@@ -112,15 +112,13 @@ public class HikariDatastore extends Datastore {
             preparedStatement.setString(1, uuid.toString());
 
             ResultSet resultSet = preparedStatement.executeQuery();
-            List<String> nodes = new ArrayList<>();
 
             if (resultSet.next()) {
                 if (!resultSet.getString("perms").equals("#")) {
-                    nodes.addAll(Arrays.asList(resultSet.getString("perms").split(":")));
+                    user.loadNodes((Arrays.asList(resultSet.getString("perms").split(":"))));
                 }
                 user.setName(resultSet.getString("name"));
 
-                user.loadNodes(nodes);
                 preparedStatement.close();
                 resultSet.close();
                 return true;
@@ -150,17 +148,17 @@ public class HikariDatastore extends Datastore {
             preparedStatement.setString(1, uuid.toString());
 
             ResultSet resultSet = preparedStatement.executeQuery();
-            List<String> nodes = new ArrayList<>();
 
             if (resultSet.next()) {
                 if (!resultSet.getString("perms").equals("#")) {
-                    nodes.addAll(Arrays.asList(resultSet.getString("perms").split(":")));
+                    user.loadNodes(Arrays.asList(resultSet.getString("perms").split(":")));
                 }
-                user.loadNodes(nodes);
+
                 preparedStatement.close();
                 resultSet.close();
                 return true;
             }
+
             preparedStatement.close();
             resultSet.close();
             return true;
@@ -199,15 +197,13 @@ public class HikariDatastore extends Datastore {
             preparedStatement.setString(1, name);
 
             ResultSet resultSet = preparedStatement.executeQuery();
-            List<String> nodes = new ArrayList<>();
 
             if (resultSet.next()) {
                 if (!resultSet.getString("perms").equals("#")) {
-                    nodes.addAll(Arrays.asList(resultSet.getString("perms").split(":")));
+                    group.loadNodes(Arrays.asList(resultSet.getString("perms").split(":")));
                 }
             }
 
-            group.loadNodes(nodes);
             preparedStatement.close();
             resultSet.close();
             return true;
@@ -224,16 +220,17 @@ public class HikariDatastore extends Datastore {
             preparedStatement.setString(1, name);
 
             ResultSet resultSet = preparedStatement.executeQuery();
-            List<String> nodes = new ArrayList<>();
 
             if (resultSet.next()) {
                 if (!resultSet.getString("perms").equals("#")) {
-                    nodes.addAll(Arrays.asList(resultSet.getString("perms").split(":")));
+                    group.loadNodes(Arrays.asList(resultSet.getString("perms").split(":")));
                 }
 
-                group.loadNodes(nodes);
+                preparedStatement.close();
+                resultSet.close();
                 return true;
             }
+
             preparedStatement.close();
             resultSet.close();
             return false;
@@ -263,9 +260,7 @@ public class HikariDatastore extends Datastore {
         });
 
         GroupManager gm = plugin.getGroupManager();
-        if (success) {
-            groups.forEach(gm::setGroup);
-        }
+        if (success) groups.forEach(gm::setGroup);
         return success;
     }
 
