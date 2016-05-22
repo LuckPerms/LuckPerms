@@ -1,0 +1,19 @@
+# LuckPerms Configuration
+
+# The name of the server, used for server specific permissions. Set to 'global' to disable.
+server: bungee
+
+# The default group assigned to all user on join. e.g. a value of "default" = luckperms.group.default
+default-group: default
+
+# If users on this server should have their global permissions/groups applied.
+include-global: false
+
+prefix: '&7&l[&b&lL&a&lP&7&l] &c'
+
+sql:
+  address: localhost:3306
+  database: minecraft
+  username: root
+  password: ''
+  sync-minutes: 3

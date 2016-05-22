@@ -1,0 +1,10 @@
+name: LuckPerms
+author: Luck
+version: 1.0
+main: me.lucko.luckperms.LPBukkitPlugin
+softdepend: [Vault]
+description: A permissions plugin
+commands:
+  luckperms:
+    description: Manage permissions
+    aliases: [perms, permissions, lp, p, perm]
