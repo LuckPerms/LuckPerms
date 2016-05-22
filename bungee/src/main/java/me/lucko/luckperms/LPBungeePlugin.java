@@ -16,20 +16,14 @@ import net.md_5.bungee.api.plugin.Plugin;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+@Getter
 public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     public static final String VERSION = "v1.0";
 
-    @Getter
-    LPConfiguration configuration;
-
-    @Getter
-    UserManager userManager;
-
-    @Getter
-    GroupManager groupManager;
-
-    @Getter
-    Datastore datastore;
+    private LPConfiguration configuration;
+    private UserManager userManager;
+    private GroupManager groupManager;
+    private Datastore datastore;
 
     @Override
     public void onEnable() {
@@ -58,17 +52,6 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         }
     }
 
-
-    @Override
-    public UserManager getUserManager() {
-        return userManager;
-    }
-
-    @Override
-    public GroupManager getGroupManager() {
-        return groupManager;
-    }
-
     @Override
     public String getVersion() {
         return VERSION;
@@ -83,16 +66,6 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     @Override
     public int getPlayerCount() {
         return getProxy().getOnlineCount();
-    }
-
-    @Override
-    public LPConfiguration getConfiguration() {
-        return configuration;
-    }
-
-    @Override
-    public Datastore getDatastore() {
-        return datastore;
     }
 
     @Override

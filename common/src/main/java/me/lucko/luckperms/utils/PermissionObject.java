@@ -2,7 +2,6 @@ package me.lucko.luckperms.utils;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.NonNull;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksPermissionException;
@@ -36,7 +35,6 @@ public abstract class PermissionObject {
      * If false, only permissions specific to the server are applied
      */
     @Setter
-
     private boolean includeGlobalPermissions;
 
     /**
@@ -158,8 +156,10 @@ public abstract class PermissionObject {
                 }
                 node = parts[1];
 
-                perms.put(node, getNodes().get(originalNode));
-                continue;
+                if (!node.matches("luckperms\\.group\\..*")) {
+                    perms.put(node, getNodes().get(originalNode));
+                    continue;
+                }
             }
 
             if (node.matches("luckperms\\.group\\..*")) {
