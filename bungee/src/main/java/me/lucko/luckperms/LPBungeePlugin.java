@@ -53,6 +53,11 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     }
 
     @Override
+    public void onDisable() {
+        datastore.shutdown();
+    }
+
+    @Override
     public String getVersion() {
         return VERSION;
     }

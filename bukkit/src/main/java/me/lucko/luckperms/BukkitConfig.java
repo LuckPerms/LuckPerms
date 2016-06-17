@@ -36,32 +36,32 @@ public class BukkitConfig implements LPConfiguration {
 
     @Override
     public String getServer() {
-        return configuration.getString("server");
+        return configuration.getString("server", "global");
     }
 
     @Override
     public String getPrefix() {
-        return configuration.getString("prefix");
+        return configuration.getString("prefix", "&7&l[&b&lL&a&lP&7&l] &c");
     }
 
     @Override
     public int getSyncTime() {
-        return configuration.getInt("sql.sync-minutes");
+        return configuration.getInt("sql.sync-minutes", 3);
     }
 
     @Override
     public String getDefaultGroupNode() {
-        return "luckperms.group." + configuration.getString("default-group");
+        return "luckperms.group." + configuration.getString("default-group", "default");
     }
 
     @Override
     public String getDefaultGroupName() {
-        return configuration.getString("default-group");
+        return configuration.getString("default-group", "default");
     }
 
     @Override
     public boolean getIncludeGlobalPerms() {
-        return configuration.getBoolean("include-global");
+        return configuration.getBoolean("include-global", true);
     }
 
     @Override

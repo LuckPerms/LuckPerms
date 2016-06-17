@@ -14,7 +14,6 @@ import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.PluginManager;
-import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -55,6 +54,9 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         userManager = new BukkitUserManager(this);
         groupManager = new GroupManager(this);
 
+        // Run update task to refresh any online users
+        new UpdateTask(this).run();
+
         int mins = getConfiguration().getSyncTime();
         if (mins > 0) {
             long ticks = mins * 60 * 20;
@@ -74,6 +76,11 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
             e.printStackTrace();
         }
 
+    }
+
+    @Override
+    public void onDisable() {
+        datastore.shutdown();
     }
 
     @Override

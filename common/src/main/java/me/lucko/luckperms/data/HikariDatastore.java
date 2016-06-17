@@ -105,6 +105,13 @@ public class HikariDatastore extends Datastore {
     }
 
     @Override
+    public void shutdown() {
+        if (hikari != null) {
+            hikari.shutdown();
+        }
+    }
+
+    @Override
     public boolean loadUser(UUID uuid) {
         User user = plugin.getUserManager().makeUser(uuid);
         boolean success = runQuery(connection -> {
