@@ -146,43 +146,116 @@ public abstract class PermissionObject {
             server = "global";
         }
 
-        for (String node : getNodes().keySet()) {
-            String originalNode = node;
-            // Has a defined server
-            if (node.contains("/")) {
-                String[] parts = node.split("\\/", 2);
+        /*
+        Priority:
+
+        1. server specific nodes
+        2. user nodes
+        3. server specific group nodes
+        4. group nodes
+        */
+
+        final Map<String, Boolean> serverSpecificNodes = new HashMap<>();
+        final Map<String, Boolean> userNodes = new HashMap<>();
+        final Map<String, Boolean> serverSpecificGroups = new HashMap<>();
+        final Map<String, Boolean> groupNodes = new HashMap<>();
+
+        // Sorts the permissions and puts them into a priority order
+        for (Map.Entry<String, Boolean> node : getNodes().entrySet()) {
+            serverSpecific:
+            if (node.getKey().contains("/")) {
+                String[] parts = node.getKey().split("\\/", 2);
+
+                if (parts[0].equalsIgnoreCase("global")) {
+                    // REGULAR
+                    break serverSpecific;
+                }
+
                 if (!parts[0].equalsIgnoreCase(server)) {
+                    // SERVER SPECIFIC BUT DOES NOT APPLY
                     continue;
                 }
-                node = parts[1];
 
-                if (!node.matches("luckperms\\.group\\..*")) {
-                    perms.put(node, getNodes().get(originalNode));
+                if (parts[1].matches("luckperms\\.group\\..*")) {
+                    // SERVER SPECIFIC AND GROUP
+                    serverSpecificGroups.put(node.getKey(), node.getValue());
                     continue;
                 }
-            }
 
-            if (node.matches("luckperms\\.group\\..*")) {
-                if (getNodes().get(originalNode)) {
-                    String groupName = node.split("\\.", 3)[2];
-                    Group group = plugin.getGroupManager().getGroup(groupName);
-
-                    if (!excludedGroups.contains(groupName)) {
-                        if (group != null) {
-                            perms.putAll(group.getLocalPermissions(server, excludedGroups));
-                        } else {
-                            plugin.getLogger().warning("Error whilst refreshing the permissions of '" + objectName + "'." +
-                            "\n The group '" + groupName + "' is not loaded.");
-                        }
-                    }
-                }
-
-                perms.put(node, getNodes().get(originalNode));
+                // SERVER SPECIFIC
+                serverSpecificNodes.put(node.getKey(), node.getValue());
                 continue;
             }
 
-            if (includeGlobal) perms.put(node, getNodes().get(originalNode));
+            if (node.getKey().matches("luckperms\\.group\\..*")) {
+                // GROUP
+                groupNodes.put(node.getKey(), node.getValue());
+                continue;
+            }
+
+            // JUST NORMAL
+            if (!includeGlobal) continue;
+            userNodes.put(node.getKey(), node.getValue());
         }
+
+        // If a group is negated at a higher priority, the group should not then be applied at a lower priority
+        serverSpecificGroups.entrySet().stream().filter(node -> !node.getValue()).forEach(node -> {
+            groupNodes.remove(node.getKey());
+            groupNodes.remove(node.getKey().split("\\/", 2)[1]);
+        });
+
+        // Apply lowest priority: groupNodes
+        for (Map.Entry<String, Boolean> groupNode : groupNodes.entrySet()) {
+            // Add the actual group perm node, so other plugins can hook
+            perms.put(groupNode.getKey(), groupNode.getValue());
+
+
+            // Don't add negated groups
+            if (!groupNode.getValue()) continue;
+
+            String groupName = groupNode.getKey().split("\\.", 3)[2];
+            if (!excludedGroups.contains(groupName)) {
+                Group group = plugin.getGroupManager().getGroup(groupName);
+                if (group != null) {
+                    perms.putAll(group.getLocalPermissions(server, excludedGroups));
+                } else {
+                    plugin.getLogger().warning("Error whilst refreshing the permissions of '" + objectName + "'." +
+                            "\n The group '" + groupName + "' is not loaded.");
+                }
+            }
+        }
+
+        // Apply next priority: serverSpecificGroups
+        for (Map.Entry<String, Boolean> groupNode : serverSpecificGroups.entrySet()) {
+            final String rawNode = groupNode.getKey().split("\\/")[1];
+
+            // Add the actual group perm node, so other plugins can hook
+            perms.put(rawNode, groupNode.getValue());
+
+            // Don't add negated groups
+            if (!groupNode.getValue()) continue;
+
+            String groupName = rawNode.split("\\.", 3)[2];
+            if (!excludedGroups.contains(groupName)) {
+                Group group = plugin.getGroupManager().getGroup(groupName);
+                if (group != null) {
+                    perms.putAll(group.getLocalPermissions(server, excludedGroups));
+                } else {
+                    plugin.getLogger().warning("Error whilst refreshing the permissions of '" + objectName + "'." +
+                            "\n The group '" + groupName + "' is not loaded.");
+                }
+            }
+        }
+
+        // Apply next priority: userNodes
+        perms.putAll(userNodes);
+
+        // Apply highest priority: serverSpecificNodes
+        for (Map.Entry<String, Boolean> node : serverSpecificNodes.entrySet()) {
+            final String rawNode = node.getKey().split("\\/")[1];
+            perms.put(rawNode, node.getValue());
+        }
+
         return perms;
     }
 
