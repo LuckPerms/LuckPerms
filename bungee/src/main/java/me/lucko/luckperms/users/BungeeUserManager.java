@@ -41,4 +41,11 @@ public class BungeeUserManager extends UserManager {
     public User makeUser(UUID uuid, String username) {
         return new BungeeUser(uuid, username, plugin);
     }
+
+    @Override
+    public void updateAllUsers() {
+        for (ProxiedPlayer p : plugin.getProxy().getPlayers()) {
+            plugin.getDatastore().loadUser(p.getUniqueId());
+        }
+    }
 }

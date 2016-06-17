@@ -117,4 +117,9 @@ public abstract class UserManager {
      * @return a new {@link User} object
      */
     public abstract User makeUser(UUID uuid, String username);
+
+    /**
+     * Reloads the data of all online users
+     */
+    public abstract void updateAllUsers();
 }

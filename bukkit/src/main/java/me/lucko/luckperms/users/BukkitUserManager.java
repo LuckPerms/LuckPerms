@@ -50,4 +50,11 @@ public class BukkitUserManager extends UserManager {
     public User makeUser(UUID uuid, String username) {
         return new BukkitUser(uuid, username, plugin);
     }
+
+    @Override
+    public void updateAllUsers() {
+        for (Player p : plugin.getServer().getOnlinePlayers()) {
+            plugin.getDatastore().loadUser(p.getUniqueId());
+        }
+    }
 }

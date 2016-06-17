@@ -55,12 +55,12 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         groupManager = new GroupManager(this);
 
         // Run update task to refresh any online users
-        new UpdateTask(this).run();
+        runUpdateTask();
 
         int mins = getConfiguration().getSyncTime();
         if (mins > 0) {
             long ticks = mins * 60 * 20;
-            new UpdateTask(this).runTaskTimer(this, ticks, ticks);
+            getServer().getScheduler().runTaskTimerAsynchronously(this, new UpdateTask(this), ticks, ticks);
         }
 
         // Provide vault support
@@ -111,6 +111,6 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
     @Override
     public void runUpdateTask() {
-        new UpdateTask(this).runTask(this);
+        getServer().getScheduler().runTaskAsynchronously(this, new UpdateTask(this));
     }
 }

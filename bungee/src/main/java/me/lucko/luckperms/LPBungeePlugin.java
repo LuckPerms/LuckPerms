@@ -75,7 +75,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
     @Override
     public void runUpdateTask() {
-        new UpdateTask(this).run();
+        doAsync(new UpdateTask(this));
     }
 
     @Override

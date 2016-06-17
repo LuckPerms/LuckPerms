@@ -135,7 +135,8 @@ public class HikariDatastore extends Datastore {
             return false;
         });
 
-        if (success) plugin.getUserManager().updateOrSetUser(user);
+        // User updating and loading should be done sync as permission attachments are updated
+        if (success) plugin.doSync(() -> plugin.getUserManager().updateOrSetUser(user));
         return success;
     }
 
@@ -171,7 +172,8 @@ public class HikariDatastore extends Datastore {
             return true;
         });
 
-        if (success) plugin.getUserManager().updateOrSetUser(user);
+        // User updating and loading should be done sync as permission attachments are updated
+        if (success) plugin.doSync(() -> plugin.getUserManager().updateOrSetUser(user));
         return success;
     }
 
