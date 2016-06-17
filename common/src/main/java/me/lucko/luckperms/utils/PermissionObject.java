@@ -187,6 +187,9 @@ public abstract class PermissionObject {
                 continue;
             }
 
+            // Skip adding global permissions if they are not requested
+            if (!includeGlobal) continue;
+
             if (node.getKey().matches("luckperms\\.group\\..*")) {
                 // GROUP
                 groupNodes.put(node.getKey(), node.getValue());
@@ -194,7 +197,6 @@ public abstract class PermissionObject {
             }
 
             // JUST NORMAL
-            if (!includeGlobal) continue;
             userNodes.put(node.getKey(), node.getValue());
         }
 
