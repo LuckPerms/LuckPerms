@@ -8,9 +8,8 @@ import me.lucko.luckperms.exceptions.ObjectLacksPermissionException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.utils.PermissionObject;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public abstract class User extends PermissionObject {
 
@@ -60,7 +59,7 @@ public abstract class User extends PermissionObject {
      * @return true if the user is a member of the group
      */
     public boolean isInGroup(Group group, String server) {
-        return getLocalGroups(server).contains(group.getName());
+        return hasPermission("luckperms.group." + group.getName(), true, server);
     }
 
     /**
@@ -83,15 +82,7 @@ public abstract class User extends PermissionObject {
             server = "global";
         }
 
-        if (isInGroup(group, server)) {
-            throw new ObjectAlreadyHasException();
-        }
-
-        if (server.equalsIgnoreCase("global")) {
-            getNodes().put("luckperms.group." + group.getName(), true);
-        } else {
-            getNodes().put(server + "/luckperms.group." + group.getName(), true);
-        }
+        setPermission("luckperms.group." + group.getName(), true, server);
     }
 
     /**
@@ -114,15 +105,7 @@ public abstract class User extends PermissionObject {
             server = "global";
         }
 
-        if (!getLocalGroups(server).contains(group.getName())) {
-            throw new ObjectLacksPermissionException();
-        }
-
-        if (server.equalsIgnoreCase("global")) {
-            getNodes().remove("luckperms.group." + group.getName());
-        } else {
-            getNodes().remove(server + "/luckperms.group." + group.getName());
-        }
+        unsetPermission("luckperms.group." + group.getName(), server);
     }
 
     /**
@@ -139,7 +122,7 @@ public abstract class User extends PermissionObject {
      * @return a {@link List} of group names
      */
     public List<String> getGroupNames() {
-        return getGroups(null, true, true);
+        return getGroups(null, null, true);
     }
 
     /**
@@ -148,45 +131,81 @@ public abstract class User extends PermissionObject {
      * @return a {@link List} of group names
      */
     public List<String> getLocalGroups(String server) {
-        return getGroups(server, false, false);
+        return getGroups(server, null, false);
     }
 
     /**
      * Get a {@link List} of the groups the user is a member of on a specific server with the option to include global groups or all groups
      * @param server Which server to check on
+     * @param excludedGroups groups to exclude (prevents circular inheritance issues)
      * @param includeGlobal Whether to include global groups
-     * @param includeAll Whether to get all groups
      * @return a {@link List} of group names
      */
-    public List<String> getGroups(String server, boolean includeGlobal, boolean includeAll) {
+    private List<String> getGroups(String server, List<String> excludedGroups, boolean includeGlobal) {
+        if (excludedGroups == null) {
+            excludedGroups = new ArrayList<>();
+        }
+
+        excludedGroups.add(getObjectName());
         List<String> groups = new ArrayList<>();
 
         if (server == null || server.equals("")) {
             server = "global";
         }
 
-        for (String node : getNodes().keySet()) {
-            String originalNode = node;
-            // Has a defined server
-            if (node.contains("/")) {
-                String[] parts = node.split("\\/", 2);
-                if (!parts[0].equalsIgnoreCase(server) && !includeAll) {
+        /*
+        Priority:
+
+        1. server specific group nodes
+        2. group nodes
+        */
+
+        final Map<String, Boolean> serverSpecificGroups = new HashMap<>();
+        final Map<String, Boolean> groupNodes = new HashMap<>();
+
+        // Sorts the permissions and puts them into a priority order
+        for (Map.Entry<String, Boolean> node : getNodes().entrySet()) {
+            serverSpecific:
+            if (node.getKey().contains("/")) {
+                String[] parts = node.getKey().split("\\/", 2);
+
+                if (parts[0].equalsIgnoreCase("global")) {
+                    // REGULAR
+                    break serverSpecific;
+                }
+
+                if (!parts[0].equalsIgnoreCase(server)) {
+                    // SERVER SPECIFIC BUT DOES NOT APPLY
                     continue;
                 }
-                node = parts[1];
-            } else {
-                if (!includeGlobal) {
+
+                if (parts[1].matches("luckperms\\.group\\..*")) {
+                    // SERVER SPECIFIC AND GROUP
+                    serverSpecificGroups.put(node.getKey(), node.getValue());
                     continue;
                 }
+
+                continue;
             }
 
-            if (node.matches("luckperms\\.group\\..*")) {
-                if (getNodes().get(originalNode)) {
-                    String groupName = node.split("\\.", 3)[2];
-                    groups.add(groupName);
-                }
+            // Skip adding global permissions if they are not requested
+            if (!includeGlobal) continue;
+
+            if (node.getKey().matches("luckperms\\.group\\..*")) {
+                // GROUP
+                groupNodes.put(node.getKey(), node.getValue());
             }
+
         }
+
+        // If a group is negated at a higher priority, the group should not then be applied at a lower priority
+        serverSpecificGroups.entrySet().stream().filter(node -> !node.getValue()).forEach(node -> {
+            groupNodes.remove(node.getKey());
+            groupNodes.remove(node.getKey().split("\\/", 2)[1]);
+        });
+
+        groups.addAll(serverSpecificGroups.entrySet().stream().filter(Map.Entry::getValue).map(e -> e.getKey().split("\\.", 3)[2]).collect(Collectors.toList()));
+        groups.addAll(groupNodes.entrySet().stream().filter(Map.Entry::getValue).map(e -> e.getKey().split("\\.", 3)[2]).collect(Collectors.toList()));
         return groups;
     }
 
