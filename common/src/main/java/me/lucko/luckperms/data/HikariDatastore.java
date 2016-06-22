@@ -2,6 +2,7 @@ package me.lucko.luckperms.data;
 
 import com.zaxxer.hikari.HikariDataSource;
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.groups.GroupManager;
 import me.lucko.luckperms.users.User;
@@ -11,7 +12,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -121,9 +121,7 @@ public class HikariDatastore extends Datastore {
             ResultSet resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
-                if (!resultSet.getString("perms").equals("#")) {
-                    user.loadNodes((Arrays.asList(resultSet.getString("perms").split(":"))));
-                }
+                user.loadNodes(resultSet.getString("perms"));
                 user.setName(resultSet.getString("name"));
 
                 preparedStatement.close();
@@ -143,11 +141,14 @@ public class HikariDatastore extends Datastore {
     @Override
     public boolean loadOrCreateUser(UUID uuid, String username) {
         User user = plugin.getUserManager().makeUser(uuid, username);
+        try {
+            user.setPermission(plugin.getConfiguration().getDefaultGroupNode(), true);
+        } catch (ObjectAlreadyHasException ignored) {}
         boolean success = runQuery(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement(USER_INSERT);
-            preparedStatement.setString(1, uuid.toString());
-            preparedStatement.setString(2, username);
-            preparedStatement.setString(3, plugin.getConfiguration().getDefaultGroupNode());
+            preparedStatement.setString(1, user.getUuid().toString());
+            preparedStatement.setString(2, user.getName());
+            preparedStatement.setString(3, user.serializeNodes());
             preparedStatement.setString(4, username);
             preparedStatement.execute();
             preparedStatement.close();
@@ -158,9 +159,7 @@ public class HikariDatastore extends Datastore {
             ResultSet resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
-                if (!resultSet.getString("perms").equals("#")) {
-                    user.loadNodes(Arrays.asList(resultSet.getString("perms").split(":")));
-                }
+                user.loadNodes(resultSet.getString("perms"));
 
                 preparedStatement.close();
                 resultSet.close();
@@ -196,9 +195,9 @@ public class HikariDatastore extends Datastore {
         Group group = plugin.getGroupManager().makeGroup(name);
         boolean success = runQuery(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement(GROUP_INSERT);
-            preparedStatement.setString(1, name);
-            preparedStatement.setString(2, "#");
-            preparedStatement.setString(3, "#");
+            preparedStatement.setString(1, group.getName());
+            preparedStatement.setString(2, group.serializeNodes());
+            preparedStatement.setString(3, group.serializeNodes());
             preparedStatement.execute();
             preparedStatement.close();
 
@@ -208,9 +207,7 @@ public class HikariDatastore extends Datastore {
             ResultSet resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
-                if (!resultSet.getString("perms").equals("#")) {
-                    group.loadNodes(Arrays.asList(resultSet.getString("perms").split(":")));
-                }
+                group.loadNodes(resultSet.getString("perms"));
             }
 
             preparedStatement.close();
@@ -231,9 +228,7 @@ public class HikariDatastore extends Datastore {
             ResultSet resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
-                if (!resultSet.getString("perms").equals("#")) {
-                    group.loadNodes(Arrays.asList(resultSet.getString("perms").split(":")));
-                }
+                group.loadNodes(resultSet.getString("perms"));
 
                 preparedStatement.close();
                 resultSet.close();
@@ -258,9 +253,7 @@ public class HikariDatastore extends Datastore {
 
             while (resultSet.next()) {
                 Group group = plugin.getGroupManager().makeGroup(resultSet.getString("name"));
-                if (!resultSet.getString("perms").equals("#")) {
-                    group.loadNodes(Arrays.asList(resultSet.getString("perms").split(":")));
-                }
+                group.loadNodes(resultSet.getString("perms"));
                 groups.add(group);
             }
             preparedStatement.close();

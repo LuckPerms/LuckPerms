@@ -1,5 +1,6 @@
 package me.lucko.luckperms;
 
+import com.google.gson.Gson;
 import lombok.Getter;
 import me.lucko.luckperms.commands.CommandManager;
 import me.lucko.luckperms.data.Datastore;
@@ -24,9 +25,11 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     private UserManager userManager;
     private GroupManager groupManager;
     private Datastore datastore;
+    private Gson gson;
 
     @Override
     public void onEnable() {
+        gson = new Gson();
         configuration = new BungeeConfig(this);
 
         // register events
@@ -86,5 +89,10 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     @Override
     public void doSync(Runnable r) {
         r.run();
+    }
+
+    @Override
+    public Gson getGson() {
+        return gson;
     }
 }

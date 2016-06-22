@@ -1,5 +1,6 @@
 package me.lucko.luckperms;
 
+import com.google.gson.Gson;
 import lombok.Getter;
 import me.lucko.luckperms.data.Datastore;
 import me.lucko.luckperms.data.DatastoreConfiguration;
@@ -28,9 +29,11 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private UserManager userManager;
     private GroupManager groupManager;
     private Datastore datastore;
+    private Gson gson;
 
     @Override
     public void onEnable() {
+        gson = new Gson();
         configuration = new BukkitConfig(this);
 
         // register events
@@ -91,6 +94,11 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     @Override
     public void doSync(Runnable r) {
         Bukkit.getScheduler().runTask(this, r);
+    }
+
+    @Override
+    public Gson getGson() {
+        return gson;
     }
 
     @Override

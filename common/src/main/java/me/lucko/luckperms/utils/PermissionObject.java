@@ -1,5 +1,6 @@
 package me.lucko.luckperms.utils;
 
+import com.google.gson.reflect.TypeToken;
 import lombok.Getter;
 import lombok.Setter;
 import me.lucko.luckperms.LuckPermsPlugin;
@@ -11,7 +12,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Represents an object that can hold permissions
@@ -262,48 +262,18 @@ public abstract class PermissionObject {
     }
 
     /**
-     * Loads a list of semi-serialised nodes into the object
-     * @param data The data to be loaded
+     * Loads serialised nodes into the object
+     * @param json The json data to be loaded
      */
-    public void loadNodes(List<String> data) {
-        // String is the node in format "server/plugin.command-false" or "plugin.command-false" or "server/plugin.command"
-        // or just "plugin.command"
-
-        for (String s : data) {
-            String[] parts = s.split("-", 2);
-
-            if (parts.length == 2) {
-                nodes.put(parts[0], Boolean.valueOf(parts[1]));
-            } else {
-                nodes.put(parts[0], true);
-            }
-        }
-    }
-
-    /**
-     * Convert the permission nodes map to a list of strings
-     * @return a {@link List} of nodes
-     */
-    public List<String> getNodesAsString() {
-        List<String> data = new ArrayList<>();
-
-        for (String node : nodes.keySet()) {
-            if (nodes.get(node)) {
-                data.add(node);
-            } else {
-                data.add(node + "-false");
-            }
-        }
-
-        return data;
+    public void loadNodes(String json) {
+        nodes.putAll(plugin.getGson().fromJson(json, new TypeToken<Map<String, Boolean>>(){}.getType()));
     }
 
     /**
      * Serialize the nodes in the object to be saved in the datastore
-     * @return A serialized string
+     * @return A json string
      */
     public String serializeNodes() {
-        if (nodes.isEmpty()) return "#";
-        return getNodesAsString().stream().collect(Collectors.joining(":"));
+        return plugin.getGson().toJson(nodes);
     }
 }
