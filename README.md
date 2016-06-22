@@ -14,7 +14,7 @@ Yeah, I don't know. There are other more advanced, optimized, better programmed 
  - **BungeeCord compatible** - my main motive for making this was that all other Bungee/Bukkit compatible perms plugins are utter aids. (At least, I couldn't find any decent ones)
 
 ### Caveats
- - Only supports MySQL
+ - Only supports MySQL & SQLite (support for other stuff might happen in the future)
  - Not at all tested and could be super unreliable
  - It's quite possibly shit™
 

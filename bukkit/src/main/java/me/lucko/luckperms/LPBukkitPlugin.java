@@ -1,10 +1,10 @@
 package me.lucko.luckperms;
 
-import com.google.gson.Gson;
 import lombok.Getter;
 import me.lucko.luckperms.data.Datastore;
-import me.lucko.luckperms.data.DatastoreConfiguration;
-import me.lucko.luckperms.data.HikariDatastore;
+import me.lucko.luckperms.data.MySQLConfiguration;
+import me.lucko.luckperms.data.methods.MySQLDatastore;
+import me.lucko.luckperms.data.methods.SQLiteDatastore;
 import me.lucko.luckperms.groups.GroupManager;
 import me.lucko.luckperms.listeners.PlayerListener;
 import me.lucko.luckperms.runnables.UpdateTask;
@@ -18,6 +18,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -29,11 +30,9 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private UserManager userManager;
     private GroupManager groupManager;
     private Datastore datastore;
-    private Gson gson;
 
     @Override
     public void onEnable() {
-        gson = new Gson();
         configuration = new BukkitConfig(this);
 
         // register events
@@ -46,13 +45,25 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         main.setExecutor(commandManager);
         main.setAliases(Arrays.asList("perms", "lp", "permissions", "p", "perm"));
 
-        datastore = new HikariDatastore(this);
-        datastore.init(new DatastoreConfiguration(
-                configuration.getDatabaseValue("address"),
-                configuration.getDatabaseValue("database"),
-                configuration.getDatabaseValue("username"),
-                configuration.getDatabaseValue("password")
-        ));
+        final String storageMethod = configuration.getStorageMethod();
+
+        if (storageMethod.equalsIgnoreCase("mysql")) {
+            getLogger().info("Using MySQL as storage method.");
+            datastore = new MySQLDatastore(this, new MySQLConfiguration(
+                    configuration.getDatabaseValue("address"),
+                    configuration.getDatabaseValue("database"),
+                    configuration.getDatabaseValue("username"),
+                    configuration.getDatabaseValue("password")
+            ));
+        } else if (storageMethod.equalsIgnoreCase("sqlite")) {
+            getLogger().info("Using SQLite as storage method.");
+            datastore = new SQLiteDatastore(this, new File(getDataFolder(), "luckperms.sqlite"));
+        } else {
+            getLogger().warning("Storage method '" + storageMethod + "' was not recognised. Using SQLite as fallback.");
+            datastore = new SQLiteDatastore(this, new File(getDataFolder(), "luckperms.sqlite"));
+        }
+
+        datastore.init();
 
         userManager = new BukkitUserManager(this);
         groupManager = new GroupManager(this);
@@ -94,11 +105,6 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     @Override
     public void doSync(Runnable r) {
         Bukkit.getScheduler().runTask(this, r);
-    }
-
-    @Override
-    public Gson getGson() {
-        return gson;
     }
 
     @Override

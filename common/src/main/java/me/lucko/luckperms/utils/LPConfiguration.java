@@ -9,5 +9,6 @@ public interface LPConfiguration {
     String getDefaultGroupName();
     boolean getIncludeGlobalPerms();
     String getDatabaseValue(String value);
+    String getStorageMethod();
 
 }

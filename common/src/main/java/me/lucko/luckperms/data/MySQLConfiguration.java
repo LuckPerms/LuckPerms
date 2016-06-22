@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class DatastoreConfiguration {
+public class MySQLConfiguration {
 
     private final String address;
     private final String database;

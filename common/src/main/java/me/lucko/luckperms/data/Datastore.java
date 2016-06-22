@@ -47,7 +47,7 @@ public abstract class Datastore {
     /*
         These methods will block the thread that they're ran on.
      */
-    public abstract void init(DatastoreConfiguration configuration);
+    public abstract void init();
     public abstract void shutdown();
     public abstract boolean loadOrCreateUser(UUID uuid, String username);
     public abstract boolean loadUser(UUID uuid);

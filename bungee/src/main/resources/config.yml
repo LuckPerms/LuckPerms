@@ -11,6 +11,11 @@ include-global: false
 
 prefix: '&7&l[&b&lL&a&lP&7&l] &c'
 
+# Which storage method the plugin should use.
+# Currently supported: mysql, sqlite
+# Fill out connection info below if you're using MySQL
+storage-method: sqlite
+
 sql:
   address: localhost:3306
   database: minecraft

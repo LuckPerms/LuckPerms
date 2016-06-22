@@ -1,6 +1,5 @@
 package me.lucko.luckperms.utils;
 
-import com.google.gson.reflect.TypeToken;
 import lombok.Getter;
 import lombok.Setter;
 import me.lucko.luckperms.LuckPermsPlugin;
@@ -259,21 +258,5 @@ public abstract class PermissionObject {
         }
 
         return perms;
-    }
-
-    /**
-     * Loads serialised nodes into the object
-     * @param json The json data to be loaded
-     */
-    public void loadNodes(String json) {
-        nodes.putAll(plugin.getGson().fromJson(json, new TypeToken<Map<String, Boolean>>(){}.getType()));
-    }
-
-    /**
-     * Serialize the nodes in the object to be saved in the datastore
-     * @return A json string
-     */
-    public String serializeNodes() {
-        return plugin.getGson().toJson(nodes);
     }
 }

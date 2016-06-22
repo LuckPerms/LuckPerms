@@ -75,4 +75,9 @@ public class BungeeConfig implements LPConfiguration {
     public String getDatabaseValue(String value) {
         return configuration.getString("sql." + value);
     }
+
+    @Override
+    public String getStorageMethod() {
+        return configuration.getString("storage-method", "sqlite");
+    }
 }

@@ -1,11 +1,11 @@
 package me.lucko.luckperms;
 
-import com.google.gson.Gson;
 import lombok.Getter;
 import me.lucko.luckperms.commands.CommandManager;
 import me.lucko.luckperms.data.Datastore;
-import me.lucko.luckperms.data.DatastoreConfiguration;
-import me.lucko.luckperms.data.HikariDatastore;
+import me.lucko.luckperms.data.MySQLConfiguration;
+import me.lucko.luckperms.data.methods.MySQLDatastore;
+import me.lucko.luckperms.data.methods.SQLiteDatastore;
 import me.lucko.luckperms.groups.GroupManager;
 import me.lucko.luckperms.listeners.PlayerListener;
 import me.lucko.luckperms.runnables.UpdateTask;
@@ -14,6 +14,7 @@ import me.lucko.luckperms.users.UserManager;
 import me.lucko.luckperms.utils.LPConfiguration;
 import net.md_5.bungee.api.plugin.Plugin;
 
+import java.io.File;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -25,11 +26,9 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     private UserManager userManager;
     private GroupManager groupManager;
     private Datastore datastore;
-    private Gson gson;
 
     @Override
     public void onEnable() {
-        gson = new Gson();
         configuration = new BungeeConfig(this);
 
         // register events
@@ -38,13 +37,25 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         // register commands
         getProxy().getPluginManager().registerCommand(this, new MainCommand(new CommandManager(this)));
 
-        datastore = new HikariDatastore(this);
-        datastore.init(new DatastoreConfiguration(
-                configuration.getDatabaseValue("address"),
-                configuration.getDatabaseValue("database"),
-                configuration.getDatabaseValue("username"),
-                configuration.getDatabaseValue("password")
-        ));
+        final String storageMethod = configuration.getStorageMethod();
+
+        if (storageMethod.equalsIgnoreCase("mysql")) {
+            getLogger().info("Using MySQL as storage method.");
+            datastore = new MySQLDatastore(this, new MySQLConfiguration(
+                    configuration.getDatabaseValue("address"),
+                    configuration.getDatabaseValue("database"),
+                    configuration.getDatabaseValue("username"),
+                    configuration.getDatabaseValue("password")
+            ));
+        } else if (storageMethod.equalsIgnoreCase("sqlite")) {
+            getLogger().info("Using SQLite as storage method.");
+            datastore = new SQLiteDatastore(this, new File(getDataFolder(), "luckperms.sqlite"));
+        } else {
+            getLogger().warning("Storage method '" + storageMethod + "' was not recognised. Using SQLite as fallback.");
+            datastore = new SQLiteDatastore(this, new File(getDataFolder(), "luckperms.sqlite"));
+        }
+
+        datastore.init();
 
         userManager = new BungeeUserManager(this);
         groupManager = new GroupManager(this);
@@ -89,10 +100,5 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     @Override
     public void doSync(Runnable r) {
         r.run();
-    }
-
-    @Override
-    public Gson getGson() {
-        return gson;
     }
 }

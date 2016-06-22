@@ -1,6 +1,5 @@
 package me.lucko.luckperms;
 
-import com.google.gson.Gson;
 import me.lucko.luckperms.data.Datastore;
 import me.lucko.luckperms.groups.GroupManager;
 import me.lucko.luckperms.users.UserManager;
@@ -75,6 +74,4 @@ public interface LuckPermsPlugin {
      * @param r the task to run
      */
     void doSync(Runnable r);
-
-    Gson getGson();
 }
