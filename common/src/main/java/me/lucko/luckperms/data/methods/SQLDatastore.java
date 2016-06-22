@@ -286,7 +286,7 @@ public abstract class SQLDatastore extends Datastore {
                 preparedStatement1.setString(2, uuid.toString());
             }
 
-            preparedStatement.execute();
+            preparedStatement1.execute();
             return true;
         });
         return success;
