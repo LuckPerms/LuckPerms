@@ -1,0 +1,80 @@
+= LuckPerms
+A (fairly bad) permissions implementation for Bukkit/BungeeCord.
+
+=== Features
+* **Group inheritance** - users can be members of multiple groups, groups can inherit other groups
+* **Multi-server support** - data is synced across all servers/platforms
+* **Per-server permissions/groups** - define user/group permissions that only apply on certain servers
+* **Server-specific groups** - define groups that only apply on certain servers
+* **Vault Support** - hooks into Vault to integrate with other plugins
+* **Easy and simple setup and configuration using commands** - no editing yml files, yuck
+* **Efficient/lightweight** - maybe? Who knows, it might be.
+* **BungeeCord compatible** - permissions, users and groups are synced across Bukkit/BungeeCord instances
+* **Support for MySQL and SQLite** - other storage methods coming soon (maybe)
+
+===== Possible Caveats
+* Currently only supports MySQL and SQLite (support for more methods might come in the future)
+* Not at all tested and could produce unexpected/buggy results and errors
+
+=== Setup
+All configuration options are in the **config.yml** file, which is generated automagically when the plugin first starts.
+
+You can define the settings for per-server permissions, the storage method and credentials within this file.
+
+=== Commands
+
+Command usage is printed to the console/chat whenever invalid arguments are provided. Simply typing /perms will list all commands a user has permission to use.
+
+==== Aliases
+| Bukkit | /luckperms |
+| | /perms |
+| | /permissions |
+| | /lp |
+| | /perm |
+| Bungee | /luckpermsbungee |
+| | /bperms |
+| | /bpermissions |
+| | /lpb |
+| | /bperm |
+
+Arguments: <required> [optional]
+
+Users with OP have access to all commands.
+
+|  **Command**  |  **Description**  |  **Permission**  |
+| /perms | Sends plugin info and usage | N/A |
+| /perms sync | Runs an update task and reloads the data of all online users | luckperms.sync |
+| /perms info | Shows information about the plugin | luckperms.info |
+| /perms debug | Shows some very brief debug info about the number of users/groups loaded | luckperms.debug |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+| /perms creategroup <group> | Creates a new group with the given name | luckperms.creategroup |
+| /perms deletegroup <group> | Deletes an existing group | luckperms.deletegroup |
+| /perms listgroups | Shows a list of the groups registered within the system | luckperms.listgroups |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+| /perms user <user> info | Shows info about the user | luckperms.user.info |
+| /perms user <user> getuuid | Shows the users Mojang UUID | luckperms.user.getuuid |
+| /perms user <user> listnodes | Lists all of the permission nodes the user has | luckperms.user.listnodes |
+| /perms user <user> haspermission <node> [server] | Checks if the user has a permission on a certain server | luckperms.user.haspermission |
+| /perms user <user> set <node> <true/false> [server]| Sets a permission for the user | luckperms.user.setpermission |
+| /perms user <user> unset <node> [server] | Unsets a permission for the user | luckperms.user.unsetpermission |
+| /perms user <user> addgroup <group> [server] | Adds the user to a group | luckperms.user.addgroup |
+| /perms user <user> removegroup <group> [server] | Removes the user from a group | luckperms.user.removegroup |
+| /perms user <user> clear | Clears all permissions the user has | luckperms.user.clear |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+| /perms group <group> info | Shows info about the group | luckperms.group.info |
+| /perms group <group> listnodes | Lists all of the permission nodes the group has | luckperms.group.listnodes |
+| /perms group <group> haspermission <node> [server] | Checks if the group has a permission on a certain server | luckperms.group.haspermission |
+| /perms group <group> set <node> <true/false> [server]| Sets a permission for the group | luckperms.group.setpermission |
+| /perms group <group> unset <node> [server] | Unsets a permission for the group | luckperms.group.unsetpermission |
+| /perms group <group> setinherit <group> [server]| Sets the group to inherit all permissions from another group | luckperms.group.setinherit |
+| /perms group <group> unsetinherit <group> [server] | Unsets a perviously defined inheritance rule | luckperms.group.unsetinherit |
+| /perms group <group> clear | Clears all permissions the group has | luckperms.group.clear |
+
+=== License
+See LICENSE.md.
