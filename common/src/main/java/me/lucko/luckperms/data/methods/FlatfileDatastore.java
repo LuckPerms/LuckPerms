@@ -11,6 +11,7 @@ import me.lucko.luckperms.users.User;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @SuppressWarnings({"ResultOfMethodCallIgnored", "UnnecessaryLocalVariable"})
 public class FlatfileDatastore extends Datastore {
@@ -40,6 +41,7 @@ public class FlatfileDatastore extends Datastore {
             jsonWriter = new JsonWriter(bufferedWriter);
             jsonWriter.setIndent("    ");
             success = writeOperation.onRun(jsonWriter);
+            jsonWriter.flush();
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -315,7 +317,11 @@ public class FlatfileDatastore extends Datastore {
 
     @Override
     public boolean loadAllGroups() {
-        List<String> groups = Arrays.asList(groupsDir.list((dir, name1) -> name1.endsWith(".json")));
+        List<String> groups = Arrays.asList(groupsDir.list((dir, name1) -> name1.endsWith(".json")))
+                .stream().map(s -> s.substring(0, s.length() - 5))
+                .collect(Collectors.toList());
+
+        plugin.getGroupManager().unloadAll();
         groups.forEach(this::loadGroup);
         return true;
     }

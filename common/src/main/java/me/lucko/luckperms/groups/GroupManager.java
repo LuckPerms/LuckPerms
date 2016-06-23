@@ -70,6 +70,13 @@ public class GroupManager {
     }
 
     /**
+     * Unloads all groups from the manager
+     */
+    public void unloadAll() {
+        groups.clear();
+    }
+
+    /**
      * Load all groups from the datastore
      */
     public void loadAllGroups() {

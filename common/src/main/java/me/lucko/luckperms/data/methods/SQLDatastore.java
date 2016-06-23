@@ -231,8 +231,11 @@ public abstract class SQLDatastore extends Datastore {
             return true;
         });
 
-        GroupManager gm = plugin.getGroupManager();
-        if (success) groups.forEach(gm::setGroup);
+        if (success) {
+            GroupManager gm = plugin.getGroupManager();
+            gm.unloadAll();
+            groups.forEach(gm::setGroup);
+        }
         return success;
     }
 
