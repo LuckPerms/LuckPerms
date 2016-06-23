@@ -45,7 +45,7 @@ public class DeleteGroupCommand extends MainCommand {
                 } else {
                     plugin.getDatastore().deleteGroup(group, success1 -> {
                         if (!success1) {
-                            Util.sendPluginMessage(sender, "There was an error whilst creating the group.");
+                            Util.sendPluginMessage(sender, "There was an error whilst deleting the group.");
                         } else {
                             Util.sendPluginMessage(sender, "&b" + groupName + "&a was successfully deleted.");
                             plugin.runUpdateTask();

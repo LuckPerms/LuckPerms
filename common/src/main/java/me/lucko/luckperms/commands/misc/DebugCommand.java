@@ -21,7 +21,7 @@ public class DebugCommand extends MainCommand {
             return;
         }
 
-        Util.sendPluginMessage(sender, "&d>> Debug Info");
+        Util.sendPluginMessage(sender, "&d&l> &dDebug Info");
         Util.sendPluginMessage(sender, "&eOnline Players: &6" + plugin.getPlayerCount());
         Util.sendPluginMessage(sender, "&eLoaded Users: &6" + plugin.getUserManager().getUsers().size());
         Util.sendPluginMessage(sender, "&eLoaded Groups: &6" + plugin.getGroupManager().getGroups().size());
