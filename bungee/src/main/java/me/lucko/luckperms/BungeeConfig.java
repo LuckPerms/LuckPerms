@@ -27,6 +27,7 @@ public class BungeeConfig implements LPConfiguration {
         }
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private File makeFile(String file) throws IOException {
         File cfg = new File(plugin.getDataFolder(), file);
 

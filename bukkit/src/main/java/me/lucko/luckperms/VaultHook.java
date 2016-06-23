@@ -8,7 +8,7 @@ import me.lucko.luckperms.users.User;
 import net.milkbowl.vault.permission.Permission;
 
 @AllArgsConstructor
-public class VaultHook extends Permission {
+class VaultHook extends Permission {
     private final LPBukkitPlugin plugin;
 
     @Override
@@ -90,9 +90,7 @@ public class VaultHook extends Permission {
     @Override
     public boolean playerInGroup(String world, String player, String group) {
         final User user = plugin.getUserManager().getUser(player);
-        if (user == null) return false;
-
-        return user.getGroupNames().contains(group);
+        return user != null && user.getGroupNames().contains(group);
     }
 
     @Override

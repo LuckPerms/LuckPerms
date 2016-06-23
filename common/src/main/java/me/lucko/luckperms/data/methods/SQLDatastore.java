@@ -39,9 +39,9 @@ public abstract class SQLDatastore extends Datastore {
     private static final String UUIDCACHE_SELECT = "SELECT uuid FROM lp_uuid WHERE name=?";
     private static final String UUIDCACHE_UPDATE = "UPDATE lp_uuid SET uuid=? WHERE name=?";
 
-    private Gson gson;
+    private final Gson gson;
 
-    public SQLDatastore(LuckPermsPlugin plugin, String name) {
+    SQLDatastore(LuckPermsPlugin plugin, String name) {
         super(plugin, name);
         gson = new Gson();
     }
@@ -317,7 +317,7 @@ public abstract class SQLDatastore extends Datastore {
     }
 
     private class Closer {
-        private List<AutoCloseable> objects = new ArrayList<>();
+        private final List<AutoCloseable> objects = new ArrayList<>();
 
         public void add(AutoCloseable a) {
             objects.add(a);

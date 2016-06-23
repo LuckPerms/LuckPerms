@@ -105,7 +105,7 @@ public class CommandManager {
 
     }
 
-    public void registerMainCommand(MainCommand command) {
+    private void registerMainCommand(MainCommand command) {
         plugin.getLogger().log(Level.INFO, "[CommandManager] Registered main command '" + command.getName() + "'");
         mainCommands.add(command);
     }

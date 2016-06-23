@@ -42,7 +42,7 @@ public abstract class PermissionObject {
     @Setter
     private Map<String, Boolean> nodes = new HashMap<>();
 
-    public PermissionObject(LuckPermsPlugin plugin, String objectName) {
+    protected PermissionObject(LuckPermsPlugin plugin, String objectName) {
         this.objectName = objectName;
         this.plugin = plugin;
         this.includeGlobalPermissions = plugin.getConfiguration().getIncludeGlobalPerms();

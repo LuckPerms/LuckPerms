@@ -16,6 +16,7 @@ public class BukkitConfig implements LPConfiguration {
         create();
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void create() {
         File configFile = new File(plugin.getDataFolder(), "config.yml");
 

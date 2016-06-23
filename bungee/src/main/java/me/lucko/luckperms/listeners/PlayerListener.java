@@ -3,7 +3,6 @@ package me.lucko.luckperms.listeners;
 import lombok.AllArgsConstructor;
 import me.lucko.luckperms.LPBungeePlugin;
 import me.lucko.luckperms.commands.Util;
-import me.lucko.luckperms.data.Datastore;
 import me.lucko.luckperms.users.User;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;

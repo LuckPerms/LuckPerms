@@ -26,13 +26,13 @@ public abstract class User extends PermissionObject {
     @Setter
     private String name;
 
-    public User(UUID uuid, LuckPermsPlugin plugin) {
+    User(UUID uuid, LuckPermsPlugin plugin) {
         super(plugin, uuid.toString());
         this.uuid = uuid;
         this.name = null;
     }
 
-    public User(UUID uuid, String name, LuckPermsPlugin plugin) {
+    User(UUID uuid, String name, LuckPermsPlugin plugin) {
         super(plugin, uuid.toString());
         this.uuid = uuid;
         this.name = name;

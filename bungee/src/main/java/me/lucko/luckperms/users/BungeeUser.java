@@ -12,12 +12,12 @@ public class BungeeUser extends User {
 
     private final LPBungeePlugin plugin;
 
-    public BungeeUser(UUID uuid, LPBungeePlugin plugin) {
+    BungeeUser(UUID uuid, LPBungeePlugin plugin) {
         super(uuid, plugin);
         this.plugin = plugin;
     }
 
-    public BungeeUser(UUID uuid, String username, LPBungeePlugin plugin) {
+    BungeeUser(UUID uuid, String username, LPBungeePlugin plugin) {
         super(uuid, username, plugin);
         this.plugin = plugin;
     }

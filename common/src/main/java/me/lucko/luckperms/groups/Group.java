@@ -12,7 +12,7 @@ public class Group extends PermissionObject {
     @Getter
     private final String name;
 
-    public Group(String name, LuckPermsPlugin plugin) {
+    Group(String name, LuckPermsPlugin plugin) {
         super(plugin, name);
         this.name = name;
     }

@@ -9,7 +9,7 @@ import me.lucko.luckperms.users.User;
 import java.util.List;
 
 public abstract class UserSubCommand extends SubCommand {
-    public UserSubCommand(String name, String description, String usage, String permission) {
+    protected UserSubCommand(String name, String description, String usage, String permission) {
         super(name, description, usage, permission);
     }
 

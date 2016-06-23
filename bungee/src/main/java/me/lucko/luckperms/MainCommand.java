@@ -8,7 +8,7 @@ import net.md_5.bungee.api.plugin.Command;
 
 import java.util.Arrays;
 
-public class MainCommand extends Command {
+class MainCommand extends Command {
     private final CommandManager manager;
 
     public MainCommand(CommandManager manager) {

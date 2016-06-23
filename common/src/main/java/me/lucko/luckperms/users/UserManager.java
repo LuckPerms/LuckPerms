@@ -2,9 +2,6 @@ package me.lucko.luckperms.users;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.Util;
 import me.lucko.luckperms.data.Datastore;
 
 import java.util.Map;

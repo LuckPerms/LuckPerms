@@ -68,7 +68,7 @@ public class PlayerListener implements Listener {
         plugin.getUserManager().unloadUser(user);
     }
 
-    public static String color(String string) {
+    private static String color(String string) {
         return ChatColor.translateAlternateColorCodes('&', string);
     }
 

@@ -13,7 +13,7 @@ public class SQLiteDatastore extends SQLDatastore {
     private static final String CREATETABLE_USERS = "CREATE TABLE IF NOT EXISTS `lp_users` (`uuid` VARCHAR(36) NOT NULL, `name` VARCHAR(16) NOT NULL, `perms` TEXT NOT NULL, PRIMARY KEY (`uuid`));";
     private static final String CREATETABLE_GROUPS = "CREATE TABLE IF NOT EXISTS `lp_groups` (`name` VARCHAR(36) NOT NULL, `perms` TEXT NULL, PRIMARY KEY (`name`));";
 
-    private File file;
+    private final File file;
     private Connection connection = null;
 
     public SQLiteDatastore(LuckPermsPlugin plugin, File file) {

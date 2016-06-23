@@ -16,7 +16,7 @@ public abstract class SubCommand {
     @Getter
     private final String permission;
 
-    public SubCommand(String name, String description, String usage, String permission) {
+    protected SubCommand(String name, String description, String usage, String permission) {
         this.name = name;
         this.description = description;
         this.usage = usage;

@@ -12,13 +12,13 @@ public abstract class Datastore {
     protected final LuckPermsPlugin plugin;
 
     @Getter
-    public String name;
+    public final String name;
 
     @Getter
     @Setter
     private boolean acceptingLogins;
 
-    public Datastore(LuckPermsPlugin plugin, String name) {
+    protected Datastore(LuckPermsPlugin plugin, String name) {
         this.plugin = plugin;
         this.name = name;
         this.acceptingLogins = true;

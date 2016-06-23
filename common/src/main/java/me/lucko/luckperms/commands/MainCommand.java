@@ -17,7 +17,7 @@ public abstract class MainCommand {
     @Getter
     private final int requiredArgsLength;
 
-    public MainCommand(String name, String usage, int requiredArgsLength) {
+    protected MainCommand(String name, String usage, int requiredArgsLength) {
         this.name = name;
         this.usage = usage;
         this.requiredArgsLength = requiredArgsLength;

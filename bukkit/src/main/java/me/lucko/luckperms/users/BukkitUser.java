@@ -18,12 +18,12 @@ public class BukkitUser extends User {
     @Setter
     private PermissionAttachment attachment = null;
 
-    public BukkitUser(UUID uuid, LPBukkitPlugin plugin) {
+    BukkitUser(UUID uuid, LPBukkitPlugin plugin) {
         super(uuid, plugin);
         this.plugin = plugin;
     }
 
-    public BukkitUser(UUID uuid, String username, LPBukkitPlugin plugin) {
+    BukkitUser(UUID uuid, String username, LPBukkitPlugin plugin) {
         super(uuid, username, plugin);
         this.plugin = plugin;
     }

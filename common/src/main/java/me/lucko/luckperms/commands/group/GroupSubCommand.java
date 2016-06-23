@@ -9,7 +9,7 @@ import me.lucko.luckperms.groups.Group;
 import java.util.List;
 
 public abstract class GroupSubCommand extends SubCommand {
-    public GroupSubCommand(String name, String description, String usage, String permission) {
+    protected GroupSubCommand(String name, String description, String usage, String permission) {
         super(name, description, usage, permission);
     }
 
