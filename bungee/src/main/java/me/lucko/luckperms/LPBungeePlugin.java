@@ -4,6 +4,7 @@ import lombok.Getter;
 import me.lucko.luckperms.commands.CommandManager;
 import me.lucko.luckperms.data.Datastore;
 import me.lucko.luckperms.data.MySQLConfiguration;
+import me.lucko.luckperms.data.methods.FlatfileDatastore;
 import me.lucko.luckperms.data.methods.MySQLDatastore;
 import me.lucko.luckperms.data.methods.SQLiteDatastore;
 import me.lucko.luckperms.groups.GroupManager;
@@ -50,6 +51,9 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         } else if (storageMethod.equalsIgnoreCase("sqlite")) {
             getLogger().info("Using SQLite as storage method.");
             datastore = new SQLiteDatastore(this, new File(getDataFolder(), "luckperms.sqlite"));
+        } else if (storageMethod.equalsIgnoreCase("flatfile")) {
+            getLogger().info("Using Flatfile (JSON) as storage method.");
+            datastore = new FlatfileDatastore(this, getDataFolder());
         } else {
             getLogger().warning("Storage method '" + storageMethod + "' was not recognised. Using SQLite as fallback.");
             datastore = new SQLiteDatastore(this, new File(getDataFolder(), "luckperms.sqlite"));

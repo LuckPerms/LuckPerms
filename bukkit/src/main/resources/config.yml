@@ -12,7 +12,7 @@ include-global: true
 prefix: '&7&l[&b&lL&a&lP&7&l] &c'
 
 # Which storage method the plugin should use.
-# Currently supported: mysql, sqlite
+# Currently supported: mysql, sqlite, flatfile
 # Fill out connection info below if you're using MySQL
 storage-method: sqlite
 

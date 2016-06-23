@@ -10,10 +10,10 @@ A (fairly bad) permissions implementation for Bukkit/BungeeCord.
 * **Easy and simple setup and configuration using commands** - no editing yml files, yuck
 * **Efficient/lightweight** - maybe? Who knows, it might be.
 * **BungeeCord compatible** - permissions, users and groups are synced across Bukkit/BungeeCord instances
-* **Support for MySQL and SQLite** - other storage methods coming soon (maybe)
+* **Support for MySQL, SQLite & Flatfile (JSON)** - other storage methods coming soon (maybe)
 
 ===== Possible Caveats
-* Currently only supports MySQL and SQLite (support for more methods might come in the future)
+* Currently only supports MySQL, SQLite & Flatfile (JSON) (support for more methods might come in the future)
 * Not at all tested and could produce unexpected/buggy results and errors
 
 === Setup
