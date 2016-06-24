@@ -76,7 +76,7 @@ public class FlatfileDatastore extends Datastore {
         return success;
     }
 
-    private void close(AutoCloseable closeable) {
+    private static void close(AutoCloseable closeable) {
         if (closeable == null) return;
         try {
             closeable.close();

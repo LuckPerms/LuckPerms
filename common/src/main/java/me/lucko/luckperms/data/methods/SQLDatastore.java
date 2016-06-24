@@ -2,6 +2,8 @@ package me.lucko.luckperms.data.methods;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.data.Datastore;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
@@ -21,7 +23,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 @SuppressWarnings("UnnecessaryLocalVariable")
-public abstract class SQLDatastore extends Datastore {
+abstract class SQLDatastore extends Datastore {
 
     private static final Type NM_TYPE = new TypeToken<Map<String, Boolean>>(){}.getType();
 
@@ -48,47 +50,75 @@ public abstract class SQLDatastore extends Datastore {
 
     abstract Connection getConnection() throws SQLException;
 
-    private static void executeQuery(Connection connection, String query, Closer closer) throws SQLException {
-        PreparedStatement preparedStatement = connection.prepareStatement(query);
-        closer.add(preparedStatement);
-        preparedStatement.execute();
-        preparedStatement.close();
+    private static void close(AutoCloseable closeable) {
+        if (closeable == null) return;
+        try {
+            closeable.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    private boolean runQuery(Query query) {
+    private boolean runQuery(QueryPS queryPS) {
         boolean success = false;
 
         Connection connection = null;
-        Closer c = new Closer();
+        PreparedStatement preparedStatement = null;
         try {
             connection = getConnection();
             if (connection == null) {
                 throw new IllegalStateException("SQL connection is null");
             }
-            success = query.onRun(connection, c);
+
+            preparedStatement = connection.prepareStatement(queryPS.getQuery());
+            queryPS.onRun(preparedStatement);
+            preparedStatement.execute();
+            success = true;
+
         } catch (SQLException e) {
             e.printStackTrace();
-            success = false;
         } finally {
-            c.closeAll();
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+            close(preparedStatement);
+            close(connection);
+        }
+        return success;
+    }
+
+    private boolean runQuery(QueryRS queryRS) {
+        boolean success = false;
+
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+
+        try {
+            connection = getConnection();
+            if (connection == null) {
+                throw new IllegalStateException("SQL connection is null");
             }
+
+            preparedStatement = connection.prepareStatement(queryRS.getQuery());
+            queryRS.onRun(preparedStatement);
+            preparedStatement.execute();
+
+            resultSet = preparedStatement.executeQuery();
+            success = queryRS.onResult(resultSet);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            close(resultSet);
+            close(preparedStatement);
+            close(connection);
         }
         return success;
     }
 
     void setupTables(String... tableQueries) {
-        boolean success = runQuery((connection, closer) -> {
-            for (String s : tableQueries) {
-                executeQuery(connection, s, closer);
-            }
-            return true;
-        });
+        boolean success = true;
+        for (String q : tableQueries) {
+            if (!runQuery(new Query(q))) success = false;
+        }
 
         if (!success) {
             plugin.getLogger().log(Level.SEVERE, "Error occurred whilst initialising the database. All connections are disallowed.");
@@ -100,19 +130,21 @@ public abstract class SQLDatastore extends Datastore {
     @Override
     public boolean loadUser(UUID uuid) {
         User user = plugin.getUserManager().makeUser(uuid);
-        boolean success = runQuery((connection, closer) -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(USER_SELECT);
-            closer.add(preparedStatement);
-            preparedStatement.setString(1, uuid.toString());
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-            closer.add(resultSet);
-            if (resultSet.next()) {
-                user.getNodes().putAll(gson.fromJson(resultSet.getString("perms"), NM_TYPE));
-                user.setName(resultSet.getString("name"));
-                return true;
+        boolean success = runQuery(new QueryRS(USER_SELECT) {
+            @Override
+            void onRun(PreparedStatement preparedStatement) throws SQLException {
+                preparedStatement.setString(1, uuid.toString());
             }
-            return false;
+
+            @Override
+            boolean onResult(ResultSet resultSet) throws SQLException {
+                if (resultSet.next()) {
+                    user.getNodes().putAll(gson.fromJson(resultSet.getString("perms"), NM_TYPE));
+                    user.setName(resultSet.getString("name"));
+                    return true;
+                }
+                return false;
+            }
         });
 
         // User updating and loading should be done sync as permission attachments are updated
@@ -126,24 +158,30 @@ public abstract class SQLDatastore extends Datastore {
         try {
             user.setPermission(plugin.getConfiguration().getDefaultGroupNode(), true);
         } catch (ObjectAlreadyHasException ignored) {}
-        boolean success = runQuery((connection, closer) -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(USER_SELECT);
-            closer.add(preparedStatement);
-            preparedStatement.setString(1, user.getUuid().toString());
 
-            ResultSet resultSet = preparedStatement.executeQuery();
-            closer.add(resultSet);
-            if (!resultSet.next()) {
-                PreparedStatement preparedStatement1 = connection.prepareStatement(USER_INSERT);
-                closer.add(preparedStatement1);
-                preparedStatement1.setString(1, user.getUuid().toString());
-                preparedStatement1.setString(2, user.getName());
-                preparedStatement1.setString(3, gson.toJson(user.getNodes()));
-                preparedStatement1.execute();
-            } else {
-                user.getNodes().putAll(gson.fromJson(resultSet.getString("perms"), NM_TYPE));
+        boolean success = runQuery(new QueryRS(USER_SELECT) {
+            @Override
+            void onRun(PreparedStatement preparedStatement) throws SQLException {
+                preparedStatement.setString(1, user.getUuid().toString());
             }
-            return true;
+
+            @Override
+            boolean onResult(ResultSet resultSet) throws SQLException {
+                boolean success = true;
+                if (!resultSet.next()) {
+                    success = runQuery(new QueryPS(USER_INSERT) {
+                        @Override
+                        void onRun(PreparedStatement preparedStatement) throws SQLException {
+                            preparedStatement.setString(1, user.getUuid().toString());
+                            preparedStatement.setString(2, user.getName());
+                            preparedStatement.setString(3, gson.toJson(user.getNodes()));
+                        }
+                    });
+                } else {
+                    user.getNodes().putAll(gson.fromJson(resultSet.getString("perms"), NM_TYPE));
+                }
+                return success;
+            }
         });
 
         // User updating and loading should be done sync as permission attachments are updated
@@ -153,14 +191,13 @@ public abstract class SQLDatastore extends Datastore {
 
     @Override
     public boolean saveUser(User user) {
-        boolean success = runQuery((connection, closer) -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(USER_UPDATE);
-            closer.add(preparedStatement);
-            preparedStatement.setString(1, user.getName());
-            preparedStatement.setString(2, gson.toJson(user.getNodes()));
-            preparedStatement.setString(3, user.getUuid().toString());
-            preparedStatement.execute();
-            return true;
+        boolean success = runQuery(new QueryPS(USER_UPDATE) {
+            @Override
+            void onRun(PreparedStatement preparedStatement) throws SQLException {
+                preparedStatement.setString(1, user.getName());
+                preparedStatement.setString(2, gson.toJson(user.getNodes()));
+                preparedStatement.setString(3, user.getUuid().toString());
+            }
         });
         return success;
     }
@@ -168,25 +205,28 @@ public abstract class SQLDatastore extends Datastore {
     @Override
     public boolean createAndLoadGroup(String name) {
         Group group = plugin.getGroupManager().makeGroup(name);
-        boolean success = runQuery((connection, closer) -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(GROUP_SELECT);
-            closer.add(preparedStatement);
-            preparedStatement.setString(1, group.getName());
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-            closer.add(resultSet);
-
-            if (!resultSet.next()) {
-                PreparedStatement preparedStatement1 = connection.prepareStatement(GROUP_INSERT);
-                closer.add(preparedStatement1);
-                preparedStatement1.setString(1, group.getName());
-                preparedStatement1.setString(2, gson.toJson(group.getNodes()));
-                preparedStatement1.execute();
-
-            } else {
-                group.getNodes().putAll(gson.fromJson(resultSet.getString("perms"), NM_TYPE));
+        boolean success = runQuery(new QueryRS(GROUP_SELECT) {
+            @Override
+            void onRun(PreparedStatement preparedStatement) throws SQLException {
+                preparedStatement.setString(1, group.getName());
             }
-            return true;
+
+            @Override
+            boolean onResult(ResultSet resultSet) throws SQLException {
+                boolean success = true;
+                if (!resultSet.next()) {
+                    success = runQuery(new QueryPS(GROUP_INSERT) {
+                        @Override
+                        void onRun(PreparedStatement preparedStatement) throws SQLException {
+                            preparedStatement.setString(1, group.getName());
+                            preparedStatement.setString(2, gson.toJson(group.getNodes()));
+                        }
+                    });
+                } else {
+                    group.getNodes().putAll(gson.fromJson(resultSet.getString("perms"), NM_TYPE));
+                }
+                return success;
+            }
         });
 
         if (success) plugin.getGroupManager().updateOrSetGroup(group);
@@ -196,18 +236,20 @@ public abstract class SQLDatastore extends Datastore {
     @Override
     public boolean loadGroup(String name) {
         Group group = plugin.getGroupManager().makeGroup(name);
-        boolean success = runQuery((connection, closer) -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(GROUP_SELECT);
-            closer.add(preparedStatement);
-            preparedStatement.setString(1, name);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-            closer.add(resultSet);
-            if (resultSet.next()) {
-                group.getNodes().putAll(gson.fromJson(resultSet.getString("perms"), NM_TYPE));
-                return true;
+        boolean success = runQuery(new QueryRS(GROUP_SELECT) {
+            @Override
+            void onRun(PreparedStatement preparedStatement) throws SQLException {
+                preparedStatement.setString(1, name);
             }
-            return false;
+
+            @Override
+            boolean onResult(ResultSet resultSet) throws SQLException {
+                if (resultSet.next()) {
+                    group.getNodes().putAll(gson.fromJson(resultSet.getString("perms"), NM_TYPE));
+                    return true;
+                }
+                return false;
+            }
         });
 
         if (success) plugin.getGroupManager().updateOrSetGroup(group);
@@ -217,18 +259,21 @@ public abstract class SQLDatastore extends Datastore {
     @Override
     public boolean loadAllGroups() {
         List<Group> groups = new ArrayList<>();
-        boolean success = runQuery((connection, closer) -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(GROUP_SELECT_ALL);
-            closer.add(preparedStatement);
+        boolean success = runQuery(new QueryRS(GROUP_SELECT_ALL) {
+            @Override
+            void onRun(PreparedStatement preparedStatement) throws SQLException {
 
-            ResultSet resultSet = preparedStatement.executeQuery();
-            closer.add(resultSet);
-            while (resultSet.next()) {
-                Group group = plugin.getGroupManager().makeGroup(resultSet.getString("name"));
-                group.getNodes().putAll(gson.fromJson(resultSet.getString("perms"), NM_TYPE));
-                groups.add(group);
             }
-            return true;
+
+            @Override
+            boolean onResult(ResultSet resultSet) throws SQLException {
+                while (resultSet.next()) {
+                    Group group = plugin.getGroupManager().makeGroup(resultSet.getString("name"));
+                    group.getNodes().putAll(gson.fromJson(resultSet.getString("perms"), NM_TYPE));
+                    groups.add(group);
+                }
+                return true;
+            }
         });
 
         if (success) {
@@ -241,97 +286,110 @@ public abstract class SQLDatastore extends Datastore {
 
     @Override
     public boolean saveGroup(Group group) {
-        boolean success = runQuery((connection, closer) -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(GROUP_UPDATE);
-            closer.add(preparedStatement);
-            preparedStatement.setString(1, gson.toJson(group.getNodes()));
-            preparedStatement.setString(2, group.getName());
-            preparedStatement.execute();
-            return true;
+        boolean success = runQuery(new QueryPS(GROUP_UPDATE) {
+            @Override
+            void onRun(PreparedStatement preparedStatement) throws SQLException {
+                preparedStatement.setString(1, gson.toJson(group.getNodes()));
+                preparedStatement.setString(2, group.getName());
+            }
         });
         return success;
     }
 
     @Override
     public boolean deleteGroup(Group group) {
-        boolean success = runQuery((connection, closer) -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(GROUP_DELETE);
-            closer.add(preparedStatement);
-            preparedStatement.setString(1, group.getName());
-            preparedStatement.execute();
-            return true;
+        boolean success = runQuery(new QueryPS(GROUP_DELETE) {
+            @Override
+            void onRun(PreparedStatement preparedStatement) throws SQLException {
+                preparedStatement.setString(1, group.getName());
+            }
         });
+
         if (success) plugin.getGroupManager().unloadGroup(group);
         return success;
     }
 
     @Override
     public boolean saveUUIDData(String username, UUID uuid) {
-        boolean success = runQuery((connection, closer) -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(UUIDCACHE_SELECT);
-            closer.add(preparedStatement);
-            preparedStatement.setString(1, username);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-            closer.add(resultSet);
-
-            PreparedStatement preparedStatement1;
-            if (resultSet.next()) {
-                preparedStatement1 = connection.prepareStatement(UUIDCACHE_UPDATE);
-                closer.add(preparedStatement1);
-                preparedStatement1.setString(1, uuid.toString());
-                preparedStatement1.setString(2, username);
-
-            } else {
-                preparedStatement1 = connection.prepareStatement(UUIDCACHE_INSERT);
-                closer.add(preparedStatement1);
-                preparedStatement1.setString(1, username);
-                preparedStatement1.setString(2, uuid.toString());
+        boolean success = runQuery(new QueryRS(UUIDCACHE_SELECT) {
+            @Override
+            void onRun(PreparedStatement preparedStatement) throws SQLException {
+                preparedStatement.setString(1, username);
             }
 
-            preparedStatement1.execute();
-            return true;
+            @Override
+            boolean onResult(ResultSet resultSet) throws SQLException {
+                boolean success;
+                if (resultSet.next()) {
+                    success = runQuery(new QueryPS(UUIDCACHE_UPDATE) {
+                        @Override
+                        void onRun(PreparedStatement preparedStatement) throws SQLException {
+                            preparedStatement.setString(1, uuid.toString());
+                            preparedStatement.setString(2, username);
+                        }
+                    });
+                } else {
+                    success = runQuery(new QueryPS(UUIDCACHE_INSERT) {
+                        @Override
+                        void onRun(PreparedStatement preparedStatement) throws SQLException {
+                            preparedStatement.setString(1, username);
+                            preparedStatement.setString(2, uuid.toString());
+                        }
+                    });
+                }
+                return success;
+            }
         });
+
         return success;
     }
 
     @Override
     public UUID getUUID(String username) {
         final UUID[] uuid = {null};
-        boolean success = runQuery((connection, closer) -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(UUIDCACHE_SELECT);
-            closer.add(preparedStatement);
-            preparedStatement.setString(1, username);
 
-            ResultSet resultSet = preparedStatement.executeQuery();
-            closer.add(resultSet);
-            if (resultSet.next()) {
-                uuid[0] = UUID.fromString(resultSet.getString("uuid"));
-                return true;
+        boolean success = runQuery(new QueryRS(UUIDCACHE_SELECT) {
+            @Override
+            void onRun(PreparedStatement preparedStatement) throws SQLException {
+                preparedStatement.setString(1, username);
             }
-            return false;
+
+            @Override
+            boolean onResult(ResultSet resultSet) throws SQLException {
+                if (resultSet.next()) {
+                    uuid[0] = UUID.fromString(resultSet.getString("uuid"));
+                    return true;
+                }
+                return false;
+            }
         });
 
         return success ? uuid[0] : null;
     }
 
-    interface Query {
-        boolean onRun(Connection connection, Closer closer) throws SQLException;
+    private class Query extends QueryPS {
+        Query(String query) {
+            super(query);
+        }
+
+        @Override
+        void onRun(PreparedStatement preparedStatement) throws SQLException {
+            // Do nothing
+        }
     }
 
-    private class Closer {
-        private final List<AutoCloseable> objects = new ArrayList<>();
+    @Getter
+    @AllArgsConstructor
+    private abstract class QueryPS {
+        private final String query;
+        abstract void onRun(PreparedStatement preparedStatement) throws SQLException;
+    }
 
-        public void add(AutoCloseable a) {
-            objects.add(a);
-        }
-
-        void closeAll() {
-            objects.stream().filter(a -> a != null).forEach(a -> {
-                try {
-                    a.close();
-                } catch (Exception ignored) {}
-            });
-        }
+    @Getter
+    @AllArgsConstructor
+    private abstract class QueryRS {
+        private final String query;
+        abstract void onRun(PreparedStatement preparedStatement) throws SQLException;
+        abstract boolean onResult(ResultSet resultSet) throws SQLException;
     }
 }
