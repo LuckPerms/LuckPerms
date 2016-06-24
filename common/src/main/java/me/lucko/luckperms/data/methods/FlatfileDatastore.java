@@ -161,7 +161,7 @@ public class FlatfileDatastore extends Datastore {
             reader.nextName(); // name record
             reader.nextString(); // name
             reader.nextName(); // primaryGroup record
-            reader.nextString(); // primaryGroup
+            user.setPrimaryGroup(reader.nextString()); // primaryGroup
             reader.nextName(); //perms
             reader.beginObject();
             while (reader.hasNext()) {

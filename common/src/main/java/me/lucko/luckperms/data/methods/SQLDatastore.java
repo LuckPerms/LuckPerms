@@ -184,6 +184,7 @@ abstract class SQLDatastore extends Datastore {
                     });
                 } else {
                     user.getNodes().putAll(gson.fromJson(resultSet.getString("perms"), NM_TYPE));
+                    user.setPrimaryGroup(resultSet.getString("primary_group"));
                 }
                 return success;
             }

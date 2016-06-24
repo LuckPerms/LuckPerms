@@ -1,6 +1,7 @@
-package me.lucko.luckperms;
+package me.lucko.luckperms.vaulthooks;
 
 import lombok.AllArgsConstructor;
+import me.lucko.luckperms.LPBukkitPlugin;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksPermissionException;
 import me.lucko.luckperms.groups.Group;
@@ -8,7 +9,7 @@ import me.lucko.luckperms.users.User;
 import net.milkbowl.vault.permission.Permission;
 
 @AllArgsConstructor
-class VaultHook extends Permission {
+public class VaultPermissionHook extends Permission {
     private final LPBukkitPlugin plugin;
 
     @Override
