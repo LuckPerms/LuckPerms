@@ -63,6 +63,7 @@ Users with OP have access to all commands.
 | /perms user <user> unset <node> [server] | Unsets a permission for the user | luckperms.user.unsetpermission |
 | /perms user <user> addgroup <group> [server] | Adds the user to a group | luckperms.user.addgroup |
 | /perms user <user> removegroup <group> [server] | Removes the user from a group | luckperms.user.removegroup |
+| /perms user <user> setprimarygroup <group> | Sets the users primary group | luckperms.user.setprimarygroup |
 | /perms user <user> clear | Clears all permissions the user has | luckperms.user.clear |
 |  |  |  |
 |  |  |  |
