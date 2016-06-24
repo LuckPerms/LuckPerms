@@ -42,7 +42,7 @@ public class GroupManager {
      * @param group The group to update or set
      */
     public void updateOrSetGroup(Group group) {
-        if (!groups.containsKey(group.getName())) {
+        if (!isLoaded(group.getName())) {
             // The group isn't already loaded
             groups.put(group.getName(), group);
         } else {

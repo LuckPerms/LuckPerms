@@ -90,7 +90,10 @@ class VaultHook extends Permission {
     @Override
     public boolean playerInGroup(String world, String player, String group) {
         final User user = plugin.getUserManager().getUser(player);
-        return user != null && user.getGroupNames().contains(group);
+        if (user == null) return false;
+
+        final Group group1 = plugin.getGroupManager().getGroup(group);
+        return group1 != null && user.isInGroup(group1);
     }
 
     @Override
@@ -126,14 +129,13 @@ class VaultHook extends Permission {
     @Override
     public String[] getPlayerGroups(String world, String player) {
         final User user = plugin.getUserManager().getUser(player);
-        if (user == null) return new String[0];
-
-        return user.getGroupNames().toArray(new String[0]);
+        return (user == null) ? new String[0] : user.getGroupNames().toArray(new String[0]);
     }
 
     @Override
     public String getPrimaryGroup(String world, String player) {
-        throw new UnsupportedOperationException();
+        final User user = plugin.getUserManager().getUser(player);
+        return (user == null) ? null : user.getPrimaryGroup();
     }
 
     @Override

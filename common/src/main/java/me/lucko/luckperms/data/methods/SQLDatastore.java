@@ -27,9 +27,9 @@ abstract class SQLDatastore extends Datastore {
 
     private static final Type NM_TYPE = new TypeToken<Map<String, Boolean>>(){}.getType();
 
-    private static final String USER_INSERT = "INSERT INTO lp_users VALUES(?, ?, ?)";
+    private static final String USER_INSERT = "INSERT INTO lp_users VALUES(?, ?, ?, ?)";
     private static final String USER_SELECT = "SELECT * FROM lp_users WHERE uuid=?";
-    private static final String USER_UPDATE = "UPDATE lp_users SET name=?, perms=? WHERE uuid=?";
+    private static final String USER_UPDATE = "UPDATE lp_users SET name=?, primary_group = ?, perms=? WHERE uuid=?";
 
     private static final String GROUP_INSERT = "INSERT INTO lp_groups VALUES(?, ?)";
     private static final String GROUP_SELECT = "SELECT perms FROM lp_groups WHERE name=?";
@@ -139,8 +139,9 @@ abstract class SQLDatastore extends Datastore {
             @Override
             boolean onResult(ResultSet resultSet) throws SQLException {
                 if (resultSet.next()) {
-                    user.getNodes().putAll(gson.fromJson(resultSet.getString("perms"), NM_TYPE));
                     user.setName(resultSet.getString("name"));
+                    user.getNodes().putAll(gson.fromJson(resultSet.getString("perms"), NM_TYPE));
+                    user.setPrimaryGroup(resultSet.getString("primary_group"));
                     return true;
                 }
                 return false;
@@ -155,10 +156,6 @@ abstract class SQLDatastore extends Datastore {
     @Override
     public boolean loadOrCreateUser(UUID uuid, String username) {
         User user = plugin.getUserManager().makeUser(uuid, username);
-        try {
-            user.setPermission(plugin.getConfiguration().getDefaultGroupNode(), true);
-        } catch (ObjectAlreadyHasException ignored) {}
-
         boolean success = runQuery(new QueryRS(USER_SELECT) {
             @Override
             void onRun(PreparedStatement preparedStatement) throws SQLException {
@@ -169,12 +166,20 @@ abstract class SQLDatastore extends Datastore {
             boolean onResult(ResultSet resultSet) throws SQLException {
                 boolean success = true;
                 if (!resultSet.next()) {
+
+                    // Setup the new user with default values
+                    try {
+                        user.setPermission(plugin.getConfiguration().getDefaultGroupNode(), true);
+                    } catch (ObjectAlreadyHasException ignored) {}
+                    user.setPrimaryGroup(plugin.getConfiguration().getDefaultGroupName());
+
                     success = runQuery(new QueryPS(USER_INSERT) {
                         @Override
                         void onRun(PreparedStatement preparedStatement) throws SQLException {
                             preparedStatement.setString(1, user.getUuid().toString());
                             preparedStatement.setString(2, user.getName());
-                            preparedStatement.setString(3, gson.toJson(user.getNodes()));
+                            preparedStatement.setString(3, user.getPrimaryGroup());
+                            preparedStatement.setString(4, gson.toJson(user.getNodes()));
                         }
                     });
                 } else {
@@ -196,7 +201,8 @@ abstract class SQLDatastore extends Datastore {
             void onRun(PreparedStatement preparedStatement) throws SQLException {
                 preparedStatement.setString(1, user.getName());
                 preparedStatement.setString(2, gson.toJson(user.getNodes()));
-                preparedStatement.setString(3, user.getUuid().toString());
+                preparedStatement.setString(3, user.getPrimaryGroup());
+                preparedStatement.setString(4, user.getUuid().toString());
             }
         });
         return success;

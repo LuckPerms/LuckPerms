@@ -36,6 +36,7 @@ public class CommandManager {
         userCommand.registerSubCommand(new UserListNodesCommand());
         userCommand.registerSubCommand(new UserRemoveGroupCommand());
         userCommand.registerSubCommand(new UserSetPermissionCommand());
+        userCommand.registerSubCommand(new UserSetPrimaryGroupCommand());
         userCommand.registerSubCommand(new UserUnSetPermissionCommand());
 
         GroupMainCommand groupCommand = new GroupMainCommand();

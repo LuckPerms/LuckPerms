@@ -21,6 +21,7 @@ public class UserInfoCommand extends UserSubCommand {
                 prefix + "&d-> &eUUID: &6" + user.getUuid() + "\n" +
                 prefix + "&d-> &eStatus: " + plugin.getPlayerStatus(user.getUuid()) + "\n" +
                 prefix + "&d-> &eGroups: &6" + Util.listToCommaSep(user.getGroupNames()) + "\n" +
+                prefix + "&d-> &ePrimary Group: &6" + user.getPrimaryGroup() + "\n" +
                 prefix + "&d-> &ePermissions: &6" + (user.getNodes().keySet().size() - user.getGroupNames().size()) + "\n" +
                 prefix + "&d-> &bUse &a/perms user " + user.getName() + " listnodes &bto see all permissions.";
 

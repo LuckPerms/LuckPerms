@@ -26,6 +26,13 @@ public abstract class User extends PermissionObject {
     @Setter
     private String name;
 
+    /**
+     * The users primary group
+     */
+    @Getter
+    @Setter
+    private String primaryGroup = null;
+
     User(UUID uuid, LuckPermsPlugin plugin) {
         super(plugin, uuid.toString());
         this.uuid = uuid;

@@ -120,9 +120,6 @@ public class FlatfileDatastore extends Datastore {
     @Override
     public boolean loadOrCreateUser(UUID uuid, String username) {
         User user = plugin.getUserManager().makeUser(uuid, username);
-        try {
-            user.setPermission(plugin.getConfiguration().getDefaultGroupNode(), true);
-        } catch (ObjectAlreadyHasException ignored) {}
 
         File userFile = new File(usersDir, uuid.toString() + ".json");
         if (!userFile.exists()) {
@@ -133,10 +130,17 @@ public class FlatfileDatastore extends Datastore {
                 return false;
             }
 
+            // Setup the new user with default values
+            try {
+                user.setPermission(plugin.getConfiguration().getDefaultGroupNode(), true);
+            } catch (ObjectAlreadyHasException ignored) {}
+            user.setPrimaryGroup(plugin.getConfiguration().getDefaultGroupName());
+
             boolean success = doWrite(userFile, writer -> {
                 writer.beginObject();
                 writer.name("uuid").value(user.getUuid().toString());
                 writer.name("name").value(user.getName());
+                writer.name("primaryGroup").value(user.getPrimaryGroup());
                 writer.name("perms");
                 writer.beginObject();
                 for (Map.Entry<String, Boolean> e : user.getNodes().entrySet()) {
@@ -156,6 +160,8 @@ public class FlatfileDatastore extends Datastore {
             reader.nextString(); // uuid
             reader.nextName(); // name record
             reader.nextString(); // name
+            reader.nextName(); // primaryGroup record
+            reader.nextString(); // primaryGroup
             reader.nextName(); //perms
             reader.beginObject();
             while (reader.hasNext()) {
@@ -189,7 +195,9 @@ public class FlatfileDatastore extends Datastore {
             reader.nextString(); // uuid
             reader.nextName(); // name record
             user.setName(reader.nextString()); // name
-            reader.nextName(); //perms
+            reader.nextName(); // primaryGroup record
+            user.setPrimaryGroup(reader.nextString()); // primaryGroup
+            reader.nextName(); // perms record
             reader.beginObject();
             while (reader.hasNext()) {
                 String node = reader.nextName();
@@ -223,6 +231,7 @@ public class FlatfileDatastore extends Datastore {
             writer.beginObject();
             writer.name("uuid").value(user.getUuid().toString());
             writer.name("name").value(user.getName());
+            writer.name("primaryGroup").value(user.getPrimaryGroup());
             writer.name("perms");
             writer.beginObject();
             for (Map.Entry<String, Boolean> e : user.getNodes().entrySet()) {

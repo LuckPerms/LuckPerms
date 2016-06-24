@@ -57,7 +57,7 @@ public abstract class UserManager {
      * @param user The user to update or set
      */
     public void updateOrSetUser(User user) {
-        if (!users.containsKey(user.getUuid())) {
+        if (!isLoaded(user.getUuid())) {
             // The user isn't already loaded, so we can just add
             users.put(user.getUuid(), user);
             // They're probably not online, but in case they are...
@@ -65,6 +65,7 @@ public abstract class UserManager {
         } else {
             // Override the user's current loaded nodes, and force a refresh
             users.get(user.getUuid()).setNodes(user.getNodes());
+            users.get(user.getUuid()).setPrimaryGroup(user.getPrimaryGroup());
             users.get(user.getUuid()).refreshPermissions();
         }
     }

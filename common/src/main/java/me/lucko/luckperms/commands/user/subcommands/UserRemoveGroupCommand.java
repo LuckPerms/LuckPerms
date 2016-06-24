@@ -33,6 +33,11 @@ public class UserRemoveGroupCommand extends UserSubCommand {
             return;
         }
 
+        if (server.equalsIgnoreCase("global") && user.getPrimaryGroup().equalsIgnoreCase(group1.getName())) {
+            Util.sendPluginMessage(sender, "You cannot remove a user from their primary group.");
+            return;
+        }
+
         try {
             user.removeGroup(group1, server);
             Util.sendPluginMessage(sender, "&b" + user.getName() + "&a was removed from group &b" + group + "&a on server &b" + server + "&a.");
