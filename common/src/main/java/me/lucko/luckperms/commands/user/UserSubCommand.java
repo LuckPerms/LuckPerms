@@ -15,6 +15,11 @@ public abstract class UserSubCommand extends SubCommand {
 
     protected abstract void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args);
 
+    @Override
+    public boolean isAuthorized(Sender sender) {
+        return sender.hasPermission(getPermission()) || sender.hasPermission("luckperms.user.*") || sender.hasPermission("luckperms.*");
+    }
+
     protected void saveUser(User user, Sender sender, LuckPermsPlugin plugin) {
         user.refreshPermissions();
 

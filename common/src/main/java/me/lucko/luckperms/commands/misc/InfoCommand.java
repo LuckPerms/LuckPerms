@@ -30,4 +30,9 @@ public class InfoCommand extends MainCommand {
     public List<? extends SubCommand> getSubCommands() {
         return new ArrayList<>();
     }
+
+    @Override
+    protected boolean canUse(Sender sender) {
+        return sender.hasPermission("luckperms.info") || sender.hasPermission("luckperms.*");
+    }
 }

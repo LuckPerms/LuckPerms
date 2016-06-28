@@ -68,11 +68,9 @@ public class CommandManager {
         if (args.size() == 0) {
             Util.sendPluginMessage(sender, "&6Running &bLuckPerms " + plugin.getVersion() + "&6.");
 
-            if (sender.hasPermission("luckperms.info")) {
-                for (MainCommand c : mainCommands) {
-                    Util.sendPluginMessage(sender, "&e-> &d" + c.getUsage());
-                }
-            }
+            mainCommands.stream()
+                    .filter(c -> c.canUse(sender))
+                    .forEach(c -> Util.sendPluginMessage(sender, "&e-> &d" + c.getUsage()));
 
         } else {
             String c = args.get(0);

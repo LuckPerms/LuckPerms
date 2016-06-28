@@ -24,7 +24,7 @@ public abstract class SubCommand {
     }
 
     public boolean isAuthorized(Sender sender) {
-        return sender.hasPermission(permission);
+        return sender.hasPermission(permission) || sender.hasPermission("luckperms.*");
     }
 
     public void sendUsage(Sender sender) {

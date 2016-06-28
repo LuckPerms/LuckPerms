@@ -12,7 +12,7 @@ class MainCommand extends Command {
     private final CommandManager manager;
 
     public MainCommand(CommandManager manager) {
-        super("luckpermsbungee", "luckperms.use", "bperms", "lpb", "bpermissions", "bp", "bperm");
+        super("luckpermsbungee", null, "bperms", "lpb", "bpermissions", "bp", "bperm");
         this.manager = manager;
 
     }

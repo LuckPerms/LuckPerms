@@ -39,4 +39,13 @@ public abstract class MainCommand {
             Util.sendPluginMessage(sender, "You do not have permission to use this command!");
         }
     }
+
+    protected boolean canUse(Sender sender) {
+        for (SubCommand sc : getSubCommands()) {
+            if (sc.isAuthorized(sender)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

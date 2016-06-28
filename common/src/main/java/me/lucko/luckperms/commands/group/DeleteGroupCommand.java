@@ -60,4 +60,9 @@ public class DeleteGroupCommand extends MainCommand {
     public List<SubCommand> getSubCommands() {
         return new ArrayList<>();
     }
+
+    @Override
+    protected boolean canUse(Sender sender) {
+        return sender.hasPermission("luckperms.deletegroup") || sender.hasPermission("luckperms.*");
+    }
 }

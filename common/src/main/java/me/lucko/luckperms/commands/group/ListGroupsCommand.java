@@ -32,6 +32,11 @@ public class ListGroupsCommand extends MainCommand {
 
     @Override
     public List<SubCommand> getSubCommands() {
-        return null;
+        return new ArrayList<>();
+    }
+
+    @Override
+    protected boolean canUse(Sender sender) {
+        return sender.hasPermission("luckperms.listgroups") || sender.hasPermission("luckperms.*");
     }
 }

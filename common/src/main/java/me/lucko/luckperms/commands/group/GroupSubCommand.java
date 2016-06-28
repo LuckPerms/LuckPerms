@@ -15,6 +15,11 @@ public abstract class GroupSubCommand extends SubCommand {
 
     protected abstract void execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args);
 
+    @Override
+    public boolean isAuthorized(Sender sender) {
+        return sender.hasPermission(getPermission()) || sender.hasPermission("luckperms.group.*") || sender.hasPermission("luckperms.*");
+    }
+
     protected void saveGroup(Group group, Sender sender, LuckPermsPlugin plugin) {
         plugin.getDatastore().saveGroup(group, success -> {
             if (success) {

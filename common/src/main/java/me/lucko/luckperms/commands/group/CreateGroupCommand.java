@@ -48,4 +48,9 @@ public class CreateGroupCommand extends MainCommand {
     public List<SubCommand> getSubCommands() {
         return new ArrayList<>();
     }
+
+    @Override
+    protected boolean canUse(Sender sender) {
+        return sender.hasPermission("luckperms.creategroup") || sender.hasPermission("luckperms.*");
+    }
 }
