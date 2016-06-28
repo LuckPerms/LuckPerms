@@ -10,6 +10,7 @@ public class BukkitUserManager extends UserManager {
     private final LPBukkitPlugin plugin;
 
     public BukkitUserManager(LPBukkitPlugin plugin) {
+        super(plugin);
         this.plugin = plugin;
     }
 

@@ -1,14 +1,14 @@
 package me.lucko.luckperms.users;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.data.Datastore;
+import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-@NoArgsConstructor
 public abstract class UserManager {
 
     /**
@@ -16,6 +16,15 @@ public abstract class UserManager {
      */
     @Getter
     private final Map<UUID, User> users = new ConcurrentHashMap<>();
+
+    /**
+     * Reference to main plugin instance
+     */
+    private final LuckPermsPlugin plugin;
+
+    public UserManager(LuckPermsPlugin plugin) {
+        this.plugin = plugin;
+    }
 
     /**
      * Get a user object by UUID
@@ -78,6 +87,18 @@ public abstract class UserManager {
     public void saveUser(User user, Datastore datastore) {
         user.refreshPermissions();
         datastore.saveUser(user, success -> {});
+    }
+
+    /**
+     * Set a user to the default group
+     * @param user the user to give to
+     */
+    public void giveDefaults(User user) {
+        // Setup the new user with default values
+        try {
+            user.setPermission(plugin.getConfiguration().getDefaultGroupNode(), true);
+        } catch (ObjectAlreadyHasException ignored) {}
+        user.setPrimaryGroup(plugin.getConfiguration().getDefaultGroupName());
     }
 
     /**

@@ -17,7 +17,7 @@ public class UserClearCommand extends UserSubCommand {
     @Override
     protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args) {
         user.clearNodes();
-        user.getNodes().put(plugin.getConfiguration().getDefaultGroupNode(), true);
+        plugin.getUserManager().giveDefaults(user);
         Util.sendPluginMessage(sender, "&b" + user.getName() + "&a's permissions were cleared.");
 
         saveUser(user, sender, plugin);

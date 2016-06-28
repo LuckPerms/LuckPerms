@@ -9,6 +9,7 @@ public class BungeeUserManager extends UserManager {
     private final LPBungeePlugin plugin;
 
     public BungeeUserManager(LPBungeePlugin plugin) {
+        super(plugin);
         this.plugin = plugin;
     }
 

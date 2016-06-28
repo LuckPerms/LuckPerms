@@ -4,7 +4,6 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.data.Datastore;
-import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.users.User;
 
@@ -130,11 +129,7 @@ public class FlatfileDatastore extends Datastore {
                 return false;
             }
 
-            // Setup the new user with default values
-            try {
-                user.setPermission(plugin.getConfiguration().getDefaultGroupNode(), true);
-            } catch (ObjectAlreadyHasException ignored) {}
-            user.setPrimaryGroup(plugin.getConfiguration().getDefaultGroupName());
+            plugin.getUserManager().giveDefaults(user);
 
             boolean success = doWrite(userFile, writer -> {
                 writer.beginObject();

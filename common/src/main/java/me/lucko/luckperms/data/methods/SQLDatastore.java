@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.data.Datastore;
-import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.groups.GroupManager;
 import me.lucko.luckperms.users.User;
@@ -165,12 +164,7 @@ abstract class SQLDatastore extends Datastore {
             boolean onResult(ResultSet resultSet) throws SQLException {
                 boolean success = true;
                 if (!resultSet.next()) {
-
-                    // Setup the new user with default values
-                    try {
-                        user.setPermission(plugin.getConfiguration().getDefaultGroupNode(), true);
-                    } catch (ObjectAlreadyHasException ignored) {}
-                    user.setPrimaryGroup(plugin.getConfiguration().getDefaultGroupName());
+                    plugin.getUserManager().giveDefaults(user);
 
                     success = runQuery(new QueryPS(USER_INSERT) {
                         @Override
