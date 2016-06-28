@@ -6,7 +6,6 @@ import me.lucko.luckperms.data.Datastore;
 import me.lucko.luckperms.data.MySQLConfiguration;
 import me.lucko.luckperms.data.methods.FlatfileDatastore;
 import me.lucko.luckperms.data.methods.MySQLDatastore;
-import me.lucko.luckperms.data.methods.SQLiteDatastore;
 import me.lucko.luckperms.groups.GroupManager;
 import me.lucko.luckperms.listeners.PlayerListener;
 import me.lucko.luckperms.runnables.UpdateTask;
@@ -15,7 +14,6 @@ import me.lucko.luckperms.users.UserManager;
 import me.lucko.luckperms.utils.LPConfiguration;
 import net.md_5.bungee.api.plugin.Plugin;
 
-import java.io.File;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -48,15 +46,12 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
                     configuration.getDatabaseValue("username"),
                     configuration.getDatabaseValue("password")
             ));
-        } else if (storageMethod.equalsIgnoreCase("sqlite")) {
-            getLogger().info("Using SQLite as storage method.");
-            datastore = new SQLiteDatastore(this, new File(getDataFolder(), "luckperms.sqlite"));
         } else if (storageMethod.equalsIgnoreCase("flatfile")) {
             getLogger().info("Using Flatfile (JSON) as storage method.");
             datastore = new FlatfileDatastore(this, getDataFolder());
         } else {
-            getLogger().warning("Storage method '" + storageMethod + "' was not recognised. Using SQLite as fallback.");
-            datastore = new SQLiteDatastore(this, new File(getDataFolder(), "luckperms.sqlite"));
+            getLogger().warning("Storage method '" + storageMethod + "' was not recognised. Using Flatfile as fallback.");
+            datastore = new FlatfileDatastore(this, getDataFolder());
         }
 
         datastore.init();

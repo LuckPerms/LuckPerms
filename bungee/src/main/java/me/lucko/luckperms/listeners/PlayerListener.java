@@ -11,6 +11,9 @@ import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
+import java.lang.ref.WeakReference;
+import java.util.concurrent.TimeUnit;
+
 @AllArgsConstructor
 public class PlayerListener implements Listener {
 
@@ -22,14 +25,21 @@ public class PlayerListener implements Listener {
 
         plugin.getDatastore().loadOrCreateUser(player.getUniqueId(), player.getName(), success -> {
             if (!success) {
-                e.getPlayer().sendMessage(new TextComponent(Util.color("&e&l[LP] &cPermissions data could not be loaded. Please contact an administrator.")));
+                WeakReference<ProxiedPlayer> p = new WeakReference<>(player);
+                plugin.getProxy().getScheduler().schedule(plugin, () -> {
+                    ProxiedPlayer pl = p.get();
+                    if (pl != null) {
+                        pl.sendMessage(new TextComponent(Util.color(Util.PREFIX + "Permissions data could not be loaded. Please contact an administrator.")));
+                    }
+                }, 3, TimeUnit.SECONDS);
+
             } else {
                 User user = plugin.getUserManager().getUser(player.getUniqueId());
                 user.refreshPermissions();
             }
         });
 
-        plugin.getDatastore().saveUUIDData(e.getPlayer().getName(), e.getPlayer().getUniqueId(), success -> {});
+        plugin.getDatastore().saveUUIDData(player.getName(), player.getUniqueId(), success -> {});
     }
 
     @EventHandler

@@ -30,23 +30,25 @@ public class BukkitUser extends User {
 
     @Override
     public void refreshPermissions() {
-        Player player = Bukkit.getPlayer(getUuid());
-        if (player == null) return;
+        plugin.doSync(() -> {
+            Player player = Bukkit.getPlayer(getUuid());
+            if (player == null) return;
 
-        if (attachment == null) {
-            getPlugin().getLogger().warning("User " + getName() + " does not have a permissions attachment defined.");
-            setAttachment(player.addAttachment(plugin));
-        }
+            if (attachment == null) {
+                getPlugin().getLogger().warning("User " + getName() + " does not have a permissions attachment defined.");
+                setAttachment(player.addAttachment(plugin));
+            }
 
-        // Clear existing permissions
-        for (String p : attachment.getPermissions().keySet()) {
-            attachment.setPermission(p, false);
-        }
+            // Clear existing permissions
+            for (String p : attachment.getPermissions().keySet()) {
+                attachment.setPermission(p, false);
+            }
 
-        // Re-add all defined permissions for the user
-        Map<String, Boolean> local = getLocalPermissions(getPlugin().getConfiguration().getServer(), null);
-        for (String node : local.keySet()) {
-            attachment.setPermission(node, local.get(node));
-        }
+            // Re-add all defined permissions for the user
+            Map<String, Boolean> local = getLocalPermissions(getPlugin().getConfiguration().getServer(), null);
+            for (String node : local.keySet()) {
+                attachment.setPermission(node, local.get(node));
+            }
+        });
     }
 }

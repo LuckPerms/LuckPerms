@@ -6,9 +6,10 @@ import java.util.UUID;
 
 public class Util {
 
+    public static final String PREFIX = "&7&l[&b&lL&a&lP&7&l] &c";
+
     public static void sendPluginMessage(Sender sender, String message) {
-        // TODO: Pull the prefix from the config somehow
-        sender.sendMessage(color("&7&l[&b&lL&a&lP&7&l] &c" + message));
+        sender.sendMessage(color(PREFIX + message));
     }
 
     public static String color(String s) {

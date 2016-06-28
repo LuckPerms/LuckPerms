@@ -2,6 +2,7 @@ package me.lucko.luckperms.listeners;
 
 import lombok.AllArgsConstructor;
 import me.lucko.luckperms.LPBukkitPlugin;
+import me.lucko.luckperms.commands.Util;
 import me.lucko.luckperms.users.BukkitUser;
 import me.lucko.luckperms.users.User;
 import org.bukkit.ChatColor;
@@ -20,8 +21,8 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onPlayerPreLogin(AsyncPlayerPreLoginEvent e) {
         if (!plugin.getDatastore().isAcceptingLogins()) {
-            e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, color(plugin.getConfiguration().getPrefix() +
-                    "&cError whilst validating login with the network. \nPlease contact an administrator."));
+            e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
+                    color(Util.PREFIX + "Error whilst validating login with the network. \nPlease contact an administrator."));
             return;
         }
         plugin.getDatastore().loadOrCreateUser(e.getUniqueId(), e.getName());
@@ -33,8 +34,8 @@ public class PlayerListener implements Listener {
         User user = plugin.getUserManager().getUser(player.getUniqueId());
 
         if (user == null) {
-            e.disallow(PlayerLoginEvent.Result.KICK_OTHER, color(plugin.getConfiguration().getPrefix() +
-                    "&cUser data could not be loaded. Please contact an administrator."));
+            e.disallow(PlayerLoginEvent.Result.KICK_OTHER,
+                    color(Util.PREFIX + "User data could not be loaded. Please contact an administrator."));
             return;
         }
 

@@ -16,7 +16,7 @@ public class GroupInfoCommand extends GroupSubCommand {
 
     @Override
     protected void execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args) {
-        final String prefix = plugin.getConfiguration().getPrefix();
+        final String prefix = Util.PREFIX;
         String sb = prefix + "&d-> &eGroup: &6" + group.getName() + "\n" +
                 prefix + "&d-> &ePermissions: &6" + group.getNodes().keySet().size() + "\n" +
                 prefix + "&d-> &bUse &a/perms group " + group.getName() + " listnodes &bto see all permissions.";

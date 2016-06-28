@@ -16,7 +16,7 @@ public class UserInfoCommand extends UserSubCommand {
 
     @Override
     protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args) {
-        final String prefix = plugin.getConfiguration().getPrefix();
+        final String prefix = Util.PREFIX;
         String sb = prefix + "&d-> &eUser: &6" + user.getName() + "\n" +
                 prefix + "&d-> &eUUID: &6" + user.getUuid() + "\n" +
                 prefix + "&d-> &eStatus: " + plugin.getPlayerStatus(user.getUuid()) + "\n" +

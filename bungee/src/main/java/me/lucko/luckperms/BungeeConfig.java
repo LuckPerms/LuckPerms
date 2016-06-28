@@ -41,15 +41,9 @@ public class BungeeConfig implements LPConfiguration {
         return cfg;
     }
 
-
     @Override
     public String getServer() {
         return configuration.getString("server", "bungee");
-    }
-
-    @Override
-    public String getPrefix() {
-        return configuration.getString("prefix", "&7&l[&b&lL&a&lP&7&l] &c");
     }
 
     @Override

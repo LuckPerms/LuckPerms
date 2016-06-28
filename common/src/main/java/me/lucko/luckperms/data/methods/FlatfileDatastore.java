@@ -176,7 +176,7 @@ public class FlatfileDatastore extends Datastore {
         });
 
         // User updating and loading should be done sync as permission attachments are updated
-        if (success) plugin.doSync(() -> plugin.getUserManager().updateOrSetUser(user));
+        if (success) plugin.getUserManager().updateOrSetUser(user);
         return success;
     }
 
@@ -210,8 +210,7 @@ public class FlatfileDatastore extends Datastore {
             return true;
         });
 
-        // User updating and loading should be done sync as permission attachments are updated
-        if (success) plugin.doSync(() -> plugin.getUserManager().updateOrSetUser(user));
+        if (success) plugin.getUserManager().updateOrSetUser(user);
         return success;
     }
 

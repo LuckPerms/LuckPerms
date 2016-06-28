@@ -41,11 +41,6 @@ public class BukkitConfig implements LPConfiguration {
     }
 
     @Override
-    public String getPrefix() {
-        return configuration.getString("prefix", "&7&l[&b&lL&a&lP&7&l] &c");
-    }
-
-    @Override
     public int getSyncTime() {
         return configuration.getInt("sql.sync-minutes", 3);
     }
