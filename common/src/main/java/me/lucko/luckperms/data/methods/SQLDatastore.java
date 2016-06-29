@@ -193,8 +193,8 @@ abstract class SQLDatastore extends Datastore {
             @Override
             void onRun(PreparedStatement preparedStatement) throws SQLException {
                 preparedStatement.setString(1, user.getName());
-                preparedStatement.setString(2, gson.toJson(user.getNodes()));
-                preparedStatement.setString(3, user.getPrimaryGroup());
+                preparedStatement.setString(2, user.getPrimaryGroup());
+                preparedStatement.setString(3, gson.toJson(user.getNodes()));
                 preparedStatement.setString(4, user.getUuid().toString());
             }
         });
