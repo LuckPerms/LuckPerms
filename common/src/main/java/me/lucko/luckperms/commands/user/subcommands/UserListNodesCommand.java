@@ -1,6 +1,7 @@
 package me.lucko.luckperms.commands.user.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.commands.Permission;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.Util;
 import me.lucko.luckperms.commands.user.UserSubCommand;
@@ -10,8 +11,7 @@ import java.util.List;
 
 public class UserListNodesCommand extends UserSubCommand {
     public UserListNodesCommand() {
-        super("listnodes", "Lists the permission nodes the user has",
-                "/perms user <user> listnodes", "luckperms.user.listnodes");
+        super("listnodes", "Lists the permission nodes the user has", "/perms user <user> listnodes", Permission.USER_LISTNODES);
     }
 
     @Override

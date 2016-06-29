@@ -15,6 +15,7 @@ import me.lucko.luckperms.commands.user.subcommands.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 
 public class CommandManager {
@@ -66,40 +67,34 @@ public class CommandManager {
      */
     public boolean onCommand(Sender sender, List<String> args) {
         if (args.size() == 0) {
-            Util.sendPluginMessage(sender, "&6Running &bLuckPerms " + plugin.getVersion() + "&6.");
-
-            mainCommands.stream()
-                    .filter(c -> c.canUse(sender))
-                    .forEach(c -> Util.sendPluginMessage(sender, "&e-> &d" + c.getUsage()));
-
-        } else {
-            String c = args.get(0);
-            MainCommand main = null;
-
-            for (MainCommand mainCommand : mainCommands) {
-                if (mainCommand.getName().equalsIgnoreCase(c)) {
-                    main = mainCommand;
-                    break;
-                }
-            }
-
-            if (main == null) {
-                Util.sendPluginMessage(sender, "Command not recognised.");
-                return true;
-            }
-
-            if (main.getRequiredArgsLength() == 0) {
-                main.execute(plugin, sender, null);
-                return true;
-            }
-
-            if (args.size() == 1) {
-                main.sendUsage(sender);
-                return true;
-            }
-
-            main.execute(plugin, sender, new ArrayList<>(args.subList(1, args.size())));
+            sendCommandUsage(sender);
+            return true;
         }
+
+        Optional<MainCommand> o = mainCommands.stream().filter(m -> m.getName().equalsIgnoreCase(args.get(0))).limit(1).findAny();
+
+        if (!o.isPresent()) {
+            sendCommandUsage(sender);
+            return true;
+        }
+
+        final MainCommand main = o.get();
+        if (!main.canUse(sender)) {
+            sendCommandUsage(sender);
+            return true;
+        }
+
+        if (main.getRequiredArgsLength() == 0) {
+            main.execute(plugin, sender, null);
+            return true;
+        }
+
+        if (args.size() == 1) {
+            main.sendUsage(sender);
+            return true;
+        }
+
+        main.execute(plugin, sender, new ArrayList<>(args.subList(1, args.size())));
         return true;
 
     }
@@ -109,4 +104,11 @@ public class CommandManager {
         mainCommands.add(command);
     }
 
+    private void sendCommandUsage(Sender sender) {
+        Util.sendPluginMessage(sender, "&6Running &bLuckPerms " + plugin.getVersion() + "&6.");
+
+        mainCommands.stream()
+                .filter(c -> c.canUse(sender))
+                .forEach(c -> Util.sendPluginMessage(sender, "&e-> &d" + c.getUsage()));
+    }
 }

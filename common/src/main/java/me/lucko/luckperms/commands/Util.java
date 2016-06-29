@@ -20,8 +20,8 @@ public class Util {
         // Stolen from Bukkit :>
         char[] b = textToTranslate.toCharArray();
 
-        for(int i = 0; i < b.length - 1; ++i) {
-            if(b[i] == altColorChar && "0123456789AaBbCcDdEeFfKkLlMmNnOoRr".indexOf(b[i + 1]) > -1) {
+        for (int i = 0; i < b.length - 1; ++i) {
+            if (b[i] == altColorChar && "0123456789AaBbCcDdEeFfKkLlMmNnOoRr".indexOf(b[i + 1]) > -1) {
                 b[i] = 167;
                 b[i + 1] = Character.toLowerCase(b[i + 1]);
             }
@@ -42,11 +42,7 @@ public class Util {
         if (strings.isEmpty()) return "&6None";
 
         StringBuilder sb = new StringBuilder();
-
-        for (String s : strings) {
-            sb.append("&6").append(s).append("&7, ");
-        }
-
+        strings.stream().forEach(s -> sb.append("&6").append(s).append("&7, "));
         return sb.delete(sb.length() - 2, sb.length()).toString();
     }
 
@@ -55,11 +51,11 @@ public class Util {
 
         StringBuilder sb = new StringBuilder();
 
-        for (String node : nodes.keySet()) {
-            if (nodes.get(node)) {
-                sb.append("&a").append(node).append("&7, ");
+        for (Map.Entry<String, Boolean> e : nodes.entrySet()) {
+            if (e.getValue()) {
+                sb.append("&a").append(e.getKey()).append("&7, ");
             } else {
-                sb.append("&c").append(node).append("&7, ");
+                sb.append("&c").append(e.getKey()).append("&7, ");
             }
         }
 

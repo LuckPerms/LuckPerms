@@ -6,6 +6,7 @@ import me.lucko.luckperms.data.Datastore;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -40,17 +41,13 @@ public abstract class UserManager {
      * @param name The name to search by
      * @return a {@link User} object if the user is loaded, returns null if the user is not loaded
      */
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     public User getUser(String name) {
-        User user = null;
-
-        for (User u : users.values()) {
-            if (u.getName().equalsIgnoreCase(name)) {
-                user = u;
-                break;
-            }
+        try {
+            return users.values().stream().filter(u -> u.getName().equalsIgnoreCase(name)).limit(1).findAny().get();
+        } catch (NoSuchElementException e) {
+            return null;
         }
-
-        return user;
     }
 
     /**

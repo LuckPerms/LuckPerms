@@ -1,30 +1,18 @@
 package me.lucko.luckperms.commands;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+@Getter
+@AllArgsConstructor
 public abstract class SubCommand {
-
-    @Getter
     private final String name;
-
-    @Getter
     private final String description;
-
-    @Getter
     private final String usage;
-
-    @Getter
-    private final String permission;
-
-    protected SubCommand(String name, String description, String usage, String permission) {
-        this.name = name;
-        this.description = description;
-        this.usage = usage;
-        this.permission = permission;
-    }
+    private final Permission permission;
 
     public boolean isAuthorized(Sender sender) {
-        return sender.hasPermission(permission) || sender.hasPermission("luckperms.*");
+        return permission.isAuthorized(sender);
     }
 
     public void sendUsage(Sender sender) {

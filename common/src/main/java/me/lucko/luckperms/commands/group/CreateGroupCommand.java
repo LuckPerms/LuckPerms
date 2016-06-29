@@ -1,10 +1,7 @@
 package me.lucko.luckperms.commands.group;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.MainCommand;
-import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SubCommand;
-import me.lucko.luckperms.commands.Util;
+import me.lucko.luckperms.commands.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,18 +13,12 @@ public class CreateGroupCommand extends MainCommand {
 
     @Override
     protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args) {
-        if (!sender.hasPermission("luckperms.creategroup")) {
-            Util.sendPluginMessage(sender, "You do not have permission to use this command!");
-            return;
-        }
-
         if (args.size() == 0) {
             sendUsage(sender);
             return;
         }
 
         String groupName = args.get(0).toLowerCase();
-
         plugin.getDatastore().loadGroup(groupName, success -> {
             if (success) {
                 Util.sendPluginMessage(sender, "That group already exists!");
@@ -51,6 +42,6 @@ public class CreateGroupCommand extends MainCommand {
 
     @Override
     protected boolean canUse(Sender sender) {
-        return sender.hasPermission("luckperms.creategroup") || sender.hasPermission("luckperms.*");
+        return Permission.CREATE_GROUP.isAuthorized(sender);
     }
 }

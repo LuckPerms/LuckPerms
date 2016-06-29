@@ -1,6 +1,7 @@
 package me.lucko.luckperms.commands.group.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.commands.Permission;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.Util;
 import me.lucko.luckperms.commands.group.GroupSubCommand;
@@ -10,8 +11,7 @@ import java.util.List;
 
 public class GroupClearCommand extends GroupSubCommand {
     public GroupClearCommand() {
-        super("clear", "Clears a groups permissions",
-                "/perms group <group> clear", "luckperms.group.clear");
+        super("clear", "Clears a groups permissions", "/perms group <group> clear", Permission.GROUP_CLEAR);
     }
 
     @Override
@@ -24,6 +24,6 @@ public class GroupClearCommand extends GroupSubCommand {
 
     @Override
     public boolean isArgLengthInvalid(int argLength) {
-        return true;
+        return false;
     }
 }

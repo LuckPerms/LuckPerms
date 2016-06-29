@@ -1,6 +1,7 @@
 package me.lucko.luckperms.commands.group.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.commands.Permission;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.Util;
 import me.lucko.luckperms.commands.group.GroupSubCommand;
@@ -12,7 +13,7 @@ import java.util.List;
 public class GroupSetInheritCommand extends GroupSubCommand {
     public GroupSetInheritCommand() {
         super("setinherit", "Sets another group for this group to inherit permissions from",
-                "/perms group <group> setinherit <group> [server]", "luckperms.group.setinherit");
+                "/perms group <group> setinherit <group> [server]", Permission.GROUP_SETINHERIT);
     }
 
     @Override
@@ -23,16 +24,16 @@ public class GroupSetInheritCommand extends GroupSubCommand {
             if (!success) {
                 Util.sendPluginMessage(sender, groupName + " does not exist!");
             } else {
-                final String node = "group." + groupName;
-
                 try {
                     if (args.size() == 2) {
                         final String server = args.get(1).toLowerCase();
-                        group.setPermission(node, true, server);
-                        Util.sendPluginMessage(sender, "&b" + group.getName() + "&a now inherits permissions from &b" + groupName + "&a on server &b" + server + "&a.");
+                        group.setPermission("group." + groupName, true, server);
+                        Util.sendPluginMessage(sender, "&b" + group.getName() + "&a now inherits permissions from &b" +
+                                groupName + "&a on server &b" + server + "&a.");
                     } else {
-                        group.setPermission(node, true);
-                        Util.sendPluginMessage(sender, "&b" + group.getName() + "&a now inherits permissions from &b" + groupName + "&a.");
+                        group.setPermission("group." + groupName, true);
+                        Util.sendPluginMessage(sender, "&b" + group.getName() + "&a now inherits permissions from &b" +
+                                groupName + "&a.");
                     }
 
                     saveGroup(group, sender, plugin);
@@ -45,6 +46,6 @@ public class GroupSetInheritCommand extends GroupSubCommand {
 
     @Override
     public boolean isArgLengthInvalid(int argLength) {
-        return argLength == 0;
+        return argLength != 1 && argLength != 2;
     }
 }

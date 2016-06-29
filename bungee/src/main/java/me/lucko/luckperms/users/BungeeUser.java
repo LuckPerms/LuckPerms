@@ -29,14 +29,10 @@ public class BungeeUser extends User {
 
         // Clear existing permissions
         Collection<String> perms = new ArrayList<>(player.getPermissions());
-        for (String p : perms) {
-            player.setPermission(p, false);
-        }
+        perms.stream().forEach(p -> player.setPermission(p, false));
 
         // Re-add all defined permissions for the user
         Map<String, Boolean> local = getLocalPermissions(getPlugin().getConfiguration().getServer(), null);
-        for (String node : local.keySet()) {
-            player.setPermission(node, local.get(node));
-        }
+        local.entrySet().stream().forEach(e -> player.setPermission(e.getKey(), e.getValue()));
     }
 }

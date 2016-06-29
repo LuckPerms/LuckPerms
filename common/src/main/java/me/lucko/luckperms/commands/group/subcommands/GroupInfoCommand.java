@@ -1,6 +1,7 @@
 package me.lucko.luckperms.commands.group.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.commands.Permission;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.Util;
 import me.lucko.luckperms.commands.group.GroupSubCommand;
@@ -10,18 +11,16 @@ import java.util.List;
 
 public class GroupInfoCommand extends GroupSubCommand {
     public GroupInfoCommand() {
-        super("info", "Gives info about the group",
-                "/perms group <group> info", "luckperms.group.info");
+        super("info", "Gives info about the group", "/perms group <group> info", Permission.GROUP_INFO);
     }
 
     @Override
     protected void execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args) {
-        final String prefix = Util.PREFIX;
-        String sb = prefix + "&d-> &eGroup: &6" + group.getName() + "\n" +
-                prefix + "&d-> &ePermissions: &6" + group.getNodes().keySet().size() + "\n" +
-                prefix + "&d-> &bUse &a/perms group " + group.getName() + " listnodes &bto see all permissions.";
-
-        sender.sendMessage(Util.color(sb));
+        sender.sendMessage(Util.color(
+                Util.PREFIX + "&d-> &eGroup: &6" + group.getName() + "\n" +
+                Util.PREFIX + "&d-> &ePermissions: &6" + group.getNodes().keySet().size() + "\n" +
+                Util.PREFIX + "&d-> &bUse &a/perms group " + group.getName() + " listnodes &bto see all permissions."
+        ));
     }
 
     @Override

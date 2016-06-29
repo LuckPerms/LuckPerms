@@ -9,7 +9,7 @@ import me.lucko.luckperms.groups.Group;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 public class GroupMainCommand extends MainCommand {
 
@@ -21,8 +21,21 @@ public class GroupMainCommand extends MainCommand {
 
     @Override
     protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args) {
-        if (args.size() <= 1) {
+        if (args.size() < 2) {
             sendUsage(sender);
+            return;
+        }
+
+        Optional<GroupSubCommand> o = subCommands.stream().filter(s -> s.getName().equalsIgnoreCase(args.get(1))).limit(1).findAny();
+
+        if (!o.isPresent()) {
+            Util.sendPluginMessage(sender, "Command not recognised.");
+            return;
+        }
+
+        final GroupSubCommand sub = o.get();
+        if (!sub.isAuthorized(sender)) {
+            Util.sendPluginMessage(sender, "You do not have permission to use this command!");
             return;
         }
 
@@ -31,38 +44,14 @@ public class GroupMainCommand extends MainCommand {
             strippedArgs.addAll(args.subList(2, args.size()));
         }
 
-        String c = args.get(1);
-        GroupSubCommand tempSub = null;
-
-        for (GroupSubCommand s : subCommands) {
-            if (s.getName().equalsIgnoreCase(c)) {
-                tempSub = s;
-                break;
-            }
-        }
-
-        final GroupSubCommand sub = tempSub;
-
-        if (sub == null) {
-            Util.sendPluginMessage(sender, "Command not recognised.");
-            return;
-        }
-
-
-        if (!sub.isAuthorized(sender)) {
-            Util.sendPluginMessage(sender, "You do not have permission to use this command!");
-            return;
-        }
-
-        String g = args.get(0).toLowerCase();
-
-        plugin.getDatastore().loadGroup(g, success -> {
+        final String groupName = args.get(0).toLowerCase();
+        plugin.getDatastore().loadGroup(groupName, success -> {
             if (!success) {
                 Util.sendPluginMessage(sender, "&eGroup could not be found.");
                 return;
             }
 
-            Group group = plugin.getGroupManager().getGroup(g);
+            Group group = plugin.getGroupManager().getGroup(groupName);
             if (group == null) {
                 Util.sendPluginMessage(sender, "&eGroup could not be found.");
                 return;
@@ -86,18 +75,4 @@ public class GroupMainCommand extends MainCommand {
         subCommands.add(subCommand);
     }
 
-    @Override
-    protected void sendUsage(Sender sender) {
-        List<SubCommand> subs = getSubCommands().stream().filter(s -> s.isAuthorized(sender)).collect(Collectors.toList());
-        if (subs.size() > 0) {
-            Util.sendPluginMessage(sender, "&e" + getName() + " Sub Commands:");
-
-            for (SubCommand s : subs) {
-                s.sendUsage(sender);
-            }
-
-        } else {
-            Util.sendPluginMessage(sender, "You do not have permission to use this command!");
-        }
-    }
 }

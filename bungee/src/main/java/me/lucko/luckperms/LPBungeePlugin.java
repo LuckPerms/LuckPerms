@@ -77,8 +77,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
     @Override
     public String getPlayerStatus(UUID uuid) {
-        if (getProxy().getPlayer(uuid) != null) return "&aOnline";
-        return "&cOffline";
+        return getProxy().getPlayer(uuid) != null ? "&aOnline" : "&cOffline";
     }
 
     @Override

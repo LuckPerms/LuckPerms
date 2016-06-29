@@ -1,6 +1,7 @@
 package me.lucko.luckperms.commands.user.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.commands.Permission;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.Util;
 import me.lucko.luckperms.commands.user.UserSubCommand;
@@ -10,7 +11,7 @@ import java.util.List;
 
 public class UserGetUUIDCommand extends UserSubCommand {
     public UserGetUUIDCommand() {
-        super("getuuid", "Get the UUID of a user", "/perms user <user> getuuid", "luckperms.user.getuuid");
+        super("getuuid", "Get the UUID of a user", "/perms user <user> getuuid", Permission.USER_GETUUID);
     }
 
     @Override

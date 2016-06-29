@@ -56,10 +56,7 @@ public abstract class PermissionObject {
      */
     public boolean hasPermission(String node, Boolean b) {
         if (node.startsWith("global/")) node = node.replace("global/", "");
-        if (b) {
-            return getNodes().containsKey(node) && getNodes().get(node);
-        }
-        return getNodes().containsKey(node) && !getNodes().get(node);
+        return b ? getNodes().containsKey(node) && getNodes().get(node) : getNodes().containsKey(node) && !getNodes().get(node);
     }
 
     /**
@@ -108,7 +105,6 @@ public abstract class PermissionObject {
         if (!getNodes().containsKey(node)) {
             throw new ObjectLacksPermissionException();
         }
-
         getNodes().remove(node);
     }
 

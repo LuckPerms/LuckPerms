@@ -1,6 +1,7 @@
 package me.lucko.luckperms.commands.user.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.commands.Permission;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.Util;
 import me.lucko.luckperms.commands.user.UserSubCommand;
@@ -10,8 +11,7 @@ import java.util.List;
 
 public class UserClearCommand extends UserSubCommand {
     public UserClearCommand() {
-        super("clear", "Clears a users permissions and groups",
-                "/perms user <user> clear", "luckperms.user.clear");
+        super("clear", "Clears a users permissions and groups", "/perms user <user> clear", Permission.USER_CLEAR);
     }
 
     @Override

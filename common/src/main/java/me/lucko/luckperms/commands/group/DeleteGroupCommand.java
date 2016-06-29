@@ -1,10 +1,7 @@
 package me.lucko.luckperms.commands.group;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.MainCommand;
-import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SubCommand;
-import me.lucko.luckperms.commands.Util;
+import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.groups.Group;
 
 import java.util.ArrayList;
@@ -17,11 +14,6 @@ public class DeleteGroupCommand extends MainCommand {
 
     @Override
     protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args) {
-        if (!sender.hasPermission("luckperms.deletegroup")) {
-            Util.sendPluginMessage(sender, "You do not have permission to use this command!");
-            return;
-        }
-
         if (args.size() == 0) {
             sendUsage(sender);
             return;
@@ -41,7 +33,7 @@ public class DeleteGroupCommand extends MainCommand {
 
                 Group group = plugin.getGroupManager().getGroup(groupName);
                 if (group == null) {
-                    Util.sendPluginMessage(sender, "An unexpected error occurred.");
+                    Util.sendPluginMessage(sender, "An unexpected error occurred. Group not loaded.");
                 } else {
                     plugin.getDatastore().deleteGroup(group, success1 -> {
                         if (!success1) {
@@ -63,6 +55,6 @@ public class DeleteGroupCommand extends MainCommand {
 
     @Override
     protected boolean canUse(Sender sender) {
-        return sender.hasPermission("luckperms.deletegroup") || sender.hasPermission("luckperms.*");
+        return Permission.DELETE_GROUP.isAuthorized(sender);
     }
 }

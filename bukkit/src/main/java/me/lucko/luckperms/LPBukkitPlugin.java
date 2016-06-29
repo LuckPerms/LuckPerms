@@ -123,8 +123,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
     @Override
     public String getPlayerStatus(UUID uuid) {
-        if (getServer().getPlayer(uuid) != null) return "&aOnline";
-        return "&cOffline";
+        return getServer().getPlayer(uuid) != null ? "&aOnline" : "&cOffline";
     }
 
     @Override

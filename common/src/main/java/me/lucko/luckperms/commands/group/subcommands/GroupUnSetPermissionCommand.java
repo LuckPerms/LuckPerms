@@ -1,6 +1,7 @@
 package me.lucko.luckperms.commands.group.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.commands.Permission;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.Util;
 import me.lucko.luckperms.commands.group.GroupSubCommand;
@@ -12,7 +13,7 @@ import java.util.List;
 public class GroupUnSetPermissionCommand extends GroupSubCommand {
     public GroupUnSetPermissionCommand() {
         super("unset", "Unsets a permission for a group",
-                "/perms group <group> unset <node> [server]", "luckperms.group.unsetpermission");
+                "/perms group <group> unset <node> [server]", Permission.GROUP_UNSETPERMISSION);
     }
 
     @Override
@@ -33,7 +34,8 @@ public class GroupUnSetPermissionCommand extends GroupSubCommand {
             if (args.size() == 2) {
                 final String server = args.get(1).toLowerCase();
                 group.unsetPermission(node, server);
-                Util.sendPluginMessage(sender, "&aUnset &b" + node + "&a for &b" + group.getName() + "&a on server &b" + server + "&a.");
+                Util.sendPluginMessage(sender, "&aUnset &b" + node + "&a for &b" + group.getName() + "&a on server &b" +
+                        server + "&a.");
             } else {
                 group.unsetPermission(node);
                 Util.sendPluginMessage(sender, "&aUnset &b" + node + "&a for &b" + group.getName() + "&a.");
@@ -47,6 +49,6 @@ public class GroupUnSetPermissionCommand extends GroupSubCommand {
 
     @Override
     public boolean isArgLengthInvalid(int argLength) {
-        return argLength == 0;
+        return argLength != 1 && argLength != 2;
     }
 }

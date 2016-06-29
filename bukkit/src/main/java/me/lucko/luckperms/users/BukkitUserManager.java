@@ -54,8 +54,6 @@ public class BukkitUserManager extends UserManager {
 
     @Override
     public void updateAllUsers() {
-        for (Player p : plugin.getServer().getOnlinePlayers()) {
-            plugin.getDatastore().loadUser(p.getUniqueId());
-        }
+        plugin.getServer().getOnlinePlayers().stream().map(Player::getUniqueId).forEach(u -> plugin.getDatastore().loadUser(u));
     }
 }

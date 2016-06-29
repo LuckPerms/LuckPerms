@@ -1,6 +1,7 @@
 package me.lucko.luckperms.commands.user.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.commands.Permission;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.Util;
 import me.lucko.luckperms.commands.user.UserSubCommand;
@@ -11,7 +12,7 @@ import java.util.List;
 public class UserHasPermCommand extends UserSubCommand {
     public UserHasPermCommand() {
         super("haspermission", "Checks to see if a user has a certain permission node",
-                "/perms user <user> haspermission <node> [server]", "luckperms.user.haspermission");
+                "/perms user <user> haspermission <node> [server]", Permission.USER_HASPERMISSION);
     }
 
     @Override
@@ -25,6 +26,6 @@ public class UserHasPermCommand extends UserSubCommand {
 
     @Override
     public boolean isArgLengthInvalid(int argLength) {
-        return argLength == 0;
+        return argLength != 1 && argLength != 2;
     }
 }

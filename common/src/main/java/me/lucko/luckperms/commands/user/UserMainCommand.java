@@ -9,6 +9,7 @@ import me.lucko.luckperms.users.User;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class UserMainCommand extends MainCommand{
@@ -21,31 +22,19 @@ public class UserMainCommand extends MainCommand{
 
     @Override
     protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args) {
-        if (args.size() <= 1) {
+        if (args.size() < 2) {
             sendUsage(sender);
             return;
         }
 
-        // The first argument is the name of the user, the second is the command
-        String command = args.get(1);
-        UserSubCommand tempSub = null;
+        Optional<UserSubCommand> o = subCommands.stream().filter(s -> s.getName().equalsIgnoreCase(args.get(1))).limit(1).findAny();
 
-        // Try to identify the command used
-        for (UserSubCommand s : subCommands) {
-            if (s.getName().equalsIgnoreCase(command)) {
-                tempSub = s;
-                break;
-            }
-        }
-
-        // The command the sender used
-        final UserSubCommand sub = tempSub;
-
-        if (sub == null) {
+        if (!o.isPresent()) {
             Util.sendPluginMessage(sender, "Command not recognised.");
             return;
         }
 
+        final UserSubCommand sub = o.get();
         if (!sub.isAuthorized(sender)) {
             Util.sendPluginMessage(sender, "You do not have permission to use this command!");
             return;
@@ -57,8 +46,7 @@ public class UserMainCommand extends MainCommand{
             strippedArgs.addAll(args.subList(2, args.size()));
         }
 
-        String user = args.get(0);
-
+        final String user = args.get(0);
         UUID u = Util.parseUuid(user);
         if (u != null) {
             runSub(plugin, sender, u, sub, strippedArgs);
@@ -88,9 +76,8 @@ public class UserMainCommand extends MainCommand{
                 return;
             }
 
-            User user1 = plugin.getUserManager().getUser(uuid);
-
-            if (user1 == null) {
+            User user = plugin.getUserManager().getUser(uuid);
+            if (user == null) {
                 Util.sendPluginMessage(sender, "&eUser could not be found.");
             }
 
@@ -99,8 +86,8 @@ public class UserMainCommand extends MainCommand{
                 return;
             }
 
-            command.execute(plugin, sender, user1, strippedArgs);
-            plugin.getUserManager().cleanupUser(user1);
+            command.execute(plugin, sender, user, strippedArgs);
+            plugin.getUserManager().cleanupUser(user);
         });
     }
 

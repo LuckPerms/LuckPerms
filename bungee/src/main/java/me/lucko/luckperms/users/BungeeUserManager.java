@@ -41,8 +41,6 @@ public class BungeeUserManager extends UserManager {
 
     @Override
     public void updateAllUsers() {
-        for (ProxiedPlayer p : plugin.getProxy().getPlayers()) {
-            plugin.getDatastore().loadUser(p.getUniqueId());
-        }
+        plugin.getProxy().getPlayers().stream().map(ProxiedPlayer::getUniqueId).forEach(u -> plugin.getDatastore().loadUser(u));
     }
 }

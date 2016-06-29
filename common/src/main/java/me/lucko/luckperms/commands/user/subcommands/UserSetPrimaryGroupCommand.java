@@ -1,6 +1,7 @@
 package me.lucko.luckperms.commands.user.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.commands.Permission;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.Util;
 import me.lucko.luckperms.commands.user.UserSubCommand;
@@ -12,7 +13,7 @@ import java.util.List;
 public class UserSetPrimaryGroupCommand extends UserSubCommand {
     public UserSetPrimaryGroupCommand() {
         super("setprimarygroup", "Sets a users primary group",
-                "/perms user <user> setprimarygroup <group>", "luckperms.user.setprimarygroup");
+                "/perms user <user> setprimarygroup <group>", Permission.USER_SETPRIMARYGROUP);
     }
 
     @Override
@@ -41,6 +42,6 @@ public class UserSetPrimaryGroupCommand extends UserSubCommand {
 
     @Override
     public boolean isArgLengthInvalid(int argLength) {
-        return argLength == 0;
+        return argLength != 1;
     }
 }

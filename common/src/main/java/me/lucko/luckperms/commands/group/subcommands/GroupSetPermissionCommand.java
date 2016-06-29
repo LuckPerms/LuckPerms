@@ -1,6 +1,7 @@
 package me.lucko.luckperms.commands.group.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.commands.Permission;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.Util;
 import me.lucko.luckperms.commands.group.GroupSubCommand;
@@ -11,8 +12,8 @@ import java.util.List;
 
 public class GroupSetPermissionCommand extends GroupSubCommand {
     public GroupSetPermissionCommand() {
-        super("set", "Sets a permission for a group",
-                "/perms group <group> set <node> <true|false> [server]", "luckperms.group.setpermission");
+        super("set", "Sets a permission for a group", "/perms group <group> set <node> <true|false> [server]",
+                Permission.GROUP_SETPERMISSION);
     }
 
     @Override
@@ -41,7 +42,8 @@ public class GroupSetPermissionCommand extends GroupSubCommand {
             if (args.size() == 3) {
                 final String server = args.get(2).toLowerCase();
                 group.setPermission(node, b, server);
-                Util.sendPluginMessage(sender, "&aSet &b" + node + "&a to &b" + bool + "&a for &b" + group.getName() + "&a on server &b" + server + "&a.");
+                Util.sendPluginMessage(sender, "&aSet &b" + node + "&a to &b" + bool + "&a for &b" + group.getName() +
+                        "&a on server &b" + server + "&a.");
             } else {
                 group.setPermission(node, b);
                 Util.sendPluginMessage(sender, "&aSet &b" + node + "&a to " + bool + " for &b" + group.getName() + "&a.");
@@ -55,6 +57,6 @@ public class GroupSetPermissionCommand extends GroupSubCommand {
 
     @Override
     public boolean isArgLengthInvalid(int argLength) {
-        return argLength < 2;
+        return argLength != 2 && argLength != 3;
     }
 }
