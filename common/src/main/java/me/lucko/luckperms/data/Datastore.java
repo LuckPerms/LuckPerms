@@ -21,7 +21,7 @@ public abstract class Datastore {
     protected Datastore(LuckPermsPlugin plugin, String name) {
         this.plugin = plugin;
         this.name = name;
-        this.acceptingLogins = true;
+        this.acceptingLogins = false;
     }
 
     /**

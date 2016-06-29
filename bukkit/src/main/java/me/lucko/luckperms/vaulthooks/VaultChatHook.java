@@ -9,9 +9,9 @@ import net.milkbowl.vault.permission.Permission;
  *
  * Registered on the lowest priority so other plugins can override
  */
-public class VaultChatHook extends Chat {
+class VaultChatHook extends Chat {
 
-    public VaultChatHook(Permission perms) {
+    VaultChatHook(Permission perms) {
         super(perms);
     }
 

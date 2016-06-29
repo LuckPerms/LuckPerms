@@ -113,17 +113,13 @@ abstract class SQLDatastore extends Datastore {
         return success;
     }
 
-    void setupTables(String... tableQueries) {
+    boolean setupTables(String... tableQueries) {
         boolean success = true;
         for (String q : tableQueries) {
             if (!runQuery(new Query(q))) success = false;
         }
 
-        if (!success) {
-            plugin.getLogger().log(Level.SEVERE, "Error occurred whilst initialising the database. All connections are disallowed.");
-            shutdown();
-            setAcceptingLogins(false);
-        }
+        return success;
     }
 
     @Override

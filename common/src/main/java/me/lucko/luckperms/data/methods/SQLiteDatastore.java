@@ -6,6 +6,7 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.logging.Level;
 
 public class SQLiteDatastore extends SQLDatastore {
 
@@ -23,12 +24,23 @@ public class SQLiteDatastore extends SQLDatastore {
 
     @Override
     public void init() {
-        setupTables(CREATETABLE_UUID, CREATETABLE_USERS, CREATETABLE_GROUPS);
+        if (!setupTables(CREATETABLE_UUID, CREATETABLE_USERS, CREATETABLE_GROUPS)) {
+            plugin.getLogger().log(Level.SEVERE, "Error occurred whilst initialising the database. All connections are disallowed.");
+            shutdown();
+        } else {
+            setAcceptingLogins(true);
+        }
     }
 
     @Override
     public void shutdown() {
-
+        try {
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
