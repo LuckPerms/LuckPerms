@@ -24,8 +24,8 @@ public class GroupUnSetPermissionCommand extends GroupSubCommand {
             return;
         }
 
-        if (node.matches(".*luckperms\\.group\\..*")) {
-            Util.sendPluginMessage(sender, "Use the uninherit command instead of specifying the node.");
+        if (node.matches("group\\..*")) {
+            Util.sendPluginMessage(sender, "Use the unsetinherit command instead of specifying the node.");
             return;
         }
 

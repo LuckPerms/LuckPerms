@@ -25,7 +25,7 @@ public class UserSetPermissionCommand extends UserSubCommand {
             return;
         }
 
-        if (node.matches(".*luckperms\\.group\\..*")) {
+        if (node.matches("group\\..*")) {
             Util.sendPluginMessage(sender, "Use the addgroup command instead of specifying the node.");
             return;
         }

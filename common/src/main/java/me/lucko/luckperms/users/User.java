@@ -66,7 +66,7 @@ public abstract class User extends PermissionObject {
      * @return true if the user is a member of the group
      */
     public boolean isInGroup(Group group, String server) {
-        return hasPermission("luckperms.group." + group.getName(), true, server);
+        return hasPermission("group." + group.getName(), true, server);
     }
 
     /**
@@ -89,7 +89,7 @@ public abstract class User extends PermissionObject {
             server = "global";
         }
 
-        setPermission("luckperms.group." + group.getName(), true, server);
+        setPermission("group." + group.getName(), true, server);
     }
 
     /**
@@ -112,7 +112,7 @@ public abstract class User extends PermissionObject {
             server = "global";
         }
 
-        unsetPermission("luckperms.group." + group.getName(), server);
+        unsetPermission("group." + group.getName(), server);
     }
 
     /**
@@ -186,7 +186,7 @@ public abstract class User extends PermissionObject {
                     continue;
                 }
 
-                if (parts[1].matches("luckperms\\.group\\..*")) {
+                if (parts[1].matches("group\\..*")) {
                     // SERVER SPECIFIC AND GROUP
                     serverSpecificGroups.put(node.getKey(), node.getValue());
                     continue;
@@ -198,7 +198,7 @@ public abstract class User extends PermissionObject {
             // Skip adding global permissions if they are not requested
             if (!includeGlobal) continue;
 
-            if (node.getKey().matches("luckperms\\.group\\..*")) {
+            if (node.getKey().matches("group\\..*")) {
                 // GROUP
                 groupNodes.put(node.getKey(), node.getValue());
             }
@@ -211,8 +211,8 @@ public abstract class User extends PermissionObject {
             groupNodes.remove(node.getKey().split("\\/", 2)[1]);
         });
 
-        groups.addAll(serverSpecificGroups.entrySet().stream().filter(Map.Entry::getValue).map(e -> e.getKey().split("\\.", 3)[2]).collect(Collectors.toList()));
-        groups.addAll(groupNodes.entrySet().stream().filter(Map.Entry::getValue).map(e -> e.getKey().split("\\.", 3)[2]).collect(Collectors.toList()));
+        groups.addAll(serverSpecificGroups.entrySet().stream().filter(Map.Entry::getValue).map(e -> e.getKey().split("\\.", 2)[1]).collect(Collectors.toList()));
+        groups.addAll(groupNodes.entrySet().stream().filter(Map.Entry::getValue).map(e -> e.getKey().split("\\.", 2)[1]).collect(Collectors.toList()));
         return groups;
     }
 

@@ -23,7 +23,7 @@ public class GroupSetInheritCommand extends GroupSubCommand {
             if (!success) {
                 Util.sendPluginMessage(sender, groupName + " does not exist!");
             } else {
-                final String node = "luckperms.group." + groupName;
+                final String node = "group." + groupName;
 
                 try {
                     if (args.size() == 2) {

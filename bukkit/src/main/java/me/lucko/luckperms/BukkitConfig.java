@@ -47,7 +47,7 @@ public class BukkitConfig implements LPConfiguration {
 
     @Override
     public String getDefaultGroupNode() {
-        return "luckperms.group." + configuration.getString("default-group", "default");
+        return "group." + configuration.getString("default-group", "default");
     }
 
     @Override

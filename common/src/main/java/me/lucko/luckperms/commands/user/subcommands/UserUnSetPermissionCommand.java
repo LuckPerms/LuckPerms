@@ -24,7 +24,7 @@ public class UserUnSetPermissionCommand extends UserSubCommand {
             return;
         }
 
-        if (node.matches(".*luckperms\\.group\\..*")) {
+        if (node.matches("group\\..*")) {
             Util.sendPluginMessage(sender, "Use the removegroup command instead of specifying the node.");
             return;
         }

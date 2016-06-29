@@ -175,7 +175,7 @@ public abstract class PermissionObject {
                     continue;
                 }
 
-                if (parts[1].matches("luckperms\\.group\\..*")) {
+                if (parts[1].matches("group\\..*")) {
                     // SERVER SPECIFIC AND GROUP
                     serverSpecificGroups.put(node.getKey(), node.getValue());
                     continue;
@@ -189,7 +189,7 @@ public abstract class PermissionObject {
             // Skip adding global permissions if they are not requested
             if (!includeGlobal) continue;
 
-            if (node.getKey().matches("luckperms\\.group\\..*")) {
+            if (node.getKey().matches("group\\..*")) {
                 // GROUP
                 groupNodes.put(node.getKey(), node.getValue());
                 continue;
@@ -214,7 +214,7 @@ public abstract class PermissionObject {
             // Don't add negated groups
             if (!groupNode.getValue()) continue;
 
-            String groupName = groupNode.getKey().split("\\.", 3)[2];
+            String groupName = groupNode.getKey().split("\\.", 2)[1];
             if (!excludedGroups.contains(groupName)) {
                 Group group = plugin.getGroupManager().getGroup(groupName);
                 if (group != null) {
@@ -236,7 +236,7 @@ public abstract class PermissionObject {
             // Don't add negated groups
             if (!groupNode.getValue()) continue;
 
-            String groupName = rawNode.split("\\.", 3)[2];
+            String groupName = rawNode.split("\\.", 2)[1];
             if (!excludedGroups.contains(groupName)) {
                 Group group = plugin.getGroupManager().getGroup(groupName);
                 if (group != null) {

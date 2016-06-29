@@ -25,7 +25,7 @@ public class GroupSetPermissionCommand extends GroupSubCommand {
             return;
         }
 
-        if (node.matches(".*luckperms\\.group\\..*")) {
+        if (node.matches("group\\..*")) {
             Util.sendPluginMessage(sender, "Use the inherit command instead of specifying the node.");
             return;
         }

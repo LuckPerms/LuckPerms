@@ -27,7 +27,7 @@ public class GroupUnsetInheritCommand extends GroupSubCommand {
         }
 
         try {
-            group.unsetPermission("luckperms.group." + groupName, server);
+            group.unsetPermission("group." + groupName, server);
             Util.sendPluginMessage(sender, "&b" + group.getName() + "&a no longer inherits permissions from &b" + groupName + "&a on server &b" + server + "&a.");
             saveGroup(group, sender, plugin);
         } catch (ObjectLacksPermissionException e) {
