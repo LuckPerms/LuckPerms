@@ -39,23 +39,19 @@
             <version>2.0.1</version>
             <scope>compile</scope>
         </dependency>
-        <!-- Javaassist library -->
-        <dependency>
-            <groupId>org.javassist</groupId>
-            <artifactId>javassist</artifactId>
-            <version>3.18.1-GA</version>
-        </dependency>
         <!-- slf4j library -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <version>1.7.5</version>
+            <scope>compile</scope>
         </dependency>
         <!-- gson -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.7</version>
+            <scope>compile</scope>
         </dependency>
         <!-- Lombok -->
         <dependency>
