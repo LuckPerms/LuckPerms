@@ -89,12 +89,12 @@ public class FlatfileDatastore extends Datastore {
         try {
             makeFiles();
         } catch (IOException e) {
-            // TODO catch here or something
             e.printStackTrace();
             return;
         }
 
         uuidCache.putAll(getUUIDCache());
+        setAcceptingLogins(true);
     }
 
     private void makeFiles() throws IOException {

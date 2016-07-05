@@ -12,14 +12,10 @@ import me.lucko.luckperms.runnables.UpdateTask;
 import me.lucko.luckperms.users.BukkitUserManager;
 import me.lucko.luckperms.users.UserManager;
 import me.lucko.luckperms.utils.LPConfiguration;
-import me.lucko.luckperms.vaulthooks.VaultChatHook;
-import me.lucko.luckperms.vaulthooks.VaultPermissionHook;
-import net.milkbowl.vault.chat.Chat;
-import net.milkbowl.vault.permission.Permission;
+import me.lucko.luckperms.vaulthooks.VaultHook;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.PluginManager;
-import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -85,18 +81,11 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         }
 
         // Provide vault support
-        try {
-            if (getServer().getPluginManager().isPluginEnabled("Vault")) {
-                final VaultPermissionHook permsHook = new VaultPermissionHook(this);
-                getServer().getServicesManager().register(Permission.class, permsHook, this, ServicePriority.High);
-                getServer().getServicesManager().register(Chat.class, new VaultChatHook(permsHook), this, ServicePriority.Lowest);
-                getLogger().info("Registered Vault permission & chat hook.");
-            } else {
-                getLogger().info("Vault not found.");
-            }
-        } catch (Exception e) {
-            getLogger().warning("Error whilst hooking into Vault.");
-            e.printStackTrace();
+        if (getServer().getPluginManager().isPluginEnabled("Vault")) {
+            VaultHook.hook(this);
+            getLogger().info("Registered Vault permission & chat hook.");
+        } else {
+            getLogger().info("Vault not found.");
         }
 
     }

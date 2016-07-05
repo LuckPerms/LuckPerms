@@ -6,6 +6,7 @@ import me.lucko.luckperms.data.MySQLConfiguration;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.logging.Level;
 
 public class MySQLDatastore extends SQLDatastore {
 
@@ -38,7 +39,12 @@ public class MySQLDatastore extends SQLDatastore {
         hikari.addDataSourceProperty("user", username);
         hikari.addDataSourceProperty("password", password);
 
-        setupTables(CREATETABLE_UUID, CREATETABLE_USERS, CREATETABLE_GROUPS);
+        if (!setupTables(CREATETABLE_UUID, CREATETABLE_USERS, CREATETABLE_GROUPS)) {
+            plugin.getLogger().log(Level.SEVERE, "Error occurred whilst initialising the database. All connections are disallowed.");
+            shutdown();
+        } else {
+            setAcceptingLogins(true);
+        }
     }
 
     @Override
