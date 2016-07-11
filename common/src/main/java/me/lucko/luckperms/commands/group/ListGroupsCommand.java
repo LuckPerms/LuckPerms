@@ -1,7 +1,12 @@
 package me.lucko.luckperms.commands.group;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.*;
+import me.lucko.luckperms.commands.MainCommand;
+import me.lucko.luckperms.commands.Sender;
+import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.commands.Util;
+import me.lucko.luckperms.constants.Messages;
+import me.lucko.luckperms.constants.Permission;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,10 +20,9 @@ public class ListGroupsCommand extends MainCommand {
     protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         plugin.getDatastore().loadAllGroups(success -> {
             if (!success) {
-                Util.sendPluginMessage(sender, "Unable to load all groups.");
+                Messages.GROUPS_LOAD_ERROR.send(sender);
             } else {
-                Util.sendPluginMessage(sender, "&aGroups: " +
-                        Util.listToCommaSep(new ArrayList<>(plugin.getGroupManager().getGroups().keySet())));
+                Messages.GROUPS_LIST.send(sender, Util.listToCommaSep(new ArrayList<>(plugin.getGroupManager().getGroups().keySet())));
             }
         });
     }

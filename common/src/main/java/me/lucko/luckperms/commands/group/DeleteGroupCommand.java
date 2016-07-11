@@ -1,7 +1,11 @@
 package me.lucko.luckperms.commands.group;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.*;
+import me.lucko.luckperms.commands.MainCommand;
+import me.lucko.luckperms.commands.Sender;
+import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.constants.Messages;
+import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.groups.Group;
 
 import java.util.ArrayList;
@@ -22,24 +26,24 @@ public class DeleteGroupCommand extends MainCommand {
         String groupName = args.get(0).toLowerCase();
 
         if (groupName.equalsIgnoreCase(plugin.getConfiguration().getDefaultGroupName())) {
-            Util.sendPluginMessage(sender, "You cannot delete the default group.");
+            Messages.DELETE_GROUP_ERROR_DEFAULT.send(sender);
             return;
         }
 
         plugin.getDatastore().loadGroup(groupName, success -> {
             if (!success) {
-                Util.sendPluginMessage(sender, "That group does not exist!");
+                Messages.GROUP_DOES_NOT_EXIST.send(sender);
             } else {
 
                 Group group = plugin.getGroupManager().getGroup(groupName);
                 if (group == null) {
-                    Util.sendPluginMessage(sender, "An unexpected error occurred. Group not loaded.");
+                    Messages.GROUP_LOAD_ERROR.send(sender);
                 } else {
                     plugin.getDatastore().deleteGroup(group, success1 -> {
                         if (!success1) {
-                            Util.sendPluginMessage(sender, "There was an error whilst deleting the group.");
+                            Messages.DELETE_GROUP_ERROR.send(sender);
                         } else {
-                            Util.sendPluginMessage(sender, "&b" + groupName + "&a was successfully deleted.");
+                            Messages.DELETE_GROUP_SUCCESS.send(sender, groupName);
                             plugin.runUpdateTask();
                         }
                     });

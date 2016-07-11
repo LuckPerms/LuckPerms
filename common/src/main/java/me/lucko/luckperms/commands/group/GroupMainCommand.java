@@ -4,7 +4,7 @@ import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.commands.MainCommand;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
-import me.lucko.luckperms.commands.Util;
+import me.lucko.luckperms.constants.Messages;
 import me.lucko.luckperms.groups.Group;
 
 import java.util.ArrayList;
@@ -29,13 +29,13 @@ public class GroupMainCommand extends MainCommand {
         Optional<GroupSubCommand> o = subCommands.stream().filter(s -> s.getName().equalsIgnoreCase(args.get(1))).limit(1).findAny();
 
         if (!o.isPresent()) {
-            Util.sendPluginMessage(sender, "Command not recognised.");
+            Messages.COMMAND_NOT_RECOGNISED.send(sender);
             return;
         }
 
         final GroupSubCommand sub = o.get();
         if (!sub.isAuthorized(sender)) {
-            Util.sendPluginMessage(sender, "You do not have permission to use this command!");
+            Messages.COMMAND_NO_PERMISSION.send(sender);
             return;
         }
 
@@ -47,13 +47,13 @@ public class GroupMainCommand extends MainCommand {
         final String groupName = args.get(0).toLowerCase();
         plugin.getDatastore().loadGroup(groupName, success -> {
             if (!success) {
-                Util.sendPluginMessage(sender, "&eGroup could not be found.");
+                Messages.GROUP_NOT_FOUND.send(sender);
                 return;
             }
 
             Group group = plugin.getGroupManager().getGroup(groupName);
             if (group == null) {
-                Util.sendPluginMessage(sender, "&eGroup could not be found.");
+                Messages.GROUP_NOT_FOUND.send(sender);
                 return;
             }
 

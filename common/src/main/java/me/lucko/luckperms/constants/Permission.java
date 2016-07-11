@@ -1,8 +1,10 @@
-package me.lucko.luckperms.commands;
+package me.lucko.luckperms.constants;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import me.lucko.luckperms.commands.Sender;
 
+@SuppressWarnings("SpellCheckingInspection")
 @AllArgsConstructor
 public enum Permission {
 

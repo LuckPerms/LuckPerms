@@ -1,10 +1,10 @@
 package me.lucko.luckperms.commands.group.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.Permission;
 import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.Util;
 import me.lucko.luckperms.commands.group.GroupSubCommand;
+import me.lucko.luckperms.constants.Messages;
+import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.groups.Group;
 
@@ -27,7 +27,7 @@ public class GroupSetPermissionCommand extends GroupSubCommand {
         }
 
         if (node.matches("group\\..*")) {
-            Util.sendPluginMessage(sender, "Use the inherit command instead of specifying the node.");
+            Messages.GROUP_USE_INHERIT.send(sender);
             return;
         }
 
@@ -42,16 +42,15 @@ public class GroupSetPermissionCommand extends GroupSubCommand {
             if (args.size() == 3) {
                 final String server = args.get(2).toLowerCase();
                 group.setPermission(node, b, server);
-                Util.sendPluginMessage(sender, "&aSet &b" + node + "&a to &b" + bool + "&a for &b" + group.getName() +
-                        "&a on server &b" + server + "&a.");
+                Messages.SETPERMISSION_SERVER_SUCCESS.send(sender, node, bool, group.getName(), server);
             } else {
                 group.setPermission(node, b);
-                Util.sendPluginMessage(sender, "&aSet &b" + node + "&a to " + bool + " for &b" + group.getName() + "&a.");
+                Messages.SETPERMISSION_SUCCESS.send(sender, node, bool, group.getName());
             }
 
             saveGroup(group, sender, plugin);
         } catch (ObjectAlreadyHasException e) {
-            Util.sendPluginMessage(sender, group.getName() + " already has this permission!");
+            Messages.ALREADY_HASPERMISSION.send(sender, group.getName());
         }
     }
 

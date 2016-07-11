@@ -1,10 +1,10 @@
 package me.lucko.luckperms.commands.user.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.Permission;
 import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.Util;
 import me.lucko.luckperms.commands.user.UserSubCommand;
+import me.lucko.luckperms.constants.Messages;
+import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.users.User;
 
 import java.util.List;
@@ -18,7 +18,7 @@ public class UserClearCommand extends UserSubCommand {
     protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args) {
         user.clearNodes();
         plugin.getUserManager().giveDefaults(user);
-        Util.sendPluginMessage(sender, "&b" + user.getName() + "&a's permissions were cleared.");
+        Messages.CLEAR_SUCCESS.send(sender, user.getName());
 
         saveUser(user, sender, plugin);
     }

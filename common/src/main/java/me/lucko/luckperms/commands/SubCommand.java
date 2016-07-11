@@ -2,6 +2,7 @@ package me.lucko.luckperms.commands;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import me.lucko.luckperms.constants.Permission;
 
 @Getter
 @AllArgsConstructor

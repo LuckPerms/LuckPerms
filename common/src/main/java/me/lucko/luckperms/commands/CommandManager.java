@@ -12,6 +12,7 @@ import me.lucko.luckperms.commands.misc.InfoCommand;
 import me.lucko.luckperms.commands.misc.SyncCommand;
 import me.lucko.luckperms.commands.user.UserMainCommand;
 import me.lucko.luckperms.commands.user.subcommands.*;
+import me.lucko.luckperms.constants.Messages;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -105,7 +106,7 @@ public class CommandManager {
     }
 
     private void sendCommandUsage(Sender sender) {
-        Util.sendPluginMessage(sender, "&6Running &bLuckPerms " + plugin.getVersion() + "&6.");
+        Messages.INFO_BRIEF.send(sender, plugin.getVersion());
 
         mainCommands.stream()
                 .filter(c -> c.canUse(sender))

@@ -1,10 +1,10 @@
 package me.lucko.luckperms.commands.user;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.Permission;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
-import me.lucko.luckperms.commands.Util;
+import me.lucko.luckperms.constants.Messages;
+import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.users.User;
 
 import java.util.List;
@@ -21,9 +21,9 @@ public abstract class UserSubCommand extends SubCommand {
 
         plugin.getDatastore().saveUser(user, success -> {
             if (success) {
-                Util.sendPluginMessage(sender, "&7(User data was saved to the datastore)");
+                Messages.USER_SAVE_SUCCESS.send(sender);
             } else {
-                Util.sendPluginMessage(sender, "There was an error whilst saving the user.");
+                Messages.USER_SAVE_ERROR.send(sender);
             }
         });
     }

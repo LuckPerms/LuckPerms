@@ -3,6 +3,7 @@ package me.lucko.luckperms.commands;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.constants.Messages;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,7 +34,7 @@ public abstract class MainCommand {
             }
 
         } else {
-            Util.sendPluginMessage(sender, "You do not have permission to use this command!");
+            Messages.COMMAND_NO_PERMISSION.send(sender);
         }
     }
 

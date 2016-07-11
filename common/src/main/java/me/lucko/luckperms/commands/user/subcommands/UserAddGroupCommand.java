@@ -1,10 +1,10 @@
 package me.lucko.luckperms.commands.user.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.Permission;
 import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.Util;
 import me.lucko.luckperms.commands.user.UserSubCommand;
+import me.lucko.luckperms.constants.Messages;
+import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.users.User;
@@ -22,11 +22,11 @@ public class UserAddGroupCommand extends UserSubCommand {
 
         plugin.getDatastore().loadGroup(groupName, success -> {
             if (!success) {
-                Util.sendPluginMessage(sender, groupName + " does not exist!");
+                Messages.GROUP_DOES_NOT_EXIST.send(sender);
             } else {
                 Group group = plugin.getGroupManager().getGroup(groupName);
                 if (group == null) {
-                    Util.sendPluginMessage(sender, "That group does not exist!");
+                    Messages.GROUP_DOES_NOT_EXIST.send(sender);
                     return;
                 }
 
@@ -34,17 +34,15 @@ public class UserAddGroupCommand extends UserSubCommand {
                     if (args.size() == 2) {
                         final String server = args.get(1).toLowerCase();
                         user.addGroup(group, server);
-                        Util.sendPluginMessage(sender, "&b" + user.getName() + "&a successfully added to group &b" +
-                                groupName + "&a on the server &b" + server + "&a.");
+                        Messages.USER_ADDGROUP_SERVER_SUCCESS.send(sender, user.getName(), groupName, server);
                     } else {
                         user.addGroup(group);
-                        Util.sendPluginMessage(sender, "&b" + user.getName() + "&a successfully added to group &b" +
-                                groupName + "&a.");
+                        Messages.USER_ADDGROUP_SUCCESS.send(sender, user.getName(), groupName);
                     }
 
                     saveUser(user, sender, plugin);
                 } catch (ObjectAlreadyHasException e) {
-                    Util.sendPluginMessage(sender, "The user is already a member of that group.");
+                    Messages.USER_ALREADY_MEMBER_OF.send(sender, user.getName(), group.getName());
                 }
             }
         });

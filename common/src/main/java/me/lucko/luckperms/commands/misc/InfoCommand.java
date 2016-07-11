@@ -1,7 +1,11 @@
 package me.lucko.luckperms.commands.misc;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.*;
+import me.lucko.luckperms.commands.MainCommand;
+import me.lucko.luckperms.commands.Sender;
+import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.constants.Messages;
+import me.lucko.luckperms.constants.Permission;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,9 +17,7 @@ public class InfoCommand extends MainCommand {
 
     @Override
     protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args) {
-        Util.sendPluginMessage(sender, "&6Running &bLuckPerms " + plugin.getVersion() + "&6.");
-        Util.sendPluginMessage(sender, "&eAuthor: &6Luck");
-        Util.sendPluginMessage(sender, "&eStorage Method: &6" + plugin.getDatastore().getName());
+        Messages.INFO.send(sender, plugin.getVersion(), plugin.getDatastore().getName());
     }
 
     @Override

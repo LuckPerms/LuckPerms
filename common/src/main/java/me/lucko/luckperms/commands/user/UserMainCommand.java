@@ -5,6 +5,7 @@ import me.lucko.luckperms.commands.MainCommand;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.commands.Util;
+import me.lucko.luckperms.constants.Messages;
 import me.lucko.luckperms.users.User;
 
 import java.util.ArrayList;
@@ -30,13 +31,13 @@ public class UserMainCommand extends MainCommand{
         Optional<UserSubCommand> o = subCommands.stream().filter(s -> s.getName().equalsIgnoreCase(args.get(1))).limit(1).findAny();
 
         if (!o.isPresent()) {
-            Util.sendPluginMessage(sender, "Command not recognised.");
+            Messages.COMMAND_NOT_RECOGNISED.send(sender);
             return;
         }
 
         final UserSubCommand sub = o.get();
         if (!sub.isAuthorized(sender)) {
-            Util.sendPluginMessage(sender, "You do not have permission to use this command!");
+            Messages.COMMAND_NO_PERMISSION.send(sender);
             return;
         }
 
@@ -54,11 +55,11 @@ public class UserMainCommand extends MainCommand{
         }
 
         if (user.length() <= 16) {
-            Util.sendPluginMessage(sender, "&7(Attempting UUID lookup, since you specified a user)");
+            Messages.USER_ATTEMPTING_LOOKUP.send(sender);
 
             plugin.getDatastore().getUUID(user, uuid -> {
                 if (uuid == null) {
-                    Util.sendPluginMessage(sender, "&eUser could not be found.");
+                    Messages.USER_NOT_FOUND.send(sender);
                     return;
                 }
                 runSub(plugin, sender, uuid, sub, strippedArgs);
@@ -66,19 +67,19 @@ public class UserMainCommand extends MainCommand{
             return;
         }
 
-        Util.sendPluginMessage(sender, "&d" + user + "&c is not a valid username/uuid.");
+        Messages.USER_INVALID_ENTRY.send(sender, user);
     }
 
     private void runSub(LuckPermsPlugin plugin, Sender sender, UUID uuid, UserSubCommand command, List<String> strippedArgs) {
         plugin.getDatastore().loadUser(uuid, success -> {
             if (!success) {
-                Util.sendPluginMessage(sender, "&eUser could not be found.");
+                Messages.USER_NOT_FOUND.send(sender);
                 return;
             }
 
             User user = plugin.getUserManager().getUser(uuid);
             if (user == null) {
-                Util.sendPluginMessage(sender, "&eUser could not be found.");
+                Messages.USER_NOT_FOUND.send(sender);
             }
 
             if (command.isArgLengthInvalid(strippedArgs.size())) {

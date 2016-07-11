@@ -1,10 +1,10 @@
 package me.lucko.luckperms.commands.user.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.Permission;
 import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.Util;
 import me.lucko.luckperms.commands.user.UserSubCommand;
+import me.lucko.luckperms.constants.Messages;
+import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.users.User;
 
 import java.util.List;
@@ -16,7 +16,7 @@ public class UserGetUUIDCommand extends UserSubCommand {
 
     @Override
     protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args) {
-        Util.sendPluginMessage(sender, "&bThe UUID of &e" + user.getName() + "&b is &e" + user.getUuid().toString() + "&b.");
+        Messages.USER_GETUUID.send(sender, user.getName(), user.getUuid().toString());
     }
 
     @Override

@@ -1,10 +1,10 @@
 package me.lucko.luckperms.commands.group;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.Permission;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
-import me.lucko.luckperms.commands.Util;
+import me.lucko.luckperms.constants.Messages;
+import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.groups.Group;
 
 import java.util.List;
@@ -19,9 +19,9 @@ public abstract class GroupSubCommand extends SubCommand {
     protected void saveGroup(Group group, Sender sender, LuckPermsPlugin plugin) {
         plugin.getDatastore().saveGroup(group, success -> {
             if (success) {
-                Util.sendPluginMessage(sender, "&7(Group data was saved to the datastore)");
+                Messages.GROUP_SAVE_SUCCESS.send(sender);
             } else {
-                Util.sendPluginMessage(sender, "There was an error whilst saving the group.");
+                Messages.GROUP_SAVE_ERROR.send(sender);
             }
 
             plugin.runUpdateTask();
