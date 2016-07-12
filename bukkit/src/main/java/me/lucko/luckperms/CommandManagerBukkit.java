@@ -20,7 +20,7 @@ class CommandManagerBukkit extends CommandManager implements CommandExecutor {
         return onCommand(new Sender() {
             @Override
             public void sendMessage(String s) {
-                CommandSender c = cs.get();
+                final CommandSender c = cs.get();
                 if (c != null) {
                     c.sendMessage(s);
                 }
@@ -28,7 +28,7 @@ class CommandManagerBukkit extends CommandManager implements CommandExecutor {
 
             @Override
             public boolean hasPermission(String node) {
-                CommandSender c = cs.get();
+                final CommandSender c = cs.get();
                 return c != null && c.hasPermission(node);
             }
         }, Arrays.asList(args));

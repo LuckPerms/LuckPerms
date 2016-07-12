@@ -22,20 +22,23 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onPlayerPostLogin(PostLoginEvent e) {
         final ProxiedPlayer player = e.getPlayer();
+        final WeakReference<ProxiedPlayer> p = new WeakReference<>(player);
 
         plugin.getDatastore().loadOrCreateUser(player.getUniqueId(), player.getName(), success -> {
             if (!success) {
-                WeakReference<ProxiedPlayer> p = new WeakReference<>(player);
                 plugin.getProxy().getScheduler().schedule(plugin, () -> {
-                    ProxiedPlayer pl = p.get();
+                    final ProxiedPlayer pl = p.get();
                     if (pl != null) {
                         pl.sendMessage(new TextComponent(Util.color(Util.PREFIX + "Permissions data could not be loaded. Please contact an administrator.")));
                     }
                 }, 3, TimeUnit.SECONDS);
 
             } else {
-                User user = plugin.getUserManager().getUser(player.getUniqueId());
-                user.refreshPermissions();
+                final ProxiedPlayer pl = p.get();
+                if (pl != null) {
+                    final User user = plugin.getUserManager().getUser(pl.getUniqueId());
+                    user.refreshPermissions();
+                }
             }
         });
 

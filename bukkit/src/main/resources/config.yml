@@ -3,7 +3,7 @@
 # The name of the server, used for server specific permissions. Set to 'global' to disable.
 server: global
 
-# The default group assigned to all user on join.
+# The default group assigned to all users on their first join.
 default-group: default
 
 # If users on this server should have their global permissions/groups applied.
