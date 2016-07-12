@@ -3,9 +3,9 @@ package me.lucko.luckperms.listeners;
 import lombok.AllArgsConstructor;
 import me.lucko.luckperms.LPBukkitPlugin;
 import me.lucko.luckperms.commands.Util;
+import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.users.BukkitUser;
 import me.lucko.luckperms.users.User;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -22,7 +22,7 @@ public class PlayerListener implements Listener {
     public void onPlayerPreLogin(AsyncPlayerPreLoginEvent e) {
         if (!plugin.getDatastore().isAcceptingLogins()) {
             e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
-                    color(Util.PREFIX + "Error whilst validating login with the network. \nPlease contact an administrator."));
+                    Util.color(Message.PREFIX + "Error whilst validating login with the network. \nPlease contact an administrator."));
             return;
         }
         plugin.getDatastore().loadOrCreateUser(e.getUniqueId(), e.getName());
@@ -35,7 +35,7 @@ public class PlayerListener implements Listener {
 
         if (user == null) {
             e.disallow(PlayerLoginEvent.Result.KICK_OTHER,
-                    color(Util.PREFIX + "User data could not be loaded. Please contact an administrator."));
+                    Util.color(Message.PREFIX + "User data could not be loaded. Please contact an administrator."));
             return;
         }
 
@@ -67,10 +67,6 @@ public class PlayerListener implements Listener {
         // Unload the user from memory when they disconnect
         User user = plugin.getUserManager().getUser(player.getUniqueId());
         plugin.getUserManager().unloadUser(user);
-    }
-
-    private static String color(String string) {
-        return ChatColor.translateAlternateColorCodes('&', string);
     }
 
 }

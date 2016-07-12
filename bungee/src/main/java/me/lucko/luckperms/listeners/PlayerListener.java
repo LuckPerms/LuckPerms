@@ -3,6 +3,7 @@ package me.lucko.luckperms.listeners;
 import lombok.AllArgsConstructor;
 import me.lucko.luckperms.LPBungeePlugin;
 import me.lucko.luckperms.commands.Util;
+import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.users.User;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -29,7 +30,7 @@ public class PlayerListener implements Listener {
                 plugin.getProxy().getScheduler().schedule(plugin, () -> {
                     final ProxiedPlayer pl = p.get();
                     if (pl != null) {
-                        pl.sendMessage(new TextComponent(Util.color(Util.PREFIX + "Permissions data could not be loaded. Please contact an administrator.")));
+                        pl.sendMessage(new TextComponent(Util.color(Message.PREFIX + "Permissions data could not be loaded. Please contact an administrator.")));
                     }
                 }, 3, TimeUnit.SECONDS);
 

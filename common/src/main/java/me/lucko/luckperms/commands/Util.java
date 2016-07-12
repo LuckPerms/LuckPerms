@@ -1,15 +1,17 @@
 package me.lucko.luckperms.commands;
 
+import me.lucko.luckperms.constants.Message;
+
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 public class Util {
 
-    public static final String PREFIX = "&7&l[&b&lL&a&lP&7&l] &c";
+    private Util() {}
 
     public static void sendPluginMessage(Sender sender, String message) {
-        sender.sendMessage(color(PREFIX + message));
+        sender.sendMessage(color(Message.PREFIX + message));
     }
 
     public static String color(String s) {
