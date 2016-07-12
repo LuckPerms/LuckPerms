@@ -4,7 +4,7 @@ import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.commands.MainCommand;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
-import me.lucko.luckperms.constants.Messages;
+import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.groups.Group;
 
@@ -26,24 +26,24 @@ public class DeleteGroupCommand extends MainCommand {
         String groupName = args.get(0).toLowerCase();
 
         if (groupName.equalsIgnoreCase(plugin.getConfiguration().getDefaultGroupName())) {
-            Messages.DELETE_GROUP_ERROR_DEFAULT.send(sender);
+            Message.DELETE_GROUP_ERROR_DEFAULT.send(sender);
             return;
         }
 
         plugin.getDatastore().loadGroup(groupName, success -> {
             if (!success) {
-                Messages.GROUP_DOES_NOT_EXIST.send(sender);
+                Message.GROUP_DOES_NOT_EXIST.send(sender);
             } else {
 
                 Group group = plugin.getGroupManager().getGroup(groupName);
                 if (group == null) {
-                    Messages.GROUP_LOAD_ERROR.send(sender);
+                    Message.GROUP_LOAD_ERROR.send(sender);
                 } else {
                     plugin.getDatastore().deleteGroup(group, success1 -> {
                         if (!success1) {
-                            Messages.DELETE_GROUP_ERROR.send(sender);
+                            Message.DELETE_GROUP_ERROR.send(sender);
                         } else {
-                            Messages.DELETE_GROUP_SUCCESS.send(sender, groupName);
+                            Message.DELETE_GROUP_SUCCESS.send(sender, groupName);
                             plugin.runUpdateTask();
                         }
                     });

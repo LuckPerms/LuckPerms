@@ -3,7 +3,7 @@ package me.lucko.luckperms.commands.group.subcommands;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.group.GroupSubCommand;
-import me.lucko.luckperms.constants.Messages;
+import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.exceptions.ObjectLacksPermissionException;
 import me.lucko.luckperms.groups.Group;
@@ -26,7 +26,7 @@ public class GroupUnSetPermissionCommand extends GroupSubCommand {
         }
 
         if (node.matches("group\\..*")) {
-            Messages.GROUP_USE_UNINHERIT.send(sender);
+            Message.GROUP_USE_UNINHERIT.send(sender);
             return;
         }
 
@@ -34,15 +34,15 @@ public class GroupUnSetPermissionCommand extends GroupSubCommand {
             if (args.size() == 2) {
                 final String server = args.get(1).toLowerCase();
                 group.unsetPermission(node, server);
-                Messages.UNSETPERMISSION_SERVER_SUCCESS.send(sender, node, group.getName(), server);
+                Message.UNSETPERMISSION_SERVER_SUCCESS.send(sender, node, group.getName(), server);
             } else {
                 group.unsetPermission(node);
-                Messages.UNSETPERMISSION_SUCCESS.send(sender, node, group.getName());
+                Message.UNSETPERMISSION_SUCCESS.send(sender, node, group.getName());
             }
 
             saveGroup(group, sender, plugin);
         } catch (ObjectLacksPermissionException e) {
-            Messages.DOES_NOT_HAVEPERMISSION.send(sender, group.getName());
+            Message.DOES_NOT_HAVEPERMISSION.send(sender, group.getName());
         }
     }
 

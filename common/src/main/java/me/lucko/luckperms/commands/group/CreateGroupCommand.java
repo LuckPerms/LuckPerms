@@ -4,7 +4,7 @@ import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.commands.MainCommand;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
-import me.lucko.luckperms.constants.Messages;
+import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 
 import java.util.ArrayList;
@@ -25,13 +25,13 @@ public class CreateGroupCommand extends MainCommand {
         String groupName = args.get(0).toLowerCase();
         plugin.getDatastore().loadGroup(groupName, success -> {
             if (success) {
-                Messages.GROUP_ALREADY_EXISTS.send(sender);
+                Message.GROUP_ALREADY_EXISTS.send(sender);
             } else {
                 plugin.getDatastore().createAndLoadGroup(groupName, success1 -> {
                     if (!success1) {
-                        Messages.CREATE_GROUP_ERROR.send(sender);
+                        Message.CREATE_GROUP_ERROR.send(sender);
                     } else {
-                        Messages.CREATE_GROUP_SUCCESS.send(sender, groupName);
+                        Message.CREATE_GROUP_SUCCESS.send(sender, groupName);
                         plugin.runUpdateTask();
                     }
                 });

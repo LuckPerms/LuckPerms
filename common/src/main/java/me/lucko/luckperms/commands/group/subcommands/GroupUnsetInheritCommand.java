@@ -3,7 +3,7 @@ package me.lucko.luckperms.commands.group.subcommands;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.group.GroupSubCommand;
-import me.lucko.luckperms.constants.Messages;
+import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.exceptions.ObjectLacksPermissionException;
 import me.lucko.luckperms.groups.Group;
@@ -24,15 +24,15 @@ public class GroupUnsetInheritCommand extends GroupSubCommand {
             if (args.size() == 2) {
                 final String server = args.get(1).toLowerCase();
                 group.unsetPermission("group." + groupName, server);
-                Messages.GROUP_UNSETINHERIT_SERVER_SUCCESS.send(sender, group.getName(), groupName, server);
+                Message.GROUP_UNSETINHERIT_SERVER_SUCCESS.send(sender, group.getName(), groupName, server);
             } else {
                 group.unsetPermission("group." + groupName);
-                Messages.GROUP_UNSETINHERIT_SUCCESS.send(sender, group.getName(), groupName);
+                Message.GROUP_UNSETINHERIT_SUCCESS.send(sender, group.getName(), groupName);
             }
 
             saveGroup(group, sender, plugin);
         } catch (ObjectLacksPermissionException e) {
-            Messages.GROUP_DOES_NOT_INHERIT.send(sender, group.getName(), groupName);
+            Message.GROUP_DOES_NOT_INHERIT.send(sender, group.getName(), groupName);
         }
     }
 

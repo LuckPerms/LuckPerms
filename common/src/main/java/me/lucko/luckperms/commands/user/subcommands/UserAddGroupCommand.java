@@ -3,7 +3,7 @@ package me.lucko.luckperms.commands.user.subcommands;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.user.UserSubCommand;
-import me.lucko.luckperms.constants.Messages;
+import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.groups.Group;
@@ -22,11 +22,11 @@ public class UserAddGroupCommand extends UserSubCommand {
 
         plugin.getDatastore().loadGroup(groupName, success -> {
             if (!success) {
-                Messages.GROUP_DOES_NOT_EXIST.send(sender);
+                Message.GROUP_DOES_NOT_EXIST.send(sender);
             } else {
                 Group group = plugin.getGroupManager().getGroup(groupName);
                 if (group == null) {
-                    Messages.GROUP_DOES_NOT_EXIST.send(sender);
+                    Message.GROUP_DOES_NOT_EXIST.send(sender);
                     return;
                 }
 
@@ -34,15 +34,15 @@ public class UserAddGroupCommand extends UserSubCommand {
                     if (args.size() == 2) {
                         final String server = args.get(1).toLowerCase();
                         user.addGroup(group, server);
-                        Messages.USER_ADDGROUP_SERVER_SUCCESS.send(sender, user.getName(), groupName, server);
+                        Message.USER_ADDGROUP_SERVER_SUCCESS.send(sender, user.getName(), groupName, server);
                     } else {
                         user.addGroup(group);
-                        Messages.USER_ADDGROUP_SUCCESS.send(sender, user.getName(), groupName);
+                        Message.USER_ADDGROUP_SUCCESS.send(sender, user.getName(), groupName);
                     }
 
                     saveUser(user, sender, plugin);
                 } catch (ObjectAlreadyHasException e) {
-                    Messages.USER_ALREADY_MEMBER_OF.send(sender, user.getName(), group.getName());
+                    Message.USER_ALREADY_MEMBER_OF.send(sender, user.getName(), group.getName());
                 }
             }
         });

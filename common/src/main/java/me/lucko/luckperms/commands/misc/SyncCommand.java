@@ -4,7 +4,7 @@ import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.commands.MainCommand;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
-import me.lucko.luckperms.constants.Messages;
+import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ public class SyncCommand extends MainCommand {
 
     @Override
     protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args) {
-        Messages.UPDATE_TASK_RUN.send(sender);
+        Message.UPDATE_TASK_RUN.send(sender);
         plugin.runUpdateTask();
     }
 

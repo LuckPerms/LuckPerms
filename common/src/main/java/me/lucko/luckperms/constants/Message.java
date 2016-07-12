@@ -6,7 +6,7 @@ import me.lucko.luckperms.commands.Util;
 
 @SuppressWarnings("SpellCheckingInspection")
 @AllArgsConstructor
-public enum Messages {
+public enum Message {
 
     PREFIX("&7&l[&b&lL&a&lP&7&l] &c", false),
 
@@ -48,15 +48,15 @@ public enum Messages {
     UPDATE_TASK_RUN("&bRunning update task for all online users.", true),
     INFO(
             PREFIX + "&6Running &bLuckPerms %s&6." + "\n" +
-                    PREFIX + "&eAuthor: &6Luck" + "\n" +
-                    PREFIX + "&eStorage Method: &6%s",
+            PREFIX + "&eAuthor: &6Luck" + "\n" +
+            PREFIX + "&eStorage Method: &6%s",
             false
     ),
     DEBUG(
             PREFIX + "&d&l> &dDebug Info" + "\n" +
-                    PREFIX + "&eOnline Players: &6%s" + "\n" +
-                    PREFIX + "&eLoaded Users: &6%s" + "\n" +
-                    PREFIX + "&eLoaded Groups: &6%s",
+            PREFIX + "&eOnline Players: &6%s" + "\n" +
+            PREFIX + "&eLoaded Users: &6%s" + "\n" +
+            PREFIX + "&eLoaded Groups: &6%s",
             false
     ),
 

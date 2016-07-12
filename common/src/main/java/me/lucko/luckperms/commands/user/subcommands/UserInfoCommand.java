@@ -4,7 +4,7 @@ import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.Util;
 import me.lucko.luckperms.commands.user.UserSubCommand;
-import me.lucko.luckperms.constants.Messages;
+import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.users.User;
 
@@ -17,7 +17,7 @@ public class UserInfoCommand extends UserSubCommand {
 
     @Override
     protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args) {
-        Messages.USER_INFO.send(sender, user.getName(), user.getUuid(), plugin.getPlayerStatus(user.getUuid()),
+        Message.USER_INFO.send(sender, user.getName(), user.getUuid(), plugin.getPlayerStatus(user.getUuid()),
                 Util.listToCommaSep(user.getGroupNames()), user.getPrimaryGroup(),
                 (user.getNodes().keySet().size() - user.getGroupNames().size()), user.getName()
         );

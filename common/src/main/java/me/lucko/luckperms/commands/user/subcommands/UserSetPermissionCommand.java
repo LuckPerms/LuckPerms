@@ -3,7 +3,7 @@ package me.lucko.luckperms.commands.user.subcommands;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.user.UserSubCommand;
-import me.lucko.luckperms.constants.Messages;
+import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.users.User;
@@ -27,7 +27,7 @@ public class UserSetPermissionCommand extends UserSubCommand {
         }
 
         if (node.matches("group\\..*")) {
-            Messages.USER_USE_ADDGROUP.send(sender);
+            Message.USER_USE_ADDGROUP.send(sender);
             return;
         }
 
@@ -42,15 +42,15 @@ public class UserSetPermissionCommand extends UserSubCommand {
             if (args.size() == 3) {
                 final String server = args.get(2).toLowerCase();
                 user.setPermission(node, b, server);
-                Messages.SETPERMISSION_SERVER_SUCCESS.send(sender, node, bool, user.getName(), server);
+                Message.SETPERMISSION_SERVER_SUCCESS.send(sender, node, bool, user.getName(), server);
             } else {
                 user.setPermission(node, b);
-                Messages.SETPERMISSION_SUCCESS.send(sender, node, bool, user.getName());
+                Message.SETPERMISSION_SUCCESS.send(sender, node, bool, user.getName());
             }
 
             saveUser(user, sender, plugin);
         } catch (ObjectAlreadyHasException e) {
-            Messages.ALREADY_HASPERMISSION.send(sender, user.getName());
+            Message.ALREADY_HASPERMISSION.send(sender, user.getName());
         }
     }
 

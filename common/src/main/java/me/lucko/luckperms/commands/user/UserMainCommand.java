@@ -5,7 +5,7 @@ import me.lucko.luckperms.commands.MainCommand;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.commands.Util;
-import me.lucko.luckperms.constants.Messages;
+import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.users.User;
 
 import java.util.ArrayList;
@@ -31,13 +31,13 @@ public class UserMainCommand extends MainCommand{
         Optional<UserSubCommand> o = subCommands.stream().filter(s -> s.getName().equalsIgnoreCase(args.get(1))).limit(1).findAny();
 
         if (!o.isPresent()) {
-            Messages.COMMAND_NOT_RECOGNISED.send(sender);
+            Message.COMMAND_NOT_RECOGNISED.send(sender);
             return;
         }
 
         final UserSubCommand sub = o.get();
         if (!sub.isAuthorized(sender)) {
-            Messages.COMMAND_NO_PERMISSION.send(sender);
+            Message.COMMAND_NO_PERMISSION.send(sender);
             return;
         }
 
@@ -55,11 +55,11 @@ public class UserMainCommand extends MainCommand{
         }
 
         if (user.length() <= 16) {
-            Messages.USER_ATTEMPTING_LOOKUP.send(sender);
+            Message.USER_ATTEMPTING_LOOKUP.send(sender);
 
             plugin.getDatastore().getUUID(user, uuid -> {
                 if (uuid == null) {
-                    Messages.USER_NOT_FOUND.send(sender);
+                    Message.USER_NOT_FOUND.send(sender);
                     return;
                 }
                 runSub(plugin, sender, uuid, sub, strippedArgs);
@@ -67,19 +67,19 @@ public class UserMainCommand extends MainCommand{
             return;
         }
 
-        Messages.USER_INVALID_ENTRY.send(sender, user);
+        Message.USER_INVALID_ENTRY.send(sender, user);
     }
 
     private void runSub(LuckPermsPlugin plugin, Sender sender, UUID uuid, UserSubCommand command, List<String> strippedArgs) {
         plugin.getDatastore().loadUser(uuid, success -> {
             if (!success) {
-                Messages.USER_NOT_FOUND.send(sender);
+                Message.USER_NOT_FOUND.send(sender);
                 return;
             }
 
             User user = plugin.getUserManager().getUser(uuid);
             if (user == null) {
-                Messages.USER_NOT_FOUND.send(sender);
+                Message.USER_NOT_FOUND.send(sender);
             }
 
             if (command.isArgLengthInvalid(strippedArgs.size())) {

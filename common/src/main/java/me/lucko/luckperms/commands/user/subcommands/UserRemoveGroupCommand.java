@@ -3,7 +3,7 @@ package me.lucko.luckperms.commands.user.subcommands;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.user.UserSubCommand;
-import me.lucko.luckperms.constants.Messages;
+import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.exceptions.ObjectLacksPermissionException;
 import me.lucko.luckperms.users.User;
@@ -21,7 +21,7 @@ public class UserRemoveGroupCommand extends UserSubCommand {
 
         if ((args.size() == 1 || (args.size() == 2 && args.get(1).equalsIgnoreCase("global")))
                 && user.getPrimaryGroup().equalsIgnoreCase(groupName)) {
-            Messages.USER_REMOVEGROUP_ERROR_PRIMARY.send(sender);
+            Message.USER_REMOVEGROUP_ERROR_PRIMARY.send(sender);
             return;
         }
 
@@ -29,15 +29,15 @@ public class UserRemoveGroupCommand extends UserSubCommand {
             if (args.size() == 2) {
                 final String server = args.get(1).toLowerCase();
                 user.unsetPermission("group." + groupName, server);
-                Messages.USER_REMOVEGROUP_SERVER_SUCCESS.send(sender, user.getName(), groupName, server);
+                Message.USER_REMOVEGROUP_SERVER_SUCCESS.send(sender, user.getName(), groupName, server);
             } else {
                 user.unsetPermission("group." + groupName);
-                Messages.USER_REMOVEGROUP_SUCCESS.send(sender, user.getName(), groupName);
+                Message.USER_REMOVEGROUP_SUCCESS.send(sender, user.getName(), groupName);
             }
 
             saveUser(user, sender, plugin);
         } catch (ObjectLacksPermissionException e) {
-            Messages.USER_NOT_MEMBER_OF.send(sender, user.getName(), groupName);
+            Message.USER_NOT_MEMBER_OF.send(sender, user.getName(), groupName);
         }
     }
 

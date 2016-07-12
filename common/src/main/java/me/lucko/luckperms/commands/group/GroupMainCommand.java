@@ -4,7 +4,7 @@ import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.commands.MainCommand;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
-import me.lucko.luckperms.constants.Messages;
+import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.groups.Group;
 
 import java.util.ArrayList;
@@ -29,13 +29,13 @@ public class GroupMainCommand extends MainCommand {
         Optional<GroupSubCommand> o = subCommands.stream().filter(s -> s.getName().equalsIgnoreCase(args.get(1))).limit(1).findAny();
 
         if (!o.isPresent()) {
-            Messages.COMMAND_NOT_RECOGNISED.send(sender);
+            Message.COMMAND_NOT_RECOGNISED.send(sender);
             return;
         }
 
         final GroupSubCommand sub = o.get();
         if (!sub.isAuthorized(sender)) {
-            Messages.COMMAND_NO_PERMISSION.send(sender);
+            Message.COMMAND_NO_PERMISSION.send(sender);
             return;
         }
 
@@ -47,13 +47,13 @@ public class GroupMainCommand extends MainCommand {
         final String groupName = args.get(0).toLowerCase();
         plugin.getDatastore().loadGroup(groupName, success -> {
             if (!success) {
-                Messages.GROUP_NOT_FOUND.send(sender);
+                Message.GROUP_NOT_FOUND.send(sender);
                 return;
             }
 
             Group group = plugin.getGroupManager().getGroup(groupName);
             if (group == null) {
-                Messages.GROUP_NOT_FOUND.send(sender);
+                Message.GROUP_NOT_FOUND.send(sender);
                 return;
             }
 

@@ -4,7 +4,7 @@ import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.Util;
 import me.lucko.luckperms.commands.group.GroupSubCommand;
-import me.lucko.luckperms.constants.Messages;
+import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.groups.Group;
 
@@ -18,7 +18,7 @@ public class GroupListNodesCommand extends GroupSubCommand {
 
     @Override
     protected void execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args) {
-        Messages.LISTNODES.send(sender, group.getName(), Util.nodesToString(group.getNodes()));
+        Message.LISTNODES.send(sender, group.getName(), Util.nodesToString(group.getNodes()));
     }
 
     @Override

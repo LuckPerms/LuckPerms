@@ -3,7 +3,7 @@ package me.lucko.luckperms.commands.group.subcommands;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.group.GroupSubCommand;
-import me.lucko.luckperms.constants.Messages;
+import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.groups.Group;
@@ -22,21 +22,21 @@ public class GroupSetInheritCommand extends GroupSubCommand {
 
         plugin.getDatastore().loadGroup(groupName, success -> {
             if (!success) {
-                Messages.GROUP_LOAD_ERROR.send(sender);
+                Message.GROUP_LOAD_ERROR.send(sender);
             } else {
                 try {
                     if (args.size() == 2) {
                         final String server = args.get(1).toLowerCase();
                         group.setPermission("group." + groupName, true, server);
-                        Messages.GROUP_SETINHERIT_SERVER_SUCCESS.send(sender, group.getName(), groupName, server);
+                        Message.GROUP_SETINHERIT_SERVER_SUCCESS.send(sender, group.getName(), groupName, server);
                     } else {
                         group.setPermission("group." + groupName, true);
-                        Messages.GROUP_SETINHERIT_SUCCESS.send(sender, group.getName(), groupName);
+                        Message.GROUP_SETINHERIT_SUCCESS.send(sender, group.getName(), groupName);
                     }
 
                     saveGroup(group, sender, plugin);
                 } catch (ObjectAlreadyHasException e) {
-                    Messages.GROUP_ALREADY_INHERITS.send(sender, group.getName(), groupName);
+                    Message.GROUP_ALREADY_INHERITS.send(sender, group.getName(), groupName);
                 }
             }
         });
