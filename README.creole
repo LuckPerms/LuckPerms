@@ -6,6 +6,7 @@ A (fairly bad) permissions implementation for Bukkit/BungeeCord.
 * **Multi-server support** - data is synced across all servers/platforms
 * **Per-server permissions/groups** - define user/group permissions that only apply on certain servers
 * **Server-specific groups** - define groups that only apply on certain servers
+* **Tracks / paths** - users can be promoted/demoted along multiple group tracks
 * **Vault Support** - hooks into Vault to integrate with other plugins
 * **Easy and simple setup and configuration using commands** - no editing yml files, yuck
 * **Efficient/lightweight** - maybe? Who knows, it might be.
@@ -41,6 +42,13 @@ Arguments: <required> [optional]
 
 Users with OP have access to all commands.
 
+Additionally, you can use wildcards to grant users access to a selection of commands.
+* **All commands** - luckperms.*
+* **All user commands** - luckperms.user.*
+* **All group commands** - luckperms.group.*
+* **All track commands** - luckperms.track.*
+
+
 |  **Command**  |  **Description**  |  **Permission**  |
 | /perms | Sends plugin info and usage | N/A |
 | /perms sync | Runs an update task and reloads the data of all online users | luckperms.sync |
@@ -55,6 +63,12 @@ Users with OP have access to all commands.
 |  |  |  |
 |  |  |  |
 |  |  |  |
+| /perms createtrack <track> | Creates a new track with the given name | luckperms.createtrack |
+| /perms deletetrack <track> | Deletes an existing track | luckperms.deletetrack |
+| /perms listtracks | Shows a list of the tracks registered within the system | luckperms.listtracks |
+|  |  |  |
+|  |  |  |
+|  |  |  |
 | /perms user <user> info | Shows info about the user | luckperms.user.info |
 | /perms user <user> getuuid | Shows the users Mojang UUID | luckperms.user.getuuid |
 | /perms user <user> listnodes | Lists all of the permission nodes the user has | luckperms.user.listnodes |
@@ -65,6 +79,10 @@ Users with OP have access to all commands.
 | /perms user <user> addgroup <group> [server] | Adds the user to a group | luckperms.user.addgroup |
 | /perms user <user> removegroup <group> [server] | Removes the user from a group | luckperms.user.removegroup |
 | /perms user <user> setprimarygroup <group> | Sets the users primary group | luckperms.user.setprimarygroup |
+| /perms user <user> showtracks | Shows a list of the tracks the user can be promoted/demoted on | luckperms.user.showtracks |
+| /perms user <user> promote <track> | Promotes the user along a given track | luckperms.user.promote |
+| /perms user <user> demote <track> | Demotes the user along a given track | luckperms.user.demote |
+| /perms user <user> showpos <track> | Shows the users position on a given track | luckperms.user.showpos |
 | /perms user <user> clear | Clears all permissions the user has | luckperms.user.clear |
 |  |  |  |
 |  |  |  |
@@ -77,7 +95,17 @@ Users with OP have access to all commands.
 | /perms group <group> unset <node> [server] | Unsets a permission for the group | luckperms.group.unsetpermission |
 | /perms group <group> setinherit <group> [server]| Sets the group to inherit all permissions from another group | luckperms.group.setinherit |
 | /perms group <group> unsetinherit <group> [server] | Unsets a perviously defined inheritance rule | luckperms.group.unsetinherit |
+| /perms group <group> showtracks | Shows a list of the tracks that the users in the group can be promoted/demoted on | luckperms.group.showtracks |
 | /perms group <group> clear | Clears all permissions the group has | luckperms.group.clear |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+| /perms track <track> info | Shows info about the track | luckperms.track.info |
+| /perms track <track> append <group> | Appends a group to the end of the track | luckperms.track.append |
+| /perms track <track> insert <group> <position> | Inserts a group at the given position on the track | luckperms.track.insert |
+| /perms track <track> remove <group> | Removes a group from the track | luckperms.track.remove |
+| /perms track <track> clear | Clears all groups on the track | luckperms.track.clear |
+
 
 === License
 See LICENSE.md.

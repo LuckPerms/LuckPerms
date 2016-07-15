@@ -2,6 +2,7 @@ package me.lucko.luckperms;
 
 import me.lucko.luckperms.data.Datastore;
 import me.lucko.luckperms.groups.GroupManager;
+import me.lucko.luckperms.tracks.TrackManager;
 import me.lucko.luckperms.users.UserManager;
 import me.lucko.luckperms.utils.LPConfiguration;
 
@@ -12,15 +13,21 @@ public interface LuckPermsPlugin {
 
     /**
      * Retrieves the {@link UserManager} used to manage users and their permissions/groups
-     * @return the {@link UserManager} object
+     * @return the {@link UserManager} instance
      */
     UserManager getUserManager();
 
     /**
      * Retrieves the {@link GroupManager} used to manage the loaded groups and modify their permissions
-     * @return the {@link GroupManager} object
+     * @return the {@link GroupManager} instance
      */
     GroupManager getGroupManager();
+
+    /**
+     * Retrieves the {@link TrackManager} used to manage the loaded tracks
+     * @return the {@link TrackManager} instance
+     */
+    TrackManager getTrackManager();
 
     /**
      * Retrieves the {@link LPConfiguration} for getting values from the config

@@ -5,6 +5,7 @@ import com.google.gson.stream.JsonWriter;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.data.Datastore;
 import me.lucko.luckperms.groups.Group;
+import me.lucko.luckperms.tracks.Track;
 import me.lucko.luckperms.users.User;
 
 import java.io.*;
@@ -20,6 +21,7 @@ public class FlatfileDatastore extends Datastore {
     private final File pluginDir;
     private File usersDir;
     private File groupsDir;
+    private File tracksDir;
     private File uuidData;
 
     public FlatfileDatastore(LuckPermsPlugin plugin, File pluginDir) {
@@ -106,6 +108,9 @@ public class FlatfileDatastore extends Datastore {
 
         groupsDir = new File(data, "groups");
         groupsDir.mkdir();
+
+        tracksDir = new File(data, "tracks");
+        tracksDir.mkdir();
 
         uuidData = new File(data, "uuidcache.txt");
         uuidData.createNewFile();
@@ -361,6 +366,132 @@ public class FlatfileDatastore extends Datastore {
         File groupFile = new File(groupsDir, group.getName() + ".json");
         if (groupFile.exists()) {
             groupFile.delete();
+        }
+        return true;
+    }
+
+    @Override
+    public boolean createAndLoadTrack(String name) {
+        Track track = plugin.getTrackManager().makeTrack(name);
+        List<String> groups = new ArrayList<>();
+
+        File trackFile = new File(tracksDir, name + ".json");
+        if (!trackFile.exists()) {
+            try {
+                trackFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+
+            boolean success = doWrite(trackFile, writer -> {
+                writer.beginObject();
+                writer.name("name").value(track.getName());
+                writer.name("groups");
+                writer.beginArray();
+                for (String s : track.getGroups()) {
+                    writer.value(s);
+                }
+                writer.endArray();
+                writer.endObject();
+                return true;
+            });
+
+            if (!success) return false;
+        }
+
+        boolean success = doRead(trackFile, reader -> {
+            reader.beginObject();
+            reader.nextName(); // name record
+            reader.nextString(); // name
+            reader.nextName(); // groups record
+            reader.beginArray();
+            while (reader.hasNext()) {
+                groups.add(reader.nextString());
+            }
+            reader.endArray();
+            reader.endObject();
+            return true;
+        });
+
+        track.setGroups(groups);
+        if (success) plugin.getTrackManager().updateOrSetTrack(track);
+        return success;
+    }
+
+    @Override
+    public boolean loadTrack(String name) {
+        Track track = plugin.getTrackManager().makeTrack(name);
+        List<String> groups = new ArrayList<>();
+
+        File trackFile = new File(tracksDir, name + ".json");
+        if (!trackFile.exists()) {
+            return false;
+        }
+
+        boolean success = doRead(trackFile, reader -> {
+            reader.beginObject();
+            reader.nextName(); // name record
+            reader.nextString(); // name
+            reader.nextName(); // groups record
+            reader.beginArray();
+            while (reader.hasNext()) {
+                groups.add(reader.nextString());
+            }
+            reader.endArray();
+            reader.endObject();
+            return true;
+        });
+
+        track.setGroups(groups);
+        if (success) plugin.getTrackManager().updateOrSetTrack(track);
+        return success;
+    }
+
+    @Override
+    public boolean loadAllTracks() {
+        String[] fileNames = tracksDir.list((dir, name) -> name.endsWith(".json"));
+        if (fileNames == null) return false;
+        List<String> tracks = Arrays.stream(fileNames).map(s -> s.substring(0, s.length() - 5)).collect(Collectors.toList());
+
+        plugin.getTrackManager().unloadAll();
+        tracks.forEach(this::loadTrack);
+        return true;
+    }
+
+    @Override
+    public boolean saveTrack(Track track) {
+        File trackFile = new File(tracksDir, track.getName() + ".json");
+        if (!trackFile.exists()) {
+            try {
+                trackFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+
+        boolean success = doWrite(trackFile, writer -> {
+            writer.beginObject();
+            writer.name("name").value(track.getName());
+            writer.name("groups");
+            writer.beginArray();
+            for (String s : track.getGroups()) {
+                writer.value(s);
+            }
+            writer.endArray();
+            writer.endObject();
+            return true;
+        });
+
+        return success;
+    }
+
+    @Override
+    public boolean deleteTrack(Track track) {
+        File trackFile = new File(tracksDir, track.getName() + ".json");
+        if (trackFile.exists()) {
+            trackFile.delete();
         }
         return true;
     }

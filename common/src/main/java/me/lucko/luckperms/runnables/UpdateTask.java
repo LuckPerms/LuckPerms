@@ -18,6 +18,9 @@ public class UpdateTask implements Runnable {
             plugin.getDatastore().createAndLoadGroup(defaultGroup);
         }
 
+        // Reload all of the tracks
+        plugin.getDatastore().loadAllTracks();
+
         // Refresh all online users.
         plugin.getUserManager().updateAllUsers();
     }

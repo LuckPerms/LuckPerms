@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.groups.Group;
+import me.lucko.luckperms.tracks.Track;
 import me.lucko.luckperms.users.User;
 
 import java.util.UUID;
@@ -45,7 +46,7 @@ public abstract class Datastore {
     }
 
     /*
-        These methods will block the thread that they're ran on.
+        These methods are called immediately and in the same thread as they are called in.
      */
     public abstract void init();
     public abstract void shutdown();
@@ -57,16 +58,19 @@ public abstract class Datastore {
     public abstract boolean loadAllGroups();
     public abstract boolean saveGroup(Group group);
     public abstract boolean deleteGroup(Group group);
+    public abstract boolean createAndLoadTrack(String name);
+    public abstract boolean loadTrack(String name);
+    public abstract boolean loadAllTracks();
+    public abstract boolean saveTrack(Track track);
+    public abstract boolean deleteTrack(Track track);
     public abstract boolean saveUUIDData(String username, UUID uuid);
     public abstract UUID getUUID(String username);
 
 
 
     /*
-        These methods will return as soon as they are called. The callback will be ran when the task is complete
-        They therefore will not block the thread that they're ran on
-
-        Callbacks are ran on the main server thread (if applicable)
+        These methods will schedule the operation to run async. The callback will be ran when the task is complete.
+        Callbacks are ran on the main Bukkit server thread (if applicable)
      */
     public void loadOrCreateUser(UUID uuid, String username, Callback callback) {
         doAsync(() -> runCallback(loadOrCreateUser(uuid, username), callback));
@@ -98,6 +102,26 @@ public abstract class Datastore {
 
     public void deleteGroup(Group group, Callback callback) {
         doAsync(() -> runCallback(deleteGroup(group), callback));
+    }
+
+    public void createAndLoadTrack(String name, Callback callback) {
+        doAsync(() -> runCallback(createAndLoadTrack(name), callback));
+    }
+
+    public void loadTrack(String name, Callback callback) {
+        doAsync(() -> runCallback(loadTrack(name), callback));
+    }
+
+    public void loadAllTracks(Callback callback) {
+        doAsync(() -> runCallback(loadAllTracks(), callback));
+    }
+
+    public void saveTrack(Track track, Callback callback) {
+        doAsync(() -> runCallback(saveTrack(track), callback));
+    }
+
+    public void deleteTrack(Track track, Callback callback) {
+        doAsync(() -> runCallback(deleteTrack(track), callback));
     }
 
     public void saveUUIDData(String username, UUID uuid, Callback callback) {

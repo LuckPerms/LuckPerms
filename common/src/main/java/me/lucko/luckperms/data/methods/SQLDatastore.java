@@ -8,6 +8,8 @@ import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.data.Datastore;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.groups.GroupManager;
+import me.lucko.luckperms.tracks.Track;
+import me.lucko.luckperms.tracks.TrackManager;
 import me.lucko.luckperms.users.User;
 
 import java.lang.reflect.Type;
@@ -24,6 +26,7 @@ import java.util.UUID;
 abstract class SQLDatastore extends Datastore {
 
     private static final Type NM_TYPE = new TypeToken<Map<String, Boolean>>(){}.getType();
+    private static final Type T_TYPE = new TypeToken<List<String>>(){}.getType();
 
     private static final String USER_INSERT = "INSERT INTO lp_users VALUES(?, ?, ?, ?)";
     private static final String USER_SELECT = "SELECT * FROM lp_users WHERE uuid=?";
@@ -34,6 +37,12 @@ abstract class SQLDatastore extends Datastore {
     private static final String GROUP_SELECT_ALL = "SELECT * FROM lp_groups";
     private static final String GROUP_UPDATE = "UPDATE lp_groups SET perms=? WHERE name=?";
     private static final String GROUP_DELETE = "DELETE FROM lp_groups WHERE name=?";
+
+    private static final String TRACK_INSERT = "INSERT INTO lp_tracks VALUES(?, ?)";
+    private static final String TRACK_SELECT = "SELECT groups FROM lp_tracks WHERE name=?";
+    private static final String TRACK_SELECT_ALL = "SELECT * FROM lp_tracks";
+    private static final String TRACK_UPDATE = "UPDATE lp_tracks SET groups=? WHERE name=?";
+    private static final String TRACK_DELETE = "DELETE FROM lp_tracks WHERE name=?";
 
     private static final String UUIDCACHE_INSERT = "INSERT INTO lp_uuid VALUES(?, ?)";
     private static final String UUIDCACHE_SELECT = "SELECT uuid FROM lp_uuid WHERE name=?";
@@ -300,6 +309,111 @@ abstract class SQLDatastore extends Datastore {
         });
 
         if (success) plugin.getGroupManager().unloadGroup(group);
+        return success;
+    }
+
+    @Override
+    public boolean createAndLoadTrack(String name) {
+        Track track = plugin.getTrackManager().makeTrack(name);
+        boolean success = runQuery(new QueryRS(TRACK_SELECT) {
+            @Override
+            void onRun(PreparedStatement preparedStatement) throws SQLException {
+                preparedStatement.setString(1, track.getName());
+            }
+
+            @Override
+            boolean onResult(ResultSet resultSet) throws SQLException {
+                boolean success = true;
+                if (!resultSet.next()) {
+                    success = runQuery(new QueryPS(TRACK_INSERT) {
+                        @Override
+                        void onRun(PreparedStatement preparedStatement) throws SQLException {
+                            preparedStatement.setString(1, track.getName());
+                            preparedStatement.setString(2, gson.toJson(track.getGroups()));
+                        }
+                    });
+                } else {
+                    track.setGroups(gson.fromJson(resultSet.getString("groups"), T_TYPE));
+                }
+                return success;
+            }
+        });
+
+        if (success) plugin.getTrackManager().updateOrSetTrack(track);
+        return success;
+    }
+
+    @Override
+    public boolean loadTrack(String name) {
+        Track track = plugin.getTrackManager().makeTrack(name);
+        boolean success = runQuery(new QueryRS(TRACK_SELECT) {
+            @Override
+            void onRun(PreparedStatement preparedStatement) throws SQLException {
+                preparedStatement.setString(1, name);
+            }
+
+            @Override
+            boolean onResult(ResultSet resultSet) throws SQLException {
+                if (resultSet.next()) {
+                    track.setGroups(gson.fromJson(resultSet.getString("groups"), T_TYPE));
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        if (success) plugin.getTrackManager().updateOrSetTrack(track);
+        return success;
+    }
+
+    @Override
+    public boolean loadAllTracks() {
+        List<Track> tracks = new ArrayList<>();
+        boolean success = runQuery(new QueryRS(TRACK_SELECT_ALL) {
+            @Override
+            void onRun(PreparedStatement preparedStatement) throws SQLException {
+
+            }
+
+            @Override
+            boolean onResult(ResultSet resultSet) throws SQLException {
+                while (resultSet.next()) {
+                    Track track = plugin.getTrackManager().makeTrack(resultSet.getString("name"));
+                    track.setGroups(gson.fromJson(resultSet.getString("groups"), T_TYPE));
+                    tracks.add(track);
+                }
+                return true;
+            }
+        });
+
+        if (success) {
+            TrackManager tm = plugin.getTrackManager();
+            tm.unloadAll();
+            tracks.forEach(tm::setTrack);
+        }
+        return success;
+    }
+
+    @Override
+    public boolean saveTrack(Track track) {
+        boolean success = runQuery(new QueryPS(TRACK_UPDATE) {
+            @Override
+            void onRun(PreparedStatement preparedStatement) throws SQLException {
+                preparedStatement.setString(1, gson.toJson(track.getGroups()));
+                preparedStatement.setString(2, track.getName());
+            }
+        });
+        return success;
+    }
+
+    @Override
+    public boolean deleteTrack(Track track) {
+        boolean success = runQuery(new QueryPS(TRACK_DELETE) {
+            @Override
+            void onRun(PreparedStatement preparedStatement) throws SQLException {
+                preparedStatement.setString(1, track.getName());
+            }
+        });
         return success;
     }
 

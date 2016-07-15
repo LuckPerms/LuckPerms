@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
-import me.lucko.luckperms.exceptions.ObjectLacksPermissionException;
+import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.utils.Patterns;
 import me.lucko.luckperms.utils.PermissionObject;
@@ -96,9 +96,9 @@ public abstract class User extends PermissionObject {
     /**
      * Remove the user from a group
      * @param group the group to remove the user from
-     * @throws ObjectLacksPermissionException if the user isn't a member of the group
+     * @throws ObjectLacksException if the user isn't a member of the group
      */
-    public void removeGroup(Group group) throws ObjectLacksPermissionException {
+    public void removeGroup(Group group) throws ObjectLacksException {
         removeGroup(group, "global");
     }
 
@@ -106,9 +106,9 @@ public abstract class User extends PermissionObject {
      * Remove the user from a group
      * @param group The group to remove the user from
      * @param server The server to remove the group on
-     * @throws ObjectLacksPermissionException if the user isn't a member of the group
+     * @throws ObjectLacksException if the user isn't a member of the group
      */
-    public void removeGroup(Group group, String server) throws ObjectLacksPermissionException {
+    public void removeGroup(Group group, String server) throws ObjectLacksException {
         if (server == null) {
             server = "global";
         }
@@ -214,12 +214,12 @@ public abstract class User extends PermissionObject {
 
         groups.addAll(serverSpecificGroups.entrySet().stream()
                 .filter(Map.Entry::getValue)
-                .map(e -> Patterns.SERVER_SPLIT.split(e.getKey(), 2)[1])
+                .map(e -> Patterns.DOT_SPLIT.split(e.getKey(), 2)[1])
                 .collect(Collectors.toList())
         );
         groups.addAll(groupNodes.entrySet().stream()
                 .filter(Map.Entry::getValue)
-                .map(e -> Patterns.SERVER_SPLIT.split(e.getKey(), 2)[1])
+                .map(e -> Patterns.DOT_SPLIT.split(e.getKey(), 2)[1])
                 .collect(Collectors.toList())
         );
         return groups;

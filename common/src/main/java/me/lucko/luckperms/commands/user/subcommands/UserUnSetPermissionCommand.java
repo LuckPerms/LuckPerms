@@ -5,7 +5,7 @@ import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.user.UserSubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
-import me.lucko.luckperms.exceptions.ObjectLacksPermissionException;
+import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.users.User;
 import me.lucko.luckperms.utils.Patterns;
 
@@ -42,7 +42,7 @@ public class UserUnSetPermissionCommand extends UserSubCommand {
             }
 
             saveUser(user, sender, plugin);
-        } catch (ObjectLacksPermissionException e) {
+        } catch (ObjectLacksException e) {
             Message.DOES_NOT_HAVEPERMISSION.send(sender, user.getName());
         }
     }

@@ -1,4 +1,4 @@
-package me.lucko.luckperms.commands.group;
+package me.lucko.luckperms.commands.track;
 
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.commands.MainCommand;
@@ -11,9 +11,9 @@ import me.lucko.luckperms.utils.Patterns;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CreateGroupCommand extends MainCommand {
-    public CreateGroupCommand() {
-        super("CreateGroup", "/perms creategroup <group>", 1);
+public class CreateTrackCommand extends MainCommand {
+    public CreateTrackCommand() {
+        super("CreateTrack", "/perms createtrack <track>", 1);
     }
 
     @Override
@@ -23,27 +23,27 @@ public class CreateGroupCommand extends MainCommand {
             return;
         }
 
-        String groupName = args.get(0).toLowerCase();
+        String trackName = args.get(0).toLowerCase();
 
-        if (groupName.length() > 36) {
-            Message.GROUP_NAME_TOO_LONG.send(sender, groupName);
+        if (trackName.length() > 36) {
+            Message.TRACK_NAME_TOO_LONG.send(sender, trackName);
             return;
         }
 
-        if (Patterns.NON_ALPHA_NUMERIC.matcher(groupName).find()) {
-            Message.GROUP_INVALID_ENTRY.send(sender);
+        if (Patterns.NON_ALPHA_NUMERIC.matcher(trackName).find()) {
+            Message.TRACK_INVALID_ENTRY.send(sender);
             return;
         }
 
-        plugin.getDatastore().loadGroup(groupName, success -> {
+        plugin.getDatastore().loadTrack(trackName, success -> {
             if (success) {
-                Message.GROUP_ALREADY_EXISTS.send(sender);
+                Message.TRACK_ALREADY_EXISTS.send(sender);
             } else {
-                plugin.getDatastore().createAndLoadGroup(groupName, success1 -> {
+                plugin.getDatastore().createAndLoadTrack(trackName, success1 -> {
                     if (!success1) {
-                        Message.CREATE_GROUP_ERROR.send(sender);
+                        Message.CREATE_TRACK_ERROR.send(sender);
                     } else {
-                        Message.CREATE_SUCCESS.send(sender, groupName);
+                        Message.CREATE_SUCCESS.send(sender, trackName);
                         plugin.runUpdateTask();
                     }
                 });
@@ -52,12 +52,12 @@ public class CreateGroupCommand extends MainCommand {
     }
 
     @Override
-    public List<SubCommand> getSubCommands() {
+    public List<? extends SubCommand> getSubCommands() {
         return new ArrayList<>();
     }
 
     @Override
     protected boolean canUse(Sender sender) {
-        return Permission.CREATE_GROUP.isAuthorized(sender);
+        return Permission.CREATE_TRACK.isAuthorized(sender);
     }
 }

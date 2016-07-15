@@ -5,7 +5,7 @@ import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.user.UserSubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
-import me.lucko.luckperms.exceptions.ObjectLacksPermissionException;
+import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.users.User;
 
 import java.util.List;
@@ -36,7 +36,7 @@ public class UserRemoveGroupCommand extends UserSubCommand {
             }
 
             saveUser(user, sender, plugin);
-        } catch (ObjectLacksPermissionException e) {
+        } catch (ObjectLacksException e) {
             Message.USER_NOT_MEMBER_OF.send(sender, user.getName(), groupName);
         }
     }

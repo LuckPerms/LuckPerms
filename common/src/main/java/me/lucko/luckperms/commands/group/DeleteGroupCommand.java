@@ -43,7 +43,7 @@ public class DeleteGroupCommand extends MainCommand {
                         if (!success1) {
                             Message.DELETE_GROUP_ERROR.send(sender);
                         } else {
-                            Message.DELETE_GROUP_SUCCESS.send(sender, groupName);
+                            Message.DELETE_SUCCESS.send(sender, groupName);
                             plugin.runUpdateTask();
                         }
                     });

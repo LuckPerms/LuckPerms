@@ -18,7 +18,7 @@ public class DebugCommand extends MainCommand {
     @Override
     protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         Message.DEBUG.send(sender, plugin.getPlayerCount(), plugin.getUserManager().getUsers().size(),
-                plugin.getGroupManager().getGroups().size()
+                plugin.getGroupManager().getGroups().size(), plugin.getTrackManager().getTracks().size()
         );
     }
 

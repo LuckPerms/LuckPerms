@@ -3,7 +3,7 @@ package me.lucko.luckperms.vaulthooks;
 import lombok.Setter;
 import me.lucko.luckperms.LPBukkitPlugin;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
-import me.lucko.luckperms.exceptions.ObjectLacksPermissionException;
+import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.users.User;
 import net.milkbowl.vault.permission.Permission;
@@ -54,7 +54,7 @@ class VaultPermissionHook extends Permission {
 
         try {
             user.unsetPermission(permission);
-        } catch (ObjectLacksPermissionException ignored) {}
+        } catch (ObjectLacksException ignored) {}
         plugin.getUserManager().saveUser(user, plugin.getDatastore());
         return true;
     }
@@ -84,7 +84,7 @@ class VaultPermissionHook extends Permission {
 
         try {
             group.unsetPermission(permission);
-        } catch (ObjectLacksPermissionException ignored) {}
+        } catch (ObjectLacksException ignored) {}
         plugin.runUpdateTask();
         return true;
     }
@@ -123,7 +123,7 @@ class VaultPermissionHook extends Permission {
 
         try {
             user.removeGroup(group);
-        } catch (ObjectLacksPermissionException ignored) {}
+        } catch (ObjectLacksException ignored) {}
         plugin.getUserManager().saveUser(user, plugin.getDatastore());
         return true;
     }

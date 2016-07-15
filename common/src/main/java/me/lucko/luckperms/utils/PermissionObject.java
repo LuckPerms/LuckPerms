@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
-import me.lucko.luckperms.exceptions.ObjectLacksPermissionException;
+import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.groups.Group;
 
 import java.util.ArrayList;
@@ -126,12 +126,12 @@ public abstract class PermissionObject {
     /**
      * Unsets a permission for the object
      * @param node The node to be unset
-     * @throws ObjectLacksPermissionException if the node wasn't already set
+     * @throws ObjectLacksException if the node wasn't already set
      */
-    public void unsetPermission(String node) throws ObjectLacksPermissionException {
+    public void unsetPermission(String node) throws ObjectLacksException {
         if (node.startsWith("global/")) node = node.replace("global/", "");
         if (!getNodes().containsKey(node)) {
-            throw new ObjectLacksPermissionException();
+            throw new ObjectLacksException();
         }
         getNodes().remove(node);
     }
@@ -140,9 +140,9 @@ public abstract class PermissionObject {
      * Unsets a permission for the object
      * @param node The node to be unset
      * @param server The server to unset the node on
-     * @throws ObjectLacksPermissionException if the node wasn't already set
+     * @throws ObjectLacksException if the node wasn't already set
      */
-    public void unsetPermission(String node, String server) throws ObjectLacksPermissionException {
+    public void unsetPermission(String node, String server) throws ObjectLacksException {
         unsetPermission(server + "/" + node);
     }
 

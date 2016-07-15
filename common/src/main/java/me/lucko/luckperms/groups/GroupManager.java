@@ -17,7 +17,6 @@ public class GroupManager {
 
     public GroupManager(LuckPermsPlugin plugin) {
         this.plugin = plugin;
-        loadAllGroups();
     }
 
     /**

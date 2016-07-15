@@ -48,6 +48,44 @@ public class Util {
         return sb.delete(sb.length() - 2, sb.length()).toString();
     }
 
+    public static String listToArrowSep(List<String> strings, String highlight) {
+        if (strings.isEmpty()) return "&6None";
+
+        StringBuilder sb = new StringBuilder();
+        for (String s : strings) {
+            if (s.equalsIgnoreCase(highlight)) {
+                sb.append("&e").append(s).append("&7 ---> ");
+            } else {
+                sb.append("&6").append(s).append("&7 ---> ");
+            }
+        }
+        return sb.delete(sb.length() - 6, sb.length()).toString();
+    }
+
+    public static String listToArrowSep(List<String> strings, String highlightFirst, String highlightSecond, boolean reversed) {
+        if (strings.isEmpty()) return "&6None";
+
+        StringBuilder sb = new StringBuilder();
+        for (String s : strings) {
+            if (s.equalsIgnoreCase(highlightFirst)) {
+                sb.append("&e").append(s).append("&4").append(reversed ? " <--- " : " ---> ");
+            } else if (s.equalsIgnoreCase(highlightSecond)) {
+                sb.append("&e").append(s).append("&7").append(reversed ? " <--- " : " ---> ");
+            } else {
+                sb.append("&6").append(s).append("&7").append(reversed ? " <--- " : " ---> ");
+            }
+        }
+        return sb.delete(sb.length() - 6, sb.length()).toString();
+    }
+
+    public static String listToArrowSep(List<String> strings) {
+        if (strings.isEmpty()) return "&6None";
+
+        StringBuilder sb = new StringBuilder();
+        strings.forEach(s -> sb.append("&6").append(s).append("&e ---> "));
+        return sb.delete(sb.length() - 6, sb.length()).toString();
+    }
+
     public static String nodesToString(Map<String, Boolean> nodes) {
         if (nodes.isEmpty()) return "&6None";
 

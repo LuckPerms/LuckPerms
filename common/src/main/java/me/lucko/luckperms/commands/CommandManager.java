@@ -10,6 +10,11 @@ import me.lucko.luckperms.commands.group.subcommands.*;
 import me.lucko.luckperms.commands.misc.DebugCommand;
 import me.lucko.luckperms.commands.misc.InfoCommand;
 import me.lucko.luckperms.commands.misc.SyncCommand;
+import me.lucko.luckperms.commands.track.CreateTrackCommand;
+import me.lucko.luckperms.commands.track.DeleteTrackCommand;
+import me.lucko.luckperms.commands.track.ListTracksCommand;
+import me.lucko.luckperms.commands.track.TrackMainCommand;
+import me.lucko.luckperms.commands.track.subcommands.*;
 import me.lucko.luckperms.commands.user.UserMainCommand;
 import me.lucko.luckperms.commands.user.subcommands.*;
 import me.lucko.luckperms.constants.Message;
@@ -32,14 +37,18 @@ public class CommandManager {
         this.registerMainCommand(userCommand);
         userCommand.registerSubCommand(new UserAddGroupCommand());
         userCommand.registerSubCommand(new UserClearCommand());
+        userCommand.registerSubCommand(new UserDemoteCommand());
         userCommand.registerSubCommand(new UserGetUUIDCommand());
         userCommand.registerSubCommand(new UserHasPermCommand());
         userCommand.registerSubCommand(new UserInfoCommand());
         userCommand.registerSubCommand(new UserInheritsPermCommand());
         userCommand.registerSubCommand(new UserListNodesCommand());
+        userCommand.registerSubCommand(new UserPromoteCommand());
         userCommand.registerSubCommand(new UserRemoveGroupCommand());
         userCommand.registerSubCommand(new UserSetPermissionCommand());
         userCommand.registerSubCommand(new UserSetPrimaryGroupCommand());
+        userCommand.registerSubCommand(new UserShowPosCommand());
+        userCommand.registerSubCommand(new UserShowTracksCommand());
         userCommand.registerSubCommand(new UserUnSetPermissionCommand());
 
         GroupMainCommand groupCommand = new GroupMainCommand();
@@ -51,12 +60,24 @@ public class CommandManager {
         groupCommand.registerSubCommand(new GroupListNodesCommand());
         groupCommand.registerSubCommand(new GroupSetInheritCommand());
         groupCommand.registerSubCommand(new GroupSetPermissionCommand());
+        groupCommand.registerSubCommand(new GroupShowTracksCommand());
         groupCommand.registerSubCommand(new GroupUnsetInheritCommand());
         groupCommand.registerSubCommand(new GroupUnSetPermissionCommand());
+
+        TrackMainCommand trackCommand = new TrackMainCommand();
+        this.registerMainCommand(trackCommand);
+        trackCommand.registerSubCommand(new TrackAppendCommand());
+        trackCommand.registerSubCommand(new TrackClearCommand());
+        trackCommand.registerSubCommand(new TrackInfoCommand());
+        trackCommand.registerSubCommand(new TrackInsertCommand());
+        trackCommand.registerSubCommand(new TrackRemoveCommand());
 
         this.registerMainCommand(new CreateGroupCommand());
         this.registerMainCommand(new DeleteGroupCommand());
         this.registerMainCommand(new ListGroupsCommand());
+        this.registerMainCommand(new CreateTrackCommand());
+        this.registerMainCommand(new DeleteTrackCommand());
+        this.registerMainCommand(new ListTracksCommand());
         this.registerMainCommand(new DebugCommand());
         this.registerMainCommand(new InfoCommand());
         this.registerMainCommand(new SyncCommand());
