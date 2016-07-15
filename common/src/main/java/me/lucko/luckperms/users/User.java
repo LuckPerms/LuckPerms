@@ -96,7 +96,7 @@ public abstract class User extends PermissionObject {
     /**
      * Remove the user from a group
      * @param group the group to remove the user from
-     * @throws ObjectLacksPermissionException
+     * @throws ObjectLacksPermissionException if the user isn't a member of the group
      */
     public void removeGroup(Group group) throws ObjectLacksPermissionException {
         removeGroup(group, "global");

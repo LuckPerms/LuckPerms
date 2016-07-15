@@ -319,9 +319,9 @@ public class FlatfileDatastore extends Datastore {
 
     @Override
     public boolean loadAllGroups() {
-        List<String> groups = Arrays.asList(groupsDir.list((dir, name1) -> name1.endsWith(".json")))
-                .stream().map(s -> s.substring(0, s.length() - 5))
-                .collect(Collectors.toList());
+        String[] fileNames = groupsDir.list((dir, name) -> name.endsWith(".json"));
+        if (fileNames == null) return false;
+        List<String> groups = Arrays.stream(fileNames).map(s -> s.substring(0, s.length() - 5)).collect(Collectors.toList());
 
         plugin.getGroupManager().unloadAll();
         groups.forEach(this::loadGroup);

@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.logging.Level;
 
 @SuppressWarnings("UnnecessaryLocalVariable")
 abstract class SQLDatastore extends Datastore {

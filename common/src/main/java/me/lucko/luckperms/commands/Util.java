@@ -44,7 +44,7 @@ public class Util {
         if (strings.isEmpty()) return "&6None";
 
         StringBuilder sb = new StringBuilder();
-        strings.stream().forEach(s -> sb.append("&6").append(s).append("&7, "));
+        strings.forEach(s -> sb.append("&6").append(s).append("&7, "));
         return sb.delete(sb.length() - 2, sb.length()).toString();
     }
 

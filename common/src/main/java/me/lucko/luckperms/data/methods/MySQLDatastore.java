@@ -50,7 +50,7 @@ public class MySQLDatastore extends SQLDatastore {
     @Override
     public void shutdown() {
         if (hikari != null) {
-            hikari.shutdown();
+            hikari.close();
         }
     }
 
