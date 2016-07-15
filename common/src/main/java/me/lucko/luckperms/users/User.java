@@ -6,6 +6,7 @@ import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksPermissionException;
 import me.lucko.luckperms.groups.Group;
+import me.lucko.luckperms.utils.Patterns;
 import me.lucko.luckperms.utils.PermissionObject;
 
 import java.util.*;
@@ -186,7 +187,7 @@ public abstract class User extends PermissionObject {
                     continue;
                 }
 
-                if (parts[1].matches("group\\..*")) {
+                if (Patterns.GROUP_MATCH.matcher(parts[1]).matches()) {
                     // SERVER SPECIFIC AND GROUP
                     serverSpecificGroups.put(node.getKey(), node.getValue());
                     continue;
@@ -198,7 +199,7 @@ public abstract class User extends PermissionObject {
             // Skip adding global permissions if they are not requested
             if (!includeGlobal) continue;
 
-            if (node.getKey().matches("group\\..*")) {
+            if (Patterns.GROUP_MATCH.matcher(node.getKey()).matches()) {
                 // GROUP
                 groupNodes.put(node.getKey(), node.getValue());
             }
@@ -208,11 +209,19 @@ public abstract class User extends PermissionObject {
         // If a group is negated at a higher priority, the group should not then be applied at a lower priority
         serverSpecificGroups.entrySet().stream().filter(node -> !node.getValue()).forEach(node -> {
             groupNodes.remove(node.getKey());
-            groupNodes.remove(node.getKey().split("\\/", 2)[1]);
+            groupNodes.remove(Patterns.SERVER_SPLIT.split(node.getKey(), 2)[1]);
         });
 
-        groups.addAll(serverSpecificGroups.entrySet().stream().filter(Map.Entry::getValue).map(e -> e.getKey().split("\\.", 2)[1]).collect(Collectors.toList()));
-        groups.addAll(groupNodes.entrySet().stream().filter(Map.Entry::getValue).map(e -> e.getKey().split("\\.", 2)[1]).collect(Collectors.toList()));
+        groups.addAll(serverSpecificGroups.entrySet().stream()
+                .filter(Map.Entry::getValue)
+                .map(e -> Patterns.SERVER_SPLIT.split(e.getKey(), 2)[1])
+                .collect(Collectors.toList())
+        );
+        groups.addAll(groupNodes.entrySet().stream()
+                .filter(Map.Entry::getValue)
+                .map(e -> Patterns.SERVER_SPLIT.split(e.getKey(), 2)[1])
+                .collect(Collectors.toList())
+        );
         return groups;
     }
 

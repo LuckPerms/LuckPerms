@@ -71,6 +71,34 @@ public abstract class PermissionObject {
     }
 
     /**
+     * Checks to see if the object inherits a certain permission
+     * @param node The permission node
+     * @param b If the node is true/false(negated)
+     * @return true if the user inherits the permission
+     */
+    public boolean inheritsPermission(String node, Boolean b) {
+        if (node.contains("/")) {
+            // Use other method
+            final String[] parts = Patterns.SERVER_SPLIT.split(node, 2);
+            return inheritsPermission(parts[1], b, parts[0]);
+        }
+
+        return inheritsPermission(node, b, "global");
+    }
+
+    /**
+     * Checks to see the the object inherits a permission on a certain server
+     * @param node The permission node
+     * @param b If the node is true/false(negated)
+     * @param server The server
+     * @return true if the user inherits the permission
+     */
+    public boolean inheritsPermission(String node, Boolean b, String server) {
+        final Map<String, Boolean> local = getLocalPermissions(server, null);
+        return b ? local.containsKey(node) && local.get(node) : local.containsKey(node) && !local.get(node);
+    }
+
+    /**
      * Sets a permission for the object
      * @param node The node to be set
      * @param value What to set the node to - true/false(negated)
@@ -126,7 +154,6 @@ public abstract class PermissionObject {
      */
     public Map<String, Boolean> getLocalPermissions(String server, List<String> excludedGroups) {
         return getPermissions(server, excludedGroups, includeGlobalPermissions);
-
     }
 
     private Map<String, Boolean> getPermissions(String server, List<String> excludedGroups, boolean includeGlobal) {
@@ -159,7 +186,7 @@ public abstract class PermissionObject {
         for (Map.Entry<String, Boolean> node : getNodes().entrySet()) {
             serverSpecific:
             if (node.getKey().contains("/")) {
-                String[] parts = node.getKey().split("\\/", 2);
+                String[] parts = Patterns.SERVER_SPLIT.split(node.getKey(), 2);
 
                 if (parts[0].equalsIgnoreCase("global")) {
                     // REGULAR
@@ -171,7 +198,7 @@ public abstract class PermissionObject {
                     continue;
                 }
 
-                if (parts[1].matches("group\\..*")) {
+                if (Patterns.GROUP_MATCH.matcher(parts[1]).matches()) {
                     // SERVER SPECIFIC AND GROUP
                     serverSpecificGroups.put(node.getKey(), node.getValue());
                     continue;
@@ -185,7 +212,7 @@ public abstract class PermissionObject {
             // Skip adding global permissions if they are not requested
             if (!includeGlobal) continue;
 
-            if (node.getKey().matches("group\\..*")) {
+            if (Patterns.GROUP_MATCH.matcher(node.getKey()).matches()) {
                 // GROUP
                 groupNodes.put(node.getKey(), node.getValue());
                 continue;
@@ -198,7 +225,7 @@ public abstract class PermissionObject {
         // If a group is negated at a higher priority, the group should not then be applied at a lower priority
         serverSpecificGroups.entrySet().stream().filter(node -> !node.getValue()).forEach(node -> {
             groupNodes.remove(node.getKey());
-            groupNodes.remove(node.getKey().split("\\/", 2)[1]);
+            groupNodes.remove(Patterns.SERVER_SPLIT.split(node.getKey(), 2)[1]);
         });
 
         // Apply lowest priority: groupNodes
@@ -210,7 +237,7 @@ public abstract class PermissionObject {
             // Don't add negated groups
             if (!groupNode.getValue()) continue;
 
-            String groupName = groupNode.getKey().split("\\.", 2)[1];
+            String groupName = Patterns.DOT_SPLIT.split(groupNode.getKey(), 2)[1];
             if (!excludedGroups.contains(groupName)) {
                 Group group = plugin.getGroupManager().getGroup(groupName);
                 if (group != null) {
@@ -224,7 +251,7 @@ public abstract class PermissionObject {
 
         // Apply next priority: serverSpecificGroups
         for (Map.Entry<String, Boolean> groupNode : serverSpecificGroups.entrySet()) {
-            final String rawNode = groupNode.getKey().split("\\/")[1];
+            final String rawNode = Patterns.SERVER_SPLIT.split(groupNode.getKey())[1];
 
             // Add the actual group perm node, so other plugins can hook
             perms.put(rawNode, groupNode.getValue());
@@ -232,7 +259,7 @@ public abstract class PermissionObject {
             // Don't add negated groups
             if (!groupNode.getValue()) continue;
 
-            String groupName = rawNode.split("\\.", 2)[1];
+            String groupName = Patterns.DOT_SPLIT.split(rawNode, 2)[1];
             if (!excludedGroups.contains(groupName)) {
                 Group group = plugin.getGroupManager().getGroup(groupName);
                 if (group != null) {
@@ -249,7 +276,7 @@ public abstract class PermissionObject {
 
         // Apply highest priority: serverSpecificNodes
         for (Map.Entry<String, Boolean> node : serverSpecificNodes.entrySet()) {
-            final String rawNode = node.getKey().split("\\/")[1];
+            final String rawNode = Patterns.SERVER_SPLIT.split(node.getKey())[1];
             perms.put(rawNode, node.getValue());
         }
 

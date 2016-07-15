@@ -7,6 +7,7 @@ import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.groups.Group;
+import me.lucko.luckperms.utils.Patterns;
 
 import java.util.List;
 
@@ -19,14 +20,14 @@ public class GroupSetPermissionCommand extends GroupSubCommand {
     @Override
     protected void execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args) {
         String node = args.get(0);
-        String bool = args.get(1);
+        String bool = args.get(1).toLowerCase();
 
         if (node.contains("/")) {
             sendUsage(sender);
             return;
         }
 
-        if (node.matches("group\\..*")) {
+        if (Patterns.GROUP_MATCH.matcher(node).matches()) {
             Message.GROUP_USE_INHERIT.send(sender);
             return;
         }

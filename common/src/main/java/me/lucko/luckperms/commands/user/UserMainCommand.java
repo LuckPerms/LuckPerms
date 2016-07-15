@@ -47,6 +47,11 @@ public class UserMainCommand extends MainCommand{
             strippedArgs.addAll(args.subList(2, args.size()));
         }
 
+        if (sub.isArgLengthInvalid(strippedArgs.size())) {
+            sub.sendUsage(sender);
+            return;
+        }
+
         final String user = args.get(0);
         UUID u = Util.parseUuid(user);
         if (u != null) {
@@ -80,11 +85,6 @@ public class UserMainCommand extends MainCommand{
             User user = plugin.getUserManager().getUser(uuid);
             if (user == null) {
                 Message.USER_NOT_FOUND.send(sender);
-            }
-
-            if (command.isArgLengthInvalid(strippedArgs.size())) {
-                command.sendUsage(sender);
-                return;
             }
 
             command.execute(plugin, sender, user, strippedArgs);

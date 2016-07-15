@@ -7,6 +7,7 @@ import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.exceptions.ObjectLacksPermissionException;
 import me.lucko.luckperms.users.User;
+import me.lucko.luckperms.utils.Patterns;
 
 import java.util.List;
 
@@ -25,7 +26,7 @@ public class UserUnSetPermissionCommand extends UserSubCommand {
             return;
         }
 
-        if (node.matches("group\\..*")) {
+        if (Patterns.GROUP_MATCH.matcher(node).matches()) {
             Message.USER_USE_REMOVEGROUP.send(sender);
             return;
         }

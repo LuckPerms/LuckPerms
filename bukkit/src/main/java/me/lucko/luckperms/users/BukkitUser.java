@@ -40,11 +40,11 @@ public class BukkitUser extends User {
             }
 
             // Clear existing permissions
-            attachment.getPermissions().keySet().stream().forEach(p -> attachment.setPermission(p, false));
+            attachment.getPermissions().keySet().forEach(p -> attachment.setPermission(p, false));
 
             // Re-add all defined permissions for the user
             Map<String, Boolean> local = getLocalPermissions(getPlugin().getConfiguration().getServer(), null);
-            local.entrySet().stream().forEach(e -> attachment.setPermission(e.getKey(), e.getValue()));
+            local.entrySet().forEach(e -> attachment.setPermission(e.getKey(), e.getValue()));
         });
     }
 }

@@ -6,6 +6,7 @@ import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.utils.Patterns;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,17 @@ public class CreateGroupCommand extends MainCommand {
         }
 
         String groupName = args.get(0).toLowerCase();
+
+        if (groupName.length() > 36) {
+            Message.GROUP_NAME_TOO_LONG.send(sender, groupName);
+            return;
+        }
+
+        if (Patterns.NON_ALPHA_NUMERIC.matcher(groupName).find()) {
+            Message.GROUP_INVALID_ENTRY.send(sender);
+            return;
+        }
+
         plugin.getDatastore().loadGroup(groupName, success -> {
             if (success) {
                 Message.GROUP_ALREADY_EXISTS.send(sender);

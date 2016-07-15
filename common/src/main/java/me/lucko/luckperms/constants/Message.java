@@ -25,6 +25,7 @@ public enum Message {
     USER_NOT_MEMBER_OF("%s is not a member of '%s'.", true),
     USER_USE_ADDGROUP("Use the addgroup command instead of specifying the node.", true),
     USER_USE_REMOVEGROUP("Use the removegroup command instead of specifying the node.", true),
+    USER_INVALID_ENTRY("&d%s&c is not a valid username/uuid.", true),
 
     GROUP_NOT_FOUND("&eGroup could not be found.", true),
     GROUP_SAVE_SUCCESS("&7(Group data was saved to the datastore)", true),
@@ -33,13 +34,14 @@ public enum Message {
     GROUP_DOES_NOT_INHERIT("%s does not inherit '%s'.", true),
     GROUP_USE_INHERIT("Use the setinherit command instead of specifying the node.", true),
     GROUP_USE_UNINHERIT("Use the unsetinherit command instead of specifying the node.", true),
+    GROUP_INVALID_ENTRY("Group names can only contain alphanumeric charcters.", true),
 
 
     USER_ATTEMPTING_LOOKUP("&7(Attempting UUID lookup, since you specified a user)", true),
-    USER_INVALID_ENTRY("&d%s&c is not a valid username/uuid.", true),
 
     GROUP_ALREADY_EXISTS("That group already exists!", true),
     GROUP_DOES_NOT_EXIST("That group does not exist!", true),
+    GROUP_NAME_TOO_LONG("Group name '%s' exceeds the maximum length of 36 characters.", true),
 
     GROUP_LOAD_ERROR("An unexpected error occurred. Group not loaded.", true),
     GROUPS_LOAD_ERROR("An unexpected error occurred. Unable to load all groups.", true),

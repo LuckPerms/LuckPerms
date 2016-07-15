@@ -44,6 +44,11 @@ public class GroupMainCommand extends MainCommand {
             strippedArgs.addAll(args.subList(2, args.size()));
         }
 
+        if (sub.isArgLengthInvalid(strippedArgs.size())) {
+            sub.sendUsage(sender);
+            return;
+        }
+
         final String groupName = args.get(0).toLowerCase();
         plugin.getDatastore().loadGroup(groupName, success -> {
             if (!success) {
@@ -54,11 +59,6 @@ public class GroupMainCommand extends MainCommand {
             Group group = plugin.getGroupManager().getGroup(groupName);
             if (group == null) {
                 Message.GROUP_NOT_FOUND.send(sender);
-                return;
-            }
-
-            if (sub.isArgLengthInvalid(strippedArgs.size())) {
-                sub.sendUsage(sender);
                 return;
             }
 

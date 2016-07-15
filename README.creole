@@ -59,6 +59,7 @@ Users with OP have access to all commands.
 | /perms user <user> getuuid | Shows the users Mojang UUID | luckperms.user.getuuid |
 | /perms user <user> listnodes | Lists all of the permission nodes the user has | luckperms.user.listnodes |
 | /perms user <user> haspermission <node> [server] | Checks if the user has a permission on a certain server | luckperms.user.haspermission |
+| /perms user <user> inheritspermission <node> [server] | Checks if the user inherits a permission on a certain server. (This checks all parent groups unlike haspermission) | luckperms.user.inheritspermission |
 | /perms user <user> set <node> <true/false> [server]| Sets a permission for the user | luckperms.user.setpermission |
 | /perms user <user> unset <node> [server] | Unsets a permission for the user | luckperms.user.unsetpermission |
 | /perms user <user> addgroup <group> [server] | Adds the user to a group | luckperms.user.addgroup |
@@ -71,6 +72,7 @@ Users with OP have access to all commands.
 | /perms group <group> info | Shows info about the group | luckperms.group.info |
 | /perms group <group> listnodes | Lists all of the permission nodes the group has | luckperms.group.listnodes |
 | /perms group <group> haspermission <node> [server] | Checks if the group has a permission on a certain server | luckperms.group.haspermission |
+| /perms group <group> inheritspermission <node> [server] | Checks if the group inherits a permission on a certain server. (This checks all parent groups unlike haspermission) | luckperms.group.inheritspermission |
 | /perms group <group> set <node> <true/false> [server]| Sets a permission for the group | luckperms.group.setpermission |
 | /perms group <group> unset <node> [server] | Unsets a permission for the group | luckperms.group.unsetpermission |
 | /perms group <group> setinherit <group> [server]| Sets the group to inherit all permissions from another group | luckperms.group.setinherit |

@@ -35,6 +35,7 @@ public class CommandManager {
         userCommand.registerSubCommand(new UserGetUUIDCommand());
         userCommand.registerSubCommand(new UserHasPermCommand());
         userCommand.registerSubCommand(new UserInfoCommand());
+        userCommand.registerSubCommand(new UserInheritsPermCommand());
         userCommand.registerSubCommand(new UserListNodesCommand());
         userCommand.registerSubCommand(new UserRemoveGroupCommand());
         userCommand.registerSubCommand(new UserSetPermissionCommand());
@@ -46,6 +47,7 @@ public class CommandManager {
         groupCommand.registerSubCommand(new GroupClearCommand());
         groupCommand.registerSubCommand(new GroupHasPermCommand());
         groupCommand.registerSubCommand(new GroupInfoCommand());
+        groupCommand.registerSubCommand(new GroupInheritsPermCommand());
         groupCommand.registerSubCommand(new GroupListNodesCommand());
         groupCommand.registerSubCommand(new GroupSetInheritCommand());
         groupCommand.registerSubCommand(new GroupSetPermissionCommand());
