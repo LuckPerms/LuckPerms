@@ -15,13 +15,13 @@ import java.util.stream.Collectors;
 
 public class DeleteGroupCommand extends MainCommand {
     public DeleteGroupCommand() {
-        super("DeleteGroup", "/perms deletegroup <group>", 1);
+        super("DeleteGroup", "/%s deletegroup <group>", 1);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         if (args.size() == 0) {
-            sendUsage(sender);
+            sendUsage(sender, label);
             return;
         }
 

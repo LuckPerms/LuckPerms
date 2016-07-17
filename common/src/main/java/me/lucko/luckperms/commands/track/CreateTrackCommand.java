@@ -13,13 +13,13 @@ import java.util.List;
 
 public class CreateTrackCommand extends MainCommand {
     public CreateTrackCommand() {
-        super("CreateTrack", "/perms createtrack <track>", 1);
+        super("CreateTrack", "/%s createtrack <track>", 1);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         if (args.size() == 0) {
-            sendUsage(sender);
+            sendUsage(sender, label);
             return;
         }
 

@@ -11,11 +11,11 @@ import java.util.List;
 
 public class GroupClearCommand extends GroupSubCommand {
     public GroupClearCommand() {
-        super("clear", "Clears a groups permissions", "/perms group <group> clear", Permission.GROUP_CLEAR);
+        super("clear", "Clears a groups permissions", "/%s group <group> clear", Permission.GROUP_CLEAR);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
         group.clearNodes();
         Message.CLEAR_SUCCESS.send(sender, group.getName());
 

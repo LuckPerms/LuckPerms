@@ -14,11 +14,11 @@ import java.util.List;
 
 public class ListTracksCommand extends MainCommand {
     public ListTracksCommand() {
-        super("ListTracks", "/perms listtracks", 0);
+        super("ListTracks", "/%s listtracks", 0);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         plugin.getDatastore().loadAllTracks(success -> {
             if (!success) {
                 Message.TRACKS_LOAD_ERROR.send(sender);

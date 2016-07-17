@@ -17,13 +17,13 @@ public class TrackMainCommand extends MainCommand {
     private final List<TrackSubCommand> subCommands = new ArrayList<>();
 
     public TrackMainCommand() {
-        super("Track", "/perms track <track>", 2);
+        super("Track", "/%s track <track>", 2);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         if (args.size() < 2) {
-            sendUsage(sender);
+            sendUsage(sender, label);
             return;
         }
 
@@ -46,7 +46,7 @@ public class TrackMainCommand extends MainCommand {
         }
 
         if (sub.isArgLengthInvalid(strippedArgs.size())) {
-            sub.sendUsage(sender);
+            sub.sendUsage(sender, label);
             return;
         }
 
@@ -63,7 +63,7 @@ public class TrackMainCommand extends MainCommand {
                 return;
             }
 
-            sub.execute(plugin, sender, track, strippedArgs);
+            sub.execute(plugin, sender, track, strippedArgs, label);
         });
     }
 

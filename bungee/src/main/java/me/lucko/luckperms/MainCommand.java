@@ -21,7 +21,7 @@ class MainCommand extends Command implements TabExecutor {
 
     @Override
     public void execute(CommandSender sender, String[] args) {
-        manager.onCommand(makeSender(sender), Arrays.asList(args));
+        manager.onCommand(makeSender(sender), "bperms", Arrays.asList(args));
     }
 
     @Override

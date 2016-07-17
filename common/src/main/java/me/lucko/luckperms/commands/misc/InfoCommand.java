@@ -12,11 +12,11 @@ import java.util.List;
 
 public class InfoCommand extends MainCommand {
     public InfoCommand() {
-        super("Info", "/perms info", 0);
+        super("Info", "/%s info", 0);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         Message.INFO.send(sender, plugin.getVersion(), plugin.getDatastore().getName());
     }
 

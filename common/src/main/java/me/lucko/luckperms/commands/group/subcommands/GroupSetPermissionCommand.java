@@ -13,17 +13,17 @@ import java.util.List;
 
 public class GroupSetPermissionCommand extends GroupSubCommand {
     public GroupSetPermissionCommand() {
-        super("set", "Sets a permission for a group", "/perms group <group> set <node> <true|false> [server]",
+        super("set", "Sets a permission for a group", "/%s group <group> set <node> <true|false> [server]",
                 Permission.GROUP_SETPERMISSION);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
         String node = args.get(0);
         String bool = args.get(1).toLowerCase();
 
         if (node.contains("/")) {
-            sendUsage(sender);
+            sendUsage(sender, label);
             return;
         }
 
@@ -33,7 +33,7 @@ public class GroupSetPermissionCommand extends GroupSubCommand {
         }
 
         if (!bool.equalsIgnoreCase("true") && !bool.equalsIgnoreCase("false")) {
-            sendUsage(sender);
+            sendUsage(sender, label);
             return;
         }
 

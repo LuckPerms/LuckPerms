@@ -11,11 +11,11 @@ import java.util.List;
 
 public class UserClearCommand extends UserSubCommand {
     public UserClearCommand() {
-        super("clear", "Clears a users permissions and groups", "/perms user <user> clear", Permission.USER_CLEAR);
+        super("clear", "Clears a users permissions and groups", "/%s user <user> clear", Permission.USER_CLEAR);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
         user.clearNodes();
         plugin.getUserManager().giveDefaults(user);
         Message.CLEAR_SUCCESS.send(sender, user.getName());

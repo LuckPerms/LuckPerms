@@ -19,13 +19,13 @@ public class UserMainCommand extends MainCommand {
     private final List<UserSubCommand> subCommands = new ArrayList<>();
 
     public UserMainCommand() {
-        super("User", "/perms user <user>", 2);
+        super("User", "/%s user <user>", 2);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         if (args.size() < 2) {
-            sendUsage(sender);
+            sendUsage(sender, label);
             return;
         }
 
@@ -49,14 +49,14 @@ public class UserMainCommand extends MainCommand {
         }
 
         if (sub.isArgLengthInvalid(strippedArgs.size())) {
-            sub.sendUsage(sender);
+            sub.sendUsage(sender, label);
             return;
         }
 
         final String user = args.get(0);
         UUID u = Util.parseUuid(user);
         if (u != null) {
-            runSub(plugin, sender, u, sub, strippedArgs);
+            runSub(plugin, sender, u, sub, strippedArgs, label);
             return;
         }
 
@@ -68,7 +68,7 @@ public class UserMainCommand extends MainCommand {
                     Message.USER_NOT_FOUND.send(sender);
                     return;
                 }
-                runSub(plugin, sender, uuid, sub, strippedArgs);
+                runSub(plugin, sender, uuid, sub, strippedArgs, label);
             });
             return;
         }
@@ -91,7 +91,7 @@ public class UserMainCommand extends MainCommand {
         return onAbstractTabComplete(sender, args, plugin);
     }
 
-    private void runSub(LuckPermsPlugin plugin, Sender sender, UUID uuid, UserSubCommand command, List<String> strippedArgs) {
+    private void runSub(LuckPermsPlugin plugin, Sender sender, UUID uuid, UserSubCommand command, List<String> strippedArgs, String label) {
         plugin.getDatastore().loadUser(uuid, success -> {
             if (!success) {
                 Message.USER_NOT_FOUND.send(sender);
@@ -103,7 +103,7 @@ public class UserMainCommand extends MainCommand {
                 Message.USER_NOT_FOUND.send(sender);
             }
 
-            command.execute(plugin, sender, user, strippedArgs);
+            command.execute(plugin, sender, user, strippedArgs, label);
             plugin.getUserManager().cleanupUser(user);
         });
     }

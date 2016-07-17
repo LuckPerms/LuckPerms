@@ -12,11 +12,11 @@ import java.util.List;
 
 public class TrackRemoveCommand extends TrackSubCommand {
     public TrackRemoveCommand() {
-        super("remove", "Removes a group from the track", "/perms track <track> remove <group>", Permission.TRACK_REMOVE);
+        super("remove", "Removes a group from the track", "/%s track <track> remove <group>", Permission.TRACK_REMOVE);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args, String label) {
         String groupName = args.get(0).toLowerCase();
         try {
             track.removeGroup(groupName);

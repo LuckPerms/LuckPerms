@@ -12,11 +12,11 @@ import java.util.List;
 
 public class SyncCommand extends MainCommand {
     public SyncCommand() {
-        super("Sync", "/perms sync", 0);
+        super("Sync", "/%s sync", 0);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         Message.UPDATE_TASK_RUN.send(sender);
         plugin.runUpdateTask();
     }

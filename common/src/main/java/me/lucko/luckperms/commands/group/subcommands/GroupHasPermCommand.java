@@ -12,11 +12,11 @@ import java.util.List;
 public class GroupHasPermCommand extends GroupSubCommand {
     public GroupHasPermCommand() {
         super("haspermission", "Checks to see if a group has a certain permission node",
-                "/perms group <group> haspermission <node> [server]", Permission.GROUP_HASPERMISSION);
+                "/%s group <group> haspermission <node> [server]", Permission.GROUP_HASPERMISSION);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
         if (args.size() == 2) {
             Util.sendBoolean(sender, args.get(0), group.hasPermission(args.get(0), true, args.get(1).toLowerCase()));
         } else {

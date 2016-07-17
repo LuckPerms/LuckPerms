@@ -15,11 +15,11 @@ import java.util.List;
 public class TrackInsertCommand extends TrackSubCommand {
     public TrackInsertCommand() {
         super("insert", "Inserts a group at a given position along the track",
-                "/perms track <track> insert <group> <position>", Permission.TRACK_INSERT);
+                "/%s track <track> insert <group> <position>", Permission.TRACK_INSERT);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args, String label) {
         String groupName = args.get(0).toLowerCase();
         int pos;
         try {

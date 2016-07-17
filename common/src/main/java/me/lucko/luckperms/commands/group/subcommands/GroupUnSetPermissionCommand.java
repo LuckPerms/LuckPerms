@@ -14,15 +14,15 @@ import java.util.List;
 public class GroupUnSetPermissionCommand extends GroupSubCommand {
     public GroupUnSetPermissionCommand() {
         super("unset", "Unsets a permission for a group",
-                "/perms group <group> unset <node> [server]", Permission.GROUP_UNSETPERMISSION);
+                "/%s group <group> unset <node> [server]", Permission.GROUP_UNSETPERMISSION);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
         String node = args.get(0);
 
         if (node.contains("/")) {
-            sendUsage(sender);
+            sendUsage(sender, label);
             return;
         }
 

@@ -120,7 +120,7 @@ public enum Message {
             PREFIX + "&d-> &eGroups: &6%s" + "\n" +
             PREFIX + "&d-> &ePrimary Group: &6%s" + "\n" +
             PREFIX + "&d-> &ePermissions: &6%s" + "\n" +
-            PREFIX + "&d-> &bUse &a/perms user %s listnodes &bto see all permissions.",
+            PREFIX + "&d-> &bUse &a/%s user %s listnodes &bto see all permissions.",
             false
     ),
     USER_GETUUID("&bThe UUID of &e%s&b is &e%s&b.", true),
@@ -131,7 +131,7 @@ public enum Message {
     USER_REMOVEGROUP_ERROR_PRIMARY("You cannot remove a user from their primary group.", true),
     USER_PRIMARYGROUP_SUCCESS("&b%s&a's primary group was set to &b%s&a.", true),
     USER_PRIMARYGROUP_ERROR_ALREADYHAS("The user already has this group set as their primary group.", true),
-    USER_PRIMARYGROUP_ERROR_NOTMEMBER("The user must be a member of the group first! Use &4/perms user <user> addgroup <group>", true),
+    USER_PRIMARYGROUP_ERROR_NOTMEMBER("The user must be a member of the group first! Use &4/%s user <user> addgroup <group>", true),
     USER_SHOWTRACKS_INFO("&aShowing tracks that contain the group '&b%s&a' (%s's primary group)", true),
     USER_PROMOTE_SUCCESS_PROMOTE("&aPromoting user along track &b%s&a from &b%s&a to &b%s&a.", true),
     USER_PROMOTE_SUCCESS_REMOVE("&b%s&a was removed from &b%s&a, added to &b%s&a, and their primary group was set to &b%s&a.", true),
@@ -156,7 +156,7 @@ public enum Message {
     GROUP_INFO(
             PREFIX + "&d-> &eGroup: &6%s" + "\n" +
             PREFIX + "&d-> &ePermissions: &6%s" + "\n" +
-            PREFIX + "&d-> &bUse &a/perms group %s listnodes &bto see all permissions.",
+            PREFIX + "&d-> &bUse &a/%s group %s listnodes &bto see all permissions.",
             false
     ),
     GROUP_SETINHERIT_SUCCESS("&b%s&a now inherits permissions from &b%s&a.", true),

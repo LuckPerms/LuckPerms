@@ -13,11 +13,11 @@ import java.util.List;
 public class GroupSetInheritCommand extends GroupSubCommand {
     public GroupSetInheritCommand() {
         super("setinherit", "Sets another group for this group to inherit permissions from",
-                "/perms group <group> setinherit <group> [server]", Permission.GROUP_SETINHERIT);
+                "/%s group <group> setinherit <group> [server]", Permission.GROUP_SETINHERIT);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
         String groupName = args.get(0).toLowerCase();
 
         plugin.getDatastore().loadGroup(groupName, success -> {

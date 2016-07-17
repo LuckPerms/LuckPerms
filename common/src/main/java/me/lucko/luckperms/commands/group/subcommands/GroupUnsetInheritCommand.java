@@ -13,11 +13,11 @@ import java.util.List;
 public class GroupUnsetInheritCommand extends GroupSubCommand {
     public GroupUnsetInheritCommand() {
         super("unsetinherit", "Unsets another group for this group to inherit permissions from",
-                "/perms group <group> unsetinherit <group> [server]", Permission.GROUP_UNSETINHERIT);
+                "/%s group <group> unsetinherit <group> [server]", Permission.GROUP_UNSETINHERIT);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
         String groupName = args.get(0).toLowerCase();
 
         try {

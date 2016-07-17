@@ -12,12 +12,12 @@ import java.util.List;
 
 public class GroupListNodesCommand extends GroupSubCommand {
     public GroupListNodesCommand() {
-        super("listnodes", "Lists the permission nodes the group has", "/perms group <group> listnodes",
+        super("listnodes", "Lists the permission nodes the group has", "/%s group <group> listnodes",
                 Permission.GROUP_LISTNODES);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
         Message.LISTNODES.send(sender, group.getName(), Util.nodesToString(group.getNodes()));
     }
 

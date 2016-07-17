@@ -11,11 +11,11 @@ import java.util.List;
 
 public class TrackClearCommand extends TrackSubCommand {
     public TrackClearCommand() {
-        super("clear", "Clears the groups on the track", "/perms track <track> clear", Permission.TRACK_CLEAR);
+        super("clear", "Clears the groups on the track", "/%s track <track> clear", Permission.TRACK_CLEAR);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args, String label) {
         track.clearGroups();
         Message.TRACK_CLEAR.send(sender, track.getName());
         saveTrack(track, sender, plugin);

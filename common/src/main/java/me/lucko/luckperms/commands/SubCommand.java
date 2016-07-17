@@ -51,8 +51,8 @@ public abstract class SubCommand {
         return permission.isAuthorized(sender);
     }
 
-    public void sendUsage(Sender sender) {
-        Util.sendPluginMessage(sender, "&e-> &d" + getUsage());
+    public void sendUsage(Sender sender, String label) {
+        Util.sendPluginMessage(sender, "&e-> &d" + String.format(getUsage(), label));
     }
 
     public List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin) {

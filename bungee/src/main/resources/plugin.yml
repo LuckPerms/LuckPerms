@@ -1,3 +1,5 @@
 name: LuckPerms
-main: me.lucko.luckperms.LPBungeePlugin
 author: Luck
+version: 1.1
+main: me.lucko.luckperms.LPBungeePlugin
+description: A permissions plugin

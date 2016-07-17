@@ -12,11 +12,11 @@ import java.util.List;
 public class UserInheritsPermCommand extends UserSubCommand {
     public UserInheritsPermCommand() {
         super("inheritspermission", "Checks to see if a user inherits a certain permission node",
-                "/perms user <user> inheritspermission <node> [server]", Permission.USER_INHERITSPERMISSION);
+                "/%s user <user> inheritspermission <node> [server]", Permission.USER_INHERITSPERMISSION);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
         if (args.size() >= 2) {
             Util.sendBoolean(sender, args.get(0), user.inheritsPermission(args.get(0), true, args.get(1)));
         } else {

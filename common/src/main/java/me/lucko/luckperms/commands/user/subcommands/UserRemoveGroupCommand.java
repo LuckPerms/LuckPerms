@@ -12,11 +12,11 @@ import java.util.List;
 
 public class UserRemoveGroupCommand extends UserSubCommand {
     public UserRemoveGroupCommand() {
-        super("removegroup", "Removes a user from a group", "/perms user <user> removegroup <group> [server]", Permission.USER_REMOVEGROUP);
+        super("removegroup", "Removes a user from a group", "/%s user <user> removegroup <group> [server]", Permission.USER_REMOVEGROUP);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
         String groupName = args.get(0).toLowerCase();
 
         if ((args.size() == 1 || (args.size() == 2 && args.get(1).equalsIgnoreCase("global")))

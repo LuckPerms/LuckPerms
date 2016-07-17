@@ -13,11 +13,11 @@ import java.util.List;
 public class UserSetPrimaryGroupCommand extends UserSubCommand {
     public UserSetPrimaryGroupCommand() {
         super("setprimarygroup", "Sets a users primary group",
-                "/perms user <user> setprimarygroup <group>", Permission.USER_SETPRIMARYGROUP);
+                "/%s user <user> setprimarygroup <group>", Permission.USER_SETPRIMARYGROUP);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
         Group group = plugin.getGroupManager().getGroup(args.get(0).toLowerCase());
         if (group == null) {
             Message.GROUP_DOES_NOT_EXIST.send(sender);
@@ -30,7 +30,7 @@ public class UserSetPrimaryGroupCommand extends UserSubCommand {
         }
 
         if (!user.isInGroup(group)) {
-            Message.USER_PRIMARYGROUP_ERROR_NOTMEMBER.send(sender);
+            Message.USER_PRIMARYGROUP_ERROR_NOTMEMBER.send(sender, label);
             return;
         }
 

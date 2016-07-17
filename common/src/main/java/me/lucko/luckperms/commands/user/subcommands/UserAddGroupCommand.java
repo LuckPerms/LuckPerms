@@ -13,11 +13,11 @@ import java.util.List;
 
 public class UserAddGroupCommand extends UserSubCommand {
     public UserAddGroupCommand() {
-        super("addgroup", "Adds the user to a group", "/perms user <user> addgroup <group> [server]", Permission.USER_ADDGROUP);
+        super("addgroup", "Adds the user to a group", "/%s user <user> addgroup <group> [server]", Permission.USER_ADDGROUP);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
         String groupName = args.get(0).toLowerCase();
 
         plugin.getDatastore().loadGroup(groupName, success -> {

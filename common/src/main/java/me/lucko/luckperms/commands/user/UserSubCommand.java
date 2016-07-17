@@ -14,7 +14,7 @@ public abstract class UserSubCommand extends SubCommand {
         super(name, description, usage, permission);
     }
 
-    protected abstract void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args);
+    protected abstract void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label);
 
     protected void saveUser(User user, Sender sender, LuckPermsPlugin plugin) {
         user.refreshPermissions();

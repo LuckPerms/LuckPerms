@@ -14,7 +14,7 @@ public abstract class GroupSubCommand extends SubCommand {
         super(name, description, usage, permission);
     }
 
-    protected abstract void execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args);
+    protected abstract void execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label);
 
     protected void saveGroup(Group group, Sender sender, LuckPermsPlugin plugin) {
         plugin.getDatastore().saveGroup(group, success -> {

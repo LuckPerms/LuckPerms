@@ -18,13 +18,13 @@ public abstract class MainCommand {
     private final String usage;
     private final int requiredArgsLength;
 
-    protected abstract void execute(LuckPermsPlugin plugin, Sender sender, List<String> args);
+    protected abstract void execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label);
     protected abstract List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin);
     public abstract List<? extends SubCommand> getSubCommands();
 
-    protected void sendUsage(Sender sender) {
+    protected void sendUsage(Sender sender, String label) {
         if (getSubCommands().isEmpty()) {
-            Util.sendPluginMessage(sender, "&e-> &d" + getUsage());
+            Util.sendPluginMessage(sender, "&e-> &d" + String.format(getUsage(), label));
             return;
         }
 
@@ -33,7 +33,7 @@ public abstract class MainCommand {
             Util.sendPluginMessage(sender, "&e" + getName() + " Sub Commands:");
 
             for (SubCommand s : subs) {
-                s.sendUsage(sender);
+                s.sendUsage(sender, label);
             }
 
         } else {

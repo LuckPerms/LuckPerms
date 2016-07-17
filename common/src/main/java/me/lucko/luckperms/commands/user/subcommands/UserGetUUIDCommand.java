@@ -11,11 +11,11 @@ import java.util.List;
 
 public class UserGetUUIDCommand extends UserSubCommand {
     public UserGetUUIDCommand() {
-        super("getuuid", "Get the UUID of a user", "/perms user <user> getuuid", Permission.USER_GETUUID);
+        super("getuuid", "Get the UUID of a user", "/%s user <user> getuuid", Permission.USER_GETUUID);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
         Message.USER_GETUUID.send(sender, user.getName(), user.getUuid().toString());
     }
 

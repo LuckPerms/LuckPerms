@@ -17,13 +17,13 @@ public class GroupMainCommand extends MainCommand {
     private final List<GroupSubCommand> subCommands = new ArrayList<>();
 
     public GroupMainCommand() {
-        super("Group", "/perms group <group>", 2);
+        super("Group", "/%s group <group>", 2);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         if (args.size() < 2) {
-            sendUsage(sender);
+            sendUsage(sender, label);
             return;
         }
 
@@ -46,7 +46,7 @@ public class GroupMainCommand extends MainCommand {
         }
 
         if (sub.isArgLengthInvalid(strippedArgs.size())) {
-            sub.sendUsage(sender);
+            sub.sendUsage(sender, label);
             return;
         }
 
@@ -63,7 +63,7 @@ public class GroupMainCommand extends MainCommand {
                 return;
             }
 
-            sub.execute(plugin, sender, group, strippedArgs);
+            sub.execute(plugin, sender, group, strippedArgs, label);
         });
     }
 

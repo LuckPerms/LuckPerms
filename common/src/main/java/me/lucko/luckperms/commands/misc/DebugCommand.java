@@ -12,11 +12,11 @@ import java.util.List;
 
 public class DebugCommand extends MainCommand {
     public DebugCommand() {
-        super("Debug", "/perms debug", 0);
+        super("Debug", "/%s debug", 0);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         Message.DEBUG.send(sender, plugin.getPlayerCount(), plugin.getUserManager().getUsers().size(),
                 plugin.getGroupManager().getGroups().size(), plugin.getTrackManager().getTracks().size()
         );

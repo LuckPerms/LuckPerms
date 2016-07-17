@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 @Getter
 public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
-    public static final String VERSION = "v1.0";
+    public static final String VERSION = "v1.1";
 
     private LPConfiguration configuration;
     private UserManager userManager;
@@ -40,6 +40,9 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
         // register commands
         getProxy().getPluginManager().registerCommand(this, new MainCommand(new CommandManager(this)));
+
+        // disable the default Bungee /perms command so it gets handled by the Bukkit plugin
+        getProxy().getDisabledCommands().add("perms");
 
         final String storageMethod = configuration.getStorageMethod();
 

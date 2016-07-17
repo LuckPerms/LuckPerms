@@ -91,36 +91,36 @@ public class CommandManager {
      * @param args the arguments provided
      * @return if the command was successful (hint: it always is :> )
      */
-    public boolean onCommand(Sender sender, List<String> args) {
+    public boolean onCommand(Sender sender, String label, List<String> args) {
         if (args.size() == 0) {
-            sendCommandUsage(sender);
+            sendCommandUsage(sender, label);
             return true;
         }
 
         Optional<MainCommand> o = mainCommands.stream().filter(m -> m.getName().equalsIgnoreCase(args.get(0))).limit(1).findAny();
 
         if (!o.isPresent()) {
-            sendCommandUsage(sender);
+            sendCommandUsage(sender, label);
             return true;
         }
 
         final MainCommand main = o.get();
         if (!main.canUse(sender)) {
-            sendCommandUsage(sender);
+            sendCommandUsage(sender, label);
             return true;
         }
 
         if (main.getRequiredArgsLength() == 0) {
-            main.execute(plugin, sender, null);
+            main.execute(plugin, sender, null, label);
             return true;
         }
 
         if (args.size() == 1) {
-            main.sendUsage(sender);
+            main.sendUsage(sender, label);
             return true;
         }
 
-        main.execute(plugin, sender, new ArrayList<>(args.subList(1, args.size())));
+        main.execute(plugin, sender, new ArrayList<>(args.subList(1, args.size())), label);
         return true;
 
     }
@@ -155,11 +155,11 @@ public class CommandManager {
         mainCommands.add(command);
     }
 
-    private void sendCommandUsage(Sender sender) {
+    private void sendCommandUsage(Sender sender, String label) {
         Message.INFO_BRIEF.send(sender, plugin.getVersion());
 
         mainCommands.stream()
                 .filter(c -> c.canUse(sender))
-                .forEach(c -> Util.sendPluginMessage(sender, "&e-> &d" + c.getUsage()));
+                .forEach(c -> Util.sendPluginMessage(sender, "&e-> &d" + String.format(c.getUsage(), label)));
     }
 }

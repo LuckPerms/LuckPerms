@@ -14,11 +14,11 @@ import java.util.List;
 
 public class TrackAppendCommand extends TrackSubCommand {
     public TrackAppendCommand() {
-        super("append", "Appends a group onto the end of the track", "/perms track <track> append <group>", Permission.TRACK_APPEND);
+        super("append", "Appends a group onto the end of the track", "/%s track <track> append <group>", Permission.TRACK_APPEND);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args, String label) {
         String groupName = args.get(0).toLowerCase();
 
         plugin.getDatastore().loadGroup(groupName, success -> {

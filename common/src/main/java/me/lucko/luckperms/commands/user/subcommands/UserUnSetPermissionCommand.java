@@ -14,15 +14,15 @@ import java.util.List;
 public class UserUnSetPermissionCommand extends UserSubCommand {
     public UserUnSetPermissionCommand() {
         super("unset", "Unsets a permission for a user",
-                "/perms user <user> unset <node> [server]", Permission.USER_UNSETPERMISSION);
+                "/%s user <user> unset <node> [server]", Permission.USER_UNSETPERMISSION);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
         String node = args.get(0);
 
         if (node.contains("/")) {
-            sendUsage(sender);
+            sendUsage(sender, label);
             return;
         }
 

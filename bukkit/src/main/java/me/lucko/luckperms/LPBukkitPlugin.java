@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 
 @Getter
 public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
-    public static final String VERSION = "v1.0";
+    public static final String VERSION = "v1.1";
 
     private LPConfiguration configuration;
     private UserManager userManager;

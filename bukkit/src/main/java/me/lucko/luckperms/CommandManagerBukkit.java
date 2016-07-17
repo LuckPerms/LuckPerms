@@ -18,7 +18,7 @@ class CommandManagerBukkit extends CommandManager implements CommandExecutor, Ta
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        return onCommand(makeSender(sender), Arrays.asList(args));
+        return onCommand(makeSender(sender), label, Arrays.asList(args));
     }
 
 

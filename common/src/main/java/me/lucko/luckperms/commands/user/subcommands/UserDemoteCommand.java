@@ -16,11 +16,11 @@ import java.util.List;
 
 public class UserDemoteCommand extends UserSubCommand {
     public UserDemoteCommand() {
-        super("demote", "Demotes a user along a track", "/perms user <user> demote <track>", Permission.USER_DEMOTE);
+        super("demote", "Demotes a user along a track", "/%s user <user> demote <track>", Permission.USER_DEMOTE);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
         final String trackName = args.get(0).toLowerCase();
 
         plugin.getDatastore().loadTrack(trackName, success -> {

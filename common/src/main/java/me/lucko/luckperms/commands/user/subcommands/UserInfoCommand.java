@@ -12,14 +12,14 @@ import java.util.List;
 
 public class UserInfoCommand extends UserSubCommand {
     public UserInfoCommand() {
-        super("info", "Gives info about the user", "/perms user <user> info", Permission.USER_INFO);
+        super("info", "Gives info about the user", "/%s user <user> info", Permission.USER_INFO);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
         Message.USER_INFO.send(sender, user.getName(), user.getUuid(), plugin.getPlayerStatus(user.getUuid()),
                 Util.listToCommaSep(user.getGroupNames()), user.getPrimaryGroup(),
-                (user.getNodes().keySet().size() - user.getGroupNames().size()), user.getName()
+                (user.getNodes().keySet().size() - user.getGroupNames().size()), label, user.getName()
         );
     }
 

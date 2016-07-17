@@ -12,11 +12,11 @@ import java.util.List;
 public class UserHasPermCommand extends UserSubCommand {
     public UserHasPermCommand() {
         super("haspermission", "Checks to see if a user has a certain permission node",
-                "/perms user <user> haspermission <node> [server]", Permission.USER_HASPERMISSION);
+                "/%s user <user> haspermission <node> [server]", Permission.USER_HASPERMISSION);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
         if (args.size() >= 2) {
             Util.sendBoolean(sender, args.get(0), user.hasPermission(args.get(0), true, args.get(1)));
         } else {

@@ -14,7 +14,7 @@ public abstract class TrackSubCommand extends SubCommand {
         super(name, description, usage, permission);
     }
 
-    protected abstract void execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args);
+    protected abstract void execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args, String label);
 
     protected void saveTrack(Track track, Sender sender, LuckPermsPlugin plugin) {
         plugin.getDatastore().saveTrack(track, success -> {

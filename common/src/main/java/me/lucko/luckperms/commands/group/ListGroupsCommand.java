@@ -14,11 +14,11 @@ import java.util.List;
 
 public class ListGroupsCommand extends MainCommand {
     public ListGroupsCommand() {
-        super("ListGroups", "/perms listgroups", 0);
+        super("ListGroups", "/%s listgroups", 0);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         plugin.getDatastore().loadAllGroups(success -> {
             if (!success) {
                 Message.GROUPS_LOAD_ERROR.send(sender);

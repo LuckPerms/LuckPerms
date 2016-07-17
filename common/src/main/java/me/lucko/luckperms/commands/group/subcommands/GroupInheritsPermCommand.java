@@ -12,11 +12,11 @@ import java.util.List;
 public class GroupInheritsPermCommand extends GroupSubCommand {
     public GroupInheritsPermCommand() {
         super("inheritspermission", "Checks to see if a group inherits a certain permission node",
-                "/perms group <group> inheritspermission <node> [server]", Permission.GROUP_INHERITSPERMISSION);
+                "/%s group <group> inheritspermission <node> [server]", Permission.GROUP_INHERITSPERMISSION);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
         if (args.size() == 2) {
             Util.sendBoolean(sender, args.get(0), group.inheritsPermission(args.get(0), true, args.get(1).toLowerCase()));
         } else {

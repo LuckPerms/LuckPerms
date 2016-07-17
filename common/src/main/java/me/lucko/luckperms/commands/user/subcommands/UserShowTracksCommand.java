@@ -14,11 +14,12 @@ import java.util.stream.Collectors;
 
 public class UserShowTracksCommand extends UserSubCommand {
     public UserShowTracksCommand() {
-        super("showtracks", "Lists the tracks that this user's primary group features on", "/perms user <user> showtracks", Permission.USER_SHOWTRACKS);
+        super("showtracks", "Lists the tracks that this user's primary group features on", "/%s user <user> showtracks",
+                Permission.USER_SHOWTRACKS);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
         plugin.getDatastore().loadAllTracks(success -> {
             if (!success) {
                 Message.TRACKS_LOAD_ERROR.send(sender);

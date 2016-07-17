@@ -16,11 +16,11 @@ import java.util.List;
 
 public class UserPromoteCommand extends UserSubCommand {
     public UserPromoteCommand() {
-        super("promote", "Promotes the user along a track", "/perms user <user> promote <track>", Permission.USER_PROMOTE);
+        super("promote", "Promotes the user along a track", "/%s user <user> promote <track>", Permission.USER_PROMOTE);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
         final String trackName = args.get(0).toLowerCase();
 
         plugin.getDatastore().loadTrack(trackName, success -> {

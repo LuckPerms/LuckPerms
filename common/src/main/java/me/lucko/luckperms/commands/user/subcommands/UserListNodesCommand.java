@@ -12,11 +12,11 @@ import java.util.List;
 
 public class UserListNodesCommand extends UserSubCommand {
     public UserListNodesCommand() {
-        super("listnodes", "Lists the permission nodes the user has", "/perms user <user> listnodes", Permission.USER_LISTNODES);
+        super("listnodes", "Lists the permission nodes the user has", "/%s user <user> listnodes", Permission.USER_LISTNODES);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
         Message.LISTNODES.send(sender, user.getName(), Util.nodesToString(user.getNodes()));
     }
 

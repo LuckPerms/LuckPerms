@@ -14,16 +14,16 @@ import java.util.List;
 public class UserSetPermissionCommand extends UserSubCommand {
     public UserSetPermissionCommand() {
         super("set", "Sets a permission for a user",
-                "/perms user <user> set <node> <true|false> [server]", Permission.USER_SETPERMISSION);
+                "/%s user <user> set <node> <true|false> [server]", Permission.USER_SETPERMISSION);
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args) {
+    protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
         String node = args.get(0);
         String bool = args.get(1).toLowerCase();
 
         if (node.contains("/")) {
-            sendUsage(sender);
+            sendUsage(sender, label);
             return;
         }
 
@@ -33,7 +33,7 @@ public class UserSetPermissionCommand extends UserSubCommand {
         }
 
         if (!bool.equalsIgnoreCase("true") && !bool.equalsIgnoreCase("false")) {
-            sendUsage(sender);
+            sendUsage(sender, label);
             return;
         }
 
