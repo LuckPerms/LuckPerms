@@ -6,6 +6,7 @@ import me.lucko.luckperms.tracks.TrackManager;
 import me.lucko.luckperms.users.UserManager;
 import me.lucko.luckperms.utils.LPConfiguration;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -64,6 +65,12 @@ public interface LuckPermsPlugin {
      * @return the number of users
      */
     int getPlayerCount();
+
+    /**
+     * Gets the usernames of the users online on the platform
+     * @return a {@link List} of usernames
+     */
+    List<String> getPlayerList();
 
     /**
      * Runs an update task

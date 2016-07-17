@@ -12,8 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-public class UserMainCommand extends MainCommand{
+public class UserMainCommand extends MainCommand {
 
     private final List<UserSubCommand> subCommands = new ArrayList<>();
 
@@ -73,6 +74,21 @@ public class UserMainCommand extends MainCommand{
         }
 
         Message.USER_INVALID_ENTRY.send(sender, user);
+    }
+
+    @Override
+    protected List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin) {
+        final List<String> onlinePlayers = plugin.getPlayerList();
+
+        if (args.size() <= 1) {
+            if (args.isEmpty() || args.get(0).equalsIgnoreCase("")) {
+                return onlinePlayers;
+            }
+
+            return onlinePlayers.stream().filter(s -> s.toLowerCase().startsWith(args.get(0).toLowerCase())).collect(Collectors.toList());
+        }
+
+        return onAbstractTabComplete(sender, args, plugin);
     }
 
     private void runSub(LuckPermsPlugin plugin, Sender sender, UUID uuid, UserSubCommand command, List<String> strippedArgs) {

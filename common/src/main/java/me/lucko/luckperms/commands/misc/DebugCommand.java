@@ -7,7 +7,7 @@ import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class DebugCommand extends MainCommand {
@@ -23,8 +23,13 @@ public class DebugCommand extends MainCommand {
     }
 
     @Override
+    protected List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin) {
+        return Collections.emptyList();
+    }
+
+    @Override
     public List<? extends SubCommand> getSubCommands() {
-        return new ArrayList<>();
+        return Collections.emptyList();
     }
 
     @Override

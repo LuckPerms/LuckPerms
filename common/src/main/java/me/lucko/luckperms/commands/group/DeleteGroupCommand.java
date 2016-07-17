@@ -9,7 +9,9 @@ import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.groups.Group;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DeleteGroupCommand extends MainCommand {
     public DeleteGroupCommand() {
@@ -53,8 +55,23 @@ public class DeleteGroupCommand extends MainCommand {
     }
 
     @Override
+    protected List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin) {
+        final List<String> groups = new ArrayList<>(plugin.getGroupManager().getGroups().keySet());
+
+        if (args.size() <= 1) {
+            if (args.isEmpty() || args.get(0).equalsIgnoreCase("")) {
+                return groups;
+            }
+
+            return groups.stream().filter(s -> s.toLowerCase().startsWith(args.get(0).toLowerCase())).collect(Collectors.toList());
+        }
+
+        return Collections.emptyList();
+    }
+
+    @Override
     public List<SubCommand> getSubCommands() {
-        return new ArrayList<>();
+        return Collections.emptyList();
     }
 
     @Override

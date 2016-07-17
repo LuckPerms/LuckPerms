@@ -16,12 +16,15 @@ import me.lucko.luckperms.utils.LPConfiguration;
 import me.lucko.luckperms.vaulthooks.VaultHook;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Getter
 public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
@@ -45,6 +48,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         CommandManagerBukkit commandManager = new CommandManagerBukkit(this);
         PluginCommand main = getServer().getPluginCommand("luckperms");
         main.setExecutor(commandManager);
+        main.setTabCompleter(commandManager);
         main.setAliases(Arrays.asList("perms", "lp", "permissions", "p", "perm"));
 
         final String storageMethod = configuration.getStorageMethod();
@@ -121,6 +125,11 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     @Override
     public int getPlayerCount() {
         return getServer().getOnlinePlayers().size();
+    }
+
+    @Override
+    public List<String> getPlayerList() {
+        return getServer().getOnlinePlayers().stream().map(Player::getName).collect(Collectors.toList());
     }
 
     @Override

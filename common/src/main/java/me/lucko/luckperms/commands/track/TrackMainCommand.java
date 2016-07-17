@@ -10,6 +10,7 @@ import me.lucko.luckperms.tracks.Track;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class TrackMainCommand extends MainCommand {
 
@@ -64,6 +65,21 @@ public class TrackMainCommand extends MainCommand {
 
             sub.execute(plugin, sender, track, strippedArgs);
         });
+    }
+
+    @Override
+    protected List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin) {
+        final List<String> tracks = new ArrayList<>(plugin.getTrackManager().getTracks().keySet());
+
+        if (args.size() <= 1) {
+            if (args.isEmpty() || args.get(0).equalsIgnoreCase("")) {
+                return tracks;
+            }
+
+            return tracks.stream().filter(s -> s.toLowerCase().startsWith(args.get(0).toLowerCase())).collect(Collectors.toList());
+        }
+
+        return onAbstractTabComplete(sender, args, plugin);
     }
 
     @Override

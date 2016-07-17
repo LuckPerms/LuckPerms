@@ -29,7 +29,7 @@ public enum Message {
     USER_NOT_FOUND("&eUser could not be found.", true),
     USER_SAVE_SUCCESS("&7(User data was saved to the datastore)", true),
     USER_SAVE_ERROR("There was an error whilst saving the user.", true),
-    USER_ATTEMPTING_LOOKUP("&7(Attempting UUID lookup, since you specified a user)", true),
+    USER_ATTEMPTING_LOOKUP("&7(Attempting UUID lookup, since you specified a username)", true),
 
     GROUP_NOT_FOUND("&eGroup could not be found.", true),
     GROUP_SAVE_SUCCESS("&7(Group data was saved to the datastore)", true),

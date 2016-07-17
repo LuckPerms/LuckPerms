@@ -20,9 +20,11 @@ import me.lucko.luckperms.commands.user.subcommands.*;
 import me.lucko.luckperms.constants.Message;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 public class CommandManager {
     private final LuckPermsPlugin plugin;
@@ -121,6 +123,31 @@ public class CommandManager {
         main.execute(plugin, sender, new ArrayList<>(args.subList(1, args.size())));
         return true;
 
+    }
+
+    /**
+     * Generic tab complete method to be called from the command executor object of the platform
+     * @param sender who is tab completing
+     * @param args the arguments provided so far
+     * @return a list of suggestions
+     */
+    public List<String> onTabComplete(Sender sender, List<String> args) {
+        final List<MainCommand> mains = mainCommands.stream().filter(m -> m.canUse(sender)).collect(Collectors.toList());
+
+        if (args.size() <= 1) {
+            if (args.isEmpty() || args.get(0).equalsIgnoreCase("")) {
+                return mains.stream().map(MainCommand::getName).map(String::toLowerCase).collect(Collectors.toList());
+            }
+
+            return mains.stream().map(MainCommand::getName).map(String::toLowerCase).filter(s -> s.startsWith(args.get(0).toLowerCase())).collect(Collectors.toList());
+        }
+
+        Optional<MainCommand> o = mains.stream().filter(m -> m.getName().equalsIgnoreCase(args.get(0))).limit(1).findAny();
+        if (!o.isPresent()) {
+            return Collections.emptyList();
+        }
+
+        return o.get().onTabComplete(sender, args.subList(1, args.size()), plugin);
     }
 
     private void registerMainCommand(MainCommand command) {

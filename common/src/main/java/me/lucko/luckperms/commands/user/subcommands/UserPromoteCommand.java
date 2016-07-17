@@ -80,6 +80,11 @@ public class UserPromoteCommand extends UserSubCommand {
     }
 
     @Override
+    public List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin) {
+        return getTrackTabComplete(args, plugin);
+    }
+
+    @Override
     public boolean isArgLengthInvalid(int argLength) {
         return argLength != 1;
     }

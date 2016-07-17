@@ -9,6 +9,7 @@ import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ListGroupsCommand extends MainCommand {
@@ -28,8 +29,13 @@ public class ListGroupsCommand extends MainCommand {
     }
 
     @Override
+    protected List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin) {
+        return Collections.emptyList();
+    }
+
+    @Override
     public List<SubCommand> getSubCommands() {
-        return new ArrayList<>();
+        return Collections.emptyList();
     }
 
     @Override

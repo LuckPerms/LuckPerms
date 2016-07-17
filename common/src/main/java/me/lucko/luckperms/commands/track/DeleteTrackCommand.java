@@ -9,7 +9,9 @@ import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.tracks.Track;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DeleteTrackCommand extends MainCommand {
     public DeleteTrackCommand() {
@@ -48,8 +50,23 @@ public class DeleteTrackCommand extends MainCommand {
     }
 
     @Override
+    protected List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin) {
+        final List<String> tracks = new ArrayList<>(plugin.getTrackManager().getTracks().keySet());
+
+        if (args.size() <= 1) {
+            if (args.isEmpty() || args.get(0).equalsIgnoreCase("")) {
+                return tracks;
+            }
+
+            return tracks.stream().filter(s -> s.toLowerCase().startsWith(args.get(0).toLowerCase())).collect(Collectors.toList());
+        }
+
+        return Collections.emptyList();
+    }
+
+    @Override
     public List<SubCommand> getSubCommands() {
-        return new ArrayList<>();
+        return Collections.emptyList();
     }
 
     @Override

@@ -13,10 +13,13 @@ import me.lucko.luckperms.tracks.TrackManager;
 import me.lucko.luckperms.users.BungeeUserManager;
 import me.lucko.luckperms.users.UserManager;
 import me.lucko.luckperms.utils.LPConfiguration;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Getter
 public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
@@ -86,6 +89,11 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     @Override
     public int getPlayerCount() {
         return getProxy().getOnlineCount();
+    }
+
+    @Override
+    public List<String> getPlayerList() {
+        return getProxy().getPlayers().stream().map(ProxiedPlayer::getName).collect(Collectors.toList());
     }
 
     @Override

@@ -32,6 +32,10 @@ public class Util {
         return new String(b);
     }
 
+    public static boolean startsWithIgnoreCase(String s, String startsWith) {
+        return s.toLowerCase().startsWith(startsWith);
+    }
+
     public static void sendBoolean(Sender sender, String node, boolean b) {
         if (b) {
             sender.sendMessage(Util.color("&b" + node + ": &atrue"));

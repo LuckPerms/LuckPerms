@@ -10,6 +10,7 @@ import me.lucko.luckperms.groups.Group;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class GroupMainCommand extends MainCommand {
 
@@ -64,6 +65,21 @@ public class GroupMainCommand extends MainCommand {
 
             sub.execute(plugin, sender, group, strippedArgs);
         });
+    }
+
+    @Override
+    protected List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin) {
+        final List<String> groups = new ArrayList<>(plugin.getGroupManager().getGroups().keySet());
+
+        if (args.size() <= 1) {
+            if (args.isEmpty() || args.get(0).equalsIgnoreCase("")) {
+                return groups;
+            }
+
+            return groups.stream().filter(s -> s.toLowerCase().startsWith(args.get(0).toLowerCase())).collect(Collectors.toList());
+        }
+
+        return onAbstractTabComplete(sender, args, plugin);
     }
 
     @Override

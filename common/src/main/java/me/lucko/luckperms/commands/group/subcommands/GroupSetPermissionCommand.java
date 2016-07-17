@@ -56,6 +56,11 @@ public class GroupSetPermissionCommand extends GroupSubCommand {
     }
 
     @Override
+    public List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin) {
+        return getBoolTabComplete(args);
+    }
+
+    @Override
     public boolean isArgLengthInvalid(int argLength) {
         return argLength != 2 && argLength != 3;
     }
