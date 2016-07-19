@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 @Getter
 public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
-    public static final String VERSION = "v1.1";
+    public static final String VERSION = "v1.2";
 
     private LPConfiguration configuration;
     private UserManager userManager;
