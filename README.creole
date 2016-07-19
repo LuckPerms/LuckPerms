@@ -1,8 +1,10 @@
 = LuckPerms
 A (fairly bad) permissions implementation for Bukkit/BungeeCord.
 
-=== Features
+== Features
 * **Group inheritance** - users can be members of multiple groups, groups can inherit other groups
+* **Temporary permissions** - users/groups can be given permissions that expire after a given time
+* **Temporary groups** - users/groups can be added to/inherit other groups temporarily
 * **Multi-server support** - data is synced across all servers/platforms
 * **Per-server permissions/groups** - define user/group permissions that only apply on certain servers
 * **Server-specific groups** - define groups that only apply on certain servers
@@ -17,16 +19,37 @@ A (fairly bad) permissions implementation for Bukkit/BungeeCord.
 * Currently only supports MySQL, SQLite & Flatfile (JSON) (support for more methods might come in the future)
 * Not at all tested and could produce unexpected/buggy results and errors
 
-=== Setup
+== Setup
 All configuration options are in the **config.yml** file, which is generated automagically when the plugin first starts.
 
 You can define the settings for per-server permissions, the storage method and credentials within this file.
 
-=== Commands
+== Info
+=== Permission Calculation
+Permissions are calculated based on a priority system as follows.
+
+* Temporary permissions will override non-temporary permissions.
+
+Example: if a user has a false permission set for "test.node", and a temporary true permission set for "test.node", the temporary permission will override the permanent one, and the user will be granted the true node.
+
+* Server specific permissions will override generic/global permissions.
+
+Example: if a user has a global "fly.use" permission, and then has a negated "fly.use" permission on the "factions" server, the server specific permission will override the globally defined one, and the user will be granted the negated node.
+
+* Inherited permissions will be overridden by an objects own permissions.
+
+Example: A user is a member of the default group, which grants "some.thing.perm", but the users own permissions has "some.thing.perm" set to false. The inherited permission will be overridden by the users own permissions, and the user will be granted the negative node.
+
+=== Temporary Permissions
+Temporary permissions are checked each time a user/group is loaded, and when the sync task runs. This means if you set a temporary permission to expire after 30 seconds, it won't actually be removed until the sync task runs.
+
+The only way around this is to decrease the sync interval.
+
+== Commands
 
 Command usage is printed to the console/chat whenever invalid arguments are provided. Simply typing /perms will list all commands a user has permission to use.
 
-==== Aliases
+=== Aliases
 | Bukkit | /luckperms |
 | | /perms |
 | | /permissions |
@@ -78,6 +101,10 @@ Additionally, you can use wildcards to grant users access to a selection of comm
 | /perms user <user> unset <node> [server] | Unsets a permission for the user | luckperms.user.unsetpermission |
 | /perms user <user> addgroup <group> [server] | Adds the user to a group | luckperms.user.addgroup |
 | /perms user <user> removegroup <group> [server] | Removes the user from a group | luckperms.user.removegroup |
+| /perms user <user> settemp <node> <true/false> <duration> [server]| Sets a temporary permission for the user | luckperms.user.settemppermission |
+| /perms user <user> unsettemp <node> [server] | Unsets a temporary permission for the user | luckperms.user.unsettemppermission |
+| /perms user <user> addtempgroup <group> <duration> [server] | Adds the user to a group temporarily | luckperms.user.addtempgroup |
+| /perms user <user> removetempgroup <group> [server] | Removes the user from a temporary group | luckperms.user.removetempgroup |
 | /perms user <user> setprimarygroup <group> | Sets the users primary group | luckperms.user.setprimarygroup |
 | /perms user <user> showtracks | Shows a list of the tracks the user can be promoted/demoted on | luckperms.user.showtracks |
 | /perms user <user> promote <track> | Promotes the user along a given track | luckperms.user.promote |
@@ -94,7 +121,11 @@ Additionally, you can use wildcards to grant users access to a selection of comm
 | /perms group <group> set <node> <true/false> [server]| Sets a permission for the group | luckperms.group.setpermission |
 | /perms group <group> unset <node> [server] | Unsets a permission for the group | luckperms.group.unsetpermission |
 | /perms group <group> setinherit <group> [server]| Sets the group to inherit all permissions from another group | luckperms.group.setinherit |
-| /perms group <group> unsetinherit <group> [server] | Unsets a perviously defined inheritance rule | luckperms.group.unsetinherit |
+| /perms group <group> unsetinherit <group> [server] | Unsets a previously defined inheritance rule | luckperms.group.unsetinherit |
+| /perms group <group> settemp <node> <true/false> <duration> [server] | Sets a temporary permission for the group | luckperms.group.settemppermission |
+| /perms group <group> unsettemp <node> [server] | Unsets a temporary permission for the group | luckperms.group.unsettemppermission |
+| /perms group <group> settempinherit <group> <duration> [server] | Sets the group to inherit all permissions from another group temporarily | luckperms.group.settempinherit |
+| /perms group <group> unsettempinherit <group> [server] | Unsets a previously defined temporary inheritance rule | luckperms.group.unsettempinherit |
 | /perms group <group> showtracks | Shows a list of the tracks that the users in the group can be promoted/demoted on | luckperms.group.showtracks |
 | /perms group <group> clear | Clears all permissions the group has | luckperms.group.clear |
 |  |  |  |
@@ -107,5 +138,5 @@ Additionally, you can use wildcards to grant users access to a selection of comm
 | /perms track <track> clear | Clears all groups on the track | luckperms.track.clear |
 
 
-=== License
+== License
 See LICENSE.md.

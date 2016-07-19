@@ -94,12 +94,47 @@ public abstract class User extends PermissionObject {
     }
 
     /**
+     * Add a user to a group on a specific server
+     * @param group The group to add the user to
+     * @param expireAt when the group should expire
+     * @throws ObjectAlreadyHasException if the user is already a member of the group on that server
+     */
+    public void addGroup(Group group, long expireAt) throws ObjectAlreadyHasException {
+        setPermission("group." + group.getName(), true, expireAt);
+    }
+
+    /**
+     * Add a user to a group on a specific server
+     * @param group The group to add the user to
+     * @param server The server to add the group on
+     * @param expireAt when the group should expire
+     * @throws ObjectAlreadyHasException if the user is already a member of the group on that server
+     */
+    public void addGroup(Group group, String server, long expireAt) throws ObjectAlreadyHasException {
+        if (server == null) {
+            server = "global";
+        }
+
+        setPermission("group." + group.getName(), true, server, expireAt);
+    }
+
+    /**
      * Remove the user from a group
      * @param group the group to remove the user from
      * @throws ObjectLacksException if the user isn't a member of the group
      */
     public void removeGroup(Group group) throws ObjectLacksException {
         removeGroup(group, "global");
+    }
+
+    /**
+     * Remove the user from a group
+     * @param group the group to remove the user from
+     * @param temporary if the group being removed is temporary
+     * @throws ObjectLacksException if the user isn't a member of the group
+     */
+    public void removeGroup(Group group, boolean temporary) throws ObjectLacksException {
+        removeGroup(group, "global", temporary);
     }
 
     /**
@@ -114,6 +149,21 @@ public abstract class User extends PermissionObject {
         }
 
         unsetPermission("group." + group.getName(), server);
+    }
+
+    /**
+     * Remove the user from a group
+     * @param group The group to remove the user from
+     * @param server The server to remove the group on
+     * @param temporary if the group being removed is temporary
+     * @throws ObjectLacksException if the user isn't a member of the group
+     */
+    public void removeGroup(Group group, String server, boolean temporary) throws ObjectLacksException {
+        if (server == null) {
+            server = "global";
+        }
+
+        unsetPermission("group." + group.getName(), server, temporary);
     }
 
     /**
@@ -172,10 +222,10 @@ public abstract class User extends PermissionObject {
         final Map<String, Boolean> groupNodes = new HashMap<>();
 
         // Sorts the permissions and puts them into a priority order
-        for (Map.Entry<String, Boolean> node : getNodes().entrySet()) {
+        for (Map.Entry<String, Boolean> node : convertTemporaryPerms().entrySet()) {
             serverSpecific:
             if (node.getKey().contains("/")) {
-                String[] parts = node.getKey().split("\\/", 2);
+                String[] parts = Patterns.SERVER_SPLIT.split(node.getKey(), 2);
 
                 if (parts[0].equalsIgnoreCase("global")) {
                     // REGULAR

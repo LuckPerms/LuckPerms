@@ -7,10 +7,8 @@ import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.groups.Group;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Represents an object that can hold permissions
@@ -39,7 +37,6 @@ public abstract class PermissionObject {
     /**
      * The user/group's permissions
      */
-    @Setter
     private Map<String, Boolean> nodes = new HashMap<>();
 
     protected PermissionObject(LuckPermsPlugin plugin, String objectName) {
@@ -48,15 +45,43 @@ public abstract class PermissionObject {
         this.includeGlobalPermissions = plugin.getConfiguration().getIncludeGlobalPerms();
     }
 
+    public void setNodes(Map<String, Boolean> nodes) {
+        this.nodes = nodes;
+        auditTemporaryPermissions();
+    }
+
+    /**
+     * Utility method for checking if a map has a certain permission. Used by both #hasPermission and #inheritsPermission
+     */
+    private static boolean hasPermission(Map<String, Boolean> toQuery, String node, boolean b) {
+        // Not temporary
+        if (!node.contains("$")) {
+            return b ? toQuery.containsKey(node) && toQuery.get(node) : toQuery.containsKey(node) && !toQuery.get(node);
+        }
+
+        node = Patterns.TEMP_SPLIT.split(node)[0];
+
+        for (Map.Entry<String, Boolean> e : toQuery.entrySet()) {
+            if (e.getKey().contains("$")) {
+                String[] parts = Patterns.TEMP_SPLIT.split(e.getKey());
+                if (parts[0].equalsIgnoreCase(node)) {
+                    return b ? e.getValue() : !e.getValue();
+                }
+            }
+        }
+
+        return false;
+    }
+
     /**
      * Checks to see if the object has a certain permission
      * @param node The permission node
      * @param b If the node is true/false(negated)
      * @return true if the user has the permission
      */
-    public boolean hasPermission(String node, Boolean b) {
+    public boolean hasPermission(String node, boolean b) {
         if (node.startsWith("global/")) node = node.replace("global/", "");
-        return b ? getNodes().containsKey(node) && getNodes().get(node) : getNodes().containsKey(node) && !getNodes().get(node);
+        return hasPermission(getNodes(), node, b);
     }
 
     /**
@@ -66,8 +91,19 @@ public abstract class PermissionObject {
      * @param server The server
      * @return true if the user has the permission
      */
-    public boolean hasPermission(String node, Boolean b, String server) {
+    public boolean hasPermission(String node, boolean b, String server) {
         return hasPermission(server + "/" + node, b);
+    }
+
+    /**
+     * Checks to see the the object has a permission on a certain server
+     * @param node The permission node
+     * @param b If the node is true/false(negated)
+     * @param temporary if the permission is temporary
+     * @return true if the user has the permission
+     */
+    public boolean hasPermission(String node, boolean b, boolean temporary) {
+        return hasPermission(node + (temporary ? "$a" : ""), b);
     }
 
     /**
@@ -76,7 +112,7 @@ public abstract class PermissionObject {
      * @param b If the node is true/false(negated)
      * @return true if the user inherits the permission
      */
-    public boolean inheritsPermission(String node, Boolean b) {
+    public boolean inheritsPermission(String node, boolean b) {
         if (node.contains("/")) {
             // Use other method
             final String[] parts = Patterns.SERVER_SPLIT.split(node, 2);
@@ -93,9 +129,20 @@ public abstract class PermissionObject {
      * @param server The server
      * @return true if the user inherits the permission
      */
-    public boolean inheritsPermission(String node, Boolean b, String server) {
+    public boolean inheritsPermission(String node, boolean b, String server) {
         final Map<String, Boolean> local = getLocalPermissions(server, null);
-        return b ? local.containsKey(node) && local.get(node) : local.containsKey(node) && !local.get(node);
+        return hasPermission(local, node, b);
+    }
+
+    /**
+     * Checks to see if the object inherits a certain permission
+     * @param node The permission node
+     * @param b If the node is true/false(negated)
+     * @param temporary if the permission is temporary
+     * @return true if the user inherits the permission
+     */
+    public boolean inheritsPermission(String node, boolean b, boolean temporary) {
+        return inheritsPermission(node + (temporary ? "$a" : ""), b);
     }
 
     /**
@@ -104,7 +151,7 @@ public abstract class PermissionObject {
      * @param value What to set the node to - true/false(negated)
      * @throws ObjectAlreadyHasException if the object already has the permission
      */
-    public void setPermission(String node, Boolean value) throws ObjectAlreadyHasException {
+    public void setPermission(String node, boolean value) throws ObjectAlreadyHasException {
         if (node.startsWith("global/")) node = node.replace("global/", "");
         if (hasPermission(node, value)) {
             throw new ObjectAlreadyHasException();
@@ -119,8 +166,64 @@ public abstract class PermissionObject {
      * @param server The server to set the permission on
      * @throws ObjectAlreadyHasException if the object already has the permission
      */
-    public void setPermission(String node, Boolean value, String server) throws ObjectAlreadyHasException {
+    public void setPermission(String node, boolean value, String server) throws ObjectAlreadyHasException {
         setPermission(server + "/" + node, value);
+    }
+
+    /**
+     * Sets a permission for the object
+     * @param node The node to set
+     * @param value What to set the node to - true/false(negated)
+     * @param expireAt The time in unixtime when the permission will expire
+     * @throws ObjectAlreadyHasException if the object already has the permission
+     */
+    public void setPermission(String node, boolean value, long expireAt) throws ObjectAlreadyHasException {
+        setPermission(node + "$" + expireAt, value);
+    }
+
+    /**
+     * Sets a permission for the object
+     * @param node The node to set
+     * @param value What to set the node to - true/false(negated)
+     * @param server The server to set the permission on
+     * @param expireAt The time in unixtime when the permission will expire
+     * @throws ObjectAlreadyHasException if the object already has the permission
+     */
+    public void setPermission(String node, boolean value, String server, long expireAt) throws ObjectAlreadyHasException {
+        setPermission(node + "$" + expireAt, value, server);
+    }
+
+    /**
+     * Unsets a permission for the object
+     * @param node The node to be unset
+     * @param temporary if the permission being removed is temporary
+     * @throws ObjectLacksException if the node wasn't already set
+     */
+    public void unsetPermission(String node, boolean temporary) throws ObjectLacksException {
+        if (node.startsWith("global/")) node = node.replace("global/", "");
+        String match = null;
+
+        if (!temporary) {
+            if (getNodes().containsKey(node)) {
+                match = node;
+            }
+        } else {
+            for (String n : getNodes().keySet()) {
+                if (n.contains("$")) {
+                    String[] parts = Patterns.TEMP_SPLIT.split(n);
+                    if (parts[0].equalsIgnoreCase(node)) {
+                        match = n;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (match != null) {
+            getNodes().remove(match);
+        } else {
+            throw new ObjectLacksException();
+        }
     }
 
     /**
@@ -129,11 +232,7 @@ public abstract class PermissionObject {
      * @throws ObjectLacksException if the node wasn't already set
      */
     public void unsetPermission(String node) throws ObjectLacksException {
-        if (node.startsWith("global/")) node = node.replace("global/", "");
-        if (!getNodes().containsKey(node)) {
-            throw new ObjectLacksException();
-        }
-        getNodes().remove(node);
+        unsetPermission(node, node.contains("$"));
     }
 
     /**
@@ -147,6 +246,17 @@ public abstract class PermissionObject {
     }
 
     /**
+     * Unsets a permission for the object
+     * @param node The node to be unset
+     * @param server The server to unset the node on
+     * @param temporary if the permission being unset is temporary
+     * @throws ObjectLacksException if the node wasn't already set
+     */
+    public void unsetPermission(String node, String server, boolean temporary) throws ObjectLacksException {
+        unsetPermission(server + "/" + node, temporary);
+    }
+
+    /**
      * Gets the permissions and inherited permissions that apply to a specific server
      * @param server The server to get nodes for
      * @param excludedGroups Groups that shouldn't be inherited (to prevent circular inheritance issues)
@@ -154,6 +264,83 @@ public abstract class PermissionObject {
      */
     public Map<String, Boolean> getLocalPermissions(String server, List<String> excludedGroups) {
         return getPermissions(server, excludedGroups, includeGlobalPermissions);
+    }
+
+    /**
+     * Processes the objects and returns the temporary ones.
+     * @return a map of temporary nodes
+     */
+    public Map<Map.Entry<String, Boolean>, Long> getTemporaryNodes() {
+        Map<Map.Entry<String, Boolean>, Long> temps = new HashMap<>();
+
+        for (Map.Entry<String, Boolean> e : getNodes().entrySet()) {
+            if (!e.getKey().contains("$")) {
+                continue;
+            }
+
+            String[] parts = Patterns.TEMP_SPLIT.split(e.getKey());
+            final long expiry = Long.parseLong(parts[1]);
+            temps.put(new AbstractMap.SimpleEntry<>(parts[0], e.getValue()), expiry);
+        }
+
+        return temps;
+    }
+
+    /**
+     * Processes the objects and returns the non-temporary ones.
+     * @return a map of permanent nodes
+     */
+    public Map<String, Boolean> getPermanentNodes() {
+        Map<String, Boolean> permas = new HashMap<>();
+
+        for (Map.Entry<String, Boolean> e : getNodes().entrySet()) {
+            if (e.getKey().contains("$")) {
+                continue;
+            }
+
+            permas.put(e.getKey(), e.getValue());
+        }
+
+        return permas;
+    }
+
+    /**
+     * Removes temporary permissions that have expired
+     * @return true if permissions had expired and had to be removed
+     */
+    public boolean auditTemporaryPermissions() {
+        Set<String> toRemove = getNodes().keySet().stream()
+                .filter(s -> s.contains("$"))
+                .filter(s -> DateUtil.shouldExpire(Long.parseLong(Patterns.TEMP_SPLIT.split(s)[1])))
+                .collect(Collectors.toSet());
+        toRemove.forEach(s -> getNodes().remove(s));
+        return !toRemove.isEmpty();
+    }
+
+    private String stripTime(String s) {
+        if (s.contains("$")) {
+            return Patterns.TEMP_SPLIT.split(s)[0];
+        }
+        return s;
+    }
+
+    protected Map<String, Boolean> convertTemporaryPerms() {
+        auditTemporaryPermissions();
+
+        Map<String, Boolean> nodes = new HashMap<>();
+        Map<String, Boolean> tempNodes = new HashMap<>();
+
+        for (Map.Entry<String, Boolean> e : getNodes().entrySet()) {
+            if (e.getKey().contains("$")) {
+                tempNodes.put(e.getKey(), e.getValue());
+            } else {
+                nodes.put(e.getKey(), e.getValue());
+            }
+        }
+
+        // temporary permissions override non-temporary permissions
+        tempNodes.entrySet().forEach(e -> nodes.put(stripTime(e.getKey()), e.getValue()));
+        return nodes;
     }
 
     private Map<String, Boolean> getPermissions(String server, List<String> excludedGroups, boolean includeGlobal) {
@@ -183,7 +370,7 @@ public abstract class PermissionObject {
         final Map<String, Boolean> groupNodes = new HashMap<>();
 
         // Sorts the permissions and puts them into a priority order
-        for (Map.Entry<String, Boolean> node : getNodes().entrySet()) {
+        for (Map.Entry<String, Boolean> node : convertTemporaryPerms().entrySet()) {
             serverSpecific:
             if (node.getKey().contains("/")) {
                 String[] parts = Patterns.SERVER_SPLIT.split(node.getKey(), 2);

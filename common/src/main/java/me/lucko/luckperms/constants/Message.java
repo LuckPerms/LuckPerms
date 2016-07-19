@@ -20,6 +20,8 @@ public enum Message {
 
     ALREADY_HASPERMISSION("%s already has this permission!", true),
     DOES_NOT_HAVEPERMISSION("%s does not have this permission set.", true),
+    ALREADY_HAS_TEMP_PERMISSION("%s already has this permission set temporarily!", true),
+    DOES_NOT_HAVE_TEMP_PERMISSION("%s does not have this permission set temporarily.", true),
 
 
 
@@ -65,6 +67,12 @@ public enum Message {
     USER_NOT_MEMBER_OF("%s is not a member of '%s'.", true),
     GROUP_ALREADY_INHERITS("%s already inherits '%s'.", true),
     GROUP_DOES_NOT_INHERIT("%s does not inherit '%s'.", true),
+
+    USER_ALREADY_TEMP_MEMBER_OF("%s is already a temporary member of '%s'.", true),
+    USER_NOT_TEMP_MEMBER_OF("%s is not a temporary member of '%s'.", true),
+    GROUP_ALREADY_TEMP_INHERITS("%s already temporarily inherits '%s'.", true),
+    GROUP_DOES_NOT_TEMP_INHERIT("%s does not temporarily inherit '%s'.", true),
+
     TRACK_ALREADY_CONTAINS("Track %s already contains the group '%s'.", true),
     TRACK_DOES_NOT_CONTAIN("Track %s does not contain the group '%s'.", true),
 
@@ -107,11 +115,18 @@ public enum Message {
     TRACKS_LIST("&aTracks: %s", true),
 
     LISTNODES("&e%s's Nodes:" + "\n" + "%s", true),
+    LISTNODES_TEMP("&e%s's Temporary Nodes:" + "\n" + "%s", true),
     SETPERMISSION_SUCCESS("&aSet &b%s&a to &b%s&a for &b%s&a.", true),
     SETPERMISSION_SERVER_SUCCESS("&aSet &b%s&a to &b%s&a for &b%s&a on server &b%s&a.", true),
+    SETPERMISSION_TEMP_SUCCESS("&aSet &b%s&a to &b%s&a for &b%s&a for a duration of &b%s&a.", true),
+    SETPERMISSION_TEMP_SERVER_SUCCESS("&aSet &b%s&a to &b%s&a for &b%s&a on server &b%s&a for a duration of &b%s&a.", true),
     UNSETPERMISSION_SUCCESS("&aUnset &b%s&a for &b%s&a.", true),
     UNSETPERMISSION_SERVER_SUCCESS("&aUnset &b%s&a for &b%s&a on server &b%$s&a.", true),
+    UNSET_TEMP_PERMISSION_SUCCESS("&aUnset temporary permission &b%s&a for &b%s&a.", true),
+    UNSET_TEMP_PERMISSION_SERVER_SUCCESS("&aUnset temporary permission &b%s&a for &b%s&a on server &b%$s&a.", true),
     CLEAR_SUCCESS("&b%s&a's permissions were cleared.", true),
+    ILLEGAL_DATE_ERROR("Could not parse date '%s'.", true),
+    PAST_DATE_ERROR("You cannot set a date in the past!", true),
 
     USER_INFO(
             PREFIX + "&d-> &eUser: &6%s" + "\n" +
@@ -120,14 +135,19 @@ public enum Message {
             PREFIX + "&d-> &eGroups: &6%s" + "\n" +
             PREFIX + "&d-> &ePrimary Group: &6%s" + "\n" +
             PREFIX + "&d-> &ePermissions: &6%s" + "\n" +
+            PREFIX + "&d-> &eTemporary Permissions: &6%s" + "\n" +
             PREFIX + "&d-> &bUse &a/%s user %s listnodes &bto see all permissions.",
             false
     ),
     USER_GETUUID("&bThe UUID of &e%s&b is &e%s&b.", true),
     USER_ADDGROUP_SUCCESS("&b%s&a successfully added to group &b%s&a.", true),
     USER_ADDGROUP_SERVER_SUCCESS("&b%s&a successfully added to group &b%s&a on server &b%s&a.", true),
+    USER_ADDTEMPGROUP_SUCCESS("&b%s&a successfully added to group &b%s&a for a duration of &b%s&a.", true),
+    USER_ADDTEMPGROUP_SERVER_SUCCESS("&b%s&a successfully added to group &b%s&a on server &b%s&a for a duration of &b%s&a.", true),
     USER_REMOVEGROUP_SUCCESS("&b%s&a was removed from group &b%s&a.", true),
     USER_REMOVEGROUP_SERVER_SUCCESS("&b%s&a was removed from group &b%s&a on server &b%s&a.", true),
+    USER_REMOVETEMPGROUP_SUCCESS("&b%s&a was removed from temproary group &b%s&a.", true),
+    USER_REMOVETEMPGROUP_SERVER_SUCCESS("&b%s&a was removed from temporary group &b%s&a on server &b%s&a.", true),
     USER_REMOVEGROUP_ERROR_PRIMARY("You cannot remove a user from their primary group.", true),
     USER_PRIMARYGROUP_SUCCESS("&b%s&a's primary group was set to &b%s&a.", true),
     USER_PRIMARYGROUP_ERROR_ALREADYHAS("The user already has this group set as their primary group.", true),
@@ -156,13 +176,18 @@ public enum Message {
     GROUP_INFO(
             PREFIX + "&d-> &eGroup: &6%s" + "\n" +
             PREFIX + "&d-> &ePermissions: &6%s" + "\n" +
+            PREFIX + "&d-> &eTemporary Permissions: &6%s" + "\n" +
             PREFIX + "&d-> &bUse &a/%s group %s listnodes &bto see all permissions.",
             false
     ),
     GROUP_SETINHERIT_SUCCESS("&b%s&a now inherits permissions from &b%s&a.", true),
     GROUP_SETINHERIT_SERVER_SUCCESS("&b%s&a now inherits permissions from &b%s&a on server &b%s&a.", true),
+    GROUP_SET_TEMP_INHERIT_SUCCESS("&b%s&a now inherits permissions from &b%s&a for a duration of &b%s&a.", true),
+    GROUP_SET_TEMP_INHERIT_SERVER_SUCCESS("&b%s&a now inherits permissions from &b%s&a on server &b%s&a for a duration of &b%s&a.", true),
     GROUP_UNSETINHERIT_SUCCESS("&b%s&a no longer inherits permissions from &b%s&a.", true),
     GROUP_UNSETINHERIT_SERVER_SUCCESS("&b%s&a no longer inherits permissions from &b%s&a on server &b%s&a.", true),
+    GROUP_UNSET_TEMP_INHERIT_SUCCESS("&b%s&a no longer temporarily inherits permissions from &b%s&a.", true),
+    GROUP_UNSET_TEMP_INHERIT_SERVER_SUCCESS("&b%s&a no longer temporarily inherits permissions from &b%s&a on server &b%s&a.", true),
 
     TRACK_INFO(
             PREFIX + "&d-> &eTrack: &6%s" + "\n" +

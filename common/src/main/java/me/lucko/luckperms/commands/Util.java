@@ -1,6 +1,7 @@
 package me.lucko.luckperms.commands;
 
 import me.lucko.luckperms.constants.Message;
+import me.lucko.luckperms.utils.DateUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -86,7 +87,7 @@ public class Util {
         return sb.delete(sb.length() - 6, sb.length()).toString();
     }
 
-    public static String nodesToString(Map<String, Boolean> nodes) {
+    public static String permNodesToString(Map<String, Boolean> nodes) {
         if (nodes.isEmpty()) return "&6None";
 
         StringBuilder sb = new StringBuilder();
@@ -100,6 +101,24 @@ public class Util {
         }
 
         return sb.delete(sb.length() - 2, sb.length()).toString();
+    }
+
+    public static String tempNodesToString(Map<Map.Entry<String, Boolean>, Long> nodes) {
+        if (nodes.isEmpty()) return "&6None";
+
+        StringBuilder sb = new StringBuilder();
+
+        for (Map.Entry<Map.Entry<String, Boolean>, Long> e : nodes.entrySet()) {
+            if (e.getKey().getValue()) {
+                sb.append("&a").append(e.getKey().getKey()).append("&6 - expires in ")
+                        .append(DateUtil.formatDateDiff(e.getValue())).append("\n");
+            } else {
+                sb.append("&c").append(e.getKey().getKey()).append("&6 - expires in ")
+                        .append(DateUtil.formatDateDiff(e.getValue())).append("\n");
+            }
+        }
+
+        return sb.toString();
     }
 
     public static UUID parseUuid(String s) {
