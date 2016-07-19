@@ -65,9 +65,11 @@ public class UserDemote extends UserSubCommand {
 
                         try {
                             user.unsetPermission("group." + old);
+                        } catch (ObjectLacksException ignored) {}
+                        try {
                             user.addGroup(previousGroup);
-                            user.setPrimaryGroup(previousGroup.getName());
-                        } catch (ObjectLacksException | ObjectAlreadyHasException ignored) {}
+                        } catch (ObjectAlreadyHasException ignored) {}
+                        user.setPrimaryGroup(previousGroup.getName());
 
                         Message.USER_DEMOTE_SUCCESS_PROMOTE.send(sender, track.getName(), old, previousGroup.getName());
                         Message.USER_DEMOTE_SUCCESS_REMOVE.send(sender, user.getName(), old, previousGroup.getName(), previousGroup.getName());

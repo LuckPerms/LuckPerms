@@ -65,9 +65,11 @@ public class UserPromote extends UserSubCommand {
 
                         try {
                             user.unsetPermission("group." + old);
+                        } catch (ObjectLacksException ignored) {}
+                        try {
                             user.addGroup(nextGroup);
-                            user.setPrimaryGroup(nextGroup.getName());
-                        } catch (ObjectLacksException | ObjectAlreadyHasException ignored) {}
+                        } catch (ObjectAlreadyHasException ignored) {}
+                        user.setPrimaryGroup(nextGroup.getName());
 
                         Message.USER_PROMOTE_SUCCESS_PROMOTE.send(sender, track.getName(), old, nextGroup.getName());
                         Message.USER_PROMOTE_SUCCESS_REMOVE.send(sender, user.getName(), old, nextGroup.getName(), nextGroup.getName());
