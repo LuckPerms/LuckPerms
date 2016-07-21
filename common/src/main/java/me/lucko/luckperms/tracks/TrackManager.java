@@ -1,7 +1,6 @@
 package me.lucko.luckperms.tracks;
 
 import lombok.Getter;
-import me.lucko.luckperms.LuckPermsPlugin;
 
 import java.util.Map;
 import java.util.Set;
@@ -9,17 +8,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class TrackManager {
-    private final LuckPermsPlugin plugin;
 
     /**
      * A {@link Map} containing all loaded tracks
      */
     @Getter
     private final Map<String, Track> tracks = new ConcurrentHashMap<>();
-
-    public TrackManager(LuckPermsPlugin plugin) {
-        this.plugin = plugin;
-    }
 
     /**
      * Get a track object by name
@@ -84,13 +78,6 @@ public class TrackManager {
      */
     public void unloadAll() {
         tracks.clear();
-    }
-
-    /**
-     * Load all tracks from the datastore
-     */
-    public void loadAllTracks() {
-        plugin.getDatastore().loadAllTracks(success -> {});
     }
 
     /**

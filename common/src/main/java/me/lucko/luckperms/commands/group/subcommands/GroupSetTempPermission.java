@@ -56,6 +56,11 @@ public class GroupSetTempPermission extends GroupSubCommand {
         try {
             if (args.size() == 4) {
                 final String server = args.get(3).toLowerCase();
+                if (Patterns.NON_ALPHA_NUMERIC.matcher(server).find()) {
+                    Message.SERVER_INVALID_ENTRY.send(sender);
+                    return;
+                }
+
                 group.setPermission(node, b, server, duration);
                 Message.SETPERMISSION_TEMP_SERVER_SUCCESS.send(sender, node, bool, group.getName(), server, DateUtil.formatDateDiff(duration));
             } else {

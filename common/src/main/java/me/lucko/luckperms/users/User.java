@@ -1,7 +1,9 @@
 package me.lucko.luckperms.users;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
@@ -12,6 +14,8 @@ import me.lucko.luckperms.utils.PermissionObject;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@ToString(of = {"uuid"})
+@EqualsAndHashCode(of = {"uuid"}, callSuper = false)
 public abstract class User extends PermissionObject {
 
     /**
@@ -35,13 +39,13 @@ public abstract class User extends PermissionObject {
     private String primaryGroup = null;
 
     User(UUID uuid, LuckPermsPlugin plugin) {
-        super(plugin, uuid.toString());
+        super(uuid.toString(), plugin);
         this.uuid = uuid;
         this.name = null;
     }
 
     User(UUID uuid, String name, LuckPermsPlugin plugin) {
-        super(plugin, uuid.toString());
+        super(uuid.toString(), plugin);
         this.uuid = uuid;
         this.name = name;
     }
@@ -193,7 +197,8 @@ public abstract class User extends PermissionObject {
     }
 
     /**
-     * Get a {@link List} of the groups the user is a member of on a specific server with the option to include global groups or all groups
+     * Get a {@link List} of the groups the user is a member of on a specific server with the option to include global
+     * groups or all groups
      * @param server Which server to check on
      * @param excludedGroups groups to exclude (prevents circular inheritance issues)
      * @param includeGlobal Whether to include global groups
@@ -273,10 +278,5 @@ public abstract class User extends PermissionObject {
                 .collect(Collectors.toList())
         );
         return groups;
-    }
-
-    @Override
-    public String toString() {
-        return getUuid().toString();
     }
 }

@@ -34,6 +34,11 @@ public class UserUnsetTempPermission extends UserSubCommand {
         try {
             if (args.size() == 2) {
                 final String server = args.get(1).toLowerCase();
+                if (Patterns.NON_ALPHA_NUMERIC.matcher(server).find()) {
+                    Message.SERVER_INVALID_ENTRY.send(sender);
+                    return;
+                }
+
                 user.unsetPermission(node, server, true);
                 Message.UNSET_TEMP_PERMISSION_SERVER_SUCCESS.send(sender, node, user.getName(), server);
             } else {

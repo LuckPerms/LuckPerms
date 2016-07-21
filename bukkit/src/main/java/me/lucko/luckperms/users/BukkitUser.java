@@ -3,7 +3,6 @@ package me.lucko.luckperms.users;
 import lombok.Getter;
 import lombok.Setter;
 import me.lucko.luckperms.LPBukkitPlugin;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
 
@@ -31,7 +30,7 @@ public class BukkitUser extends User {
     @Override
     public void refreshPermissions() {
         plugin.doSync(() -> {
-            Player player = Bukkit.getPlayer(getUuid());
+            final Player player = plugin.getServer().getPlayer(getUuid());
             if (player == null) return;
 
             if (attachment == null) {

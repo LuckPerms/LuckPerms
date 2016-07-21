@@ -7,6 +7,7 @@ import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.users.User;
+import me.lucko.luckperms.utils.Patterns;
 
 import java.util.List;
 
@@ -33,6 +34,11 @@ public class UserRemoveGroup extends UserSubCommand {
         try {
             if (args.size() == 2) {
                 final String server = args.get(1).toLowerCase();
+                if (Patterns.NON_ALPHA_NUMERIC.matcher(server).find()) {
+                    Message.SERVER_INVALID_ENTRY.send(sender);
+                    return;
+                }
+
                 user.unsetPermission("group." + groupName, server);
                 Message.USER_REMOVEGROUP_SERVER_SUCCESS.send(sender, user.getName(), groupName, server);
             } else {

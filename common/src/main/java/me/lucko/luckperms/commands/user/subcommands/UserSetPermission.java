@@ -42,6 +42,11 @@ public class UserSetPermission extends UserSubCommand {
         try {
             if (args.size() == 3) {
                 final String server = args.get(2).toLowerCase();
+                if (Patterns.NON_ALPHA_NUMERIC.matcher(server).find()) {
+                    Message.SERVER_INVALID_ENTRY.send(sender);
+                    return;
+                }
+
                 user.setPermission(node, b, server);
                 Message.SETPERMISSION_SERVER_SUCCESS.send(sender, node, bool, user.getName(), server);
             } else {

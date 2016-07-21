@@ -33,19 +33,21 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
     @Override
     public void onEnable() {
+        getLogger().info("Loading configuration...");
         configuration = new BungeeConfig(this);
 
         // register events
         getProxy().getPluginManager().registerListener(this, new PlayerListener(this));
 
         // register commands
+        getLogger().info("Registering commands...");
         getProxy().getPluginManager().registerCommand(this, new MainCommand(new CommandManager(this)));
 
         // disable the default Bungee /perms command so it gets handled by the Bukkit plugin
         getProxy().getDisabledCommands().add("perms");
 
+        getLogger().info("Detecting storage method...");
         final String storageMethod = configuration.getStorageMethod();
-
         if (storageMethod.equalsIgnoreCase("mysql")) {
             getLogger().info("Using MySQL as storage method.");
             datastore = new MySQLDatastore(this, new MySQLConfiguration(
@@ -58,20 +60,28 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
             getLogger().info("Using Flatfile (JSON) as storage method.");
             datastore = new FlatfileDatastore(this, getDataFolder());
         } else {
-            getLogger().warning("Storage method '" + storageMethod + "' was not recognised. Using Flatfile as fallback.");
+            getLogger().severe("Storage method '" + storageMethod + "' was not recognised. Using Flatfile as fallback.");
             datastore = new FlatfileDatastore(this, getDataFolder());
         }
 
+        getLogger().info("Initialising datastore...");
         datastore.init();
 
+        getLogger().info("Loading internal permission managers...");
         userManager = new BungeeUserManager(this);
         groupManager = new GroupManager(this);
-        trackManager = new TrackManager(this);
+        trackManager = new TrackManager();
+
+        // Run update task to refresh any online users
+        getLogger().info("Scheduling Update Task to refresh any online users.");
+        runUpdateTask();
 
         int mins = getConfiguration().getSyncTime();
         if (mins > 0) {
             getProxy().getScheduler().schedule(this, new UpdateTask(this), mins, mins, TimeUnit.MINUTES);
         }
+
+        getLogger().info("Successfully loaded.");
     }
 
     @Override

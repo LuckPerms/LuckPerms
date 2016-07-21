@@ -9,6 +9,7 @@ import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.users.User;
 import me.lucko.luckperms.utils.DateUtil;
+import me.lucko.luckperms.utils.Patterns;
 
 import java.util.List;
 
@@ -53,6 +54,11 @@ public class UserAddTempGroup extends UserSubCommand {
                 try {
                     if (args.size() == 3) {
                         final String server = args.get(2).toLowerCase();
+                        if (Patterns.NON_ALPHA_NUMERIC.matcher(server).find()) {
+                            Message.SERVER_INVALID_ENTRY.send(sender);
+                            return;
+                        }
+
                         user.addGroup(group, server, duration);
                         Message.USER_ADDTEMPGROUP_SERVER_SUCCESS.send(sender, user.getName(), groupName, server,
                                 DateUtil.formatDateDiff(duration));

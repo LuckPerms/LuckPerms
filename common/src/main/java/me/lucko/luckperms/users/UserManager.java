@@ -1,6 +1,7 @@
 package me.lucko.luckperms.users;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.data.Datastore;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
@@ -10,6 +11,7 @@ import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+@RequiredArgsConstructor
 public abstract class UserManager {
 
     /**
@@ -22,10 +24,6 @@ public abstract class UserManager {
      * Reference to main plugin instance
      */
     private final LuckPermsPlugin plugin;
-
-    public UserManager(LuckPermsPlugin plugin) {
-        this.plugin = plugin;
-    }
 
     /**
      * Get a user object by UUID

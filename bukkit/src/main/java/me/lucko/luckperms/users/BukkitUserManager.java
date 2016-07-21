@@ -1,7 +1,6 @@
 package me.lucko.luckperms.users;
 
 import me.lucko.luckperms.LPBukkitPlugin;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.UUID;
@@ -22,7 +21,7 @@ public class BukkitUserManager extends UserManager {
                 BukkitUser u = (BukkitUser) user;
 
                 if (u.getAttachment() != null) {
-                    Player player = Bukkit.getPlayer(u.getUuid());
+                    Player player = plugin.getServer().getPlayer(u.getUuid());
 
                     if (player != null) {
                         player.removeAttachment(u.getAttachment());
@@ -37,7 +36,7 @@ public class BukkitUserManager extends UserManager {
 
     @Override
     public void cleanupUser(User user) {
-        if (Bukkit.getPlayer(user.getUuid()) == null) {
+        if (plugin.getServer().getPlayer(user.getUuid()) == null) {
             unloadUser(user);
         }
     }

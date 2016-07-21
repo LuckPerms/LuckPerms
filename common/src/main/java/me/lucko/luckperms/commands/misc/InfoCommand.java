@@ -6,6 +6,7 @@ import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.utils.LPConfiguration;
 
 import java.util.Collections;
 import java.util.List;
@@ -17,7 +18,9 @@ public class InfoCommand extends MainCommand {
 
     @Override
     protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
-        Message.INFO.send(sender, plugin.getVersion(), plugin.getDatastore().getName());
+        final LPConfiguration c = plugin.getConfiguration();
+        Message.INFO.send(sender, plugin.getVersion(), plugin.getDatastore().getName(), c.getServer(),
+                c.getDefaultGroupName(), c.getSyncTime(), c.getIncludeGlobalPerms());
     }
 
     @Override

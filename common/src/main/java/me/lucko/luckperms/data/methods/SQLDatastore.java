@@ -3,6 +3,7 @@ package me.lucko.luckperms.data.methods;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import lombok.AllArgsConstructor;
+import lombok.Cleanup;
 import lombok.Getter;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.data.Datastore;
@@ -57,66 +58,40 @@ abstract class SQLDatastore extends Datastore {
 
     abstract Connection getConnection() throws SQLException;
 
-    private static void close(AutoCloseable closeable) {
-        if (closeable == null) return;
-        try {
-            closeable.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     private boolean runQuery(QueryPS queryPS) {
         boolean success = false;
-
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
         try {
-            connection = getConnection();
+            @Cleanup Connection connection = getConnection();
             if (connection == null) {
                 throw new IllegalStateException("SQL connection is null");
             }
 
-            preparedStatement = connection.prepareStatement(queryPS.getQuery());
+            @Cleanup PreparedStatement preparedStatement =  connection.prepareStatement(queryPS.getQuery());
             queryPS.onRun(preparedStatement);
             preparedStatement.execute();
             success = true;
-
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            close(preparedStatement);
-            close(connection);
         }
         return success;
     }
 
     private boolean runQuery(QueryRS queryRS) {
         boolean success = false;
-
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-
         try {
-            connection = getConnection();
+            @Cleanup Connection connection = getConnection();
             if (connection == null) {
                 throw new IllegalStateException("SQL connection is null");
             }
 
-            preparedStatement = connection.prepareStatement(queryRS.getQuery());
+            @Cleanup PreparedStatement preparedStatement = connection.prepareStatement(queryRS.getQuery());
             queryRS.onRun(preparedStatement);
             preparedStatement.execute();
 
-            resultSet = preparedStatement.executeQuery();
+            @Cleanup ResultSet resultSet = preparedStatement.executeQuery();
             success = queryRS.onResult(resultSet);
-
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            close(resultSet);
-            close(preparedStatement);
-            close(connection);
         }
         return success;
     }

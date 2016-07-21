@@ -17,7 +17,9 @@ import java.util.concurrent.TimeUnit;
 
 @AllArgsConstructor
 public class PlayerListener implements Listener {
-
+    private static final TextComponent WARN_MESSAGE = new TextComponent(Util.color(
+            Message.PREFIX + "Permissions data could not be loaded. Please contact an administrator.")
+    );
     private final LPBungeePlugin plugin;
 
     @EventHandler
@@ -25,12 +27,13 @@ public class PlayerListener implements Listener {
         final ProxiedPlayer player = e.getPlayer();
         final WeakReference<ProxiedPlayer> p = new WeakReference<>(player);
 
+        // Create user async and at post login. We're not concerned if data couldn't be loaded, the player won't be kicked.
         plugin.getDatastore().loadOrCreateUser(player.getUniqueId(), player.getName(), success -> {
             if (!success) {
                 plugin.getProxy().getScheduler().schedule(plugin, () -> {
                     final ProxiedPlayer pl = p.get();
                     if (pl != null) {
-                        pl.sendMessage(new TextComponent(Util.color(Message.PREFIX + "Permissions data could not be loaded. Please contact an administrator.")));
+                        pl.sendMessage(WARN_MESSAGE);
                     }
                 }, 3, TimeUnit.SECONDS);
 
@@ -48,10 +51,10 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onPlayerQuit(PlayerDisconnectEvent e) {
-        ProxiedPlayer player = e.getPlayer();
+        final ProxiedPlayer player = e.getPlayer();
 
         // Unload the user from memory when they disconnect
-        User user = plugin.getUserManager().getUser(player.getUniqueId());
+        final User user = plugin.getUserManager().getUser(player.getUniqueId());
         plugin.getUserManager().unloadUser(user);
     }
 }

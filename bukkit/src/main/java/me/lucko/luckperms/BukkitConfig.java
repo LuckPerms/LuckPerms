@@ -7,66 +7,49 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import java.io.File;
 import java.io.IOException;
 
-public class BukkitConfig implements LPConfiguration {
-    private final LPBukkitPlugin plugin;
+class BukkitConfig extends LPConfiguration<LPBukkitPlugin> {
     private YamlConfiguration configuration;
 
-    public BukkitConfig(LPBukkitPlugin plugin) {
-        this.plugin = plugin;
-        create();
+    BukkitConfig(LPBukkitPlugin plugin) {
+        super(plugin, "global", true, "sqlite");
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    private void create() {
-        File configFile = new File(plugin.getDataFolder(), "config.yml");
+    @Override
+    protected void init() {
+        File configFile = new File(getPlugin().getDataFolder(), "config.yml");
 
         if (!configFile.exists()) {
             configFile.getParentFile().mkdirs();
-            plugin.saveResource("config.yml", false);
+            getPlugin().saveResource("config.yml", false);
         }
 
         configuration = new YamlConfiguration();
 
         try {
             configuration.load(configFile);
-
         } catch (InvalidConfigurationException | IOException e) {
             e.printStackTrace();
         }
     }
 
     @Override
-    public String getServer() {
-        return configuration.getString("server", "global");
+    protected void set(String path, Object value) {
+        configuration.set(path, value);
     }
 
     @Override
-    public int getSyncTime() {
-        return configuration.getInt("sql.sync-minutes", 3);
+    protected String getString(String path, String def) {
+        return configuration.getString(path, def);
     }
 
     @Override
-    public String getDefaultGroupNode() {
-        return "group." + configuration.getString("default-group", "default");
+    protected int getInt(String path, int def) {
+        return configuration.getInt(path, def);
     }
 
     @Override
-    public String getDefaultGroupName() {
-        return configuration.getString("default-group", "default");
-    }
-
-    @Override
-    public boolean getIncludeGlobalPerms() {
-        return configuration.getBoolean("include-global", true);
-    }
-
-    @Override
-    public String getDatabaseValue(String value) {
-        return configuration.getString("sql." + value);
-    }
-
-    @Override
-    public String getStorageMethod() {
-        return configuration.getString("storage-method", "sqlite");
+    protected boolean getBoolean(String path, boolean def) {
+        return configuration.getBoolean(path, def);
     }
 }

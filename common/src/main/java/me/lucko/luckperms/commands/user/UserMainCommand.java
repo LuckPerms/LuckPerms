@@ -7,6 +7,7 @@ import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.commands.Util;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.users.User;
+import me.lucko.luckperms.utils.Patterns;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +55,12 @@ public class UserMainCommand extends MainCommand {
         }
 
         final String user = args.get(0);
+
+        if (Patterns.NON_USERNAME.matcher(user).find()) {
+            Message.USER_INVALID_ENTRY.send(sender, user);
+            return;
+        }
+
         UUID u = Util.parseUuid(user);
         if (u != null) {
             runSub(plugin, sender, u, sub, strippedArgs, label);

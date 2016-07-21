@@ -10,30 +10,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 
-public class BungeeConfig implements LPConfiguration {
-    private final LPBungeePlugin plugin;
+class BungeeConfig extends LPConfiguration<LPBungeePlugin> {
     private Configuration configuration;
 
-    public BungeeConfig(LPBungeePlugin plugin) {
-        this.plugin = plugin;
-        reload();
-    }
-
-    private void reload() {
-        try {
-            configuration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(makeFile("config.yml"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    BungeeConfig(LPBungeePlugin plugin) {
+        super(plugin, "bungee", false, "flatfile");
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     private File makeFile(String file) throws IOException {
-        File cfg = new File(plugin.getDataFolder(), file);
+        File cfg = new File(getPlugin().getDataFolder(), file);
 
         if (!cfg.exists()) {
-            plugin.getDataFolder().mkdir();
-            try (InputStream is = plugin.getResourceAsStream(file)) {
+            getPlugin().getDataFolder().mkdir();
+            try (InputStream is = getPlugin().getResourceAsStream(file)) {
                 Files.copy(is, cfg.toPath());
             }
         }
@@ -42,37 +32,31 @@ public class BungeeConfig implements LPConfiguration {
     }
 
     @Override
-    public String getServer() {
-        return configuration.getString("server", "bungee");
+    protected void init() {
+        try {
+            configuration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(makeFile("config.yml"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
-    public int getSyncTime() {
-        return configuration.getInt("sql.sync-minutes", 3);
+    protected void set(String path, Object value) {
+        configuration.set(path, value);
     }
 
     @Override
-    public String getDefaultGroupNode() {
-        return "group." + configuration.getString("default-group", "default");
+    protected String getString(String path, String def) {
+        return configuration.getString(path, def);
     }
 
     @Override
-    public String getDefaultGroupName() {
-        return configuration.getString("default-group", "default");
+    protected int getInt(String path, int def) {
+        return configuration.getInt(path, def);
     }
 
     @Override
-    public boolean getIncludeGlobalPerms() {
-        return configuration.getBoolean("include-global", false);
-    }
-
-    @Override
-    public String getDatabaseValue(String value) {
-        return configuration.getString("sql." + value);
-    }
-
-    @Override
-    public String getStorageMethod() {
-        return configuration.getString("storage-method", "sqlite");
+    protected boolean getBoolean(String path, boolean def) {
+        return configuration.getBoolean(path, def);
     }
 }

@@ -1,5 +1,7 @@
 package me.lucko.luckperms.commands;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.utils.DateUtil;
 
@@ -7,9 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Util {
-
-    private Util() {}
 
     public static void sendPluginMessage(Sender sender, String message) {
         sender.sendMessage(color(Message.PREFIX + message));

@@ -7,6 +7,7 @@ import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.groups.Group;
+import me.lucko.luckperms.utils.Patterns;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,6 +30,11 @@ public class DeleteGroup extends MainCommand {
 
         if (groupName.equalsIgnoreCase(plugin.getConfiguration().getDefaultGroupName())) {
             Message.DELETE_GROUP_ERROR_DEFAULT.send(sender);
+            return;
+        }
+
+        if (Patterns.NON_ALPHA_NUMERIC.matcher(groupName).find()) {
+            Message.GROUP_INVALID_ENTRY.send(sender);
             return;
         }
 

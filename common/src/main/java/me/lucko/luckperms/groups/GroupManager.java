@@ -1,11 +1,13 @@
 package me.lucko.luckperms.groups;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import me.lucko.luckperms.LuckPermsPlugin;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@RequiredArgsConstructor
 public class GroupManager {
     private final LuckPermsPlugin plugin;
 
@@ -14,10 +16,6 @@ public class GroupManager {
      */
     @Getter
     private final Map<String, Group> groups = new ConcurrentHashMap<>();
-
-    public GroupManager(LuckPermsPlugin plugin) {
-        this.plugin = plugin;
-    }
 
     /**
      * Get a group object by name
@@ -73,19 +71,6 @@ public class GroupManager {
      */
     public void unloadAll() {
         groups.clear();
-    }
-
-    /**
-     * Load all groups from the datastore
-     */
-    public void loadAllGroups() {
-        plugin.getDatastore().loadAllGroups(success -> {
-            String defaultGroup = plugin.getConfiguration().getDefaultGroupName();
-
-            if (!groups.keySet().contains(defaultGroup)) {
-                plugin.getDatastore().createAndLoadGroup(defaultGroup, success1 -> {});
-            }
-        });
     }
 
     /**

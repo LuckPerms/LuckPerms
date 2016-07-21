@@ -147,7 +147,8 @@ public class CommandManager {
                 return mains.stream().map(MainCommand::getName).map(String::toLowerCase).collect(Collectors.toList());
             }
 
-            return mains.stream().map(MainCommand::getName).map(String::toLowerCase).filter(s -> s.startsWith(args.get(0).toLowerCase())).collect(Collectors.toList());
+            return mains.stream().map(MainCommand::getName).map(String::toLowerCase)
+                    .filter(s -> s.startsWith(args.get(0).toLowerCase())).collect(Collectors.toList());
         }
 
         Optional<MainCommand> o = mains.stream().filter(m -> m.getName().equalsIgnoreCase(args.get(0))).limit(1).findAny();

@@ -1,52 +1,46 @@
 package me.lucko.luckperms.utils;
 
+import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.RequiredArgsConstructor;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.groups.Group;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
  * Represents an object that can hold permissions
  * For example a User or a Group
  */
-@Getter
+@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class PermissionObject {
 
     /**
      * The UUID of the user / name of the group.
      * Used to prevent circular inheritance issues
      */
+    @Getter
     private final String objectName;
 
     /**
      * Reference to the main plugin instance
      */
+    @Getter(AccessLevel.PROTECTED)
     private final LuckPermsPlugin plugin;
-
-    /**
-     * If false, only permissions specific to the server are applied
-     */
-    @Setter
-    private boolean includeGlobalPermissions;
 
     /**
      * The user/group's permissions
      */
-    private Map<String, Boolean> nodes = new HashMap<>();
-
-    protected PermissionObject(LuckPermsPlugin plugin, String objectName) {
-        this.objectName = objectName;
-        this.plugin = plugin;
-        this.includeGlobalPermissions = plugin.getConfiguration().getIncludeGlobalPerms();
-    }
+    @Getter
+    private Map<String, Boolean> nodes = new ConcurrentHashMap<>();
 
     public void setNodes(Map<String, Boolean> nodes) {
-        this.nodes = nodes;
+        this.nodes.clear();
+        this.nodes.putAll(nodes);
         auditTemporaryPermissions();
     }
 
@@ -81,7 +75,7 @@ public abstract class PermissionObject {
      */
     public boolean hasPermission(String node, boolean b) {
         if (node.startsWith("global/")) node = node.replace("global/", "");
-        return hasPermission(getNodes(), node, b);
+        return hasPermission(this.nodes, node, b);
     }
 
     /**
@@ -156,7 +150,7 @@ public abstract class PermissionObject {
         if (hasPermission(node, value)) {
             throw new ObjectAlreadyHasException();
         }
-        getNodes().put(node, value);
+        this.nodes.put(node, value);
     }
 
     /**
@@ -201,26 +195,21 @@ public abstract class PermissionObject {
      */
     public void unsetPermission(String node, boolean temporary) throws ObjectLacksException {
         if (node.startsWith("global/")) node = node.replace("global/", "");
-        String match = null;
+        final String fNode = node;
+        Optional<String> match = Optional.empty();
 
-        if (!temporary) {
-            if (getNodes().containsKey(node)) {
-                match = node;
-            }
+        if (temporary) {
+            match = this.nodes.keySet().stream()
+                    .filter(n -> n.contains("$")).filter(n -> Patterns.TEMP_SPLIT.split(n)[0].equalsIgnoreCase(fNode))
+                    .findFirst();
         } else {
-            for (String n : getNodes().keySet()) {
-                if (n.contains("$")) {
-                    String[] parts = Patterns.TEMP_SPLIT.split(n);
-                    if (parts[0].equalsIgnoreCase(node)) {
-                        match = n;
-                        break;
-                    }
-                }
+            if (this.nodes.containsKey(fNode)) {
+                match = Optional.of(fNode);
             }
         }
 
-        if (match != null) {
-            getNodes().remove(match);
+        if (match.isPresent()) {
+            this.nodes.remove(match.get());
         } else {
             throw new ObjectLacksException();
         }
@@ -263,7 +252,7 @@ public abstract class PermissionObject {
      * @return a {@link Map} of the permissions
      */
     public Map<String, Boolean> getLocalPermissions(String server, List<String> excludedGroups) {
-        return getPermissions(server, excludedGroups, includeGlobalPermissions);
+        return getPermissions(server, excludedGroups, plugin.getConfiguration().getIncludeGlobalPerms());
     }
 
     /**
@@ -271,19 +260,12 @@ public abstract class PermissionObject {
      * @return a map of temporary nodes
      */
     public Map<Map.Entry<String, Boolean>, Long> getTemporaryNodes() {
-        Map<Map.Entry<String, Boolean>, Long> temps = new HashMap<>();
-
-        for (Map.Entry<String, Boolean> e : getNodes().entrySet()) {
-            if (!e.getKey().contains("$")) {
-                continue;
-            }
-
-            String[] parts = Patterns.TEMP_SPLIT.split(e.getKey());
+        return this.nodes.entrySet().stream().filter(e -> e.getKey().contains("$")).map(e -> {
+            final String[] parts = Patterns.TEMP_SPLIT.split(e.getKey());
             final long expiry = Long.parseLong(parts[1]);
-            temps.put(new AbstractMap.SimpleEntry<>(parts[0], e.getValue()), expiry);
-        }
+            return new AbstractMap.SimpleEntry<Map.Entry<String, Boolean>, Long>(new AbstractMap.SimpleEntry<>(parts[0], e.getValue()), expiry);
 
-        return temps;
+        }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     /**
@@ -291,37 +273,18 @@ public abstract class PermissionObject {
      * @return a map of permanent nodes
      */
     public Map<String, Boolean> getPermanentNodes() {
-        Map<String, Boolean> permas = new HashMap<>();
-
-        for (Map.Entry<String, Boolean> e : getNodes().entrySet()) {
-            if (e.getKey().contains("$")) {
-                continue;
-            }
-
-            permas.put(e.getKey(), e.getValue());
-        }
-
-        return permas;
+        return this.nodes.entrySet().stream().filter(e -> !e.getKey().contains("$"))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     /**
      * Removes temporary permissions that have expired
-     * @return true if permissions had expired and had to be removed
      */
-    public boolean auditTemporaryPermissions() {
-        Set<String> toRemove = getNodes().keySet().stream()
+    public void auditTemporaryPermissions() {
+        this.nodes.keySet().stream()
                 .filter(s -> s.contains("$"))
                 .filter(s -> DateUtil.shouldExpire(Long.parseLong(Patterns.TEMP_SPLIT.split(s)[1])))
-                .collect(Collectors.toSet());
-        toRemove.forEach(s -> getNodes().remove(s));
-        return !toRemove.isEmpty();
-    }
-
-    private String stripTime(String s) {
-        if (s.contains("$")) {
-            return Patterns.TEMP_SPLIT.split(s)[0];
-        }
-        return s;
+                .forEach(s -> this.nodes.remove(s));
     }
 
     protected Map<String, Boolean> convertTemporaryPerms() {
@@ -330,7 +293,7 @@ public abstract class PermissionObject {
         Map<String, Boolean> nodes = new HashMap<>();
         Map<String, Boolean> tempNodes = new HashMap<>();
 
-        for (Map.Entry<String, Boolean> e : getNodes().entrySet()) {
+        for (Map.Entry<String, Boolean> e : this.nodes.entrySet()) {
             if (e.getKey().contains("$")) {
                 tempNodes.put(e.getKey(), e.getValue());
             } else {
@@ -468,5 +431,12 @@ public abstract class PermissionObject {
         }
 
         return perms;
+    }
+
+    private static String stripTime(String s) {
+        if (s.contains("$")) {
+            return Patterns.TEMP_SPLIT.split(s)[0];
+        }
+        return s;
     }
 }

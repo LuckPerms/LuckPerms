@@ -8,6 +8,7 @@ import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.utils.DateUtil;
+import me.lucko.luckperms.utils.Patterns;
 
 import java.util.List;
 
@@ -46,6 +47,11 @@ public class GroupSetTempInherit extends GroupSubCommand {
                 try {
                     if (args.size() == 3) {
                         final String server = args.get(2).toLowerCase();
+                        if (Patterns.NON_ALPHA_NUMERIC.matcher(server).find()) {
+                            Message.SERVER_INVALID_ENTRY.send(sender);
+                            return;
+                        }
+
                         group.setPermission("group." + groupName, true, server, duration);
                         Message.GROUP_SET_TEMP_INHERIT_SERVER_SUCCESS.send(sender, group.getName(), groupName, server,
                                 DateUtil.formatDateDiff(duration));

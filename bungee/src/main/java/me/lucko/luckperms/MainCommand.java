@@ -16,7 +16,6 @@ class MainCommand extends Command implements TabExecutor {
     public MainCommand(CommandManager manager) {
         super("luckpermsbungee", null, "bperms", "lpb", "bpermissions", "bp", "bperm");
         this.manager = manager;
-
     }
 
     @Override

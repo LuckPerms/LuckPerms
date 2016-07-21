@@ -6,6 +6,7 @@ import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.groups.Group;
+import me.lucko.luckperms.utils.Patterns;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +52,12 @@ public class GroupMainCommand extends MainCommand {
         }
 
         final String groupName = args.get(0).toLowerCase();
+
+        if (Patterns.NON_ALPHA_NUMERIC.matcher(groupName).find()) {
+            Message.GROUP_INVALID_ENTRY.send(sender);
+            return;
+        }
+
         plugin.getDatastore().loadGroup(groupName, success -> {
             if (!success) {
                 Message.GROUP_NOT_FOUND.send(sender);

@@ -1,6 +1,9 @@
 package me.lucko.luckperms.tracks;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.groups.Group;
@@ -9,6 +12,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@ToString(of = {"name"})
+@EqualsAndHashCode(of = {"name"}, callSuper = false)
+@RequiredArgsConstructor
 public class Track {
 
     /**
@@ -20,11 +26,7 @@ public class Track {
     /**
      * The groups within this track
      */
-    private List<String> groups = new ArrayList<>();
-
-    Track(String name) {
-        this.name = name;
-    }
+    private List<String> groups = Collections.synchronizedList(new ArrayList<>());
 
     /**
      * Gets an ordered list of the groups on this track
@@ -165,12 +167,6 @@ public class Track {
         groups.clear();
     }
 
-    private void assertContains(Group g) throws ObjectLacksException {
-        if (!containsGroup(g)) {
-            throw new ObjectLacksException();
-        }
-    }
-
     private void assertNotContains(Group g) throws ObjectAlreadyHasException {
         if (containsGroup(g)) {
             throw new ObjectAlreadyHasException();
@@ -182,16 +178,4 @@ public class Track {
             throw new ObjectLacksException();
         }
     }
-
-    private void assertNotContains(String g) throws ObjectAlreadyHasException {
-        if (containsGroup(g)) {
-            throw new ObjectAlreadyHasException();
-        }
-    }
-
-    @Override
-    public String toString() {
-        return name;
-    }
-
 }

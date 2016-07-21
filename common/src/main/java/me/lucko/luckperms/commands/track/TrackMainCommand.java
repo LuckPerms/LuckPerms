@@ -6,6 +6,7 @@ import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.tracks.Track;
+import me.lucko.luckperms.utils.Patterns;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +52,12 @@ public class TrackMainCommand extends MainCommand {
         }
 
         final String trackName = args.get(0).toLowerCase();
+
+        if (Patterns.NON_ALPHA_NUMERIC.matcher(trackName).find()) {
+            Message.TRACK_INVALID_ENTRY.send(sender);
+            return;
+        }
+
         plugin.getDatastore().loadTrack(trackName, success -> {
             if (!success) {
                 Message.TRACK_NOT_FOUND.send(sender);

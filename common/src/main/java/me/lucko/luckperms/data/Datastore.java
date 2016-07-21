@@ -1,6 +1,8 @@
 package me.lucko.luckperms.data;
 
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.groups.Group;
@@ -9,6 +11,7 @@ import me.lucko.luckperms.users.User;
 
 import java.util.UUID;
 
+@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class Datastore {
     protected final LuckPermsPlugin plugin;
 
@@ -17,13 +20,7 @@ public abstract class Datastore {
 
     @Getter
     @Setter
-    private boolean acceptingLogins;
-
-    protected Datastore(LuckPermsPlugin plugin, String name) {
-        this.plugin = plugin;
-        this.name = name;
-        this.acceptingLogins = false;
-    }
+    private boolean acceptingLogins = false;
 
     /**
      * Execute a runnable asynchronously

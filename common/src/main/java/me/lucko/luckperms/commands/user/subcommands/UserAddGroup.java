@@ -8,6 +8,7 @@ import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.users.User;
+import me.lucko.luckperms.utils.Patterns;
 
 import java.util.List;
 
@@ -38,6 +39,11 @@ public class UserAddGroup extends UserSubCommand {
                 try {
                     if (args.size() == 2) {
                         final String server = args.get(1).toLowerCase();
+                        if (Patterns.NON_ALPHA_NUMERIC.matcher(server).find()) {
+                            Message.SERVER_INVALID_ENTRY.send(sender);
+                            return;
+                        }
+
                         user.addGroup(group, server);
                         Message.USER_ADDGROUP_SERVER_SUCCESS.send(sender, user.getName(), groupName, server);
                     } else {

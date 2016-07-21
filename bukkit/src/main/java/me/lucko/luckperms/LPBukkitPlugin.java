@@ -38,6 +38,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
     @Override
     public void onEnable() {
+        getLogger().info("Loading configuration...");
         configuration = new BukkitConfig(this);
 
         // register events
@@ -45,14 +46,15 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         pm.registerEvents(new PlayerListener(this), this);
 
         // register commands
+        getLogger().info("Registering commands...");
         CommandManagerBukkit commandManager = new CommandManagerBukkit(this);
         PluginCommand main = getServer().getPluginCommand("luckperms");
         main.setExecutor(commandManager);
         main.setTabCompleter(commandManager);
         main.setAliases(Arrays.asList("perms", "lp", "permissions", "p", "perm"));
 
+        getLogger().info("Detecting storage method...");
         final String storageMethod = configuration.getStorageMethod();
-
         if (storageMethod.equalsIgnoreCase("mysql")) {
             getLogger().info("Using MySQL as storage method.");
             datastore = new MySQLDatastore(this, new MySQLConfiguration(
@@ -68,17 +70,20 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
             getLogger().info("Using Flatfile (JSON) as storage method.");
             datastore = new FlatfileDatastore(this, getDataFolder());
         } else {
-            getLogger().warning("Storage method '" + storageMethod + "' was not recognised. Using SQLite as fallback.");
+            getLogger().severe("Storage method '" + storageMethod + "' was not recognised. Using SQLite as fallback.");
             datastore = new SQLiteDatastore(this, new File(getDataFolder(), "luckperms.sqlite"));
         }
 
+        getLogger().info("Initialising datastore...");
         datastore.init();
 
+        getLogger().info("Loading internal permission managers...");
         userManager = new BukkitUserManager(this);
         groupManager = new GroupManager(this);
-        trackManager = new TrackManager(this);
+        trackManager = new TrackManager();
 
         // Run update task to refresh any online users
+        getLogger().info("Scheduling Update Task to refresh any online users.");
         runUpdateTask();
 
         int mins = getConfiguration().getSyncTime();
@@ -88,13 +93,20 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         }
 
         // Provide vault support
-        if (getServer().getPluginManager().isPluginEnabled("Vault")) {
-            VaultHook.hook(this);
-            getLogger().info("Registered Vault permission & chat hook.");
-        } else {
-            getLogger().info("Vault not found.");
+        getLogger().info("Attempting to hook into Vault...");
+        try {
+            if (getServer().getPluginManager().isPluginEnabled("Vault")) {
+                VaultHook.hook(this);
+                getLogger().info("Registered Vault permission & chat hook.");
+            } else {
+                getLogger().info("Vault not found.");
+            }
+        } catch (Exception e) {
+            getLogger().severe("Error occurred whilst hooking into Vault.");
+            e.printStackTrace();
         }
 
+        getLogger().info("Successfully loaded.");
     }
 
     @Override

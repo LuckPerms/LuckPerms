@@ -16,13 +16,14 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 @AllArgsConstructor
 public class PlayerListener implements Listener {
+    private static final String KICK_MESSAGE = Util.color(Message.PREFIX + "User data could not be loaded. Please contact an administrator.");
     private final LPBukkitPlugin plugin;
 
     @EventHandler
     public void onPlayerPreLogin(AsyncPlayerPreLoginEvent e) {
         if (!plugin.getDatastore().isAcceptingLogins()) {
-            e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
-                    Util.color(Message.PREFIX + "Error whilst validating login with the network. \nPlease contact an administrator."));
+            // Datastore is disabled, prevent players from joining the server
+            e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, KICK_MESSAGE);
             return;
         }
         plugin.getDatastore().loadOrCreateUser(e.getUniqueId(), e.getName());
@@ -30,12 +31,11 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onPlayerLogin(PlayerLoginEvent e) {
-        Player player = e.getPlayer();
-        User user = plugin.getUserManager().getUser(player.getUniqueId());
+        final Player player = e.getPlayer();
+        final User user = plugin.getUserManager().getUser(player.getUniqueId());
 
         if (user == null) {
-            e.disallow(PlayerLoginEvent.Result.KICK_OTHER,
-                    Util.color(Message.PREFIX + "User data could not be loaded. Please contact an administrator."));
+            e.disallow(PlayerLoginEvent.Result.KICK_OTHER, KICK_MESSAGE);
             return;
         }
 
@@ -52,7 +52,7 @@ public class PlayerListener implements Listener {
         // Save UUID data for the player
         plugin.getDatastore().saveUUIDData(e.getPlayer().getName(), e.getPlayer().getUniqueId(), success -> {});
 
-        User user = plugin.getUserManager().getUser(e.getPlayer().getUniqueId());
+        final User user = plugin.getUserManager().getUser(e.getPlayer().getUniqueId());
         if (user != null) {
             // Refresh permissions again
             user.refreshPermissions();
@@ -62,10 +62,10 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent e) {
-        Player player = e.getPlayer();
+        final Player player = e.getPlayer();
 
         // Unload the user from memory when they disconnect
-        User user = plugin.getUserManager().getUser(player.getUniqueId());
+        final User user = plugin.getUserManager().getUser(player.getUniqueId());
         plugin.getUserManager().unloadUser(user);
     }
 

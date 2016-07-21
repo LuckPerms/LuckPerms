@@ -52,9 +52,11 @@ public enum Message {
 
     GROUP_USE_INHERIT("Use the setinherit command instead of specifying the node.", true),
     GROUP_USE_UNINHERIT("Use the unsetinherit command instead of specifying the node.", true),
-    GROUP_INVALID_ENTRY("Group names can only contain alphanumeric charcters.", true),
+    GROUP_INVALID_ENTRY("Group names can only contain alphanumeric characters.", true),
 
-    TRACK_INVALID_ENTRY("Track names can only contain alphanumeric charcters.", true),
+    TRACK_INVALID_ENTRY("Track names can only contain alphanumeric characters.", true),
+
+    SERVER_INVALID_ENTRY("Server names can only contain alphanumeric characters.", true),
 
 
     /**
@@ -93,7 +95,11 @@ public enum Message {
     INFO(
             PREFIX + "&6Running &bLuckPerms %s&6." + "\n" +
             PREFIX + "&eAuthor: &6Luck" + "\n" +
-            PREFIX + "&eStorage Method: &6%s",
+            PREFIX + "&eStorage Method: &6%s" + "\n" +
+            PREFIX + "&eServer Name: &6%s" + "\n" +
+            PREFIX + "&eDefault Group: &6%s" + "\n" +
+            PREFIX + "&eSync Interval: &6%s minutes" + "\n" +
+            PREFIX + "&eInclude Global Perms: &6%s",
             false
     ),
     DEBUG(

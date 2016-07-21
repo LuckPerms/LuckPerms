@@ -2,6 +2,7 @@ package me.lucko.luckperms.data.methods;
 
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import lombok.Cleanup;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.data.Datastore;
 import me.lucko.luckperms.groups.Group;
@@ -31,59 +32,30 @@ public class FlatfileDatastore extends Datastore {
 
     private boolean doWrite(File file, WriteOperation writeOperation) {
         boolean success = false;
-
-        FileWriter fileWriter = null;
-        BufferedWriter bufferedWriter = null;
-        JsonWriter jsonWriter = null;
-
         try {
-            fileWriter = new FileWriter(file);
-            bufferedWriter = new BufferedWriter(fileWriter);
-            jsonWriter = new JsonWriter(bufferedWriter);
+            @Cleanup FileWriter fileWriter = new FileWriter(file);
+            @Cleanup BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+            @Cleanup JsonWriter jsonWriter = new JsonWriter(bufferedWriter);
             jsonWriter.setIndent("    ");
             success = writeOperation.onRun(jsonWriter);
             jsonWriter.flush();
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            close(jsonWriter);
-            close(bufferedWriter);
-            close(fileWriter);
         }
-
         return success;
     }
 
     private boolean doRead(File file, ReadOperation readOperation) {
         boolean success = false;
-
-        FileReader fileReader = null;
-        BufferedReader bufferedReader = null;
-        JsonReader jsonReader = null;
-
         try {
-            fileReader = new FileReader(file);
-            bufferedReader = new BufferedReader(fileReader);
-            jsonReader = new JsonReader(bufferedReader);
+            @Cleanup FileReader fileReader = new FileReader(file);
+            @Cleanup BufferedReader bufferedReader = new BufferedReader(fileReader);
+            @Cleanup JsonReader jsonReader = new JsonReader(bufferedReader);
             success = readOperation.onRun(jsonReader);
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            close(jsonReader);
-            close(bufferedReader);
-            close(fileReader);
         }
-
         return success;
-    }
-
-    private static void close(AutoCloseable closeable) {
-        if (closeable == null) return;
-        try {
-            closeable.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
@@ -499,12 +471,9 @@ public class FlatfileDatastore extends Datastore {
     private Map<String, String> getUUIDCache() {
         Map<String, String> cache = new HashMap<>();
 
-        FileReader fileReader = null;
-        BufferedReader bufferedReader = null;
-
         try {
-            fileReader = new FileReader(uuidData);
-            bufferedReader = new BufferedReader(fileReader);
+            @Cleanup FileReader fileReader = new FileReader(uuidData);
+            @Cleanup BufferedReader bufferedReader = new BufferedReader(fileReader);
 
             Properties props = new Properties();
             props.load(bufferedReader);
@@ -514,21 +483,14 @@ public class FlatfileDatastore extends Datastore {
 
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            close(bufferedReader);
-            close(fileReader);
         }
-
         return cache;
     }
 
     private void saveUUIDCache(Map<String, String> cache) {
-        FileWriter fileWriter = null;
-        BufferedWriter bufferedWriter = null;
-
         try {
-            fileWriter = new FileWriter(uuidData);
-            bufferedWriter = new BufferedWriter(fileWriter);
+            @Cleanup FileWriter fileWriter = new FileWriter(uuidData);
+            @Cleanup BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
 
             Properties properties = new Properties();
             properties.putAll(cache);
@@ -536,9 +498,6 @@ public class FlatfileDatastore extends Datastore {
 
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            close(bufferedWriter);
-            close(fileWriter);
         }
     }
 

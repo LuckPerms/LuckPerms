@@ -1,9 +1,13 @@
 package me.lucko.luckperms.groups;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.ToString;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.utils.PermissionObject;
 
+@ToString(of = {"name"})
+@EqualsAndHashCode(of = {"name"}, callSuper = false)
 public class Group extends PermissionObject {
 
     /**
@@ -13,7 +17,7 @@ public class Group extends PermissionObject {
     private final String name;
 
     Group(String name, LuckPermsPlugin plugin) {
-        super(plugin, name);
+        super(name, plugin);
         this.name = name;
     }
 
@@ -22,10 +26,5 @@ public class Group extends PermissionObject {
      */
     public void clearNodes() {
         getNodes().clear();
-    }
-
-    @Override
-    public String toString() {
-        return getName();
     }
 }
