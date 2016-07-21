@@ -1,6 +1,8 @@
 package me.lucko.luckperms;
 
 import lombok.Getter;
+import me.lucko.luckperms.api.LuckPermsApi;
+import me.lucko.luckperms.api.implementation.ApiProvider;
 import me.lucko.luckperms.data.Datastore;
 import me.lucko.luckperms.data.MySQLConfiguration;
 import me.lucko.luckperms.data.methods.FlatfileDatastore;
@@ -18,6 +20,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -28,7 +31,7 @@ import java.util.stream.Collectors;
 
 @Getter
 public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
-    public static final String VERSION = "v1.2";
+    public static final String VERSION = "v1.3";
 
     private LPConfiguration configuration;
     private UserManager userManager;
@@ -84,7 +87,11 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
         // Run update task to refresh any online users
         getLogger().info("Scheduling Update Task to refresh any online users.");
-        runUpdateTask();
+        try {
+            new UpdateTask(this).run();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         int mins = getConfiguration().getSyncTime();
         if (mins > 0) {
@@ -106,12 +113,22 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
             e.printStackTrace();
         }
 
+        getLogger().info("Registering API...");
+        final ApiProvider provider = new ApiProvider(this);
+        LuckPerms.registerProvider(provider);
+        getServer().getServicesManager().register(LuckPermsApi.class, provider, this, ServicePriority.Normal);
+
         getLogger().info("Successfully loaded.");
     }
 
     @Override
     public void onDisable() {
+        getLogger().info("Closing datastore...");
         datastore.shutdown();
+
+        getLogger().info("Unregistering API...");
+        LuckPerms.unregisterProvider();
+        getServer().getServicesManager().unregisterAll(this);
     }
 
     @Override

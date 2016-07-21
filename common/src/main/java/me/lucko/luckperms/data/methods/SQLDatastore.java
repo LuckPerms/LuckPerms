@@ -66,7 +66,7 @@ abstract class SQLDatastore extends Datastore {
                 throw new IllegalStateException("SQL connection is null");
             }
 
-            @Cleanup PreparedStatement preparedStatement =  connection.prepareStatement(queryPS.getQuery());
+            @Cleanup PreparedStatement preparedStatement = connection.prepareStatement(queryPS.getQuery());
             queryPS.onRun(preparedStatement);
             preparedStatement.execute();
             success = true;
@@ -389,6 +389,8 @@ abstract class SQLDatastore extends Datastore {
                 preparedStatement.setString(1, track.getName());
             }
         });
+
+        if (success) plugin.getTrackManager().unloadTrack(track);
         return success;
     }
 

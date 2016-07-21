@@ -1,11 +1,10 @@
 package me.lucko.luckperms.utils;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import lombok.experimental.UtilityClass;
 
 import java.util.regex.Pattern;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@UtilityClass
 public class Patterns {
     public static final Pattern SERVER_SPLIT = Pattern.compile("\\/");
     public static final Pattern TEMP_SPLIT = Pattern.compile("\\$");

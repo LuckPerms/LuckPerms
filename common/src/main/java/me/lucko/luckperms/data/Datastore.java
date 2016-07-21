@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.api.data.Callback;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.tracks.Track;
 import me.lucko.luckperms.users.User;
@@ -39,6 +40,10 @@ public abstract class Datastore {
     }
 
     private void runCallback(boolean result, Callback callback) {
+        doSync(() -> callback.onComplete(result));
+    }
+
+    private void runCallback(UUID result, Callback.GetUUID callback) {
         doSync(() -> callback.onComplete(result));
     }
 
@@ -125,15 +130,7 @@ public abstract class Datastore {
         doAsync(() -> runCallback(saveUUIDData(username, uuid), callback));
     }
 
-    public void getUUID(String username, GetUUIDCallback callback) {
-        doAsync(() -> doSync(() -> callback.onComplete(getUUID(username))));
-    }
-
-    public interface Callback {
-        void onComplete(boolean success);
-    }
-
-    public interface GetUUIDCallback {
-        void onComplete(UUID uuid);
+    public void getUUID(String username, Callback.GetUUID callback) {
+        doAsync(() -> runCallback(getUUID(username), callback));
     }
 }

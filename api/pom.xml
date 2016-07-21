@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>luckperms-common</artifactId>
+    <artifactId>luckperms-api</artifactId>
     <build>
         <plugins>
             <plugin>
@@ -23,15 +23,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <dependencies>
-        <!-- LuckPerms API -->
-        <dependency>
-            <groupId>me.lucko</groupId>
-            <artifactId>luckperms-api</artifactId>
-            <version>${project.parent.version}</version>
-            <scope>compile</scope>
-        </dependency>
-    </dependencies>
-
 </project>

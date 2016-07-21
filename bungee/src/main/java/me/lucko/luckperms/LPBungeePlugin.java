@@ -1,6 +1,7 @@
 package me.lucko.luckperms;
 
 import lombok.Getter;
+import me.lucko.luckperms.api.implementation.ApiProvider;
 import me.lucko.luckperms.commands.CommandManager;
 import me.lucko.luckperms.data.Datastore;
 import me.lucko.luckperms.data.MySQLConfiguration;
@@ -23,7 +24,7 @@ import java.util.stream.Collectors;
 
 @Getter
 public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
-    public static final String VERSION = "v1.2";
+    public static final String VERSION = "v1.3";
 
     private LPConfiguration configuration;
     private UserManager userManager;
@@ -74,19 +75,30 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
         // Run update task to refresh any online users
         getLogger().info("Scheduling Update Task to refresh any online users.");
-        runUpdateTask();
+        try {
+            new UpdateTask(this).run();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         int mins = getConfiguration().getSyncTime();
         if (mins > 0) {
             getProxy().getScheduler().schedule(this, new UpdateTask(this), mins, mins, TimeUnit.MINUTES);
         }
 
+        getLogger().info("Registering API...");
+        LuckPerms.registerProvider(new ApiProvider(this));
+
         getLogger().info("Successfully loaded.");
     }
 
     @Override
     public void onDisable() {
+        getLogger().info("Closing datastore...");
         datastore.shutdown();
+
+        getLogger().info("Unregistering API...");
+        LuckPerms.unregisterProvider();
     }
 
     @Override
