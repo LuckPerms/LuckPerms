@@ -74,7 +74,7 @@ Command usage is printed to the console/chat whenever invalid arguments are prov
 | /lp              | /lpb             |
 | /perm            | /bperm           |
 
-Arguments: <required> [optional]
+Arguments: \<required\> [optional]
 
 Users with OP have access to all commands.
 
@@ -89,55 +89,55 @@ Additionally, you can use wildcards to grant users access to a selection of comm
 *  /perms sync - luckperms.sync
 *  /perms info - luckperms.info
 *  /perms debug - luckperms.debug
-*  /perms creategroup <group> - luckperms.creategroup
-*  /perms deletegroup <group> - luckperms.deletegroup
+*  /perms creategroup \<group\> - luckperms.creategroup
+*  /perms deletegroup \<group\> - luckperms.deletegroup
 *  /perms listgroups - luckperms.listgroups
-*  /perms createtrack <track> - luckperms.createtrack
-*  /perms deletetrack <track> - luckperms.deletetrack
+*  /perms createtrack \<track\> - luckperms.createtrack
+*  /perms deletetrack \<track\> - luckperms.deletetrack
 *  /perms listtracks - luckperms.listtracks
 
 ### User
-*  /perms user <user> info - luckperms.user.info
-*  /perms user <user> getuuid - luckperms.user.getuuid
-*  /perms user <user> listnodes - luckperms.user.listnodes
-*  /perms user <user> haspermission <node> [server] - luckperms.user.haspermission
-*  /perms user <user> inheritspermission <node> [server] - luckperms.user.inheritspermission
-*  /perms user <user> set <node> <true/false> [server] - luckperms.user.setpermission
-*  /perms user <user> unset <node> [server] -  luckperms.user.unsetpermission
-*  /perms user <user> addgroup <group> [server] - luckperms.user.addgroup
-*  /perms user <user> removegroup <group> [server] - luckperms.user.removegroup
-*  /perms user <user> settemp <node> <true/false> <duration> [server] - luckperms.user.settemppermission
-*  /perms user <user> addtempgroup <group> <duration> [server] - luckperms.user.addtempgroup
-*  /perms user <user> removetempgroup <group> [server] - luckperms.user.removetempgroup
-*  /perms user <user> setprimarygroup <group> - luckperms.user.setprimarygroup
-*  /perms user <user> showtracks - luckperms.user.showtracks
-*  /perms user <user> promote <track> - luckperms.user.promote
-*  /perms user <user> demote <track> - luckperms.user.demote
-*  /perms user <user> showpos <track> - luckperms.user.showpos
-*  /perms user <user> clear - luckperms.user.clear
+*  /perms user \<user\> info - luckperms.user.info
+*  /perms user \<user\> getuuid - luckperms.user.getuuid
+*  /perms user \<user\> listnodes - luckperms.user.listnodes
+*  /perms user \<user\> haspermission \<node\> [server] - luckperms.user.haspermission
+*  /perms user \<user\> inheritspermission \<node\> [server] - luckperms.user.inheritspermission
+*  /perms user \<user\> set \<node\> \<true/false\> [server] - luckperms.user.setpermission
+*  /perms user \<user\> unset \<node\> [server] -  luckperms.user.unsetpermission
+*  /perms user \<user\> addgroup \<group\> [server] - luckperms.user.addgroup
+*  /perms user \<user\> removegroup \<group\> [server] - luckperms.user.removegroup
+*  /perms user \<user\> settemp \<node\> \<true/false\> \<duration\> [server] - luckperms.user.settemppermission
+*  /perms user \<user\> addtempgroup \<group\> \<duration\> [server] - luckperms.user.addtempgroup
+*  /perms user \<user\> removetempgroup \<group\> [server] - luckperms.user.removetempgroup
+*  /perms user \<user\> setprimarygroup \<group\> - luckperms.user.setprimarygroup
+*  /perms user \<user\> showtracks - luckperms.user.showtracks
+*  /perms user \<user\> promote \<track\> - luckperms.user.promote
+*  /perms user \<user\> demote \<track\> - luckperms.user.demote
+*  /perms user \<user\> showpos \<track\> - luckperms.user.showpos
+*  /perms user \<user\> clear - luckperms.user.clear
 
 ### Group
-*  /perms group <group> info - 	luckperms.group.info
-*  /perms group <group> listnodes - luckperms.group.listnodes
-*  /perms group <group> haspermission <node> [server] - luckperms.group.haspermission
-*  /perms group <group> inheritspermission <node> [server] - luckperms.group.inheritspermission
-*  /perms group <group> set <node> <true/false> [server] - luckperms.group.setpermission
-*  /perms group <group> unset <node> [server] - luckperms.group.unsetpermission
-*  /perms group <group> setinherit <group> [server] - luckperms.group.setinherit
-*  /perms group <group> unsetinherit <group> [server] - luckperms.group.unsetinherit
-*  /perms group <group> settemp <node> <true/false> <duration> [server] - settemppermission
-*  /perms group <group> unsettemp <node> [server] - luckperms.group.unsettemppermission
-*  /perms group <group> settempinherit <group> <duration> [server] - luckperms.group.settempinherit
-*  /perms group <group> unsettempinherit <group> [server] - luckperms.group.unsettempinherit
-*  /perms group <group> showtracks - luckperms.group.showtracks
-*  /perms group <group> clear - luckperms.group.clear
+*  /perms group \<group\> info - 	luckperms.group.info
+*  /perms group \<group\> listnodes - luckperms.group.listnodes
+*  /perms group \<group\> haspermission \<node\> [server] - luckperms.group.haspermission
+*  /perms group \<group\> inheritspermission \<node\> [server] - luckperms.group.inheritspermission
+*  /perms group \<group\> set \<node\> \<true/false\> [server] - luckperms.group.setpermission
+*  /perms group \<group\> unset \<node\> [server] - luckperms.group.unsetpermission
+*  /perms group \<group\> setinherit \<group\> [server] - luckperms.group.setinherit
+*  /perms group \<group\> unsetinherit \<group\> [server] - luckperms.group.unsetinherit
+*  /perms group \<group\> settemp \<node\> \<true/false\> \<duration\> [server] - settemppermission
+*  /perms group \<group\> unsettemp \<node\> [server] - luckperms.group.unsettemppermission
+*  /perms group \<group\> settempinherit \<group\> \<duration\> [server] - luckperms.group.settempinherit
+*  /perms group \<group\> unsettempinherit \<group\> [server] - luckperms.group.unsettempinherit
+*  /perms group \<group\> showtracks - luckperms.group.showtracks
+*  /perms group \<group\> clear - luckperms.group.clear
 
 ### Track
-*  /perms track <track> info - luckperms.track.info
-*  /perms track <track> append <group> - luckperms.track.append
-*  /perms track <track> insert <group> <position> - luckperms.track.insert
-*  /perms track <track> remove <group> - luckperms.track.remove
-*  /perms track <track> clear - luckperms.track.clear
+*  /perms track \<track\> info - luckperms.track.info
+*  /perms track \<track\> append \<group\> - luckperms.track.append
+*  /perms track \<track\> insert \<group\> \<position\> - luckperms.track.insert
+*  /perms track \<track\> remove \<group\> - luckperms.track.remove
+*  /perms track \<track\> clear - luckperms.track.clear
 
 ## License
 See LICENSE.md.
