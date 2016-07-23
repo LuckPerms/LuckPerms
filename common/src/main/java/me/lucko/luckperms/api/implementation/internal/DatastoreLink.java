@@ -43,18 +43,10 @@ public class DatastoreLink implements Datastore {
         return s.toLowerCase();
     }
 
-    private static Callback checkCallback(Callback c) {
+    private static <T> Callback<T> checkCallback(Callback<T> c) {
         // If no callback was given, just send an empty one
         if (c == null) {
-            c = success -> {};
-        }
-        return c;
-    }
-
-    private static Callback.GetUUID checkCallback(Callback.GetUUID c) {
-        // If no callback was given, just send an empty one
-        if (c == null) {
-            c = success -> {};
+            c = t -> {};
         }
         return c;
     }
@@ -84,82 +76,82 @@ public class DatastoreLink implements Datastore {
         private final me.lucko.luckperms.data.Datastore master;
 
         @Override
-        public void loadOrCreateUser(@NonNull UUID uuid, @NonNull String username, Callback callback) {
+        public void loadOrCreateUser(@NonNull UUID uuid, @NonNull String username, Callback<Boolean> callback) {
             master.loadOrCreateUser(uuid, checkUsername(username), checkCallback(callback));
         }
 
         @Override
-        public void loadUser(@NonNull UUID uuid, Callback callback) {
+        public void loadUser(@NonNull UUID uuid, Callback<Boolean> callback) {
             master.loadUser(uuid, checkCallback(callback));
         }
 
         @Override
-        public void saveUser(@NonNull User user, Callback callback) {
+        public void saveUser(@NonNull User user, Callback<Boolean> callback) {
             Utils.checkUser(user);
             master.saveUser(((UserLink) user).getMaster(), checkCallback(callback));
         }
 
         @Override
-        public void createAndLoadGroup(@NonNull String name, Callback callback) {
+        public void createAndLoadGroup(@NonNull String name, Callback<Boolean> callback) {
             master.createAndLoadGroup(checkName(name), checkCallback(callback));
         }
 
         @Override
-        public void loadGroup(@NonNull String name, Callback callback) {
+        public void loadGroup(@NonNull String name, Callback<Boolean> callback) {
             master.loadGroup(checkName(name), checkCallback(callback));
         }
 
         @Override
-        public void loadAllGroups(Callback callback) {
+        public void loadAllGroups(Callback<Boolean> callback) {
             master.loadAllGroups(checkCallback(callback));
         }
 
         @Override
-        public void saveGroup(@NonNull Group group, Callback callback) {
+        public void saveGroup(@NonNull Group group, Callback<Boolean> callback) {
             Utils.checkGroup(group);
             master.saveGroup(((GroupLink) group).getMaster(), checkCallback(callback));
         }
 
         @Override
-        public void deleteGroup(@NonNull Group group, Callback callback) {
+        public void deleteGroup(@NonNull Group group, Callback<Boolean> callback) {
             Utils.checkGroup(group);
             master.deleteGroup(((GroupLink) group).getMaster(), checkCallback(callback));
         }
 
         @Override
-        public void createAndLoadTrack(@NonNull String name, Callback callback) {
+        public void createAndLoadTrack(@NonNull String name, Callback<Boolean> callback) {
             master.createAndLoadTrack(checkName(name), checkCallback(callback));
         }
 
         @Override
-        public void loadTrack(@NonNull String name, Callback callback) {
+        public void loadTrack(@NonNull String name, Callback<Boolean> callback) {
             master.loadTrack(checkName(name), checkCallback(callback));
         }
 
         @Override
-        public void loadAllTracks(Callback callback) {
+        public void loadAllTracks(Callback<Boolean> callback) {
             master.loadAllTracks(checkCallback(callback));
         }
 
         @Override
-        public void saveTrack(@NonNull Track track, Callback callback) {
+        public void saveTrack(@NonNull Track track, Callback<Boolean> callback) {
             Utils.checkTrack(track);
             master.saveTrack(((TrackLink) track).getMaster(), checkCallback(callback));
         }
 
         @Override
-        public void deleteTrack(@NonNull Track track, Callback callback) {
+        public void deleteTrack(@NonNull Track track, Callback<Boolean> callback) {
             Utils.checkTrack(track);
             master.deleteTrack(((TrackLink) track).getMaster(), checkCallback(callback));
         }
 
         @Override
-        public void saveUUIDData(@NonNull String username, @NonNull UUID uuid, Callback callback) {
+        public void saveUUIDData(@NonNull String username, @NonNull UUID uuid, Callback<Boolean> callback) {
             master.saveUUIDData(checkUsername(username), uuid, checkCallback(callback));
         }
 
         @Override
-        public void getUUID(@NonNull String username, Callback.GetUUID callback) {
+        public void getUUID(@NonNull String username, Callback<UUID> callback) {
             master.getUUID(checkUsername(username), checkCallback(callback));
         }
     }

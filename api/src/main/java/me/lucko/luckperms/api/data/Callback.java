@@ -1,11 +1,7 @@
 package me.lucko.luckperms.api.data;
 
-import java.util.UUID;
+public interface Callback<T> {
 
-public interface Callback {
-    void onComplete(boolean success);
+    void onComplete(T t);
 
-    interface GetUUID {
-        void onComplete(UUID uuid);
-    }
 }

@@ -39,12 +39,8 @@ public abstract class Datastore {
         plugin.doSync(r);
     }
 
-    private void runCallback(boolean result, Callback callback) {
-        doSync(() -> callback.onComplete(result));
-    }
-
-    private void runCallback(UUID result, Callback.GetUUID callback) {
-        doSync(() -> callback.onComplete(result));
+    private <T> void runCallback(T t, Callback<T> callback) {
+        doSync(() -> callback.onComplete(t));
     }
 
     /*
@@ -74,63 +70,63 @@ public abstract class Datastore {
         These methods will schedule the operation to run async. The callback will be ran when the task is complete.
         Callbacks are ran on the main Bukkit server thread (if applicable)
      */
-    public void loadOrCreateUser(UUID uuid, String username, Callback callback) {
+    public void loadOrCreateUser(UUID uuid, String username, Callback<Boolean> callback) {
         doAsync(() -> runCallback(loadOrCreateUser(uuid, username), callback));
     }
 
-    public void loadUser(UUID uuid, Callback callback) {
+    public void loadUser(UUID uuid, Callback<Boolean> callback) {
         doAsync(() -> runCallback(loadUser(uuid), callback));
     }
 
-    public void saveUser(User user, Callback callback) {
+    public void saveUser(User user, Callback<Boolean> callback) {
         doAsync(() -> runCallback(saveUser(user), callback));
     }
 
-    public void createAndLoadGroup(String name, Callback callback) {
+    public void createAndLoadGroup(String name, Callback<Boolean> callback) {
         doAsync(() -> runCallback(createAndLoadGroup(name), callback));
     }
 
-    public void loadGroup(String name, Callback callback) {
+    public void loadGroup(String name, Callback<Boolean> callback) {
         doAsync(() -> runCallback(loadGroup(name), callback));
     }
 
-    public void loadAllGroups(Callback callback) {
+    public void loadAllGroups(Callback<Boolean> callback) {
         doAsync(() -> runCallback(loadAllGroups(), callback));
     }
 
-    public void saveGroup(Group group, Callback callback) {
+    public void saveGroup(Group group, Callback<Boolean> callback) {
         doAsync(() -> runCallback(saveGroup(group), callback));
     }
 
-    public void deleteGroup(Group group, Callback callback) {
+    public void deleteGroup(Group group, Callback<Boolean> callback) {
         doAsync(() -> runCallback(deleteGroup(group), callback));
     }
 
-    public void createAndLoadTrack(String name, Callback callback) {
+    public void createAndLoadTrack(String name, Callback<Boolean> callback) {
         doAsync(() -> runCallback(createAndLoadTrack(name), callback));
     }
 
-    public void loadTrack(String name, Callback callback) {
+    public void loadTrack(String name, Callback<Boolean> callback) {
         doAsync(() -> runCallback(loadTrack(name), callback));
     }
 
-    public void loadAllTracks(Callback callback) {
+    public void loadAllTracks(Callback<Boolean> callback) {
         doAsync(() -> runCallback(loadAllTracks(), callback));
     }
 
-    public void saveTrack(Track track, Callback callback) {
+    public void saveTrack(Track track, Callback<Boolean> callback) {
         doAsync(() -> runCallback(saveTrack(track), callback));
     }
 
-    public void deleteTrack(Track track, Callback callback) {
+    public void deleteTrack(Track track, Callback<Boolean> callback) {
         doAsync(() -> runCallback(deleteTrack(track), callback));
     }
 
-    public void saveUUIDData(String username, UUID uuid, Callback callback) {
+    public void saveUUIDData(String username, UUID uuid, Callback<Boolean> callback) {
         doAsync(() -> runCallback(saveUUIDData(username, uuid), callback));
     }
 
-    public void getUUID(String username, Callback.GetUUID callback) {
+    public void getUUID(String username, Callback<UUID> callback) {
         doAsync(() -> runCallback(getUUID(username), callback));
     }
 }

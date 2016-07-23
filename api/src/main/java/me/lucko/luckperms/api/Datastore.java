@@ -1,5 +1,6 @@
 package me.lucko.luckperms.api;
 
+
 import me.lucko.luckperms.api.data.Callback;
 
 import java.util.UUID;
@@ -19,21 +20,21 @@ public interface Datastore {
     Sync sync();
 
     interface Async {
-        void loadOrCreateUser(UUID uuid, String username, Callback callback);
-        void loadUser(UUID uuid, Callback callback);
-        void saveUser(User user, Callback callback);
-        void createAndLoadGroup(String name, Callback callback);
-        void loadGroup(String name, Callback callback);
-        void loadAllGroups(Callback callback);
-        void saveGroup(Group group, Callback callback);
-        void deleteGroup(Group group, Callback callback);
-        void createAndLoadTrack(String name, Callback callback);
-        void loadTrack(String name, Callback callback);
-        void loadAllTracks(Callback callback);
-        void saveTrack(Track track, Callback callback);
-        void deleteTrack(Track track, Callback callback);
-        void saveUUIDData(String username, UUID uuid, Callback callback);
-        void getUUID(String username, Callback.GetUUID callback);
+        void loadOrCreateUser(UUID uuid, String username, Callback<Boolean> callback);
+        void loadUser(UUID uuid, Callback<Boolean> callback);
+        void saveUser(User user, Callback<Boolean> callback);
+        void createAndLoadGroup(String name, Callback<Boolean> callback);
+        void loadGroup(String name, Callback<Boolean> callback);
+        void loadAllGroups(Callback<Boolean> callback);
+        void saveGroup(Group group, Callback<Boolean> callback);
+        void deleteGroup(Group group, Callback<Boolean> callback);
+        void createAndLoadTrack(String name, Callback<Boolean> callback);
+        void loadTrack(String name, Callback<Boolean> callback);
+        void loadAllTracks(Callback<Boolean> callback);
+        void saveTrack(Track track, Callback<Boolean> callback);
+        void deleteTrack(Track track, Callback<Boolean> callback);
+        void saveUUIDData(String username, UUID uuid, Callback<Boolean> callback);
+        void getUUID(String username, Callback<UUID> callback);
     }
 
     interface Sync {
