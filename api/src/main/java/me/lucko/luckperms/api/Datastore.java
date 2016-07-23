@@ -1,6 +1,5 @@
 package me.lucko.luckperms.api;
 
-
 import me.lucko.luckperms.api.data.Callback;
 
 import java.util.UUID;

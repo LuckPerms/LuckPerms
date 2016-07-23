@@ -3,7 +3,9 @@ package me.lucko.luckperms.users;
 import me.lucko.luckperms.LPBukkitPlugin;
 import org.bukkit.entity.Player;
 
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class BukkitUserManager extends UserManager {
     private final LPBukkitPlugin plugin;
@@ -53,6 +55,10 @@ public class BukkitUserManager extends UserManager {
 
     @Override
     public void updateAllUsers() {
-        plugin.getServer().getOnlinePlayers().stream().map(Player::getUniqueId).forEach(u -> plugin.getDatastore().loadUser(u));
+        // Sometimes called async, so we need to get the players on the Bukkit thread.
+        plugin.doSync(() -> {
+            Set<UUID> players = plugin.getServer().getOnlinePlayers().stream().map(Player::getUniqueId).collect(Collectors.toSet());
+            plugin.doAsync(() -> players.forEach(u -> plugin.getDatastore().loadUser(u)));
+        });
     }
 }
