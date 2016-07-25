@@ -1,7 +1,6 @@
 package me.lucko.luckperms.users;
 
 import me.lucko.luckperms.LPBungeePlugin;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.util.UUID;
 
@@ -41,6 +40,8 @@ public class BungeeUserManager extends UserManager {
 
     @Override
     public void updateAllUsers() {
-        plugin.getProxy().getPlayers().stream().map(ProxiedPlayer::getUniqueId).forEach(u -> plugin.getDatastore().loadUser(u));
+        plugin.getProxy().getPlayers().stream()
+                .map(p -> plugin.getUuidCache().getUUID(p.getName(), p.getUniqueId()))
+                .forEach(u -> plugin.getDatastore().loadUser(u));
     }
 }

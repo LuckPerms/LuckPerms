@@ -61,6 +61,10 @@ public abstract class LPConfiguration<T extends LuckPermsPlugin> {
         return getBoolean("include-global", defaultIncludeGlobal);
     }
 
+    public boolean getOnlineMode() {
+        return getBoolean("online-mode", true);
+    }
+
     public String getDatabaseValue(String value) {
         return getString("sql." + value, null);
     }

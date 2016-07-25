@@ -5,6 +5,7 @@ import me.lucko.luckperms.groups.GroupManager;
 import me.lucko.luckperms.tracks.TrackManager;
 import me.lucko.luckperms.users.UserManager;
 import me.lucko.luckperms.utils.LPConfiguration;
+import me.lucko.luckperms.utils.UuidCache;
 
 import java.util.List;
 import java.util.UUID;
@@ -47,6 +48,12 @@ public interface LuckPermsPlugin {
      * @return the plugin's {@link Logger}
      */
     Logger getLogger();
+
+    /**
+     * Retrieves the {@link UuidCache} for the plugin
+     * @return the plugin's {@link UuidCache}
+     */
+    UuidCache getUuidCache();
 
     /**
      * @return the version of the plugin

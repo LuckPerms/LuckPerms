@@ -99,7 +99,8 @@ public enum Message {
             PREFIX + "&eServer Name: &6%s" + "\n" +
             PREFIX + "&eDefault Group: &6%s" + "\n" +
             PREFIX + "&eSync Interval: &6%s minutes" + "\n" +
-            PREFIX + "&eInclude Global Perms: &6%s",
+            PREFIX + "&eInclude Global Perms: &6%s" + "\n" +
+            PREFIX + "&eOnline Mode: &6%s",
             false
     ),
     DEBUG(

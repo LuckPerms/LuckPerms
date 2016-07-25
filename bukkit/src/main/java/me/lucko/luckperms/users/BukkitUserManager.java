@@ -57,7 +57,9 @@ public class BukkitUserManager extends UserManager {
     public void updateAllUsers() {
         // Sometimes called async, so we need to get the players on the Bukkit thread.
         plugin.doSync(() -> {
-            Set<UUID> players = plugin.getServer().getOnlinePlayers().stream().map(Player::getUniqueId).collect(Collectors.toSet());
+            Set<UUID> players = plugin.getServer().getOnlinePlayers().stream()
+                    .map(p -> plugin.getUuidCache().getUUID(p.getName(), p.getUniqueId()))
+                    .collect(Collectors.toSet());
             plugin.doAsync(() -> players.forEach(u -> plugin.getDatastore().loadUser(u)));
         });
     }

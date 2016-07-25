@@ -15,6 +15,7 @@ import me.lucko.luckperms.tracks.TrackManager;
 import me.lucko.luckperms.users.BukkitUserManager;
 import me.lucko.luckperms.users.UserManager;
 import me.lucko.luckperms.utils.LPConfiguration;
+import me.lucko.luckperms.utils.UuidCache;
 import me.lucko.luckperms.vaulthooks.VaultHook;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
@@ -38,6 +39,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private GroupManager groupManager;
     private TrackManager trackManager;
     private Datastore datastore;
+    private UuidCache uuidCache;
 
     @Override
     public void onEnable() {
@@ -81,6 +83,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         datastore.init();
 
         getLogger().info("Loading internal permission managers...");
+        uuidCache = new UuidCache(getConfiguration().getOnlineMode());
         userManager = new BukkitUserManager(this);
         groupManager = new GroupManager(this);
         trackManager = new TrackManager();

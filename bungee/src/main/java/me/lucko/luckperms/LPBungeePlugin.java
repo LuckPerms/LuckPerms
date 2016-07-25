@@ -14,6 +14,7 @@ import me.lucko.luckperms.tracks.TrackManager;
 import me.lucko.luckperms.users.BungeeUserManager;
 import me.lucko.luckperms.users.UserManager;
 import me.lucko.luckperms.utils.LPConfiguration;
+import me.lucko.luckperms.utils.UuidCache;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 
@@ -31,6 +32,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     private GroupManager groupManager;
     private TrackManager trackManager;
     private Datastore datastore;
+    private UuidCache uuidCache;
 
     @Override
     public void onEnable() {
@@ -69,6 +71,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         datastore.init();
 
         getLogger().info("Loading internal permission managers...");
+        uuidCache = new UuidCache(getConfiguration().getOnlineMode());
         userManager = new BungeeUserManager(this);
         groupManager = new GroupManager(this);
         trackManager = new TrackManager();

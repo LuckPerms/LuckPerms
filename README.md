@@ -6,6 +6,7 @@ A (fairly bad) permissions implementation for Bukkit/BungeeCord.
 * **Temporary permissions** - users/groups can be given permissions that expire after a given time
 * **Temporary groups** - users/groups can be added to/inherit other groups temporarily
 * **Multi-server support** - data is synced across all servers/platforms
+* **Full offline-mode/mixed-mode support** - player permissions are synced properly over offline-mode or mixed online/offline-mode networks.
 * **Per-server permissions/groups** - define user/group permissions that only apply on certain servers
 * **Server-specific groups** - define groups that only apply on certain servers
 * **Tracks / paths** - users can be promoted/demoted along multiple group tracks
