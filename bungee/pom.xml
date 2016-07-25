@@ -16,7 +16,7 @@
 
     <build>
         <defaultGoal>clean package</defaultGoal>
-        <finalName>LuckPerms</finalName>
+        <finalName>LuckPermsBungee</finalName>
         <sourceDirectory>${basedir}/src/main/java</sourceDirectory>
         <resources>
             <resource>
