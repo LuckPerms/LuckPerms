@@ -25,8 +25,6 @@ import java.util.stream.Collectors;
 
 @Getter
 public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
-    public static final String VERSION = "v1.3";
-
     private LPConfiguration configuration;
     private UserManager userManager;
     private GroupManager groupManager;
@@ -106,7 +104,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
     @Override
     public String getVersion() {
-        return VERSION;
+        return getDescription().getVersion();
     }
 
     @Override

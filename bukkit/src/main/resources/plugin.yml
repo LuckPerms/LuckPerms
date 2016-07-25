@@ -1,6 +1,6 @@
 name: LuckPerms
 author: Luck
-version: 1.2
+version: ${global.version}
 main: me.lucko.luckperms.LPBukkitPlugin
 softdepend: [Vault]
 description: A permissions plugin

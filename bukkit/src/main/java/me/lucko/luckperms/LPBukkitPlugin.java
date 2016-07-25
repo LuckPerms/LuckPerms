@@ -32,8 +32,6 @@ import java.util.stream.Collectors;
 
 @Getter
 public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
-    public static final String VERSION = "v1.3";
-
     private LPConfiguration configuration;
     private UserManager userManager;
     private GroupManager groupManager;
@@ -146,7 +144,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
     @Override
     public String getVersion() {
-        return VERSION;
+        return getDescription().getVersion();
     }
 
     @Override
