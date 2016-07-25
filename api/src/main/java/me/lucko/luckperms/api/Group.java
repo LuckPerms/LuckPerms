@@ -1,5 +1,10 @@
 package me.lucko.luckperms.api;
 
+import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
+import me.lucko.luckperms.exceptions.ObjectLacksException;
+
+import java.util.List;
+
 /**
  * Wrapper interface for internal Group instances
  * The implementations of this interface limit access to the Group and add parameter checks to further prevent
@@ -8,11 +13,159 @@ package me.lucko.luckperms.api;
 @SuppressWarnings("unused")
 public interface Group extends PermissionObject {
 
+    /**
+     * @return the name of the group
+     */
     String getName();
+
+    /**
+     * check to see if a group inherits a group
+     * @param group The group to check membership of
+     * @return true if the user is a member of the group
+     */
+    boolean inheritsGroup(Group group);
+
+    /**
+     * check to see if the group inherits a group on a specific server
+     * @param group The group to check membership of
+     * @param server The server to check on
+     * @return true if the group inherits the group
+     */
+    boolean inheritsGroup(Group group, String server);
+
+    /**
+     * check to see if the group inherits a group on a specific server
+     * @param group The group to check membership of
+     * @param server The server to check on
+     * @param world The world to check on
+     * @return true if the group inherits the group
+     */
+    boolean inheritsGroup(Group group, String server, String world);
+
+    /**
+     * Make this group inherit another group
+     * @param group the group to be inherited
+     * @throws ObjectAlreadyHasException if the group already inherits the group
+     */
+    void setInheritGroup(Group group) throws ObjectAlreadyHasException;
+
+    /**
+     * Make this group inherit another group on a specific server
+     * @param group the group to be inherited
+     * @param server The server to add the group on
+     * @throws ObjectAlreadyHasException if the group already inherits the group on that server
+     */
+    void setInheritGroup(Group group, String server) throws ObjectAlreadyHasException;
+
+    /**
+     * Make this group inherit another group on a specific server
+     * @param group the group to be inherited
+     * @param server The server to add the group on
+     * @param world The world to add the group on
+     * @throws ObjectAlreadyHasException if the group already inherits the group on that server
+     */
+    void setInheritGroup(Group group, String server, String world) throws ObjectAlreadyHasException;
+
+    /**
+     * Make this group inherit another group on a specific server
+     * @param group the group to be inherited
+     * @param expireAt when the group should expire
+     * @throws ObjectAlreadyHasException if the group already inherits the group on that server
+     */
+    void setInheritGroup(Group group, long expireAt) throws ObjectAlreadyHasException;
+
+    /**
+     * Make this group inherit another group on a specific server
+     * @param group the group to be inherited
+     * @param server The server to add the group on
+     * @param expireAt when the group should expire
+     * @throws ObjectAlreadyHasException if the group already inherits the group on that server
+     */
+    void setInheritGroup(Group group, String server, long expireAt) throws ObjectAlreadyHasException;
+
+    /**
+     * Make this group inherit another group on a specific server
+     * @param group the group to be inherited
+     * @param server The server to add the group on
+     * @param world The world to add the group on
+     * @param expireAt when the group should expire
+     * @throws ObjectAlreadyHasException if the group already inherits the group on that server
+     */
+    void setInheritGroup(Group group, String server, String world, long expireAt) throws ObjectAlreadyHasException;
+
+    /**
+     * Remove a previously set inheritance
+     * @param group the group to uninherit
+     * @throws ObjectLacksException if the group does not already inherit the group
+     */
+    void unsetInheritGroup(Group group) throws ObjectLacksException;
+
+    /**
+     * Remove a previously set inheritance
+     * @param group the group to uninherit
+     * @param temporary if the group being removed is temporary
+     * @throws ObjectLacksException if the group does not already inherit the group
+     */
+    void unsetInheritGroup(Group group, boolean temporary) throws ObjectLacksException;
+
+    /**
+     * Remove a previously set inheritance
+     * @param group the group to uninherit
+     * @param server The server to remove the group on
+     * @throws ObjectLacksException if the group does not already inherit the group
+     */
+    void unsetInheritGroup(Group group, String server) throws ObjectLacksException;
+
+    /**
+     * Remove a previously set inheritance
+     * @param group the group to uninherit
+     * @param server The server to remove the group on
+     * @param world The world to remove the group on
+     * @throws ObjectLacksException if the group does not already inherit the group
+     */
+    void unsetInheritGroup(Group group, String server, String world) throws ObjectLacksException;
+
+    /**
+     * Remove a previously set inheritance
+     * @param group the group to uninherit
+     * @param server The server to remove the group on
+     * @param temporary if the group being removed is temporary
+     * @throws ObjectLacksException if the group does not already inherit the group
+     */
+    void unsetInheritGroup(Group group, String server, boolean temporary) throws ObjectLacksException;
+
+    /**
+     * Remove a previously set inheritance
+     * @param group the group to uninherit
+     * @param server The server to remove the group on
+     * @param world The world to remove the group on
+     * @param temporary if the group being removed is temporary
+     * @throws ObjectLacksException if the group does not already inherit the group
+     */
+    void unsetInheritGroup(Group group, String server, String world, boolean temporary) throws ObjectLacksException;
 
     /**
      * Clear all of the groups permission nodes
      */
     void clearNodes();
 
+    /**
+     * Get a {@link List} of all of the groups the group inherits, on all servers
+     * @return a {@link List} of group names
+     */
+    List<String> getGroupNames();
+
+    /**
+     * Get a {@link List} of the groups the group inherits on a specific server
+     * @param server the server to check
+     * @return a {@link List} of group names
+     */
+    List<String> getLocalGroups(String server, String world);
+
+    /**
+     * Get a {@link List} of the groups the group inherits on a specific server
+     * @param server the server to check
+     * @return a {@link List} of group names
+     */
+    List<String> getLocalGroups(String server);
 }
