@@ -3,7 +3,6 @@ package me.lucko.luckperms.users;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.data.Datastore;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.Map;
@@ -72,16 +71,6 @@ public abstract class UserManager {
             users.get(user.getUuid()).setPrimaryGroup(user.getPrimaryGroup());
             users.get(user.getUuid()).refreshPermissions();
         }
-    }
-
-    /**
-     * Saves a user object in the datastore
-     * @param user the user to save
-     * @param datastore the datastore
-     */
-    public void saveUser(User user, Datastore datastore) {
-        user.refreshPermissions();
-        datastore.saveUser(user, success -> {});
     }
 
     /**

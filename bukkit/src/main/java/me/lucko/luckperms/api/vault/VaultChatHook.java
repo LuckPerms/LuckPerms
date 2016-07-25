@@ -1,4 +1,4 @@
-package me.lucko.luckperms.vaulthooks;
+package me.lucko.luckperms.api.vault;
 
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.permission.Permission;
