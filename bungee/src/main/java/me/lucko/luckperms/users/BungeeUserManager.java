@@ -23,7 +23,7 @@ public class BungeeUserManager extends UserManager {
 
     @Override
     public void cleanupUser(User user) {
-        if (plugin.getProxy().getPlayer(user.getUuid()) == null) {
+        if (plugin.getProxy().getPlayer(plugin.getUuidCache().getExternalUUID(user.getUuid())) == null) {
             unloadUser(user);
         }
     }
@@ -41,7 +41,7 @@ public class BungeeUserManager extends UserManager {
     @Override
     public void updateAllUsers() {
         plugin.getProxy().getPlayers().stream()
-                .map(p -> plugin.getUuidCache().getUUID(p.getName(), p.getUniqueId()))
+                .map(p -> plugin.getUuidCache().getUUID(p.getUniqueId()))
                 .forEach(u -> plugin.getDatastore().loadUser(u));
     }
 }

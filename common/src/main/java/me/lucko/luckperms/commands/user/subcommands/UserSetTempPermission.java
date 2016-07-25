@@ -15,7 +15,7 @@ import java.util.List;
 public class UserSetTempPermission extends UserSubCommand {
     public UserSetTempPermission() {
         super("settemp", "Sets a temporary permission for a user",
-                "/%s user <user> settemp <node> <true|false> <duration> [server]", Permission.USER_SET_TEMP_PERMISSION);
+                "/%s user <user> settemp <node> <true|false> <duration> [server] [world]", Permission.USER_SET_TEMP_PERMISSION);
     }
 
     @Override
@@ -54,15 +54,22 @@ public class UserSetTempPermission extends UserSubCommand {
         }
 
         try {
-            if (args.size() == 4) {
+            if (args.size() >= 4) {
                 final String server = args.get(3).toLowerCase();
                 if (Patterns.NON_ALPHA_NUMERIC.matcher(server).find()) {
                     Message.SERVER_INVALID_ENTRY.send(sender);
                     return;
                 }
 
-                user.setPermission(node, b, server, duration);
-                Message.SETPERMISSION_TEMP_SERVER_SUCCESS.send(sender, node, bool, user.getName(), server, DateUtil.formatDateDiff(duration));
+                if (args.size() == 4) {
+                    user.setPermission(node, b, server, duration);
+                    Message.SETPERMISSION_TEMP_SERVER_SUCCESS.send(sender, node, bool, user.getName(), server, DateUtil.formatDateDiff(duration));
+                } else {
+                    final String world = args.get(4).toLowerCase();
+                    user.setPermission(node, b, server, world, duration);
+                    Message.SETPERMISSION_TEMP_SERVER_WORLD_SUCCESS.send(sender, node, bool, user.getName(), server, world, DateUtil.formatDateDiff(duration));
+                }
+
             } else {
                 user.setPermission(node, b, duration);
                 Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, bool, user.getName(), DateUtil.formatDateDiff(duration));
@@ -81,6 +88,6 @@ public class UserSetTempPermission extends UserSubCommand {
 
     @Override
     public boolean isArgLengthInvalid(int argLength) {
-        return argLength != 3 && argLength != 4;
+        return argLength != 3 && argLength != 4 && argLength != 5;
     }
 }

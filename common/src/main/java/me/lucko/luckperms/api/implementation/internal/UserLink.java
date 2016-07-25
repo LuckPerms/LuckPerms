@@ -71,6 +71,12 @@ public class UserLink extends PermissionObjectLink implements User {
     }
 
     @Override
+    public boolean isInGroup(@NonNull Group group, @NonNull String server, @NonNull String world) {
+        Utils.checkGroup(group);
+        return master.isInGroup(((GroupLink) group).getMaster(), server, world);
+    }
+
+    @Override
     public void addGroup(@NonNull Group group) throws ObjectAlreadyHasException {
         Utils.checkGroup(group);
         master.addGroup(((GroupLink) group).getMaster());
@@ -83,6 +89,12 @@ public class UserLink extends PermissionObjectLink implements User {
     }
 
     @Override
+    public void addGroup(@NonNull Group group, @NonNull String server, @NonNull String world) throws ObjectAlreadyHasException {
+        Utils.checkGroup(group);
+        master.addGroup(((GroupLink) group).getMaster(), checkServer(server), world);
+    }
+
+    @Override
     public void addGroup(@NonNull Group group, @NonNull long expireAt) throws ObjectAlreadyHasException {
         Utils.checkGroup(group);
         master.addGroup(((GroupLink) group).getMaster(), checkTime(expireAt));
@@ -92,6 +104,12 @@ public class UserLink extends PermissionObjectLink implements User {
     public void addGroup(@NonNull Group group, @NonNull String server, @NonNull long expireAt) throws ObjectAlreadyHasException {
         Utils.checkGroup(group);
         master.addGroup(((GroupLink) group).getMaster(), checkServer(server), checkTime(expireAt));
+    }
+
+    @Override
+    public void addGroup(@NonNull Group group, @NonNull String server, @NonNull String world, @NonNull long expireAt) throws ObjectAlreadyHasException {
+        Utils.checkGroup(group);
+        master.addGroup(((GroupLink) group).getMaster(), checkServer(server), world, checkTime(expireAt));
     }
 
     @Override
@@ -113,9 +131,21 @@ public class UserLink extends PermissionObjectLink implements User {
     }
 
     @Override
+    public void removeGroup(@NonNull Group group, @NonNull String server, @NonNull String world) throws ObjectLacksException {
+        Utils.checkGroup(group);
+        master.removeGroup(((GroupLink) group).getMaster(), checkServer(server), world);
+    }
+
+    @Override
     public void removeGroup(@NonNull Group group, @NonNull String server, @NonNull boolean temporary) throws ObjectLacksException {
         Utils.checkGroup(group);
         master.removeGroup(((GroupLink) group).getMaster(), checkServer(server), temporary);
+    }
+
+    @Override
+    public void removeGroup(@NonNull Group group, @NonNull String server, @NonNull String world, @NonNull boolean temporary) throws ObjectLacksException {
+        Utils.checkGroup(group);
+        master.removeGroup(((GroupLink) group).getMaster(), checkServer(server), world, temporary);
     }
 
     @Override
@@ -126,6 +156,11 @@ public class UserLink extends PermissionObjectLink implements User {
     @Override
     public List<String> getGroupNames() {
         return master.getGroupNames();
+    }
+
+    @Override
+    public List<String> getLocalGroups(@NonNull String server, @NonNull String world) {
+        return master.getLocalGroups(checkServer(server), world);
     }
 
     @Override

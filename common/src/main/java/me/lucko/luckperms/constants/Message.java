@@ -1,11 +1,9 @@
 package me.lucko.luckperms.constants;
 
-import lombok.AllArgsConstructor;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.Util;
 
 @SuppressWarnings("SpellCheckingInspection")
-@AllArgsConstructor
 public enum Message {
 
     /**
@@ -125,12 +123,16 @@ public enum Message {
     LISTNODES_TEMP("&e%s's Temporary Nodes:" + "\n" + "%s", true),
     SETPERMISSION_SUCCESS("&aSet &b%s&a to &b%s&a for &b%s&a.", true),
     SETPERMISSION_SERVER_SUCCESS("&aSet &b%s&a to &b%s&a for &b%s&a on server &b%s&a.", true),
+    SETPERMISSION_SERVER_WORLD_SUCCESS("&aSet &b%s&a to &b%s&a for &b%s&a on server &b%s&a, world &b%s&a.", true),
     SETPERMISSION_TEMP_SUCCESS("&aSet &b%s&a to &b%s&a for &b%s&a for a duration of &b%s&a.", true),
     SETPERMISSION_TEMP_SERVER_SUCCESS("&aSet &b%s&a to &b%s&a for &b%s&a on server &b%s&a for a duration of &b%s&a.", true),
+    SETPERMISSION_TEMP_SERVER_WORLD_SUCCESS("&aSet &b%s&a to &b%s&a for &b%s&a on server &b%s&a, world &b%s&a, for a duration of &b%s&a.", true),
     UNSETPERMISSION_SUCCESS("&aUnset &b%s&a for &b%s&a.", true),
     UNSETPERMISSION_SERVER_SUCCESS("&aUnset &b%s&a for &b%s&a on server &b%$s&a.", true),
+    UNSETPERMISSION_SERVER_WORLD_SUCCESS("&aUnset &b%s&a for &b%s&a on server &b%$s&a, world &b%$s&a.", true),
     UNSET_TEMP_PERMISSION_SUCCESS("&aUnset temporary permission &b%s&a for &b%s&a.", true),
     UNSET_TEMP_PERMISSION_SERVER_SUCCESS("&aUnset temporary permission &b%s&a for &b%s&a on server &b%$s&a.", true),
+    UNSET_TEMP_PERMISSION_SERVER_WORLD_SUCCESS("&aUnset temporary permission &b%s&a for &b%s&a on server &b%$s&a, world &b%$s&a.", true),
     CLEAR_SUCCESS("&b%s&a's permissions were cleared.", true),
     ILLEGAL_DATE_ERROR("Could not parse date '%s'.", true),
     PAST_DATE_ERROR("You cannot set a date in the past!", true),
@@ -149,12 +151,16 @@ public enum Message {
     USER_GETUUID("&bThe UUID of &e%s&b is &e%s&b.", true),
     USER_ADDGROUP_SUCCESS("&b%s&a successfully added to group &b%s&a.", true),
     USER_ADDGROUP_SERVER_SUCCESS("&b%s&a successfully added to group &b%s&a on server &b%s&a.", true),
+    USER_ADDGROUP_SERVER_WORLD_SUCCESS("&b%s&a successfully added to group &b%s&a on server &b%s&a, world &b%s&a.", true),
     USER_ADDTEMPGROUP_SUCCESS("&b%s&a successfully added to group &b%s&a for a duration of &b%s&a.", true),
     USER_ADDTEMPGROUP_SERVER_SUCCESS("&b%s&a successfully added to group &b%s&a on server &b%s&a for a duration of &b%s&a.", true),
+    USER_ADDTEMPGROUP_SERVER_WORLD_SUCCESS("&b%s&a successfully added to group &b%s&a on server &b%s&a, world &b%s&a, for a duration of &b%s&a.", true),
     USER_REMOVEGROUP_SUCCESS("&b%s&a was removed from group &b%s&a.", true),
     USER_REMOVEGROUP_SERVER_SUCCESS("&b%s&a was removed from group &b%s&a on server &b%s&a.", true),
+    USER_REMOVEGROUP_SERVER_WORLD_SUCCESS("&b%s&a was removed from group &b%s&a on server &b%s&a, world &b%s&a.", true),
     USER_REMOVETEMPGROUP_SUCCESS("&b%s&a was removed from temproary group &b%s&a.", true),
     USER_REMOVETEMPGROUP_SERVER_SUCCESS("&b%s&a was removed from temporary group &b%s&a on server &b%s&a.", true),
+    USER_REMOVETEMPGROUP_SERVER_WORLD_SUCCESS("&b%s&a was removed from temporary group &b%s&a on server &b%s&a, world &b%s&a.", true),
     USER_REMOVEGROUP_ERROR_PRIMARY("You cannot remove a user from their primary group.", true),
     USER_PRIMARYGROUP_SUCCESS("&b%s&a's primary group was set to &b%s&a.", true),
     USER_PRIMARYGROUP_ERROR_ALREADYHAS("The user already has this group set as their primary group.", true),
@@ -189,12 +195,16 @@ public enum Message {
     ),
     GROUP_SETINHERIT_SUCCESS("&b%s&a now inherits permissions from &b%s&a.", true),
     GROUP_SETINHERIT_SERVER_SUCCESS("&b%s&a now inherits permissions from &b%s&a on server &b%s&a.", true),
+    GROUP_SETINHERIT_SERVER_WORLD_SUCCESS("&b%s&a now inherits permissions from &b%s&a on server &b%s&a, world &b%s&a.", true),
     GROUP_SET_TEMP_INHERIT_SUCCESS("&b%s&a now inherits permissions from &b%s&a for a duration of &b%s&a.", true),
     GROUP_SET_TEMP_INHERIT_SERVER_SUCCESS("&b%s&a now inherits permissions from &b%s&a on server &b%s&a for a duration of &b%s&a.", true),
+    GROUP_SET_TEMP_INHERIT_SERVER_WORLD_SUCCESS("&b%s&a now inherits permissions from &b%s&a on server &b%s&a, world &b%s&a, for a duration of &b%s&a.", true),
     GROUP_UNSETINHERIT_SUCCESS("&b%s&a no longer inherits permissions from &b%s&a.", true),
     GROUP_UNSETINHERIT_SERVER_SUCCESS("&b%s&a no longer inherits permissions from &b%s&a on server &b%s&a.", true),
+    GROUP_UNSETINHERIT_SERVER_WORLD_SUCCESS("&b%s&a no longer inherits permissions from &b%s&a on server &b%s&a, world &b%s&a.", true),
     GROUP_UNSET_TEMP_INHERIT_SUCCESS("&b%s&a no longer temporarily inherits permissions from &b%s&a.", true),
     GROUP_UNSET_TEMP_INHERIT_SERVER_SUCCESS("&b%s&a no longer temporarily inherits permissions from &b%s&a on server &b%s&a.", true),
+    GROUP_UNSET_TEMP_INHERIT_SERVER_WORLD_SUCCESS("&b%s&a no longer temporarily inherits permissions from &b%s&a on server &b%s&a, world &b%s&a.", true),
 
     TRACK_INFO(
             PREFIX + "&d-> &eTrack: &6%s" + "\n" +
@@ -211,6 +221,11 @@ public enum Message {
     private String message;
     private boolean showPrefix;
 
+    Message(String message, boolean showPrefix) {
+        this.message = Util.color(message);
+        this.showPrefix = showPrefix;
+    }
+
     @Override
     public String toString() {
         return message;
@@ -218,9 +233,9 @@ public enum Message {
 
     public void send(Sender sender, Object... objects) {
         if (showPrefix) {
-            sender.sendMessage(Util.color(PREFIX + String.format(message, objects)));
+            sender.sendMessage(PREFIX + String.format(message, objects));
         } else {
-            sender.sendMessage(Util.color(String.format(message, objects)));
+            sender.sendMessage(String.format(message, objects));
         }
     }
 }

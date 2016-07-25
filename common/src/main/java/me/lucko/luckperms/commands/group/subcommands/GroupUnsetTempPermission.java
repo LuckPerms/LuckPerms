@@ -14,7 +14,7 @@ import java.util.List;
 public class GroupUnsetTempPermission extends GroupSubCommand {
     public GroupUnsetTempPermission() {
         super("unsettemp", "Unsets a temporary permission for a group",
-                "/%s group <group> unsettemp <node> [server]", Permission.GROUP_UNSET_TEMP_PERMISSION);
+                "/%s group <group> unsettemp <node> [server] [world]", Permission.GROUP_UNSET_TEMP_PERMISSION);
     }
 
     @Override
@@ -32,15 +32,22 @@ public class GroupUnsetTempPermission extends GroupSubCommand {
         }
 
         try {
-            if (args.size() == 2) {
+            if (args.size() >= 2) {
                 final String server = args.get(1).toLowerCase();
                 if (Patterns.NON_ALPHA_NUMERIC.matcher(server).find()) {
                     Message.SERVER_INVALID_ENTRY.send(sender);
                     return;
                 }
 
-                group.unsetPermission(node, server);
-                Message.UNSET_TEMP_PERMISSION_SERVER_SUCCESS.send(sender, node, group.getName(), server, true);
+                if (args.size() == 2) {
+                    group.unsetPermission(node, server);
+                    Message.UNSET_TEMP_PERMISSION_SERVER_SUCCESS.send(sender, node, group.getName(), server);
+                } else {
+                    final String world = args.get(2).toLowerCase();
+                    group.unsetPermission(node, server, world);
+                    Message.UNSET_TEMP_PERMISSION_SERVER_WORLD_SUCCESS.send(sender, node, group.getName(), server, world);
+                }
+
             } else {
                 group.unsetPermission(node, true);
                 Message.UNSET_TEMP_PERMISSION_SUCCESS.send(sender, node, group.getName());
@@ -54,6 +61,6 @@ public class GroupUnsetTempPermission extends GroupSubCommand {
 
     @Override
     public boolean isArgLengthInvalid(int argLength) {
-        return argLength != 1 && argLength != 2;
+        return argLength != 1 && argLength != 2 && argLength != 3;
     }
 }

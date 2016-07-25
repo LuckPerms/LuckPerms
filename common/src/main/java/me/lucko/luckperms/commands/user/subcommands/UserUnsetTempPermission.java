@@ -14,7 +14,7 @@ import java.util.List;
 public class UserUnsetTempPermission extends UserSubCommand {
     public UserUnsetTempPermission() {
         super("unsettemp", "Unsets a temporary permission for a user",
-                "/%s user <user> unsettemp <node> [server]", Permission.USER_UNSET_TEMP_PERMISSION);
+                "/%s user <user> unsettemp <node> [server] [world]", Permission.USER_UNSET_TEMP_PERMISSION);
     }
 
     @Override
@@ -32,15 +32,22 @@ public class UserUnsetTempPermission extends UserSubCommand {
         }
 
         try {
-            if (args.size() == 2) {
+            if (args.size() >= 2) {
                 final String server = args.get(1).toLowerCase();
                 if (Patterns.NON_ALPHA_NUMERIC.matcher(server).find()) {
                     Message.SERVER_INVALID_ENTRY.send(sender);
                     return;
                 }
 
-                user.unsetPermission(node, server, true);
-                Message.UNSET_TEMP_PERMISSION_SERVER_SUCCESS.send(sender, node, user.getName(), server);
+                if (args.size() == 2) {
+                    user.unsetPermission(node, server, true);
+                    Message.UNSET_TEMP_PERMISSION_SERVER_SUCCESS.send(sender, node, user.getName(), server);
+                } else {
+                    final String world = args.get(2).toLowerCase();
+                    user.unsetPermission(node, server, world, true);
+                    Message.UNSET_TEMP_PERMISSION_SERVER_WORLD_SUCCESS.send(sender, node, user.getName(), server, world);
+                }
+
             } else {
                 user.unsetPermission(node, true);
                 Message.UNSET_TEMP_PERMISSION_SUCCESS.send(sender, node, user.getName());
@@ -54,6 +61,6 @@ public class UserUnsetTempPermission extends UserSubCommand {
 
     @Override
     public boolean isArgLengthInvalid(int argLength) {
-        return argLength != 1 && argLength != 2;
+        return argLength != 1 && argLength != 2 && argLength != 3;
     }
 }

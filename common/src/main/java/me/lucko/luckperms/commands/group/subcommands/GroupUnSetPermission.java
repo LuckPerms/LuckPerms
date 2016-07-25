@@ -14,7 +14,7 @@ import java.util.List;
 public class GroupUnSetPermission extends GroupSubCommand {
     public GroupUnSetPermission() {
         super("unset", "Unsets a permission for a group",
-                "/%s group <group> unset <node> [server]", Permission.GROUP_UNSETPERMISSION);
+                "/%s group <group> unset <node> [server] [world]", Permission.GROUP_UNSETPERMISSION);
     }
 
     @Override
@@ -32,15 +32,22 @@ public class GroupUnSetPermission extends GroupSubCommand {
         }
 
         try {
-            if (args.size() == 2) {
+            if (args.size() >= 2) {
                 final String server = args.get(1).toLowerCase();
                 if (Patterns.NON_ALPHA_NUMERIC.matcher(server).find()) {
                     Message.SERVER_INVALID_ENTRY.send(sender);
                     return;
                 }
 
-                group.unsetPermission(node, server);
-                Message.UNSETPERMISSION_SERVER_SUCCESS.send(sender, node, group.getName(), server);
+                if (args.size() == 2) {
+                    group.unsetPermission(node, server);
+                    Message.UNSETPERMISSION_SERVER_SUCCESS.send(sender, node, group.getName(), server);
+                } else {
+                    final String world = args.get(2).toLowerCase();
+                    group.unsetPermission(node, server, world);
+                    Message.UNSETPERMISSION_SERVER_WORLD_SUCCESS.send(sender, node, group.getName(), server, world);
+                }
+
             } else {
                 group.unsetPermission(node);
                 Message.UNSETPERMISSION_SUCCESS.send(sender, node, group.getName());
@@ -54,6 +61,6 @@ public class GroupUnSetPermission extends GroupSubCommand {
 
     @Override
     public boolean isArgLengthInvalid(int argLength) {
-        return argLength != 1 && argLength != 2;
+        return argLength != 1 && argLength != 2 && argLength != 3;
     }
 }

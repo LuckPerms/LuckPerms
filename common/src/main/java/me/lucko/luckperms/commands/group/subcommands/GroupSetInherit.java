@@ -14,7 +14,7 @@ import java.util.List;
 public class GroupSetInherit extends GroupSubCommand {
     public GroupSetInherit() {
         super("setinherit", "Sets another group for this group to inherit permissions from",
-                "/%s group <group> setinherit <group> [server]", Permission.GROUP_SETINHERIT);
+                "/%s group <group> setinherit <group> [server] [world]", Permission.GROUP_SETINHERIT);
     }
 
     @Override
@@ -31,15 +31,22 @@ public class GroupSetInherit extends GroupSubCommand {
                 Message.GROUP_LOAD_ERROR.send(sender);
             } else {
                 try {
-                    if (args.size() == 2) {
+                    if (args.size() >= 2) {
                         final String server = args.get(1).toLowerCase();
                         if (Patterns.NON_ALPHA_NUMERIC.matcher(server).find()) {
                             Message.SERVER_INVALID_ENTRY.send(sender);
                             return;
                         }
 
-                        group.setPermission("group." + groupName, true, server);
-                        Message.GROUP_SETINHERIT_SERVER_SUCCESS.send(sender, group.getName(), groupName, server);
+                        if (args.size() == 2) {
+                            group.setPermission("group." + groupName, true, server);
+                            Message.GROUP_SETINHERIT_SERVER_SUCCESS.send(sender, group.getName(), groupName, server);
+                        } else {
+                            final String world = args.get(2).toLowerCase();
+                            group.setPermission("group." + groupName, true, server, world);
+                            Message.GROUP_SETINHERIT_SERVER_WORLD_SUCCESS.send(sender, group.getName(), groupName, server, world);
+                        }
+
                     } else {
                         group.setPermission("group." + groupName, true);
                         Message.GROUP_SETINHERIT_SUCCESS.send(sender, group.getName(), groupName);
@@ -60,6 +67,6 @@ public class GroupSetInherit extends GroupSubCommand {
 
     @Override
     public boolean isArgLengthInvalid(int argLength) {
-        return argLength != 1 && argLength != 2;
+        return argLength != 1 && argLength != 2 && argLength != 3;
     }
 }

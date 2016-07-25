@@ -14,7 +14,7 @@ import java.util.List;
 
 public class UserAddGroup extends UserSubCommand {
     public UserAddGroup() {
-        super("addgroup", "Adds the user to a group", "/%s user <user> addgroup <group> [server]", Permission.USER_ADDGROUP);
+        super("addgroup", "Adds the user to a group", "/%s user <user> addgroup <group> [server] [world]", Permission.USER_ADDGROUP);
     }
 
     @Override
@@ -37,15 +37,22 @@ public class UserAddGroup extends UserSubCommand {
                 }
 
                 try {
-                    if (args.size() == 2) {
+                    if (args.size() >= 2) {
                         final String server = args.get(1).toLowerCase();
                         if (Patterns.NON_ALPHA_NUMERIC.matcher(server).find()) {
                             Message.SERVER_INVALID_ENTRY.send(sender);
                             return;
                         }
 
-                        user.addGroup(group, server);
-                        Message.USER_ADDGROUP_SERVER_SUCCESS.send(sender, user.getName(), groupName, server);
+                        if (args.size() == 2) {
+                            user.addGroup(group, server);
+                            Message.USER_ADDGROUP_SERVER_SUCCESS.send(sender, user.getName(), groupName, server);
+                        } else {
+                            final String world = args.get(2).toLowerCase();
+                            user.addGroup(group, server, world);
+                            Message.USER_ADDGROUP_SERVER_WORLD_SUCCESS.send(sender, user.getName(), groupName, server, world);
+                        }
+
                     } else {
                         user.addGroup(group);
                         Message.USER_ADDGROUP_SUCCESS.send(sender, user.getName(), groupName);
@@ -66,6 +73,6 @@ public class UserAddGroup extends UserSubCommand {
 
     @Override
     public boolean isArgLengthInvalid(int argLength) {
-        return (argLength != 1 && argLength != 2);
+        return (argLength != 1 && argLength != 2 && argLength != 3);
     }
 }

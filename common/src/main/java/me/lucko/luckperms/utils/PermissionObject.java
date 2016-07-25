@@ -93,11 +93,48 @@ public abstract class PermissionObject {
      * Checks to see the the object has a permission on a certain server
      * @param node The permission node
      * @param b If the node is true/false(negated)
+     * @param server The server
+     * @param world The world
+     * @return true if the user has the permission
+     */
+    public boolean hasPermission(String node, boolean b, String server, String world) {
+        return hasPermission(server + "-" + world + "/" + node, b);
+    }
+
+    /**
+     * Checks to see the the object has a permission on a certain server
+     * @param node The permission node
+     * @param b If the node is true/false(negated)
      * @param temporary if the permission is temporary
      * @return true if the user has the permission
      */
     public boolean hasPermission(String node, boolean b, boolean temporary) {
         return hasPermission(node + (temporary ? "$a" : ""), b);
+    }
+
+    /**
+     * Checks to see the the object has a permission on a certain server
+     * @param node The permission node
+     * @param b If the node is true/false(negated)
+     * @param server The server to check on
+     * @param temporary if the permission is temporary
+     * @return true if the user has the permission
+     */
+    public boolean hasPermission(String node, boolean b, String server, boolean temporary) {
+        return hasPermission(server + "/" + node + (temporary ? "$a" : ""), b);
+    }
+
+    /**
+     * Checks to see the the object has a permission on a certain server
+     * @param node The permission node
+     * @param b If the node is true/false(negated)
+     * @param server The server to check on
+     * @param world The world to check on
+     * @param temporary if the permission is temporary
+     * @return true if the user has the permission
+     */
+    public boolean hasPermission(String node, boolean b, String server, String world, boolean temporary) {
+        return hasPermission(server + "-" + world + "/" + node + (temporary ? "$a" : ""), b);
     }
 
     /**
@@ -124,7 +161,26 @@ public abstract class PermissionObject {
      * @return true if the user inherits the permission
      */
     public boolean inheritsPermission(String node, boolean b, String server) {
+        if (server.contains("-")) {
+            // Use other method
+            final String[] parts = Patterns.WORLD_SPLIT.split(server, 2);
+            return inheritsPermission(node, b, parts[0], parts[1]);
+        }
+
         final Map<String, Boolean> local = getLocalPermissions(server, null);
+        return hasPermission(local, node, b);
+    }
+
+    /**
+     * Checks to see the the object inherits a permission on a certain server
+     * @param node The permission node
+     * @param b If the node is true/false(negated)
+     * @param server The server
+     * @param world The world
+     * @return true if the user inherits the permission
+     */
+    public boolean inheritsPermission(String node, boolean b, String server, String world) {
+        final Map<String, Boolean> local = getLocalPermissions(server, world, null);
         return hasPermission(local, node, b);
     }
 
@@ -137,6 +193,31 @@ public abstract class PermissionObject {
      */
     public boolean inheritsPermission(String node, boolean b, boolean temporary) {
         return inheritsPermission(node + (temporary ? "$a" : ""), b);
+    }
+
+    /**
+     * Checks to see if the object inherits a certain permission
+     * @param node The permission node
+     * @param b If the node is true/false(negated)
+     * @param server The server
+     * @param temporary if the permission is temporary
+     * @return true if the user inherits the permission
+     */
+    public boolean inheritsPermission(String node, boolean b, String server, boolean temporary) {
+        return inheritsPermission(server + "/" + node + (temporary ? "$a" : ""), b);
+    }
+
+    /**
+     * Checks to see if the object inherits a certain permission
+     * @param node The permission node
+     * @param b If the node is true/false(negated)
+     * @param server The server
+     * @param world The world
+     * @param temporary if the permission is temporary
+     * @return true if the user inherits the permission
+     */
+    public boolean inheritsPermission(String node, boolean b, String server, String world, boolean temporary) {
+        return inheritsPermission(server + "-" + world + "/" + node + (temporary ? "$a" : ""), b);
     }
 
     /**
@@ -168,6 +249,18 @@ public abstract class PermissionObject {
      * Sets a permission for the object
      * @param node The node to set
      * @param value What to set the node to - true/false(negated)
+     * @param server The server to set the permission on
+     * @param world The world to set the permission on
+     * @throws ObjectAlreadyHasException if the object already has the permission
+     */
+    public void setPermission(String node, boolean value, String server, String world) throws ObjectAlreadyHasException {
+        setPermission(server + "-" + world + "/" + node, value);
+    }
+
+    /**
+     * Sets a permission for the object
+     * @param node The node to set
+     * @param value What to set the node to - true/false(negated)
      * @param expireAt The time in unixtime when the permission will expire
      * @throws ObjectAlreadyHasException if the object already has the permission
      */
@@ -185,6 +278,19 @@ public abstract class PermissionObject {
      */
     public void setPermission(String node, boolean value, String server, long expireAt) throws ObjectAlreadyHasException {
         setPermission(node + "$" + expireAt, value, server);
+    }
+
+    /**
+     * Sets a permission for the object
+     * @param node The node to set
+     * @param value What to set the node to - true/false(negated)
+     * @param server The server to set the permission on
+     * @param world The world to set the permission on
+     * @param expireAt The time in unixtime when the permission will expire
+     * @throws ObjectAlreadyHasException if the object already has the permission
+     */
+    public void setPermission(String node, boolean value, String server, String world, long expireAt) throws ObjectAlreadyHasException {
+        setPermission(node + "$" + expireAt, value, server, world);
     }
 
     /**
@@ -238,11 +344,45 @@ public abstract class PermissionObject {
      * Unsets a permission for the object
      * @param node The node to be unset
      * @param server The server to unset the node on
+     * @param world The world to unset the node on
+     * @throws ObjectLacksException if the node wasn't already set
+     */
+    public void unsetPermission(String node, String server, String world) throws ObjectLacksException {
+        unsetPermission(server + "-" + world + "/" + node);
+    }
+
+    /**
+     * Unsets a permission for the object
+     * @param node The node to be unset
+     * @param server The server to unset the node on
      * @param temporary if the permission being unset is temporary
      * @throws ObjectLacksException if the node wasn't already set
      */
     public void unsetPermission(String node, String server, boolean temporary) throws ObjectLacksException {
         unsetPermission(server + "/" + node, temporary);
+    }
+
+    /**
+     * Unsets a permission for the object
+     * @param node The node to be unset
+     * @param server The server to unset the node on
+     * @param world The world to unset the node on
+     * @param temporary if the permission being unset is temporary
+     * @throws ObjectLacksException if the node wasn't already set
+     */
+    public void unsetPermission(String node, String server, String world, boolean temporary) throws ObjectLacksException {
+        unsetPermission(server + "-" + world + "/" + node, temporary);
+    }
+
+    /**
+     * Gets the permissions and inherited permissions that apply to a specific server
+     * @param server The server to get nodes for
+     * @param world The world to get nodes for
+     * @param excludedGroups Groups that shouldn't be inherited (to prevent circular inheritance issues)
+     * @return a {@link Map} of the permissions
+     */
+    public Map<String, Boolean> getLocalPermissions(String server, String world, List<String> excludedGroups) {
+        return getPermissions(server, world, excludedGroups, plugin.getConfiguration().getIncludeGlobalPerms());
     }
 
     /**
@@ -252,7 +392,7 @@ public abstract class PermissionObject {
      * @return a {@link Map} of the permissions
      */
     public Map<String, Boolean> getLocalPermissions(String server, List<String> excludedGroups) {
-        return getPermissions(server, excludedGroups, plugin.getConfiguration().getIncludeGlobalPerms());
+        return getLocalPermissions(server, null, excludedGroups);
     }
 
     /**
@@ -287,7 +427,7 @@ public abstract class PermissionObject {
                 .forEach(s -> this.nodes.remove(s));
     }
 
-    protected Map<String, Boolean> convertTemporaryPerms() {
+    private Map<String, Boolean> convertTemporaryPerms() {
         auditTemporaryPermissions();
 
         Map<String, Boolean> nodes = new HashMap<>();
@@ -306,7 +446,7 @@ public abstract class PermissionObject {
         return nodes;
     }
 
-    private Map<String, Boolean> getPermissions(String server, List<String> excludedGroups, boolean includeGlobal) {
+    protected Map<String, Boolean> getPermissions(String server, String world, List<String> excludedGroups, boolean includeGlobal) {
         if (excludedGroups == null) {
             excludedGroups = new ArrayList<>();
         }
@@ -318,17 +458,25 @@ public abstract class PermissionObject {
             server = "global";
         }
 
+        if (world != null && world.equalsIgnoreCase("")) {
+            world = null;
+        }
+
         /*
         Priority:
 
-        1. server specific nodes
-        2. user nodes
-        3. server specific group nodes
-        4. group nodes
+        1. server+world specific nodes
+        2. server specific nodes
+        3. user nodes
+        4. server+world specific group nodes
+        5. server specific group nodes
+        6. group nodes
         */
 
+        final Map<String, Boolean> serverWorldSpecificNodes = new HashMap<>();
         final Map<String, Boolean> serverSpecificNodes = new HashMap<>();
         final Map<String, Boolean> userNodes = new HashMap<>();
+        final Map<String, Boolean> serverWorldSpecificGroups = new HashMap<>();
         final Map<String, Boolean> serverSpecificGroups = new HashMap<>();
         final Map<String, Boolean> groupNodes = new HashMap<>();
 
@@ -337,6 +485,33 @@ public abstract class PermissionObject {
             serverSpecific:
             if (node.getKey().contains("/")) {
                 String[] parts = Patterns.SERVER_SPLIT.split(node.getKey(), 2);
+                // 0=server(+world)   1=node
+
+                // WORLD SPECIFIC
+                if (parts[0].contains("-")) {
+                    String[] serverParts = Patterns.WORLD_SPLIT.split(parts[0], 2);
+                    // 0=server   1=world
+
+                    if ((!serverParts[0].equalsIgnoreCase("global") || !includeGlobal) && (!serverParts[0].equalsIgnoreCase(server))) {
+                        // GLOBAL AND UNWANTED OR SERVER SPECIFIC BUT DOES NOT APPLY :(((
+                        continue;
+                    }
+
+                    if (world != null && !serverParts[1].equalsIgnoreCase(world)) {
+                        // WORLD SPECIFIC BUT DOES NOT APPLY
+                        continue;
+                    }
+
+                    if (Patterns.GROUP_MATCH.matcher(parts[1]).matches()) {
+                        // SERVER+WORLD SPECIFIC AND GROUP
+                        serverWorldSpecificGroups.put(node.getKey(), node.getValue());
+                        continue;
+                    }
+
+                    // SERVER+WORLD SPECIFIC
+                    serverWorldSpecificNodes.put(node.getKey(), node.getValue());
+                    continue;
+                }
 
                 if (parts[0].equalsIgnoreCase("global")) {
                     // REGULAR
@@ -362,17 +537,30 @@ public abstract class PermissionObject {
             // Skip adding global permissions if they are not requested
             if (!includeGlobal) continue;
 
-            if (Patterns.GROUP_MATCH.matcher(node.getKey()).matches()) {
+            // Could be here if the server was set to global.
+            String n = node.getKey();
+            if (n.contains("/")) {
+                n = Patterns.SERVER_SPLIT.split(n, 2)[0];
+            }
+
+            if (Patterns.GROUP_MATCH.matcher(n).matches()) {
                 // GROUP
-                groupNodes.put(node.getKey(), node.getValue());
+                groupNodes.put(n, node.getValue());
                 continue;
             }
 
             // JUST NORMAL
-            userNodes.put(node.getKey(), node.getValue());
+            userNodes.put(n, node.getValue());
         }
 
         // If a group is negated at a higher priority, the group should not then be applied at a lower priority
+        serverWorldSpecificGroups.entrySet().stream().filter(node -> !node.getValue()).forEach(node -> {
+            groupNodes.remove(node.getKey());
+            groupNodes.remove(Patterns.SERVER_SPLIT.split(node.getKey(), 2)[1]);
+            serverSpecificGroups.remove(node.getKey());
+            serverSpecificGroups.remove(Patterns.SERVER_SPLIT.split(node.getKey(), 2)[1]);
+            serverSpecificGroups.remove(Patterns.WORLD_SPLIT.split(node.getKey(), 2)[0] + "/" + Patterns.SERVER_SPLIT.split(node.getKey(), 2)[1]);
+        });
         serverSpecificGroups.entrySet().stream().filter(node -> !node.getValue()).forEach(node -> {
             groupNodes.remove(node.getKey());
             groupNodes.remove(Patterns.SERVER_SPLIT.split(node.getKey(), 2)[1]);
@@ -399,24 +587,26 @@ public abstract class PermissionObject {
             }
         }
 
-        // Apply next priority: serverSpecificGroups
-        for (Map.Entry<String, Boolean> groupNode : serverSpecificGroups.entrySet()) {
-            final String rawNode = Patterns.SERVER_SPLIT.split(groupNode.getKey())[1];
+        // Apply next priorities: serverSpecificGroups and then serverWorldSpecificGroups
+        for (Map<String, Boolean> m : Arrays.asList(serverSpecificGroups, serverWorldSpecificGroups)) {
+            for (Map.Entry<String, Boolean> groupNode : m.entrySet()) {
+                final String rawNode = Patterns.SERVER_SPLIT.split(groupNode.getKey())[1];
 
-            // Add the actual group perm node, so other plugins can hook
-            perms.put(rawNode, groupNode.getValue());
+                // Add the actual group perm node, so other plugins can hook
+                perms.put(rawNode, groupNode.getValue());
 
-            // Don't add negated groups
-            if (!groupNode.getValue()) continue;
+                // Don't add negated groups
+                if (!groupNode.getValue()) continue;
 
-            String groupName = Patterns.DOT_SPLIT.split(rawNode, 2)[1];
-            if (!excludedGroups.contains(groupName)) {
-                Group group = plugin.getGroupManager().getGroup(groupName);
-                if (group != null) {
-                    perms.putAll(group.getLocalPermissions(server, excludedGroups));
-                } else {
-                    plugin.getLogger().warning("Error whilst refreshing the permissions of '" + objectName + "'." +
-                            "\n The group '" + groupName + "' is not loaded.");
+                String groupName = Patterns.DOT_SPLIT.split(rawNode, 2)[1];
+                if (!excludedGroups.contains(groupName)) {
+                    Group group = plugin.getGroupManager().getGroup(groupName);
+                    if (group != null) {
+                        perms.putAll(group.getLocalPermissions(server, excludedGroups));
+                    } else {
+                        plugin.getLogger().warning("Error whilst refreshing the permissions of '" + objectName + "'." +
+                                "\n The group '" + groupName + "' is not loaded.");
+                    }
                 }
             }
         }
@@ -424,10 +614,12 @@ public abstract class PermissionObject {
         // Apply next priority: userNodes
         perms.putAll(userNodes);
 
-        // Apply highest priority: serverSpecificNodes
-        for (Map.Entry<String, Boolean> node : serverSpecificNodes.entrySet()) {
-            final String rawNode = Patterns.SERVER_SPLIT.split(node.getKey())[1];
-            perms.put(rawNode, node.getValue());
+        // Apply final priorities: serverSpecificNodes and then serverWorldSpecificNodes
+        for (Map<String, Boolean> m : Arrays.asList(serverSpecificNodes, serverWorldSpecificNodes)) {
+            for (Map.Entry<String, Boolean> node : m.entrySet()) {
+                final String rawNode = Patterns.SERVER_SPLIT.split(node.getKey())[1];
+                perms.put(rawNode, node.getValue());
+            }
         }
 
         return perms;

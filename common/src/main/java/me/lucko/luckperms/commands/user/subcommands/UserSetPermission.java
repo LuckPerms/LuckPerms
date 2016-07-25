@@ -14,7 +14,7 @@ import java.util.List;
 public class UserSetPermission extends UserSubCommand {
     public UserSetPermission() {
         super("set", "Sets a permission for a user",
-                "/%s user <user> set <node> <true|false> [server]", Permission.USER_SETPERMISSION);
+                "/%s user <user> set <node> <true|false> [server] [world]", Permission.USER_SETPERMISSION);
     }
 
     @Override
@@ -40,15 +40,22 @@ public class UserSetPermission extends UserSubCommand {
         boolean b = Boolean.parseBoolean(bool);
 
         try {
-            if (args.size() == 3) {
+            if (args.size() >= 3) {
                 final String server = args.get(2).toLowerCase();
                 if (Patterns.NON_ALPHA_NUMERIC.matcher(server).find()) {
                     Message.SERVER_INVALID_ENTRY.send(sender);
                     return;
                 }
 
-                user.setPermission(node, b, server);
-                Message.SETPERMISSION_SERVER_SUCCESS.send(sender, node, bool, user.getName(), server);
+                if (args.size() == 3) {
+                    user.setPermission(node, b, server);
+                    Message.SETPERMISSION_SERVER_SUCCESS.send(sender, node, bool, user.getName(), server);
+                } else {
+                    final String world = args.get(3).toLowerCase();
+                    user.setPermission(node, b, server, world);
+                    Message.SETPERMISSION_SERVER_WORLD_SUCCESS.send(sender, node, bool, user.getName(), server, world);
+                }
+
             } else {
                 user.setPermission(node, b);
                 Message.SETPERMISSION_SUCCESS.send(sender, node, bool, user.getName());
@@ -67,6 +74,6 @@ public class UserSetPermission extends UserSubCommand {
 
     @Override
     public boolean isArgLengthInvalid(int argLength) {
-        return argLength != 2 && argLength != 3;
+        return argLength != 2 && argLength != 3 && argLength != 4;
     }
 }

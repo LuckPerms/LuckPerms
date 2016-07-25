@@ -65,8 +65,23 @@ class PermissionObjectLink implements PermissionObject {
     }
 
     @Override
+    public boolean hasPermission(@NonNull String node, @NonNull boolean b, @NonNull String server, @NonNull String world) {
+        return master.hasPermission(node, b, checkServer(server), world);
+    }
+
+    @Override
     public boolean hasPermission(@NonNull String node, @NonNull boolean b, @NonNull boolean temporary) {
         return master.hasPermission(node, b, temporary);
+    }
+
+    @Override
+    public boolean hasPermission(@NonNull String node, @NonNull boolean b, @NonNull String server, @NonNull boolean temporary) {
+        return master.hasPermission(node, b, checkServer(server), temporary);
+    }
+
+    @Override
+    public boolean hasPermission(@NonNull String node, @NonNull boolean b, @NonNull String server, @NonNull String world, @NonNull boolean temporary) {
+        return master.hasPermission(node, b, checkServer(server), world, temporary);
     }
 
     @Override
@@ -80,8 +95,23 @@ class PermissionObjectLink implements PermissionObject {
     }
 
     @Override
+    public boolean inheritsPermission(@NonNull String node, @NonNull boolean b, @NonNull String server, @NonNull String world) {
+        return master.inheritsPermission(node, b, checkServer(server), world);
+    }
+
+    @Override
     public boolean inheritsPermission(@NonNull String node, @NonNull boolean b, @NonNull boolean temporary) {
         return master.inheritsPermission(node, b, temporary);
+    }
+
+    @Override
+    public boolean inheritsPermission(@NonNull String node, @NonNull boolean b, @NonNull String server, @NonNull boolean temporary) {
+        return master.inheritsPermission(node, b, checkServer(server), temporary);
+    }
+
+    @Override
+    public boolean inheritsPermission(@NonNull String node, @NonNull boolean b, @NonNull String server, @NonNull String world, @NonNull boolean temporary) {
+        return master.inheritsPermission(node, b, checkServer(server), world, temporary);
     }
 
     @Override
@@ -95,6 +125,11 @@ class PermissionObjectLink implements PermissionObject {
     }
 
     @Override
+    public void setPermission(@NonNull String node, @NonNull boolean value, @NonNull String server, @NonNull String world) throws ObjectAlreadyHasException {
+        master.setPermission(checkNode(node), value, checkServer(server), world);
+    }
+
+    @Override
     public void setPermission(@NonNull String node, @NonNull boolean value, @NonNull long expireAt) throws ObjectAlreadyHasException {
         master.setPermission(checkNode(node), value, checkTime(expireAt));
     }
@@ -102,6 +137,11 @@ class PermissionObjectLink implements PermissionObject {
     @Override
     public void setPermission(@NonNull String node, @NonNull boolean value, @NonNull String server, @NonNull long expireAt) throws ObjectAlreadyHasException {
         master.setPermission(checkNode(node), value, checkServer(server), checkTime(expireAt));
+    }
+
+    @Override
+    public void setPermission(@NonNull String node, @NonNull boolean value, @NonNull String server, @NonNull String world, @NonNull long expireAt) throws ObjectAlreadyHasException {
+        master.setPermission(checkNode(node), value, checkServer(server), world, checkTime(expireAt));
     }
 
     @Override
@@ -120,8 +160,23 @@ class PermissionObjectLink implements PermissionObject {
     }
 
     @Override
+    public void unsetPermission(@NonNull String node, @NonNull String server, @NonNull String world) throws ObjectLacksException {
+        master.unsetPermission(checkNode(node), checkServer(server), world);
+    }
+
+    @Override
     public void unsetPermission(@NonNull String node, @NonNull String server, @NonNull boolean temporary) throws ObjectLacksException {
         master.unsetPermission(checkNode(node), checkServer(server), temporary);
+    }
+
+    @Override
+    public void unsetPermission(@NonNull String node, @NonNull String server, @NonNull String world, @NonNull boolean temporary) throws ObjectLacksException {
+        master.unsetPermission(checkNode(node), checkServer(server), world, temporary);
+    }
+
+    @Override
+    public Map<String, Boolean> getLocalPermissions(String server, String world, List<String> excludedGroups) {
+        return master.getLocalPermissions(server, world, excludedGroups);
     }
 
     @Override

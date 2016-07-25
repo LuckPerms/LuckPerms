@@ -23,7 +23,7 @@ public class BukkitUserManager extends UserManager {
                 BukkitUser u = (BukkitUser) user;
 
                 if (u.getAttachment() != null) {
-                    Player player = plugin.getServer().getPlayer(u.getUuid());
+                    Player player = plugin.getServer().getPlayer(plugin.getUuidCache().getExternalUUID(u.getUuid()));
 
                     if (player != null) {
                         player.removeAttachment(u.getAttachment());
@@ -38,7 +38,7 @@ public class BukkitUserManager extends UserManager {
 
     @Override
     public void cleanupUser(User user) {
-        if (plugin.getServer().getPlayer(user.getUuid()) == null) {
+        if (plugin.getServer().getPlayer(plugin.getUuidCache().getExternalUUID(user.getUuid())) == null) {
             unloadUser(user);
         }
     }
@@ -58,7 +58,7 @@ public class BukkitUserManager extends UserManager {
         // Sometimes called async, so we need to get the players on the Bukkit thread.
         plugin.doSync(() -> {
             Set<UUID> players = plugin.getServer().getOnlinePlayers().stream()
-                    .map(p -> plugin.getUuidCache().getUUID(p.getName(), p.getUniqueId()))
+                    .map(p -> plugin.getUuidCache().getUUID(p.getUniqueId()))
                     .collect(Collectors.toSet());
             plugin.doAsync(() -> players.forEach(u -> plugin.getDatastore().loadUser(u)));
         });

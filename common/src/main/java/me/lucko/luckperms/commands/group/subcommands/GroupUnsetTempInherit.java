@@ -14,7 +14,7 @@ import java.util.List;
 public class GroupUnsetTempInherit extends GroupSubCommand {
     public GroupUnsetTempInherit() {
         super("unsettempinherit", "Unsets another group for this group to inherit permissions from",
-                "/%s group <group> unsettempinherit <group> [server]", Permission.GROUP_UNSET_TEMP_INHERIT);
+                "/%s group <group> unsettempinherit <group> [server] [world]", Permission.GROUP_UNSET_TEMP_INHERIT);
     }
 
     @Override
@@ -27,15 +27,22 @@ public class GroupUnsetTempInherit extends GroupSubCommand {
         }
 
         try {
-            if (args.size() == 2) {
+            if (args.size() >= 2) {
                 final String server = args.get(1).toLowerCase();
                 if (Patterns.NON_ALPHA_NUMERIC.matcher(server).find()) {
                     Message.SERVER_INVALID_ENTRY.send(sender);
                     return;
                 }
 
-                group.unsetPermission("group." + groupName, server, true);
-                Message.GROUP_UNSET_TEMP_INHERIT_SERVER_SUCCESS.send(sender, group.getName(), groupName, server);
+                if (args.size() == 2) {
+                    group.unsetPermission("group." + groupName, server, true);
+                    Message.GROUP_UNSET_TEMP_INHERIT_SERVER_SUCCESS.send(sender, group.getName(), groupName, server);
+                } else {
+                    final String world = args.get(2).toLowerCase();
+                    group.unsetPermission("group." + groupName, server, world, true);
+                    Message.GROUP_UNSET_TEMP_INHERIT_SERVER_WORLD_SUCCESS.send(sender, group.getName(), groupName, server, world);
+                }
+
             } else {
                 group.unsetPermission("group." + groupName, true);
                 Message.GROUP_UNSET_TEMP_INHERIT_SUCCESS.send(sender, group.getName(), groupName);
@@ -54,6 +61,6 @@ public class GroupUnsetTempInherit extends GroupSubCommand {
 
     @Override
     public boolean isArgLengthInvalid(int argLength) {
-        return argLength != 1 && argLength != 2;
+        return argLength != 1 && argLength != 2 && argLength != 3;
     }
 }

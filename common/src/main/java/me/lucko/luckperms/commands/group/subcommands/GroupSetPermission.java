@@ -13,7 +13,7 @@ import java.util.List;
 
 public class GroupSetPermission extends GroupSubCommand {
     public GroupSetPermission() {
-        super("set", "Sets a permission for a group", "/%s group <group> set <node> <true|false> [server]",
+        super("set", "Sets a permission for a group", "/%s group <group> set <node> <true|false> [server] [world]",
                 Permission.GROUP_SETPERMISSION);
     }
 
@@ -40,15 +40,22 @@ public class GroupSetPermission extends GroupSubCommand {
         boolean b = Boolean.parseBoolean(bool);
 
         try {
-            if (args.size() == 3) {
+            if (args.size() >= 3) {
                 final String server = args.get(2).toLowerCase();
                 if (Patterns.NON_ALPHA_NUMERIC.matcher(server).find()) {
                     Message.SERVER_INVALID_ENTRY.send(sender);
                     return;
                 }
 
-                group.setPermission(node, b, server);
-                Message.SETPERMISSION_SERVER_SUCCESS.send(sender, node, bool, group.getName(), server);
+                if (args.size() == 3) {
+                    group.setPermission(node, b, server);
+                    Message.SETPERMISSION_SERVER_SUCCESS.send(sender, node, bool, group.getName(), server);
+                } else {
+                    final String world = args.get(3).toLowerCase();
+                    group.setPermission(node, b, server, world);
+                    Message.SETPERMISSION_SERVER_WORLD_SUCCESS.send(sender, node, bool, group.getName(), server, world);
+                }
+
             } else {
                 group.setPermission(node, b);
                 Message.SETPERMISSION_SUCCESS.send(sender, node, bool, group.getName());
@@ -67,6 +74,6 @@ public class GroupSetPermission extends GroupSubCommand {
 
     @Override
     public boolean isArgLengthInvalid(int argLength) {
-        return argLength != 2 && argLength != 3;
+        return argLength != 2 && argLength != 3 && argLength != 4;
     }
 }

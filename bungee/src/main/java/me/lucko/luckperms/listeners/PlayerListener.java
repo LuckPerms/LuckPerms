@@ -12,6 +12,7 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
+import net.md_5.bungee.api.event.ServerSwitchEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
@@ -39,18 +40,20 @@ public class PlayerListener implements Listener {
             if (!cache.isOnlineMode()) {
                 UUID uuid = plugin.getDatastore().getUUID(c.getName());
                 if (uuid != null) {
-                    cache.addToCache(c.getName(), uuid);
+                    cache.addToCache(c.getUniqueId(), uuid);
                 } else {
-                    cache.addToCache(c.getName(), c.getUniqueId());
+                    // No previous data for this player
+                    cache.addToCache(c.getUniqueId(), c.getUniqueId());
                     plugin.getDatastore().saveUUIDData(c.getName(), c.getUniqueId());
                 }
             } else {
+                // Online mode, no cache needed. This is just for name -> uuid lookup.
                 plugin.getDatastore().saveUUIDData(c.getName(), c.getUniqueId());
             }
 
             // We have to make a new user on this thread whilst the connection is being held, or we get concurrency issues as the Bukkit server
             // and the BungeeCord server try to make a new user at the same time.
-            plugin.getDatastore().loadOrCreateUser(cache.getUUID(c.getName(), c.getUniqueId()), c.getName());
+            plugin.getDatastore().loadOrCreateUser(cache.getUUID(c.getUniqueId()), c.getName());
             e.completeIntent(plugin);
         });
     }
@@ -60,7 +63,7 @@ public class PlayerListener implements Listener {
         final ProxiedPlayer player = e.getPlayer();
         final WeakReference<ProxiedPlayer> p = new WeakReference<>(player);
 
-        final User user = plugin.getUserManager().getUser(plugin.getUuidCache().getUUID(e.getPlayer().getName(), e.getPlayer().getUniqueId()));
+        final User user = plugin.getUserManager().getUser(plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId()));
         if (user == null) {
             plugin.getProxy().getScheduler().schedule(plugin, () -> {
                 final ProxiedPlayer pl = p.get();
@@ -79,9 +82,17 @@ public class PlayerListener implements Listener {
         final UuidCache cache = plugin.getUuidCache();
 
         // Unload the user from memory when they disconnect;
-        cache.clearCache(player.getName());
+        cache.clearCache(player.getUniqueId());
 
-        final User user = plugin.getUserManager().getUser(cache.getUUID(player.getName(), player.getUniqueId()));
+        final User user = plugin.getUserManager().getUser(cache.getUUID(player.getUniqueId()));
         plugin.getUserManager().unloadUser(user);
+    }
+
+    @EventHandler
+    public void onPlayerServerSwitch(ServerSwitchEvent e) {
+        final User user = plugin.getUserManager().getUser(plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId()));
+        if (user != null) {
+            user.refreshPermissions();
+        }
     }
 }

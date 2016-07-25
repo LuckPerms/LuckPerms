@@ -14,7 +14,7 @@ import java.util.List;
 public class UserHasPerm extends UserSubCommand {
     public UserHasPerm() {
         super("haspermission", "Checks to see if a user has a certain permission node",
-                "/%s user <user> haspermission <node> [server]", Permission.USER_HASPERMISSION);
+                "/%s user <user> haspermission <node> [server] [world]", Permission.USER_HASPERMISSION);
     }
 
     @Override
@@ -25,7 +25,12 @@ public class UserHasPerm extends UserSubCommand {
                 return;
             }
 
-            Util.sendBoolean(sender, args.get(0), user.hasPermission(args.get(0), true, args.get(1)));
+            if (args.size() == 2) {
+                Util.sendBoolean(sender, args.get(0), user.hasPermission(args.get(0), true, args.get(1)));
+            } else {
+                Util.sendBoolean(sender, args.get(0), user.hasPermission(args.get(0), true, args.get(1), args.get(2)));
+            }
+
         } else {
             Util.sendBoolean(sender, args.get(0), user.hasPermission(args.get(0), true, "global"));
         }
@@ -33,6 +38,6 @@ public class UserHasPerm extends UserSubCommand {
 
     @Override
     public boolean isArgLengthInvalid(int argLength) {
-        return argLength != 1 && argLength != 2;
+        return argLength != 1 && argLength != 2 && argLength != 3;
     }
 }

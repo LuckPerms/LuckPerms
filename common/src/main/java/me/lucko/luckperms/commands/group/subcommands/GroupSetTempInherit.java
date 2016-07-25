@@ -15,7 +15,7 @@ import java.util.List;
 public class GroupSetTempInherit extends GroupSubCommand {
     public GroupSetTempInherit() {
         super("settempinherit", "Sets another group for this group to inherit permissions from temporarily",
-                "/%s group <group> settempinherit <group> <duration> [server]", Permission.GROUP_SET_TEMP_INHERIT);
+                "/%s group <group> settempinherit <group> <duration> [server] [world]", Permission.GROUP_SET_TEMP_INHERIT);
     }
 
     @Override
@@ -45,16 +45,24 @@ public class GroupSetTempInherit extends GroupSubCommand {
                 Message.GROUP_LOAD_ERROR.send(sender);
             } else {
                 try {
-                    if (args.size() == 3) {
+                    if (args.size() >= 3) {
                         final String server = args.get(2).toLowerCase();
                         if (Patterns.NON_ALPHA_NUMERIC.matcher(server).find()) {
                             Message.SERVER_INVALID_ENTRY.send(sender);
                             return;
                         }
 
-                        group.setPermission("group." + groupName, true, server, duration);
-                        Message.GROUP_SET_TEMP_INHERIT_SERVER_SUCCESS.send(sender, group.getName(), groupName, server,
-                                DateUtil.formatDateDiff(duration));
+                        if (args.size() == 3) {
+                            group.setPermission("group." + groupName, true, server, duration);
+                            Message.GROUP_SET_TEMP_INHERIT_SERVER_SUCCESS.send(sender, group.getName(), groupName, server,
+                                    DateUtil.formatDateDiff(duration));
+                        } else {
+                            final String world = args.get(3).toLowerCase();
+                            group.setPermission("group." + groupName, true, server, world, duration);
+                            Message.GROUP_SET_TEMP_INHERIT_SERVER_WORLD_SUCCESS.send(sender, group.getName(), groupName, server,
+                                    world, DateUtil.formatDateDiff(duration));
+                        }
+
                     } else {
                         group.setPermission("group." + groupName, true, duration);
                         Message.GROUP_SET_TEMP_INHERIT_SUCCESS.send(sender, group.getName(), groupName, DateUtil.formatDateDiff(duration));
@@ -75,6 +83,6 @@ public class GroupSetTempInherit extends GroupSubCommand {
 
     @Override
     public boolean isArgLengthInvalid(int argLength) {
-        return argLength != 2 && argLength != 3;
+        return argLength != 2 && argLength != 3 && argLength != 4;
     }
 }

@@ -14,8 +14,8 @@ import java.util.List;
 
 public class GroupSetTempPermission extends GroupSubCommand {
     public GroupSetTempPermission() {
-        super("settemp", "Sets a temporary permission for a group", "/%s group <group> settemp <node> <true|false> <duration> [server]",
-                Permission.GROUP_SET_TEMP_PERMISSION);
+        super("settemp", "Sets a temporary permission for a group",
+                "/%s group <group> settemp <node> <true|false> <duration> [server] [world]", Permission.GROUP_SET_TEMP_PERMISSION);
     }
 
     @Override
@@ -54,15 +54,24 @@ public class GroupSetTempPermission extends GroupSubCommand {
         }
 
         try {
-            if (args.size() == 4) {
+            if (args.size() >= 4) {
                 final String server = args.get(3).toLowerCase();
                 if (Patterns.NON_ALPHA_NUMERIC.matcher(server).find()) {
                     Message.SERVER_INVALID_ENTRY.send(sender);
                     return;
                 }
 
-                group.setPermission(node, b, server, duration);
-                Message.SETPERMISSION_TEMP_SERVER_SUCCESS.send(sender, node, bool, group.getName(), server, DateUtil.formatDateDiff(duration));
+                if (args.size() == 4) {
+                    group.setPermission(node, b, server, duration);
+                    Message.SETPERMISSION_TEMP_SERVER_SUCCESS.send(sender, node, bool, group.getName(), server,
+                            DateUtil.formatDateDiff(duration));
+                } else {
+                    final String world = args.get(4).toLowerCase();
+                    group.setPermission(node, b, server, world, duration);
+                    Message.SETPERMISSION_TEMP_SERVER_WORLD_SUCCESS.send(sender, node, bool, group.getName(), server,
+                            world, DateUtil.formatDateDiff(duration));
+                }
+
             } else {
                 group.setPermission(node, b, duration);
                 Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, bool, group.getName(), DateUtil.formatDateDiff(duration));
@@ -81,6 +90,6 @@ public class GroupSetTempPermission extends GroupSubCommand {
 
     @Override
     public boolean isArgLengthInvalid(int argLength) {
-        return argLength != 3 && argLength != 4;
+        return argLength != 3 && argLength != 4 && argLength != 5;
     }
 }

@@ -13,7 +13,7 @@ import java.util.List;
 
 public class UserRemoveGroup extends UserSubCommand {
     public UserRemoveGroup() {
-        super("removegroup", "Removes a user from a group", "/%s user <user> removegroup <group> [server]", Permission.USER_REMOVEGROUP);
+        super("removegroup", "Removes a user from a group", "/%s user <user> removegroup <group> [server] [world]", Permission.USER_REMOVEGROUP);
     }
 
     @Override
@@ -32,15 +32,22 @@ public class UserRemoveGroup extends UserSubCommand {
         }
 
         try {
-            if (args.size() == 2) {
+            if (args.size() >= 2) {
                 final String server = args.get(1).toLowerCase();
                 if (Patterns.NON_ALPHA_NUMERIC.matcher(server).find()) {
                     Message.SERVER_INVALID_ENTRY.send(sender);
                     return;
                 }
 
-                user.unsetPermission("group." + groupName, server);
-                Message.USER_REMOVEGROUP_SERVER_SUCCESS.send(sender, user.getName(), groupName, server);
+                if (args.size() == 2) {
+                    user.unsetPermission("group." + groupName, server);
+                    Message.USER_REMOVEGROUP_SERVER_SUCCESS.send(sender, user.getName(), groupName, server);
+                } else {
+                    final String world = args.get(2).toLowerCase();
+                    user.unsetPermission("group." + groupName, server, world);
+                    Message.USER_REMOVEGROUP_SERVER_WORLD_SUCCESS.send(sender, user.getName(), groupName, server, world);
+                }
+
             } else {
                 user.unsetPermission("group." + groupName);
                 Message.USER_REMOVEGROUP_SUCCESS.send(sender, user.getName(), groupName);
@@ -59,6 +66,6 @@ public class UserRemoveGroup extends UserSubCommand {
 
     @Override
     public boolean isArgLengthInvalid(int argLength) {
-        return (argLength != 1 && argLength != 2);
+        return (argLength != 1 && argLength != 2 && argLength != 3);
     }
 }

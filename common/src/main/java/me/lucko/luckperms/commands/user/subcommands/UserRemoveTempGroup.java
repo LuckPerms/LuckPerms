@@ -13,7 +13,8 @@ import java.util.List;
 
 public class UserRemoveTempGroup extends UserSubCommand {
     public UserRemoveTempGroup() {
-        super("removetempgroup", "Removes a user from a temporary group", "/%s user <user> removetempgroup <group> [server]", Permission.USER_REMOVETEMPGROUP);
+        super("removetempgroup", "Removes a user from a temporary group",
+                "/%s user <user> removetempgroup <group> [server] [world]", Permission.USER_REMOVETEMPGROUP);
     }
 
     @Override
@@ -26,15 +27,22 @@ public class UserRemoveTempGroup extends UserSubCommand {
         }
 
         try {
-            if (args.size() == 2) {
+            if (args.size() >= 2) {
                 final String server = args.get(1).toLowerCase();
                 if (Patterns.NON_ALPHA_NUMERIC.matcher(server).find()) {
                     Message.SERVER_INVALID_ENTRY.send(sender);
                     return;
                 }
 
-                user.unsetPermission("group." + groupName, server, true);
-                Message.USER_REMOVETEMPGROUP_SERVER_SUCCESS.send(sender, user.getName(), groupName, server);
+                if (args.size() == 2) {
+                    user.unsetPermission("group." + groupName, server, true);
+                    Message.USER_REMOVETEMPGROUP_SERVER_SUCCESS.send(sender, user.getName(), groupName, server);
+                } else {
+                    final String world = args.get(2).toLowerCase();
+                    user.unsetPermission("group." + groupName, server, world, true);
+                    Message.USER_REMOVETEMPGROUP_SERVER_WORLD_SUCCESS.send(sender, user.getName(), groupName, server, world);
+                }
+
             } else {
                 user.unsetPermission("group." + groupName, true);
                 Message.USER_REMOVETEMPGROUP_SUCCESS.send(sender, user.getName(), groupName);
@@ -53,6 +61,6 @@ public class UserRemoveTempGroup extends UserSubCommand {
 
     @Override
     public boolean isArgLengthInvalid(int argLength) {
-        return (argLength != 1 && argLength != 2);
+        return (argLength != 1 && argLength != 2 && argLength != 3);
     }
 }

@@ -24,7 +24,7 @@ public class BungeeUser extends User {
 
     @Override
     public void refreshPermissions() {
-        ProxiedPlayer player = plugin.getProxy().getPlayer(getUuid());
+        ProxiedPlayer player = plugin.getProxy().getPlayer(plugin.getUuidCache().getExternalUUID(getUuid()));
         if (player == null) return;
 
         // Clear existing permissions
@@ -32,7 +32,8 @@ public class BungeeUser extends User {
         perms.forEach(p -> player.setPermission(p, false));
 
         // Re-add all defined permissions for the user
-        Map<String, Boolean> local = getLocalPermissions(getPlugin().getConfiguration().getServer(), null);
+        final String server = player.getServer() == null ? null : (player.getServer().getInfo() == null ? null : player.getServer().getInfo().getName());
+        Map<String, Boolean> local = getLocalPermissions(getPlugin().getConfiguration().getServer(), server, null);
         local.entrySet().forEach(e -> player.setPermission(e.getKey(), e.getValue()));
     }
 }

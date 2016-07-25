@@ -30,7 +30,7 @@ public class BukkitUser extends User {
     @Override
     public void refreshPermissions() {
         plugin.doSync(() -> {
-            final Player player = plugin.getServer().getPlayer(getUuid());
+            final Player player = plugin.getServer().getPlayer(plugin.getUuidCache().getExternalUUID(getUuid()));
             if (player == null) return;
 
             if (attachment == null) {
@@ -42,7 +42,7 @@ public class BukkitUser extends User {
             attachment.getPermissions().keySet().forEach(p -> attachment.setPermission(p, false));
 
             // Re-add all defined permissions for the user
-            Map<String, Boolean> local = getLocalPermissions(getPlugin().getConfiguration().getServer(), null);
+            Map<String, Boolean> local = getLocalPermissions(getPlugin().getConfiguration().getServer(), player.getWorld().getName(), null);
             local.entrySet().forEach(e -> attachment.setPermission(e.getKey(), e.getValue()));
         });
     }

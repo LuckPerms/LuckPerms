@@ -14,7 +14,7 @@ import java.util.List;
 public class GroupUnsetInherit extends GroupSubCommand {
     public GroupUnsetInherit() {
         super("unsetinherit", "Unsets another group for this group to inherit permissions from",
-                "/%s group <group> unsetinherit <group> [server]", Permission.GROUP_UNSETINHERIT);
+                "/%s group <group> unsetinherit <group> [server] [world]", Permission.GROUP_UNSETINHERIT);
     }
 
     @Override
@@ -27,15 +27,22 @@ public class GroupUnsetInherit extends GroupSubCommand {
         }
 
         try {
-            if (args.size() == 2) {
+            if (args.size() >= 2) {
                 final String server = args.get(1).toLowerCase();
                 if (Patterns.NON_ALPHA_NUMERIC.matcher(server).find()) {
                     Message.SERVER_INVALID_ENTRY.send(sender);
                     return;
                 }
 
-                group.unsetPermission("group." + groupName, server);
-                Message.GROUP_UNSETINHERIT_SERVER_SUCCESS.send(sender, group.getName(), groupName, server);
+                if (args.size() == 2) {
+                    group.unsetPermission("group." + groupName, server);
+                    Message.GROUP_UNSETINHERIT_SERVER_SUCCESS.send(sender, group.getName(), groupName, server);
+                } else {
+                    final String world = args.get(2).toLowerCase();
+                    group.unsetPermission("group." + groupName, server, world);
+                    Message.GROUP_UNSETINHERIT_SERVER_WORLD_SUCCESS.send(sender, group.getName(), groupName, server, world);
+                }
+
             } else {
                 group.unsetPermission("group." + groupName);
                 Message.GROUP_UNSETINHERIT_SUCCESS.send(sender, group.getName(), groupName);
@@ -54,6 +61,6 @@ public class GroupUnsetInherit extends GroupSubCommand {
 
     @Override
     public boolean isArgLengthInvalid(int argLength) {
-        return argLength != 1 && argLength != 2;
+        return argLength != 1 && argLength != 2 && argLength != 3;
     }
 }

@@ -3,12 +3,14 @@ package me.lucko.luckperms.utils;
 import lombok.Getter;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class UuidCache {
 
-    private Map<String, UUID> cache;
+    // External UUID --> Internal UUID
+    private Map<UUID, UUID> cache;
 
     @Getter
     private final boolean onlineMode;
@@ -21,18 +23,25 @@ public class UuidCache {
         }
     }
 
-    public UUID getUUID(String name, UUID fallback) {
-        return onlineMode ? fallback : (cache.containsKey(name) ? cache.get(name) : fallback);
+    public UUID getUUID(UUID external) {
+        return onlineMode ? external : (cache.containsKey(external) ? cache.get(external) : external);
     }
 
-    public void addToCache(String name, UUID uuid) {
-        if (onlineMode) return;
-        cache.put(name, uuid);
+    public UUID getExternalUUID(UUID internal) {
+        if (onlineMode) return internal;
+
+        Optional<UUID> external = cache.entrySet().stream().filter(e -> e.getValue().equals(internal)).map(Map.Entry::getKey).findFirst();
+        return external.isPresent() ? external.get() : internal;
     }
 
-    public void clearCache(String name) {
+    public void addToCache(UUID external, UUID internal) {
         if (onlineMode) return;
-        cache.remove(name);
+        cache.put(external, internal);
+    }
+
+    public void clearCache(UUID external) {
+        if (onlineMode) return;
+        cache.remove(external);
     }
 
 }

@@ -151,7 +151,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
     @Override
     public String getPlayerStatus(UUID uuid) {
-        return getServer().getPlayer(uuid) != null ? "&aOnline" : "&cOffline";
+        return getServer().getPlayer(getUuidCache().getExternalUUID(uuid)) != null ? "&aOnline" : "&cOffline";
     }
 
     @Override

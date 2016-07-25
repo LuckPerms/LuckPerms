@@ -15,8 +15,8 @@ import java.util.List;
 
 public class UserAddTempGroup extends UserSubCommand {
     public UserAddTempGroup() {
-        super("addtempgroup", "Adds the user to a group temporarily", "/%s user <user> addtempgroup <group> <duration> [server]",
-                Permission.USER_ADDTEMPGROUP);
+        super("addtempgroup", "Adds the user to a group temporarily",
+                "/%s user <user> addtempgroup <group> <duration> [server] [world]", Permission.USER_ADDTEMPGROUP);
     }
 
     @Override
@@ -52,16 +52,24 @@ public class UserAddTempGroup extends UserSubCommand {
                 }
 
                 try {
-                    if (args.size() == 3) {
+                    if (args.size() >= 3) {
                         final String server = args.get(2).toLowerCase();
                         if (Patterns.NON_ALPHA_NUMERIC.matcher(server).find()) {
                             Message.SERVER_INVALID_ENTRY.send(sender);
                             return;
                         }
 
-                        user.addGroup(group, server, duration);
-                        Message.USER_ADDTEMPGROUP_SERVER_SUCCESS.send(sender, user.getName(), groupName, server,
-                                DateUtil.formatDateDiff(duration));
+                        if (args.size() == 3) {
+                            user.addGroup(group, server, duration);
+                            Message.USER_ADDTEMPGROUP_SERVER_SUCCESS.send(sender, user.getName(), groupName, server,
+                                    DateUtil.formatDateDiff(duration));
+                        } else {
+                            final String world = args.get(3).toLowerCase();
+                            user.addGroup(group, server, world, duration);
+                            Message.USER_ADDTEMPGROUP_SERVER_WORLD_SUCCESS.send(sender, user.getName(), groupName, server,
+                                    world, DateUtil.formatDateDiff(duration));
+                        }
+
                     } else {
                         user.addGroup(group, duration);
                         Message.USER_ADDTEMPGROUP_SUCCESS.send(sender, user.getName(), groupName, DateUtil.formatDateDiff(duration));
@@ -82,6 +90,6 @@ public class UserAddTempGroup extends UserSubCommand {
 
     @Override
     public boolean isArgLengthInvalid(int argLength) {
-        return (argLength != 2 && argLength != 3);
+        return (argLength != 2 && argLength != 3 && argLength != 4);
     }
 }
