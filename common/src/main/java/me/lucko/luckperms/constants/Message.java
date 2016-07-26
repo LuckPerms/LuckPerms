@@ -1,9 +1,11 @@
 package me.lucko.luckperms.constants;
 
+import lombok.AllArgsConstructor;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.Util;
 
 @SuppressWarnings("SpellCheckingInspection")
+@AllArgsConstructor
 public enum Message {
 
     /*
@@ -221,11 +223,6 @@ public enum Message {
     private String message;
     private boolean showPrefix;
 
-    Message(String message, boolean showPrefix) {
-        this.message = Util.color(message);
-        this.showPrefix = showPrefix;
-    }
-
     @Override
     public String toString() {
         return message;
@@ -233,9 +230,9 @@ public enum Message {
 
     public void send(Sender sender, Object... objects) {
         if (showPrefix) {
-            sender.sendMessage(PREFIX + String.format(message, objects));
+            sender.sendMessage(Util.color(PREFIX + String.format(message, objects)));
         } else {
-            sender.sendMessage(String.format(message, objects));
+            sender.sendMessage(Util.color(String.format(message, objects)));
         }
     }
 }
