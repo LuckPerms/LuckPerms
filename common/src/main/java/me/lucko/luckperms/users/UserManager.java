@@ -48,7 +48,7 @@ public abstract class UserManager {
     }
 
     /**
-     * Add a user to the {@link #getUsers()} map
+     * Add a user to the users map
      * @param user the user to add
      */
     public void setUser(User user) {
@@ -56,7 +56,7 @@ public abstract class UserManager {
     }
 
     /**
-     * Updates (or sets if the user wasn't already loaded) a user in the {@link #getUsers()} map
+     * Updates (or sets if the user wasn't already loaded) a user in the users map
      * @param user The user to update or set
      */
     public void updateOrSetUser(User user) {

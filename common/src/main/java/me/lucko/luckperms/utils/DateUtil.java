@@ -24,6 +24,7 @@ public class DateUtil {
     /**
      * Converts a time string to a unix timestamp
      * @param time the time string
+     * @param future if the date is in the future, as opposed to the past
      * @return a unix timestamp
      * @throws IllegalDateException if the date input was invalid
      */

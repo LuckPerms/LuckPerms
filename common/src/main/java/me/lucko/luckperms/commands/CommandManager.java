@@ -96,8 +96,9 @@ public class CommandManager {
     /**
      * Generic on command method to be called from the command executor object of the platform
      * @param sender who sent the command
+     * @param label the command label used
      * @param args the arguments provided
-     * @return if the command was successful (hint: it always is :> )
+     * @return if the command was successful
      */
     public boolean onCommand(Sender sender, String label, List<String> args) {
         if (args.size() == 0) {

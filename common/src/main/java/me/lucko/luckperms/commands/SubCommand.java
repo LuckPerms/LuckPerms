@@ -37,9 +37,18 @@ public abstract class SubCommand {
         Util.sendPluginMessage(sender, "&e-> &d" + String.format(getUsage(), label));
     }
 
+    /*
+     * Returns a list of suggestions, which are empty by default. Sub classes that give tab complete suggestions override
+     * this method to give their own list.
+     */
+
     /**
      * Returns a list of suggestions, which are empty by default. Sub classes that give tab complete suggestions override
      * this method to give their own list.
+     * @param sender who is tab completing
+     * @param args the arguments so far
+     * @param plugin the plugin instance
+     * @return a list of suggestions
      */
     public List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin) {
         return Collections.emptyList();

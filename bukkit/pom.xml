@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>luckperms-bukkit</artifactId>
-    <version>$(project.parent.version)</version>
+    <version>1.4</version>
     <packaging>jar</packaging>
     <name>LuckPerms</name>
 
@@ -72,14 +72,14 @@
         <dependency>
             <groupId>me.lucko.luckperms</groupId>
             <artifactId>luckperms-common</artifactId>
-            <version>${project.parent.version}</version>
+            <version>1.4</version>
             <scope>compile</scope>
         </dependency>
         <!-- LuckPerms API -->
         <dependency>
             <groupId>me.lucko.luckperms</groupId>
             <artifactId>luckperms-api</artifactId>
-            <version>${project.parent.version}</version>
+            <version>1.4</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

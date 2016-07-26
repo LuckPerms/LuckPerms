@@ -234,6 +234,7 @@ public class Group extends PermissionObject {
     /**
      * Get a {@link List} of the groups the group inherits on a specific server
      * @param server the server to check
+     * @param world the world to check
      * @return a {@link List} of group names
      */
     public List<String> getLocalGroups(String server, String world) {

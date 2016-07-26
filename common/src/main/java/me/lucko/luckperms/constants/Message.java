@@ -6,7 +6,7 @@ import me.lucko.luckperms.commands.Util;
 @SuppressWarnings("SpellCheckingInspection")
 public enum Message {
 
-    /**
+    /*
      * General & Commands
      */
     PREFIX("&7&l[&b&lL&a&lP&7&l] &c", false),
@@ -23,7 +23,7 @@ public enum Message {
 
 
 
-    /**
+    /*
      * Loading / Saving
      */
     USER_NOT_FOUND("&eUser could not be found.", true),
@@ -41,7 +41,7 @@ public enum Message {
 
 
 
-    /**
+    /*
      * Command Syntax
      */
     USER_USE_ADDGROUP("Use the addgroup command instead of specifying the node.", true),
@@ -57,7 +57,7 @@ public enum Message {
     SERVER_INVALID_ENTRY("Server names can only contain alphanumeric characters.", true),
 
 
-    /**
+    /*
      * Commands
      */
     CREATE_SUCCESS("&b%s&a was successfully created.", true),

@@ -9,6 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <version>1.4</version>
     <artifactId>luckperms-api</artifactId>
     <build>
         <plugins>
