@@ -5,9 +5,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>me.lucko</groupId>
+    <groupId>me.lucko.luckperms</groupId>
     <artifactId>luckperms</artifactId>
-    <version>${global.version}</version>
+    <version>1.4</version>
     <modules>
         <module>bukkit</module>
         <module>common</module>
@@ -17,7 +17,6 @@
 
     <packaging>pom</packaging>
     <properties>
-        <global.version>1.4</global.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 

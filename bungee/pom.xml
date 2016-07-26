@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>luckperms</artifactId>
-        <groupId>me.lucko</groupId>
-        <version>${global.version}</version>
+        <groupId>me.lucko.luckperms</groupId>
+        <version>1.4</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -63,14 +63,14 @@
         </dependency>
         <!-- LuckPerms Common -->
         <dependency>
-            <groupId>me.lucko</groupId>
+            <groupId>me.lucko.luckperms</groupId>
             <artifactId>luckperms-common</artifactId>
             <version>${project.parent.version}</version>
             <scope>compile</scope>
         </dependency>
         <!-- LuckPerms API -->
         <dependency>
-            <groupId>me.lucko</groupId>
+            <groupId>me.lucko.luckperms</groupId>
             <artifactId>luckperms-api</artifactId>
             <version>${project.parent.version}</version>
             <scope>compile</scope>
