@@ -1,5 +1,9 @@
-# LuckPerms
+# LuckPerms [![Build Status](https://ci.lucko.me/job/LuckPerms/badge/icon)](https://ci.lucko.me/job/LuckPerms/)
 A permissions implementation for Bukkit/BungeeCord.
+
+## Links
+* **Development Builds** - <https://ci.lucko.me/job/LuckPerms/>
+* **Javadocs** - <https://ci.lucko.me/job/LuckPerms/javadoc/>
 
 ## Features
 * **Group inheritance** - users can be members of multiple groups, groups can inherit other groups
@@ -65,6 +69,24 @@ If you want to use LuckPerms in your onEnable method, you need to add the follow
 depend: [LuckPerms]
 ```
 All of the available methods can be seen in the various interfaces in the `luckperms-api` module.
+
+You can add LuckPerms as a Maven dependency by adding the following to your projects `pom.xml`.
+````xml
+<repositories>
+    <repository>
+        <id>luck-repo</id>
+        <url>https://ci.lucko.me/plugin/repository/everything/</url>
+    </repository>
+</repositories>
+
+<dependencies>
+    <dependency>
+        <groupId>me.lucko.luckperms</groupId>
+        <artifactId>luckperms-api</artifactId>
+        <version>1.4</version>
+    </dependency>
+</dependencies>
+````
 
 ## Commands
 
