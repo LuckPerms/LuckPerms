@@ -540,7 +540,7 @@ public abstract class PermissionObject {
             // Could be here if the server was set to global.
             String n = node.getKey();
             if (n.contains("/")) {
-                n = Patterns.SERVER_SPLIT.split(n, 2)[0];
+                n = Patterns.SERVER_SPLIT.split(n, 2)[1];
             }
 
             if (Patterns.GROUP_MATCH.matcher(n).matches()) {
@@ -570,7 +570,6 @@ public abstract class PermissionObject {
         for (Map.Entry<String, Boolean> groupNode : groupNodes.entrySet()) {
             // Add the actual group perm node, so other plugins can hook
             perms.put(groupNode.getKey(), groupNode.getValue());
-
 
             // Don't add negated groups
             if (!groupNode.getValue()) continue;
