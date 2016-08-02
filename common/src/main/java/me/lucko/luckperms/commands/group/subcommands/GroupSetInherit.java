@@ -1,8 +1,9 @@
 package me.lucko.luckperms.commands.group.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.commands.Predicate;
 import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.group.GroupSubCommand;
+import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
@@ -11,14 +12,15 @@ import me.lucko.luckperms.utils.Patterns;
 
 import java.util.List;
 
-public class GroupSetInherit extends GroupSubCommand {
+public class GroupSetInherit extends SubCommand<Group> {
     public GroupSetInherit() {
         super("setinherit", "Sets another group for this group to inherit permissions from",
-                "/%s group <group> setinherit <group> [server] [world]", Permission.GROUP_SETINHERIT);
+                "/%s group <group> setinherit <group> [server] [world]", Permission.GROUP_SETINHERIT,
+                Predicate.notinRange(1, 3));
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
         String groupName = args.get(0).toLowerCase();
 
         if (groupName.contains("/") || groupName.contains("$")) {
@@ -63,10 +65,5 @@ public class GroupSetInherit extends GroupSubCommand {
     @Override
     public List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin) {
         return getGroupTabComplete(args, plugin);
-    }
-
-    @Override
-    public boolean isArgLengthInvalid(int argLength) {
-        return argLength != 1 && argLength != 2 && argLength != 3;
     }
 }

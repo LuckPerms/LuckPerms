@@ -1,9 +1,10 @@
 package me.lucko.luckperms.commands.user.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.commands.Predicate;
 import me.lucko.luckperms.commands.Sender;
+import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.commands.Util;
-import me.lucko.luckperms.commands.user.UserSubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.tracks.Track;
@@ -11,13 +12,14 @@ import me.lucko.luckperms.users.User;
 
 import java.util.List;
 
-public class UserShowPos extends UserSubCommand {
+public class UserShowPos extends SubCommand<User> {
     public UserShowPos() {
-        super("showpos", "Shows a users position on a track", "/%s user <user> showpos <track>", Permission.USER_SHOWPOS);
+        super("showpos", "Shows a users position on a track", "/%s user <user> showpos <track>", Permission.USER_SHOWPOS,
+                Predicate.notOneOf(new Integer[]{1}));
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
         final String trackName = args.get(0).toLowerCase();
 
         plugin.getDatastore().loadTrack(trackName, success -> {
@@ -48,10 +50,5 @@ public class UserShowPos extends UserSubCommand {
     @Override
     public List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin) {
         return getTrackTabComplete(args, plugin);
-    }
-
-    @Override
-    public boolean isArgLengthInvalid(int argLength) {
-        return argLength != 1;
     }
 }

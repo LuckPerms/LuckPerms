@@ -1,9 +1,8 @@
 package me.lucko.luckperms.commands.group;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.MainCommand;
 import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.commands.SingleMainCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.groups.Group;
@@ -14,7 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class DeleteGroup extends MainCommand {
+public class DeleteGroup extends SingleMainCommand {
     public DeleteGroup() {
         super("DeleteGroup", "/%s deletegroup <group>", 1);
     }
@@ -76,12 +75,7 @@ public class DeleteGroup extends MainCommand {
     }
 
     @Override
-    public List<SubCommand> getSubCommands() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    protected boolean canUse(Sender sender) {
+    protected boolean isAuthorized(Sender sender) {
         return Permission.DELETE_GROUP.isAuthorized(sender);
     }
 }

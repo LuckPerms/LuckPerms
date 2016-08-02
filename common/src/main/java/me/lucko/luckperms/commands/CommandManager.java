@@ -114,7 +114,7 @@ public class CommandManager {
         }
 
         final MainCommand main = o.get();
-        if (!main.canUse(sender)) {
+        if (!main.isAuthorized(sender)) {
             sendCommandUsage(sender, label);
             return true;
         }
@@ -140,8 +140,9 @@ public class CommandManager {
      * @param args the arguments provided so far
      * @return a list of suggestions
      */
+    @SuppressWarnings("unchecked")
     public List<String> onTabComplete(Sender sender, List<String> args) {
-        final List<MainCommand> mains = mainCommands.stream().filter(m -> m.canUse(sender)).collect(Collectors.toList());
+        final List<MainCommand> mains = mainCommands.stream().filter(m -> m.isAuthorized(sender)).collect(Collectors.toList());
 
         if (args.size() <= 1) {
             if (args.isEmpty() || args.get(0).equalsIgnoreCase("")) {
@@ -169,7 +170,7 @@ public class CommandManager {
         Message.INFO_BRIEF.send(sender, plugin.getVersion());
 
         mainCommands.stream()
-                .filter(c -> c.canUse(sender))
+                .filter(c -> c.isAuthorized(sender))
                 .forEach(c -> Util.sendPluginMessage(sender, "&e-> &d" + String.format(c.getUsage(), label)));
     }
 }

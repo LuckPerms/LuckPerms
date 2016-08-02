@@ -1,18 +1,16 @@
 package me.lucko.luckperms.commands.group;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.MainCommand;
 import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.commands.SingleMainCommand;
 import me.lucko.luckperms.commands.Util;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-public class ListGroups extends MainCommand {
+public class ListGroups extends SingleMainCommand {
     public ListGroups() {
         super("ListGroups", "/%s listgroups", 0);
     }
@@ -29,17 +27,7 @@ public class ListGroups extends MainCommand {
     }
 
     @Override
-    protected List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin) {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public List<SubCommand> getSubCommands() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    protected boolean canUse(Sender sender) {
+    protected boolean isAuthorized(Sender sender) {
         return Permission.LIST_GROUPS.isAuthorized(sender);
     }
 }

@@ -1,9 +1,8 @@
 package me.lucko.luckperms.commands.track;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.MainCommand;
 import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.commands.SingleMainCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.tracks.Track;
@@ -14,7 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class DeleteTrack extends MainCommand {
+public class DeleteTrack extends SingleMainCommand {
     public DeleteTrack() {
         super("DeleteTrack", "/%s deletetrack <track>", 1);
     }
@@ -71,12 +70,7 @@ public class DeleteTrack extends MainCommand {
     }
 
     @Override
-    public List<SubCommand> getSubCommands() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    protected boolean canUse(Sender sender) {
+    protected boolean isAuthorized(Sender sender) {
         return Permission.DELETE_TRACK.isAuthorized(sender);
     }
 }

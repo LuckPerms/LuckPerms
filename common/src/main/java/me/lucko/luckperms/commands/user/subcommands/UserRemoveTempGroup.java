@@ -1,8 +1,9 @@
 package me.lucko.luckperms.commands.user.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.commands.Predicate;
 import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.user.UserSubCommand;
+import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
@@ -11,14 +12,15 @@ import me.lucko.luckperms.utils.Patterns;
 
 import java.util.List;
 
-public class UserRemoveTempGroup extends UserSubCommand {
+public class UserRemoveTempGroup extends SubCommand<User> {
     public UserRemoveTempGroup() {
         super("removetempgroup", "Removes a user from a temporary group",
-                "/%s user <user> removetempgroup <group> [server] [world]", Permission.USER_REMOVETEMPGROUP);
+                "/%s user <user> removetempgroup <group> [server] [world]", Permission.USER_REMOVETEMPGROUP,
+                Predicate.notinRange(1, 3));
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
         String groupName = args.get(0).toLowerCase();
 
         if (groupName.contains("/") || groupName.contains("$")) {
@@ -57,10 +59,5 @@ public class UserRemoveTempGroup extends UserSubCommand {
     @Override
     public List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin) {
         return getGroupTabComplete(args, plugin);
-    }
-
-    @Override
-    public boolean isArgLengthInvalid(int argLength) {
-        return (argLength != 1 && argLength != 2 && argLength != 3);
     }
 }

@@ -1,8 +1,9 @@
 package me.lucko.luckperms.commands.user.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.commands.Predicate;
 import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.user.UserSubCommand;
+import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
@@ -12,14 +13,15 @@ import me.lucko.luckperms.utils.Patterns;
 
 import java.util.List;
 
-public class UserSetTempPermission extends UserSubCommand {
+public class UserSetTempPermission extends SubCommand<User> {
     public UserSetTempPermission() {
         super("settemp", "Sets a temporary permission for a user",
-                "/%s user <user> settemp <node> <true|false> <duration> [server] [world]", Permission.USER_SET_TEMP_PERMISSION);
+                "/%s user <user> settemp <node> <true|false> <duration> [server] [world]",
+                Permission.USER_SET_TEMP_PERMISSION, Predicate.notinRange(3, 5));
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
         String node = args.get(0);
         String bool = args.get(1).toLowerCase();
 
@@ -84,10 +86,5 @@ public class UserSetTempPermission extends UserSubCommand {
     @Override
     public List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin) {
         return getBoolTabComplete(args);
-    }
-
-    @Override
-    public boolean isArgLengthInvalid(int argLength) {
-        return argLength != 3 && argLength != 4 && argLength != 5;
     }
 }

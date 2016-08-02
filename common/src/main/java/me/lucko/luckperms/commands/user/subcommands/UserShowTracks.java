@@ -1,9 +1,10 @@
 package me.lucko.luckperms.commands.user.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.commands.Predicate;
 import me.lucko.luckperms.commands.Sender;
+import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.commands.Util;
-import me.lucko.luckperms.commands.user.UserSubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.tracks.Track;
@@ -12,14 +13,14 @@ import me.lucko.luckperms.users.User;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class UserShowTracks extends UserSubCommand {
+public class UserShowTracks extends SubCommand<User> {
     public UserShowTracks() {
         super("showtracks", "Lists the tracks that this user's primary group features on", "/%s user <user> showtracks",
-                Permission.USER_SHOWTRACKS);
+                Permission.USER_SHOWTRACKS, Predicate.alwaysFalse());
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
         plugin.getDatastore().loadAllTracks(success -> {
             if (!success) {
                 Message.TRACKS_LOAD_ERROR.send(sender);
@@ -30,10 +31,5 @@ public class UserShowTracks extends UserSubCommand {
             Message.TRACKS_LIST.send(sender, Util.listToCommaSep(
                     plugin.getTrackManager().getApplicableTracks(user.getPrimaryGroup()).stream().map(Track::getName).collect(Collectors.toList())));
         });
-    }
-
-    @Override
-    public boolean isArgLengthInvalid(int argLength) {
-        return false;
     }
 }

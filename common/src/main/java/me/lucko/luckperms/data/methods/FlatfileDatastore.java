@@ -503,12 +503,14 @@ public class FlatfileDatastore extends Datastore {
 
     @Override
     public boolean saveUUIDData(String username, UUID uuid) {
+        username = username.toLowerCase();
         uuidCache.put(username, uuid.toString());
         return true;
     }
 
     @Override
     public UUID getUUID(String username) {
+        username = username.toLowerCase();
         if (uuidCache.get(username) == null) return null;
         return UUID.fromString(uuidCache.get(username));
     }

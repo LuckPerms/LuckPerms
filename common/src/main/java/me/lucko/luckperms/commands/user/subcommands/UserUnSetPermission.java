@@ -1,8 +1,9 @@
 package me.lucko.luckperms.commands.user.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.commands.Predicate;
 import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.user.UserSubCommand;
+import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
@@ -11,14 +12,14 @@ import me.lucko.luckperms.utils.Patterns;
 
 import java.util.List;
 
-public class UserUnSetPermission extends UserSubCommand {
+public class UserUnSetPermission extends SubCommand<User> {
     public UserUnSetPermission() {
         super("unset", "Unsets a permission for a user",
-                "/%s user <user> unset <node> [server] [world]", Permission.USER_UNSETPERMISSION);
+                "/%s user <user> unset <node> [server] [world]", Permission.USER_UNSETPERMISSION, Predicate.notinRange(1, 3));
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
+    public void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
         String node = args.get(0);
 
         if (node.contains("/") || node.contains("$")) {
@@ -57,10 +58,5 @@ public class UserUnSetPermission extends UserSubCommand {
         } catch (ObjectLacksException e) {
             Message.DOES_NOT_HAVEPERMISSION.send(sender, user.getName());
         }
-    }
-
-    @Override
-    public boolean isArgLengthInvalid(int argLength) {
-        return argLength != 1 && argLength != 2 && argLength != 3;
     }
 }

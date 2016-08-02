@@ -80,7 +80,7 @@ abstract class SQLDatastore extends Datastore {
         boolean success = false;
         try {
             @Cleanup Connection connection = getConnection();
-            if (connection == null) {
+            if (connection == null || connection.isClosed()) {
                 throw new IllegalStateException("SQL connection is null");
             }
 
@@ -396,10 +396,11 @@ abstract class SQLDatastore extends Datastore {
 
     @Override
     public boolean saveUUIDData(String username, UUID uuid) {
+        final String u = username.toLowerCase();
         boolean success = runQuery(new QueryRS(UUIDCACHE_SELECT) {
             @Override
             void onRun(PreparedStatement preparedStatement) throws SQLException {
-                preparedStatement.setString(1, username);
+                preparedStatement.setString(1, u);
             }
 
             @Override
@@ -410,14 +411,14 @@ abstract class SQLDatastore extends Datastore {
                         @Override
                         void onRun(PreparedStatement preparedStatement) throws SQLException {
                             preparedStatement.setString(1, uuid.toString());
-                            preparedStatement.setString(2, username);
+                            preparedStatement.setString(2, u);
                         }
                     });
                 } else {
                     success = runQuery(new QueryPS(UUIDCACHE_INSERT) {
                         @Override
                         void onRun(PreparedStatement preparedStatement) throws SQLException {
-                            preparedStatement.setString(1, username);
+                            preparedStatement.setString(1, u);
                             preparedStatement.setString(2, uuid.toString());
                         }
                     });
@@ -431,12 +432,13 @@ abstract class SQLDatastore extends Datastore {
 
     @Override
     public UUID getUUID(String username) {
+        final String u = username.toLowerCase();
         final UUID[] uuid = {null};
 
         boolean success = runQuery(new QueryRS(UUIDCACHE_SELECT) {
             @Override
             void onRun(PreparedStatement preparedStatement) throws SQLException {
-                preparedStatement.setString(1, username);
+                preparedStatement.setString(1, u);
             }
 
             @Override
