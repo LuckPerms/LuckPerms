@@ -2,8 +2,8 @@
 A permissions implementation for Bukkit/BungeeCord.
 
 ## Links
-* **Development Builds** - <https://ci.lucko.me/job/LuckPerms/>
-* **Javadocs** - <https://ci.lucko.me/job/LuckPerms/javadoc/>
+* **Development Builds** - <https://ci.lucko.me/job/LuckPerms>
+* **Javadocs** - <https://jd.lucko.me/LuckPerms>
 
 ## Features
 * **Group inheritance** - users can be members of multiple groups, groups can inherit other groups
