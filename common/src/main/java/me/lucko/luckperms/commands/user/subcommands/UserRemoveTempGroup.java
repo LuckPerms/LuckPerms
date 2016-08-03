@@ -16,7 +16,7 @@ public class UserRemoveTempGroup extends SubCommand<User> {
     public UserRemoveTempGroup() {
         super("removetempgroup", "Removes a user from a temporary group",
                 "/%s user <user> removetempgroup <group> [server] [world]", Permission.USER_REMOVETEMPGROUP,
-                Predicate.notinRange(1, 3));
+                Predicate.notInRange(1, 3));
     }
 
     @Override

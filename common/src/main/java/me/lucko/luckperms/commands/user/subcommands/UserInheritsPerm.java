@@ -16,7 +16,7 @@ public class UserInheritsPerm extends SubCommand<User> {
     public UserInheritsPerm() {
         super("inheritspermission", "Checks to see if a user inherits a certain permission node",
                 "/%s user <user> inheritspermission <node> [server] [world]", Permission.USER_INHERITSPERMISSION,
-                Predicate.notinRange(1, 3));
+                Predicate.notInRange(1, 3));
     }
 
     @Override

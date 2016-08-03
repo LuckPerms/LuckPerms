@@ -11,7 +11,7 @@ import java.util.List;
 
 public class CreateTrack extends SingleMainCommand {
     public CreateTrack() {
-        super("CreateTrack", "/%s createtrack <track>", 1);
+        super("CreateTrack", "/%s createtrack <track>", 1, Permission.CREATE_TRACK);
     }
 
     @Override
@@ -47,10 +47,5 @@ public class CreateTrack extends SingleMainCommand {
                 });
             }
         });
-    }
-
-    @Override
-    protected boolean isAuthorized(Sender sender) {
-        return Permission.CREATE_TRACK.isAuthorized(sender);
     }
 }

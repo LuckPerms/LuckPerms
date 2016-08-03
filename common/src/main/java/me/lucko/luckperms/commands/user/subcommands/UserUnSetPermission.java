@@ -15,7 +15,7 @@ import java.util.List;
 public class UserUnSetPermission extends SubCommand<User> {
     public UserUnSetPermission() {
         super("unset", "Unsets a permission for a user",
-                "/%s user <user> unset <node> [server] [world]", Permission.USER_UNSETPERMISSION, Predicate.notinRange(1, 3));
+                "/%s user <user> unset <node> [server] [world]", Permission.USER_UNSETPERMISSION, Predicate.notInRange(1, 3));
     }
 
     @Override

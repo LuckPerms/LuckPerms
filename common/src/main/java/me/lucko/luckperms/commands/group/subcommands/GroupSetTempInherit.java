@@ -17,7 +17,7 @@ public class GroupSetTempInherit extends SubCommand<Group> {
     public GroupSetTempInherit() {
         super("settempinherit", "Sets another group for this group to inherit permissions from temporarily",
                 "/%s group <group> settempinherit <group> <duration> [server] [world]",
-                Permission.GROUP_SET_TEMP_INHERIT, Predicate.notinRange(2, 4));
+                Permission.GROUP_SET_TEMP_INHERIT, Predicate.notInRange(2, 4));
     }
 
     @Override

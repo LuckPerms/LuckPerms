@@ -16,7 +16,7 @@ public class UserSetPermission extends SubCommand<User> {
     public UserSetPermission() {
         super("set", "Sets a permission for a user",
                 "/%s user <user> set <node> <true|false> [server] [world]", Permission.USER_SETPERMISSION,
-                Predicate.notinRange(2, 4));
+                Predicate.notInRange(2, 4));
     }
 
     @Override

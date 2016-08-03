@@ -16,7 +16,7 @@ import java.util.List;
 public class TrackAppend extends SubCommand<Track> {
     public TrackAppend() {
         super("append", "Appends a group onto the end of the track", "/%s track <track> append <group>",
-                Permission.TRACK_APPEND, Predicate.notOneOf(new Integer[]{1}));
+                Permission.TRACK_APPEND, Predicate.not(1));
     }
 
     @Override

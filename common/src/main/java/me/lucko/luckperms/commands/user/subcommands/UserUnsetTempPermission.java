@@ -16,7 +16,7 @@ public class UserUnsetTempPermission extends SubCommand<User> {
     public UserUnsetTempPermission() {
         super("unsettemp", "Unsets a temporary permission for a user",
                 "/%s user <user> unsettemp <node> [server] [world]", Permission.USER_UNSET_TEMP_PERMISSION,
-                Predicate.notinRange(1, 3));
+                Predicate.notInRange(1, 3));
     }
 
     @Override

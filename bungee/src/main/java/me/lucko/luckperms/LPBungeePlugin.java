@@ -4,7 +4,6 @@ import lombok.Getter;
 import me.lucko.luckperms.api.implementation.ApiProvider;
 import me.lucko.luckperms.commands.CommandManager;
 import me.lucko.luckperms.data.Datastore;
-import me.lucko.luckperms.data.MySQLConfiguration;
 import me.lucko.luckperms.data.methods.FlatfileDatastore;
 import me.lucko.luckperms.data.methods.MySQLDatastore;
 import me.lucko.luckperms.groups.GroupManager;
@@ -51,12 +50,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         final String storageMethod = configuration.getStorageMethod();
         if (storageMethod.equalsIgnoreCase("mysql")) {
             getLogger().info("Using MySQL as storage method.");
-            datastore = new MySQLDatastore(this, new MySQLConfiguration(
-                    configuration.getDatabaseValue("address"),
-                    configuration.getDatabaseValue("database"),
-                    configuration.getDatabaseValue("username"),
-                    configuration.getDatabaseValue("password")
-            ));
+            datastore = new MySQLDatastore(this, configuration.getDatabaseValues());
         } else if (storageMethod.equalsIgnoreCase("flatfile")) {
             getLogger().info("Using Flatfile (JSON) as storage method.");
             datastore = new FlatfileDatastore(this, getDataFolder());

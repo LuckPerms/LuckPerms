@@ -12,7 +12,7 @@ import java.util.List;
 
 public class ListTracks extends SingleMainCommand {
     public ListTracks() {
-        super("ListTracks", "/%s listtracks", 0);
+        super("ListTracks", "/%s listtracks", 0, Permission.LIST_TRACKS);
     }
 
     @Override
@@ -24,10 +24,5 @@ public class ListTracks extends SingleMainCommand {
                 Message.TRACKS_LIST.send(sender, Util.listToCommaSep(new ArrayList<>(plugin.getTrackManager().getTracks().keySet())));
             }
         });
-    }
-
-    @Override
-    protected boolean isAuthorized(Sender sender) {
-        return Permission.LIST_TRACKS.isAuthorized(sender);
     }
 }

@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 public class DeleteGroup extends SingleMainCommand {
     public DeleteGroup() {
-        super("DeleteGroup", "/%s deletegroup <group>", 1);
+        super("DeleteGroup", "/%s deletegroup <group>", 1, Permission.DELETE_GROUP);
     }
 
     @Override
@@ -72,10 +72,5 @@ public class DeleteGroup extends SingleMainCommand {
         }
 
         return Collections.emptyList();
-    }
-
-    @Override
-    protected boolean isAuthorized(Sender sender) {
-        return Permission.DELETE_GROUP.isAuthorized(sender);
     }
 }

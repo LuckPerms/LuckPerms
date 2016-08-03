@@ -15,7 +15,7 @@ import java.util.List;
 public class GroupSetPermission extends SubCommand<Group> {
     public GroupSetPermission() {
         super("set", "Sets a permission for a group", "/%s group <group> set <node> <true|false> [server] [world]",
-                Permission.GROUP_SETPERMISSION, Predicate.notinRange(2, 4));
+                Permission.GROUP_SETPERMISSION, Predicate.notInRange(2, 4));
     }
 
     @Override

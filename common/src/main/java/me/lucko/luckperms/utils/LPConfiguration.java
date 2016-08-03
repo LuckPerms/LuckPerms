@@ -3,6 +3,7 @@ package me.lucko.luckperms.utils;
 import lombok.AccessLevel;
 import lombok.Getter;
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.data.MySQLConfiguration;
 
 public abstract class LPConfiguration<T extends LuckPermsPlugin> {
 
@@ -65,8 +66,13 @@ public abstract class LPConfiguration<T extends LuckPermsPlugin> {
         return getBoolean("online-mode", true);
     }
 
-    public String getDatabaseValue(String value) {
-        return getString("sql." + value, null);
+    public MySQLConfiguration getDatabaseValues() {
+        return new MySQLConfiguration(
+                getString("sql.address", null),
+                getString("sql.database", null),
+                getString("sql.username", null),
+                getString("sql.password", null)
+        );
     }
 
     public String getStorageMethod() {

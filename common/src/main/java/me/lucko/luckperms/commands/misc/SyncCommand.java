@@ -10,17 +10,12 @@ import java.util.List;
 
 public class SyncCommand extends SingleMainCommand {
     public SyncCommand() {
-        super("Sync", "/%s sync", 0);
+        super("Sync", "/%s sync", 0, Permission.SYNC);
     }
 
     @Override
     protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         Message.UPDATE_TASK_RUN.send(sender);
         plugin.runUpdateTask();
-    }
-
-    @Override
-    protected boolean isAuthorized(Sender sender) {
-        return Permission.SYNC.isAuthorized(sender);
     }
 }

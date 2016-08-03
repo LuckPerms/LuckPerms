@@ -10,7 +10,7 @@ import java.util.List;
 
 public class DebugCommand extends SingleMainCommand {
     public DebugCommand() {
-        super("Debug", "/%s debug", 0);
+        super("Debug", "/%s debug", 0, Permission.DEBUG);
     }
 
     @Override
@@ -18,10 +18,5 @@ public class DebugCommand extends SingleMainCommand {
         Message.DEBUG.send(sender, plugin.getPlayerCount(), plugin.getUserManager().getUsers().size(),
                 plugin.getGroupManager().getGroups().size(), plugin.getTrackManager().getTracks().size()
         );
-    }
-
-    @Override
-    protected boolean isAuthorized(Sender sender) {
-        return Permission.DEBUG.isAuthorized(sender);
     }
 }

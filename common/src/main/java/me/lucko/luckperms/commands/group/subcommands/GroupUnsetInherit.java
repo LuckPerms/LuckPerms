@@ -16,7 +16,7 @@ public class GroupUnsetInherit extends SubCommand<Group> {
     public GroupUnsetInherit() {
         super("unsetinherit", "Unsets another group for this group to inherit permissions from",
                 "/%s group <group> unsetinherit <group> [server] [world]", Permission.GROUP_UNSETINHERIT,
-                Predicate.notinRange(1, 3));
+                Predicate.notInRange(1, 3));
     }
 
     @Override

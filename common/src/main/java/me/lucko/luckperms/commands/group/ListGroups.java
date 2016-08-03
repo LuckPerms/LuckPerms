@@ -12,7 +12,7 @@ import java.util.List;
 
 public class ListGroups extends SingleMainCommand {
     public ListGroups() {
-        super("ListGroups", "/%s listgroups", 0);
+        super("ListGroups", "/%s listgroups", 0, Permission.LIST_GROUPS);
     }
 
     @Override
@@ -24,10 +24,5 @@ public class ListGroups extends SingleMainCommand {
                 Message.GROUPS_LIST.send(sender, Util.listToCommaSep(new ArrayList<>(plugin.getGroupManager().getGroups().keySet())));
             }
         });
-    }
-
-    @Override
-    protected boolean isAuthorized(Sender sender) {
-        return Permission.LIST_GROUPS.isAuthorized(sender);
     }
 }

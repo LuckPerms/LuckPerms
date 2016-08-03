@@ -34,6 +34,7 @@ public class PlayerListener implements Listener {
            Offline mode. */
         e.registerIntent(plugin);
         plugin.doAsync(() -> {
+            final long startTime = System.currentTimeMillis();
             final UuidCache cache = plugin.getUuidCache();
             final PendingConnection c = e.getConnection();
 
@@ -54,6 +55,10 @@ public class PlayerListener implements Listener {
             // We have to make a new user on this thread whilst the connection is being held, or we get concurrency issues as the Bukkit server
             // and the BungeeCord server try to make a new user at the same time.
             plugin.getDatastore().loadOrCreateUser(cache.getUUID(c.getUniqueId()), c.getName());
+            final long time = System.currentTimeMillis() - startTime;
+            if (time >= 1000) {
+                plugin.getLogger().warning("Processing login for " + c.getName() + " took " + time + "ms.");
+            }
             e.completeIntent(plugin);
         });
     }

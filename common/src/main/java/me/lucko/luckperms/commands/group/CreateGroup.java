@@ -11,7 +11,7 @@ import java.util.List;
 
 public class CreateGroup extends SingleMainCommand {
     public CreateGroup() {
-        super("CreateGroup", "/%s creategroup <group>", 1);
+        super("CreateGroup", "/%s creategroup <group>", 1, Permission.CREATE_GROUP);
     }
 
     @Override
@@ -47,10 +47,5 @@ public class CreateGroup extends SingleMainCommand {
                 });
             }
         });
-    }
-
-    @Override
-    protected boolean isAuthorized(Sender sender) {
-        return Permission.CREATE_GROUP.isAuthorized(sender);
     }
 }

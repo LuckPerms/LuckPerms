@@ -18,7 +18,7 @@ public class UserAddTempGroup extends SubCommand<User> {
     public UserAddTempGroup() {
         super("addtempgroup", "Adds the user to a group temporarily",
                 "/%s user <user> addtempgroup <group> <duration> [server] [world]", Permission.USER_ADDTEMPGROUP,
-                Predicate.notinRange(2, 4));
+                Predicate.notInRange(2, 4));
     }
 
     @Override

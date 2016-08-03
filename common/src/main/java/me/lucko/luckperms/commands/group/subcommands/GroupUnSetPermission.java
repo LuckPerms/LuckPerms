@@ -15,7 +15,7 @@ import java.util.List;
 public class GroupUnSetPermission extends SubCommand<Group> {
     public GroupUnSetPermission() {
         super("unset", "Unsets a permission for a group", "/%s group <group> unset <node> [server] [world]",
-                Permission.GROUP_UNSETPERMISSION, Predicate.notinRange(1, 3));
+                Permission.GROUP_UNSETPERMISSION, Predicate.notInRange(1, 3));
     }
 
     @Override

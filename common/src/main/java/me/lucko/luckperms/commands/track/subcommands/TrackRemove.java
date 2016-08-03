@@ -14,7 +14,7 @@ import java.util.List;
 public class TrackRemove extends SubCommand<Track> {
     public TrackRemove() {
         super("remove", "Removes a group from the track", "/%s track <track> remove <group>", Permission.TRACK_REMOVE,
-                Predicate.notOneOf(new Integer[]{1}));
+                Predicate.not(1));
     }
 
     @Override

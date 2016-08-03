@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 public class DeleteTrack extends SingleMainCommand {
     public DeleteTrack() {
-        super("DeleteTrack", "/%s deletetrack <track>", 1);
+        super("DeleteTrack", "/%s deletetrack <track>", 1, Permission.DELETE_TRACK);
     }
 
     @Override
@@ -67,10 +67,5 @@ public class DeleteTrack extends SingleMainCommand {
         }
 
         return Collections.emptyList();
-    }
-
-    @Override
-    protected boolean isAuthorized(Sender sender) {
-        return Permission.DELETE_TRACK.isAuthorized(sender);
     }
 }

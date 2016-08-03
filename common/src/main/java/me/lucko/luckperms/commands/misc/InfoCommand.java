@@ -11,7 +11,7 @@ import java.util.List;
 
 public class InfoCommand extends SingleMainCommand {
     public InfoCommand() {
-        super("Info", "/%s info", 0);
+        super("Info", "/%s info", 0, Permission.INFO);
     }
 
     @Override
@@ -19,10 +19,5 @@ public class InfoCommand extends SingleMainCommand {
         final LPConfiguration c = plugin.getConfiguration();
         Message.INFO.send(sender, plugin.getVersion(), plugin.getDatastore().getName(), c.getServer(),
                 c.getDefaultGroupName(), c.getSyncTime(), c.getIncludeGlobalPerms(), c.getOnlineMode());
-    }
-
-    @Override
-    protected boolean isAuthorized(Sender sender) {
-        return Permission.INFO.isAuthorized(sender);
     }
 }

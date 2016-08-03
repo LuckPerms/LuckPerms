@@ -15,7 +15,7 @@ import java.util.List;
 public class UserRemoveGroup extends SubCommand<User> {
     public UserRemoveGroup() {
         super("removegroup", "Removes a user from a group", "/%s user <user> removegroup <group> [server] [world]",
-                Permission.USER_REMOVEGROUP, Predicate.notinRange(1, 3));
+                Permission.USER_REMOVEGROUP, Predicate.notInRange(1, 3));
     }
 
     @Override

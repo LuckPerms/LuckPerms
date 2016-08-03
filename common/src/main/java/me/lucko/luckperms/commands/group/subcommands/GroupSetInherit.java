@@ -16,7 +16,7 @@ public class GroupSetInherit extends SubCommand<Group> {
     public GroupSetInherit() {
         super("setinherit", "Sets another group for this group to inherit permissions from",
                 "/%s group <group> setinherit <group> [server] [world]", Permission.GROUP_SETINHERIT,
-                Predicate.notinRange(1, 3));
+                Predicate.notInRange(1, 3));
     }
 
     @Override

@@ -16,7 +16,7 @@ import java.util.List;
 public class TrackInsert extends SubCommand<Track> {
     public TrackInsert() {
         super("insert", "Inserts a group at a given position along the track",
-                "/%s track <track> insert <group> <position>", Permission.TRACK_INSERT, Predicate.notOneOf(new Integer[]{2}));
+                "/%s track <track> insert <group> <position>", Permission.TRACK_INSERT, Predicate.not(2));
     }
 
     @Override

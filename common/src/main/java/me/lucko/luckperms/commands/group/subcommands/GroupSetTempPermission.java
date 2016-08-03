@@ -17,7 +17,7 @@ public class GroupSetTempPermission extends SubCommand<Group> {
     public GroupSetTempPermission() {
         super("settemp", "Sets a temporary permission for a group",
                 "/%s group <group> settemp <node> <true|false> <duration> [server] [world]",
-                Permission.GROUP_SET_TEMP_PERMISSION, Predicate.notinRange(3, 5));
+                Permission.GROUP_SET_TEMP_PERMISSION, Predicate.notInRange(3, 5));
     }
 
     @Override

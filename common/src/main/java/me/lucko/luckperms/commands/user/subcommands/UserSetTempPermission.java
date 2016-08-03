@@ -17,7 +17,7 @@ public class UserSetTempPermission extends SubCommand<User> {
     public UserSetTempPermission() {
         super("settemp", "Sets a temporary permission for a user",
                 "/%s user <user> settemp <node> <true|false> <duration> [server] [world]",
-                Permission.USER_SET_TEMP_PERMISSION, Predicate.notinRange(3, 5));
+                Permission.USER_SET_TEMP_PERMISSION, Predicate.notInRange(3, 5));
     }
 
     @Override

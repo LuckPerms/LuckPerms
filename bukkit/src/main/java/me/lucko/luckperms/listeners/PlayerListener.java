@@ -21,6 +21,7 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onPlayerPreLogin(AsyncPlayerPreLoginEvent e) {
+        final long startTime = System.currentTimeMillis();
         if (!plugin.getDatastore().isAcceptingLogins()) {
             // Datastore is disabled, prevent players from joining the server
             e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, KICK_MESSAGE);
@@ -43,6 +44,10 @@ public class PlayerListener implements Listener {
         }
 
         plugin.getDatastore().loadOrCreateUser(cache.getUUID(e.getUniqueId()), e.getName());
+        final long time = System.currentTimeMillis() - startTime;
+        if (time >= 1000) {
+            plugin.getLogger().warning("Processing login for " + e.getName() + " took " + time + "ms.");
+        }
     }
 
     @EventHandler

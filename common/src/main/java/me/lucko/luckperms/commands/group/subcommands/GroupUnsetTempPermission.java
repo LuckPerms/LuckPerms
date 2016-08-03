@@ -16,7 +16,7 @@ public class GroupUnsetTempPermission extends SubCommand<Group> {
     public GroupUnsetTempPermission() {
         super("unsettemp", "Unsets a temporary permission for a group",
                 "/%s group <group> unsettemp <node> [server] [world]", Permission.GROUP_UNSET_TEMP_PERMISSION,
-                Predicate.notinRange(1, 3));
+                Predicate.notInRange(1, 3));
     }
 
     @Override

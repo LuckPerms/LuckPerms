@@ -16,7 +16,7 @@ import java.util.List;
 public class UserAddGroup extends SubCommand<User> {
     public UserAddGroup() {
         super("addgroup", "Adds the user to a group", "/%s user <user> addgroup <group> [server] [world]",
-                Permission.USER_ADDGROUP, Predicate.notinRange(1, 3));
+                Permission.USER_ADDGROUP, Predicate.notInRange(1, 3));
     }
 
     @Override
