@@ -12,7 +12,7 @@ import java.util.UUID;
  * errors and ensure all API interactions to not damage the state of the user.
  */
 @SuppressWarnings("unused")
-public interface User extends PermissionObject {
+public interface User extends PermissionHolder {
 
     /**
      * @return the users Mojang assigned unique id

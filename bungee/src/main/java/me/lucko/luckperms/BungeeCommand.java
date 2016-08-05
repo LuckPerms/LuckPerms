@@ -1,16 +1,16 @@
 package me.lucko.luckperms;
 
 import me.lucko.luckperms.commands.CommandManager;
-import me.lucko.luckperms.commands.Sender;
+import me.lucko.luckperms.commands.SenderFactory;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.TabExecutor;
 
-import java.lang.ref.WeakReference;
 import java.util.Arrays;
 
 class BungeeCommand extends Command implements TabExecutor {
+    private static final Factory FACTORY = new Factory();
     private final CommandManager manager;
 
     public BungeeCommand(CommandManager manager) {
@@ -20,31 +20,24 @@ class BungeeCommand extends Command implements TabExecutor {
 
     @Override
     public void execute(CommandSender sender, String[] args) {
-        manager.onCommand(makeSender(sender), "bperms", Arrays.asList(args));
+        manager.onCommand(FACTORY.wrap(sender), "bperms", Arrays.asList(args));
     }
 
     @Override
     public Iterable<String> onTabComplete(CommandSender sender, String[] args) {
-        return manager.onTabComplete(makeSender(sender), Arrays.asList(args));
+        return manager.onTabComplete(FACTORY.wrap(sender), Arrays.asList(args));
     }
 
-    private static Sender makeSender(CommandSender sender) {
-        return new Sender() {
-            final WeakReference<CommandSender> cs = new WeakReference<>(sender);
+    private static class Factory extends SenderFactory<CommandSender> {
 
-            @Override
-            public void sendMessage(String s) {
-                final CommandSender c = cs.get();
-                if (c != null) {
-                    c.sendMessage(new TextComponent(s));
-                }
-            }
+        @Override
+        protected void sendMessage(CommandSender sender, String s) {
+            sender.sendMessage(new TextComponent(s));
+        }
 
-            @Override
-            public boolean hasPermission(String node) {
-                final CommandSender c = cs.get();
-                return c != null && c.hasPermission(node);
-            }
-        };
+        @Override
+        protected boolean hasPermission(CommandSender sender, String node) {
+            return sender.hasPermission(node);
+        }
     }
 }

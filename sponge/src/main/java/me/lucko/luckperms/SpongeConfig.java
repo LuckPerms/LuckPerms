@@ -1,6 +1,7 @@
 package me.lucko.luckperms;
 
 import me.lucko.luckperms.utils.LPConfiguration;
+import me.lucko.luckperms.utils.Patterns;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -47,7 +48,7 @@ class SpongeConfig extends LPConfiguration<LPSpongePlugin> {
     }
 
     private ConfigurationNode getNode(String path) {
-        String[] paths = path.split("\\.");
+        String[] paths = Patterns.DOT.split(path);
         ConfigurationNode node = root;
 
         for (String s : paths) {

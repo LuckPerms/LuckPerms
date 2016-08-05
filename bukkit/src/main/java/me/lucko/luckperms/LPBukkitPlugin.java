@@ -5,12 +5,12 @@ import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.implementation.ApiProvider;
 import me.lucko.luckperms.api.vault.VaultHook;
+import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.data.Datastore;
 import me.lucko.luckperms.data.methods.FlatfileDatastore;
 import me.lucko.luckperms.data.methods.MySQLDatastore;
 import me.lucko.luckperms.data.methods.SQLiteDatastore;
 import me.lucko.luckperms.groups.GroupManager;
-import me.lucko.luckperms.listeners.PlayerListener;
 import me.lucko.luckperms.runnables.UpdateTask;
 import me.lucko.luckperms.tracks.TrackManager;
 import me.lucko.luckperms.users.BukkitUserManager;
@@ -47,7 +47,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
         // register events
         PluginManager pm = Bukkit.getPluginManager();
-        pm.registerEvents(new PlayerListener(this), this);
+        pm.registerEvents(new BukkitListener(this), this);
 
         // register commands
         getLog().info("Registering commands...");
@@ -149,8 +149,8 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     }
 
     @Override
-    public String getPlayerStatus(UUID uuid) {
-        return getServer().getPlayer(getUuidCache().getExternalUUID(uuid)) != null ? "&aOnline" : "&cOffline";
+    public Message getPlayerStatus(UUID uuid) {
+        return getServer().getPlayer(getUuidCache().getExternalUUID(uuid)) != null ? Message.PLAYER_ONLINE : Message.PLAYER_OFFLINE;
     }
 
     @Override

@@ -4,12 +4,12 @@ import com.google.inject.Inject;
 import lombok.Getter;
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.implementation.ApiProvider;
+import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.data.Datastore;
 import me.lucko.luckperms.data.methods.FlatfileDatastore;
 import me.lucko.luckperms.data.methods.MySQLDatastore;
 import me.lucko.luckperms.data.methods.SQLiteDatastore;
 import me.lucko.luckperms.groups.GroupManager;
-import me.lucko.luckperms.listeners.PlayerListener;
 import me.lucko.luckperms.runnables.UpdateTask;
 import me.lucko.luckperms.tracks.TrackManager;
 import me.lucko.luckperms.users.SpongeUserManager;
@@ -37,7 +37,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Getter
-@Plugin(id = "luckperms", name = "LuckPerms", version = LPSpongePlugin.VERSION)
+@Plugin(id = "luckperms", name = "LuckPerms", version = LPSpongePlugin.VERSION, authors = {"Luck"}, description = "A permissions plugin")
 public class LPSpongePlugin implements LuckPermsPlugin {
     static final String VERSION = "1.5"; // TODO load this from pom
 
@@ -59,14 +59,17 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     private TrackManager trackManager;
     private Datastore datastore;
     private UuidCache uuidCache;
+    private me.lucko.luckperms.api.Logger log;
 
     @Listener
     public void onEnable(GamePreInitializationEvent event) {
+        log = LogUtil.wrap(logger);
+
         getLog().info("Loading configuration...");
         configuration = new SpongeConfig(this);
 
         // register events
-        Sponge.getEventManager().registerListeners(this, new PlayerListener(this));
+        Sponge.getEventManager().registerListeners(this, new SpongeListener(this));
 
         // register commands
         getLog().info("Registering commands...");
@@ -129,16 +132,12 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         LuckPerms.unregisterProvider();
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private File getStorageDir() {
         File base = configDir.toFile().getParentFile().getParentFile();
-        File luckperms = new File(base, "luckperms");
-        luckperms.mkdirs();
-        return luckperms;
-    }
-
-    @Override
-    public me.lucko.luckperms.api.Logger getLog() {
-        return LogUtil.wrap(getLogger());
+        File luckPermsDir = new File(base, "luckperms");
+        luckPermsDir.mkdirs();
+        return luckPermsDir;
     }
 
     @Override
@@ -147,8 +146,8 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     }
 
     @Override
-    public String getPlayerStatus(UUID uuid) {
-        return game.getServer().getPlayer(getUuidCache().getExternalUUID(uuid)).isPresent() ? "&aOnline" : "&cOffline";
+    public Message getPlayerStatus(UUID uuid) {
+        return game.getServer().getPlayer(getUuidCache().getExternalUUID(uuid)).isPresent() ? Message.PLAYER_ONLINE : Message.PLAYER_OFFLINE;
     }
 
     @Override

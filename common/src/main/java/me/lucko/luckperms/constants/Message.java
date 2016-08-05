@@ -13,6 +13,9 @@ public enum Message {
      */
     PREFIX("&7&l[&b&lL&a&lP&7&l] &c", false),
     EMPTY("%s", true),
+    PLAYER_ONLINE("&aOnline", false),
+    PLAYER_OFFLINE("&cOffline", false),
+    LOADING_ERROR("Permissions data could not be loaded. Please contact an administrator.", true),
 
     COMMAND_NOT_RECOGNISED("Command not recognised.", true),
     COMMAND_NO_PERMISSION("You do not have permission to use this command!", true),
@@ -225,7 +228,7 @@ public enum Message {
 
     @Override
     public String toString() {
-        return message;
+        return Util.color(showPrefix ? PREFIX + message : message);
     }
 
     public void send(Sender sender, Object... objects) {

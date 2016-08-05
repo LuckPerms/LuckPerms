@@ -3,7 +3,7 @@ package me.lucko.luckperms.api.implementation.internal;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
-import me.lucko.luckperms.api.PermissionObject;
+import me.lucko.luckperms.api.PermissionHolder;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.utils.DateUtil;
@@ -14,14 +14,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Provides a link between {@link PermissionObject} and {@link me.lucko.luckperms.utils.PermissionObject}
+ * Provides a link between {@link PermissionHolder} and {@link me.lucko.luckperms.utils.PermissionHolder}
  */
 @SuppressWarnings("unused")
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
-class PermissionObjectLink implements PermissionObject {
+class PermissionHolderLink implements PermissionHolder {
 
     @NonNull
-    private final me.lucko.luckperms.utils.PermissionObject master;
+    private final me.lucko.luckperms.utils.PermissionHolder master;
 
     static String checkServer(String s) {
         if (Patterns.NON_ALPHA_NUMERIC.matcher(s).find()) {

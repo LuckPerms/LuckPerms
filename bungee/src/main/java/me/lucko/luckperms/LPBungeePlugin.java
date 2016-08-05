@@ -4,11 +4,11 @@ import lombok.Getter;
 import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.implementation.ApiProvider;
 import me.lucko.luckperms.commands.CommandManager;
+import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.data.Datastore;
 import me.lucko.luckperms.data.methods.FlatfileDatastore;
 import me.lucko.luckperms.data.methods.MySQLDatastore;
 import me.lucko.luckperms.groups.GroupManager;
-import me.lucko.luckperms.listeners.PlayerListener;
 import me.lucko.luckperms.runnables.UpdateTask;
 import me.lucko.luckperms.tracks.TrackManager;
 import me.lucko.luckperms.users.BungeeUserManager;
@@ -39,7 +39,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         configuration = new BungeeConfig(this);
 
         // register events
-        getProxy().getPluginManager().registerListener(this, new PlayerListener(this));
+        getProxy().getPluginManager().registerListener(this, new BungeeListener(this));
 
         // register commands
         getLog().info("Registering commands...");
@@ -109,8 +109,8 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     }
 
     @Override
-    public String getPlayerStatus(UUID uuid) {
-        return getProxy().getPlayer(getUuidCache().getExternalUUID(uuid)) != null ? "&aOnline" : "&cOffline";
+    public Message getPlayerStatus(UUID uuid) {
+        return getProxy().getPlayer(getUuidCache().getExternalUUID(uuid)) != null ? Message.PLAYER_ONLINE : Message.PLAYER_OFFLINE;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package me.lucko.luckperms;
 
 import me.lucko.luckperms.api.Logger;
+import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.data.Datastore;
 import me.lucko.luckperms.groups.GroupManager;
 import me.lucko.luckperms.tracks.TrackManager;
@@ -11,6 +12,10 @@ import me.lucko.luckperms.utils.UuidCache;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Main internal interface for LuckPerms plugins, allowing the luckperms-common module to bind with the plugin instance.
+ * All plugin platforms implement this interface.
+ */
 public interface LuckPermsPlugin {
 
     /**
@@ -65,7 +70,7 @@ public interface LuckPermsPlugin {
      * @param uuid The player's uuid
      * @return a formatted status string
      */
-    String getPlayerStatus(UUID uuid);
+    Message getPlayerStatus(UUID uuid);
 
     /**
      * Gets the number of users online on the platform

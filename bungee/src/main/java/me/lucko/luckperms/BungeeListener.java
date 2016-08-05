@@ -1,10 +1,8 @@
-package me.lucko.luckperms.listeners;
+package me.lucko.luckperms;
 
-import lombok.AllArgsConstructor;
-import me.lucko.luckperms.LPBungeePlugin;
-import me.lucko.luckperms.commands.Util;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.users.User;
+import me.lucko.luckperms.utils.AbstractListener;
 import me.lucko.luckperms.utils.UuidCache;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.PendingConnection;
@@ -20,12 +18,14 @@ import java.lang.ref.WeakReference;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-@AllArgsConstructor
-public class PlayerListener implements Listener {
-    private static final TextComponent WARN_MESSAGE = new TextComponent(Util.color(
-            Message.PREFIX + "Permissions data could not be loaded. Please contact an administrator.")
-    );
+class BungeeListener extends AbstractListener implements Listener {
+    private static final TextComponent WARN_MESSAGE = new TextComponent(Message.LOADING_ERROR.toString());
     private final LPBungeePlugin plugin;
+
+    BungeeListener(LPBungeePlugin plugin) {
+        super(plugin);
+        this.plugin = plugin;
+    }
 
     @EventHandler
     public void onPlayerLogin(LoginEvent e) {
@@ -83,21 +83,11 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onPlayerQuit(PlayerDisconnectEvent e) {
-        final ProxiedPlayer player = e.getPlayer();
-        final UuidCache cache = plugin.getUuidCache();
-
-        // Unload the user from memory when they disconnect;
-        cache.clearCache(player.getUniqueId());
-
-        final User user = plugin.getUserManager().getUser(cache.getUUID(player.getUniqueId()));
-        plugin.getUserManager().unloadUser(user);
+        onLeave(e.getPlayer().getUniqueId());
     }
 
     @EventHandler
     public void onPlayerServerSwitch(ServerSwitchEvent e) {
-        final User user = plugin.getUserManager().getUser(plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId()));
-        if (user != null) {
-            user.refreshPermissions();
-        }
+        refreshPlayer(e.getPlayer().getUniqueId());
     }
 }

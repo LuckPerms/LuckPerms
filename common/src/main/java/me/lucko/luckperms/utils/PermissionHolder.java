@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  * For example a User or a Group
  */
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
-public abstract class PermissionObject {
+public abstract class PermissionHolder {
 
     /**
      * The UUID of the user / name of the group.
@@ -53,11 +53,11 @@ public abstract class PermissionObject {
             return b ? toQuery.containsKey(node) && toQuery.get(node) : toQuery.containsKey(node) && !toQuery.get(node);
         }
 
-        node = Patterns.TEMP_SPLIT.split(node)[0];
+        node = Patterns.TEMP_DELIMITER.split(node)[0];
 
         for (Map.Entry<String, Boolean> e : toQuery.entrySet()) {
             if (e.getKey().contains("$")) {
-                String[] parts = Patterns.TEMP_SPLIT.split(e.getKey());
+                String[] parts = Patterns.TEMP_DELIMITER.split(e.getKey());
                 if (parts[0].equalsIgnoreCase(node)) {
                     return b ? e.getValue() : !e.getValue();
                 }
@@ -146,7 +146,7 @@ public abstract class PermissionObject {
     public boolean inheritsPermission(String node, boolean b) {
         if (node.contains("/")) {
             // Use other method
-            final String[] parts = Patterns.SERVER_SPLIT.split(node, 2);
+            final String[] parts = Patterns.SERVER_DELIMITER.split(node, 2);
             return inheritsPermission(parts[1], b, parts[0]);
         }
 
@@ -163,7 +163,7 @@ public abstract class PermissionObject {
     public boolean inheritsPermission(String node, boolean b, String server) {
         if (server.contains("-")) {
             // Use other method
-            final String[] parts = Patterns.WORLD_SPLIT.split(server, 2);
+            final String[] parts = Patterns.WORLD_DELIMITER.split(server, 2);
             return inheritsPermission(node, b, parts[0], parts[1]);
         }
 
@@ -306,7 +306,7 @@ public abstract class PermissionObject {
 
         if (temporary) {
             match = this.nodes.keySet().stream()
-                    .filter(n -> n.contains("$")).filter(n -> Patterns.TEMP_SPLIT.split(n)[0].equalsIgnoreCase(fNode))
+                    .filter(n -> n.contains("$")).filter(n -> Patterns.TEMP_DELIMITER.split(n)[0].equalsIgnoreCase(fNode))
                     .findFirst();
         } else {
             if (this.nodes.containsKey(fNode)) {
@@ -401,7 +401,7 @@ public abstract class PermissionObject {
      */
     public Map<Map.Entry<String, Boolean>, Long> getTemporaryNodes() {
         return this.nodes.entrySet().stream().filter(e -> e.getKey().contains("$")).map(e -> {
-            final String[] parts = Patterns.TEMP_SPLIT.split(e.getKey());
+            final String[] parts = Patterns.TEMP_DELIMITER.split(e.getKey());
             final long expiry = Long.parseLong(parts[1]);
             return new AbstractMap.SimpleEntry<Map.Entry<String, Boolean>, Long>(new AbstractMap.SimpleEntry<>(parts[0], e.getValue()), expiry);
 
@@ -423,7 +423,7 @@ public abstract class PermissionObject {
     public void auditTemporaryPermissions() {
         this.nodes.keySet().stream()
                 .filter(s -> s.contains("$"))
-                .filter(s -> DateUtil.shouldExpire(Long.parseLong(Patterns.TEMP_SPLIT.split(s)[1])))
+                .filter(s -> DateUtil.shouldExpire(Long.parseLong(Patterns.TEMP_DELIMITER.split(s)[1])))
                 .forEach(s -> this.nodes.remove(s));
     }
 
@@ -484,12 +484,12 @@ public abstract class PermissionObject {
         for (Map.Entry<String, Boolean> node : convertTemporaryPerms().entrySet()) {
             serverSpecific:
             if (node.getKey().contains("/")) {
-                String[] parts = Patterns.SERVER_SPLIT.split(node.getKey(), 2);
+                String[] parts = Patterns.SERVER_DELIMITER.split(node.getKey(), 2);
                 // 0=server(+world)   1=node
 
                 // WORLD SPECIFIC
                 if (parts[0].contains("-")) {
-                    String[] serverParts = Patterns.WORLD_SPLIT.split(parts[0], 2);
+                    String[] serverParts = Patterns.WORLD_DELIMITER.split(parts[0], 2);
                     // 0=server   1=world
 
                     if ((!serverParts[0].equalsIgnoreCase("global") || !includeGlobal) && (!serverParts[0].equalsIgnoreCase(server))) {
@@ -540,7 +540,7 @@ public abstract class PermissionObject {
             // Could be here if the server was set to global.
             String n = node.getKey();
             if (n.contains("/")) {
-                n = Patterns.SERVER_SPLIT.split(n, 2)[1];
+                n = Patterns.SERVER_DELIMITER.split(n, 2)[1];
             }
 
             if (Patterns.GROUP_MATCH.matcher(n).matches()) {
@@ -556,14 +556,14 @@ public abstract class PermissionObject {
         // If a group is negated at a higher priority, the group should not then be applied at a lower priority
         serverWorldSpecificGroups.entrySet().stream().filter(node -> !node.getValue()).forEach(node -> {
             groupNodes.remove(node.getKey());
-            groupNodes.remove(Patterns.SERVER_SPLIT.split(node.getKey(), 2)[1]);
+            groupNodes.remove(Patterns.SERVER_DELIMITER.split(node.getKey(), 2)[1]);
             serverSpecificGroups.remove(node.getKey());
-            serverSpecificGroups.remove(Patterns.SERVER_SPLIT.split(node.getKey(), 2)[1]);
-            serverSpecificGroups.remove(Patterns.WORLD_SPLIT.split(node.getKey(), 2)[0] + "/" + Patterns.SERVER_SPLIT.split(node.getKey(), 2)[1]);
+            serverSpecificGroups.remove(Patterns.SERVER_DELIMITER.split(node.getKey(), 2)[1]);
+            serverSpecificGroups.remove(Patterns.WORLD_DELIMITER.split(node.getKey(), 2)[0] + "/" + Patterns.SERVER_DELIMITER.split(node.getKey(), 2)[1]);
         });
         serverSpecificGroups.entrySet().stream().filter(node -> !node.getValue()).forEach(node -> {
             groupNodes.remove(node.getKey());
-            groupNodes.remove(Patterns.SERVER_SPLIT.split(node.getKey(), 2)[1]);
+            groupNodes.remove(Patterns.SERVER_DELIMITER.split(node.getKey(), 2)[1]);
         });
 
         // Apply lowest priority: groupNodes
@@ -574,7 +574,7 @@ public abstract class PermissionObject {
             // Don't add negated groups
             if (!groupNode.getValue()) continue;
 
-            String groupName = Patterns.DOT_SPLIT.split(groupNode.getKey(), 2)[1];
+            String groupName = Patterns.DOT.split(groupNode.getKey(), 2)[1];
             if (!excludedGroups.contains(groupName)) {
                 Group group = plugin.getGroupManager().getGroup(groupName);
                 if (group != null) {
@@ -589,7 +589,7 @@ public abstract class PermissionObject {
         // Apply next priorities: serverSpecificGroups and then serverWorldSpecificGroups
         for (Map<String, Boolean> m : Arrays.asList(serverSpecificGroups, serverWorldSpecificGroups)) {
             for (Map.Entry<String, Boolean> groupNode : m.entrySet()) {
-                final String rawNode = Patterns.SERVER_SPLIT.split(groupNode.getKey())[1];
+                final String rawNode = Patterns.SERVER_DELIMITER.split(groupNode.getKey())[1];
 
                 // Add the actual group perm node, so other plugins can hook
                 perms.put(rawNode, groupNode.getValue());
@@ -597,7 +597,7 @@ public abstract class PermissionObject {
                 // Don't add negated groups
                 if (!groupNode.getValue()) continue;
 
-                String groupName = Patterns.DOT_SPLIT.split(rawNode, 2)[1];
+                String groupName = Patterns.DOT.split(rawNode, 2)[1];
                 if (!excludedGroups.contains(groupName)) {
                     Group group = plugin.getGroupManager().getGroup(groupName);
                     if (group != null) {
@@ -616,7 +616,7 @@ public abstract class PermissionObject {
         // Apply final priorities: serverSpecificNodes and then serverWorldSpecificNodes
         for (Map<String, Boolean> m : Arrays.asList(serverSpecificNodes, serverWorldSpecificNodes)) {
             for (Map.Entry<String, Boolean> node : m.entrySet()) {
-                final String rawNode = Patterns.SERVER_SPLIT.split(node.getKey())[1];
+                final String rawNode = Patterns.SERVER_DELIMITER.split(node.getKey())[1];
                 perms.put(rawNode, node.getValue());
             }
         }
@@ -626,7 +626,7 @@ public abstract class PermissionObject {
 
     private static String stripTime(String s) {
         if (s.contains("$")) {
-            return Patterns.TEMP_SPLIT.split(s)[0];
+            return Patterns.TEMP_DELIMITER.split(s)[0];
         }
         return s;
     }

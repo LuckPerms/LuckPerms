@@ -11,7 +11,7 @@ import java.util.List;
  * errors and ensure all API interactions to not damage the state of the group.
  */
 @SuppressWarnings("unused")
-public interface Group extends PermissionObject {
+public interface Group extends PermissionHolder {
 
     /**
      * @return the name of the group

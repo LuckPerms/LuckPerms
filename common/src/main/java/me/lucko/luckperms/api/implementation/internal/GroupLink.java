@@ -13,7 +13,7 @@ import java.util.List;
  * Provides a link between {@link Group} and {@link me.lucko.luckperms.groups.Group}
  */
 @SuppressWarnings("unused")
-public class GroupLink extends PermissionObjectLink implements Group {
+public class GroupLink extends PermissionHolderLink implements Group {
 
     @Getter(AccessLevel.PACKAGE)
     private final me.lucko.luckperms.groups.Group master;

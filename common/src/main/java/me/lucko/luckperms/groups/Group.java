@@ -7,7 +7,7 @@ import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.utils.Patterns;
-import me.lucko.luckperms.utils.PermissionObject;
+import me.lucko.luckperms.utils.PermissionHolder;
 
 import java.util.List;
 import java.util.Map;
@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 @ToString(of = {"name"})
 @EqualsAndHashCode(of = {"name"}, callSuper = false)
-public class Group extends PermissionObject {
+public class Group extends PermissionHolder {
 
     /**
      * The name of the group
@@ -263,7 +263,7 @@ public class Group extends PermissionObject {
         Map<String, Boolean> perms = getPermissions(server, world, null, includeGlobal);
         return perms.keySet().stream()
                 .filter(s -> Patterns.GROUP_MATCH.matcher(s).matches())
-                .map(s -> Patterns.DOT_SPLIT.split(s, 2)[1])
+                .map(s -> Patterns.DOT.split(s, 2)[1])
                 .collect(Collectors.toList());
     }
 }

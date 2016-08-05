@@ -15,7 +15,7 @@ import java.util.UUID;
  * Provides a link between {@link User} and {@link me.lucko.luckperms.users.User}
  */
 @SuppressWarnings("unused")
-public class UserLink extends PermissionObjectLink implements User {
+public class UserLink extends PermissionHolderLink implements User {
 
     @Getter(AccessLevel.PACKAGE)
     private final me.lucko.luckperms.users.User master;

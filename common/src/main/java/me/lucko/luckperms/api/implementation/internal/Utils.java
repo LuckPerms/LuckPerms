@@ -1,9 +1,11 @@
 package me.lucko.luckperms.api.implementation.internal;
 
+import lombok.experimental.UtilityClass;
 import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.User;
 
+@UtilityClass
 class Utils {
 
     static void checkUser(User user) {

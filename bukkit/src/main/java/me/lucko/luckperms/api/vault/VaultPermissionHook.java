@@ -7,7 +7,7 @@ import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.users.User;
-import me.lucko.luckperms.utils.PermissionObject;
+import me.lucko.luckperms.utils.PermissionHolder;
 import net.milkbowl.vault.permission.Permission;
 
 /**
@@ -33,7 +33,7 @@ class VaultPermissionHook extends Permission {
         return true;
     }
 
-    private boolean objectHas(String world, PermissionObject object, String permission) {
+    private boolean objectHas(String world, PermissionHolder object, String permission) {
         if (object == null) return false;
 
         if (world != null && !world.equals("")) {
@@ -43,7 +43,7 @@ class VaultPermissionHook extends Permission {
         }
     }
 
-    private boolean objectAdd(String world, PermissionObject object, String permission) {
+    private boolean objectAdd(String world, PermissionHolder object, String permission) {
         if (object == null) return false;
 
         try {
@@ -58,7 +58,7 @@ class VaultPermissionHook extends Permission {
         return true;
     }
 
-    private boolean objectRemove(String world, PermissionObject object, String permission) {
+    private boolean objectRemove(String world, PermissionHolder object, String permission) {
         if (object == null) return false;
 
         try {
@@ -73,7 +73,7 @@ class VaultPermissionHook extends Permission {
         return true;
     }
 
-    private void objectSave(PermissionObject t) {
+    private void objectSave(PermissionHolder t) {
         if (t instanceof User) {
             ((User) t).refreshPermissions();
             plugin.getDatastore().saveUser(((User) t), aBoolean -> {});
