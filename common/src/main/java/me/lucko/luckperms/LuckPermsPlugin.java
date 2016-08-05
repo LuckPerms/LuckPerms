@@ -1,5 +1,6 @@
 package me.lucko.luckperms;
 
+import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.data.Datastore;
 import me.lucko.luckperms.groups.GroupManager;
 import me.lucko.luckperms.tracks.TrackManager;
@@ -9,7 +10,6 @@ import me.lucko.luckperms.utils.UuidCache;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Logger;
 
 public interface LuckPermsPlugin {
 
@@ -47,7 +47,7 @@ public interface LuckPermsPlugin {
      * Retrieves the {@link Logger} for the plugin
      * @return the plugin's {@link Logger}
      */
-    Logger getLogger();
+    Logger getLog();
 
     /**
      * Retrieves the {@link UuidCache} for the plugin

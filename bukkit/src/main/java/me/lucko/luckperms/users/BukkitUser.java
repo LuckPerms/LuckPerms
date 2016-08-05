@@ -34,7 +34,7 @@ public class BukkitUser extends User {
             if (player == null) return;
 
             if (attachment == null) {
-                getPlugin().getLogger().warning("User " + getName() + " does not have a permissions attachment defined.");
+                getPlugin().getLog().warn("User " + getName() + " does not have a permissions attachment defined.");
                 setAttachment(player.addAttachment(plugin));
             }
 

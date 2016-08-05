@@ -1,12 +1,10 @@
 package me.lucko.luckperms.data.methods;
 
+import lombok.Cleanup;
 import me.lucko.luckperms.LuckPermsPlugin;
 
 import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.logging.Level;
+import java.sql.*;
 
 public class SQLiteDatastore extends SQLDatastore {
 
@@ -26,11 +24,51 @@ public class SQLiteDatastore extends SQLDatastore {
     @Override
     public void init() {
         if (!setupTables(CREATETABLE_UUID, CREATETABLE_USERS, CREATETABLE_GROUPS, CREATETABLE_TRACKS)) {
-            plugin.getLogger().log(Level.SEVERE, "Error occurred whilst initialising the database. All connections are disallowed.");
+            plugin.getLog().severe("Error occurred whilst initialising the database. All connections are disallowed.");
             shutdown();
         } else {
             setAcceptingLogins(true);
         }
+    }
+
+    @Override
+    boolean runQuery(QueryPS queryPS) {
+        boolean success = false;
+        try {
+            Connection connection = getConnection();
+            if (connection == null || connection.isClosed()) {
+                throw new IllegalStateException("SQL connection is null");
+            }
+
+            @Cleanup PreparedStatement preparedStatement = connection.prepareStatement(queryPS.getQuery());
+            queryPS.onRun(preparedStatement);
+            preparedStatement.execute();
+            success = true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
+
+    @Override
+    boolean runQuery(QueryRS queryRS) {
+        boolean success = false;
+        try {
+            Connection connection = getConnection();
+            if (connection == null || connection.isClosed()) {
+                throw new IllegalStateException("SQL connection is null");
+            }
+
+            @Cleanup PreparedStatement preparedStatement = connection.prepareStatement(queryRS.getQuery());
+            queryRS.onRun(preparedStatement);
+            preparedStatement.execute();
+
+            @Cleanup ResultSet resultSet = preparedStatement.executeQuery();
+            success = queryRS.onResult(resultSet);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return success;
     }
 
     @Override

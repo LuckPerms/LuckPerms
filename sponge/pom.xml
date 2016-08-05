@@ -9,14 +9,14 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>luckperms-bungee</artifactId>
+    <artifactId>luckperms-sponge</artifactId>
     <version>1.5</version>
     <packaging>jar</packaging>
     <name>LuckPerms</name>
 
     <build>
         <defaultGoal>clean package</defaultGoal>
-        <finalName>LuckPermsBungee</finalName>
+        <finalName>LuckPermsSponge</finalName>
         <sourceDirectory>${basedir}/src/main/java</sourceDirectory>
         <resources>
             <resource>
@@ -54,11 +54,11 @@
     </build>
 
     <dependencies>
-        <!-- BungeeCord API -->
+        <!-- Sponge API -->
         <dependency>
-            <groupId>net.md-5</groupId>
-            <artifactId>bungeecord-api</artifactId>
-            <version>1.9-SNAPSHOT</version>
+            <groupId>org.spongepowered</groupId>
+            <artifactId>spongeapi</artifactId>
+            <version>4.1.0</version>
             <scope>provided</scope>
         </dependency>
         <!-- LuckPerms Common -->
@@ -76,5 +76,4 @@
             <scope>compile</scope>
         </dependency>
     </dependencies>
-
 </project>

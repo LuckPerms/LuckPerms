@@ -34,6 +34,11 @@ public class ApiProvider implements LuckPermsApi {
     }
 
     @Override
+    public Logger getLogger() {
+        return plugin.getLog();
+    }
+
+    @Override
     public User getUser(@NonNull UUID uuid) {
         final me.lucko.luckperms.users.User user = plugin.getUserManager().getUser(uuid);
         if (user == null) {

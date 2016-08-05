@@ -1,12 +1,14 @@
 package me.lucko.luckperms.data.methods;
 
 import com.zaxxer.hikari.HikariDataSource;
+import lombok.Cleanup;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.data.MySQLConfiguration;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.logging.Level;
 
 public class MySQLDatastore extends SQLDatastore {
 
@@ -41,11 +43,51 @@ public class MySQLDatastore extends SQLDatastore {
         hikari.addDataSourceProperty("password", password);
 
         if (!setupTables(CREATETABLE_UUID, CREATETABLE_USERS, CREATETABLE_GROUPS, CREATETABLE_TRACKS)) {
-            plugin.getLogger().log(Level.SEVERE, "Error occurred whilst initialising the database. All connections are disallowed.");
+            plugin.getLog().severe("Error occurred whilst initialising the database. All connections are disallowed.");
             shutdown();
         } else {
             setAcceptingLogins(true);
         }
+    }
+
+    @Override
+    boolean runQuery(QueryPS queryPS) {
+        boolean success = false;
+        try {
+            @Cleanup Connection connection = getConnection();
+            if (connection == null || connection.isClosed()) {
+                throw new IllegalStateException("SQL connection is null");
+            }
+
+            @Cleanup PreparedStatement preparedStatement = connection.prepareStatement(queryPS.getQuery());
+            queryPS.onRun(preparedStatement);
+            preparedStatement.execute();
+            success = true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
+
+    @Override
+    boolean runQuery(QueryRS queryRS) {
+        boolean success = false;
+        try {
+            @Cleanup Connection connection = getConnection();
+            if (connection == null || connection.isClosed()) {
+                throw new IllegalStateException("SQL connection is null");
+            }
+
+            @Cleanup PreparedStatement preparedStatement = connection.prepareStatement(queryRS.getQuery());
+            queryRS.onRun(preparedStatement);
+            preparedStatement.execute();
+
+            @Cleanup ResultSet resultSet = preparedStatement.executeQuery();
+            success = queryRS.onResult(resultSet);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return success;
     }
 
     @Override

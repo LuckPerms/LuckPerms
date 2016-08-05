@@ -57,7 +57,7 @@ public class PlayerListener implements Listener {
             plugin.getDatastore().loadOrCreateUser(cache.getUUID(c.getUniqueId()), c.getName());
             final long time = System.currentTimeMillis() - startTime;
             if (time >= 1000) {
-                plugin.getLogger().warning("Processing login for " + c.getName() + " took " + time + "ms.");
+                plugin.getLog().warn("Processing login for " + c.getName() + " took " + time + "ms.");
             }
             e.completeIntent(plugin);
         });

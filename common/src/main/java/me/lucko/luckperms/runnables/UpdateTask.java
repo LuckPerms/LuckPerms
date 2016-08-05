@@ -9,7 +9,7 @@ public class UpdateTask implements Runnable {
 
     @Override
     public void run() {
-        plugin.getLogger().info("Running update task.");
+        plugin.getLog().info("Running update task.");
 
         // Reload all of the groups
         plugin.getDatastore().loadAllGroups();

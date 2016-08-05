@@ -1,5 +1,5 @@
 # LuckPerms [![Build Status](https://ci.lucko.me/job/LuckPerms/badge/icon)](https://ci.lucko.me/job/LuckPerms/)
-A permissions implementation for Bukkit/BungeeCord.
+A permissions implementation for Bukkit/Spigot, BungeeCord and Sponge.
 
 ## Links
 * **Development Builds** - <https://ci.lucko.me/job/LuckPerms>
@@ -23,11 +23,12 @@ A permissions implementation for Bukkit/BungeeCord.
 * **Well documented** - API methods have comprehensive Java docs, it's clear what each method does.
 * **Efficient/lightweight** - maybe? Who knows, it might be.
 * **Open Sourced, Free...** - you shouldn't have to pay $10+ for a "powerful" permissions plugin.
-* **BungeeCord compatible** - permissions, users and groups are synced across Bukkit/BungeeCord instances
+* **BungeeCord compatible** - permissions, users and groups are synced across all LuckPerms instances
+* **Sponge compatible** - permissions, users and groups are synced across all LuckPerms instances (bukkit --> sponge, for example)
 * **Support for MySQL, SQLite & Flatfile (JSON)** - other storage methods coming soon (maybe)
 
 ## Setup
-All configuration options are in the **config.yml** file, which is generated automagically when the plugin first starts.
+All configuration options are in the **config.yml/luckperms.conf** file, which is generated automagically when the plugin first starts.
 
 You can define the settings for per-server permissions, the storage method and credentials within this file.
 
@@ -57,11 +58,20 @@ Temporary permissions are checked each time a user/group is loaded, and when the
 The only way around this is to decrease the sync interval.
 
 ## API
-LuckPerms has an extensive API, allowing for easy integration with other projects. To use the Api, you need to obtain an instance of the `LuckPermsApi` interface. This can be done in two ways, (one way on BungeeCord).
+LuckPerms has an extensive API, allowing for easy integration with other projects. To use the Api, you need to obtain an instance of the `LuckPermsApi` interface. This can be done in a number of ways.
 
 ```java
+// On all platforms
 final LuckPermsApi api = LuckPerms.getApi();
+
+// On Bukkit/Spigot
 final LuckPermsApi api = Bukkit.getServicesManager().getRegistration(LuckPermsApi.class).getProvider();
+
+// On Sponge
+Optional<LuckPermsApi> provider = Sponge.getServiceManager().provide(LuckPermsApi.class);
+if (provider.isPresent()) {
+    final LuckPermsApi api = provider.get();
+}
 ```
 
 If you want to use LuckPerms in your onEnable method, you need to add the following to your plugins `plugin.yml`.
@@ -83,7 +93,7 @@ You can add LuckPerms as a Maven dependency by adding the following to your proj
     <dependency>
         <groupId>me.lucko.luckperms</groupId>
         <artifactId>luckperms-api</artifactId>
-        <version>1.4</version>
+        <version>1.5</version>
     </dependency>
 </dependencies>
 ````

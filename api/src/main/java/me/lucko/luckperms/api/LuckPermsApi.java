@@ -9,6 +9,7 @@ public interface LuckPermsApi {
     String getVersion();
 
     Datastore getDatastore();
+    Logger getLogger();
 
     User getUser(UUID uuid);
     User getUser(String name);

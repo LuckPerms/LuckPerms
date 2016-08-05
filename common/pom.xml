@@ -5,11 +5,11 @@
     <parent>
         <artifactId>luckperms</artifactId>
         <groupId>me.lucko.luckperms</groupId>
-        <version>1.4</version>
+        <version>1.5</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <version>1.4</version>
+    <version>1.5</version>
     <artifactId>luckperms-common</artifactId>
     <build>
         <plugins>
@@ -30,7 +30,7 @@
         <dependency>
             <groupId>me.lucko.luckperms</groupId>
             <artifactId>luckperms-api</artifactId>
-            <version>1.4</version>
+            <version>1.5</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

@@ -580,7 +580,7 @@ public abstract class PermissionObject {
                 if (group != null) {
                     perms.putAll(group.getLocalPermissions(server, excludedGroups));
                 } else {
-                    plugin.getLogger().warning("Error whilst refreshing the permissions of '" + objectName + "'." +
+                    plugin.getLog().warn("Error whilst refreshing the permissions of '" + objectName + "'." +
                             "\n The group '" + groupName + "' is not loaded.");
                 }
             }
@@ -603,7 +603,7 @@ public abstract class PermissionObject {
                     if (group != null) {
                         perms.putAll(group.getLocalPermissions(server, excludedGroups));
                     } else {
-                        plugin.getLogger().warning("Error whilst refreshing the permissions of '" + objectName + "'." +
+                        plugin.getLog().warn("Error whilst refreshing the permissions of '" + objectName + "'." +
                                 "\n The group '" + groupName + "' is not loaded.");
                     }
                 }

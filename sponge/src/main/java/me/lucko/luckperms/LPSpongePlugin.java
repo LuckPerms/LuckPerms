@@ -1,10 +1,9 @@
 package me.lucko.luckperms;
 
+import com.google.inject.Inject;
 import lombok.Getter;
-import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.implementation.ApiProvider;
-import me.lucko.luckperms.api.vault.VaultHook;
 import me.lucko.luckperms.data.Datastore;
 import me.lucko.luckperms.data.methods.FlatfileDatastore;
 import me.lucko.luckperms.data.methods.MySQLDatastore;
@@ -13,26 +12,47 @@ import me.lucko.luckperms.groups.GroupManager;
 import me.lucko.luckperms.listeners.PlayerListener;
 import me.lucko.luckperms.runnables.UpdateTask;
 import me.lucko.luckperms.tracks.TrackManager;
-import me.lucko.luckperms.users.BukkitUserManager;
+import me.lucko.luckperms.users.SpongeUserManager;
 import me.lucko.luckperms.users.UserManager;
 import me.lucko.luckperms.utils.LPConfiguration;
 import me.lucko.luckperms.utils.LogUtil;
 import me.lucko.luckperms.utils.UuidCache;
-import org.bukkit.Bukkit;
-import org.bukkit.command.PluginCommand;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.PluginManager;
-import org.bukkit.plugin.ServicePriority;
-import org.bukkit.plugin.java.JavaPlugin;
+import org.slf4j.Logger;
+import org.spongepowered.api.Game;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandManager;
+import org.spongepowered.api.config.ConfigDir;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
+import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
+import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.scheduler.Scheduler;
 
 import java.io.File;
-import java.util.Arrays;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Getter
-public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
+@Plugin(id = "luckperms", name = "LuckPerms", version = LPSpongePlugin.VERSION)
+public class LPSpongePlugin implements LuckPermsPlugin {
+    static final String VERSION = "1.5"; // TODO load this from pom
+
+    @Inject
+    private Logger logger;
+
+    @Inject
+    private Game game;
+
+    @Inject
+    @ConfigDir(sharedRoot = false)
+    private Path configDir;
+
+    private Scheduler scheduler = Sponge.getScheduler();
+
     private LPConfiguration configuration;
     private UserManager userManager;
     private GroupManager groupManager;
@@ -40,22 +60,18 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private Datastore datastore;
     private UuidCache uuidCache;
 
-    @Override
-    public void onEnable() {
+    @Listener
+    public void onEnable(GamePreInitializationEvent event) {
         getLog().info("Loading configuration...");
-        configuration = new BukkitConfig(this);
+        configuration = new SpongeConfig(this);
 
         // register events
-        PluginManager pm = Bukkit.getPluginManager();
-        pm.registerEvents(new PlayerListener(this), this);
+        Sponge.getEventManager().registerListeners(this, new PlayerListener(this));
 
         // register commands
         getLog().info("Registering commands...");
-        BukkitCommand commandManager = new BukkitCommand(this);
-        PluginCommand main = getServer().getPluginCommand("luckperms");
-        main.setExecutor(commandManager);
-        main.setTabCompleter(commandManager);
-        main.setAliases(Arrays.asList("perms", "lp", "permissions", "p", "perm"));
+        CommandManager cmdService = Sponge.getCommandManager();
+        cmdService.register(this, new SpongeCommand(this), "luckperms", "perms", "lp", "permissions", "p", "perm");
 
         getLog().info("Detecting storage method...");
         final String storageMethod = configuration.getStorageMethod();
@@ -64,13 +80,13 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
             datastore = new MySQLDatastore(this, configuration.getDatabaseValues());
         } else if (storageMethod.equalsIgnoreCase("sqlite")) {
             getLog().info("Using SQLite as storage method.");
-            datastore = new SQLiteDatastore(this, new File(getDataFolder(), "luckperms.sqlite"));
+            datastore = new SQLiteDatastore(this, new File(getStorageDir(), "luckperms.sqlite"));
         } else if (storageMethod.equalsIgnoreCase("flatfile")) {
             getLog().info("Using Flatfile (JSON) as storage method.");
-            datastore = new FlatfileDatastore(this, getDataFolder());
+            datastore = new FlatfileDatastore(this, getStorageDir());
         } else {
             getLog().severe("Storage method '" + storageMethod + "' was not recognised. Using SQLite as fallback.");
-            datastore = new SQLiteDatastore(this, new File(getDataFolder(), "luckperms.sqlite"));
+            datastore = new SQLiteDatastore(this, new File(getStorageDir(), "luckperms.sqlite"));
         }
 
         getLog().info("Initialising datastore...");
@@ -78,7 +94,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
         getLog().info("Loading internal permission managers...");
         uuidCache = new UuidCache(getConfiguration().getOnlineMode());
-        userManager = new BukkitUserManager(this);
+        userManager = new SpongeUserManager(this);
         groupManager = new GroupManager(this);
         trackManager = new TrackManager();
 
@@ -92,79 +108,71 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
         int mins = getConfiguration().getSyncTime();
         if (mins > 0) {
-            long ticks = mins * 60 * 20;
-            getServer().getScheduler().runTaskTimerAsynchronously(this, new UpdateTask(this), ticks, ticks);
-        }
-
-        // Provide vault support
-        getLog().info("Attempting to hook into Vault...");
-        try {
-            if (getServer().getPluginManager().isPluginEnabled("Vault")) {
-                VaultHook.hook(this);
-                getLog().info("Registered Vault permission & chat hook.");
-            } else {
-                getLog().info("Vault not found.");
-            }
-        } catch (Exception e) {
-            getLog().severe("Error occurred whilst hooking into Vault.");
-            e.printStackTrace();
+            scheduler.createTaskBuilder().async().interval(mins, TimeUnit.MINUTES).execute(new UpdateTask(this))
+                    .submit(LPSpongePlugin.this);
         }
 
         getLog().info("Registering API...");
         final ApiProvider provider = new ApiProvider(this);
         LuckPerms.registerProvider(provider);
-        getServer().getServicesManager().register(LuckPermsApi.class, provider, this, ServicePriority.Normal);
+        Sponge.getServiceManager().setProvider(this, LuckPermsApi.class, provider);
 
         getLog().info("Successfully loaded.");
     }
 
-    @Override
-    public void onDisable() {
+    @Listener
+    public void onDisable(GameStoppingServerEvent event) {
         getLog().info("Closing datastore...");
         datastore.shutdown();
 
         getLog().info("Unregistering API...");
         LuckPerms.unregisterProvider();
-        getServer().getServicesManager().unregisterAll(this);
+    }
+
+    private File getStorageDir() {
+        File base = configDir.toFile().getParentFile().getParentFile();
+        File luckperms = new File(base, "luckperms");
+        luckperms.mkdirs();
+        return luckperms;
     }
 
     @Override
-    public void doAsync(Runnable r) {
-        Bukkit.getScheduler().runTaskAsynchronously(this, r);
-    }
-
-    @Override
-    public void doSync(Runnable r) {
-        Bukkit.getScheduler().runTask(this, r);
-    }
-
-    @Override
-    public Logger getLog() {
+    public me.lucko.luckperms.api.Logger getLog() {
         return LogUtil.wrap(getLogger());
     }
 
     @Override
     public String getVersion() {
-        return getDescription().getVersion();
+        return VERSION;
     }
 
     @Override
     public String getPlayerStatus(UUID uuid) {
-        return getServer().getPlayer(getUuidCache().getExternalUUID(uuid)) != null ? "&aOnline" : "&cOffline";
+        return game.getServer().getPlayer(getUuidCache().getExternalUUID(uuid)).isPresent() ? "&aOnline" : "&cOffline";
     }
 
     @Override
     public int getPlayerCount() {
-        return getServer().getOnlinePlayers().size();
+        return game.getServer().getOnlinePlayers().size();
     }
 
     @Override
     public List<String> getPlayerList() {
-        return getServer().getOnlinePlayers().stream().map(Player::getName).collect(Collectors.toList());
+        return game.getServer().getOnlinePlayers().stream().map(Player::getName).collect(Collectors.toList());
     }
 
     @Override
     public void runUpdateTask() {
-        getServer().getScheduler().runTaskAsynchronously(this, new UpdateTask(this));
+        scheduler.createTaskBuilder().async().execute(new UpdateTask(this)).submit(LPSpongePlugin.this);
+    }
+
+    @Override
+    public void doAsync(Runnable r) {
+        scheduler.createTaskBuilder().async().execute(r).submit(LPSpongePlugin.this);
+    }
+
+    @Override
+    public void doSync(Runnable r) {
+        scheduler.createTaskBuilder().execute(r).submit(LPSpongePlugin.this);
     }
 }

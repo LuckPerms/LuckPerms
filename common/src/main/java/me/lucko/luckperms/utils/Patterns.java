@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 
 @UtilityClass
 public class Patterns {
+    public static final Pattern SPACE_SPLIT = Pattern.compile(" ");
     public static final Pattern SERVER_SPLIT = Pattern.compile("\\/");
     public static final Pattern WORLD_SPLIT = Pattern.compile("\\-");
     public static final Pattern TEMP_SPLIT = Pattern.compile("\\$");

@@ -3,7 +3,6 @@ package me.lucko.luckperms.data.methods;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import lombok.AllArgsConstructor;
-import lombok.Cleanup;
 import lombok.Getter;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.data.Datastore;
@@ -58,43 +57,8 @@ abstract class SQLDatastore extends Datastore {
 
     abstract Connection getConnection() throws SQLException;
 
-    private boolean runQuery(QueryPS queryPS) {
-        boolean success = false;
-        try {
-            @Cleanup Connection connection = getConnection();
-            if (connection == null) {
-                throw new IllegalStateException("SQL connection is null");
-            }
-
-            @Cleanup PreparedStatement preparedStatement = connection.prepareStatement(queryPS.getQuery());
-            queryPS.onRun(preparedStatement);
-            preparedStatement.execute();
-            success = true;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return success;
-    }
-
-    private boolean runQuery(QueryRS queryRS) {
-        boolean success = false;
-        try {
-            @Cleanup Connection connection = getConnection();
-            if (connection == null || connection.isClosed()) {
-                throw new IllegalStateException("SQL connection is null");
-            }
-
-            @Cleanup PreparedStatement preparedStatement = connection.prepareStatement(queryRS.getQuery());
-            queryRS.onRun(preparedStatement);
-            preparedStatement.execute();
-
-            @Cleanup ResultSet resultSet = preparedStatement.executeQuery();
-            success = queryRS.onResult(resultSet);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return success;
-    }
+    abstract boolean runQuery(QueryPS queryPS);
+    abstract boolean runQuery(QueryRS queryRS);
 
     boolean setupTables(String... tableQueries) {
         boolean success = true;
@@ -467,14 +431,14 @@ abstract class SQLDatastore extends Datastore {
 
     @Getter
     @AllArgsConstructor
-    private abstract class QueryPS {
+    abstract class QueryPS {
         private final String query;
         abstract void onRun(PreparedStatement preparedStatement) throws SQLException;
     }
 
     @Getter
     @AllArgsConstructor
-    private abstract class QueryRS {
+    abstract class QueryRS {
         private final String query;
         abstract void onRun(PreparedStatement preparedStatement) throws SQLException;
         abstract boolean onResult(ResultSet resultSet) throws SQLException;

@@ -46,14 +46,14 @@ public class PlayerListener implements Listener {
         plugin.getDatastore().loadOrCreateUser(cache.getUUID(e.getUniqueId()), e.getName());
         final long time = System.currentTimeMillis() - startTime;
         if (time >= 1000) {
-            plugin.getLogger().warning("Processing login for " + e.getName() + " took " + time + "ms.");
+            plugin.getLog().warn("Processing login for " + e.getName() + " took " + time + "ms.");
         }
     }
 
     @EventHandler
     public void onPlayerLogin(PlayerLoginEvent e) {
         final Player player = e.getPlayer();
-        final User user = plugin.getUserManager().getUser(plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId()));
+        final User user = plugin.getUserManager().getUser(plugin.getUuidCache().getUUID(player.getUniqueId()));
 
         if (user == null) {
             e.disallow(PlayerLoginEvent.Result.KICK_OTHER, KICK_MESSAGE);
@@ -75,6 +75,11 @@ public class PlayerListener implements Listener {
     }
 
     @EventHandler
+    public void onPlayerChangedWorld(PlayerChangedWorldEvent e) {
+        refreshPlayer(e.getPlayer());
+    }
+
+    @EventHandler
     public void onPlayerQuit(PlayerQuitEvent e) {
         final Player player = e.getPlayer();
         final UuidCache cache = plugin.getUuidCache();
@@ -84,11 +89,6 @@ public class PlayerListener implements Listener {
 
         final User user = plugin.getUserManager().getUser(cache.getUUID(player.getUniqueId()));
         plugin.getUserManager().unloadUser(user);
-    }
-
-    @EventHandler
-    public void onPlayerChangedWorld(PlayerChangedWorldEvent e) {
-        refreshPlayer(e.getPlayer());
     }
 
     private void refreshPlayer(Player p) {

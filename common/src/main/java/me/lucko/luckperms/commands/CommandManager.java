@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 public class CommandManager {
@@ -162,7 +161,7 @@ public class CommandManager {
     }
 
     private void registerMainCommand(MainCommand command) {
-        plugin.getLogger().log(Level.INFO, "[CommandManager] Registered main command '" + command.getName() + "'");
+        plugin.getLog().info("[CommandManager] Registered main command '" + command.getName() + "'");
         mainCommands.add(command);
     }
 

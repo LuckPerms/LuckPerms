@@ -22,14 +22,14 @@ public abstract class LPConfiguration<T extends LuckPermsPlugin> {
         init();
 
         if (Patterns.NON_ALPHA_NUMERIC.matcher(getServer()).find()) {
-            plugin.getLogger().severe("Server name defined in config.yml contains invalid characters. Server names can " +
+            plugin.getLog().severe("Server name defined in config.yml contains invalid characters. Server names can " +
                     "only contain alphanumeric characters.\nDefined server name '" + getServer() + "' will be replaced with '" +
                     defaultServerName + "' (the default)");
             set("server", defaultServerName);
         }
 
         if (Patterns.NON_ALPHA_NUMERIC.matcher(getDefaultGroupName()).find()) {
-            plugin.getLogger().severe("Default group defined in config.yml contains invalid characters. Group names can " +
+            plugin.getLog().severe("Default group defined in config.yml contains invalid characters. Group names can " +
                     "only contain alphanumeric characters.\nDefined default group name '" + getDefaultGroupName() +
                     "' will be replaced with 'default' (the default)");
             set("default-group", "default");

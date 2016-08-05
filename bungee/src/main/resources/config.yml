@@ -16,7 +16,7 @@ include-global: false
 
 # 1. You have Spigot servers connected to a BungeeCord proxy, with online-mode set to false, but 'bungeecord' set to true in the spigot.yml
 #    AND 'ip-forward' set to true in the BungeeCord config.yml
-#    In this case, set online-mode in LuckPerms to true, dispite the server being in offline mode.
+#    In this case, set online-mode in LuckPerms to true, despite the server being in offline mode.
 
 # 2. You are only running one server instance using LuckPerms, (not a network)
 #    In this case, set online-mode to true no matter what is set in server.properties. (we can just fallback to the servers uuid cache)

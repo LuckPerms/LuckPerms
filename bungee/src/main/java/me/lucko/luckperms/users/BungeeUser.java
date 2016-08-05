@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.UUID;
 
 public class BungeeUser extends User {
-
     private final LPBungeePlugin plugin;
 
     BungeeUser(UUID uuid, LPBungeePlugin plugin) {

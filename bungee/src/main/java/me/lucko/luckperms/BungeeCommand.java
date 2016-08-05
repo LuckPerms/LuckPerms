@@ -2,29 +2,30 @@ package me.lucko.luckperms;
 
 import me.lucko.luckperms.commands.CommandManager;
 import me.lucko.luckperms.commands.Sender;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabExecutor;
+import net.md_5.bungee.api.CommandSender;
+import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.plugin.Command;
+import net.md_5.bungee.api.plugin.TabExecutor;
 
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
-import java.util.List;
 
-class CommandManagerBukkit extends CommandManager implements CommandExecutor, TabExecutor {
-    CommandManagerBukkit(LuckPermsPlugin plugin) {
-        super(plugin);
+class BungeeCommand extends Command implements TabExecutor {
+    private final CommandManager manager;
+
+    public BungeeCommand(CommandManager manager) {
+        super("luckpermsbungee", null, "bperms", "lpb", "bpermissions", "bp", "bperm");
+        this.manager = manager;
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        return onCommand(makeSender(sender), label, Arrays.asList(args));
+    public void execute(CommandSender sender, String[] args) {
+        manager.onCommand(makeSender(sender), "bperms", Arrays.asList(args));
     }
 
-
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
-        return onTabComplete(makeSender(sender), Arrays.asList(args));
+    public Iterable<String> onTabComplete(CommandSender sender, String[] args) {
+        return manager.onTabComplete(makeSender(sender), Arrays.asList(args));
     }
 
     private static Sender makeSender(CommandSender sender) {
@@ -35,7 +36,7 @@ class CommandManagerBukkit extends CommandManager implements CommandExecutor, Ta
             public void sendMessage(String s) {
                 final CommandSender c = cs.get();
                 if (c != null) {
-                    c.sendMessage(s);
+                    c.sendMessage(new TextComponent(s));
                 }
             }
 
