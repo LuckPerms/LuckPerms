@@ -23,7 +23,6 @@
 package me.lucko.luckperms.constants;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 import me.lucko.luckperms.commands.Sender;
 
 @SuppressWarnings("SpellCheckingInspection")
@@ -42,74 +41,56 @@ public enum Permission {
     DELETE_TRACK("deletetrack", null),
     LIST_TRACKS("listtracks", null),
 
-    USER_INFO("info", PermissionGroup.USER),
-    USER_GETUUID("getuuid", PermissionGroup.USER),
-    USER_LISTNODES("listnodes", PermissionGroup.USER),
-    USER_HASPERMISSION("haspermission", PermissionGroup.USER),
-    USER_INHERITSPERMISSION("inheritspermission", PermissionGroup.USER),
-    USER_SETPERMISSION("setpermission", PermissionGroup.USER),
-    USER_UNSETPERMISSION("unsetpermission", PermissionGroup.USER),
-    USER_ADDGROUP("addgroup", PermissionGroup.USER),
-    USER_REMOVEGROUP("removegroup", PermissionGroup.USER),
-    USER_SET_TEMP_PERMISSION("settemppermission", PermissionGroup.USER),
-    USER_UNSET_TEMP_PERMISSION("unsettemppermission", PermissionGroup.USER),
-    USER_ADDTEMPGROUP("addtempgroup", PermissionGroup.USER),
-    USER_REMOVETEMPGROUP("removetempgroup", PermissionGroup.USER),
-    USER_SETPRIMARYGROUP("setprimarygroup", PermissionGroup.USER),
-    USER_SHOWTRACKS("showtracks", PermissionGroup.USER),
-    USER_PROMOTE("promote", PermissionGroup.USER),
-    USER_DEMOTE("demote", PermissionGroup.USER),
-    USER_SHOWPOS("showpos", PermissionGroup.USER),
-    USER_CLEAR("clear", PermissionGroup.USER),
+    USER_INFO("info", "user"),
+    USER_GETUUID("getuuid", "user"),
+    USER_LISTNODES("listnodes", "user"),
+    USER_HASPERMISSION("haspermission", "user"),
+    USER_INHERITSPERMISSION("inheritspermission", "user"),
+    USER_SETPERMISSION("setpermission", "user"),
+    USER_UNSETPERMISSION("unsetpermission", "user"),
+    USER_ADDGROUP("addgroup", "user"),
+    USER_REMOVEGROUP("removegroup", "user"),
+    USER_SET_TEMP_PERMISSION("settemppermission", "user"),
+    USER_UNSET_TEMP_PERMISSION("unsettemppermission", "user"),
+    USER_ADDTEMPGROUP("addtempgroup", "user"),
+    USER_REMOVETEMPGROUP("removetempgroup", "user"),
+    USER_SETPRIMARYGROUP("setprimarygroup", "user"),
+    USER_SHOWTRACKS("showtracks", "user"),
+    USER_PROMOTE("promote", "user"),
+    USER_DEMOTE("demote", "user"),
+    USER_SHOWPOS("showpos", "user"),
+    USER_CLEAR("clear", "user"),
 
-    GROUP_INFO("info", PermissionGroup.GROUP),
-    GROUP_LISTNODES("listnodes", PermissionGroup.GROUP),
-    GROUP_HASPERMISSION("haspermission", PermissionGroup.GROUP),
-    GROUP_INHERITSPERMISSION("inheritspermission", PermissionGroup.GROUP),
-    GROUP_SETPERMISSION("setpermission", PermissionGroup.GROUP),
-    GROUP_UNSETPERMISSION("unsetpermission", PermissionGroup.GROUP),
-    GROUP_SETINHERIT("setinherit", PermissionGroup.GROUP),
-    GROUP_UNSETINHERIT("unsetinherit", PermissionGroup.GROUP),
-    GROUP_SET_TEMP_PERMISSION("settemppermission", PermissionGroup.GROUP),
-    GROUP_UNSET_TEMP_PERMISSION("unsettemppermission", PermissionGroup.GROUP),
-    GROUP_SET_TEMP_INHERIT("settempinherit", PermissionGroup.GROUP),
-    GROUP_UNSET_TEMP_INHERIT("unsettempinherit", PermissionGroup.GROUP),
-    GROUP_SHOWTRACKS("showtracks", PermissionGroup.GROUP),
-    GROUP_CLEAR("clear", PermissionGroup.GROUP),
+    GROUP_INFO("info", "group"),
+    GROUP_LISTNODES("listnodes", "group"),
+    GROUP_HASPERMISSION("haspermission", "group"),
+    GROUP_INHERITSPERMISSION("inheritspermission", "group"),
+    GROUP_SETPERMISSION("setpermission", "group"),
+    GROUP_UNSETPERMISSION("unsetpermission", "group"),
+    GROUP_SETINHERIT("setinherit", "group"),
+    GROUP_UNSETINHERIT("unsetinherit", "group"),
+    GROUP_SET_TEMP_PERMISSION("settemppermission", "group"),
+    GROUP_UNSET_TEMP_PERMISSION("unsettemppermission", "group"),
+    GROUP_SET_TEMP_INHERIT("settempinherit", "group"),
+    GROUP_UNSET_TEMP_INHERIT("unsettempinherit", "group"),
+    GROUP_SHOWTRACKS("showtracks", "group"),
+    GROUP_CLEAR("clear", "group"),
 
-    TRACK_INFO("info", PermissionGroup.TRACK),
-    TRACK_APPEND("append", PermissionGroup.TRACK),
-    TRACK_INSERT("insert", PermissionGroup.TRACK),
-    TRACK_REMOVE("remove", PermissionGroup.TRACK),
-    TRACK_CLEAR("clear", PermissionGroup.TRACK);
+    TRACK_INFO("info", "track"),
+    TRACK_APPEND("append", "track"),
+    TRACK_INSERT("insert", "track"),
+    TRACK_REMOVE("remove", "track"),
+    TRACK_CLEAR("clear", "track");
 
     private String node;
-    private PermissionGroup group;
+    private String group;
 
     public boolean isAuthorized(Sender sender) {
-        if (sender.hasPermission("luckperms.*")) {
-            return true;
-        }
-
         if (group != null) {
-            return group.isAuthorized(sender) || sender.hasPermission("luckperms." + group.getNode() + "." + node);
+            return sender.hasPermission("luckperms." + group + "." + node);
         }
 
         return sender.hasPermission("luckperms." + node);
-    }
-
-    @Getter
-    @AllArgsConstructor
-    private enum PermissionGroup {
-        USER("user"),
-        GROUP("group"),
-        TRACK("track");
-
-        private String node;
-
-        private boolean isAuthorized(Sender sender) {
-            return sender.hasPermission("luckperms." + node + ".*");
-        }
     }
 
 }

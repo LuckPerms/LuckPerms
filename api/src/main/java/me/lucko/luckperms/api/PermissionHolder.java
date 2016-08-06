@@ -267,14 +267,33 @@ public interface PermissionHolder {
      * @param server The server to get nodes for
      * @param world The world to get nodes for
      * @param excludedGroups Groups that shouldn't be inherited (to prevent circular inheritance issues)
+     * @param possibleNodes A list of possible permission nodes for wildcard permission handling
+     * @return a {@link Map} of the permissions
+     */
+    Map<String, Boolean> getLocalPermissions(String server, String world, List<String> excludedGroups, List<String> possibleNodes);
+
+    /**
+     * Gets the permissions and inherited permissions that apply to a specific server
+     * @param server The server to get nodes for
+     * @param world The world to get nodes for
+     * @param excludedGroups Groups that shouldn't be inherited (to prevent circular inheritance issues)
      * @return a {@link Map} of the permissions
      */
     Map<String, Boolean> getLocalPermissions(String server, String world, List<String> excludedGroups);
 
     /**
      * Gets the permissions and inherited permissions that apply to a specific server
-     * @param server The server to get nodes for (can be null)
-     * @param excludedGroups Groups that shouldn't be inherited, can be null (to prevent circular inheritance issues)
+     * @param server The server to get nodes for
+     * @param excludedGroups Groups that shouldn't be inherited (to prevent circular inheritance issues)
+     * @param possibleNodes A list of possible permission nodes for wildcard permission handling
+     * @return a {@link Map} of the permissions
+     */
+    Map<String, Boolean> getLocalPermissions(String server, List<String> excludedGroups, List<String> possibleNodes);
+
+    /**
+     * Gets the permissions and inherited permissions that apply to a specific server
+     * @param server The server to get nodes for
+     * @param excludedGroups Groups that shouldn't be inherited (to prevent circular inheritance issues)
      * @return a {@link Map} of the permissions
      */
     Map<String, Boolean> getLocalPermissions(String server, List<String> excludedGroups);

@@ -176,8 +176,18 @@ class PermissionHolderLink implements PermissionHolder {
     }
 
     @Override
+    public Map<String, Boolean> getLocalPermissions(String server, String world, List<String> excludedGroups, List<String> possibleNodes) {
+        return master.getLocalPermissions(server, world, excludedGroups, possibleNodes);
+    }
+
+    @Override
     public Map<String, Boolean> getLocalPermissions(String server, String world, List<String> excludedGroups) {
         return master.getLocalPermissions(server, world, excludedGroups);
+    }
+
+    @Override
+    public Map<String, Boolean> getLocalPermissions(String server, List<String> excludedGroups, List<String> possibleNodes) {
+        return master.getLocalPermissions(server, excludedGroups, possibleNodes);
     }
 
     @Override

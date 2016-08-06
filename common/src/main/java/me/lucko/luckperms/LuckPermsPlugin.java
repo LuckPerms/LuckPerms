@@ -107,6 +107,12 @@ public interface LuckPermsPlugin {
     List<String> getPlayerList();
 
     /**
+     * Gets all possible permission nodes, used for resolving wildcards
+     * @return a {@link List} of permission nodes
+     */
+    List<String> getPossiblePermissions();
+
+    /**
      * Runs an update task
      */
     void runUpdateTask();

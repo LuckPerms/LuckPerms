@@ -8,6 +8,7 @@ A permissions implementation for Bukkit/Spigot, BungeeCord and Sponge.
 ## Features
 * **Group inheritance** - users can be members of multiple groups, groups can inherit other groups
 * **Temporary permissions** - users/groups can be given permissions that expire after a given time
+* **Wildcard permissions** - users/groups can be given wildcard permissions (e.g. "minecraft.command.*"), even when plugins haven't implemented their own wildcards.
 * **Temporary groups** - users/groups can be added to/inherit other groups temporarily
 * **Multi-server support** - data is synced across all servers/platforms
 * **Full offline-mode/mixed-mode support** - player permissions are synced properly over offline-mode or mixed online/offline-mode networks.
@@ -34,23 +35,31 @@ You can define the settings for per-server permissions, the storage method and c
 
 ## Info
 ### Permission Calculation
-Permissions are calculated based on a priority system as follows.
+#### Permissions are calculated based on a priority system as follows.
 
-* Temporary permissions will override non-temporary permissions.
+* **Non wildcard permissions will override wildcard permissions**
+
+Example: if a user has a true permission set for "luckperms.\*", and a false permission set for "luckperms.something", the non-wildcard permission will override the wildcard, and "luckperms.something" will be set to false, despite the wildcard.
+
+* **More specific wildcards override less specific ones**
+
+Example: if a user has "luckperms.\*" set to true, but "luckperms.user.\*" set to false, all of the user permissions will be set to false, despite the more generic wildcard for "luckperms.*".
+
+* **Temporary permissions will override non-temporary permissions.**
 
 Example: if a user has a false permission set for "test.node", and a temporary true permission set for "test.node", the temporary permission will override the permanent one, and the user will be granted the true node.
 
-* World specific permissions will override generic permissions.
+* **World specific permissions will override generic permissions.**
 
 Example: if a user has a global "fly.use" permission, and then has a negated "fly.use" permission in the "world_nether" world, the world specific permission will override the globally defined one, and the user will be granted the negated node (provided they're in that world, of course.).
 
-* Server specific permissions will override generic/global permissions.
+* **Server specific permissions will override generic/global permissions.**
 
-Example: if a user has a global "fly.use" permission, and then has a negated "fly.use" permission on the "factions" server, the server specific permission will override the globally defined one, and the user will be granted the negated node.
+Example: if a user has a global "fly.use" permission, and then has a negated "fly.use" permission on the "factions" server, the server specific permission will override the globally defined one, and the user will be granted the negated node (provided they're on that server).
 
-* Inherited permissions will be overridden by an objects own permissions.
+* **Inherited permissions will be overridden by an objects own permissions.**
 
-Example: A user is a member of the default group, which grants "some.thing.perm", but the users own permissions has "some.thing.perm" set to false. The inherited permission will be overridden by the users own permissions, and the user will be granted the negative node (provided they're on that server).
+Example: A user is a member of the default group, which grants "some.thing.perm", but the users own permissions has "some.thing.perm" set to false. The inherited permission will be overridden by the users own permissions, and the user will be granted the negative node.
 
 ### Temporary Permissions
 Temporary permissions are checked each time a user/group is loaded, and when the sync task runs. This means if you set a temporary permission to expire after 30 seconds, it won't actually be removed until the sync task runs.
@@ -102,7 +111,7 @@ You can add LuckPerms as a Maven dependency by adding the following to your proj
     <dependency>
         <groupId>me.lucko.luckperms</groupId>
         <artifactId>luckperms-api</artifactId>
-        <version>2.0</version>
+        <version>2.1</version>
     </dependency>
 </dependencies>
 ````

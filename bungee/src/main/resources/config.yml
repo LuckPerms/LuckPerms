@@ -22,6 +22,11 @@ include-global: false
 #    In this case, set online-mode to true no matter what is set in server.properties. (we can just fallback to the servers uuid cache)
 online-mode: true
 
+# If the plugin should apply wildcard permissions.
+# If set to true, LuckPerms will detect wildcard permissions, and resolve & apply all registered permissions matching
+# the wildcard. This will only work for plugins that define all of their permissions to the server.
+apply-wildcards: true
+
 # Which storage method the plugin should use.
 # Currently supported: mysql & flatfile
 # Fill out connection info below if you're using MySQL

@@ -40,7 +40,6 @@ import me.lucko.luckperms.users.UserManager;
 import me.lucko.luckperms.utils.LPConfiguration;
 import me.lucko.luckperms.utils.LogUtil;
 import me.lucko.luckperms.utils.UuidCache;
-import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
@@ -48,6 +47,7 @@ import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -71,7 +71,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         configuration = new BukkitConfig(this);
 
         // register events
-        PluginManager pm = Bukkit.getPluginManager();
+        PluginManager pm = getServer().getPluginManager();
         pm.registerEvents(new BukkitListener(this), this);
 
         // register commands
@@ -155,12 +155,12 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
     @Override
     public void doAsync(Runnable r) {
-        Bukkit.getScheduler().runTaskAsynchronously(this, r);
+        getServer().getScheduler().runTaskAsynchronously(this, r);
     }
 
     @Override
     public void doSync(Runnable r) {
-        Bukkit.getScheduler().runTask(this, r);
+        getServer().getScheduler().runTask(this, r);
     }
 
     @Override
@@ -181,6 +181,18 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     @Override
     public List<String> getPlayerList() {
         return getServer().getOnlinePlayers().stream().map(Player::getName).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> getPossiblePermissions() {
+        final List<String> perms = new ArrayList<>();
+
+        getServer().getPluginManager().getPermissions().forEach(p -> {
+            perms.add(p.getName());
+            p.getChildren().keySet().forEach(perms::add);
+        });
+
+        return perms;
     }
 
     @Override

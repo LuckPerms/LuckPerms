@@ -29,14 +29,13 @@ import me.lucko.luckperms.utils.UuidCache;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.api.event.LoginEvent;
-import net.md_5.bungee.api.event.PlayerDisconnectEvent;
-import net.md_5.bungee.api.event.PostLoginEvent;
-import net.md_5.bungee.api.event.ServerSwitchEvent;
+import net.md_5.bungee.api.event.*;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
 import java.lang.ref.WeakReference;
+import java.util.Collections;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -47,6 +46,27 @@ class BungeeListener extends AbstractListener implements Listener {
     BungeeListener(LPBungeePlugin plugin) {
         super(plugin);
         this.plugin = plugin;
+    }
+
+    @EventHandler
+    public void onPlayerPermissionCheck(PermissionCheckEvent e) {
+        if (!(e.getSender() instanceof ProxiedPlayer)) {
+            return;
+        }
+
+        final ProxiedPlayer player = ((ProxiedPlayer) e.getSender());
+        final User user = plugin.getUserManager().getUser(plugin.getUuidCache().getUUID(player.getUniqueId()));
+        if (user == null) return;
+
+
+        final String server = player.getServer() == null ? null : (player.getServer().getInfo() == null ? null : player.getServer().getInfo().getName());
+        Map<String, Boolean> local = user.getLocalPermissions(plugin.getConfiguration().getServer(), server, null, Collections.singletonList(e.getPermission()));
+        for (Map.Entry<String, Boolean> en : local.entrySet()) {
+            if (en.getKey().equalsIgnoreCase(e.getPermission())) {
+                e.setHasPermission(en.getValue());
+                return;
+            }
+        }
     }
 
     @EventHandler

@@ -88,6 +88,10 @@ public abstract class LPConfiguration<T extends LuckPermsPlugin> {
         return getBoolean("online-mode", true);
     }
 
+    public boolean getApplyWildcards() {
+        return getBoolean("apply-wildcards", true);
+    }
+
     public MySQLConfiguration getDatabaseValues() {
         return new MySQLConfiguration(
                 getString("sql.address", null),

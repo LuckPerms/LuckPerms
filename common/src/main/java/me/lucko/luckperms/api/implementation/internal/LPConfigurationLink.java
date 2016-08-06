@@ -64,6 +64,11 @@ public class LPConfigurationLink implements LPConfiguration {
     }
 
     @Override
+    public boolean getApplyWildcards() {
+        return master.getApplyWildcards();
+    }
+
+    @Override
     public MySQLConfiguration getDatabaseValues() {
         return master.getDatabaseValues();
     }

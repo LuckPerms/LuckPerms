@@ -41,6 +41,7 @@ import me.lucko.luckperms.utils.UuidCache;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -141,6 +142,12 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     @Override
     public List<String> getPlayerList() {
         return getProxy().getPlayers().stream().map(ProxiedPlayer::getName).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> getPossiblePermissions() {
+        // No such thing on Bungee. Wildcards are processed in the listener instead.
+        return Collections.emptyList();
     }
 
     @Override

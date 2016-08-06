@@ -60,6 +60,11 @@ public interface LPConfiguration {
     boolean getOnlineMode();
 
     /**
+     * @return if LuckPerms is applying wildcard permissions
+     */
+    boolean getApplyWildcards();
+
+    /**
      * @return the database values set in the configuration
      */
     MySQLConfiguration getDatabaseValues();

@@ -401,10 +401,33 @@ public abstract class PermissionHolder {
      * @param server The server to get nodes for
      * @param world The world to get nodes for
      * @param excludedGroups Groups that shouldn't be inherited (to prevent circular inheritance issues)
+     * @param possibleNodes A list of possible permission nodes for wildcard permission handling
+     * @return a {@link Map} of the permissions
+     */
+    public Map<String, Boolean> getLocalPermissions(String server, String world, List<String> excludedGroups, List<String> possibleNodes) {
+        return getPermissions(server, world, excludedGroups, plugin.getConfiguration().getIncludeGlobalPerms(), possibleNodes);
+    }
+
+    /**
+     * Gets the permissions and inherited permissions that apply to a specific server
+     * @param server The server to get nodes for
+     * @param world The world to get nodes for
+     * @param excludedGroups Groups that shouldn't be inherited (to prevent circular inheritance issues)
      * @return a {@link Map} of the permissions
      */
     public Map<String, Boolean> getLocalPermissions(String server, String world, List<String> excludedGroups) {
-        return getPermissions(server, world, excludedGroups, plugin.getConfiguration().getIncludeGlobalPerms());
+        return getPermissions(server, world, excludedGroups, plugin.getConfiguration().getIncludeGlobalPerms(), null);
+    }
+
+    /**
+     * Gets the permissions and inherited permissions that apply to a specific server
+     * @param server The server to get nodes for
+     * @param excludedGroups Groups that shouldn't be inherited (to prevent circular inheritance issues)
+     * @param possibleNodes A list of possible permission nodes for wildcard permission handling
+     * @return a {@link Map} of the permissions
+     */
+    public Map<String, Boolean> getLocalPermissions(String server, List<String> excludedGroups, List<String> possibleNodes) {
+        return getLocalPermissions(server, null, excludedGroups, possibleNodes);
     }
 
     /**
@@ -414,7 +437,7 @@ public abstract class PermissionHolder {
      * @return a {@link Map} of the permissions
      */
     public Map<String, Boolean> getLocalPermissions(String server, List<String> excludedGroups) {
-        return getLocalPermissions(server, null, excludedGroups);
+        return getLocalPermissions(server, null, excludedGroups, null);
     }
 
     /**
@@ -468,7 +491,7 @@ public abstract class PermissionHolder {
         return nodes;
     }
 
-    protected Map<String, Boolean> getPermissions(String server, String world, List<String> excludedGroups, boolean includeGlobal) {
+    protected Map<String, Boolean> getPermissions(String server, String world, List<String> excludedGroups, boolean includeGlobal, List<String> possibleNodes) {
         if (excludedGroups == null) {
             excludedGroups = new ArrayList<>();
         }
@@ -643,7 +666,59 @@ public abstract class PermissionHolder {
             }
         }
 
+        if (plugin.getConfiguration().getApplyWildcards()) {
+            if (possibleNodes != null && !possibleNodes.isEmpty()) {
+                return applyWildcards(perms, possibleNodes);
+            }
+            return applyWildcards(perms, plugin.getPossiblePermissions());
+        }
+
         return perms;
+    }
+
+    private Map<String, Boolean> applyWildcards(Map<String, Boolean> input, List<String> possibleNodes) {
+        // Add all group nodes, so wildcard group.* and '*' can apply.
+        plugin.getGroupManager().getGroups().keySet().forEach(s -> possibleNodes.add("group." + s));
+
+        SortedMap<Integer, Map<String, Boolean>> wildcards = new TreeMap<>(Collections.reverseOrder());
+        for (Map.Entry<String, Boolean> e : input.entrySet()) {
+            if (e.getKey().equals("*") || e.getKey().equals("'*'")) {
+                wildcards.put(0, Collections.singletonMap("*", e.getValue()));
+                continue;
+            }
+
+            if (!e.getKey().endsWith(".*")) {
+                continue;
+            }
+
+            final String node = e.getKey().substring(0, e.getKey().length() - 2);
+            final String[] parts = Patterns.DOT.split(node);
+
+            if (!wildcards.containsKey(parts.length)) {
+                wildcards.put(parts.length, new HashMap<>());
+            }
+
+            wildcards.get(parts.length).put(node, e.getValue());
+        }
+
+        for (Map.Entry<Integer, Map<String, Boolean>> e : wildcards.entrySet()) {
+            if (e.getKey() == 0) {
+                // Apply all permissions
+                possibleNodes.stream()
+                        .filter(n -> !input.containsKey(n)) // Don't override existing nodes
+                        .forEach(n -> input.put(n, e.getValue().get("*")));
+                break;
+            }
+
+            for (Map.Entry<String, Boolean> wc : e.getValue().entrySet()) {
+                possibleNodes.stream()
+                        .filter(n -> n.startsWith(wc.getKey() + ".")) // Only nodes that match the wildcard are applied
+                        .filter(n -> !input.containsKey(n)) // Don't override existing nodes
+                        .forEach(n -> input.put(n, wc.getValue()));
+            }
+        }
+
+        return input;
     }
 
     private static String stripTime(String s) {

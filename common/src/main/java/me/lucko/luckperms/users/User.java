@@ -313,7 +313,7 @@ public abstract class User extends PermissionHolder {
      */
     private List<String> getGroups(String server, String world, boolean includeGlobal) {
         // Call super #getPermissions method, and just sort through those
-        Map<String, Boolean> perms = getPermissions(server, world, null, includeGlobal);
+        Map<String, Boolean> perms = getPermissions(server, world, null, includeGlobal, null);
         return perms.keySet().stream()
                 .filter(s -> Patterns.GROUP_MATCH.matcher(s).matches())
                 .map(s -> Patterns.DOT.split(s, 2)[1])

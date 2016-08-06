@@ -50,6 +50,8 @@ import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.scheduler.Scheduler;
+import org.spongepowered.api.service.permission.PermissionDescription;
+import org.spongepowered.api.service.permission.PermissionService;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -179,6 +181,12 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     @Override
     public List<String> getPlayerList() {
         return game.getServer().getOnlinePlayers().stream().map(Player::getName).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> getPossiblePermissions() {
+        PermissionService p = game.getServiceManager().provideUnchecked(PermissionService.class);
+        return p.getDescriptions().stream().map(PermissionDescription::getId).collect(Collectors.toList());
     }
 
     @Override
