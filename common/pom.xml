@@ -9,7 +9,6 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <version>1.5</version>
     <artifactId>luckperms-common</artifactId>
     <build>
         <plugins>
@@ -30,7 +29,7 @@
         <dependency>
             <groupId>me.lucko.luckperms</groupId>
             <artifactId>luckperms-api</artifactId>
-            <version>1.5</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
         <!-- HikariCP -->

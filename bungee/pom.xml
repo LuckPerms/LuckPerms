@@ -10,9 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>luckperms-bungee</artifactId>
-    <version>1.5</version>
     <packaging>jar</packaging>
-    <name>LuckPerms</name>
 
     <build>
         <defaultGoal>clean package</defaultGoal>
@@ -46,6 +44,16 @@
                         </goals>
                         <configuration>
                             <minimizeJar>true</minimizeJar>
+                            <relocations>
+                                <relocation>
+                                    <pattern>org.slf4j</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.slf4j</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.zaxxer.hikari</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.hikari</shadedPattern>
+                                </relocation>
+                            </relocations>
                         </configuration>
                     </execution>
                 </executions>
@@ -65,14 +73,14 @@
         <dependency>
             <groupId>me.lucko.luckperms</groupId>
             <artifactId>luckperms-common</artifactId>
-            <version>1.5</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
         <!-- LuckPerms API -->
         <dependency>
             <groupId>me.lucko.luckperms</groupId>
             <artifactId>luckperms-api</artifactId>
-            <version>1.5</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
         <!-- HikariCP -->

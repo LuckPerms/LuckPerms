@@ -32,9 +32,12 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     private TrackManager trackManager;
     private Datastore datastore;
     private UuidCache uuidCache;
+    private Logger log;
 
     @Override
     public void onEnable() {
+        log = LogUtil.wrap(getLogger());
+
         getLog().info("Loading configuration...");
         configuration = new BungeeConfig(this);
 
@@ -96,11 +99,6 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
         getLog().info("Unregistering API...");
         LuckPerms.unregisterProvider();
-    }
-
-    @Override
-    public Logger getLog() {
-        return LogUtil.wrap(getLogger());
     }
 
     @Override

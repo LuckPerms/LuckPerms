@@ -37,9 +37,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Getter
-@Plugin(id = "luckperms", name = "LuckPerms", version = LPSpongePlugin.VERSION, authors = {"Luck"}, description = "A permissions plugin")
+@Plugin(id = "luckperms", name = "LuckPerms", version = "MAGIC", authors = {"Luck"}, description = "A permissions plugin")
 public class LPSpongePlugin implements LuckPermsPlugin {
-    static final String VERSION = "1.5"; // TODO load this from pom
 
     @Inject
     private Logger logger;
@@ -142,7 +141,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
     @Override
     public String getVersion() {
-        return VERSION;
+        return "MAGIC";
     }
 
     @Override

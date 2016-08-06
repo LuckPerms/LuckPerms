@@ -39,9 +39,12 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private TrackManager trackManager;
     private Datastore datastore;
     private UuidCache uuidCache;
+    private Logger log;
 
     @Override
     public void onEnable() {
+        log = LogUtil.wrap(getLogger());
+
         getLog().info("Loading configuration...");
         configuration = new BukkitConfig(this);
 
@@ -136,11 +139,6 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     @Override
     public void doSync(Runnable r) {
         Bukkit.getScheduler().runTask(this, r);
-    }
-
-    @Override
-    public Logger getLog() {
-        return LogUtil.wrap(getLogger());
     }
 
     @Override
