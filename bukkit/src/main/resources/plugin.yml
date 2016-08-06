@@ -1,6 +1,6 @@
 name: LuckPerms
 author: Luck
-version: ${project.version}
+version: ${project.version}.${git.closest.tag.commit.count}
 main: me.lucko.luckperms.LPBukkitPlugin
 softdepend: [Vault]
 description: A permissions plugin

@@ -5,7 +5,7 @@
     <parent>
         <artifactId>luckperms</artifactId>
         <groupId>me.lucko.luckperms</groupId>
-        <version>1.5</version>
+        <version>2.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -14,7 +14,7 @@
 
     <build>
         <defaultGoal>clean package</defaultGoal>
-        <finalName>LuckPermsSponge</finalName>
+        <finalName>LuckPermsSponge-${project.version}.${git.closest.tag.commit.count}</finalName>
         <sourceDirectory>${basedir}/src/main/java</sourceDirectory>
         <resources>
             <resource>
@@ -70,7 +70,7 @@
                             <properties>
                                 <property>
                                     <name>version</name>
-                                    <value>${project.version}</value>
+                                    <value>${project.version}.${git.closest.tag.commit.count}</value>
                                 </property>
                             </properties>
                         </transformerClass>
@@ -91,6 +91,21 @@
                         <version>${project.version}</version>
                     </dependency>
                 </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+                <version>2.2.1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <injectAllReactorProjects>true</injectAllReactorProjects>
+                </configuration>
             </plugin>
         </plugins>
     </build>
