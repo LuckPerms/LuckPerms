@@ -11,6 +11,8 @@ import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.List;
 
+import static me.lucko.luckperms.api.implementation.internal.Utils.checkGroup;
+
 /**
  * Provides a link between {@link Track} and {@link me.lucko.luckperms.tracks.Track}
  */
@@ -39,31 +41,31 @@ public class TrackLink implements Track {
 
     @Override
     public String getNext(@NonNull Group current) throws ObjectLacksException {
-        Utils.checkGroup(current);
+        checkGroup(current);
         return master.getNext(((GroupLink) current).getMaster());
     }
 
     @Override
     public String getPrevious(@NonNull Group current) throws ObjectLacksException {
-        Utils.checkGroup(current);
+        checkGroup(current);
         return master.getPrevious(((GroupLink) current).getMaster());
     }
 
     @Override
     public void appendGroup(@NonNull Group group) throws ObjectAlreadyHasException {
-        Utils.checkGroup(group);
+        checkGroup(group);
         master.appendGroup(((GroupLink) group).getMaster());
     }
 
     @Override
     public void insertGroup(@NonNull Group group, @NonNull int position) throws ObjectAlreadyHasException, IndexOutOfBoundsException {
-        Utils.checkGroup(group);
+        checkGroup(group);
         master.insertGroup(((GroupLink) group).getMaster(), position);
     }
 
     @Override
     public void removeGroup(@NonNull Group group) throws ObjectLacksException {
-        Utils.checkGroup(group);
+        checkGroup(group);
         master.removeGroup(((GroupLink) group).getMaster());
     }
 
@@ -74,7 +76,7 @@ public class TrackLink implements Track {
 
     @Override
     public boolean containsGroup(@NonNull Group group) {
-        Utils.checkGroup(group);
+        checkGroup(group);
         return master.containsGroup(((GroupLink) group).getMaster());
     }
 

@@ -35,14 +35,6 @@ public class AbstractListener {
         }
     }
 
-    protected void onLogin(UUID uuid, String username) {
-
-    }
-
-    protected void onJoin(UUID uuid, String username) {
-
-    }
-
     protected void onLeave(UUID uuid) {
         final UuidCache cache = plugin.getUuidCache();
 

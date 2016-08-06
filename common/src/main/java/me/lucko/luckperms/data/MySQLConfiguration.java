@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class MySQLConfiguration {
+public class MySQLConfiguration implements me.lucko.luckperms.api.data.MySQLConfiguration {
 
     private final String address;
     private final String database;

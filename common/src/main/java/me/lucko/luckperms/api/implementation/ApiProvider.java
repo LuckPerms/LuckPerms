@@ -4,11 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.api.*;
-import me.lucko.luckperms.api.implementation.internal.DatastoreLink;
-import me.lucko.luckperms.api.implementation.internal.GroupLink;
-import me.lucko.luckperms.api.implementation.internal.TrackLink;
-import me.lucko.luckperms.api.implementation.internal.UserLink;
+import me.lucko.luckperms.api.implementation.internal.*;
 
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -29,8 +27,18 @@ public class ApiProvider implements LuckPermsApi {
     }
 
     @Override
+    public LPConfiguration getConfiguration() {
+        return new LPConfigurationLink(plugin.getConfiguration());
+    }
+
+    @Override
     public Datastore getDatastore() {
         return new DatastoreLink(plugin.getDatastore());
+    }
+
+    @Override
+    public UuidCache getUuidCache() {
+        return new UuidCacheLink(plugin.getUuidCache());
     }
 
     @Override
@@ -49,6 +57,11 @@ public class ApiProvider implements LuckPermsApi {
     }
 
     @Override
+    public Optional<User> getUserSafe(UUID uuid) {
+        return Optional.ofNullable(getUser(uuid));
+    }
+
+    @Override
     public User getUser(@NonNull String name) {
         final me.lucko.luckperms.users.User user = plugin.getUserManager().getUser(name);
         if (user == null) {
@@ -56,6 +69,11 @@ public class ApiProvider implements LuckPermsApi {
         }
 
         return new UserLink(user);
+    }
+
+    @Override
+    public Optional<User> getUserSafe(String name) {
+        return Optional.ofNullable(getUser(name));
     }
 
     @Override
@@ -74,6 +92,11 @@ public class ApiProvider implements LuckPermsApi {
     }
 
     @Override
+    public Optional<Group> getGroupSafe(String name) {
+        return Optional.ofNullable(getGroup(name));
+    }
+
+    @Override
     public boolean isGroupLoaded(@NonNull String name) {
         return plugin.getGroupManager().isLoaded(name);
     }
@@ -86,6 +109,11 @@ public class ApiProvider implements LuckPermsApi {
         }
 
         return new TrackLink(track);
+    }
+
+    @Override
+    public Optional<Track> getTrackSafe(String name) {
+        return Optional.ofNullable(getTrack(name));
     }
 
     @Override

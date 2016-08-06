@@ -10,9 +10,6 @@ import me.lucko.luckperms.users.User;
 import me.lucko.luckperms.utils.PermissionHolder;
 import net.milkbowl.vault.permission.Permission;
 
-/**
- *
- */
 class VaultPermissionHook extends Permission {
 
     @Setter

@@ -6,12 +6,12 @@ import lombok.NonNull;
 import me.lucko.luckperms.api.PermissionHolder;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
-import me.lucko.luckperms.utils.DateUtil;
-import me.lucko.luckperms.utils.Patterns;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import static me.lucko.luckperms.api.implementation.internal.Utils.*;
 
 /**
  * Provides a link between {@link PermissionHolder} and {@link me.lucko.luckperms.utils.PermissionHolder}
@@ -22,27 +22,6 @@ class PermissionHolderLink implements PermissionHolder {
 
     @NonNull
     private final me.lucko.luckperms.utils.PermissionHolder master;
-
-    static String checkServer(String s) {
-        if (Patterns.NON_ALPHA_NUMERIC.matcher(s).find()) {
-            throw new IllegalArgumentException("Invalid server entry '" + s + "'. Server names can only contain alphanumeric characters.");
-        }
-        return s;
-    }
-
-    private static String checkNode(String s) {
-        if (s.contains("/") || s.contains("$")) {
-            throw new IllegalArgumentException("Invalid node entry '" + s + "'. Nodes cannot contain '/' or '$' characters.");
-        }
-        return s;
-    }
-
-    static long checkTime(long l) {
-        if (DateUtil.shouldExpire(l)) {
-            throw new IllegalArgumentException("Unix time '" + l + "' is invalid, as it has already passed.");
-        }
-        return l;
-    }
 
     @Override
     public String getObjectName() {

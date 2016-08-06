@@ -7,9 +7,10 @@ import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.data.Callback;
-import me.lucko.luckperms.utils.Patterns;
 
 import java.util.UUID;
+
+import static me.lucko.luckperms.api.implementation.internal.Utils.*;
 
 /**
  * Provides a link between {@link Datastore} and {@link me.lucko.luckperms.data.Datastore}
@@ -25,22 +26,6 @@ public class DatastoreLink implements Datastore {
         this.master = master;
         this.async = new Async(master);
         this.sync = new Sync(master);
-    }
-
-    private static String checkUsername(String s) {
-        if (s.length() > 16 || Patterns.NON_USERNAME.matcher(s).find()) {
-            throw new IllegalArgumentException("Invalid username entry '" + s + "'. Usernames must be less than 16 chars" +
-                    " and only contain 'a-z A-Z 1-9 _'.");
-        }
-        return s;
-    }
-
-    private static String checkName(String s) {
-        if (s.length() > 36 || Patterns.NON_ALPHA_NUMERIC.matcher(s).find()) {
-            throw new IllegalArgumentException("Invalid name entry '" + s + "'. Names must be less than 37 chars" +
-                    " and only contain 'a-z A-Z 1-9'.");
-        }
-        return s.toLowerCase();
     }
 
     private static <T> Callback<T> checkCallback(Callback<T> c) {
@@ -87,7 +72,7 @@ public class DatastoreLink implements Datastore {
 
         @Override
         public void saveUser(@NonNull User user, Callback<Boolean> callback) {
-            Utils.checkUser(user);
+            checkUser(user);
             master.saveUser(((UserLink) user).getMaster(), checkCallback(callback));
         }
 
@@ -108,13 +93,13 @@ public class DatastoreLink implements Datastore {
 
         @Override
         public void saveGroup(@NonNull Group group, Callback<Boolean> callback) {
-            Utils.checkGroup(group);
+            checkGroup(group);
             master.saveGroup(((GroupLink) group).getMaster(), checkCallback(callback));
         }
 
         @Override
         public void deleteGroup(@NonNull Group group, Callback<Boolean> callback) {
-            Utils.checkGroup(group);
+            checkGroup(group);
             master.deleteGroup(((GroupLink) group).getMaster(), checkCallback(callback));
         }
 
@@ -135,13 +120,13 @@ public class DatastoreLink implements Datastore {
 
         @Override
         public void saveTrack(@NonNull Track track, Callback<Boolean> callback) {
-            Utils.checkTrack(track);
+            checkTrack(track);
             master.saveTrack(((TrackLink) track).getMaster(), checkCallback(callback));
         }
 
         @Override
         public void deleteTrack(@NonNull Track track, Callback<Boolean> callback) {
-            Utils.checkTrack(track);
+            checkTrack(track);
             master.deleteTrack(((TrackLink) track).getMaster(), checkCallback(callback));
         }
 
@@ -172,7 +157,7 @@ public class DatastoreLink implements Datastore {
 
         @Override
         public boolean saveUser(@NonNull User user) {
-            Utils.checkUser(user);
+            checkUser(user);
             return master.saveUser(((UserLink) user).getMaster());
         }
 
@@ -193,13 +178,13 @@ public class DatastoreLink implements Datastore {
 
         @Override
         public boolean saveGroup(@NonNull Group group) {
-            Utils.checkGroup(group);
+            checkGroup(group);
             return master.saveGroup(((GroupLink) group).getMaster());
         }
 
         @Override
         public boolean deleteGroup(@NonNull Group group) {
-            Utils.checkGroup(group);
+            checkGroup(group);
             return master.deleteGroup(((GroupLink) group).getMaster());
         }
 
@@ -220,13 +205,13 @@ public class DatastoreLink implements Datastore {
 
         @Override
         public boolean saveTrack(@NonNull Track track) {
-            Utils.checkTrack(track);
+            checkTrack(track);
             return master.saveTrack(((TrackLink) track).getMaster());
         }
 
         @Override
         public boolean deleteTrack(@NonNull Track track) {
-            Utils.checkTrack(track);
+            checkTrack(track);
             return master.deleteTrack(((TrackLink) track).getMaster());
         }
 

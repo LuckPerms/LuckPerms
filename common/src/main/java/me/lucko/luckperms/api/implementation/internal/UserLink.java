@@ -11,6 +11,8 @@ import me.lucko.luckperms.exceptions.ObjectLacksException;
 import java.util.List;
 import java.util.UUID;
 
+import static me.lucko.luckperms.api.implementation.internal.Utils.*;
+
 /**
  * Provides a link between {@link User} and {@link me.lucko.luckperms.users.User}
  */
@@ -60,91 +62,91 @@ public class UserLink extends PermissionHolderLink implements User {
 
     @Override
     public boolean isInGroup(@NonNull Group group) {
-        Utils.checkGroup(group);
+        checkGroup(group);
         return master.isInGroup(((GroupLink) group).getMaster());
     }
 
     @Override
     public boolean isInGroup(@NonNull Group group, @NonNull String server) {
-        Utils.checkGroup(group);
+        checkGroup(group);
         return master.isInGroup(((GroupLink) group).getMaster(), server);
     }
 
     @Override
     public boolean isInGroup(@NonNull Group group, @NonNull String server, @NonNull String world) {
-        Utils.checkGroup(group);
+        checkGroup(group);
         return master.isInGroup(((GroupLink) group).getMaster(), server, world);
     }
 
     @Override
     public void addGroup(@NonNull Group group) throws ObjectAlreadyHasException {
-        Utils.checkGroup(group);
+        checkGroup(group);
         master.addGroup(((GroupLink) group).getMaster());
     }
 
     @Override
     public void addGroup(@NonNull Group group, @NonNull String server) throws ObjectAlreadyHasException {
-        Utils.checkGroup(group);
+        checkGroup(group);
         master.addGroup(((GroupLink) group).getMaster(), checkServer(server));
     }
 
     @Override
     public void addGroup(@NonNull Group group, @NonNull String server, @NonNull String world) throws ObjectAlreadyHasException {
-        Utils.checkGroup(group);
+        checkGroup(group);
         master.addGroup(((GroupLink) group).getMaster(), checkServer(server), world);
     }
 
     @Override
     public void addGroup(@NonNull Group group, @NonNull long expireAt) throws ObjectAlreadyHasException {
-        Utils.checkGroup(group);
+        checkGroup(group);
         master.addGroup(((GroupLink) group).getMaster(), checkTime(expireAt));
     }
 
     @Override
     public void addGroup(@NonNull Group group, @NonNull String server, @NonNull long expireAt) throws ObjectAlreadyHasException {
-        Utils.checkGroup(group);
+        checkGroup(group);
         master.addGroup(((GroupLink) group).getMaster(), checkServer(server), checkTime(expireAt));
     }
 
     @Override
     public void addGroup(@NonNull Group group, @NonNull String server, @NonNull String world, @NonNull long expireAt) throws ObjectAlreadyHasException {
-        Utils.checkGroup(group);
+        checkGroup(group);
         master.addGroup(((GroupLink) group).getMaster(), checkServer(server), world, checkTime(expireAt));
     }
 
     @Override
     public void removeGroup(@NonNull Group group) throws ObjectLacksException {
-        Utils.checkGroup(group);
+        checkGroup(group);
         master.removeGroup(((GroupLink) group).getMaster());
     }
 
     @Override
     public void removeGroup(@NonNull Group group, @NonNull boolean temporary) throws ObjectLacksException {
-        Utils.checkGroup(group);
+        checkGroup(group);
         master.removeGroup(((GroupLink) group).getMaster(), temporary);
     }
 
     @Override
     public void removeGroup(@NonNull Group group, @NonNull String server) throws ObjectLacksException {
-        Utils.checkGroup(group);
+        checkGroup(group);
         master.removeGroup(((GroupLink) group).getMaster(), checkServer(server));
     }
 
     @Override
     public void removeGroup(@NonNull Group group, @NonNull String server, @NonNull String world) throws ObjectLacksException {
-        Utils.checkGroup(group);
+        checkGroup(group);
         master.removeGroup(((GroupLink) group).getMaster(), checkServer(server), world);
     }
 
     @Override
     public void removeGroup(@NonNull Group group, @NonNull String server, @NonNull boolean temporary) throws ObjectLacksException {
-        Utils.checkGroup(group);
+        checkGroup(group);
         master.removeGroup(((GroupLink) group).getMaster(), checkServer(server), temporary);
     }
 
     @Override
     public void removeGroup(@NonNull Group group, @NonNull String server, @NonNull String world, @NonNull boolean temporary) throws ObjectLacksException {
-        Utils.checkGroup(group);
+        checkGroup(group);
         master.removeGroup(((GroupLink) group).getMaster(), checkServer(server), world, temporary);
     }
 
