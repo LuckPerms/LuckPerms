@@ -61,11 +61,20 @@ The only way around this is to decrease the sync interval.
 LuckPerms has an extensive API, allowing for easy integration with other projects. To use the Api, you need to obtain an instance of the `LuckPermsApi` interface. This can be done in a number of ways.
 
 ```java
-// On all platforms
+// On all platforms (throws IllegalStateException if the API is not loaded)
 final LuckPermsApi api = LuckPerms.getApi();
 
+// Or with Optional
+Optional<LuckPermsApi> provider = LuckPerms.getApiSafe();
+if (provider.isPresent()) {
+    final LuckPermsApi api = provider.get();
+}
+
 // On Bukkit/Spigot
-final LuckPermsApi api = Bukkit.getServicesManager().getRegistration(LuckPermsApi.class).getProvider();
+ServicesManager manager = Bukkit.getServicesManager();
+if (manager.isProvidedFor(LuckPermsApi.class)) {
+    final LuckPermsApi api = manager.getRegistration(LuckPermsApi.class).getProvider();
+}
 
 // On Sponge
 Optional<LuckPermsApi> provider = Sponge.getServiceManager().provide(LuckPermsApi.class);
