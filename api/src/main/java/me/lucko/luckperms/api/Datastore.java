@@ -28,7 +28,8 @@ import java.util.UUID;
 
 /**
  * Wrapper interface for the internal Datastore instance
- * The implementations of this interface limit access to the datastore and add parameter checks to further prevent
+ *
+ * <p> The implementations of this interface limit access to the datastore and add parameter checks to further prevent
  * errors and ensure all API interactions to not damage the state of the plugin.
  */
 @SuppressWarnings("unused")

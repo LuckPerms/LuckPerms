@@ -41,7 +41,7 @@ public enum Message {
 
     COMMAND_NOT_RECOGNISED("Command not recognised.", true),
     COMMAND_NO_PERMISSION("You do not have permission to use this command!", true),
-    INFO_BRIEF("&6Running &bLuckPerms %s&6.", true),
+    INFO_BRIEF("&6Running &bLuckPerms v%s&6.", true),
 
     ALREADY_HASPERMISSION("%s already has this permission!", true),
     DOES_NOT_HAVEPERMISSION("%s does not have this permission set.", true),
@@ -118,14 +118,15 @@ public enum Message {
 
     UPDATE_TASK_RUN("&bRunning update task for all online users.", true),
     INFO(
-            PREFIX + "&6Running &bLuckPerms %s&6." + "\n" +
+            PREFIX + "&6Running &bLuckPerms v%s&6." + "\n" +
             PREFIX + "&eAuthor: &6Luck" + "\n" +
             PREFIX + "&eStorage Method: &6%s" + "\n" +
             PREFIX + "&eServer Name: &6%s" + "\n" +
             PREFIX + "&eDefault Group: &6%s" + "\n" +
             PREFIX + "&eSync Interval: &6%s minutes" + "\n" +
             PREFIX + "&eInclude Global Perms: &6%s" + "\n" +
-            PREFIX + "&eOnline Mode: &6%s",
+            PREFIX + "&eOnline Mode: &6%s" + "\n" +
+            PREFIX + "&eApply Wildcards: &6%s",
             false
     ),
     DEBUG(
@@ -240,7 +241,7 @@ public enum Message {
     ),
     TRACK_CLEAR("&b%s&a's groups track was cleared.", true),
     TRACK_APPEND_SUCCESS("&aGroup &b%s&a was successfully appended to track &b%s&a.", true),
-    TRACK_INSERT_SUCCESS("&aGroup &b%s&a was successfully inserted into to track &b%s&a at position &b%s&a.", true),
+    TRACK_INSERT_SUCCESS("&aGroup &b%s&a was successfully inserted into track &b%s&a at position &b%s&a.", true),
     TRACK_INSERT_ERROR_NUMBER("Expected number but instead received: %s", true),
     TRACK_INSERT_ERROR_INVALID_POS("Unable to insert at position %s. Index out of bounds.", true),
     TRACK_REMOVE_SUCCESS("&aGroup &b%s&a was successfully removed from track &b%s&a.", true);

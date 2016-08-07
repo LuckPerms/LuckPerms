@@ -30,7 +30,8 @@ import java.util.Map;
 
 /**
  * Wrapper interface for internal PermissionHolder (user/group) instances
- * The implementations of this interface limit access to the object and add parameter checks to further prevent
+ *
+ * <p> The implementations of this interface limit access to the object and add parameter checks to further prevent
  * errors and ensure all API interactions to not damage the state of the object.
  */
 @SuppressWarnings("unused")

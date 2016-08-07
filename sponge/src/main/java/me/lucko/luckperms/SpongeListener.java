@@ -33,7 +33,8 @@ import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
-class SpongeListener extends AbstractListener {
+@SuppressWarnings("WeakerAccess")
+public class SpongeListener extends AbstractListener {
     private final LPSpongePlugin plugin;
 
     SpongeListener(LPSpongePlugin plugin) {

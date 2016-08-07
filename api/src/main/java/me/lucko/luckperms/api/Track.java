@@ -29,7 +29,8 @@ import java.util.List;
 
 /**
  * Wrapper interface for internal Track instances
- * The implementations of this interface limit access to the Track and add parameter checks to further prevent
+ *
+ * <p> The implementations of this interface limit access to the Track and add parameter checks to further prevent
  * errors and ensure all API interactions to not damage the state of the track.
  */
 @SuppressWarnings("unused")

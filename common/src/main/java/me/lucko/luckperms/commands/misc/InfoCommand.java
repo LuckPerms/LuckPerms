@@ -40,6 +40,6 @@ public class InfoCommand extends SingleMainCommand {
     protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         final LPConfiguration c = plugin.getConfiguration();
         Message.INFO.send(sender, plugin.getVersion(), plugin.getDatastore().getName(), c.getServer(),
-                c.getDefaultGroupName(), c.getSyncTime(), c.getIncludeGlobalPerms(), c.getOnlineMode());
+                c.getDefaultGroupName(), c.getSyncTime(), c.getIncludeGlobalPerms(), c.getOnlineMode(), c.getApplyWildcards());
     }
 }

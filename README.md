@@ -119,7 +119,7 @@ You can add LuckPerms as a Maven dependency by adding the following to your proj
 ## Versioning
 As of version 2.0, LuckPerms roughly follows the standards set out in Semantic Versioning.
 
-The only difference is that patch number is not included anywhere within the pom, and is calculated each build, based upon how may commits have been made since the last tag. (A new tag is made every minor version)
+The only difference is that the patch number is not included anywhere within the pom, and is calculated each build, based upon how may commits have been made since the last tag. (A new tag is made every minor version)
 
 This means that API versions do not have a patch number (as no API changes are made in patches). API versions will be x.y, and each individual build of LuckPerms will follow x.y.z.
 

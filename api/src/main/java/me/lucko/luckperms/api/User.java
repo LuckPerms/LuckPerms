@@ -30,7 +30,8 @@ import java.util.UUID;
 
 /**
  * Wrapper interface for internal User instances
- * The implementations of this interface limit access to the User and add parameter checks to further prevent
+ *
+ * <p> The implementations of this interface limit access to the User and add parameter checks to further prevent
  * errors and ensure all API interactions to not damage the state of the user.
  */
 @SuppressWarnings("unused")

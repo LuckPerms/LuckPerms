@@ -28,10 +28,24 @@ import me.lucko.luckperms.LPBukkitPlugin;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
 
+import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.UUID;
 
 public class BukkitUser extends User {
+    private static Field permissionsField = null;
+    private static Field getPermissionsField() {
+        if (permissionsField == null) {
+            try {
+                permissionsField = PermissionAttachment.class.getDeclaredField("permissions");
+                permissionsField.setAccessible(true);
+            } catch (SecurityException | NoSuchFieldException e) {
+                e.printStackTrace();
+            }
+        }
+        return permissionsField;
+    }
+
 
     private final LPBukkitPlugin plugin;
 
@@ -49,6 +63,7 @@ public class BukkitUser extends User {
         this.plugin = plugin;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void refreshPermissions() {
         plugin.doSync(() -> {
@@ -60,12 +75,35 @@ public class BukkitUser extends User {
                 setAttachment(player.addAttachment(plugin));
             }
 
-            // Clear existing permissions
-            attachment.getPermissions().keySet().forEach(p -> attachment.setPermission(p, false));
+            // Calculate the permissions that should be applied
+            Map<String, Boolean> toApply = getLocalPermissions(getPlugin().getConfiguration().getServer(), player.getWorld().getName(), null);
 
-            // Re-add all defined permissions for the user
-            Map<String, Boolean> local = getLocalPermissions(getPlugin().getConfiguration().getServer(), player.getWorld().getName(), null);
-            local.entrySet().forEach(e -> attachment.setPermission(e.getKey(), e.getValue()));
+            try {
+                Map<String, Boolean> existing = (Map<String, Boolean>) getPermissionsField().get(attachment);
+
+                boolean different = false;
+                if (toApply.size() != existing.size()) {
+                    different = true;
+                } else {
+                    for (Map.Entry<String, Boolean> e : existing.entrySet()) {
+                        if (toApply.containsKey(e.getKey()) && toApply.get(e.getKey()) == e.getValue()) {
+                            continue;
+                        }
+                        different = true;
+                        break;
+                    }
+                }
+
+                if (!different) return;
+
+                // Faster than recalculating permissions after each PermissionAttachment#setPermission
+                existing.clear();
+                existing.putAll(toApply);
+                attachment.getPermissible().recalculatePermissions();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         });
     }
 }

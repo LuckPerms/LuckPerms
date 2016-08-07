@@ -8,3 +8,101 @@ commands:
   luckperms:
     description: Manage permissions
     aliases: [perms, permissions, lp, p, perm]
+permissions:
+  luckperms.*:
+    description: Gives access to all LuckPerms commands
+    children:
+      luckperms.sync: true
+      luckperms.info: true
+      luckperms.debug: true
+      luckperms.creategroup: true
+      luckperms.deletegroup: true
+      luckperms.listgroups: true
+      luckperms.createtrack: true
+      luckperms.deletetrack: true
+      luckperms.listtracks: true
+      luckperms.user.info: true
+      luckperms.user.getuuid: true
+      luckperms.user.listnodes: true
+      luckperms.user.haspermission: true
+      luckperms.user.inheritspermission: true
+      luckperms.user.setpermission: true
+      luckperms.user.unsetpermission: true
+      luckperms.user.addgroup: true
+      luckperms.user.removegroup: true
+      luckperms.user.settemppermission: true
+      luckperms.user.unsettemppermission: true
+      luckperms.user.addtempgroup: true
+      luckperms.user.removetempgroup: true
+      luckperms.user.setprimarygroup: true
+      luckperms.user.showtracks: true
+      luckperms.user.promote: true
+      luckperms.user.demote: true
+      luckperms.user.showpos: true
+      luckperms.user.clear: true
+      luckperms.group.info: true
+      luckperms.group.listnodes: true
+      luckperms.group.haspermission: true
+      luckperms.group.inheritspermission: true
+      luckperms.group.setpermission: true
+      luckperms.group.unsetpermission: true
+      luckperms.group.setinherit: true
+      luckperms.group.unsetinherit: true
+      luckperms.group.settemppermission: true
+      luckperms.group.unsettemppermission: true
+      luckperms.group.settempinherit: true
+      luckperms.group.unsettempinherit: true
+      luckperms.group.showtracks: true
+      luckperms.group.clear: true
+      luckperms.track.info: true
+      luckperms.track.append: true
+      luckperms.track.insert: true
+      luckperms.track.remove: true
+      luckperms.track.clear: true
+  luckperms.user.*:
+    description: Gives access to all LuckPerms user commands
+    children:
+      luckperms.user.info: true
+      luckperms.user.getuuid: true
+      luckperms.user.listnodes: true
+      luckperms.user.haspermission: true
+      luckperms.user.inheritspermission: true
+      luckperms.user.setpermission: true
+      luckperms.user.unsetpermission: true
+      luckperms.user.addgroup: true
+      luckperms.user.removegroup: true
+      luckperms.user.settemppermission: true
+      luckperms.user.unsettemppermission: true
+      luckperms.user.addtempgroup: true
+      luckperms.user.removetempgroup: true
+      luckperms.user.setprimarygroup: true
+      luckperms.user.showtracks: true
+      luckperms.user.promote: true
+      luckperms.user.demote: true
+      luckperms.user.showpos: true
+      luckperms.user.clear: true
+  luckperms.group.*:
+    description: Gives access to all LuckPerms group commands
+    children:
+      luckperms.group.info: true
+      luckperms.group.listnodes: true
+      luckperms.group.haspermission: true
+      luckperms.group.inheritspermission: true
+      luckperms.group.setpermission: true
+      luckperms.group.unsetpermission: true
+      luckperms.group.setinherit: true
+      luckperms.group.unsetinherit: true
+      luckperms.group.settemppermission: true
+      luckperms.group.unsettemppermission: true
+      luckperms.group.settempinherit: true
+      luckperms.group.unsettempinherit: true
+      luckperms.group.showtracks: true
+      luckperms.group.clear: true
+  luckperms.track.*:
+    description: Gives access to all LuckPerms track commands
+    children:
+      luckperms.track.info: true
+      luckperms.track.append: true
+      luckperms.track.insert: true
+      luckperms.track.remove: true
+      luckperms.track.clear: true

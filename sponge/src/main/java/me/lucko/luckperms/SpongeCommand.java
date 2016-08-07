@@ -51,6 +51,7 @@ class SpongeCommand extends CommandManager implements CommandCallable {
 
     @Override
     public List<String> getSuggestions(CommandSource source, String s) throws CommandException {
+        // TODO: fix this so it actually works
         return onTabComplete(FACTORY.wrap(source), Arrays.asList(Patterns.SPACE.split(s)));
     }
 

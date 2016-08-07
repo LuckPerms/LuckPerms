@@ -46,22 +46,26 @@ import org.spongepowered.api.command.CommandManager;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.service.permission.PermissionDescription;
 import org.spongepowered.api.service.permission.PermissionService;
+import org.spongepowered.api.text.Text;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Getter
-@Plugin(id = "luckperms", name = "LuckPerms", version = "MAGIC", authors = {"Luck"}, description = "A permissions plugin")
+@Plugin(id = "luckperms", name = "LuckPerms", version = "null", authors = {"Luck"}, description = "A permissions plugin")
 public class LPSpongePlugin implements LuckPermsPlugin {
 
     @Inject
@@ -98,6 +102,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         getLog().info("Registering commands...");
         CommandManager cmdService = Sponge.getCommandManager();
         cmdService.register(this, new SpongeCommand(this), "luckperms", "perms", "lp", "permissions", "p", "perm");
+        registerPermissions();
 
         getLog().info("Detecting storage method...");
         final String storageMethod = configuration.getStorageMethod();
@@ -155,6 +160,11 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         LuckPerms.unregisterProvider();
     }
 
+    @Listener
+    public void onPostInit(GamePostInitializationEvent event) {
+        registerPermissions();
+    }
+
     @SuppressWarnings("ResultOfMethodCallIgnored")
     private File getStorageDir() {
         File base = configDir.toFile().getParentFile().getParentFile();
@@ -165,7 +175,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
     @Override
     public String getVersion() {
-        return "MAGIC";
+        return "null";
     }
 
     @Override
@@ -185,8 +195,11 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
     @Override
     public List<String> getPossiblePermissions() {
-        PermissionService p = game.getServiceManager().provideUnchecked(PermissionService.class);
-        return p.getDescriptions().stream().map(PermissionDescription::getId).collect(Collectors.toList());
+        Optional<PermissionService> p = game.getServiceManager().provide(PermissionService.class);
+        if (!p.isPresent()) {
+            return Collections.emptyList();
+        }
+        return p.get().getDescriptions().stream().map(PermissionDescription::getId).collect(Collectors.toList());
     }
 
     @Override
@@ -202,5 +215,80 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     @Override
     public void doSync(Runnable r) {
         scheduler.createTaskBuilder().execute(r).submit(LPSpongePlugin.this);
+    }
+
+    private void registerPermissions() {
+        Optional<PermissionService> ps = game.getServiceManager().provide(PermissionService.class);
+        if (!ps.isPresent()) {
+            getLog().warn("Unable to register all LuckPerms permissions. PermissionService not available.");
+            return;
+        }
+
+        final PermissionService p = ps.get();
+
+        Optional<PermissionDescription.Builder> builder = p.newDescriptionBuilder(this);
+        if (!builder.isPresent()) {
+            getLog().warn("Unable to register all LuckPerms permissions. Description Builder not available.");
+            return;
+        }
+
+        registerPermission(p, "luckperms.sync");
+        registerPermission(p, "luckperms.info");
+        registerPermission(p, "luckperms.debug");
+        registerPermission(p, "luckperms.creategroup");
+        registerPermission(p, "luckperms.deletegroup");
+        registerPermission(p, "luckperms.listgroups");
+        registerPermission(p, "luckperms.createtrack");
+        registerPermission(p, "luckperms.deletetrack");
+        registerPermission(p, "luckperms.listtracks");
+        registerPermission(p, "luckperms.user.info");
+        registerPermission(p, "luckperms.user.getuuid");
+        registerPermission(p, "luckperms.user.listnodes");
+        registerPermission(p, "luckperms.user.haspermission");
+        registerPermission(p, "luckperms.user.inheritspermission");
+        registerPermission(p, "luckperms.user.setpermission");
+        registerPermission(p, "luckperms.user.unsetpermission");
+        registerPermission(p, "luckperms.user.addgroup");
+        registerPermission(p, "luckperms.user.removegroup");
+        registerPermission(p, "luckperms.user.settemppermission");
+        registerPermission(p, "luckperms.user.unsettemppermission");
+        registerPermission(p, "luckperms.user.addtempgroup");
+        registerPermission(p, "luckperms.user.removetempgroup");
+        registerPermission(p, "luckperms.user.setprimarygroup");
+        registerPermission(p, "luckperms.user.showtracks");
+        registerPermission(p, "luckperms.user.promote");
+        registerPermission(p, "luckperms.user.demote");
+        registerPermission(p, "luckperms.user.showpos");
+        registerPermission(p, "luckperms.user.clear");
+        registerPermission(p, "luckperms.group.info");
+        registerPermission(p, "luckperms.group.listnodes");
+        registerPermission(p, "luckperms.group.haspermission");
+        registerPermission(p, "luckperms.group.inheritspermission");
+        registerPermission(p, "luckperms.group.setpermission");
+        registerPermission(p, "luckperms.group.unsetpermission");
+        registerPermission(p, "luckperms.group.setinherit");
+        registerPermission(p, "luckperms.group.unsetinherit");
+        registerPermission(p, "luckperms.group.settemppermission");
+        registerPermission(p, "luckperms.group.unsettemppermission");
+        registerPermission(p, "luckperms.group.settempinherit");
+        registerPermission(p, "luckperms.group.unsettempinherit");
+        registerPermission(p, "luckperms.group.showtracks");
+        registerPermission(p, "luckperms.group.clear");
+        registerPermission(p, "luckperms.track.info");
+        registerPermission(p, "luckperms.track.append");
+        registerPermission(p, "luckperms.track.insert");
+        registerPermission(p, "luckperms.track.remove");
+        registerPermission(p, "luckperms.track.clear");
+    }
+
+    private void registerPermission(PermissionService p, String node) {
+        Optional<PermissionDescription.Builder> builder = p.newDescriptionBuilder(this);
+        if (!builder.isPresent()) return;
+
+        try {
+            builder.get().assign(PermissionDescription.ROLE_ADMIN, true).description(Text.of(node)).id(node).register();
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+        }
     }
 }
