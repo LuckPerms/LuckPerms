@@ -55,7 +55,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public Datastore getDatastore() {
-        return new DatastoreLink(plugin.getDatastore());
+        return new DatastoreLink(plugin, plugin.getDatastore());
     }
 
     @Override
