@@ -30,7 +30,7 @@ import me.lucko.luckperms.commands.Util;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.groups.Group;
-import me.lucko.luckperms.utils.Patterns;
+import me.lucko.luckperms.utils.ArgumentChecker;
 
 import java.util.List;
 
@@ -44,7 +44,7 @@ public class GroupInheritsPerm extends SubCommand<Group> {
     @Override
     public void execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
         if (args.size() >= 2) {
-            if (Patterns.NON_ALPHA_NUMERIC.matcher(args.get(1)).find()) {
+            if (!ArgumentChecker.checkServer(args.get(1))) {
                 Message.SERVER_INVALID_ENTRY.send(sender);
                 return;
             }

@@ -65,6 +65,16 @@ public interface LPConfiguration {
     boolean getApplyWildcards();
 
     /**
+     * @return if LuckPerms is resolving and applying regex permissions
+     */
+    boolean getApplyRegex();
+
+    /**
+     * @return if LuckPerms is expanding shorthand permissions
+     */
+    boolean getApplyShorthand();
+
+    /**
      * @return the database values set in the configuration
      */
     MySQLConfiguration getDatabaseValues();

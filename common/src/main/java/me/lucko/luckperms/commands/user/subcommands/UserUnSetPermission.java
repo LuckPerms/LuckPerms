@@ -30,6 +30,7 @@ import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.users.User;
+import me.lucko.luckperms.utils.ArgumentChecker;
 import me.lucko.luckperms.utils.Patterns;
 
 import java.util.List;
@@ -44,7 +45,7 @@ public class UserUnSetPermission extends SubCommand<User> {
     public void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
         String node = args.get(0);
 
-        if (node.contains("/") || node.contains("$")) {
+        if (!ArgumentChecker.checkNode(node)) {
             sendUsage(sender, label);
             return;
         }
@@ -57,7 +58,7 @@ public class UserUnSetPermission extends SubCommand<User> {
         try {
             if (args.size() >= 2) {
                 final String server = args.get(1).toLowerCase();
-                if (Patterns.NON_ALPHA_NUMERIC.matcher(server).find()) {
+                if (!ArgumentChecker.checkServer(server)) {
                     Message.SERVER_INVALID_ENTRY.send(sender);
                     return;
                 }

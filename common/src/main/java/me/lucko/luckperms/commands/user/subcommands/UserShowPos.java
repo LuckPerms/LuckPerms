@@ -31,6 +31,7 @@ import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.tracks.Track;
 import me.lucko.luckperms.users.User;
+import me.lucko.luckperms.utils.ArgumentChecker;
 
 import java.util.List;
 
@@ -43,6 +44,10 @@ public class UserShowPos extends SubCommand<User> {
     @Override
     public void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
         final String trackName = args.get(0).toLowerCase();
+        if (!ArgumentChecker.checkName(trackName)) {
+            Message.TRACK_INVALID_ENTRY.send(sender);
+            return;
+        }
 
         plugin.getDatastore().loadTrack(trackName, success -> {
             if (!success) {

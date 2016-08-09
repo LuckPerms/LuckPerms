@@ -27,7 +27,7 @@ import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SingleMainCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
-import me.lucko.luckperms.utils.Patterns;
+import me.lucko.luckperms.utils.ArgumentChecker;
 
 import java.util.List;
 
@@ -44,13 +44,7 @@ public class CreateGroup extends SingleMainCommand {
         }
 
         String groupName = args.get(0).toLowerCase();
-
-        if (groupName.length() > 36) {
-            Message.GROUP_NAME_TOO_LONG.send(sender, groupName);
-            return;
-        }
-
-        if (Patterns.NON_ALPHA_NUMERIC.matcher(groupName).find()) {
+        if (!ArgumentChecker.checkName(groupName)) {
             Message.GROUP_INVALID_ENTRY.send(sender);
             return;
         }

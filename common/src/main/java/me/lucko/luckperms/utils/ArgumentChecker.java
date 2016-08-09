@@ -20,27 +20,32 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.api.implementation.internal;
+package me.lucko.luckperms.utils;
 
-import lombok.AllArgsConstructor;
-import me.lucko.luckperms.api.UuidCache;
+import lombok.experimental.UtilityClass;
 
-import java.util.UUID;
+@UtilityClass
+public class ArgumentChecker {
 
-/**
- * Provides a link between {@link UuidCache} and {@link me.lucko.luckperms.utils.UuidCache}
- */
-@AllArgsConstructor
-public class UuidCacheLink implements UuidCache {
-    private final me.lucko.luckperms.utils.UuidCache master;
-
-    @Override
-    public UUID getUUID(UUID external) {
-        return master.getUUID(external);
+    public static boolean checkUsername(String s) {
+        return !(s.length() > 16 || Patterns.NON_USERNAME.matcher(s).find());
     }
 
-    @Override
-    public UUID getExternalUUID(UUID internal) {
-        return master.getExternalUUID(internal);
+    public static boolean checkName(String s) {
+        return !(s.length() > 36 || Patterns.NON_ALPHA_NUMERIC.matcher(s).find());
     }
+
+    public static boolean checkServer(String s) {
+        return !s.toLowerCase().startsWith("r=") && !Patterns.NON_ALPHA_NUMERIC.matcher(s).find();
+    }
+
+    public static boolean checkNode(String s) {
+        return !(s.contains("/") || s.contains("$"));
+    }
+
+    public static boolean checkTime(long l) {
+        return !DateUtil.shouldExpire(l);
+    }
+
+
 }

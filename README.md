@@ -19,6 +19,8 @@ A permissions implementation for Bukkit/Spigot, BungeeCord and Sponge.
 * **Developer API** - easily integrate LuckPerms into your own projects
 * **Easy and simple setup and configuration using commands** - no editing yml files, yuck
 * **Negated permissions and groups** - define special rules for certain users/groups
+* **Regex permissions** - define special permissions using regex
+* **Shorthand nodes** - add nodes using the LuckPerms shorthand system
 * **Full support for UUIDs, even in Offline Mode** - users can change their usernames without losing permissions. In offline mode, a single user has the same internal UUID across a network.
 * **Permission data stored within MySQL in a json format** - easily integrate the LuckPerms backend into your other projects
 * **Well documented** - API methods have comprehensive Java docs, it's clear what each method does.
@@ -37,7 +39,7 @@ You can define the settings for per-server permissions, the storage method and c
 ### Permission Calculation
 #### Permissions are calculated based on a priority system as follows.
 
-* **Non wildcard permissions will override wildcard permissions**
+* **Non wildcard/regex permissions will be overridden by normal permissions**
 
 Example: if a user has a true permission set for "luckperms.\*", and a false permission set for "luckperms.something", the non-wildcard permission will override the wildcard, and "luckperms.something" will be set to false, despite the wildcard.
 
@@ -65,6 +67,40 @@ Example: A user is a member of the default group, which grants "some.thing.perm"
 Temporary permissions are checked each time a user/group is loaded, and when the sync task runs. This means if you set a temporary permission to expire after 30 seconds, it won't actually be removed until the sync task runs.
 
 The only way around this is to decrease the sync interval.
+
+### Shorthand Permissions
+LuckPerms has it's own system (although it's quite similar to PermissionsEx :P) that allows you to set permissions in a shorthand format.
+
+Using the LuckPerms permission nodes as an example, say for instance, you wanted to let a user set and unset permissions for both groups and users.
+
+Without shorthand, you would have to apply 4 nodes.
+```
+luckperms.user.setpermission
+luckperms.user.unsetpermission
+luckperms.group.setpermission
+luckperms.group.unsetpermission
+```
+However, with shorthand, you can just apply the following node:
+
+`luckperms.(user|group).(setpermission|unsetpermission)`
+
+You use brackets to define part of a node as a shorthand group, and then use the vertical bar `|` to separate entries.
+
+There are some limitations, firstly, you cannot use shorthand in the first part of the node. (The "luckperms" part in the example above)
+
+Additionally, you cannot combine shorthand and normal text in the same part of the node.
+For example, `luckperms.(user|group).(set|unset)permission` would not work.
+
+### Regex
+LuckPerms has support for regex when defining permission nodes and server/world names.
+
+Whenever regex is used, it MUST be prefixed with "R=", so LuckPerms knows to treat it as regex, and not as a normal string.
+
+For example, if you wanted to give all members of the default group, the `essentials.fly` permission on all of your hub servers, where the hub server names are hub1, hub2, hub3, etc.
+You would use the command `/perms group default set essentials.fly true R=hub\d+`.
+
+You can also use regex in permission nodes.
+Once again using LuckPerms permissions as an example, if you wanted a user to be able to create both groups and tracks, you would normally just add the two permission nodes. However with regex, you can just add one. `luckperms\.create.*` Remember to escape any characters, specifically dots, as the entire node will be parsed.
 
 ## API
 LuckPerms has an extensive API, allowing for easy integration with other projects. To use the Api, you need to obtain an instance of the `LuckPermsApi` interface. This can be done in a number of ways.

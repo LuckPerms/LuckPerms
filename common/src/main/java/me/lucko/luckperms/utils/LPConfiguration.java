@@ -92,6 +92,14 @@ public abstract class LPConfiguration<T extends LuckPermsPlugin> {
         return getBoolean("apply-wildcards", true);
     }
 
+    public boolean getApplyRegex() {
+        return getBoolean("apply-regex", true);
+    }
+
+    public boolean getApplyShorthand() {
+        return getBoolean("apply-shorthand", true);
+    }
+
     public MySQLConfiguration getDatabaseValues() {
         return new MySQLConfiguration(
                 getString("sql.address", null),

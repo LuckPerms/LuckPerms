@@ -27,7 +27,7 @@ import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SingleMainCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
-import me.lucko.luckperms.utils.Patterns;
+import me.lucko.luckperms.utils.ArgumentChecker;
 
 import java.util.List;
 
@@ -44,13 +44,7 @@ public class CreateTrack extends SingleMainCommand {
         }
 
         String trackName = args.get(0).toLowerCase();
-
-        if (trackName.length() > 36) {
-            Message.TRACK_NAME_TOO_LONG.send(sender, trackName);
-            return;
-        }
-
-        if (Patterns.NON_ALPHA_NUMERIC.matcher(trackName).find()) {
+        if (!ArgumentChecker.checkName(trackName)) {
             Message.TRACK_INVALID_ENTRY.send(sender);
             return;
         }

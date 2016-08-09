@@ -30,7 +30,7 @@ import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.users.User;
-import me.lucko.luckperms.utils.Patterns;
+import me.lucko.luckperms.utils.ArgumentChecker;
 
 import java.util.List;
 
@@ -44,7 +44,7 @@ public class UserRemoveGroup extends SubCommand<User> {
     public void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
         String groupName = args.get(0).toLowerCase();
 
-        if (groupName.contains("/") || groupName.contains("$")) {
+        if (!ArgumentChecker.checkNode(groupName)) {
             sendUsage(sender, label);
             return;
         }
@@ -58,7 +58,7 @@ public class UserRemoveGroup extends SubCommand<User> {
         try {
             if (args.size() >= 2) {
                 final String server = args.get(1).toLowerCase();
-                if (Patterns.NON_ALPHA_NUMERIC.matcher(server).find()) {
+                if (!ArgumentChecker.checkServer(server)) {
                     Message.SERVER_INVALID_ENTRY.send(sender);
                     return;
                 }

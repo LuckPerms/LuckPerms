@@ -24,6 +24,7 @@ package me.lucko.luckperms.api.implementation.internal;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
+import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.api.Datastore;
 import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.Track;
@@ -40,11 +41,13 @@ import static me.lucko.luckperms.api.implementation.internal.Utils.*;
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class DatastoreLink implements Datastore {
 
+    private final LuckPermsPlugin plugin;
     private final me.lucko.luckperms.data.Datastore master;
     private final Async async;
     private final Sync sync;
 
-    public DatastoreLink(@NonNull me.lucko.luckperms.data.Datastore master) {
+    public DatastoreLink(@NonNull LuckPermsPlugin plugin, @NonNull me.lucko.luckperms.data.Datastore master) {
+        this.plugin = plugin;
         this.master = master;
         this.async = new Async(master);
         this.sync = new Sync(master);
@@ -122,6 +125,9 @@ public class DatastoreLink implements Datastore {
         @Override
         public void deleteGroup(@NonNull Group group, Callback<Boolean> callback) {
             checkGroup(group);
+            if (group.getName().equalsIgnoreCase(plugin.getConfiguration().getDefaultGroupName())) {
+                throw new IllegalArgumentException("Cannot delete the default group.");
+            }
             master.deleteGroup(((GroupLink) group).getMaster(), checkCallback(callback));
         }
 
@@ -207,6 +213,9 @@ public class DatastoreLink implements Datastore {
         @Override
         public boolean deleteGroup(@NonNull Group group) {
             checkGroup(group);
+            if (group.getName().equalsIgnoreCase(plugin.getConfiguration().getDefaultGroupName())) {
+                throw new IllegalArgumentException("Cannot delete the default group.");
+            }
             return master.deleteGroup(((GroupLink) group).getMaster());
         }
 

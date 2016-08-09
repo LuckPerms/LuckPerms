@@ -30,7 +30,7 @@ import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.groups.Group;
-import me.lucko.luckperms.utils.Patterns;
+import me.lucko.luckperms.utils.ArgumentChecker;
 
 import java.util.List;
 
@@ -45,7 +45,7 @@ public class GroupUnsetInherit extends SubCommand<Group> {
     public void execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
         String groupName = args.get(0).toLowerCase();
 
-        if (groupName.contains("/") || groupName.contains("$")) {
+        if (!ArgumentChecker.checkNode(groupName)) {
             sendUsage(sender, label);
             return;
         }
@@ -53,7 +53,7 @@ public class GroupUnsetInherit extends SubCommand<Group> {
         try {
             if (args.size() >= 2) {
                 final String server = args.get(1).toLowerCase();
-                if (Patterns.NON_ALPHA_NUMERIC.matcher(server).find()) {
+                if (!ArgumentChecker.checkServer(server)) {
                     Message.SERVER_INVALID_ENTRY.send(sender);
                     return;
                 }

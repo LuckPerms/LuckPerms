@@ -26,8 +26,7 @@ import lombok.experimental.UtilityClass;
 import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.User;
-import me.lucko.luckperms.utils.DateUtil;
-import me.lucko.luckperms.utils.Patterns;
+import me.lucko.luckperms.utils.ArgumentChecker;
 
 @UtilityClass
 class Utils {
@@ -51,7 +50,7 @@ class Utils {
     }
 
     static String checkUsername(String s) {
-        if (s.length() > 16 || Patterns.NON_USERNAME.matcher(s).find()) {
+        if (!ArgumentChecker.checkUsername(s)) {
             throw new IllegalArgumentException("Invalid username entry '" + s + "'. Usernames must be less than 16 chars" +
                     " and only contain 'a-z A-Z 1-9 _'.");
         }
@@ -59,7 +58,7 @@ class Utils {
     }
 
     static String checkName(String s) {
-        if (s.length() > 36 || Patterns.NON_ALPHA_NUMERIC.matcher(s).find()) {
+        if (!ArgumentChecker.checkName(s)) {
             throw new IllegalArgumentException("Invalid name entry '" + s + "'. Names must be less than 37 chars" +
                     " and only contain 'a-z A-Z 1-9'.");
         }
@@ -67,21 +66,21 @@ class Utils {
     }
 
     static String checkServer(String s) {
-        if (Patterns.NON_ALPHA_NUMERIC.matcher(s).find()) {
+        if (!ArgumentChecker.checkServer(s)) {
             throw new IllegalArgumentException("Invalid server entry '" + s + "'. Server names can only contain alphanumeric characters.");
         }
         return s;
     }
 
     static String checkNode(String s) {
-        if (s.contains("/") || s.contains("$")) {
+        if (!ArgumentChecker.checkNode(s)) {
             throw new IllegalArgumentException("Invalid node entry '" + s + "'. Nodes cannot contain '/' or '$' characters.");
         }
         return s;
     }
 
     static long checkTime(long l) {
-        if (DateUtil.shouldExpire(l)) {
+        if (!ArgumentChecker.checkTime(l)) {
             throw new IllegalArgumentException("Unix time '" + l + "' is invalid, as it has already passed.");
         }
         return l;

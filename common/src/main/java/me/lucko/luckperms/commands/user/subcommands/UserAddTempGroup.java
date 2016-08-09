@@ -31,8 +31,8 @@ import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.users.User;
+import me.lucko.luckperms.utils.ArgumentChecker;
 import me.lucko.luckperms.utils.DateUtil;
-import me.lucko.luckperms.utils.Patterns;
 
 import java.util.List;
 
@@ -47,7 +47,7 @@ public class UserAddTempGroup extends SubCommand<User> {
     public void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
         String groupName = args.get(0).toLowerCase();
 
-        if (groupName.contains("/") || groupName.contains("$")) {
+        if (!ArgumentChecker.checkNode(groupName)) {
             sendUsage(sender, label);
             return;
         }
@@ -78,7 +78,7 @@ public class UserAddTempGroup extends SubCommand<User> {
                 try {
                     if (args.size() >= 3) {
                         final String server = args.get(2).toLowerCase();
-                        if (Patterns.NON_ALPHA_NUMERIC.matcher(server).find()) {
+                        if (!ArgumentChecker.checkServer(server)) {
                             Message.SERVER_INVALID_ENTRY.send(sender);
                             return;
                         }

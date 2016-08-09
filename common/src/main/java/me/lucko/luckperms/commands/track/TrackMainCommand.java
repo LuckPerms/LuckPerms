@@ -28,6 +28,7 @@ import me.lucko.luckperms.commands.MainCommand;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.tracks.Track;
+import me.lucko.luckperms.utils.ArgumentChecker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,10 @@ public class TrackMainCommand extends MainCommand<Track> {
 
     @Override
     protected void getTarget(String target, LuckPermsPlugin plugin, Sender sender, Callback<Track> onSuccess) {
+        if (!ArgumentChecker.checkName(target)) {
+            Message.TRACK_INVALID_ENTRY.send(sender);
+            return;
+        }
         plugin.getDatastore().loadTrack(target, success -> {
             if (!success) {
                 Message.TRACK_NOT_FOUND.send(sender);

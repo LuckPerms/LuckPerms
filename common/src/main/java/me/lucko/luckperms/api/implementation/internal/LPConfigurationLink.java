@@ -27,7 +27,7 @@ import me.lucko.luckperms.api.LPConfiguration;
 import me.lucko.luckperms.api.data.MySQLConfiguration;
 
 /**
- * Provides a link between {@link me.lucko.luckperms.api.LPConfiguration} and {@link me.lucko.luckperms.utils.LPConfiguration}
+ * Provides a link between {@link LPConfiguration} and {@link me.lucko.luckperms.utils.LPConfiguration}
  */
 @AllArgsConstructor
 public class LPConfigurationLink implements LPConfiguration {
@@ -66,6 +66,16 @@ public class LPConfigurationLink implements LPConfiguration {
     @Override
     public boolean getApplyWildcards() {
         return master.getApplyWildcards();
+    }
+
+    @Override
+    public boolean getApplyRegex() {
+        return master.getApplyRegex();
+    }
+
+    @Override
+    public boolean getApplyShorthand() {
+        return master.getApplyShorthand();
     }
 
     @Override

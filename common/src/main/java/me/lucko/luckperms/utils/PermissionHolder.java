@@ -32,6 +32,7 @@ import me.lucko.luckperms.groups.Group;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -537,12 +538,12 @@ public abstract class PermissionHolder {
                     String[] serverParts = Patterns.WORLD_DELIMITER.split(parts[0], 2);
                     // 0=server   1=world
 
-                    if ((!serverParts[0].equalsIgnoreCase("global") || !includeGlobal) && (!serverParts[0].equalsIgnoreCase(server))) {
+                    if ((!serverParts[0].equalsIgnoreCase("global") || !includeGlobal) && (!matches(server, serverParts[0]))) {
                         // GLOBAL AND UNWANTED OR SERVER SPECIFIC BUT DOES NOT APPLY :(((
                         continue;
                     }
 
-                    if (world != null && !serverParts[1].equalsIgnoreCase(world)) {
+                    if (world != null && !matches(world, serverParts[1])) {
                         // WORLD SPECIFIC BUT DOES NOT APPLY
                         continue;
                     }
@@ -563,7 +564,7 @@ public abstract class PermissionHolder {
                     break serverSpecific;
                 }
 
-                if (!parts[0].equalsIgnoreCase(server)) {
+                if (!matches(server, parts[0])) {
                     // SERVER SPECIFIC BUT DOES NOT APPLY
                     continue;
                 }
@@ -631,6 +632,8 @@ public abstract class PermissionHolder {
             }
         }
 
+        applyShorthandIfEnabled(perms);
+
         // Apply next priorities: serverSpecificGroups and then serverWorldSpecificGroups
         for (Map<String, Boolean> m : Arrays.asList(serverSpecificGroups, serverWorldSpecificGroups)) {
             for (Map.Entry<String, Boolean> groupNode : m.entrySet()) {
@@ -653,10 +656,12 @@ public abstract class PermissionHolder {
                     }
                 }
             }
+            applyShorthandIfEnabled(perms);
         }
 
         // Apply next priority: userNodes
         perms.putAll(userNodes);
+        applyShorthandIfEnabled(perms);
 
         // Apply final priorities: serverSpecificNodes and then serverWorldSpecificNodes
         for (Map<String, Boolean> m : Arrays.asList(serverSpecificNodes, serverWorldSpecificNodes)) {
@@ -664,22 +669,60 @@ public abstract class PermissionHolder {
                 final String rawNode = Patterns.SERVER_DELIMITER.split(node.getKey())[1];
                 perms.put(rawNode, node.getValue());
             }
+            applyShorthandIfEnabled(perms);
         }
+
+        if (plugin.getConfiguration().getApplyRegex()) {
+            if (possibleNodes != null && !possibleNodes.isEmpty()) {
+                perms =  applyRegex(perms, possibleNodes);
+            } else {
+                perms =  applyRegex(perms, plugin.getPossiblePermissions());
+            }
+        }
+
+        applyShorthandIfEnabled(perms);
 
         if (plugin.getConfiguration().getApplyWildcards()) {
             if (possibleNodes != null && !possibleNodes.isEmpty()) {
-                return applyWildcards(perms, possibleNodes);
+                perms =  applyWildcards(perms, possibleNodes);
+            } else {
+                perms =  applyWildcards(perms, plugin.getPossiblePermissions());
             }
-            return applyWildcards(perms, plugin.getPossiblePermissions());
         }
 
         return perms;
     }
 
-    private Map<String, Boolean> applyWildcards(Map<String, Boolean> input, List<String> possibleNodes) {
-        // Add all group nodes, so wildcard group.* and '*' can apply.
-        plugin.getGroupManager().getGroups().keySet().forEach(s -> possibleNodes.add("group." + s));
+    private boolean matches(String entry, String possibleRegex) {
+        if (!possibleRegex.toLowerCase().startsWith("r=") || !plugin.getConfiguration().getApplyRegex()) {
+            return entry.equalsIgnoreCase(possibleRegex);
+        }
 
+        Pattern p = Patterns.compile(possibleRegex.substring(2));
+        if (p == null) {
+            return false;
+        }
+        return p.matcher(entry).matches();
+    }
+
+    private Map<String, Boolean> applyRegex(Map<String, Boolean> input, List<String> possibleNodes) {
+        for (Map.Entry<String, Boolean> e : input.entrySet()) {
+            if (!e.getKey().startsWith("r=") && !e.getKey().startsWith("R=")) {
+                continue;
+            }
+
+            final Pattern node = Patterns.compile(e.getKey().substring(2));
+            if (node == null) continue;
+            possibleNodes.stream()
+                    .filter(n -> node.matcher(n).matches())
+                    .filter(n -> !input.containsKey(n))
+                    .forEach(n -> input.put(n, e.getValue()));
+        }
+
+        return input;
+    }
+
+    private static Map<String, Boolean> applyWildcards(Map<String, Boolean> input, List<String> possibleNodes) {
         SortedMap<Integer, Map<String, Boolean>> wildcards = new TreeMap<>(Collections.reverseOrder());
         for (Map.Entry<String, Boolean> e : input.entrySet()) {
             if (e.getKey().equals("*") || e.getKey().equals("'*'")) {
@@ -716,6 +759,57 @@ public abstract class PermissionHolder {
                         .filter(n -> !input.containsKey(n)) // Don't override existing nodes
                         .forEach(n -> input.put(n, wc.getValue()));
             }
+        }
+
+        return input;
+    }
+
+    private void applyShorthandIfEnabled(Map<String, Boolean> map) {
+        if (plugin.getConfiguration().getApplyShorthand()) {
+            applyShorthand(map);
+        }
+    }
+
+    private static Map<String, Boolean> applyShorthand(Map<String, Boolean> input) {
+        for (Map.Entry<String, Boolean> e : input.entrySet()) {
+            if (!Patterns.SHORTHAND_NODE.matcher(e.getKey()).find()) {
+                continue;
+            }
+
+            if (!e.getKey().contains(".")) {
+                continue;
+            }
+
+            String[] parts = Patterns.DOT.split(e.getKey());
+            List<Set<String>> nodeParts = new ArrayList<>();
+
+            for (String s : parts) {
+                if ((!s.startsWith("(") || !s.endsWith(")")) || !s.contains("|")) {
+                    nodeParts.add(Collections.singleton(s));
+                    continue;
+                }
+
+                final String bits = s.substring(1, s.length() - 1);
+                nodeParts.add(new HashSet<>(Arrays.asList(Patterns.VERTICAL_BAR.split(bits))));
+            }
+
+            Set<String> nodes = new HashSet<>();
+            for (Set<String> set : nodeParts) {
+                final Set<String> newNodes = new HashSet<>();
+                if (nodes.isEmpty()) {
+                    newNodes.addAll(set);
+                } else {
+                    nodes.forEach(str -> newNodes.addAll(set.stream()
+                            .map(add -> str + "." + add)
+                            .collect(Collectors.toList()))
+                    );
+                }
+                nodes = newNodes;
+            }
+
+            nodes.stream()
+                    .filter(n -> !input.containsKey(n)) // Don't override existing nodes
+                    .forEach(n -> input.put(n, e.getValue()));
         }
 
         return input;

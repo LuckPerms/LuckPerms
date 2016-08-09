@@ -28,7 +28,7 @@ import me.lucko.luckperms.commands.MainCommand;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.groups.Group;
-import me.lucko.luckperms.utils.Patterns;
+import me.lucko.luckperms.utils.ArgumentChecker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +40,7 @@ public class GroupMainCommand extends MainCommand<Group> {
 
     @Override
     protected void getTarget(String target, LuckPermsPlugin plugin, Sender sender, Callback<Group> onSuccess) {
-        if (Patterns.NON_ALPHA_NUMERIC.matcher(target).find()) {
+        if (!ArgumentChecker.checkName(target)) {
             Message.GROUP_INVALID_ENTRY.send(sender);
             return;
         }

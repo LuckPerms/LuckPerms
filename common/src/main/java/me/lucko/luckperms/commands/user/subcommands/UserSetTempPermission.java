@@ -30,6 +30,7 @@ import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.users.User;
+import me.lucko.luckperms.utils.ArgumentChecker;
 import me.lucko.luckperms.utils.DateUtil;
 import me.lucko.luckperms.utils.Patterns;
 
@@ -47,7 +48,7 @@ public class UserSetTempPermission extends SubCommand<User> {
         String node = args.get(0);
         String bool = args.get(1).toLowerCase();
 
-        if (node.contains("/") || node.contains("$")) {
+        if (!ArgumentChecker.checkNode(node)) {
             sendUsage(sender, label);
             return;
         }
@@ -80,7 +81,7 @@ public class UserSetTempPermission extends SubCommand<User> {
         try {
             if (args.size() >= 4) {
                 final String server = args.get(3).toLowerCase();
-                if (Patterns.NON_ALPHA_NUMERIC.matcher(server).find()) {
+                if (!ArgumentChecker.checkServer(server)) {
                     Message.SERVER_INVALID_ENTRY.send(sender);
                     return;
                 }

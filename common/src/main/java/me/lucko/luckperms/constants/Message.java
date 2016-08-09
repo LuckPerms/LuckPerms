@@ -105,13 +105,11 @@ public enum Message {
 
     GROUP_ALREADY_EXISTS("That group already exists!", true),
     GROUP_DOES_NOT_EXIST("That group does not exist!", true),
-    GROUP_NAME_TOO_LONG("Group name '%s' exceeds the maximum length of 36 characters.", true),
     GROUP_LOAD_ERROR("An unexpected error occurred. Group not loaded.", true),
     GROUPS_LOAD_ERROR("An unexpected error occurred. Unable to load all groups.", true),
 
     TRACK_ALREADY_EXISTS("That track already exists!", true),
     TRACK_DOES_NOT_EXIST("That track does not exist!", true),
-    TRACK_NAME_TOO_LONG("Track name '%s' exceeds the maximum length of 36 characters.", true),
     TRACK_LOAD_ERROR("An unexpected error occurred. Track not loaded.", true),
     TRACKS_LOAD_ERROR("An unexpected error occurred. Unable to load all tracks.", true),
     TRACK_EMPTY("The track cannot be used as it is empty or contains only one group.", true),

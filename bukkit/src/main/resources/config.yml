@@ -27,6 +27,16 @@ online-mode: true
 # the wildcard. This will only work for plugins that define all of their permissions to the server.
 apply-wildcards: true
 
+# If the plugin should parse regex permissions.
+# If set to true, LuckPerms will detect regex permissions, marked with "r=" at the start of the node, and resolve &
+# apply all registered permissions matching the regex. This will only work for plugins that define all of their
+# permissions to the server.
+apply-regex: true
+
+# If the plugin should complete and apply shorthand permissions.
+# If set to true, LuckPerms will detect and expand shorthand node patterns.
+apply-shorthand: true
+
 # Which storage method the plugin should use.
 # Currently supported: mysql, sqlite, flatfile
 # Fill out connection info below if you're using MySQL
