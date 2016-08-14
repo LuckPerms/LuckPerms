@@ -23,6 +23,7 @@
 package me.lucko.luckperms.commands.track;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.commands.CommandResult;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SingleMainCommand;
 import me.lucko.luckperms.commands.Util;
@@ -38,13 +39,13 @@ public class ListTracks extends SingleMainCommand {
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
-        plugin.getDatastore().loadAllTracks(success -> {
-            if (!success) {
-                Message.TRACKS_LOAD_ERROR.send(sender);
-            } else {
-                Message.TRACKS_LIST.send(sender, Util.listToCommaSep(new ArrayList<>(plugin.getTrackManager().getTracks().keySet())));
-            }
-        });
+    protected CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
+        if (!plugin.getDatastore().loadAllTracks()) {
+            Message.TRACKS_LOAD_ERROR.send(sender);
+            return CommandResult.LOADING_ERROR;
+        }
+
+        Message.TRACKS_LIST.send(sender, Util.listToCommaSep(new ArrayList<>(plugin.getTrackManager().getAll().keySet())));
+        return CommandResult.SUCCESS;
     }
 }

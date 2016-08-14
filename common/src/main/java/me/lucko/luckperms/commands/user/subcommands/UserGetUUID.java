@@ -23,6 +23,7 @@
 package me.lucko.luckperms.commands.user.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.commands.CommandResult;
 import me.lucko.luckperms.commands.Predicate;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
@@ -39,7 +40,8 @@ public class UserGetUUID extends SubCommand<User> {
     }
 
     @Override
-    public void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
         Message.USER_GETUUID.send(sender, user.getName(), user.getUuid().toString());
+        return CommandResult.SUCCESS;
     }
 }

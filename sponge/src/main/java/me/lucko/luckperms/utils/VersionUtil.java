@@ -54,7 +54,7 @@ public class VersionUtil extends ClassTransformer {
         attribute.setAnnotation(annotation);
 
         CtMethod getVersionMethod = clazz.getDeclaredMethod("getVersion");
-        CtMethod hackedVersionMethod = CtNewMethod.make("public String getVersion() { return \"" + this.version + "\"; }", clazz);
+        CtMethod hackedVersionMethod = CtNewMethod.make("public String getVersion() { return \"" + version + "\"; }", clazz);
         clazz.removeMethod(getVersionMethod);
         clazz.addMethod(hackedVersionMethod);
     }

@@ -22,8 +22,8 @@
 
 package me.lucko.luckperms;
 
-import me.lucko.luckperms.utils.LPConfiguration;
-import me.lucko.luckperms.utils.Patterns;
+import me.lucko.luckperms.constants.Patterns;
+import me.lucko.luckperms.core.LPConfiguration;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;

@@ -27,19 +27,20 @@ import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.implementation.ApiProvider;
 import me.lucko.luckperms.api.vault.VaultHook;
+import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.constants.Message;
-import me.lucko.luckperms.data.Datastore;
-import me.lucko.luckperms.data.methods.FlatfileDatastore;
-import me.lucko.luckperms.data.methods.MySQLDatastore;
-import me.lucko.luckperms.data.methods.SQLiteDatastore;
+import me.lucko.luckperms.core.LPConfiguration;
+import me.lucko.luckperms.core.UuidCache;
 import me.lucko.luckperms.groups.GroupManager;
 import me.lucko.luckperms.runnables.UpdateTask;
+import me.lucko.luckperms.storage.Datastore;
+import me.lucko.luckperms.storage.methods.FlatfileDatastore;
+import me.lucko.luckperms.storage.methods.MySQLDatastore;
+import me.lucko.luckperms.storage.methods.SQLiteDatastore;
 import me.lucko.luckperms.tracks.TrackManager;
 import me.lucko.luckperms.users.BukkitUserManager;
 import me.lucko.luckperms.users.UserManager;
-import me.lucko.luckperms.utils.LPConfiguration;
-import me.lucko.luckperms.utils.LogUtil;
-import me.lucko.luckperms.utils.UuidCache;
+import me.lucko.luckperms.utils.LogFactory;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
@@ -47,14 +48,12 @@ import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Getter
 public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
+    private final Set<UUID> ignoringLogs = new HashSet<>();
     private LPConfiguration configuration;
     private UserManager userManager;
     private GroupManager groupManager;
@@ -65,7 +64,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
     @Override
     public void onEnable() {
-        log = LogUtil.wrap(getLogger());
+        log = LogFactory.wrap(getLogger());
 
         getLog().info("Loading configuration...");
         configuration = new BukkitConfig(this);
@@ -120,6 +119,8 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
             long ticks = mins * 60 * 20;
             getServer().getScheduler().runTaskTimerAsynchronously(this, new UpdateTask(this), ticks, ticks);
         }
+
+        getServer().getScheduler().runTaskTimer(this, BukkitSenderFactory.get(), 1L, 1L);
 
         // Provide vault support
         getLog().info("Attempting to hook into Vault...");
@@ -181,6 +182,11 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     @Override
     public List<String> getPlayerList() {
         return getServer().getOnlinePlayers().stream().map(Player::getName).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Sender> getSenders() {
+        return getServer().getOnlinePlayers().stream().map(p -> BukkitSenderFactory.get().wrap(p)).collect(Collectors.toList());
     }
 
     @Override

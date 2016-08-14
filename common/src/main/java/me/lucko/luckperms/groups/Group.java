@@ -26,10 +26,11 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.constants.Patterns;
+import me.lucko.luckperms.core.PermissionHolder;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
-import me.lucko.luckperms.utils.Patterns;
-import me.lucko.luckperms.utils.PermissionHolder;
+import me.lucko.luckperms.utils.Identifiable;
 
 import java.util.List;
 import java.util.Map;
@@ -37,7 +38,7 @@ import java.util.stream.Collectors;
 
 @ToString(of = {"name"})
 @EqualsAndHashCode(of = {"name"}, callSuper = false)
-public class Group extends PermissionHolder {
+public class Group extends PermissionHolder implements Identifiable<String> {
 
     /**
      * The name of the group
@@ -56,7 +57,7 @@ public class Group extends PermissionHolder {
      * @return true if the user is a member of the group
      */
     public boolean inheritsGroup(Group group) {
-        return inheritsGroup(group, "global");
+        return group.getName().equalsIgnoreCase(this.getName()) || inheritsGroup(group, "global");
     }
 
     /**
@@ -66,7 +67,7 @@ public class Group extends PermissionHolder {
      * @return true if the group inherits the group
      */
     public boolean inheritsGroup(Group group, String server) {
-        return hasPermission("group." + group.getName(), true, server);
+        return group.getName().equalsIgnoreCase(this.getName()) || hasPermission("group." + group.getName(), true, server);
     }
 
     /**
@@ -77,7 +78,7 @@ public class Group extends PermissionHolder {
      * @return true if the group inherits the group
      */
     public boolean inheritsGroup(Group group, String server, String world) {
-        return hasPermission("group." + group.getName(), true, server, world);
+        return group.getName().equalsIgnoreCase(this.getName()) || hasPermission("group." + group.getName(), true, server, world);
     }
 
     /**
@@ -96,6 +97,10 @@ public class Group extends PermissionHolder {
      * @throws ObjectAlreadyHasException if the group already inherits the group on that server
      */
     public void setInheritGroup(Group group, String server) throws ObjectAlreadyHasException {
+        if (group.getName().equalsIgnoreCase(this.getName())) {
+            throw new ObjectAlreadyHasException();
+        }
+
         if (server == null) {
             server = "global";
         }
@@ -111,6 +116,10 @@ public class Group extends PermissionHolder {
      * @throws ObjectAlreadyHasException if the group already inherits the group on that server
      */
     public void setInheritGroup(Group group, String server, String world) throws ObjectAlreadyHasException {
+        if (group.getName().equalsIgnoreCase(this.getName())) {
+            throw new ObjectAlreadyHasException();
+        }
+
         if (server == null) {
             server = "global";
         }
@@ -125,6 +134,10 @@ public class Group extends PermissionHolder {
      * @throws ObjectAlreadyHasException if the group already inherits the group on that server
      */
     public void setInheritGroup(Group group, long expireAt) throws ObjectAlreadyHasException {
+        if (group.getName().equalsIgnoreCase(this.getName())) {
+            throw new ObjectAlreadyHasException();
+        }
+
         setPermission("group." + group.getName(), true, expireAt);
     }
 
@@ -136,6 +149,10 @@ public class Group extends PermissionHolder {
      * @throws ObjectAlreadyHasException if the group already inherits the group on that server
      */
     public void setInheritGroup(Group group, String server, long expireAt) throws ObjectAlreadyHasException {
+        if (group.getName().equalsIgnoreCase(this.getName())) {
+            throw new ObjectAlreadyHasException();
+        }
+
         if (server == null) {
             server = "global";
         }
@@ -152,6 +169,10 @@ public class Group extends PermissionHolder {
      * @throws ObjectAlreadyHasException if the group already inherits the group on that server
      */
     public void setInheritGroup(Group group, String server, String world, long expireAt) throws ObjectAlreadyHasException {
+        if (group.getName().equalsIgnoreCase(this.getName())) {
+            throw new ObjectAlreadyHasException();
+        }
+
         if (server == null) {
             server = "global";
         }
@@ -287,5 +308,10 @@ public class Group extends PermissionHolder {
                 .filter(s -> Patterns.GROUP_MATCH.matcher(s).matches())
                 .map(s -> Patterns.DOT.split(s, 2)[1])
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public String getId() {
+        return name;
     }
 }

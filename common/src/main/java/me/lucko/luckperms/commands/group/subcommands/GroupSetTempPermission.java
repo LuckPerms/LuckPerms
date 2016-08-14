@@ -23,16 +23,18 @@
 package me.lucko.luckperms.commands.group.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.commands.CommandResult;
 import me.lucko.luckperms.commands.Predicate;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Message;
+import me.lucko.luckperms.constants.Patterns;
 import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.data.LogEntryBuilder;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.utils.ArgumentChecker;
 import me.lucko.luckperms.utils.DateUtil;
-import me.lucko.luckperms.utils.Patterns;
 
 import java.util.List;
 
@@ -44,23 +46,23 @@ public class GroupSetTempPermission extends SubCommand<Group> {
     }
 
     @Override
-    public void execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
         String node = args.get(0);
         String bool = args.get(1).toLowerCase();
 
-        if (!ArgumentChecker.checkNode(node)) {
+        if (ArgumentChecker.checkNode(node)) {
             sendUsage(sender, label);
-            return;
+            return CommandResult.INVALID_ARGS;
         }
 
         if (Patterns.GROUP_MATCH.matcher(node).matches()) {
             Message.GROUP_USE_INHERIT.send(sender);
-            return;
+            return CommandResult.INVALID_ARGS;
         }
 
         if (!bool.equalsIgnoreCase("true") && !bool.equalsIgnoreCase("false")) {
             sendUsage(sender, label);
-            return;
+            return CommandResult.INVALID_ARGS;
         }
 
         boolean b = Boolean.parseBoolean(bool);
@@ -70,46 +72,57 @@ public class GroupSetTempPermission extends SubCommand<Group> {
             duration = DateUtil.parseDateDiff(args.get(2), true);
         } catch (DateUtil.IllegalDateException e) {
             Message.ILLEGAL_DATE_ERROR.send(sender, args.get(2));
-            return;
+            return CommandResult.INVALID_ARGS;
         }
 
         if (DateUtil.shouldExpire(duration)) {
             Message.PAST_DATE_ERROR.send(sender);
-            return;
+            return CommandResult.INVALID_ARGS;
         }
 
         try {
             if (args.size() >= 4) {
                 final String server = args.get(3).toLowerCase();
-                if (!ArgumentChecker.checkServer(server)) {
+                if (ArgumentChecker.checkServer(server)) {
                     Message.SERVER_INVALID_ENTRY.send(sender);
-                    return;
+                    return CommandResult.INVALID_ARGS;
                 }
 
                 if (args.size() == 4) {
                     group.setPermission(node, b, server, duration);
                     Message.SETPERMISSION_TEMP_SERVER_SUCCESS.send(sender, node, bool, group.getName(), server,
                             DateUtil.formatDateDiff(duration));
+                    LogEntryBuilder.get().actor(sender).acted(group)
+                            .action("settemp " + node + " " + b + " " + duration + " " + server)
+                            .submit(plugin);
                 } else {
                     final String world = args.get(4).toLowerCase();
                     group.setPermission(node, b, server, world, duration);
                     Message.SETPERMISSION_TEMP_SERVER_WORLD_SUCCESS.send(sender, node, bool, group.getName(), server,
                             world, DateUtil.formatDateDiff(duration));
+                    LogEntryBuilder.get().actor(sender).acted(group)
+                            .action("settemp " + node + " " + b + " " + duration + " " + server + " " + world)
+                            .submit(plugin);
                 }
 
             } else {
                 group.setPermission(node, b, duration);
                 Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, bool, group.getName(), DateUtil.formatDateDiff(duration));
+                LogEntryBuilder.get().actor(sender).acted(group)
+                        .action("settemp " + node + " " + b + " " + duration)
+                        .submit(plugin);
             }
 
-            saveGroup(group, sender, plugin);
+            save(group, sender, plugin);
+            return CommandResult.SUCCESS;
         } catch (ObjectAlreadyHasException e) {
             Message.ALREADY_HAS_TEMP_PERMISSION.send(sender, group.getName());
+            return CommandResult.STATE_ERROR;
         }
     }
 
     @Override
-    public List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin) {
+    public List<String> onTabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         return getBoolTabComplete(args);
     }
 }

@@ -23,15 +23,14 @@
 package me.lucko.luckperms.commands.track.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.Predicate;
-import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SubCommand;
-import me.lucko.luckperms.commands.Util;
+import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.data.LogEntryBuilder;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.tracks.Track;
+import me.lucko.luckperms.utils.ArgumentChecker;
 
 import java.util.List;
 
@@ -42,42 +41,53 @@ public class TrackInsert extends SubCommand<Track> {
     }
 
     @Override
-    public void execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args, String label) {
         String groupName = args.get(0).toLowerCase();
+
+        if (ArgumentChecker.checkNode(groupName)) {
+            sendUsage(sender, label);
+            return CommandResult.INVALID_ARGS;
+        }
+
         int pos;
         try {
             pos = Integer.parseInt(args.get(1));
         } catch (NumberFormatException e) {
             Message.TRACK_INSERT_ERROR_NUMBER.send(sender, args.get(1));
-            return;
+            return CommandResult.INVALID_ARGS;
         }
 
-        plugin.getDatastore().loadGroup(groupName, success -> {
-            if (!success) {
-                Message.GROUP_DOES_NOT_EXIST.send(sender);
-            } else {
-                Group group = plugin.getGroupManager().getGroup(groupName);
-                if (group == null) {
-                    Message.GROUP_DOES_NOT_EXIST.send(sender);
-                    return;
-                }
+        if (!plugin.getDatastore().loadGroup(groupName)) {
+            Message.GROUP_DOES_NOT_EXIST.send(sender);
+            return CommandResult.INVALID_ARGS;
+        }
 
-                try {
-                    track.insertGroup(group, pos - 1);
-                    Message.TRACK_INSERT_SUCCESS.send(sender, group.getName(), track.getName(), pos);
-                    Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), group.getName()));
-                    saveTrack(track, sender, plugin);
-                } catch (ObjectAlreadyHasException e) {
-                    Message.TRACK_ALREADY_CONTAINS.send(sender, track.getName(), group.getName());
-                } catch (IndexOutOfBoundsException e) {
-                    Message.TRACK_INSERT_ERROR_INVALID_POS.send(sender, pos);
-                }
-            }
-        });
+        Group group = plugin.getGroupManager().get(groupName);
+        if (group == null) {
+            Message.GROUP_DOES_NOT_EXIST.send(sender);
+            return CommandResult.LOADING_ERROR;
+        }
+
+        try {
+            track.insertGroup(group, pos - 1);
+            Message.TRACK_INSERT_SUCCESS.send(sender, group.getName(), track.getName(), pos);
+            Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), group.getName()));
+            LogEntryBuilder.get().actor(sender).acted(track)
+                    .action("insert " + group.getName() + " " + pos)
+                    .submit(plugin);
+            save(track, sender, plugin);
+            return CommandResult.SUCCESS;
+        } catch (ObjectAlreadyHasException e) {
+            Message.TRACK_ALREADY_CONTAINS.send(sender, track.getName(), group.getName());
+            return CommandResult.STATE_ERROR;
+        } catch (IndexOutOfBoundsException e) {
+            Message.TRACK_INSERT_ERROR_INVALID_POS.send(sender, pos);
+            return CommandResult.INVALID_ARGS;
+        }
     }
 
     @Override
-    public List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin) {
+    public List<String> onTabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         return getGroupTabComplete(args, plugin);
     }
 }

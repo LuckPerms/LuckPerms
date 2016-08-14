@@ -23,7 +23,7 @@
 package me.lucko.luckperms.api.implementation.internal;
 
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 import me.lucko.luckperms.api.Group;
@@ -38,17 +38,19 @@ import static me.lucko.luckperms.api.implementation.internal.Utils.checkGroup;
 /**
  * Provides a link between {@link Track} and {@link me.lucko.luckperms.tracks.Track}
  */
+@EqualsAndHashCode(of = {"name"})
 @SuppressWarnings("unused")
-@AllArgsConstructor
 public class TrackLink implements Track {
 
-    @NonNull
     @Getter(AccessLevel.PACKAGE)
     private final me.lucko.luckperms.tracks.Track master;
 
-    @Override
-    public String getName() {
-        return master.getName();
+    @Getter
+    private final String name;
+
+    public TrackLink(@NonNull me.lucko.luckperms.tracks.Track master) {
+        this.master = master;
+        this.name = master.getName();
     }
 
     @Override

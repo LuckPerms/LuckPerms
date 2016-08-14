@@ -78,7 +78,19 @@ public abstract class SubCommand<T> {
      * @param args the stripped arguments given
      * @param label the command label used
      */
-    public abstract void execute(LuckPermsPlugin plugin, Sender sender, T t, List<String> args, String label);
+    public abstract CommandResult execute(LuckPermsPlugin plugin, Sender sender, T t, List<String> args, String label);
+
+    /**
+     * Returns a list of suggestions, which are empty by default. Sub classes that give tab complete suggestions override
+     * this method to give their own list.
+     * @param plugin the plugin instance
+     * @param sender who is tab completing
+     * @param args the arguments so far
+     * @return a list of suggestions
+     */
+    public List<String> onTabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+        return Collections.emptyList();
+    }
 
     /**
      * Send the command usage to a sender
@@ -98,18 +110,6 @@ public abstract class SubCommand<T> {
         return permission.isAuthorized(sender);
     }
 
-    /**
-     * Returns a list of suggestions, which are empty by default. Sub classes that give tab complete suggestions override
-     * this method to give their own list.
-     * @param sender who is tab completing
-     * @param args the arguments so far
-     * @param plugin the plugin instance
-     * @return a list of suggestions
-     */
-    public List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin) {
-        return Collections.emptyList();
-    }
-
     /*
         ----------------------------------------------------------------------------------
         Utility methods used by #onTabComplete and #execute implementations in sub classes
@@ -117,11 +117,11 @@ public abstract class SubCommand<T> {
      */
 
     protected static List<String> getGroupTabComplete(List<String> args, LuckPermsPlugin plugin) {
-        return getTabComplete(new ArrayList<>(plugin.getGroupManager().getGroups().keySet()), args);
+        return getTabComplete(new ArrayList<>(plugin.getGroupManager().getAll().keySet()), args);
     }
 
     protected static List<String> getTrackTabComplete(List<String> args, LuckPermsPlugin plugin) {
-        return getTabComplete(new ArrayList<>(plugin.getTrackManager().getTracks().keySet()), args);
+        return getTabComplete(new ArrayList<>(plugin.getTrackManager().getAll().keySet()), args);
     }
 
     protected static List<String> getBoolTabComplete(List<String> args) {
@@ -144,7 +144,7 @@ public abstract class SubCommand<T> {
         return Collections.emptyList();
     }
 
-    protected static void saveUser(User user, Sender sender, LuckPermsPlugin plugin) {
+    protected static void save(User user, Sender sender, LuckPermsPlugin plugin) {
         user.refreshPermissions();
 
         plugin.getDatastore().saveUser(user, success -> {
@@ -156,7 +156,7 @@ public abstract class SubCommand<T> {
         });
     }
 
-    protected static void saveGroup(Group group, Sender sender, LuckPermsPlugin plugin) {
+    protected static void save(Group group, Sender sender, LuckPermsPlugin plugin) {
         plugin.getDatastore().saveGroup(group, success -> {
             if (success) {
                 Message.GROUP_SAVE_SUCCESS.send(sender);
@@ -168,7 +168,7 @@ public abstract class SubCommand<T> {
         });
     }
 
-    protected static void saveTrack(Track track, Sender sender, LuckPermsPlugin plugin) {
+    protected static void save(Track track, Sender sender, LuckPermsPlugin plugin) {
         plugin.getDatastore().saveTrack(track, success -> {
             if (success) {
                 Message.TRACK_SAVE_SUCCESS.send(sender);

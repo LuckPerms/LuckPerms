@@ -22,69 +22,105 @@
 
 package me.lucko.luckperms.commands.user;
 
+import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.api.data.Callback;
 import me.lucko.luckperms.commands.MainCommand;
 import me.lucko.luckperms.commands.Sender;
+import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.commands.Util;
+import me.lucko.luckperms.commands.user.subcommands.*;
 import me.lucko.luckperms.constants.Message;
+import me.lucko.luckperms.constants.Patterns;
 import me.lucko.luckperms.users.User;
-import me.lucko.luckperms.utils.Patterns;
 
 import java.util.List;
 import java.util.UUID;
 
 public class UserMainCommand extends MainCommand<User> {
     public UserMainCommand() {
-        super("User", "/%s user <user>", 2);
+        super("User", "/%s user <user>", 2, ImmutableList.<SubCommand<User>>builder()
+            .add(new UserInfo())
+            .add(new UserGetUUID())
+            .add(new UserListNodes())
+            .add(new UserHasPerm())
+            .add(new UserInheritsPerm())
+            .add(new UserSetPermission())
+            .add(new UserUnSetPermission())
+            .add(new UserAddGroup())
+            .add(new UserRemoveGroup())
+            .add(new UserSetTempPermission())
+            .add(new UserUnsetTempPermission())
+            .add(new UserAddTempGroup())
+            .add(new UserRemoveTempGroup())
+            .add(new UserSetPrimaryGroup())
+            .add(new UserShowTracks())
+            .add(new UserPromote())
+            .add(new UserDemote())
+            .add(new UserShowPos())
+            .add(new UserClear())
+            .build()
+        );
     }
 
     @Override
-    protected void getTarget(String target, LuckPermsPlugin plugin, Sender sender, Callback<User> onSuccess) {
+    protected User getTarget(String target, LuckPermsPlugin plugin, Sender sender) {
         UUID u = Util.parseUuid(target);
         if (u != null) {
-            runSub(plugin, sender, u, onSuccess);
-            return;
+            User user = getUser(plugin, u);
+            if (user == null) {
+
+                Message.USER_NEVER_JOINED.send(sender);
+                if (!plugin.getDatastore().loadOrCreateUser(u, "null")) {
+                    Message.USER_CREATE_FAIL.send(sender);
+                    return null;
+                }
+
+                user = getUser(plugin, u);
+            }
+            return user;
         }
 
         if (target.length() <= 16) {
             if (Patterns.NON_USERNAME.matcher(target).find()) {
                 Message.USER_INVALID_ENTRY.send(sender, target);
-                return;
+                return null;
             }
 
             Message.USER_ATTEMPTING_LOOKUP.send(sender);
 
-            plugin.getDatastore().getUUID(target, uuid -> {
-                if (uuid == null) {
-                    Message.USER_NOT_FOUND.send(sender);
-                    return;
-                }
+            UUID uuid = plugin.getDatastore().getUUID(target);
+            if (uuid == null) {
+                Message.USER_NOT_FOUND.send(sender);
+                return null;
+            }
 
-                runSub(plugin, sender, uuid, onSuccess);
-            });
-            return;
+            User user = getUser(plugin, uuid);
+            if (user == null) {
+                Message.USER_NOT_FOUND.send(sender);
+            }
+            return user;
         }
 
         Message.USER_INVALID_ENTRY.send(sender, target);
+        return null;
     }
 
-    private void runSub(LuckPermsPlugin plugin, Sender sender, UUID uuid, Callback<User> onSuccess) {
-        plugin.getDatastore().loadUser(uuid, success -> {
-            if (!success) {
-                Message.USER_NOT_FOUND.send(sender);
-                return;
-            }
+    @Override
+    protected void cleanup(User user, LuckPermsPlugin plugin) {
+        plugin.getUserManager().cleanup(user);
+    }
 
-            User user = plugin.getUserManager().getUser(uuid);
-            if (user == null) {
-                Message.USER_NOT_FOUND.send(sender);
-                return;
-            }
+    private User getUser(LuckPermsPlugin plugin, UUID uuid) {
+        if (!plugin.getDatastore().loadUser(uuid)) {
+            return null;
+        }
 
-            onSuccess.onComplete(user);
-            plugin.getUserManager().cleanupUser(user);
-        });
+        User user = plugin.getUserManager().get(uuid);
+        if (user == null) {
+            return null;
+        }
+
+        return user;
     }
 
     @Override

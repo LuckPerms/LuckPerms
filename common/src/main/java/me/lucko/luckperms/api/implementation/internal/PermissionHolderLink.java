@@ -36,14 +36,14 @@ import java.util.Map;
 import static me.lucko.luckperms.api.implementation.internal.Utils.*;
 
 /**
- * Provides a link between {@link PermissionHolder} and {@link me.lucko.luckperms.utils.PermissionHolder}
+ * Provides a link between {@link PermissionHolder} and {@link me.lucko.luckperms.core.PermissionHolder}
  */
 @SuppressWarnings("unused")
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 class PermissionHolderLink implements PermissionHolder {
 
     @NonNull
-    private final me.lucko.luckperms.utils.PermissionHolder master;
+    private final me.lucko.luckperms.core.PermissionHolder master;
 
     @Override
     public String getObjectName() {

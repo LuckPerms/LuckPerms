@@ -23,15 +23,17 @@
 package me.lucko.luckperms.commands.user.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.commands.CommandResult;
 import me.lucko.luckperms.commands.Predicate;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Message;
+import me.lucko.luckperms.constants.Patterns;
 import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.data.LogEntryBuilder;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.users.User;
 import me.lucko.luckperms.utils.ArgumentChecker;
-import me.lucko.luckperms.utils.Patterns;
 
 import java.util.List;
 
@@ -43,44 +45,55 @@ public class UserUnsetTempPermission extends SubCommand<User> {
     }
 
     @Override
-    public void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
         String node = args.get(0);
 
-        if (!ArgumentChecker.checkNode(node)) {
+        if (ArgumentChecker.checkNode(node)) {
             sendUsage(sender, label);
-            return;
+            return CommandResult.INVALID_ARGS;
         }
 
         if (Patterns.GROUP_MATCH.matcher(node).matches()) {
             Message.USER_USE_REMOVEGROUP.send(sender);
-            return;
+            return CommandResult.INVALID_ARGS;
         }
 
         try {
             if (args.size() >= 2) {
                 final String server = args.get(1).toLowerCase();
-                if (!ArgumentChecker.checkServer(server)) {
+                if (ArgumentChecker.checkServer(server)) {
                     Message.SERVER_INVALID_ENTRY.send(sender);
-                    return;
+                    return CommandResult.INVALID_ARGS;
                 }
 
                 if (args.size() == 2) {
                     user.unsetPermission(node, server, true);
                     Message.UNSET_TEMP_PERMISSION_SERVER_SUCCESS.send(sender, node, user.getName(), server);
+                    LogEntryBuilder.get().actor(sender).acted(user)
+                            .action("unsettemp " + node + " " + server)
+                            .submit(plugin);
                 } else {
                     final String world = args.get(2).toLowerCase();
                     user.unsetPermission(node, server, world, true);
                     Message.UNSET_TEMP_PERMISSION_SERVER_WORLD_SUCCESS.send(sender, node, user.getName(), server, world);
+                    LogEntryBuilder.get().actor(sender).acted(user)
+                            .action("unsettemp " + node + " " + server + " " + world)
+                            .submit(plugin);
                 }
 
             } else {
                 user.unsetPermission(node, true);
                 Message.UNSET_TEMP_PERMISSION_SUCCESS.send(sender, node, user.getName());
+                LogEntryBuilder.get().actor(sender).acted(user)
+                        .action("unsettemp " + node)
+                        .submit(plugin);
             }
 
-            saveUser(user, sender, plugin);
+            save(user, sender, plugin);
+            return CommandResult.SUCCESS;
         } catch (ObjectLacksException e) {
             Message.DOES_NOT_HAVE_TEMP_PERMISSION.send(sender, user.getName());
+            return CommandResult.STATE_ERROR;
         }
     }
 }

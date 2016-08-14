@@ -20,15 +20,17 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.utils;
+package me.lucko.luckperms.core;
 
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.constants.Patterns;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.groups.Group;
+import me.lucko.luckperms.utils.DateUtil;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -622,7 +624,7 @@ public abstract class PermissionHolder {
 
             String groupName = Patterns.DOT.split(groupNode.getKey(), 2)[1];
             if (!excludedGroups.contains(groupName)) {
-                Group group = plugin.getGroupManager().getGroup(groupName);
+                Group group = plugin.getGroupManager().get(groupName);
                 if (group != null) {
                     perms.putAll(group.getLocalPermissions(server, excludedGroups));
                 } else {
@@ -647,7 +649,7 @@ public abstract class PermissionHolder {
 
                 String groupName = Patterns.DOT.split(rawNode, 2)[1];
                 if (!excludedGroups.contains(groupName)) {
-                    Group group = plugin.getGroupManager().getGroup(groupName);
+                    Group group = plugin.getGroupManager().get(groupName);
                     if (group != null) {
                         perms.putAll(group.getLocalPermissions(server, excludedGroups));
                     } else {

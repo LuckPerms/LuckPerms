@@ -23,29 +23,29 @@
 package me.lucko.luckperms.utils;
 
 import lombok.experimental.UtilityClass;
+import me.lucko.luckperms.constants.Patterns;
 
 @UtilityClass
 public class ArgumentChecker {
 
     public static boolean checkUsername(String s) {
-        return !(s.length() > 16 || Patterns.NON_USERNAME.matcher(s).find());
+        return (s.length() > 16 || Patterns.NON_USERNAME.matcher(s).find());
     }
 
     public static boolean checkName(String s) {
-        return !(s.length() > 36 || Patterns.NON_ALPHA_NUMERIC.matcher(s).find());
+        return (s.length() > 36 || Patterns.NON_ALPHA_NUMERIC.matcher(s).find());
     }
 
     public static boolean checkServer(String s) {
-        return !s.toLowerCase().startsWith("r=") && !Patterns.NON_ALPHA_NUMERIC.matcher(s).find();
+        return s.toLowerCase().startsWith("r=") || Patterns.NON_ALPHA_NUMERIC.matcher(s).find();
     }
 
     public static boolean checkNode(String s) {
-        return !(s.contains("/") || s.contains("$"));
+        return (s.contains("/") || s.contains("$"));
     }
 
     public static boolean checkTime(long l) {
-        return !DateUtil.shouldExpire(l);
+        return DateUtil.shouldExpire(l);
     }
-
 
 }

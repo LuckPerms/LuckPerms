@@ -23,12 +23,10 @@
 package me.lucko.luckperms.commands.user.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.Predicate;
-import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SubCommand;
-import me.lucko.luckperms.commands.Util;
+import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.data.LogEntryBuilder;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.groups.Group;
@@ -45,73 +43,75 @@ public class UserPromote extends SubCommand<User> {
     }
 
     @Override
-    public void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
         final String trackName = args.get(0).toLowerCase();
-        if (!ArgumentChecker.checkName(trackName)) {
+        if (ArgumentChecker.checkName(trackName)) {
             Message.TRACK_INVALID_ENTRY.send(sender);
-            return;
+            return CommandResult.INVALID_ARGS;
         }
 
-        plugin.getDatastore().loadTrack(trackName, success -> {
-            if (!success) {
-                Message.TRACK_DOES_NOT_EXIST.send(sender);
-            } else {
-                Track track = plugin.getTrackManager().getTrack(trackName);
-                if (track == null) {
-                    Message.TRACK_DOES_NOT_EXIST.send(sender);
-                    return;
-                }
+        if (!plugin.getDatastore().loadTrack(trackName)) {
+            Message.TRACK_DOES_NOT_EXIST.send(sender);
+            return CommandResult.INVALID_ARGS;
+        }
 
-                if (track.getSize() <= 1) {
-                    Message.TRACK_EMPTY.send(sender);
-                    return;
-                }
+        Track track = plugin.getTrackManager().get(trackName);
+        if (track == null) {
+            Message.TRACK_DOES_NOT_EXIST.send(sender);
+            return CommandResult.LOADING_ERROR;
+        }
 
-                final String old = user.getPrimaryGroup();
-                final String next;
-                try {
-                    next = track.getNext(old);
-                } catch (ObjectLacksException e) {
-                    Message.TRACK_DOES_NOT_CONTAIN.send(sender, track.getName(), old);
-                    Message.USER_PROMOTE_ERROR_NOT_CONTAIN_GROUP.send(sender);
-                    return;
-                }
+        if (track.getSize() <= 1) {
+            Message.TRACK_EMPTY.send(sender);
+            return CommandResult.STATE_ERROR;
+        }
 
-                if (next == null) {
-                    Message.USER_PROMOTE_ERROR_ENDOFTRACK.send(sender, track.getName());
-                    return;
-                }
+        final String old = user.getPrimaryGroup();
+        final String next;
+        try {
+            next = track.getNext(old);
+        } catch (ObjectLacksException e) {
+            Message.TRACK_DOES_NOT_CONTAIN.send(sender, track.getName(), old);
+            Message.USER_PROMOTE_ERROR_NOT_CONTAIN_GROUP.send(sender);
+            return CommandResult.STATE_ERROR;
+        }
 
-                plugin.getDatastore().loadGroup(next, success1 -> {
-                    if (!success1) {
-                        Message.USER_PROMOTE_ERROR_MALFORMED.send(sender, next);
-                    } else {
-                        Group nextGroup = plugin.getGroupManager().getGroup(next);
-                        if (nextGroup == null) {
-                            Message.USER_PROMOTE_ERROR_MALFORMED.send(sender, next);
-                            return;
-                        }
+        if (next == null) {
+            Message.USER_PROMOTE_ERROR_ENDOFTRACK.send(sender, track.getName());
+            return CommandResult.STATE_ERROR;
+        }
 
-                        try {
-                            user.unsetPermission("group." + old);
-                        } catch (ObjectLacksException ignored) {}
-                        try {
-                            user.addGroup(nextGroup);
-                        } catch (ObjectAlreadyHasException ignored) {}
-                        user.setPrimaryGroup(nextGroup.getName());
+        if (!plugin.getDatastore().loadGroup(next)) {
+            Message.USER_PROMOTE_ERROR_MALFORMED.send(sender, next);
+            return CommandResult.STATE_ERROR;
+        }
 
-                        Message.USER_PROMOTE_SUCCESS_PROMOTE.send(sender, track.getName(), old, nextGroup.getName());
-                        Message.USER_PROMOTE_SUCCESS_REMOVE.send(sender, user.getName(), old, nextGroup.getName(), nextGroup.getName());
-                        Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), old, nextGroup.getName(), false));
-                        saveUser(user, sender, plugin);
-                    }
-                });
-            }
-        });
+        Group nextGroup = plugin.getGroupManager().get(next);
+        if (nextGroup == null) {
+            Message.USER_PROMOTE_ERROR_MALFORMED.send(sender, next);
+            return CommandResult.LOADING_ERROR;
+        }
+
+        try {
+            user.unsetPermission("group." + old);
+        } catch (ObjectLacksException ignored) {}
+        try {
+            user.addGroup(nextGroup);
+        } catch (ObjectAlreadyHasException ignored) {}
+        user.setPrimaryGroup(nextGroup.getName());
+
+        Message.USER_PROMOTE_SUCCESS_PROMOTE.send(sender, track.getName(), old, nextGroup.getName());
+        Message.USER_PROMOTE_SUCCESS_REMOVE.send(sender, user.getName(), old, nextGroup.getName(), nextGroup.getName());
+        Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), old, nextGroup.getName(), false));
+        LogEntryBuilder.get().actor(sender).acted(user)
+                .action("promote " + track.getName() + "(from " + old + " to " + nextGroup.getName() + ")")
+                .submit(plugin);
+        save(user, sender, plugin);
+        return CommandResult.SUCCESS;
     }
 
     @Override
-    public List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin) {
+    public List<String> onTabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         return getTrackTabComplete(args, plugin);
     }
 }

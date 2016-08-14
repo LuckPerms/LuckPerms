@@ -23,10 +23,12 @@
 package me.lucko.luckperms.commands.group;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.commands.CommandResult;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SingleMainCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.data.LogEntryBuilder;
 import me.lucko.luckperms.utils.ArgumentChecker;
 
 import java.util.List;
@@ -37,31 +39,31 @@ public class CreateGroup extends SingleMainCommand {
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
+    protected CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         if (args.size() == 0) {
             sendUsage(sender, label);
-            return;
+            return CommandResult.INVALID_ARGS;
         }
 
         String groupName = args.get(0).toLowerCase();
-        if (!ArgumentChecker.checkName(groupName)) {
+        if (ArgumentChecker.checkName(groupName)) {
             Message.GROUP_INVALID_ENTRY.send(sender);
-            return;
+            return CommandResult.INVALID_ARGS;
         }
 
-        plugin.getDatastore().loadGroup(groupName, success -> {
-            if (success) {
-                Message.GROUP_ALREADY_EXISTS.send(sender);
-            } else {
-                plugin.getDatastore().createAndLoadGroup(groupName, success1 -> {
-                    if (!success1) {
-                        Message.CREATE_GROUP_ERROR.send(sender);
-                    } else {
-                        Message.CREATE_SUCCESS.send(sender, groupName);
-                        plugin.runUpdateTask();
-                    }
-                });
-            }
-        });
+        if (plugin.getDatastore().loadGroup(groupName)) {
+            Message.GROUP_ALREADY_EXISTS.send(sender);
+            return CommandResult.INVALID_ARGS;
+        }
+
+        if (!plugin.getDatastore().createAndLoadGroup(groupName)) {
+            Message.CREATE_GROUP_ERROR.send(sender);
+            return CommandResult.FAILURE;
+        }
+
+        Message.CREATE_SUCCESS.send(sender, groupName);
+        LogEntryBuilder.get().actor(sender).actedName(groupName).type('G').action("create").submit(plugin);
+        plugin.runUpdateTask();
+        return CommandResult.SUCCESS;
     }
 }

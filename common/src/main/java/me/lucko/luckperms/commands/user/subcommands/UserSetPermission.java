@@ -23,15 +23,17 @@
 package me.lucko.luckperms.commands.user.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.commands.CommandResult;
 import me.lucko.luckperms.commands.Predicate;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Message;
+import me.lucko.luckperms.constants.Patterns;
 import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.data.LogEntryBuilder;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.users.User;
 import me.lucko.luckperms.utils.ArgumentChecker;
-import me.lucko.luckperms.utils.Patterns;
 
 import java.util.List;
 
@@ -43,23 +45,23 @@ public class UserSetPermission extends SubCommand<User> {
     }
 
     @Override
-    public void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
         String node = args.get(0);
         String bool = args.get(1).toLowerCase();
 
-        if (!ArgumentChecker.checkNode(node)) {
+        if (ArgumentChecker.checkNode(node)) {
             sendUsage(sender, label);
-            return;
+            return CommandResult.INVALID_ARGS;
         }
 
         if (Patterns.GROUP_MATCH.matcher(node).matches()) {
             Message.USER_USE_ADDGROUP.send(sender);
-            return;
+            return CommandResult.INVALID_ARGS;
         }
 
         if (!bool.equalsIgnoreCase("true") && !bool.equalsIgnoreCase("false")) {
             sendUsage(sender, label);
-            return;
+            return CommandResult.INVALID_ARGS;
         }
 
         boolean b = Boolean.parseBoolean(bool);
@@ -67,33 +69,44 @@ public class UserSetPermission extends SubCommand<User> {
         try {
             if (args.size() >= 3) {
                 final String server = args.get(2).toLowerCase();
-                if (!ArgumentChecker.checkServer(server)) {
+                if (ArgumentChecker.checkServer(server)) {
                     Message.SERVER_INVALID_ENTRY.send(sender);
-                    return;
+                    return CommandResult.INVALID_ARGS;
                 }
 
                 if (args.size() == 3) {
                     user.setPermission(node, b, server);
                     Message.SETPERMISSION_SERVER_SUCCESS.send(sender, node, bool, user.getName(), server);
+                    LogEntryBuilder.get().actor(sender).acted(user)
+                            .action("set " + node + " " + b + " " + server)
+                            .submit(plugin);
                 } else {
                     final String world = args.get(3).toLowerCase();
                     user.setPermission(node, b, server, world);
                     Message.SETPERMISSION_SERVER_WORLD_SUCCESS.send(sender, node, bool, user.getName(), server, world);
+                    LogEntryBuilder.get().actor(sender).acted(user)
+                            .action("set " + node + " " + b + " " + server + " " + world)
+                            .submit(plugin);
                 }
 
             } else {
                 user.setPermission(node, b);
                 Message.SETPERMISSION_SUCCESS.send(sender, node, bool, user.getName());
+                LogEntryBuilder.get().actor(sender).acted(user)
+                        .action("set " + node + " " + b)
+                        .submit(plugin);
             }
 
-            saveUser(user, sender, plugin);
+            save(user, sender, plugin);
+            return CommandResult.SUCCESS;
         } catch (ObjectAlreadyHasException e) {
             Message.ALREADY_HASPERMISSION.send(sender, user.getName());
+            return CommandResult.STATE_ERROR;
         }
     }
 
     @Override
-    public List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin) {
+    public List<String> onTabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         return getBoolTabComplete(args);
     }
 }

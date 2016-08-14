@@ -17,6 +17,7 @@ A permissions implementation for Bukkit/Spigot, BungeeCord and Sponge.
 * **Tracks / paths / ladders** - users can be promoted/demoted along multiple group tracks
 * **Vault Support** - hooks into Vault to integrate with other plugins
 * **Developer API** - easily integrate LuckPerms into your own projects
+* **Advanced action logging** - keep track of permission changes over time
 * **Easy and simple setup and configuration using commands** - no editing yml files, yuck
 * **Negated permissions and groups** - define special rules for certain users/groups
 * **Regex permissions** - define special permissions using regex
@@ -236,6 +237,14 @@ Additionally, you can use wildcards to grant users access to a selection of comm
 *  /perms track \<track\> insert \<group\> \<position\> - luckperms.track.insert
 *  /perms track \<track\> remove \<group\> - luckperms.track.remove
 *  /perms track \<track\> clear - luckperms.track.clear
+
+### Log
+*  /perms log recent [user] [page] - luckperms.log.recent
+*  /perms log search \<query\> [page] - luckperms.log.search
+*  /perms log notify [on|off] - luckperms.log.notify
+*  /perms log userhistory \<user\> [page] - luckperms.log.userhistory
+*  /perms log grouphistory \<group\> [page] - luckperms.log.grouphistory
+*  /perms log trackhistory \<track\> [page] - luckperms.log.trackhistory
 
 ## License
 See LICENSE.md.

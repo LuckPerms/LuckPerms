@@ -80,17 +80,29 @@ public enum Permission {
     TRACK_APPEND("append", "track"),
     TRACK_INSERT("insert", "track"),
     TRACK_REMOVE("remove", "track"),
-    TRACK_CLEAR("clear", "track");
+    TRACK_CLEAR("clear", "track"),
+
+    LOG_RECENT("recent", "log"),
+    LOG_USER_HISTORY("userhistory", "log"),
+    LOG_GROUP_HISTORY("grouphistory", "log"),
+    LOG_TRACK_HISTORY("trackhistory", "log"),
+    LOG_SEARCH("search", "log"),
+    LOG_NOTIFY("notify", "log"),
+    LOG_EXPORT("export", "log");
 
     private String node;
     private String group;
 
-    public boolean isAuthorized(Sender sender) {
+    public String getNode() {
         if (group != null) {
-            return sender.hasPermission("luckperms." + group + "." + node);
+            return "luckperms." + group + "." + node;
         }
 
-        return sender.hasPermission("luckperms." + node);
+        return "luckperms." + node;
+    }
+
+    public boolean isAuthorized(Sender sender) {
+        return sender.hasPermission(this);
     }
 
 }

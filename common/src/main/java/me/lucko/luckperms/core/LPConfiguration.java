@@ -20,12 +20,13 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.utils;
+package me.lucko.luckperms.core;
 
 import lombok.AccessLevel;
 import lombok.Getter;
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.data.MySQLConfiguration;
+import me.lucko.luckperms.constants.Patterns;
+import me.lucko.luckperms.storage.MySQLConfiguration;
 
 public abstract class LPConfiguration<T extends LuckPermsPlugin> {
 

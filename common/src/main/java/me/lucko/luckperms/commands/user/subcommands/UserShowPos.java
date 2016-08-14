@@ -23,10 +23,7 @@
 package me.lucko.luckperms.commands.user.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.Predicate;
-import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SubCommand;
-import me.lucko.luckperms.commands.Util;
+import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.tracks.Track;
@@ -42,40 +39,40 @@ public class UserShowPos extends SubCommand<User> {
     }
 
     @Override
-    public void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
         final String trackName = args.get(0).toLowerCase();
-        if (!ArgumentChecker.checkName(trackName)) {
+        if (ArgumentChecker.checkName(trackName)) {
             Message.TRACK_INVALID_ENTRY.send(sender);
-            return;
+            return CommandResult.INVALID_ARGS;
         }
 
-        plugin.getDatastore().loadTrack(trackName, success -> {
-            if (!success) {
-                Message.TRACK_DOES_NOT_EXIST.send(sender);
-            } else {
-                Track track = plugin.getTrackManager().getTrack(trackName);
-                if (track == null) {
-                    Message.TRACK_DOES_NOT_EXIST.send(sender);
-                    return;
-                }
+        if (!plugin.getDatastore().loadTrack(trackName)) {
+            Message.TRACK_DOES_NOT_EXIST.send(sender);
+            return CommandResult.INVALID_ARGS;
+        }
 
-                if (track.getSize() <= 1) {
-                    Message.TRACK_EMPTY.send(sender);
-                    return;
-                }
+        Track track = plugin.getTrackManager().get(trackName);
+        if (track == null) {
+            Message.TRACK_DOES_NOT_EXIST.send(sender);
+            return CommandResult.LOADING_ERROR;
+        }
 
-                if (!track.containsGroup(user.getPrimaryGroup())) {
-                    Message.TRACK_DOES_NOT_CONTAIN.send(sender, track.getName(), user.getPrimaryGroup());
-                    return;
-                }
+        if (track.getSize() <= 1) {
+            Message.TRACK_EMPTY.send(sender);
+            return CommandResult.STATE_ERROR;
+        }
 
-                Message.USER_SHOWPOS.send(sender, user.getName(), track.getName(), Util.listToArrowSep(track.getGroups(), user.getPrimaryGroup()));
-            }
-        });
+        if (!track.containsGroup(user.getPrimaryGroup())) {
+            Message.TRACK_DOES_NOT_CONTAIN.send(sender, track.getName(), user.getPrimaryGroup());
+            return CommandResult.STATE_ERROR;
+        }
+
+        Message.USER_SHOWPOS.send(sender, user.getName(), track.getName(), Util.listToArrowSep(track.getGroups(), user.getPrimaryGroup()));
+        return CommandResult.SUCCESS;
     }
 
     @Override
-    public List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin) {
+    public List<String> onTabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         return getTrackTabComplete(args, plugin);
     }
 }

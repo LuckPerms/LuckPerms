@@ -27,11 +27,12 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.constants.Patterns;
+import me.lucko.luckperms.core.PermissionHolder;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.groups.Group;
-import me.lucko.luckperms.utils.Patterns;
-import me.lucko.luckperms.utils.PermissionHolder;
+import me.lucko.luckperms.utils.Identifiable;
 
 import java.util.List;
 import java.util.Map;
@@ -40,7 +41,7 @@ import java.util.stream.Collectors;
 
 @ToString(of = {"uuid"})
 @EqualsAndHashCode(of = {"uuid"}, callSuper = false)
-public abstract class User extends PermissionHolder {
+public abstract class User extends PermissionHolder implements Identifiable<UUID> {
 
     /**
      * The users Mojang UUID
@@ -318,5 +319,10 @@ public abstract class User extends PermissionHolder {
                 .filter(s -> Patterns.GROUP_MATCH.matcher(s).matches())
                 .map(s -> Patterns.DOT.split(s, 2)[1])
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public UUID getId() {
+        return uuid;
     }
 }

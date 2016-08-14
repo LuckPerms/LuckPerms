@@ -23,6 +23,7 @@
 package me.lucko.luckperms.api;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -82,7 +83,7 @@ public interface LuckPermsApi {
     /**
      * Gets a wrapped user object from the user storage
      * @param name the username of the user to get
-     * @return a a {@link User} object, if one matching the uuid is loaded, or null if not
+     * @return a {@link User} object, if one matching the uuid is loaded, or null if not
      */
     User getUser(String name);
 
@@ -92,6 +93,12 @@ public interface LuckPermsApi {
      * @return an optional {@link User} object
      */
     Optional<User> getUserSafe(String name);
+
+    /**
+     * Gets a set of all loaded users.
+     * @return a {@link Set} of {@link User} objects
+     */
+    Set<User> getUsers();
 
     /**
      * Check if a user is loaded in memory
@@ -115,6 +122,12 @@ public interface LuckPermsApi {
     Optional<Group> getGroupSafe(String name);
 
     /**
+     * Gets a set of all loaded groups.
+     * @return a {@link Set} of {@link Group} objects
+     */
+    Set<Group> getGroups();
+
+    /**
      * Check if a group is loaded in memory
      * @param name the name to check for
      * @return true if the group is loaded
@@ -134,6 +147,12 @@ public interface LuckPermsApi {
      * @return an optional {@link Track} object
      */
     Optional<Track> getTrackSafe(String name);
+
+    /**
+     * Gets a set of all loaded tracks.
+     * @return a {@link Set} of {@link Track} objects
+     */
+    Set<Track> getTracks();
 
     /**
      * Check if a track is loaded in memory

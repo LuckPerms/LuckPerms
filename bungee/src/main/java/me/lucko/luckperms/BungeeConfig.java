@@ -22,7 +22,7 @@
 
 package me.lucko.luckperms;
 
-import me.lucko.luckperms.utils.LPConfiguration;
+import me.lucko.luckperms.core.LPConfiguration;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;

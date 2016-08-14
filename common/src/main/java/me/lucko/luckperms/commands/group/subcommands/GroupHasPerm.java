@@ -23,10 +23,7 @@
 package me.lucko.luckperms.commands.group.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.Predicate;
-import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SubCommand;
-import me.lucko.luckperms.commands.Util;
+import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.groups.Group;
@@ -42,11 +39,11 @@ public class GroupHasPerm extends SubCommand<Group> {
     }
 
     @Override
-    public void execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
         if (args.size() >= 2) {
-            if (!ArgumentChecker.checkServer(args.get(1))) {
+            if (ArgumentChecker.checkServer(args.get(1))) {
                 Message.SERVER_INVALID_ENTRY.send(sender);
-                return;
+                return CommandResult.INVALID_ARGS;
             }
 
             if (args.size() == 2) {
@@ -58,5 +55,6 @@ public class GroupHasPerm extends SubCommand<Group> {
         } else {
             Util.sendBoolean(sender, args.get(0), group.hasPermission(args.get(0), true, "global"));
         }
+        return CommandResult.SUCCESS;
     }
 }

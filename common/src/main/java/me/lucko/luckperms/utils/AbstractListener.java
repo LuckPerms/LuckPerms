@@ -24,6 +24,8 @@ package me.lucko.luckperms.utils;
 
 import lombok.AllArgsConstructor;
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.api.data.Callback;
+import me.lucko.luckperms.core.UuidCache;
 import me.lucko.luckperms.users.User;
 
 import java.util.UUID;
@@ -43,11 +45,11 @@ public class AbstractListener {
             } else {
                 // No previous data for this player
                 cache.addToCache(u, u);
-                plugin.getDatastore().saveUUIDData(username, u, b -> {});
+                plugin.getDatastore().saveUUIDData(username, u, Callback.empty());
             }
         } else {
             // Online mode, no cache needed. This is just for name -> uuid lookup.
-            plugin.getDatastore().saveUUIDData(username, u, b -> {});
+            plugin.getDatastore().saveUUIDData(username, u, Callback.empty());
         }
 
         plugin.getDatastore().loadOrCreateUser(cache.getUUID(u), username);
@@ -63,12 +65,12 @@ public class AbstractListener {
         // Unload the user from memory when they disconnect;
         cache.clearCache(uuid);
 
-        final User user = plugin.getUserManager().getUser(cache.getUUID(uuid));
-        plugin.getUserManager().unloadUser(user);
+        final User user = plugin.getUserManager().get(cache.getUUID(uuid));
+        plugin.getUserManager().unload(user);
     }
 
     protected void refreshPlayer(UUID uuid) {
-        final User user = plugin.getUserManager().getUser(plugin.getUuidCache().getUUID(uuid));
+        final User user = plugin.getUserManager().get(plugin.getUuidCache().getUUID(uuid));
         if (user != null) {
             user.refreshPermissions();
         }

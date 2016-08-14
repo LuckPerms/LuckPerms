@@ -27,11 +27,11 @@ import me.lucko.luckperms.api.LPConfiguration;
 import me.lucko.luckperms.api.data.MySQLConfiguration;
 
 /**
- * Provides a link between {@link LPConfiguration} and {@link me.lucko.luckperms.utils.LPConfiguration}
+ * Provides a link between {@link LPConfiguration} and {@link me.lucko.luckperms.core.LPConfiguration}
  */
 @AllArgsConstructor
 public class LPConfigurationLink implements LPConfiguration {
-    private final me.lucko.luckperms.utils.LPConfiguration master;
+    private final me.lucko.luckperms.core.LPConfiguration master;
 
     @Override
     public String getServer() {

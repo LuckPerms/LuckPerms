@@ -23,11 +23,13 @@
 package me.lucko.luckperms.commands.group.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.commands.CommandResult;
 import me.lucko.luckperms.commands.Predicate;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.data.LogEntryBuilder;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.utils.ArgumentChecker;
@@ -42,50 +44,66 @@ public class GroupSetInherit extends SubCommand<Group> {
     }
 
     @Override
-    public void execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
         String groupName = args.get(0).toLowerCase();
 
-        if (!ArgumentChecker.checkNode(groupName)) {
+        if (ArgumentChecker.checkNode(groupName)) {
             sendUsage(sender, label);
-            return;
+            return CommandResult.INVALID_ARGS;
         }
 
-        plugin.getDatastore().loadGroup(groupName, success -> {
-            if (!success) {
-                Message.GROUP_LOAD_ERROR.send(sender);
-            } else {
-                try {
-                    if (args.size() >= 2) {
-                        final String server = args.get(1).toLowerCase();
-                        if (!ArgumentChecker.checkServer(server)) {
-                            Message.SERVER_INVALID_ENTRY.send(sender);
-                            return;
-                        }
+        if (!plugin.getDatastore().loadGroup(groupName)) {
+            Message.GROUP_DOES_NOT_EXIST.send(sender);
+            return CommandResult.INVALID_ARGS;
+        }
 
-                        if (args.size() == 2) {
-                            group.setPermission("group." + groupName, true, server);
-                            Message.GROUP_SETINHERIT_SERVER_SUCCESS.send(sender, group.getName(), groupName, server);
-                        } else {
-                            final String world = args.get(2).toLowerCase();
-                            group.setPermission("group." + groupName, true, server, world);
-                            Message.GROUP_SETINHERIT_SERVER_WORLD_SUCCESS.send(sender, group.getName(), groupName, server, world);
-                        }
+        Group group1 = plugin.getGroupManager().get(groupName);
+        if (group1 == null) {
+            Message.GROUP_DOES_NOT_EXIST.send(sender);
+            return CommandResult.LOADING_ERROR;
+        }
 
-                    } else {
-                        group.setPermission("group." + groupName, true);
-                        Message.GROUP_SETINHERIT_SUCCESS.send(sender, group.getName(), groupName);
-                    }
-
-                    saveGroup(group, sender, plugin);
-                } catch (ObjectAlreadyHasException e) {
-                    Message.GROUP_ALREADY_INHERITS.send(sender, group.getName(), groupName);
+        try {
+            if (args.size() >= 2) {
+                final String server = args.get(1).toLowerCase();
+                if (ArgumentChecker.checkServer(server)) {
+                    Message.SERVER_INVALID_ENTRY.send(sender);
+                    return CommandResult.INVALID_ARGS;
                 }
+
+                if (args.size() == 2) {
+                    group.setInheritGroup(group1, server);
+                    Message.GROUP_SETINHERIT_SERVER_SUCCESS.send(sender, group.getName(), group1.getName(), server);
+                    LogEntryBuilder.get().actor(sender).acted(group)
+                            .action("setinherit " + group1.getName() + " " + server)
+                            .submit(plugin);
+                } else {
+                    final String world = args.get(2).toLowerCase();
+                    group.setInheritGroup(group1, server, world);
+                    Message.GROUP_SETINHERIT_SERVER_WORLD_SUCCESS.send(sender, group.getName(), group1.getName(), server, world);
+                    LogEntryBuilder.get().actor(sender).acted(group)
+                            .action("setinherit " + group1.getName() + " " + server + " " + world)
+                            .submit(plugin);
+                }
+
+            } else {
+                group.setInheritGroup(group1);
+                Message.GROUP_SETINHERIT_SUCCESS.send(sender, group.getName(), group1.getName());
+                LogEntryBuilder.get().actor(sender).acted(group)
+                        .action("setinherit " + group1.getName())
+                        .submit(plugin);
             }
-        });
+
+            save(group, sender, plugin);
+            return CommandResult.SUCCESS;
+        } catch (ObjectAlreadyHasException e) {
+            Message.GROUP_ALREADY_INHERITS.send(sender, group.getName(), group1.getName());
+            return CommandResult.STATE_ERROR;
+        }
     }
 
     @Override
-    public List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin) {
+    public List<String> onTabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         return getGroupTabComplete(args, plugin);
     }
 }

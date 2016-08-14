@@ -24,6 +24,7 @@ package me.lucko.luckperms.commands;
 
 import lombok.experimental.UtilityClass;
 import me.lucko.luckperms.constants.Message;
+import me.lucko.luckperms.constants.Patterns;
 import me.lucko.luckperms.utils.DateUtil;
 
 import java.util.List;
@@ -55,12 +56,16 @@ public class Util {
         return new String(b);
     }
 
+    public static String stripColor(String s) {
+        return s == null ? null : Patterns.STRIP_COLOR_PATTERN.matcher(s).replaceAll("");
+    }
+
+    public static String formatBoolean(boolean b) {
+        return b ? "&atrue" : "&cfalse";
+    }
+
     public static void sendBoolean(Sender sender, String node, boolean b) {
-        if (b) {
-            sender.sendMessage(Util.color("&b" + node + ": &atrue"));
-        } else {
-            sender.sendMessage(Util.color("&b" + node + ": &cfalse"));
-        }
+        sender.sendMessage(Util.color("&b" + node + ": " + formatBoolean(b)));
     }
 
     public static String listToCommaSep(List<String> strings) {

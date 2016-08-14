@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.utils;
+package me.lucko.luckperms.constants;
 
 import lombok.experimental.UtilityClass;
 
@@ -43,6 +43,7 @@ public class Patterns {
     public static final Pattern NON_ALPHA_NUMERIC = Pattern.compile("[^A-Za-z0-9]");
     public static final Pattern NON_USERNAME = Pattern.compile("[^A-Za-z0-9_]");
     public static final Pattern SHORTHAND_NODE = Pattern.compile("\\.\\([^.]+\\)");
+    public static final Pattern STRIP_COLOR_PATTERN = Pattern.compile("(?i)" + String.valueOf('§') + "[0-9A-FK-OR]");
 
     public static Pattern compile(String regex) throws PatternSyntaxException {
         if (!CACHE.containsKey(regex)) {

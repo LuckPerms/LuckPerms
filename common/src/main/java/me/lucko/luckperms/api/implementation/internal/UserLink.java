@@ -23,6 +23,7 @@
 package me.lucko.luckperms.api.implementation.internal;
 
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 import me.lucko.luckperms.api.Group;
@@ -38,20 +39,20 @@ import static me.lucko.luckperms.api.implementation.internal.Utils.*;
 /**
  * Provides a link between {@link User} and {@link me.lucko.luckperms.users.User}
  */
+@EqualsAndHashCode(of = {"uuid"}, callSuper = false)
 @SuppressWarnings("unused")
 public class UserLink extends PermissionHolderLink implements User {
 
     @Getter(AccessLevel.PACKAGE)
     private final me.lucko.luckperms.users.User master;
 
+    @Getter
+    private final UUID uuid;
+
     public UserLink(@NonNull me.lucko.luckperms.users.User master) {
         super(master);
         this.master = master;
-    }
-
-    @Override
-    public UUID getUuid() {
-        return master.getUuid();
+        this.uuid = master.getUuid();
     }
 
     @Override

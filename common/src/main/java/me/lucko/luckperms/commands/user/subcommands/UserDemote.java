@@ -23,12 +23,10 @@
 package me.lucko.luckperms.commands.user.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.Predicate;
-import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SubCommand;
-import me.lucko.luckperms.commands.Util;
+import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.data.LogEntryBuilder;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.groups.Group;
@@ -45,73 +43,75 @@ public class UserDemote extends SubCommand<User> {
     }
 
     @Override
-    public void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
         final String trackName = args.get(0).toLowerCase();
-        if (!ArgumentChecker.checkName(trackName)) {
+        if (ArgumentChecker.checkName(trackName)) {
             Message.TRACK_INVALID_ENTRY.send(sender);
-            return;
+            return CommandResult.INVALID_ARGS;
         }
 
-        plugin.getDatastore().loadTrack(trackName, success -> {
-            if (!success) {
-                Message.TRACK_DOES_NOT_EXIST.send(sender);
-            } else {
-                Track track = plugin.getTrackManager().getTrack(trackName);
-                if (track == null) {
-                    Message.TRACK_DOES_NOT_EXIST.send(sender);
-                    return;
-                }
+        if (!plugin.getDatastore().loadTrack(trackName)) {
+            Message.TRACK_DOES_NOT_EXIST.send(sender);
+            return CommandResult.INVALID_ARGS;
+        }
 
-                if (track.getSize() <= 1) {
-                    Message.TRACK_EMPTY.send(sender);
-                    return;
-                }
+        Track track = plugin.getTrackManager().get(trackName);
+        if (track == null) {
+            Message.TRACK_DOES_NOT_EXIST.send(sender);
+            return CommandResult.LOADING_ERROR;
+        }
 
-                final String old = user.getPrimaryGroup();
-                final String previous;
-                try {
-                    previous = track.getPrevious(old);
-                } catch (ObjectLacksException e) {
-                    Message.TRACK_DOES_NOT_CONTAIN.send(sender, track.getName(), old);
-                    Message.USER_DEMOTE_ERROR_NOT_CONTAIN_GROUP.send(sender);
-                    return;
-                }
+        if (track.getSize() <= 1) {
+            Message.TRACK_EMPTY.send(sender);
+            return CommandResult.STATE_ERROR;
+        }
 
-                if (previous == null) {
-                    Message.USER_DEMOTE_ERROR_ENDOFTRACK.send(sender, track.getName());
-                    return;
-                }
+        final String old = user.getPrimaryGroup();
+        final String previous;
+        try {
+            previous = track.getPrevious(old);
+        } catch (ObjectLacksException e) {
+            Message.TRACK_DOES_NOT_CONTAIN.send(sender, track.getName(), old);
+            Message.USER_DEMOTE_ERROR_NOT_CONTAIN_GROUP.send(sender);
+            return CommandResult.STATE_ERROR;
+        }
 
-                plugin.getDatastore().loadGroup(previous, success1 -> {
-                    if (!success1) {
-                        Message.USER_DEMOTE_ERROR_MALFORMED.send(sender, previous);
-                    } else {
-                        Group previousGroup = plugin.getGroupManager().getGroup(previous);
-                        if (previousGroup == null) {
-                            Message.USER_DEMOTE_ERROR_MALFORMED.send(sender, previous);
-                            return;
-                        }
+        if (previous == null) {
+            Message.USER_DEMOTE_ERROR_ENDOFTRACK.send(sender, track.getName());
+            return CommandResult.STATE_ERROR;
+        }
 
-                        try {
-                            user.unsetPermission("group." + old);
-                        } catch (ObjectLacksException ignored) {}
-                        try {
-                            user.addGroup(previousGroup);
-                        } catch (ObjectAlreadyHasException ignored) {}
-                        user.setPrimaryGroup(previousGroup.getName());
+        if (!plugin.getDatastore().loadGroup(previous)) {
+            Message.USER_DEMOTE_ERROR_MALFORMED.send(sender, previous);
+            return CommandResult.STATE_ERROR;
+        }
 
-                        Message.USER_DEMOTE_SUCCESS_PROMOTE.send(sender, track.getName(), old, previousGroup.getName());
-                        Message.USER_DEMOTE_SUCCESS_REMOVE.send(sender, user.getName(), old, previousGroup.getName(), previousGroup.getName());
-                        Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), previousGroup.getName(), old, true));
-                        saveUser(user, sender, plugin);
-                    }
-                });
-            }
-        });
+        Group previousGroup = plugin.getGroupManager().get(previous);
+        if (previousGroup == null) {
+            Message.USER_DEMOTE_ERROR_MALFORMED.send(sender, previous);
+            return CommandResult.LOADING_ERROR;
+        }
+
+        try {
+            user.unsetPermission("group." + old);
+        } catch (ObjectLacksException ignored) {}
+        try {
+            user.addGroup(previousGroup);
+        } catch (ObjectAlreadyHasException ignored) {}
+        user.setPrimaryGroup(previousGroup.getName());
+
+        Message.USER_DEMOTE_SUCCESS_PROMOTE.send(sender, track.getName(), old, previousGroup.getName());
+        Message.USER_DEMOTE_SUCCESS_REMOVE.send(sender, user.getName(), old, previousGroup.getName(), previousGroup.getName());
+        Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), previousGroup.getName(), old, true));
+        LogEntryBuilder.get().actor(sender).acted(user)
+                .action("demote " + track.getName() + "(from " + old + " to " + previousGroup.getName() + ")")
+                .submit(plugin);
+        save(user, sender, plugin);
+        return CommandResult.SUCCESS;
     }
 
     @Override
-    public List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin) {
+    public List<String> onTabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         return getTrackTabComplete(args, plugin);
     }
 }

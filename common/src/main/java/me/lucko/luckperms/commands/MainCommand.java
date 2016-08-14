@@ -22,10 +22,10 @@
 
 package me.lucko.luckperms.commands;
 
+import com.google.common.collect.ImmutableList;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.api.data.Callback;
 import me.lucko.luckperms.constants.Message;
 
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Getter
-@RequiredArgsConstructor
+@AllArgsConstructor
 public abstract class MainCommand<T> {
 
     /**
@@ -57,7 +57,11 @@ public abstract class MainCommand<T> {
      * A list of the sub commands under this main command
      */
     @Getter
-    private final List<SubCommand<T>> subCommands = new ArrayList<>();
+    private final List<SubCommand<T>> subCommands;
+
+    MainCommand(String name, String usage, int requiredArgsLength) {
+        this(name, usage, requiredArgsLength, ImmutableList.of());
+    }
 
     /**
      * Called when this main command is ran
@@ -66,37 +70,44 @@ public abstract class MainCommand<T> {
      * @param args the stripped arguments given
      * @param label the command label used
      */
-    protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
-        if (args.size() < 2) {
+    protected CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
+        if (args.size() < requiredArgsLength) {
             sendUsage(sender, label);
-            return;
+            return CommandResult.INVALID_ARGS;
         }
 
-        Optional<SubCommand<T>> o = subCommands.stream().filter(s -> s.getName().equalsIgnoreCase(args.get(1))).limit(1).findAny();
+        Optional<SubCommand<T>> o = subCommands.stream().filter(s -> s.getName().equalsIgnoreCase(args.get(requiredArgsLength - 1))).limit(1).findAny();
 
         if (!o.isPresent()) {
             Message.COMMAND_NOT_RECOGNISED.send(sender);
-            return;
+            return CommandResult.INVALID_ARGS;
         }
 
         final SubCommand<T> sub = o.get();
         if (!sub.isAuthorized(sender)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
-            return;
+            return CommandResult.NO_PERMISSION;
         }
 
         List<String> strippedArgs = new ArrayList<>();
-        if (args.size() > 2) {
-            strippedArgs.addAll(args.subList(2, args.size()));
+        if (args.size() > requiredArgsLength) {
+            strippedArgs.addAll(args.subList(requiredArgsLength, args.size()));
         }
 
         if (sub.getIsArgumentInvalid().test(strippedArgs.size())) {
             sub.sendUsage(sender, label);
-            return;
+            return CommandResult.INVALID_ARGS;
         }
 
         final String name = args.get(0).toLowerCase();
-        getTarget(name, plugin, sender, t -> sub.execute(plugin, sender, t, strippedArgs, label));
+        T t = getTarget(name, plugin, sender);
+        if (t != null) {
+            CommandResult result = sub.execute(plugin, sender, t, strippedArgs, label);
+            cleanup(t, plugin);
+            return result;
+        }
+
+        return CommandResult.LOADING_ERROR;
     }
 
     /**
@@ -104,9 +115,10 @@ public abstract class MainCommand<T> {
      * @param target the name of the object to be looked up
      * @param plugin a link to the main plugin instance
      * @param sender the user who send the command (used to send error messages if the lookup was unsuccessful)
-     * @param onSuccess the callback to run when the lookup is completed
      */
-    protected abstract void getTarget(String target, LuckPermsPlugin plugin, Sender sender, Callback<T> onSuccess);
+    protected abstract T getTarget(String target, LuckPermsPlugin plugin, Sender sender);
+
+    protected abstract void cleanup(T t, LuckPermsPlugin plugin);
 
     /**
      * Get a list of objects for tab completion
@@ -174,10 +186,6 @@ public abstract class MainCommand<T> {
             return Collections.emptyList();
         }
 
-        return o.get().onTabComplete(sender, args.subList(2, args.size()), plugin);
-    }
-
-    public void registerSubCommand(SubCommand<T> subCommand) {
-        subCommands.add(subCommand);
+        return o.get().onTabComplete(plugin, sender, args.subList(2, args.size()));
     }
 }

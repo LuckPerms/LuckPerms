@@ -53,7 +53,7 @@ class BukkitListener extends AbstractListener implements Listener {
     @EventHandler
     public void onPlayerLogin(PlayerLoginEvent e) {
         final Player player = e.getPlayer();
-        final User user = plugin.getUserManager().getUser(plugin.getUuidCache().getUUID(player.getUniqueId()));
+        final User user = plugin.getUserManager().get(plugin.getUuidCache().getUUID(player.getUniqueId()));
 
         if (user == null) {
             e.disallow(PlayerLoginEvent.Result.KICK_OTHER, Message.LOADING_ERROR.toString());

@@ -20,14 +20,16 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.data;
+package me.lucko.luckperms.storage;
 
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.data.Callback;
+import me.lucko.luckperms.data.Log;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.tracks.Track;
 import me.lucko.luckperms.users.User;
@@ -61,15 +63,13 @@ public abstract class Datastore {
         plugin.doSync(r);
     }
 
-    private <T> void runCallback(T t, Callback<T> callback) {
-        doSync(() -> callback.onComplete(t));
-    }
-
     /*
         These methods are called immediately and in the same thread as they are called in.
      */
     public abstract void init();
     public abstract void shutdown();
+    public abstract boolean logAction(LogEntry entry);
+    public abstract Log getLog();
     public abstract boolean loadOrCreateUser(UUID uuid, String username);
     public abstract boolean loadUser(UUID uuid);
     public abstract boolean saveUser(User user);
@@ -92,63 +92,122 @@ public abstract class Datastore {
         These methods will schedule the operation to run async. The callback will be ran when the task is complete.
         Callbacks are ran on the main Bukkit server thread (if applicable)
      */
+    public void logAction(LogEntry entry, Callback<Boolean> callback) {
+        doAsync(() -> {
+            boolean result = logAction(entry);
+            doSync(() -> callback.onComplete(result));
+        });
+    }
+
+    public void getLog(Callback<Log> callback) {
+        doAsync(() -> {
+            Log result = getLog();
+            doSync(() -> callback.onComplete(result));
+        });
+    }
+
     public void loadOrCreateUser(UUID uuid, String username, Callback<Boolean> callback) {
-        doAsync(() -> runCallback(loadOrCreateUser(uuid, username), callback));
+        doAsync(() -> {
+            boolean result = loadOrCreateUser(uuid, username);
+            doSync(() -> callback.onComplete(result));
+        });
     }
 
     public void loadUser(UUID uuid, Callback<Boolean> callback) {
-        doAsync(() -> runCallback(loadUser(uuid), callback));
+        doAsync(() -> {
+            boolean result = loadUser(uuid);
+            doSync(() -> callback.onComplete(result));
+        });
     }
 
     public void saveUser(User user, Callback<Boolean> callback) {
-        doAsync(() -> runCallback(saveUser(user), callback));
+        doAsync(() -> {
+            boolean result = saveUser(user);
+            doSync(() -> callback.onComplete(result));
+        });
     }
 
     public void createAndLoadGroup(String name, Callback<Boolean> callback) {
-        doAsync(() -> runCallback(createAndLoadGroup(name), callback));
+        doAsync(() -> {
+            boolean result = createAndLoadGroup(name);
+            doSync(() -> callback.onComplete(result));
+        });
     }
 
     public void loadGroup(String name, Callback<Boolean> callback) {
-        doAsync(() -> runCallback(loadGroup(name), callback));
+        doAsync(() -> {
+            boolean result = loadGroup(name);
+            doSync(() -> callback.onComplete(result));
+        });
     }
 
     public void loadAllGroups(Callback<Boolean> callback) {
-        doAsync(() -> runCallback(loadAllGroups(), callback));
+        doAsync(() -> {
+            boolean result = loadAllGroups();
+            doSync(() -> callback.onComplete(result));
+        });
     }
 
     public void saveGroup(Group group, Callback<Boolean> callback) {
-        doAsync(() -> runCallback(saveGroup(group), callback));
+        doAsync(() -> {
+            boolean result = saveGroup(group);
+            doSync(() -> callback.onComplete(result));
+        });
     }
 
     public void deleteGroup(Group group, Callback<Boolean> callback) {
-        doAsync(() -> runCallback(deleteGroup(group), callback));
+        doAsync(() -> {
+            boolean result = deleteGroup(group);
+            doSync(() -> callback.onComplete(result));
+        });
     }
 
     public void createAndLoadTrack(String name, Callback<Boolean> callback) {
-        doAsync(() -> runCallback(createAndLoadTrack(name), callback));
+        doAsync(() -> {
+            boolean result = createAndLoadTrack(name);
+            doSync(() -> callback.onComplete(result));
+        });
     }
 
     public void loadTrack(String name, Callback<Boolean> callback) {
-        doAsync(() -> runCallback(loadTrack(name), callback));
+        doAsync(() -> {
+            boolean result = loadTrack(name);
+            doSync(() -> callback.onComplete(result));
+        });
     }
 
     public void loadAllTracks(Callback<Boolean> callback) {
-        doAsync(() -> runCallback(loadAllTracks(), callback));
+        doAsync(() -> {
+            boolean result = loadAllTracks();
+            doSync(() -> callback.onComplete(result));
+        });
     }
 
     public void saveTrack(Track track, Callback<Boolean> callback) {
-        doAsync(() -> runCallback(saveTrack(track), callback));
+        doAsync(() -> {
+            boolean result = saveTrack(track);
+            doSync(() -> callback.onComplete(result));
+        });
     }
 
     public void deleteTrack(Track track, Callback<Boolean> callback) {
-        doAsync(() -> runCallback(deleteTrack(track), callback));
+        doAsync(() -> {
+            boolean result = deleteTrack(track);
+            doSync(() -> callback.onComplete(result));
+        });
     }
 
     public void saveUUIDData(String username, UUID uuid, Callback<Boolean> callback) {
-        doAsync(() -> runCallback(saveUUIDData(username, uuid), callback));
+        doAsync(() -> {
+            boolean result = saveUUIDData(username, uuid);
+            doSync(() -> callback.onComplete(result));
+        });
     }
 
     public void getUUID(String username, Callback<UUID> callback) {
-        doAsync(() -> runCallback(getUUID(username), callback));
+        doAsync(() -> {
+            UUID result = getUUID(username);
+            doSync(() -> callback.onComplete(result));
+        });
     }
 }

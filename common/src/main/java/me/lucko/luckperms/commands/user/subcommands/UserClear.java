@@ -23,11 +23,13 @@
 package me.lucko.luckperms.commands.user.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.commands.CommandResult;
 import me.lucko.luckperms.commands.Predicate;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.data.LogEntryBuilder;
 import me.lucko.luckperms.users.User;
 
 import java.util.List;
@@ -39,11 +41,13 @@ public class UserClear extends SubCommand<User> {
     }
 
     @Override
-    public void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
         user.clearNodes();
         plugin.getUserManager().giveDefaults(user);
         Message.CLEAR_SUCCESS.send(sender, user.getName());
+        LogEntryBuilder.get().actor(sender).acted(user).action("clear").submit(plugin);
 
-        saveUser(user, sender, plugin);
+        save(user, sender, plugin);
+        return CommandResult.SUCCESS;
     }
 }

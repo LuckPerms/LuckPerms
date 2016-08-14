@@ -37,31 +37,31 @@ public class SpongeUserManager extends UserManager {
     }
 
     @Override
-    public void unloadUser(User user) {
+    public void unload(User user) {
         if (user != null) {
             Optional<Player> p = plugin.getGame().getServer().getPlayer(plugin.getUuidCache().getExternalUUID(user.getUuid()));
             if (p.isPresent()) {
                 p.get().getSubjectData().clearParents();
                 p.get().getSubjectData().clearPermissions();
             }
-            getUsers().remove(user.getUuid());
+            getAll().remove(user.getUuid());
         }
     }
 
     @Override
-    public void cleanupUser(User user) {
+    public void cleanup(User user) {
         if (plugin.getGame().getServer().getPlayer(plugin.getUuidCache().getExternalUUID(user.getUuid())).isPresent()) {
-            unloadUser(user);
+            unload(user);
         }
     }
 
     @Override
-    public User makeUser(UUID uuid) {
+    public User make(UUID uuid) {
         return new SpongeUser(uuid, plugin);
     }
 
     @Override
-    public User makeUser(UUID uuid, String username) {
+    public User make(UUID uuid, String username) {
         return new SpongeUser(uuid, username, plugin);
     }
 

@@ -23,9 +23,9 @@
 package me.lucko.luckperms;
 
 import me.lucko.luckperms.constants.Message;
+import me.lucko.luckperms.core.UuidCache;
 import me.lucko.luckperms.users.User;
 import me.lucko.luckperms.utils.AbstractListener;
-import me.lucko.luckperms.utils.UuidCache;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -55,7 +55,7 @@ class BungeeListener extends AbstractListener implements Listener {
         }
 
         final ProxiedPlayer player = ((ProxiedPlayer) e.getSender());
-        final User user = plugin.getUserManager().getUser(plugin.getUuidCache().getUUID(player.getUniqueId()));
+        final User user = plugin.getUserManager().get(plugin.getUuidCache().getUUID(player.getUniqueId()));
         if (user == null) return;
 
 
@@ -110,7 +110,7 @@ class BungeeListener extends AbstractListener implements Listener {
         final ProxiedPlayer player = e.getPlayer();
         final WeakReference<ProxiedPlayer> p = new WeakReference<>(player);
 
-        final User user = plugin.getUserManager().getUser(plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId()));
+        final User user = plugin.getUserManager().get(plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId()));
         if (user == null) {
             plugin.getProxy().getScheduler().schedule(plugin, () -> {
                 final ProxiedPlayer pl = p.get();

@@ -23,10 +23,12 @@
 package me.lucko.luckperms.commands.group;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.commands.CommandResult;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SingleMainCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.data.LogEntryBuilder;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.utils.ArgumentChecker;
 
@@ -41,49 +43,49 @@ public class DeleteGroup extends SingleMainCommand {
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
+    protected CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         if (args.size() == 0) {
             sendUsage(sender, label);
-            return;
+            return CommandResult.INVALID_ARGS;
         }
 
         String groupName = args.get(0).toLowerCase();
 
         if (groupName.equalsIgnoreCase(plugin.getConfiguration().getDefaultGroupName())) {
             Message.DELETE_GROUP_ERROR_DEFAULT.send(sender);
-            return;
+            return CommandResult.INVALID_ARGS;
         }
 
-        if (!ArgumentChecker.checkName(groupName)) {
+        if (ArgumentChecker.checkName(groupName)) {
             Message.GROUP_INVALID_ENTRY.send(sender);
-            return;
+            return CommandResult.INVALID_ARGS;
         }
 
-        plugin.getDatastore().loadGroup(groupName, success -> {
-            if (!success) {
-                Message.GROUP_DOES_NOT_EXIST.send(sender);
-            } else {
+        if (!plugin.getDatastore().loadGroup(groupName)) {
+            Message.GROUP_DOES_NOT_EXIST.send(sender);
+            return CommandResult.INVALID_ARGS;
+        }
 
-                Group group = plugin.getGroupManager().getGroup(groupName);
-                if (group == null) {
-                    Message.GROUP_LOAD_ERROR.send(sender);
-                } else {
-                    plugin.getDatastore().deleteGroup(group, success1 -> {
-                        if (!success1) {
-                            Message.DELETE_GROUP_ERROR.send(sender);
-                        } else {
-                            Message.DELETE_SUCCESS.send(sender, groupName);
-                            plugin.runUpdateTask();
-                        }
-                    });
-                }
-            }
-        });
+        Group group = plugin.getGroupManager().get(groupName);
+        if (group == null) {
+            Message.GROUP_LOAD_ERROR.send(sender);
+            return CommandResult.LOADING_ERROR;
+        }
+
+        if (!plugin.getDatastore().deleteGroup(group)) {
+            Message.DELETE_GROUP_ERROR.send(sender);
+            return CommandResult.FAILURE;
+        }
+
+        Message.DELETE_SUCCESS.send(sender, groupName);
+        LogEntryBuilder.get().actor(sender).actedName(groupName).type('G').action("delete").submit(plugin);
+        plugin.runUpdateTask();
+        return CommandResult.SUCCESS;
     }
 
     @Override
     protected List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin) {
-        final List<String> groups = new ArrayList<>(plugin.getGroupManager().getGroups().keySet());
+        final List<String> groups = new ArrayList<>(plugin.getGroupManager().getAll().keySet());
 
         if (args.size() <= 1) {
             if (args.isEmpty() || args.get(0).equalsIgnoreCase("")) {

@@ -23,6 +23,7 @@
 package me.lucko.luckperms.commands.misc;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.commands.CommandResult;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SingleMainCommand;
 import me.lucko.luckperms.constants.Message;
@@ -36,9 +37,13 @@ public class DebugCommand extends SingleMainCommand {
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
-        Message.DEBUG.send(sender, plugin.getPlayerCount(), plugin.getUserManager().getUsers().size(),
-                plugin.getGroupManager().getGroups().size(), plugin.getTrackManager().getTracks().size()
+    protected CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
+        Message.DEBUG.send(sender,
+                plugin.getPlayerCount(),
+                plugin.getUserManager().getAll().size(),
+                plugin.getGroupManager().getAll().size(),
+                plugin.getTrackManager().getAll().size()
         );
+        return CommandResult.SUCCESS;
     }
 }

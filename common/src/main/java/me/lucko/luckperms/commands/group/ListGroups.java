@@ -23,6 +23,7 @@
 package me.lucko.luckperms.commands.group;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.commands.CommandResult;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SingleMainCommand;
 import me.lucko.luckperms.commands.Util;
@@ -38,13 +39,13 @@ public class ListGroups extends SingleMainCommand {
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
-        plugin.getDatastore().loadAllGroups(success -> {
-            if (!success) {
-                Message.GROUPS_LOAD_ERROR.send(sender);
-            } else {
-                Message.GROUPS_LIST.send(sender, Util.listToCommaSep(new ArrayList<>(plugin.getGroupManager().getGroups().keySet())));
-            }
-        });
+    protected CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
+        if (!plugin.getDatastore().loadAllGroups()) {
+            Message.GROUPS_LOAD_ERROR.send(sender);
+            return CommandResult.LOADING_ERROR;
+        }
+
+        Message.GROUPS_LIST.send(sender, Util.listToCommaSep(new ArrayList<>(plugin.getGroupManager().getAll().keySet())));
+        return CommandResult.SUCCESS;
     }
 }

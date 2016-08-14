@@ -23,15 +23,17 @@
 package me.lucko.luckperms;
 
 import me.lucko.luckperms.api.Logger;
+import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.constants.Message;
-import me.lucko.luckperms.data.Datastore;
+import me.lucko.luckperms.core.LPConfiguration;
+import me.lucko.luckperms.core.UuidCache;
 import me.lucko.luckperms.groups.GroupManager;
+import me.lucko.luckperms.storage.Datastore;
 import me.lucko.luckperms.tracks.TrackManager;
 import me.lucko.luckperms.users.UserManager;
-import me.lucko.luckperms.utils.LPConfiguration;
-import me.lucko.luckperms.utils.UuidCache;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -107,10 +109,22 @@ public interface LuckPermsPlugin {
     List<String> getPlayerList();
 
     /**
+     * Gets a list of all Senders online on the platform
+     * @return a {@link List} of senders
+     */
+    List<Sender> getSenders();
+
+    /**
      * Gets all possible permission nodes, used for resolving wildcards
      * @return a {@link List} of permission nodes
      */
     List<String> getPossiblePermissions();
+
+    /**
+     * Gets a set of players ignoring logging output
+     * @return a {@link Set} of uuids
+     */
+    Set<UUID> getIgnoringLogs();
 
     /**
      * Runs an update task

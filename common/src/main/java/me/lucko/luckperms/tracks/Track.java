@@ -29,15 +29,16 @@ import lombok.ToString;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.groups.Group;
+import me.lucko.luckperms.utils.Identifiable;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@ToString(of = {"name"})
-@EqualsAndHashCode(of = {"name"}, callSuper = false)
+@ToString
+@EqualsAndHashCode(of = {"name"})
 @RequiredArgsConstructor
-public class Track {
+public class Track implements Identifiable<String> {
 
     /**
      * The name of the track
@@ -199,5 +200,10 @@ public class Track {
         if (!containsGroup(g)) {
             throw new ObjectLacksException();
         }
+    }
+
+    @Override
+    public String getId() {
+        return name;
     }
 }

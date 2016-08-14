@@ -22,31 +22,69 @@
 
 package me.lucko.luckperms.commands;
 
+import lombok.Getter;
+import me.lucko.luckperms.constants.Permission;
+
 import java.lang.ref.WeakReference;
+import java.util.*;
+import java.util.stream.Collectors;
 
-public abstract class SenderFactory<T> {
+/**
+ * Factory class to make a thread-safe sender instance
+ * @param <T> the command sender type
+ */
+public abstract class SenderFactory<T> implements Runnable {
+    // Ensures messages are sent in order, etc.
+    private final List<Runnable> tasks = new ArrayList<>();
 
+    private final SenderFactory<T> factory = this;
+
+    protected abstract String getName(T t);
+    protected abstract UUID getUuid(T t);
     protected abstract void sendMessage(T t, String s);
     protected abstract boolean hasPermission(T t, String node);
 
-    public Sender wrap(T t) {
-        final SenderFactory<T> factory = this;
+    public final Sender wrap(T t) {
         return new Sender() {
-            final WeakReference<T> cs = new WeakReference<>(t);
+            final WeakReference<T> tRef = new WeakReference<>(t);
+
+            // Cache these permissions, so they can be accessed async
+            final Map<Permission, Boolean> perms = Arrays.stream(Permission.values())
+                    .map(p -> new AbstractMap.SimpleEntry<>(p, factory.hasPermission(t, p.getNode())))
+                    .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue));
+
+            @Getter
+            final String name = factory.getName(t);
+
+            @Getter
+            final UUID uuid = factory.getUuid(t);
 
             @Override
             public void sendMessage(String s) {
-                final T c = cs.get();
-                if (c != null) {
-                    factory.sendMessage(c, s);
+                final T t = tRef.get();
+                if (t != null) {
+                    synchronized (tasks) {
+                        tasks.add(() -> factory.sendMessage(t, s));
+                    }
                 }
             }
 
             @Override
-            public boolean hasPermission(String node) {
-                final T c = cs.get();
-                return c != null && factory.hasPermission(c, node);
+            public boolean hasPermission(Permission permission) {
+                synchronized (perms) {
+                    return perms.get(permission);
+                }
             }
         };
+    }
+
+    @Override
+    public final void run() {
+        synchronized (tasks) {
+            if (!tasks.isEmpty()) {
+                tasks.forEach(Runnable::run);
+                tasks.clear();
+            }
+        }
     }
 }

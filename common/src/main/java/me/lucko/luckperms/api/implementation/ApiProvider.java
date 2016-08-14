@@ -29,7 +29,9 @@ import me.lucko.luckperms.api.*;
 import me.lucko.luckperms.api.implementation.internal.*;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Provides static access to LuckPerms
@@ -70,7 +72,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public User getUser(@NonNull UUID uuid) {
-        final me.lucko.luckperms.users.User user = plugin.getUserManager().getUser(uuid);
+        final me.lucko.luckperms.users.User user = plugin.getUserManager().get(uuid);
         if (user == null) {
             return null;
         }
@@ -85,7 +87,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public User getUser(@NonNull String name) {
-        final me.lucko.luckperms.users.User user = plugin.getUserManager().getUser(name);
+        final me.lucko.luckperms.users.User user = plugin.getUserManager().get(name);
         if (user == null) {
             return null;
         }
@@ -99,13 +101,18 @@ public class ApiProvider implements LuckPermsApi {
     }
 
     @Override
+    public Set<User> getUsers() {
+        return plugin.getUserManager().getAll().values().stream().map(UserLink::new).collect(Collectors.toSet());
+    }
+
+    @Override
     public boolean isUserLoaded(@NonNull UUID uuid) {
         return plugin.getUserManager().isLoaded(uuid);
     }
 
     @Override
     public Group getGroup(@NonNull String name) {
-        final me.lucko.luckperms.groups.Group group = plugin.getGroupManager().getGroup(name);
+        final me.lucko.luckperms.groups.Group group = plugin.getGroupManager().get(name);
         if (group == null) {
             return null;
         }
@@ -119,13 +126,18 @@ public class ApiProvider implements LuckPermsApi {
     }
 
     @Override
+    public Set<Group> getGroups() {
+        return plugin.getGroupManager().getAll().values().stream().map(GroupLink::new).collect(Collectors.toSet());
+    }
+
+    @Override
     public boolean isGroupLoaded(@NonNull String name) {
         return plugin.getGroupManager().isLoaded(name);
     }
 
     @Override
     public Track getTrack(@NonNull String name) {
-        final me.lucko.luckperms.tracks.Track track = plugin.getTrackManager().getTrack(name);
+        final me.lucko.luckperms.tracks.Track track = plugin.getTrackManager().get(name);
         if (track == null) {
             return null;
         }
@@ -136,6 +148,11 @@ public class ApiProvider implements LuckPermsApi {
     @Override
     public Optional<Track> getTrackSafe(String name) {
         return Optional.ofNullable(getTrack(name));
+    }
+
+    @Override
+    public Set<Track> getTracks() {
+        return plugin.getTrackManager().getAll().values().stream().map(TrackLink::new).collect(Collectors.toSet());
     }
 
     @Override

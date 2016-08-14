@@ -23,13 +23,16 @@
 package me.lucko.luckperms.commands.misc;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.commands.CommandResult;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SingleMainCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
-import me.lucko.luckperms.utils.LPConfiguration;
+import me.lucko.luckperms.core.LPConfiguration;
 
 import java.util.List;
+
+import static me.lucko.luckperms.commands.Util.formatBoolean;
 
 public class InfoCommand extends SingleMainCommand {
     public InfoCommand() {
@@ -37,9 +40,21 @@ public class InfoCommand extends SingleMainCommand {
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
+    protected CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         final LPConfiguration c = plugin.getConfiguration();
-        Message.INFO.send(sender, plugin.getVersion(), plugin.getDatastore().getName(), c.getServer(),
-                c.getDefaultGroupName(), c.getSyncTime(), c.getIncludeGlobalPerms(), c.getOnlineMode(), c.getApplyWildcards());
+        Message.INFO.send(sender,
+                plugin.getVersion(),
+                plugin.getDatastore().getName(),
+                c.getServer(),
+                c.getDefaultGroupName(),
+                c.getSyncTime(),
+                formatBoolean(c.getIncludeGlobalPerms()),
+                formatBoolean(c.getOnlineMode()),
+                formatBoolean(c.getApplyWildcards()),
+                formatBoolean(c.getApplyRegex()),
+                formatBoolean(c.getApplyShorthand())
+        );
+
+        return CommandResult.SUCCESS;
     }
 }

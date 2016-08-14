@@ -23,7 +23,6 @@
 package me.lucko.luckperms.commands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.api.data.Callback;
 import me.lucko.luckperms.constants.Permission;
 
 import java.util.Collections;
@@ -41,13 +40,19 @@ public class SingleMainCommand extends MainCommand<Object> {
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
+    protected CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         // Do nothing, allow the implementation to override this
+        return null;
     }
 
     @Override
-    protected void getTarget(String target, LuckPermsPlugin plugin, Sender sender, Callback onSuccess) {
-        // Do nothing, don't run callback
+    protected Object getTarget(String target, LuckPermsPlugin plugin, Sender sender) {
+        return null;
+    }
+
+    @Override
+    protected void cleanup(Object o, LuckPermsPlugin plugin) {
+        // Do nothing
     }
 
     @Override

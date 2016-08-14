@@ -40,8 +40,11 @@ public interface Datastore {
 
     Async async();
     Sync sync();
+    Future future();
 
     interface Async {
+        void logAction(LogEntry entry, Callback<Boolean> callback);
+        void getLog(Callback<Log> callback);
         void loadOrCreateUser(UUID uuid, String username, Callback<Boolean> callback);
         void loadUser(UUID uuid, Callback<Boolean> callback);
         void saveUser(User user, Callback<Boolean> callback);
@@ -60,6 +63,8 @@ public interface Datastore {
     }
 
     interface Sync {
+        boolean logAction(LogEntry entry);
+        Log getLog();
         boolean loadOrCreateUser(UUID uuid, String username);
         boolean loadUser(UUID uuid);
         boolean saveUser(User user);
@@ -75,5 +80,25 @@ public interface Datastore {
         boolean deleteTrack(Track track);
         boolean saveUUIDData(String username, UUID uuid);
         UUID getUUID(String username);
+    }
+
+    interface Future {
+        java.util.concurrent.Future<Boolean> logAction(LogEntry entry);
+        java.util.concurrent.Future<Log> getLog();
+        java.util.concurrent.Future<Boolean> loadOrCreateUser(UUID uuid, String username);
+        java.util.concurrent.Future<Boolean> loadUser(UUID uuid);
+        java.util.concurrent.Future<Boolean> saveUser(User user);
+        java.util.concurrent.Future<Boolean> createAndLoadGroup(String name);
+        java.util.concurrent.Future<Boolean> loadGroup(String name);
+        java.util.concurrent.Future<Boolean> loadAllGroups();
+        java.util.concurrent.Future<Boolean> saveGroup(Group group);
+        java.util.concurrent.Future<Boolean> deleteGroup(Group group);
+        java.util.concurrent.Future<Boolean> createAndLoadTrack(String name);
+        java.util.concurrent.Future<Boolean> loadTrack(String name);
+        java.util.concurrent.Future<Boolean> loadAllTracks();
+        java.util.concurrent.Future<Boolean> saveTrack(Track track);
+        java.util.concurrent.Future<Boolean> deleteTrack(Track track);
+        java.util.concurrent.Future<Boolean> saveUUIDData(String username, UUID uuid);
+        java.util.concurrent.Future<UUID> getUUID(String username);
     }
 }

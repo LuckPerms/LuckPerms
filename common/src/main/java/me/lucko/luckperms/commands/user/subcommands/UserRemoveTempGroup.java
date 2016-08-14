@@ -23,11 +23,13 @@
 package me.lucko.luckperms.commands.user.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.commands.CommandResult;
 import me.lucko.luckperms.commands.Predicate;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.data.LogEntryBuilder;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.users.User;
 import me.lucko.luckperms.utils.ArgumentChecker;
@@ -42,44 +44,55 @@ public class UserRemoveTempGroup extends SubCommand<User> {
     }
 
     @Override
-    public void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
         String groupName = args.get(0).toLowerCase();
 
-        if (!ArgumentChecker.checkNode(groupName)) {
+        if (ArgumentChecker.checkNode(groupName)) {
             sendUsage(sender, label);
-            return;
+            return CommandResult.INVALID_ARGS;
         }
 
         try {
             if (args.size() >= 2) {
                 final String server = args.get(1).toLowerCase();
-                if (!ArgumentChecker.checkServer(server)) {
+                if (ArgumentChecker.checkServer(server)) {
                     Message.SERVER_INVALID_ENTRY.send(sender);
-                    return;
+                    return CommandResult.INVALID_ARGS;
                 }
 
                 if (args.size() == 2) {
                     user.unsetPermission("group." + groupName, server, true);
                     Message.USER_REMOVETEMPGROUP_SERVER_SUCCESS.send(sender, user.getName(), groupName, server);
+                    LogEntryBuilder.get().actor(sender).acted(user)
+                            .action("removetempgroup " + groupName + " " + server)
+                            .submit(plugin);
                 } else {
                     final String world = args.get(2).toLowerCase();
                     user.unsetPermission("group." + groupName, server, world, true);
                     Message.USER_REMOVETEMPGROUP_SERVER_WORLD_SUCCESS.send(sender, user.getName(), groupName, server, world);
+                    LogEntryBuilder.get().actor(sender).acted(user)
+                            .action("removetempgroup " + groupName + " " + server + " " + world)
+                            .submit(plugin);
                 }
 
             } else {
                 user.unsetPermission("group." + groupName, true);
                 Message.USER_REMOVETEMPGROUP_SUCCESS.send(sender, user.getName(), groupName);
+                LogEntryBuilder.get().actor(sender).acted(user)
+                        .action("removetempgroup " + groupName)
+                        .submit(plugin);
             }
 
-            saveUser(user, sender, plugin);
+            save(user, sender, plugin);
+            return CommandResult.SUCCESS;
         } catch (ObjectLacksException e) {
             Message.USER_NOT_TEMP_MEMBER_OF.send(sender, user.getName(), groupName);
+            return CommandResult.STATE_ERROR;
         }
     }
 
     @Override
-    public List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin) {
+    public List<String> onTabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         return getGroupTabComplete(args, plugin);
     }
 }

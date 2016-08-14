@@ -23,10 +23,12 @@
 package me.lucko.luckperms.commands.track;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.commands.CommandResult;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SingleMainCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.data.LogEntryBuilder;
 import me.lucko.luckperms.utils.ArgumentChecker;
 
 import java.util.List;
@@ -37,31 +39,31 @@ public class CreateTrack extends SingleMainCommand {
     }
 
     @Override
-    protected void execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
+    protected CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         if (args.size() == 0) {
             sendUsage(sender, label);
-            return;
+            return CommandResult.INVALID_ARGS;
         }
 
         String trackName = args.get(0).toLowerCase();
-        if (!ArgumentChecker.checkName(trackName)) {
+        if (ArgumentChecker.checkName(trackName)) {
             Message.TRACK_INVALID_ENTRY.send(sender);
-            return;
+            return CommandResult.INVALID_ARGS;
         }
 
-        plugin.getDatastore().loadTrack(trackName, success -> {
-            if (success) {
-                Message.TRACK_ALREADY_EXISTS.send(sender);
-            } else {
-                plugin.getDatastore().createAndLoadTrack(trackName, success1 -> {
-                    if (!success1) {
-                        Message.CREATE_TRACK_ERROR.send(sender);
-                    } else {
-                        Message.CREATE_SUCCESS.send(sender, trackName);
-                        plugin.runUpdateTask();
-                    }
-                });
-            }
-        });
+        if (plugin.getDatastore().loadTrack(trackName)) {
+            Message.TRACK_ALREADY_EXISTS.send(sender);
+            return CommandResult.INVALID_ARGS;
+        }
+
+        if (!plugin.getDatastore().createAndLoadTrack(trackName)) {
+            Message.CREATE_TRACK_ERROR.send(sender);
+            return CommandResult.FAILURE;
+        }
+
+        Message.CREATE_SUCCESS.send(sender, trackName);
+        LogEntryBuilder.get().actor(sender).actedName(trackName).type('T').action("create").submit(plugin);
+        plugin.runUpdateTask();
+        return CommandResult.SUCCESS;
     }
 }

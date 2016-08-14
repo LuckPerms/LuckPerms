@@ -31,8 +31,6 @@ public class UpdateTask implements Runnable {
 
     @Override
     public void run() {
-        plugin.getLog().info("Running update task.");
-
         // Reload all of the groups
         plugin.getDatastore().loadAllGroups();
         String defaultGroup = plugin.getConfiguration().getDefaultGroupName();

@@ -28,11 +28,11 @@ import me.lucko.luckperms.api.UuidCache;
 import java.util.UUID;
 
 /**
- * Provides a link between {@link UuidCache} and {@link me.lucko.luckperms.utils.UuidCache}
+ * Provides a link between {@link UuidCache} and {@link me.lucko.luckperms.core.UuidCache}
  */
 @AllArgsConstructor
 public class UuidCacheLink implements UuidCache {
-    private final me.lucko.luckperms.utils.UuidCache master;
+    private final me.lucko.luckperms.core.UuidCache master;
 
     @Override
     public UUID getUUID(UUID external) {

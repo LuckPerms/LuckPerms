@@ -22,8 +22,24 @@
 
 package me.lucko.luckperms.api.data;
 
+import lombok.NonNull;
+
+import java.util.function.Consumer;
+
 public interface Callback<T> {
 
     void onComplete(T t);
+
+    static <T> Callback<T> empty() {
+        return t -> {};
+    }
+
+    static <T> Callback<T> of(@NonNull Runnable runnable) {
+        return t -> runnable.run();
+    }
+
+    static <T> Callback<T> of(@NonNull Consumer<T> consumer) {
+        return consumer::accept;
+    }
 
 }

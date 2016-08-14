@@ -22,12 +22,18 @@
 
 package me.lucko.luckperms.commands;
 
+import me.lucko.luckperms.constants.Permission;
+
+import java.util.UUID;
+
 /**
- * Wrapper class to represent a CommandSender in Bukkit/Bungee within the luckperms-common command implementations.
+ * Wrapper interface to represent a CommandSender/CommandSource within the luckperms-common command implementations.
  */
 public interface Sender {
 
+    String getName();
+    UUID getUuid();
     void sendMessage(String s);
-    boolean hasPermission(String node);
+    boolean hasPermission(Permission permission);
 
 }

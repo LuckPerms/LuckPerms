@@ -22,10 +22,12 @@
 
 package me.lucko.luckperms.commands.group;
 
+import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.api.data.Callback;
 import me.lucko.luckperms.commands.MainCommand;
 import me.lucko.luckperms.commands.Sender;
+import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.commands.group.subcommands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.utils.ArgumentChecker;
@@ -35,34 +37,53 @@ import java.util.List;
 
 public class GroupMainCommand extends MainCommand<Group> {
     public GroupMainCommand() {
-        super("Group", "/%s group <group>", 2);
+        super("Group", "/%s group <group>", 2, ImmutableList.<SubCommand<Group>>builder()
+            .add(new GroupInfo())
+            .add(new GroupListNodes())
+            .add(new GroupHasPerm())
+            .add(new GroupInheritsPerm())
+            .add(new GroupSetPermission())
+            .add(new GroupUnSetPermission())
+            .add(new GroupSetInherit())
+            .add(new GroupUnsetInherit())
+            .add(new GroupSetTempPermission())
+            .add(new GroupUnsetTempPermission())
+            .add(new GroupSetTempInherit())
+            .add(new GroupUnsetTempInherit())
+            .add(new GroupShowTracks())
+            .add(new GroupClear())
+            .build()
+        );
     }
 
     @Override
-    protected void getTarget(String target, LuckPermsPlugin plugin, Sender sender, Callback<Group> onSuccess) {
-        if (!ArgumentChecker.checkName(target)) {
+    protected Group getTarget(String target, LuckPermsPlugin plugin, Sender sender) {
+        if (ArgumentChecker.checkName(target)) {
             Message.GROUP_INVALID_ENTRY.send(sender);
-            return;
+            return null;
         }
 
-        plugin.getDatastore().loadGroup(target, success -> {
-            if (!success) {
-                Message.GROUP_NOT_FOUND.send(sender);
-                return;
-            }
+        if (!plugin.getDatastore().loadGroup(target)) {
+            Message.GROUP_NOT_FOUND.send(sender);
+            return null;
+        }
 
-            Group group = plugin.getGroupManager().getGroup(target);
-            if (group == null) {
-                Message.GROUP_NOT_FOUND.send(sender);
-                return;
-            }
+        Group group = plugin.getGroupManager().get(target);
 
-            onSuccess.onComplete(group);
-        });
+        if (group == null) {
+            Message.GROUP_NOT_FOUND.send(sender);
+        }
+
+        return group;
+    }
+
+    @Override
+    protected void cleanup(Group group, LuckPermsPlugin plugin) {
+
     }
 
     @Override
     protected List<String> getObjects(LuckPermsPlugin plugin) {
-        return new ArrayList<>(plugin.getGroupManager().getGroups().keySet());
+        return new ArrayList<>(plugin.getGroupManager().getAll().keySet());
     }
 }

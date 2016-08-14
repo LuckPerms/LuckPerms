@@ -20,25 +20,32 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.data.methods;
+package me.lucko.luckperms.storage.methods;
 
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import lombok.Cleanup;
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.data.Datastore;
+import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.constants.Constants;
+import me.lucko.luckperms.data.Log;
 import me.lucko.luckperms.groups.Group;
+import me.lucko.luckperms.storage.Datastore;
 import me.lucko.luckperms.tracks.Track;
 import me.lucko.luckperms.users.User;
 
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.*;
+import java.util.logging.Formatter;
 import java.util.stream.Collectors;
 
 @SuppressWarnings({"ResultOfMethodCallIgnored", "UnnecessaryLocalVariable"})
 public class FlatfileDatastore extends Datastore {
+    private static final String LOG_FORMAT = "%s(%s): [%s] %s(%s) --> %s";
 
+    private final Logger actionLogger = Logger.getLogger("lp_actions");
     private Map<String, String> uuidCache = new ConcurrentHashMap<>();
 
     private final File pluginDir;
@@ -46,6 +53,7 @@ public class FlatfileDatastore extends Datastore {
     private File groupsDir;
     private File tracksDir;
     private File uuidData;
+    private File actionLog;
 
     public FlatfileDatastore(LuckPermsPlugin plugin, File pluginDir) {
         super(plugin, "Flatfile - JSON");
@@ -90,6 +98,23 @@ public class FlatfileDatastore extends Datastore {
         }
 
         uuidCache.putAll(getUUIDCache());
+
+        try {
+            FileHandler fh = new FileHandler(actionLog.getAbsolutePath(), 0, 1, true);
+            fh.setFormatter(new Formatter() {
+                @Override
+                public String format(LogRecord record) {
+                    return new Date(record.getMillis()).toString() + ": " + record.getMessage() + "\n";
+                }
+            });
+            actionLogger.addHandler(fh);
+            actionLogger.setUseParentHandlers(false);
+            actionLogger.setLevel(Level.ALL);
+            actionLogger.setFilter(record -> true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         setAcceptingLogins(true);
     }
 
@@ -108,6 +133,9 @@ public class FlatfileDatastore extends Datastore {
 
         uuidData = new File(data, "uuidcache.txt");
         uuidData.createNewFile();
+
+        actionLog = new File(data, "actions.log");
+        actionLog.createNewFile();
     }
 
     @Override
@@ -116,8 +144,27 @@ public class FlatfileDatastore extends Datastore {
     }
 
     @Override
+    public boolean logAction(LogEntry entry) {
+        actionLogger.info(String.format(LOG_FORMAT,
+                (entry.getActor().equals(Constants.getConsoleUUID()) ? "" : entry.getActor() + " "),
+                entry.getActorName(),
+                Character.toString(entry.getType()),
+                (entry.getActed() == null ? "" : entry.getActed().toString() + " "),
+                entry.getActedName(),
+                entry.getAction())
+        );
+        return true;
+    }
+
+    @Override
+    public Log getLog() {
+        // TODO Add log viewing support for flatfile D:
+        return Log.builder().build();
+    }
+
+    @Override
     public boolean loadOrCreateUser(UUID uuid, String username) {
-        User user = plugin.getUserManager().makeUser(uuid, username);
+        User user = plugin.getUserManager().make(uuid, username);
 
         File userFile = new File(usersDir, uuid.toString() + ".json");
         if (!userFile.exists()) {
@@ -148,12 +195,13 @@ public class FlatfileDatastore extends Datastore {
             if (!success) return false;
         }
 
+        final String[] name = new String[1];
         boolean success = doRead(userFile, reader -> {
             reader.beginObject();
             reader.nextName(); // uuid record
             reader.nextString(); // uuid
             reader.nextName(); // name record
-            reader.nextString(); // name
+            name[0] = reader.nextString(); // name
             reader.nextName(); // primaryGroup record
             user.setPrimaryGroup(reader.nextString()); // primaryGroup
             reader.nextName(); //perms
@@ -169,13 +217,30 @@ public class FlatfileDatastore extends Datastore {
             return true;
         });
 
-        if (success) plugin.getUserManager().updateOrSetUser(user);
+        if (!name[0].equals(user.getName())) {
+            doWrite(userFile, writer -> {
+                writer.beginObject();
+                writer.name("uuid").value(user.getUuid().toString());
+                writer.name("name").value(user.getName());
+                writer.name("primaryGroup").value(user.getPrimaryGroup());
+                writer.name("perms");
+                writer.beginObject();
+                for (Map.Entry<String, Boolean> e : user.getNodes().entrySet()) {
+                    writer.name(e.getKey()).value(e.getValue().booleanValue());
+                }
+                writer.endObject();
+                writer.endObject();
+                return true;
+            });
+        }
+
+        if (success) plugin.getUserManager().updateOrSet(user);
         return success;
     }
 
     @Override
     public boolean loadUser(UUID uuid) {
-        User user = plugin.getUserManager().makeUser(uuid);
+        User user = plugin.getUserManager().make(uuid);
 
         File userFile = new File(usersDir, uuid.toString() + ".json");
         if (!userFile.exists()) {
@@ -203,7 +268,7 @@ public class FlatfileDatastore extends Datastore {
             return true;
         });
 
-        if (success) plugin.getUserManager().updateOrSetUser(user);
+        if (success) plugin.getUserManager().updateOrSet(user);
         return success;
     }
 
@@ -238,7 +303,7 @@ public class FlatfileDatastore extends Datastore {
 
     @Override
     public boolean createAndLoadGroup(String name) {
-        Group group = plugin.getGroupManager().makeGroup(name);
+        Group group = plugin.getGroupManager().make(name);
 
         File groupFile = new File(groupsDir, name + ".json");
         if (!groupFile.exists()) {
@@ -282,13 +347,13 @@ public class FlatfileDatastore extends Datastore {
             return true;
         });
 
-        if (success) plugin.getGroupManager().updateOrSetGroup(group);
+        if (success) plugin.getGroupManager().updateOrSet(group);
         return success;
     }
 
     @Override
     public boolean loadGroup(String name) {
-        Group group = plugin.getGroupManager().makeGroup(name);
+        Group group = plugin.getGroupManager().make(name);
 
         File groupFile = new File(groupsDir, name + ".json");
         if (!groupFile.exists()) {
@@ -312,7 +377,7 @@ public class FlatfileDatastore extends Datastore {
             return true;
         });
 
-        if (success) plugin.getGroupManager().updateOrSetGroup(group);
+        if (success) plugin.getGroupManager().updateOrSet(group);
         return success;
     }
 
@@ -366,7 +431,7 @@ public class FlatfileDatastore extends Datastore {
 
     @Override
     public boolean createAndLoadTrack(String name) {
-        Track track = plugin.getTrackManager().makeTrack(name);
+        Track track = plugin.getTrackManager().make(name);
         List<String> groups = new ArrayList<>();
 
         File trackFile = new File(tracksDir, name + ".json");
@@ -409,13 +474,13 @@ public class FlatfileDatastore extends Datastore {
         });
 
         track.setGroups(groups);
-        if (success) plugin.getTrackManager().updateOrSetTrack(track);
+        if (success) plugin.getTrackManager().updateOrSet(track);
         return success;
     }
 
     @Override
     public boolean loadTrack(String name) {
-        Track track = plugin.getTrackManager().makeTrack(name);
+        Track track = plugin.getTrackManager().make(name);
         List<String> groups = new ArrayList<>();
 
         File trackFile = new File(tracksDir, name + ".json");
@@ -438,7 +503,7 @@ public class FlatfileDatastore extends Datastore {
         });
 
         track.setGroups(groups);
-        if (success) plugin.getTrackManager().updateOrSetTrack(track);
+        if (success) plugin.getTrackManager().updateOrSet(track);
         return success;
     }
 

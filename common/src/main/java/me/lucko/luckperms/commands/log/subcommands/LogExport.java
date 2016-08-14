@@ -20,18 +20,26 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.data;
+package me.lucko.luckperms.commands.log.subcommands;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.commands.CommandResult;
+import me.lucko.luckperms.commands.Predicate;
+import me.lucko.luckperms.commands.Sender;
+import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.data.Log;
 
-@Getter
-@AllArgsConstructor
-public class MySQLConfiguration implements me.lucko.luckperms.api.data.MySQLConfiguration {
+import java.util.List;
 
-    private final String address;
-    private final String database;
-    private final String username;
-    private final String password;
+public class LogExport extends SubCommand<Log> {
+    public LogExport() {
+        super("export", "Export the log to a file", "/%s log export <file>", Permission.LOG_EXPORT, Predicate.not(1));
+    }
 
+    @Override
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) {
+        // TODO: implement this
+        return CommandResult.SUCCESS;
+    }
 }

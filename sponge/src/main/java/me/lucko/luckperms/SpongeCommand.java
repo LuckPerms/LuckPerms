@@ -22,37 +22,35 @@
 
 package me.lucko.luckperms;
 
+import me.lucko.luckperms.api.data.Callback;
 import me.lucko.luckperms.commands.CommandManager;
-import me.lucko.luckperms.commands.SenderFactory;
-import me.lucko.luckperms.utils.Patterns;
+import me.lucko.luckperms.constants.Patterns;
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.serializer.TextSerializers;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+@SuppressWarnings("NullableProblems")
 class SpongeCommand extends CommandManager implements CommandCallable {
-    private static final Factory FACTORY = new Factory();
-
     SpongeCommand(LuckPermsPlugin plugin) {
         super(plugin);
     }
 
     @Override
     public CommandResult process(CommandSource source, String s) throws CommandException {
-        onCommand(FACTORY.wrap(source), "perms", Arrays.asList(Patterns.SPACE.split(s)));
+        onCommand(SpongeSenderFactory.get().wrap(source), "perms", Arrays.asList(Patterns.SPACE.split(s)), Callback.empty());
         return CommandResult.success();
     }
 
     @Override
     public List<String> getSuggestions(CommandSource source, String s) throws CommandException {
         // TODO: fix this so it actually works
-        return onTabComplete(FACTORY.wrap(source), Arrays.asList(Patterns.SPACE.split(s)));
+        return onTabComplete(SpongeSenderFactory.get().wrap(source), Arrays.asList(Patterns.SPACE.split(s)));
     }
 
     @Override
@@ -73,19 +71,5 @@ class SpongeCommand extends CommandManager implements CommandCallable {
     @Override
     public Text getUsage(CommandSource source) {
         return Text.of("/perms");
-    }
-
-    private static class Factory extends SenderFactory<CommandSource> {
-
-        @SuppressWarnings("deprecation")
-        @Override
-        protected void sendMessage(CommandSource source, String s) {
-            source.sendMessage(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(s));
-        }
-
-        @Override
-        protected boolean hasPermission(CommandSource source, String node) {
-            return source.hasPermission(node);
-        }
     }
 }

@@ -23,10 +23,7 @@
 package me.lucko.luckperms.commands.group.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.Predicate;
-import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SubCommand;
-import me.lucko.luckperms.commands.Util;
+import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.groups.Group;
@@ -42,15 +39,19 @@ public class GroupShowTracks extends SubCommand<Group> {
     }
 
     @Override
-    public void execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
-        plugin.getDatastore().loadAllTracks(success -> {
-            if (!success) {
-                Message.TRACKS_LOAD_ERROR.send(sender);
-                return;
-            }
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
+        if (!plugin.getDatastore().loadAllTracks()) {
+            Message.TRACKS_LOAD_ERROR.send(sender);
+            return CommandResult.LOADING_ERROR;
+        }
 
-            Message.TRACKS_LIST.send(sender, Util.listToCommaSep(
-                    plugin.getTrackManager().getApplicableTracks(group.getName()).stream().map(Track::getName).collect(Collectors.toList())));
-        });
+        Message.TRACKS_LIST.send(sender,
+                Util.listToCommaSep(plugin.getTrackManager().getApplicableTracks(group.getName()).stream()
+                        .map(Track::getName)
+                        .collect(Collectors.toList())
+                )
+        );
+
+        return CommandResult.SUCCESS;
     }
 }

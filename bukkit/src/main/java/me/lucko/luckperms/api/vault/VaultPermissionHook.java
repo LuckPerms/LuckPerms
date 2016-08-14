@@ -25,11 +25,12 @@ package me.lucko.luckperms.api.vault;
 import lombok.NonNull;
 import lombok.Setter;
 import me.lucko.luckperms.LPBukkitPlugin;
+import me.lucko.luckperms.api.data.Callback;
+import me.lucko.luckperms.core.PermissionHolder;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.users.User;
-import me.lucko.luckperms.utils.PermissionHolder;
 import net.milkbowl.vault.permission.Permission;
 
 class VaultPermissionHook extends Permission {
@@ -95,54 +96,54 @@ class VaultPermissionHook extends Permission {
     private void objectSave(PermissionHolder t) {
         if (t instanceof User) {
             ((User) t).refreshPermissions();
-            plugin.getDatastore().saveUser(((User) t), aBoolean -> {});
+            plugin.getDatastore().saveUser(((User) t), Callback.empty());
         }
         if (t instanceof Group) {
-            plugin.getDatastore().saveGroup(((Group) t), aBoolean -> plugin.runUpdateTask());
+            plugin.getDatastore().saveGroup(((Group) t), c -> plugin.runUpdateTask());
         }
     }
 
     @Override
     public boolean playerHas(String world, @NonNull String player, @NonNull String permission) {
-        return objectHas(world, plugin.getUserManager().getUser(player), permission);
+        return objectHas(world, plugin.getUserManager().get(player), permission);
     }
 
     @Override
     public boolean playerAdd(String world, @NonNull String player, @NonNull String permission) {
-        final User user = plugin.getUserManager().getUser(player);
+        final User user = plugin.getUserManager().get(player);
         return objectAdd(world, user, permission);
     }
 
     @Override
     public boolean playerRemove(String world, @NonNull String player, @NonNull String permission) {
-        final User user = plugin.getUserManager().getUser(player);
+        final User user = plugin.getUserManager().get(player);
         return objectRemove(world, user, permission);
     }
 
     @Override
     public boolean groupHas(String world, @NonNull String groupName, @NonNull String permission) {
-        final Group group = plugin.getGroupManager().getGroup(groupName);
+        final Group group = plugin.getGroupManager().get(groupName);
         return objectHas(world, group, permission);
     }
 
     @Override
     public boolean groupAdd(String world, @NonNull String groupName, @NonNull String permission) {
-        final Group group = plugin.getGroupManager().getGroup(groupName);
+        final Group group = plugin.getGroupManager().get(groupName);
         return objectAdd(world, group, permission);
     }
 
     @Override
     public boolean groupRemove(String world, @NonNull String groupName, @NonNull String permission) {
-        final Group group = plugin.getGroupManager().getGroup(groupName);
+        final Group group = plugin.getGroupManager().get(groupName);
         return objectRemove(world, group, permission);
     }
 
     @Override
     public boolean playerInGroup(String world, @NonNull String player, @NonNull String group) {
-        final User user = plugin.getUserManager().getUser(player);
+        final User user = plugin.getUserManager().get(player);
         if (user == null) return false;
 
-        final Group group1 = plugin.getGroupManager().getGroup(group);
+        final Group group1 = plugin.getGroupManager().get(group);
         if (group1 == null) return false;
 
         if (world != null && !world.equals("")) {
@@ -154,10 +155,10 @@ class VaultPermissionHook extends Permission {
 
     @Override
     public boolean playerAddGroup(String world, @NonNull String player, @NonNull String groupName) {
-        final User user = plugin.getUserManager().getUser(player);
+        final User user = plugin.getUserManager().get(player);
         if (user == null) return false;
 
-        final Group group = plugin.getGroupManager().getGroup(groupName);
+        final Group group = plugin.getGroupManager().get(groupName);
         if (group == null) return false;
 
         try {
@@ -173,10 +174,10 @@ class VaultPermissionHook extends Permission {
 
     @Override
     public boolean playerRemoveGroup(String world, @NonNull String player, @NonNull String groupName) {
-        final User user = plugin.getUserManager().getUser(player);
+        final User user = plugin.getUserManager().get(player);
         if (user == null) return false;
 
-        final Group group = plugin.getGroupManager().getGroup(groupName);
+        final Group group = plugin.getGroupManager().get(groupName);
         if (group == null) return false;
 
         try {
@@ -192,7 +193,7 @@ class VaultPermissionHook extends Permission {
 
     @Override
     public String[] getPlayerGroups(String world, @NonNull String player) {
-        final User user = plugin.getUserManager().getUser(player);
+        final User user = plugin.getUserManager().get(player);
         return (user == null) ? new String[0] :
                 world != null && !world.equals("") ? user.getLocalGroups("global", world).toArray(new String[0]) :
                         user.getGroupNames().toArray(new String[0]);
@@ -200,13 +201,13 @@ class VaultPermissionHook extends Permission {
 
     @Override
     public String getPrimaryGroup(String world, @NonNull String player) {
-        final User user = plugin.getUserManager().getUser(player);
+        final User user = plugin.getUserManager().get(player);
         return (user == null) ? null : user.getPrimaryGroup();
     }
 
     @Override
     public String[] getGroups() {
-        return plugin.getGroupManager().getGroups().keySet().toArray(new String[0]);
+        return plugin.getGroupManager().getAll().keySet().toArray(new String[0]);
     }
 
     @Override

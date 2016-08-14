@@ -38,7 +38,7 @@ public class BukkitUserManager extends UserManager {
     }
 
     @Override
-    public void unloadUser(User user) {
+    public void unload(User user) {
         if (user != null) {
 
             if (user instanceof BukkitUser) {
@@ -54,24 +54,24 @@ public class BukkitUserManager extends UserManager {
                 }
             }
 
-            getUsers().remove(user.getUuid());
+            getAll().remove(user.getUuid());
         }
     }
 
     @Override
-    public void cleanupUser(User user) {
+    public void cleanup(User user) {
         if (plugin.getServer().getPlayer(plugin.getUuidCache().getExternalUUID(user.getUuid())) == null) {
-            unloadUser(user);
+            unload(user);
         }
     }
 
     @Override
-    public User makeUser(UUID uuid) {
+    public User make(UUID uuid) {
         return new BukkitUser(uuid, plugin);
     }
 
     @Override
-    public User makeUser(UUID uuid, String username) {
+    public User make(UUID uuid, String username) {
         return new BukkitUser(uuid, username, plugin);
     }
 

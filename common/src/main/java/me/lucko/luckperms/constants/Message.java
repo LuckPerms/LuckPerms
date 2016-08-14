@@ -38,6 +38,7 @@ public enum Message {
     PLAYER_ONLINE("&aOnline", false),
     PLAYER_OFFLINE("&cOffline", false),
     LOADING_ERROR("Permissions data could not be loaded. Please contact an administrator.", true),
+    LOG("&3LOG &3&l> %s", true),
 
     COMMAND_NOT_RECOGNISED("Command not recognised.", true),
     COMMAND_NO_PERMISSION("You do not have permission to use this command!", true),
@@ -57,6 +58,8 @@ public enum Message {
     USER_SAVE_SUCCESS("&7(User data was saved to the datastore)", true),
     USER_SAVE_ERROR("There was an error whilst saving the user.", true),
     USER_ATTEMPTING_LOOKUP("&7(Attempting UUID lookup, since you specified a username)", true),
+    USER_NEVER_JOINED("&6(&e&lWARNING: &cA user with that UUID has not joined the server before.&6)", true),
+    USER_CREATE_FAIL("There was an error whilst creating a new user.", true),
 
     GROUP_NOT_FOUND("&eGroup could not be found.", true),
     GROUP_SAVE_SUCCESS("&7(Group data was saved to the datastore)", true),
@@ -124,7 +127,9 @@ public enum Message {
             PREFIX + "&eSync Interval: &6%s minutes" + "\n" +
             PREFIX + "&eInclude Global Perms: &6%s" + "\n" +
             PREFIX + "&eOnline Mode: &6%s" + "\n" +
-            PREFIX + "&eApply Wildcards: &6%s",
+            PREFIX + "&eApply Wildcards: &6%s" + "\n" +
+            PREFIX + "&eApply Regex: &6%s" + "\n" +
+            PREFIX + "&eApply Shorthand: &6%s",
             false
     ),
     DEBUG(
@@ -242,7 +247,45 @@ public enum Message {
     TRACK_INSERT_SUCCESS("&aGroup &b%s&a was successfully inserted into track &b%s&a at position &b%s&a.", true),
     TRACK_INSERT_ERROR_NUMBER("Expected number but instead received: %s", true),
     TRACK_INSERT_ERROR_INVALID_POS("Unable to insert at position %s. Index out of bounds.", true),
-    TRACK_REMOVE_SUCCESS("&aGroup &b%s&a was successfully removed from track &b%s&a.", true);
+    TRACK_REMOVE_SUCCESS("&aGroup &b%s&a was successfully removed from track &b%s&a.", true),
+
+    LOG_LOAD_ERROR("The log could not be loaded.", true),
+    LOG_INVALID_PAGE("Invalid page number.", true),
+    LOG_INVALID_PAGE_RANGE("Invalid page number. Please enter a value between 1 and %s.", true),
+    LOG_NO_ENTRIES("&eNo log entries to show.", true),
+    LOG_ENTRY("&e#%s -> &8(&7%s ago&8) %s", true),
+
+    LOG_NOTIFY_TOGGLE_ON("&aEnabled&b logging output.", true),
+    LOG_NOTIFY_TOGGLE_OFF("&cDisabled&b logging output.", true),
+    LOG_NOTIFY_ALREADY_ON("You are already receiving notifications.", true),
+    LOG_NOTIFY_ALREADY_OFF("You aren't currently receiving notifications.", true),
+    LOG_NOTIFY_UNKNOWN("State unknown. Expecting \"on\" or \"off\".", true),
+
+    LOG_SEARCH_HEADER("&aShowing recent actions for query &b%s &a(page &f%s&a of &f%s&a)", true),
+
+    LOG_RECENT_HEADER("&aShowing recent actions (page &f%s&a of &f%s&a)", true),
+    LOG_RECENT_BY_HEADER("&aShowing recent actions by &b%s &a(page &f%s&a of &f%s&a)", true),
+
+    LOG_HISTORY_USER_HEADER("&aShowing history for user &b%s &a(page &f%s&a of &f%s&a)", true),
+    LOG_HISTORY_GROUP_HEADER("&aShowing history for group &b%s &a(page &f%s&a of &f%s&a)", true),
+    LOG_HISTORY_TRACK_HEADER("&aShowing history for track &b%s &a(page &f%s&a of &f%s&a)", true),
+
+    IMPORT_PROGRESS("&e(Import) &d-> &6%s% complete &7- &e%s&6/&e%s &6operations complete with &c%s &6errors.", true),
+    IMPORT_PROGRESS_SIN("&e(Import) &d-> &6%s% complete &7- &e%s&6/&e%s &6operations complete with &c%s &6error.", true),
+    IMPORT_START("&e(Import) &d-> &6Starting import process.", true),
+
+    IMPORT_END_COMPLETE("&e(Import) &a&lCOMPLETED &7- took &e%s &7seconds - &7No errors.", true),
+    IMPORT_END_COMPLETE_ERR("&e(Import) &a&lCOMPLETED &7- took &e%s &7seconds - &c%s errors.", true),
+    IMPORT_END_COMPLETE_ERR_SIN("&e(Import) &a&lCOMPLETED &7- took &e%s &7seconds - &c%s error.", true),
+    IMPORT_END_ERROR_HEADER(
+            PREFIX + "&e(Import) &7-----> &6Showing Error #&e%s &7<-----" + "\n" +
+            PREFIX + "&e(Import) &6Whilst executing: &fCommand #%s" + "\n" +
+            PREFIX + "&e(Import) &6Output:s",
+            false
+    ),
+
+    IMPORT_END_ERROR_CONTENT("&e(Import) &7-> &c%s", true),
+    IMPORT_END_ERROR_FOOTER("&e(Import) &7<---------------------------->", true);
 
     private String message;
     private boolean showPrefix;

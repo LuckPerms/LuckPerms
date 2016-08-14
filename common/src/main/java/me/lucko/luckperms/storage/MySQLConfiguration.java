@@ -20,52 +20,18 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.utils;
+package me.lucko.luckperms.storage;
 
-import lombok.experimental.UtilityClass;
-import me.lucko.luckperms.api.Logger;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-@UtilityClass
-public class LogUtil {
-    public static Logger wrap(org.slf4j.Logger l) {
-        return new Logger() {
-            private final org.slf4j.Logger logger = l;
+@Getter
+@AllArgsConstructor
+public class MySQLConfiguration implements me.lucko.luckperms.api.data.MySQLConfiguration {
 
-            @Override
-            public void info(String s) {
-                logger.info(s);
-            }
+    private final String address;
+    private final String database;
+    private final String username;
+    private final String password;
 
-            @Override
-            public void warn(String s) {
-                logger.warn(s);
-            }
-
-            @Override
-            public void severe(String s) {
-                logger.error(s);
-            }
-        };
-    }
-
-    public static Logger wrap(java.util.logging.Logger l) {
-        return new Logger() {
-            private final java.util.logging.Logger logger = l;
-
-            @Override
-            public void info(String s) {
-                logger.info(s);
-            }
-
-            @Override
-            public void warn(String s) {
-                logger.warning(s);
-            }
-
-            @Override
-            public void severe(String s) {
-                logger.severe(s);
-            }
-        };
-    }
 }

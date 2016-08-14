@@ -23,6 +23,7 @@
 package me.lucko.luckperms.api.implementation.internal;
 
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 import me.lucko.luckperms.api.Group;
@@ -36,20 +37,20 @@ import static me.lucko.luckperms.api.implementation.internal.Utils.*;
 /**
  * Provides a link between {@link Group} and {@link me.lucko.luckperms.groups.Group}
  */
+@EqualsAndHashCode(of = {"name"}, callSuper = false)
 @SuppressWarnings("unused")
 public class GroupLink extends PermissionHolderLink implements Group {
 
     @Getter(AccessLevel.PACKAGE)
     private final me.lucko.luckperms.groups.Group master;
 
+    @Getter
+    private final String name;
+
     public GroupLink(@NonNull me.lucko.luckperms.groups.Group master) {
         super(master);
         this.master = master;
-    }
-
-    @Override
-    public String getName() {
-        return master.getName();
+        this.name = master.getName();
     }
 
     @Override

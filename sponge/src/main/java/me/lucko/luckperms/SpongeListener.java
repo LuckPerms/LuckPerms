@@ -58,7 +58,7 @@ public class SpongeListener extends AbstractListener {
     @Listener
     public void onClientLogin(ClientConnectionEvent.Login e) {
         final GameProfile player = e.getProfile();
-        final User user = plugin.getUserManager().getUser(plugin.getUuidCache().getUUID(player.getUniqueId()));
+        final User user = plugin.getUserManager().get(plugin.getUuidCache().getUUID(player.getUniqueId()));
 
         if (user == null) {
             e.setCancelled(true);

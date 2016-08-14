@@ -23,11 +23,13 @@
 package me.lucko.luckperms.commands.group.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.commands.CommandResult;
 import me.lucko.luckperms.commands.Predicate;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.data.LogEntryBuilder;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.utils.ArgumentChecker;
@@ -43,12 +45,12 @@ public class GroupSetTempInherit extends SubCommand<Group> {
     }
 
     @Override
-    public void execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
         String groupName = args.get(0).toLowerCase();
 
-        if (!ArgumentChecker.checkNode(groupName)) {
+        if (ArgumentChecker.checkNode(groupName)) {
             sendUsage(sender, label);
-            return;
+            return CommandResult.INVALID_ARGS;
         }
 
         long duration;
@@ -56,52 +58,68 @@ public class GroupSetTempInherit extends SubCommand<Group> {
             duration = DateUtil.parseDateDiff(args.get(1), true);
         } catch (DateUtil.IllegalDateException e) {
             Message.ILLEGAL_DATE_ERROR.send(sender, args.get(1));
-            return;
+            return CommandResult.INVALID_ARGS;
         }
 
         if (DateUtil.shouldExpire(duration)) {
             Message.PAST_DATE_ERROR.send(sender);
-            return;
+            return CommandResult.INVALID_ARGS;
         }
 
-        plugin.getDatastore().loadGroup(groupName, success -> {
-            if (!success) {
-                Message.GROUP_LOAD_ERROR.send(sender);
-            } else {
-                try {
-                    if (args.size() >= 3) {
-                        final String server = args.get(2).toLowerCase();
-                        if (!ArgumentChecker.checkServer(server)) {
-                            Message.SERVER_INVALID_ENTRY.send(sender);
-                            return;
-                        }
+        if (!plugin.getDatastore().loadGroup(groupName)) {
+            Message.GROUP_DOES_NOT_EXIST.send(sender);
+            return CommandResult.INVALID_ARGS;
+        }
 
-                        if (args.size() == 3) {
-                            group.setPermission("group." + groupName, true, server, duration);
-                            Message.GROUP_SET_TEMP_INHERIT_SERVER_SUCCESS.send(sender, group.getName(), groupName, server,
-                                    DateUtil.formatDateDiff(duration));
-                        } else {
-                            final String world = args.get(3).toLowerCase();
-                            group.setPermission("group." + groupName, true, server, world, duration);
-                            Message.GROUP_SET_TEMP_INHERIT_SERVER_WORLD_SUCCESS.send(sender, group.getName(), groupName, server,
-                                    world, DateUtil.formatDateDiff(duration));
-                        }
+        Group group1 = plugin.getGroupManager().get(groupName);
+        if (group1 == null) {
+            Message.GROUP_DOES_NOT_EXIST.send(sender);
+            return CommandResult.INVALID_ARGS;
+        }
 
-                    } else {
-                        group.setPermission("group." + groupName, true, duration);
-                        Message.GROUP_SET_TEMP_INHERIT_SUCCESS.send(sender, group.getName(), groupName, DateUtil.formatDateDiff(duration));
-                    }
-
-                    saveGroup(group, sender, plugin);
-                } catch (ObjectAlreadyHasException e) {
-                    Message.GROUP_ALREADY_TEMP_INHERITS.send(sender, group.getName(), groupName);
+        try {
+            if (args.size() >= 3) {
+                final String server = args.get(2).toLowerCase();
+                if (ArgumentChecker.checkServer(server)) {
+                    Message.SERVER_INVALID_ENTRY.send(sender);
+                    return CommandResult.INVALID_ARGS;
                 }
+
+                if (args.size() == 3) {
+                    group.setInheritGroup(group1, server, duration);
+                    Message.GROUP_SET_TEMP_INHERIT_SERVER_SUCCESS.send(sender, group.getName(), group1.getName(), server,
+                            DateUtil.formatDateDiff(duration));
+                    LogEntryBuilder.get().actor(sender).acted(group)
+                            .action("settempinherit " + group1.getName() + " " + duration + " " + server)
+                            .submit(plugin);
+                } else {
+                    final String world = args.get(3).toLowerCase();
+                    group.setInheritGroup(group1, server, world, duration);
+                    Message.GROUP_SET_TEMP_INHERIT_SERVER_WORLD_SUCCESS.send(sender, group.getName(), group1.getName(), server,
+                            world, DateUtil.formatDateDiff(duration));
+                    LogEntryBuilder.get().actor(sender).acted(group)
+                            .action("settempinherit " + group1.getName() + " " + duration + " " + server + " " + world)
+                            .submit(plugin);
+                }
+
+            } else {
+                group.setInheritGroup(group1, duration);
+                Message.GROUP_SET_TEMP_INHERIT_SUCCESS.send(sender, group.getName(), group1.getName(), DateUtil.formatDateDiff(duration));
+                LogEntryBuilder.get().actor(sender).acted(group)
+                        .action("settempinherit " + group1.getName() + " " + duration)
+                        .submit(plugin);
             }
-        });
+
+            save(group, sender, plugin);
+            return CommandResult.SUCCESS;
+        } catch (ObjectAlreadyHasException e) {
+            Message.USER_ALREADY_TEMP_MEMBER_OF.send(sender, group.getName(), group1.getName());
+            return CommandResult.STATE_ERROR;
+        }
     }
 
     @Override
-    public List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin) {
+    public List<String> onTabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         return getGroupTabComplete(args, plugin);
     }
 }

@@ -23,6 +23,7 @@
 package me.lucko.luckperms.commands.group.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.commands.CommandResult;
 import me.lucko.luckperms.commands.Predicate;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
@@ -39,8 +40,14 @@ public class GroupInfo extends SubCommand<Group> {
     }
 
     @Override
-    public void execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
-        Message.GROUP_INFO.send(sender, group.getName(), group.getPermanentNodes().keySet().size(),
-                group.getTemporaryNodes().keySet().size(), label, group.getName());
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
+        Message.GROUP_INFO.send(sender,
+                group.getName(),
+                group.getPermanentNodes().keySet().size(),
+                group.getTemporaryNodes().keySet().size(),
+                label,
+                group.getName()
+        );
+        return CommandResult.SUCCESS;
     }
 }

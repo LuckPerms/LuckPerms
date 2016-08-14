@@ -59,6 +59,13 @@ permissions:
       luckperms.track.insert: true
       luckperms.track.remove: true
       luckperms.track.clear: true
+      luckperms.log.export: true
+      luckperms.log.userhistory: true
+      luckperms.log.grouphistory: true
+      luckperms.log.trackhistory: true
+      luckperms.log.notify: true
+      luckperms.log.recent: true
+      luckperms.log.search: true
   luckperms.user.*:
     description: Gives access to all LuckPerms user commands
     children:
@@ -106,3 +113,13 @@ permissions:
       luckperms.track.insert: true
       luckperms.track.remove: true
       luckperms.track.clear: true
+  luckperms.log.*:
+    description: Gives access to all LuckPerms log commands
+    children:
+      luckperms.log.export: true
+      luckperms.log.userhistory: true
+      luckperms.log.grouphistory: true
+      luckperms.log.trackhistory: true
+      luckperms.log.notify: true
+      luckperms.log.recent: true
+      luckperms.log.search: true

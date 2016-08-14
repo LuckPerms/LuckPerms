@@ -50,7 +50,7 @@ class Utils {
     }
 
     static String checkUsername(String s) {
-        if (!ArgumentChecker.checkUsername(s)) {
+        if (ArgumentChecker.checkUsername(s)) {
             throw new IllegalArgumentException("Invalid username entry '" + s + "'. Usernames must be less than 16 chars" +
                     " and only contain 'a-z A-Z 1-9 _'.");
         }
@@ -58,7 +58,7 @@ class Utils {
     }
 
     static String checkName(String s) {
-        if (!ArgumentChecker.checkName(s)) {
+        if (ArgumentChecker.checkName(s)) {
             throw new IllegalArgumentException("Invalid name entry '" + s + "'. Names must be less than 37 chars" +
                     " and only contain 'a-z A-Z 1-9'.");
         }
@@ -66,21 +66,21 @@ class Utils {
     }
 
     static String checkServer(String s) {
-        if (!ArgumentChecker.checkServer(s)) {
+        if (ArgumentChecker.checkServer(s)) {
             throw new IllegalArgumentException("Invalid server entry '" + s + "'. Server names can only contain alphanumeric characters.");
         }
         return s;
     }
 
     static String checkNode(String s) {
-        if (!ArgumentChecker.checkNode(s)) {
+        if (ArgumentChecker.checkNode(s)) {
             throw new IllegalArgumentException("Invalid node entry '" + s + "'. Nodes cannot contain '/' or '$' characters.");
         }
         return s;
     }
 
     static long checkTime(long l) {
-        if (!ArgumentChecker.checkTime(l)) {
+        if (ArgumentChecker.checkTime(l)) {
             throw new IllegalArgumentException("Unix time '" + l + "' is invalid, as it has already passed.");
         }
         return l;

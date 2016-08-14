@@ -23,13 +23,13 @@
 package me.lucko.luckperms.commands.track.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.Predicate;
-import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.data.LogEntryBuilder;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.tracks.Track;
+import me.lucko.luckperms.utils.ArgumentChecker;
 
 import java.util.List;
 
@@ -40,19 +40,31 @@ public class TrackRemove extends SubCommand<Track> {
     }
 
     @Override
-    public void execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args, String label) {
         String groupName = args.get(0).toLowerCase();
+
+        if (ArgumentChecker.checkNode(groupName)) {
+            sendUsage(sender, label);
+            return CommandResult.INVALID_ARGS;
+        }
+
         try {
             track.removeGroup(groupName);
             Message.TRACK_REMOVE_SUCCESS.send(sender, groupName, track.getName());
-            saveTrack(track, sender, plugin);
+            Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups()));
+            LogEntryBuilder.get().actor(sender).acted(track)
+                    .action("remove " + groupName)
+                    .submit(plugin);
+            save(track, sender, plugin);
+            return CommandResult.SUCCESS;
         } catch (ObjectLacksException e) {
             Message.TRACK_DOES_NOT_CONTAIN.send(sender, track.getName(), groupName);
+            return CommandResult.STATE_ERROR;
         }
     }
 
     @Override
-    public List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin) {
+    public List<String> onTabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         return getGroupTabComplete(args, plugin);
     }
 }

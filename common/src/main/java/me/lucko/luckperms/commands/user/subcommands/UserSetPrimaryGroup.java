@@ -23,11 +23,13 @@
 package me.lucko.luckperms.commands.user.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.commands.CommandResult;
 import me.lucko.luckperms.commands.Predicate;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.data.LogEntryBuilder;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.users.User;
 
@@ -40,31 +42,35 @@ public class UserSetPrimaryGroup extends SubCommand<User> {
     }
 
     @Override
-    public void execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
-        Group group = plugin.getGroupManager().getGroup(args.get(0).toLowerCase());
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
+        Group group = plugin.getGroupManager().get(args.get(0).toLowerCase());
         if (group == null) {
             Message.GROUP_DOES_NOT_EXIST.send(sender);
-            return;
+            return CommandResult.INVALID_ARGS;
         }
 
         if (user.getPrimaryGroup().equalsIgnoreCase(group.getName())) {
             Message.USER_PRIMARYGROUP_ERROR_ALREADYHAS.send(sender);
-            return;
+            return CommandResult.STATE_ERROR;
         }
 
         if (!user.isInGroup(group)) {
             Message.USER_PRIMARYGROUP_ERROR_NOTMEMBER.send(sender, label);
-            return;
+            return CommandResult.STATE_ERROR;
         }
 
         user.setPrimaryGroup(group.getName());
         Message.USER_PRIMARYGROUP_SUCCESS.send(sender, user.getName(), group.getName());
+        LogEntryBuilder.get().actor(sender).acted(user)
+                .action("setprimarygroup " + group.getName())
+                .submit(plugin);
 
-        saveUser(user, sender, plugin);
+        save(user, sender, plugin);
+        return CommandResult.SUCCESS;
     }
 
     @Override
-    public List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin) {
+    public List<String> onTabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         return getGroupTabComplete(args, plugin);
     }
 }

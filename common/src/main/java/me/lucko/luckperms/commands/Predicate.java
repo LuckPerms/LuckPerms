@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+@SuppressWarnings({"WeakerAccess", "unused"})
 @UtilityClass
 public class Predicate {
     public static <T> java.util.function.Predicate<T> alwaysFalse() {

@@ -20,16 +20,18 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.data.methods;
+package me.lucko.luckperms.storage.methods;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.data.Datastore;
+import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.data.Log;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.groups.GroupManager;
+import me.lucko.luckperms.storage.Datastore;
 import me.lucko.luckperms.tracks.Track;
 import me.lucko.luckperms.tracks.TrackManager;
 import me.lucko.luckperms.users.User;
@@ -70,6 +72,9 @@ abstract class SQLDatastore extends Datastore {
     private static final String UUIDCACHE_SELECT = "SELECT uuid FROM lp_uuid WHERE name=?";
     private static final String UUIDCACHE_UPDATE = "UPDATE lp_uuid SET uuid=? WHERE name=?";
 
+    private static final String ACTION_INSERT = "INSERT INTO lp_actions(`time`, `actor_uuid`, `actor_name`, `type`, `acted_uuid`, `acted_name`, `action`) VALUES(?, ?, ?, ?, ?, ?, ?)";
+    private static final String ACTION_SELECT_ALL = "SELECT * FROM lp_actions";
+
     private final Gson gson;
 
     SQLDatastore(LuckPermsPlugin plugin, String name) {
@@ -93,7 +98,7 @@ abstract class SQLDatastore extends Datastore {
 
     @Override
     public boolean loadUser(UUID uuid) {
-        User user = plugin.getUserManager().makeUser(uuid);
+        User user = plugin.getUserManager().make(uuid);
         boolean success = runQuery(new QueryRS(USER_SELECT) {
             @Override
             void onRun(PreparedStatement preparedStatement) throws SQLException {
@@ -112,13 +117,60 @@ abstract class SQLDatastore extends Datastore {
             }
         });
 
-        if (success) plugin.getUserManager().updateOrSetUser(user);
+        if (success) plugin.getUserManager().updateOrSet(user);
         return success;
     }
 
     @Override
+    public boolean logAction(LogEntry entry) {
+        boolean success = runQuery(new QueryPS(ACTION_INSERT) {
+            @Override
+            void onRun(PreparedStatement preparedStatement) throws SQLException {
+                preparedStatement.setLong(1, entry.getTimestamp());
+                preparedStatement.setString(2, entry.getActor().toString());
+                preparedStatement.setString(3, entry.getActorName());
+                preparedStatement.setString(4, Character.toString(entry.getType()));
+                preparedStatement.setString(5, entry.getActed() == null ? "null" : entry.getActed().toString());
+                preparedStatement.setString(6, entry.getActedName());
+                preparedStatement.setString(7, entry.getAction());
+            }
+        });
+        return success;
+    }
+
+    @Override
+    public Log getLog() {
+        final Log.Builder log = Log.builder();
+        boolean success = runQuery(new QueryRS(ACTION_SELECT_ALL) {
+            @Override
+            void onRun(PreparedStatement preparedStatement) throws SQLException {
+
+            }
+
+            @Override
+            boolean onResult(ResultSet resultSet) throws SQLException {
+                while (resultSet.next()) {
+                    final String actedUuid = resultSet.getString("acted_uuid");
+                    LogEntry e = new LogEntry(
+                            resultSet.getLong("time"),
+                            UUID.fromString(resultSet.getString("actor_uuid")),
+                            resultSet.getString("actor_name"),
+                            resultSet.getString("type").toCharArray()[0],
+                            actedUuid.equals("null") ? null : UUID.fromString(actedUuid),
+                            resultSet.getString("acted_name"),
+                            resultSet.getString("action")
+                    );
+                    log.add(e);
+                }
+                return true;
+            }
+        });
+        return success ? log.build() : null;
+    }
+
+    @Override
     public boolean loadOrCreateUser(UUID uuid, String username) {
-        User user = plugin.getUserManager().makeUser(uuid, username);
+        User user = plugin.getUserManager().make(uuid, username);
         boolean success = runQuery(new QueryRS(USER_SELECT) {
             @Override
             void onRun(PreparedStatement preparedStatement) throws SQLException {
@@ -143,12 +195,24 @@ abstract class SQLDatastore extends Datastore {
                 } else {
                     user.getNodes().putAll(gson.fromJson(resultSet.getString("perms"), NM_TYPE));
                     user.setPrimaryGroup(resultSet.getString("primary_group"));
+
+                    if (!resultSet.getString("name").equals(user.getName())) {
+                        runQuery(new QueryPS(USER_UPDATE) {
+                            @Override
+                            void onRun(PreparedStatement preparedStatement) throws SQLException {
+                                preparedStatement.setString(1, user.getName());
+                                preparedStatement.setString(2, user.getPrimaryGroup());
+                                preparedStatement.setString(3, gson.toJson(user.getNodes()));
+                                preparedStatement.setString(4, user.getUuid().toString());
+                            }
+                        });
+                    }
                 }
                 return success;
             }
         });
 
-        if (success) plugin.getUserManager().updateOrSetUser(user);
+        if (success) plugin.getUserManager().updateOrSet(user);
         return success;
     }
 
@@ -168,7 +232,7 @@ abstract class SQLDatastore extends Datastore {
 
     @Override
     public boolean createAndLoadGroup(String name) {
-        Group group = plugin.getGroupManager().makeGroup(name);
+        Group group = plugin.getGroupManager().make(name);
         boolean success = runQuery(new QueryRS(GROUP_SELECT) {
             @Override
             void onRun(PreparedStatement preparedStatement) throws SQLException {
@@ -193,13 +257,13 @@ abstract class SQLDatastore extends Datastore {
             }
         });
 
-        if (success) plugin.getGroupManager().updateOrSetGroup(group);
+        if (success) plugin.getGroupManager().updateOrSet(group);
         return success;
     }
 
     @Override
     public boolean loadGroup(String name) {
-        Group group = plugin.getGroupManager().makeGroup(name);
+        Group group = plugin.getGroupManager().make(name);
         boolean success = runQuery(new QueryRS(GROUP_SELECT) {
             @Override
             void onRun(PreparedStatement preparedStatement) throws SQLException {
@@ -216,7 +280,7 @@ abstract class SQLDatastore extends Datastore {
             }
         });
 
-        if (success) plugin.getGroupManager().updateOrSetGroup(group);
+        if (success) plugin.getGroupManager().updateOrSet(group);
         return success;
     }
 
@@ -232,7 +296,7 @@ abstract class SQLDatastore extends Datastore {
             @Override
             boolean onResult(ResultSet resultSet) throws SQLException {
                 while (resultSet.next()) {
-                    Group group = plugin.getGroupManager().makeGroup(resultSet.getString("name"));
+                    Group group = plugin.getGroupManager().make(resultSet.getString("name"));
                     group.getNodes().putAll(gson.fromJson(resultSet.getString("perms"), NM_TYPE));
                     groups.add(group);
                 }
@@ -243,7 +307,7 @@ abstract class SQLDatastore extends Datastore {
         if (success) {
             GroupManager gm = plugin.getGroupManager();
             gm.unloadAll();
-            groups.forEach(gm::setGroup);
+            groups.forEach(gm::set);
         }
         return success;
     }
@@ -269,13 +333,13 @@ abstract class SQLDatastore extends Datastore {
             }
         });
 
-        if (success) plugin.getGroupManager().unloadGroup(group);
+        if (success) plugin.getGroupManager().unload(group);
         return success;
     }
 
     @Override
     public boolean createAndLoadTrack(String name) {
-        Track track = plugin.getTrackManager().makeTrack(name);
+        Track track = plugin.getTrackManager().make(name);
         boolean success = runQuery(new QueryRS(TRACK_SELECT) {
             @Override
             void onRun(PreparedStatement preparedStatement) throws SQLException {
@@ -300,13 +364,13 @@ abstract class SQLDatastore extends Datastore {
             }
         });
 
-        if (success) plugin.getTrackManager().updateOrSetTrack(track);
+        if (success) plugin.getTrackManager().updateOrSet(track);
         return success;
     }
 
     @Override
     public boolean loadTrack(String name) {
-        Track track = plugin.getTrackManager().makeTrack(name);
+        Track track = plugin.getTrackManager().make(name);
         boolean success = runQuery(new QueryRS(TRACK_SELECT) {
             @Override
             void onRun(PreparedStatement preparedStatement) throws SQLException {
@@ -323,7 +387,7 @@ abstract class SQLDatastore extends Datastore {
             }
         });
 
-        if (success) plugin.getTrackManager().updateOrSetTrack(track);
+        if (success) plugin.getTrackManager().updateOrSet(track);
         return success;
     }
 
@@ -339,7 +403,7 @@ abstract class SQLDatastore extends Datastore {
             @Override
             boolean onResult(ResultSet resultSet) throws SQLException {
                 while (resultSet.next()) {
-                    Track track = plugin.getTrackManager().makeTrack(resultSet.getString("name"));
+                    Track track = plugin.getTrackManager().make(resultSet.getString("name"));
                     track.setGroups(gson.fromJson(resultSet.getString("groups"), T_TYPE));
                     tracks.add(track);
                 }
@@ -350,7 +414,7 @@ abstract class SQLDatastore extends Datastore {
         if (success) {
             TrackManager tm = plugin.getTrackManager();
             tm.unloadAll();
-            tracks.forEach(tm::setTrack);
+            tracks.forEach(tm::set);
         }
         return success;
     }
@@ -376,7 +440,7 @@ abstract class SQLDatastore extends Datastore {
             }
         });
 
-        if (success) plugin.getTrackManager().unloadTrack(track);
+        if (success) plugin.getTrackManager().unload(track);
         return success;
     }
 
