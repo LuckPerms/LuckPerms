@@ -22,8 +22,6 @@
 
 package me.lucko.luckperms.api.data;
 
-import lombok.NonNull;
-
 import java.util.function.Consumer;
 
 public interface Callback<T> {
@@ -34,11 +32,17 @@ public interface Callback<T> {
         return t -> {};
     }
 
-    static <T> Callback<T> of(@NonNull Runnable runnable) {
+    static <T> Callback<T> of(Runnable runnable) {
+        if (runnable == null) {
+            throw new NullPointerException("runnable");
+        }
         return t -> runnable.run();
     }
 
-    static <T> Callback<T> of(@NonNull Consumer<T> consumer) {
+    static <T> Callback<T> of(Consumer<T> consumer) {
+        if (consumer == null) {
+            throw new NullPointerException("consumer");
+        }
         return consumer::accept;
     }
 

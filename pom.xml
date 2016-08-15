@@ -38,14 +38,4 @@
             <url>https://repo.spongepowered.org/maven</url>
         </repository>
     </repositories>
-
-    <dependencies>
-        <!-- Lombok -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.16.10</version>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
 </project>

@@ -119,5 +119,12 @@
             <version>1.7.9</version>
             <scope>compile</scope>
         </dependency>
+        <!-- Lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.16.10</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 </project>

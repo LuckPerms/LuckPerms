@@ -45,11 +45,11 @@ public class LogUserHistory extends SubCommand<Log> {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) {
         String user = args.get(0);
-        final int[] page = {-999};
+        int page = -999;
 
         if (args.size() == 2) {
             try {
-                page[0] = Integer.parseInt(args.get(1));
+                page = Integer.parseInt(args.get(1));
             } catch (NumberFormatException e) {
                 // invalid page
                 return showLog(-1, null, null, null);
@@ -58,11 +58,11 @@ public class LogUserHistory extends SubCommand<Log> {
 
         UUID uuid = Util.parseUuid(user);
         if (uuid != null) {
-            if (page[0] == -999) {
-                page[0] = log.getUserHistoryMaxPages(uuid);
+            if (page == -999) {
+                page = log.getUserHistoryMaxPages(uuid);
             }
 
-            return showLog(page[0], uuid, sender, log);
+            return showLog(page, uuid, sender, log);
 
         }
 
@@ -81,11 +81,11 @@ public class LogUserHistory extends SubCommand<Log> {
                 return CommandResult.INVALID_ARGS;
             }
 
-            if (page[0] == -999) {
-                page[0] = log.getUserHistoryMaxPages(uuid1);
+            if (page == -999) {
+                page = log.getUserHistoryMaxPages(uuid1);
             }
 
-            return showLog(page[0], uuid1, sender, log);
+            return showLog(page, uuid1, sender, log);
         }
 
         Message.USER_INVALID_ENTRY.send(sender, user);

@@ -148,7 +148,7 @@ You can add LuckPerms as a Maven dependency by adding the following to your proj
     <dependency>
         <groupId>me.lucko.luckperms</groupId>
         <artifactId>luckperms-api</artifactId>
-        <version>2.1</version>
+        <version>2.3</version>
     </dependency>
 </dependencies>
 ````
@@ -181,6 +181,7 @@ Additionally, you can use wildcards to grant users access to a selection of comm
 * **All user commands** - luckperms.user.*
 * **All group commands** - luckperms.group.*
 * **All track commands** - luckperms.track.*
+* **All log commands** - luckperms.log.*
 
 ### General
 *  /perms - n/a

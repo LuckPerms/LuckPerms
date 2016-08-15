@@ -22,8 +22,6 @@
 
 package me.lucko.luckperms;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import me.lucko.luckperms.api.LuckPermsApi;
 
 import java.util.Optional;
@@ -31,11 +29,8 @@ import java.util.Optional;
 /**
  * Static access to LuckPerms
  */
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class LuckPerms {
-
     private static LuckPermsApi api = null;
-
 
     /**
      * Gets an instance of {@link LuckPermsApi}
@@ -64,6 +59,10 @@ public final class LuckPerms {
 
     static void unregisterProvider() {
         api = null;
+    }
+
+    private LuckPerms() {
+        throw new UnsupportedOperationException("This class cannot be instantiated.");
     }
 
 }

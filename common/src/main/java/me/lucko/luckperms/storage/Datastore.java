@@ -90,7 +90,7 @@ public abstract class Datastore {
 
     /*
         These methods will schedule the operation to run async. The callback will be ran when the task is complete.
-        Callbacks are ran on the main Bukkit server thread (if applicable)
+        Callbacks are ran on the main server thread (except on BungeeCord)
      */
     public void logAction(LogEntry entry, Callback<Boolean> callback) {
         doAsync(() -> {
