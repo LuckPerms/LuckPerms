@@ -331,7 +331,8 @@ public abstract class PermissionHolder {
 
         if (temporary) {
             match = this.nodes.keySet().stream()
-                    .filter(n -> n.contains("$")).filter(n -> Patterns.TEMP_DELIMITER.split(n)[0].equalsIgnoreCase(fNode))
+                    .filter(n -> n.contains("$"))
+                    .filter(n -> Patterns.TEMP_DELIMITER.split(n)[0].equalsIgnoreCase(fNode))
                     .findFirst();
         } else {
             if (this.nodes.containsKey(fNode)) {

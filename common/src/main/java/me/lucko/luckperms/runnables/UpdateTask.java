@@ -31,14 +31,14 @@ public class UpdateTask implements Runnable {
 
     @Override
     public void run() {
-        // Reload all of the groups
+        // Reload all groups
         plugin.getDatastore().loadAllGroups();
         String defaultGroup = plugin.getConfiguration().getDefaultGroupName();
         if (!plugin.getGroupManager().isLoaded(defaultGroup)) {
             plugin.getDatastore().createAndLoadGroup(defaultGroup);
         }
 
-        // Reload all of the tracks
+        // Reload all tracks
         plugin.getDatastore().loadAllTracks();
 
         // Refresh all online users.

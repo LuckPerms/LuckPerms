@@ -60,7 +60,7 @@ public class VersionUtil extends ClassTransformer {
     }
 
     @Override
-    public void configure(final Properties properties) {
+    public void configure(Properties properties) {
         assert properties != null;
         version = properties.getProperty("version");
     }

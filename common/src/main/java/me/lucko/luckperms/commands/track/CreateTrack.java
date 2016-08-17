@@ -28,7 +28,7 @@ import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SingleMainCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
-import me.lucko.luckperms.data.LogEntryBuilder;
+import me.lucko.luckperms.data.LogEntry;
 import me.lucko.luckperms.utils.ArgumentChecker;
 
 import java.util.List;
@@ -62,7 +62,7 @@ public class CreateTrack extends SingleMainCommand {
         }
 
         Message.CREATE_SUCCESS.send(sender, trackName);
-        LogEntryBuilder.get().actor(sender).actedName(trackName).type('T').action("create").submit(plugin);
+        LogEntry.build().actor(sender).actedName(trackName).type('T').action("create").build().submit(plugin);
         plugin.runUpdateTask();
         return CommandResult.SUCCESS;
     }

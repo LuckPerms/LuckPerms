@@ -24,19 +24,20 @@ package me.lucko.luckperms.api;
 
 import java.util.UUID;
 
-public final class LogEntry implements Comparable<LogEntry> {
+public class LogEntry implements Comparable<LogEntry> {
     public static LogEntryBuilder builder() {
         return new LogEntryBuilder();
     }
+
     private static final String FORMAT = "&8(&e%s&8) [&a%s&8] (&b%s&8) &7--> &f%s";
 
-    private final long timestamp;
-    private final UUID actor;
-    private final String actorName;
-    private final char type;
-    private final UUID acted;
-    private final String actedName;
-    private final String action;
+    private long timestamp;
+    private UUID actor;
+    private String actorName;
+    private char type;
+    private UUID acted;
+    private String actedName;
+    private String action;
 
     public LogEntry(long timestamp, UUID actor, String actorName, char type, UUID acted, String actedName, String action) {
         if (actor == null) {
@@ -59,6 +60,16 @@ public final class LogEntry implements Comparable<LogEntry> {
         this.acted = acted;
         this.actedName = actedName;
         this.action = action;
+    }
+
+    protected LogEntry() {
+        this.timestamp = 0L;
+        this.actor = null;
+        this.actorName = null;
+        this.type = Character.MIN_VALUE;
+        this.acted = null;
+        this.actedName = null;
+        this.action = null;
     }
 
     @Override
@@ -107,6 +118,34 @@ public final class LogEntry implements Comparable<LogEntry> {
 
     public String getAction() {
         return action;
+    }
+
+    void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    void setActor(UUID actor) {
+        this.actor = actor;
+    }
+
+    void setActorName(String actorName) {
+        this.actorName = actorName;
+    }
+
+    void setType(char type) {
+        this.type = type;
+    }
+
+    void setActed(UUID acted) {
+        this.acted = acted;
+    }
+
+    void setActedName(String actedName) {
+        this.actedName = actedName;
+    }
+
+    void setAction(String action) {
+        this.action = action;
     }
 
     @Override
@@ -160,59 +199,116 @@ public final class LogEntry implements Comparable<LogEntry> {
         return result;
     }
 
-    public static class LogEntryBuilder {
-        private long timestamp;
-        private UUID actor;
-        private String actorName;
-        private char type;
-        private UUID acted;
-        private String actedName;
-        private String action;
+    public static class LogEntryBuilder extends AbstractLogEntryBuilder<LogEntry, LogEntry.LogEntryBuilder> {
 
-        public LogEntryBuilder timestamp(long timestamp) {
-            this.timestamp = timestamp;
-            return this;
+        @Override
+        protected LogEntry createObj() {
+            return new LogEntry();
         }
 
-        public LogEntryBuilder actor(UUID actor) {
-            this.actor = actor;
+        @Override
+        protected LogEntryBuilder getThis() {
             return this;
         }
+    }
 
-        public LogEntryBuilder actorName(String actorName) {
-            this.actorName = actorName;
-            return this;
+    public static abstract class AbstractLogEntryBuilder<T extends LogEntry, B extends AbstractLogEntryBuilder<T, B>> {
+        private T obj;
+        private B thisObj;
+
+        public AbstractLogEntryBuilder() {
+            obj = createObj();
+            thisObj = getThis();
         }
 
-        public LogEntryBuilder type(char type) {
-            this.type = type;
-            return this;
+        protected abstract T createObj();
+        protected abstract B getThis();
+
+        public long getTimestamp() {
+            return obj.getTimestamp();
         }
 
-        public LogEntryBuilder acted(UUID acted) {
-            this.acted = acted;
-            return this;
+        public UUID getActor() {
+            return obj.getActor();
         }
 
-        public LogEntryBuilder actedName(String actedName) {
-            this.actedName = actedName;
-            return this;
+        public String getActorName() {
+            return obj.getActorName();
         }
 
-        public LogEntryBuilder action(String action) {
-            this.action = action;
-            return this;
+        public char getType() {
+            return obj.getType();
         }
 
-        public LogEntry build() {
-            return new LogEntry(timestamp, actor, actorName, type, acted, actedName, action);
+        public UUID getActed() {
+            return obj.getActed();
+        }
+
+        public String getActedName() {
+            return obj.getActedName();
+        }
+
+        public String getAction() {
+            return obj.getAction();
+        }
+
+        public B timestamp(long timestamp) {
+            obj.setTimestamp(timestamp);
+            return thisObj;
+        }
+
+        public B actor(UUID actor) {
+            obj.setActor(actor);
+            return thisObj;
+        }
+
+        public B actorName(String actorName) {
+            obj.setActorName(actorName);
+            return thisObj;
+        }
+
+        public B type(char type) {
+            obj.setType(type);
+            return thisObj;
+        }
+
+        public B acted(UUID acted) {
+            obj.setActed(acted);
+            return thisObj;
+        }
+
+        public B actedName(String actedName) {
+            obj.setActedName(actedName);
+            return thisObj;
+        }
+
+        public B action(String action) {
+            obj.setAction(action);
+            return thisObj;
+        }
+
+        public T build() {
+            if (getActor() == null) {
+                throw new NullPointerException("actor");
+            }
+            if (getActorName() == null) {
+                throw new NullPointerException("actorName");
+            }
+            if (getActedName() == null) {
+                throw new NullPointerException("actedName");
+            }
+            if (getAction() == null) {
+                throw new NullPointerException("action");
+            }
+
+            return obj;
         }
 
         @Override
         public String toString() {
-            return "LogEntry.LogEntryBuilder(timestamp=" + this.timestamp + ", actor=" + this.actor + ", actorName=" +
-                    this.actorName + ", type=" + this.type + ", acted=" + this.acted + ", actedName=" + this.actedName +
-                    ", action=" + this.action + ")";
+            return "LogEntry.LogEntryBuilder(timestamp=" + getTimestamp() + ", actor=" + getActor() + ", actorName=" +
+                    getActorName() + ", type=" + getType() + ", acted=" + getActed() + ", actedName=" + getActedName() +
+                    ", action=" + getAction() + ")";
         }
     }
 

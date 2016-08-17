@@ -45,8 +45,8 @@ public class SpongeListener extends AbstractListener {
     @Listener
     public void onClientAuth(ClientConnectionEvent.Auth e) {
         if (!plugin.getDatastore().isAcceptingLogins()) {
-            // Datastore is disabled, prevent players from joining the server
-            // Just don't load their data, they will be kicked at login
+            /* Datastore is disabled, prevent players from joining the server
+               Just don't load their data, they will be kicked at login */
             return;
         }
 

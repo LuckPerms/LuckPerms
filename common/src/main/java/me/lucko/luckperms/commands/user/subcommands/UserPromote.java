@@ -26,7 +26,7 @@ import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
-import me.lucko.luckperms.data.LogEntryBuilder;
+import me.lucko.luckperms.data.LogEntry;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.groups.Group;
@@ -103,9 +103,9 @@ public class UserPromote extends SubCommand<User> {
         Message.USER_PROMOTE_SUCCESS_PROMOTE.send(sender, track.getName(), old, nextGroup.getName());
         Message.USER_PROMOTE_SUCCESS_REMOVE.send(sender, user.getName(), old, nextGroup.getName(), nextGroup.getName());
         Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), old, nextGroup.getName(), false));
-        LogEntryBuilder.get().actor(sender).acted(user)
+        LogEntry.build().actor(sender).acted(user)
                 .action("promote " + track.getName() + "(from " + old + " to " + nextGroup.getName() + ")")
-                .submit(plugin);
+                .build().submit(plugin);
         save(user, sender, plugin);
         return CommandResult.SUCCESS;
     }

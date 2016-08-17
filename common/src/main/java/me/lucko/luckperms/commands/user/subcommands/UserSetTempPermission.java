@@ -30,7 +30,7 @@ import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Patterns;
 import me.lucko.luckperms.constants.Permission;
-import me.lucko.luckperms.data.LogEntryBuilder;
+import me.lucko.luckperms.data.LogEntry;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.users.User;
 import me.lucko.luckperms.utils.ArgumentChecker;
@@ -91,24 +91,24 @@ public class UserSetTempPermission extends SubCommand<User> {
                 if (args.size() == 4) {
                     user.setPermission(node, b, server, duration);
                     Message.SETPERMISSION_TEMP_SERVER_SUCCESS.send(sender, node, bool, user.getName(), server, DateUtil.formatDateDiff(duration));
-                    LogEntryBuilder.get().actor(sender).acted(user)
+                    LogEntry.build().actor(sender).acted(user)
                             .action("settemp " + node + " " + b + " " + duration + " " + server)
-                            .submit(plugin);
+                            .build().submit(plugin);
                 } else {
                     final String world = args.get(4).toLowerCase();
                     user.setPermission(node, b, server, world, duration);
                     Message.SETPERMISSION_TEMP_SERVER_WORLD_SUCCESS.send(sender, node, bool, user.getName(), server, world, DateUtil.formatDateDiff(duration));
-                    LogEntryBuilder.get().actor(sender).acted(user)
+                    LogEntry.build().actor(sender).acted(user)
                             .action("settemp " + node + " " + b + " " + duration + " " + server + " " + world)
-                            .submit(plugin);
+                            .build().submit(plugin);
                 }
 
             } else {
                 user.setPermission(node, b, duration);
                 Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, bool, user.getName(), DateUtil.formatDateDiff(duration));
-                LogEntryBuilder.get().actor(sender).acted(user)
+                LogEntry.build().actor(sender).acted(user)
                         .action("settemp " + node + " " + b + " " + duration)
-                        .submit(plugin);
+                        .build().submit(plugin);
             }
 
             save(user, sender, plugin);

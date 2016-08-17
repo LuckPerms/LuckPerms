@@ -51,6 +51,11 @@ public class Group extends PermissionHolder implements Identifiable<String> {
         this.name = name;
     }
 
+    @Override
+    public String getId() {
+        return name;
+    }
+
     /**
      * check to see if a group inherits a group
      * @param group The group to check membership of
@@ -308,10 +313,5 @@ public class Group extends PermissionHolder implements Identifiable<String> {
                 .filter(s -> Patterns.GROUP_MATCH.matcher(s).matches())
                 .map(s -> Patterns.DOT.split(s, 2)[1])
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public String getId() {
-        return name;
     }
 }

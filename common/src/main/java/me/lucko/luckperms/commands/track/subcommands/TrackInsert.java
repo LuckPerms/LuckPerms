@@ -26,7 +26,7 @@ import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
-import me.lucko.luckperms.data.LogEntryBuilder;
+import me.lucko.luckperms.data.LogEntry;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.tracks.Track;
@@ -72,9 +72,9 @@ public class TrackInsert extends SubCommand<Track> {
             track.insertGroup(group, pos - 1);
             Message.TRACK_INSERT_SUCCESS.send(sender, group.getName(), track.getName(), pos);
             Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), group.getName()));
-            LogEntryBuilder.get().actor(sender).acted(track)
+            LogEntry.build().actor(sender).acted(track)
                     .action("insert " + group.getName() + " " + pos)
-                    .submit(plugin);
+                    .build().submit(plugin);
             save(track, sender, plugin);
             return CommandResult.SUCCESS;
         } catch (ObjectAlreadyHasException e) {

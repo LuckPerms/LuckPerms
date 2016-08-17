@@ -43,7 +43,9 @@ public abstract class UserManager extends AbstractManager<UUID, User> {
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     public User get(String name) {
         try {
-            return objects.values().stream().filter(u -> u.getName().equalsIgnoreCase(name)).limit(1).findAny().get();
+            return objects.values().stream()
+                    .filter(u -> u.getName().equalsIgnoreCase(name))
+                    .limit(1).findAny().get();
         } catch (NoSuchElementException e) {
             return null;
         }

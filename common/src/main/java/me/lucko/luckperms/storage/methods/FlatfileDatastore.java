@@ -385,7 +385,9 @@ public class FlatfileDatastore extends Datastore {
     public boolean loadAllGroups() {
         String[] fileNames = groupsDir.list((dir, name) -> name.endsWith(".json"));
         if (fileNames == null) return false;
-        List<String> groups = Arrays.stream(fileNames).map(s -> s.substring(0, s.length() - 5)).collect(Collectors.toList());
+        List<String> groups = Arrays.stream(fileNames)
+                .map(s -> s.substring(0, s.length() - 5))
+                .collect(Collectors.toList());
 
         plugin.getGroupManager().unloadAll();
         groups.forEach(this::loadGroup);
@@ -511,7 +513,9 @@ public class FlatfileDatastore extends Datastore {
     public boolean loadAllTracks() {
         String[] fileNames = tracksDir.list((dir, name) -> name.endsWith(".json"));
         if (fileNames == null) return false;
-        List<String> tracks = Arrays.stream(fileNames).map(s -> s.substring(0, s.length() - 5)).collect(Collectors.toList());
+        List<String> tracks = Arrays.stream(fileNames)
+                .map(s -> s.substring(0, s.length() - 5))
+                .collect(Collectors.toList());
 
         plugin.getTrackManager().unloadAll();
         tracks.forEach(this::loadTrack);

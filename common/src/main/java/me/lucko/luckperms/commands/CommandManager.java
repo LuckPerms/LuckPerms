@@ -144,18 +144,28 @@ public class CommandManager {
      */
     @SuppressWarnings("unchecked")
     public List<String> onTabComplete(Sender sender, List<String> args) {
-        final List<MainCommand> mains = mainCommands.stream().filter(m -> m.isAuthorized(sender)).collect(Collectors.toList());
+        final List<MainCommand> mains = mainCommands.stream()
+                .filter(m -> m.isAuthorized(sender))
+                .collect(Collectors.toList());
 
         if (args.size() <= 1) {
             if (args.isEmpty() || args.get(0).equalsIgnoreCase("")) {
-                return mains.stream().map(MainCommand::getName).map(String::toLowerCase).collect(Collectors.toList());
+                return mains.stream()
+                        .map(m -> m.getName().toLowerCase())
+                        .collect(Collectors.toList());
             }
 
-            return mains.stream().map(MainCommand::getName).map(String::toLowerCase)
-                    .filter(s -> s.startsWith(args.get(0).toLowerCase())).collect(Collectors.toList());
+            return mains.stream()
+                    .map(m -> m.getName().toLowerCase())
+                    .filter(s -> s.startsWith(args.get(0).toLowerCase()))
+                    .collect(Collectors.toList());
         }
 
-        Optional<MainCommand> o = mains.stream().filter(m -> m.getName().equalsIgnoreCase(args.get(0))).limit(1).findAny();
+        Optional<MainCommand> o = mains.stream()
+                .filter(m -> m.getName().equalsIgnoreCase(args.get(0)))
+                .limit(1)
+                .findAny();
+
         if (!o.isPresent()) {
             return Collections.emptyList();
         }

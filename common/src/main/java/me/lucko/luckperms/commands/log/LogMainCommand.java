@@ -73,17 +73,28 @@ public class LogMainCommand extends MainCommand<Log> {
 
     @Override
     protected List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin) {
-        final List<SubCommand<Log>> subs = getSubCommands().stream().filter(s -> s.isAuthorized(sender)).collect(Collectors.toList());
+        final List<SubCommand<Log>> subs = getSubCommands().stream()
+                .filter(s -> s.isAuthorized(sender))
+                .collect(Collectors.toList());
+
         if (args.size() <= 1) {
             if (args.isEmpty() || args.get(0).equalsIgnoreCase("")) {
-                return subs.stream().map(SubCommand::getName).map(String::toLowerCase).collect(Collectors.toList());
+                return subs.stream()
+                        .map(m -> m.getName().toLowerCase())
+                        .collect(Collectors.toList());
             }
 
-            return subs.stream().map(SubCommand::getName).map(String::toLowerCase)
-                    .filter(s -> s.toLowerCase().startsWith(args.get(0).toLowerCase())).collect(Collectors.toList());
+            return subs.stream()
+                    .map(m -> m.getName().toLowerCase())
+                    .filter(s -> s.toLowerCase().startsWith(args.get(0).toLowerCase()))
+                    .collect(Collectors.toList());
         }
 
-        Optional<SubCommand<Log>> o = subs.stream().filter(s -> s.getName().equalsIgnoreCase(args.get(0))).limit(1).findAny();
+        Optional<SubCommand<Log>> o = subs.stream()
+                .filter(s -> s.getName().equalsIgnoreCase(args.get(0)))
+                .limit(1)
+                .findAny();
+
         if (!o.isPresent()) {
             return Collections.emptyList();
         }

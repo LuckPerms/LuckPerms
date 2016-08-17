@@ -29,7 +29,7 @@ import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
-import me.lucko.luckperms.data.LogEntryBuilder;
+import me.lucko.luckperms.data.LogEntry;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.utils.ArgumentChecker;
@@ -74,24 +74,24 @@ public class GroupSetInherit extends SubCommand<Group> {
                 if (args.size() == 2) {
                     group.setInheritGroup(group1, server);
                     Message.GROUP_SETINHERIT_SERVER_SUCCESS.send(sender, group.getName(), group1.getName(), server);
-                    LogEntryBuilder.get().actor(sender).acted(group)
+                    LogEntry.build().actor(sender).acted(group)
                             .action("setinherit " + group1.getName() + " " + server)
-                            .submit(plugin);
+                            .build().submit(plugin);
                 } else {
                     final String world = args.get(2).toLowerCase();
                     group.setInheritGroup(group1, server, world);
                     Message.GROUP_SETINHERIT_SERVER_WORLD_SUCCESS.send(sender, group.getName(), group1.getName(), server, world);
-                    LogEntryBuilder.get().actor(sender).acted(group)
+                    LogEntry.build().actor(sender).acted(group)
                             .action("setinherit " + group1.getName() + " " + server + " " + world)
-                            .submit(plugin);
+                            .build().submit(plugin);
                 }
 
             } else {
                 group.setInheritGroup(group1);
                 Message.GROUP_SETINHERIT_SUCCESS.send(sender, group.getName(), group1.getName());
-                LogEntryBuilder.get().actor(sender).acted(group)
+                LogEntry.build().actor(sender).acted(group)
                         .action("setinherit " + group1.getName())
-                        .submit(plugin);
+                        .build().submit(plugin);
             }
 
             save(group, sender, plugin);

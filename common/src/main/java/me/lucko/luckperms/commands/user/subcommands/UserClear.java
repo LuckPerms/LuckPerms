@@ -29,7 +29,7 @@ import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
-import me.lucko.luckperms.data.LogEntryBuilder;
+import me.lucko.luckperms.data.LogEntry;
 import me.lucko.luckperms.users.User;
 
 import java.util.List;
@@ -45,7 +45,7 @@ public class UserClear extends SubCommand<User> {
         user.clearNodes();
         plugin.getUserManager().giveDefaults(user);
         Message.CLEAR_SUCCESS.send(sender, user.getName());
-        LogEntryBuilder.get().actor(sender).acted(user).action("clear").submit(plugin);
+        LogEntry.build().actor(sender).acted(user).action("clear").build().submit(plugin);
 
         save(user, sender, plugin);
         return CommandResult.SUCCESS;

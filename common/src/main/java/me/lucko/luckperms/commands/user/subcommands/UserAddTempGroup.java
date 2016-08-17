@@ -29,7 +29,7 @@ import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
-import me.lucko.luckperms.data.LogEntryBuilder;
+import me.lucko.luckperms.data.LogEntry;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.users.User;
@@ -90,25 +90,25 @@ public class UserAddTempGroup extends SubCommand<User> {
                     user.addGroup(group, server, duration);
                     Message.USER_ADDTEMPGROUP_SERVER_SUCCESS.send(sender, user.getName(), groupName, server,
                             DateUtil.formatDateDiff(duration));
-                    LogEntryBuilder.get().actor(sender).acted(user)
+                    LogEntry.build().actor(sender).acted(user)
                             .action("addtempgroup " + group.getName() + " " + duration + " " + server)
-                            .submit(plugin);
+                            .build().submit(plugin);
                 } else {
                     final String world = args.get(3).toLowerCase();
                     user.addGroup(group, server, world, duration);
                     Message.USER_ADDTEMPGROUP_SERVER_WORLD_SUCCESS.send(sender, user.getName(), groupName, server,
                             world, DateUtil.formatDateDiff(duration));
-                    LogEntryBuilder.get().actor(sender).acted(user)
+                    LogEntry.build().actor(sender).acted(user)
                             .action("addtempgroup " + group.getName() + " " + duration + " " + server + " " + world)
-                            .submit(plugin);
+                            .build().submit(plugin);
                 }
 
             } else {
                 user.addGroup(group, duration);
                 Message.USER_ADDTEMPGROUP_SUCCESS.send(sender, user.getName(), groupName, DateUtil.formatDateDiff(duration));
-                LogEntryBuilder.get().actor(sender).acted(user)
+                LogEntry.build().actor(sender).acted(user)
                         .action("addtempgroup " + group.getName() + " " + duration)
-                        .submit(plugin);
+                        .build().submit(plugin);
             }
 
             save(user, sender, plugin);

@@ -55,7 +55,11 @@ public class UuidCache {
     public UUID getExternalUUID(UUID internal) {
         if (onlineMode) return internal;
 
-        Optional<UUID> external = cache.entrySet().stream().filter(e -> e.getValue().equals(internal)).map(Map.Entry::getKey).findFirst();
+        Optional<UUID> external = cache.entrySet().stream()
+                .filter(e -> e.getValue().equals(internal))
+                .map(Map.Entry::getKey)
+                .findFirst();
+
         return external.isPresent() ? external.get() : internal;
     }
 

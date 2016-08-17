@@ -28,7 +28,7 @@ import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SingleMainCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
-import me.lucko.luckperms.data.LogEntryBuilder;
+import me.lucko.luckperms.data.LogEntry;
 import me.lucko.luckperms.tracks.Track;
 import me.lucko.luckperms.utils.ArgumentChecker;
 
@@ -72,7 +72,7 @@ public class DeleteTrack extends SingleMainCommand {
         }
 
         Message.DELETE_SUCCESS.send(sender, trackName);
-        LogEntryBuilder.get().actor(sender).actedName(trackName).type('T').action("delete").submit(plugin);
+        LogEntry.build().actor(sender).actedName(trackName).type('T').action("delete").build().submit(plugin);
         plugin.runUpdateTask();
         return CommandResult.SUCCESS;
     }
@@ -86,7 +86,9 @@ public class DeleteTrack extends SingleMainCommand {
                 return tracks;
             }
 
-            return tracks.stream().filter(s -> s.toLowerCase().startsWith(args.get(0).toLowerCase())).collect(Collectors.toList());
+            return tracks.stream()
+                    .filter(s -> s.toLowerCase().startsWith(args.get(0).toLowerCase()))
+                    .collect(Collectors.toList());
         }
 
         return Collections.emptyList();

@@ -30,7 +30,7 @@ import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Patterns;
 import me.lucko.luckperms.constants.Permission;
-import me.lucko.luckperms.data.LogEntryBuilder;
+import me.lucko.luckperms.data.LogEntry;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.users.User;
 import me.lucko.luckperms.utils.ArgumentChecker;
@@ -68,24 +68,24 @@ public class UserUnSetPermission extends SubCommand<User> {
                 if (args.size() == 2) {
                     user.unsetPermission(node, server);
                     Message.UNSETPERMISSION_SERVER_SUCCESS.send(sender, node, user.getName(), server);
-                    LogEntryBuilder.get().actor(sender).acted(user)
+                    LogEntry.build().actor(sender).acted(user)
                             .action("unset " + node + " " + server)
-                            .submit(plugin);
+                            .build().submit(plugin);
                 } else {
                     final String world = args.get(2).toLowerCase();
                     user.unsetPermission(node, server, world);
                     Message.UNSETPERMISSION_SERVER_WORLD_SUCCESS.send(sender, node, user.getName(), server, world);
-                    LogEntryBuilder.get().actor(sender).acted(user)
+                    LogEntry.build().actor(sender).acted(user)
                             .action("unset " + node + " " + server + " " + world)
-                            .submit(plugin);
+                            .build().submit(plugin);
                 }
 
             } else {
                 user.unsetPermission(node);
                 Message.UNSETPERMISSION_SUCCESS.send(sender, node, user.getName());
-                LogEntryBuilder.get().actor(sender).acted(user)
+                LogEntry.build().actor(sender).acted(user)
                         .action("unset " + node)
-                        .submit(plugin);
+                        .build().submit(plugin);
             }
 
             save(user, sender, plugin);

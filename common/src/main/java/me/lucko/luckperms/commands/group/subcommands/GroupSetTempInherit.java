@@ -29,7 +29,7 @@ import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
-import me.lucko.luckperms.data.LogEntryBuilder;
+import me.lucko.luckperms.data.LogEntry;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.utils.ArgumentChecker;
@@ -89,25 +89,25 @@ public class GroupSetTempInherit extends SubCommand<Group> {
                     group.setInheritGroup(group1, server, duration);
                     Message.GROUP_SET_TEMP_INHERIT_SERVER_SUCCESS.send(sender, group.getName(), group1.getName(), server,
                             DateUtil.formatDateDiff(duration));
-                    LogEntryBuilder.get().actor(sender).acted(group)
+                    LogEntry.build().actor(sender).acted(group)
                             .action("settempinherit " + group1.getName() + " " + duration + " " + server)
-                            .submit(plugin);
+                            .build().submit(plugin);
                 } else {
                     final String world = args.get(3).toLowerCase();
                     group.setInheritGroup(group1, server, world, duration);
                     Message.GROUP_SET_TEMP_INHERIT_SERVER_WORLD_SUCCESS.send(sender, group.getName(), group1.getName(), server,
                             world, DateUtil.formatDateDiff(duration));
-                    LogEntryBuilder.get().actor(sender).acted(group)
+                    LogEntry.build().actor(sender).acted(group)
                             .action("settempinherit " + group1.getName() + " " + duration + " " + server + " " + world)
-                            .submit(plugin);
+                            .build().submit(plugin);
                 }
 
             } else {
                 group.setInheritGroup(group1, duration);
                 Message.GROUP_SET_TEMP_INHERIT_SUCCESS.send(sender, group.getName(), group1.getName(), DateUtil.formatDateDiff(duration));
-                LogEntryBuilder.get().actor(sender).acted(group)
+                LogEntry.build().actor(sender).acted(group)
                         .action("settempinherit " + group1.getName() + " " + duration)
-                        .submit(plugin);
+                        .build().submit(plugin);
             }
 
             save(group, sender, plugin);

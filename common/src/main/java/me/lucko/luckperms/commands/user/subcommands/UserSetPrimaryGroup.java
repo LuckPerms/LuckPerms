@@ -29,7 +29,7 @@ import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
-import me.lucko.luckperms.data.LogEntryBuilder;
+import me.lucko.luckperms.data.LogEntry;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.users.User;
 
@@ -61,9 +61,9 @@ public class UserSetPrimaryGroup extends SubCommand<User> {
 
         user.setPrimaryGroup(group.getName());
         Message.USER_PRIMARYGROUP_SUCCESS.send(sender, user.getName(), group.getName());
-        LogEntryBuilder.get().actor(sender).acted(user)
+        LogEntry.build().actor(sender).acted(user)
                 .action("setprimarygroup " + group.getName())
-                .submit(plugin);
+                .build().submit(plugin);
 
         save(user, sender, plugin);
         return CommandResult.SUCCESS;

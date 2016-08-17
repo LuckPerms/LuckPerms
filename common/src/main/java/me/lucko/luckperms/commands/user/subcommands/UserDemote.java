@@ -26,7 +26,7 @@ import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
-import me.lucko.luckperms.data.LogEntryBuilder;
+import me.lucko.luckperms.data.LogEntry;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.groups.Group;
@@ -103,9 +103,9 @@ public class UserDemote extends SubCommand<User> {
         Message.USER_DEMOTE_SUCCESS_PROMOTE.send(sender, track.getName(), old, previousGroup.getName());
         Message.USER_DEMOTE_SUCCESS_REMOVE.send(sender, user.getName(), old, previousGroup.getName(), previousGroup.getName());
         Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), previousGroup.getName(), old, true));
-        LogEntryBuilder.get().actor(sender).acted(user)
+        LogEntry.build().actor(sender).acted(user)
                 .action("demote " + track.getName() + "(from " + old + " to " + previousGroup.getName() + ")")
-                .submit(plugin);
+                .build().submit(plugin);
         save(user, sender, plugin);
         return CommandResult.SUCCESS;
     }

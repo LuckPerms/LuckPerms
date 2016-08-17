@@ -75,6 +75,11 @@ public abstract class User extends PermissionHolder implements Identifiable<UUID
         this.name = name;
     }
 
+    @Override
+    public UUID getId() {
+        return uuid;
+    }
+
     /**
      * Refresh and re-assign the users permissions
      */
@@ -319,10 +324,5 @@ public abstract class User extends PermissionHolder implements Identifiable<UUID
                 .filter(s -> Patterns.GROUP_MATCH.matcher(s).matches())
                 .map(s -> Patterns.DOT.split(s, 2)[1])
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public UUID getId() {
-        return uuid;
     }
 }

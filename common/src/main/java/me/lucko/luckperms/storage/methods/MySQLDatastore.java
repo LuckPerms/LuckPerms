@@ -66,7 +66,7 @@ public class MySQLDatastore extends SQLDatastore {
         hikari.addDataSourceProperty("password", password);
 
         if (!setupTables(CREATETABLE_UUID, CREATETABLE_USERS, CREATETABLE_GROUPS, CREATETABLE_TRACKS, CREATETABLE_ACTION)) {
-            plugin.getLog().severe("Error occurred whilst initialising the database. All connections are disallowed.");
+            plugin.getLog().severe("Error occurred whilst initialising the database.");
             shutdown();
         } else {
             setAcceptingLogins(true);

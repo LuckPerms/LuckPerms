@@ -29,7 +29,7 @@ import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
-import me.lucko.luckperms.data.LogEntryBuilder;
+import me.lucko.luckperms.data.LogEntry;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.users.User;
 import me.lucko.luckperms.utils.ArgumentChecker;
@@ -68,24 +68,24 @@ public class UserRemoveGroup extends SubCommand<User> {
                 if (args.size() == 2) {
                     user.unsetPermission("group." + groupName, server);
                     Message.USER_REMOVEGROUP_SERVER_SUCCESS.send(sender, user.getName(), groupName, server);
-                    LogEntryBuilder.get().actor(sender).acted(user)
+                    LogEntry.build().actor(sender).acted(user)
                             .action("removegroup " + groupName + " " + server)
-                            .submit(plugin);
+                            .build().submit(plugin);
                 } else {
                     final String world = args.get(2).toLowerCase();
                     user.unsetPermission("group." + groupName, server, world);
                     Message.USER_REMOVEGROUP_SERVER_WORLD_SUCCESS.send(sender, user.getName(), groupName, server, world);
-                    LogEntryBuilder.get().actor(sender).acted(user)
+                    LogEntry.build().actor(sender).acted(user)
                             .action("removegroup " + groupName + " " + server + " " + world)
-                            .submit(plugin);
+                            .build().submit(plugin);
                 }
 
             } else {
                 user.unsetPermission("group." + groupName);
                 Message.USER_REMOVEGROUP_SUCCESS.send(sender, user.getName(), groupName);
-                LogEntryBuilder.get().actor(sender).acted(user)
+                LogEntry.build().actor(sender).acted(user)
                         .action("removegroup " + groupName)
-                        .submit(plugin);
+                        .build().submit(plugin);
             }
 
             save(user, sender, plugin);

@@ -51,6 +51,11 @@ public class Track implements Identifiable<String> {
      */
     private List<String> groups = Collections.synchronizedList(new ArrayList<>());
 
+    @Override
+    public String getId() {
+        return name;
+    }
+
     /**
      * Gets an ordered list of the groups on this track
      * @return am ordered {@link List} of the groups on this track
@@ -200,10 +205,5 @@ public class Track implements Identifiable<String> {
         if (!containsGroup(g)) {
             throw new ObjectLacksException();
         }
-    }
-
-    @Override
-    public String getId() {
-        return name;
     }
 }

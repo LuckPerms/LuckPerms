@@ -28,7 +28,7 @@ import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SingleMainCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
-import me.lucko.luckperms.data.LogEntryBuilder;
+import me.lucko.luckperms.data.LogEntry;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.utils.ArgumentChecker;
 
@@ -78,7 +78,7 @@ public class DeleteGroup extends SingleMainCommand {
         }
 
         Message.DELETE_SUCCESS.send(sender, groupName);
-        LogEntryBuilder.get().actor(sender).actedName(groupName).type('G').action("delete").submit(plugin);
+        LogEntry.build().actor(sender).actedName(groupName).type('G').action("delete").build().submit(plugin);
         plugin.runUpdateTask();
         return CommandResult.SUCCESS;
     }
@@ -92,7 +92,8 @@ public class DeleteGroup extends SingleMainCommand {
                 return groups;
             }
 
-            return groups.stream().filter(s -> s.toLowerCase().startsWith(args.get(0).toLowerCase())).collect(Collectors.toList());
+            return groups.stream().filter(s -> s.toLowerCase().startsWith(args.get(0).toLowerCase()))
+                    .collect(Collectors.toList());
         }
 
         return Collections.emptyList();

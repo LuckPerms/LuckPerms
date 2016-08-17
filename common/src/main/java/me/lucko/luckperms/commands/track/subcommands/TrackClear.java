@@ -29,7 +29,7 @@ import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
-import me.lucko.luckperms.data.LogEntryBuilder;
+import me.lucko.luckperms.data.LogEntry;
 import me.lucko.luckperms.tracks.Track;
 
 import java.util.List;
@@ -44,7 +44,7 @@ public class TrackClear extends SubCommand<Track> {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args, String label) {
         track.clearGroups();
         Message.TRACK_CLEAR.send(sender, track.getName());
-        LogEntryBuilder.get().actor(sender).acted(track).action("clear").submit(plugin);
+        LogEntry.build().actor(sender).acted(track).action("clear").build().submit(plugin);
         save(track, sender, plugin);
         return CommandResult.SUCCESS;
     }

@@ -30,7 +30,7 @@ import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Patterns;
 import me.lucko.luckperms.constants.Permission;
-import me.lucko.luckperms.data.LogEntryBuilder;
+import me.lucko.luckperms.data.LogEntry;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.utils.ArgumentChecker;
@@ -69,24 +69,24 @@ public class GroupUnsetTempPermission extends SubCommand<Group> {
                 if (args.size() == 2) {
                     group.unsetPermission(node, server);
                     Message.UNSET_TEMP_PERMISSION_SERVER_SUCCESS.send(sender, node, group.getName(), server);
-                    LogEntryBuilder.get().actor(sender).acted(group)
+                    LogEntry.build().actor(sender).acted(group)
                             .action("unsettemp " + node + " " + server)
-                            .submit(plugin);
+                            .build().submit(plugin);
                 } else {
                     final String world = args.get(2).toLowerCase();
                     group.unsetPermission(node, server, world);
                     Message.UNSET_TEMP_PERMISSION_SERVER_WORLD_SUCCESS.send(sender, node, group.getName(), server, world);
-                    LogEntryBuilder.get().actor(sender).acted(group)
+                    LogEntry.build().actor(sender).acted(group)
                             .action("unsettemp " + node + " " + server + " " + world)
-                            .submit(plugin);
+                            .build().submit(plugin);
                 }
 
             } else {
                 group.unsetPermission(node, true);
                 Message.UNSET_TEMP_PERMISSION_SUCCESS.send(sender, node, group.getName());
-                LogEntryBuilder.get().actor(sender).acted(group)
+                LogEntry.build().actor(sender).acted(group)
                         .action("unsettemp " + node)
-                        .submit(plugin);
+                        .build().submit(plugin);
             }
 
             save(group, sender, plugin);

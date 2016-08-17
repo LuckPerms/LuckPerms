@@ -76,7 +76,10 @@ public abstract class MainCommand<T> {
             return CommandResult.INVALID_ARGS;
         }
 
-        Optional<SubCommand<T>> o = subCommands.stream().filter(s -> s.getName().equalsIgnoreCase(args.get(requiredArgsLength - 1))).limit(1).findAny();
+        Optional<SubCommand<T>> o = subCommands.stream()
+                .filter(s -> s.getName().equalsIgnoreCase(args.get(requiredArgsLength - 1)))
+                .limit(1)
+                .findAny();
 
         if (!o.isPresent()) {
             Message.COMMAND_NOT_RECOGNISED.send(sender);
@@ -121,7 +124,7 @@ public abstract class MainCommand<T> {
     protected abstract void cleanup(T t, LuckPermsPlugin plugin);
 
     /**
-     * Get a list of objects for tab completion
+     * Get a list of {@link T} objects for tab completion
      * @param plugin a link to the main plugin instance
      * @return a list of strings
      */
@@ -138,7 +141,10 @@ public abstract class MainCommand<T> {
             return;
         }
 
-        List<SubCommand> subs = getSubCommands().stream().filter(s -> s.isAuthorized(sender)).collect(Collectors.toList());
+        List<SubCommand> subs = getSubCommands().stream()
+                .filter(s -> s.isAuthorized(sender))
+                .collect(Collectors.toList());
+
         if (subs.size() > 0) {
             Util.sendPluginMessage(sender, "&e" + getName() + " Sub Commands:");
 
@@ -168,20 +174,33 @@ public abstract class MainCommand<T> {
                 return objects;
             }
 
-            return objects.stream().filter(s -> s.toLowerCase().startsWith(args.get(0).toLowerCase())).collect(Collectors.toList());
+            return objects.stream()
+                    .filter(s -> s.toLowerCase().startsWith(args.get(0).toLowerCase()))
+                    .collect(Collectors.toList());
         }
 
-        final List<SubCommand<T>> subs = getSubCommands().stream().filter(s -> s.isAuthorized(sender)).collect(Collectors.toList());
+        final List<SubCommand<T>> subs = getSubCommands().stream()
+                .filter(s -> s.isAuthorized(sender))
+                .collect(Collectors.toList());
+
         if (args.size() == 2) {
             if (args.get(1).equalsIgnoreCase("")) {
-                return subs.stream().map(SubCommand::getName).map(String::toLowerCase).collect(Collectors.toList());
+                return subs.stream()
+                        .map(m -> m.getName().toLowerCase())
+                        .collect(Collectors.toList());
             }
 
-            return subs.stream().map(SubCommand::getName).map(String::toLowerCase)
-                    .filter(s -> s.toLowerCase().startsWith(args.get(1).toLowerCase())).collect(Collectors.toList());
+            return subs.stream()
+                    .map(m -> m.getName().toLowerCase())
+                    .filter(s -> s.toLowerCase().startsWith(args.get(1).toLowerCase()))
+                    .collect(Collectors.toList());
         }
 
-        Optional<SubCommand<T>> o = subs.stream().filter(s -> s.getName().equalsIgnoreCase(args.get(1))).limit(1).findAny();
+        Optional<SubCommand<T>> o = subs.stream()
+                .filter(s -> s.getName().equalsIgnoreCase(args.get(1)))
+                .limit(1)
+                .findAny();
+
         if (!o.isPresent()) {
             return Collections.emptyList();
         }

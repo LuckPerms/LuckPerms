@@ -26,7 +26,7 @@ import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
-import me.lucko.luckperms.data.LogEntryBuilder;
+import me.lucko.luckperms.data.LogEntry;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.tracks.Track;
 import me.lucko.luckperms.utils.ArgumentChecker;
@@ -52,9 +52,9 @@ public class TrackRemove extends SubCommand<Track> {
             track.removeGroup(groupName);
             Message.TRACK_REMOVE_SUCCESS.send(sender, groupName, track.getName());
             Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups()));
-            LogEntryBuilder.get().actor(sender).acted(track)
+            LogEntry.build().actor(sender).acted(track)
                     .action("remove " + groupName)
-                    .submit(plugin);
+                    .build().submit(plugin);
             save(track, sender, plugin);
             return CommandResult.SUCCESS;
         } catch (ObjectLacksException e) {
