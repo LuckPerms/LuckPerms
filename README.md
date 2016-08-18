@@ -189,7 +189,7 @@ Additionally, you can use wildcards to grant users access to a selection of comm
 *  /perms sync - luckperms.sync
 *  /perms info - luckperms.info
 *  /perms debug - luckperms.debug
-*  /perms import <file> - luckperms.import
+*  /perms import \<file\> - luckperms.import
 *  /perms creategroup \<group\> - luckperms.creategroup
 *  /perms deletegroup \<group\> - luckperms.deletegroup
 *  /perms listgroups - luckperms.listgroups
