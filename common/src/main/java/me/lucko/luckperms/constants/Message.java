@@ -121,25 +121,24 @@ public enum Message {
 
     UPDATE_TASK_RUN("&bRunning update task for all online users.", true),
     INFO(
-            PREFIX + "&6Running &bLuckPerms v%s&6." + "\n" +
-            PREFIX + "&eAuthor: &6Luck" + "\n" +
-            PREFIX + "&eStorage Method: &6%s" + "\n" +
-            PREFIX + "&eServer Name: &6%s" + "\n" +
-            PREFIX + "&eDefault Group: &6%s" + "\n" +
-            PREFIX + "&eSync Interval: &6%s minutes" + "\n" +
-            PREFIX + "&eInclude Global Perms: &6%s" + "\n" +
-            PREFIX + "&eOnline Mode: &6%s" + "\n" +
-            PREFIX + "&eApply Wildcards: &6%s" + "\n" +
-            PREFIX + "&eApply Regex: &6%s" + "\n" +
-            PREFIX + "&eApply Shorthand: &6%s",
+            PREFIX + "&6Running &bLuckPerms v%s&6 by &bLuck&6." + "\n" +
+            PREFIX + "&f-> &eStorage Method: &6%s" + "\n" +
+            PREFIX + "&f-> &eServer Name: &6%s" + "\n" +
+            PREFIX + "&f-> &eDefault Group: &6%s" + "\n" +
+            PREFIX + "&f-> &eSync Interval: &6%s minutes" + "\n" +
+            PREFIX + "&f-> &eInclude Global Perms: &6%s" + "\n" +
+            PREFIX + "&f-> &eOnline Mode: &6%s" + "\n" +
+            PREFIX + "&f-> &eApply Wildcards: &6%s" + "\n" +
+            PREFIX + "&f-> &eApply Regex: &6%s" + "\n" +
+            PREFIX + "&f-> &eApply Shorthand: &6%s",
             false
     ),
     DEBUG(
             PREFIX + "&d&l> &dDebug Info" + "\n" +
-            PREFIX + "&eOnline Players: &6%s" + "\n" +
-            PREFIX + "&eLoaded Users: &6%s" + "\n" +
-            PREFIX + "&eLoaded Groups: &6%s" + "\n" +
-            PREFIX + "&eLoaded Tracks: &6%s",
+            PREFIX + "&f> &eOnline Players: &6%s" + "\n" +
+            PREFIX + "&f> &eLoaded Users: &6%s" + "\n" +
+            PREFIX + "&f> &eLoaded Groups: &6%s" + "\n" +
+            PREFIX + "&f> &eLoaded Tracks: &6%s",
             false
     ),
 

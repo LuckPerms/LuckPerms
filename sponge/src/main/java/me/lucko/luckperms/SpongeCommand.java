@@ -31,6 +31,7 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.text.Text;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -49,8 +50,12 @@ class SpongeCommand extends CommandManager implements CommandCallable {
 
     @Override
     public List<String> getSuggestions(CommandSource source, String s) throws CommandException {
-        // TODO: fix this so it actually works
-        return onTabComplete(SpongeSenderFactory.get().wrap(source), Arrays.asList(Patterns.SPACE.split(s)));
+        List<String> args = new ArrayList<>(Arrays.asList(Patterns.SPACE.split(s)));
+        if (s.endsWith(" ")) {
+            args.add("");
+        }
+
+        return onTabComplete(SpongeSenderFactory.get().wrap(source), args);
     }
 
     @Override

@@ -39,7 +39,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-class BungeeListener extends AbstractListener implements Listener {
+@SuppressWarnings("WeakerAccess")
+public class BungeeListener extends AbstractListener implements Listener {
     private static final TextComponent WARN_MESSAGE = new TextComponent(Message.LOADING_ERROR.toString());
     private final LPBungeePlugin plugin;
 
