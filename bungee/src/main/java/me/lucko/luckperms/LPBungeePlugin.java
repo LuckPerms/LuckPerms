@@ -30,6 +30,7 @@ import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.core.LPConfiguration;
 import me.lucko.luckperms.core.UuidCache;
+import me.lucko.luckperms.data.Importer;
 import me.lucko.luckperms.groups.GroupManager;
 import me.lucko.luckperms.runnables.UpdateTask;
 import me.lucko.luckperms.storage.Datastore;
@@ -42,6 +43,7 @@ import me.lucko.luckperms.utils.LogFactory;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 
+import java.io.File;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -56,6 +58,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     private Datastore datastore;
     private UuidCache uuidCache;
     private Logger log;
+    private Importer importer;
 
     @Override
     public void onEnable() {
@@ -69,7 +72,8 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
         // register commands
         getLog().info("Registering commands...");
-        getProxy().getPluginManager().registerCommand(this, new BungeeCommand(new CommandManager(this)));
+        CommandManager commandManager = new CommandManager(this);
+        getProxy().getPluginManager().registerCommand(this, new BungeeCommand(commandManager));
 
         // disable the default Bungee /perms command so it gets handled by the Bukkit plugin
         getProxy().getDisabledCommands().add("perms");
@@ -95,6 +99,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         userManager = new BungeeUserManager(this);
         groupManager = new GroupManager(this);
         trackManager = new TrackManager();
+        importer = new Importer(commandManager);
 
         // Run update task to refresh any online users
         getLog().info("Scheduling Update Task to refresh any online users.");
@@ -130,6 +135,11 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     @Override
     public String getVersion() {
         return getDescription().getVersion();
+    }
+
+    @Override
+    public File getMainDir() {
+        return getDataFolder();
     }
 
     @Override

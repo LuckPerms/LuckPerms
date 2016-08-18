@@ -74,7 +74,7 @@ public class LogEntry implements Comparable<LogEntry> {
 
     @Override
     public int compareTo(LogEntry o) {
-        return Long.compare(timestamp, o.getTimestamp());
+        return equals(o) ? 0 : (Long.compare(timestamp, o.getTimestamp()) == 0 ? 1 : Long.compare(timestamp, o.getTimestamp()));
     }
 
     public boolean matchesSearch(String query) {

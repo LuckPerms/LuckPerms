@@ -270,22 +270,34 @@ public enum Message {
     LOG_HISTORY_GROUP_HEADER("&aShowing history for group &b%s &a(page &f%s&a of &f%s&a)", true),
     LOG_HISTORY_TRACK_HEADER("&aShowing history for track &b%s &a(page &f%s&a of &f%s&a)", true),
 
-    IMPORT_PROGRESS("&e(Import) &d-> &6%s% complete &7- &e%s&6/&e%s &6operations complete with &c%s &6errors.", true),
-    IMPORT_PROGRESS_SIN("&e(Import) &d-> &6%s% complete &7- &e%s&6/&e%s &6operations complete with &c%s &6error.", true),
+    LOG_EXPORT_ALREADY_EXISTS("Error: File %s already exists.", true),
+    LOG_EXPORT_NOT_WRITABLE("Error: File %s is not writable.", true),
+    LOG_EXPORT_EMPTY("The log is empty and therefore cannot be exported.", true),
+    LOG_EXPORT_FAILURE("An unexpected error occured whilst writing to the file.", true),
+    LOG_EXPORT_SUCCESS("&aSuccessfully exported the log to &b%s&a.", true),
+
+    IMPORT_ALREADY_RUNNING("Another import process is already running. Please wait for it to finish and try again.", true),
+    IMPORT_LOG_DOESNT_EXIST("Error: File %s does not exist.", true),
+    IMPORT_LOG_NOT_READABLE("Error: File %s is not readable.", true),
+    IMPORT_LOG_FAILURE("An unexpected error occured whilst reading from the log file.", true),
+
+    IMPORT_PROGRESS("&e(Import) &d-> &f%s &6percent complete &7- &e%s&6/&e%s &6operations complete with &c%s &6errors.", true),
+    IMPORT_PROGRESS_SIN("&e(Import) &d-> &f%s &6percent complete &7- &e%s&6/&e%s &6operations complete with &c%s &6error.", true),
     IMPORT_START("&e(Import) &d-> &6Starting import process.", true),
 
     IMPORT_END_COMPLETE("&e(Import) &a&lCOMPLETED &7- took &e%s &7seconds - &7No errors.", true),
     IMPORT_END_COMPLETE_ERR("&e(Import) &a&lCOMPLETED &7- took &e%s &7seconds - &c%s errors.", true),
     IMPORT_END_COMPLETE_ERR_SIN("&e(Import) &a&lCOMPLETED &7- took &e%s &7seconds - &c%s error.", true),
     IMPORT_END_ERROR_HEADER(
-            PREFIX + "&e(Import) &7-----> &6Showing Error #&e%s &7<-----" + "\n" +
+            PREFIX + "&e(Import) &7------------> &6Showing Error #&e%s &7<------------" + "\n" +
             PREFIX + "&e(Import) &6Whilst executing: &fCommand #%s" + "\n" +
-            PREFIX + "&e(Import) &6Output:s",
+            PREFIX + "&e(Import) &6Type: &f%s" + "\n" +
+            PREFIX + "&e(Import) &6Output:",
             false
     ),
 
-    IMPORT_END_ERROR_CONTENT("&e(Import) &7-> &c%s", true),
-    IMPORT_END_ERROR_FOOTER("&e(Import) &7<---------------------------->", true);
+    IMPORT_END_ERROR_CONTENT("&e(Import) &d-> &c%s", true),
+    IMPORT_END_ERROR_FOOTER("&e(Import) &7<------------------------------------------>", true);
 
     private String message;
     private boolean showPrefix;

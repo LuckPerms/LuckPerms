@@ -27,11 +27,13 @@ import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.core.LPConfiguration;
 import me.lucko.luckperms.core.UuidCache;
+import me.lucko.luckperms.data.Importer;
 import me.lucko.luckperms.groups.GroupManager;
 import me.lucko.luckperms.storage.Datastore;
 import me.lucko.luckperms.tracks.TrackManager;
 import me.lucko.luckperms.users.UserManager;
 
+import java.io.File;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -88,6 +90,16 @@ public interface LuckPermsPlugin {
      * @return the version of the plugin
      */
     String getVersion();
+
+    /**
+     * @return the main plugin directory
+     */
+    File getMainDir();
+
+    /**
+     * @return the importer instance for the platform
+     */
+    Importer getImporter();
 
     /**
      * Returns a colored string indicating the status of a player

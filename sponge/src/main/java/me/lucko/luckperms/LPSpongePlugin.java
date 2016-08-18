@@ -31,6 +31,7 @@ import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.core.LPConfiguration;
 import me.lucko.luckperms.core.UuidCache;
+import me.lucko.luckperms.data.Importer;
 import me.lucko.luckperms.groups.GroupManager;
 import me.lucko.luckperms.runnables.UpdateTask;
 import me.lucko.luckperms.storage.Datastore;
@@ -87,6 +88,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     private Datastore datastore;
     private UuidCache uuidCache;
     private me.lucko.luckperms.api.Logger log;
+    private Importer importer;
 
     @Listener
     public void onEnable(GamePreInitializationEvent event) {
@@ -101,7 +103,8 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         // register commands
         getLog().info("Registering commands...");
         CommandManager cmdService = Sponge.getCommandManager();
-        cmdService.register(this, new SpongeCommand(this), "luckperms", "perms", "lp", "permissions", "p", "perm");
+        SpongeCommand commandManager = new SpongeCommand(this);
+        cmdService.register(this, commandManager, "luckperms", "perms", "lp", "permissions", "p", "perm");
 
         getLog().info("Detecting storage method...");
         final String storageMethod = configuration.getStorageMethod();
@@ -110,13 +113,13 @@ public class LPSpongePlugin implements LuckPermsPlugin {
             datastore = new MySQLDatastore(this, configuration.getDatabaseValues());
         } else if (storageMethod.equalsIgnoreCase("sqlite")) {
             getLog().info("Using SQLite as storage method.");
-            datastore = new SQLiteDatastore(this, new File(getStorageDir(), "luckperms.sqlite"));
+            datastore = new SQLiteDatastore(this, new File(getMainDir(), "luckperms.sqlite"));
         } else if (storageMethod.equalsIgnoreCase("flatfile")) {
             getLog().info("Using Flatfile (JSON) as storage method.");
-            datastore = new FlatfileDatastore(this, getStorageDir());
+            datastore = new FlatfileDatastore(this, getMainDir());
         } else {
             getLog().severe("Storage method '" + storageMethod + "' was not recognised. Using SQLite as fallback.");
-            datastore = new SQLiteDatastore(this, new File(getStorageDir(), "luckperms.sqlite"));
+            datastore = new SQLiteDatastore(this, new File(getMainDir(), "luckperms.sqlite"));
         }
 
         getLog().info("Initialising datastore...");
@@ -127,6 +130,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         userManager = new SpongeUserManager(this);
         groupManager = new GroupManager(this);
         trackManager = new TrackManager();
+        importer = new Importer(commandManager);
 
         // Run update task to refresh any online users
         getLog().info("Scheduling Update Task to refresh any online users.");
@@ -184,7 +188,8 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    private File getStorageDir() {
+    @Override
+    public File getMainDir() {
         File base = configDir.toFile().getParentFile().getParentFile();
         File luckPermsDir = new File(base, "luckperms");
         luckPermsDir.mkdirs();

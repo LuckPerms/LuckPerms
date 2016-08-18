@@ -18,6 +18,7 @@ A permissions implementation for Bukkit/Spigot, BungeeCord and Sponge.
 * **Vault Support** - hooks into Vault to integrate with other plugins
 * **Developer API** - easily integrate LuckPerms into your own projects
 * **Advanced action logging** - keep track of permission changes over time
+* **Easily switch between storage systems** - export a log file from one datastore and import it into another
 * **Easy and simple setup and configuration using commands** - no editing yml files, yuck
 * **Negated permissions and groups** - define special rules for certain users/groups
 * **Regex permissions** - define special permissions using regex
@@ -188,6 +189,7 @@ Additionally, you can use wildcards to grant users access to a selection of comm
 *  /perms sync - luckperms.sync
 *  /perms info - luckperms.info
 *  /perms debug - luckperms.debug
+*  /perms import <file> - luckperms.import
 *  /perms creategroup \<group\> - luckperms.creategroup
 *  /perms deletegroup \<group\> - luckperms.deletegroup
 *  /perms listgroups - luckperms.listgroups
@@ -243,6 +245,7 @@ Additionally, you can use wildcards to grant users access to a selection of comm
 *  /perms log recent [user] [page] - luckperms.log.recent
 *  /perms log search \<query\> [page] - luckperms.log.search
 *  /perms log notify [on|off] - luckperms.log.notify
+*  /perms log export \<file\> - luckperms.log.export
 *  /perms log userhistory \<user\> [page] - luckperms.log.userhistory
 *  /perms log grouphistory \<group\> [page] - luckperms.log.grouphistory
 *  /perms log trackhistory \<track\> [page] - luckperms.log.trackhistory

@@ -41,13 +41,10 @@ import java.util.stream.Collectors;
  * Executes a list of commands sequentially in a single thread.
  */
 @RequiredArgsConstructor
-public class Importer { // TODO: implement this
-
-    @Getter
-    private boolean running = false;
-
+public class Importer {
     private final CommandManager commandManager;
 
+    private boolean running = false;
     private Sender executor = null;
     private List<String> commands = null;
     private Map<Integer, Result> cmdResult = null;
@@ -55,16 +52,22 @@ public class Importer { // TODO: implement this
     private long lastMsg = 0;
     private int executing = -1;
 
-    public synchronized void start(Sender executor, List<String> commands) {
-        if (isRunning()) {
-            throw new IllegalStateException("Import already running.");
+    public synchronized boolean startRun() {
+        if (running) {
+            return false;
         }
 
         running = true;
+        return true;
+
+    }
+
+    public void start(Sender executor, List<String> commands) {
         this.executor = executor;
         this.commands = commands.stream()
                 .map(s -> s.startsWith("/") ? s.substring(1) : s)
-                .map(s -> s.startsWith("perms ") ? s.substring(5) : s)
+                .map(s -> s.startsWith("perms ") ? s.substring(6) : s)
+                .map(s -> s.startsWith("luckperms ") ? s.substring(10) : s)
                 .collect(Collectors.toList());
 
         cmdResult = new HashMap<>();
@@ -127,7 +130,7 @@ public class Importer { // TODO: implement this
         int errIndex = 1;
         for (Map.Entry<Integer, Result> e : cmdResult.entrySet()) {
             if (e.getValue().getResult() != null && !e.getValue().getResult().booleanValue()) {
-                Message.IMPORT_END_ERROR_HEADER.send(executor, errIndex, e.getKey());
+                Message.IMPORT_END_ERROR_HEADER.send(executor, errIndex, e.getKey(), e.getValue().getResult().toString());
                 for (String s : e.getValue().getOutput()) {
                     Message.IMPORT_END_ERROR_CONTENT.send(executor, s);
                 }
@@ -140,7 +143,7 @@ public class Importer { // TODO: implement this
     }
 
     private void sendProgress(int executing) {
-        int percent = (executing / commands.size()) * 100;
+        int percent = (executing * 100) / commands.size();
         int errors = 0;
 
         for (Map.Entry<Integer, Result> e : cmdResult.entrySet()) {

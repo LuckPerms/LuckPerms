@@ -32,6 +32,7 @@ public enum Permission {
     SYNC("sync", null),
     INFO("info", null),
     DEBUG("debug", null),
+    IMPORT("import", null),
 
     CREATE_GROUP("creategroup", null),
     DELETE_GROUP("deletegroup", null),

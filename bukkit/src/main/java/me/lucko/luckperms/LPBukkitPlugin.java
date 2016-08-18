@@ -31,6 +31,7 @@ import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.core.LPConfiguration;
 import me.lucko.luckperms.core.UuidCache;
+import me.lucko.luckperms.data.Importer;
 import me.lucko.luckperms.groups.GroupManager;
 import me.lucko.luckperms.runnables.UpdateTask;
 import me.lucko.luckperms.storage.Datastore;
@@ -61,6 +62,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private Datastore datastore;
     private UuidCache uuidCache;
     private Logger log;
+    private Importer importer;
 
     @Override
     public void onEnable() {
@@ -105,6 +107,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         userManager = new BukkitUserManager(this);
         groupManager = new GroupManager(this);
         trackManager = new TrackManager();
+        importer = new Importer(commandManager);
 
         // Run update task to refresh any online users
         getLog().info("Scheduling Update Task to refresh any online users.");
@@ -167,6 +170,11 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     @Override
     public String getVersion() {
         return getDescription().getVersion();
+    }
+
+    @Override
+    public File getMainDir() {
+        return getDataFolder();
     }
 
     @Override

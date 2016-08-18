@@ -42,7 +42,7 @@ public class LogMainCommand extends MainCommand<Log> {
             .add(new LogRecent())
             .add(new LogSearch())
             .add(new LogNotify())
-            // .add(new LogExport())
+            .add(new LogExport())
             .add(new LogUserHistory())
             .add(new LogGroupHistory())
             .add(new LogTrackHistory())

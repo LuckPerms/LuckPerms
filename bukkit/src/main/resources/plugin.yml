@@ -15,6 +15,7 @@ permissions:
       luckperms.sync: true
       luckperms.info: true
       luckperms.debug: true
+      luckperms.import: true
       luckperms.creategroup: true
       luckperms.deletegroup: true
       luckperms.listgroups: true

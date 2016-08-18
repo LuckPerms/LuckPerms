@@ -147,36 +147,30 @@ public abstract class SubCommand<T> {
     protected static void save(User user, Sender sender, LuckPermsPlugin plugin) {
         user.refreshPermissions();
 
-        plugin.getDatastore().saveUser(user, success -> {
-            if (success) {
-                Message.USER_SAVE_SUCCESS.send(sender);
-            } else {
-                Message.USER_SAVE_ERROR.send(sender);
-            }
-        });
+        if (plugin.getDatastore().saveUser(user)) {
+            Message.USER_SAVE_SUCCESS.send(sender);
+        } else {
+            Message.USER_SAVE_ERROR.send(sender);
+        }
     }
 
     protected static void save(Group group, Sender sender, LuckPermsPlugin plugin) {
-        plugin.getDatastore().saveGroup(group, success -> {
-            if (success) {
-                Message.GROUP_SAVE_SUCCESS.send(sender);
-            } else {
-                Message.GROUP_SAVE_ERROR.send(sender);
-            }
+        if (plugin.getDatastore().saveGroup(group)) {
+            Message.GROUP_SAVE_SUCCESS.send(sender);
+        } else {
+            Message.GROUP_SAVE_ERROR.send(sender);
+        }
 
-            plugin.runUpdateTask();
-        });
+        plugin.runUpdateTask();
     }
 
     protected static void save(Track track, Sender sender, LuckPermsPlugin plugin) {
-        plugin.getDatastore().saveTrack(track, success -> {
-            if (success) {
-                Message.TRACK_SAVE_SUCCESS.send(sender);
-            } else {
-                Message.TRACK_SAVE_ERROR.send(sender);
-            }
+        if (plugin.getDatastore().saveTrack(track)) {
+            Message.TRACK_SAVE_SUCCESS.send(sender);
+        } else {
+            Message.TRACK_SAVE_ERROR.send(sender);
+        }
 
-            plugin.runUpdateTask();
-        });
+        plugin.runUpdateTask();
     }
 }
