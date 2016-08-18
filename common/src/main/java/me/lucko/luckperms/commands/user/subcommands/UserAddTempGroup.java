@@ -55,7 +55,6 @@ public class UserAddTempGroup extends SubCommand<User> {
         }
 
         long duration;
-
         try {
             duration = Long.parseLong(args.get(1));
         } catch (NumberFormatException e) {
