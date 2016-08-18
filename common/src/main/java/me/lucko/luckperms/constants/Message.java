@@ -26,6 +26,8 @@ import lombok.AllArgsConstructor;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.Util;
 
+import java.util.IllegalFormatException;
+
 @SuppressWarnings("SpellCheckingInspection")
 @AllArgsConstructor
 public enum Message {
@@ -159,11 +161,11 @@ public enum Message {
     SETPERMISSION_TEMP_SERVER_SUCCESS("&aSet &b%s&a to &b%s&a for &b%s&a on server &b%s&a for a duration of &b%s&a.", true),
     SETPERMISSION_TEMP_SERVER_WORLD_SUCCESS("&aSet &b%s&a to &b%s&a for &b%s&a on server &b%s&a, world &b%s&a, for a duration of &b%s&a.", true),
     UNSETPERMISSION_SUCCESS("&aUnset &b%s&a for &b%s&a.", true),
-    UNSETPERMISSION_SERVER_SUCCESS("&aUnset &b%s&a for &b%s&a on server &b%$s&a.", true),
-    UNSETPERMISSION_SERVER_WORLD_SUCCESS("&aUnset &b%s&a for &b%s&a on server &b%$s&a, world &b%$s&a.", true),
+    UNSETPERMISSION_SERVER_SUCCESS("&aUnset &b%s&a for &b%s&a on server &b%s&a.", true),
+    UNSETPERMISSION_SERVER_WORLD_SUCCESS("&aUnset &b%s&a for &b%s&a on server &b%s&a, world &b%s&a.", true),
     UNSET_TEMP_PERMISSION_SUCCESS("&aUnset temporary permission &b%s&a for &b%s&a.", true),
-    UNSET_TEMP_PERMISSION_SERVER_SUCCESS("&aUnset temporary permission &b%s&a for &b%s&a on server &b%$s&a.", true),
-    UNSET_TEMP_PERMISSION_SERVER_WORLD_SUCCESS("&aUnset temporary permission &b%s&a for &b%s&a on server &b%$s&a, world &b%$s&a.", true),
+    UNSET_TEMP_PERMISSION_SERVER_SUCCESS("&aUnset temporary permission &b%s&a for &b%s&a on server &b%s&a.", true),
+    UNSET_TEMP_PERMISSION_SERVER_WORLD_SUCCESS("&aUnset temporary permission &b%s&a for &b%s&a on server &b%s&a, world &b%s&a.", true),
     CLEAR_SUCCESS("&b%s&a's permissions were cleared.", true),
     ILLEGAL_DATE_ERROR("Could not parse date '%s'.", true),
     PAST_DATE_ERROR("You cannot set a date in the past!", true),
@@ -308,10 +310,15 @@ public enum Message {
     }
 
     public void send(Sender sender, Object... objects) {
-        if (showPrefix) {
-            sender.sendMessage(Util.color(PREFIX + String.format(message, objects)));
-        } else {
-            sender.sendMessage(Util.color(String.format(message, objects)));
+        try {
+            if (showPrefix) {
+                sender.sendMessage(Util.color(PREFIX + String.format(message, objects)));
+            } else {
+                sender.sendMessage(Util.color(String.format(message, objects)));
+            }
+        } catch (IllegalFormatException e) {
+            System.out.println("Could not format message: " + this);
+            e.printStackTrace();
         }
     }
 }
