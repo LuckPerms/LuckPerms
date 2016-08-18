@@ -55,10 +55,14 @@ public class GroupSetTempInherit extends SubCommand<Group> {
 
         long duration;
         try {
-            duration = DateUtil.parseDateDiff(args.get(1), true);
-        } catch (DateUtil.IllegalDateException e) {
-            Message.ILLEGAL_DATE_ERROR.send(sender, args.get(1));
-            return CommandResult.INVALID_ARGS;
+            duration = Long.parseLong(args.get(1));
+        } catch (NumberFormatException e) {
+            try {
+                duration = DateUtil.parseDateDiff(args.get(1), true);
+            } catch (DateUtil.IllegalDateException e1) {
+                Message.ILLEGAL_DATE_ERROR.send(sender, args.get(1));
+                return CommandResult.INVALID_ARGS;
+            }
         }
 
         if (DateUtil.shouldExpire(duration)) {
