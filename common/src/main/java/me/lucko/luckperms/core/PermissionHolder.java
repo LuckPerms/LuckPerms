@@ -701,15 +701,28 @@ public abstract class PermissionHolder {
     }
 
     private boolean matches(String entry, String possibleRegex) {
-        if (!possibleRegex.toLowerCase().startsWith("r=") || !plugin.getConfiguration().getApplyRegex()) {
-            return entry.equalsIgnoreCase(possibleRegex);
+        if (possibleRegex.toLowerCase().startsWith("r=") && plugin.getConfiguration().getApplyRegex()) {
+            Pattern p = Patterns.compile(possibleRegex.substring(2));
+            if (p == null) {
+                return false;
+            }
+            return p.matcher(entry).matches();
         }
 
-        Pattern p = Patterns.compile(possibleRegex.substring(2));
-        if (p == null) {
+        if (possibleRegex.startsWith("(") && possibleRegex.endsWith(")") && possibleRegex.contains("|")) {
+            final String bits = possibleRegex.substring(1, possibleRegex.length() - 1);
+            String[] parts = Patterns.VERTICAL_BAR.split(bits);
+
+            for (String s : parts) {
+                if (s.equalsIgnoreCase(entry)) {
+                    return true;
+                }
+            }
+
             return false;
         }
-        return p.matcher(entry).matches();
+
+        return entry.equalsIgnoreCase(possibleRegex);
     }
 
     private Map<String, Boolean> applyRegex(Map<String, Boolean> input, List<String> possibleNodes) {
