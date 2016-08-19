@@ -20,18 +20,14 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.storage;
+package me.lucko.luckperms.api.data;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+@SuppressWarnings("deprecation")
+public interface DatastoreConfiguration extends MySQLConfiguration {
 
-@Getter
-@AllArgsConstructor
-public class MySQLConfiguration implements me.lucko.luckperms.api.data.MySQLConfiguration {
-
-    private final String address;
-    private final String database;
-    private final String username;
-    private final String password;
+    String getAddress();
+    String getDatabase();
+    String getUsername();
+    String getPassword();
 
 }

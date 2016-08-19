@@ -34,8 +34,7 @@ import me.lucko.luckperms.data.Importer;
 import me.lucko.luckperms.groups.GroupManager;
 import me.lucko.luckperms.runnables.UpdateTask;
 import me.lucko.luckperms.storage.Datastore;
-import me.lucko.luckperms.storage.methods.FlatfileDatastore;
-import me.lucko.luckperms.storage.methods.MySQLDatastore;
+import me.lucko.luckperms.storage.StorageFactory;
 import me.lucko.luckperms.tracks.TrackManager;
 import me.lucko.luckperms.users.BungeeUserManager;
 import me.lucko.luckperms.users.UserManager;
@@ -78,21 +77,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         // disable the default Bungee /perms command so it gets handled by the Bukkit plugin
         getProxy().getDisabledCommands().add("perms");
 
-        getLog().info("Detecting storage method...");
-        final String storageMethod = configuration.getStorageMethod();
-        if (storageMethod.equalsIgnoreCase("mysql")) {
-            getLog().info("Using MySQL as storage method.");
-            datastore = new MySQLDatastore(this, configuration.getDatabaseValues());
-        } else if (storageMethod.equalsIgnoreCase("flatfile")) {
-            getLog().info("Using Flatfile (JSON) as storage method.");
-            datastore = new FlatfileDatastore(this, getDataFolder());
-        } else {
-            getLog().severe("Storage method '" + storageMethod + "' was not recognised. Using Flatfile as fallback.");
-            datastore = new FlatfileDatastore(this, getDataFolder());
-        }
-
-        getLog().info("Initialising datastore...");
-        datastore.init();
+        datastore = StorageFactory.getDatastore(this, "h2");
 
         getLog().info("Loading internal permission managers...");
         uuidCache = new UuidCache(getConfiguration().getOnlineMode());
@@ -160,6 +145,11 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     @Override
     public List<Sender> getSenders() {
         return getProxy().getPlayers().stream().map(p -> BungeeSenderFactory.get().wrap(p)).collect(Collectors.toList());
+    }
+
+    @Override
+    public Sender getConsoleSender() {
+        return BungeeSenderFactory.get().wrap(getProxy().getConsole());
     }
 
     @Override

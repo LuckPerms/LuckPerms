@@ -35,9 +35,7 @@ import me.lucko.luckperms.data.Importer;
 import me.lucko.luckperms.groups.GroupManager;
 import me.lucko.luckperms.runnables.UpdateTask;
 import me.lucko.luckperms.storage.Datastore;
-import me.lucko.luckperms.storage.methods.FlatfileDatastore;
-import me.lucko.luckperms.storage.methods.MySQLDatastore;
-import me.lucko.luckperms.storage.methods.SQLiteDatastore;
+import me.lucko.luckperms.storage.StorageFactory;
 import me.lucko.luckperms.tracks.TrackManager;
 import me.lucko.luckperms.users.SpongeUserManager;
 import me.lucko.luckperms.users.UserManager;
@@ -106,24 +104,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         SpongeCommand commandManager = new SpongeCommand(this);
         cmdService.register(this, commandManager, "luckperms", "perms", "lp", "permissions", "p", "perm");
 
-        getLog().info("Detecting storage method...");
-        final String storageMethod = configuration.getStorageMethod();
-        if (storageMethod.equalsIgnoreCase("mysql")) {
-            getLog().info("Using MySQL as storage method.");
-            datastore = new MySQLDatastore(this, configuration.getDatabaseValues());
-        } else if (storageMethod.equalsIgnoreCase("sqlite")) {
-            getLog().info("Using SQLite as storage method.");
-            datastore = new SQLiteDatastore(this, new File(getMainDir(), "luckperms.sqlite"));
-        } else if (storageMethod.equalsIgnoreCase("flatfile")) {
-            getLog().info("Using Flatfile (JSON) as storage method.");
-            datastore = new FlatfileDatastore(this, getMainDir());
-        } else {
-            getLog().severe("Storage method '" + storageMethod + "' was not recognised. Using SQLite as fallback.");
-            datastore = new SQLiteDatastore(this, new File(getMainDir(), "luckperms.sqlite"));
-        }
-
-        getLog().info("Initialising datastore...");
-        datastore.init();
+        datastore = StorageFactory.getDatastore(this, "h2");
 
         getLog().info("Loading internal permission managers...");
         uuidCache = new UuidCache(getConfiguration().getOnlineMode());
@@ -197,6 +178,11 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     }
 
     @Override
+    public File getDataFolder() {
+        return getMainDir();
+    }
+
+    @Override
     public String getVersion() {
         return "null";
     }
@@ -219,6 +205,11 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     @Override
     public List<Sender> getSenders() {
         return game.getServer().getOnlinePlayers().stream().map(s -> SpongeSenderFactory.get().wrap(s)).collect(Collectors.toList());
+    }
+
+    @Override
+    public Sender getConsoleSender() {
+        return SpongeSenderFactory.get().wrap(game.getServer().getConsole());
     }
 
     @Override

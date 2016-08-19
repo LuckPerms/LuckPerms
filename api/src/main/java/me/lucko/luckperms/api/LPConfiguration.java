@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.api;
 
+import me.lucko.luckperms.api.data.DatastoreConfiguration;
 import me.lucko.luckperms.api.data.MySQLConfiguration;
 
 /**
@@ -76,8 +77,16 @@ public interface LPConfiguration {
 
     /**
      * @return the database values set in the configuration
+     * @deprecated use {@link #getDatastoreConfig()}
      */
+    @SuppressWarnings("deprecation")
+    @Deprecated
     MySQLConfiguration getDatabaseValues();
+
+    /**
+     * @return the values set for data storage in the configuration
+     */
+    DatastoreConfiguration getDatastoreConfig();
 
     /**
      * @return the storage method string from the configuration

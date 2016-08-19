@@ -26,7 +26,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.constants.Patterns;
-import me.lucko.luckperms.storage.MySQLConfiguration;
+import me.lucko.luckperms.storage.DatastoreConfiguration;
 
 public abstract class LPConfiguration<T extends LuckPermsPlugin> {
 
@@ -70,7 +70,7 @@ public abstract class LPConfiguration<T extends LuckPermsPlugin> {
     }
 
     public int getSyncTime() {
-        return getInt("sql.sync-minutes", 3);
+        return getInt("data.sync-minutes", 3);
     }
 
     public String getDefaultGroupNode() {
@@ -101,12 +101,12 @@ public abstract class LPConfiguration<T extends LuckPermsPlugin> {
         return getBoolean("apply-shorthand", true);
     }
 
-    public MySQLConfiguration getDatabaseValues() {
-        return new MySQLConfiguration(
-                getString("sql.address", null),
-                getString("sql.database", null),
-                getString("sql.username", null),
-                getString("sql.password", null)
+    public DatastoreConfiguration getDatabaseValues() {
+        return new DatastoreConfiguration(
+                getString("data.address", null),
+                getString("data.database", null),
+                getString("data.username", null),
+                getString("data.password", null)
         );
     }
 

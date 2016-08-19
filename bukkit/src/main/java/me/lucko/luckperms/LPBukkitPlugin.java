@@ -35,9 +35,7 @@ import me.lucko.luckperms.data.Importer;
 import me.lucko.luckperms.groups.GroupManager;
 import me.lucko.luckperms.runnables.UpdateTask;
 import me.lucko.luckperms.storage.Datastore;
-import me.lucko.luckperms.storage.methods.FlatfileDatastore;
-import me.lucko.luckperms.storage.methods.MySQLDatastore;
-import me.lucko.luckperms.storage.methods.SQLiteDatastore;
+import me.lucko.luckperms.storage.StorageFactory;
 import me.lucko.luckperms.tracks.TrackManager;
 import me.lucko.luckperms.users.BukkitUserManager;
 import me.lucko.luckperms.users.UserManager;
@@ -83,24 +81,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         main.setTabCompleter(commandManager);
         main.setAliases(Arrays.asList("perms", "lp", "permissions", "p", "perm"));
 
-        getLog().info("Detecting storage method...");
-        final String storageMethod = configuration.getStorageMethod();
-        if (storageMethod.equalsIgnoreCase("mysql")) {
-            getLog().info("Using MySQL as storage method.");
-            datastore = new MySQLDatastore(this, configuration.getDatabaseValues());
-        } else if (storageMethod.equalsIgnoreCase("sqlite")) {
-            getLog().info("Using SQLite as storage method.");
-            datastore = new SQLiteDatastore(this, new File(getDataFolder(), "luckperms.sqlite"));
-        } else if (storageMethod.equalsIgnoreCase("flatfile")) {
-            getLog().info("Using Flatfile (JSON) as storage method.");
-            datastore = new FlatfileDatastore(this, getDataFolder());
-        } else {
-            getLog().severe("Storage method '" + storageMethod + "' was not recognised. Using SQLite as fallback.");
-            datastore = new SQLiteDatastore(this, new File(getDataFolder(), "luckperms.sqlite"));
-        }
-
-        getLog().info("Initialising datastore...");
-        datastore.init();
+        datastore = StorageFactory.getDatastore(this, "sqlite");
 
         getLog().info("Loading internal permission managers...");
         uuidCache = new UuidCache(getConfiguration().getOnlineMode());
@@ -195,6 +176,11 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     @Override
     public List<Sender> getSenders() {
         return getServer().getOnlinePlayers().stream().map(p -> BukkitSenderFactory.get().wrap(p)).collect(Collectors.toList());
+    }
+
+    @Override
+    public Sender getConsoleSender() {
+        return BukkitSenderFactory.get().wrap(getServer().getConsoleSender());
     }
 
     @Override

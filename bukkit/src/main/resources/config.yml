@@ -1,4 +1,9 @@
-# LuckPerms Configuration
+##############################################################################
+# +------------------------------------------------------------------------+ #
+# |                       LuckPerms Configuration                          | #
+# |                  https://github.com/lucko/LuckPerms                    | #
+# +------------------------------------------------------------------------+ #
+##############################################################################
 
 # The name of the server, used for server specific permissions. Set to 'global' to disable.
 server: global
@@ -38,13 +43,16 @@ apply-regex: true
 apply-shorthand: true
 
 # Which storage method the plugin should use.
-# Currently supported: mysql, sqlite, flatfile
-# Fill out connection info below if you're using MySQL
-storage-method: sqlite
+# Currently supported: mysql, sqlite, h2, flatfile, mongodb
+# Fill out connection info below if you're using MySQL or MongoDB
+storage-method: h2
 
-sql:
+data:
   address: localhost:3306
   database: minecraft
   username: root
   password: ''
+
+  # Set to -1 to disable. If this is the only instance accessing the datastore, you can disable syncing.
+  # e.g. if you're using sqlite or flatfile, this can be set to -1 to save resources.
   sync-minutes: 3

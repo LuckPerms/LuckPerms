@@ -109,7 +109,7 @@ abstract class SQLDatastore extends Datastore {
             boolean onResult(ResultSet resultSet) throws SQLException {
                 if (resultSet.next()) {
                     user.setName(resultSet.getString("name"));
-                    user.getNodes().putAll(gson.fromJson(resultSet.getString("perms"), NM_TYPE));
+                    user.setNodes(gson.fromJson(resultSet.getString("perms"), NM_TYPE));
                     user.setPrimaryGroup(resultSet.getString("primary_group"));
                     return true;
                 }
@@ -193,7 +193,7 @@ abstract class SQLDatastore extends Datastore {
                         }
                     });
                 } else {
-                    user.getNodes().putAll(gson.fromJson(resultSet.getString("perms"), NM_TYPE));
+                    user.setNodes(gson.fromJson(resultSet.getString("perms"), NM_TYPE));
                     user.setPrimaryGroup(resultSet.getString("primary_group"));
 
                     if (!resultSet.getString("name").equals(user.getName())) {
@@ -251,7 +251,7 @@ abstract class SQLDatastore extends Datastore {
                         }
                     });
                 } else {
-                    group.getNodes().putAll(gson.fromJson(resultSet.getString("perms"), NM_TYPE));
+                    group.setNodes(gson.fromJson(resultSet.getString("perms"), NM_TYPE));
                 }
                 return success;
             }
@@ -273,7 +273,7 @@ abstract class SQLDatastore extends Datastore {
             @Override
             boolean onResult(ResultSet resultSet) throws SQLException {
                 if (resultSet.next()) {
-                    group.getNodes().putAll(gson.fromJson(resultSet.getString("perms"), NM_TYPE));
+                    group.setNodes(gson.fromJson(resultSet.getString("perms"), NM_TYPE));
                     return true;
                 }
                 return false;
@@ -297,7 +297,7 @@ abstract class SQLDatastore extends Datastore {
             boolean onResult(ResultSet resultSet) throws SQLException {
                 while (resultSet.next()) {
                     Group group = plugin.getGroupManager().make(resultSet.getString("name"));
-                    group.getNodes().putAll(gson.fromJson(resultSet.getString("perms"), NM_TYPE));
+                    group.setNodes(gson.fromJson(resultSet.getString("perms"), NM_TYPE));
                     groups.add(group);
                 }
                 return true;

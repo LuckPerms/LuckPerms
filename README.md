@@ -30,7 +30,7 @@ A permissions implementation for Bukkit/Spigot, BungeeCord and Sponge.
 * **Open Sourced, Free...** - you shouldn't have to pay $10+ for a "powerful" permissions plugin.
 * **BungeeCord compatible** - permissions, users and groups are synced across all LuckPerms instances
 * **Sponge compatible** - permissions, users and groups are synced across all LuckPerms instances (bukkit --> sponge, for example)
-* **Support for MySQL, SQLite & Flatfile (JSON)** - other storage methods coming soon (maybe)
+* **Support for MySQL, MongoDB, SQLite, H2 & Flatfile (JSON)** - other storage methods coming soon (maybe)
 
 ## Setup
 All configuration options are in the **config.yml/luckperms.conf** file, which is generated automagically when the plugin first starts.

@@ -97,6 +97,11 @@ public interface LuckPermsPlugin {
     File getMainDir();
 
     /**
+     * @return the platforms data folder
+     */
+    File getDataFolder();
+
+    /**
      * @return the importer instance for the platform
      */
     Importer getImporter();
@@ -125,6 +130,12 @@ public interface LuckPermsPlugin {
      * @return a {@link List} of senders
      */
     List<Sender> getSenders();
+
+    /**
+     * Gets the console sender of the instance
+     * @return a the console sender of the instance
+     */
+    Sender getConsoleSender();
 
     /**
      * Gets all possible permission nodes, used for resolving wildcards

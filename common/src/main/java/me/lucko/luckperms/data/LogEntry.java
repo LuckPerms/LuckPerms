@@ -31,6 +31,9 @@ import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.tracks.Track;
 import me.lucko.luckperms.users.User;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class LogEntry extends me.lucko.luckperms.api.LogEntry {
     public static LogEntryBuilder build() {
         return new LogEntryBuilder();
@@ -45,8 +48,12 @@ public class LogEntry extends me.lucko.luckperms.api.LogEntry {
 
         final String msg = super.getFormatted();
 
-        plugin.getSenders().stream()
+        List<Sender> senders = plugin.getSenders().stream()
                 .filter(Permission.LOG_NOTIFY::isAuthorized)
+                .collect(Collectors.toList());
+        senders.add(plugin.getConsoleSender());
+
+        senders.stream()
                 .filter(s -> !plugin.getIgnoringLogs().contains(s.getUuid()))
                 .forEach(s -> Message.LOG.send(s, msg));
     }

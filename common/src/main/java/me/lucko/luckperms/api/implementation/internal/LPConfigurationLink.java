@@ -24,6 +24,7 @@ package me.lucko.luckperms.api.implementation.internal;
 
 import lombok.AllArgsConstructor;
 import me.lucko.luckperms.api.LPConfiguration;
+import me.lucko.luckperms.api.data.DatastoreConfiguration;
 import me.lucko.luckperms.api.data.MySQLConfiguration;
 
 /**
@@ -78,8 +79,14 @@ public class LPConfigurationLink implements LPConfiguration {
         return master.getApplyShorthand();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public MySQLConfiguration getDatabaseValues() {
+        return getDatastoreConfig();
+    }
+
+    @Override
+    public DatastoreConfiguration getDatastoreConfig() {
         return master.getDatabaseValues();
     }
 

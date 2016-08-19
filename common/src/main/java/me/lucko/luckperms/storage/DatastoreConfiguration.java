@@ -20,16 +20,18 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.api.data;
+package me.lucko.luckperms.storage;
 
-/**
- * @deprecated Use {@link DatastoreConfiguration}. This is now used by multiple datastores, not just MySQL.
- */
-@Deprecated
-public interface MySQLConfiguration {
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-    String getAddress();
-    String getDatabase();
-    String getUsername();
-    String getPassword();
+@Getter
+@AllArgsConstructor
+public class DatastoreConfiguration implements me.lucko.luckperms.api.data.DatastoreConfiguration {
+
+    private final String address;
+    private final String database;
+    private final String username;
+    private final String password;
+
 }
