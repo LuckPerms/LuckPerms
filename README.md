@@ -5,6 +5,11 @@ A permissions implementation for Bukkit/Spigot, BungeeCord and Sponge.
 * **Development Builds** - <https://ci.lucko.me/job/LuckPerms>
 * **Javadocs** - <https://jd.lucko.me/LuckPerms>
 
+## Why LuckPerms?
+_Features checked on 19th Aug 2016. If you find any inaccuracies, please do let me know. I tried to be as fair as possible, and copy all major features from the respective plugin pages._
+
+![alt text](https://static.lucko.me/luckperms-compare.png "Feature comparison")
+
 ## Features
 * **Group inheritance** - users can be members of multiple groups, groups can inherit other groups
 * **Temporary permissions** - users/groups can be given permissions that expire after a given time
