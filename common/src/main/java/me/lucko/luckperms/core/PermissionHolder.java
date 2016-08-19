@@ -468,12 +468,16 @@ public abstract class PermissionHolder {
 
     /**
      * Removes temporary permissions that have expired
+     * @return true if permissions had expired and were removed
      */
-    public void auditTemporaryPermissions() {
-        this.nodes.keySet().stream()
+    public boolean auditTemporaryPermissions() {
+        List<String> toExpire = this.nodes.keySet().stream()
                 .filter(s -> s.contains("$"))
                 .filter(s -> DateUtil.shouldExpire(Long.parseLong(Patterns.TEMP_DELIMITER.split(s)[1])))
-                .forEach(s -> this.nodes.remove(s));
+                .collect(Collectors.toList());
+
+        toExpire.forEach(s -> this.nodes.remove(s));
+        return !toExpire.isEmpty();
     }
 
     private Map<String, Boolean> convertTemporaryPerms() {

@@ -32,6 +32,7 @@ import me.lucko.luckperms.core.LPConfiguration;
 import me.lucko.luckperms.core.UuidCache;
 import me.lucko.luckperms.data.Importer;
 import me.lucko.luckperms.groups.GroupManager;
+import me.lucko.luckperms.runnables.ExpireTemporaryTask;
 import me.lucko.luckperms.runnables.UpdateTask;
 import me.lucko.luckperms.storage.Datastore;
 import me.lucko.luckperms.storage.StorageFactory;
@@ -101,6 +102,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
         // 20 times per second (once per "tick")
         getProxy().getScheduler().schedule(this, BungeeSenderFactory.get(), 50L, 50L, TimeUnit.MILLISECONDS);
+        getProxy().getScheduler().schedule(this, new ExpireTemporaryTask(this), 3L, 3L, TimeUnit.SECONDS);
 
         getLog().info("Registering API...");
         LuckPerms.registerProvider(new ApiProvider(this));

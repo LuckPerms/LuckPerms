@@ -66,9 +66,7 @@ Example: if a user has a global "fly.use" permission, and then has a negated "fl
 Example: A user is a member of the default group, which grants "some.thing.perm", but the users own permissions has "some.thing.perm" set to false. The inherited permission will be overridden by the users own permissions, and the user will be granted the negative node.
 
 ### Temporary Permissions
-Temporary permissions are checked each time a user/group is loaded, and when the sync task runs. This means if you set a temporary permission to expire after 30 seconds, it won't actually be removed until the sync task runs.
-
-The only way around this is to decrease the sync interval.
+Temporary permissions are audited once every 3 seconds, to check if they have expired. This check happens regardless of the sync interval setting. This means that you can safely set temporary permissions to expire after a matter of seconds, and they will be removed on-time.
 
 ### Shorthand Permissions
 LuckPerms has it's own system (although it's quite similar to PermissionsEx :P) that allows you to set permissions in a shorthand format.

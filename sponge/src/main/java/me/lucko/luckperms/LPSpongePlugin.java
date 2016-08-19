@@ -33,6 +33,7 @@ import me.lucko.luckperms.core.LPConfiguration;
 import me.lucko.luckperms.core.UuidCache;
 import me.lucko.luckperms.data.Importer;
 import me.lucko.luckperms.groups.GroupManager;
+import me.lucko.luckperms.runnables.ExpireTemporaryTask;
 import me.lucko.luckperms.runnables.UpdateTask;
 import me.lucko.luckperms.storage.Datastore;
 import me.lucko.luckperms.storage.StorageFactory;
@@ -128,6 +129,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         }
 
         scheduler.createTaskBuilder().intervalTicks(1L).execute(SpongeSenderFactory.get()).submit(this);
+        scheduler.createTaskBuilder().async().intervalTicks(60L).execute(new ExpireTemporaryTask(this)).submit(this);
 
         getLog().info("Registering API...");
         final ApiProvider provider = new ApiProvider(this);

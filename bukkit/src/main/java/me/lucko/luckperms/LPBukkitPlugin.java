@@ -33,6 +33,7 @@ import me.lucko.luckperms.core.LPConfiguration;
 import me.lucko.luckperms.core.UuidCache;
 import me.lucko.luckperms.data.Importer;
 import me.lucko.luckperms.groups.GroupManager;
+import me.lucko.luckperms.runnables.ExpireTemporaryTask;
 import me.lucko.luckperms.runnables.UpdateTask;
 import me.lucko.luckperms.storage.Datastore;
 import me.lucko.luckperms.storage.StorageFactory;
@@ -81,7 +82,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         main.setTabCompleter(commandManager);
         main.setAliases(Arrays.asList("perms", "lp", "permissions", "p", "perm"));
 
-        datastore = StorageFactory.getDatastore(this, "sqlite");
+        datastore = StorageFactory.getDatastore(this, "h2");
 
         getLog().info("Loading internal permission managers...");
         uuidCache = new UuidCache(getConfiguration().getOnlineMode());
@@ -105,6 +106,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         }
 
         getServer().getScheduler().runTaskTimer(this, BukkitSenderFactory.get(), 1L, 1L);
+        getServer().getScheduler().runTaskTimerAsynchronously(this, new ExpireTemporaryTask(this), 60L, 60L);
 
         // Provide vault support
         getLog().info("Attempting to hook into Vault...");
