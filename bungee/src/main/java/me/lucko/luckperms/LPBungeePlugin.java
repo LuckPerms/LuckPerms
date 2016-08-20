@@ -88,14 +88,6 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         trackManager = new TrackManager();
         importer = new Importer(commandManager);
 
-        // Run update task to refresh any online users
-        getLog().info("Scheduling Update Task to refresh any online users.");
-        try {
-            new UpdateTask(this).run();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
         int mins = getConfiguration().getSyncTime();
         if (mins > 0) {
             getProxy().getScheduler().schedule(this, new UpdateTask(this), mins, mins, TimeUnit.MINUTES);
@@ -108,6 +100,14 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         getLog().info("Registering API...");
         apiProvider = new ApiProvider(this);
         LuckPerms.registerProvider(apiProvider);
+
+        // Run update task to refresh any online users
+        getLog().info("Scheduling Update Task to refresh any online users.");
+        try {
+            new UpdateTask(this).run();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         getLog().info("Successfully loaded.");
     }
