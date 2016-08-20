@@ -60,6 +60,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private TrackManager trackManager;
     private Datastore datastore;
     private UuidCache uuidCache;
+    private ApiProvider apiProvider;
     private Logger log;
     private Importer importer;
 
@@ -123,9 +124,9 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         }
 
         getLog().info("Registering API...");
-        final ApiProvider provider = new ApiProvider(this);
-        LuckPerms.registerProvider(provider);
-        getServer().getServicesManager().register(LuckPermsApi.class, provider, this, ServicePriority.Normal);
+        apiProvider = new ApiProvider(this);
+        LuckPerms.registerProvider(apiProvider);
+        getServer().getServicesManager().register(LuckPermsApi.class, apiProvider, this, ServicePriority.Normal);
 
         getLog().info("Successfully loaded.");
     }

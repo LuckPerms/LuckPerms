@@ -22,7 +22,6 @@
 
 package me.lucko.luckperms.api.implementation.internal;
 
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import me.lucko.luckperms.api.PermissionHolder;
@@ -39,8 +38,8 @@ import static me.lucko.luckperms.api.implementation.internal.Utils.*;
  * Provides a link between {@link PermissionHolder} and {@link me.lucko.luckperms.core.PermissionHolder}
  */
 @SuppressWarnings("unused")
-@AllArgsConstructor(access = AccessLevel.PACKAGE)
-class PermissionHolderLink implements PermissionHolder {
+@AllArgsConstructor
+public class PermissionHolderLink implements PermissionHolder {
 
     @NonNull
     private final me.lucko.luckperms.core.PermissionHolder master;

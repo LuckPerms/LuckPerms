@@ -20,39 +20,21 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.runnables;
+package me.lucko.luckperms.api.event.events;
 
-import lombok.AllArgsConstructor;
-import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.api.event.events.PostSyncEvent;
-import me.lucko.luckperms.api.event.events.PreSyncEvent;
+import me.lucko.luckperms.api.PermissionHolder;
+import me.lucko.luckperms.api.event.TargetedEvent;
 
-@AllArgsConstructor
-public class UpdateTask implements Runnable {
-    private final LuckPermsPlugin plugin;
+public class PermissionExpireEvent extends TargetedEvent<PermissionHolder> {
 
-    /**
-     * Called ASYNC
-     */
-    @Override
-    public void run() {
-        PreSyncEvent event = new PreSyncEvent();
-        plugin.getApiProvider().fireEvent(event);
-        if (event.isCancelled()) return;
+    private final String node;
 
-        // Reload all groups
-        plugin.getDatastore().loadAllGroups();
-        String defaultGroup = plugin.getConfiguration().getDefaultGroupName();
-        if (!plugin.getGroupManager().isLoaded(defaultGroup)) {
-            plugin.getDatastore().createAndLoadGroup(defaultGroup);
-        }
+    public PermissionExpireEvent(PermissionHolder target, String node) {
+        super("Permission Expire Event", target);
+        this.node = node;
+    }
 
-        // Reload all tracks
-        plugin.getDatastore().loadAllTracks();
-
-        // Refresh all online users.
-        plugin.getUserManager().updateAllUsers();
-
-        plugin.getApiProvider().fireEvent(new PostSyncEvent());;
+    public String getNode() {
+        return node;
     }
 }

@@ -23,6 +23,9 @@
 package me.lucko.luckperms.commands.user.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.api.event.events.UserPromoteEvent;
+import me.lucko.luckperms.api.implementation.internal.TrackLink;
+import me.lucko.luckperms.api.implementation.internal.UserLink;
 import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
@@ -107,6 +110,7 @@ public class UserPromote extends SubCommand<User> {
                 .action("promote " + track.getName() + "(from " + old + " to " + nextGroup.getName() + ")")
                 .build().submit(plugin);
         save(user, sender, plugin);
+        plugin.getApiProvider().fireEventAsync(new UserPromoteEvent(new TrackLink(track), new UserLink(user), old, nextGroup.getName()));
         return CommandResult.SUCCESS;
     }
 

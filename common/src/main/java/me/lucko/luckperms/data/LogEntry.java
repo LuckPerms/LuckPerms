@@ -23,6 +23,7 @@
 package me.lucko.luckperms.data;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.api.event.events.LogNotifyEvent;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
@@ -45,6 +46,10 @@ public class LogEntry extends me.lucko.luckperms.api.LogEntry {
 
     public void submit(LuckPermsPlugin plugin) {
         plugin.getDatastore().logAction(this);
+
+        LogNotifyEvent event = new LogNotifyEvent(this);
+        plugin.getApiProvider().fireEvent(event);
+        if (event.isCancelled()) return;
 
         final String msg = super.getFormatted();
 

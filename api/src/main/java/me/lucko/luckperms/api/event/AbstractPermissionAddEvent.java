@@ -20,39 +20,38 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.runnables;
+package me.lucko.luckperms.api.event;
 
-import lombok.AllArgsConstructor;
-import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.api.event.events.PostSyncEvent;
-import me.lucko.luckperms.api.event.events.PreSyncEvent;
+import me.lucko.luckperms.api.PermissionHolder;
 
-@AllArgsConstructor
-public class UpdateTask implements Runnable {
-    private final LuckPermsPlugin plugin;
+import java.util.Optional;
 
-    /**
-     * Called ASYNC
-     */
-    @Override
-    public void run() {
-        PreSyncEvent event = new PreSyncEvent();
-        plugin.getApiProvider().fireEvent(event);
-        if (event.isCancelled()) return;
+public class AbstractPermissionAddEvent extends TargetedEvent<PermissionHolder> {
 
-        // Reload all groups
-        plugin.getDatastore().loadAllGroups();
-        String defaultGroup = plugin.getConfiguration().getDefaultGroupName();
-        if (!plugin.getGroupManager().isLoaded(defaultGroup)) {
-            plugin.getDatastore().createAndLoadGroup(defaultGroup);
-        }
+    private final String server;
+    private final String world;
+    private final long expiry;
 
-        // Reload all tracks
-        plugin.getDatastore().loadAllTracks();
+    protected AbstractPermissionAddEvent(String eventName, PermissionHolder target, String server, String world, long expiry) {
+        super(eventName, target);
+        this.server = server;
+        this.world = world;
+        this.expiry = expiry;
+    }
 
-        // Refresh all online users.
-        plugin.getUserManager().updateAllUsers();
+    public Optional<String> getServer() {
+        return Optional.ofNullable(server);
+    }
 
-        plugin.getApiProvider().fireEvent(new PostSyncEvent());;
+    public Optional<String> getWorld() {
+        return Optional.ofNullable(world);
+    }
+
+    public boolean isTemporary() {
+        return expiry != 0L;
+    }
+
+    public long getExpiry() {
+        return expiry;
     }
 }

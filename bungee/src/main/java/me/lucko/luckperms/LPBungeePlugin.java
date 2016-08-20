@@ -57,6 +57,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     private TrackManager trackManager;
     private Datastore datastore;
     private UuidCache uuidCache;
+    private ApiProvider apiProvider;
     private Logger log;
     private Importer importer;
 
@@ -105,7 +106,8 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         getProxy().getScheduler().schedule(this, new ExpireTemporaryTask(this), 3L, 3L, TimeUnit.SECONDS);
 
         getLog().info("Registering API...");
-        LuckPerms.registerProvider(new ApiProvider(this));
+        apiProvider = new ApiProvider(this);
+        LuckPerms.registerProvider(apiProvider);
 
         getLog().info("Successfully loaded.");
     }

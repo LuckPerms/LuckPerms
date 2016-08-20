@@ -25,6 +25,7 @@ package me.lucko.luckperms.utils;
 import lombok.AllArgsConstructor;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.api.data.Callback;
+import me.lucko.luckperms.api.event.events.UserFirstLoginEvent;
 import me.lucko.luckperms.core.UuidCache;
 import me.lucko.luckperms.users.User;
 
@@ -44,10 +45,16 @@ public class AbstractListener {
                 cache.addToCache(u, uuid);
             } else {
                 // No previous data for this player
+                plugin.getApiProvider().fireEventAsync(new UserFirstLoginEvent(u, username));
                 cache.addToCache(u, u);
                 plugin.getDatastore().saveUUIDData(username, u, Callback.empty());
             }
         } else {
+            UUID uuid = plugin.getDatastore().getUUID(username);
+            if (uuid == null) {
+                plugin.getApiProvider().fireEventAsync(new UserFirstLoginEvent(u, username));
+            }
+
             // Online mode, no cache needed. This is just for name -> uuid lookup.
             plugin.getDatastore().saveUUIDData(username, u, Callback.empty());
         }

@@ -22,10 +22,13 @@
 
 package me.lucko.luckperms.api.implementation;
 
+import com.google.common.eventbus.EventBus;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.api.*;
+import me.lucko.luckperms.api.event.LPEvent;
+import me.lucko.luckperms.api.event.LPListener;
 import me.lucko.luckperms.api.implementation.internal.*;
 
 import java.util.Optional;
@@ -39,6 +42,21 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class ApiProvider implements LuckPermsApi {
     private final LuckPermsPlugin plugin;
+    private final EventBus eventBus = new EventBus("LuckPerms");
+
+    public void fireEventAsync(LPEvent event) {
+        plugin.doAsync(() -> fireEvent(event));
+    }
+
+    public void fireEvent(LPEvent event) {
+        try {
+            event.setApi(this);
+            eventBus.post(event);
+        } catch (Exception e) {
+            getLogger().severe("Couldn't fire LuckPerms Event: " + event.getEventName());
+            e.printStackTrace();
+        }
+    }
 
     @Override
     public void runUpdateTask() {
@@ -48,6 +66,16 @@ public class ApiProvider implements LuckPermsApi {
     @Override
     public String getVersion() {
         return plugin.getVersion();
+    }
+
+    @Override
+    public void registerListener(LPListener listener) {
+        eventBus.register(listener);
+    }
+
+    @Override
+    public void unregisterListener(LPListener listener) {
+        eventBus.unregister(listener);
     }
 
     @Override

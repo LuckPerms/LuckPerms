@@ -20,39 +20,10 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.runnables;
+package me.lucko.luckperms.api.event;
 
-import lombok.AllArgsConstructor;
-import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.api.event.events.PostSyncEvent;
-import me.lucko.luckperms.api.event.events.PreSyncEvent;
-
-@AllArgsConstructor
-public class UpdateTask implements Runnable {
-    private final LuckPermsPlugin plugin;
-
-    /**
-     * Called ASYNC
-     */
-    @Override
-    public void run() {
-        PreSyncEvent event = new PreSyncEvent();
-        plugin.getApiProvider().fireEvent(event);
-        if (event.isCancelled()) return;
-
-        // Reload all groups
-        plugin.getDatastore().loadAllGroups();
-        String defaultGroup = plugin.getConfiguration().getDefaultGroupName();
-        if (!plugin.getGroupManager().isLoaded(defaultGroup)) {
-            plugin.getDatastore().createAndLoadGroup(defaultGroup);
-        }
-
-        // Reload all tracks
-        plugin.getDatastore().loadAllTracks();
-
-        // Refresh all online users.
-        plugin.getUserManager().updateAllUsers();
-
-        plugin.getApiProvider().fireEvent(new PostSyncEvent());;
-    }
+/**
+ * Used to mark a class that listens for LuckPerms events
+ */
+public interface LPListener {
 }

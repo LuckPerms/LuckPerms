@@ -27,6 +27,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.api.event.events.GroupAddEvent;
+import me.lucko.luckperms.api.implementation.internal.GroupLink;
+import me.lucko.luckperms.api.implementation.internal.PermissionHolderLink;
 import me.lucko.luckperms.constants.Patterns;
 import me.lucko.luckperms.core.PermissionHolder;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
@@ -121,7 +124,8 @@ public abstract class User extends PermissionHolder implements Identifiable<UUID
      * @throws ObjectAlreadyHasException if the user is already a member of the group
      */
     public void addGroup(Group group) throws ObjectAlreadyHasException {
-        addGroup(group, "global");
+        setPermission("group." + group.getName(), true);
+        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderLink(this), new GroupLink(group), null, null, 0L));
     }
 
     /**
@@ -136,6 +140,7 @@ public abstract class User extends PermissionHolder implements Identifiable<UUID
         }
 
         setPermission("group." + group.getName(), true, server);
+        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderLink(this), new GroupLink(group), server, null, 0L));
     }
 
     /**
@@ -151,6 +156,7 @@ public abstract class User extends PermissionHolder implements Identifiable<UUID
         }
 
         setPermission("group." + group.getName(), true, server, world);
+        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderLink(this), new GroupLink(group), server, world, 0L));
     }
 
     /**
@@ -161,6 +167,7 @@ public abstract class User extends PermissionHolder implements Identifiable<UUID
      */
     public void addGroup(Group group, long expireAt) throws ObjectAlreadyHasException {
         setPermission("group." + group.getName(), true, expireAt);
+        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderLink(this), new GroupLink(group), null, null, expireAt));
     }
 
     /**
@@ -176,6 +183,7 @@ public abstract class User extends PermissionHolder implements Identifiable<UUID
         }
 
         setPermission("group." + group.getName(), true, server, expireAt);
+        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderLink(this), new GroupLink(group), server, null, expireAt));
     }
 
     /**
@@ -192,6 +200,7 @@ public abstract class User extends PermissionHolder implements Identifiable<UUID
         }
 
         setPermission("group." + group.getName(), true, server, world, expireAt);
+        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderLink(this), new GroupLink(group), server, world, expireAt));
     }
 
     /**

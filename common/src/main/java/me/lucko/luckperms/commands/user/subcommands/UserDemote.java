@@ -23,6 +23,9 @@
 package me.lucko.luckperms.commands.user.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.api.event.events.UserDemoteEvent;
+import me.lucko.luckperms.api.implementation.internal.TrackLink;
+import me.lucko.luckperms.api.implementation.internal.UserLink;
 import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
@@ -107,6 +110,7 @@ public class UserDemote extends SubCommand<User> {
                 .action("demote " + track.getName() + "(from " + old + " to " + previousGroup.getName() + ")")
                 .build().submit(plugin);
         save(user, sender, plugin);
+        plugin.getApiProvider().fireEventAsync(new UserDemoteEvent(new TrackLink(track), new UserLink(user), old, previousGroup.getName()));
         return CommandResult.SUCCESS;
     }
 

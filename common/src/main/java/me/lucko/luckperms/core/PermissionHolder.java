@@ -26,6 +26,11 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.api.event.events.GroupRemoveEvent;
+import me.lucko.luckperms.api.event.events.PermissionExpireEvent;
+import me.lucko.luckperms.api.event.events.PermissionSetEvent;
+import me.lucko.luckperms.api.event.events.PermissionUnsetEvent;
+import me.lucko.luckperms.api.implementation.internal.PermissionHolderLink;
 import me.lucko.luckperms.constants.Patterns;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
@@ -252,11 +257,7 @@ public abstract class PermissionHolder {
      * @throws ObjectAlreadyHasException if the object already has the permission
      */
     public void setPermission(String node, boolean value) throws ObjectAlreadyHasException {
-        if (node.startsWith("global/")) node = node.replace("global/", "");
-        if (hasPermission(node, value)) {
-            throw new ObjectAlreadyHasException();
-        }
-        this.nodes.put(node, value);
+        setPermission(node, value, null, null, 0L);
     }
 
     /**
@@ -267,7 +268,7 @@ public abstract class PermissionHolder {
      * @throws ObjectAlreadyHasException if the object already has the permission
      */
     public void setPermission(String node, boolean value, String server) throws ObjectAlreadyHasException {
-        setPermission(server + "/" + node, value);
+        setPermission(node, value, server, null, 0L);
     }
 
     /**
@@ -279,7 +280,7 @@ public abstract class PermissionHolder {
      * @throws ObjectAlreadyHasException if the object already has the permission
      */
     public void setPermission(String node, boolean value, String server, String world) throws ObjectAlreadyHasException {
-        setPermission(server + "-" + world + "/" + node, value);
+        setPermission(node, value, server, world, 0L);
     }
 
     /**
@@ -290,7 +291,7 @@ public abstract class PermissionHolder {
      * @throws ObjectAlreadyHasException if the object already has the permission
      */
     public void setPermission(String node, boolean value, long expireAt) throws ObjectAlreadyHasException {
-        setPermission(node + "$" + expireAt, value);
+        setPermission(node, value, null, null, expireAt);
     }
 
     /**
@@ -302,7 +303,7 @@ public abstract class PermissionHolder {
      * @throws ObjectAlreadyHasException if the object already has the permission
      */
     public void setPermission(String node, boolean value, String server, long expireAt) throws ObjectAlreadyHasException {
-        setPermission(node + "$" + expireAt, value, server);
+        setPermission(node, value, server, null, expireAt);
     }
 
     /**
@@ -315,7 +316,43 @@ public abstract class PermissionHolder {
      * @throws ObjectAlreadyHasException if the object already has the permission
      */
     public void setPermission(String node, boolean value, String server, String world, long expireAt) throws ObjectAlreadyHasException {
-        setPermission(node + "$" + expireAt, value, server, world);
+        if (node.startsWith("global/")) node = node.replace("global/", "");
+
+        if (server != null && server.equals("")) server = null;
+        if (world != null && world.equals("")) world = null;
+
+        StringBuilder builder = new StringBuilder();
+
+        if (server != null) {
+            builder.append(server);
+
+            if (world != null) {
+                builder.append("-").append(world);
+            }
+            builder.append("/");
+        } else {
+            if (world != null) {
+                builder.append("global-").append(world);
+            }
+            builder.append("/");
+        }
+
+        builder.append(node);
+
+        if (expireAt != 0L) {
+            builder.append("$").append(expireAt);
+        }
+
+        final String finalNode = builder.toString();
+
+
+        if (hasPermission(node, value)) {
+            throw new ObjectAlreadyHasException();
+        }
+
+        this.nodes.put(finalNode, value);
+        plugin.getApiProvider().fireEventAsync(new PermissionSetEvent(
+                new PermissionHolderLink(this), node, value, server, world, expireAt));
     }
 
     /**
@@ -325,26 +362,7 @@ public abstract class PermissionHolder {
      * @throws ObjectLacksException if the node wasn't already set
      */
     public void unsetPermission(String node, boolean temporary) throws ObjectLacksException {
-        if (node.startsWith("global/")) node = node.replace("global/", "");
-        final String fNode = node;
-        Optional<String> match = Optional.empty();
-
-        if (temporary) {
-            match = this.nodes.keySet().stream()
-                    .filter(n -> n.contains("$"))
-                    .filter(n -> Patterns.TEMP_DELIMITER.split(n)[0].equalsIgnoreCase(fNode))
-                    .findFirst();
-        } else {
-            if (this.nodes.containsKey(fNode)) {
-                match = Optional.of(fNode);
-            }
-        }
-
-        if (match.isPresent()) {
-            this.nodes.remove(match.get());
-        } else {
-            throw new ObjectLacksException();
-        }
+        unsetPermission(node, null, null, temporary);
     }
 
     /**
@@ -353,7 +371,7 @@ public abstract class PermissionHolder {
      * @throws ObjectLacksException if the node wasn't already set
      */
     public void unsetPermission(String node) throws ObjectLacksException {
-        unsetPermission(node, node.contains("$"));
+        unsetPermission(node, null, null, false);
     }
 
     /**
@@ -363,7 +381,7 @@ public abstract class PermissionHolder {
      * @throws ObjectLacksException if the node wasn't already set
      */
     public void unsetPermission(String node, String server) throws ObjectLacksException {
-        unsetPermission(server + "/" + node);
+        unsetPermission(node, server, null, false);
     }
 
     /**
@@ -374,7 +392,7 @@ public abstract class PermissionHolder {
      * @throws ObjectLacksException if the node wasn't already set
      */
     public void unsetPermission(String node, String server, String world) throws ObjectLacksException {
-        unsetPermission(server + "-" + world + "/" + node);
+        unsetPermission(node, server, world, false);
     }
 
     /**
@@ -385,7 +403,7 @@ public abstract class PermissionHolder {
      * @throws ObjectLacksException if the node wasn't already set
      */
     public void unsetPermission(String node, String server, boolean temporary) throws ObjectLacksException {
-        unsetPermission(server + "/" + node, temporary);
+        unsetPermission(node, server, null, temporary);
     }
 
     /**
@@ -397,7 +415,55 @@ public abstract class PermissionHolder {
      * @throws ObjectLacksException if the node wasn't already set
      */
     public void unsetPermission(String node, String server, String world, boolean temporary) throws ObjectLacksException {
-        unsetPermission(server + "-" + world + "/" + node, temporary);
+        if (node.startsWith("global/")) node = node.replace("global/", "");
+
+        if (server != null && server.equals("")) server = null;
+        if (world != null && world.equals("")) world = null;
+
+        StringBuilder builder = new StringBuilder();
+
+        if (server != null) {
+            builder.append(server);
+
+            if (world != null) {
+                builder.append("-").append(world);
+            }
+            builder.append("/");
+        } else {
+            if (world != null) {
+                builder.append("global-").append(world);
+            }
+            builder.append("/");
+        }
+
+        builder.append(node);
+
+        final String finalNode = builder.toString();
+        Optional<String> match = Optional.empty();
+
+        if (temporary) {
+            match = this.nodes.keySet().stream()
+                    .filter(n -> n.contains("$"))
+                    .filter(n -> Patterns.TEMP_DELIMITER.split(n)[0].equalsIgnoreCase(finalNode))
+                    .findFirst();
+        } else {
+            if (this.nodes.containsKey(finalNode)) {
+                match = Optional.of(finalNode);
+            }
+        }
+
+        if (match.isPresent()) {
+            this.nodes.remove(match.get());
+            plugin.getApiProvider().fireEventAsync(new PermissionUnsetEvent(
+                    new PermissionHolderLink(this), node, server, world, temporary));
+            if (node.startsWith("group.")) {
+                plugin.getApiProvider().fireEventAsync(new GroupRemoveEvent(
+                        new PermissionHolderLink(this), Patterns.DOT.split(node, 2)[1], server, world, temporary));
+            }
+
+        } else {
+            throw new ObjectLacksException();
+        }
     }
 
     /**
@@ -476,7 +542,10 @@ public abstract class PermissionHolder {
                 .filter(s -> DateUtil.shouldExpire(Long.parseLong(Patterns.TEMP_DELIMITER.split(s)[1])))
                 .collect(Collectors.toList());
 
-        toExpire.forEach(s -> this.nodes.remove(s));
+        toExpire.forEach(s -> {
+            plugin.getApiProvider().fireEventAsync(new PermissionExpireEvent(new PermissionHolderLink(this), s));
+            this.nodes.remove(s);
+        });
         return !toExpire.isEmpty();
     }
 

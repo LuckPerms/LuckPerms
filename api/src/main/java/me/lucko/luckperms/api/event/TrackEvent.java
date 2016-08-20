@@ -20,39 +20,39 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.runnables;
+package me.lucko.luckperms.api.event;
 
-import lombok.AllArgsConstructor;
-import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.api.event.events.PostSyncEvent;
-import me.lucko.luckperms.api.event.events.PreSyncEvent;
+import me.lucko.luckperms.api.Track;
+import me.lucko.luckperms.api.User;
 
-@AllArgsConstructor
-public class UpdateTask implements Runnable {
-    private final LuckPermsPlugin plugin;
+public abstract class TrackEvent extends LPEvent {
 
-    /**
-     * Called ASYNC
-     */
-    @Override
-    public void run() {
-        PreSyncEvent event = new PreSyncEvent();
-        plugin.getApiProvider().fireEvent(event);
-        if (event.isCancelled()) return;
+    private final Track track;
+    private final User user;
+    private final String fromGroup;
+    private final String toGroup;
 
-        // Reload all groups
-        plugin.getDatastore().loadAllGroups();
-        String defaultGroup = plugin.getConfiguration().getDefaultGroupName();
-        if (!plugin.getGroupManager().isLoaded(defaultGroup)) {
-            plugin.getDatastore().createAndLoadGroup(defaultGroup);
-        }
+    protected TrackEvent(String eventName, Track track, User user, String fromGroup, String toGroup) {
+        super(eventName);
+        this.track = track;
+        this.user = user;
+        this.fromGroup = fromGroup;
+        this.toGroup = toGroup;
+    }
 
-        // Reload all tracks
-        plugin.getDatastore().loadAllTracks();
+    public Track getTrack() {
+        return track;
+    }
 
-        // Refresh all online users.
-        plugin.getUserManager().updateAllUsers();
+    public User getUser() {
+        return user;
+    }
 
-        plugin.getApiProvider().fireEvent(new PostSyncEvent());;
+    public String getFromGroup() {
+        return fromGroup;
+    }
+
+    public String getToGroup() {
+        return toGroup;
     }
 }

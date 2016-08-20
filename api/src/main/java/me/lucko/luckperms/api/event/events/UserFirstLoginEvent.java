@@ -20,39 +20,32 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.runnables;
+package me.lucko.luckperms.api.event.events;
 
-import lombok.AllArgsConstructor;
-import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.api.event.events.PostSyncEvent;
-import me.lucko.luckperms.api.event.events.PreSyncEvent;
+import me.lucko.luckperms.api.event.LPEvent;
 
-@AllArgsConstructor
-public class UpdateTask implements Runnable {
-    private final LuckPermsPlugin plugin;
+import java.util.UUID;
 
-    /**
-     * Called ASYNC
-     */
-    @Override
-    public void run() {
-        PreSyncEvent event = new PreSyncEvent();
-        plugin.getApiProvider().fireEvent(event);
-        if (event.isCancelled()) return;
+/**
+ * This event is fired before the player has actually joined the game on the async login / auth event.
+ * If you want to do something with the user, store the UUID in a set, and then check the set in the PlayerJoinEvent o.e.
+ */
+public class UserFirstLoginEvent extends LPEvent {
 
-        // Reload all groups
-        plugin.getDatastore().loadAllGroups();
-        String defaultGroup = plugin.getConfiguration().getDefaultGroupName();
-        if (!plugin.getGroupManager().isLoaded(defaultGroup)) {
-            plugin.getDatastore().createAndLoadGroup(defaultGroup);
-        }
+    private final UUID uuid;
+    private final String username;
 
-        // Reload all tracks
-        plugin.getDatastore().loadAllTracks();
+    public UserFirstLoginEvent(UUID uuid, String username) {
+        super("User First Join Event");
+        this.uuid = uuid;
+        this.username = username;
+    }
 
-        // Refresh all online users.
-        plugin.getUserManager().updateAllUsers();
+    public UUID getUuid() {
+        return uuid;
+    }
 
-        plugin.getApiProvider().fireEvent(new PostSyncEvent());;
+    public String getUsername() {
+        return username;
     }
 }

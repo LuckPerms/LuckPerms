@@ -25,6 +25,8 @@ package me.lucko.luckperms.users;
 import lombok.Getter;
 import lombok.Setter;
 import me.lucko.luckperms.LPBukkitPlugin;
+import me.lucko.luckperms.api.event.events.UserPermissionRefreshEvent;
+import me.lucko.luckperms.api.implementation.internal.UserLink;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
 
@@ -104,6 +106,8 @@ public class BukkitUser extends User {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
+            plugin.getApiProvider().fireEventAsync(new UserPermissionRefreshEvent(new UserLink(this)));
         });
     }
 }

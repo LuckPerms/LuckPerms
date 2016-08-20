@@ -86,6 +86,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     private TrackManager trackManager;
     private Datastore datastore;
     private UuidCache uuidCache;
+    private ApiProvider apiProvider;
     private me.lucko.luckperms.api.Logger log;
     private Importer importer;
 
@@ -132,9 +133,9 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         scheduler.createTaskBuilder().async().intervalTicks(60L).execute(new ExpireTemporaryTask(this)).submit(this);
 
         getLog().info("Registering API...");
-        final ApiProvider provider = new ApiProvider(this);
-        LuckPerms.registerProvider(provider);
-        Sponge.getServiceManager().setProvider(this, LuckPermsApi.class, provider);
+        apiProvider = new ApiProvider(this);
+        LuckPerms.registerProvider(apiProvider);
+        Sponge.getServiceManager().setProvider(this, LuckPermsApi.class, apiProvider);
 
         getLog().info("Successfully loaded.");
     }

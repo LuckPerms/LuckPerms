@@ -20,39 +20,34 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.runnables;
+package me.lucko.luckperms.api.event.events;
 
-import lombok.AllArgsConstructor;
-import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.api.event.events.PostSyncEvent;
-import me.lucko.luckperms.api.event.events.PreSyncEvent;
+import me.lucko.luckperms.api.PermissionHolder;
+import me.lucko.luckperms.api.event.AbstractPermissionAddEvent;
 
-@AllArgsConstructor
-public class UpdateTask implements Runnable {
-    private final LuckPermsPlugin plugin;
+import java.util.AbstractMap;
+import java.util.Map;
 
-    /**
-     * Called ASYNC
-     */
-    @Override
-    public void run() {
-        PreSyncEvent event = new PreSyncEvent();
-        plugin.getApiProvider().fireEvent(event);
-        if (event.isCancelled()) return;
+public class PermissionSetEvent extends AbstractPermissionAddEvent {
 
-        // Reload all groups
-        plugin.getDatastore().loadAllGroups();
-        String defaultGroup = plugin.getConfiguration().getDefaultGroupName();
-        if (!plugin.getGroupManager().isLoaded(defaultGroup)) {
-            plugin.getDatastore().createAndLoadGroup(defaultGroup);
-        }
+    private final String node;
+    private final boolean value;
 
-        // Reload all tracks
-        plugin.getDatastore().loadAllTracks();
+    public PermissionSetEvent(PermissionHolder target, String node, boolean value, String server, String world, long expiry) {
+        super("Permission Set Event", target, server, world, expiry);
+        this.node = node;
+        this.value = value;
+    }
 
-        // Refresh all online users.
-        plugin.getUserManager().updateAllUsers();
+    public String getNode() {
+        return node;
+    }
 
-        plugin.getApiProvider().fireEvent(new PostSyncEvent());;
+    public boolean getValue() {
+        return value;
+    }
+
+    public Map.Entry<String, Boolean> getEntry() {
+        return new AbstractMap.SimpleEntry<>(node, value);
     }
 }

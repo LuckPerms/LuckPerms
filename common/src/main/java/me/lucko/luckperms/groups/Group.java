@@ -26,6 +26,9 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.api.event.events.GroupAddEvent;
+import me.lucko.luckperms.api.implementation.internal.GroupLink;
+import me.lucko.luckperms.api.implementation.internal.PermissionHolderLink;
 import me.lucko.luckperms.constants.Patterns;
 import me.lucko.luckperms.core.PermissionHolder;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
@@ -92,7 +95,12 @@ public class Group extends PermissionHolder implements Identifiable<String> {
      * @throws ObjectAlreadyHasException if the group already inherits the group
      */
     public void setInheritGroup(Group group) throws ObjectAlreadyHasException {
-        setInheritGroup(group, "global");
+        if (group.getName().equalsIgnoreCase(this.getName())) {
+            throw new ObjectAlreadyHasException();
+        }
+
+        setPermission("group." + group.getName(), true);
+        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderLink(this), new GroupLink(group), null, null, 0L));
     }
 
     /**
@@ -111,6 +119,7 @@ public class Group extends PermissionHolder implements Identifiable<String> {
         }
 
         setPermission("group." + group.getName(), true, server);
+        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderLink(this), new GroupLink(group), server, null, 0L));
     }
 
     /**
@@ -130,6 +139,7 @@ public class Group extends PermissionHolder implements Identifiable<String> {
         }
 
         setPermission("group." + group.getName(), true, server, world);
+        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderLink(this), new GroupLink(group), server, world, 0L));
     }
 
     /**
@@ -144,6 +154,7 @@ public class Group extends PermissionHolder implements Identifiable<String> {
         }
 
         setPermission("group." + group.getName(), true, expireAt);
+        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderLink(this), new GroupLink(group), null, null, expireAt));
     }
 
     /**
@@ -163,6 +174,7 @@ public class Group extends PermissionHolder implements Identifiable<String> {
         }
 
         setPermission("group." + group.getName(), true, server, expireAt);
+        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderLink(this), new GroupLink(group), server, null, expireAt));
     }
 
     /**
@@ -183,6 +195,7 @@ public class Group extends PermissionHolder implements Identifiable<String> {
         }
 
         setPermission("group." + group.getName(), true, server, world, expireAt);
+        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderLink(this), new GroupLink(group), server, world, expireAt));
     }
 
     /**

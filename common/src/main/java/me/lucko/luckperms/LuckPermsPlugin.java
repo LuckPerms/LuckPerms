@@ -23,6 +23,7 @@
 package me.lucko.luckperms;
 
 import me.lucko.luckperms.api.Logger;
+import me.lucko.luckperms.api.implementation.ApiProvider;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.core.LPConfiguration;
@@ -44,47 +45,18 @@ import java.util.UUID;
  */
 public interface LuckPermsPlugin {
 
-    /**
-     * Retrieves the {@link UserManager} used to manage users and their permissions/groups
-     * @return the {@link UserManager} instance
+    /*
+     * Access to all of the main internal manager classes
      */
     UserManager getUserManager();
-
-    /**
-     * Retrieves the {@link GroupManager} used to manage the loaded groups and modify their permissions
-     * @return the {@link GroupManager} instance
-     */
     GroupManager getGroupManager();
-
-    /**
-     * Retrieves the {@link TrackManager} used to manage the loaded tracks
-     * @return the {@link TrackManager} instance
-     */
     TrackManager getTrackManager();
-
-    /**
-     * Retrieves the {@link LPConfiguration} for getting values from the config
-     * @return the {@link LPConfiguration} implementation for the platform
-     */
     LPConfiguration getConfiguration();
-
-    /**
-     * Retrieves the {@link Datastore} for loading/saving plugin data
-     * @return the {@link Datastore} object
-     */
     Datastore getDatastore();
-
-    /**
-     * Retrieves the {@link Logger} for the plugin
-     * @return the plugin's {@link Logger}
-     */
     Logger getLog();
-
-    /**
-     * Retrieves the {@link UuidCache} for the plugin
-     * @return the plugin's {@link UuidCache}
-     */
     UuidCache getUuidCache();
+    ApiProvider getApiProvider();
+    Importer getImporter();
 
     /**
      * @return the version of the plugin
@@ -100,11 +72,6 @@ public interface LuckPermsPlugin {
      * @return the platforms data folder
      */
     File getDataFolder();
-
-    /**
-     * @return the importer instance for the platform
-     */
-    Importer getImporter();
 
     /**
      * Returns a colored string indicating the status of a player
@@ -126,14 +93,12 @@ public interface LuckPermsPlugin {
     List<String> getPlayerList();
 
     /**
-     * Gets a list of all Senders online on the platform
-     * @return a {@link List} of senders
+     * @return a {@link List} of senders online on the platform
      */
     List<Sender> getSenders();
 
     /**
-     * Gets the console sender of the instance
-     * @return a the console sender of the instance
+     * @return the console sender of the instance
      */
     Sender getConsoleSender();
 

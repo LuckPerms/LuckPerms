@@ -152,10 +152,45 @@ You can add LuckPerms as a Maven dependency by adding the following to your proj
     <dependency>
         <groupId>me.lucko.luckperms</groupId>
         <artifactId>luckperms-api</artifactId>
-        <version>2.4</version>
+        <version>2.5</version>
     </dependency>
 </dependencies>
 ````
+
+### Events
+LuckPerms exposes a full read/write API, as well as an event listening system. Due to the multi-platform nature of the project, an internal Event system is used, as opposed to the systems already in place on each platform. (the Bukkit Event api, for example). This means that simply registering your listener with the platform is not sufficient.
+
+All events are *fired asynchronously*. This means you should not interact with or call any non-thread safe methods from within listeners.
+
+To listen to an event, you need to first make a class that implements `LPListener`. Then within this class, you can define all of your listener methods.
+
+Each listener method must be annotated with `@Subscribe`. For example...
+
+```java
+package me.lucko.test;
+
+import com.google.common.eventbus.Subscribe;
+import me.lucko.luckperms.api.event.LPListener;
+import me.lucko.luckperms.api.event.events.PermissionSetEvent;
+
+public class TestListener implements LPListener {
+
+    @Subscribe
+    public void onPermissionSet(PermissionSetEvent event) {
+
+    }
+
+}
+```
+
+You also need to register your new Listener with the API.
+```java
+@Override
+public void onEnable() {
+    LuckPermsApi api;
+    api.registerListener(new TestListener());
+}
+```
 
 ## Versioning
 As of version 2.0, LuckPerms roughly follows the standards set out in Semantic Versioning.

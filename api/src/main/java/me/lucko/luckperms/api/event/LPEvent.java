@@ -20,39 +20,39 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.runnables;
+package me.lucko.luckperms.api.event;
 
-import lombok.AllArgsConstructor;
-import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.api.event.events.PostSyncEvent;
-import me.lucko.luckperms.api.event.events.PreSyncEvent;
+import me.lucko.luckperms.api.LuckPermsApi;
 
-@AllArgsConstructor
-public class UpdateTask implements Runnable {
-    private final LuckPermsPlugin plugin;
+public abstract class LPEvent {
 
     /**
-     * Called ASYNC
+     * A link to the API instance provided for convenience.
      */
-    @Override
-    public void run() {
-        PreSyncEvent event = new PreSyncEvent();
-        plugin.getApiProvider().fireEvent(event);
-        if (event.isCancelled()) return;
+    private LuckPermsApi api = null;
 
-        // Reload all groups
-        plugin.getDatastore().loadAllGroups();
-        String defaultGroup = plugin.getConfiguration().getDefaultGroupName();
-        if (!plugin.getGroupManager().isLoaded(defaultGroup)) {
-            plugin.getDatastore().createAndLoadGroup(defaultGroup);
-        }
+    /**
+     * A friendly name of the event
+     */
+    private final String eventName;
 
-        // Reload all tracks
-        plugin.getDatastore().loadAllTracks();
-
-        // Refresh all online users.
-        plugin.getUserManager().updateAllUsers();
-
-        plugin.getApiProvider().fireEvent(new PostSyncEvent());;
+    protected LPEvent(String eventName) {
+        this.eventName = eventName;
     }
+
+    public String getEventName() {
+        return eventName;
+    }
+
+    public LuckPermsApi getApi() {
+        return api;
+    }
+
+    public void setApi(LuckPermsApi api) {
+        if (this.api != null) {
+            throw new IllegalStateException("API can only be set once.");
+        }
+        this.api = api;
+    }
+
 }

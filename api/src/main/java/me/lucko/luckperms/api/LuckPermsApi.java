@@ -22,6 +22,8 @@
 
 package me.lucko.luckperms.api;
 
+import me.lucko.luckperms.api.event.LPListener;
+
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -41,6 +43,18 @@ public interface LuckPermsApi {
      * @return the version of the plugin running on the platform
      */
     String getVersion();
+
+    /**
+     * Registers a listener to be sent LuckPerms events
+     * @param listener the listener instance
+     */
+    void registerListener(LPListener listener);
+
+    /**
+     * Unregisters a previously registered listener from the EventBus
+     * @param listener the listener instance to unregister
+     */
+    void unregisterListener(LPListener listener);
 
     /**
      * Gets a wrapped {@link LPConfiguration} instance, with read only access

@@ -20,39 +20,21 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.runnables;
+package me.lucko.luckperms.api.event;
 
-import lombok.AllArgsConstructor;
-import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.api.event.events.PostSyncEvent;
-import me.lucko.luckperms.api.event.events.PreSyncEvent;
+public class CancellableEvent extends LPEvent {
 
-@AllArgsConstructor
-public class UpdateTask implements Runnable {
-    private final LuckPermsPlugin plugin;
+    private boolean cancelled = false;
 
-    /**
-     * Called ASYNC
-     */
-    @Override
-    public void run() {
-        PreSyncEvent event = new PreSyncEvent();
-        plugin.getApiProvider().fireEvent(event);
-        if (event.isCancelled()) return;
+    protected CancellableEvent(String eventName) {
+        super(eventName);
+    }
 
-        // Reload all groups
-        plugin.getDatastore().loadAllGroups();
-        String defaultGroup = plugin.getConfiguration().getDefaultGroupName();
-        if (!plugin.getGroupManager().isLoaded(defaultGroup)) {
-            plugin.getDatastore().createAndLoadGroup(defaultGroup);
-        }
+    public boolean isCancelled() {
+        return cancelled;
+    }
 
-        // Reload all tracks
-        plugin.getDatastore().loadAllTracks();
-
-        // Refresh all online users.
-        plugin.getUserManager().updateAllUsers();
-
-        plugin.getApiProvider().fireEvent(new PostSyncEvent());;
+    public void setCancelled(boolean cancelled) {
+        this.cancelled = cancelled;
     }
 }
