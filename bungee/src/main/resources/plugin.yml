@@ -1,5 +1,5 @@
 name: LuckPerms
 author: Luck
-version: ${project.version}.${git.closest.tag.commit.count}
+version: ${release.version}.${git.closest.tag.commit.count}
 main: me.lucko.luckperms.LPBungeePlugin
 description: A permissions plugin
