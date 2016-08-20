@@ -98,7 +98,7 @@ public class GroupSetTempPermission extends SubCommand<Group> {
                             DateUtil.formatDateDiff(duration));
                     LogEntry.build().actor(sender).acted(group)
                             .action("settemp " + node + " " + b + " " + duration + " " + server)
-                            .build().submit(plugin);
+                            .build().submit(plugin, sender);
                 } else {
                     final String world = args.get(4).toLowerCase();
                     group.setPermission(node, b, server, world, duration);
@@ -106,7 +106,7 @@ public class GroupSetTempPermission extends SubCommand<Group> {
                             world, DateUtil.formatDateDiff(duration));
                     LogEntry.build().actor(sender).acted(group)
                             .action("settemp " + node + " " + b + " " + duration + " " + server + " " + world)
-                            .build().submit(plugin);
+                            .build().submit(plugin, sender);
                 }
 
             } else {
@@ -114,7 +114,7 @@ public class GroupSetTempPermission extends SubCommand<Group> {
                 Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, bool, group.getName(), DateUtil.formatDateDiff(duration));
                 LogEntry.build().actor(sender).acted(group)
                         .action("settemp " + node + " " + b + " " + duration)
-                        .build().submit(plugin);
+                        .build().submit(plugin, sender);
             }
 
             save(group, sender, plugin);

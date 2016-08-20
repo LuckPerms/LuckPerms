@@ -76,14 +76,14 @@ public class UserAddGroup extends SubCommand<User> {
                     Message.USER_ADDGROUP_SERVER_SUCCESS.send(sender, user.getName(), groupName, server);
                     LogEntry.build().actor(sender).acted(user)
                             .action("addgroup " + group.getName() + " " + server)
-                            .build().submit(plugin);
+                            .build().submit(plugin, sender);
                 } else {
                     final String world = args.get(2).toLowerCase();
                     user.addGroup(group, server, world);
                     Message.USER_ADDGROUP_SERVER_WORLD_SUCCESS.send(sender, user.getName(), groupName, server, world);
                     LogEntry.build().actor(sender).acted(user)
                             .action("addgroup " + group.getName() + " " + server + " " + world)
-                            .build().submit(plugin);
+                            .build().submit(plugin, sender);
                 }
 
             } else {
@@ -91,7 +91,7 @@ public class UserAddGroup extends SubCommand<User> {
                 Message.USER_ADDGROUP_SUCCESS.send(sender, user.getName(), groupName);
                 LogEntry.build().actor(sender).acted(user)
                         .action("addgroup " + group.getName())
-                        .build().submit(plugin);
+                        .build().submit(plugin, sender);
             }
 
             save(user, sender, plugin);

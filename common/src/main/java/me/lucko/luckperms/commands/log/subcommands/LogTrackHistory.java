@@ -46,7 +46,7 @@ public class LogTrackHistory extends SubCommand<Log> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) {
-        String track = args.get(0);
+        String track = args.get(0).toLowerCase();
         int page = -999;
 
         if (args.size() == 2) {

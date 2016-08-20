@@ -97,14 +97,14 @@ public class UserSetTempPermission extends SubCommand<User> {
                     Message.SETPERMISSION_TEMP_SERVER_SUCCESS.send(sender, node, bool, user.getName(), server, DateUtil.formatDateDiff(duration));
                     LogEntry.build().actor(sender).acted(user)
                             .action("settemp " + node + " " + b + " " + duration + " " + server)
-                            .build().submit(plugin);
+                            .build().submit(plugin, sender);
                 } else {
                     final String world = args.get(4).toLowerCase();
                     user.setPermission(node, b, server, world, duration);
                     Message.SETPERMISSION_TEMP_SERVER_WORLD_SUCCESS.send(sender, node, bool, user.getName(), server, world, DateUtil.formatDateDiff(duration));
                     LogEntry.build().actor(sender).acted(user)
                             .action("settemp " + node + " " + b + " " + duration + " " + server + " " + world)
-                            .build().submit(plugin);
+                            .build().submit(plugin, sender);
                 }
 
             } else {
@@ -112,7 +112,7 @@ public class UserSetTempPermission extends SubCommand<User> {
                 Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, bool, user.getName(), DateUtil.formatDateDiff(duration));
                 LogEntry.build().actor(sender).acted(user)
                         .action("settemp " + node + " " + b + " " + duration)
-                        .build().submit(plugin);
+                        .build().submit(plugin, sender);
             }
 
             save(user, sender, plugin);

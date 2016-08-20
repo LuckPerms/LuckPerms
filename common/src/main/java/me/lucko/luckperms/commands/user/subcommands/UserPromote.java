@@ -108,7 +108,7 @@ public class UserPromote extends SubCommand<User> {
         Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), old, nextGroup.getName(), false));
         LogEntry.build().actor(sender).acted(user)
                 .action("promote " + track.getName() + "(from " + old + " to " + nextGroup.getName() + ")")
-                .build().submit(plugin);
+                .build().submit(plugin, sender);
         save(user, sender, plugin);
         plugin.getApiProvider().fireEventAsync(new UserPromoteEvent(new TrackLink(track), new UserLink(user), old, nextGroup.getName()));
         return CommandResult.SUCCESS;

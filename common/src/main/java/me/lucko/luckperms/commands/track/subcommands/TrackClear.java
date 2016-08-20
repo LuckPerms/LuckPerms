@@ -44,7 +44,7 @@ public class TrackClear extends SubCommand<Track> {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args, String label) {
         track.clearGroups();
         Message.TRACK_CLEAR.send(sender, track.getName());
-        LogEntry.build().actor(sender).acted(track).action("clear").build().submit(plugin);
+        LogEntry.build().actor(sender).acted(track).action("clear").build().submit(plugin, sender);
         save(track, sender, plugin);
         return CommandResult.SUCCESS;
     }

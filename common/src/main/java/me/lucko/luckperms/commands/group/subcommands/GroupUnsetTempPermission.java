@@ -71,14 +71,14 @@ public class GroupUnsetTempPermission extends SubCommand<Group> {
                     Message.UNSET_TEMP_PERMISSION_SERVER_SUCCESS.send(sender, node, group.getName(), server);
                     LogEntry.build().actor(sender).acted(group)
                             .action("unsettemp " + node + " " + server)
-                            .build().submit(plugin);
+                            .build().submit(plugin, sender);
                 } else {
                     final String world = args.get(2).toLowerCase();
                     group.unsetPermission(node, server, world);
                     Message.UNSET_TEMP_PERMISSION_SERVER_WORLD_SUCCESS.send(sender, node, group.getName(), server, world);
                     LogEntry.build().actor(sender).acted(group)
                             .action("unsettemp " + node + " " + server + " " + world)
-                            .build().submit(plugin);
+                            .build().submit(plugin, sender);
                 }
 
             } else {
@@ -86,7 +86,7 @@ public class GroupUnsetTempPermission extends SubCommand<Group> {
                 Message.UNSET_TEMP_PERMISSION_SUCCESS.send(sender, node, group.getName());
                 LogEntry.build().actor(sender).acted(group)
                         .action("unsettemp " + node)
-                        .build().submit(plugin);
+                        .build().submit(plugin, sender);
             }
 
             save(group, sender, plugin);

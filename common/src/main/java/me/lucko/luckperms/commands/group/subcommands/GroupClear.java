@@ -44,7 +44,7 @@ public class GroupClear extends SubCommand<Group> {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
         group.clearNodes();
         Message.CLEAR_SUCCESS.send(sender, group.getName());
-        LogEntry.build().actor(sender).acted(group).action("clear").build().submit(plugin);
+        LogEntry.build().actor(sender).acted(group).action("clear").build().submit(plugin, sender);
         save(group, sender, plugin);
         return CommandResult.SUCCESS;
     }

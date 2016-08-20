@@ -65,14 +65,14 @@ public class UserRemoveTempGroup extends SubCommand<User> {
                     Message.USER_REMOVETEMPGROUP_SERVER_SUCCESS.send(sender, user.getName(), groupName, server);
                     LogEntry.build().actor(sender).acted(user)
                             .action("removetempgroup " + groupName + " " + server)
-                            .build().submit(plugin);
+                            .build().submit(plugin, sender);
                 } else {
                     final String world = args.get(2).toLowerCase();
                     user.unsetPermission("group." + groupName, server, world, true);
                     Message.USER_REMOVETEMPGROUP_SERVER_WORLD_SUCCESS.send(sender, user.getName(), groupName, server, world);
                     LogEntry.build().actor(sender).acted(user)
                             .action("removetempgroup " + groupName + " " + server + " " + world)
-                            .build().submit(plugin);
+                            .build().submit(plugin, sender);
                 }
 
             } else {
@@ -80,7 +80,7 @@ public class UserRemoveTempGroup extends SubCommand<User> {
                 Message.USER_REMOVETEMPGROUP_SUCCESS.send(sender, user.getName(), groupName);
                 LogEntry.build().actor(sender).acted(user)
                         .action("removetempgroup " + groupName)
-                        .build().submit(plugin);
+                        .build().submit(plugin, sender);
             }
 
             save(user, sender, plugin);

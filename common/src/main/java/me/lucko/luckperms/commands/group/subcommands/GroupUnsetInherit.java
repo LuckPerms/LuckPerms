@@ -65,14 +65,14 @@ public class GroupUnsetInherit extends SubCommand<Group> {
                     Message.GROUP_UNSETINHERIT_SERVER_SUCCESS.send(sender, group.getName(), groupName, server);
                     LogEntry.build().actor(sender).acted(group)
                             .action("unsetinherit " + groupName + " " + server)
-                            .build().submit(plugin);
+                            .build().submit(plugin, sender);
                 } else {
                     final String world = args.get(2).toLowerCase();
                     group.unsetPermission("group." + groupName, server, world);
                     Message.GROUP_UNSETINHERIT_SERVER_WORLD_SUCCESS.send(sender, group.getName(), groupName, server, world);
                     LogEntry.build().actor(sender).acted(group)
                             .action("unsetinherit " + groupName + " " + server + " " + world)
-                            .build().submit(plugin);
+                            .build().submit(plugin, sender);
                 }
 
             } else {
@@ -80,7 +80,7 @@ public class GroupUnsetInherit extends SubCommand<Group> {
                 Message.GROUP_UNSETINHERIT_SUCCESS.send(sender, group.getName(), groupName);
                 LogEntry.build().actor(sender).acted(group)
                         .action("unsetinherit " + groupName)
-                        .build().submit(plugin);
+                        .build().submit(plugin, sender);
             }
 
             save(group, sender, plugin);

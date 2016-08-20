@@ -96,7 +96,7 @@ public class UserAddTempGroup extends SubCommand<User> {
                             DateUtil.formatDateDiff(duration));
                     LogEntry.build().actor(sender).acted(user)
                             .action("addtempgroup " + group.getName() + " " + duration + " " + server)
-                            .build().submit(plugin);
+                            .build().submit(plugin, sender);
                 } else {
                     final String world = args.get(3).toLowerCase();
                     user.addGroup(group, server, world, duration);
@@ -104,7 +104,7 @@ public class UserAddTempGroup extends SubCommand<User> {
                             world, DateUtil.formatDateDiff(duration));
                     LogEntry.build().actor(sender).acted(user)
                             .action("addtempgroup " + group.getName() + " " + duration + " " + server + " " + world)
-                            .build().submit(plugin);
+                            .build().submit(plugin, sender);
                 }
 
             } else {
@@ -112,7 +112,7 @@ public class UserAddTempGroup extends SubCommand<User> {
                 Message.USER_ADDTEMPGROUP_SUCCESS.send(sender, user.getName(), groupName, DateUtil.formatDateDiff(duration));
                 LogEntry.build().actor(sender).acted(user)
                         .action("addtempgroup " + group.getName() + " " + duration)
-                        .build().submit(plugin);
+                        .build().submit(plugin, sender);
             }
 
             save(user, sender, plugin);

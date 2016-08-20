@@ -51,10 +51,12 @@ public class TrackRemove extends SubCommand<Track> {
         try {
             track.removeGroup(groupName);
             Message.TRACK_REMOVE_SUCCESS.send(sender, groupName, track.getName());
-            Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups()));
+            if (track.getGroups().size() > 1) {
+                Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups()));
+            }
             LogEntry.build().actor(sender).acted(track)
                     .action("remove " + groupName)
-                    .build().submit(plugin);
+                    .build().submit(plugin, sender);
             save(track, sender, plugin);
             return CommandResult.SUCCESS;
         } catch (ObjectLacksException e) {

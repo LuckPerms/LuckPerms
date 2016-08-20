@@ -62,7 +62,7 @@ public class CreateTrack extends SingleMainCommand {
         }
 
         Message.CREATE_SUCCESS.send(sender, trackName);
-        LogEntry.build().actor(sender).actedName(trackName).type('T').action("create").build().submit(plugin);
+        LogEntry.build().actor(sender).actedName(trackName).type('T').action("create").build().submit(plugin, sender);
         plugin.runUpdateTask();
         return CommandResult.SUCCESS;
     }

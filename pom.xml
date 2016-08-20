@@ -15,7 +15,25 @@
         <module>sponge</module>
     </modules>
 
+    <name>LuckPerms</name>
+    <description>An advanced permissions implementation for Bukkit/Spigot, BungeeCord and Sponge.</description>
+    <url>https://github.com/lucko/LuckPerms</url>
+
+    <licenses>
+        <license>
+            <name>MIT</name>
+            <url>https://opensource.org/licenses/MIT</url>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>scm:git:https://github.com/lucko/LuckPerms.git</connection>
+        <developerConnection>scm:git:git@github.com:lucko/LuckPerms.git</developerConnection>
+        <url>https://github.com/lucko/LuckPerms</url>
+    </scm>
+
     <packaging>pom</packaging>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <release.version>2.5</release.version>

@@ -65,14 +65,14 @@ public class GroupUnsetTempInherit extends SubCommand<Group> {
                     Message.GROUP_UNSET_TEMP_INHERIT_SERVER_SUCCESS.send(sender, group.getName(), groupName, server);
                     LogEntry.build().actor(sender).acted(group)
                             .action("unsettempinherit " + groupName + " " + server)
-                            .build().submit(plugin);
+                            .build().submit(plugin, sender);
                 } else {
                     final String world = args.get(2).toLowerCase();
                     group.unsetPermission("group." + groupName, server, world, true);
                     Message.GROUP_UNSET_TEMP_INHERIT_SERVER_WORLD_SUCCESS.send(sender, group.getName(), groupName, server, world);
                     LogEntry.build().actor(sender).acted(group)
                             .action("unsettempinherit " + groupName + " " + server + " " + world)
-                            .build().submit(plugin);
+                            .build().submit(plugin, sender);
                 }
 
             } else {
@@ -80,7 +80,7 @@ public class GroupUnsetTempInherit extends SubCommand<Group> {
                 Message.GROUP_UNSET_TEMP_INHERIT_SUCCESS.send(sender, group.getName(), groupName);
                 LogEntry.build().actor(sender).acted(group)
                         .action("unsettempinherit " + groupName)
-                        .build().submit(plugin);
+                        .build().submit(plugin, sender);
             }
 
             save(group, sender, plugin);

@@ -46,7 +46,7 @@ public class LogGroupHistory extends SubCommand<Log> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) {
-        String group = args.get(0);
+        String group = args.get(0).toLowerCase();
         int page = -999;
 
         if (args.size() == 2) {

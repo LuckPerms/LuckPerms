@@ -63,7 +63,7 @@ public class UserSetPrimaryGroup extends SubCommand<User> {
         Message.USER_PRIMARYGROUP_SUCCESS.send(sender, user.getName(), group.getName());
         LogEntry.build().actor(sender).acted(user)
                 .action("setprimarygroup " + group.getName())
-                .build().submit(plugin);
+                .build().submit(plugin, sender);
 
         save(user, sender, plugin);
         return CommandResult.SUCCESS;

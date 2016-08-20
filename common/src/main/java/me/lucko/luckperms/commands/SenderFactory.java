@@ -34,9 +34,8 @@ import java.util.stream.Collectors;
  * @param <T> the command sender type
  */
 public abstract class SenderFactory<T> implements Runnable {
-    // Ensures messages are sent in order, etc.
-    private final List<Runnable> tasks = new ArrayList<>();
-
+    private final Map<T, List<String>> messages = new HashMap<>();
+    //private final List<Map.Entry<T, String>> messages = new ArrayList<>();
     private final SenderFactory<T> factory = this;
 
     protected abstract String getName(T t);
@@ -63,8 +62,12 @@ public abstract class SenderFactory<T> implements Runnable {
             public void sendMessage(String s) {
                 final T t = tRef.get();
                 if (t != null) {
-                    synchronized (tasks) {
-                        tasks.add(() -> factory.sendMessage(t, s));
+                    synchronized (messages) {
+                        if (!messages.containsKey(t)) {
+                            messages.put(t, new ArrayList<>());
+                        }
+
+                        messages.get(t).add(s);
                     }
                 }
             }
@@ -80,10 +83,10 @@ public abstract class SenderFactory<T> implements Runnable {
 
     @Override
     public final void run() {
-        synchronized (tasks) {
-            if (!tasks.isEmpty()) {
-                tasks.forEach(Runnable::run);
-                tasks.clear();
+        synchronized (messages) {
+            if (!messages.isEmpty()) {
+                messages.entrySet().forEach(e -> e.getValue().forEach(s -> factory.sendMessage(e.getKey(), s)));
+                messages.clear();
             }
         }
     }

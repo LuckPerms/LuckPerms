@@ -78,14 +78,14 @@ public class GroupSetPermission extends SubCommand<Group> {
                     Message.SETPERMISSION_SERVER_SUCCESS.send(sender, node, bool, group.getName(), server);
                     LogEntry.build().actor(sender).acted(group)
                             .action("set " + node + " " + b + " " + server)
-                            .build().submit(plugin);
+                            .build().submit(plugin, sender);
                 } else {
                     final String world = args.get(3).toLowerCase();
                     group.setPermission(node, b, server, world);
                     Message.SETPERMISSION_SERVER_WORLD_SUCCESS.send(sender, node, bool, group.getName(), server, world);
                     LogEntry.build().actor(sender).acted(group)
                             .action("set " + node + " " + b + " " + server + " " + world)
-                            .build().submit(plugin);
+                            .build().submit(plugin, sender);
                 }
 
             } else {
@@ -93,7 +93,7 @@ public class GroupSetPermission extends SubCommand<Group> {
                 Message.SETPERMISSION_SUCCESS.send(sender, node, bool, group.getName());
                 LogEntry.build().actor(sender).acted(group)
                         .action("set " + node + " " + b)
-                        .build().submit(plugin);
+                        .build().submit(plugin, sender);
             }
 
             save(group, sender, plugin);

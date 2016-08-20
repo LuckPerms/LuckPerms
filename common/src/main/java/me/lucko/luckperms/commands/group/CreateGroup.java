@@ -62,7 +62,7 @@ public class CreateGroup extends SingleMainCommand {
         }
 
         Message.CREATE_SUCCESS.send(sender, groupName);
-        LogEntry.build().actor(sender).actedName(groupName).type('G').action("create").build().submit(plugin);
+        LogEntry.build().actor(sender).actedName(groupName).type('G').action("create").build().submit(plugin, sender);
         plugin.runUpdateTask();
         return CommandResult.SUCCESS;
     }

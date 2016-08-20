@@ -70,14 +70,14 @@ public class UserUnSetPermission extends SubCommand<User> {
                     Message.UNSETPERMISSION_SERVER_SUCCESS.send(sender, node, user.getName(), server);
                     LogEntry.build().actor(sender).acted(user)
                             .action("unset " + node + " " + server)
-                            .build().submit(plugin);
+                            .build().submit(plugin, sender);
                 } else {
                     final String world = args.get(2).toLowerCase();
                     user.unsetPermission(node, server, world);
                     Message.UNSETPERMISSION_SERVER_WORLD_SUCCESS.send(sender, node, user.getName(), server, world);
                     LogEntry.build().actor(sender).acted(user)
                             .action("unset " + node + " " + server + " " + world)
-                            .build().submit(plugin);
+                            .build().submit(plugin, sender);
                 }
 
             } else {
@@ -85,7 +85,7 @@ public class UserUnSetPermission extends SubCommand<User> {
                 Message.UNSETPERMISSION_SUCCESS.send(sender, node, user.getName());
                 LogEntry.build().actor(sender).acted(user)
                         .action("unset " + node)
-                        .build().submit(plugin);
+                        .build().submit(plugin, sender);
             }
 
             save(user, sender, plugin);

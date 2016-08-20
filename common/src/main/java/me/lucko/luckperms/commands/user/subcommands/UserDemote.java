@@ -108,7 +108,7 @@ public class UserDemote extends SubCommand<User> {
         Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), previousGroup.getName(), old, true));
         LogEntry.build().actor(sender).acted(user)
                 .action("demote " + track.getName() + "(from " + old + " to " + previousGroup.getName() + ")")
-                .build().submit(plugin);
+                .build().submit(plugin, sender);
         save(user, sender, plugin);
         plugin.getApiProvider().fireEventAsync(new UserDemoteEvent(new TrackLink(track), new UserLink(user), old, previousGroup.getName()));
         return CommandResult.SUCCESS;

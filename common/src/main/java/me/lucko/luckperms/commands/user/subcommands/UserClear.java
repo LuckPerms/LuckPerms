@@ -45,7 +45,7 @@ public class UserClear extends SubCommand<User> {
         user.clearNodes();
         plugin.getUserManager().giveDefaults(user);
         Message.CLEAR_SUCCESS.send(sender, user.getName());
-        LogEntry.build().actor(sender).acted(user).action("clear").build().submit(plugin);
+        LogEntry.build().actor(sender).acted(user).action("clear").build().submit(plugin, sender);
 
         save(user, sender, plugin);
         return CommandResult.SUCCESS;

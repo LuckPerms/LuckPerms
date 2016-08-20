@@ -76,14 +76,14 @@ public class GroupSetInherit extends SubCommand<Group> {
                     Message.GROUP_SETINHERIT_SERVER_SUCCESS.send(sender, group.getName(), group1.getName(), server);
                     LogEntry.build().actor(sender).acted(group)
                             .action("setinherit " + group1.getName() + " " + server)
-                            .build().submit(plugin);
+                            .build().submit(plugin, sender);
                 } else {
                     final String world = args.get(2).toLowerCase();
                     group.setInheritGroup(group1, server, world);
                     Message.GROUP_SETINHERIT_SERVER_WORLD_SUCCESS.send(sender, group.getName(), group1.getName(), server, world);
                     LogEntry.build().actor(sender).acted(group)
                             .action("setinherit " + group1.getName() + " " + server + " " + world)
-                            .build().submit(plugin);
+                            .build().submit(plugin, sender);
                 }
 
             } else {
@@ -91,7 +91,7 @@ public class GroupSetInherit extends SubCommand<Group> {
                 Message.GROUP_SETINHERIT_SUCCESS.send(sender, group.getName(), group1.getName());
                 LogEntry.build().actor(sender).acted(group)
                         .action("setinherit " + group1.getName())
-                        .build().submit(plugin);
+                        .build().submit(plugin, sender);
             }
 
             save(group, sender, plugin);

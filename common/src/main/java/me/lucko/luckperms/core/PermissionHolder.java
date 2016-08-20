@@ -332,9 +332,8 @@ public abstract class PermissionHolder {
             builder.append("/");
         } else {
             if (world != null) {
-                builder.append("global-").append(world);
+                builder.append("global-").append(world).append("/");
             }
-            builder.append("/");
         }
 
         builder.append(node);
@@ -346,7 +345,7 @@ public abstract class PermissionHolder {
         final String finalNode = builder.toString();
 
 
-        if (hasPermission(node, value)) {
+        if (hasPermission(finalNode, value)) {
             throw new ObjectAlreadyHasException();
         }
 
@@ -431,9 +430,8 @@ public abstract class PermissionHolder {
             builder.append("/");
         } else {
             if (world != null) {
-                builder.append("global-").append(world);
+                builder.append("global-").append(world).append("/");
             }
-            builder.append("/");
         }
 
         builder.append(node);

@@ -44,7 +44,7 @@ public class LogEntry extends me.lucko.luckperms.api.LogEntry {
         super();
     }
 
-    public void submit(LuckPermsPlugin plugin) {
+    public void submit(LuckPermsPlugin plugin, Sender sender) {
         plugin.getDatastore().logAction(this);
 
         LogNotifyEvent event = new LogNotifyEvent(this);
@@ -60,6 +60,7 @@ public class LogEntry extends me.lucko.luckperms.api.LogEntry {
 
         senders.stream()
                 .filter(s -> !plugin.getIgnoringLogs().contains(s.getUuid()))
+                .filter(s -> !s.getUuid().equals(sender.getUuid()))
                 .forEach(s -> Message.LOG.send(s, msg));
     }
     

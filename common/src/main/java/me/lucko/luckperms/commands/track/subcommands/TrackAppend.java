@@ -63,10 +63,12 @@ public class TrackAppend extends SubCommand<Track> {
         try {
             track.appendGroup(group);
             Message.TRACK_APPEND_SUCCESS.send(sender, group.getName(), track.getName());
-            Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), group.getName()));
+            if (track.getGroups().size() > 1) {
+                Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), group.getName()));
+            }
             LogEntry.build().actor(sender).acted(track)
                     .action("append " + group.getName())
-                    .build().submit(plugin);
+                    .build().submit(plugin, sender);
             save(track, sender, plugin);
             return CommandResult.SUCCESS;
         } catch (ObjectAlreadyHasException e) {

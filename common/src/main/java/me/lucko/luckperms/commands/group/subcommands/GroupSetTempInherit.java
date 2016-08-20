@@ -95,7 +95,7 @@ public class GroupSetTempInherit extends SubCommand<Group> {
                             DateUtil.formatDateDiff(duration));
                     LogEntry.build().actor(sender).acted(group)
                             .action("settempinherit " + group1.getName() + " " + duration + " " + server)
-                            .build().submit(plugin);
+                            .build().submit(plugin, sender);
                 } else {
                     final String world = args.get(3).toLowerCase();
                     group.setInheritGroup(group1, server, world, duration);
@@ -103,7 +103,7 @@ public class GroupSetTempInherit extends SubCommand<Group> {
                             world, DateUtil.formatDateDiff(duration));
                     LogEntry.build().actor(sender).acted(group)
                             .action("settempinherit " + group1.getName() + " " + duration + " " + server + " " + world)
-                            .build().submit(plugin);
+                            .build().submit(plugin, sender);
                 }
 
             } else {
@@ -111,7 +111,7 @@ public class GroupSetTempInherit extends SubCommand<Group> {
                 Message.GROUP_SET_TEMP_INHERIT_SUCCESS.send(sender, group.getName(), group1.getName(), DateUtil.formatDateDiff(duration));
                 LogEntry.build().actor(sender).acted(group)
                         .action("settempinherit " + group1.getName() + " " + duration)
-                        .build().submit(plugin);
+                        .build().submit(plugin, sender);
             }
 
             save(group, sender, plugin);
