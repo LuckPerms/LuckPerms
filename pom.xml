@@ -71,5 +71,13 @@
             <id>sponge-repo</id>
             <url>https://repo.spongepowered.org/maven</url>
         </repository>
+        <repository>
+            <id>pex-repo</id>
+            <url>http://pex-repo.aoeu.xyz</url>
+        </repository>
+        <repository>
+            <id>alskebo-repo</id>
+            <url>http://repo.alskebo.com/repository/maven-releases</url>
+        </repository>
     </repositories>
 </project>

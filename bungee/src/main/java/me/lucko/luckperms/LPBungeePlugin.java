@@ -127,6 +127,11 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     }
 
     @Override
+    public Type getType() {
+        return Type.BUNGEE;
+    }
+
+    @Override
     public File getMainDir() {
         return getDataFolder();
     }
@@ -160,6 +165,24 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     public List<String> getPossiblePermissions() {
         // No such thing on Bungee. Wildcards are processed in the listener instead.
         return Collections.emptyList();
+    }
+
+    @Override
+    public Object getPlugin(String name) {
+        return getProxy().getPluginManager().getPlugin(name);
+    }
+
+    @Override
+    public Object getService(Class clazz) {
+        return null;
+    }
+
+    @Override
+    public boolean isPluginLoaded(String name) {
+        return getProxy().getPluginManager().getPlugins().stream()
+                .filter(p -> p.getDescription().getName().equalsIgnoreCase(name))
+                .findAny()
+                .isPresent();
     }
 
     @Override

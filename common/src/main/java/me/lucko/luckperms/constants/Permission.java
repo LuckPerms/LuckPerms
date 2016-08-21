@@ -89,7 +89,9 @@ public enum Permission {
     LOG_TRACK_HISTORY("trackhistory", "log"),
     LOG_SEARCH("search", "log"),
     LOG_NOTIFY("notify", "log"),
-    LOG_EXPORT("export", "log");
+    LOG_EXPORT("export", "log"),
+
+    MIGRATION("migration", null);
 
     private String node;
     private String group;

@@ -298,7 +298,9 @@ public enum Message {
     ),
 
     IMPORT_END_ERROR_CONTENT("&e(Import) &d-> &c%s", true),
-    IMPORT_END_ERROR_FOOTER("&e(Import) &7<------------------------------------------>", true);
+    IMPORT_END_ERROR_FOOTER("&e(Import) &7<------------------------------------------>", true),
+
+    MIGRATION_NOT_CONSOLE("Migration must be performed from the Console.", true);
 
     private String message;
     private boolean showPrefix;

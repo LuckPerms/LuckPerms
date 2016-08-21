@@ -157,6 +157,11 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     }
 
     @Override
+    public Type getType() {
+        return Type.BUKKIT;
+    }
+
+    @Override
     public File getMainDir() {
         return getDataFolder();
     }
@@ -196,6 +201,21 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         });
 
         return perms;
+    }
+
+    @Override
+    public Object getPlugin(String name) {
+        return getServer().getPluginManager().getPlugin(name);
+    }
+
+    @Override
+    public Object getService(Class clazz) {
+        return getServer().getServicesManager().load(clazz);
+    }
+
+    @Override
+    public boolean isPluginLoaded(String name) {
+        return getServer().getPluginManager().isPluginEnabled(name);
     }
 
     @Override

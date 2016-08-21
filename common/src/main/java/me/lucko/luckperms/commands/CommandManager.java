@@ -63,6 +63,7 @@ public class CommandManager {
             .add(new InfoCommand())
             .add(new DebugCommand())
             .add(new ImportCommand())
+            // .add(new MigrationMainCommand()) TODO
             .add(new CreateGroup())
             .add(new DeleteGroup())
             .add(new ListGroups())

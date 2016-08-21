@@ -76,7 +76,7 @@ public abstract class MainCommand<T> {
             return CommandResult.INVALID_ARGS;
         }
 
-        Optional<SubCommand<T>> o = subCommands.stream()
+        Optional<SubCommand<T>> o = getSubCommands().stream()
                 .filter(s -> s.getName().equalsIgnoreCase(args.get(requiredArgsLength - 1)))
                 .limit(1)
                 .findAny();

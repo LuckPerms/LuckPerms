@@ -191,6 +191,11 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     }
 
     @Override
+    public Type getType() {
+        return Type.SPONGE;
+    }
+
+    @Override
     public Message getPlayerStatus(UUID uuid) {
         return game.getServer().getPlayer(getUuidCache().getExternalUUID(uuid)).isPresent() ? Message.PLAYER_ONLINE : Message.PLAYER_OFFLINE;
     }
@@ -222,6 +227,21 @@ public class LPSpongePlugin implements LuckPermsPlugin {
             return Collections.emptyList();
         }
         return p.get().getDescriptions().stream().map(PermissionDescription::getId).collect(Collectors.toList());
+    }
+
+    @Override
+    public Object getPlugin(String name) {
+        return game.getPluginManager().getPlugin(name).get().getInstance().get();
+    }
+
+    @Override
+    public Object getService(Class clazz) {
+        return Sponge.getServiceManager().provideUnchecked(clazz);
+    }
+
+    @Override
+    public boolean isPluginLoaded(String name) {
+        return game.getPluginManager().isLoaded(name);
     }
 
     @Override

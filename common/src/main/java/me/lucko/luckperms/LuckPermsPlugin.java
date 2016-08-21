@@ -63,6 +63,12 @@ public interface LuckPermsPlugin {
      */
     String getVersion();
 
+
+    /**
+     * @return the platform type
+     */
+    Type getType();
+
     /**
      * @return the main plugin directory
      */
@@ -115,6 +121,27 @@ public interface LuckPermsPlugin {
     Set<UUID> getIgnoringLogs();
 
     /**
+     * Gets a loaded plugins instance from the platform
+     * @param name the name of the plugin
+     * @return a plugin instance
+     */
+    Object getPlugin(String name);
+
+    /**
+     * Gets a provided service from the platform.
+     * @param clazz the class of the service
+     * @return the service instance, if it is provided for
+     */
+    Object getService(Class clazz);
+
+    /**
+     * Checks if a plugin is loaded on the platform
+     * @param name the name of the plugin
+     * @return true if the plugin is loaded
+     */
+    boolean isPluginLoaded(String name);
+
+    /**
      * Runs an update task
      */
     void runUpdateTask();
@@ -130,4 +157,9 @@ public interface LuckPermsPlugin {
      * @param r the task to run
      */
     void doSync(Runnable r);
+
+
+    enum Type {
+        BUKKIT, BUNGEE, SPONGE;
+    }
 }
