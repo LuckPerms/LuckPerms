@@ -29,14 +29,25 @@ import me.lucko.luckperms.commands.Predicate;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
+import org.anjocaido.groupmanager.GlobalGroups;
 import org.anjocaido.groupmanager.GroupManager;
+import org.anjocaido.groupmanager.data.Group;
+import org.anjocaido.groupmanager.data.User;
+import org.anjocaido.groupmanager.dataholder.WorldDataHolder;
+import org.anjocaido.groupmanager.dataholder.worlds.WorldsHolder;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class MigrationGroupManager extends SubCommand<Object> {
     public MigrationGroupManager() {
         super("groupmanager", "Migration from GroupManager",
-                "/%s migration groupmanager [world names]", Permission.MIGRATION, Predicate.alwaysFalse());
+                "/%s migration groupmanager [world names]", Permission.MIGRATION, Predicate.is(0));
     }
 
     @Override
@@ -47,13 +58,145 @@ public class MigrationGroupManager extends SubCommand<Object> {
             return CommandResult.STATE_ERROR;
         }
 
+        final List<String> worlds = args.stream()
+                .map(String::toLowerCase)
+                .collect(Collectors.toList());
+
         GroupManager gm = (GroupManager) plugin.getPlugin("GroupManager");
 
-        // Migrate all users.
-        log.info("GroupManager Migration: Starting user migration.");
+        // Migrate Global Groups
+        log.info("GroupManager Migration: Starting Global Group migration.");
 
-        // gm.getWorldsHolder().getWorldData().
-        // TODO
-        return null;
+        GlobalGroups gg;
+        try {
+            gg = (GlobalGroups) GroupManager.class.getMethod("getGlobalGroups").invoke(gm);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            e.printStackTrace();
+            return CommandResult.FAILURE;
+        }
+
+        for (Group g : gg.getGroupList()) {
+            plugin.getDatastore().createAndLoadGroup(g.getName().toLowerCase());
+            me.lucko.luckperms.groups.Group group = plugin.getGroupManager().get(g.getName().toLowerCase());
+
+            for (String node : g.getPermissionList()) {
+                boolean value = true;
+                if (node.startsWith("!")) {
+                    node = node.substring(1);
+                    value = false;
+                }
+
+                try {
+                    group.setPermission(node, value);
+                } catch (ObjectAlreadyHasException ignored) {}
+            }
+
+            for (String s : g.getInherits()) {
+                try {
+                    group.setPermission("group." + s.toLowerCase(), true);
+                } catch (ObjectAlreadyHasException ignored) {}
+            }
+
+        }
+
+        Map<UUID, Map<String, Boolean>> users = new HashMap<>();
+        Map<String, Map<String, Boolean>> groups = new HashMap<>();
+
+        WorldsHolder wh;
+        try {
+            wh = (WorldsHolder) GroupManager.class.getMethod("getWorldsHolder").invoke(gm);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            e.printStackTrace();
+            return CommandResult.FAILURE;
+        }
+
+        // Collect data for all users and groups.
+        log.info("GroupManager Migration: Starting user and group migration.");
+        for (String world : worlds) {
+            world = world.toLowerCase();
+
+            WorldDataHolder wdh;
+
+            try {
+                wdh = (WorldDataHolder) WorldsHolder.class.getMethod("getWorldData", String.class).invoke(wh, world);
+            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                e.printStackTrace();
+                return CommandResult.FAILURE;
+            }
+
+            for (Group g : wdh.getGroupList()) {
+                groups.putIfAbsent(g.getName().toLowerCase(), new HashMap<>());
+
+                for (String node : g.getPermissionList()) {
+                    boolean value = true;
+                    if (node.startsWith("!")) {
+                        node = node.substring(1);
+                        value = false;
+                    }
+
+                    groups.get(g.getName().toLowerCase()).put("global-" + world + "/" + node, value);
+                }
+
+                for (String s : g.getInherits()) {
+                    groups.get(g.getName().toLowerCase()).put("global-" + world + "/group." + s.toLowerCase(), true);
+                }
+            }
+
+            for (User user : wdh.getUserList()) {
+                UUID uuid;
+                try {
+                    uuid = UUID.fromString(user.getUUID());
+                } catch (IllegalArgumentException e){
+                    continue;
+                }
+
+                users.putIfAbsent(uuid, new HashMap<>());
+
+                for (String node : user.getPermissionList()) {
+                    boolean value = true;
+                    if (node.startsWith("!")) {
+                        node = node.substring(1);
+                        value = false;
+                    }
+
+                    users.get(uuid).put("global-" + world + "/" + node, value);
+                }
+
+                users.get(uuid).put("global-" + world + "/group." + user.getGroupName().toLowerCase(), true);
+            }
+
+        }
+
+        log.info("GroupManager Migration: All existing GroupManager data has been processed. Now beginning the import process.");
+
+        for (Map.Entry<UUID, Map<String, Boolean>> e : users.entrySet()) {
+            plugin.getDatastore().loadOrCreateUser(e.getKey(), "null");
+            me.lucko.luckperms.users.User user = plugin.getUserManager().get(e.getKey());
+
+            for (Map.Entry<String, Boolean> n : e.getValue().entrySet()) {
+                try {
+                    user.setPermission(n.getKey(), n.getValue());
+                } catch (ObjectAlreadyHasException ignored) {}
+            }
+
+            plugin.getDatastore().saveUser(user);
+            plugin.getUserManager().cleanup(user);
+        }
+
+        for (Map.Entry<String, Map<String, Boolean>> e : groups.entrySet()) {
+            plugin.getDatastore().createAndLoadGroup(e.getKey());
+            me.lucko.luckperms.groups.Group group = plugin.getGroupManager().get(e.getKey());
+
+            for (Map.Entry<String, Boolean> n : e.getValue().entrySet()) {
+                try {
+                    group.setPermission(n.getKey(), n.getValue());
+                } catch (ObjectAlreadyHasException ignored) {}
+            }
+
+            plugin.getDatastore().saveGroup(group);
+        }
+
+        log.info("GroupManager Migration: Success! Completed without any errors.");
+        return CommandResult.SUCCESS;
     }
 }

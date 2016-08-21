@@ -37,8 +37,10 @@ import ru.tehkode.permissions.PermissionManager;
 import ru.tehkode.permissions.PermissionUser;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class MigrationPermissionsEx extends SubCommand<Object> {
     public MigrationPermissionsEx() {
@@ -55,8 +57,24 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             return CommandResult.STATE_ERROR;
         }
 
+        if (plugin.getType() != LuckPermsPlugin.Type.BUKKIT) {
+            // Sponge uses a completely different version of PEX.
+            log.severe("PEX import is not supported on this platform.");
+            return CommandResult.STATE_ERROR;
+        }
+
+        final List<String> worlds = args.stream()
+                .map(String::toLowerCase)
+                .collect(Collectors.toList());
+
         PermissionsEx pex = (PermissionsEx) plugin.getPlugin("PermissionsEx");
-        PermissionManager manager = null; // TODO
+        PermissionManager manager; // The compiler complains if you call the method directly, as Bukkit is not in this module.
+        try {
+            manager = (PermissionManager) PermissionsEx.class.getMethod("getPermissionsManager").invoke(pex);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            e.printStackTrace();
+            return CommandResult.FAILURE;
+        }
 
         // Migrate all users
         log.info("PermissionsEx Migration: Starting user migration.");
@@ -81,8 +99,8 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 // Probably won't happen. I have no API docs on getOwnPermissions#null though.
             }
 
-            if (args != null && !args.isEmpty()) {
-                for (String world : args) {
+            if (worlds != null && !worlds.isEmpty()) {
+                for (String world : worlds) {
                     for (String node : user.getOwnPermissions(world)) {
                         boolean value = true;
                         if (node.startsWith("!")) {
@@ -103,8 +121,8 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 } catch (ObjectAlreadyHasException ignored) {}
             }
 
-            if (args != null && !args.isEmpty()) {
-                for (String world : args) {
+            if (worlds != null && !worlds.isEmpty()) {
+                for (String world : worlds) {
                     for (String s : user.getGroupNames(world)) {
                         try {
                             lpUser.setPermission("group." + s.toLowerCase(), true, "global", world);
@@ -140,8 +158,8 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 // Probably won't happen. I have no API docs on getOwnPermissions#null though.
             }
 
-            if (args != null && !args.isEmpty()) {
-                for (String world : args) {
+            if (worlds != null && !worlds.isEmpty()) {
+                for (String world : worlds) {
                     for (String node : group.getOwnPermissions(world)) {
                         boolean value = true;
                         if (node.startsWith("!")) {
@@ -162,8 +180,8 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 } catch (ObjectAlreadyHasException ignored) {}
             }
 
-            if (args != null && !args.isEmpty()) {
-                for (String world : args) {
+            if (worlds != null && !worlds.isEmpty()) {
+                for (String world : worlds) {
                     for (PermissionGroup g : group.getParents(world)) {
                         try {
                             lpGroup.setPermission("group." + g.getName().toLowerCase(), true, "global", world);
@@ -173,6 +191,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             }
         }
 
+        log.info("PermissionsEx Migration: Success! Completed without any errors.");
         return CommandResult.SUCCESS;
     }
 }

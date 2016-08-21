@@ -27,7 +27,10 @@ import me.lucko.luckperms.commands.CommandResult;
 import me.lucko.luckperms.commands.MainCommand;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.commands.migration.subcommands.MigrationGroupManager;
+import me.lucko.luckperms.commands.migration.subcommands.MigrationPermissionsEx;
 import me.lucko.luckperms.commands.migration.subcommands.MigrationPowerfulPerms;
+import me.lucko.luckperms.commands.migration.subcommands.MigrationZPermissions;
 import me.lucko.luckperms.constants.Constants;
 import me.lucko.luckperms.constants.Message;
 
@@ -42,9 +45,24 @@ public class MigrationMainCommand extends MainCommand<Object> {
         super("Migration", "/%s migration", 1, null);
 
         try {
+            Class.forName("org.anjocaido.groupmanager.GroupManager");
+            subCommands.add(new MigrationGroupManager());
+        } catch (Throwable ignored) {}
+
+        try {
+            Class.forName("ru.tehkode.permissions.bukkit.PermissionsEx");
+            subCommands.add(new MigrationPermissionsEx());
+        } catch (Throwable ignored) {}
+
+        try {
+            Class.forName("com.github.cheesesoftware.PowerfulPermsAPI.PowerfulPermsPlugin");
             subCommands.add(new MigrationPowerfulPerms());
-        } catch (Throwable ignored) {
-        }
+        } catch (Throwable ignored) {}
+
+        try {
+            Class.forName("org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsService");
+            subCommands.add(new MigrationZPermissions());
+        } catch (Throwable ignored) {}
 
     }
 

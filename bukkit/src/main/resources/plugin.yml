@@ -2,7 +2,7 @@ name: LuckPerms
 author: Luck
 version: ${release.version}.${git.closest.tag.commit.count}
 main: me.lucko.luckperms.LPBukkitPlugin
-softdepend: [Vault]
+softdepend: [Vault, PermissionsEx, GroupManager, PowerfulPerms, zPermissions] # For migration
 description: A permissions plugin
 commands:
   luckperms:

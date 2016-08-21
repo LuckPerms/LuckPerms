@@ -56,7 +56,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
        </sadness> */
     private static Method getPlayerGroupsMethod = null;
     private static Method getGroupMethod = null;
-    private static boolean legacy = true;
+    private static boolean legacy = false;
 
     static {
         try {
@@ -320,7 +320,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         }
 
         // We done.
-        log.info("PowerfulPerms Migration: Success! Migration completed without any errors.");
+        log.info("PowerfulPerms Migration: Success! Completed without any errors.");
         return CommandResult.SUCCESS;
     }
 

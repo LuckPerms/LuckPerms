@@ -38,6 +38,7 @@ import org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsService;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * <3 <3  zPermissions  <3 <3
@@ -63,6 +64,10 @@ public class MigrationZPermissions extends SubCommand<Object> {
             return CommandResult.STATE_ERROR;
         }
 
+        final List<String> worlds = args.stream()
+                .map(String::toLowerCase)
+                .collect(Collectors.toList());
+
         // Migrate all users.
         log.info("zPermissions Migration: Starting user migration.");
         for (UUID u : service.getAllPlayersUUID()) {
@@ -75,8 +80,8 @@ public class MigrationZPermissions extends SubCommand<Object> {
                 } catch (ObjectAlreadyHasException ignored) {}
             }
 
-            if (args != null && !args.isEmpty()) {
-                for (String world : args) {
+            if (worlds != null && !worlds.isEmpty()) {
+                for (String world : worlds) {
                     for (Map.Entry<String, Boolean> e : service.getPlayerPermissions(world, null, u).entrySet()) {
                         try {
                             user.setPermission(e.getKey(), e.getValue(), "global", world);
@@ -119,8 +124,8 @@ public class MigrationZPermissions extends SubCommand<Object> {
                 } catch (ObjectAlreadyHasException ignored) {}
             }
 
-            if (args != null && !args.isEmpty()) {
-                for (String world : args) {
+            if (worlds != null && !worlds.isEmpty()) {
+                for (String world : worlds) {
                     for (Map.Entry<String, Boolean> e : service.getGroupPermissions(world, null, g).entrySet()) {
                         try {
                             group.setPermission(e.getKey(), e.getValue(), "global", world);
@@ -132,7 +137,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
             plugin.getDatastore().saveGroup(group);
         }
 
-        log.info("zPermissions Migration: Complete!");
+        log.info("zPermissions Migration: Success! Completed without any errors.");
         return CommandResult.SUCCESS;
     }
 }
