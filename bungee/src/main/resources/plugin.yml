@@ -2,5 +2,5 @@ name: LuckPerms
 author: Luck
 version: ${release.version}.${git.closest.tag.commit.count}
 main: me.lucko.luckperms.LPBungeePlugin
-softdepend: [VPowerfulPerms] # For migration
+softdepend: [PowerfulPerms] # For migration
 description: A permissions plugin
