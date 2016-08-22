@@ -32,17 +32,49 @@ import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.users.User;
+import ru.tehkode.permissions.NativeInterface;
 import ru.tehkode.permissions.PermissionGroup;
 import ru.tehkode.permissions.PermissionManager;
 import ru.tehkode.permissions.PermissionUser;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class MigrationPermissionsEx extends SubCommand<Object> {
+
+    private static Class<?> bukkitPlayer = null;
+    private static Method getUniqueIdMethod = null;
+    private static Method getPlayerMethod = null;
+
+    static {
+        try {
+            bukkitPlayer = Class.forName("org.bukkit.entity.Player");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        if (bukkitPlayer != null) {
+            try {
+                getUniqueIdMethod = bukkitPlayer.getMethod("getUniqueId");
+                getUniqueIdMethod.setAccessible(true);
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            }
+        }
+
+        try {
+            getPlayerMethod = PermissionUser.class.getMethod("getPlayer");
+            getPlayerMethod.setAccessible(true);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+    }
+
     public MigrationPermissionsEx() {
         super("permissionsex", "Migration from PermissionsEx",
                 "/%s migration permissionsex [world names]", Permission.MIGRATION, Predicate.alwaysFalse());
@@ -76,10 +108,45 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             return CommandResult.FAILURE;
         }
 
+        NativeInterface ni;
+        try {
+            Field f = manager.getClass().getDeclaredField("nativeI");
+            f.setAccessible(true);
+            ni = (NativeInterface) f.get(manager);
+        } catch (Throwable t) {
+            t.printStackTrace();
+            return CommandResult.FAILURE;
+        }
+
         // Migrate all users
         log.info("PermissionsEx Migration: Starting user migration.");
         for (PermissionUser user : manager.getUsers()) {
-            UUID u = UUID.fromString(user.getIdentifier());
+            UUID u = null;
+
+            try {
+                u = UUID.fromString(user.getIdentifier());
+            } catch (IllegalArgumentException e) {
+
+                u = ni.nameToUUID(user.getIdentifier());
+
+                if (u == null) {
+                    if (bukkitPlayer != null) {
+                        try {
+                            Object playerObj = getPlayerMethod.invoke(user);
+                            u = (UUID) getUniqueIdMethod.invoke(playerObj);
+
+                        } catch (Throwable t) {
+                            t.printStackTrace();
+                        }
+                    }
+                }
+            }
+
+            if (u == null) {
+                log.severe("Unable to get a UUID for user identifier: " + user.getIdentifier());
+                continue;
+            }
+
             plugin.getDatastore().loadOrCreateUser(u, "null");
             User lpUser = plugin.getUserManager().get(u);
 
