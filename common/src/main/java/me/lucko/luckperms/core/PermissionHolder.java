@@ -566,7 +566,11 @@ public abstract class PermissionHolder {
         return nodes;
     }
 
-    protected Map<String, Boolean> getPermissions(String server, String world, List<String> excludedGroups, boolean includeGlobal, List<String> possibleNodes) {
+    public Map<String, Boolean> getPermissions(String server, String world, List<String> excludedGroups, boolean includeGlobal, List<String> possibleNodes) {
+        return getPermissions(server, world, excludedGroups, includeGlobal, possibleNodes, true);
+    }
+
+    public Map<String, Boolean> getPermissions(String server, String world, List<String> excludedGroups, boolean includeGlobal, List<String> possibleNodes, boolean applyGroups) {
         if (excludedGroups == null) {
             excludedGroups = new ArrayList<>();
         }
@@ -686,40 +690,16 @@ public abstract class PermissionHolder {
             groupNodes.remove(Patterns.SERVER_DELIMITER.split(node.getKey(), 2)[1]);
         });
 
-        // Apply lowest priority: groupNodes
-        for (Map.Entry<String, Boolean> groupNode : groupNodes.entrySet()) {
-            // Add the actual group perm node, so other plugins can hook
-            perms.put(groupNode.getKey(), groupNode.getValue());
-
-            // Don't add negated groups
-            if (!groupNode.getValue()) continue;
-
-            String groupName = Patterns.DOT.split(groupNode.getKey(), 2)[1];
-            if (!excludedGroups.contains(groupName)) {
-                Group group = plugin.getGroupManager().get(groupName);
-                if (group != null) {
-                    perms.putAll(group.getLocalPermissions(server, excludedGroups));
-                } else {
-                    plugin.getLog().warn("Error whilst refreshing the permissions of '" + objectName + "'." +
-                            "\n The group '" + groupName + "' is not loaded.");
-                }
-            }
-        }
-
-        applyShorthandIfEnabled(perms);
-
-        // Apply next priorities: serverSpecificGroups and then serverWorldSpecificGroups
-        for (Map<String, Boolean> m : Arrays.asList(serverSpecificGroups, serverWorldSpecificGroups)) {
-            for (Map.Entry<String, Boolean> groupNode : m.entrySet()) {
-                final String rawNode = Patterns.SERVER_DELIMITER.split(groupNode.getKey())[1];
-
+        if (applyGroups) {
+            // Apply lowest priority: groupNodes
+            for (Map.Entry<String, Boolean> groupNode : groupNodes.entrySet()) {
                 // Add the actual group perm node, so other plugins can hook
-                perms.put(rawNode, groupNode.getValue());
+                perms.put(groupNode.getKey(), groupNode.getValue());
 
                 // Don't add negated groups
                 if (!groupNode.getValue()) continue;
 
-                String groupName = Patterns.DOT.split(rawNode, 2)[1];
+                String groupName = Patterns.DOT.split(groupNode.getKey(), 2)[1];
                 if (!excludedGroups.contains(groupName)) {
                     Group group = plugin.getGroupManager().get(groupName);
                     if (group != null) {
@@ -730,7 +710,33 @@ public abstract class PermissionHolder {
                     }
                 }
             }
+
             applyShorthandIfEnabled(perms);
+
+            // Apply next priorities: serverSpecificGroups and then serverWorldSpecificGroups
+            for (Map<String, Boolean> m : Arrays.asList(serverSpecificGroups, serverWorldSpecificGroups)) {
+                for (Map.Entry<String, Boolean> groupNode : m.entrySet()) {
+                    final String rawNode = Patterns.SERVER_DELIMITER.split(groupNode.getKey())[1];
+
+                    // Add the actual group perm node, so other plugins can hook
+                    perms.put(rawNode, groupNode.getValue());
+
+                    // Don't add negated groups
+                    if (!groupNode.getValue()) continue;
+
+                    String groupName = Patterns.DOT.split(rawNode, 2)[1];
+                    if (!excludedGroups.contains(groupName)) {
+                        Group group = plugin.getGroupManager().get(groupName);
+                        if (group != null) {
+                            perms.putAll(group.getLocalPermissions(server, excludedGroups));
+                        } else {
+                            plugin.getLog().warn("Error whilst refreshing the permissions of '" + objectName + "'." +
+                                    "\n The group '" + groupName + "' is not loaded.");
+                        }
+                    }
+                }
+                applyShorthandIfEnabled(perms);
+            }
         }
 
         // Apply next priority: userNodes

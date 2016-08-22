@@ -43,11 +43,12 @@ public class VaultHook {
             if (chatHook == null) {
                 chatHook = new VaultChatHook(permissionHook);
             }
+            chatHook.setPlugin(plugin);
 
             final ServicesManager sm = plugin.getServer().getServicesManager();
             sm.unregisterAll(plugin);
             sm.register(Permission.class, permissionHook, plugin, ServicePriority.High);
-            sm.register(Chat.class, chatHook, plugin, ServicePriority.Lowest);
+            sm.register(Chat.class, chatHook, plugin, ServicePriority.Low);
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -93,7 +93,7 @@ class VaultPermissionHook extends Permission {
         return true;
     }
 
-    private void objectSave(PermissionHolder t) {
+    void objectSave(PermissionHolder t) {
         if (t instanceof User) {
             ((User) t).refreshPermissions();
             plugin.getDatastore().saveUser(((User) t), Callback.empty());
