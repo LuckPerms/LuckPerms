@@ -24,6 +24,9 @@ package me.lucko.luckperms.api.event;
 
 import me.lucko.luckperms.api.LuckPermsApi;
 
+/**
+ * Abstract LuckPerms Event class.
+ */
 public abstract class LPEvent {
 
     /**

@@ -25,6 +25,9 @@ package me.lucko.luckperms.api.event.events;
 import me.lucko.luckperms.api.PermissionHolder;
 import me.lucko.luckperms.api.event.AbstractPermissionRemoveEvent;
 
+/**
+ * Called whenever a user or group has a permission unset.
+ */
 public class PermissionUnsetEvent extends AbstractPermissionRemoveEvent {
 
     private final String node;

@@ -33,19 +33,19 @@ class Utils {
 
     static void checkUser(User user) {
         if (!(user instanceof UserLink)) {
-            throw new IllegalArgumentException("User instance cannot be handled by this implementation.");
+            throw new IllegalStateException("User instance cannot be handled by this implementation.");
         }
     }
 
     static void checkGroup(Group group) {
         if (!(group instanceof GroupLink)) {
-            throw new IllegalArgumentException("Group instance cannot be handled by this implementation.");
+            throw new IllegalStateException("Group instance cannot be handled by this implementation.");
         }
     }
 
     static void checkTrack(Track track) {
         if (!(track instanceof TrackLink)) {
-            throw new IllegalArgumentException("Track instance cannot be handled by this implementation.");
+            throw new IllegalStateException("Track instance cannot be handled by this implementation.");
         }
     }
 

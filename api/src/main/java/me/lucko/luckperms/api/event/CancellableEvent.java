@@ -22,7 +22,10 @@
 
 package me.lucko.luckperms.api.event;
 
-public class CancellableEvent extends LPEvent {
+/**
+ * Event that allows listeners to set the cancelled state of an event.
+ */
+public abstract class CancellableEvent extends LPEvent {
 
     private boolean cancelled = false;
 

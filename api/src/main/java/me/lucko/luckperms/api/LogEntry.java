@@ -24,6 +24,9 @@ package me.lucko.luckperms.api;
 
 import java.util.UUID;
 
+/**
+ * Represents a single entry in a log
+ */
 public class LogEntry implements Comparable<LogEntry> {
     public static LogEntryBuilder builder() {
         return new LogEntryBuilder();

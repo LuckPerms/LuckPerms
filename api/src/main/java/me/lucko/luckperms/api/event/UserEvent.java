@@ -24,6 +24,9 @@ package me.lucko.luckperms.api.event;
 
 import me.lucko.luckperms.api.User;
 
+/**
+ * Represents an event acting upon a user.
+ */
 public class UserEvent extends LPEvent {
 
     private final User user;

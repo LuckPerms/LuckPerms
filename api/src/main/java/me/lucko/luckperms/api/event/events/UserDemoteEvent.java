@@ -26,6 +26,9 @@ import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.event.TrackEvent;
 
+/**
+ * Called whenever a user is demoted down a track
+ */
 public class UserDemoteEvent extends TrackEvent {
 
     public UserDemoteEvent(Track track, User user, String from, String to) {

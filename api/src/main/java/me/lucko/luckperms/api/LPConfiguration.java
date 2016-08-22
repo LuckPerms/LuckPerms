@@ -28,6 +28,7 @@ import me.lucko.luckperms.api.data.MySQLConfiguration;
 /**
  * A wrapper interface for the internal LuckPerms configuration, providing read only access.
  */
+@SuppressWarnings("unused")
 public interface LPConfiguration {
 
     /**

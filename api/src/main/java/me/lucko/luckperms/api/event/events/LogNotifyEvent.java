@@ -25,8 +25,16 @@ package me.lucko.luckperms.api.event.events;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.event.CancellableEvent;
 
+/**
+ * Called before a LogEntry is broadcasted to players only with the notify permission.
+ * The log entry will still be recorded in the datastore, regardless of the cancellation state of this event.
+ * Cancelling this event only stops the broadcast.
+ */
 public class LogNotifyEvent extends CancellableEvent {
 
+    /**
+     * The log entry to be broadcasted
+     */
     private final LogEntry entry;
 
     public LogNotifyEvent(LogEntry entry) {

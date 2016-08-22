@@ -29,7 +29,7 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * The root Api interface in LuckPerms
+ * The root API interface in LuckPerms
  */
 @SuppressWarnings("unused")
 public interface LuckPermsApi {

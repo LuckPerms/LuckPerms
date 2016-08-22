@@ -29,9 +29,6 @@ import java.util.List;
 
 /**
  * Wrapper interface for internal Group instances
- *
- * <p> The implementations of this interface limit access to the Group and add parameter checks to further prevent
- * errors and ensure all API interactions to not damage the state of the group.
  */
 @SuppressWarnings("unused")
 public interface Group extends PermissionHolder {
@@ -42,26 +39,34 @@ public interface Group extends PermissionHolder {
     String getName();
 
     /**
-     * check to see if a group inherits a group
+     * Check to see if a group inherits a group
      * @param group The group to check membership of
-     * @return true if the user is a member of the group
+     * @return true if the group inherits the other group
+     * @throws NullPointerException if the group is null
+     * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      */
     boolean inheritsGroup(Group group);
 
     /**
-     * check to see if the group inherits a group on a specific server
+     * Check to see if the group inherits a group on a specific server
      * @param group The group to check membership of
      * @param server The server to check on
-     * @return true if the group inherits the group
+     * @return true if the group inherits the group on the server
+     * @throws NullPointerException if the group or server is null
+     * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
+     * @throws IllegalArgumentException if the server is invalid
      */
     boolean inheritsGroup(Group group, String server);
 
     /**
-     * check to see if the group inherits a group on a specific server
+     * Check to see if the group inherits a group on a specific server and world
      * @param group The group to check membership of
      * @param server The server to check on
      * @param world The world to check on
-     * @return true if the group inherits the group
+     * @return true if the group inherits the group on the server and world
+     * @throws NullPointerException if the group, server or world is null
+     * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
+     * @throws IllegalArgumentException if the server or world is invalid
      */
     boolean inheritsGroup(Group group, String server, String world);
 
@@ -69,101 +74,134 @@ public interface Group extends PermissionHolder {
      * Make this group inherit another group
      * @param group the group to be inherited
      * @throws ObjectAlreadyHasException if the group already inherits the group
+     * @throws NullPointerException if the group is null
+     * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      */
     void setInheritGroup(Group group) throws ObjectAlreadyHasException;
 
     /**
      * Make this group inherit another group on a specific server
      * @param group the group to be inherited
-     * @param server The server to add the group on
+     * @param server The server to inherit the group on
      * @throws ObjectAlreadyHasException if the group already inherits the group on that server
+     * @throws NullPointerException if the group or server is null
+     * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
+     * @throws IllegalArgumentException if the server is invalid
      */
     void setInheritGroup(Group group, String server) throws ObjectAlreadyHasException;
 
     /**
-     * Make this group inherit another group on a specific server
+     * Make this group inherit another group on a specific server and world
      * @param group the group to be inherited
-     * @param server The server to add the group on
-     * @param world The world to add the group on
-     * @throws ObjectAlreadyHasException if the group already inherits the group on that server
+     * @param server The server to inherit the group on
+     * @param world The world to inherit the group on
+     * @throws ObjectAlreadyHasException if the group already inherits the group on that server and world
+     * @throws NullPointerException if the group, server or world is null
+     * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
+     * @throws IllegalArgumentException if the server or world is invalid
      */
     void setInheritGroup(Group group, String server, String world) throws ObjectAlreadyHasException;
 
     /**
-     * Make this group inherit another group on a specific server
+     * Make this group inherit another group temporarily
      * @param group the group to be inherited
-     * @param expireAt when the group should expire
-     * @throws ObjectAlreadyHasException if the group already inherits the group on that server
+     * @param expireAt the unix time when the group should expire
+     * @throws ObjectAlreadyHasException if the group already inherits the group temporarily
+     * @throws NullPointerException if the group is null
+     * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
+     * @throws IllegalArgumentException if the expiry time is in the past
      */
     void setInheritGroup(Group group, long expireAt) throws ObjectAlreadyHasException;
 
     /**
-     * Make this group inherit another group on a specific server
+     * Make this group inherit another group on a specific server temporarily
      * @param group the group to be inherited
-     * @param server The server to add the group on
+     * @param server The server inherit add the group on
      * @param expireAt when the group should expire
-     * @throws ObjectAlreadyHasException if the group already inherits the group on that server
+     * @throws ObjectAlreadyHasException if the group already inherits the group on that server temporarily
+     * @throws NullPointerException if the group or server is null
+     * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
+     * @throws IllegalArgumentException if the expiry time is in the past or the server is invalid
      */
     void setInheritGroup(Group group, String server, long expireAt) throws ObjectAlreadyHasException;
 
     /**
-     * Make this group inherit another group on a specific server
+     * Make this group inherit another group on a specific server and world temporarily
      * @param group the group to be inherited
-     * @param server The server to add the group on
-     * @param world The world to add the group on
+     * @param server The server to inherit the group on
+     * @param world The world to inherit the group on
      * @param expireAt when the group should expire
-     * @throws ObjectAlreadyHasException if the group already inherits the group on that server
+     * @throws ObjectAlreadyHasException if the group already inherits the group on that server and world temporarily
+     * @throws NullPointerException if the group, server or world is null
+     * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
+     * @throws IllegalArgumentException if the expiry time is in the past or the server/world is invalid
      */
     void setInheritGroup(Group group, String server, String world, long expireAt) throws ObjectAlreadyHasException;
 
     /**
-     * Remove a previously set inheritance
+     * Remove a previously set inheritance rule
      * @param group the group to uninherit
      * @throws ObjectLacksException if the group does not already inherit the group
+     * @throws NullPointerException if the group is null
+     * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      */
     void unsetInheritGroup(Group group) throws ObjectLacksException;
 
     /**
-     * Remove a previously set inheritance
+     * Remove a previously set inheritance rule
      * @param group the group to uninherit
      * @param temporary if the group being removed is temporary
      * @throws ObjectLacksException if the group does not already inherit the group
+     * @throws NullPointerException if the group is null
+     * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      */
     void unsetInheritGroup(Group group, boolean temporary) throws ObjectLacksException;
 
     /**
-     * Remove a previously set inheritance
+     * Remove a previously set inheritance rule on a specific server
      * @param group the group to uninherit
      * @param server The server to remove the group on
-     * @throws ObjectLacksException if the group does not already inherit the group
+     * @throws ObjectLacksException if the group does not already inherit the group on that server
+     * @throws NullPointerException if the group or server is null
+     * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
+     * @throws IllegalArgumentException if the server is invalid
      */
     void unsetInheritGroup(Group group, String server) throws ObjectLacksException;
 
     /**
-     * Remove a previously set inheritance
+     * Remove a previously set inheritance rule on a specific server and world
      * @param group the group to uninherit
      * @param server The server to remove the group on
      * @param world The world to remove the group on
      * @throws ObjectLacksException if the group does not already inherit the group
+     * @throws NullPointerException if the group, server or world is null
+     * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
+     * @throws IllegalArgumentException if the server or world is invalid
      */
     void unsetInheritGroup(Group group, String server, String world) throws ObjectLacksException;
 
     /**
-     * Remove a previously set inheritance
+     * Remove a previously set inheritance rule on a specific server
      * @param group the group to uninherit
      * @param server The server to remove the group on
      * @param temporary if the group being removed is temporary
      * @throws ObjectLacksException if the group does not already inherit the group
+     * @throws NullPointerException if the group or server is null
+     * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
+     * @throws IllegalArgumentException if the expiry time is in the past or the server is invalid
      */
     void unsetInheritGroup(Group group, String server, boolean temporary) throws ObjectLacksException;
 
     /**
-     * Remove a previously set inheritance
+     * Remove a previously set inheritance rule on a specific server and world
      * @param group the group to uninherit
      * @param server The server to remove the group on
      * @param world The world to remove the group on
-     * @param temporary if the group being removed is temporary
+     * @param temporary if the group being removed was set temporarily
      * @throws ObjectLacksException if the group does not already inherit the group
+     * @throws NullPointerException if the group, server or world is null
+     * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
+     * @throws IllegalArgumentException if the expiry time is in the past or the server/world is invalid
      */
     void unsetInheritGroup(Group group, String server, String world, boolean temporary) throws ObjectLacksException;
 
@@ -183,6 +221,8 @@ public interface Group extends PermissionHolder {
      * @param server the server to check
      * @param world the world to check
      * @return a {@link List} of group names
+     * @throws NullPointerException if the server or world is null
+     * @throws IllegalArgumentException if the server or world is invalid
      */
     List<String> getLocalGroups(String server, String world);
 
@@ -190,6 +230,8 @@ public interface Group extends PermissionHolder {
      * Get a {@link List} of the groups the group inherits on a specific server
      * @param server the server to check
      * @return a {@link List} of group names
+     * @throws NullPointerException if the server is null
+     * @throws IllegalArgumentException if the server is invalid
      */
     List<String> getLocalGroups(String server);
 }

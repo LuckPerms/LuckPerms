@@ -24,6 +24,10 @@ package me.lucko.luckperms.api.event.events;
 
 import me.lucko.luckperms.api.event.CancellableEvent;
 
+/**
+ * Called before the sync task is about to run.
+ * Set this event to cancelled to prevent the sync task from running.
+ */
 public class PreSyncEvent extends CancellableEvent {
 
     public PreSyncEvent() {

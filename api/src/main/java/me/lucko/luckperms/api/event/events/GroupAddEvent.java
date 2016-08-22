@@ -26,8 +26,14 @@ import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.PermissionHolder;
 import me.lucko.luckperms.api.event.AbstractPermissionAddEvent;
 
+/**
+ * Called whenever a user or group is added to / starts to inherit another group
+ */
 public class GroupAddEvent extends AbstractPermissionAddEvent {
 
+    /**
+     * The group being added to the target
+     */
     private final Group group;
 
     public GroupAddEvent(PermissionHolder target, Group group, String server, String world, long expiry) {

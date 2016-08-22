@@ -66,7 +66,7 @@ public class UserLink extends PermissionHolderLink implements User {
     }
 
     @Override
-    public void setPrimaryGroup(String s) throws ObjectAlreadyHasException {
+    public void setPrimaryGroup(@NonNull String s) throws ObjectAlreadyHasException {
         if (getPrimaryGroup().equalsIgnoreCase(s)) {
             throw new ObjectAlreadyHasException();
         }

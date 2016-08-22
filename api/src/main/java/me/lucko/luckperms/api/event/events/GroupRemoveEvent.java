@@ -25,8 +25,15 @@ package me.lucko.luckperms.api.event.events;
 import me.lucko.luckperms.api.PermissionHolder;
 import me.lucko.luckperms.api.event.AbstractPermissionRemoveEvent;
 
+/**
+ * Called whenever a user or group is removed from / stops inheriting another group
+ */
 public class GroupRemoveEvent extends AbstractPermissionRemoveEvent {
 
+    /**
+     * The name of group being removed from the target.
+     * Be aware that this group may have already been deleted, and and instance may therefore not exist internally.
+     */
     private final String group;
 
     public GroupRemoveEvent(PermissionHolder target, String group, String server, String world, boolean temporary) {

@@ -28,6 +28,9 @@ import me.lucko.luckperms.api.event.AbstractPermissionAddEvent;
 import java.util.AbstractMap;
 import java.util.Map;
 
+/**
+ * Called whenever a user or group has a permission set.
+ */
 public class PermissionSetEvent extends AbstractPermissionAddEvent {
 
     private final String node;

@@ -27,7 +27,10 @@ import me.lucko.luckperms.api.event.LPEvent;
 import java.util.UUID;
 
 /**
- * This event is fired before the player has actually joined the game on the async login / auth event.
+ * Called when the user logs into the network for the first time.
+ * Particularly useful for networks with multiple lobbies, who want to welcome a user when they join for the first time.
+ *
+ * <p>This event is fired before the player has actually joined the game on the async login / auth event.
  * If you want to do something with the user, store the UUID in a set, and then check the set in the PlayerJoinEvent o.e.
  */
 public class UserFirstLoginEvent extends LPEvent {

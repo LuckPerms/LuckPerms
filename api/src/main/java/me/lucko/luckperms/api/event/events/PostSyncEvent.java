@@ -24,6 +24,9 @@ package me.lucko.luckperms.api.event.events;
 
 import me.lucko.luckperms.api.event.LPEvent;
 
+/**
+ * Called after the sync task has ran.
+ */
 public class PostSyncEvent extends LPEvent {
 
     public PostSyncEvent() {

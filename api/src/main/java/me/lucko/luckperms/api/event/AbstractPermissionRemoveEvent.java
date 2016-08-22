@@ -47,7 +47,15 @@ public class AbstractPermissionRemoveEvent extends TargetedEvent<PermissionHolde
         return Optional.ofNullable(world);
     }
 
+    /**
+     * @deprecated use {@link #isTemporary()}
+     */
+    @Deprecated
     public boolean getTemporary() {
+        return temporary;
+    }
+
+    public boolean isTemporary() {
         return temporary;
     }
 

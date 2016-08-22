@@ -22,6 +22,10 @@
 
 package me.lucko.luckperms.api.data;
 
+/**
+ * Represents the data section of the main LuckPerms configuration.
+ * All methods could return null.
+ */
 @SuppressWarnings("deprecation")
 public interface DatastoreConfiguration extends MySQLConfiguration {
 

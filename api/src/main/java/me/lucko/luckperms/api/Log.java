@@ -28,7 +28,7 @@ import java.util.UUID;
 
 /**
  * Represents the internal LuckPerms log.
- * All content is immutable. You can add to the log using the {@link Datastore}, and then request an updated copy.
+ * All content internally is immutable. You can add to the log using the {@link Datastore}, and then request an updated copy.
  */
 @SuppressWarnings("unused")
 public interface Log {
@@ -38,27 +38,124 @@ public interface Log {
      */
     SortedSet<LogEntry> getContent();
 
+    /**
+     * @return all content in this log
+     */
     SortedSet<LogEntry> getRecent();
+
+    /**
+     * Gets the recent content separated by page
+     * @param pageNo the page number
+     * @return the page content
+     */
     SortedMap<Integer, LogEntry> getRecent(int pageNo);
+
+    /**
+     * @return the max page number allowed in the {@link #getRecent(int)} method
+     */
     int getRecentMaxPages();
 
+
+    /**
+     * @param actor the uuid of the actor to filter by
+     * @return all content in this log where is actor = uuid
+     */
     SortedSet<LogEntry> getRecent(UUID actor);
+
+    /**
+     * Gets the recent content for the uuid, separated into pages
+     * @param pageNo the page number
+     * @param actor the uuid of the actor to filter by
+     * @return the page content
+     */
     SortedMap<Integer, LogEntry> getRecent(int pageNo, UUID actor);
+
+    /**
+     * @param actor the actor to filter by
+     * @return the max page number allowed in the {@link #getRecent(int, UUID)} method
+     */
     int getRecentMaxPages(UUID actor);
 
+
+    /**
+     * @param uuid the uuid to filter by
+     * @return all content in this log where the user = uuid
+     */
     SortedSet<LogEntry> getUserHistory(UUID uuid);
+
+    /**
+     * Gets the user history content, separated by pages
+     * @param pageNo the page number
+     * @param uuid the uuid of the acted user to filter by
+     * @return the page content
+     */
     SortedMap<Integer, LogEntry> getUserHistory(int pageNo, UUID uuid);
+
+    /**
+     * @param uuid the uuid to filter by
+     * @return the max page number allowed in the {@link #getUserHistory(int, UUID)} method
+     */
     int getUserHistoryMaxPages(UUID uuid);
 
+    
+    /**
+     * @param name the name to filter by
+     * @return all content in this log where the group = name
+     */
     SortedSet<LogEntry> getGroupHistory(String name);
+
+    /**
+     * Gets the group history content, separated by pages
+     * @param pageNo the page number
+     * @param name the name of the acted group to filter by
+     * @return the page content
+     */
     SortedMap<Integer, LogEntry> getGroupHistory(int pageNo, String name);
+
+    /**
+     * @param name the name to filter by
+     * @return the max page number allowed in the {@link #getGroupHistory(int, String)} method
+     */
     int getGroupHistoryMaxPages(String name);
 
+
+    /**
+     * @param name the name to filter by
+     * @return all content in this log where the track = name
+     */
     SortedSet<LogEntry> getTrackHistory(String name);
+
+    /**
+     * Gets the track history content, separated by pages
+     * @param pageNo the page number
+     * @param name the name of the acted track to filter by
+     * @return the page content
+     */
     SortedMap<Integer, LogEntry> getTrackHistory(int pageNo, String name);
+
+    /**
+     * @param name the name to filter by
+     * @return the max page number allowed in the {@link #getTrackHistory(int, String)} method
+     */
     int getTrackHistoryMaxPages(String name);
 
+    /**
+     * @param query the query to filter by
+     * @return all content in this log where the content matches query
+     */
     SortedSet<LogEntry> getSearch(String query);
+
+    /**
+     * Gets the search content, separated by pages
+     * @param pageNo the page number
+     * @param query the query to filter by
+     * @return the page content
+     */
     SortedMap<Integer, LogEntry> getSearch(int pageNo, String query);
+
+    /**
+     * @param query the query to filter by
+     * @return the max page number allowed in the {@link #getSearch(int, String)} method
+     */
     int getSearchMaxPages(String query);
 }

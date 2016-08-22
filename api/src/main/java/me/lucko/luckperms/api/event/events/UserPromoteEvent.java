@@ -26,6 +26,9 @@ import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.event.TrackEvent;
 
+/**
+ * Called whenever a user is promoted up a track
+ */
 public class UserPromoteEvent extends TrackEvent {
 
     public UserPromoteEvent(Track track, User user, String from, String to) {

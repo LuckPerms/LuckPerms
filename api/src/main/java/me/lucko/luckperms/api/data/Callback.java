@@ -24,8 +24,17 @@ package me.lucko.luckperms.api.data;
 
 import java.util.function.Consumer;
 
+/**
+ * A callback used to wait for the completion of asynchronous operations.
+ * All callbacks are ran on the main Bukkit server thread.
+ * @param <T> the return type
+ */
 public interface Callback<T> {
 
+    /**
+     * Called when the operation completes.
+     * @param t the return value, may be null
+     */
     void onComplete(T t);
 
     static <T> Callback<T> empty() {
