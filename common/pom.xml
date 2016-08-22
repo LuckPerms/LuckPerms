@@ -119,6 +119,12 @@
             <version>1.4</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>net.alpenblock</groupId>
+            <artifactId>BungeePerms</artifactId>
+            <version>3.0-dev-52</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
 </project>

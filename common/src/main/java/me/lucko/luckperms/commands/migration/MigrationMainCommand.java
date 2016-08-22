@@ -27,10 +27,7 @@ import me.lucko.luckperms.commands.CommandResult;
 import me.lucko.luckperms.commands.MainCommand;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
-import me.lucko.luckperms.commands.migration.subcommands.MigrationGroupManager;
-import me.lucko.luckperms.commands.migration.subcommands.MigrationPermissionsEx;
-import me.lucko.luckperms.commands.migration.subcommands.MigrationPowerfulPerms;
-import me.lucko.luckperms.commands.migration.subcommands.MigrationZPermissions;
+import me.lucko.luckperms.commands.migration.subcommands.*;
 import me.lucko.luckperms.constants.Constants;
 import me.lucko.luckperms.constants.Message;
 
@@ -62,6 +59,11 @@ public class MigrationMainCommand extends MainCommand<Object> {
         try {
             Class.forName("org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsService");
             subCommands.add(new MigrationZPermissions());
+        } catch (Throwable ignored) {}
+
+        try {
+            Class.forName("net.alpenblock.bungeeperms.BungeePerms");
+            subCommands.add(new MigrationBungeePerms());
         } catch (Throwable ignored) {}
 
     }

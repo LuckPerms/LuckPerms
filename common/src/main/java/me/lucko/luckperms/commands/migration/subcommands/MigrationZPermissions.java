@@ -46,8 +46,8 @@ import java.util.stream.Collectors;
  */
 public class MigrationZPermissions extends SubCommand<Object> {
     public MigrationZPermissions() {
-        super("zpermissions", "Migration from zPermissions",
-                "/%s migration zpermissions [world names]", Permission.MIGRATION, Predicate.alwaysFalse());
+        super("zpermissions", "Migration from zPermissions", "/%s migration zpermissions [world names]",
+                Permission.MIGRATION, Predicate.alwaysFalse());
     }
 
     @Override
