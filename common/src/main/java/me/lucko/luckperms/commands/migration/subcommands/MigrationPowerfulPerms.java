@@ -111,7 +111,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         // Find a list of UUIDs
         log.info("PowerfulPerms Migration: Getting a list of UUIDs to migrate.");
 
-        HikariDataSource hikari = new HikariDataSource();
+        @Cleanup HikariDataSource hikari = new HikariDataSource();
         hikari.setMaximumPoolSize(2);
         hikari.setDataSourceClassName("com.mysql.jdbc.jdbc2.optional.MysqlDataSource");
         hikari.addDataSourceProperty("serverName", address.split(":")[0]);
@@ -133,7 +133,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
 
             } else {
                 @Cleanup PreparedStatement preparedStatement = connection.prepareStatement("SELECT `uuid` FROM " + dbTable);
-                ResultSet resultSet = preparedStatement.executeQuery();
+                @Cleanup ResultSet resultSet = preparedStatement.executeQuery();
 
                 while (resultSet.next()) {
                     uuids.add(UUID.fromString(resultSet.getString("uuid")));
