@@ -60,6 +60,7 @@ import org.spongepowered.api.text.Text;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -79,7 +80,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
     private Scheduler scheduler = Sponge.getScheduler();
 
-    private final Set<UUID> ignoringLogs = new HashSet<>();
+    private final Set<UUID> ignoringLogs = ConcurrentHashMap.newKeySet();
     private LPConfiguration configuration;
     private UserManager userManager;
     private GroupManager groupManager;

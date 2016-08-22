@@ -22,15 +22,21 @@
 
 package me.lucko.luckperms.users;
 
+import lombok.Getter;
 import me.lucko.luckperms.LPBukkitPlugin;
 import org.bukkit.entity.Player;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class BukkitUserManager extends UserManager {
     private final LPBukkitPlugin plugin;
+
+    @Getter
+    private final Map<UUID, String> worldCache = new ConcurrentHashMap<>();
 
     public BukkitUserManager(LPBukkitPlugin plugin) {
         super(plugin);

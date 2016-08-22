@@ -30,6 +30,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.*;
+import org.bukkit.permissions.PermissionAttachment;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 class BukkitListener extends AbstractListener implements Listener {
     private final LPBukkitPlugin plugin;
@@ -62,7 +65,15 @@ class BukkitListener extends AbstractListener implements Listener {
 
         if (user instanceof BukkitUser) {
             BukkitUser u = (BukkitUser) user;
-            u.setAttachment(player.addAttachment(plugin));
+
+            PermissionAttachment attachment = player.addAttachment(plugin);
+            try {
+                BukkitUser.getPermissionsField().set(attachment, new ConcurrentHashMap<>());
+            } catch (Throwable t) {
+                t.printStackTrace();
+            }
+
+            u.setAttachment(attachment);
         }
 
         user.refreshPermissions();
@@ -71,16 +82,19 @@ class BukkitListener extends AbstractListener implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
         // Refresh permissions again
+        plugin.getUserManager().getWorldCache().put(e.getPlayer().getUniqueId(), e.getPlayer().getWorld().getName());
         refreshPlayer(e.getPlayer().getUniqueId());
     }
 
     @EventHandler
     public void onPlayerChangedWorld(PlayerChangedWorldEvent e) {
+        plugin.getUserManager().getWorldCache().put(e.getPlayer().getUniqueId(), e.getPlayer().getWorld().getName());
         refreshPlayer(e.getPlayer().getUniqueId());
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent e) {
+        plugin.getUserManager().getWorldCache().remove(e.getPlayer().getUniqueId());
         onLeave(e.getPlayer().getUniqueId());
     }
 }

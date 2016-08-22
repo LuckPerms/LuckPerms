@@ -27,7 +27,6 @@ import lombok.Setter;
 import me.lucko.luckperms.LPBukkitPlugin;
 import me.lucko.luckperms.api.event.events.UserPermissionRefreshEvent;
 import me.lucko.luckperms.api.implementation.internal.UserLink;
-import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
 
 import java.lang.reflect.Field;
@@ -36,7 +35,7 @@ import java.util.UUID;
 
 public class BukkitUser extends User {
     private static Field permissionsField = null;
-    private static Field getPermissionsField() {
+    public static Field getPermissionsField() {
         if (permissionsField == null) {
             try {
                 permissionsField = PermissionAttachment.class.getDeclaredField("permissions");
@@ -68,46 +67,42 @@ public class BukkitUser extends User {
     @SuppressWarnings("unchecked")
     @Override
     public void refreshPermissions() {
-        plugin.doSync(() -> {
-            final Player player = plugin.getServer().getPlayer(plugin.getUuidCache().getExternalUUID(getUuid()));
-            if (player == null) return;
+        if (attachment == null) {
+            getPlugin().getLog().severe("User " + getName() + " does not have a permissions attachment defined.");
+        }
 
-            if (attachment == null) {
-                getPlugin().getLog().warn("User " + getName() + " does not have a permissions attachment defined.");
-                setAttachment(player.addAttachment(plugin));
-            }
+        // Calculate the permissions that should be applied
+        Map<String, Boolean> toApply = getLocalPermissions(getPlugin().getConfiguration().getServer(), plugin.getUserManager().getWorldCache().get(getUuid()), null);
 
-            // Calculate the permissions that should be applied
-            Map<String, Boolean> toApply = getLocalPermissions(getPlugin().getConfiguration().getServer(), player.getWorld().getName(), null);
+        try {
+            // Existing is thread-safe, hopefully
+            Map<String, Boolean> existing = (Map<String, Boolean>) getPermissionsField().get(attachment);
 
-            try {
-                Map<String, Boolean> existing = (Map<String, Boolean>) getPermissionsField().get(attachment);
-
-                boolean different = false;
-                if (toApply.size() != existing.size()) {
-                    different = true;
-                } else {
-                    for (Map.Entry<String, Boolean> e : existing.entrySet()) {
-                        if (toApply.containsKey(e.getKey()) && toApply.get(e.getKey()) == e.getValue()) {
-                            continue;
-                        }
-                        different = true;
-                        break;
+            boolean different = false;
+            if (toApply.size() != existing.size()) {
+                different = true;
+            } else {
+                for (Map.Entry<String, Boolean> e : existing.entrySet()) {
+                    if (toApply.containsKey(e.getKey()) && toApply.get(e.getKey()) == e.getValue()) {
+                        continue;
                     }
+                    different = true;
+                    break;
                 }
-
-                if (!different) return;
-
-                // Faster than recalculating permissions after each PermissionAttachment#setPermission
-                existing.clear();
-                existing.putAll(toApply);
-                attachment.getPermissible().recalculatePermissions();
-
-            } catch (Exception e) {
-                e.printStackTrace();
             }
 
-            plugin.getApiProvider().fireEventAsync(new UserPermissionRefreshEvent(new UserLink(this)));
-        });
+            if (!different) return;
+
+            // Faster than recalculating permissions after each PermissionAttachment#setPermission
+            existing.clear();
+            existing.putAll(toApply);
+
+            attachment.getPermissible().recalculatePermissions();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        plugin.getApiProvider().fireEventAsync(new UserPermissionRefreshEvent(new UserLink(this)));
     }
 }

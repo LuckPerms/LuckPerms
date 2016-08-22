@@ -39,7 +39,6 @@ import me.lucko.luckperms.storage.Datastore;
 import me.lucko.luckperms.storage.StorageFactory;
 import me.lucko.luckperms.tracks.TrackManager;
 import me.lucko.luckperms.users.BukkitUserManager;
-import me.lucko.luckperms.users.UserManager;
 import me.lucko.luckperms.utils.LogFactory;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
@@ -49,13 +48,14 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Getter
 public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
-    private final Set<UUID> ignoringLogs = new HashSet<>();
+    private final Set<UUID> ignoringLogs = ConcurrentHashMap.newKeySet();
     private LPConfiguration configuration;
-    private UserManager userManager;
+    private BukkitUserManager userManager;
     private GroupManager groupManager;
     private TrackManager trackManager;
     private Datastore datastore;
