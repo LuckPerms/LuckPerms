@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.api.vault;
 
+import lombok.NonNull;
 import lombok.Setter;
 import me.lucko.luckperms.LPBukkitPlugin;
 import me.lucko.luckperms.constants.Patterns;
@@ -84,6 +85,7 @@ class VaultChatHook extends Chat {
 
     private void saveMeta(PermissionHolder holder, String world, String node, String value) {
         if (holder == null) return;
+        if (node.equals("")) return;
         node = escapeCharacters(node);
         value = escapeCharacters(value);
 
@@ -103,6 +105,7 @@ class VaultChatHook extends Chat {
 
     private static int getMeta(PermissionHolder holder, String world, String node, int defaultValue) {
         if (holder == null) return defaultValue;
+        if (node.equals("")) return defaultValue;
         node = escapeCharacters(node);
 
         for (Map.Entry<String, Boolean> e : holder.getPermissions("global", world, null, true, Collections.emptyList(), false).entrySet()) {
@@ -131,6 +134,7 @@ class VaultChatHook extends Chat {
 
     private static double getMeta(PermissionHolder holder, String world, String node, double defaultValue) {
         if (holder == null) return defaultValue;
+        if (node.equals("")) return defaultValue;
         node = escapeCharacters(node);
 
         for (Map.Entry<String, Boolean> e : holder.getPermissions("global", world, null, true, Collections.emptyList(), false).entrySet()) {
@@ -159,7 +163,7 @@ class VaultChatHook extends Chat {
 
     private static boolean getMeta(PermissionHolder holder, String world, String node, boolean defaultValue) {
         if (holder == null) return defaultValue;
-
+        if (node.equals("")) return defaultValue;
         node = escapeCharacters(node);
 
         for (Map.Entry<String, Boolean> e : holder.getPermissions("global", world, null, true, Collections.emptyList(), false).entrySet()) {
@@ -188,7 +192,7 @@ class VaultChatHook extends Chat {
 
     private static String getMeta(PermissionHolder holder, String world, String node, String defaultValue) {
         if (holder == null) return defaultValue;
-
+        if (node.equals("")) return defaultValue;
         node = escapeCharacters(node);
 
         for (Map.Entry<String, Boolean> e : holder.getPermissions("global", world, null, true, Collections.emptyList(), false).entrySet()) {
@@ -233,14 +237,16 @@ class VaultChatHook extends Chat {
         return meta == null ? "" : meta;
     }
 
-    public String getPlayerPrefix(String world, String player) {
+    public String getPlayerPrefix(String world, @NonNull String player) {
         final User user = plugin.getUserManager().get(player);
         return getChatMeta(PREFIX_PATTERN, user, world);
     }
 
-    public void setPlayerPrefix(String world, String player, String prefix) {
+    public void setPlayerPrefix(String world, @NonNull String player, @NonNull String prefix) {
         final User user = plugin.getUserManager().get(player);
         if (user == null) return;
+
+        if (prefix.equals("")) return;
 
         try {
             user.setPermission("prefix.1000." + escapeCharacters(prefix), true);
@@ -249,14 +255,16 @@ class VaultChatHook extends Chat {
         perms.objectSave(user);
     }
 
-    public String getPlayerSuffix(String world, String player) {
+    public String getPlayerSuffix(String world, @NonNull String player) {
         final User user = plugin.getUserManager().get(player);
         return getChatMeta(SUFFIX_PATTERN, user, world);
     }
 
-    public void setPlayerSuffix(String world, String player, String suffix) {
+    public void setPlayerSuffix(String world, @NonNull String player, @NonNull String suffix) {
         final User user = plugin.getUserManager().get(player);
         if (user == null) return;
+
+        if (suffix.equals("")) return;
 
         try {
             user.setPermission("suffix.1000." + escapeCharacters(suffix), true);
@@ -265,14 +273,16 @@ class VaultChatHook extends Chat {
         perms.objectSave(user);
     }
 
-    public String getGroupPrefix(String world, String group) {
+    public String getGroupPrefix(String world, @NonNull String group) {
         final Group g = plugin.getGroupManager().get(group);
         return getChatMeta(PREFIX_PATTERN, g, world);
     }
 
-    public void setGroupPrefix(String world, String group, String prefix) {
+    public void setGroupPrefix(String world, @NonNull String group, @NonNull String prefix) {
         final Group g = plugin.getGroupManager().get(group);
         if (g == null) return;
+
+        if (prefix.equals("")) return;
 
         try {
             g.setPermission("prefix.1000." + escapeCharacters(prefix), true);
@@ -281,14 +291,16 @@ class VaultChatHook extends Chat {
         perms.objectSave(g);
     }
 
-    public String getGroupSuffix(String world, String group) {
+    public String getGroupSuffix(String world, @NonNull String group) {
         final Group g = plugin.getGroupManager().get(group);
         return getChatMeta(SUFFIX_PATTERN, g, world);
     }
 
-    public void setGroupSuffix(String world, String group, String suffix) {
+    public void setGroupSuffix(String world, @NonNull String group, @NonNull String suffix) {
         final Group g = plugin.getGroupManager().get(group);
         if (g == null) return;
+
+        if (suffix.equals("")) return;
 
         try {
             g.setPermission("suffix.1000." + escapeCharacters(suffix), true);
@@ -297,82 +309,82 @@ class VaultChatHook extends Chat {
         perms.objectSave(g);
     }
 
-    public int getPlayerInfoInteger(String world, String player, String node, int defaultValue) {
+    public int getPlayerInfoInteger(String world, @NonNull String player, @NonNull String node, int defaultValue) {
         final User user = plugin.getUserManager().get(player);
         return getMeta(user, world, node, defaultValue);
     }
 
-    public void setPlayerInfoInteger(String world, String player, String node, int value) {
+    public void setPlayerInfoInteger(String world, @NonNull String player, @NonNull String node, int value) {
         final User user = plugin.getUserManager().get(player);
         saveMeta(user, world, node, String.valueOf(value));
     }
 
-    public int getGroupInfoInteger(String world, String group, String node, int defaultValue) {
+    public int getGroupInfoInteger(String world, @NonNull String group, @NonNull String node, int defaultValue) {
         final Group g = plugin.getGroupManager().get(group);
         return getMeta(g, world, node, defaultValue);
     }
 
-    public void setGroupInfoInteger(String world, String group, String node, int value) {
+    public void setGroupInfoInteger(String world, @NonNull String group, @NonNull String node, int value) {
         final Group g = plugin.getGroupManager().get(group);
         saveMeta(g, world, node, String.valueOf(value));
     }
 
-    public double getPlayerInfoDouble(String world, String player, String node, double defaultValue) {
+    public double getPlayerInfoDouble(String world, @NonNull String player, @NonNull String node, double defaultValue) {
         final User user = plugin.getUserManager().get(player);
         return getMeta(user, world, node, defaultValue);
     }
 
-    public void setPlayerInfoDouble(String world, String player, String node, double value) {
+    public void setPlayerInfoDouble(String world, @NonNull String player, @NonNull String node, double value) {
         final User user = plugin.getUserManager().get(player);
         saveMeta(user, world, node, String.valueOf(value));
     }
 
-    public double getGroupInfoDouble(String world, String group, String node, double defaultValue) {
+    public double getGroupInfoDouble(String world, @NonNull String group, @NonNull String node, double defaultValue) {
         final Group g = plugin.getGroupManager().get(group);
         return getMeta(g, world, node, defaultValue);
     }
 
-    public void setGroupInfoDouble(String world, String group, String node, double value) {
+    public void setGroupInfoDouble(String world, @NonNull String group, @NonNull String node, double value) {
         final Group g = plugin.getGroupManager().get(group);
         saveMeta(g, world, node, String.valueOf(value));
     }
 
-    public boolean getPlayerInfoBoolean(String world, String player, String node, boolean defaultValue) {
+    public boolean getPlayerInfoBoolean(String world, @NonNull String player, @NonNull String node, boolean defaultValue) {
         final User user = plugin.getUserManager().get(player);
         return getMeta(user, world, node, defaultValue);
     }
 
-    public void setPlayerInfoBoolean(String world, String player, String node, boolean value) {
+    public void setPlayerInfoBoolean(String world, @NonNull String player, @NonNull String node, boolean value) {
         final User user = plugin.getUserManager().get(player);
         saveMeta(user, world, node, String.valueOf(value));
     }
 
-    public boolean getGroupInfoBoolean(String world, String group, String node, boolean defaultValue) {
+    public boolean getGroupInfoBoolean(String world, @NonNull String group, @NonNull String node, boolean defaultValue) {
         final Group g = plugin.getGroupManager().get(group);
         return getMeta(g, world, node, defaultValue);
     }
 
-    public void setGroupInfoBoolean(String world, String group, String node, boolean value) {
+    public void setGroupInfoBoolean(String world, @NonNull String group, @NonNull String node, boolean value) {
         final Group g = plugin.getGroupManager().get(group);
         saveMeta(g, world, node, String.valueOf(value));
     }
 
-    public String getPlayerInfoString(String world, String player, String node, String defaultValue) {
+    public String getPlayerInfoString(String world, @NonNull String player, @NonNull String node, String defaultValue) {
         final User user = plugin.getUserManager().get(player);
         return getMeta(user, world, node, defaultValue);
     }
 
-    public void setPlayerInfoString(String world, String player, String node, String value) {
+    public void setPlayerInfoString(String world, @NonNull String player, @NonNull String node, String value) {
         final User user = plugin.getUserManager().get(player);
         saveMeta(user, world, node, value);
     }
 
-    public String getGroupInfoString(String world, String group, String node, String defaultValue) {
+    public String getGroupInfoString(String world, @NonNull String group, @NonNull String node, String defaultValue) {
         final Group g = plugin.getGroupManager().get(group);
         return getMeta(g, world, node, defaultValue);
     }
 
-    public void setGroupInfoString(String world, String group, String node, String value) {
+    public void setGroupInfoString(String world, @NonNull String group, @NonNull String node, String value) {
         final Group g = plugin.getGroupManager().get(group);
         saveMeta(g, world, node, value);
     }
