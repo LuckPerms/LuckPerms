@@ -48,4 +48,12 @@ public class ArgumentChecker {
         return DateUtil.shouldExpire(l);
     }
 
+    public static String escapeCharacters(String s) {
+        s = s.replace(".", "{SEP}");
+        s = s.replace("/", "{FSEP}");
+        s = s.replace("$", "{DSEP}");
+
+        return s;
+    }
+
 }

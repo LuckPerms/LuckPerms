@@ -33,6 +33,7 @@ import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.tracks.Track;
 import me.lucko.luckperms.users.User;
+import me.lucko.luckperms.utils.ArgumentChecker;
 import org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsService;
 
 import java.util.List;
@@ -97,6 +98,24 @@ public class MigrationZPermissions extends SubCommand<Object> {
             }
 
             user.setPrimaryGroup(service.getPlayerPrimaryGroup(u));
+
+            String prefix = service.getPlayerPrefix(u);
+            String suffix = service.getPlayerSuffix(u);
+
+            if (prefix != null && !prefix.equals("")) {
+                prefix = ArgumentChecker.escapeCharacters(prefix);
+                try {
+                    user.setPermission("prefix.100." + prefix, true);
+                } catch (ObjectAlreadyHasException ignored) {}
+            }
+
+            if (suffix != null && !suffix.equals("")) {
+                suffix = ArgumentChecker.escapeCharacters(suffix);
+                try {
+                    user.setPermission("suffix.100." + suffix, true);
+                } catch (ObjectAlreadyHasException ignored) {}
+            }
+
             plugin.getUserManager().cleanup(user);
             plugin.getDatastore().saveUser(user);
         }

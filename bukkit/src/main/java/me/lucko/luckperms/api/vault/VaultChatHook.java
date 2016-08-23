@@ -36,6 +36,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import static me.lucko.luckperms.utils.ArgumentChecker.escapeCharacters;
+
 /**
  * Provides the Vault Chat service through the use of normal permission nodes.
  *
@@ -50,7 +52,7 @@ import java.util.regex.Pattern;
  * Permission Nodes = meta.node.value
  *
  * Node that special characters used within LuckPerms are escaped:
- * See {@link #escapeCharacters(String)}
+ * See {@link me.lucko.luckperms.utils.ArgumentChecker#escapeCharacters(String)}
  *
  * Registered on normal priority so other plugins can override.
  */
@@ -73,14 +75,6 @@ class VaultChatHook extends Chat {
 
     public boolean isEnabled() {
         return perms.isEnabled();
-    }
-
-    private static String escapeCharacters(String s) {
-        s = s.replace(".", "{SEP}");
-        s = s.replace("/", "{FSEP}");
-        s = s.replace("$", "{DSEP}");
-
-        return s;
     }
 
     private void saveMeta(PermissionHolder holder, String world, String node, String value) {

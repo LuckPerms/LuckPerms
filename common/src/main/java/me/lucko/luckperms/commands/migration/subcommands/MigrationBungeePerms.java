@@ -30,6 +30,7 @@ import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
+import me.lucko.luckperms.utils.ArgumentChecker;
 import net.alpenblock.bungeeperms.*;
 
 import java.util.List;
@@ -92,6 +93,23 @@ public class MigrationBungeePerms extends SubCommand<Object> {
                 } catch (ObjectAlreadyHasException ignored) {}
             }
 
+            String prefix = u.getPrefix();
+            String suffix = u.getSuffix();
+
+            if (prefix != null && !prefix.equals("")) {
+                prefix = ArgumentChecker.escapeCharacters(prefix);
+                try {
+                    user.setPermission("prefix.100." + prefix, true);
+                } catch (ObjectAlreadyHasException ignored) {}
+            }
+
+            if (suffix != null && !suffix.equals("")) {
+                suffix = ArgumentChecker.escapeCharacters(suffix);
+                try {
+                    user.setPermission("suffix.100." + suffix, true);
+                } catch (ObjectAlreadyHasException ignored) {}
+            }
+
             plugin.getDatastore().saveUser(user);
             plugin.getUserManager().cleanup(user);
         }
@@ -134,11 +152,29 @@ public class MigrationBungeePerms extends SubCommand<Object> {
                 } catch (ObjectAlreadyHasException ignored) {}
             }
 
+            String prefix = g.getPrefix();
+            String suffix = g.getSuffix();
+
+            if (prefix != null && !prefix.equals("")) {
+                prefix = ArgumentChecker.escapeCharacters(prefix);
+                try {
+                    group.setPermission("prefix.50." + prefix, true);
+                } catch (ObjectAlreadyHasException ignored) {}
+            }
+
+            if (suffix != null && !suffix.equals("")) {
+                suffix = ArgumentChecker.escapeCharacters(suffix);
+                try {
+                    group.setPermission("suffix.50." + suffix, true);
+                } catch (ObjectAlreadyHasException ignored) {}
+            }
+
+
+
             plugin.getDatastore().saveGroup(group);
         }
 
         log.info("BungeePerms Migration: Migrated " + groupCount + " groups");
-
         log.info("BungeePerms Migration: Success! Completed without any errors.");
         return CommandResult.SUCCESS;
     }

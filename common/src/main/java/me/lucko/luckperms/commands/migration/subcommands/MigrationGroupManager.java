@@ -168,6 +168,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
         }
 
         log.info("GroupManager Migration: All existing GroupManager data has been processed. Now beginning the import process.");
+        log.info("GroupManager Migration: Found a total of " + users.size() + " users and " + groups.size() + " groups.");
 
         for (Map.Entry<UUID, Map<String, Boolean>> e : users.entrySet()) {
             plugin.getDatastore().loadOrCreateUser(e.getKey(), "null");

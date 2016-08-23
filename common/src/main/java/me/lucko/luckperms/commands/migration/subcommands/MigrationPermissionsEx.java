@@ -32,6 +32,7 @@ import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.users.User;
+import me.lucko.luckperms.utils.ArgumentChecker;
 import ru.tehkode.permissions.NativeInterface;
 import ru.tehkode.permissions.PermissionGroup;
 import ru.tehkode.permissions.PermissionManager;
@@ -120,6 +121,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
 
         // Migrate all users
         log.info("PermissionsEx Migration: Starting user migration.");
+        int userCount = 0;
         for (PermissionUser user : manager.getUsers()) {
             UUID u = null;
 
@@ -147,6 +149,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 continue;
             }
 
+            userCount++;
             plugin.getDatastore().loadOrCreateUser(u, "null");
             User lpUser = plugin.getUserManager().get(u);
 
@@ -198,13 +201,34 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 }
             }
 
+            String prefix = user.getOwnPrefix();
+            String suffix = user.getOwnSuffix();
+
+            if (prefix != null && !prefix.equals("")) {
+                prefix = ArgumentChecker.escapeCharacters(prefix);
+                try {
+                    lpUser.setPermission("prefix.100." + prefix, true);
+                } catch (ObjectAlreadyHasException ignored) {}
+            }
+
+            if (suffix != null && !suffix.equals("")) {
+                suffix = ArgumentChecker.escapeCharacters(suffix);
+                try {
+                    lpUser.setPermission("suffix.100." + suffix, true);
+                } catch (ObjectAlreadyHasException ignored) {}
+            }
+
             plugin.getUserManager().cleanup(lpUser);
             plugin.getDatastore().saveUser(lpUser);
         }
 
+        log.info("PermissionsEx Migration: Migrated " + userCount + " users.");
+
         // Migrate all groups.
         log.info("PermissionsEx Migration: Starting group migration.");
+        int groupCount = 0;
         for (PermissionGroup group : manager.getGroupList()) {
+            groupCount ++;
             final String name = group.getName().toLowerCase();
             plugin.getDatastore().createAndLoadGroup(name);
             Group lpGroup = plugin.getGroupManager().get(name);
@@ -256,8 +280,27 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                     }
                 }
             }
+
+            String prefix = group.getOwnPrefix();
+            String suffix = group.getOwnSuffix();
+
+            if (prefix != null && !prefix.equals("")) {
+                prefix = ArgumentChecker.escapeCharacters(prefix);
+                try {
+                    lpGroup.setPermission("prefix.50." + prefix, true);
+                } catch (ObjectAlreadyHasException ignored) {}
+            }
+
+            if (suffix != null && !suffix.equals("")) {
+                suffix = ArgumentChecker.escapeCharacters(suffix);
+                try {
+                    lpGroup.setPermission("suffix.50." + suffix, true);
+                } catch (ObjectAlreadyHasException ignored) {}
+            }
+
         }
 
+        log.info("PermissionsEx Migration: Migrated " + groupCount + " groups");
         log.info("PermissionsEx Migration: Success! Completed without any errors.");
         return CommandResult.SUCCESS;
     }
