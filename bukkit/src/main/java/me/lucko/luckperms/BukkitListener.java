@@ -76,20 +76,21 @@ class BukkitListener extends AbstractListener implements Listener {
             u.setAttachment(attachment);
         }
 
-        user.refreshPermissions();
+        plugin.doAsync(user::refreshPermissions);
     }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
         // Refresh permissions again
         plugin.getUserManager().getWorldCache().put(e.getPlayer().getUniqueId(), e.getPlayer().getWorld().getName());
-        refreshPlayer(e.getPlayer().getUniqueId());
+        plugin.doAsync(() -> refreshPlayer(e.getPlayer().getUniqueId()));
     }
 
     @EventHandler
     public void onPlayerChangedWorld(PlayerChangedWorldEvent e) {
         plugin.getUserManager().getWorldCache().put(e.getPlayer().getUniqueId(), e.getPlayer().getWorld().getName());
-        refreshPlayer(e.getPlayer().getUniqueId());
+        plugin.doAsync(() -> refreshPlayer(e.getPlayer().getUniqueId()));
+
     }
 
     @EventHandler

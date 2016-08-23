@@ -71,11 +71,11 @@ public class BukkitUser extends User {
             getPlugin().getLog().severe("User " + getName() + " does not have a permissions attachment defined.");
         }
 
-        // Calculate the permissions that should be applied
+        // Calculate the permissions that should be applied. This is done async, who cares about how long it takes or how often it's done.
         Map<String, Boolean> toApply = getLocalPermissions(getPlugin().getConfiguration().getServer(), plugin.getUserManager().getWorldCache().get(getUuid()), null);
 
         try {
-            // Existing is thread-safe, hopefully
+            // The map in the LP PermissionAttachment is a ConcurrentHashMap. We can modify it's contents async.
             Map<String, Boolean> existing = (Map<String, Boolean>) getPermissionsField().get(attachment);
 
             boolean different = false;
@@ -93,11 +93,13 @@ public class BukkitUser extends User {
 
             if (!different) return;
 
-            // Faster than recalculating permissions after each PermissionAttachment#setPermission
             existing.clear();
             existing.putAll(toApply);
 
-            attachment.getPermissible().recalculatePermissions();
+            /* Must be called sync, as #recalculatePermissions is an unmodified Bukkit API call that is absolutely not thread safe.
+               Shouldn't be too taxing on the server. This only gets called when permissions have actually changed,
+               which is like once per user per login, assuming their permissions don't get modified. */
+            plugin.doSync(() -> attachment.getPermissible().recalculatePermissions());
 
         } catch (Exception e) {
             e.printStackTrace();
