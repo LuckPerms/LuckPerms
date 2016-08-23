@@ -56,4 +56,12 @@ public class ArgumentChecker {
         return s;
     }
 
+    public static String unescapeCharacters(String s) {
+        s = s.replace("{SEP}", ".");
+        s = s.replace("{FSEP}", "/");
+        s = s.replace("{DSEP}", "$");
+
+        return s;
+    }
+
 }

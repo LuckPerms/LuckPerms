@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import static me.lucko.luckperms.utils.ArgumentChecker.escapeCharacters;
+import static me.lucko.luckperms.utils.ArgumentChecker.unescapeCharacters;
 
 /**
  * Provides the Vault Chat service through the use of normal permission nodes.
@@ -117,7 +118,7 @@ class VaultChatHook extends Chat {
             }
 
             try {
-                return Integer.parseInt(parts[2]);
+                return Integer.parseInt(unescapeCharacters(parts[2]));
             } catch (Throwable t) {
                 return defaultValue;
             }
@@ -146,7 +147,7 @@ class VaultChatHook extends Chat {
             }
 
             try {
-                return Double.parseDouble(parts[2]);
+                return Double.parseDouble(unescapeCharacters(parts[2]));
             } catch (Throwable t) {
                 return defaultValue;
             }
@@ -175,7 +176,7 @@ class VaultChatHook extends Chat {
             }
 
             try {
-                return Boolean.parseBoolean(parts[2]);
+                return Boolean.parseBoolean(unescapeCharacters(parts[2]));
             } catch (Throwable t) {
                 return defaultValue;
             }
@@ -203,7 +204,7 @@ class VaultChatHook extends Chat {
                 continue;
             }
 
-            return parts[2];
+            return unescapeCharacters(parts[2]);
         }
 
         return defaultValue;
@@ -228,7 +229,7 @@ class VaultChatHook extends Chat {
             }
         }
 
-        return meta == null ? "" : meta;
+        return meta == null ? "" : unescapeCharacters(meta);
     }
 
     public String getPlayerPrefix(String world, @NonNull String player) {
