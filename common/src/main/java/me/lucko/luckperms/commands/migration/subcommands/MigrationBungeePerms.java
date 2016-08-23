@@ -28,7 +28,9 @@ import me.lucko.luckperms.commands.CommandResult;
 import me.lucko.luckperms.commands.Predicate;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.constants.Constants;
 import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.data.LogEntry;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.utils.ArgumentChecker;
 import net.alpenblock.bungeeperms.*;
@@ -55,103 +57,90 @@ public class MigrationBungeePerms extends SubCommand<Object> {
             return CommandResult.STATE_ERROR;
         }
 
-        // Migrate all users.
-        log.info("BungeePerms Migration: Starting user migration.");
-        int userCount = 0;
-        for (User u : bp.getPermissionsManager().getBackEnd().loadUsers()) {
-            if (u.getUUID() == null) continue;
-
-            userCount++;
-            plugin.getDatastore().loadOrCreateUser(u.getUUID(), "null");
-            me.lucko.luckperms.users.User user = plugin.getUserManager().get(u.getUUID());
-
-            for (String perm : u.getPerms()) {
-                try {
-                    user.setPermission(perm, true);
-                } catch (ObjectAlreadyHasException ignored) {}
-            }
-
-            for (Map.Entry<String, Server> e : u.getServers().entrySet()) {
-                for (String perm : e.getValue().getPerms()) {
-                    try {
-                        user.setPermission(perm, true, e.getKey());
-                    } catch (ObjectAlreadyHasException ignored) {}
-                }
-
-                for (Map.Entry<String, World> we : e.getValue().getWorlds().entrySet()) {
-                    for (String perm : we.getValue().getPerms()) {
-                        try {
-                            user.setPermission(perm, true, e.getKey(), we.getKey());
-                        } catch (ObjectAlreadyHasException ignored) {}
-                    }
-                }
-            }
-
-            for (String group : u.getGroupsString()) {
-                try {
-                    user.setPermission("group." + group, true);
-                } catch (ObjectAlreadyHasException ignored) {}
-            }
-
-            String prefix = u.getPrefix();
-            String suffix = u.getSuffix();
-
-            if (prefix != null && !prefix.equals("")) {
-                prefix = ArgumentChecker.escapeCharacters(prefix);
-                try {
-                    user.setPermission("prefix.100." + prefix, true);
-                } catch (ObjectAlreadyHasException ignored) {}
-            }
-
-            if (suffix != null && !suffix.equals("")) {
-                suffix = ArgumentChecker.escapeCharacters(suffix);
-                try {
-                    user.setPermission("suffix.100." + suffix, true);
-                } catch (ObjectAlreadyHasException ignored) {}
-            }
-
-            plugin.getDatastore().saveUser(user);
-            plugin.getUserManager().cleanup(user);
-        }
-
-        log.info("BungeePerms Migration: Migrated " + userCount + " users.");
-
         // Migrate all groups.
         log.info("BungeePerms Migration: Starting group migration.");
         int groupCount = 0;
         for (Group g : bp.getPermissionsManager().getBackEnd().loadGroups()) {
             groupCount ++;
+
+            // Make a LuckPerms group for the one being migrated
             plugin.getDatastore().createAndLoadGroup(g.getName().toLowerCase());
             me.lucko.luckperms.groups.Group group = plugin.getGroupManager().get(g.getName().toLowerCase());
+            try {
+                LogEntry.build()
+                        .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                        .acted(group).action("create")
+                        .build().submit(plugin);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
 
+
+            // Migrate global perms
             for (String perm : g.getPerms()) {
                 try {
                     group.setPermission(perm, true);
-                } catch (ObjectAlreadyHasException ignored) {}
-            }
-
-            for (Map.Entry<String, Server> e : g.getServers().entrySet()) {
-                for (String perm : e.getValue().getPerms()) {
-                    try {
-                        group.setPermission(perm, true, e.getKey());
-                    } catch (ObjectAlreadyHasException ignored) {}
-                }
-
-                for (Map.Entry<String, World> we : e.getValue().getWorlds().entrySet()) {
-                    for (String perm : we.getValue().getPerms()) {
-                        try {
-                            group.setPermission(perm, true, e.getKey(), we.getKey());
-                        } catch (ObjectAlreadyHasException ignored) {}
+                    LogEntry.build()
+                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .acted(group).action("set " + perm + " true")
+                            .build().submit(plugin);
+                } catch (Exception ex) {
+                    if (!(ex instanceof ObjectAlreadyHasException)) {
+                        ex.printStackTrace();
                     }
                 }
             }
 
+            // Migrate per-server perms
+            for (Map.Entry<String, Server> e : g.getServers().entrySet()) {
+                for (String perm : e.getValue().getPerms()) {
+                    try {
+                        group.setPermission(perm, true, e.getKey());
+                        LogEntry.build()
+                                .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                .acted(group).action("set " + perm + " true " + e.getKey())
+                                .build().submit(plugin);
+                    } catch (Exception ex) {
+                        if (!(ex instanceof ObjectAlreadyHasException)) {
+                            ex.printStackTrace();
+                        }
+                    }
+                }
+
+                // Migrate per-world perms
+                for (Map.Entry<String, World> we : e.getValue().getWorlds().entrySet()) {
+                    for (String perm : we.getValue().getPerms()) {
+                        try {
+                            group.setPermission(perm, true, e.getKey(), we.getKey());
+                            LogEntry.build()
+                                    .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                    .acted(group).action("set " + perm + " true " + e.getKey() + " " + we.getKey())
+                                    .build().submit(plugin);
+                        } catch (Exception ex) {
+                            if (!(ex instanceof ObjectAlreadyHasException)) {
+                                ex.printStackTrace();
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Migrate any parent groups
             for (String inherit : g.getInheritances()) {
                 try {
                     group.setPermission("group." + inherit, true);
-                } catch (ObjectAlreadyHasException ignored) {}
+                    LogEntry.build()
+                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .acted(group).action("setinherit " + group)
+                            .build().submit(plugin);
+                } catch (Exception ex) {
+                    if (!(ex instanceof ObjectAlreadyHasException)) {
+                        ex.printStackTrace();
+                    }
+                }
             }
 
+            // Migrate prefix and suffix
             String prefix = g.getPrefix();
             String suffix = g.getSuffix();
 
@@ -159,22 +148,152 @@ public class MigrationBungeePerms extends SubCommand<Object> {
                 prefix = ArgumentChecker.escapeCharacters(prefix);
                 try {
                     group.setPermission("prefix.50." + prefix, true);
-                } catch (ObjectAlreadyHasException ignored) {}
+                    LogEntry.build()
+                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .acted(group).action("set prefix.50." + prefix + " true")
+                            .build().submit(plugin);
+                } catch (Exception ex) {
+                    if (!(ex instanceof ObjectAlreadyHasException)) {
+                        ex.printStackTrace();
+                    }
+                }
             }
 
             if (suffix != null && !suffix.equals("")) {
                 suffix = ArgumentChecker.escapeCharacters(suffix);
                 try {
                     group.setPermission("suffix.50." + suffix, true);
-                } catch (ObjectAlreadyHasException ignored) {}
+                    LogEntry.build()
+                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .acted(group).action("set suffix.50." + suffix + " true")
+                            .build().submit(plugin);
+                } catch (Exception ex) {
+                    if (!(ex instanceof ObjectAlreadyHasException)) {
+                        ex.printStackTrace();
+                    }
+                }
             }
-
-
 
             plugin.getDatastore().saveGroup(group);
         }
 
         log.info("BungeePerms Migration: Migrated " + groupCount + " groups");
+
+        // Migrate all users.
+        log.info("BungeePerms Migration: Starting user migration.");
+        int userCount = 0;
+        for (User u : bp.getPermissionsManager().getBackEnd().loadUsers()) {
+            if (u.getUUID() == null) continue;
+
+            userCount++;
+
+            // Make a LuckPerms user for the one being migrated.
+            plugin.getDatastore().loadOrCreateUser(u.getUUID(), "null");
+            me.lucko.luckperms.users.User user = plugin.getUserManager().get(u.getUUID());
+
+            // Migrate global perms
+            for (String perm : u.getPerms()) {
+                try {
+                    user.setPermission(perm, true);
+                    LogEntry.build()
+                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .acted(user).action("set " + perm + " true")
+                            .build().submit(plugin);
+                } catch (Exception ex) {
+                    if (!(ex instanceof ObjectAlreadyHasException)) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+
+            // Migrate per-server perms
+            for (Map.Entry<String, Server> e : u.getServers().entrySet()) {
+                for (String perm : e.getValue().getPerms()) {
+                    try {
+                        user.setPermission(perm, true, e.getKey());
+                        LogEntry.build()
+                                .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                .acted(user).action("set " + perm + " true " + e.getKey())
+                                .build().submit(plugin);
+                    } catch (Exception ex) {
+                        if (!(ex instanceof ObjectAlreadyHasException)) {
+                            ex.printStackTrace();
+                        }
+                    }
+                }
+
+                // Migrate per-world perms
+                for (Map.Entry<String, World> we : e.getValue().getWorlds().entrySet()) {
+                    for (String perm : we.getValue().getPerms()) {
+                        try {
+                            user.setPermission(perm, true, e.getKey(), we.getKey());
+                            LogEntry.build()
+                                    .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                    .acted(user).action("set " + perm + " true " + e.getKey() + " " + we.getKey())
+                                    .build().submit(plugin);
+                        } catch (Exception ex) {
+                            if (!(ex instanceof ObjectAlreadyHasException)) {
+                                ex.printStackTrace();
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Migrate groups
+            for (String group : u.getGroupsString()) {
+                try {
+                    user.setPermission("group." + group, true);
+                    LogEntry.build()
+                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .acted(user).action("addgroup " + group)
+                            .build().submit(plugin);
+                } catch (Exception ex) {
+                    if (!(ex instanceof ObjectAlreadyHasException)) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+
+            // Migrate prefix & suffix
+            String prefix = u.getPrefix();
+            String suffix = u.getSuffix();
+
+            if (prefix != null && !prefix.equals("")) {
+                prefix = ArgumentChecker.escapeCharacters(prefix);
+                try {
+                    user.setPermission("prefix.100." + prefix, true);
+                    LogEntry.build()
+                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .acted(user).action("set prefix.100." + prefix + " true")
+                            .build().submit(plugin);
+                } catch (Exception ex) {
+                    if (!(ex instanceof ObjectAlreadyHasException)) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+
+            if (suffix != null && !suffix.equals("")) {
+                suffix = ArgumentChecker.escapeCharacters(suffix);
+                try {
+                    user.setPermission("suffix.100." + suffix, true);
+                    LogEntry.build()
+                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .acted(user).action("set suffix.100." + suffix + " true")
+                            .build().submit(plugin);
+                } catch (Exception ex) {
+                    if (!(ex instanceof ObjectAlreadyHasException)) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+
+            plugin.getDatastore().saveUser(user);
+            plugin.getUserManager().cleanup(user);
+        }
+
+        log.info("BungeePerms Migration: Migrated " + userCount + " users.");
         log.info("BungeePerms Migration: Success! Completed without any errors.");
         return CommandResult.SUCCESS;
     }

@@ -28,7 +28,9 @@ import me.lucko.luckperms.commands.CommandResult;
 import me.lucko.luckperms.commands.Predicate;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.constants.Constants;
 import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.data.LogEntry;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import org.anjocaido.groupmanager.GlobalGroups;
 import org.anjocaido.groupmanager.GroupManager;
@@ -38,10 +40,7 @@ import org.anjocaido.groupmanager.dataholder.WorldDataHolder;
 import org.anjocaido.groupmanager.dataholder.worlds.WorldsHolder;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class MigrationGroupManager extends SubCommand<Object> {
@@ -78,29 +77,56 @@ public class MigrationGroupManager extends SubCommand<Object> {
         for (Group g : gg.getGroupList()) {
             plugin.getDatastore().createAndLoadGroup(g.getName().toLowerCase());
             me.lucko.luckperms.groups.Group group = plugin.getGroupManager().get(g.getName().toLowerCase());
+            try {
+                LogEntry.build()
+                        .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                        .acted(group).action("create")
+                        .build().submit(plugin);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
 
             for (String node : g.getPermissionList()) {
                 boolean value = true;
-                if (node.startsWith("!")) {
+                if (node.startsWith("!") || node.startsWith("-")) {
                     node = node.substring(1);
                     value = false;
+                } else if (node.startsWith("+")) {
+                    node = node.substring(1);
+                    value = true;
                 }
 
                 try {
                     group.setPermission(node, value);
-                } catch (ObjectAlreadyHasException ignored) {}
+                    LogEntry.build()
+                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .acted(group).action("set " + node + " " + value)
+                            .build().submit(plugin);
+                } catch (Exception ex) {
+                    if (!(ex instanceof ObjectAlreadyHasException)) {
+                        ex.printStackTrace();
+                    }
+                }
             }
 
             for (String s : g.getInherits()) {
                 try {
                     group.setPermission("group." + s.toLowerCase(), true);
-                } catch (ObjectAlreadyHasException ignored) {}
+                    LogEntry.build()
+                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .acted(group).action("setinherit " + s.toLowerCase())
+                            .build().submit(plugin);
+                } catch (Exception ex) {
+                    if (!(ex instanceof ObjectAlreadyHasException)) {
+                        ex.printStackTrace();
+                    }
+                }
             }
 
         }
 
-        Map<UUID, Map<String, Boolean>> users = new HashMap<>();
-        Map<String, Map<String, Boolean>> groups = new HashMap<>();
+        Map<UUID, Map<Map.Entry<String, String>, Boolean>> users = new HashMap<>();
+        Map<String, Map<Map.Entry<String, String>, Boolean>> groups = new HashMap<>();
 
         WorldsHolder wh;
         try {
@@ -129,16 +155,19 @@ public class MigrationGroupManager extends SubCommand<Object> {
 
                 for (String node : g.getPermissionList()) {
                     boolean value = true;
-                    if (node.startsWith("!")) {
+                    if (node.startsWith("!") || node.startsWith("-")) {
                         node = node.substring(1);
                         value = false;
+                    } else if (node.startsWith("+")) {
+                        node = node.substring(1);
+                        value = true;
                     }
 
-                    groups.get(g.getName().toLowerCase()).put("global-" + world + "/" + node, value);
+                    groups.get(g.getName().toLowerCase()).put(new AbstractMap.SimpleEntry<>(world, node), value);
                 }
 
                 for (String s : g.getInherits()) {
-                    groups.get(g.getName().toLowerCase()).put("global-" + world + "/group." + s.toLowerCase(), true);
+                    groups.get(g.getName().toLowerCase()).put(new AbstractMap.SimpleEntry<>(world, "group." + s.toLowerCase()), true);
                 }
             }
 
@@ -154,15 +183,18 @@ public class MigrationGroupManager extends SubCommand<Object> {
 
                 for (String node : user.getPermissionList()) {
                     boolean value = true;
-                    if (node.startsWith("!")) {
+                    if (node.startsWith("!") || node.startsWith("-")) {
                         node = node.substring(1);
                         value = false;
+                    } else if (node.startsWith("+")) {
+                        node = node.substring(1);
+                        value = true;
                     }
 
-                    users.get(uuid).put("global-" + world + "/" + node, value);
+                    users.get(uuid).put(new AbstractMap.SimpleEntry<>(world, node), value);
                 }
 
-                users.get(uuid).put("global-" + world + "/group." + user.getGroupName().toLowerCase(), true);
+                users.get(uuid).put(new AbstractMap.SimpleEntry<>(world, "group." + user.getGroupName().toLowerCase()), true);
             }
 
         }
@@ -170,31 +202,82 @@ public class MigrationGroupManager extends SubCommand<Object> {
         log.info("GroupManager Migration: All existing GroupManager data has been processed. Now beginning the import process.");
         log.info("GroupManager Migration: Found a total of " + users.size() + " users and " + groups.size() + " groups.");
 
-        for (Map.Entry<UUID, Map<String, Boolean>> e : users.entrySet()) {
+        for (Map.Entry<String, Map<Map.Entry<String, String>, Boolean>> e : groups.entrySet()) {
+            plugin.getDatastore().createAndLoadGroup(e.getKey());
+            me.lucko.luckperms.groups.Group group = plugin.getGroupManager().get(e.getKey());
+            try {
+                LogEntry.build()
+                        .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                        .acted(group).action("create")
+                        .build().submit(plugin);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
+
+            for (Map.Entry<Map.Entry<String, String>, Boolean> n : e.getValue().entrySet()) {
+                // n.key.key = world
+                // n.key.value = node
+                // n.value = true/false
+                try {
+                    group.setPermission("global-" + n.getKey().getKey() + "/" + n.getKey().getValue(), n.getValue());
+
+                    if (n.getKey().getValue().startsWith("group.")) {
+                        String groupName = n.getKey().getValue().substring(6);
+                        LogEntry.build()
+                                .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                .acted(group).action("setinherit " + groupName + " global " + n.getKey().getKey())
+                                .build().submit(plugin);
+                    } else {
+                        LogEntry.build()
+                                .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                .acted(group).action("set " + n.getKey().getValue() + " " + n.getValue() + " global " + n.getKey().getKey())
+                                .build().submit(plugin);
+                    }
+
+                } catch (Exception ex) {
+                    if (!(ex instanceof ObjectAlreadyHasException)) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+
+            plugin.getDatastore().saveGroup(group);
+        }
+
+        for (Map.Entry<UUID, Map<Map.Entry<String, String>, Boolean>> e : users.entrySet()) {
             plugin.getDatastore().loadOrCreateUser(e.getKey(), "null");
             me.lucko.luckperms.users.User user = plugin.getUserManager().get(e.getKey());
 
-            for (Map.Entry<String, Boolean> n : e.getValue().entrySet()) {
+            for (Map.Entry<Map.Entry<String, String>, Boolean> n : e.getValue().entrySet()) {
+                // n.key.key = world
+                // n.key.value = node
+                // n.value = true/false
                 try {
-                    user.setPermission(n.getKey(), n.getValue());
-                } catch (ObjectAlreadyHasException ignored) {}
+                    user.setPermission("global-" + n.getKey().getKey() + "/" + n.getKey().getValue(), n.getValue());
+
+                    if (n.getKey().getValue().startsWith("group.")) {
+                        String group = n.getKey().getValue().substring(6);
+                        LogEntry.build()
+                                .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                .acted(user).action("addgroup " + group + " global " + n.getKey().getKey())
+                                .build().submit(plugin);
+                    } else {
+                        LogEntry.build()
+                                .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                .acted(user).action("set " + n.getKey().getValue() + " " + n.getValue() + " global " + n.getKey().getKey())
+                                .build().submit(plugin);
+                    }
+
+                } catch (Exception ex) {
+                    if (!(ex instanceof ObjectAlreadyHasException)) {
+                        ex.printStackTrace();
+                    }
+                }
             }
 
             plugin.getDatastore().saveUser(user);
             plugin.getUserManager().cleanup(user);
-        }
-
-        for (Map.Entry<String, Map<String, Boolean>> e : groups.entrySet()) {
-            plugin.getDatastore().createAndLoadGroup(e.getKey());
-            me.lucko.luckperms.groups.Group group = plugin.getGroupManager().get(e.getKey());
-
-            for (Map.Entry<String, Boolean> n : e.getValue().entrySet()) {
-                try {
-                    group.setPermission(n.getKey(), n.getValue());
-                } catch (ObjectAlreadyHasException ignored) {}
-            }
-
-            plugin.getDatastore().saveGroup(group);
         }
 
         log.info("GroupManager Migration: Success! Completed without any errors.");

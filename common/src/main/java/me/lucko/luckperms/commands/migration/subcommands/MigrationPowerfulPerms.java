@@ -31,7 +31,9 @@ import me.lucko.luckperms.commands.CommandResult;
 import me.lucko.luckperms.commands.Predicate;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.constants.Constants;
 import me.lucko.luckperms.core.PermissionHolder;
+import me.lucko.luckperms.data.LogEntry;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.users.User;
 
@@ -155,6 +157,45 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         PowerfulPermsPlugin ppPlugin = (PowerfulPermsPlugin) plugin.getPlugin("PowerfulPerms");
         PermissionManager pm = ppPlugin.getPermissionManager();
 
+        // Groups first.
+        log.info("PowerfulPerms Migration: Starting group migration.");
+        Map<Integer, Group> groups = pm.getGroups();
+        for (Group g : groups.values()) {
+            plugin.getDatastore().createAndLoadGroup(g.getName().toLowerCase());
+            final me.lucko.luckperms.groups.Group group = plugin.getGroupManager().get(g.getName().toLowerCase());
+            try {
+                LogEntry.build()
+                        .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                        .acted(group).action("create")
+                        .build().submit(plugin);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
+            for (Permission p : g.getOwnPermissions()) {
+                applyPerm(group, p, plugin);
+            }
+
+            for (Group parent : g.getParents()) {
+                try {
+                    group.setPermission("group." + parent.getName().toLowerCase(), true);
+                    LogEntry.build()
+                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .acted(group).action("setinherit " + parent.getName().toLowerCase())
+                            .build().submit(plugin);
+                } catch (Exception ex) {
+                    if (!(ex instanceof ObjectAlreadyHasException)) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+
+            plugin.getDatastore().saveGroup(group);
+        }
+        log.info("PowerfulPerms Migration: Group migration complete.");
+
+        // Now users.
+        log.info("PowerfulPerms Migration: Starting user migration.");
         final Map<UUID, CountDownLatch> progress = new HashMap<>();
 
         // Migrate all users and their groups
@@ -170,7 +211,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                 @Override
                 public void run() {
                     List<Permission> perms = this.getResult();
-                    perms.forEach(p -> applyPerm(user, p));
+                    perms.forEach(p -> applyPerm(user, p, plugin));
 
                     // Update the progress so the user can be saved and unloaded.
                     synchronized (progress) {
@@ -216,11 +257,27 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                                                 if (server == null) {
                                                     try {
                                                         user.setPermission("group." + g.getName().toLowerCase(), true);
-                                                    } catch (ObjectAlreadyHasException ignored) {}
+                                                        LogEntry.build()
+                                                                .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                                                .acted(user).action("addgroup " + g.getName().toLowerCase())
+                                                                .build().submit(plugin);
+                                                    } catch (Exception ex) {
+                                                        if (!(ex instanceof ObjectAlreadyHasException)) {
+                                                            ex.printStackTrace();
+                                                        }
+                                                    }
                                                 } else {
                                                     try {
                                                         user.setPermission("group." + g.getName().toLowerCase(), true, server);
-                                                    } catch (ObjectAlreadyHasException ignored) {}
+                                                        LogEntry.build()
+                                                                .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                                                .acted(user).action("addgroup " + g.getName().toLowerCase() + " " + server)
+                                                                .build().submit(plugin);
+                                                    } catch (Exception ex) {
+                                                        if (!(ex instanceof ObjectAlreadyHasException)) {
+                                                            ex.printStackTrace();
+                                                        }
+                                                    }
                                                 }
                                             }
                                         });
@@ -233,22 +290,54 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                                                 if (server == null) {
                                                     try {
                                                         user.setPermission("group." + group.getName().toLowerCase(), true, g.getExpirationDate().getTime() / 1000L);
-                                                    } catch (ObjectAlreadyHasException ignored) {}
+                                                        LogEntry.build()
+                                                                .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                                                .acted(user).action("addtempgroup " + group.getName().toLowerCase() + " " + g.getExpirationDate().getTime() / 1000L)
+                                                                .build().submit(plugin);
+                                                    } catch (Exception ex) {
+                                                        if (!(ex instanceof ObjectAlreadyHasException)) {
+                                                            ex.printStackTrace();
+                                                        }
+                                                    }
                                                 } else {
                                                     try {
                                                         user.setPermission("group." + group.getName().toLowerCase(), true, server, g.getExpirationDate().getTime() / 1000L);
-                                                    } catch (ObjectAlreadyHasException ignored) {}
+                                                        LogEntry.build()
+                                                                .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                                                .acted(user).action("addtempgroup " + group.getName().toLowerCase() + " " + g.getExpirationDate().getTime() / 1000L + " " + server)
+                                                                .build().submit(plugin);
+                                                    } catch (Exception ex) {
+                                                        if (!(ex instanceof ObjectAlreadyHasException)) {
+                                                            ex.printStackTrace();
+                                                        }
+                                                    }
                                                 }
 
                                             } else {
                                                 if (server == null) {
                                                     try {
                                                         user.setPermission("group." + group.getName().toLowerCase(), true);
-                                                    } catch (ObjectAlreadyHasException ignored) {}
+                                                        LogEntry.build()
+                                                                .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                                                .acted(user).action("addgroup " + group.getName().toLowerCase())
+                                                                .build().submit(plugin);
+                                                    } catch (Exception ex) {
+                                                        if (!(ex instanceof ObjectAlreadyHasException)) {
+                                                            ex.printStackTrace();
+                                                        }
+                                                    }
                                                 } else {
                                                     try {
                                                         user.setPermission("group." + group.getName().toLowerCase(), true, server);
-                                                    } catch (ObjectAlreadyHasException ignored) {}
+                                                        LogEntry.build()
+                                                                .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                                                .acted(user).action("addgroup " + group.getName().toLowerCase() + " " + server)
+                                                                .build().submit(plugin);
+                                                    } catch (Exception ex) {
+                                                        if (!(ex instanceof ObjectAlreadyHasException)) {
+                                                            ex.printStackTrace();
+                                                        }
+                                                    }
                                                 }
                                             }
                                         });
@@ -271,33 +360,9 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             }
         }
 
-        // The user processes will run individually in separate threads.
-        // In the meantime, it's should be safe to load in the groups on this thread.
-        log.info("PowerfulPerms Migration: User migration is now running. Starting group migration.");
-
-        // Let's import groups. yay
-        Map<Integer, Group> groups = pm.getGroups();
-        for (Group g : groups.values()) {
-            plugin.getDatastore().createAndLoadGroup(g.getName().toLowerCase());
-            final me.lucko.luckperms.groups.Group group = plugin.getGroupManager().get(g.getName().toLowerCase());
-
-            for (Permission p : g.getOwnPermissions()) {
-                applyPerm(group, p);
-            }
-
-            for (Group parent : g.getParents()) {
-                try {
-                    group.setPermission("group." + parent.getName().toLowerCase(), true);
-                } catch (ObjectAlreadyHasException ignored) {}
-            }
-
-            plugin.getDatastore().saveGroup(group);
-        }
-
-        // All groups are now migrated, but there may still be some users being migrated.
+        // All groups are migrated, but there may still be some users being migrated.
         // This block will wait for all users to be completed.
-        log.info("PowerfulPerms Migration: All groups are now migrated. Waiting for user migration to complete.");
-        log.info("PowerfulPerms Migration: This may take some time.");
+        log.info("PowerfulPerms Migration: Waiting for user migration to complete. This may take some time");
         boolean sleep = true;
         while (sleep) {
             sleep = false;
@@ -324,7 +389,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         return CommandResult.SUCCESS;
     }
 
-    private void applyPerm(PermissionHolder holder, Permission p) {
+    private void applyPerm(PermissionHolder holder, Permission p, LuckPermsPlugin plugin) {
         String node = p.getPermissionString();
         boolean value = true;
         if (node.startsWith("!")) {
@@ -357,14 +422,26 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             if (expireAt == 0L) {
                 try {
                     holder.setPermission(node, value, server, world);
-                } catch (ObjectAlreadyHasException e) {
-                    e.printStackTrace();
+                    LogEntry.build()
+                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .acted(holder).action("set " + node + " " + value + " " + server + " " + world)
+                            .build().submit(plugin);
+                } catch (Exception ex) {
+                    if (!(ex instanceof ObjectAlreadyHasException)) {
+                        ex.printStackTrace();
+                    }
                 }
             } else {
                 try {
                     holder.setPermission(node, value, server, world, expireAt);
-                } catch (ObjectAlreadyHasException e) {
-                    e.printStackTrace();
+                    LogEntry.build()
+                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .acted(holder).action("settemp " + node + " " + value + " " + expireAt + " " + server + " " + world)
+                            .build().submit(plugin);
+                } catch (Exception ex) {
+                    if (!(ex instanceof ObjectAlreadyHasException)) {
+                        ex.printStackTrace();
+                    }
                 }
             }
 
@@ -372,21 +449,53 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             if (expireAt == 0L) {
                 try {
                     holder.setPermission(node, value, server);
-                } catch (ObjectAlreadyHasException ignored) {}
+                    LogEntry.build()
+                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .acted(holder).action("set " + node + " " + value + " " + server)
+                            .build().submit(plugin);
+                } catch (Exception ex) {
+                    if (!(ex instanceof ObjectAlreadyHasException)) {
+                        ex.printStackTrace();
+                    }
+                }
             } else {
                 try {
                     holder.setPermission(node, value, server, expireAt);
-                } catch (ObjectAlreadyHasException ignored) {}
+                    LogEntry.build()
+                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .acted(holder).action("settemp " + node + " " + value + " " + expireAt + " " + server)
+                            .build().submit(plugin);
+                } catch (Exception ex) {
+                    if (!(ex instanceof ObjectAlreadyHasException)) {
+                        ex.printStackTrace();
+                    }
+                }
             }
         } else {
             if (expireAt == 0L) {
                 try {
                     holder.setPermission(node, value);
-                } catch (ObjectAlreadyHasException ignored) {}
+                    LogEntry.build()
+                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .acted(holder).action("set " + node + " " + value)
+                            .build().submit(plugin);
+                } catch (Exception ex) {
+                    if (!(ex instanceof ObjectAlreadyHasException)) {
+                        ex.printStackTrace();
+                    }
+                }
             } else {
                 try {
                     holder.setPermission(node, value, expireAt);
-                } catch (ObjectAlreadyHasException ignored) {}
+                    LogEntry.build()
+                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .acted(holder).action("settemp " + node + " " + value + " " + expireAt)
+                            .build().submit(plugin);
+                } catch (Exception ex) {
+                    if (!(ex instanceof ObjectAlreadyHasException)) {
+                        ex.printStackTrace();
+                    }
+                }
             }
         }
     }

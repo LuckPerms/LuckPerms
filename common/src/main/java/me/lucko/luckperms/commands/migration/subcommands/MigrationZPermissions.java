@@ -28,7 +28,9 @@ import me.lucko.luckperms.commands.CommandResult;
 import me.lucko.luckperms.commands.Predicate;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.constants.Constants;
 import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.data.LogEntry;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.tracks.Track;
@@ -69,6 +71,84 @@ public class MigrationZPermissions extends SubCommand<Object> {
                 .map(String::toLowerCase)
                 .collect(Collectors.toList());
 
+        // Migrate all groups
+        log.info("zPermissions Migration: Starting group migration.");
+        for (String g : service.getAllGroups()) {
+            plugin.getDatastore().createAndLoadGroup(g.toLowerCase());
+            Group group = plugin.getGroupManager().get(g.toLowerCase());
+            try {
+                LogEntry.build()
+                        .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                        .acted(group).action("create")
+                        .build().submit(plugin);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
+            for (Map.Entry<String, Boolean> e : service.getGroupPermissions(null, null, g).entrySet()) {
+                try {
+                    group.setPermission(e.getKey(), e.getValue());
+                    LogEntry.build()
+                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .acted(group).action("set " + e.getKey() + " " + e.getValue())
+                            .build().submit(plugin);
+                } catch (Exception ex) {
+                    if (!(ex instanceof ObjectAlreadyHasException)) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+
+            if (worlds != null && !worlds.isEmpty()) {
+                for (String world : worlds) {
+                    for (Map.Entry<String, Boolean> e : service.getGroupPermissions(world, null, g).entrySet()) {
+                        try {
+                            group.setPermission(e.getKey(), e.getValue(), "global", world);
+                            LogEntry.build()
+                                    .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                    .acted(group).action("set " + e.getKey() + " true " + e.getValue() + " " + world)
+                                    .build().submit(plugin);
+                        } catch (Exception ex) {
+                            if (!(ex instanceof ObjectAlreadyHasException)) {
+                                ex.printStackTrace();
+                            }
+                        }
+                    }
+                }
+            }
+
+            plugin.getDatastore().saveGroup(group);
+        }
+
+        // Migrate all tracks
+        log.info("zPermissions Migration: Starting track migration.");
+        for (String t : service.getAllTracks()) {
+            plugin.getDatastore().createAndLoadTrack(t.toLowerCase());
+            Track track = plugin.getTrackManager().get(t.toLowerCase());
+            try {
+                LogEntry.build()
+                        .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                        .acted(track).action("create")
+                        .build().submit(plugin);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
+            track.setGroups(service.getTrackGroups(t));
+            for (String group : track.getGroups()) {
+                try {
+                    LogEntry.build()
+                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .acted(track).action("append " + group)
+                            .build().submit(plugin);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+
+            plugin.getDatastore().saveTrack(track);
+        }
+
         // Migrate all users.
         log.info("zPermissions Migration: Starting user migration.");
         for (UUID u : service.getAllPlayersUUID()) {
@@ -78,7 +158,15 @@ public class MigrationZPermissions extends SubCommand<Object> {
             for (Map.Entry<String, Boolean> e : service.getPlayerPermissions(null, null, u).entrySet()) {
                 try {
                     user.setPermission(e.getKey(), e.getValue());
-                } catch (ObjectAlreadyHasException ignored) {}
+                    LogEntry.build()
+                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .acted(user).action("set " + e.getKey() + " " + e.getValue())
+                            .build().submit(plugin);
+                } catch (Exception ex) {
+                    if (!(ex instanceof ObjectAlreadyHasException)) {
+                        ex.printStackTrace();
+                    }
+                }
             }
 
             if (worlds != null && !worlds.isEmpty()) {
@@ -86,7 +174,15 @@ public class MigrationZPermissions extends SubCommand<Object> {
                     for (Map.Entry<String, Boolean> e : service.getPlayerPermissions(world, null, u).entrySet()) {
                         try {
                             user.setPermission(e.getKey(), e.getValue(), "global", world);
-                        } catch (ObjectAlreadyHasException ignored) {}
+                            LogEntry.build()
+                                    .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                    .acted(user).action("set " + e.getKey() + " true " + e.getValue() + " " + world)
+                                    .build().submit(plugin);
+                        } catch (Exception ex) {
+                            if (!(ex instanceof ObjectAlreadyHasException)) {
+                                ex.printStackTrace();
+                            }
+                        }
                     }
                 }
             }
@@ -94,10 +190,26 @@ public class MigrationZPermissions extends SubCommand<Object> {
             for (String g : service.getPlayerAssignedGroups(u)) {
                 try {
                     user.setPermission("group." + g.toLowerCase(), true);
-                } catch (ObjectAlreadyHasException ignored) {}
+                    LogEntry.build()
+                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .acted(user).action("addgroup " + g.toLowerCase())
+                            .build().submit(plugin);
+                } catch (Exception ex) {
+                    if (!(ex instanceof ObjectAlreadyHasException)) {
+                        ex.printStackTrace();
+                    }
+                }
             }
 
             user.setPrimaryGroup(service.getPlayerPrimaryGroup(u));
+            try {
+                LogEntry.build()
+                        .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                        .acted(user).action("setprimarygroup " + service.getPlayerPrimaryGroup(u))
+                        .build().submit(plugin);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
 
             String prefix = service.getPlayerPrefix(u);
             String suffix = service.getPlayerSuffix(u);
@@ -106,54 +218,34 @@ public class MigrationZPermissions extends SubCommand<Object> {
                 prefix = ArgumentChecker.escapeCharacters(prefix);
                 try {
                     user.setPermission("prefix.100." + prefix, true);
-                } catch (ObjectAlreadyHasException ignored) {}
+                    LogEntry.build()
+                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .acted(user).action("set prefix.100." + prefix + " true")
+                            .build().submit(plugin);
+                } catch (Exception ex) {
+                    if (!(ex instanceof ObjectAlreadyHasException)) {
+                        ex.printStackTrace();
+                    }
+                }
             }
 
             if (suffix != null && !suffix.equals("")) {
                 suffix = ArgumentChecker.escapeCharacters(suffix);
                 try {
                     user.setPermission("suffix.100." + suffix, true);
-                } catch (ObjectAlreadyHasException ignored) {}
-            }
-
-            plugin.getUserManager().cleanup(user);
-            plugin.getDatastore().saveUser(user);
-        }
-
-        // Migrate all tracks
-        log.info("zPermissions Migration: Starting track migration.");
-        for (String t : service.getAllTracks()) {
-            plugin.getDatastore().createAndLoadTrack(t.toLowerCase());
-            Track track = plugin.getTrackManager().get(t.toLowerCase());
-
-            track.setGroups(service.getTrackGroups(t));
-
-            plugin.getDatastore().saveTrack(track);
-        }
-
-        // Migrate all groups
-        log.info("zPermissions Migration: Starting group migration.");
-        for (String g : service.getAllGroups()) {
-            plugin.getDatastore().createAndLoadGroup(g.toLowerCase());
-            Group group = plugin.getGroupManager().get(g.toLowerCase());
-
-            for (Map.Entry<String, Boolean> e : service.getGroupPermissions(null, null, g).entrySet()) {
-                try {
-                    group.setPermission(e.getKey(), e.getValue());
-                } catch (ObjectAlreadyHasException ignored) {}
-            }
-
-            if (worlds != null && !worlds.isEmpty()) {
-                for (String world : worlds) {
-                    for (Map.Entry<String, Boolean> e : service.getGroupPermissions(world, null, g).entrySet()) {
-                        try {
-                            group.setPermission(e.getKey(), e.getValue(), "global", world);
-                        } catch (ObjectAlreadyHasException ignored) {}
+                    LogEntry.build()
+                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .acted(user).action("set suffix.100." + suffix + " true")
+                            .build().submit(plugin);
+                } catch (Exception ex) {
+                    if (!(ex instanceof ObjectAlreadyHasException)) {
+                        ex.printStackTrace();
                     }
                 }
             }
 
-            plugin.getDatastore().saveGroup(group);
+            plugin.getUserManager().cleanup(user);
+            plugin.getDatastore().saveUser(user);
         }
 
         log.info("zPermissions Migration: Success! Completed without any errors.");

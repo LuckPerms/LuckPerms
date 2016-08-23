@@ -28,7 +28,9 @@ import me.lucko.luckperms.commands.CommandResult;
 import me.lucko.luckperms.commands.Predicate;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.constants.Constants;
 import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.data.LogEntry;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.users.User;
@@ -119,6 +121,140 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             return CommandResult.FAILURE;
         }
 
+        // Migrate all groups.
+        log.info("PermissionsEx Migration: Starting group migration.");
+        int groupCount = 0;
+        for (PermissionGroup group : manager.getGroupList()) {
+            groupCount ++;
+            final String name = group.getName().toLowerCase();
+            plugin.getDatastore().createAndLoadGroup(name);
+            Group lpGroup = plugin.getGroupManager().get(name);
+            try {
+                LogEntry.build()
+                        .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                        .acted(lpGroup).action("create")
+                        .build().submit(plugin);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
+            try {
+                for (String node : group.getOwnPermissions(null)) {
+                    boolean value = true;
+                    if (node.startsWith("!")) {
+                        node = node.substring(1);
+                        value = false;
+                    }
+
+                    try {
+                        lpGroup.setPermission(node, value);
+                        LogEntry.build()
+                                .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                .acted(lpGroup).action("set " + node + " " + value)
+                                .build().submit(plugin);
+                    } catch (Exception ex) {
+                        if (!(ex instanceof ObjectAlreadyHasException)) {
+                            ex.printStackTrace();
+                        }
+                    }
+                }
+            } catch (NullPointerException ignored) {
+                // Probably won't happen. I have no API docs on getOwnPermissions#null though.
+            }
+
+            if (worlds != null && !worlds.isEmpty()) {
+                for (String world : worlds) {
+                    for (String node : group.getOwnPermissions(world)) {
+                        boolean value = true;
+                        if (node.startsWith("!")) {
+                            node = node.substring(1);
+                            value = false;
+                        }
+
+                        try {
+                            lpGroup.setPermission(node, value, "global", world);
+                            LogEntry.build()
+                                    .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                    .acted(lpGroup).action("set " + node + " " + value + " global " + world)
+                                    .build().submit(plugin);
+                        } catch (Exception ex) {
+                            if (!(ex instanceof ObjectAlreadyHasException)) {
+                                ex.printStackTrace();
+                            }
+                        }
+                    }
+                }
+            }
+
+            for (PermissionGroup g : group.getParents()) {
+                try {
+                    lpGroup.setPermission("group." + g.getName().toLowerCase(), true);
+                    LogEntry.build()
+                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .acted(lpGroup).action("setinherit " + g.getName().toLowerCase())
+                            .build().submit(plugin);
+                } catch (Exception ex) {
+                    if (!(ex instanceof ObjectAlreadyHasException)) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+
+            if (worlds != null && !worlds.isEmpty()) {
+                for (String world : worlds) {
+                    for (PermissionGroup g : group.getParents(world)) {
+                        try {
+                            lpGroup.setPermission("group." + g.getName().toLowerCase(), true, "global", world);
+                            LogEntry.build()
+                                    .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                    .acted(lpGroup).action("setinherit " + g.getName().toLowerCase() + " global " + world)
+                                    .build().submit(plugin);
+                        } catch (Exception ex) {
+                            if (!(ex instanceof ObjectAlreadyHasException)) {
+                                ex.printStackTrace();
+                            }
+                        }
+                    }
+                }
+            }
+
+            String prefix = group.getOwnPrefix();
+            String suffix = group.getOwnSuffix();
+
+            if (prefix != null && !prefix.equals("")) {
+                prefix = ArgumentChecker.escapeCharacters(prefix);
+                try {
+                    lpGroup.setPermission("prefix.50." + prefix, true);
+                    LogEntry.build()
+                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .acted(lpGroup).action("set prefix.50." + prefix + " true")
+                            .build().submit(plugin);
+                } catch (Exception ex) {
+                    if (!(ex instanceof ObjectAlreadyHasException)) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+
+            if (suffix != null && !suffix.equals("")) {
+                suffix = ArgumentChecker.escapeCharacters(suffix);
+                try {
+                    lpGroup.setPermission("suffix.50." + suffix, true);
+                    LogEntry.build()
+                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .acted(lpGroup).action("set suffix.50." + suffix + " true")
+                            .build().submit(plugin);
+                } catch (Exception ex) {
+                    if (!(ex instanceof ObjectAlreadyHasException)) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+
+        }
+
+        log.info("PermissionsEx Migration: Migrated " + groupCount + " groups");
+
         // Migrate all users
         log.info("PermissionsEx Migration: Starting user migration.");
         int userCount = 0;
@@ -163,7 +299,15 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
 
                     try {
                         lpUser.setPermission(node, value);
-                    } catch (ObjectAlreadyHasException ignored) {}
+                        LogEntry.build()
+                                .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                .acted(lpUser).action("set " + node + " " + value)
+                                .build().submit(plugin);
+                    } catch (Exception ex) {
+                        if (!(ex instanceof ObjectAlreadyHasException)) {
+                            ex.printStackTrace();
+                        }
+                    }
                 }
             } catch (NullPointerException ignored) {
                 // Probably won't happen. I have no API docs on getOwnPermissions#null though.
@@ -180,7 +324,15 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
 
                         try {
                             lpUser.setPermission(node, value, "global", world);
-                        } catch (ObjectAlreadyHasException ignored) {}
+                            LogEntry.build()
+                                    .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                    .acted(lpUser).action("set " + node + " " + value + " global " + world)
+                                    .build().submit(plugin);
+                        } catch (Exception ex) {
+                            if (!(ex instanceof ObjectAlreadyHasException)) {
+                                ex.printStackTrace();
+                            }
+                        }
                     }
                 }
             }
@@ -188,7 +340,15 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             for (String s : user.getGroupNames()) {
                 try {
                     lpUser.setPermission("group." + s.toLowerCase(), true);
-                } catch (ObjectAlreadyHasException ignored) {}
+                    LogEntry.build()
+                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .acted(lpUser).action("addgroup " + s.toLowerCase())
+                            .build().submit(plugin);
+                } catch (Exception ex) {
+                    if (!(ex instanceof ObjectAlreadyHasException)) {
+                        ex.printStackTrace();
+                    }
+                }
             }
 
             if (worlds != null && !worlds.isEmpty()) {
@@ -196,7 +356,15 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                     for (String s : user.getGroupNames(world)) {
                         try {
                             lpUser.setPermission("group." + s.toLowerCase(), true, "global", world);
-                        } catch (ObjectAlreadyHasException ignored) {}
+                            LogEntry.build()
+                                    .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                    .acted(lpUser).action("addgroup " + s.toLowerCase() + " global " + world)
+                                    .build().submit(plugin);
+                        } catch (Exception ex) {
+                            if (!(ex instanceof ObjectAlreadyHasException)) {
+                                ex.printStackTrace();
+                            }
+                        }
                     }
                 }
             }
@@ -208,14 +376,30 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 prefix = ArgumentChecker.escapeCharacters(prefix);
                 try {
                     lpUser.setPermission("prefix.100." + prefix, true);
-                } catch (ObjectAlreadyHasException ignored) {}
+                    LogEntry.build()
+                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .acted(lpUser).action("set prefix.100." + prefix + " true")
+                            .build().submit(plugin);
+                } catch (Exception ex) {
+                    if (!(ex instanceof ObjectAlreadyHasException)) {
+                        ex.printStackTrace();
+                    }
+                }
             }
 
             if (suffix != null && !suffix.equals("")) {
                 suffix = ArgumentChecker.escapeCharacters(suffix);
                 try {
                     lpUser.setPermission("suffix.100." + suffix, true);
-                } catch (ObjectAlreadyHasException ignored) {}
+                    LogEntry.build()
+                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .acted(lpUser).action("set suffix.100." + suffix + " true")
+                            .build().submit(plugin);
+                } catch (Exception ex) {
+                    if (!(ex instanceof ObjectAlreadyHasException)) {
+                        ex.printStackTrace();
+                    }
+                }
             }
 
             plugin.getUserManager().cleanup(lpUser);
@@ -223,84 +407,6 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         }
 
         log.info("PermissionsEx Migration: Migrated " + userCount + " users.");
-
-        // Migrate all groups.
-        log.info("PermissionsEx Migration: Starting group migration.");
-        int groupCount = 0;
-        for (PermissionGroup group : manager.getGroupList()) {
-            groupCount ++;
-            final String name = group.getName().toLowerCase();
-            plugin.getDatastore().createAndLoadGroup(name);
-            Group lpGroup = plugin.getGroupManager().get(name);
-
-            try {
-                for (String node : group.getOwnPermissions(null)) {
-                    boolean value = true;
-                    if (node.startsWith("!")) {
-                        node = node.substring(1);
-                        value = false;
-                    }
-
-                    try {
-                        lpGroup.setPermission(node, value);
-                    } catch (ObjectAlreadyHasException ignored) {}
-                }
-            } catch (NullPointerException ignored) {
-                // Probably won't happen. I have no API docs on getOwnPermissions#null though.
-            }
-
-            if (worlds != null && !worlds.isEmpty()) {
-                for (String world : worlds) {
-                    for (String node : group.getOwnPermissions(world)) {
-                        boolean value = true;
-                        if (node.startsWith("!")) {
-                            node = node.substring(1);
-                            value = false;
-                        }
-
-                        try {
-                            lpGroup.setPermission(node, value, "global", world);
-                        } catch (ObjectAlreadyHasException ignored) {}
-                    }
-                }
-            }
-
-            for (PermissionGroup g : group.getParents()) {
-                try {
-                    lpGroup.setPermission("group." + g.getName().toLowerCase(), true);
-                } catch (ObjectAlreadyHasException ignored) {}
-            }
-
-            if (worlds != null && !worlds.isEmpty()) {
-                for (String world : worlds) {
-                    for (PermissionGroup g : group.getParents(world)) {
-                        try {
-                            lpGroup.setPermission("group." + g.getName().toLowerCase(), true, "global", world);
-                        } catch (ObjectAlreadyHasException ignored) {}
-                    }
-                }
-            }
-
-            String prefix = group.getOwnPrefix();
-            String suffix = group.getOwnSuffix();
-
-            if (prefix != null && !prefix.equals("")) {
-                prefix = ArgumentChecker.escapeCharacters(prefix);
-                try {
-                    lpGroup.setPermission("prefix.50." + prefix, true);
-                } catch (ObjectAlreadyHasException ignored) {}
-            }
-
-            if (suffix != null && !suffix.equals("")) {
-                suffix = ArgumentChecker.escapeCharacters(suffix);
-                try {
-                    lpGroup.setPermission("suffix.50." + suffix, true);
-                } catch (ObjectAlreadyHasException ignored) {}
-            }
-
-        }
-
-        log.info("PermissionsEx Migration: Migrated " + groupCount + " groups");
         log.info("PermissionsEx Migration: Success! Completed without any errors.");
         return CommandResult.SUCCESS;
     }

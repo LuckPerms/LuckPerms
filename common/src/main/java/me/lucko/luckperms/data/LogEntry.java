@@ -44,6 +44,10 @@ public class LogEntry extends me.lucko.luckperms.api.LogEntry {
         super();
     }
 
+    public void submit(LuckPermsPlugin plugin) {
+        submit(plugin, null);
+    }
+
     public void submit(LuckPermsPlugin plugin, Sender sender) {
         plugin.getDatastore().logAction(this);
 
@@ -58,10 +62,16 @@ public class LogEntry extends me.lucko.luckperms.api.LogEntry {
                 .collect(Collectors.toList());
         senders.add(plugin.getConsoleSender());
 
-        senders.stream()
-                .filter(s -> !plugin.getIgnoringLogs().contains(s.getUuid()))
-                .filter(s -> !s.getUuid().equals(sender.getUuid()))
-                .forEach(s -> Message.LOG.send(s, msg));
+        if (sender == null) {
+            senders.stream()
+                    .filter(s -> !plugin.getIgnoringLogs().contains(s.getUuid()))
+                    .forEach(s -> Message.LOG.send(s, msg));
+        } else {
+            senders.stream()
+                    .filter(s -> !plugin.getIgnoringLogs().contains(s.getUuid()))
+                    .filter(s -> !s.getUuid().equals(sender.getUuid()))
+                    .forEach(s -> Message.LOG.send(s, msg));
+        }
     }
     
     public static class LogEntryBuilder extends AbstractLogEntryBuilder<LogEntry, LogEntry.LogEntryBuilder> {
