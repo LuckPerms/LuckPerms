@@ -94,6 +94,7 @@ public enum Message {
      */
     CREATE_SUCCESS("&b%s&a was successfully created.", true),
     DELETE_SUCCESS("&b%s&a was successfully deleted.", true),
+    RENAME_SUCCESS("&b%s&a was successfully renamed to &b%s&a.", true),
 
     USER_ALREADY_MEMBER_OF("%s is already a member of '%s'.", true),
     USER_NOT_MEMBER_OF("%s is not a member of '%s'.", true),

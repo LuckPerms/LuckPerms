@@ -20,42 +20,47 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.commands.track;
+package me.lucko.luckperms.commands.track.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.commands.CommandResult;
+import me.lucko.luckperms.commands.Predicate;
 import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SingleMainCommand;
+import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.data.LogEntry;
 import me.lucko.luckperms.tracks.Track;
+import me.lucko.luckperms.utils.ArgumentChecker;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class DeleteTrack extends SingleMainCommand {
-    public DeleteTrack() {
-        super("DeleteTrack", "/%s deletetrack <track>", 1, Permission.DELETE_TRACK);
+public class TrackRename extends SubCommand<Track> {
+    public TrackRename() {
+        super("rename", "Rename this track", "/%s track <track> rename <new name>",
+                Permission.TRACK_APPEND, Predicate.not(1));
     }
 
     @Override
-    protected CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
-        if (args.size() == 0) {
-            sendUsage(sender, label);
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args, String label) {
+        String newTrackName = args.get(0).toLowerCase();
+        if (ArgumentChecker.checkName(newTrackName)) {
+            Message.TRACK_INVALID_ENTRY.send(sender);
             return CommandResult.INVALID_ARGS;
         }
 
-        String trackName = args.get(0).toLowerCase();
-        if (!plugin.getDatastore().loadTrack(trackName)) {
-            Message.TRACK_DOES_NOT_EXIST.send(sender);
+        if (plugin.getDatastore().loadTrack(newTrackName)) {
+            Message.TRACK_ALREADY_EXISTS.send(sender);
             return CommandResult.INVALID_ARGS;
         }
 
-        Track track = plugin.getTrackManager().get(trackName);
-        if (track == null) {
+        if (!plugin.getDatastore().createAndLoadTrack(newTrackName)) {
+            Message.CREATE_TRACK_ERROR.send(sender);
+            return CommandResult.FAILURE;
+        }
+
+        Track newTrack = plugin.getTrackManager().get(newTrackName);
+        if (newTrack == null) {
             Message.TRACK_LOAD_ERROR.send(sender);
             return CommandResult.LOADING_ERROR;
         }
@@ -65,26 +70,11 @@ public class DeleteTrack extends SingleMainCommand {
             return CommandResult.FAILURE;
         }
 
-        Message.DELETE_SUCCESS.send(sender, trackName);
-        LogEntry.build().actor(sender).actedName(trackName).type('T').action("delete").build().submit(plugin, sender);
-        plugin.runUpdateTask();
+        plugin.getTrackManager().copy(track, newTrack);
+
+        Message.RENAME_SUCCESS.send(sender, track.getName(), newTrack.getName());
+        LogEntry.build().actor(sender).acted(track).action("rename " + newTrack.getName()).build().submit(plugin, sender);
+        save(newTrack, sender, plugin);
         return CommandResult.SUCCESS;
-    }
-
-    @Override
-    protected List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin) {
-        final List<String> tracks = new ArrayList<>(plugin.getTrackManager().getAll().keySet());
-
-        if (args.size() <= 1) {
-            if (args.isEmpty() || args.get(0).equalsIgnoreCase("")) {
-                return tracks;
-            }
-
-            return tracks.stream()
-                    .filter(s -> s.toLowerCase().startsWith(args.get(0).toLowerCase()))
-                    .collect(Collectors.toList());
-        }
-
-        return Collections.emptyList();
     }
 }

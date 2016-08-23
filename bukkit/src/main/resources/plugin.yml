@@ -55,11 +55,13 @@ permissions:
       luckperms.group.unsettempinherit: true
       luckperms.group.showtracks: true
       luckperms.group.clear: true
+      luckperms.group.rename: true
       luckperms.track.info: true
       luckperms.track.append: true
       luckperms.track.insert: true
       luckperms.track.remove: true
       luckperms.track.clear: true
+      luckperms.track.rename: true
       luckperms.log.export: true
       luckperms.log.userhistory: true
       luckperms.log.grouphistory: true
@@ -106,6 +108,7 @@ permissions:
       luckperms.group.unsettempinherit: true
       luckperms.group.showtracks: true
       luckperms.group.clear: true
+      luckperms.group.rename: true
   luckperms.track.*:
     description: Gives access to all LuckPerms track commands
     children:
@@ -114,6 +117,7 @@ permissions:
       luckperms.track.insert: true
       luckperms.track.remove: true
       luckperms.track.clear: true
+      luckperms.track.rename: true
   luckperms.log.*:
     description: Gives access to all LuckPerms log commands
     children:

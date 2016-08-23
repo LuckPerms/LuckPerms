@@ -20,48 +20,47 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.commands.group;
+package me.lucko.luckperms.commands.group.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.commands.CommandResult;
+import me.lucko.luckperms.commands.Predicate;
 import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SingleMainCommand;
+import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.data.LogEntry;
 import me.lucko.luckperms.groups.Group;
+import me.lucko.luckperms.utils.ArgumentChecker;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class DeleteGroup extends SingleMainCommand {
-    public DeleteGroup() {
-        super("DeleteGroup", "/%s deletegroup <group>", 1, Permission.DELETE_GROUP);
+public class GroupRename extends SubCommand<Group> {
+    public GroupRename() {
+        super("rename", "Rename this group", "/%s group <group> rename <new name>",
+                Permission.TRACK_APPEND, Predicate.not(1));
     }
 
     @Override
-    protected CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
-        if (args.size() == 0) {
-            sendUsage(sender, label);
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
+        String newGroupName = args.get(0).toLowerCase();
+        if (ArgumentChecker.checkName(newGroupName)) {
+            Message.GROUP_INVALID_ENTRY.send(sender);
             return CommandResult.INVALID_ARGS;
         }
 
-        String groupName = args.get(0).toLowerCase();
-
-        if (groupName.equalsIgnoreCase(plugin.getConfiguration().getDefaultGroupName())) {
-            Message.DELETE_GROUP_ERROR_DEFAULT.send(sender);
+        if (plugin.getDatastore().loadGroup(newGroupName)) {
+            Message.GROUP_ALREADY_EXISTS.send(sender);
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!plugin.getDatastore().loadGroup(groupName)) {
-            Message.GROUP_DOES_NOT_EXIST.send(sender);
-            return CommandResult.INVALID_ARGS;
+        if (!plugin.getDatastore().createAndLoadGroup(newGroupName)) {
+            Message.CREATE_GROUP_ERROR.send(sender);
+            return CommandResult.FAILURE;
         }
 
-        Group group = plugin.getGroupManager().get(groupName);
-        if (group == null) {
+        Group newGroup = plugin.getGroupManager().get(newGroupName);
+        if (newGroup == null) {
             Message.GROUP_LOAD_ERROR.send(sender);
             return CommandResult.LOADING_ERROR;
         }
@@ -71,25 +70,11 @@ public class DeleteGroup extends SingleMainCommand {
             return CommandResult.FAILURE;
         }
 
-        Message.DELETE_SUCCESS.send(sender, groupName);
-        LogEntry.build().actor(sender).actedName(groupName).type('G').action("delete").build().submit(plugin, sender);
-        plugin.runUpdateTask();
+        plugin.getGroupManager().copy(group, newGroup);
+
+        Message.RENAME_SUCCESS.send(sender, group.getName(), newGroup.getName());
+        LogEntry.build().actor(sender).acted(group).action("rename " + newGroup.getName()).build().submit(plugin, sender);
+        save(newGroup, sender, plugin);
         return CommandResult.SUCCESS;
-    }
-
-    @Override
-    protected List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin) {
-        final List<String> groups = new ArrayList<>(plugin.getGroupManager().getAll().keySet());
-
-        if (args.size() <= 1) {
-            if (args.isEmpty() || args.get(0).equalsIgnoreCase("")) {
-                return groups;
-            }
-
-            return groups.stream().filter(s -> s.toLowerCase().startsWith(args.get(0).toLowerCase()))
-                    .collect(Collectors.toList());
-        }
-
-        return Collections.emptyList();
     }
 }

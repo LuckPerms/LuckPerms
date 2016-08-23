@@ -41,7 +41,7 @@ public class TrackManager extends AbstractManager<String, Track> {
     }
 
     @Override
-    protected void copy(Track from, Track to) {
+    public void copy(Track from, Track to) {
         to.setGroups(from.getGroups());
     }
 

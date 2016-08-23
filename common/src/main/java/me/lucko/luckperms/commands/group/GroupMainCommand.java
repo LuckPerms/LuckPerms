@@ -30,7 +30,6 @@ import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.commands.group.subcommands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.groups.Group;
-import me.lucko.luckperms.utils.ArgumentChecker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,17 +51,13 @@ public class GroupMainCommand extends MainCommand<Group> {
             .add(new GroupUnsetTempInherit())
             .add(new GroupShowTracks())
             .add(new GroupClear())
+            .add(new GroupRename())
             .build()
         );
     }
 
     @Override
     protected Group getTarget(String target, LuckPermsPlugin plugin, Sender sender) {
-        if (ArgumentChecker.checkName(target)) {
-            Message.GROUP_INVALID_ENTRY.send(sender);
-            return null;
-        }
-
         if (!plugin.getDatastore().loadGroup(target)) {
             Message.GROUP_NOT_FOUND.send(sender);
             return null;

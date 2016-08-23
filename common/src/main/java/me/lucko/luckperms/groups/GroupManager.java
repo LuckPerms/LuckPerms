@@ -31,7 +31,7 @@ public class GroupManager extends AbstractManager<String, Group> {
     private final LuckPermsPlugin plugin;
 
     @Override
-    protected void copy(Group from, Group to) {
+    public void copy(Group from, Group to) {
         to.setNodes(from.getNodes());
     }
 

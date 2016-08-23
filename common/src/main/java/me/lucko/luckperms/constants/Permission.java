@@ -76,12 +76,14 @@ public enum Permission {
     GROUP_UNSET_TEMP_INHERIT("unsettempinherit", "group"),
     GROUP_SHOWTRACKS("showtracks", "group"),
     GROUP_CLEAR("clear", "group"),
+    GROUP_RENAME("rename", "group"),
 
     TRACK_INFO("info", "track"),
     TRACK_APPEND("append", "track"),
     TRACK_INSERT("insert", "track"),
     TRACK_REMOVE("remove", "track"),
     TRACK_CLEAR("clear", "track"),
+    TRACK_RENAME("rename", "track"),
 
     LOG_RECENT("recent", "log"),
     LOG_USER_HISTORY("userhistory", "log"),

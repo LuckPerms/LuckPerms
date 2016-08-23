@@ -67,7 +67,7 @@ public abstract class AbstractManager<I, T extends Identifiable<I>> {
         }
     }
 
-    protected abstract void copy(T from, T to);
+    public abstract void copy(T from, T to);
 
     /**
      * Check to see if a object is loaded or not

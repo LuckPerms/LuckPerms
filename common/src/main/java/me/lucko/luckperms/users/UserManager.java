@@ -52,7 +52,7 @@ public abstract class UserManager extends AbstractManager<UUID, User> {
     }
 
     @Override
-    protected void copy(User from, User to) {
+    public void copy(User from, User to) {
         to.setNodes(from.getNodes());
         to.setPrimaryGroup(from.getPrimaryGroup());
         to.refreshPermissions();
