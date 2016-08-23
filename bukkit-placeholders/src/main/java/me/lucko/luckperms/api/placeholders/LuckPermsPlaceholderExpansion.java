@@ -52,7 +52,7 @@ import java.util.regex.Pattern;
  * - meta_<node>
  */
 public class LuckPermsPlaceholderExpansion extends PlaceholderExpansion {
-    private static final String IDENTIFIER = "LuckPerms";
+    private static final String IDENTIFIER = "luckperms";
     private static final String PLUGIN_NAME = "LuckPerms";
     private static final String AUTHOR = "Luck";
 
