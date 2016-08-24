@@ -116,27 +116,22 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         trackManager = new TrackManager();
         importer = new Importer(commandManager);
 
-        int mins = getConfiguration().getSyncTime();
-        if (mins > 0) {
-            scheduler.createTaskBuilder().async().interval(mins, TimeUnit.MINUTES).execute(new UpdateTask(this))
-                    .submit(LPSpongePlugin.this);
-        }
-
-        scheduler.createTaskBuilder().intervalTicks(1L).execute(SpongeSenderFactory.get()).submit(this);
-        scheduler.createTaskBuilder().async().intervalTicks(60L).execute(new ExpireTemporaryTask(this)).submit(this);
-
         getLog().info("Registering API...");
         apiProvider = new ApiProvider(this);
         LuckPerms.registerProvider(apiProvider);
         Sponge.getServiceManager().setProvider(this, LuckPermsApi.class, apiProvider);
 
-        // Run update task to refresh any online users
-        getLog().info("Scheduling Update Task to refresh any online users.");
-        try {
-            new UpdateTask(this).run();
-        } catch (Exception e) {
-            e.printStackTrace();
+        int mins = getConfiguration().getSyncTime();
+        if (mins > 0) {
+            scheduler.createTaskBuilder().async().interval(mins, TimeUnit.MINUTES).execute(new UpdateTask(this))
+                    .submit(LPSpongePlugin.this);
+        } else {
+            // Update online users
+            runUpdateTask();
         }
+
+        scheduler.createTaskBuilder().intervalTicks(1L).execute(SpongeSenderFactory.get()).submit(this);
+        scheduler.createTaskBuilder().async().intervalTicks(60L).execute(new ExpireTemporaryTask(this)).submit(this);
 
         getLog().info("Successfully loaded.");
     }
