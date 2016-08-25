@@ -134,6 +134,15 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                 return CommandResult.FAILURE;
 
             } else {
+                @Cleanup PreparedStatement columnPs = connection.prepareStatement("SELECT COLUMN_NAME, COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME=?");
+                columnPs.setString(1, dbTable);
+                @Cleanup ResultSet columnRs = columnPs.executeQuery();
+
+                log.info("Found table: " + dbTable);
+                while (columnRs.next()) {
+                    log.info("" + columnRs.getString("COLUMN_NAME") + " - " + columnRs.getString("COLUMN_TYPE"));
+                }
+
                 @Cleanup PreparedStatement preparedStatement = connection.prepareStatement("SELECT `uuid` FROM " + dbTable);
                 @Cleanup ResultSet resultSet = preparedStatement.executeQuery();
 
