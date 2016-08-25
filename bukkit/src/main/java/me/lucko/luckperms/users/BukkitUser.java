@@ -68,7 +68,7 @@ public class BukkitUser extends User {
     @Override
     public void refreshPermissions() {
         if (attachment == null) {
-            getPlugin().getLog().severe("User " + getName() + " does not have a permissions attachment defined.");
+            return;
         }
 
         // Calculate the permissions that should be applied. This is done async, who cares about how long it takes or how often it's done.
