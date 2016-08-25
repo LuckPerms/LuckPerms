@@ -27,6 +27,7 @@ import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.implementation.ApiProvider;
 import me.lucko.luckperms.api.vault.VaultHook;
+import me.lucko.luckperms.commands.ConsecutiveExecutor;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.core.LPConfiguration;
@@ -63,6 +64,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private ApiProvider apiProvider;
     private Logger log;
     private Importer importer;
+    private ConsecutiveExecutor consecutiveExecutor;
 
     @Override
     public void onEnable() {
@@ -91,6 +93,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         groupManager = new GroupManager(this);
         trackManager = new TrackManager();
         importer = new Importer(commandManager);
+        consecutiveExecutor = new ConsecutiveExecutor(commandManager);
 
         int mins = getConfiguration().getSyncTime();
         if (mins > 0) {
@@ -100,6 +103,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
         getServer().getScheduler().runTaskTimer(this, BukkitSenderFactory.get(), 1L, 1L);
         getServer().getScheduler().runTaskTimerAsynchronously(this, new ExpireTemporaryTask(this), 60L, 60L);
+        getServer().getScheduler().runTaskTimerAsynchronously(this, consecutiveExecutor, 20L, 20L);
 
         // Provide vault support
         getLog().info("Attempting to hook into Vault...");

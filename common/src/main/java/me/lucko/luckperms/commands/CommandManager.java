@@ -33,10 +33,7 @@ import me.lucko.luckperms.commands.group.GroupMainCommand;
 import me.lucko.luckperms.commands.group.ListGroups;
 import me.lucko.luckperms.commands.log.LogMainCommand;
 import me.lucko.luckperms.commands.migration.MigrationMainCommand;
-import me.lucko.luckperms.commands.misc.DebugCommand;
-import me.lucko.luckperms.commands.misc.ImportCommand;
-import me.lucko.luckperms.commands.misc.InfoCommand;
-import me.lucko.luckperms.commands.misc.SyncCommand;
+import me.lucko.luckperms.commands.misc.*;
 import me.lucko.luckperms.commands.track.CreateTrack;
 import me.lucko.luckperms.commands.track.DeleteTrack;
 import me.lucko.luckperms.commands.track.ListTracks;
@@ -64,6 +61,7 @@ public class CommandManager {
             .add(new InfoCommand())
             .add(new DebugCommand())
             .add(new ImportCommand())
+            .add(new QueueCommand())
             .add(new MigrationMainCommand())
             .add(new CreateGroup())
             .add(new DeleteGroup())

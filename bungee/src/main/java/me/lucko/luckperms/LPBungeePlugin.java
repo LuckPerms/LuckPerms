@@ -26,6 +26,7 @@ import lombok.Getter;
 import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.implementation.ApiProvider;
 import me.lucko.luckperms.commands.CommandManager;
+import me.lucko.luckperms.commands.ConsecutiveExecutor;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.core.LPConfiguration;
@@ -64,6 +65,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     private ApiProvider apiProvider;
     private Logger log;
     private Importer importer;
+    private ConsecutiveExecutor consecutiveExecutor;
 
     @Override
     public void onEnable() {
@@ -91,6 +93,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         groupManager = new GroupManager(this);
         trackManager = new TrackManager();
         importer = new Importer(commandManager);
+        consecutiveExecutor = new ConsecutiveExecutor(commandManager);
 
         int mins = getConfiguration().getSyncTime();
         if (mins > 0) {
@@ -100,6 +103,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         // 20 times per second (once per "tick")
         getProxy().getScheduler().schedule(this, BungeeSenderFactory.get(), 50L, 50L, TimeUnit.MILLISECONDS);
         getProxy().getScheduler().schedule(this, new ExpireTemporaryTask(this), 3L, 3L, TimeUnit.SECONDS);
+        getProxy().getScheduler().schedule(this, consecutiveExecutor, 1L, 1L, TimeUnit.SECONDS);
 
         getLog().info("Registering API...");
         apiProvider = new ApiProvider(this);

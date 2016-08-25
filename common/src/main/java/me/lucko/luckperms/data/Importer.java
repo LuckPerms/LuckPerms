@@ -38,7 +38,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Executes a list of commands sequentially in a single thread.
+ * Class to handle import operations
  */
 @RequiredArgsConstructor
 public class Importer {

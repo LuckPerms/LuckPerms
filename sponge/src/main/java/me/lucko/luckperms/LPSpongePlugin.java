@@ -26,6 +26,7 @@ import com.google.inject.Inject;
 import lombok.Getter;
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.implementation.ApiProvider;
+import me.lucko.luckperms.commands.ConsecutiveExecutor;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
@@ -90,6 +91,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     private ApiProvider apiProvider;
     private me.lucko.luckperms.api.Logger log;
     private Importer importer;
+    private ConsecutiveExecutor consecutiveExecutor;
 
     @Listener
     public void onEnable(GamePreInitializationEvent event) {
@@ -115,6 +117,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         groupManager = new GroupManager(this);
         trackManager = new TrackManager();
         importer = new Importer(commandManager);
+        consecutiveExecutor = new ConsecutiveExecutor(commandManager);
 
         getLog().info("Registering API...");
         apiProvider = new ApiProvider(this);
@@ -132,6 +135,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
         scheduler.createTaskBuilder().intervalTicks(1L).execute(SpongeSenderFactory.get()).submit(this);
         scheduler.createTaskBuilder().async().intervalTicks(60L).execute(new ExpireTemporaryTask(this)).submit(this);
+        scheduler.createTaskBuilder().async().intervalTicks(20L).execute(consecutiveExecutor).submit(this);
 
         getLog().info("Successfully loaded.");
     }

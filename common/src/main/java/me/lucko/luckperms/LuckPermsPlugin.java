@@ -24,6 +24,7 @@ package me.lucko.luckperms;
 
 import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.implementation.ApiProvider;
+import me.lucko.luckperms.commands.ConsecutiveExecutor;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.core.LPConfiguration;
@@ -57,6 +58,7 @@ public interface LuckPermsPlugin {
     UuidCache getUuidCache();
     ApiProvider getApiProvider();
     Importer getImporter();
+    ConsecutiveExecutor getConsecutiveExecutor();
 
     /**
      * @return the version of the plugin
