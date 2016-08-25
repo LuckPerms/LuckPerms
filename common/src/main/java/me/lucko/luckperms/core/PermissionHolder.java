@@ -815,6 +815,7 @@ public abstract class PermissionHolder {
         return input;
     }
 
+    // TODO Support the "Sponge way" of doing wildcards
     private static Map<String, Boolean> applyWildcards(Map<String, Boolean> input, List<String> possibleNodes) {
         SortedMap<Integer, Map<String, Boolean>> wildcards = new TreeMap<>(Collections.reverseOrder());
         for (Map.Entry<String, Boolean> e : input.entrySet()) {
