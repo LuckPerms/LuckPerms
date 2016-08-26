@@ -109,7 +109,8 @@ abstract class SQLDatastore extends Datastore {
             boolean onResult(ResultSet resultSet) throws SQLException {
                 if (resultSet.next()) {
                     user.setName(resultSet.getString("name"));
-                    user.setNodes(gson.fromJson(resultSet.getString("perms"), NM_TYPE));
+                    Map<String, Boolean> nodes = gson.fromJson(resultSet.getString("perms"), NM_TYPE);
+                    user.setNodes(nodes);
                     user.setPrimaryGroup(resultSet.getString("primary_group"));
                     return true;
                 }
@@ -193,7 +194,8 @@ abstract class SQLDatastore extends Datastore {
                         }
                     });
                 } else {
-                    user.setNodes(gson.fromJson(resultSet.getString("perms"), NM_TYPE));
+                    Map<String, Boolean> nodes = gson.fromJson(resultSet.getString("perms"), NM_TYPE);
+                    user.setNodes(nodes);
                     user.setPrimaryGroup(resultSet.getString("primary_group"));
 
                     if (!resultSet.getString("name").equals(user.getName())) {
@@ -251,7 +253,8 @@ abstract class SQLDatastore extends Datastore {
                         }
                     });
                 } else {
-                    group.setNodes(gson.fromJson(resultSet.getString("perms"), NM_TYPE));
+                    Map<String, Boolean> nodes = gson.fromJson(resultSet.getString("perms"), NM_TYPE);
+                    group.setNodes(nodes);
                 }
                 return success;
             }
@@ -273,7 +276,8 @@ abstract class SQLDatastore extends Datastore {
             @Override
             boolean onResult(ResultSet resultSet) throws SQLException {
                 if (resultSet.next()) {
-                    group.setNodes(gson.fromJson(resultSet.getString("perms"), NM_TYPE));
+                    Map<String, Boolean> nodes = gson.fromJson(resultSet.getString("perms"), NM_TYPE);
+                    group.setNodes(nodes);
                     return true;
                 }
                 return false;
@@ -297,7 +301,8 @@ abstract class SQLDatastore extends Datastore {
             boolean onResult(ResultSet resultSet) throws SQLException {
                 while (resultSet.next()) {
                     Group group = plugin.getGroupManager().make(resultSet.getString("name"));
-                    group.setNodes(gson.fromJson(resultSet.getString("perms"), NM_TYPE));
+                    Map<String, Boolean> nodes = gson.fromJson(resultSet.getString("perms"), NM_TYPE);
+                    group.setNodes(nodes);
                     groups.add(group);
                 }
                 return true;

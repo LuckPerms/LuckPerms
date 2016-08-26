@@ -175,4 +175,12 @@ public interface LuckPermsApi {
      */
     boolean isTrackLoaded(String name);
 
+    /**
+     * Returns a permission builder instance
+     * @param permission the main permission node to build
+     * @return a {@link Node.Builder} instance
+     * @throws IllegalArgumentException if the permission is invalid
+     */
+    Node.Builder buildNode(String permission) throws IllegalArgumentException;
+
 }

@@ -153,6 +153,10 @@ public class LuckPermsSubject implements Subject {
 
         @Override
         public Map<Set<Context>, Map<String, Boolean>> getAllPermissions() {
+            return null;
+            // TODO
+
+            /*
             Map<String, Boolean> nodes = holder.convertTemporaryPerms();
             Map<Set<Context>, Map<String, Boolean>> permissions = new HashMap<>();
 
@@ -286,6 +290,7 @@ public class LuckPermsSubject implements Subject {
             }
 
             return permissions;
+            */
         }
 
         @Override

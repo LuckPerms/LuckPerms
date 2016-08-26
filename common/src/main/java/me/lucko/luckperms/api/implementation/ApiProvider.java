@@ -27,6 +27,7 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.api.*;
+import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.event.LPEvent;
 import me.lucko.luckperms.api.event.LPListener;
 import me.lucko.luckperms.api.implementation.internal.*;
@@ -35,6 +36,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static me.lucko.luckperms.api.implementation.internal.Utils.checkNode;
 
 /**
  * Provides static access to LuckPerms
@@ -186,5 +189,10 @@ public class ApiProvider implements LuckPermsApi {
     @Override
     public boolean isTrackLoaded(@NonNull String name) {
         return plugin.getTrackManager().isLoaded(name);
+    }
+
+    @Override
+    public Node.Builder buildNode(String permission) throws IllegalArgumentException {
+        return new me.lucko.luckperms.utils.Node.Builder(checkNode(permission));
     }
 }

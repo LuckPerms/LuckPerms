@@ -288,7 +288,9 @@ public abstract class User extends PermissionHolder implements Identifiable<UUID
     public void clearNodes() {
         String defaultGroupNode = getPlugin().getConfiguration().getDefaultGroupNode();
         getNodes().clear();
-        getNodes().put(defaultGroupNode, true);
+        try {
+            setPermission(defaultGroupNode, true);
+        } catch (ObjectAlreadyHasException ignored) {}
     }
 
     /**
@@ -328,7 +330,7 @@ public abstract class User extends PermissionHolder implements Identifiable<UUID
      */
     private List<String> getGroups(String server, String world, boolean includeGlobal) {
         // Call super #getPermissions method, and just sort through those
-        Map<String, Boolean> perms = getPermissions(server, world, null, includeGlobal, null);
+        Map<String, Boolean> perms = getPermissions(server, world, null, includeGlobal, null, true);
         return perms.keySet().stream()
                 .filter(s -> Patterns.GROUP_MATCH.matcher(s).matches())
                 .map(s -> Patterns.DOT.split(s, 2)[1])

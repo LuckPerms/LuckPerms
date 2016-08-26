@@ -26,9 +26,12 @@ import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.core.PermissionHolder;
 import me.lucko.luckperms.users.User;
 
 import java.util.List;
+
+import static me.lucko.luckperms.core.PermissionHolder.*;
 
 public class UserListNodes extends SubCommand<User> {
     public UserListNodes() {
@@ -38,8 +41,8 @@ public class UserListNodes extends SubCommand<User> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
-        Message.LISTNODES.send(sender, user.getName(), Util.permNodesToString(user.getPermanentNodes()));
-        Message.LISTNODES_TEMP.send(sender, user.getName(), Util.tempNodesToString(user.getTemporaryNodes()));
+        Message.LISTNODES.send(sender, user.getName(), Util.permNodesToString(convertToLegacy(user.getPermanentNodes())));
+        Message.LISTNODES_TEMP.send(sender, user.getName(), Util.tempNodesToString(user.getTemporaryNodesLegacy()));
         return CommandResult.SUCCESS;
     }
 }

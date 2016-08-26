@@ -43,8 +43,8 @@ public class UserInfo extends SubCommand<User> {
                 plugin.getPlayerStatus(user.getUuid()),
                 Util.listToCommaSep(user.getGroupNames()),
                 user.getPrimaryGroup(),
-                user.getPermanentNodes().keySet().size(),
-                user.getTemporaryNodes().keySet().size(),
+                user.getPermanentNodes().size(),
+                user.getTemporaryNodes().size(),
                 label,
                 user.getName()
         );

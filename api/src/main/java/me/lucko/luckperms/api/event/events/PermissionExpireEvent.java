@@ -27,7 +27,9 @@ import me.lucko.luckperms.api.event.TargetedEvent;
 
 /**
  * Called when a permission expires for an object.
+ * @deprecated in favour of {@link PermissionNodeExpireEvent}
  */
+@Deprecated
 public class PermissionExpireEvent extends TargetedEvent<PermissionHolder> {
 
     private final String node;

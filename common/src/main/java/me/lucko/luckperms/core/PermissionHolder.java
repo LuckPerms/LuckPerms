@@ -26,20 +26,18 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.event.events.GroupRemoveEvent;
-import me.lucko.luckperms.api.event.events.PermissionExpireEvent;
-import me.lucko.luckperms.api.event.events.PermissionSetEvent;
-import me.lucko.luckperms.api.event.events.PermissionUnsetEvent;
+import me.lucko.luckperms.api.event.events.PermissionNodeExpireEvent;
+import me.lucko.luckperms.api.event.events.PermissionNodeSetEvent;
+import me.lucko.luckperms.api.event.events.PermissionNodeUnsetEvent;
 import me.lucko.luckperms.api.implementation.internal.PermissionHolderLink;
-import me.lucko.luckperms.constants.Patterns;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.groups.Group;
-import me.lucko.luckperms.utils.DateUtil;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -66,31 +64,42 @@ public abstract class PermissionHolder {
      * The user/group's permissions
      */
     @Getter
-    private Map<String, Boolean> nodes = new ConcurrentHashMap<>();
+    private Set<Node> nodes = ConcurrentHashMap.newKeySet();
 
-    public void setNodes(Map<String, Boolean> nodes) {
+    public void setNodes(Set<Node> nodes) {
         this.nodes.clear();
-        this.nodes.putAll(nodes);
+        this.nodes.addAll(nodes);
         auditTemporaryPermissions();
     }
 
-    /**
-     * Utility method for checking if a map has a certain permission. Used by both #hasPermission and #inheritsPermission
-     */
-    private static boolean hasPermission(Map<String, Boolean> toQuery, String node, boolean b) {
-        // Not temporary
-        if (!node.contains("$")) {
-            return b ? toQuery.containsKey(node) && toQuery.get(node) : toQuery.containsKey(node) && !toQuery.get(node);
+    @Deprecated
+    public static Map<String, Boolean> convertToLegacy(Set<Node> nodes) {
+        Map<String, Boolean> m = new HashMap<>();
+        for (Node node : nodes) {
+            m.put(node.toSerializedNode(), node.getValue());
         }
+        return Collections.unmodifiableMap(m);
+    }
 
-        node = Patterns.TEMP_DELIMITER.split(node)[0];
+    private static Node.Builder buildNode(String permission) {
+        return new me.lucko.luckperms.utils.Node.Builder(permission);
+    }
 
-        for (Map.Entry<String, Boolean> e : toQuery.entrySet()) {
-            if (e.getKey().contains("$")) {
-                String[] parts = Patterns.TEMP_DELIMITER.split(e.getKey());
-                if (parts[0].equalsIgnoreCase(node)) {
-                    return b ? e.getValue() : !e.getValue();
-                }
+    @Deprecated
+    public void setNodes(Map<String, Boolean> nodes) {
+        this.nodes.clear();
+
+        this.nodes.addAll(nodes.entrySet().stream()
+                .map(e -> me.lucko.luckperms.utils.Node.fromSerialisedNode(e.getKey(), e.getValue()))
+                .collect(Collectors.toList()));
+
+        auditTemporaryPermissions();
+    }
+
+    private static boolean hasPermission(Set<Node> toQuery, Node node) {
+        for (Node n : toQuery) {
+            if (n.almostEquals(node)) {
+                return true;
             }
         }
 
@@ -98,436 +107,171 @@ public abstract class PermissionHolder {
     }
 
     /**
-     * Checks to see if the object has a certain permission
-     * @param node The permission node
-     * @param b If the node is true/false(negated)
-     * @return true if the user has the permission
+     * Check if the holder has a permission node
+     * @param node the node to check
+     * @return true if the holder has the node
      */
+    public boolean hasPermission(Node node) {
+        return hasPermission(this.nodes, node);
+    }
+
     public boolean hasPermission(String node, boolean b) {
-        if (node.startsWith("global/")) node = node.replace("global/", "");
-        return hasPermission(this.nodes, node, b);
+        return hasPermission(buildNode(node).setValue(b).build());
     }
 
-    /**
-     * Checks to see the the object has a permission on a certain server
-     * @param node The permission node
-     * @param b If the node is true/false(negated)
-     * @param server The server
-     * @return true if the user has the permission
-     */
     public boolean hasPermission(String node, boolean b, String server) {
-        return hasPermission(server + "/" + node, b);
+        return hasPermission(buildNode(node).setValue(b).setServer(server).build());
     }
 
-    /**
-     * Checks to see the the object has a permission on a certain server
-     * @param node The permission node
-     * @param b If the node is true/false(negated)
-     * @param server The server
-     * @param world The world
-     * @return true if the user has the permission
-     */
     public boolean hasPermission(String node, boolean b, String server, String world) {
-        return hasPermission(server + "-" + world + "/" + node, b);
+        return hasPermission(buildNode(node).setValue(b).setServer(server).setWorld(world).build());
     }
 
-    /**
-     * Checks to see the the object has a permission on a certain server
-     * @param node The permission node
-     * @param b If the node is true/false(negated)
-     * @param temporary if the permission is temporary
-     * @return true if the user has the permission
-     */
     public boolean hasPermission(String node, boolean b, boolean temporary) {
-        return hasPermission(node + (temporary ? "$a" : ""), b);
+        return hasPermission(buildNode(node).setValue(b).setExpiry(temporary ? 10L : 0L).build());
     }
 
-    /**
-     * Checks to see the the object has a permission on a certain server
-     * @param node The permission node
-     * @param b If the node is true/false(negated)
-     * @param server The server to check on
-     * @param temporary if the permission is temporary
-     * @return true if the user has the permission
-     */
     public boolean hasPermission(String node, boolean b, String server, boolean temporary) {
-        return hasPermission(server + "/" + node + (temporary ? "$a" : ""), b);
+        return hasPermission(buildNode(node).setValue(b).setServer(server).setExpiry(temporary ? 10L : 0L).build());
     }
 
-    /**
-     * Checks to see the the object has a permission on a certain server
-     * @param node The permission node
-     * @param b If the node is true/false(negated)
-     * @param server The server to check on
-     * @param world The world to check on
-     * @param temporary if the permission is temporary
-     * @return true if the user has the permission
-     */
     public boolean hasPermission(String node, boolean b, String server, String world, boolean temporary) {
-        return hasPermission(server + "-" + world + "/" + node + (temporary ? "$a" : ""), b);
+        return hasPermission(buildNode(node).setValue(b).setServer(server).setWorld(world).setExpiry(temporary ? 10L : 0L).build());
     }
 
     /**
-     * Checks to see if the object inherits a certain permission
-     * @param node The permission node
-     * @param b If the node is true/false(negated)
-     * @return true if the user inherits the permission
+     * Check if the holder inherits a node
+     * @param node the node to check
+     * @return true if the holder inherits the node
      */
+    public boolean inheritsPermission(Node node) {
+        return hasPermission(getAllNodes(null), node);
+    }
+
     public boolean inheritsPermission(String node, boolean b) {
-        if (node.contains("/")) {
-            // Use other method
-            final String[] parts = Patterns.SERVER_DELIMITER.split(node, 2);
-            return inheritsPermission(parts[1], b, parts[0]);
-        }
-
-        return inheritsPermission(node, b, "global");
+        return inheritsPermission(buildNode(node).setValue(b).build());
     }
 
-    /**
-     * Checks to see the the object inherits a permission on a certain server
-     * @param node The permission node
-     * @param b If the node is true/false(negated)
-     * @param server The server
-     * @return true if the user inherits the permission
-     */
     public boolean inheritsPermission(String node, boolean b, String server) {
-        if (server.contains("-")) {
-            // Use other method
-            final String[] parts = Patterns.WORLD_DELIMITER.split(server, 2);
-            return inheritsPermission(node, b, parts[0], parts[1]);
-        }
-
-        final Map<String, Boolean> local = getLocalPermissions(server, null);
-        return hasPermission(local, node, b);
+        return inheritsPermission(buildNode(node).setValue(b).setServer(server).build());
     }
 
-    /**
-     * Checks to see the the object inherits a permission on a certain server
-     * @param node The permission node
-     * @param b If the node is true/false(negated)
-     * @param server The server
-     * @param world The world
-     * @return true if the user inherits the permission
-     */
     public boolean inheritsPermission(String node, boolean b, String server, String world) {
-        final Map<String, Boolean> local = getLocalPermissions(server, world, null);
-        return hasPermission(local, node, b);
+        return inheritsPermission(buildNode(node).setValue(b).setServer(server).setWorld(world).build());
     }
 
-    /**
-     * Checks to see if the object inherits a certain permission
-     * @param node The permission node
-     * @param b If the node is true/false(negated)
-     * @param temporary if the permission is temporary
-     * @return true if the user inherits the permission
-     */
     public boolean inheritsPermission(String node, boolean b, boolean temporary) {
-        return inheritsPermission(node + (temporary ? "$a" : ""), b);
+        return inheritsPermission(buildNode(node).setValue(b).setExpiry(temporary ? 10L : 0L).build());
     }
 
-    /**
-     * Checks to see if the object inherits a certain permission
-     * @param node The permission node
-     * @param b If the node is true/false(negated)
-     * @param server The server
-     * @param temporary if the permission is temporary
-     * @return true if the user inherits the permission
-     */
     public boolean inheritsPermission(String node, boolean b, String server, boolean temporary) {
-        return inheritsPermission(server + "/" + node + (temporary ? "$a" : ""), b);
+        return inheritsPermission(buildNode(node).setValue(b).setServer(server).setExpiry(temporary ? 10L : 0L).build());
     }
 
-    /**
-     * Checks to see if the object inherits a certain permission
-     * @param node The permission node
-     * @param b If the node is true/false(negated)
-     * @param server The server
-     * @param world The world
-     * @param temporary if the permission is temporary
-     * @return true if the user inherits the permission
-     */
     public boolean inheritsPermission(String node, boolean b, String server, String world, boolean temporary) {
-        return inheritsPermission(server + "-" + world + "/" + node + (temporary ? "$a" : ""), b);
+        return inheritsPermission(buildNode(node).setValue(b).setServer(server).setWorld(world).setExpiry(temporary ? 10L : 0L).build());
     }
 
-    /**
-     * Sets a permission for the object
-     * @param node The node to be set
-     * @param value What to set the node to - true/false(negated)
-     * @throws ObjectAlreadyHasException if the object already has the permission
-     */
-    public void setPermission(String node, boolean value) throws ObjectAlreadyHasException {
-        setPermission(node, value, null, null, 0L);
-    }
-
-    /**
-     * Sets a permission for the object
-     * @param node The node to set
-     * @param value What to set the node to - true/false(negated)
-     * @param server The server to set the permission on
-     * @throws ObjectAlreadyHasException if the object already has the permission
-     */
-    public void setPermission(String node, boolean value, String server) throws ObjectAlreadyHasException {
-        setPermission(node, value, server, null, 0L);
-    }
-
-    /**
-     * Sets a permission for the object
-     * @param node The node to set
-     * @param value What to set the node to - true/false(negated)
-     * @param server The server to set the permission on
-     * @param world The world to set the permission on
-     * @throws ObjectAlreadyHasException if the object already has the permission
-     */
-    public void setPermission(String node, boolean value, String server, String world) throws ObjectAlreadyHasException {
-        setPermission(node, value, server, world, 0L);
-    }
-
-    /**
-     * Sets a permission for the object
-     * @param node The node to set
-     * @param value What to set the node to - true/false(negated)
-     * @param expireAt The time in unixtime when the permission will expire
-     * @throws ObjectAlreadyHasException if the object already has the permission
-     */
-    public void setPermission(String node, boolean value, long expireAt) throws ObjectAlreadyHasException {
-        setPermission(node, value, null, null, expireAt);
-    }
-
-    /**
-     * Sets a permission for the object
-     * @param node The node to set
-     * @param value What to set the node to - true/false(negated)
-     * @param server The server to set the permission on
-     * @param expireAt The time in unixtime when the permission will expire
-     * @throws ObjectAlreadyHasException if the object already has the permission
-     */
-    public void setPermission(String node, boolean value, String server, long expireAt) throws ObjectAlreadyHasException {
-        setPermission(node, value, server, null, expireAt);
-    }
-
-    /**
-     * Sets a permission for the object
-     * @param node The node to set
-     * @param value What to set the node to - true/false(negated)
-     * @param server The server to set the permission on
-     * @param world The world to set the permission on
-     * @param expireAt The time in unixtime when the permission will expire
-     * @throws ObjectAlreadyHasException if the object already has the permission
-     */
-    public void setPermission(String node, boolean value, String server, String world, long expireAt) throws ObjectAlreadyHasException {
-        if (node.startsWith("global/")) node = node.replace("global/", "");
-
-        if (server != null && server.equals("")) server = null;
-        if (world != null && world.equals("")) world = null;
-
-        StringBuilder builder = new StringBuilder();
-
-        if (server != null) {
-            builder.append(server);
-
-            if (world != null) {
-                builder.append("-").append(world);
-            }
-            builder.append("/");
-        } else {
-            if (world != null) {
-                builder.append("global-").append(world).append("/");
-            }
-        }
-
-        builder.append(node);
-
-        if (expireAt != 0L) {
-            builder.append("$").append(expireAt);
-        }
-
-        final String finalNode = builder.toString();
-
-
-        if (hasPermission(finalNode, value)) {
+    public void setPermission(Node node) throws ObjectAlreadyHasException {
+        if (hasPermission(node)) {
             throw new ObjectAlreadyHasException();
         }
 
-        this.nodes.put(finalNode, value);
-        plugin.getApiProvider().fireEventAsync(new PermissionSetEvent(
-                new PermissionHolderLink(this), node, value, server, world, expireAt));
+        nodes.add(node);
+        plugin.getApiProvider().fireEventAsync(new PermissionNodeSetEvent(new PermissionHolderLink(this), node));
+    }
+
+    public void setPermission(String node, boolean value) throws ObjectAlreadyHasException {
+        setPermission(buildNode(node).setValue(value).build());
+    }
+
+    public void setPermission(String node, boolean value, String server) throws ObjectAlreadyHasException {
+        setPermission(buildNode(node).setValue(value).setServer(server).build());
+    }
+
+    public void setPermission(String node, boolean value, String server, String world) throws ObjectAlreadyHasException {
+        setPermission(buildNode(node).setValue(value).setServer(server).setWorld(world).build());
+    }
+
+    public void setPermission(String node, boolean value, long expireAt) throws ObjectAlreadyHasException {
+        setPermission(buildNode(node).setValue(value).setExpiry(expireAt).build());
+    }
+
+    public void setPermission(String node, boolean value, String server, long expireAt) throws ObjectAlreadyHasException {
+        setPermission(buildNode(node).setValue(value).setServer(server).setExpiry(expireAt).build());
+    }
+
+    public void setPermission(String node, boolean value, String server, String world, long expireAt) throws ObjectAlreadyHasException {
+        setPermission(buildNode(node).setValue(value).setServer(server).setWorld(world).setExpiry(expireAt).build());
     }
 
     /**
-     * Unsets a permission for the object
-     * @param node The node to be unset
-     * @param temporary if the permission being removed is temporary
-     * @throws ObjectLacksException if the node wasn't already set
+     * Unsets a permission node
+     * @param node the node to unset
+     * @throws ObjectLacksException if the holder doesn't have this node already
      */
-    public void unsetPermission(String node, boolean temporary) throws ObjectLacksException {
-        unsetPermission(node, null, null, temporary);
-    }
-
-    /**
-     * Unsets a permission for the object
-     * @param node The node to be unset
-     * @throws ObjectLacksException if the node wasn't already set
-     */
-    public void unsetPermission(String node) throws ObjectLacksException {
-        unsetPermission(node, null, null, false);
-    }
-
-    /**
-     * Unsets a permission for the object
-     * @param node The node to be unset
-     * @param server The server to unset the node on
-     * @throws ObjectLacksException if the node wasn't already set
-     */
-    public void unsetPermission(String node, String server) throws ObjectLacksException {
-        unsetPermission(node, server, null, false);
-    }
-
-    /**
-     * Unsets a permission for the object
-     * @param node The node to be unset
-     * @param server The server to unset the node on
-     * @param world The world to unset the node on
-     * @throws ObjectLacksException if the node wasn't already set
-     */
-    public void unsetPermission(String node, String server, String world) throws ObjectLacksException {
-        unsetPermission(node, server, world, false);
-    }
-
-    /**
-     * Unsets a permission for the object
-     * @param node The node to be unset
-     * @param server The server to unset the node on
-     * @param temporary if the permission being unset is temporary
-     * @throws ObjectLacksException if the node wasn't already set
-     */
-    public void unsetPermission(String node, String server, boolean temporary) throws ObjectLacksException {
-        unsetPermission(node, server, null, temporary);
-    }
-
-    /**
-     * Unsets a permission for the object
-     * @param node The node to be unset
-     * @param server The server to unset the node on
-     * @param world The world to unset the node on
-     * @param temporary if the permission being unset is temporary
-     * @throws ObjectLacksException if the node wasn't already set
-     */
-    public void unsetPermission(String node, String server, String world, boolean temporary) throws ObjectLacksException {
-        if (node.startsWith("global/")) node = node.replace("global/", "");
-
-        if (server != null && server.equals("")) server = null;
-        if (world != null && world.equals("")) world = null;
-
-        StringBuilder builder = new StringBuilder();
-
-        if (server != null) {
-            builder.append(server);
-
-            if (world != null) {
-                builder.append("-").append(world);
-            }
-            builder.append("/");
-        } else {
-            if (world != null) {
-                builder.append("global-").append(world).append("/");
-            }
-        }
-
-        builder.append(node);
-
-        final String finalNode = builder.toString();
-        Optional<String> match = Optional.empty();
-
-        if (temporary) {
-            match = this.nodes.keySet().stream()
-                    .filter(n -> n.contains("$"))
-                    .filter(n -> Patterns.TEMP_DELIMITER.split(n)[0].equalsIgnoreCase(finalNode))
-                    .findFirst();
-        } else {
-            if (this.nodes.containsKey(finalNode)) {
-                match = Optional.of(finalNode);
-            }
-        }
-
-        if (match.isPresent()) {
-            this.nodes.remove(match.get());
-            plugin.getApiProvider().fireEventAsync(new PermissionUnsetEvent(
-                    new PermissionHolderLink(this), node, server, world, temporary));
-            if (node.startsWith("group.")) {
-                plugin.getApiProvider().fireEventAsync(new GroupRemoveEvent(
-                        new PermissionHolderLink(this), Patterns.DOT.split(node, 2)[1], server, world, temporary));
-            }
-
-        } else {
+    public void unsetPermission(Node node) throws ObjectLacksException {
+        if (!hasPermission(node)) {
             throw new ObjectLacksException();
         }
+
+        nodes.remove(node);
+
+        if (node.isGroupNode()) {
+            plugin.getApiProvider().fireEventAsync(new GroupRemoveEvent(new PermissionHolderLink(this),
+                    node.getGroupName(), node.getServer().orElse(null), node.getWorld().orElse(null), node.isTemporary()));
+        } else {
+            plugin.getApiProvider().fireEventAsync(new PermissionNodeUnsetEvent(new PermissionHolderLink(this), node));
+        }
+    }
+
+    public void unsetPermission(String node, boolean temporary) throws ObjectLacksException {
+        unsetPermission(buildNode(node).setExpiry(temporary ? 10L : 0L).build());
+    }
+
+    public void unsetPermission(String node) throws ObjectLacksException {
+        unsetPermission(buildNode(node).build());
+    }
+
+    public void unsetPermission(String node, String server) throws ObjectLacksException {
+        unsetPermission(buildNode(node).setServer(server).build());
+    }
+
+    public void unsetPermission(String node, String server, String world) throws ObjectLacksException {
+        unsetPermission(buildNode(node).setServer(server).setWorld(world).build());
+    }
+
+    public void unsetPermission(String node, String server, boolean temporary) throws ObjectLacksException {
+        unsetPermission(buildNode(node).setServer(server).setExpiry(temporary ? 10L : 0L).build());
+    }
+
+    public void unsetPermission(String node, String server, String world, boolean temporary) throws ObjectLacksException {
+        unsetPermission(buildNode(node).setServer(server).setWorld(world).setExpiry(temporary ? 10L : 0L).build());
     }
 
     /**
-     * Gets the permissions and inherited permissions that apply to a specific server
-     * @param server The server to get nodes for
-     * @param world The world to get nodes for
-     * @param excludedGroups Groups that shouldn't be inherited (to prevent circular inheritance issues)
-     * @param possibleNodes A list of possible permission nodes for wildcard permission handling
-     * @return a {@link Map} of the permissions
+     * @return The temporary nodes held by the holder
      */
-    public Map<String, Boolean> getLocalPermissions(String server, String world, List<String> excludedGroups, List<String> possibleNodes) {
-        return getPermissions(server, world, excludedGroups, plugin.getConfiguration().getIncludeGlobalPerms(), possibleNodes);
+    public Set<Node> getTemporaryNodes() {
+        return nodes.stream().filter(Node::isTemporary).collect(Collectors.toSet());
+    }
+
+    @Deprecated
+    public Map<Map.Entry<String, Boolean>, Long> getTemporaryNodesLegacy() {
+        Map<Map.Entry<String, Boolean>, Long> m = new HashMap<>();
+
+        for (Node node : getTemporaryNodes()) {
+            m.put(new AbstractMap.SimpleEntry<>(node.getKey(), node.getValue()), node.getExpiryUnixTime());
+        }
+
+        return m;
     }
 
     /**
-     * Gets the permissions and inherited permissions that apply to a specific server
-     * @param server The server to get nodes for
-     * @param world The world to get nodes for
-     * @param excludedGroups Groups that shouldn't be inherited (to prevent circular inheritance issues)
-     * @return a {@link Map} of the permissions
+     * @return The permanent nodes held by the holder
      */
-    public Map<String, Boolean> getLocalPermissions(String server, String world, List<String> excludedGroups) {
-        return getPermissions(server, world, excludedGroups, plugin.getConfiguration().getIncludeGlobalPerms(), null);
-    }
-
-    /**
-     * Gets the permissions and inherited permissions that apply to a specific server
-     * @param server The server to get nodes for
-     * @param excludedGroups Groups that shouldn't be inherited (to prevent circular inheritance issues)
-     * @param possibleNodes A list of possible permission nodes for wildcard permission handling
-     * @return a {@link Map} of the permissions
-     */
-    public Map<String, Boolean> getLocalPermissions(String server, List<String> excludedGroups, List<String> possibleNodes) {
-        return getLocalPermissions(server, null, excludedGroups, possibleNodes);
-    }
-
-    /**
-     * Gets the permissions and inherited permissions that apply to a specific server
-     * @param server The server to get nodes for
-     * @param excludedGroups Groups that shouldn't be inherited (to prevent circular inheritance issues)
-     * @return a {@link Map} of the permissions
-     */
-    public Map<String, Boolean> getLocalPermissions(String server, List<String> excludedGroups) {
-        return getLocalPermissions(server, null, excludedGroups, null);
-    }
-
-    /**
-     * Processes the objects and returns the temporary ones.
-     * @return a map of temporary nodes
-     */
-    public Map<Map.Entry<String, Boolean>, Long> getTemporaryNodes() {
-        return this.nodes.entrySet().stream().filter(e -> e.getKey().contains("$")).map(e -> {
-            final String[] parts = Patterns.TEMP_DELIMITER.split(e.getKey());
-            final long expiry = Long.parseLong(parts[1]);
-            return new AbstractMap.SimpleEntry<Map.Entry<String, Boolean>, Long>(new AbstractMap.SimpleEntry<>(parts[0], e.getValue()), expiry);
-
-        }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-    /**
-     * Processes the objects and returns the non-temporary ones.
-     * @return a map of permanent nodes
-     */
-    public Map<String, Boolean> getPermanentNodes() {
-        return this.nodes.entrySet().stream().filter(e -> !e.getKey().contains("$"))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    public Set<Node> getPermanentNodes() {
+        return nodes.stream().filter(Node::isPermanent).collect(Collectors.toSet());
     }
 
     /**
@@ -535,384 +279,183 @@ public abstract class PermissionHolder {
      * @return true if permissions had expired and were removed
      */
     public boolean auditTemporaryPermissions() {
-        List<String> toExpire = this.nodes.keySet().stream()
-                .filter(s -> s.contains("$"))
-                .filter(s -> DateUtil.shouldExpire(Long.parseLong(Patterns.TEMP_DELIMITER.split(s)[1])))
-                .collect(Collectors.toList());
+        boolean work = false;
+        Iterator<Node> iterator = nodes.iterator();
 
-        toExpire.forEach(s -> {
-            plugin.getApiProvider().fireEventAsync(new PermissionExpireEvent(new PermissionHolderLink(this), s));
-            this.nodes.remove(s);
-        });
-        return !toExpire.isEmpty();
-    }
+        while (iterator.hasNext()) {
+            Node element = iterator.next();
+            if (element.hasExpired()) {
+                iterator.remove();
 
-    public Map<String, Boolean> convertTemporaryPerms() {
-        auditTemporaryPermissions();
-
-        Map<String, Boolean> nodes = new HashMap<>();
-        Map<String, Boolean> tempNodes = new HashMap<>();
-
-        for (Map.Entry<String, Boolean> e : this.nodes.entrySet()) {
-            if (e.getKey().contains("$")) {
-                tempNodes.put(e.getKey(), e.getValue());
-            } else {
-                nodes.put(e.getKey(), e.getValue());
+                work = true;
+                plugin.getApiProvider().fireEventAsync(new PermissionNodeExpireEvent(new PermissionHolderLink(this), element));
             }
         }
 
-        // temporary permissions override non-temporary permissions
-        tempNodes.entrySet().forEach(e -> nodes.put(stripTime(e.getKey()), e.getValue()));
-        return nodes;
+        return work;
     }
 
-    public Map<String, Boolean> getPermissions(String server, String world, List<String> excludedGroups, boolean includeGlobal, List<String> possibleNodes) {
-        return getPermissions(server, world, excludedGroups, includeGlobal, possibleNodes, true);
-    }
+    /**
+     * Gets all of the nodes that this holder has and inherits
+     * @param excludedGroups a list of groups to exclude
+     * @return a set of nodes
+     */
+    public Set<Node> getAllNodes(List<String> excludedGroups) {
+        Set<Node> all = ConcurrentHashMap.newKeySet();
+        all.addAll(nodes);
 
-    public Map<String, Boolean> getPermissions(String server, String world, List<String> excludedGroups, boolean includeGlobal, List<String> possibleNodes, boolean applyGroups) {
         if (excludedGroups == null) {
             excludedGroups = new ArrayList<>();
         }
 
-        excludedGroups.add(getObjectName());
+        excludedGroups.add(getObjectName().toLowerCase());
+
+        Set<String> parents = nodes.stream()
+                .filter(Node::isGroupNode)
+                .map(Node::getGroupName)
+                .collect(Collectors.toSet());
+
+        for (String parent : parents) {
+            Group group = plugin.getGroupManager().get(parent);
+            if (group == null) {
+                continue;
+            }
+
+            if (excludedGroups.contains(group.getObjectName())) {
+                continue;
+            }
+
+            inherited:
+            for (Node inherited : group.getAllNodes(excludedGroups)) {
+                for (Node existing : all) {
+                    if (existing.almostEquals(inherited)) {
+                        continue inherited;
+                    }
+                }
+
+                all.add(inherited);
+            }
+        }
+
+        return all;
+    }
+
+    /*
+     * Don't use these methods, only here for compat reasons
+     */
+    public Map<String, Boolean> getLocalPermissions(String server, String world, List<String> excludedGroups, List<String> possibleNodes) {
+        return getPermissions(server, world, null, plugin.getConfiguration().getIncludeGlobalPerms(), possibleNodes, true);
+    }
+
+    public Map<String, Boolean> getLocalPermissions(String server, String world, List<String> excludedGroups) {
+        return getPermissions(server, world, null, plugin.getConfiguration().getIncludeGlobalPerms(), null, true);
+    }
+
+    public Map<String, Boolean> getLocalPermissions(String server, List<String> excludedGroups, List<String> possibleNodes) {
+        return getLocalPermissions(server, null, excludedGroups, possibleNodes);
+    }
+
+    public Map<String, Boolean> getLocalPermissions(String server, List<String> excludedGroups) {
+        return getLocalPermissions(server, null, excludedGroups, null);
+    }
+
+    /**
+     * Convert the holders nodes into a Map of permissions to be applied on the platform
+     * @param server the server
+     * @param world the world
+     * @param extraContext any extra context to filter by
+     * @param includeGlobal whether to include global nodes
+     * @param possibleNodes a list of possible permissions for resolving wildcards
+     * @param applyGroups if inherited group permissions should be included
+     * @return a map of permissions
+     */
+    public Map<String, Boolean> getPermissions(String server, String world, Map<String, String> extraContext, boolean includeGlobal, List<String> possibleNodes, boolean applyGroups) {
         Map<String, Boolean> perms = new HashMap<>();
-
-        if (server == null || server.equals("")) {
-            server = "global";
-        }
-
-        if (world != null && world.equalsIgnoreCase("")) {
-            world = null;
-        }
-
-        /*
-        Priority:
-
-        1. server+world specific nodes
-        2. server specific nodes
-        3. user nodes
-        4. server+world specific group nodes
-        5. server specific group nodes
-        6. group nodes
-        */
-
-        final Map<String, Boolean> serverWorldSpecificNodes = new HashMap<>();
-        final Map<String, Boolean> serverSpecificNodes = new HashMap<>();
-        final Map<String, Boolean> userNodes = new HashMap<>();
-        final Map<String, Boolean> serverWorldSpecificGroups = new HashMap<>();
-        final Map<String, Boolean> serverSpecificGroups = new HashMap<>();
-        final Map<String, Boolean> groupNodes = new HashMap<>();
-
-        // Sorts the permissions and puts them into a priority order
-        for (Map.Entry<String, Boolean> node : convertTemporaryPerms().entrySet()) {
-            serverSpecific:
-            if (node.getKey().contains("/")) {
-                String[] parts = Patterns.SERVER_DELIMITER.split(node.getKey(), 2);
-                // 0=server(+world)   1=node
-
-                // WORLD SPECIFIC
-                if (parts[0].contains("-")) {
-                    String[] serverParts = Patterns.WORLD_DELIMITER.split(parts[0], 2);
-                    // 0=server   1=world
-
-                    if ((!serverParts[0].equalsIgnoreCase("global") || !includeGlobal) && (!matches(server, serverParts[0]))) {
-                        // GLOBAL AND UNWANTED OR SERVER SPECIFIC BUT DOES NOT APPLY :(((
-                        continue;
-                    }
-
-                    if (world != null && !matches(world, serverParts[1])) {
-                        // WORLD SPECIFIC BUT DOES NOT APPLY
-                        continue;
-                    }
-
-                    if (Patterns.GROUP_MATCH.matcher(parts[1]).matches()) {
-                        // SERVER+WORLD SPECIFIC AND GROUP
-                        serverWorldSpecificGroups.put(node.getKey(), node.getValue());
-                        continue;
-                    }
-
-                    // SERVER+WORLD SPECIFIC
-                    serverWorldSpecificNodes.put(node.getKey(), node.getValue());
-                    continue;
-                }
-
-                if (parts[0].equalsIgnoreCase("global")) {
-                    // REGULAR
-                    break serverSpecific;
-                }
-
-                if (!matches(server, parts[0])) {
-                    // SERVER SPECIFIC BUT DOES NOT APPLY
-                    continue;
-                }
-
-                if (Patterns.GROUP_MATCH.matcher(parts[1]).matches()) {
-                    // SERVER SPECIFIC AND GROUP
-                    serverSpecificGroups.put(node.getKey(), node.getValue());
-                    continue;
-                }
-
-                // SERVER SPECIFIC
-                serverSpecificNodes.put(node.getKey(), node.getValue());
-                continue;
-            }
-
-            // Skip adding global permissions if they are not requested
-            if (!includeGlobal) continue;
-
-            // Could be here if the server was set to global.
-            String n = node.getKey();
-            if (n.contains("/")) {
-                n = Patterns.SERVER_DELIMITER.split(n, 2)[1];
-            }
-
-            if (Patterns.GROUP_MATCH.matcher(n).matches()) {
-                // GROUP
-                groupNodes.put(n, node.getValue());
-                continue;
-            }
-
-            // JUST NORMAL
-            userNodes.put(n, node.getValue());
-        }
-
-        // If a group is negated at a higher priority, the group should not then be applied at a lower priority
-        serverWorldSpecificGroups.entrySet().stream().filter(node -> !node.getValue()).forEach(node -> {
-            groupNodes.remove(node.getKey());
-            groupNodes.remove(Patterns.SERVER_DELIMITER.split(node.getKey(), 2)[1]);
-            serverSpecificGroups.remove(node.getKey());
-            serverSpecificGroups.remove(Patterns.SERVER_DELIMITER.split(node.getKey(), 2)[1]);
-            serverSpecificGroups.remove(Patterns.WORLD_DELIMITER.split(node.getKey(), 2)[0] + "/" + Patterns.SERVER_DELIMITER.split(node.getKey(), 2)[1]);
-        });
-        serverSpecificGroups.entrySet().stream().filter(node -> !node.getValue()).forEach(node -> {
-            groupNodes.remove(node.getKey());
-            groupNodes.remove(Patterns.SERVER_DELIMITER.split(node.getKey(), 2)[1]);
-        });
+        SortedSet<Node> allNodes;
 
         if (applyGroups) {
-            // Apply lowest priority: groupNodes
-            for (Map.Entry<String, Boolean> groupNode : groupNodes.entrySet()) {
-                // Add the actual group perm node, so other plugins can hook
-                perms.put(groupNode.getKey(), groupNode.getValue());
-
-                // Don't add negated groups
-                if (!groupNode.getValue()) continue;
-
-                String groupName = Patterns.DOT.split(groupNode.getKey(), 2)[1];
-                if (!excludedGroups.contains(groupName)) {
-                    Group group = plugin.getGroupManager().get(groupName);
-                    if (group != null) {
-                        perms.putAll(group.getLocalPermissions(server, excludedGroups));
-                    } else {
-                        plugin.getLog().warn("Error whilst refreshing the permissions of '" + objectName + "'." +
-                                "\n The group '" + groupName + "' is not loaded.");
-                    }
-                }
-            }
-
-            applyShorthandIfEnabled(perms);
-
-            // Apply next priorities: serverSpecificGroups and then serverWorldSpecificGroups
-            for (Map<String, Boolean> m : Arrays.asList(serverSpecificGroups, serverWorldSpecificGroups)) {
-                for (Map.Entry<String, Boolean> groupNode : m.entrySet()) {
-                    final String rawNode = Patterns.SERVER_DELIMITER.split(groupNode.getKey())[1];
-
-                    // Add the actual group perm node, so other plugins can hook
-                    perms.put(rawNode, groupNode.getValue());
-
-                    // Don't add negated groups
-                    if (!groupNode.getValue()) continue;
-
-                    String groupName = Patterns.DOT.split(rawNode, 2)[1];
-                    if (!excludedGroups.contains(groupName)) {
-                        Group group = plugin.getGroupManager().get(groupName);
-                        if (group != null) {
-                            perms.putAll(group.getLocalPermissions(server, excludedGroups));
-                        } else {
-                            plugin.getLog().warn("Error whilst refreshing the permissions of '" + objectName + "'." +
-                                    "\n The group '" + groupName + "' is not loaded.");
-                        }
-                    }
-                }
-                applyShorthandIfEnabled(perms);
-            }
+            allNodes = sort(getAllNodes(null), true);
+        } else {
+            allNodes = sort(nodes, true);
         }
 
-        // Apply next priority: userNodes
-        perms.putAll(userNodes);
-        applyShorthandIfEnabled(perms);
-
-        // Apply final priorities: serverSpecificNodes and then serverWorldSpecificNodes
-        for (Map<String, Boolean> m : Arrays.asList(serverSpecificNodes, serverWorldSpecificNodes)) {
-            for (Map.Entry<String, Boolean> node : m.entrySet()) {
-                final String rawNode = Patterns.SERVER_DELIMITER.split(node.getKey())[1];
-                perms.put(rawNode, node.getValue());
+        for (Node node : allNodes) {
+            if (!node.shouldApplyOnServer(server, includeGlobal, plugin.getConfiguration().getApplyRegex())) {
+                continue;
             }
-            applyShorthandIfEnabled(perms);
-        }
 
-        if (plugin.getConfiguration().getApplyRegex()) {
-            if (possibleNodes != null && !possibleNodes.isEmpty()) {
-                perms =  applyRegex(perms, possibleNodes);
-            } else {
-                perms =  applyRegex(perms, plugin.getPossiblePermissions());
+            if (!node.shouldApplyOnWorld(world, includeGlobal, plugin.getConfiguration().getApplyRegex())) {
+                continue;
             }
-        }
 
-        applyShorthandIfEnabled(perms);
+            if (!node.shouldApplyWithContext(extraContext)) {
+                continue;
+            }
 
-        if (plugin.getConfiguration().getApplyWildcards()) {
-            if (possibleNodes != null && !possibleNodes.isEmpty()) {
-                perms =  applyWildcards(perms, possibleNodes);
-            } else {
-                perms =  applyWildcards(perms, plugin.getPossiblePermissions());
+            perms.put(node.getPermission(), node.getValue());
+
+            if (plugin.getConfiguration().getApplyShorthand()) {
+                node.resolveShorthand().stream()
+                        .filter(s -> !perms.containsKey(s))
+                        .forEach(s -> perms.put(s, node.getValue()));
+            }
+
+            if (plugin.getConfiguration().getApplyWildcards()) {
+                node.resolveWildcard(possibleNodes).stream()
+                        .filter(s -> !perms.containsKey(s))
+                        .forEach(s -> perms.put(s, node.getValue()));
             }
         }
 
         return perms;
     }
 
-    private boolean matches(String entry, String possibleRegex) {
-        if (possibleRegex.toLowerCase().startsWith("r=") && plugin.getConfiguration().getApplyRegex()) {
-            Pattern p = Patterns.compile(possibleRegex.substring(2));
-            if (p == null) {
-                return false;
+    public static SortedSet<Node> sort(Set<Node> toSort, boolean reversed) {
+        TreeSet<Node> set = new TreeSet<>(reversed ? PRIORITY_COMPARATOR.reversed() : PRIORITY_COMPARATOR);
+        set.addAll(toSort);
+        return set;
+    }
+
+    private static final PriorityComparator PRIORITY_COMPARATOR = new PriorityComparator();
+    private static class PriorityComparator implements Comparator<Node> {
+
+        @Override
+        public int compare(Node o1, Node o2) {
+            if (takesPriority(o1, o2)) {
+                return 1;
             }
-            return p.matcher(entry).matches();
+
+            if (takesPriority(o2, o1)) {
+                return -1;
+            }
+
+            return 1;
         }
 
-        if (possibleRegex.startsWith("(") && possibleRegex.endsWith(")") && possibleRegex.contains("|")) {
-            final String bits = possibleRegex.substring(1, possibleRegex.length() - 1);
-            String[] parts = Patterns.VERTICAL_BAR.split(bits);
+        public boolean takesPriority(Node target, Node over) {
+            if (target.isTemporary() && !over.isTemporary()) {
+                return true;
+            }
 
-            for (String s : parts) {
-                if (s.equalsIgnoreCase(entry)) {
+            if (target.isWorldSpecific() && !over.isWorldSpecific()) {
+                return true;
+            }
+
+            if (target.isServerSpecific() && !over.isServerSpecific()) {
+                return true;
+            }
+
+            if (!target.isWildcard() && over.isWildcard()) {
+                return true;
+            }
+
+            if (target.isWildcard() && over.isWildcard()) {
+                if (target.getWildcardLevel() > over.getWildcardLevel()) {
                     return true;
                 }
             }
 
             return false;
         }
-
-        return entry.equalsIgnoreCase(possibleRegex);
-    }
-
-    private Map<String, Boolean> applyRegex(Map<String, Boolean> input, List<String> possibleNodes) {
-        for (Map.Entry<String, Boolean> e : input.entrySet()) {
-            if (!e.getKey().startsWith("r=") && !e.getKey().startsWith("R=")) {
-                continue;
-            }
-
-            final Pattern node = Patterns.compile(e.getKey().substring(2));
-            if (node == null) continue;
-            possibleNodes.stream()
-                    .filter(n -> node.matcher(n).matches())
-                    .filter(n -> !input.containsKey(n))
-                    .forEach(n -> input.put(n, e.getValue()));
-        }
-
-        return input;
-    }
-
-    // TODO Support the "Sponge way" of doing wildcards
-    private static Map<String, Boolean> applyWildcards(Map<String, Boolean> input, List<String> possibleNodes) {
-        SortedMap<Integer, Map<String, Boolean>> wildcards = new TreeMap<>(Collections.reverseOrder());
-        for (Map.Entry<String, Boolean> e : input.entrySet()) {
-            if (e.getKey().equals("*") || e.getKey().equals("'*'")) {
-                wildcards.put(0, Collections.singletonMap("*", e.getValue()));
-                continue;
-            }
-
-            if (!e.getKey().endsWith(".*")) {
-                continue;
-            }
-
-            final String node = e.getKey().substring(0, e.getKey().length() - 2);
-            final String[] parts = Patterns.DOT.split(node);
-
-            if (!wildcards.containsKey(parts.length)) {
-                wildcards.put(parts.length, new HashMap<>());
-            }
-
-            wildcards.get(parts.length).put(node, e.getValue());
-        }
-
-        for (Map.Entry<Integer, Map<String, Boolean>> e : wildcards.entrySet()) {
-            if (e.getKey() == 0) {
-                // Apply all permissions
-                possibleNodes.stream()
-                        .filter(n -> !input.containsKey(n)) // Don't override existing nodes
-                        .forEach(n -> input.put(n, e.getValue().get("*")));
-                break;
-            }
-
-            for (Map.Entry<String, Boolean> wc : e.getValue().entrySet()) {
-                possibleNodes.stream()
-                        .filter(n -> n.startsWith(wc.getKey() + ".")) // Only nodes that match the wildcard are applied
-                        .filter(n -> !input.containsKey(n)) // Don't override existing nodes
-                        .forEach(n -> input.put(n, wc.getValue()));
-            }
-        }
-
-        return input;
-    }
-
-    private void applyShorthandIfEnabled(Map<String, Boolean> map) {
-        if (plugin.getConfiguration().getApplyShorthand()) {
-            applyShorthand(map);
-        }
-    }
-
-    private static Map<String, Boolean> applyShorthand(Map<String, Boolean> input) {
-        for (Map.Entry<String, Boolean> e : input.entrySet()) {
-            if (!Patterns.SHORTHAND_NODE.matcher(e.getKey()).find()) {
-                continue;
-            }
-
-            if (!e.getKey().contains(".")) {
-                continue;
-            }
-
-            String[] parts = Patterns.DOT.split(e.getKey());
-            List<Set<String>> nodeParts = new ArrayList<>();
-
-            for (String s : parts) {
-                if ((!s.startsWith("(") || !s.endsWith(")")) || !s.contains("|")) {
-                    nodeParts.add(Collections.singleton(s));
-                    continue;
-                }
-
-                final String bits = s.substring(1, s.length() - 1);
-                nodeParts.add(new HashSet<>(Arrays.asList(Patterns.VERTICAL_BAR.split(bits))));
-            }
-
-            Set<String> nodes = new HashSet<>();
-            for (Set<String> set : nodeParts) {
-                final Set<String> newNodes = new HashSet<>();
-                if (nodes.isEmpty()) {
-                    newNodes.addAll(set);
-                } else {
-                    nodes.forEach(str -> newNodes.addAll(set.stream()
-                            .map(add -> str + "." + add)
-                            .collect(Collectors.toList()))
-                    );
-                }
-                nodes = newNodes;
-            }
-
-            nodes.stream()
-                    .filter(n -> !input.containsKey(n)) // Don't override existing nodes
-                    .forEach(n -> input.put(n, e.getValue()));
-        }
-
-        return input;
-    }
-
-    private static String stripTime(String s) {
-        if (s.contains("$")) {
-            return Patterns.TEMP_DELIMITER.split(s)[0];
-        }
-        return s;
     }
 }

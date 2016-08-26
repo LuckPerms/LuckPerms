@@ -24,15 +24,15 @@ package me.lucko.luckperms.api.implementation.internal;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
+import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.PermissionHolder;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static me.lucko.luckperms.api.implementation.internal.Utils.*;
+import static me.lucko.luckperms.core.PermissionHolder.convertToLegacy;
 
 /**
  * Provides a link between {@link PermissionHolder} and {@link me.lucko.luckperms.core.PermissionHolder}
@@ -50,8 +50,23 @@ public class PermissionHolderLink implements PermissionHolder {
     }
 
     @Override
+    public Set<Node> getPermissionNodes() {
+        return Collections.unmodifiableSet(master.getNodes());
+    }
+
+    @Override
+    public Set<Node> getAllNodes() {
+        return Collections.unmodifiableSet(master.getAllNodes(null));
+    }
+
+    @Override
     public Map<String, Boolean> getNodes() {
-        return Collections.unmodifiableMap(master.getNodes());
+        return convertToLegacy(master.getNodes());
+    }
+
+    @Override
+    public boolean hasPermission(@NonNull Node node) {
+        return master.hasPermission(node);
     }
 
     @Override
@@ -85,6 +100,11 @@ public class PermissionHolderLink implements PermissionHolder {
     }
 
     @Override
+    public boolean inheritsPermission(@NonNull Node node) {
+        return master.inheritsPermission(node);
+    }
+
+    @Override
     public boolean inheritsPermission(@NonNull String node, @NonNull boolean b) {
         return master.inheritsPermission(node, b);
     }
@@ -115,6 +135,11 @@ public class PermissionHolderLink implements PermissionHolder {
     }
 
     @Override
+    public void setPermission(@NonNull Node node) throws ObjectAlreadyHasException {
+        master.setPermission(node);
+    }
+
+    @Override
     public void setPermission(@NonNull String node, @NonNull boolean value) throws ObjectAlreadyHasException {
         master.setPermission(checkNode(node), value);
     }
@@ -142,6 +167,11 @@ public class PermissionHolderLink implements PermissionHolder {
     @Override
     public void setPermission(@NonNull String node, @NonNull boolean value, @NonNull String server, @NonNull String world, @NonNull long expireAt) throws ObjectAlreadyHasException {
         master.setPermission(checkNode(node), value, checkServer(server), world, checkTime(expireAt));
+    }
+
+    @Override
+    public void unsetPermission(@NonNull Node node) throws ObjectLacksException {
+        master.unsetPermission(node);
     }
 
     @Override
@@ -195,12 +225,33 @@ public class PermissionHolderLink implements PermissionHolder {
     }
 
     @Override
+    public Map<String, Boolean> getPermissions(String server, String world, Map<String, String> extraContext, boolean includeGlobal, List<String> possibleNodes, boolean applyGroups) {
+        return master.getPermissions(server, world, extraContext, includeGlobal, possibleNodes, applyGroups);
+    }
+
+    @Override
     public Map<Map.Entry<String, Boolean>, Long> getTemporaryNodes() {
+        Map<Map.Entry<String, Boolean>, Long> m = new HashMap<>();
+
+        for (Node node : master.getTemporaryNodes()) {
+            m.put(new AbstractMap.SimpleEntry<>(node.getKey(), node.getValue()), node.getExpiryUnixTime());
+        }
+
+        return m;
+    }
+
+    @Override
+    public Set<Node> getTemporaryPermissionNodes() {
         return master.getTemporaryNodes();
     }
 
     @Override
     public Map<String, Boolean> getPermanentNodes() {
+        return convertToLegacy(master.getPermanentNodes());
+    }
+
+    @Override
+    public Set<Node> getPermanentPermissionNodes() {
         return master.getPermanentNodes();
     }
 

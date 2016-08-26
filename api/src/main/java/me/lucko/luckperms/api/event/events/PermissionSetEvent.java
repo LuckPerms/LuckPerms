@@ -30,7 +30,9 @@ import java.util.Map;
 
 /**
  * Called whenever a user or group has a permission set.
+ * @deprecated in favour of {@link PermissionNodeSetEvent}
  */
+@Deprecated
 public class PermissionSetEvent extends AbstractPermissionAddEvent {
 
     private final String node;

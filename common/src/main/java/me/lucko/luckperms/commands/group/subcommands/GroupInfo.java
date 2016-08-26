@@ -43,8 +43,8 @@ public class GroupInfo extends SubCommand<Group> {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
         Message.GROUP_INFO.send(sender,
                 group.getName(),
-                group.getPermanentNodes().keySet().size(),
-                group.getTemporaryNodes().keySet().size(),
+                group.getPermanentNodes().size(),
+                group.getTemporaryNodes().size(),
                 label,
                 group.getName()
         );

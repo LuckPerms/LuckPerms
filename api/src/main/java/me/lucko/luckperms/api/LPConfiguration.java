@@ -43,12 +43,16 @@ public interface LPConfiguration {
 
     /**
      * @return the default group, in a node representation
+     * @deprecated as of 1.6, the default group is always "default"
      */
+    @Deprecated
     String getDefaultGroupNode();
 
     /**
      * @return the name of the default group
+     * @deprecated as of 1.6, the default group is always "default"
      */
+    @Deprecated
     String getDefaultGroupName();
 
     /**

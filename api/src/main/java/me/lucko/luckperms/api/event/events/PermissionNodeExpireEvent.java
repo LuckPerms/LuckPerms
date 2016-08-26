@@ -22,24 +22,16 @@
 
 package me.lucko.luckperms.api.event.events;
 
+import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.PermissionHolder;
-import me.lucko.luckperms.api.event.AbstractPermissionRemoveEvent;
+import me.lucko.luckperms.api.event.AbstractPermissionEvent;
 
 /**
- * Called whenever a user or group has a permission unset.
- * @deprecated in favour of {@link PermissionNodeUnsetEvent}
+ * Called when a temporary permission node expires
+ * @since 1.6
  */
-@Deprecated
-public class PermissionUnsetEvent extends AbstractPermissionRemoveEvent {
-
-    private final String node;
-
-    public PermissionUnsetEvent(PermissionHolder target, String node, String server, String world, boolean temporary) {
-        super("Permission Unset Event", target, server, world, temporary);
-        this.node = node;
-    }
-
-    public String getNode() {
-        return node;
+public class PermissionNodeExpireEvent extends AbstractPermissionEvent {
+    public PermissionNodeExpireEvent(PermissionHolder target, Node node) {
+        super("Permission Node Expire Event", target, node);
     }
 }
