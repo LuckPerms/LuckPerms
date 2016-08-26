@@ -547,7 +547,7 @@ public abstract class PermissionHolder {
         return !toExpire.isEmpty();
     }
 
-    private Map<String, Boolean> convertTemporaryPerms() {
+    public Map<String, Boolean> convertTemporaryPerms() {
         auditTemporaryPermissions();
 
         Map<String, Boolean> nodes = new HashMap<>();
