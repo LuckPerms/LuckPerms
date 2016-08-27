@@ -31,7 +31,6 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.InsertOneOptions;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.api.LogEntry;
-import me.lucko.luckperms.core.PermissionHolder;
 import me.lucko.luckperms.data.Log;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.groups.GroupManager;
@@ -46,7 +45,7 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
-import static me.lucko.luckperms.core.PermissionHolder.convertToLegacy;
+import static me.lucko.luckperms.core.PermissionHolder.exportToLegacy;
 
 @SuppressWarnings("unchecked")
 public class MongoDBDatastore extends Datastore {
@@ -430,7 +429,7 @@ public class MongoDBDatastore extends Datastore {
                 .append("primaryGroup", user.getPrimaryGroup());
 
         Document perms = new Document();
-        for (Map.Entry<String, Boolean> e : convert(convertToLegacy(user.getNodes())).entrySet()) {
+        for (Map.Entry<String, Boolean> e : convert(exportToLegacy(user.getNodes())).entrySet()) {
             perms.append(e.getKey(), e.getValue());
         }
 
@@ -442,7 +441,7 @@ public class MongoDBDatastore extends Datastore {
         Document main = new Document("_id", group.getName());
 
         Document perms = new Document();
-        for (Map.Entry<String, Boolean> e : convert(convertToLegacy(group.getNodes())).entrySet()) {
+        for (Map.Entry<String, Boolean> e : convert(exportToLegacy(group.getNodes())).entrySet()) {
             perms.append(e.getKey(), e.getValue());
         }
 

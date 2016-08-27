@@ -103,7 +103,7 @@ class VaultChatHook extends Chat {
         if (node.equals("")) return defaultValue;
         node = escapeCharacters(node);
 
-        for (Map.Entry<String, Boolean> e : holder.getPermissions("global", world, null, true, Collections.emptyList(), false).entrySet()) {
+        for (Map.Entry<String, Boolean> e : holder.exportNodes("global", world, null, true, false, Collections.emptyList()).entrySet()) {
             if (!e.getValue()) continue;
 
             String[] parts = Patterns.DOT.split(e.getKey(), 3);
@@ -132,7 +132,7 @@ class VaultChatHook extends Chat {
         if (node.equals("")) return defaultValue;
         node = escapeCharacters(node);
 
-        for (Map.Entry<String, Boolean> e : holder.getPermissions("global", world, null, true, Collections.emptyList(), false).entrySet()) {
+        for (Map.Entry<String, Boolean> e : holder.exportNodes("global", world, null, true, false, Collections.emptyList()).entrySet()) {
             if (!e.getValue()) continue;
 
             String[] parts = Patterns.DOT.split(e.getKey(), 3);
@@ -161,7 +161,7 @@ class VaultChatHook extends Chat {
         if (node.equals("")) return defaultValue;
         node = escapeCharacters(node);
 
-        for (Map.Entry<String, Boolean> e : holder.getPermissions("global", world, null, true, Collections.emptyList(), false).entrySet()) {
+        for (Map.Entry<String, Boolean> e : holder.exportNodes("global", world, null, true, false, Collections.emptyList()).entrySet()) {
             if (!e.getValue()) continue;
 
             String[] parts = Patterns.DOT.split(e.getKey(), 3);
@@ -190,7 +190,7 @@ class VaultChatHook extends Chat {
         if (node.equals("")) return defaultValue;
         node = escapeCharacters(node);
 
-        for (Map.Entry<String, Boolean> e : holder.getPermissions("global", world, null, true, Collections.emptyList(), false).entrySet()) {
+        for (Map.Entry<String, Boolean> e : holder.exportNodes("global", world, null, true, false, Collections.emptyList()).entrySet()) {
             if (!e.getValue()) continue;
 
             String[] parts = Patterns.DOT.split(e.getKey(), 3);

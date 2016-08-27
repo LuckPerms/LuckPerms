@@ -26,18 +26,19 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.PermissionHolder;
+import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.*;
 
 import static me.lucko.luckperms.api.implementation.internal.Utils.*;
-import static me.lucko.luckperms.core.PermissionHolder.convertToLegacy;
+import static me.lucko.luckperms.core.PermissionHolder.exportToLegacy;
 
 /**
  * Provides a link between {@link PermissionHolder} and {@link me.lucko.luckperms.core.PermissionHolder}
  */
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "deprecation"})
 @AllArgsConstructor
 public class PermissionHolderLink implements PermissionHolder {
 
@@ -50,8 +51,18 @@ public class PermissionHolderLink implements PermissionHolder {
     }
 
     @Override
-    public Set<Node> getPermissionNodes() {
+    public SortedSet<Node> getPermissions() {
+        return Collections.unmodifiableSortedSet(master.getPermissions());
+    }
+
+    @Override
+    public Set<Node> getEnduringPermissions() {
         return Collections.unmodifiableSet(master.getNodes());
+    }
+
+    @Override
+    public Set<Node> getTransientPermissions() {
+        return Collections.unmodifiableSet(master.getTransientNodes());
     }
 
     @Override
@@ -61,12 +72,17 @@ public class PermissionHolderLink implements PermissionHolder {
 
     @Override
     public Map<String, Boolean> getNodes() {
-        return convertToLegacy(master.getNodes());
+        return exportToLegacy(master.getNodes());
     }
 
     @Override
-    public boolean hasPermission(@NonNull Node node) {
-        return master.hasPermission(node);
+    public Tristate hasPermission(@NonNull Node node) {
+        return master.hasPermission(node, false);
+    }
+
+    @Override
+    public Tristate hasTransientPermission(@NonNull Node node) {
+        return master.hasPermission(node, true);
     }
 
     @Override
@@ -100,7 +116,7 @@ public class PermissionHolderLink implements PermissionHolder {
     }
 
     @Override
-    public boolean inheritsPermission(@NonNull Node node) {
+    public Tristate inheritsPermission(@NonNull Node node) {
         return master.inheritsPermission(node);
     }
 
@@ -140,6 +156,11 @@ public class PermissionHolderLink implements PermissionHolder {
     }
 
     @Override
+    public void setTransientPermission(@NonNull Node node) throws ObjectAlreadyHasException {
+        master.setTransientPermission(node);
+    }
+
+    @Override
     public void setPermission(@NonNull String node, @NonNull boolean value) throws ObjectAlreadyHasException {
         master.setPermission(checkNode(node), value);
     }
@@ -172,6 +193,11 @@ public class PermissionHolderLink implements PermissionHolder {
     @Override
     public void unsetPermission(@NonNull Node node) throws ObjectLacksException {
         master.unsetPermission(node);
+    }
+
+    @Override
+    public void unsetTransientPermission(@NonNull Node node) throws ObjectLacksException {
+        master.unsetTransientPermission(node);
     }
 
     @Override
@@ -226,7 +252,7 @@ public class PermissionHolderLink implements PermissionHolder {
 
     @Override
     public Map<String, Boolean> getPermissions(String server, String world, Map<String, String> extraContext, boolean includeGlobal, List<String> possibleNodes, boolean applyGroups) {
-        return master.getPermissions(server, world, extraContext, includeGlobal, possibleNodes, applyGroups);
+        return master.exportNodes(server, world, extraContext, includeGlobal, applyGroups, possibleNodes);
     }
 
     @Override
@@ -247,7 +273,7 @@ public class PermissionHolderLink implements PermissionHolder {
 
     @Override
     public Map<String, Boolean> getPermanentNodes() {
-        return convertToLegacy(master.getPermanentNodes());
+        return exportToLegacy(master.getPermanentNodes());
     }
 
     @Override

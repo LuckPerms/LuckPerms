@@ -28,7 +28,6 @@ import lombok.Cleanup;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.constants.Constants;
-import me.lucko.luckperms.core.PermissionHolder;
 import me.lucko.luckperms.data.Log;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.storage.Datastore;
@@ -188,7 +187,7 @@ public class FlatfileDatastore extends Datastore {
                 writer.name("primaryGroup").value(user.getPrimaryGroup());
                 writer.name("perms");
                 writer.beginObject();
-                for (Map.Entry<String, Boolean> e : convertToLegacy(user.getNodes()).entrySet()) {
+                for (Map.Entry<String, Boolean> e : exportToLegacy(user.getNodes()).entrySet()) {
                     writer.name(e.getKey()).value(e.getValue().booleanValue());
                 }
                 writer.endObject();
@@ -229,7 +228,7 @@ public class FlatfileDatastore extends Datastore {
                 writer.name("primaryGroup").value(user.getPrimaryGroup());
                 writer.name("perms");
                 writer.beginObject();
-                for (Map.Entry<String, Boolean> e : convertToLegacy(user.getNodes()).entrySet()) {
+                for (Map.Entry<String, Boolean> e : exportToLegacy(user.getNodes()).entrySet()) {
                     writer.name(e.getKey()).value(e.getValue().booleanValue());
                 }
                 writer.endObject();
@@ -295,7 +294,7 @@ public class FlatfileDatastore extends Datastore {
             writer.name("primaryGroup").value(user.getPrimaryGroup());
             writer.name("perms");
             writer.beginObject();
-            for (Map.Entry<String, Boolean> e : convertToLegacy(user.getNodes()).entrySet()) {
+            for (Map.Entry<String, Boolean> e : exportToLegacy(user.getNodes()).entrySet()) {
                 writer.name(e.getKey()).value(e.getValue().booleanValue());
             }
             writer.endObject();
@@ -323,7 +322,7 @@ public class FlatfileDatastore extends Datastore {
                 writer.name("name").value(group.getName());
                 writer.name("perms");
                 writer.beginObject();
-                for (Map.Entry<String, Boolean> e : convertToLegacy(group.getNodes()).entrySet()) {
+                for (Map.Entry<String, Boolean> e : exportToLegacy(group.getNodes()).entrySet()) {
                     writer.name(e.getKey()).value(e.getValue().booleanValue());
                 }
                 writer.endObject();
@@ -415,7 +414,7 @@ public class FlatfileDatastore extends Datastore {
             writer.name("name").value(group.getName());
             writer.name("perms");
             writer.beginObject();
-            for (Map.Entry<String, Boolean> e : convertToLegacy(group.getNodes()).entrySet()) {
+            for (Map.Entry<String, Boolean> e : exportToLegacy(group.getNodes()).entrySet()) {
                 writer.name(e.getKey()).value(e.getValue().booleanValue());
             }
             writer.endObject();

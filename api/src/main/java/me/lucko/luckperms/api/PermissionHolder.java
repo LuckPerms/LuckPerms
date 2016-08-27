@@ -28,6 +28,7 @@ import me.lucko.luckperms.exceptions.ObjectLacksException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 
 /**
  * Wrapper interface for internal PermissionHolder (object/group) instances
@@ -43,10 +44,25 @@ public interface PermissionHolder {
 
     /**
      * Gets an immutable Set of the objects permission nodes
-     * @return an immutable set of permissions
+     * @return an immutable set of permissions in priority order
      * @since 1.6
      */
-    Set<Node> getPermissionNodes();
+    SortedSet<Node> getPermissions();
+
+    /**
+     * Similar to {@link #getPermissions()}, except excluding transient permissions
+     * @return a set of nodes
+     * @since 1.6
+     */
+    Set<Node> getEnduringPermissions();
+
+    /**
+     * Similar to {@link #getPermissions()}, except excluding non-transient permissions
+     * @return a set of nodes
+     * @since 1.6
+     */
+    Set<Node> getTransientPermissions();
+
 
     /**
      * Gets an immutable set of the nodes that this object has and inherits
@@ -58,7 +74,7 @@ public interface PermissionHolder {
     /**
      * Gets an immutable Map of the objects permission nodes
      * @return an immutable map of permissions
-     * @deprecated in favour of {@link #getPermissionNodes()}
+     * @deprecated in favour of {@link #getPermissions()}
      */
     @Deprecated
     Map<String, Boolean> getNodes();
@@ -66,11 +82,20 @@ public interface PermissionHolder {
     /**
      * Checks to see if the object has a certain permission
      * @param node the node to check for
-     * @return true if the object has the permission
+     * @return a Tristate for the holders permission status for the node
      * @throws NullPointerException if the node is null
      * @since 1.6
      */
-    boolean hasPermission(Node node);
+    Tristate hasPermission(Node node);
+
+    /**
+     * Checks to see if the object has a certain permission
+     * @param node the node to check for
+     * @return a Tristate for the holders permission status for the node
+     * @throws NullPointerException if the node is null
+     * @since 1.6
+     */
+    Tristate hasTransientPermission(Node node);
 
     /**
      * Checks to see if the object has a certain permission
@@ -79,9 +104,7 @@ public interface PermissionHolder {
      * @return true if the object has the permission
      * @throws NullPointerException if the node is null
      * @throws IllegalArgumentException if the node is invalid
-     * @deprecated in favour of {@link #hasPermission(Node)}
      */
-    @Deprecated
     boolean hasPermission(String node, boolean b);
 
     /**
@@ -92,9 +115,7 @@ public interface PermissionHolder {
      * @return true if the object has the permission
      * @throws NullPointerException if the node or server is null
      * @throws IllegalArgumentException if the node or server is invalid
-     * @deprecated in favour of {@link #hasPermission(Node)}
      */
-    @Deprecated
     boolean hasPermission(String node, boolean b, String server);
 
     /**
@@ -106,9 +127,7 @@ public interface PermissionHolder {
      * @return true if the object has the permission
      * @throws NullPointerException if the node, server or world is null
      * @throws IllegalArgumentException if the node, server or world is invalid
-     * @deprecated in favour of {@link #hasPermission(Node)}
      */
-    @Deprecated
     boolean hasPermission(String node, boolean b, String server, String world);
 
     /**
@@ -119,9 +138,7 @@ public interface PermissionHolder {
      * @return true if the object has the permission
      * @throws NullPointerException if the node is null
      * @throws IllegalArgumentException if the node is invalid
-     * @deprecated in favour of {@link #hasPermission(Node)}
      */
-    @Deprecated
     boolean hasPermission(String node, boolean b, boolean temporary);
 
     /**
@@ -133,9 +150,7 @@ public interface PermissionHolder {
      * @return true if the object has the permission
      * @throws NullPointerException if the node or server is null
      * @throws IllegalArgumentException if the node or server is invalid
-     * @deprecated in favour of {@link #hasPermission(Node)}
      */
-    @Deprecated
     boolean hasPermission(String node, boolean b, String server, boolean temporary);
 
     /**
@@ -148,19 +163,17 @@ public interface PermissionHolder {
      * @return true if the object has the permission
      * @throws NullPointerException if the node, server or world is null
      * @throws IllegalArgumentException if the node, server or world is invalid
-     * @deprecated in favour of {@link #hasPermission(Node)}
      */
-    @Deprecated
     boolean hasPermission(String node, boolean b, String server, String world, boolean temporary);
 
     /**
      * Cheks to see if the object inherits a certain permission
      * @param node the node to check for
-     * @return true if the object inherits the permission
+     * @return a Tristate for the holders inheritance status for the node
      * @throws NullPointerException if the node is null
      * @since 1.6
      */
-    boolean inheritsPermission(Node node);
+    Tristate inheritsPermission(Node node);
 
     /**
      * Checks to see if the object inherits a certain permission
@@ -169,9 +182,7 @@ public interface PermissionHolder {
      * @return true if the object inherits the permission
      * @throws NullPointerException if the node is null
      * @throws IllegalArgumentException if the node is invalid
-     * @deprecated in favour of {@link #inheritsPermission(Node)}
      */
-    @Deprecated
     boolean inheritsPermission(String node, boolean b);
 
     /**
@@ -182,9 +193,7 @@ public interface PermissionHolder {
      * @return true if the object inherits the permission
      * @throws NullPointerException if the node or server is null
      * @throws IllegalArgumentException if the node or server is invalid
-     * @deprecated in favour of {@link #inheritsPermission(Node)}
      */
-    @Deprecated
     boolean inheritsPermission(String node, boolean b, String server);
 
     /**
@@ -196,9 +205,7 @@ public interface PermissionHolder {
      * @return true if the object inherits the permission
      * @throws NullPointerException if the node, server or world is null
      * @throws IllegalArgumentException if the node server or world is invalid
-     * @deprecated in favour of {@link #inheritsPermission(Node)}
      */
-    @Deprecated
     boolean inheritsPermission(String node, boolean b, String server, String world);
 
     /**
@@ -209,9 +216,7 @@ public interface PermissionHolder {
      * @return true if the object inherits the permission
      * @throws NullPointerException if the node is null
      * @throws IllegalArgumentException if the node is invalid
-     * @deprecated in favour of {@link #inheritsPermission(Node)}
      */
-    @Deprecated
     boolean inheritsPermission(String node, boolean b, boolean temporary);
 
     /**
@@ -223,9 +228,7 @@ public interface PermissionHolder {
      * @return true if the object inherits the permission
      * @throws NullPointerException if the node or server is null
      * @throws IllegalArgumentException if the node or server is invalid
-     * @deprecated in favour of {@link #inheritsPermission(Node)}
      */
-    @Deprecated
     boolean inheritsPermission(String node, boolean b, String server, boolean temporary);
 
     /**
@@ -238,9 +241,7 @@ public interface PermissionHolder {
      * @return true if the object inherits the permission
      * @throws NullPointerException if the node, server or world is null
      * @throws IllegalArgumentException if the node, server or world if invalid
-     * @deprecated in favour of {@link #inheritsPermission(Node)}
      */
-    @Deprecated
     boolean inheritsPermission(String node, boolean b, String server, String world, boolean temporary);
 
     /**
@@ -251,6 +252,25 @@ public interface PermissionHolder {
      * @since 1.6
      */
     void setPermission(Node node) throws ObjectAlreadyHasException;
+
+    /**
+     * Sets a transient permission for the object
+     *
+     * <p> A transient node is a permission that does not persist.
+     * Whenever a user logs out of the server, or the server restarts, this permission will disappear.
+     * It is never saved to the datastore, and therefore will not apply on other servers.
+     *
+     * This is useful if you want to temporarily set a permission for a user while they're online, but don't
+     * want it to persist, and have to worry about removing it when they log out.
+     *
+     * For unsetting a transient permission, see {@link #unsetTransientPermission(Node)}
+     *
+     * @param node The node to be set
+     * @throws ObjectAlreadyHasException if the object already has the permission
+     * @throws NullPointerException if the node is null
+     * @since 1.6
+     */
+    void setTransientPermission(Node node) throws ObjectAlreadyHasException;
 
     /**
      * Sets a permission for the object
@@ -341,6 +361,15 @@ public interface PermissionHolder {
      * @since 1.6
      */
     void unsetPermission(Node node) throws ObjectLacksException;
+
+    /**
+     * Unsets a transient permission for the object
+     * @param node The node to be unset
+     * @throws ObjectLacksException if the node wasn't already set
+     * @throws NullPointerException if the node is null
+     * @since 1.6
+     */
+    void unsetTransientPermission(Node node) throws ObjectLacksException;
 
     /**
      * Unsets a permission for the object

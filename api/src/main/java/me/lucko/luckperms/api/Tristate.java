@@ -20,28 +20,28 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.commands.group.subcommands;
+package me.lucko.luckperms.api;
 
-import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.*;
-import me.lucko.luckperms.constants.Message;
-import me.lucko.luckperms.constants.Permission;
-import me.lucko.luckperms.groups.Group;
+/**
+ * Represents a permission value
+ */
+public enum Tristate {
 
-import java.util.List;
+    TRUE(true),
+    FALSE(false),
+    UNDEFINED(false);
 
-import static me.lucko.luckperms.core.PermissionHolder.exportToLegacy;
+    private final boolean booleanValue;
 
-public class GroupListNodes extends SubCommand<Group> {
-    public GroupListNodes() {
-        super("listnodes", "Lists the permission nodes the group has", "/%s group <group> listnodes",
-                Permission.GROUP_LISTNODES, Predicate.alwaysFalse());
+    Tristate(boolean booleanValue) {
+        this.booleanValue = booleanValue;
     }
 
-    @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
-        Message.LISTNODES.send(sender, group.getName(), Util.permNodesToString(exportToLegacy(group.getPermanentNodes())));
-        Message.LISTNODES_TEMP.send(sender, group.getName(), Util.tempNodesToString(group.getTemporaryNodesLegacy()));
-        return CommandResult.SUCCESS;
+    public boolean asBoolean() {
+        return booleanValue;
+    }
+
+    public static Tristate fromBoolean(boolean b) {
+        return b ? TRUE : FALSE;
     }
 }

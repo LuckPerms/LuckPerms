@@ -30,7 +30,10 @@ import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -49,6 +52,15 @@ class SpongeCommand extends CommandManager implements CommandCallable {
     }
 
     @Override
+    public List<String> getSuggestions(CommandSource source, String s, @Nullable Location<World> location) throws CommandException {
+        List<String> args = new ArrayList<>(Arrays.asList(Patterns.SPACE.split(s)));
+        if (s.endsWith(" ")) {
+            args.add("");
+        }
+
+        return onTabComplete(SpongeSenderFactory.get().wrap(source), args);
+    }
+
     public List<String> getSuggestions(CommandSource source, String s) throws CommandException {
         List<String> args = new ArrayList<>(Arrays.asList(Patterns.SPACE.split(s)));
         if (s.endsWith(" ")) {
@@ -64,12 +76,12 @@ class SpongeCommand extends CommandManager implements CommandCallable {
     }
 
     @Override
-    public Optional<? extends Text> getShortDescription(CommandSource source) {
+    public Optional<Text> getShortDescription(CommandSource source) {
         return Optional.of(Text.of("LuckPerms main command."));
     }
 
     @Override
-    public Optional<? extends Text> getHelp(CommandSource source) {
+    public Optional<Text> getHelp(CommandSource source) {
         return Optional.of(Text.of("Type /perms for help."));
     }
 

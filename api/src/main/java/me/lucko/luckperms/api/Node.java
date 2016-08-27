@@ -45,9 +45,21 @@ public interface Node extends Map.Entry<String, Boolean> {
     Boolean getValue();
 
     /**
+     * @return the value of this node as a Tristate
+     */
+    Tristate getTristate();
+
+    /**
      * @return true if the node is negated
      */
     boolean isNegated();
+
+    /**
+     * If this node is set to override explicitly.
+     * This value does not persist across saves, and is therefore only useful for transient nodes
+     * @return true if this node is set to override explicitly
+     */
+    boolean isOverride();
 
     /**
      * Gets the server this node applies on, if the node is server specific
@@ -190,6 +202,13 @@ public interface Node extends Map.Entry<String, Boolean> {
     int getWildcardLevel();
 
     /**
+     * Similar to {@link #equals(Object)}, except doesn't take note of the value
+     * @param node the other node
+     * @return true if the two nodes are almost equal
+     */
+    boolean equalsIgnoringValue(Node node);
+
+    /**
      * Similar to {@link #equals(Object)}, except doesn't take note of the expiry time or value
      * @param node the other node
      * @return true if the two nodes are almost equal
@@ -199,6 +218,13 @@ public interface Node extends Map.Entry<String, Boolean> {
     interface Builder {
         Builder setNegated(boolean negated);
         Builder setValue(boolean value);
+
+        /**
+         * Warning: this value does not persist, and disappears when the holder is re-loaded.
+         * It is therefore only useful for transient nodes.
+         */
+        Builder setOverride(boolean override);
+
         Builder setExpiry(long expireAt);
         Builder setWorld(String world);
         Builder setServer(String server) throws IllegalArgumentException;

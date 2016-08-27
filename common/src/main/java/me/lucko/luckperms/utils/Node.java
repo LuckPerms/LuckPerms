@@ -24,6 +24,7 @@ package me.lucko.luckperms.utils;
 
 import com.google.common.collect.ImmutableMap;
 import lombok.*;
+import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.constants.Patterns;
 
 import java.util.*;
@@ -85,6 +86,9 @@ public class Node implements me.lucko.luckperms.api.Node {
     @Getter
     private Boolean value;
 
+    @Getter
+    private boolean override;
+
     private String server = null;
     private String world = null;
 
@@ -101,7 +105,7 @@ public class Node implements me.lucko.luckperms.api.Node {
      * @param world the world this node applies on
      * @param extraContexts any additional contexts applying to this node
      */
-    public Node(String permission, boolean value, long expireAt, String server, String world, Map<String, String> extraContexts) {
+    public Node(String permission, boolean value, boolean override, long expireAt, String server, String world, Map<String, String> extraContexts) {
         if (permission == null || permission.equals("")) {
             throw new IllegalArgumentException("Empty permission");
         }
@@ -120,6 +124,7 @@ public class Node implements me.lucko.luckperms.api.Node {
 
         this.permission = permission;
         this.value = value;
+        this.override = override;
         this.expireAt = expireAt;
         this.server = server;
         this.world = world;
@@ -127,6 +132,11 @@ public class Node implements me.lucko.luckperms.api.Node {
         if (extraContexts != null) {
             this.extraContexts.putAll(extraContexts);
         }
+    }
+
+    @Override
+    public Tristate getTristate() {
+        return Tristate.fromBoolean(value);
     }
 
     public boolean isNegated() {
@@ -396,6 +406,53 @@ public class Node implements me.lucko.luckperms.api.Node {
     }
 
     @Override
+    public boolean equalsIgnoringValue(me.lucko.luckperms.api.Node other) {
+        if (!other.getPermission().equalsIgnoreCase(this.getPermission())) {
+            return false;
+        }
+
+        if (other.isTemporary() != this.isTemporary()) {
+            return false;
+        }
+
+        if (this.isTemporary()) {
+            if (other.getExpiryUnixTime() != this.getExpiryUnixTime()) {
+                return false;
+            }
+        }
+
+        if (other.getServer().isPresent() != this.getServer().isPresent()) {
+            if (other.getServer().isPresent()) {
+                if (!other.getServer().get().equalsIgnoreCase(this.getServer().get())) {
+                    return false;
+                }
+            }
+        } else {
+            return false;
+        }
+
+        if (other.getWorld().isPresent() != this.getWorld().isPresent()) {
+            if (other.getWorld().isPresent()) {
+                if (!other.getWorld().get().equalsIgnoreCase(this.getWorld().get())) {
+                    return false;
+                }
+            }
+        } else {
+            return false;
+        }
+
+        if (!other.getExtraContexts().equals(this.getExtraContexts())) {
+            return false;
+        }
+
+        if (other.isTemporary() != this.isTemporary()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
     public boolean almostEquals(me.lucko.luckperms.api.Node other) {
         if (!other.getPermission().equalsIgnoreCase(this.getPermission())) {
             return false;
@@ -446,6 +503,7 @@ public class Node implements me.lucko.luckperms.api.Node {
     public static class Builder implements me.lucko.luckperms.api.Node.Builder {
         private final String permission;
         private Boolean value = true;
+        private boolean override = false;
         private String server = null;
         private String world = null;
         private long expireAt = 0L;
@@ -489,6 +547,12 @@ public class Node implements me.lucko.luckperms.api.Node {
         }
 
         @Override
+        public me.lucko.luckperms.api.Node.Builder setOverride(boolean override) {
+            this.override = override;
+            return this;
+        }
+
+        @Override
         public me.lucko.luckperms.api.Node.Builder setExpiry(long expireAt) {
             this.expireAt = expireAt;
             return this;
@@ -523,7 +587,7 @@ public class Node implements me.lucko.luckperms.api.Node {
 
         @Override
         public me.lucko.luckperms.api.Node build() {
-            return new Node(permission, value, expireAt, server, world, extraContexts);
+            return new Node(permission, value, override, expireAt, server, world, extraContexts);
         }
     }
 

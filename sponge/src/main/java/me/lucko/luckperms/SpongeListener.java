@@ -25,10 +25,7 @@ package me.lucko.luckperms;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.users.User;
 import me.lucko.luckperms.utils.AbstractListener;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.entity.DisplaceEntityEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.serializer.TextSerializers;
@@ -75,8 +72,10 @@ public class SpongeListener extends AbstractListener {
         refreshPlayer(e.getTargetEntity().getUniqueId());
     }
 
+    // TODO Use reflection/any other method to refresh on world change
+    /*
     @Listener
-    public void onPlayerTeleport(DisplaceEntityEvent.Teleport e) {
+    public void onPlayerTeleport(DisplaceEntityEvent e) {
         final Entity entity = e.getTargetEntity();
         if (!(entity instanceof Player)){
             return;
@@ -84,6 +83,7 @@ public class SpongeListener extends AbstractListener {
 
         refreshPlayer(entity.getUniqueId());
     }
+    */
 
     @Listener
     public void onClientLeave(ClientConnectionEvent.Disconnect e) {

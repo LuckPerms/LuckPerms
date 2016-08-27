@@ -83,4 +83,9 @@ public class GroupCollection implements SubjectCollection {
                 .map(sub -> new AbstractMap.SimpleEntry<Subject, Boolean>(sub, sub.getPermissionValue(contexts, node).asBoolean()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
+
+    @Override
+    public Subject getDefaults() {
+        return null;
+    }
 }
