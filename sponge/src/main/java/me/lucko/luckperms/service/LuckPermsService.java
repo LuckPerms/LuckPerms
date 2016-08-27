@@ -69,8 +69,12 @@ public class LuckPermsService implements PermissionService {
         contextCalculators = ConcurrentHashMap.newKeySet();
     }
 
-    @Override
     public SubjectData getDefaultData() {
+        return null; // TODO
+    }
+
+    @Override
+    public Subject getDefaults() {
         return null; // TODO
     }
 

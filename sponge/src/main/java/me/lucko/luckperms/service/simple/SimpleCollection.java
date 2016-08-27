@@ -82,4 +82,9 @@ public class SimpleCollection implements SubjectCollection {
         }
         return m;
     }
+
+    @Override
+    public Subject getDefaults() {
+        return null; // TODO
+    }
 }

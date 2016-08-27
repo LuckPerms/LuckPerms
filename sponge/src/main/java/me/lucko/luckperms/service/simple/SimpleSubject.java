@@ -119,6 +119,16 @@ public class SimpleSubject implements Subject {
     }
 
     @Override
+    public Optional<String> getOption(Set<Context> set, String s) {
+        return null; // TODO
+    }
+
+    @Override
+    public Optional<String> getOption(String key) {
+        return null; // TODO
+    }
+
+    @Override
     public Set<Context> getActiveContexts() {
         return SubjectData.GLOBAL_CONTEXT;
     }

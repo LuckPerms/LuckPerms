@@ -140,6 +140,16 @@ public class LuckPermsSubject implements Subject {
     }
 
     @Override
+    public Optional<String> getOption(Set<Context> set, String s) {
+        return null;
+    }
+
+    @Override
+    public Optional<String> getOption(String key) {
+        return null;
+    }
+
+    @Override
     public Set<Context> getActiveContexts() {
         return SubjectData.GLOBAL_CONTEXT;
     }
@@ -354,6 +364,31 @@ public class LuckPermsSubject implements Subject {
 
         @Override
         public boolean clearParents(Set<Context> set) {
+            return false;
+        }
+
+        @Override
+        public Map<Set<Context>, Map<String, String>> getAllOptions() {
+            return null;
+        }
+
+        @Override
+        public Map<String, String> getOptions(Set<Context> set) {
+            return null;
+        }
+
+        @Override
+        public boolean setOption(Set<Context> set, String s, String s1) {
+            return false;
+        }
+
+        @Override
+        public boolean clearOptions(Set<Context> set) {
+            return false;
+        }
+
+        @Override
+        public boolean clearOptions() {
             return false;
         }
 
