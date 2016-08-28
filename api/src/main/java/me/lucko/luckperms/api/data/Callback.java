@@ -26,7 +26,7 @@ import java.util.function.Consumer;
 
 /**
  * A callback used to wait for the completion of asynchronous operations.
- * All callbacks are ran on the main Bukkit server thread.
+ * All callbacks are ran on the main server thread.
  * @param <T> the return type
  */
 public interface Callback<T> {

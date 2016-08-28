@@ -20,14 +20,14 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.service;
+package me.lucko.luckperms.api.sponge;
 
 import com.google.common.collect.ImmutableSet;
 import lombok.*;
 import me.lucko.luckperms.LPSpongePlugin;
-import me.lucko.luckperms.service.collections.GroupCollection;
-import me.lucko.luckperms.service.collections.UserCollection;
-import me.lucko.luckperms.service.simple.SimpleCollection;
+import me.lucko.luckperms.api.sponge.collections.GroupCollection;
+import me.lucko.luckperms.api.sponge.collections.UserCollection;
+import me.lucko.luckperms.api.sponge.simple.SimpleCollection;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.context.ContextCalculator;
 import org.spongepowered.api.service.permission.*;
@@ -41,6 +41,7 @@ import java.util.stream.Collectors;
 public class LuckPermsService implements PermissionService {
     public static final String SERVER_CONTEXT = "server";
 
+    @Getter
     private final LPSpongePlugin plugin;
 
     @Getter
@@ -103,7 +104,7 @@ public class LuckPermsService implements PermissionService {
     }
 
     @Override
-    public Optional<PermissionDescription> getDescription(String s) {
+    public Optional<PermissionDescription> getDescription(@NonNull String s) {
         for (PermissionDescription d : descriptionSet) {
             if (d.getId().equals(s)) {
                 return Optional.of(d);
@@ -119,7 +120,7 @@ public class LuckPermsService implements PermissionService {
     }
 
     @Override
-    public void registerContextCalculator(ContextCalculator<Subject> contextCalculator) {
+    public void registerContextCalculator(@NonNull ContextCalculator<Subject> contextCalculator) {
         contextCalculators.add(contextCalculator);
     }
 

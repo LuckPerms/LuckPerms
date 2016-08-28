@@ -180,6 +180,7 @@ public interface LuckPermsApi {
      * @param permission the main permission node to build
      * @return a {@link Node.Builder} instance
      * @throws IllegalArgumentException if the permission is invalid
+     * @since 1.6
      */
     Node.Builder buildNode(String permission) throws IllegalArgumentException;
 

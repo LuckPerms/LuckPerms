@@ -31,7 +31,7 @@ import java.util.Set;
 import java.util.SortedSet;
 
 /**
- * Wrapper interface for internal PermissionHolder (object/group) instances
+ * Wrapper interface for internal PermissionHolder (user/group) instances
  */
 @SuppressWarnings("unused")
 public interface PermissionHolder {
@@ -260,11 +260,10 @@ public interface PermissionHolder {
      * Whenever a user logs out of the server, or the server restarts, this permission will disappear.
      * It is never saved to the datastore, and therefore will not apply on other servers.
      *
-     * This is useful if you want to temporarily set a permission for a user while they're online, but don't
+     * <p> This is useful if you want to temporarily set a permission for a user while they're online, but don't
      * want it to persist, and have to worry about removing it when they log out.
      *
-     * For unsetting a transient permission, see {@link #unsetTransientPermission(Node)}
-     *
+     * <p> For unsetting a transient permission, see {@link #unsetTransientPermission(Node)}
      * @param node The node to be set
      * @throws ObjectAlreadyHasException if the object already has the permission
      * @throws NullPointerException if the node is null

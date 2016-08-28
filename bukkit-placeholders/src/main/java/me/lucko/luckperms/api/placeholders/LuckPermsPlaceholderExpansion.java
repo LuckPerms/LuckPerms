@@ -51,6 +51,7 @@ import java.util.regex.Pattern;
  * - suffix
  * - meta_<node>
  */
+@SuppressWarnings("deprecation")
 public class LuckPermsPlaceholderExpansion extends PlaceholderExpansion {
     private static final String IDENTIFIER = "luckperms";
     private static final String PLUGIN_NAME = "LuckPerms";

@@ -20,15 +20,14 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.service.collections;
+package me.lucko.luckperms.api.sponge.collections;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
-import me.lucko.luckperms.service.LuckPermsService;
-import me.lucko.luckperms.service.simple.SimpleSubject;
-import me.lucko.luckperms.service.wrapping.LuckPermsSubject;
-import me.lucko.luckperms.users.User;
-import me.lucko.luckperms.users.UserManager;
+import me.lucko.luckperms.groups.GroupManager;
+import me.lucko.luckperms.api.sponge.LuckPermsService;
+import me.lucko.luckperms.api.sponge.simple.SimpleSubject;
+import me.lucko.luckperms.api.sponge.LuckPermsSubject;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
@@ -38,47 +37,30 @@ import org.spongepowered.api.service.permission.SubjectData;
 import java.util.AbstractMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
-public class UserCollection implements SubjectCollection {
+public class GroupCollection implements SubjectCollection {
     private final LuckPermsService service;
-    private final UserManager manager;
+    private final GroupManager manager;
 
     @Override
     public String getIdentifier() {
-        return PermissionService.SUBJECTS_USER;
+        return PermissionService.SUBJECTS_GROUP;
     }
 
     @Override
     public Subject get(@NonNull String id) {
-        try {
-            UUID u = UUID.fromString(id);
-            if (manager.isLoaded(u)) {
-                return new LuckPermsSubject(manager.get(u), service);
-            }
-
-        } catch (IllegalArgumentException e) {
-            User user = manager.get(id);
-            if (user != null) {
-                return new LuckPermsSubject(user, service);
-            }
+        if (manager.isLoaded(id)) {
+            return new LuckPermsSubject(manager.get(id), service);
         }
 
-        // Wtf am I meant to do here? What if no user is loaded? Load it? Create it?
         return new SimpleSubject(id, service, this);
     }
 
     @Override
     public boolean hasRegistered(@NonNull String id) {
-        try {
-            UUID u = UUID.fromString(id);
-            return manager.isLoaded(u);
-        } catch (IllegalArgumentException e) {
-            User user = manager.get(id);
-            return user != null;
-        }
+        return manager.isLoaded(id);
     }
 
     @Override
@@ -89,8 +71,8 @@ public class UserCollection implements SubjectCollection {
     }
 
     @Override
-    public Map<Subject, Boolean> getAllWithPermission(@NonNull String id) {
-        return getAllWithPermission(SubjectData.GLOBAL_CONTEXT, id);
+    public Map<Subject, Boolean> getAllWithPermission(@NonNull String node) {
+        return getAllWithPermission(SubjectData.GLOBAL_CONTEXT, node);
     }
 
     @Override
@@ -104,6 +86,6 @@ public class UserCollection implements SubjectCollection {
 
     @Override
     public Subject getDefaults() {
-        return null;
+        return new SimpleSubject("default", service, this);
     }
 }

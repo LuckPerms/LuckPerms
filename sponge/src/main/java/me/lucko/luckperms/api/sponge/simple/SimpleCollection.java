@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.service.simple;
+package me.lucko.luckperms.api.sponge.simple;
 
 import lombok.Getter;
 import lombok.NonNull;
@@ -85,6 +85,6 @@ public class SimpleCollection implements SubjectCollection {
 
     @Override
     public Subject getDefaults() {
-        return null; // TODO
+        return new SimpleSubject("default", service, this);
     }
 }

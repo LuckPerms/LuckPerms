@@ -29,6 +29,8 @@ import java.util.Optional;
 
 /**
  * Represents an immutable node object
+ * <p> Use {@link LuckPermsApi#buildNode(String)} to get an instance.
+ * @since 1.6
  */
 public interface Node extends Map.Entry<String, Boolean> {
 
@@ -202,6 +204,42 @@ public interface Node extends Map.Entry<String, Boolean> {
     int getWildcardLevel();
 
     /**
+     * @return true if this node is a meta node
+     */
+    boolean isMeta();
+
+    /**
+     * Gets the meta value from this node
+     * @return the meta value
+     * @throws IllegalStateException if this node is not a meta node
+     */
+    Map.Entry<String, String> getMeta();
+
+    /**
+     * @return true if this node is a prefix node
+     */
+    boolean isPrefix();
+
+    /**
+     * Gets the prefix value from this node
+     * @return the prefix value
+     * @throws IllegalStateException if this node is a not a prefix node
+     */
+    Map.Entry<Integer, String> getPrefix();
+
+    /**
+     * @return true if this node is a suffix node
+     */
+    boolean isSuffix();
+
+    /**
+     * Gets the suffix value from this node
+     * @return the suffix value
+     * @throws IllegalStateException if this node is a not a suffix node
+     */
+    Map.Entry<Integer, String> getSuffix();
+
+    /**
      * Similar to {@link #equals(Object)}, except doesn't take note of the value
      * @param node the other node
      * @return true if the two nodes are almost equal
@@ -229,6 +267,8 @@ public interface Node extends Map.Entry<String, Boolean> {
         Builder setWorld(String world);
         Builder setServer(String server) throws IllegalArgumentException;
         Builder withExtraContext(String key, String value);
+        Builder withExtraContext(Map<String, String> map);
+        Builder withExtraContext(Map.Entry<String, String> entry);
         Node build();
     }
 

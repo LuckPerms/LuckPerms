@@ -38,6 +38,9 @@ import java.util.stream.Collectors;
 @ToString
 @EqualsAndHashCode
 public class Node implements me.lucko.luckperms.api.Node {
+    private static final Pattern PREFIX_PATTERN = Pattern.compile("(?i)prefix\\.\\d+\\..*");
+    private static final Pattern SUFFIX_PATTERN = Pattern.compile("(?i)suffix\\.\\d+\\..*");
+
     public static me.lucko.luckperms.api.Node fromSerialisedNode(String s, Boolean b) {
         return builderFromSerialisedNode(s, b).build();
     }
@@ -234,6 +237,18 @@ public class Node implements me.lucko.luckperms.api.Node {
         }
 
         for (Map.Entry<String, String> c : context.entrySet()) {
+            if (c.getKey().equals("server")) {
+                if (shouldApplyOnServer(c.getValue(), false, false)) {
+                    return false;
+                }
+            }
+
+            if (c.getKey().equals("world")) {
+                if (shouldApplyOnWorld(c.getValue(), false, false)) {
+                    return false;
+                }
+            }
+
             if (!getExtraContexts().containsKey(c.getKey())) {
                 return false;
             }
@@ -403,6 +418,55 @@ public class Node implements me.lucko.luckperms.api.Node {
     @Override
     public int getWildcardLevel() {
         return (int) getPermission().chars().filter(num -> num == Character.getNumericValue('.')).count();
+    }
+
+    @Override
+    public boolean isMeta() {
+        return getPermission().matches("meta\\..*\\..*");
+    }
+
+    @Override
+    public Map.Entry<String, String> getMeta() {
+        if (!isMeta()) {
+            throw new IllegalStateException();
+        }
+
+        String[] metaPart = getPermission().substring("meta.".length()).split("\\.", 2);
+        return new AbstractMap.SimpleEntry<>(metaPart[0], metaPart[1]);
+    }
+
+    @Override
+    public boolean isPrefix() {
+        return PREFIX_PATTERN.matcher(getPermission()).matches();
+    }
+
+    @Override
+    public Map.Entry<Integer, String> getPrefix() {
+        if (!isPrefix()) {
+            throw new IllegalStateException();
+        }
+
+        String[] prefixPart = Patterns.DOT.split(getPermission().substring("prefix.".length()), 2);
+        Integer i = Integer.parseInt(prefixPart[0]);
+
+        return new AbstractMap.SimpleEntry<>(i, prefixPart[1]);
+    }
+
+    @Override
+    public boolean isSuffix() {
+        return SUFFIX_PATTERN.matcher(getPermission()).matches();
+    }
+
+    @Override
+    public Map.Entry<Integer, String> getSuffix() {
+        if (!isPrefix()) {
+            throw new IllegalStateException();
+        }
+
+        String[] suffixPart = Patterns.DOT.split(getPermission().substring("suffix.".length()), 2);
+        Integer i = Integer.parseInt(suffixPart[0]);
+
+        return new AbstractMap.SimpleEntry<>(i, suffixPart[1]);
     }
 
     @Override
@@ -581,7 +645,30 @@ public class Node implements me.lucko.luckperms.api.Node {
 
         @Override
         public me.lucko.luckperms.api.Node.Builder withExtraContext(@NonNull String key, @NonNull String value) {
-            this.extraContexts.put(key, value);
+            switch (key) {
+                case "server":
+                    setServer(value);
+                    break;
+                case "world":
+                    setWorld(value);
+                    break;
+                default:
+                    this.extraContexts.put(key, value);
+                    break;
+            }
+
+            return this;
+        }
+
+        @Override
+        public me.lucko.luckperms.api.Node.Builder withExtraContext(Map<String, String> map) {
+            map.entrySet().forEach(this::withExtraContext);
+            return this;
+        }
+
+        @Override
+        public me.lucko.luckperms.api.Node.Builder withExtraContext(Map.Entry<String, String> entry) {
+            withExtraContext(entry.getKey(), entry.getValue());
             return this;
         }
 

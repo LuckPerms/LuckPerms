@@ -25,16 +25,14 @@ package me.lucko.luckperms.api.vault;
 import lombok.NonNull;
 import lombok.Setter;
 import me.lucko.luckperms.LPBukkitPlugin;
-import me.lucko.luckperms.constants.Patterns;
+import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.core.PermissionHolder;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.users.User;
 import net.milkbowl.vault.chat.Chat;
 
-import java.util.Collections;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import static me.lucko.luckperms.utils.ArgumentChecker.escapeCharacters;
 import static me.lucko.luckperms.utils.ArgumentChecker.unescapeCharacters;
@@ -58,8 +56,6 @@ import static me.lucko.luckperms.utils.ArgumentChecker.unescapeCharacters;
  * Registered on normal priority so other plugins can override.
  */
 class VaultChatHook extends Chat {
-    private static final Pattern PREFIX_PATTERN = Pattern.compile("(?i)prefix\\.\\d+\\..*");
-    private static final Pattern SUFFIX_PATTERN = Pattern.compile("(?i)suffix\\.\\d+\\..*");
 
     @Setter
     private LPBukkitPlugin plugin;
@@ -103,24 +99,24 @@ class VaultChatHook extends Chat {
         if (node.equals("")) return defaultValue;
         node = escapeCharacters(node);
 
-        for (Map.Entry<String, Boolean> e : holder.exportNodes("global", world, null, true, false, Collections.emptyList()).entrySet()) {
-            if (!e.getValue()) continue;
-
-            String[] parts = Patterns.DOT.split(e.getKey(), 3);
-            if (parts.length < 3) continue;
-
-            if (!parts[0].equalsIgnoreCase("meta")) {
+        for (Node n : holder.getPermissions()) {
+            if (!n.isMeta()) {
                 continue;
             }
 
-            if (!parts[1].equalsIgnoreCase(node)) {
+            if (!n.shouldApplyOnWorld(world, true, false)) {
                 continue;
             }
 
-            try {
-                return Integer.parseInt(unescapeCharacters(parts[2]));
-            } catch (Throwable t) {
-                return defaultValue;
+            Map.Entry<String, String> meta = n.getMeta();
+            if (meta.getKey().equalsIgnoreCase(node)) {
+
+                try {
+                    return Integer.parseInt(unescapeCharacters(meta.getValue()));
+                } catch (Throwable t) {
+                    return defaultValue;
+                }
+
             }
         }
 
@@ -132,24 +128,24 @@ class VaultChatHook extends Chat {
         if (node.equals("")) return defaultValue;
         node = escapeCharacters(node);
 
-        for (Map.Entry<String, Boolean> e : holder.exportNodes("global", world, null, true, false, Collections.emptyList()).entrySet()) {
-            if (!e.getValue()) continue;
-
-            String[] parts = Patterns.DOT.split(e.getKey(), 3);
-            if (parts.length < 3) continue;
-
-            if (!parts[0].equalsIgnoreCase("meta")) {
+        for (Node n : holder.getPermissions()) {
+            if (!n.isMeta()) {
                 continue;
             }
 
-            if (!parts[1].equalsIgnoreCase(node)) {
+            if (!n.shouldApplyOnWorld(world, true, false)) {
                 continue;
             }
 
-            try {
-                return Double.parseDouble(unescapeCharacters(parts[2]));
-            } catch (Throwable t) {
-                return defaultValue;
+            Map.Entry<String, String> meta = n.getMeta();
+            if (meta.getKey().equalsIgnoreCase(node)) {
+
+                try {
+                    return Double.parseDouble(unescapeCharacters(meta.getValue()));
+                } catch (Throwable t) {
+                    return defaultValue;
+                }
+
             }
         }
 
@@ -161,24 +157,24 @@ class VaultChatHook extends Chat {
         if (node.equals("")) return defaultValue;
         node = escapeCharacters(node);
 
-        for (Map.Entry<String, Boolean> e : holder.exportNodes("global", world, null, true, false, Collections.emptyList()).entrySet()) {
-            if (!e.getValue()) continue;
-
-            String[] parts = Patterns.DOT.split(e.getKey(), 3);
-            if (parts.length < 3) continue;
-
-            if (!parts[0].equalsIgnoreCase("meta")) {
+        for (Node n : holder.getPermissions()) {
+            if (!n.isMeta()) {
                 continue;
             }
 
-            if (!parts[1].equalsIgnoreCase(node)) {
+            if (!n.shouldApplyOnWorld(world, true, false)) {
                 continue;
             }
 
-            try {
-                return Boolean.parseBoolean(unescapeCharacters(parts[2]));
-            } catch (Throwable t) {
-                return defaultValue;
+            Map.Entry<String, String> meta = n.getMeta();
+            if (meta.getKey().equalsIgnoreCase(node)) {
+
+                try {
+                    return Boolean.parseBoolean(unescapeCharacters(meta.getValue()));
+                } catch (Throwable t) {
+                    return defaultValue;
+                }
+
             }
         }
 
@@ -190,41 +186,68 @@ class VaultChatHook extends Chat {
         if (node.equals("")) return defaultValue;
         node = escapeCharacters(node);
 
-        for (Map.Entry<String, Boolean> e : holder.exportNodes("global", world, null, true, false, Collections.emptyList()).entrySet()) {
-            if (!e.getValue()) continue;
-
-            String[] parts = Patterns.DOT.split(e.getKey(), 3);
-            if (parts.length < 3) continue;
-
-            if (!parts[0].equalsIgnoreCase("meta")) {
+        for (Node n : holder.getPermissions()) {
+            if (!n.getValue()) {
                 continue;
             }
 
-            if (!parts[1].equalsIgnoreCase(node)) {
+            if (!n.isMeta()) {
                 continue;
             }
 
-            return unescapeCharacters(parts[2]);
+            if (!n.shouldApplyOnWorld(world, true, false)) {
+                continue;
+            }
+
+            Map.Entry<String, String> meta = n.getMeta();
+            if (meta.getKey().equalsIgnoreCase(node)) {
+
+                try {
+                    return unescapeCharacters(meta.getValue());
+                } catch (Throwable t) {
+                    return defaultValue;
+                }
+
+            }
         }
 
         return defaultValue;
     }
 
-    private static String getChatMeta(Pattern pattern, PermissionHolder holder, String world) {
+    private static String getChatMeta(boolean prefix, PermissionHolder holder, String world) {
         if (holder == null) return "";
 
-        int priority = 0;
+        int priority = -1000;
         String meta = null;
-        for (Map.Entry<String, Boolean> e : holder.getLocalPermissions("global", world, null).entrySet()) {
-            if (!e.getValue()) continue;
 
-            if (pattern.matcher(e.getKey()).matches()) {
-                String[] parts = Patterns.DOT.split(e.getKey(), 3);
-                int p = Integer.parseInt(parts[1]);
+        for (Node n : holder.getAllNodes(null)) {
+            if (!n.getValue()) {
+                continue;
+            }
 
-                if (meta == null || p > priority) {
-                    meta = parts[2];
-                    priority = p;
+            if (!n.shouldApplyOnWorld(world, true, false)) {
+                continue;
+            }
+
+            if (prefix) {
+                if (!n.isPrefix()) {
+                    continue;
+                }
+
+                Map.Entry<Integer, String> prefixValue = n.getPrefix();
+                if (prefixValue.getKey() > priority) {
+                    meta = prefixValue.getValue();
+                    priority = prefixValue.getKey();
+                }
+            } else {
+                if (!n.isSuffix()) {
+                    continue;
+                }
+
+                Map.Entry<Integer, String> suffixValue = n.getSuffix();
+                if (suffixValue.getKey() > priority) {
+                    meta = suffixValue.getValue();
+                    priority = suffixValue.getKey();
                 }
             }
         }
@@ -234,7 +257,7 @@ class VaultChatHook extends Chat {
 
     public String getPlayerPrefix(String world, @NonNull String player) {
         final User user = plugin.getUserManager().get(player);
-        return getChatMeta(PREFIX_PATTERN, user, world);
+        return getChatMeta(true, user, world);
     }
 
     public void setPlayerPrefix(String world, @NonNull String player, @NonNull String prefix) {
@@ -252,7 +275,7 @@ class VaultChatHook extends Chat {
 
     public String getPlayerSuffix(String world, @NonNull String player) {
         final User user = plugin.getUserManager().get(player);
-        return getChatMeta(SUFFIX_PATTERN, user, world);
+        return getChatMeta(false, user, world);
     }
 
     public void setPlayerSuffix(String world, @NonNull String player, @NonNull String suffix) {
@@ -270,7 +293,7 @@ class VaultChatHook extends Chat {
 
     public String getGroupPrefix(String world, @NonNull String group) {
         final Group g = plugin.getGroupManager().get(group);
-        return getChatMeta(PREFIX_PATTERN, g, world);
+        return getChatMeta(false, g, world);
     }
 
     public void setGroupPrefix(String world, @NonNull String group, @NonNull String prefix) {
@@ -288,7 +311,7 @@ class VaultChatHook extends Chat {
 
     public String getGroupSuffix(String world, @NonNull String group) {
         final Group g = plugin.getGroupManager().get(group);
-        return getChatMeta(SUFFIX_PATTERN, g, world);
+        return getChatMeta(false, g, world);
     }
 
     public void setGroupSuffix(String world, @NonNull String group, @NonNull String suffix) {

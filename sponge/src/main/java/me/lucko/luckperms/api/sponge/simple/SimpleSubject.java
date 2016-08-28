@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.service.simple;
+package me.lucko.luckperms.api.sponge.simple;
 
 import lombok.Getter;
 import lombok.NonNull;
@@ -29,8 +29,9 @@ import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.*;
 import org.spongepowered.api.util.Tristate;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Super simple Subject implementation.
@@ -42,9 +43,6 @@ public class SimpleSubject implements Subject {
     private final PermissionService service;
     private final SubjectCollection containingCollection;
     private final SubjectData subjectData;
-
-    private final Map<Set<Context>, Map<String, Tristate>> perms = new ConcurrentHashMap<>();
-    private final Map<Set<Context>, Set<Subject>> parents = new ConcurrentHashMap<>();
 
     public SimpleSubject(String identifier, PermissionService service, SubjectCollection containingCollection) {
         this.identifier = identifier;
@@ -65,33 +63,21 @@ public class SimpleSubject implements Subject {
 
     @Override
     public boolean hasPermission(@NonNull Set<Context> contexts, @NonNull String node) {
-        return getPermissionValue(contexts, node).asBoolean();
+        return subjectData.getPermissions(contexts).getOrDefault(node, false);
     }
 
     @Override
     public boolean hasPermission(@NonNull String permission) {
-        return getPermissionValue(getActiveContexts(), permission).asBoolean();
+        return hasPermission(getActiveContexts(), permission);
     }
 
     @Override
     public Tristate getPermissionValue(@NonNull Set<Context> contexts, @NonNull String node) {
-        if (!perms.containsKey(contexts)) {
+        if (!subjectData.getPermissions(contexts).containsKey(node)) {
             return Tristate.UNDEFINED;
         }
 
-        Map<String, Tristate> context = perms.get(contexts);
-        if (context.containsKey(node)) {
-            return context.get(node);
-        }
-
-        for (Subject parent : getParents(contexts)) {
-            Tristate ts = parent.getPermissionValue(contexts, node);
-            if (ts != Tristate.UNDEFINED) {
-                return ts;
-            }
-        }
-
-        return Tristate.UNDEFINED;
+        return Tristate.fromBoolean(subjectData.getPermissions(contexts).get(node));
     }
 
     @Override
@@ -101,7 +87,7 @@ public class SimpleSubject implements Subject {
 
     @Override
     public boolean isChildOf(@NonNull Set<Context> contexts, @NonNull Subject subject) {
-        return parents.containsKey(contexts) && parents.get(contexts).contains(subject);
+        return subjectData.getParents(contexts).contains(subject);
     }
 
     @Override
@@ -111,21 +97,17 @@ public class SimpleSubject implements Subject {
 
     @Override
     public List<Subject> getParents(@NonNull Set<Context> contexts) {
-        if (!parents.containsKey(contexts)) {
-            return Collections.emptyList();
-        }
-
-        return new ArrayList<>(parents.get(contexts));
+        return subjectData.getParents(contexts);
     }
 
     @Override
     public Optional<String> getOption(Set<Context> set, String s) {
-        return null; // TODO
+        return Optional.ofNullable(subjectData.getOptions(set).get(s));
     }
 
     @Override
     public Optional<String> getOption(String key) {
-        return null; // TODO
+        return Optional.ofNullable(subjectData.getOptions(getActiveContexts()).get(key));
     }
 
     @Override
