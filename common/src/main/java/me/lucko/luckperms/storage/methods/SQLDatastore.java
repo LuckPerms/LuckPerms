@@ -41,10 +41,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static me.lucko.luckperms.core.PermissionHolder.exportToLegacy;
 
@@ -56,7 +53,9 @@ abstract class SQLDatastore extends Datastore {
 
     private static final String USER_INSERT = "INSERT INTO lp_users VALUES(?, ?, ?, ?)";
     private static final String USER_SELECT = "SELECT * FROM lp_users WHERE uuid=?";
+    private static final String USER_SELECT_ALL = "SELECT uuid FROM lp_users";
     private static final String USER_UPDATE = "UPDATE lp_users SET name=?, primary_group = ?, perms=? WHERE uuid=?";
+    private static final String USER_DELETE = "DELETE FROM lp_users WHERE perms=?";
 
     private static final String GROUP_INSERT = "INSERT INTO lp_groups VALUES(?, ?)";
     private static final String GROUP_SELECT = "SELECT perms FROM lp_groups WHERE name=?";
@@ -95,33 +94,7 @@ abstract class SQLDatastore extends Datastore {
             if (!runQuery(new Query(q))) success = false;
         }
 
-        return success;
-    }
-
-    @Override
-    public boolean loadUser(UUID uuid) {
-        User user = plugin.getUserManager().make(uuid);
-        boolean success = runQuery(new QueryRS(USER_SELECT) {
-            @Override
-            void onRun(PreparedStatement preparedStatement) throws SQLException {
-                preparedStatement.setString(1, uuid.toString());
-            }
-
-            @Override
-            boolean onResult(ResultSet resultSet) throws SQLException {
-                if (resultSet.next()) {
-                    user.setName(resultSet.getString("name"));
-                    Map<String, Boolean> nodes = gson.fromJson(resultSet.getString("perms"), NM_TYPE);
-                    user.setNodes(nodes);
-                    user.setPrimaryGroup(resultSet.getString("primary_group"));
-                    return true;
-                }
-                return false;
-            }
-        });
-
-        if (success) plugin.getUserManager().updateOrSet(user);
-        return success;
+        return success && cleanupUsers();
     }
 
     @Override
@@ -172,7 +145,7 @@ abstract class SQLDatastore extends Datastore {
     }
 
     @Override
-    public boolean loadOrCreateUser(UUID uuid, String username) {
+    public boolean loadUser(UUID uuid, String username) {
         User user = plugin.getUserManager().make(uuid, username);
         boolean success = runQuery(new QueryRS(USER_SELECT) {
             @Override
@@ -182,35 +155,29 @@ abstract class SQLDatastore extends Datastore {
 
             @Override
             boolean onResult(ResultSet resultSet) throws SQLException {
-                boolean success = true;
-                if (!resultSet.next()) {
-                    success = runQuery(new QueryPS(USER_INSERT) {
-                        @Override
-                        void onRun(PreparedStatement preparedStatement) throws SQLException {
-                            preparedStatement.setString(1, user.getUuid().toString());
-                            preparedStatement.setString(2, user.getName());
-                            preparedStatement.setString(3, user.getPrimaryGroup());
-                            preparedStatement.setString(4, gson.toJson(exportToLegacy(user.getNodes())));
-                        }
-                    });
-                } else {
+                if (resultSet.next()) {
+                    // User exists, let's load.
                     Map<String, Boolean> nodes = gson.fromJson(resultSet.getString("perms"), NM_TYPE);
                     user.setNodes(nodes);
                     user.setPrimaryGroup(resultSet.getString("primary_group"));
 
-                    if (!resultSet.getString("name").equals(user.getName())) {
-                        runQuery(new QueryPS(USER_UPDATE) {
-                            @Override
-                            void onRun(PreparedStatement preparedStatement) throws SQLException {
-                                preparedStatement.setString(1, user.getName());
-                                preparedStatement.setString(2, user.getPrimaryGroup());
-                                preparedStatement.setString(3, gson.toJson(exportToLegacy(user.getNodes())));
-                                preparedStatement.setString(4, user.getUuid().toString());
-                            }
-                        });
+                    if (user.getName().equalsIgnoreCase("null")) {
+                        user.setName(resultSet.getString("name"));
+                    } else {
+                        if (!resultSet.getString("name").equals(user.getName())) {
+                            runQuery(new QueryPS(USER_UPDATE) {
+                                @Override
+                                void onRun(PreparedStatement preparedStatement) throws SQLException {
+                                    preparedStatement.setString(1, user.getName());
+                                    preparedStatement.setString(2, user.getPrimaryGroup());
+                                    preparedStatement.setString(3, gson.toJson(exportToLegacy(user.getNodes())));
+                                    preparedStatement.setString(4, user.getUuid().toString());
+                                }
+                            });
+                        }
                     }
                 }
-                return success;
+                return true;
             }
         });
 
@@ -220,16 +187,81 @@ abstract class SQLDatastore extends Datastore {
 
     @Override
     public boolean saveUser(User user) {
-        boolean success = runQuery(new QueryPS(USER_UPDATE) {
+        if (!plugin.getUserManager().shouldSave(user)) {
+            return true;
+        }
+
+        boolean success = runQuery(new QueryRS(USER_SELECT) {
             @Override
             void onRun(PreparedStatement preparedStatement) throws SQLException {
-                preparedStatement.setString(1, user.getName());
-                preparedStatement.setString(2, user.getPrimaryGroup());
-                preparedStatement.setString(3, gson.toJson(exportToLegacy(user.getNodes())));
-                preparedStatement.setString(4, user.getUuid().toString());
+                preparedStatement.setString(1, user.getUuid().toString());
+            }
+
+            @Override
+            boolean onResult(ResultSet resultSet) throws SQLException {
+                boolean b;
+                if (!resultSet.next()) {
+                    // Doesn't already exist, let's insert.
+                    b = runQuery(new QueryPS(USER_INSERT) {
+                        @Override
+                        void onRun(PreparedStatement preparedStatement) throws SQLException {
+                            preparedStatement.setString(1, user.getUuid().toString());
+                            preparedStatement.setString(2, user.getName());
+                            preparedStatement.setString(3, user.getPrimaryGroup());
+                            preparedStatement.setString(4, gson.toJson(exportToLegacy(user.getNodes())));
+                        }
+                    });
+
+                } else {
+                    // User exists, let's update.
+                    b = runQuery(new QueryPS(USER_UPDATE) {
+                        @Override
+                        void onRun(PreparedStatement preparedStatement) throws SQLException {
+                            preparedStatement.setString(1, user.getName());
+                            preparedStatement.setString(2, user.getPrimaryGroup());
+                            preparedStatement.setString(3, gson.toJson(exportToLegacy(user.getNodes())));
+                            preparedStatement.setString(4, user.getUuid().toString());
+                        }
+                    });
+                }
+                return b;
+            }
+        });
+
+        return success;
+    }
+
+    @Override
+    public boolean cleanupUsers() {
+        boolean success = runQuery(new QueryPS(USER_DELETE) {
+            @Override
+            void onRun(PreparedStatement preparedStatement) throws SQLException {
+                preparedStatement.setString(1, "{\"group.default\":true}");
             }
         });
         return success;
+    }
+
+    @Override
+    public Set<UUID> getUniqueUsers() {
+        Set<UUID> uuids = new HashSet<>();
+
+        boolean success = runQuery(new QueryRS(USER_SELECT_ALL) {
+            @Override
+            void onRun(PreparedStatement preparedStatement) throws SQLException {
+            }
+
+            @Override
+            boolean onResult(ResultSet resultSet) throws SQLException {
+                while (resultSet.next()) {
+                    String uuid = resultSet.getString("uuid");
+                    uuids.add(UUID.fromString(uuid));
+                }
+                return false;
+            }
+        });
+
+        return success ? uuids : null;
     }
 
     @Override

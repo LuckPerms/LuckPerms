@@ -40,6 +40,12 @@ public interface LuckPermsApi {
     void runUpdateTask();
 
     /**
+     * @return the version of the API running on the platform
+     * @since 1.6
+     */
+    double getApiVersion();
+
+    /**
      * @return the version of the plugin running on the platform
      */
     String getVersion();

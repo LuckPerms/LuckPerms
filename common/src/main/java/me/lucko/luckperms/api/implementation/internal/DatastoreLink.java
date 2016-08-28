@@ -30,8 +30,10 @@ import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.api.*;
 import me.lucko.luckperms.api.data.Callback;
 
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -106,18 +108,33 @@ public class DatastoreLink implements Datastore {
 
         @Override
         public void loadOrCreateUser(@NonNull UUID uuid, @NonNull String username, Callback<Boolean> callback) {
-            master.loadOrCreateUser(uuid, checkUsername(username), checkCallback(callback));
+            master.loadUser(uuid, checkUsername(username), checkCallback(callback));
         }
 
         @Override
         public void loadUser(@NonNull UUID uuid, Callback<Boolean> callback) {
-            master.loadUser(uuid, checkCallback(callback));
+            master.loadUser(uuid, "null", checkCallback(callback));
+        }
+
+        @Override
+        public void loadUser(@NonNull UUID uuid, @NonNull String username, Callback<Boolean> callback) {
+            master.loadUser(uuid, checkUsername(username), checkCallback(callback));
         }
 
         @Override
         public void saveUser(@NonNull User user, Callback<Boolean> callback) {
             checkUser(user);
             master.saveUser(((UserLink) user).getMaster(), checkCallback(callback));
+        }
+
+        @Override
+        public void cleanupUsers(Callback<Boolean> callback) {
+            master.cleanupUsers(checkCallback(callback));
+        }
+
+        @Override
+        public void getUniqueUsers(Callback<Set<UUID>> callback) {
+            master.getUniqueUsers(checkCallback(callback));
         }
 
         @Override
@@ -204,18 +221,33 @@ public class DatastoreLink implements Datastore {
 
         @Override
         public boolean loadOrCreateUser(@NonNull UUID uuid, @NonNull String username) {
-            return master.loadOrCreateUser(uuid, checkUsername(username));
+            return master.loadUser(uuid, checkUsername(username));
         }
 
         @Override
         public boolean loadUser(@NonNull UUID uuid) {
-            return master.loadUser(uuid);
+            return master.loadUser(uuid, "null");
+        }
+
+        @Override
+        public boolean loadUser(@NonNull UUID uuid, @NonNull String username) {
+            return master.loadUser(uuid, checkUsername(username));
         }
 
         @Override
         public boolean saveUser(@NonNull User user) {
             checkUser(user);
             return master.saveUser(((UserLink) user).getMaster());
+        }
+
+        @Override
+        public boolean cleanupUsers() {
+            return master.cleanupUsers();
+        }
+
+        @Override
+        public Set<UUID> getUniqueUsers() {
+            return master.getUniqueUsers();
         }
 
         @Override
@@ -307,14 +339,21 @@ public class DatastoreLink implements Datastore {
         @Override
         public java.util.concurrent.Future<Boolean> loadOrCreateUser(@NonNull UUID uuid, @NonNull String username) {
             LPFuture<Boolean> lpf = new LPFuture<>();
-            master.loadOrCreateUser(uuid, checkUsername(username), lpf);
+            master.loadUser(uuid, checkUsername(username), lpf);
             return lpf;
         }
 
         @Override
         public java.util.concurrent.Future<Boolean> loadUser(@NonNull UUID uuid) {
             LPFuture<Boolean> lpf = new LPFuture<>();
-            master.loadUser(uuid, lpf);
+            master.loadUser(uuid, "null", lpf);
+            return lpf;
+        }
+
+        @Override
+        public java.util.concurrent.Future<Boolean> loadUser(@NonNull UUID uuid, @NonNull String username) {
+            LPFuture<Boolean> lpf = new LPFuture<>();
+            master.loadUser(uuid, checkUsername(username), lpf);
             return lpf;
         }
 
@@ -323,6 +362,20 @@ public class DatastoreLink implements Datastore {
             LPFuture<Boolean> lpf = new LPFuture<>();
             checkUser(user);
             master.saveUser(((UserLink) user).getMaster(), lpf);
+            return lpf;
+        }
+
+        @Override
+        public java.util.concurrent.Future<Boolean> cleanupUsers() {
+            LPFuture<Boolean> lpf = new LPFuture<>();
+            master.cleanupUsers(lpf);
+            return lpf;
+        }
+
+        @Override
+        public java.util.concurrent.Future<Set<UUID>> getUniqueUsers() {
+            LPFuture<Set<UUID>> lpf = new LPFuture<>();
+            master.getUniqueUsers(lpf);
             return lpf;
         }
 

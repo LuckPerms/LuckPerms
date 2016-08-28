@@ -286,7 +286,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             }
 
             userCount++;
-            plugin.getDatastore().loadOrCreateUser(u, "null");
+            plugin.getDatastore().loadUser(u, "null");
             User lpUser = plugin.getUserManager().get(u);
 
             try {

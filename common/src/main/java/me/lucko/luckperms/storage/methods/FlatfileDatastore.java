@@ -118,6 +118,8 @@ public class FlatfileDatastore extends Datastore {
             e.printStackTrace();
         }
 
+        cleanupUsers();
+
         setAcceptingLogins(true);
     }
 
@@ -166,108 +168,58 @@ public class FlatfileDatastore extends Datastore {
     }
 
     @Override
-    public boolean loadOrCreateUser(UUID uuid, String username) {
+    public boolean loadUser(UUID uuid, String username) {
         User user = plugin.getUserManager().make(uuid, username);
+        boolean success = false;
 
         File userFile = new File(usersDir, uuid.toString() + ".json");
-        if (!userFile.exists()) {
-            try {
-                userFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-                return false;
-            }
-
-            boolean success = doWrite(userFile, writer -> {
-                writer.beginObject();
-                writer.name("uuid").value(user.getUuid().toString());
-                writer.name("name").value(user.getName());
-                writer.name("primaryGroup").value(user.getPrimaryGroup());
-                writer.name("perms");
-                writer.beginObject();
-                for (Map.Entry<String, Boolean> e : exportToLegacy(user.getNodes()).entrySet()) {
-                    writer.name(e.getKey()).value(e.getValue().booleanValue());
+        if (userFile.exists()) {
+            final String[] name = new String[1];
+            success = doRead(userFile, reader -> {
+                reader.beginObject();
+                reader.nextName(); // uuid record
+                reader.nextString(); // uuid
+                reader.nextName(); // name record
+                name[0] = reader.nextString(); // name
+                reader.nextName(); // primaryGroup record
+                user.setPrimaryGroup(reader.nextString()); // primaryGroup
+                reader.nextName(); //perms
+                reader.beginObject();
+                while (reader.hasNext()) {
+                    String node = reader.nextName();
+                    boolean b = reader.nextBoolean();
+                    user.getNodes().add(Node.fromSerialisedNode(node, b));
                 }
-                writer.endObject();
-                writer.endObject();
+
+                reader.endObject();
+                reader.endObject();
                 return true;
             });
 
-            if (!success) return false;
-        }
-
-        final String[] name = new String[1];
-        boolean success = doRead(userFile, reader -> {
-            reader.beginObject();
-            reader.nextName(); // uuid record
-            reader.nextString(); // uuid
-            reader.nextName(); // name record
-            name[0] = reader.nextString(); // name
-            reader.nextName(); // primaryGroup record
-            user.setPrimaryGroup(reader.nextString()); // primaryGroup
-            reader.nextName(); //perms
-            reader.beginObject();
-            while (reader.hasNext()) {
-                String node = reader.nextName();
-                boolean b = reader.nextBoolean();
-                user.getNodes().add(Node.fromSerialisedNode(node, b));
-            }
-
-            reader.endObject();
-            reader.endObject();
-            return true;
-        });
-
-        if (!name[0].equals(user.getName())) {
-            doWrite(userFile, writer -> {
-                writer.beginObject();
-                writer.name("uuid").value(user.getUuid().toString());
-                writer.name("name").value(user.getName());
-                writer.name("primaryGroup").value(user.getPrimaryGroup());
-                writer.name("perms");
-                writer.beginObject();
-                for (Map.Entry<String, Boolean> e : exportToLegacy(user.getNodes()).entrySet()) {
-                    writer.name(e.getKey()).value(e.getValue().booleanValue());
+            if (user.getName().equalsIgnoreCase("null")) {
+                user.setName(name[0]);
+            } else {
+                if (!name[0].equals(user.getName())) {
+                    doWrite(userFile, writer -> {
+                        writer.beginObject();
+                        writer.name("uuid").value(user.getUuid().toString());
+                        writer.name("name").value(user.getName());
+                        writer.name("primaryGroup").value(user.getPrimaryGroup());
+                        writer.name("perms");
+                        writer.beginObject();
+                        for (Map.Entry<String, Boolean> e : exportToLegacy(user.getNodes()).entrySet()) {
+                            writer.name(e.getKey()).value(e.getValue().booleanValue());
+                        }
+                        writer.endObject();
+                        writer.endObject();
+                        return true;
+                    });
                 }
-                writer.endObject();
-                writer.endObject();
-                return true;
-            });
-        }
-
-        if (success) plugin.getUserManager().updateOrSet(user);
-        return success;
-    }
-
-    @Override
-    public boolean loadUser(UUID uuid) {
-        User user = plugin.getUserManager().make(uuid);
-
-        File userFile = new File(usersDir, uuid.toString() + ".json");
-        if (!userFile.exists()) {
-            return false;
-        }
-
-        boolean success = doRead(userFile, reader -> {
-            reader.beginObject();
-            reader.nextName(); // uuid record
-            reader.nextString(); // uuid
-            reader.nextName(); // name record
-            user.setName(reader.nextString()); // name
-            reader.nextName(); // primaryGroup record
-            user.setPrimaryGroup(reader.nextString()); // primaryGroup
-            reader.nextName(); // perms record
-            reader.beginObject();
-            while (reader.hasNext()) {
-                String node = reader.nextName();
-                boolean b = reader.nextBoolean();
-                user.getNodes().add(Node.fromSerialisedNode(node, b));
             }
 
-            reader.endObject();
-            reader.endObject();
-            return true;
-        });
+        } else {
+            success = true;
+        }
 
         if (success) plugin.getUserManager().updateOrSet(user);
         return success;
@@ -300,6 +252,59 @@ public class FlatfileDatastore extends Datastore {
             return true;
         });
         return success;
+    }
+
+    @Override
+    public boolean cleanupUsers() {
+        File[] files = usersDir.listFiles((dir, name) -> name.endsWith(".json"));
+        if (files == null) return false;
+
+        for (File file : files) {
+            Map<String, Boolean> nodes = new HashMap<>();
+             doRead(file, reader -> {
+                reader.beginObject();
+                reader.nextName(); // uuid record
+                reader.nextString(); // uuid
+                reader.nextName(); // name record
+                reader.nextString(); // name
+                reader.nextName(); // primaryGroup record
+                reader.nextString(); // primaryGroup
+                reader.nextName(); //perms
+                reader.beginObject();
+                while (reader.hasNext()) {
+                    String node = reader.nextName();
+                    boolean b = reader.nextBoolean();
+                    nodes.put(node, b);
+                }
+
+                reader.endObject();
+                reader.endObject();
+                return true;
+            });
+
+            boolean shouldDelete = false;
+            if (nodes.size() == 1) {
+                for (Map.Entry<String, Boolean> e : nodes.entrySet()) {
+                    // There's only one
+                    shouldDelete = e.getKey().equalsIgnoreCase("group.default") && e.getValue();
+                }
+            }
+
+            if (shouldDelete) {
+                file.delete();
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public Set<UUID> getUniqueUsers() {
+        String[] fileNames = usersDir.list((dir, name) -> name.endsWith(".json"));
+        if (fileNames == null) return null;
+        return Arrays.stream(fileNames)
+                .map(s -> s.substring(0, s.length() - 5))
+                .map(UUID::fromString)
+                .collect(Collectors.toSet());
     }
 
     @Override

@@ -139,21 +139,23 @@ public class MongoDBDatastore extends Datastore {
     }
 
     @Override
-    public boolean loadOrCreateUser(UUID uuid, String username) {
+    public boolean loadUser(UUID uuid, String username) {
         User user = plugin.getUserManager().make(uuid, username);
         boolean success =  call(() -> {
             MongoCollection<Document> c = database.getCollection("users");
 
             try (MongoCursor<Document> cursor = c.find(new Document("_id", user.getUuid())).iterator()) {
-                if (!cursor.hasNext()) {
-                    c.insertOne(fromUser(user));
-                } else {
+                if (cursor.hasNext()) {
                     Document d = cursor.next();
                     user.setPrimaryGroup(d.getString("primaryGroup"));
                     user.setNodes(revert((Map<String, Boolean>) d.get("perms")));
 
-                    if (!d.getString("name").equals(user.getName())) {
-                        c.replaceOne(new Document("_id", user.getUuid()), fromUser(user));
+                    if (user.getName().equalsIgnoreCase("null")) {
+                        user.setName(d.getString("name"));
+                    } else {
+                        if (!d.getString("name").equals(user.getName())) {
+                            c.replaceOne(new Document("_id", user.getUuid()), fromUser(user));
+                        }
                     }
                 }
             }
@@ -165,34 +167,47 @@ public class MongoDBDatastore extends Datastore {
     }
 
     @Override
-    public boolean loadUser(UUID uuid) {
-        User user = plugin.getUserManager().make(uuid);
+    public boolean saveUser(User user) {
+        if (!plugin.getUserManager().shouldSave(user)) {
+            return true;
+        }
+
         boolean success = call(() -> {
             MongoCollection<Document> c = database.getCollection("users");
-
             try (MongoCursor<Document> cursor = c.find(new Document("_id", user.getUuid())).iterator()) {
-                if (cursor.hasNext()) {
-                    Document d = cursor.next();
-                    user.setName(d.getString("name"));
-                    user.setPrimaryGroup(d.getString("primaryGroup"));
-                    user.setNodes(revert((Map<String, Boolean>) d.get("perms")));
-                    return true;
+                if (!cursor.hasNext()) {
+                    c.insertOne(fromUser(user));
+                } else {
+                    c.replaceOne(new Document("_id", user.getUuid()), fromUser(user));
                 }
-                return false;
             }
+            return true;
         }, false);
-
-        if (success) plugin.getUserManager().updateOrSet(user);
         return success;
     }
 
     @Override
-    public boolean saveUser(User user) {
-        return call(() -> {
+    public boolean cleanupUsers() {
+        return true; // TODO
+    }
+
+    @Override
+    public Set<UUID> getUniqueUsers() {
+        Set<UUID> uuids = new HashSet<>();
+        boolean success = call(() -> {
             MongoCollection<Document> c = database.getCollection("users");
-            c.replaceOne(new Document("_id", user.getUuid()), fromUser(user));
+
+            try (MongoCursor<Document> cursor = c.find().iterator()) {
+                while (cursor.hasNext()) {
+                    Document d = cursor.next();
+                    uuids.add(UUID.fromString(d.getString("_id")));
+                }
+            }
+
             return true;
         }, false);
+
+        return success ? uuids : null;
     }
 
     @Override

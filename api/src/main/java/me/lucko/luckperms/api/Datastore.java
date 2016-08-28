@@ -24,6 +24,7 @@ package me.lucko.luckperms.api;
 
 import me.lucko.luckperms.api.data.Callback;
 
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -90,7 +91,9 @@ public interface Datastore {
          * @return true if the operation completed successfully.
          * @throws NullPointerException if uuid or username is null
          * @throws IllegalArgumentException if either of the parameters are invalid
+         * @deprecated functionality of this method is taken on by {@link #loadUser(UUID, String)}
          */
+        @Deprecated
         boolean loadOrCreateUser(UUID uuid, String username);
 
         /**
@@ -98,8 +101,20 @@ public interface Datastore {
          * @param uuid the uuid of the user to load
          * @return true if the user exists, and was loaded correctly.
          * @throws NullPointerException if uuid is null
+         * @deprecated replaced by {@link #loadUser(UUID, String)}
          */
+        @Deprecated
         boolean loadUser(UUID uuid);
+
+        /**
+         * Loads a user's data into the plugins internal storage.
+         * @param uuid the uuid of the user to load
+         * @param username the users username. (if you want to specify <code>null</code> here, just input "null" as a string.)
+         * @return if the operation was performed successfully
+         * @throws NullPointerException if uuid or username is null
+         * @since 1.6
+         */
+        boolean loadUser(UUID uuid, String username);
 
         /**
          * Saves a user object into the datastore. You should call this after you make any changes to a user.
@@ -109,6 +124,20 @@ public interface Datastore {
          * @throws IllegalStateException if the user instance was not obtained from LuckPerms.
          */
         boolean saveUser(User user);
+
+        /**
+         * Removes users from the datastore who are "default". This is called every time the plugin loads.
+         * @return true if the operation completed successfully
+         * @since 1.6
+         */
+        boolean cleanupUsers();
+
+        /**
+         * Gets a set user's UUIDs who are "unique", aren't just a member of the "default" group.
+         * @return a set of uuids, or null if the operation failed.
+         * @since 1.6
+         */
+        Set<UUID> getUniqueUsers();
 
         /**
          * Creates and loads a group into the plugins internal storage
@@ -223,9 +252,14 @@ public interface Datastore {
     interface Async {
         void logAction(LogEntry entry, Callback<Boolean> callback);
         void getLog(Callback<Log> callback);
+        @Deprecated
         void loadOrCreateUser(UUID uuid, String username, Callback<Boolean> callback);
+        @Deprecated
         void loadUser(UUID uuid, Callback<Boolean> callback);
+        void loadUser(UUID uuid, String username, Callback<Boolean> callback);
         void saveUser(User user, Callback<Boolean> callback);
+        void cleanupUsers(Callback<Boolean> callback);
+        void getUniqueUsers(Callback<Set<UUID>> callback);
         void createAndLoadGroup(String name, Callback<Boolean> callback);
         void loadGroup(String name, Callback<Boolean> callback);
         void loadAllGroups(Callback<Boolean> callback);
@@ -250,9 +284,14 @@ public interface Datastore {
     interface Future {
         java.util.concurrent.Future<Boolean> logAction(LogEntry entry);
         java.util.concurrent.Future<Log> getLog();
+        @Deprecated
         java.util.concurrent.Future<Boolean> loadOrCreateUser(UUID uuid, String username);
+        @Deprecated
         java.util.concurrent.Future<Boolean> loadUser(UUID uuid);
+        java.util.concurrent.Future<Boolean> loadUser(UUID uuid, String username);
         java.util.concurrent.Future<Boolean> saveUser(User user);
+        java.util.concurrent.Future<Boolean> cleanupUsers();
+        java.util.concurrent.Future<Set<UUID>> getUniqueUsers();
         java.util.concurrent.Future<Boolean> createAndLoadGroup(String name);
         java.util.concurrent.Future<Boolean> loadGroup(String name);
         java.util.concurrent.Future<Boolean> loadAllGroups();

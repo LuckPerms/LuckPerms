@@ -65,62 +65,41 @@ public class UserMainCommand extends MainCommand<User> {
     @Override
     protected User getTarget(String target, LuckPermsPlugin plugin, Sender sender) {
         UUID u = Util.parseUuid(target);
-        if (u != null) {
-            User user = getUser(plugin, u);
-            if (user == null) {
-
-                Message.USER_NEVER_JOINED.send(sender);
-                if (!plugin.getDatastore().loadOrCreateUser(u, "null")) {
-                    Message.USER_CREATE_FAIL.send(sender);
+        if (u == null) {
+            if (target.length() <= 16) {
+                if (Patterns.NON_USERNAME.matcher(target).find()) {
+                    Message.USER_INVALID_ENTRY.send(sender, target);
                     return null;
                 }
 
-                user = getUser(plugin, u);
-            }
-            return user;
-        }
+                Message.USER_ATTEMPTING_LOOKUP.send(sender);
 
-        if (target.length() <= 16) {
-            if (Patterns.NON_USERNAME.matcher(target).find()) {
+                u = plugin.getDatastore().getUUID(target);
+                if (u == null) {
+                    Message.USER_NOT_FOUND.send(sender);
+                    return null;
+                }
+            } else {
                 Message.USER_INVALID_ENTRY.send(sender, target);
-                return null;
             }
-
-            Message.USER_ATTEMPTING_LOOKUP.send(sender);
-
-            UUID uuid = plugin.getDatastore().getUUID(target);
-            if (uuid == null) {
-                Message.USER_NOT_FOUND.send(sender);
-                return null;
-            }
-
-            User user = getUser(plugin, uuid);
-            if (user == null) {
-                Message.USER_NOT_FOUND.send(sender);
-            }
-            return user;
         }
 
-        Message.USER_INVALID_ENTRY.send(sender, target);
-        return null;
+        if (!plugin.getDatastore().loadUser(u, "null")) {
+            Message.LOADING_ERROR.send(sender);
+        }
+
+        User user = plugin.getUserManager().get(u);
+        if (user == null) {
+            Message.LOADING_ERROR.send(sender);
+            return null;
+        }
+
+        return user;
     }
 
     @Override
     protected void cleanup(User user, LuckPermsPlugin plugin) {
         plugin.getUserManager().cleanup(user);
-    }
-
-    private User getUser(LuckPermsPlugin plugin, UUID uuid) {
-        if (!plugin.getDatastore().loadUser(uuid)) {
-            return null;
-        }
-
-        User user = plugin.getUserManager().get(uuid);
-        if (user == null) {
-            return null;
-        }
-
-        return user;
     }
 
     @Override

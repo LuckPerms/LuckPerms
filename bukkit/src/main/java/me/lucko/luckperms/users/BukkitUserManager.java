@@ -88,7 +88,7 @@ public class BukkitUserManager extends UserManager {
             Set<UUID> players = plugin.getServer().getOnlinePlayers().stream()
                     .map(p -> plugin.getUuidCache().getUUID(p.getUniqueId()))
                     .collect(Collectors.toSet());
-            plugin.doAsync(() -> players.forEach(u -> plugin.getDatastore().loadUser(u)));
+            plugin.doAsync(() -> players.forEach(u -> plugin.getDatastore().loadUser(u, "null")));
         });
     }
 }

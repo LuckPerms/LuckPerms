@@ -212,7 +212,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             progress.put(uuid, new CountDownLatch(2));
 
             // Create a LuckPerms user for the UUID
-            plugin.getDatastore().loadOrCreateUser(uuid, "null");
+            plugin.getDatastore().loadUser(uuid, "null");
             User user = plugin.getUserManager().get(uuid);
 
             // Get a list of Permissions held by the user from the PP API.

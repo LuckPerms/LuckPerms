@@ -152,7 +152,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
         // Migrate all users.
         log.info("zPermissions Migration: Starting user migration.");
         for (UUID u : service.getAllPlayersUUID()) {
-            plugin.getDatastore().loadOrCreateUser(u, "null");
+            plugin.getDatastore().loadUser(u, "null");
             User user = plugin.getUserManager().get(u);
 
             for (Map.Entry<String, Boolean> e : service.getPlayerPermissions(null, null, u).entrySet()) {

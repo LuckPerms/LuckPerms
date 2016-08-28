@@ -34,6 +34,7 @@ import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.tracks.Track;
 import me.lucko.luckperms.users.User;
 
+import java.util.Set;
 import java.util.UUID;
 
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
@@ -70,9 +71,10 @@ public abstract class Datastore {
     public abstract void shutdown();
     public abstract boolean logAction(LogEntry entry);
     public abstract Log getLog();
-    public abstract boolean loadOrCreateUser(UUID uuid, String username);
-    public abstract boolean loadUser(UUID uuid);
+    public abstract boolean loadUser(UUID uuid, String username);
     public abstract boolean saveUser(User user);
+    public abstract boolean cleanupUsers();
+    public abstract Set<UUID> getUniqueUsers();
     public abstract boolean createAndLoadGroup(String name);
     public abstract boolean loadGroup(String name);
     public abstract boolean loadAllGroups();
@@ -106,16 +108,9 @@ public abstract class Datastore {
         });
     }
 
-    public void loadOrCreateUser(UUID uuid, String username, Callback<Boolean> callback) {
+    public void loadUser(UUID uuid, String username, Callback<Boolean> callback) {
         doAsync(() -> {
-            boolean result = loadOrCreateUser(uuid, username);
-            doSync(() -> callback.onComplete(result));
-        });
-    }
-
-    public void loadUser(UUID uuid, Callback<Boolean> callback) {
-        doAsync(() -> {
-            boolean result = loadUser(uuid);
+            boolean result = loadUser(uuid, username);
             doSync(() -> callback.onComplete(result));
         });
     }
@@ -123,6 +118,20 @@ public abstract class Datastore {
     public void saveUser(User user, Callback<Boolean> callback) {
         doAsync(() -> {
             boolean result = saveUser(user);
+            doSync(() -> callback.onComplete(result));
+        });
+    }
+
+    public void cleanupUsers(Callback<Boolean> callback) {
+        doAsync(() -> {
+            boolean result = cleanupUsers();
+            doSync(() -> callback.onComplete(result));
+        });
+    }
+
+    public void getUniqueUsers(Callback<Set<UUID>> callback) {
+        doAsync(() -> {
+            Set<UUID> result = getUniqueUsers();
             doSync(() -> callback.onComplete(result));
         });
     }

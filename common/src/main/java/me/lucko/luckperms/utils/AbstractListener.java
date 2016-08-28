@@ -59,7 +59,7 @@ public class AbstractListener {
             plugin.getDatastore().saveUUIDData(username, u, Callback.empty());
         }
 
-        plugin.getDatastore().loadOrCreateUser(cache.getUUID(u), username);
+        plugin.getDatastore().loadUser(cache.getUUID(u), username);
         final long time = System.currentTimeMillis() - startTime;
         if (time >= 1000) {
             plugin.getLog().warn("Processing login for " + username + " took " + time + "ms.");

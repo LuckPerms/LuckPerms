@@ -62,6 +62,6 @@ public class SpongeUserManager extends UserManager {
     public void updateAllUsers() {
         plugin.getGame().getServer().getOnlinePlayers().stream()
                 .map(p -> plugin.getUuidCache().getUUID(p.getUniqueId()))
-                .forEach(u -> plugin.getDatastore().loadUser(u));
+                .forEach(u -> plugin.getDatastore().loadUser(u, "null"));
     }
 }

@@ -93,6 +93,34 @@ public abstract class UserManager extends AbstractManager<UUID, User> {
         }
     }
 
+    public boolean shouldSave(User user) {
+        if (user.getNodes().size() != 1) {
+            return true;
+        }
+
+        for (Node node : user.getNodes()) {
+            // There's only one.
+            if (!node.isGroupNode()) {
+                return true;
+            }
+
+            if (node.isTemporary() || node.isServerSpecific() || node.isWorldSpecific()) {
+                return true;
+            }
+
+            if (!node.getGroupName().equalsIgnoreCase("default")) {
+                // The user's only node is not the default group one.
+                return true;
+            }
+        }
+
+        if (!user.getPrimaryGroup().equalsIgnoreCase("default")) {
+            return true; // Not in the default primary group
+        }
+
+        return false;
+    }
+
     /**
      * Checks to see if the user is online, and if they are not, runs {@link #unload(Identifiable)}
      * @param user The user to be cleaned up

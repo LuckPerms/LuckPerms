@@ -97,7 +97,7 @@ public class BungeeListener extends AbstractListener implements Listener {
 
             // We have to make a new user on this thread whilst the connection is being held, or we get concurrency issues as the Bukkit server
             // and the BungeeCord server try to make a new user at the same time.
-            plugin.getDatastore().loadOrCreateUser(cache.getUUID(c.getUniqueId()), c.getName());
+            plugin.getDatastore().loadUser(cache.getUUID(c.getUniqueId()), c.getName());
             final long time = System.currentTimeMillis() - startTime;
             if (time >= 1000) {
                 plugin.getLog().warn("Processing login for " + c.getName() + " took " + time + "ms.");

@@ -246,7 +246,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
         }
 
         for (Map.Entry<UUID, Map<Map.Entry<String, String>, Boolean>> e : users.entrySet()) {
-            plugin.getDatastore().loadOrCreateUser(e.getKey(), "null");
+            plugin.getDatastore().loadUser(e.getKey(), "null");
             me.lucko.luckperms.users.User user = plugin.getUserManager().get(e.getKey());
 
             for (Map.Entry<Map.Entry<String, String>, Boolean> n : e.getValue().entrySet()) {
