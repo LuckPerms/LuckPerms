@@ -26,6 +26,7 @@ import com.google.inject.Inject;
 import lombok.Getter;
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.implementation.ApiProvider;
+import me.lucko.luckperms.api.sponge.LuckPermsService;
 import me.lucko.luckperms.commands.ConsecutiveExecutor;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.constants.Message;
@@ -118,6 +119,9 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         trackManager = new TrackManager();
         importer = new Importer(commandManager);
         consecutiveExecutor = new ConsecutiveExecutor(commandManager);
+
+        getLog().info("Registering PermissionService...");
+        Sponge.getServiceManager().setProvider(this, PermissionService.class, new LuckPermsService(this));
 
         getLog().info("Registering API...");
         apiProvider = new ApiProvider(this);

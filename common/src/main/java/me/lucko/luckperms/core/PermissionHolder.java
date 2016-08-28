@@ -85,7 +85,7 @@ public abstract class PermissionHolder {
         permissions.addAll(nodes);
         permissions.addAll(transientNodes);
 
-        Iterator<Node> iterator = permissions.descendingIterator(); // TODO check this
+        Iterator<Node> iterator = permissions.descendingIterator();
         while (iterator.hasNext()) {
             Node entry = iterator.next();
 

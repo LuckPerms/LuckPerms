@@ -46,7 +46,6 @@ public class InfoCommand extends SingleMainCommand {
                 plugin.getVersion(),
                 plugin.getDatastore().getName(),
                 c.getServer(),
-                c.getDefaultGroupName(),
                 c.getSyncTime(),
                 formatBoolean(c.getIncludeGlobalPerms()),
                 formatBoolean(c.getOnlineMode()),

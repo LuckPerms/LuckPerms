@@ -50,13 +50,6 @@ public abstract class LPConfiguration<T extends LuckPermsPlugin> {
                     defaultServerName + "' (the default)");
             set("server", defaultServerName);
         }
-
-        if (Patterns.NON_ALPHA_NUMERIC.matcher(getDefaultGroupName()).find()) {
-            plugin.getLog().severe("Default group defined in config.yml contains invalid characters. Group names can " +
-                    "only contain alphanumeric characters.\nDefined default group name '" + getDefaultGroupName() +
-                    "' will be replaced with 'default' (the default)");
-            set("default-group", "default");
-        }
     }
 
     protected abstract void init();
@@ -73,12 +66,20 @@ public abstract class LPConfiguration<T extends LuckPermsPlugin> {
         return getInt("data.sync-minutes", 3);
     }
 
+    /**
+     * As of 1.6, this value is a constant
+     * @return the default group node
+     */
     public String getDefaultGroupNode() {
-        return "group." + getDefaultGroupName();
+        return "group.default";
     }
 
+    /**
+     * As of 1.6, this value is a constant
+     * @return the name of the default group
+     */
     public String getDefaultGroupName() {
-        return getString("default-group", "default");
+        return "default";
     }
 
     public boolean getIncludeGlobalPerms() {

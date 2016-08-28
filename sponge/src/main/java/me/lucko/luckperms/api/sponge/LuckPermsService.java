@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.api.sponge;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import lombok.*;
 import me.lucko.luckperms.LPSpongePlugin;
@@ -54,7 +55,7 @@ public class LuckPermsService implements PermissionService {
     private final Set<PermissionDescription> descriptionSet;
 
     private final Map<String, SubjectCollection> subjects;
-    private final Set<ContextCalculator<Subject>> contextCalculators;
+    private final Set<ContextCalculator<Subject>> contextCalculators; // TODO actually use context calculators, idk...
 
     public LuckPermsService(LPSpongePlugin plugin) {
         this.plugin = plugin;
@@ -71,12 +72,12 @@ public class LuckPermsService implements PermissionService {
     }
 
     public SubjectData getDefaultData() {
-        return null; // TODO
+        return getDefaults().getSubjectData();
     }
 
     @Override
     public Subject getDefaults() {
-        return null; // TODO
+        return getSubjects("defaults").get("default");
     }
 
     @Override
@@ -90,7 +91,7 @@ public class LuckPermsService implements PermissionService {
 
     @Override
     public Map<String, SubjectCollection> getKnownSubjects() {
-        return subjects;
+        return ImmutableMap.copyOf(subjects);
     }
 
     @Override
@@ -122,10 +123,6 @@ public class LuckPermsService implements PermissionService {
     @Override
     public void registerContextCalculator(@NonNull ContextCalculator<Subject> contextCalculator) {
         contextCalculators.add(contextCalculator);
-    }
-
-    public List<String> getPossiblePermissions() {
-        return getDescriptions().stream().map(PermissionDescription::getId).collect(Collectors.toList());
     }
 
     @RequiredArgsConstructor

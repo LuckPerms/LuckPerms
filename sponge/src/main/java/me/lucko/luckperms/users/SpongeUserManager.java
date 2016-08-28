@@ -23,9 +23,7 @@
 package me.lucko.luckperms.users;
 
 import me.lucko.luckperms.LPSpongePlugin;
-import org.spongepowered.api.entity.living.player.Player;
 
-import java.util.Optional;
 import java.util.UUID;
 
 public class SpongeUserManager extends UserManager {
@@ -39,11 +37,6 @@ public class SpongeUserManager extends UserManager {
     @Override
     public void unload(User user) {
         if (user != null) {
-            Optional<Player> p = plugin.getGame().getServer().getPlayer(plugin.getUuidCache().getExternalUUID(user.getUuid()));
-            if (p.isPresent()) {
-                p.get().getSubjectData().clearParents();
-                p.get().getSubjectData().clearPermissions();
-            }
             getAll().remove(user.getUuid());
         }
     }

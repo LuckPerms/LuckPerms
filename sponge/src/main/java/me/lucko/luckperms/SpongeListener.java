@@ -72,19 +72,6 @@ public class SpongeListener extends AbstractListener {
         refreshPlayer(e.getTargetEntity().getUniqueId());
     }
 
-    // TODO Use reflection/any other method to refresh on world change
-    /*
-    @Listener
-    public void onPlayerTeleport(DisplaceEntityEvent e) {
-        final Entity entity = e.getTargetEntity();
-        if (!(entity instanceof Player)){
-            return;
-        }
-
-        refreshPlayer(entity.getUniqueId());
-    }
-    */
-
     @Listener
     public void onClientLeave(ClientConnectionEvent.Disconnect e) {
         onLeave(e.getTargetEntity().getUniqueId());

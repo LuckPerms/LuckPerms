@@ -125,7 +125,6 @@ public enum Message {
             PREFIX + "&6Running &bLuckPerms v%s&6 by &bLuck&6." + "\n" +
             PREFIX + "&f-> &eStorage Method: &6%s" + "\n" +
             PREFIX + "&f-> &eServer Name: &6%s" + "\n" +
-            PREFIX + "&f-> &eDefault Group: &6%s" + "\n" +
             PREFIX + "&f-> &eSync Interval: &6%s minutes" + "\n" +
             PREFIX + "&f-> &eInclude Global Perms: &6%s" + "\n" +
             PREFIX + "&f-> &eOnline Mode: &6%s" + "\n" +
