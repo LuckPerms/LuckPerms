@@ -46,6 +46,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static me.lucko.luckperms.core.PermissionHolder.exportToLegacy;
+
 @SuppressWarnings("UnnecessaryLocalVariable")
 abstract class SQLDatastore extends Datastore {
 
@@ -190,7 +192,7 @@ abstract class SQLDatastore extends Datastore {
                             preparedStatement.setString(1, user.getUuid().toString());
                             preparedStatement.setString(2, user.getName());
                             preparedStatement.setString(3, user.getPrimaryGroup());
-                            preparedStatement.setString(4, gson.toJson(user.getNodes()));
+                            preparedStatement.setString(4, gson.toJson(exportToLegacy(user.getNodes())));
                         }
                     });
                 } else {
@@ -204,7 +206,7 @@ abstract class SQLDatastore extends Datastore {
                             void onRun(PreparedStatement preparedStatement) throws SQLException {
                                 preparedStatement.setString(1, user.getName());
                                 preparedStatement.setString(2, user.getPrimaryGroup());
-                                preparedStatement.setString(3, gson.toJson(user.getNodes()));
+                                preparedStatement.setString(3, gson.toJson(exportToLegacy(user.getNodes())));
                                 preparedStatement.setString(4, user.getUuid().toString());
                             }
                         });
@@ -225,7 +227,7 @@ abstract class SQLDatastore extends Datastore {
             void onRun(PreparedStatement preparedStatement) throws SQLException {
                 preparedStatement.setString(1, user.getName());
                 preparedStatement.setString(2, user.getPrimaryGroup());
-                preparedStatement.setString(3, gson.toJson(user.getNodes()));
+                preparedStatement.setString(3, gson.toJson(exportToLegacy(user.getNodes())));
                 preparedStatement.setString(4, user.getUuid().toString());
             }
         });
@@ -249,7 +251,7 @@ abstract class SQLDatastore extends Datastore {
                         @Override
                         void onRun(PreparedStatement preparedStatement) throws SQLException {
                             preparedStatement.setString(1, group.getName());
-                            preparedStatement.setString(2, gson.toJson(group.getNodes()));
+                            preparedStatement.setString(2, gson.toJson(exportToLegacy(group.getNodes())));
                         }
                     });
                 } else {
@@ -322,7 +324,7 @@ abstract class SQLDatastore extends Datastore {
         boolean success = runQuery(new QueryPS(GROUP_UPDATE) {
             @Override
             void onRun(PreparedStatement preparedStatement) throws SQLException {
-                preparedStatement.setString(1, gson.toJson(group.getNodes()));
+                preparedStatement.setString(1, gson.toJson(exportToLegacy(group.getNodes())));
                 preparedStatement.setString(2, group.getName());
             }
         });
