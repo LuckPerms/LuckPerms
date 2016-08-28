@@ -261,17 +261,16 @@ public class LuckPermsSubject implements Subject {
 
         @Override
         public boolean clearPermissions() {
-            // TODO re-give default nodes?
-
             holder.getNodes().clear();
+            if (holder instanceof User) {
+                service.getPlugin().getUserManager().giveDefaultIfNeeded(((User) holder), false);
+            }
             superClass.objectSave(holder);
             return true;
         }
 
         @Override
         public boolean clearPermissions(Set<Context> set) {
-            // TODO re-give default nodes?
-
             Map<String, String> context = new HashMap<>();
             for (Context c : set) {
                 context.put(c.getKey(), c.getValue());
@@ -286,6 +285,10 @@ public class LuckPermsSubject implements Subject {
                     iterator.remove();
                     work = true;
                 }
+            }
+
+            if (holder instanceof User) {
+                service.getPlugin().getUserManager().giveDefaultIfNeeded(((User) holder), false);
             }
 
             superClass.objectSave(holder);
@@ -372,8 +375,6 @@ public class LuckPermsSubject implements Subject {
 
         @Override
         public boolean clearParents() {
-            // TODO re-give default nodes?
-
             boolean work = false;
             Iterator<Node> iterator = holder.getNodes().iterator();
 
@@ -386,14 +387,16 @@ public class LuckPermsSubject implements Subject {
                 }
             }
 
+            if (holder instanceof User) {
+                service.getPlugin().getUserManager().giveDefaultIfNeeded(((User) holder), false);
+            }
+
             superClass.objectSave(holder);
             return work;
         }
 
         @Override
         public boolean clearParents(Set<Context> set) {
-            // TODO re-give default nodes?
-
             Map<String, String> context = new HashMap<>();
             for (Context c : set) {
                 context.put(c.getKey(), c.getValue());
@@ -413,6 +416,10 @@ public class LuckPermsSubject implements Subject {
                     iterator.remove();
                     work = true;
                 }
+            }
+
+            if (holder instanceof User) {
+                service.getPlugin().getUserManager().giveDefaultIfNeeded(((User) holder), false);
             }
 
             superClass.objectSave(holder);

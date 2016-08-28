@@ -24,10 +24,10 @@ package me.lucko.luckperms.api.sponge.collections;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
-import me.lucko.luckperms.groups.GroupManager;
 import me.lucko.luckperms.api.sponge.LuckPermsService;
-import me.lucko.luckperms.api.sponge.simple.SimpleSubject;
 import me.lucko.luckperms.api.sponge.LuckPermsSubject;
+import me.lucko.luckperms.api.sponge.simple.SimpleSubject;
+import me.lucko.luckperms.groups.GroupManager;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;

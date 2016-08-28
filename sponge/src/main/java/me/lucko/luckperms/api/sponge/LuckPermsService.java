@@ -37,7 +37,6 @@ import org.spongepowered.api.util.Tristate;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 public class LuckPermsService implements PermissionService {
     public static final String SERVER_CONTEXT = "server";

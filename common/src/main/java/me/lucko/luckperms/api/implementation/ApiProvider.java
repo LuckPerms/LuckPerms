@@ -27,7 +27,6 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.api.*;
-import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.event.LPEvent;
 import me.lucko.luckperms.api.event.LPListener;
 import me.lucko.luckperms.api.implementation.internal.*;
@@ -77,12 +76,12 @@ public class ApiProvider implements LuckPermsApi {
     }
 
     @Override
-    public void registerListener(LPListener listener) {
+    public void registerListener(@NonNull LPListener listener) {
         eventBus.register(listener);
     }
 
     @Override
-    public void unregisterListener(LPListener listener) {
+    public void unregisterListener(@NonNull LPListener listener) {
         eventBus.unregister(listener);
     }
 
@@ -117,7 +116,7 @@ public class ApiProvider implements LuckPermsApi {
     }
 
     @Override
-    public Optional<User> getUserSafe(UUID uuid) {
+    public Optional<User> getUserSafe(@NonNull UUID uuid) {
         return Optional.ofNullable(getUser(uuid));
     }
 
@@ -132,7 +131,7 @@ public class ApiProvider implements LuckPermsApi {
     }
 
     @Override
-    public Optional<User> getUserSafe(String name) {
+    public Optional<User> getUserSafe(@NonNull String name) {
         return Optional.ofNullable(getUser(name));
     }
 
@@ -147,6 +146,12 @@ public class ApiProvider implements LuckPermsApi {
     }
 
     @Override
+    public void cleanupUser(@NonNull User user) {
+        Utils.checkUser(user);
+        plugin.getUserManager().cleanup(((UserLink) user).getMaster());
+    }
+
+    @Override
     public Group getGroup(@NonNull String name) {
         final me.lucko.luckperms.groups.Group group = plugin.getGroupManager().get(name);
         if (group == null) {
@@ -157,7 +162,7 @@ public class ApiProvider implements LuckPermsApi {
     }
 
     @Override
-    public Optional<Group> getGroupSafe(String name) {
+    public Optional<Group> getGroupSafe(@NonNull String name) {
         return Optional.ofNullable(getGroup(name));
     }
 
@@ -182,7 +187,7 @@ public class ApiProvider implements LuckPermsApi {
     }
 
     @Override
-    public Optional<Track> getTrackSafe(String name) {
+    public Optional<Track> getTrackSafe(@NonNull String name) {
         return Optional.ofNullable(getTrack(name));
     }
 
@@ -197,7 +202,7 @@ public class ApiProvider implements LuckPermsApi {
     }
 
     @Override
-    public Node.Builder buildNode(String permission) throws IllegalArgumentException {
+    public Node.Builder buildNode(@NonNull String permission) throws IllegalArgumentException {
         return new me.lucko.luckperms.utils.Node.Builder(checkNode(permission));
     }
 }

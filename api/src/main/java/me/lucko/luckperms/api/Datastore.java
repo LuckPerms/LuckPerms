@@ -133,7 +133,7 @@ public interface Datastore {
         boolean cleanupUsers();
 
         /**
-         * Gets a set user's UUIDs who are "unique", aren't just a member of the "default" group.
+         * Gets a set all user's UUIDs who are "unique", and aren't just a member of the "default" group.
          * @return a set of uuids, or null if the operation failed.
          * @since 1.6
          */

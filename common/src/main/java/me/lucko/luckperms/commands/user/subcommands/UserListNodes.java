@@ -30,7 +30,7 @@ import me.lucko.luckperms.users.User;
 
 import java.util.List;
 
-import static me.lucko.luckperms.core.PermissionHolder.*;
+import static me.lucko.luckperms.core.PermissionHolder.exportToLegacy;
 
 public class UserListNodes extends SubCommand<User> {
     public UserListNodes() {

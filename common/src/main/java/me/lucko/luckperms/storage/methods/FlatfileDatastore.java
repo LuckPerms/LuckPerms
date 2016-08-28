@@ -42,7 +42,7 @@ import java.util.logging.*;
 import java.util.logging.Formatter;
 import java.util.stream.Collectors;
 
-import static me.lucko.luckperms.core.PermissionHolder.*;
+import static me.lucko.luckperms.core.PermissionHolder.exportToLegacy;
 
 @SuppressWarnings({"ResultOfMethodCallIgnored", "UnnecessaryLocalVariable"})
 public class FlatfileDatastore extends Datastore {

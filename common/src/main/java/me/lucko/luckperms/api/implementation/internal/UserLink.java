@@ -22,7 +22,6 @@
 
 package me.lucko.luckperms.api.implementation.internal;
 
-import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
@@ -43,7 +42,7 @@ import static me.lucko.luckperms.api.implementation.internal.Utils.*;
 @SuppressWarnings("unused")
 public class UserLink extends PermissionHolderLink implements User {
 
-    @Getter(AccessLevel.PACKAGE)
+    @Getter
     private final me.lucko.luckperms.users.User master;
 
     @Getter
