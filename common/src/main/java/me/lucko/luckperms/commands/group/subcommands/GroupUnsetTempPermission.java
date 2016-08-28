@@ -46,7 +46,7 @@ public class GroupUnsetTempPermission extends SubCommand<Group> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
-        String node = args.get(0);
+        String node = args.get(0).replace("{SPACE}", " ");
 
         if (ArgumentChecker.checkNode(node)) {
             sendUsage(sender, label);

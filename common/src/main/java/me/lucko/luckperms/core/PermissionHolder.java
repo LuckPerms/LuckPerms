@@ -81,17 +81,21 @@ public abstract class PermissionHolder {
     public SortedSet<Node> getPermissions() {
         // Returns no duplicate nodes. as in, nodes with the same value.
 
+        TreeSet<Node> combined = new TreeSet<>(PRIORITY_COMPARATOR);
+        combined.addAll(nodes);
+        combined.addAll(transientNodes);
+
         TreeSet<Node> permissions = new TreeSet<>(PRIORITY_COMPARATOR);
-        permissions.addAll(nodes);
-        permissions.addAll(transientNodes);
 
-        Iterator<Node> iterator = permissions.descendingIterator();
-        while (iterator.hasNext()) {
-            Node entry = iterator.next();
+        combined:
+        for (Node node : combined) {
+            for (Node other : permissions) {
+                if (node.equalsIgnoringValue(other)) {
+                    continue combined;
+                }
+            }
 
-            permissions.stream()
-                    .filter(entry::equalsIgnoringValue) // The node appears again at a higher priority
-                    .forEachOrdered(other -> iterator.remove()); // Remove it.
+            permissions.add(node);
         }
 
         return permissions;
@@ -283,7 +287,7 @@ public abstract class PermissionHolder {
     private static Tristate hasPermission(Set<Node> toQuery, Node node) {
         for (Node n : toQuery) {
             if (n.equalsIgnoringValue(node)) {
-                n.getTristate();
+                return n.getTristate();
             }
         }
 

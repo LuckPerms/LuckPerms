@@ -61,7 +61,7 @@ public abstract class AbstractManager<I, T extends Identifiable<I>> {
     public void updateOrSet(T t) {
         if (!isLoaded(t.getId())) {
             // The object isn't already loaded
-            objects.put(t.getId(), t);
+            set(t);
         } else {
             copy(t, objects.get(t.getId()));
         }

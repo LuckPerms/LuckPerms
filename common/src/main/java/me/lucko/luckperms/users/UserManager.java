@@ -24,6 +24,8 @@ package me.lucko.luckperms.users;
 
 import lombok.RequiredArgsConstructor;
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.data.Callback;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.utils.AbstractManager;
 import me.lucko.luckperms.utils.Identifiable;
@@ -52,6 +54,12 @@ public abstract class UserManager extends AbstractManager<UUID, User> {
     }
 
     @Override
+    public void set(User u) {
+        giveDefaultIfNeeded(u, true);
+        super.set(u);
+    }
+
+    @Override
     public void copy(User from, User to) {
         to.setNodes(from.getNodes());
         to.setPrimaryGroup(from.getPrimaryGroup());
@@ -62,12 +70,27 @@ public abstract class UserManager extends AbstractManager<UUID, User> {
      * Set a user to the default group
      * @param user the user to give to
      */
-    public void giveDefaults(User user) {
-        // Setup the new user with default values
-        try {
-            user.setPermission(plugin.getConfiguration().getDefaultGroupNode(), true);
-        } catch (ObjectAlreadyHasException ignored) {}
-        user.setPrimaryGroup(plugin.getConfiguration().getDefaultGroupName());
+    public void giveDefaultIfNeeded(User user, boolean save) {
+        boolean hasGroup = false;
+        for (Node node : user.getPermissions()) {
+            if (node.isGroupNode()) {
+                hasGroup = true;
+                break;
+            }
+        }
+
+        if (!hasGroup) {
+            user.setPrimaryGroup("default");
+            try {
+                user.setPermission("group.default", true);
+            } catch (ObjectAlreadyHasException ignored) {
+                ignored.printStackTrace();
+            }
+
+            if (save) {
+                plugin.getDatastore().saveUser(user, Callback.empty());
+            }
+        }
     }
 
     /**

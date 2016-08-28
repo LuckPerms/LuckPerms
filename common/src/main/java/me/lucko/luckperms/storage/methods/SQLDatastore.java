@@ -184,8 +184,6 @@ abstract class SQLDatastore extends Datastore {
             boolean onResult(ResultSet resultSet) throws SQLException {
                 boolean success = true;
                 if (!resultSet.next()) {
-                    plugin.getUserManager().giveDefaults(user);
-
                     success = runQuery(new QueryPS(USER_INSERT) {
                         @Override
                         void onRun(PreparedStatement preparedStatement) throws SQLException {

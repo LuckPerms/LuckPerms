@@ -151,20 +151,26 @@ public interface Node extends Map.Entry<String, Boolean> {
 
     /**
      * @return the time in Unix time when this node will expire
+     * @throws IllegalStateException if the node is not temporary
      */
     long getExpiryUnixTime();
 
     /**
      * @return the {@link Date} when this node will expire
+     * @throws IllegalStateException if the node is not temporary
      */
     Date getExpiry();
 
     /**
      * @return the number of seconds until this permission will expire
+     * @throws IllegalStateException if the node is not temporary
      */
     long getSecondsTilExpiry();
 
     /**
+     * Return true if the node has expired.
+     * This also returns false if the node is not temporary
+     *
      * @return true if this node has expired
      */
     boolean hasExpired();

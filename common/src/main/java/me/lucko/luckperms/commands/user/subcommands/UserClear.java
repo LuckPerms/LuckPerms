@@ -43,7 +43,6 @@ public class UserClear extends SubCommand<User> {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
         user.clearNodes();
-        plugin.getUserManager().giveDefaults(user);
         Message.CLEAR_SUCCESS.send(sender, user.getName());
         LogEntry.build().actor(sender).acted(user).action("clear").build().submit(plugin, sender);
 

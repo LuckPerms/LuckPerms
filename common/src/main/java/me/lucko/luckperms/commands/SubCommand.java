@@ -145,13 +145,13 @@ public abstract class SubCommand<T> {
     }
 
     protected static void save(User user, Sender sender, LuckPermsPlugin plugin) {
-        user.refreshPermissions();
-
         if (plugin.getDatastore().saveUser(user)) {
             Message.USER_SAVE_SUCCESS.send(sender);
         } else {
             Message.USER_SAVE_ERROR.send(sender);
         }
+
+        user.refreshPermissions();
     }
 
     protected static void save(Group group, Sender sender, LuckPermsPlugin plugin) {

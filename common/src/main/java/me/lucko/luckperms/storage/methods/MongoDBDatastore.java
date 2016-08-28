@@ -146,7 +146,6 @@ public class MongoDBDatastore extends Datastore {
 
             try (MongoCursor<Document> cursor = c.find(new Document("_id", user.getUuid())).iterator()) {
                 if (!cursor.hasNext()) {
-                    plugin.getUserManager().giveDefaults(user);
                     c.insertOne(fromUser(user));
                 } else {
                     Document d = cursor.next();

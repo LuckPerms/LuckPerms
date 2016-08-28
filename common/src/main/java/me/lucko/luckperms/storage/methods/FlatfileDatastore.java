@@ -178,8 +178,6 @@ public class FlatfileDatastore extends Datastore {
                 return false;
             }
 
-            plugin.getUserManager().giveDefaults(user);
-
             boolean success = doWrite(userFile, writer -> {
                 writer.beginObject();
                 writer.name("uuid").value(user.getUuid().toString());

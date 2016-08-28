@@ -286,11 +286,8 @@ public abstract class User extends PermissionHolder implements Identifiable<UUID
      * Clear all of the users permission nodes
      */
     public void clearNodes() {
-        String defaultGroupNode = getPlugin().getConfiguration().getDefaultGroupNode();
         getNodes().clear();
-        try {
-            setPermission(defaultGroupNode, true);
-        } catch (ObjectAlreadyHasException ignored) {}
+        getPlugin().getUserManager().giveDefaultIfNeeded(this, false);
     }
 
     /**

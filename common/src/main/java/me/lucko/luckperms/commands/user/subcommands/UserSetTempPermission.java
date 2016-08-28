@@ -47,7 +47,7 @@ public class UserSetTempPermission extends SubCommand<User> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
-        String node = args.get(0);
+        String node = args.get(0).replace("{SPACE}", " ");
         String bool = args.get(1).toLowerCase();
 
         if (ArgumentChecker.checkNode(node)) {

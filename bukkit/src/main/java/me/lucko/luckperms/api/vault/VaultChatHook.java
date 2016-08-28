@@ -55,7 +55,7 @@ import static me.lucko.luckperms.utils.ArgumentChecker.unescapeCharacters;
  *
  * Registered on normal priority so other plugins can override.
  */
-class VaultChatHook extends Chat {
+public class VaultChatHook extends Chat {
 
     @Setter
     private LPBukkitPlugin plugin;

@@ -33,7 +33,7 @@ import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.users.User;
 import net.milkbowl.vault.permission.Permission;
 
-class VaultPermissionHook extends Permission {
+public class VaultPermissionHook extends Permission {
 
     @Setter
     private LPBukkitPlugin plugin;

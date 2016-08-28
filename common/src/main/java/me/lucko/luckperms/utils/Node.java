@@ -354,7 +354,7 @@ public class Node implements me.lucko.luckperms.api.Node {
     }
 
     public boolean hasExpired() {
-        return expireAt < (System.currentTimeMillis() / 1000L);
+        return isTemporary() && expireAt < (System.currentTimeMillis() / 1000L);
     }
 
     public Map<String, String> getExtraContexts() {
@@ -485,31 +485,23 @@ public class Node implements me.lucko.luckperms.api.Node {
             }
         }
 
-        if (other.getServer().isPresent() != this.getServer().isPresent()) {
+        if (other.getServer().isPresent() == this.getServer().isPresent()) {
             if (other.getServer().isPresent()) {
                 if (!other.getServer().get().equalsIgnoreCase(this.getServer().get())) {
                     return false;
                 }
             }
-        } else {
-            return false;
         }
 
-        if (other.getWorld().isPresent() != this.getWorld().isPresent()) {
+        if (other.getWorld().isPresent() == this.getWorld().isPresent()) {
             if (other.getWorld().isPresent()) {
                 if (!other.getWorld().get().equalsIgnoreCase(this.getWorld().get())) {
                     return false;
                 }
             }
-        } else {
-            return false;
         }
 
         if (!other.getExtraContexts().equals(this.getExtraContexts())) {
-            return false;
-        }
-
-        if (other.isTemporary() != this.isTemporary()) {
             return false;
         }
 
@@ -522,31 +514,27 @@ public class Node implements me.lucko.luckperms.api.Node {
             return false;
         }
 
-        if (other.getServer().isPresent() != this.getServer().isPresent()) {
+        if (other.isTemporary() != this.isTemporary()) {
+            return false;
+        }
+
+        if (other.getServer().isPresent() == this.getServer().isPresent()) {
             if (other.getServer().isPresent()) {
                 if (!other.getServer().get().equalsIgnoreCase(this.getServer().get())) {
                     return false;
                 }
             }
-        } else {
-            return false;
         }
 
-        if (other.getWorld().isPresent() != this.getWorld().isPresent()) {
+        if (other.getWorld().isPresent() == this.getWorld().isPresent()) {
             if (other.getWorld().isPresent()) {
                 if (!other.getWorld().get().equalsIgnoreCase(this.getWorld().get())) {
                     return false;
                 }
             }
-        } else {
-            return false;
         }
 
         if (!other.getExtraContexts().equals(this.getExtraContexts())) {
-            return false;
-        }
-
-        if (other.isTemporary() != this.isTemporary()) {
             return false;
         }
 
