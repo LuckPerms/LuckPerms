@@ -251,6 +251,8 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 }
             }
 
+            plugin.getDatastore().saveGroup(lpGroup);
+
         }
 
         log.info("PermissionsEx Migration: Migrated " + groupCount + " groups");
