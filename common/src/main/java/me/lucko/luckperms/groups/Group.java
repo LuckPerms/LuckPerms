@@ -26,6 +26,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.event.events.GroupAddEvent;
 import me.lucko.luckperms.api.implementation.internal.GroupLink;
 import me.lucko.luckperms.api.implementation.internal.PermissionHolderLink;
@@ -321,10 +322,11 @@ public class Group extends PermissionHolder implements Identifiable<String> {
      */
     private List<String> getGroups(String server, String world, boolean includeGlobal) {
         // Call super #getPermissions method, and just sort through those
-        Map<String, Boolean> perms = exportNodes(server, world, null, includeGlobal, true, null);
-        return perms.keySet().stream()
-                .filter(s -> Patterns.GROUP_MATCH.matcher(s).matches())
-                .map(s -> Patterns.DOT.split(s, 2)[1])
+        return getNodes().stream()
+                .filter(n -> n.shouldApplyOnWorld(world, includeGlobal, true))
+                .filter(n -> n.shouldApplyOnServer(server, includeGlobal, true))
+                .filter(Node::isGroupNode)
+                .map(Node::getGroupName)
                 .collect(Collectors.toList());
     }
 }

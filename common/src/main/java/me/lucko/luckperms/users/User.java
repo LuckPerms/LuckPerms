@@ -329,7 +329,9 @@ public abstract class User extends PermissionHolder implements Identifiable<UUID
      */
     public List<String> getGroups(String server, String world, boolean includeGlobal) {
         // Call super #getPermissions method, and just sort through those
-        return getAllNodesFiltered(server, world, Collections.emptyMap(), includeGlobal, true).stream()
+        return getNodes().stream()
+                .filter(n -> n.shouldApplyOnWorld(world, includeGlobal, true))
+                .filter(n -> n.shouldApplyOnServer(server, includeGlobal, true))
                 .filter(Node::isGroupNode)
                 .map(Node::getGroupName)
                 .collect(Collectors.toList());
