@@ -123,9 +123,17 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
 
         // Migrate all groups.
         log.info("PermissionsEx Migration: Starting group migration.");
+
+        int maxGroupWeight = 0;
         int groupCount = 0;
+
         for (PermissionGroup group : manager.getGroupList()) {
             groupCount ++;
+
+            if(group.getWeight() > maxGroupWeight) {
+                maxGroupWeight = group.getWeight();
+            }
+
             final String name = group.getName().toLowerCase();
             plugin.getDatastore().createAndLoadGroup(name);
             Group lpGroup = plugin.getGroupManager().get(name);
@@ -224,10 +232,10 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             if (prefix != null && !prefix.equals("")) {
                 prefix = ArgumentChecker.escapeCharacters(prefix);
                 try {
-                    lpGroup.setPermission("prefix.50." + prefix, true);
+                    lpGroup.setPermission("prefix." + group.getWeight() + "." + prefix, true);
                     LogEntry.build()
                             .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
-                            .acted(lpGroup).action("set prefix.50." + prefix + " true")
+                            .acted(lpGroup).action("set prefix." + group.getWeight() + "." + prefix + " true")
                             .build().submit(plugin);
                 } catch (Exception ex) {
                     if (!(ex instanceof ObjectAlreadyHasException)) {
@@ -239,10 +247,10 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             if (suffix != null && !suffix.equals("")) {
                 suffix = ArgumentChecker.escapeCharacters(suffix);
                 try {
-                    lpGroup.setPermission("suffix.50." + suffix, true);
+                    lpGroup.setPermission("suffix." + group.getWeight() + "." + suffix, true);
                     LogEntry.build()
                             .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
-                            .acted(lpGroup).action("set suffix.50." + suffix + " true")
+                            .acted(lpGroup).action("set suffix." + group.getWeight() + "." + suffix + " true")
                             .build().submit(plugin);
                 } catch (Exception ex) {
                     if (!(ex instanceof ObjectAlreadyHasException)) {
@@ -377,10 +385,10 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             if (prefix != null && !prefix.equals("")) {
                 prefix = ArgumentChecker.escapeCharacters(prefix);
                 try {
-                    lpUser.setPermission("prefix.100." + prefix, true);
+                    lpUser.setPermission("prefix." + maxGroupWeight + "." + prefix, true);
                     LogEntry.build()
                             .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
-                            .acted(lpUser).action("set prefix.100." + prefix + " true")
+                            .acted(lpUser).action("set prefix." + maxGroupWeight + "." + prefix + " true")
                             .build().submit(plugin);
                 } catch (Exception ex) {
                     if (!(ex instanceof ObjectAlreadyHasException)) {
@@ -392,10 +400,10 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             if (suffix != null && !suffix.equals("")) {
                 suffix = ArgumentChecker.escapeCharacters(suffix);
                 try {
-                    lpUser.setPermission("suffix.100." + suffix, true);
+                    lpUser.setPermission("suffix." + maxGroupWeight + "." + suffix, true);
                     LogEntry.build()
                             .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
-                            .acted(lpUser).action("set suffix.100." + suffix + " true")
+                            .acted(lpUser).action("set suffix." + maxGroupWeight + "." + suffix + " true")
                             .build().submit(plugin);
                 } catch (Exception ex) {
                     if (!(ex instanceof ObjectAlreadyHasException)) {
