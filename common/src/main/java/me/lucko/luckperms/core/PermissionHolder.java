@@ -39,7 +39,6 @@ import me.lucko.luckperms.groups.Group;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.stream.Collectors;
 
 /**
@@ -139,8 +138,7 @@ public abstract class PermissionHolder {
      * @return a set of nodes
      */
     public SortedSet<Node> getAllNodes(List<String> excludedGroups) {
-        SortedSet<Node> all = new ConcurrentSkipListSet<>(PRIORITY_COMPARATOR);
-        all.addAll(getPermissions());
+        SortedSet<Node> all = getPermissions();
 
         if (excludedGroups == null) {
             excludedGroups = new ArrayList<>();
@@ -536,6 +534,10 @@ public abstract class PermissionHolder {
 
         @Override
         public int compare(Node o1, Node o2) {
+            if (o1.equals(o2)) {
+                return 0;
+            }
+
             if (o1.isOverride() != o2.isOverride()) {
                 return o1.isOverride() ? 1 : -1;
             }
