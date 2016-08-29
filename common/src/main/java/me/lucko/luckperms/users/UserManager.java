@@ -61,10 +61,12 @@ public abstract class UserManager extends AbstractManager<UUID, User> {
 
     @Override
     public void copy(User from, User to) {
-        to.setNodes(from.getNodes());
-        to.setPrimaryGroup(from.getPrimaryGroup());
-        giveDefaultIfNeeded(to, true);
-        to.refreshPermissions();
+        if (from.getPrimaryGroup() != null) {
+            // This isn't just a black user. we shouldn't override in that case.
+            to.setNodes(from.getNodes());
+            to.setPrimaryGroup(from.getPrimaryGroup());
+            to.refreshPermissions();
+        }
     }
 
     /**

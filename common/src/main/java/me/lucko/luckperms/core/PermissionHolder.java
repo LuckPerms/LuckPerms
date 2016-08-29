@@ -423,7 +423,7 @@ public abstract class PermissionHolder {
      * @throws ObjectLacksException if the holder doesn't have this node already
      */
     public void unsetPermission(Node node) throws ObjectLacksException {
-        if (hasPermission(node, false) == Tristate.FALSE) {
+        if (hasPermission(node, false) != Tristate.TRUE) {
             throw new ObjectLacksException();
         }
 

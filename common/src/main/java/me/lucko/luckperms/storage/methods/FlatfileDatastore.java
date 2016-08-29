@@ -228,6 +228,13 @@ public class FlatfileDatastore extends Datastore {
     @Override
     public boolean saveUser(User user) {
         File userFile = new File(usersDir, user.getUuid().toString() + ".json");
+        if (!plugin.getUserManager().shouldSave(user)) {
+            if (userFile.exists()) {
+                userFile.delete();
+            }
+            return true;
+        }
+
         if (!userFile.exists()) {
             try {
                 userFile.createNewFile();

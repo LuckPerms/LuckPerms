@@ -169,7 +169,11 @@ public class MongoDBDatastore extends Datastore {
     @Override
     public boolean saveUser(User user) {
         if (!plugin.getUserManager().shouldSave(user)) {
-            return true;
+            boolean success = call(() -> {
+                MongoCollection<Document> c = database.getCollection("users");
+                return c.deleteOne(new Document("_id", user.getUuid())).wasAcknowledged();
+            }, false);
+            return success;
         }
 
         boolean success = call(() -> {

@@ -55,7 +55,8 @@ abstract class SQLDatastore extends Datastore {
     private static final String USER_SELECT = "SELECT * FROM lp_users WHERE uuid=?";
     private static final String USER_SELECT_ALL = "SELECT uuid FROM lp_users";
     private static final String USER_UPDATE = "UPDATE lp_users SET name=?, primary_group = ?, perms=? WHERE uuid=?";
-    private static final String USER_DELETE = "DELETE FROM lp_users WHERE perms=?";
+    private static final String USER_DELETE = "DELETE FROM lp_users WHERE uuid=?";
+    private static final String USER_DELETE_ALL = "DELETE FROM lp_users WHERE perms=?";
 
     private static final String GROUP_INSERT = "INSERT INTO lp_groups VALUES(?, ?)";
     private static final String GROUP_SELECT = "SELECT perms FROM lp_groups WHERE name=?";
@@ -189,7 +190,13 @@ abstract class SQLDatastore extends Datastore {
     @Override
     public boolean saveUser(User user) {
         if (!plugin.getUserManager().shouldSave(user)) {
-            return true;
+            boolean success = runQuery(new QueryPS(USER_DELETE) {
+                @Override
+                void onRun(PreparedStatement preparedStatement) throws SQLException {
+                    preparedStatement.setString(1, user.getUuid().toString());
+                }
+            });
+            return success;
         }
 
         boolean success = runQuery(new QueryRS(USER_SELECT) {
@@ -234,7 +241,7 @@ abstract class SQLDatastore extends Datastore {
 
     @Override
     public boolean cleanupUsers() {
-        boolean success = runQuery(new QueryPS(USER_DELETE) {
+        boolean success = runQuery(new QueryPS(USER_DELETE_ALL) {
             @Override
             void onRun(PreparedStatement preparedStatement) throws SQLException {
                 preparedStatement.setString(1, "{\"group.default\":true}");
