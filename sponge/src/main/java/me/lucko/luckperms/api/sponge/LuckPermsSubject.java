@@ -25,6 +25,7 @@ package me.lucko.luckperms.api.sponge;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 import me.lucko.luckperms.api.Node;
@@ -49,13 +50,16 @@ import java.util.stream.Collectors;
 import static me.lucko.luckperms.utils.ArgumentChecker.escapeCharacters;
 import static me.lucko.luckperms.utils.ArgumentChecker.unescapeCharacters;
 
-@AllArgsConstructor
+@EqualsAndHashCode(of = {"holder"})
 public class LuckPermsSubject implements Subject {
+    @Getter
+    private final PermissionHolder holder;
     private final EnduringData enduringData;
     private final TransientData transientData;
     private final LuckPermsService service;
 
     public LuckPermsSubject(PermissionHolder holder, LuckPermsService service) {
+        this.holder = holder;
         this.enduringData = new EnduringData(this, service, holder);
         this.transientData = new TransientData(service, holder);
         this.service = service;
@@ -165,14 +169,14 @@ public class LuckPermsSubject implements Subject {
 
     @Override
     public Optional<String> getOption(Set<Context> set, String s) {
-        Map<String, String> enduringOptions = enduringData.getOptions(set);
-        if (enduringOptions.containsKey(s)) {
-            return Optional.of(enduringOptions.get(s));
-        }
-
         Map<String, String> transientOptions = enduringData.getOptions(set);
         if (transientOptions.containsKey(s)) {
             return Optional.of(transientOptions.get(s));
+        }
+
+        Map<String, String> enduringOptions = enduringData.getOptions(set);
+        if (enduringOptions.containsKey(s)) {
+            return Optional.of(enduringOptions.get(s));
         }
 
         return Optional.empty();

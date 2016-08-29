@@ -27,6 +27,7 @@ import lombok.NonNull;
 import me.lucko.luckperms.api.sponge.LuckPermsService;
 import me.lucko.luckperms.api.sponge.LuckPermsSubject;
 import me.lucko.luckperms.api.sponge.simple.SimpleSubject;
+import me.lucko.luckperms.core.PermissionHolder;
 import me.lucko.luckperms.users.User;
 import me.lucko.luckperms.users.UserManager;
 import org.spongepowered.api.service.context.Context;
@@ -39,12 +40,14 @@ import java.util.AbstractMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
 public class UserCollection implements SubjectCollection {
     private final LuckPermsService service;
     private final UserManager manager;
+    private final Set<LuckPermsSubject> cache = ConcurrentHashMap.newKeySet();
 
     @Override
     public String getIdentifier() {
@@ -53,17 +56,30 @@ public class UserCollection implements SubjectCollection {
 
     @Override
     public Subject get(@NonNull String id) {
+        PermissionHolder holder = null;
         try {
             UUID u = UUID.fromString(id);
             if (manager.isLoaded(u)) {
-                return new LuckPermsSubject(manager.get(u), service);
+                holder = manager.get(u);
             }
 
         } catch (IllegalArgumentException e) {
             User user = manager.get(id);
             if (user != null) {
-                return new LuckPermsSubject(user, service);
+                holder = user;
             }
+        }
+
+        if (holder != null) {
+            for (LuckPermsSubject subject : cache) {
+                if (subject.getHolder().getObjectName().equalsIgnoreCase(holder.getObjectName())) {
+                    return subject;
+                }
+            }
+
+            LuckPermsSubject subject = new LuckPermsSubject(holder, service);
+            cache.add(subject);
+            return subject;
         }
 
         // What am I meant to do here? What if no user is loaded? Load it? Create it?

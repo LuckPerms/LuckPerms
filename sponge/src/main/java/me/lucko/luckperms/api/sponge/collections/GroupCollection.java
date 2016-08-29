@@ -27,6 +27,7 @@ import lombok.NonNull;
 import me.lucko.luckperms.api.sponge.LuckPermsService;
 import me.lucko.luckperms.api.sponge.LuckPermsSubject;
 import me.lucko.luckperms.api.sponge.simple.SimpleSubject;
+import me.lucko.luckperms.core.PermissionHolder;
 import me.lucko.luckperms.groups.GroupManager;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -37,12 +38,14 @@ import org.spongepowered.api.service.permission.SubjectData;
 import java.util.AbstractMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
 public class GroupCollection implements SubjectCollection {
     private final LuckPermsService service;
     private final GroupManager manager;
+    private final Set<LuckPermsSubject> cache = ConcurrentHashMap.newKeySet();
 
     @Override
     public String getIdentifier() {
@@ -52,7 +55,16 @@ public class GroupCollection implements SubjectCollection {
     @Override
     public Subject get(@NonNull String id) {
         if (manager.isLoaded(id)) {
-            return new LuckPermsSubject(manager.get(id), service);
+            PermissionHolder holder = manager.get(id);
+            for (LuckPermsSubject subject : cache) {
+                if (subject.getHolder().getObjectName().equalsIgnoreCase(holder.getObjectName())) {
+                    return subject;
+                }
+            }
+
+            LuckPermsSubject subject = new LuckPermsSubject(manager.get(id), service);
+            cache.add(subject);
+            return subject;
         }
 
         return new SimpleSubject(id, service, this);
