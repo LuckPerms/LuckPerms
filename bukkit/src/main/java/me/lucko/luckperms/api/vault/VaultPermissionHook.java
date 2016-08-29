@@ -195,7 +195,7 @@ public class VaultPermissionHook extends Permission {
     public String[] getPlayerGroups(String world, @NonNull String player) {
         final User user = plugin.getUserManager().get(player);
         return (user == null) ? new String[0] :
-                world != null && !world.equals("") ? user.getLocalGroups("global", world).toArray(new String[0]) :
+                world != null && !world.equals("") ? user.getGroups("global", world, true).toArray(new String[0]) :
                         user.getGroupNames().toArray(new String[0]);
     }
 

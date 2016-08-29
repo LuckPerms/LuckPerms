@@ -325,7 +325,7 @@ public abstract class User extends PermissionHolder implements Identifiable<UUID
      * @param includeGlobal Whether to include global groups
      * @return a {@link List} of group names
      */
-    private List<String> getGroups(String server, String world, boolean includeGlobal) {
+    public List<String> getGroups(String server, String world, boolean includeGlobal) {
         // Call super #getPermissions method, and just sort through those
         Map<String, Boolean> perms = exportNodes(server, world, null, includeGlobal, true, null);
         return perms.keySet().stream()
