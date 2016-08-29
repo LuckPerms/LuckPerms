@@ -404,6 +404,22 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 }
             }
 
+            String primary = null;
+            int weight = -100;
+            for (PermissionGroup group : user.getOwnParents()) {
+                if (group.getRank() > weight) {
+                    primary = group.getName();
+                    weight = group.getWeight();
+                }
+            }
+
+            if (primary != null) {
+                try {
+                    lpUser.setPermission("group." + primary.toLowerCase(), true);
+                } catch (ObjectAlreadyHasException ignored) {}
+                lpUser.setPrimaryGroup(primary);
+            }
+
             plugin.getUserManager().cleanup(lpUser);
             plugin.getDatastore().saveUser(lpUser);
         }
