@@ -385,10 +385,10 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             if (prefix != null && !prefix.equals("")) {
                 prefix = ArgumentChecker.escapeCharacters(prefix);
                 try {
-                    lpUser.setPermission("prefix." + maxGroupWeight + "." + prefix, true);
+                    lpUser.setPermission("prefix." + (maxGroupWeight + 1) + "." + prefix, true);
                     LogEntry.build()
                             .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
-                            .acted(lpUser).action("set prefix." + maxGroupWeight + "." + prefix + " true")
+                            .acted(lpUser).action("set prefix." + (maxGroupWeight + 1) + "." + prefix + " true")
                             .build().submit(plugin);
                 } catch (Exception ex) {
                     if (!(ex instanceof ObjectAlreadyHasException)) {
@@ -400,10 +400,10 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             if (suffix != null && !suffix.equals("")) {
                 suffix = ArgumentChecker.escapeCharacters(suffix);
                 try {
-                    lpUser.setPermission("suffix." + maxGroupWeight + "." + suffix, true);
+                    lpUser.setPermission("suffix." + (maxGroupWeight + 1) + "." + suffix, true);
                     LogEntry.build()
                             .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
-                            .acted(lpUser).action("set suffix." + maxGroupWeight + "." + suffix + " true")
+                            .acted(lpUser).action("set suffix." + (maxGroupWeight + 1) + "." + suffix + " true")
                             .build().submit(plugin);
                 } catch (Exception ex) {
                     if (!(ex instanceof ObjectAlreadyHasException)) {
