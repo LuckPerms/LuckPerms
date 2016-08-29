@@ -71,6 +71,7 @@ abstract class SQLDatastore extends Datastore {
 
     private static final String UUIDCACHE_INSERT = "INSERT INTO lp_uuid VALUES(?, ?)";
     private static final String UUIDCACHE_SELECT = "SELECT uuid FROM lp_uuid WHERE name=?";
+    private static final String UUIDCACHE_SELECT_NAME = "SELECT name FROM lp_uuid WHERE uuid=?";
     private static final String UUIDCACHE_UPDATE = "UPDATE lp_uuid SET uuid=? WHERE name=?";
 
     private static final String ACTION_INSERT = "INSERT INTO lp_actions(`time`, `actor_uuid`, `actor_name`, `type`, `acted_uuid`, `acted_name`, `action`) VALUES(?, ?, ?, ?, ?, ?, ?)";
@@ -539,6 +540,30 @@ abstract class SQLDatastore extends Datastore {
         });
 
         return success ? uuid[0] : null;
+    }
+
+    @Override
+    public String getName(UUID uuid) {
+        final String u = uuid.toString();
+        final String[] name = {null};
+
+        boolean success = runQuery(new QueryRS(UUIDCACHE_SELECT_NAME) {
+            @Override
+            void onRun(PreparedStatement preparedStatement) throws SQLException {
+                preparedStatement.setString(1, u);
+            }
+
+            @Override
+            boolean onResult(ResultSet resultSet) throws SQLException {
+                if (resultSet.next()) {
+                    name[0] = resultSet.getString("name");
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        return success ? name[0] : null;
     }
 
     private class Query extends QueryPS {

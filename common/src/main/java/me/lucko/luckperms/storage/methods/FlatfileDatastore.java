@@ -612,6 +612,16 @@ public class FlatfileDatastore extends Datastore {
         return UUID.fromString(uuidCache.get(username));
     }
 
+    @Override
+    public String getName(UUID uuid) {
+        for (Map.Entry<String, String> e : uuidCache.entrySet()) {
+            if (e.getValue().equalsIgnoreCase(uuid.toString())) {
+                return e.getKey();
+            }
+        }
+        return null;
+    }
+
     interface WriteOperation {
         boolean onRun(JsonWriter writer) throws IOException;
     }

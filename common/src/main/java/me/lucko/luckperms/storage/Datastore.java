@@ -87,6 +87,7 @@ public abstract class Datastore {
     public abstract boolean deleteTrack(Track track);
     public abstract boolean saveUUIDData(String username, UUID uuid);
     public abstract UUID getUUID(String username);
+    public abstract String getName(UUID uuid);
 
 
 
@@ -216,6 +217,13 @@ public abstract class Datastore {
     public void getUUID(String username, Callback<UUID> callback) {
         doAsync(() -> {
             UUID result = getUUID(username);
+            doSync(() -> callback.onComplete(result));
+        });
+    }
+
+    public void getName(UUID uuid, Callback<String> callback) {
+        doAsync(() -> {
+            String result = getName(uuid);
             doSync(() -> callback.onComplete(result));
         });
     }

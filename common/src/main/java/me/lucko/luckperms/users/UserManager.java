@@ -63,6 +63,7 @@ public abstract class UserManager extends AbstractManager<UUID, User> {
     public void copy(User from, User to) {
         to.setNodes(from.getNodes());
         to.setPrimaryGroup(from.getPrimaryGroup());
+        giveDefaultIfNeeded(to, true);
         to.refreshPermissions();
     }
 

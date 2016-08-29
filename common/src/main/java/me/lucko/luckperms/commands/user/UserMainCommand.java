@@ -84,7 +84,10 @@ public class UserMainCommand extends MainCommand<User> {
             }
         }
 
-        if (!plugin.getDatastore().loadUser(u, "null")) {
+        String name = plugin.getDatastore().getName(u);
+        if (name == null) name = "null";
+
+        if (!plugin.getDatastore().loadUser(u, name)) {
             Message.LOADING_ERROR.send(sender);
         }
 

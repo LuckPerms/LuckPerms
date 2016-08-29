@@ -413,6 +413,20 @@ public class MongoDBDatastore extends Datastore {
         }, null);
     }
 
+    @Override
+    public String getName(UUID uuid) {
+        return call(() -> {
+            MongoCollection<Document> c = database.getCollection("uuid");
+
+            try (MongoCursor<Document> cursor = c.find(new Document("_id", uuid)).iterator()) {
+                if (cursor.hasNext()) {
+                    return cursor.next().get("name", String.class);
+                }
+            }
+            return null;
+        }, null);
+    }
+
     private static <T> T call(Callable<T> c, T def) {
         try {
             return c.call();
