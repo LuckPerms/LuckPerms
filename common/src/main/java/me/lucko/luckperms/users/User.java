@@ -27,6 +27,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.event.events.GroupAddEvent;
 import me.lucko.luckperms.api.implementation.internal.GroupLink;
 import me.lucko.luckperms.api.implementation.internal.PermissionHolderLink;
@@ -37,6 +38,7 @@ import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.utils.Identifiable;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -327,10 +329,9 @@ public abstract class User extends PermissionHolder implements Identifiable<UUID
      */
     public List<String> getGroups(String server, String world, boolean includeGlobal) {
         // Call super #getPermissions method, and just sort through those
-        Map<String, Boolean> perms = exportNodes(server, world, null, includeGlobal, true, null);
-        return perms.keySet().stream()
-                .filter(s -> Patterns.GROUP_MATCH.matcher(s).matches())
-                .map(s -> Patterns.DOT.split(s, 2)[1])
+        return getAllNodesFiltered(server, world, Collections.emptyMap(), includeGlobal, true).stream()
+                .filter(Node::isGroupNode)
+                .map(Node::getGroupName)
                 .collect(Collectors.toList());
     }
 }
