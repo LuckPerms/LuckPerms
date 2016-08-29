@@ -93,6 +93,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     private me.lucko.luckperms.api.Logger log;
     private Importer importer;
     private ConsecutiveExecutor consecutiveExecutor;
+    private LuckPermsService service;
 
     @Listener
     public void onEnable(GamePreInitializationEvent event) {
@@ -121,7 +122,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         consecutiveExecutor = new ConsecutiveExecutor(commandManager);
 
         getLog().info("Registering PermissionService...");
-        Sponge.getServiceManager().setProvider(this, PermissionService.class, new LuckPermsService(this));
+        Sponge.getServiceManager().setProvider(this, PermissionService.class, (service = new LuckPermsService(this)));
 
         getLog().info("Registering API...");
         apiProvider = new ApiProvider(this);

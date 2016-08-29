@@ -23,6 +23,7 @@
 package me.lucko.luckperms.api.sponge.collections;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NonNull;
 import me.lucko.luckperms.api.sponge.LuckPermsService;
 import me.lucko.luckperms.api.sponge.LuckPermsSubject;
@@ -47,6 +48,8 @@ import java.util.stream.Collectors;
 public class UserCollection implements SubjectCollection {
     private final LuckPermsService service;
     private final UserManager manager;
+
+    @Getter
     private final Set<LuckPermsSubject> cache = ConcurrentHashMap.newKeySet();
 
     @Override
@@ -81,6 +84,8 @@ public class UserCollection implements SubjectCollection {
             cache.add(subject);
             return subject;
         }
+
+        service.getPlugin().getLog().warn("Couldn't get subject for: " + id);
 
         // What am I meant to do here? What if no user is loaded? Load it? Create it?
         // If I do load/create it, this method should always be called async??.... errr.
