@@ -459,7 +459,7 @@ public class Node implements me.lucko.luckperms.api.Node {
 
     @Override
     public Map.Entry<Integer, String> getSuffix() {
-        if (!isPrefix()) {
+        if (!isSuffix()) {
             throw new IllegalStateException();
         }
 
