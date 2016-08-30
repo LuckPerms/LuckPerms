@@ -66,6 +66,7 @@ public class SQLiteDatastore extends SQLDatastore {
             @Cleanup PreparedStatement preparedStatement = connection.prepareStatement(queryPS.getQuery());
             queryPS.onRun(preparedStatement);
             preparedStatement.execute();
+            
             success = true;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -84,7 +85,6 @@ public class SQLiteDatastore extends SQLDatastore {
 
             @Cleanup PreparedStatement preparedStatement = connection.prepareStatement(queryRS.getQuery());
             queryRS.onRun(preparedStatement);
-            preparedStatement.execute();
 
             @Cleanup ResultSet resultSet = preparedStatement.executeQuery();
             success = queryRS.onResult(resultSet);
