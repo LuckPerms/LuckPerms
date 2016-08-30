@@ -23,14 +23,12 @@
 package me.lucko.luckperms.commands;
 
 import lombok.experimental.UtilityClass;
+import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Patterns;
 import me.lucko.luckperms.utils.DateUtil;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @UtilityClass
 public class Util {
@@ -115,35 +113,53 @@ public class Util {
         return sb.delete(sb.length() - 6, sb.length()).toString();
     }
 
-    public static String permNodesToString(Map<String, Boolean> nodes) {
-        if (nodes.isEmpty()) return "&6None";
-
+    public static String permNodesToString(SortedSet<Node> nodes) {
         StringBuilder sb = new StringBuilder();
-
-        for (Map.Entry<String, Boolean> e : nodes.entrySet()) {
-            if (e.getValue()) {
-                sb.append("&a").append(e.getKey()).append("&7, ");
-            } else {
-                sb.append("&c").append(e.getKey()).append("&7, ");
+        for (Node node : nodes) {
+            if (node.isTemporary()) {
+                continue;
             }
+
+            sb.append("&6-> ").append(node.getValue() ? "&a" : "&c");
+            sb.append(node.getPermission());
+            if (node.isServerSpecific()) {
+                sb.append(" &7(&f").append(node.getServer().get()).append("&7)");
+            }
+            if (node.isWorldSpecific()) {
+                sb.append(" &7(&f").append(node.getWorld().get()).append("&7)");
+            }
+            sb.append("\n");
         }
 
-        return sb.delete(sb.length() - 2, sb.length()).toString();
+        if (sb.length() == 0) {
+            return "&6None";
+        }
+
+        return sb.toString();
     }
 
-    public static String tempNodesToString(Map<Map.Entry<String, Boolean>, Long> nodes) {
-        if (nodes.isEmpty()) return "&6None";
-
+    public static String tempNodesToString(SortedSet<Node> nodes) {
         StringBuilder sb = new StringBuilder();
 
-        for (Map.Entry<Map.Entry<String, Boolean>, Long> e : nodes.entrySet()) {
-            if (e.getKey().getValue()) {
-                sb.append("&a").append(e.getKey().getKey()).append("&6 - expires in ")
-                        .append(DateUtil.formatDateDiff(e.getValue())).append("\n");
-            } else {
-                sb.append("&c").append(e.getKey().getKey()).append("&6 - expires in ")
-                        .append(DateUtil.formatDateDiff(e.getValue())).append("\n");
+        for (Node node : nodes) {
+            if (!node.isTemporary()) {
+                continue;
             }
+
+            sb.append("&6-> ").append(node.getValue() ? "&a" : "&c");
+            sb.append(node.getPermission());
+            if (node.isServerSpecific()) {
+                sb.append(" &7(&f").append(node.getServer().get()).append("&7)");
+            }
+            if (node.isWorldSpecific()) {
+                sb.append(" &7(&f").append(node.getWorld().get()).append("&7)");
+            }
+
+            sb.append("&6 - expires in ").append(DateUtil.formatDateDiff(node.getExpiryUnixTime())).append("\n");
+        }
+
+        if (sb.length() == 0) {
+            return "&6None";
         }
 
         return sb.toString();

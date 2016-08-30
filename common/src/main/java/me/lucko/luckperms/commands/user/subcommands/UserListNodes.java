@@ -30,8 +30,6 @@ import me.lucko.luckperms.users.User;
 
 import java.util.List;
 
-import static me.lucko.luckperms.core.PermissionHolder.exportToLegacy;
-
 public class UserListNodes extends SubCommand<User> {
     public UserListNodes() {
         super("listnodes", "Lists the permission nodes the user has", "/%s user <user> listnodes",
@@ -40,8 +38,8 @@ public class UserListNodes extends SubCommand<User> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
-        Message.LISTNODES.send(sender, user.getName(), Util.permNodesToString(exportToLegacy(user.getPermanentNodes())));
-        Message.LISTNODES_TEMP.send(sender, user.getName(), Util.tempNodesToString(user.getTemporaryNodesLegacy()));
+        Message.LISTNODES.send(sender, user.getName(), Util.permNodesToString(user.getPermissions()));
+        Message.LISTNODES_TEMP.send(sender, user.getName(), Util.tempNodesToString(user.getPermissions()));
         return CommandResult.SUCCESS;
     }
 }

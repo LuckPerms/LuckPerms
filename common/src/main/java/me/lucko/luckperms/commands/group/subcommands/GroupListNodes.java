@@ -30,8 +30,6 @@ import me.lucko.luckperms.groups.Group;
 
 import java.util.List;
 
-import static me.lucko.luckperms.core.PermissionHolder.exportToLegacy;
-
 public class GroupListNodes extends SubCommand<Group> {
     public GroupListNodes() {
         super("listnodes", "Lists the permission nodes the group has", "/%s group <group> listnodes",
@@ -40,8 +38,8 @@ public class GroupListNodes extends SubCommand<Group> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
-        Message.LISTNODES.send(sender, group.getName(), Util.permNodesToString(exportToLegacy(group.getPermanentNodes())));
-        Message.LISTNODES_TEMP.send(sender, group.getName(), Util.tempNodesToString(group.getTemporaryNodesLegacy()));
+        Message.LISTNODES.send(sender, group.getName(), Util.permNodesToString(group.getPermissions()));
+        Message.LISTNODES_TEMP.send(sender, group.getName(), Util.tempNodesToString(group.getPermissions()));
         return CommandResult.SUCCESS;
     }
 }
