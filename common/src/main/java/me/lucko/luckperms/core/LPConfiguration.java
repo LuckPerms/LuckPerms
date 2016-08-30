@@ -102,6 +102,10 @@ public abstract class LPConfiguration<T extends LuckPermsPlugin> {
         return getBoolean("apply-shorthand", true);
     }
 
+    public boolean getLogNotify() {
+        return getBoolean("log-notify", true);
+    }
+
     public DatastoreConfiguration getDatabaseValues() {
         return new DatastoreConfiguration(
                 getString("data.address", null),

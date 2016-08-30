@@ -39,6 +39,9 @@ apply-regex: true
 # If set to true, LuckPerms will detect and expand shorthand node patterns.
 apply-shorthand: true
 
+# If the plugin should send log notifications to users whenever permissions are modified.
+log-notify: true
+
 # Which storage method the plugin should use.
 # Currently supported: mysql, sqlite, h2, flatfile, mongodb
 # Fill out connection info below if you're using MySQL or MongoDB
