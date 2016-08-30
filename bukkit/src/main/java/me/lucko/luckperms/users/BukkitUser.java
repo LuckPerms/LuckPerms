@@ -72,7 +72,14 @@ public class BukkitUser extends User {
         }
 
         // Calculate the permissions that should be applied. This is done async, who cares about how long it takes or how often it's done.
-        Map<String, Boolean> toApply = getLocalPermissions(getPlugin().getConfiguration().getServer(), plugin.getUserManager().getWorldCache().get(getUuid()), null);
+        Map<String, Boolean> toApply = exportNodes(
+                getPlugin().getConfiguration().getServer(),
+                plugin.getUserManager().getWorldCache().get(getUuid()),
+                null,
+                plugin.getConfiguration().getIncludeGlobalPerms(),
+                true,
+                plugin.getPossiblePermissions()
+        );
 
         try {
             // The map in the LP PermissionAttachment is a ConcurrentHashMap. We can modify it's contents async.
