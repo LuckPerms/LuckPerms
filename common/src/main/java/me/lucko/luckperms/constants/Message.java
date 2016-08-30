@@ -168,6 +168,46 @@ public enum Message {
     ILLEGAL_DATE_ERROR("Could not parse date '%s'.", true),
     PAST_DATE_ERROR("You cannot set a date in the past!", true),
 
+    CHAT_META_PREFIX_HEADER("&e%s's Prefixes", true),
+    CHAT_META_SUFFIX_HEADER("&e%s's Suffixes", true),
+    CHAT_META_ENTRY("&d-> &e%s &6- &f\"%s&f\"", true),
+    CHAT_META_PREFIX_NONE("&e%s has no prefixes.", true),
+    CHAT_META_SUFFIX_NONE("&e%s has no suffixes.", true),
+
+    META_INVALID_PRIORITY("Invalid priority '%s'. Expected a number.", true),
+    ALREADY_HAS_PREFIX("%s already has that prefix set.", true),
+    ALREADY_HAS_SUFFIX("%s already has that suffix set.", true),
+    DOES_NOT_HAVE_PREFIX("%s doesn't have that prefix set.", true),
+    DOES_NOT_HAVE_SUFFIX("%s doesn't have that suffix set.", true),
+
+    ADDPREFIX_SUCCESS("&b%s&a had prefix &f\"%s&f\"&a set at a priority of &b%s&a.", true),
+    ADDPREFIX_SERVER_SUCCESS("&b%s&a had prefix &f\"%s&f\"&a set at a priority of &b%s&a on server &b%s&a.", true),
+    ADDPREFIX_SERVER_WORLD_SUCCESS("&b%s&a had prefix &f\"%s&f\"&a set at a priority of &b%s&a on server &b%s&a, world &b%s&a.", true),
+    REMOVEPREFIX_SUCCESS("&b%s&a had prefix &f\"%s&f\"&a at priority &b%s&a removed.", true),
+    REMOVEPREFIX_SERVER_SUCCESS("&b%s&a had prefix &f\"%s&f\"&a at priority &b%s&a removed on server &b%s&a.", true),
+    REMOVEPREFIX_SERVER_WORLD_SUCCESS("&b%s&a had prefix &f\"%s&f\"&a at priority &b%s&a removed on server &b%s&a, world &b%s&a.", true),
+
+    ADDSUFFIX_SUCCESS("&b%s&a had suffix &f\"%s&f\"&a set at a priority of &b%s&a.", true),
+    ADDSUFFIX_SERVER_SUCCESS("&b%s&a had suffix &f\"%s&f\"&a set at a priority of &b%s&a on server &b%s&a.", true),
+    ADDSUFFIX_SERVER_WORLD_SUCCESS("&b%s&a had suffix &f\"%s&f\"&a set at a priority of &b%s&a on server &b%s&a, world &b%s&a.", true),
+    REMOVESUFFIX_SUCCESS("&b%s&a had suffix &f\"%s&f\"&a at priority &b%s&a removed.", true),
+    REMOVESUFFIX_SERVER_SUCCESS("&b%s&a had suffix &f\"%s&f\"&a at priority &b%s&a removed on server &b%s&a.", true),
+    REMOVESUFFIX_SERVER_WORLD_SUCCESS("&b%s&a had suffix &f\"%s&f\"&a at priority &b%s&a removed on server &b%s&a, world &b%s&a.", true),
+
+    ADD_TEMP_PREFIX_SUCCESS("&b%s&a had prefix &f\"%s&f\"&a set at a priority of &b%s&a for a duration of &b%s&a.", true),
+    ADD_TEMP_PREFIX_SERVER_SUCCESS("&b%s&a had prefix &f\"%s&f\"&a set at a priority of &b%s&a on server &b%s&a, for a duration of &b%s&a.", true),
+    ADD_TEMP_PREFIX_SERVER_WORLD_SUCCESS("&b%s&a had prefix &f\"%s&f\"&a set at a priority of &b%s&a on server &b%s&a, world &b%s&a, for a duration of &b%s&a.", true),
+    REMOVE_TEMP_PREFIX_SUCCESS("&b%s&a had temporary prefix &f\"%s&f\"&a at priority &b%s&a removed.", true),
+    REMOVE_TEMP_PREFIX_SERVER_SUCCESS("&b%s&a had temporary prefix &f\"%s&f\"&a at priority &b%s&a removed on server &b%s&a.", true),
+    REMOVE_TEMP_PREFIX_SERVER_WORLD_SUCCESS("&b%s&a had temporary prefix &f\"%s&f\"&a at priority &b%s&a removed on server &b%s&a, world &b%s&a.", true),
+
+    ADD_TEMP_SUFFIX_SUCCESS("&b%s&a had suffix &f\"%s&f\"&a set at a priority of &b%s&a for a duration of &b%s&a.", true),
+    ADD_TEMP_SUFFIX_SERVER_SUCCESS("&b%s&a had suffix &f\"%s&f\"&a set at a priority of &b%s&a on server &b%s&a, for a duration of &b%s&a.", true),
+    ADD_TEMP_SUFFIX_SERVER_WORLD_SUCCESS("&b%s&a had suffix &f\"%s&f\"&a set at a priority of &b%s&a on server &b%s&a, world &b%s&a, for a duration of &b%s&a.", true),
+    REMOVE_TEMP_SUFFIX_SUCCESS("&b%s&a had temporary suffix &f\"%s&f\"&a at priority &b%s&a removed.", true),
+    REMOVE_TEMP_SUFFIX_SERVER_SUCCESS("&b%s&a had temporary suffix &f\"%s&f\"&a at priority &b%s&a removed on server &b%s&a.", true),
+    REMOVE_TEMP_SUFFIX_SERVER_WORLD_SUCCESS("&b%s&a had temporary suffix &f\"%s&f\"&a at priority &b%s&a removed on server &b%s&a, world &b%s&a.", true),
+    
     USER_INFO(
             PREFIX + "&d-> &eUser: &6%s" + "\n" +
             PREFIX + "&d-> &eUUID: &6%s" + "\n" +

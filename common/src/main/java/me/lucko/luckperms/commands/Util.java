@@ -27,6 +27,7 @@ import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Patterns;
 import me.lucko.luckperms.utils.DateUtil;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -159,6 +160,27 @@ public class Util {
             } catch (IllegalArgumentException e1) {
                 return null;
             }
+        }
+    }
+
+    public static synchronized MetaComparator getMetaComparator() {
+        if (metaComparator == null) {
+            metaComparator = new MetaComparator();
+        }
+        return metaComparator;
+    }
+
+
+    private static MetaComparator metaComparator = null;
+    public class MetaComparator implements Comparator<Map.Entry<Integer, String>> {
+
+        @Override
+        public int compare(Map.Entry<Integer, String> o1, Map.Entry<Integer, String> o2) {
+            int result = Integer.compare(o1.getKey(), o2.getKey());
+            if (result == 0) {
+                result = o1.getValue().compareTo(o2.getValue());
+            }
+            return result;
         }
     }
 }

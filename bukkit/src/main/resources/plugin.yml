@@ -40,6 +40,15 @@ permissions:
       luckperms.user.promote: true
       luckperms.user.demote: true
       luckperms.user.showpos: true
+      luckperms.user.chatmeta: true
+      luckperms.user.addprefix: true
+      luckperms.user.addsuffix: true
+      luckperms.user.removeprefix: true
+      luckperms.user.removesuffix: true
+      luckperms.user.addtempprefix: true
+      luckperms.user.addtempsuffix: true
+      luckperms.user.removetempprefix: true
+      luckperms.user.removetempsuffix: true
       luckperms.user.clear: true
       luckperms.group.info: true
       luckperms.group.listnodes: true
@@ -54,6 +63,15 @@ permissions:
       luckperms.group.settempinherit: true
       luckperms.group.unsettempinherit: true
       luckperms.group.showtracks: true
+      luckperms.group.chatmeta: true
+      luckperms.group.addprefix: true
+      luckperms.group.addsuffix: true
+      luckperms.group.removeprefix: true
+      luckperms.group.removesuffix: true
+      luckperms.group.addtempprefix: true
+      luckperms.group.addtempsuffix: true
+      luckperms.group.removetempprefix: true
+      luckperms.group.removetempsuffix: true
       luckperms.group.clear: true
       luckperms.group.rename: true
       luckperms.track.info: true
@@ -90,6 +108,15 @@ permissions:
       luckperms.user.promote: true
       luckperms.user.demote: true
       luckperms.user.showpos: true
+      luckperms.user.chatmeta: true
+      luckperms.user.addprefix: true
+      luckperms.user.addsuffix: true
+      luckperms.user.removeprefix: true
+      luckperms.user.removesuffix: true
+      luckperms.user.addtempprefix: true
+      luckperms.user.addtempsuffix: true
+      luckperms.user.removetempprefix: true
+      luckperms.user.removetempsuffix: true
       luckperms.user.clear: true
   luckperms.group.*:
     description: Gives access to all LuckPerms group commands
@@ -107,6 +134,15 @@ permissions:
       luckperms.group.settempinherit: true
       luckperms.group.unsettempinherit: true
       luckperms.group.showtracks: true
+      luckperms.group.chatmeta: true
+      luckperms.group.addprefix: true
+      luckperms.group.addsuffix: true
+      luckperms.group.removeprefix: true
+      luckperms.group.removesuffix: true
+      luckperms.group.addtempprefix: true
+      luckperms.group.addtempsuffix: true
+      luckperms.group.removetempprefix: true
+      luckperms.group.removetempsuffix: true
       luckperms.group.clear: true
       luckperms.group.rename: true
   luckperms.track.*:
