@@ -130,7 +130,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         for (PermissionGroup group : manager.getGroupList()) {
             groupCount ++;
 
-            if(group.getWeight() > maxGroupWeight) {
+            if (group.getWeight() > maxGroupWeight) {
                 maxGroupWeight = group.getWeight();
             }
 
@@ -268,6 +268,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         // Migrate all users
         log.info("PermissionsEx Migration: Starting user migration.");
         int userCount = 0;
+        maxGroupWeight++;
         for (PermissionUser user : manager.getUsers()) {
             UUID u = null;
 
@@ -385,10 +386,10 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             if (prefix != null && !prefix.equals("")) {
                 prefix = ArgumentChecker.escapeCharacters(prefix);
                 try {
-                    lpUser.setPermission("prefix." + (maxGroupWeight + 1) + "." + prefix, true);
+                    lpUser.setPermission("prefix." + maxGroupWeight + "." + prefix, true);
                     LogEntry.build()
                             .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
-                            .acted(lpUser).action("set prefix." + (maxGroupWeight + 1) + "." + prefix + " true")
+                            .acted(lpUser).action("set prefix." + maxGroupWeight + "." + prefix + " true")
                             .build().submit(plugin);
                 } catch (Exception ex) {
                     if (!(ex instanceof ObjectAlreadyHasException)) {
@@ -400,10 +401,10 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             if (suffix != null && !suffix.equals("")) {
                 suffix = ArgumentChecker.escapeCharacters(suffix);
                 try {
-                    lpUser.setPermission("suffix." + (maxGroupWeight + 1) + "." + suffix, true);
+                    lpUser.setPermission("suffix." + maxGroupWeight + "." + suffix, true);
                     LogEntry.build()
                             .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
-                            .acted(lpUser).action("set suffix." + (maxGroupWeight + 1) + "." + suffix + " true")
+                            .acted(lpUser).action("set suffix." + maxGroupWeight + "." + suffix + " true")
                             .build().submit(plugin);
                 } catch (Exception ex) {
                     if (!(ex instanceof ObjectAlreadyHasException)) {
