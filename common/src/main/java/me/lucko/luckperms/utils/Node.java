@@ -38,8 +38,8 @@ import java.util.stream.Collectors;
 @ToString
 @EqualsAndHashCode
 public class Node implements me.lucko.luckperms.api.Node {
-    private static final Pattern PREFIX_PATTERN = Pattern.compile("(?i)prefix\\.\\d+\\..*");
-    private static final Pattern SUFFIX_PATTERN = Pattern.compile("(?i)suffix\\.\\d+\\..*");
+    private static final Pattern PREFIX_PATTERN = Pattern.compile("(?i)prefix\\.-?\\d+\\..*");
+    private static final Pattern SUFFIX_PATTERN = Pattern.compile("(?i)suffix\\.-?\\d+\\..*");
 
     public static me.lucko.luckperms.api.Node fromSerialisedNode(String s, Boolean b) {
         return builderFromSerialisedNode(s, b).build();
