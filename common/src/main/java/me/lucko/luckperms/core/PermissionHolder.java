@@ -228,6 +228,13 @@ public abstract class PermissionHolder {
         Map<String, Boolean> perms = new HashMap<>();
 
         for (Node node : getAllNodesFiltered(server, world, extraContext, includeGlobal, applyGroups)) {
+            if (plugin.getConfiguration().getApplyWildcards()) {
+                if (node.getPermission().equals("*") || node.getPermission().equals("'*'")) {
+                    possibleNodes.forEach(n -> perms.put(n, true));
+                    continue;
+                }
+            }
+
             perms.put(node.getPermission(), node.getValue());
 
             if (plugin.getConfiguration().getApplyShorthand()) {
