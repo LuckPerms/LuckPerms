@@ -235,7 +235,7 @@ public enum Message {
     USER_REMOVEGROUP_ERROR_PRIMARY("You cannot remove a user from their primary group.", true),
     USER_PRIMARYGROUP_SUCCESS("&b%s&a's primary group was set to &b%s&a.", true),
     USER_PRIMARYGROUP_ERROR_ALREADYHAS("The user already has this group set as their primary group.", true),
-    USER_PRIMARYGROUP_ERROR_NOTMEMBER("The user must be a member of the group first! Use &4/%s user <user> addgroup <group>", true),
+    USER_PRIMARYGROUP_ERROR_NOTMEMBER("&b%s&a was not already a member of &b%s&a, adding them now.", true),
     USER_SHOWTRACKS_INFO("&aShowing tracks that contain the group '&b%s&a' (%s's primary group)", true),
     USER_PROMOTE_SUCCESS_PROMOTE("&aPromoting user along track &b%s&a from &b%s&a to &b%s&a.", true),
     USER_PROMOTE_SUCCESS_REMOVE("&b%s&a was removed from &b%s&a, added to &b%s&a, and their primary group was set to &b%s&a.", true),

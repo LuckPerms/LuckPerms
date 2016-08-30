@@ -30,6 +30,7 @@ import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.data.LogEntry;
+import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.users.User;
 
@@ -55,8 +56,10 @@ public class UserSetPrimaryGroup extends SubCommand<User> {
         }
 
         if (!user.isInGroup(group)) {
-            Message.USER_PRIMARYGROUP_ERROR_NOTMEMBER.send(sender, label);
-            return CommandResult.STATE_ERROR;
+            Message.USER_PRIMARYGROUP_ERROR_NOTMEMBER.send(sender, user.getName(), group.getName());
+            try {
+                user.addGroup(group);
+            } catch (ObjectAlreadyHasException ignored) {}
         }
 
         user.setPrimaryGroup(group.getName());
