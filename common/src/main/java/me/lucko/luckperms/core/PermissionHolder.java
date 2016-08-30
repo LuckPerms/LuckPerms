@@ -284,7 +284,7 @@ public abstract class PermissionHolder {
 
     private static Tristate hasPermission(Set<Node> toQuery, Node node) {
         for (Node n : toQuery) {
-            if (n.equalsIgnoringValue(node)) {
+            if (n.almostEquals(node)) {
                 return n.getTristate();
             }
         }
@@ -425,7 +425,13 @@ public abstract class PermissionHolder {
             throw new ObjectLacksException();
         }
 
-        nodes.remove(node);
+        Iterator<Node> iterator = nodes.iterator();
+        while (iterator.hasNext()) {
+            Node entry = iterator.next();
+            if (entry.almostEquals(node)) {
+                iterator.remove();
+            }
+        }
 
         if (node.isGroupNode()) {
             plugin.getApiProvider().fireEventAsync(new GroupRemoveEvent(new PermissionHolderLink(this),
@@ -445,7 +451,13 @@ public abstract class PermissionHolder {
             throw new ObjectLacksException();
         }
 
-        transientNodes.remove(node);
+        Iterator<Node> iterator = transientNodes.iterator();
+        while (iterator.hasNext()) {
+            Node entry = iterator.next();
+            if (entry.almostEquals(node)) {
+                iterator.remove();
+            }
+        }
 
         if (node.isGroupNode()) {
             plugin.getApiProvider().fireEventAsync(new GroupRemoveEvent(new PermissionHolderLink(this),
