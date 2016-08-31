@@ -28,6 +28,9 @@ import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.constants.Patterns;
 import me.lucko.luckperms.storage.DatastoreConfiguration;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public abstract class LPConfiguration<T extends LuckPermsPlugin> {
 
     @Getter(AccessLevel.PROTECTED)
@@ -117,5 +120,20 @@ public abstract class LPConfiguration<T extends LuckPermsPlugin> {
 
     public String getStorageMethod() {
         return getString("storage-method", defaultStorage);
+    }
+
+    public boolean getSplitStorage() {
+        return getBoolean("split-storage.enabled", false);
+    }
+
+    public Map<String, String> getSplitStorageOptions() {
+        Map<String, String> map = new HashMap<>();
+        map.put("user", getString("split-storage.methods.user", defaultStorage));
+        map.put("group", getString("split-storage.methods.group", defaultStorage));
+        map.put("track", getString("split-storage.methods.track", defaultStorage));
+        map.put("uuid", getString("split-storage.methods.uuid", defaultStorage));
+        map.put("log", getString("split-storage.methods.log", defaultStorage));
+
+        return map;
     }
 }

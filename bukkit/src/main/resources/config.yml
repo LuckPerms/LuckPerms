@@ -47,6 +47,18 @@ log-notify: true
 # Fill out connection info below if you're using MySQL or MongoDB
 storage-method: h2
 
+# This block enables support for split datastores.
+# Only touch this if you're sure that you know what you're doing.
+# I (the author) do not endorse nor recommend the use of this feature.
+split-storage:
+  enabled: false
+  methods:
+    user: h2
+    group: h2
+    track: h2
+    uuid: h2
+    log: h2
+
 data:
   address: localhost:3306
   database: minecraft
