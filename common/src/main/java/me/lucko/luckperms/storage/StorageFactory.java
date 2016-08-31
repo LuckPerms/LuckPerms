@@ -54,7 +54,7 @@ public class StorageFactory {
                         plugin.getLog().severe("Storage method for " + e.getKey() + " - " + e.getValue() + " not recognised. " +
                                 "Using the default instead.");
                         e.setValue(defaultMethod);
-            });
+                    });
 
             Set<String> neededTypes = new HashSet<>();
             neededTypes.addAll(types.values());
