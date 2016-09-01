@@ -43,8 +43,6 @@ class SpongeUser extends User {
 
     @Override
     public void refreshPermissions() {
-        plugin.getApiProvider().fireEventAsync(new UserPermissionRefreshEvent(new UserLink(this)));
-
         // Do nothing. Should be grabbed from PermissionService.
         /*
         plugin.doSync(() -> {

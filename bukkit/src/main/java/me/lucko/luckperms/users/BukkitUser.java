@@ -106,12 +106,13 @@ public class BukkitUser extends User {
             /* Must be called sync, as #recalculatePermissions is an unmodified Bukkit API call that is absolutely not thread safe.
                Shouldn't be too taxing on the server. This only gets called when permissions have actually changed,
                which is like once per user per login, assuming their permissions don't get modified. */
-            plugin.doSync(() -> attachment.getPermissible().recalculatePermissions());
+            plugin.doSync(() -> {
+                attachment.getPermissible().recalculatePermissions();
+                plugin.getApiProvider().fireEventAsync(new UserPermissionRefreshEvent(new UserLink(this)));
+            });
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        plugin.getApiProvider().fireEventAsync(new UserPermissionRefreshEvent(new UserLink(this)));
     }
 }
