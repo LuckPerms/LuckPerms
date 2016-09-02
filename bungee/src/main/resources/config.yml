@@ -43,7 +43,7 @@ apply-shorthand: true
 log-notify: true
 
 # Which storage method the plugin should use.
-# Currently supported: mysql, sqlite, h2, flatfile, mongodb
+# Currently supported: mysql, sqlite, h2, json, yaml, mongodb
 # Fill out connection info below if you're using MySQL or MongoDB
 storage-method: h2
 

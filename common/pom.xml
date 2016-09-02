@@ -67,6 +67,13 @@
             <version>1.7.9</version>
             <scope>compile</scope>
         </dependency>
+        <!-- SnakeYAML -->
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>1.14</version>
+            <scope>provided</scope>
+        </dependency>
         <!-- gson -->
         <dependency>
             <groupId>com.google.code.gson</groupId>

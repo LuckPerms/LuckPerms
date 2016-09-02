@@ -35,7 +35,7 @@ import java.util.Set;
 
 @UtilityClass
 public class StorageFactory {
-    private static final Set<String> TYPES = ImmutableSet.of("flatfile", "mongodb", "mysql", "sqlite", "h2");
+    private static final Set<String> TYPES = ImmutableSet.of("json", "yaml", "flatfile", "mongodb", "mysql", "sqlite", "h2");
 
     @SuppressWarnings("unchecked")
     public static Datastore getDatastore(LuckPermsPlugin plugin, String defaultMethod) {
@@ -93,8 +93,10 @@ public class StorageFactory {
                 return new H2Datastore(plugin, new File(plugin.getDataFolder(), "luckperms.db"));
             case "mongodb":
                 return new MongoDBDatastore(plugin, plugin.getConfiguration().getDatabaseValues());
+            case "yaml":
+                return new YAMLDatastore(plugin, plugin.getDataFolder());
             default:
-                return new FlatfileDatastore(plugin, plugin.getDataFolder());
+                return new JSONDatastore(plugin, plugin.getDataFolder());
         }
     }
 }
