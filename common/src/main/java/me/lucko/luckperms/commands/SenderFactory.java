@@ -22,11 +22,13 @@
 
 package me.lucko.luckperms.commands;
 
+import com.google.common.collect.ImmutableMap;
 import lombok.Getter;
 import me.lucko.luckperms.constants.Permission;
 
 import java.lang.ref.WeakReference;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 /**
@@ -35,7 +37,7 @@ import java.util.stream.Collectors;
  */
 public abstract class SenderFactory<T> implements Runnable {
     private final Map<T, List<String>> messages = new HashMap<>();
-    //private final List<Map.Entry<T, String>> messages = new ArrayList<>();
+    private final AtomicBoolean shouldSend = new AtomicBoolean(false);
     private final SenderFactory<T> factory = this;
 
     protected abstract String getName(T t);
@@ -48,9 +50,8 @@ public abstract class SenderFactory<T> implements Runnable {
             final WeakReference<T> tRef = new WeakReference<>(t);
 
             // Cache these permissions, so they can be accessed async
-            final Map<Permission, Boolean> perms = Arrays.stream(Permission.values())
-                    .map(p -> new AbstractMap.SimpleEntry<>(p, factory.hasPermission(t, p.getNode())))
-                    .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue));
+            final Map<Permission, Boolean> perms = ImmutableMap.copyOf(Arrays.stream(Permission.values())
+                    .collect(Collectors.toMap(p -> p, p -> factory.hasPermission(t, p.getNode()))));
 
             @Getter
             final String name = factory.getName(t);
@@ -69,25 +70,31 @@ public abstract class SenderFactory<T> implements Runnable {
 
                         messages.get(t).add(s);
                     }
+                    shouldSend.set(true);
                 }
             }
 
             @Override
             public boolean hasPermission(Permission permission) {
-                synchronized (perms) {
-                    return perms.get(permission);
-                }
+                return perms.get(permission);
             }
         };
     }
 
     @Override
     public final void run() {
+        if (!shouldSend.getAndSet(false)) {
+            return;
+        }
+
         synchronized (messages) {
-            if (!messages.isEmpty()) {
-                messages.entrySet().forEach(e -> e.getValue().forEach(s -> factory.sendMessage(e.getKey(), s)));
-                messages.clear();
+            for (Map.Entry<T, List<String>> e : messages.entrySet()) {
+                for (String s : e.getValue()) {
+                    factory.sendMessage(e.getKey(), s);
+                }
             }
+
+            messages.clear();
         }
     }
 }
