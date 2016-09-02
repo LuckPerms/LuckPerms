@@ -79,11 +79,6 @@ public class JSONDatastore extends FlatfileDatastore {
     }
 
     @Override
-    protected void childInit() throws Exception {
-
-    }
-
-    @Override
     public boolean loadUser(UUID uuid, String username) {
         User user = plugin.getUserManager().make(uuid, username);
         boolean success = false;

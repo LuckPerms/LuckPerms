@@ -30,7 +30,6 @@ import me.lucko.luckperms.users.User;
 import me.lucko.luckperms.utils.Node;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.BaseConstructor;
 
 import java.io.*;
 import java.util.*;
@@ -44,7 +43,7 @@ public class YAMLDatastore extends FlatfileDatastore {
         super(plugin, "Flatfile - YAML", pluginDir);
     }
 
-    private Yaml getYaml() {
+    private static Yaml getYaml() {
         DumperOptions options = new DumperOptions();
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
         return new Yaml(options);
@@ -73,11 +72,6 @@ public class YAMLDatastore extends FlatfileDatastore {
             t.printStackTrace();
             return false;
         }
-    }
-
-    @Override
-    protected void childInit() throws Exception {
-
     }
 
     @Override

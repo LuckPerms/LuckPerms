@@ -81,17 +81,8 @@ abstract class FlatfileDatastore extends Datastore {
         }
 
         cleanupUsers();
-
-        try {
-            childInit();
-        } catch (Exception e) {
-            return;
-        }
-
         setAcceptingLogins(true);
     }
-
-    protected abstract void childInit() throws Exception;
 
     private void makeFiles() throws IOException {
         File data = new File(pluginDir, "data");
