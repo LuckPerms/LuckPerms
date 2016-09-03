@@ -22,6 +22,10 @@ include-global: false
 
 # 2. You are only running one server instance using LuckPerms, (not a network)
 #    In this case, set online-mode to true no matter what is set in server.properties. (we can just fallback to the servers uuid cache)
+
+# 3. If your proxy is running in offline mode, and/or you are using PaperSpigot (https://ci.destroystokyo.com/job/PaperSpigot/),
+#    you should set "bungee-online-mode" to false in the paper.yml, and set "online-mode" to true in all LuckPerms configs.
+#    This approach is thoroughly recommended for offline mode networks, or networks without "ip-forward" set to true in the BungeeCord config.
 online-mode: true
 
 # If the plugin should apply wildcard permissions.
