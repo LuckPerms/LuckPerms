@@ -132,6 +132,12 @@
             <version>3.0-dev-52</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>de.bananaco</groupId>
+            <artifactId>bpermissions-api</artifactId>
+            <version>2.12</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
 </project>

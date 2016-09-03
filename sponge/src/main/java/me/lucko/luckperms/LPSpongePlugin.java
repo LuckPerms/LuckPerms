@@ -245,23 +245,32 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     }
 
     @Override
+    public UUID getUUID(String playerName) {
+        try {
+            return game.getServer().getPlayer(playerName).get().getUniqueId();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    @Override
     public boolean isPluginLoaded(String name) {
         return game.getPluginManager().isLoaded(name);
     }
 
     @Override
     public void runUpdateTask() {
-        scheduler.createTaskBuilder().async().execute(new UpdateTask(this)).submit(LPSpongePlugin.this);
+        scheduler.createTaskBuilder().async().execute(new UpdateTask(this)).submit(this);
     }
 
     @Override
     public void doAsync(Runnable r) {
-        scheduler.createTaskBuilder().async().execute(r).submit(LPSpongePlugin.this);
+        scheduler.createTaskBuilder().async().execute(r).submit(this);
     }
 
     @Override
     public void doSync(Runnable r) {
-        scheduler.createTaskBuilder().execute(r).submit(LPSpongePlugin.this);
+        scheduler.createTaskBuilder().execute(r).submit(this);
     }
 
     private void registerPermission(PermissionService p, String node) {

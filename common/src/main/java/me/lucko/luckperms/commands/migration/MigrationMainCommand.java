@@ -66,6 +66,11 @@ public class MigrationMainCommand extends MainCommand<Object> {
             subCommands.add(new MigrationBungeePerms());
         } catch (Throwable ignored) {}
 
+        try {
+            Class.forName("de.bananaco.bpermissions.api.WorldManager");
+            subCommands.add(new MigrationBPermissions());
+        } catch (Throwable ignored) {}
+
     }
 
     @Override

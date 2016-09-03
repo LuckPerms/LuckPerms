@@ -186,6 +186,11 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     }
 
     @Override
+    public UUID getUUID(String playerName) {
+        return null; // Not needed on Bungee
+    }
+
+    @Override
     public boolean isPluginLoaded(String name) {
         return getProxy().getPluginManager().getPlugins().stream()
                 .filter(p -> p.getDescription().getName().equalsIgnoreCase(name))

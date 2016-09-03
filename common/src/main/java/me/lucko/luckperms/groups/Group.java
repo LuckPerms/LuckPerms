@@ -30,14 +30,12 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.event.events.GroupAddEvent;
 import me.lucko.luckperms.api.implementation.internal.GroupLink;
 import me.lucko.luckperms.api.implementation.internal.PermissionHolderLink;
-import me.lucko.luckperms.constants.Patterns;
 import me.lucko.luckperms.core.PermissionHolder;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.utils.Identifiable;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @ToString(of = {"name"})

@@ -137,6 +137,13 @@ public interface LuckPermsPlugin {
     Object getService(Class clazz);
 
     /**
+     * Used as a backup for migration
+     * @param playerName the players name
+     * @return a uuid if found, or null if not
+     */
+    UUID getUUID(String playerName);
+
+    /**
      * Checks if a plugin is loaded on the platform
      * @param name the name of the plugin
      * @return true if the plugin is loaded

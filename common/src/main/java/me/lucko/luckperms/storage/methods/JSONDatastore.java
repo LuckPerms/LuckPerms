@@ -26,20 +26,13 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import lombok.Cleanup;
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.api.LogEntry;
-import me.lucko.luckperms.constants.Constants;
-import me.lucko.luckperms.data.Log;
 import me.lucko.luckperms.groups.Group;
-import me.lucko.luckperms.storage.Datastore;
 import me.lucko.luckperms.tracks.Track;
 import me.lucko.luckperms.users.User;
 import me.lucko.luckperms.utils.Node;
 
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.*;
-import java.util.logging.Formatter;
 import java.util.stream.Collectors;
 
 import static me.lucko.luckperms.core.PermissionHolder.exportToLegacy;

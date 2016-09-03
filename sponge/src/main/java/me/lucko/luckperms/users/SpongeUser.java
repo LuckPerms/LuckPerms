@@ -23,8 +23,6 @@
 package me.lucko.luckperms.users;
 
 import me.lucko.luckperms.LPSpongePlugin;
-import me.lucko.luckperms.api.event.events.UserPermissionRefreshEvent;
-import me.lucko.luckperms.api.implementation.internal.UserLink;
 
 import java.util.UUID;
 

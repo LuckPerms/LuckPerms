@@ -217,6 +217,16 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         return getServer().getServicesManager().load(clazz);
     }
 
+    @SuppressWarnings("deprecation")
+    @Override
+    public UUID getUUID(String playerName) {
+        try {
+            return getServer().getOfflinePlayer(playerName).getUniqueId();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     @Override
     public boolean isPluginLoaded(String name) {
         return getServer().getPluginManager().isPluginEnabled(name);
