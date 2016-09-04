@@ -22,8 +22,10 @@
 
 package me.lucko.luckperms.utils;
 
+import com.google.common.collect.ImmutableMap;
+
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * An abstract manager class
@@ -31,10 +33,12 @@ import java.util.concurrent.ConcurrentHashMap;
  * @param <T> the class this manager is "managing"
  */
 public abstract class AbstractManager<I, T extends Identifiable<I>> {
-    protected final Map<I, T> objects = new ConcurrentHashMap<>();
+    private final Map<I, T> objects = new HashMap<>();
 
-    public Map<I, T> getAll() {
-        return objects;
+    public final Map<I, T> getAll() {
+        synchronized (objects) {
+            return ImmutableMap.copyOf(objects);
+        }
     }
 
     /**
@@ -42,28 +46,39 @@ public abstract class AbstractManager<I, T extends Identifiable<I>> {
      * @param id The id to search by
      * @return a {@link T} object if the object is loaded, returns null if the object is not loaded
      */
-    public T get(I id) {
-        return objects.get(id);
+    public final T get(I id) {
+        synchronized (objects) {
+            return objects.get(id);
+        }
     }
 
     /**
      * Add a object to the loaded objects map
      * @param t The object to add
      */
-    public void set(T t) {
-        objects.put(t.getId(), t);
+    public final void set(T t) {
+        preSet(t);
+        synchronized (objects) {
+            objects.put(t.getId(), t);
+        }
+    }
+
+    public void preSet(T t) {
+
     }
 
     /**
      * Updates (or sets if the object wasn't already loaded) an object in the objects map
      * @param t The object to update or set
      */
-    public void updateOrSet(T t) {
-        if (!isLoaded(t.getId())) {
-            // The object isn't already loaded
-            set(t);
-        } else {
-            copy(t, objects.get(t.getId()));
+    public final void updateOrSet(T t) {
+        synchronized (objects) {
+            if (!isLoaded(t.getId())) {
+                // The object isn't already loaded
+                set(t);
+            } else {
+                copy(t, objects.get(t.getId()));
+            }
         }
     }
 
@@ -74,25 +89,36 @@ public abstract class AbstractManager<I, T extends Identifiable<I>> {
      * @param id The id of the object
      * @return true if the object is loaded
      */
-    public boolean isLoaded(I id) {
-        return objects.containsKey(id);
+    public final boolean isLoaded(I id) {
+        synchronized (objects) {
+            return objects.containsKey(id);
+        }
     }
 
     /**
      * Removes and unloads the object from the manager
      * @param t The object to unload
      */
-    public void unload(T t) {
+    public final void unload(T t) {
         if (t != null) {
-            objects.remove(t.getId());
+            preUnload(t);
+            synchronized (objects) {
+                objects.remove(t.getId());
+            }
         }
+    }
+
+    public void preUnload(T t) {
+
     }
 
     /**
      * Unloads all objects from the manager
      */
-    public void unloadAll() {
-        objects.clear();
+    public final void unloadAll() {
+        synchronized (objects) {
+            objects.clear();
+        }
     }
 
     /**

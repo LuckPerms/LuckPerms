@@ -23,7 +23,6 @@
 package me.lucko.luckperms.api.sponge.collections;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.NonNull;
 import me.lucko.luckperms.api.sponge.LuckPermsService;
 import me.lucko.luckperms.api.sponge.LuckPermsSubject;
@@ -37,20 +36,15 @@ import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.service.permission.SubjectData;
 
-import java.util.AbstractMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
 public class UserCollection implements SubjectCollection {
     private final LuckPermsService service;
     private final UserManager manager;
-
-    @Getter
-    private final Set<LuckPermsSubject> cache = ConcurrentHashMap.newKeySet();
 
     @Override
     public String getIdentifier() {
@@ -74,15 +68,7 @@ public class UserCollection implements SubjectCollection {
         }
 
         if (holder != null) {
-            for (LuckPermsSubject subject : cache) {
-                if (subject.getHolder().getObjectName().equalsIgnoreCase(holder.getObjectName())) {
-                    return subject;
-                }
-            }
-
-            LuckPermsSubject subject = new LuckPermsSubject(holder, service);
-            cache.add(subject);
-            return subject;
+            return LuckPermsSubject.wrapHolder(holder, service);
         }
 
         service.getPlugin().getLog().warn("Couldn't get subject for: " + id);
@@ -106,7 +92,7 @@ public class UserCollection implements SubjectCollection {
     @Override
     public Iterable<Subject> getAllSubjects() {
         return manager.getAll().values().stream()
-                .map(u -> new LuckPermsSubject(u, service))
+                .map(u -> LuckPermsSubject.wrapHolder(u, service))
                 .collect(Collectors.toList());
     }
 
@@ -118,10 +104,9 @@ public class UserCollection implements SubjectCollection {
     @Override
     public Map<Subject, Boolean> getAllWithPermission(@NonNull Set<Context> contexts, @NonNull String node) {
         return manager.getAll().values().stream()
-                .map(u -> new LuckPermsSubject(u, service))
+                .map(u -> LuckPermsSubject.wrapHolder(u, service))
                 .filter(sub -> sub.hasPermission(contexts, node))
-                .map(sub -> new AbstractMap.SimpleEntry<Subject, Boolean>(sub, sub.getPermissionValue(contexts, node).asBoolean()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                .collect(Collectors.toMap(sub -> sub, sub -> sub.getPermissionValue(contexts, node).asBoolean()));
     }
 
     @Override

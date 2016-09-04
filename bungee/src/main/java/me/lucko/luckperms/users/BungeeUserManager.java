@@ -35,15 +35,6 @@ public class BungeeUserManager extends UserManager {
     }
 
     @Override
-    public void unload(User user) {
-        if (user != null) {
-            // Cannot clear the ProxiedPlayer's permission map, they're leaving so that will get GCed anyway
-            // Calling getPermissions.clear() throws an UnsupportedOperationException
-            getAll().remove(user.getUuid());
-        }
-    }
-
-    @Override
     public void cleanup(User user) {
         if (plugin.getProxy().getPlayer(plugin.getUuidCache().getExternalUUID(user.getUuid())) == null) {
             unload(user);

@@ -44,23 +44,18 @@ public class BukkitUserManager extends UserManager {
     }
 
     @Override
-    public void unload(User user) {
-        if (user != null) {
+    public void preUnload(User user) {
+        if (user instanceof BukkitUser) {
+            BukkitUser u = (BukkitUser) user;
 
-            if (user instanceof BukkitUser) {
-                BukkitUser u = (BukkitUser) user;
+            if (u.getAttachment() != null) {
+                Player player = plugin.getServer().getPlayer(plugin.getUuidCache().getExternalUUID(u.getUuid()));
 
-                if (u.getAttachment() != null) {
-                    Player player = plugin.getServer().getPlayer(plugin.getUuidCache().getExternalUUID(u.getUuid()));
-
-                    if (player != null) {
-                        player.removeAttachment(u.getAttachment());
-                    }
-                    u.setAttachment(null);
+                if (player != null) {
+                    player.removeAttachment(u.getAttachment());
                 }
+                u.setAttachment(null);
             }
-
-            getAll().remove(user.getUuid());
         }
     }
 

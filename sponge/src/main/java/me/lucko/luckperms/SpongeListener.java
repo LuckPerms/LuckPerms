@@ -22,7 +22,6 @@
 
 package me.lucko.luckperms;
 
-import me.lucko.luckperms.api.sponge.LuckPermsSubject;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.users.User;
 import me.lucko.luckperms.utils.AbstractListener;
@@ -30,8 +29,6 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.serializer.TextSerializers;
-
-import java.util.Iterator;
 
 @SuppressWarnings("WeakerAccess")
 public class SpongeListener extends AbstractListener {
@@ -78,12 +75,5 @@ public class SpongeListener extends AbstractListener {
     @Listener
     public void onClientLeave(ClientConnectionEvent.Disconnect e) {
         onLeave(e.getTargetEntity().getUniqueId());
-        Iterator<LuckPermsSubject> iterator = plugin.getService().getUserSubjects().getCache().iterator();
-        while (iterator.hasNext()) {
-            LuckPermsSubject subject = iterator.next();
-            if (subject.getIdentifier().equalsIgnoreCase(e.getTargetEntity().getUniqueId().toString())) {
-                iterator.remove();
-            }
-        }
     }
 }

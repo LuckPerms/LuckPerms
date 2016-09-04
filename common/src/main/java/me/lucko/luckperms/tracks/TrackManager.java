@@ -35,7 +35,7 @@ public class TrackManager extends AbstractManager<String, Track> {
      * @return a set of tracks that the groups could be a member of
      */
     public Set<Track> getApplicableTracks(String group) {
-        return objects.values().stream()
+        return getAll().values().stream()
                 .filter(t -> t.containsGroup(group))
                 .collect(Collectors.toSet());
     }

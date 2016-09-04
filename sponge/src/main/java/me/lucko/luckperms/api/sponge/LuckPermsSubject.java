@@ -52,13 +52,17 @@ import static me.lucko.luckperms.utils.ArgumentChecker.unescapeCharacters;
 
 @EqualsAndHashCode(of = {"holder"})
 public class LuckPermsSubject implements Subject {
+    public static Subject wrapHolder(PermissionHolder holder, LuckPermsService service) {
+        return new LuckPermsSubject(holder, service);
+    }
+
     @Getter
     private final PermissionHolder holder;
     private final EnduringData enduringData;
     private final TransientData transientData;
     private final LuckPermsService service;
 
-    public LuckPermsSubject(PermissionHolder holder, LuckPermsService service) {
+    private LuckPermsSubject(PermissionHolder holder, LuckPermsService service) {
         this.holder = holder;
         this.enduringData = new EnduringData(this, service, holder);
         this.transientData = new TransientData(service, holder);
@@ -77,13 +81,13 @@ public class LuckPermsSubject implements Subject {
 
     @Override
     public String getIdentifier() {
-        return enduringData.getHolder().getObjectName();
+        return holder.getObjectName();
     }
 
     @Override
     public Optional<CommandSource> getCommandSource() {
-        if (enduringData.getHolder() instanceof User) {
-            final UUID uuid = ((User) enduringData.getHolder()).getUuid();
+        if (holder instanceof User) {
+            final UUID uuid = ((User) holder).getUuid();
 
             Optional<Player> p = Sponge.getServer().getPlayer(uuid);
             if (p.isPresent()) {
@@ -96,7 +100,7 @@ public class LuckPermsSubject implements Subject {
 
     @Override
     public SubjectCollection getContainingCollection() {
-        if (enduringData.getHolder() instanceof Group) {
+        if (holder instanceof Group) {
             return service.getGroupSubjects();
         } else {
             return service.getUserSubjects();
@@ -130,18 +134,16 @@ public class LuckPermsSubject implements Subject {
             context.put(c.getKey(), c.getValue());
         }
 
-        me.lucko.luckperms.api.Tristate t = enduringData.getHolder().inheritsPermission(new me.lucko.luckperms.utils.Node.Builder(node).withExtraContext(context).build());
-        if (t == me.lucko.luckperms.api.Tristate.UNDEFINED) {
-            return Tristate.UNDEFINED;
+        switch (holder.inheritsPermission(new me.lucko.luckperms.utils.Node.Builder(node).withExtraContext(context).build())) {
+            case UNDEFINED:
+                return Tristate.UNDEFINED;
+            case TRUE:
+                return Tristate.TRUE;
+            case FALSE:
+                return Tristate.FALSE;
+            default:
+                return null;
         }
-        if (t == me.lucko.luckperms.api.Tristate.TRUE) {
-            return Tristate.TRUE;
-        }
-        if (t == me.lucko.luckperms.api.Tristate.FALSE) {
-            return Tristate.FALSE;
-        }
-
-        return null;
     }
 
     @Override
