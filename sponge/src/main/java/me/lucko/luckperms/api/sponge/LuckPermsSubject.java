@@ -130,7 +130,7 @@ public class LuckPermsSubject implements Subject {
             context.put(c.getKey(), c.getValue());
         }
 
-        me.lucko.luckperms.api.Tristate t = enduringData.getHolder().hasPermission(new me.lucko.luckperms.utils.Node.Builder(node).withExtraContext(context).build());
+        me.lucko.luckperms.api.Tristate t = enduringData.getHolder().inheritsPermission(new me.lucko.luckperms.utils.Node.Builder(node).withExtraContext(context).build());
         if (t == me.lucko.luckperms.api.Tristate.UNDEFINED) {
             return Tristate.UNDEFINED;
         }
