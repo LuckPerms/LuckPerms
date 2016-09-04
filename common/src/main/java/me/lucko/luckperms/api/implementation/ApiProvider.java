@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 import static me.lucko.luckperms.api.implementation.internal.Utils.checkNode;
 
 /**
- * Provides static access to LuckPerms
+ * Implements the LuckPerms API using the plugin instance
  */
 @AllArgsConstructor
 public class ApiProvider implements LuckPermsApi {

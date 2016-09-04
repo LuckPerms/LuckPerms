@@ -27,6 +27,7 @@ import java.util.UUID;
 /**
  * Represents a single entry in a log
  */
+@SuppressWarnings({"unused", "WeakerAccess"})
 public class LogEntry implements Comparable<LogEntry> {
     public static LogEntryBuilder builder() {
         return new LogEntryBuilder();

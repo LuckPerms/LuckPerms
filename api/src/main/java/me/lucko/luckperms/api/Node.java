@@ -32,6 +32,7 @@ import java.util.Optional;
  * <p> Use {@link LuckPermsApi#buildNode(String)} to get an instance.
  * @since 1.6
  */
+@SuppressWarnings("unused")
 public interface Node extends Map.Entry<String, Boolean> {
 
     /**

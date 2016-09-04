@@ -65,6 +65,10 @@
                                     <pattern>org.h2</pattern>
                                     <shadedPattern>me.lucko.luckperms.lib.h2</shadedPattern>
                                 </relocation>
+                                <relocation>
+                                    <pattern>org.sqlite</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.sqlite</shadedPattern>
+                                </relocation>
                             </relocations>
                         </configuration>
                     </execution>

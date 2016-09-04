@@ -35,6 +35,7 @@ import java.util.UUID;
  *
  * <p> WARNING: THIS IS ONLY EFFECTIVE FOR ONLINE PLAYERS. USE THE DATASTORE METHODS FOR OFFLINE PLAYERS.
  */
+@SuppressWarnings("unused")
 public interface UuidCache {
 
     /**

@@ -65,7 +65,6 @@ public interface LuckPermsPlugin {
      */
     String getVersion();
 
-
     /**
      * @return the platform type
      */
