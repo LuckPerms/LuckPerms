@@ -52,7 +52,7 @@ public class BukkitUserManager extends UserManager {
                 Player player = plugin.getServer().getPlayer(plugin.getUuidCache().getExternalUUID(u.getUuid()));
 
                 if (player != null) {
-                    player.removeAttachment(u.getAttachment());
+                    player.removeAttachment(u.getAttachment().getAttachment());
                 }
                 u.setAttachment(null);
             }

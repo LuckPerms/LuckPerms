@@ -32,6 +32,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.*;
 import org.bukkit.permissions.PermissionAttachment;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 class BukkitListener extends AbstractListener implements Listener {
@@ -67,13 +68,14 @@ class BukkitListener extends AbstractListener implements Listener {
             BukkitUser u = (BukkitUser) user;
 
             PermissionAttachment attachment = player.addAttachment(plugin);
+            Map<String, Boolean> newPermMap = new ConcurrentHashMap<>();
             try {
-                BukkitUser.getPermissionsField().set(attachment, new ConcurrentHashMap<>());
+                BukkitUser.getPermissionsField().set(attachment, newPermMap);
             } catch (Throwable t) {
                 t.printStackTrace();
             }
 
-            u.setAttachment(attachment);
+            u.setAttachment(new BukkitUser.PermissionAttachmentHolder(attachment, newPermMap));
         }
 
         plugin.doAsync(user::refreshPermissions);

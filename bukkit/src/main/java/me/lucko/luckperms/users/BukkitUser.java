@@ -22,6 +22,8 @@
 
 package me.lucko.luckperms.users;
 
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import me.lucko.luckperms.LPBukkitPlugin;
@@ -52,7 +54,7 @@ public class BukkitUser extends User {
 
     @Getter
     @Setter
-    private PermissionAttachment attachment = null;
+    private PermissionAttachmentHolder attachment = null;
 
     BukkitUser(UUID uuid, LPBukkitPlugin plugin) {
         super(uuid, plugin);
@@ -83,7 +85,7 @@ public class BukkitUser extends User {
 
         try {
             // The map in the LP PermissionAttachment is a ConcurrentHashMap. We can modify it's contents async.
-            Map<String, Boolean> existing = (Map<String, Boolean>) getPermissionsField().get(attachment);
+            Map<String, Boolean> existing = attachment.getPermissions();
 
             boolean different = false;
             if (toApply.size() != existing.size()) {
@@ -107,12 +109,20 @@ public class BukkitUser extends User {
                Shouldn't be too taxing on the server. This only gets called when permissions have actually changed,
                which is like once per user per login, assuming their permissions don't get modified. */
             plugin.doSync(() -> {
-                attachment.getPermissible().recalculatePermissions();
+                attachment.getAttachment().getPermissible().recalculatePermissions();
                 plugin.getApiProvider().fireEventAsync(new UserPermissionRefreshEvent(new UserLink(this)));
             });
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Getter
+    @EqualsAndHashCode
+    @AllArgsConstructor
+    public static class PermissionAttachmentHolder {
+        private final PermissionAttachment attachment;
+        private final Map<String, Boolean> permissions;
     }
 }
