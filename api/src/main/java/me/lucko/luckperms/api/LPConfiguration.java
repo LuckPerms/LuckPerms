@@ -25,6 +25,8 @@ package me.lucko.luckperms.api;
 import me.lucko.luckperms.api.data.DatastoreConfiguration;
 import me.lucko.luckperms.api.data.MySQLConfiguration;
 
+import java.util.Map;
+
 /**
  * A wrapper interface for the internal LuckPerms configuration, providing read only access.
  */
@@ -43,14 +45,14 @@ public interface LPConfiguration {
 
     /**
      * @return the default group, in a node representation
-     * @deprecated as of 1.6, the default group is always "default"
+     * @deprecated as of 2.6, the default group is always "default"
      */
     @Deprecated
     String getDefaultGroupNode();
 
     /**
      * @return the name of the default group
-     * @deprecated as of 1.6, the default group is always "default"
+     * @deprecated as of 2.6, the default group is always "default"
      */
     @Deprecated
     String getDefaultGroupName();
@@ -81,6 +83,24 @@ public interface LPConfiguration {
     boolean getApplyShorthand();
 
     /**
+     * @return if LuckPerms will send notifications to users when permissions are modified
+     * @since 2.7
+     */
+    boolean getLogNotify();
+
+    /**
+     * @return the name of the server used within Vault operations
+     * @since 2.7
+     */
+    String getVaultServer();
+
+    /**
+     * @return true if global permissions should be considered when retrieving meta or player groups
+     * @since 2.7
+     */
+    boolean getVaultIncludeGlobal();
+
+    /**
      * @return the database values set in the configuration
      * @deprecated use {@link #getDatastoreConfig()}
      */
@@ -97,5 +117,18 @@ public interface LPConfiguration {
      * @return the storage method string from the configuration
      */
     String getStorageMethod();
+
+    /**
+     * @return true if split storage is enabled
+     * @since 2.7
+     */
+    boolean getSplitStorage();
+
+    /**
+     * @return a map of split storage options, where the key is the storage section, and the value is the storage method.
+     * For example: key = user, value = json
+     * @since 2.7
+     */
+    Map<String, String> getSplitStorageOptions();
 
 }

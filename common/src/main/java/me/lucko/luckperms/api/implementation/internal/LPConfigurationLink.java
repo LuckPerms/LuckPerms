@@ -27,6 +27,8 @@ import me.lucko.luckperms.api.LPConfiguration;
 import me.lucko.luckperms.api.data.DatastoreConfiguration;
 import me.lucko.luckperms.api.data.MySQLConfiguration;
 
+import java.util.Map;
+
 /**
  * Provides a link between {@link LPConfiguration} and {@link me.lucko.luckperms.core.LPConfiguration}
  */
@@ -79,6 +81,21 @@ public class LPConfigurationLink implements LPConfiguration {
         return master.getApplyShorthand();
     }
 
+    @Override
+    public boolean getLogNotify() {
+        return master.getLogNotify();
+    }
+
+    @Override
+    public String getVaultServer() {
+        return master.getVaultServer();
+    }
+
+    @Override
+    public boolean getVaultIncludeGlobal() {
+        return master.getVaultIncludeGlobal();
+    }
+
     @SuppressWarnings("deprecation")
     @Override
     public MySQLConfiguration getDatabaseValues() {
@@ -93,5 +110,16 @@ public class LPConfigurationLink implements LPConfiguration {
     @Override
     public String getStorageMethod() {
         return master.getStorageMethod();
+    }
+
+    @Override
+    public boolean getSplitStorage() {
+        return master.getSplitStorage();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Map<String, String> getSplitStorageOptions() {
+        return master.getSplitStorageOptions();
     }
 }

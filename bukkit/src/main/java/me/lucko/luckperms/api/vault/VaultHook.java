@@ -39,6 +39,8 @@ public class VaultHook {
                 permissionHook = new VaultPermissionHook();
             }
             permissionHook.setPlugin(plugin);
+            permissionHook.setServer(plugin.getConfiguration().getVaultServer());
+            permissionHook.setIncludeGlobal(plugin.getConfiguration().getVaultIncludeGlobal());
 
             if (chatHook == null) {
                 chatHook = new VaultChatHook(permissionHook);

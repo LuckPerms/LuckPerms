@@ -46,6 +46,13 @@ apply-shorthand: true
 # If the plugin should send log notifications to users whenever permissions are modified.
 log-notify: true
 
+# The name of the server used within Vault operations. If you don't want Vault operations to be server specific, set this
+# to "global".
+vault-server: global
+
+# If global permissions should be considered when retrieving meta or player groups
+vault-include-global: true
+
 # Which storage method the plugin should use.
 # Currently supported: mysql, sqlite, h2, json, yaml, mongodb
 # Fill out connection info below if you're using MySQL or MongoDB

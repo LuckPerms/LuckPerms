@@ -110,10 +110,11 @@ public abstract class SubCommand<T> {
         return permission.isAuthorized(sender);
     }
 
+
     /*
-        ----------------------------------------------------------------------------------
-        Utility methods used by #onTabComplete and #execute implementations in sub classes
-        ----------------------------------------------------------------------------------
+     * ----------------------------------------------------------------------------------
+     * Utility methods used by #onTabComplete and #execute implementations in sub classes
+     * ----------------------------------------------------------------------------------
      */
 
     protected static List<String> getGroupTabComplete(List<String> args, LuckPermsPlugin plugin) {

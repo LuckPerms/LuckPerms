@@ -30,7 +30,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * @see me.lucko.luckperms.api.UuidCache
+ * @see me.lucko.luckperms.api.UuidCache for docs
  */
 public class UuidCache {
 

@@ -28,7 +28,7 @@ import me.lucko.luckperms.exceptions.ObjectLacksException;
 import java.util.List;
 
 /**
- * Wrapper interface for internal Track instances
+ * Interface for internal Track instances
  */
 @SuppressWarnings("unused")
 public interface Track {

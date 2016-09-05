@@ -59,7 +59,6 @@ public class Importer {
 
         running = true;
         return true;
-
     }
 
     public void start(Sender executor, List<String> commands) {

@@ -25,6 +25,7 @@ package me.lucko.luckperms;
 import lombok.Getter;
 import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.LuckPermsApi;
+import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.api.implementation.ApiProvider;
 import me.lucko.luckperms.api.vault.VaultHook;
 import me.lucko.luckperms.commands.ConsecutiveExecutor;
@@ -161,8 +162,8 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     }
 
     @Override
-    public Type getType() {
-        return Type.BUKKIT;
+    public PlatformType getType() {
+        return PlatformType.BUKKIT;
     }
 
     @Override

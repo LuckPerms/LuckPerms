@@ -367,6 +367,6 @@ public class YAMLDatastore extends FlatfileDatastore {
     }
 
     interface ReadOperation {
-        boolean onRun(Map<String, Object> values) throws IOException;
+        boolean onRun(Map<String, Object> values);
     }
 }

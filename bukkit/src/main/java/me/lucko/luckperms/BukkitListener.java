@@ -46,7 +46,7 @@ class BukkitListener extends AbstractListener implements Listener {
     @EventHandler
     public void onPlayerPreLogin(AsyncPlayerPreLoginEvent e) {
         if (!plugin.getDatastore().isAcceptingLogins()) {
-            // Datastore is disabled, prevent players from joining the server
+            // The datastore is disabled, prevent players from joining the server
             e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, Message.LOADING_ERROR.toString());
             return;
         }
@@ -70,6 +70,11 @@ class BukkitListener extends AbstractListener implements Listener {
             PermissionAttachment attachment = player.addAttachment(plugin);
             Map<String, Boolean> newPermMap = new ConcurrentHashMap<>();
             try {
+                /* Replace the standard LinkedHashMap in the attachment with a ConcurrentHashMap.
+                   This means that we can iterate over and change the permissions within our attachment asynchronously,
+                   without worrying about thread safety. The Bukkit side of things should still operate normally. Internal
+                   permission stuff should work the same. This is by far the most easy and efficient way to do things, without
+                   having to do tons of reflection. */
                 BukkitUser.getPermissionsField().set(attachment, newPermMap);
             } catch (Throwable t) {
                 t.printStackTrace();

@@ -445,14 +445,12 @@ public class MongoDBDatastore extends Datastore {
         The following two methods convert the node maps so they can be stored. */
     private static <V> Map<String, V> convert(Map<String, V> map) {
         return map.entrySet().stream()
-                .map(e -> new AbstractMap.SimpleEntry<>(e.getKey().replace(".", "[**DOT**]").replace("$", "[**DOLLAR**]"), e.getValue()))
-                .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue));
+                .collect(Collectors.toMap(e -> e.getKey().replace(".", "[**DOT**]").replace("$", "[**DOLLAR**]"), Map.Entry::getValue));
     }
 
     private static <V> Map<String, V> revert(Map<String, V> map) {
         return map.entrySet().stream()
-                .map(e -> new AbstractMap.SimpleEntry<>(e.getKey().replace("[**DOT**]", ".").replace("[**DOLLAR**]", "$"), e.getValue()))
-                .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue));
+                .collect(Collectors.toMap(e -> e.getKey().replace("[**DOT**]", ".").replace("[**DOLLAR**]", "$"), Map.Entry::getValue));
     }
 
     private static Document fromUser(User user) {

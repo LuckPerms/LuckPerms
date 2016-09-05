@@ -84,7 +84,7 @@ public class BukkitUser extends User {
         );
 
         try {
-            // The map in the LP PermissionAttachment is a ConcurrentHashMap. We can modify it's contents async.
+            // The map in the LP PermissionAttachment is a ConcurrentHashMap. We can modify and iterate over its contents async.
             Map<String, Boolean> existing = attachment.getPermissions();
 
             boolean different = false;

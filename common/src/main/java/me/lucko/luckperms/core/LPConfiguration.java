@@ -70,17 +70,19 @@ public abstract class LPConfiguration<T extends LuckPermsPlugin> {
     }
 
     /**
-     * As of 1.6, this value is a constant
+     * As of 2.6, this value is a constant
      * @return the default group node
      */
+    @SuppressWarnings("SameReturnValue")
     public String getDefaultGroupNode() {
         return "group.default";
     }
 
     /**
-     * As of 1.6, this value is a constant
+     * As of 2.6, this value is a constant
      * @return the name of the default group
      */
+    @SuppressWarnings("SameReturnValue")
     public String getDefaultGroupName() {
         return "default";
     }
@@ -107,6 +109,14 @@ public abstract class LPConfiguration<T extends LuckPermsPlugin> {
 
     public boolean getLogNotify() {
         return getBoolean("log-notify", true);
+    }
+
+    public String getVaultServer() {
+        return getString("vault-server", "global");
+    }
+
+    public boolean getVaultIncludeGlobal() {
+        return getBoolean("vault-include-global", true);
     }
 
     public DatastoreConfiguration getDatabaseValues() {

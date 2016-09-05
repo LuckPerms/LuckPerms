@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Wrapper interface for internal User instances
+ * Interface for internal User instances
  */
 @SuppressWarnings("unused")
 public interface User extends PermissionHolder {

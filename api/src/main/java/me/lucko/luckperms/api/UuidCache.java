@@ -25,7 +25,9 @@ package me.lucko.luckperms.api;
 import java.util.UUID;
 
 /**
- * This UuidCache is a means of allowing users to have the same internal UUID across a network of offline mode servers
+ * A UUID cache for online users, between external Mojang UUIDs, and internal LuckPerms UUIDs.
+ *
+ * <p> This UuidCache is a means of allowing users to have the same internal UUID across a network of offline mode servers
  * or mixed offline mode and online mode servers. Platforms running in offline mode generate a random UUID for a user when
  * they first join the server, but this UUID will then not be consistent across the network. LuckPerms will instead check
  * the datastore cache, to get a UUID for a user that is consistent across an entire network.

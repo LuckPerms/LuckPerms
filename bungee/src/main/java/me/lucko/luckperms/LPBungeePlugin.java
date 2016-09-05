@@ -24,6 +24,7 @@ package me.lucko.luckperms;
 
 import lombok.Getter;
 import me.lucko.luckperms.api.Logger;
+import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.api.implementation.ApiProvider;
 import me.lucko.luckperms.commands.CommandManager;
 import me.lucko.luckperms.commands.ConsecutiveExecutor;
@@ -135,8 +136,8 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     }
 
     @Override
-    public Type getType() {
-        return Type.BUNGEE;
+    public PlatformType getType() {
+        return PlatformType.BUNGEE;
     }
 
     @Override

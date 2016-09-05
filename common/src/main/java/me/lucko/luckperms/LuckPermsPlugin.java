@@ -23,6 +23,7 @@
 package me.lucko.luckperms;
 
 import me.lucko.luckperms.api.Logger;
+import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.api.implementation.ApiProvider;
 import me.lucko.luckperms.commands.ConsecutiveExecutor;
 import me.lucko.luckperms.commands.Sender;
@@ -68,7 +69,7 @@ public interface LuckPermsPlugin {
     /**
      * @return the platform type
      */
-    Type getType();
+    PlatformType getType();
 
     /**
      * @return the main plugin directory
@@ -166,8 +167,4 @@ public interface LuckPermsPlugin {
      */
     void doSync(Runnable r);
 
-
-    enum Type {
-        BUKKIT, BUNGEE, SPONGE;
-    }
 }

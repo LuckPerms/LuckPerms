@@ -108,7 +108,7 @@ public class LogExport extends SubCommand<Log> {
                     break track;
                 }
 
-                b.append("track ").append(e.getActedName()).append(" ").append(e.getAction());;
+                b.append("track ").append(e.getActedName()).append(" ").append(e.getAction());
             }
 
             data.add(b.toString());

@@ -24,6 +24,7 @@ package me.lucko.luckperms.commands.migration.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.api.Logger;
+import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.commands.CommandResult;
 import me.lucko.luckperms.commands.Predicate;
 import me.lucko.luckperms.commands.Sender;
@@ -62,7 +63,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             return CommandResult.STATE_ERROR;
         }
 
-        if (plugin.getType() != LuckPermsPlugin.Type.BUKKIT) {
+        if (plugin.getType() != PlatformType.BUKKIT) {
             // Sponge uses a completely different version of PEX.
             log.severe("PEX import is not supported on this platform.");
             return CommandResult.STATE_ERROR;

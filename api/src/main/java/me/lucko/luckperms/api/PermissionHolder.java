@@ -31,7 +31,7 @@ import java.util.Set;
 import java.util.SortedSet;
 
 /**
- * Wrapper interface for internal PermissionHolder (user/group) instances
+ * Interface for internal PermissionHolder (user/group) instances
  */
 @SuppressWarnings("unused")
 public interface PermissionHolder {
@@ -45,21 +45,21 @@ public interface PermissionHolder {
     /**
      * Gets an immutable Set of the objects permission nodes
      * @return an immutable set of permissions in priority order
-     * @since 1.6
+     * @since 2.6
      */
     SortedSet<Node> getPermissions();
 
     /**
      * Similar to {@link #getPermissions()}, except excluding transient permissions
      * @return a set of nodes
-     * @since 1.6
+     * @since 2.6
      */
     Set<Node> getEnduringPermissions();
 
     /**
      * Similar to {@link #getPermissions()}, except excluding non-transient permissions
      * @return a set of nodes
-     * @since 1.6
+     * @since 2.6
      */
     Set<Node> getTransientPermissions();
 
@@ -67,7 +67,7 @@ public interface PermissionHolder {
     /**
      * Gets an immutable set of the nodes that this object has and inherits
      * @return an immutable set of permissions
-     * @since 1.6
+     * @since 2.6
      */
     Set<Node> getAllNodes();
 
@@ -84,7 +84,7 @@ public interface PermissionHolder {
      * @param node the node to check for
      * @return a Tristate for the holders permission status for the node
      * @throws NullPointerException if the node is null
-     * @since 1.6
+     * @since 2.6
      */
     Tristate hasPermission(Node node);
 
@@ -93,7 +93,7 @@ public interface PermissionHolder {
      * @param node the node to check for
      * @return a Tristate for the holders permission status for the node
      * @throws NullPointerException if the node is null
-     * @since 1.6
+     * @since 2.6
      */
     Tristate hasTransientPermission(Node node);
 
@@ -171,7 +171,7 @@ public interface PermissionHolder {
      * @param node the node to check for
      * @return a Tristate for the holders inheritance status for the node
      * @throws NullPointerException if the node is null
-     * @since 1.6
+     * @since 2.6
      */
     Tristate inheritsPermission(Node node);
 
@@ -249,7 +249,7 @@ public interface PermissionHolder {
      * @param node The node to be set
      * @throws ObjectAlreadyHasException if the object already has the permission
      * @throws NullPointerException if the node is null
-     * @since 1.6
+     * @since 2.6
      */
     void setPermission(Node node) throws ObjectAlreadyHasException;
 
@@ -267,7 +267,7 @@ public interface PermissionHolder {
      * @param node The node to be set
      * @throws ObjectAlreadyHasException if the object already has the permission
      * @throws NullPointerException if the node is null
-     * @since 1.6
+     * @since 2.6
      */
     void setTransientPermission(Node node) throws ObjectAlreadyHasException;
 
@@ -357,7 +357,7 @@ public interface PermissionHolder {
      * @param node The node to be unset
      * @throws ObjectLacksException if the node wasn't already set
      * @throws NullPointerException if the node is null
-     * @since 1.6
+     * @since 2.6
      */
     void unsetPermission(Node node) throws ObjectLacksException;
 
@@ -366,7 +366,7 @@ public interface PermissionHolder {
      * @param node The node to be unset
      * @throws ObjectLacksException if the node wasn't already set
      * @throws NullPointerException if the node is null
-     * @since 1.6
+     * @since 2.6
      */
     void unsetTransientPermission(Node node) throws ObjectLacksException;
 
@@ -498,7 +498,7 @@ public interface PermissionHolder {
      * @param possibleNodes a list of possible permissions for resolving wildcards
      * @param applyGroups if inherited group permissions should be included
      * @return a map of permissions
-     * @since 1.6
+     * @since 2.6
      */
     Map<String, Boolean> getPermissions(String server, String world, Map<String, String> extraContext, boolean includeGlobal, List<String> possibleNodes, boolean applyGroups);
 
@@ -513,7 +513,7 @@ public interface PermissionHolder {
     /**
      * Processes the nodes and returns the temporary ones.
      * @return a set of temporary nodes
-     * @since 1.6
+     * @since 2.6
      */
     Set<Node> getTemporaryPermissionNodes();
 
@@ -528,7 +528,7 @@ public interface PermissionHolder {
     /**
      * Processes the nodes and returns the non-temporary ones.
      * @return a set of permanent nodes
-     * @since 1.6
+     * @since 2.6
      */
     Set<Node> getPermanentPermissionNodes();
 

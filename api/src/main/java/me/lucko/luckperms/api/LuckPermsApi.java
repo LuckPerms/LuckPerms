@@ -41,7 +41,7 @@ public interface LuckPermsApi {
 
     /**
      * @return the version of the API running on the platform
-     * @since 1.6
+     * @since 2.6
      */
     double getApiVersion();
 
@@ -49,6 +49,11 @@ public interface LuckPermsApi {
      * @return the version of the plugin running on the platform
      */
     String getVersion();
+
+    /**
+     * @return the platform LuckPerms is running on
+     */
+    PlatformType getPlatformType();
 
     /**
      * Registers a listener to be sent LuckPerms events
@@ -138,7 +143,7 @@ public interface LuckPermsApi {
      * Unload a user from the internal storage, if they're not currently online.
      * @param user the user to unload
      * @throws NullPointerException if the user is null
-     * @since 1.6
+     * @since 2.6
      */
     void cleanupUser(User user);
 
@@ -208,7 +213,7 @@ public interface LuckPermsApi {
      * @return a {@link Node.Builder} instance
      * @throws IllegalArgumentException if the permission is invalid
      * @throws NullPointerException if the permission is null
-     * @since 1.6
+     * @since 2.6
      */
     Node.Builder buildNode(String permission) throws IllegalArgumentException;
 

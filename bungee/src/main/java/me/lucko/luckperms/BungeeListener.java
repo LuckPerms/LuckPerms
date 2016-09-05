@@ -33,7 +33,6 @@ import net.md_5.bungee.api.event.*;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
-import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
@@ -109,16 +108,10 @@ public class BungeeListener extends AbstractListener implements Listener {
     @EventHandler
     public void onPlayerPostLogin(PostLoginEvent e) {
         final ProxiedPlayer player = e.getPlayer();
-        final WeakReference<ProxiedPlayer> p = new WeakReference<>(player);
-
         final User user = plugin.getUserManager().get(plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId()));
+
         if (user == null) {
-            plugin.getProxy().getScheduler().schedule(plugin, () -> {
-                final ProxiedPlayer pl = p.get();
-                if (pl != null) {
-                    pl.sendMessage(WARN_MESSAGE);
-                }
-            }, 3, TimeUnit.SECONDS);
+            plugin.getProxy().getScheduler().schedule(plugin, () -> player.sendMessage(WARN_MESSAGE), 3, TimeUnit.SECONDS);
         } else {
             user.refreshPermissions();
         }

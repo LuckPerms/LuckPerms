@@ -63,7 +63,7 @@ public abstract class AbstractManager<I, T extends Identifiable<I>> {
         }
     }
 
-    public void preSet(T t) {
+    protected void preSet(T t) {
 
     }
 
@@ -108,7 +108,7 @@ public abstract class AbstractManager<I, T extends Identifiable<I>> {
         }
     }
 
-    public void preUnload(T t) {
+    protected void preUnload(T t) {
 
     }
 

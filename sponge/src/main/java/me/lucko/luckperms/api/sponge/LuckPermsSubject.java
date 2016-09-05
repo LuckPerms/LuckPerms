@@ -342,9 +342,7 @@ public class LuckPermsSubject implements Subject {
             if (subject instanceof LuckPermsSubject) {
                 LuckPermsSubject permsSubject = ((LuckPermsSubject) subject);
 
-                Map<String, String> contexts = set.stream()
-                        .map(context -> new AbstractMap.SimpleEntry<>(context.getKey(), context.getValue()))
-                        .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue));
+                Map<String, String> contexts = set.stream().collect(Collectors.toMap(Context::getKey, Context::getValue));
 
                 try {
                     holder.setPermission(new me.lucko.luckperms.utils.Node.Builder("group." + permsSubject.getIdentifier())
@@ -363,9 +361,7 @@ public class LuckPermsSubject implements Subject {
             if (subject instanceof LuckPermsSubject) {
                 LuckPermsSubject permsSubject = ((LuckPermsSubject) subject);
 
-                Map<String, String> contexts = set.stream()
-                        .map(context -> new AbstractMap.SimpleEntry<>(context.getKey(), context.getValue()))
-                        .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue));
+                Map<String, String> contexts = set.stream().collect(Collectors.toMap(Context::getKey, Context::getValue));
 
                 try {
                     holder.unsetPermission(new me.lucko.luckperms.utils.Node.Builder("group." + permsSubject.getIdentifier())
@@ -671,9 +667,7 @@ public class LuckPermsSubject implements Subject {
             if (subject instanceof LuckPermsSubject) {
                 LuckPermsSubject permsSubject = ((LuckPermsSubject) subject);
 
-                Map<String, String> contexts = set.stream()
-                        .map(context -> new AbstractMap.SimpleEntry<>(context.getKey(), context.getValue()))
-                        .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue));
+                Map<String, String> contexts = set.stream().collect(Collectors.toMap(Context::getKey, Context::getValue));
 
                 try {
                     holder.setTransientPermission(new me.lucko.luckperms.utils.Node.Builder("group." + permsSubject.getIdentifier())
@@ -691,9 +685,7 @@ public class LuckPermsSubject implements Subject {
             if (subject instanceof LuckPermsSubject) {
                 LuckPermsSubject permsSubject = ((LuckPermsSubject) subject);
 
-                Map<String, String> contexts = set.stream()
-                        .map(context -> new AbstractMap.SimpleEntry<>(context.getKey(), context.getValue()))
-                        .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue));
+                Map<String, String> contexts = set.stream().collect(Collectors.toMap(Context::getKey, Context::getValue));
 
                 try {
                     holder.unsetTransientPermission(new me.lucko.luckperms.utils.Node.Builder("group." + permsSubject.getIdentifier())

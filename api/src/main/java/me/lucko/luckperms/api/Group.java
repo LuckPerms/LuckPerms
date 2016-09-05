@@ -28,7 +28,7 @@ import me.lucko.luckperms.exceptions.ObjectLacksException;
 import java.util.List;
 
 /**
- * Wrapper interface for internal Group instances
+ * Interface for internal Group instances
  */
 @SuppressWarnings("unused")
 public interface Group extends PermissionHolder {

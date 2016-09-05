@@ -28,7 +28,7 @@ import me.lucko.luckperms.api.event.AbstractPermissionEvent;
 
 /**
  * Called when a permission node is unset from a holder
- * @since 1.6
+ * @since 2.6
  */
 public class PermissionNodeUnsetEvent extends AbstractPermissionEvent {
     public PermissionNodeUnsetEvent(PermissionHolder target, Node node) {

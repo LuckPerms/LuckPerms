@@ -28,7 +28,7 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Wrapper interface for the internal Datastore instance
+ * Interface for the internal Datastore instance
  */
 @SuppressWarnings("unused")
 public interface Datastore {
@@ -55,7 +55,7 @@ public interface Datastore {
     Async async();
 
     /**
-     * Gets the {@link Future} interface
+     * Gets the {@link Future} interface.
      * 
      * All operations through this interface are called in a new, separate asynchronous thread, similar to {@link Async}.
      * The only difference is that instead of providing a callback, a {@link java.util.concurrent.Future} is returned.
@@ -112,7 +112,7 @@ public interface Datastore {
          * @param username the users username. (if you want to specify <code>null</code> here, just input "null" as a string.)
          * @return if the operation was performed successfully
          * @throws NullPointerException if uuid or username is null
-         * @since 1.6
+         * @since 2.6
          */
         boolean loadUser(UUID uuid, String username);
 
@@ -128,14 +128,14 @@ public interface Datastore {
         /**
          * Removes users from the datastore who are "default". This is called every time the plugin loads.
          * @return true if the operation completed successfully
-         * @since 1.6
+         * @since 2.6
          */
         boolean cleanupUsers();
 
         /**
          * Gets a set all user's UUIDs who are "unique", and aren't just a member of the "default" group.
          * @return a set of uuids, or null if the operation failed.
-         * @since 1.6
+         * @since 2.6
          */
         Set<UUID> getUniqueUsers();
 

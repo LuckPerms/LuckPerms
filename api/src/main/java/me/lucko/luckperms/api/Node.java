@@ -30,7 +30,7 @@ import java.util.Optional;
 /**
  * Represents an immutable node object
  * <p> Use {@link LuckPermsApi#buildNode(String)} to get an instance.
- * @since 1.6
+ * @since 2.6
  */
 @SuppressWarnings("unused")
 public interface Node extends Map.Entry<String, Boolean> {
@@ -260,6 +260,9 @@ public interface Node extends Map.Entry<String, Boolean> {
      */
     boolean almostEquals(Node node);
 
+    /**
+     * Builds a Node instance
+     */
     interface Builder {
         Builder setNegated(boolean negated);
         Builder setValue(boolean value);

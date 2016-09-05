@@ -1,13 +1,17 @@
 name: LuckPerms
-author: Luck
 version: ${release.version}.${git.closest.tag.commit.count}
+description: A permissions plugin
+author: Luck
+website: https://github.com/lucko/LuckPerms
+
 main: me.lucko.luckperms.LPBukkitPlugin
 softdepend: [Vault, PermissionsEx, GroupManager, PowerfulPerms, zPermissions, bPermissions] # For migration
-description: A permissions plugin
+
 commands:
   luckperms:
     description: Manage permissions
     aliases: [perms, permissions, lp, p, perm]
+
 permissions:
   luckperms.*:
     description: Gives access to all LuckPerms commands

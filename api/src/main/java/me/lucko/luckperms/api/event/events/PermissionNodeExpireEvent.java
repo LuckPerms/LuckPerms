@@ -28,7 +28,7 @@ import me.lucko.luckperms.api.event.AbstractPermissionEvent;
 
 /**
  * Called when a temporary permission node expires
- * @since 1.6
+ * @since 2.6
  */
 public class PermissionNodeExpireEvent extends AbstractPermissionEvent {
     public PermissionNodeExpireEvent(PermissionHolder target, Node node) {

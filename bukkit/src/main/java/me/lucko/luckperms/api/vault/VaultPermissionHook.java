@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.api.vault;
 
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import me.lucko.luckperms.LPBukkitPlugin;
@@ -37,6 +38,14 @@ public class VaultPermissionHook extends Permission {
 
     @Setter
     private LPBukkitPlugin plugin;
+
+    @Getter
+    @Setter
+    private String server = "global";
+
+    @Getter
+    @Setter
+    private boolean includeGlobal = true;
 
     @Override
     public String getName() {
@@ -57,9 +66,9 @@ public class VaultPermissionHook extends Permission {
         if (object == null) return false;
 
         if (world != null && !world.equals("")) {
-            return object.hasPermission(permission, true, "global", world);
+            return object.hasPermission(permission, true, server, world);
         } else {
-            return object.hasPermission(permission, true);
+            return object.hasPermission(permission, true, server);
         }
     }
 
@@ -68,9 +77,9 @@ public class VaultPermissionHook extends Permission {
 
         try {
             if (world != null && !world.equals("")) {
-                object.setPermission(permission, true, "global", world);
+                object.setPermission(permission, true, server, world);
             } else {
-                object.setPermission(permission, true);
+                object.setPermission(permission, true, server);
             }
         } catch (ObjectAlreadyHasException ignored) {}
 
@@ -83,9 +92,9 @@ public class VaultPermissionHook extends Permission {
 
         try {
             if (world != null && !world.equals("")) {
-                object.unsetPermission(permission, "global", world);
+                object.unsetPermission(permission, server, world);
             } else {
-                object.unsetPermission(permission);
+                object.unsetPermission(permission, server);
             }
         } catch (ObjectLacksException ignored) {}
 
@@ -147,7 +156,7 @@ public class VaultPermissionHook extends Permission {
         if (group1 == null) return false;
 
         if (world != null && !world.equals("")) {
-            return user.isInGroup(group1, "global", world);
+            return user.isInGroup(group1, server, world);
         } else {
             return user.isInGroup(group1);
         }
@@ -163,7 +172,7 @@ public class VaultPermissionHook extends Permission {
 
         try {
             if (world != null && !world.equals("")) {
-                user.addGroup(group, "global", world);
+                user.addGroup(group, server, world);
             } else {
                 user.addGroup(group);
             }
@@ -182,7 +191,7 @@ public class VaultPermissionHook extends Permission {
 
         try {
             if (world != null && !world.equals("")) {
-                user.removeGroup(group, "global", world);
+                user.removeGroup(group, server, world);
             } else {
                 user.removeGroup(group);
             }
@@ -195,7 +204,7 @@ public class VaultPermissionHook extends Permission {
     public String[] getPlayerGroups(String world, @NonNull String player) {
         final User user = plugin.getUserManager().get(player);
         return (user == null) ? new String[0] :
-                world != null && !world.equals("") ? user.getGroups("global", world, true).toArray(new String[0]) :
+                world != null && !world.equals("") ? user.getGroups(server, world, includeGlobal).toArray(new String[0]) :
                         user.getGroupNames().toArray(new String[0]);
     }
 

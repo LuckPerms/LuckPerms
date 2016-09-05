@@ -20,24 +20,25 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.api.event;
-
-import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.PermissionHolder;
+package me.lucko.luckperms.api;
 
 /**
- * @since 2.6
+ * Represents the platform type that LuckPerms is running on
+ * @since 2.7
  */
-public class AbstractPermissionEvent extends TargetedEvent<PermissionHolder> {
+public enum PlatformType {
 
-    private final Node node;
+    BUKKIT("Bukkit"),
+    BUNGEE("Bungee"),
+    SPONGE("Sponge");
 
-    protected AbstractPermissionEvent(String eventName, PermissionHolder target, Node node) {
-        super(eventName, target);
-        this.node = node;
+    private final String friendlyName;
+
+    PlatformType(String friendlyName) {
+        this.friendlyName = friendlyName;
     }
 
-    public Node getNode() {
-        return node;
+    public String getFriendlyName() {
+        return friendlyName;
     }
 }

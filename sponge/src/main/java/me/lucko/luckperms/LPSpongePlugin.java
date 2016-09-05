@@ -25,6 +25,7 @@ package me.lucko.luckperms;
 import com.google.inject.Inject;
 import lombok.Getter;
 import me.lucko.luckperms.api.LuckPermsApi;
+import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.api.implementation.ApiProvider;
 import me.lucko.luckperms.api.sponge.LuckPermsService;
 import me.lucko.luckperms.commands.ConsecutiveExecutor;
@@ -196,8 +197,8 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     }
 
     @Override
-    public Type getType() {
-        return Type.SPONGE;
+    public PlatformType getType() {
+        return PlatformType.SPONGE;
     }
 
     @Override
