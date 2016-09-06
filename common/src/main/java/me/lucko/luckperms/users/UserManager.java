@@ -64,8 +64,8 @@ public abstract class UserManager extends AbstractManager<UUID, User> {
             // This isn't just a black user. we shouldn't override in that case.
             to.setNodes(from.getNodes());
             to.setPrimaryGroup(from.getPrimaryGroup());
-            to.refreshPermissions();
         }
+        to.refreshPermissions();
     }
 
     /**
