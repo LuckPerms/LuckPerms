@@ -30,6 +30,7 @@ import me.lucko.luckperms.constants.Patterns;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * An immutable permission node
@@ -293,6 +294,29 @@ public class Node implements me.lucko.luckperms.api.Node {
         return possibleNodes.stream().filter(pn -> pn.startsWith(match)).collect(Collectors.toList());
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    private static boolean isInt(String a, String b) {
+        try {
+            Integer.parseInt(a);
+            Integer.parseInt(b);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private static boolean isChar(String a, String b) {
+        return a.length() == 1 && b.length() == 1;
+    }
+
+    private static Set<String> getCharRange(char a, char b) {
+        Set<String> s = new HashSet<>();
+        for (char c = a; c <= b; c++) {
+            s.add(Character.toString(c));
+        }
+        return s;
+    }
+
     @Override
     public List<String> resolveShorthand() {
         if (!Patterns.SHORTHAND_NODE.matcher(getPermission()).find()) {
@@ -307,13 +331,28 @@ public class Node implements me.lucko.luckperms.api.Node {
         List<Set<String>> nodeParts = new ArrayList<>();
 
         for (String s : parts) {
-            if ((!s.startsWith("(") || !s.endsWith(")")) || !s.contains("|")) {
+            if ((!s.startsWith("(") || !s.endsWith(")")) || (!s.contains("|") && !s.contains("-"))) {
                 nodeParts.add(Collections.singleton(s));
                 continue;
             }
 
             final String bits = s.substring(1, s.length() - 1);
-            nodeParts.add(new HashSet<>(Arrays.asList(Patterns.VERTICAL_BAR.split(bits))));
+            if (s.contains("|")) {
+                nodeParts.add(new HashSet<>(Arrays.asList(Patterns.VERTICAL_BAR.split(bits))));
+            } else {
+                String[] range = Patterns.WORLD_DELIMITER.split(bits, 2);
+                if (isChar(range[0], range[1])) {
+                    nodeParts.add(getCharRange(range[0].charAt(0), range[1].charAt(0)));
+                } else if (isInt(range[0], range[1])) {
+                    nodeParts.add(IntStream.rangeClosed(Integer.parseInt(range[0]), Integer.parseInt(range[1])).boxed()
+                            .map(i -> "" + i)
+                            .collect(Collectors.toSet())
+                    );
+                } else {
+                    // Fallback
+                    nodeParts.add(Collections.singleton(s));
+                }
+            }
         }
 
         Set<String> nodes = new HashSet<>();
