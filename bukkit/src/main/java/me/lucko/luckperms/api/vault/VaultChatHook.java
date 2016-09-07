@@ -109,7 +109,7 @@ public class VaultChatHook extends Chat {
         if (node.equals("")) return defaultValue;
         node = escapeCharacters(node);
 
-        for (Node n : holder.getPermissions()) {
+        for (Node n : holder.getPermissions(true)) {
             if (!n.getValue()) {
                 continue;
             }

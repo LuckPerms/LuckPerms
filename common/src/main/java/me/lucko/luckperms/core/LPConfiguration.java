@@ -111,6 +111,14 @@ public abstract class LPConfiguration<T extends LuckPermsPlugin> {
         return getBoolean("log-notify", true);
     }
 
+    public boolean getEnableOps() {
+        return getBoolean("enable-ops", true);
+    }
+
+    public boolean getCommandsAllowOp() {
+        return getBoolean("commands-allow-op", true);
+    }
+
     public String getVaultServer() {
         return getString("vault-server", "global");
     }

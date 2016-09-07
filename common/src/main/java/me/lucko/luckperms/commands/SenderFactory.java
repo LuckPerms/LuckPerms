@@ -24,6 +24,7 @@ package me.lucko.luckperms.commands;
 
 import com.google.common.collect.ImmutableMap;
 import lombok.Getter;
+import me.lucko.luckperms.constants.Constants;
 import me.lucko.luckperms.constants.Permission;
 
 import java.lang.ref.WeakReference;
@@ -46,39 +47,7 @@ public abstract class SenderFactory<T> implements Runnable {
     protected abstract boolean hasPermission(T t, String node);
 
     public final Sender wrap(T t) {
-        return new Sender() {
-            final WeakReference<T> tRef = new WeakReference<>(t);
-
-            // Cache these permissions, so they can be accessed async
-            final Map<Permission, Boolean> perms = ImmutableMap.copyOf(Arrays.stream(Permission.values())
-                    .collect(Collectors.toMap(p -> p, p -> factory.hasPermission(t, p.getNode()))));
-
-            @Getter
-            final String name = factory.getName(t);
-
-            @Getter
-            final UUID uuid = factory.getUuid(t);
-
-            @Override
-            public void sendMessage(String s) {
-                final T t = tRef.get();
-                if (t != null) {
-                    synchronized (messages) {
-                        if (!messages.containsKey(t)) {
-                            messages.put(t, new ArrayList<>());
-                        }
-
-                        messages.get(t).add(s);
-                    }
-                    shouldSend.set(true);
-                }
-            }
-
-            @Override
-            public boolean hasPermission(Permission permission) {
-                return perms.get(permission);
-            }
-        };
+        return new SenderImp(t);
     }
 
     @Override
@@ -95,6 +64,53 @@ public abstract class SenderFactory<T> implements Runnable {
             }
 
             messages.clear();
+        }
+    }
+
+    private class SenderImp implements Sender {
+        private final WeakReference<T> tRef;
+
+        // Cache these permissions, so they can be accessed async
+        private Map<Permission, Boolean> perms;
+
+        @Getter
+        private final String name;
+
+        @Getter
+        private final UUID uuid;
+
+        private final boolean console;
+
+        private SenderImp(T t) {
+            this.tRef = new WeakReference<>(t);
+            this.name = factory.getName(t);
+            this.uuid = factory.getUuid(t);
+            this.console = this.uuid.equals(Constants.getConsoleUUID()) || this.uuid.equals(Constants.getImporterUUID());
+
+            if (!this.console) {
+                this.perms = ImmutableMap.copyOf(Arrays.stream(Permission.values())
+                        .collect(Collectors.toMap(p -> p, p -> factory.hasPermission(t, p.getNode()))));
+            }
+        }
+
+        @Override
+        public void sendMessage(String s) {
+            final T t = tRef.get();
+            if (t != null) {
+                synchronized (messages) {
+                    if (!messages.containsKey(t)) {
+                        messages.put(t, new ArrayList<>());
+                    }
+
+                    messages.get(t).add(s);
+                }
+                shouldSend.set(true);
+            }
+        }
+
+        @Override
+        public boolean hasPermission(Permission permission) {
+            return console || perms.get(permission);
         }
     }
 }

@@ -89,6 +89,18 @@ public interface LPConfiguration {
     boolean getLogNotify();
 
     /**
+     * @return true if the vanilla op system is enabled
+     * @since 2.8
+     */
+    boolean getEnableOps();
+
+    /**
+     * @return true if opped players are allowed to use LuckPerms commands
+     * @since 2.8
+     */
+    boolean getCommandsAllowOp();
+
+    /**
      * @return the name of the server used within Vault operations
      * @since 2.7
      */

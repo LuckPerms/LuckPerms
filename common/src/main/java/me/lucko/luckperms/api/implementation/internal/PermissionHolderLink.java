@@ -52,7 +52,7 @@ public class PermissionHolderLink implements PermissionHolder {
 
     @Override
     public SortedSet<Node> getPermissions() {
-        return Collections.unmodifiableSortedSet(master.getPermissions());
+        return Collections.unmodifiableSortedSet(master.getPermissions(false));
     }
 
     @Override

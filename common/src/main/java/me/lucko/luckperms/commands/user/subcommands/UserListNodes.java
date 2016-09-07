@@ -38,8 +38,8 @@ public class UserListNodes extends SubCommand<User> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
-        Message.LISTNODES.send(sender, user.getName(), Util.permNodesToString(user.getPermissions()));
-        Message.LISTNODES_TEMP.send(sender, user.getName(), Util.tempNodesToString(user.getPermissions()));
+        Message.LISTNODES.send(sender, user.getName(), Util.permNodesToString(user.getPermissions(false)));
+        Message.LISTNODES_TEMP.send(sender, user.getName(), Util.tempNodesToString(user.getPermissions(false)));
         return CommandResult.SUCCESS;
     }
 }

@@ -87,6 +87,16 @@ public class LPConfigurationLink implements LPConfiguration {
     }
 
     @Override
+    public boolean getEnableOps() {
+        return master.getEnableOps();
+    }
+
+    @Override
+    public boolean getCommandsAllowOp() {
+        return master.getCommandsAllowOp();
+    }
+
+    @Override
     public String getVaultServer() {
         return master.getVaultServer();
     }

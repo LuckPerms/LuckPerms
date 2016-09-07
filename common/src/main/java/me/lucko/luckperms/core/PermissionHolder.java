@@ -77,20 +77,26 @@ public abstract class PermissionHolder {
      * Returns a Set of nodes in priority order
      * @return the holders transient and permanent nodes
      */
-    public SortedSet<Node> getPermissions() {
+    public SortedSet<Node> getPermissions(boolean mergeTemp) {
         // Returns no duplicate nodes. as in, nodes with the same value.
 
-        TreeSet<Node> combined = new TreeSet<>(PRIORITY_COMPARATOR);
+        TreeSet<Node> combined = new TreeSet<>(PriorityComparator.reverse());
         combined.addAll(nodes);
         combined.addAll(transientNodes);
 
-        TreeSet<Node> permissions = new TreeSet<>(PRIORITY_COMPARATOR);
+        TreeSet<Node> permissions = new TreeSet<>(PriorityComparator.reverse());
 
         combined:
         for (Node node : combined) {
             for (Node other : permissions) {
-                if (node.equalsIgnoringValue(other)) {
-                    continue combined;
+                if (mergeTemp) {
+                    if (node.equalsIgnoringValueOrTemp(other)) {
+                        continue combined;
+                    }
+                } else {
+                    if (node.almostEquals(other)) {
+                        continue combined;
+                    }
                 }
             }
 
@@ -138,7 +144,7 @@ public abstract class PermissionHolder {
      * @return a set of nodes
      */
     public SortedSet<Node> getAllNodes(List<String> excludedGroups) {
-        SortedSet<Node> all = getPermissions();
+        SortedSet<Node> all = getPermissions(true);
 
         if (excludedGroups == null) {
             excludedGroups = new ArrayList<>();
@@ -146,7 +152,7 @@ public abstract class PermissionHolder {
 
         excludedGroups.add(getObjectName().toLowerCase());
 
-        Set<String> parents = getPermissions().stream()
+        Set<String> parents = getPermissions(true).stream()
                 .filter(Node::isGroupNode)
                 .map(Node::getGroupName)
                 .collect(Collectors.toSet());
@@ -190,11 +196,12 @@ public abstract class PermissionHolder {
         SortedSet<Node> allNodes;
 
         if (applyGroups) {
-            allNodes = sort(getAllNodes(null), true);
+            allNodes = getAllNodes(null);
         } else {
-            allNodes = sort(getPermissions(), true);
+            allNodes = getPermissions(true);
         }
 
+        all:
         for (Node node : allNodes) {
             if (!node.shouldApplyOnServer(server, includeGlobal, plugin.getConfiguration().getApplyRegex())) {
                 continue;
@@ -206,6 +213,13 @@ public abstract class PermissionHolder {
 
             if (!node.shouldApplyWithContext(extraContext)) {
                 continue;
+            }
+
+            // Force higher priority nodes to override
+            for (Node alreadyIn : perms) {
+                if (node.getPermission().equals(alreadyIn.getPermission())) {
+                    continue all;
+                }
             }
 
             perms.add(node);
@@ -502,7 +516,7 @@ public abstract class PermissionHolder {
      * @return The temporary nodes held by the holder
      */
     public Set<Node> getTemporaryNodes() {
-        return getPermissions().stream().filter(Node::isTemporary).collect(Collectors.toSet());
+        return getPermissions(false).stream().filter(Node::isTemporary).collect(Collectors.toSet());
     }
 
     @Deprecated
@@ -520,7 +534,7 @@ public abstract class PermissionHolder {
      * @return The permanent nodes held by the holder
      */
     public Set<Node> getPermanentNodes() {
-        return getPermissions().stream().filter(Node::isPermanent).collect(Collectors.toSet());
+        return getPermissions(false).stream().filter(Node::isPermanent).collect(Collectors.toSet());
     }
 
     /*
@@ -540,52 +554,5 @@ public abstract class PermissionHolder {
 
     public Map<String, Boolean> getLocalPermissions(String server, List<String> excludedGroups) {
         return getLocalPermissions(server, null, excludedGroups, null);
-    }
-
-    public static SortedSet<Node> sort(Set<Node> toSort, boolean reversed) {
-        TreeSet<Node> set = new TreeSet<>(reversed ? PRIORITY_COMPARATOR.reversed() : PRIORITY_COMPARATOR);
-        set.addAll(toSort);
-        return set;
-    }
-
-    private static final PriorityComparator PRIORITY_COMPARATOR = new PriorityComparator();
-    private static class PriorityComparator implements Comparator<Node> {
-
-        @Override
-        public int compare(Node o1, Node o2) {
-            if (o1.equals(o2)) {
-                return 0;
-            }
-
-            if (o1.isOverride() != o2.isOverride()) {
-                return o1.isOverride() ? 1 : -1;
-            }
-
-            if (o1.isServerSpecific() != o2.isServerSpecific()) {
-                return o1.isServerSpecific() ? 1 : -1;
-            }
-
-            if (o1.isWorldSpecific() != o2.isWorldSpecific()) {
-                return o1.isWorldSpecific() ? 1 : -1;
-            }
-
-            if (o1.isTemporary() != o2.isTemporary()) {
-                return o1.isTemporary() ? 1 : -1;
-            }
-
-            if (o1.isWildcard() != o2.isWildcard()) {
-                return o1.isWildcard() ? 1 : -1;
-            }
-
-            if (o1.isTemporary()) {
-                return o1.getSecondsTilExpiry() < o2.getSecondsTilExpiry() ? 1 : -1;
-            }
-
-            if (o1.isWildcard()) {
-                return o1.getWildcardLevel() > o2.getWildcardLevel() ? 1 : -1;
-            }
-
-            return 1;
-        }
     }
 }

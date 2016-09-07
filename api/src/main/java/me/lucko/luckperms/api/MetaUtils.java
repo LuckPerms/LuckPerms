@@ -36,6 +36,8 @@ import java.util.Set;
  */
 public class MetaUtils {
 
+    private MetaUtils(){}
+
     /**
      * Escapes special characters used within LuckPerms, so the string can be saved without issues
      * @param s the string to escape

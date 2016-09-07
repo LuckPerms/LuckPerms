@@ -23,9 +23,11 @@
 package me.lucko.luckperms.constants;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import me.lucko.luckperms.commands.Sender;
 
 @SuppressWarnings("SpellCheckingInspection")
+@Getter
 @AllArgsConstructor
 public enum Permission {
 
@@ -113,15 +115,15 @@ public enum Permission {
 
     MIGRATION("migration", null);
 
-    private String node;
+    private String tag;
     private String group;
 
     public String getNode() {
         if (group != null) {
-            return "luckperms." + group + "." + node;
+            return "luckperms." + group + "." + tag;
         }
 
-        return "luckperms." + node;
+        return "luckperms." + tag;
     }
 
     public boolean isAuthorized(Sender sender) {

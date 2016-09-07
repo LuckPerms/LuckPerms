@@ -105,4 +105,22 @@ class BukkitListener extends AbstractListener implements Listener {
         plugin.getUserManager().getWorldCache().remove(e.getPlayer().getUniqueId());
         onLeave(e.getPlayer().getUniqueId());
     }
+
+    @EventHandler
+    public void onPlayerCommand(PlayerCommandPreprocessEvent e) {
+        if (plugin.getConfiguration().getEnableOps()) {
+            return;
+        }
+
+        String s = e.getMessage()
+                .replace("/", "")
+                .replace("bukkit:", "")
+                .replace("spigot:", "")
+                .replace("minecraft:", "");
+
+        if (s.startsWith("op") || s.startsWith("deop")) {
+            e.setCancelled(true);
+            e.getPlayer().sendMessage(Message.OP_DISABLED.toString());
+        }
+    }
 }

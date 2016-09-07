@@ -156,7 +156,7 @@ public class Node implements me.lucko.luckperms.api.Node {
     }
 
     public boolean isServerSpecific() {
-        return getServer().isPresent();
+        return getServer().isPresent() && !getServer().get().equalsIgnoreCase("global");
     }
 
     public boolean isWorldSpecific() {
@@ -170,28 +170,7 @@ public class Node implements me.lucko.luckperms.api.Node {
         }
 
         if (isServerSpecific()) {
-            if (server.toLowerCase().startsWith("r=") && applyRegex) {
-                Pattern p = Patterns.compile(server.substring(2));
-                if (p == null) {
-                    return false;
-                }
-                return p.matcher(this.server).matches();
-            }
-
-            if (server.startsWith("(") && server.endsWith(")") && server.contains("|")) {
-                final String bits = server.substring(1, server.length() - 1);
-                String[] parts = Patterns.VERTICAL_BAR.split(bits);
-
-                for (String s : parts) {
-                    if (s.equalsIgnoreCase(this.server)) {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-
-            return this.server.equalsIgnoreCase(server);
+            return shouldApply(server, applyRegex, this.server);
         } else {
             return includeGlobal;
         }
@@ -204,31 +183,35 @@ public class Node implements me.lucko.luckperms.api.Node {
         }
 
         if (isWorldSpecific()) {
-            if (world.toLowerCase().startsWith("r=") && applyRegex) {
-                Pattern p = Patterns.compile(world.substring(2));
-                if (p == null) {
-                    return false;
-                }
-                return p.matcher(this.world).matches();
-            }
-
-            if (world.startsWith("(") && world.endsWith(")") && world.contains("|")) {
-                final String bits = world.substring(1, world.length() - 1);
-                String[] parts = Patterns.VERTICAL_BAR.split(bits);
-
-                for (String s : parts) {
-                    if (s.equalsIgnoreCase(this.world)) {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-
-            return this.world.equalsIgnoreCase(world);
+            return shouldApply(world, applyRegex, this.world);
         } else {
             return includeGlobal;
         }
+    }
+
+    private static boolean shouldApply(String world, boolean applyRegex, String thisWorld) {
+        if (world.toLowerCase().startsWith("r=") && applyRegex) {
+            Pattern p = Patterns.compile(world.substring(2));
+            if (p == null) {
+                return false;
+            }
+            return p.matcher(thisWorld).matches();
+        }
+
+        if (world.startsWith("(") && world.endsWith(")") && world.contains("|")) {
+            final String bits = world.substring(1, world.length() - 1);
+            String[] parts = Patterns.VERTICAL_BAR.split(bits);
+
+            for (String s : parts) {
+                if (s.equalsIgnoreCase(thisWorld)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        return thisWorld.equalsIgnoreCase(world);
     }
 
     @Override
@@ -530,6 +513,8 @@ public class Node implements me.lucko.luckperms.api.Node {
                     return false;
                 }
             }
+        } else {
+            return false;
         }
 
         if (other.getWorld().isPresent() == this.getWorld().isPresent()) {
@@ -538,6 +523,8 @@ public class Node implements me.lucko.luckperms.api.Node {
                     return false;
                 }
             }
+        } else {
+            return false;
         }
 
         if (!other.getExtraContexts().equals(this.getExtraContexts())) {
@@ -563,6 +550,8 @@ public class Node implements me.lucko.luckperms.api.Node {
                     return false;
                 }
             }
+        } else {
+            return false;
         }
 
         if (other.getWorld().isPresent() == this.getWorld().isPresent()) {
@@ -571,6 +560,41 @@ public class Node implements me.lucko.luckperms.api.Node {
                     return false;
                 }
             }
+        } else {
+            return false;
+        }
+
+        if (!other.getExtraContexts().equals(this.getExtraContexts())) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean equalsIgnoringValueOrTemp(me.lucko.luckperms.api.Node other) {
+        if (!other.getPermission().equalsIgnoreCase(this.getPermission())) {
+            return false;
+        }
+
+        if (other.getServer().isPresent() == this.getServer().isPresent()) {
+            if (other.getServer().isPresent()) {
+                if (!other.getServer().get().equalsIgnoreCase(this.getServer().get())) {
+                    return false;
+                }
+            }
+        } else {
+            return false;
+        }
+
+        if (other.getWorld().isPresent() == this.getWorld().isPresent()) {
+            if (other.getWorld().isPresent()) {
+                if (!other.getWorld().get().equalsIgnoreCase(this.getWorld().get())) {
+                    return false;
+                }
+            }
+        } else {
+            return false;
         }
 
         if (!other.getExtraContexts().equals(this.getExtraContexts())) {

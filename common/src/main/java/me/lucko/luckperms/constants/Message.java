@@ -40,6 +40,7 @@ public enum Message {
     PLAYER_ONLINE("&aOnline", false),
     PLAYER_OFFLINE("&cOffline", false),
     LOADING_ERROR("Permissions data could not be loaded. Please contact an administrator.", true),
+    OP_DISABLED("&eThe vanilla OP system is disabled on this server.", false),
     LOG("&3LOG &3&l> %s", true),
 
     COMMAND_NOT_RECOGNISED("Command not recognised.", true),

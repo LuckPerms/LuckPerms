@@ -247,18 +247,34 @@ public interface Node extends Map.Entry<String, Boolean> {
     Map.Entry<Integer, String> getSuffix();
 
     /**
-     * Similar to {@link #equals(Object)}, except doesn't take note of the value
-     * @param node the other node
-     * @return true if the two nodes are almost equal
+     * Checks if this Node is equal to another node
+     * @param obj the other node
+     * @return true if this node is equal to the other provided
+     * @see #equalsIgnoringValue(Node) for a less strict implementation of this method
      */
-    boolean equalsIgnoringValue(Node node);
+    boolean equals(Object obj);
 
     /**
-     * Similar to {@link #equals(Object)}, except doesn't take note of the expiry time or value
-     * @param node the other node
+     * Similar to {@link Node#equals(Object)}, except doesn't take note of the value
+     * @param other the other node
      * @return true if the two nodes are almost equal
      */
-    boolean almostEquals(Node node);
+    boolean equalsIgnoringValue(Node other);
+
+    /**
+     * Similar to {@link Node#equals(Object)}, except doesn't take note of the expiry time or value
+     * @param other the other node
+     * @return true if the two nodes are almost equal
+     */
+    boolean almostEquals(Node other);
+
+    /**
+     * Similar to {@link Node#equals(Object)}, except doesn't take note of the value or if the node is temporary
+     * @param other the other node
+     * @return true if the two nodes are almost equal
+     * @since 2.8
+     */
+    boolean equalsIgnoringValueOrTemp(Node other);
 
     /**
      * Builds a Node instance
