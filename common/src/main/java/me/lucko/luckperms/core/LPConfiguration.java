@@ -112,11 +112,15 @@ public abstract class LPConfiguration<T extends LuckPermsPlugin> {
     }
 
     public boolean getEnableOps() {
-        return getBoolean("enable-ops", true);
+        return !getAutoOp() && getBoolean("enable-ops", true);
     }
 
     public boolean getCommandsAllowOp() {
         return getBoolean("commands-allow-op", true);
+    }
+
+    public boolean getAutoOp() {
+        return getBoolean("auto-op", false);
     }
 
     public String getVaultServer() {

@@ -49,6 +49,14 @@ log-notify: true
 # If the vanilla OP system is enabled. If set to false, all users will be de-opped, and the op/deop commands will be disabled.
 enable-ops: true
 
+# If set to true, any user with the permission "luckperms.autoop" will automatically be granted server operator status.
+# This permission can be inherited, or set on specific servers/worlds, temporarily, etc.
+# Additionally, setting this to true will force the "enable-ops" option above to false. All users will be de-opped unless
+# they have the permission node, and the op/deop commands will be disabled.
+#
+# It is recommended that you use this option instead of assigning a single '*' permission.
+auto-op: false
+
 # If opped players should be allowed to use LuckPerms commands. Set to false to only allow users who have the permissions access to the commands
 commands-allow-op: true
 

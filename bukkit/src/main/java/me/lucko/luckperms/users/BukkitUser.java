@@ -105,11 +105,26 @@ public class BukkitUser extends User {
             existing.clear();
             existing.putAll(toApply);
 
+            boolean op = false;
+            if (plugin.getConfiguration().getAutoOp()) {
+                for (Map.Entry<String, Boolean> e : toApply.entrySet()) {
+                    if (e.getKey().equalsIgnoreCase("luckperms.autoop") && e.getValue()) {
+                        op = true;
+                        break;
+                    }
+                }
+            }
+            boolean finalOp = op;
+
             /* Must be called sync, as #recalculatePermissions is an unmodified Bukkit API call that is absolutely not thread safe.
                Shouldn't be too taxing on the server. This only gets called when permissions have actually changed,
                which is like once per user per login, assuming their permissions don't get modified. */
             plugin.doSync(() -> {
                 attachment.getAttachment().getPermissible().recalculatePermissions();
+                if (plugin.getConfiguration().getAutoOp()) {
+                    attachment.getAttachment().getPermissible().setOp(finalOp);
+                }
+
                 plugin.getApiProvider().fireEventAsync(new UserPermissionRefreshEvent(new UserLink(this)));
             });
 
