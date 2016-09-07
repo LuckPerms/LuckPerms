@@ -49,7 +49,7 @@ log-notify: true
 # If the vanilla OP system is enabled. If set to false, all users will be de-opped, and the op/deop commands will be disabled.
 enable-ops: true
 
-# If opped players should be allowed to use LuckPerms commands. Set to false to only allow users with the permission access
+# If opped players should be allowed to use LuckPerms commands. Set to false to only allow users who have the permissions access to the commands
 commands-allow-op: true
 
 # The name of the server used within Vault operations. If you don't want Vault operations to be server specific, set this
