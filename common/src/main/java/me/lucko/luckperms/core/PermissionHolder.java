@@ -390,7 +390,7 @@ public abstract class PermissionHolder {
      * @throws ObjectAlreadyHasException if the holder has this permission already
      */
     public void setPermission(Node node) throws ObjectAlreadyHasException {
-        if (hasPermission(node, false) == Tristate.TRUE) {
+        if (hasPermission(node, false) != Tristate.UNDEFINED) {
             throw new ObjectAlreadyHasException();
         }
 
@@ -404,7 +404,7 @@ public abstract class PermissionHolder {
      * @throws ObjectAlreadyHasException if the holder has this permission already
      */
     public void setTransientPermission(Node node) throws ObjectAlreadyHasException {
-        if (hasPermission(node, true) == Tristate.TRUE) {
+        if (hasPermission(node, true) != Tristate.UNDEFINED) {
             throw new ObjectAlreadyHasException();
         }
 
@@ -442,7 +442,7 @@ public abstract class PermissionHolder {
      * @throws ObjectLacksException if the holder doesn't have this node already
      */
     public void unsetPermission(Node node) throws ObjectLacksException {
-        if (hasPermission(node, false) != Tristate.TRUE) {
+        if (hasPermission(node, false) == Tristate.UNDEFINED) {
             throw new ObjectLacksException();
         }
 
@@ -468,7 +468,7 @@ public abstract class PermissionHolder {
      * @throws ObjectLacksException if the holder doesn't have this node already
      */
     public void unsetTransientPermission(Node node) throws ObjectLacksException {
-        if (hasPermission(node, true) == Tristate.FALSE) {
+        if (hasPermission(node, true) == Tristate.UNDEFINED) {
             throw new ObjectLacksException();
         }
 
