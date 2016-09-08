@@ -124,7 +124,7 @@ abstract class FlatfileDatastore extends Datastore {
 
     @Override
     public Log getLog() {
-        // TODO Add log viewing support for flatfile D:
+        // Flatfile doesn't support viewing log data from in-game. You can just read the file in a text editor.
         return Log.builder().build();
     }
 

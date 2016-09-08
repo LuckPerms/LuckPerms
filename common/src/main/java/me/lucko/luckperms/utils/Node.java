@@ -148,6 +148,9 @@ public class Node implements me.lucko.luckperms.api.Node {
     }
 
     public Optional<String> getServer() {
+        if (isWorldSpecific() && server == null) {
+            return Optional.of("global");
+        }
         return Optional.ofNullable(server);
     }
 

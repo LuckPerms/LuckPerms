@@ -61,6 +61,7 @@ public class CommandManager {
             .add(new InfoCommand())
             .add(new DebugCommand())
             .add(new ImportCommand())
+            .add(new ExportCommand())
             .add(new QueueCommand())
             .add(new MigrationMainCommand())
             .add(new CreateGroup())
