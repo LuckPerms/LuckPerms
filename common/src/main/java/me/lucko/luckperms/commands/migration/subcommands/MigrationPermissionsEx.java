@@ -118,7 +118,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             try {
                 for (String node : group.getOwnPermissions(null)) {
                     boolean value = true;
-                    if (node.startsWith("!")) {
+                    if (node.startsWith("-")) {
                         node = node.substring(1);
                         value = false;
                     }
@@ -143,7 +143,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 for (String world : worlds) {
                     for (String node : group.getOwnPermissions(world)) {
                         boolean value = true;
-                        if (node.startsWith("!")) {
+                        if (node.startsWith("-")) {
                             node = node.substring(1);
                             value = false;
                         }
@@ -262,7 +262,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             try {
                 for (String node : user.getOwnPermissions(null)) {
                     boolean value = true;
-                    if (node.startsWith("!")) {
+                    if (node.startsWith("-")) {
                         node = node.substring(1);
                         value = false;
                     }
@@ -287,7 +287,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 for (String world : worlds) {
                     for (String node : user.getOwnPermissions(world)) {
                         boolean value = true;
-                        if (node.startsWith("!")) {
+                        if (node.startsWith("-")) {
                             node = node.substring(1);
                             value = false;
                         }
