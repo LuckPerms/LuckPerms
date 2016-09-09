@@ -123,6 +123,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
                 }
             }
 
+            plugin.getDatastore().saveGroup(group);
         }
 
         Map<UUID, Map<Map.Entry<String, String>, Boolean>> users = new HashMap<>();
