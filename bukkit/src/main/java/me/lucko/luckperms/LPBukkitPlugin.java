@@ -267,11 +267,11 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
                     "luckperms." + e.getKey() + ".*", def,
                     e.getValue().stream()
                             .map(tag -> "luckperms." + e.getKey() + "." + tag)
-                            .collect(Collectors.toMap(s -> s, s -> false))
+                            .collect(Collectors.toMap(s -> s, s -> true))
                     )
             );
         }
 
-        pm.addPermission(new Permission("luckperms.*", def, all.stream().collect(Collectors.toMap(s -> s, s -> false))));
+        pm.addPermission(new Permission("luckperms.*", def, all.stream().collect(Collectors.toMap(s -> s, s -> true))));
     }
 }
