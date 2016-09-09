@@ -60,7 +60,15 @@ public class BungeeListener extends AbstractListener implements Listener {
 
 
         final String server = player.getServer() == null ? null : (player.getServer().getInfo() == null ? null : player.getServer().getInfo().getName());
-        Map<String, Boolean> local = user.getLocalPermissions(plugin.getConfiguration().getServer(), server, null, Collections.singletonList(e.getPermission()));
+        Map<String, Boolean> local = user.exportNodes(
+                plugin.getConfiguration().getServer(),
+                server,
+                null,
+                plugin.getConfiguration().getIncludeGlobalPerms(),
+                true,
+                Collections.singletonList(e.getPermission())
+        );
+
         for (Map.Entry<String, Boolean> en : local.entrySet()) {
             if (en.getKey().equalsIgnoreCase(e.getPermission())) {
                 e.setHasPermission(en.getValue());
