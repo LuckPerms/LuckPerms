@@ -35,8 +35,8 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class SpongeSenderFactory extends SenderFactory<CommandSource> {
     private static SpongeSenderFactory instance = null;
-    public static SpongeSenderFactory get() {
-        if (instance == null){
+    public static synchronized SpongeSenderFactory get() {
+        if (instance == null) {
             instance = new SpongeSenderFactory();
         }
         return instance;

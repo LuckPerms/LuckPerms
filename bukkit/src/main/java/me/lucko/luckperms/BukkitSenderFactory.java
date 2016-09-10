@@ -34,8 +34,8 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BukkitSenderFactory extends SenderFactory<CommandSender> {
     private static BukkitSenderFactory instance = null;
-    public static BukkitSenderFactory get() {
-        if (instance == null){
+    public static synchronized BukkitSenderFactory get() {
+        if (instance == null) {
             instance = new BukkitSenderFactory();
         }
         return instance;

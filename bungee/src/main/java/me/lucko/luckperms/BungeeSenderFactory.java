@@ -35,8 +35,8 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BungeeSenderFactory extends SenderFactory<CommandSender> {
     private static BungeeSenderFactory instance = null;
-    public static BungeeSenderFactory get() {
-        if (instance == null){
+    public static synchronized BungeeSenderFactory get() {
+        if (instance == null) {
             instance = new BungeeSenderFactory();
         }
         return instance;
