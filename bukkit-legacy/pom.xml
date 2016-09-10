@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>luckperms</artifactId>
+        <groupId>me.lucko.luckperms</groupId>
+        <version>2.8-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>luckperms-bukkit-legacy</artifactId>
+    <build>
+        <defaultGoal>clean package</defaultGoal>
+        <finalName>LuckPerms-bukkit-legacy-${release.version}.${git.closest.tag.commit.count}</finalName>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.5.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.4.3</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <minimizeJar>false</minimizeJar>
+                            <artifactSet>
+                                <excludes>
+                                    <exclude>org.xerial:*</exclude>
+                                </excludes>
+                            </artifactSet>
+                            <relocations>
+                                <relocation>
+                                    <pattern>org.slf4j</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.slf4j</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.zaxxer.hikari</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.hikari</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.mongodb</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.mongodb</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.bson</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.bson</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.h2</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.h2</shadedPattern>
+                                </relocation>
+                            </relocations>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+                <version>2.2.1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <injectAllReactorProjects>true</injectAllReactorProjects>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <!-- LuckPerms Bukkit -->
+        <dependency>
+            <groupId>me.lucko.luckperms</groupId>
+            <artifactId>luckperms-bukkit</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- Shade gson and guava, as they are not included in earlier Bukkit releases -->
+        <!-- gson -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.7</version>
+            <scope>compile</scope>
+        </dependency>
+        <!-- guava -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>19.0</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+
+</project>
