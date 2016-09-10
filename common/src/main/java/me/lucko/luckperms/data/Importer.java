@@ -88,7 +88,7 @@ public class Importer {
         Message.IMPORT_START.send(executor);
         final Sender fake = new FakeSender(this);
 
-        int index = 0;
+        int index = 1;
         for (String command : commands) {
             if (lastMsg < (System.currentTimeMillis() / 1000) - 5) {
                 lastMsg = System.currentTimeMillis() / 1000;
@@ -99,10 +99,10 @@ public class Importer {
             executing = index;
             try {
                 CommandResult result = commandManager.onCommand(fake, "perms", Arrays.asList(Patterns.SPACE.split(command)));
-                getResult(index).setResult(result);
+                getResult(index, command).setResult(result);
 
             } catch (Exception e) {
-                getResult(index).setResult(CommandResult.FAILURE);
+                getResult(index, command).setResult(CommandResult.FAILURE);
                 e.printStackTrace();
             }
             index++;
@@ -129,7 +129,7 @@ public class Importer {
         int errIndex = 1;
         for (Map.Entry<Integer, Result> e : cmdResult.entrySet()) {
             if (e.getValue().getResult() != null && !e.getValue().getResult().booleanValue()) {
-                Message.IMPORT_END_ERROR_HEADER.send(executor, errIndex, e.getKey(), e.getValue().getResult().toString());
+                Message.IMPORT_END_ERROR_HEADER.send(executor, errIndex, e.getKey(), e.getValue().getCommand(), e.getValue().getResult().toString());
                 for (String s : e.getValue().getOutput()) {
                     Message.IMPORT_END_ERROR_CONTENT.send(executor, s);
                 }
@@ -158,22 +158,28 @@ public class Importer {
         }
     }
 
-    private Result getResult(int executing) {
+    private Result getResult(int executing, String command) {
         if (!cmdResult.containsKey(executing)) {
-            cmdResult.put(executing, new Result());
+            cmdResult.put(executing, new Result(command));
         }
 
-        return cmdResult.get(executing);
+        Result existing = cmdResult.get(executing);
+
+        if (!command.equals("") && existing.getCommand().equals("")) {
+            existing.setCommand(command);
+        }
+
+        return existing;
     }
 
     private void logMessage(String msg) {
-        getResult(executing).getOutput().add(Util.stripColor(msg));
+        getResult(executing, "").getOutput().add(Util.stripColor(msg));
     }
 
     private static class FakeSender implements Sender {
         private final Importer instance;
 
-        public FakeSender(Importer instance) {
+        private FakeSender(Importer instance) {
             this.instance = instance;
         }
 
@@ -199,6 +205,9 @@ public class Importer {
     }
 
     private static class Result {
+        @Getter
+        @Setter
+        private String command;
 
         @Getter
         private final List<String> output = new ArrayList<>();
@@ -206,6 +215,10 @@ public class Importer {
         @Getter
         @Setter
         private CommandResult result = CommandResult.FAILURE;
+
+        private Result(String command) {
+            this.command = command;
+        }
     }
 
 }

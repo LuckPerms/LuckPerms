@@ -333,6 +333,7 @@ public enum Message {
     IMPORT_END_ERROR_HEADER(
             PREFIX + "&e(Import) &7------------> &6Showing Error #&e%s &7<------------" + "\n" +
             PREFIX + "&e(Import) &6Whilst executing: &fCommand #%s" + "\n" +
+            PREFIX + "&e(Import) &6Command: &7%s" + "\n" +
             PREFIX + "&e(Import) &6Type: &f%s" + "\n" +
             PREFIX + "&e(Import) &6Output:",
             false
