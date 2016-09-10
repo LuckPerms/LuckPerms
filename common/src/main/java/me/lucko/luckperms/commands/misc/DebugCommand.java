@@ -38,6 +38,7 @@ public class DebugCommand extends SingleMainCommand {
 
     @Override
     protected CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
+        plugin.getLog().info(sender.getName() + " used the debug command.");
         Message.DEBUG.send(sender,
                 plugin.getPlayerCount(),
                 plugin.getUserManager().getAll().size(),
