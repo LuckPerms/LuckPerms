@@ -44,6 +44,7 @@ public class InfoCommand extends SingleMainCommand {
         final LPConfiguration c = plugin.getConfiguration();
         Message.INFO.send(sender,
                 plugin.getVersion(),
+                plugin.getType().getFriendlyName(),
                 plugin.getDatastore().getName(),
                 c.getServer(),
                 c.getSyncTime(),

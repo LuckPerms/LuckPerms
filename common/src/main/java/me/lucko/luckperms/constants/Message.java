@@ -123,6 +123,7 @@ public enum Message {
     UPDATE_TASK_RUN("&bRunning update task for all online users.", true),
     INFO(
             PREFIX + "&6Running &bLuckPerms v%s&6 by &bLuck&6." + "\n" +
+            PREFIX + "&f-> &ePlatform: &6%s" + "\n" +
             PREFIX + "&f-> &eStorage Method: &6%s" + "\n" +
             PREFIX + "&f-> &eServer Name: &6%s" + "\n" +
             PREFIX + "&f-> &eSync Interval: &6%s minutes" + "\n" +
