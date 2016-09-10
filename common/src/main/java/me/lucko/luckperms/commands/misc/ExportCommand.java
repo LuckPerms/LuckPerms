@@ -128,6 +128,9 @@ public class ExportCommand extends SingleMainCommand {
                 User user = plugin.getUserManager().get(uuid);
 
                 for (Node node : user.getNodes()) {
+                    if (node.isGroupNode() && node.getGroupName().equalsIgnoreCase("default")) {
+                        continue;
+                    }
                     write(writer, nodeToString(node, user.getUuid().toString(), false));
                 }
 
