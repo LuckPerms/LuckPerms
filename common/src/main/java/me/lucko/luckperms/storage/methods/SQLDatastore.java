@@ -265,7 +265,7 @@ abstract class SQLDatastore extends Datastore {
                     String uuid = resultSet.getString("uuid");
                     uuids.add(UUID.fromString(uuid));
                 }
-                return false;
+                return true;
             }
         });
 
