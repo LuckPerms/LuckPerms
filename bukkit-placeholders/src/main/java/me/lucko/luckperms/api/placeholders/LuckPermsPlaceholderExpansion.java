@@ -25,15 +25,11 @@ package me.lucko.luckperms.api.placeholders;
 import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.clip.placeholderapi.util.TimeUtil;
-import me.lucko.luckperms.api.LuckPermsApi;
-import me.lucko.luckperms.api.Track;
-import me.lucko.luckperms.api.User;
+import me.lucko.luckperms.api.*;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import java.util.Map;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 /*
  * PlaceholderAPI Expansion for LuckPerms, implemented using the LuckPerms API.
@@ -75,7 +71,7 @@ public class LuckPermsPlaceholderExpansion extends PlaceholderExpansion {
 
     @Override
     public String getVersion() {
-        return "2.5";
+        return "2.8";
     }
 
     @Override
@@ -127,17 +123,11 @@ public class LuckPermsPlaceholderExpansion extends PlaceholderExpansion {
 
         if (identifier.startsWith("expiry_time_") && identifier.length() > "expiry_time_".length()) {
             String node = identifier.substring("expiry_time_".length());
-
-
             long currentTime = System.currentTimeMillis() / 1000L;
-            Map<Map.Entry<String, Boolean>, Long> temps = user.getTemporaryNodes();
-
-            for (Map.Entry<Map.Entry<String, Boolean>, Long> e : temps.entrySet()) {
-                if (!e.getKey().getKey().equalsIgnoreCase(node)) {
-                    continue;
+            for (Node n : user.getTemporaryPermissionNodes()) {
+                if (n.getPermission().equalsIgnoreCase(node)) {
+                    return TimeUtil.getTime((int) (n.getExpiryUnixTime() - currentTime));
                 }
-
-                return TimeUtil.getTime((int) (e.getValue() - currentTime));
             }
 
             return "";
@@ -145,42 +135,27 @@ public class LuckPermsPlaceholderExpansion extends PlaceholderExpansion {
 
         if (identifier.startsWith("group_expiry_time_") && identifier.length() > "group_expiry_time_".length()) {
             String node = "group." + identifier.substring("group_expiry_time_".length());
-
             long currentTime = System.currentTimeMillis() / 1000L;
-            Map<Map.Entry<String, Boolean>, Long> temps = user.getTemporaryNodes();
-
-            for (Map.Entry<Map.Entry<String, Boolean>, Long> e : temps.entrySet()) {
-                if (!e.getKey().getKey().equalsIgnoreCase(node)) {
-                    continue;
+            for (Node n : user.getTemporaryPermissionNodes()) {
+                if (n.getPermission().equalsIgnoreCase(node)) {
+                    return TimeUtil.getTime((int) (n.getExpiryUnixTime() - currentTime));
                 }
-
-                return TimeUtil.getTime((int) (e.getValue() - currentTime));
             }
 
             return "";
         }
 
         if (identifier.equalsIgnoreCase("prefix")) {
-            return getChatMeta(PREFIX_PATTERN, user);
+            return MetaUtils.getPrefix(user, null, null, true);
         }
 
         if (identifier.equalsIgnoreCase("suffix")) {
-            return getChatMeta(SUFFIX_PATTERN, user);
+            return MetaUtils.getSuffix(user, null, null, true);
         }
 
         if (identifier.startsWith("meta_") && identifier.length() > "meta_".length()) {
-            String node = "meta." + escapeCharacters(identifier.substring("meta_".length())) + ".";
-            Map<String, Boolean> nodes = user.getNodes();
-
-            for (Map.Entry<String, Boolean> e : nodes.entrySet()) {
-                if (!e.getValue()) continue;
-                if (!e.getKey().toLowerCase().startsWith(node)) continue;
-
-                String meta = e.getKey().substring(node.length());
-                return unescapeCharacters(meta);
-            }
-
-            return "";
+            String node = identifier.substring("meta_".length());
+            return MetaUtils.getMeta(user, null, null, node, "", true);
         }
 
         return null;
@@ -203,45 +178,5 @@ public class LuckPermsPlaceholderExpansion extends PlaceholderExpansion {
 
     private static String formatBoolean(boolean b) {
         return b ? PlaceholderAPIPlugin.booleanTrue() : PlaceholderAPIPlugin.booleanFalse();
-    }
-
-    private static String escapeCharacters(String s) {
-        s = s.replace(".", "{SEP}");
-        s = s.replace("/", "{FSEP}");
-        s = s.replace("$", "{DSEP}");
-
-        return s;
-    }
-
-    private static String unescapeCharacters(String s) {
-        s = s.replace("{SEP}", ".");
-        s = s.replace("{FSEP}", "/");
-        s = s.replace("{DSEP}", "$");
-
-        return s;
-    }
-
-    private static final Pattern PREFIX_PATTERN = Pattern.compile("(?i)prefix\\.\\d+\\..*");
-    private static final Pattern SUFFIX_PATTERN = Pattern.compile("(?i)suffix\\.\\d+\\..*");
-    private static final Pattern DOT_PATTERN = Pattern.compile("\\.");
-
-    private static String getChatMeta(Pattern pattern, User user) {
-        int priority = 0;
-        String meta = null;
-        for (Map.Entry<String, Boolean> e : user.getLocalPermissions(null, null).entrySet()) {
-            if (!e.getValue()) continue;
-
-            if (pattern.matcher(e.getKey()).matches()) {
-                String[] parts = DOT_PATTERN.split(e.getKey(), 3);
-                int p = Integer.parseInt(parts[1]);
-
-                if (meta == null || p > priority) {
-                    meta = parts[2];
-                    priority = p;
-                }
-            }
-        }
-
-        return meta == null ? "" : unescapeCharacters(meta);
     }
 }

@@ -30,8 +30,8 @@
         <dependency>
             <groupId>me.lucko.luckperms</groupId>
             <artifactId>luckperms-api</artifactId>
-            <version>2.5</version>
-            <scope>compile</scope>
+            <version>2.8</version>
+            <scope>provided</scope>
         </dependency>
         <!-- BukkitAPI -->
         <dependency>
