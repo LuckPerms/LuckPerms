@@ -118,10 +118,8 @@ public class VaultChatHook extends Chat {
                 continue;
             }
 
-            if (!perms.getServer().equalsIgnoreCase("global")) {
-                if (!n.shouldApplyOnServer(perms.getServer(), perms.isIncludeGlobal(), false)) {
-                    continue;
-                }
+            if (!n.shouldApplyOnServer(perms.getServer(), perms.isIncludeGlobal(), false)) {
+                continue;
             }
 
             if (!n.shouldApplyOnWorld(world, perms.isIncludeGlobal(), false)) {
@@ -169,17 +167,15 @@ public class VaultChatHook extends Chat {
                 continue;
             }
 
-            if (!perms.getServer().equalsIgnoreCase("global")) {
-                if (!n.shouldApplyOnServer(perms.getServer(), perms.isIncludeGlobal(), false)) {
-                    continue;
-                }
-            }
-
-            if (!n.shouldApplyOnWorld(world, perms.isIncludeGlobal(), false)) {
+            if (prefix ? !n.isPrefix() : !n.isSuffix()) {
                 continue;
             }
 
-            if (prefix ? !n.isPrefix() : !n.isSuffix()) {
+            if (!n.shouldApplyOnServer(perms.getServer(), perms.isIncludeGlobal(), false)) {
+                continue;
+            }
+
+            if (!n.shouldApplyOnWorld(world, perms.isIncludeGlobal(), false)) {
                 continue;
             }
 
