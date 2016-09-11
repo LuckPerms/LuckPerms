@@ -46,6 +46,9 @@ apply-shorthand: true
 # If the plugin should send log notifications to users whenever permissions are modified.
 log-notify: true
 
+# If LuckPerms should print to console every time a plugin checks if a player has a permission
+debug-permission-checks: false
+
 # If the vanilla OP system is enabled. If set to false, all users will be de-opped, and the op/deop commands will be disabled.
 enable-ops: true
 

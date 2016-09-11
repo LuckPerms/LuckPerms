@@ -111,6 +111,10 @@ public abstract class LPConfiguration<T extends LuckPermsPlugin> {
         return getBoolean("log-notify", true);
     }
 
+    public boolean getDebugPermissionChecks() {
+        return getBoolean("debug-permission-checks", false);
+    }
+
     public boolean getEnableOps() {
         return !getAutoOp() && getBoolean("enable-ops", true);
     }

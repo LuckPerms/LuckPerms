@@ -24,6 +24,7 @@ package me.lucko.luckperms.users;
 
 import lombok.Getter;
 import me.lucko.luckperms.LPBukkitPlugin;
+import me.lucko.luckperms.inject.Injector;
 import org.bukkit.entity.Player;
 
 import java.util.Map;
@@ -49,9 +50,9 @@ public class BukkitUserManager extends UserManager {
             BukkitUser u = (BukkitUser) user;
             Player player = plugin.getServer().getPlayer(plugin.getUuidCache().getExternalUUID(u.getUuid()));
             if (player != null) {
-                if (u.getAttachment() != null) {
-                    player.removeAttachment(u.getAttachment().getAttachment());
-                    u.setAttachment(null);
+                if (u.getLpPermissible() != null) {
+                    Injector.unInject(player);
+                    u.setLpPermissible(null);
                 }
 
                 if (plugin.getConfiguration().getAutoOp()) {

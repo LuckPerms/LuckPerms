@@ -22,39 +22,24 @@
 
 package me.lucko.luckperms.users;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import me.lucko.luckperms.LPBukkitPlugin;
 import me.lucko.luckperms.api.event.events.UserPermissionRefreshEvent;
 import me.lucko.luckperms.api.implementation.internal.UserLink;
-import org.bukkit.permissions.PermissionAttachment;
+import me.lucko.luckperms.inject.LPPermissible;
+import org.bukkit.permissions.Permissible;
 
-import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 
 public class BukkitUser extends User {
-    private static Field permissionsField = null;
-    public static Field getPermissionsField() {
-        if (permissionsField == null) {
-            try {
-                permissionsField = PermissionAttachment.class.getDeclaredField("permissions");
-                permissionsField.setAccessible(true);
-            } catch (SecurityException | NoSuchFieldException e) {
-                e.printStackTrace();
-            }
-        }
-        return permissionsField;
-    }
-
-
     private final LPBukkitPlugin plugin;
 
     @Getter
     @Setter
-    private PermissionAttachmentHolder attachment = null;
+    private LPPermissible lpPermissible = null;
 
     BukkitUser(UUID uuid, LPBukkitPlugin plugin) {
         super(uuid, plugin);
@@ -69,7 +54,7 @@ public class BukkitUser extends User {
     @SuppressWarnings("unchecked")
     @Override
     public void refreshPermissions() {
-        if (attachment == null) {
+        if (lpPermissible == null) {
             return;
         }
 
@@ -80,12 +65,11 @@ public class BukkitUser extends User {
                 null,
                 plugin.getConfiguration().getIncludeGlobalPerms(),
                 true,
-                plugin.getPossiblePermissions()
+                Collections.emptyList()
         );
 
         try {
-            // The map in the LP PermissionAttachment is a ConcurrentHashMap. We can modify and iterate over its contents async.
-            Map<String, Boolean> existing = attachment.getPermissions();
+            Map<String, Boolean> existing = lpPermissible.getLuckPermsPermissions();
 
             boolean different = false;
             if (toApply.size() != existing.size()) {
@@ -105,39 +89,27 @@ public class BukkitUser extends User {
             existing.clear();
             existing.putAll(toApply);
 
-            boolean op = false;
             if (plugin.getConfiguration().getAutoOp()) {
+                boolean op = false;
+
                 for (Map.Entry<String, Boolean> e : toApply.entrySet()) {
                     if (e.getKey().equalsIgnoreCase("luckperms.autoop") && e.getValue()) {
                         op = true;
                         break;
                     }
                 }
-            }
-            boolean finalOp = op;
 
-            /* Must be called sync, as #recalculatePermissions is an unmodified Bukkit API call that is absolutely not thread safe.
-               Shouldn't be too taxing on the server. This only gets called when permissions have actually changed,
-               which is like once per user per login, assuming their permissions don't get modified. */
-            plugin.doSync(() -> {
-                attachment.getAttachment().getPermissible().recalculatePermissions();
-                if (plugin.getConfiguration().getAutoOp()) {
-                    attachment.getAttachment().getPermissible().setOp(finalOp);
+                final boolean finalOp = op;
+                if (lpPermissible.isOp() != op) {
+                    final Permissible parent = lpPermissible.getParent();
+                    plugin.doSync(() -> parent.setOp(finalOp));
                 }
+            }
 
-                plugin.getApiProvider().fireEventAsync(new UserPermissionRefreshEvent(new UserLink(this)));
-            });
+            plugin.getApiProvider().fireEventAsync(new UserPermissionRefreshEvent(new UserLink(this)));
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    @Getter
-    @EqualsAndHashCode
-    @AllArgsConstructor
-    public static class PermissionAttachmentHolder {
-        private final PermissionAttachment attachment;
-        private final Map<String, Boolean> permissions;
     }
 }

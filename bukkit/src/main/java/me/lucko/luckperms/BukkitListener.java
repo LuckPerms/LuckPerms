@@ -23,6 +23,8 @@
 package me.lucko.luckperms;
 
 import me.lucko.luckperms.constants.Message;
+import me.lucko.luckperms.inject.LPPermissible;
+import me.lucko.luckperms.inject.Injector;
 import me.lucko.luckperms.users.BukkitUser;
 import me.lucko.luckperms.users.User;
 import me.lucko.luckperms.utils.AbstractListener;
@@ -30,10 +32,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.*;
-import org.bukkit.permissions.PermissionAttachment;
-
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 class BukkitListener extends AbstractListener implements Listener {
     private final LPBukkitPlugin plugin;
@@ -67,20 +65,13 @@ class BukkitListener extends AbstractListener implements Listener {
         if (user instanceof BukkitUser) {
             BukkitUser u = (BukkitUser) user;
 
-            PermissionAttachment attachment = player.addAttachment(plugin);
-            Map<String, Boolean> newPermMap = new ConcurrentHashMap<>();
             try {
-                /* Replace the standard LinkedHashMap in the attachment with a ConcurrentHashMap.
-                   This means that we can iterate over and change the permissions within our attachment asynchronously,
-                   without worrying about thread safety. The Bukkit side of things should still operate normally. Internal
-                   permission stuff should work the same. This is by far the most easy and efficient way to do things, without
-                   having to do tons of reflection. */
-                BukkitUser.getPermissionsField().set(attachment, newPermMap);
+                LPPermissible lpPermissible = new LPPermissible(player, plugin);
+                Injector.inject(player, lpPermissible);
+                u.setLpPermissible(lpPermissible);
             } catch (Throwable t) {
                 t.printStackTrace();
             }
-
-            u.setAttachment(new BukkitUser.PermissionAttachmentHolder(attachment, newPermMap));
         }
 
         plugin.doAsync(user::refreshPermissions);
