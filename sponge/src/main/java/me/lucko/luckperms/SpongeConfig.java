@@ -22,7 +22,7 @@
 
 package me.lucko.luckperms;
 
-import me.lucko.luckperms.constants.Patterns;
+import com.google.common.base.Splitter;
 import me.lucko.luckperms.core.LPConfiguration;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
@@ -70,7 +70,7 @@ class SpongeConfig extends LPConfiguration<LPSpongePlugin> {
     }
 
     private ConfigurationNode getNode(String path) {
-        String[] paths = Patterns.DOT.split(path);
+        Iterable<String> paths = Splitter.on('.').split(path);
         ConfigurationNode node = root;
 
         for (String s : paths) {

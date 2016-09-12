@@ -23,8 +23,8 @@
 package me.lucko.luckperms;
 
 import me.lucko.luckperms.constants.Message;
-import me.lucko.luckperms.inject.LPPermissible;
 import me.lucko.luckperms.inject.Injector;
+import me.lucko.luckperms.inject.LPPermissible;
 import me.lucko.luckperms.users.BukkitUser;
 import me.lucko.luckperms.users.User;
 import me.lucko.luckperms.utils.AbstractListener;

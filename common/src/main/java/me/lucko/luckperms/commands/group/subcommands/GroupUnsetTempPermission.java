@@ -28,7 +28,6 @@ import me.lucko.luckperms.commands.Predicate;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Message;
-import me.lucko.luckperms.constants.Patterns;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.data.LogEntry;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
@@ -53,7 +52,7 @@ public class GroupUnsetTempPermission extends SubCommand<Group> {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (Patterns.GROUP_MATCH.matcher(node).matches()) {
+        if (node.toLowerCase().startsWith("group.")) {
             Message.GROUP_USE_UNINHERIT.send(sender);
             return CommandResult.INVALID_ARGS;
         }

@@ -37,6 +37,22 @@ public class Util {
         sender.sendMessage(color(Message.PREFIX + message));
     }
 
+    public static List<String> stripQuotes(List<String> input) {
+        input = new ArrayList<>(input);
+        ListIterator<String> iterator = input.listIterator();
+        while (iterator.hasNext()) {
+            String value = iterator.next();
+            if (!(value.length() >= 3)) {
+                continue;
+            }
+
+            if (value.charAt(0) == '"' && value.charAt(value.length() - 1) == '"') {
+                iterator.set(value.substring(1, value.length() - 1));
+            }
+        }
+        return input;
+    }
+
     public static String color(String s) {
         return translateAlternateColorCodes('&', s);
     }

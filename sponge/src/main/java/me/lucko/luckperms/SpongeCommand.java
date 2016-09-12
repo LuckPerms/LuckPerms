@@ -22,8 +22,10 @@
 
 package me.lucko.luckperms;
 
+import com.google.common.base.Splitter;
 import me.lucko.luckperms.api.data.Callback;
 import me.lucko.luckperms.commands.CommandManager;
+import me.lucko.luckperms.commands.Util;
 import me.lucko.luckperms.constants.Patterns;
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandException;
@@ -34,8 +36,6 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,27 +47,22 @@ class SpongeCommand extends CommandManager implements CommandCallable {
 
     @Override
     public CommandResult process(CommandSource source, String s) throws CommandException {
-        onCommand(SpongeSenderFactory.get().wrap(source), "perms", Arrays.asList(Patterns.SPACE.split(s)), Callback.empty());
+        onCommand(
+                SpongeSenderFactory.get().wrap(source),
+                "perms",
+                Util.stripQuotes(Splitter.on(Patterns.COMMAND_SEPARATOR).omitEmptyStrings().splitToList(s)),
+                Callback.empty()
+        );
         return CommandResult.success();
     }
 
     @Override
     public List<String> getSuggestions(CommandSource source, String s, @Nullable Location<World> location) throws CommandException {
-        List<String> args = new ArrayList<>(Arrays.asList(Patterns.SPACE.split(s)));
-        if (s.endsWith(" ")) {
-            args.add("");
-        }
-
-        return onTabComplete(SpongeSenderFactory.get().wrap(source), args);
+        return onTabComplete(SpongeSenderFactory.get().wrap(source), Splitter.on(' ').splitToList(s));
     }
 
     public List<String> getSuggestions(CommandSource source, String s) throws CommandException {
-        List<String> args = new ArrayList<>(Arrays.asList(Patterns.SPACE.split(s)));
-        if (s.endsWith(" ")) {
-            args.add("");
-        }
-
-        return onTabComplete(SpongeSenderFactory.get().wrap(source), args);
+        return onTabComplete(SpongeSenderFactory.get().wrap(source), Splitter.on(' ').splitToList(s));
     }
 
     @Override

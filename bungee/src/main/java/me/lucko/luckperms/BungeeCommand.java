@@ -22,8 +22,12 @@
 
 package me.lucko.luckperms;
 
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 import me.lucko.luckperms.api.data.Callback;
 import me.lucko.luckperms.commands.CommandManager;
+import me.lucko.luckperms.commands.Util;
+import me.lucko.luckperms.constants.Patterns;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.TabExecutor;
@@ -40,7 +44,12 @@ class BungeeCommand extends Command implements TabExecutor {
 
     @Override
     public void execute(CommandSender sender, String[] args) {
-        manager.onCommand(BungeeSenderFactory.get().wrap(sender), "bperms", Arrays.asList(args), Callback.empty());
+        manager.onCommand(
+                BungeeSenderFactory.get().wrap(sender),
+                "bperms",
+                Util.stripQuotes(Splitter.on(Patterns.COMMAND_SEPARATOR).omitEmptyStrings().splitToList(Joiner.on(' ').join(args))),
+                Callback.empty()
+        );
     }
 
     @Override

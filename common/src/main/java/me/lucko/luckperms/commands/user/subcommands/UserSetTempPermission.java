@@ -28,7 +28,6 @@ import me.lucko.luckperms.commands.Predicate;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Message;
-import me.lucko.luckperms.constants.Patterns;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.data.LogEntry;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
@@ -55,7 +54,7 @@ public class UserSetTempPermission extends SubCommand<User> {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (Patterns.GROUP_MATCH.matcher(node).matches()) {
+        if (node.toLowerCase().startsWith("group.")) {
             Message.USER_USE_ADDGROUP.send(sender);
             return CommandResult.INVALID_ARGS;
         }

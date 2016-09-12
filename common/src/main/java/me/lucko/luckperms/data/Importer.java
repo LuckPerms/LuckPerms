@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.data;
 
+import com.google.common.base.Splitter;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -31,7 +32,6 @@ import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.Util;
 import me.lucko.luckperms.constants.Constants;
 import me.lucko.luckperms.constants.Message;
-import me.lucko.luckperms.constants.Patterns;
 import me.lucko.luckperms.constants.Permission;
 
 import java.util.*;
@@ -98,7 +98,7 @@ public class Importer {
 
             executing = index;
             try {
-                CommandResult result = commandManager.onCommand(fake, "perms", Arrays.asList(Patterns.SPACE.split(command)));
+                CommandResult result = commandManager.onCommand(fake, "perms", Splitter.on(' ').splitToList(command));
                 getResult(index, command).setResult(result);
 
             } catch (Exception e) {

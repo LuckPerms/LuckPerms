@@ -22,11 +22,11 @@
 
 package me.lucko.luckperms.inject;
 
+import com.google.common.base.Splitter;
 import lombok.Getter;
 import lombok.NonNull;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.constants.Patterns;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.*;
@@ -99,7 +99,7 @@ public class LPPermissible extends PermissibleBase {
             }
 
             String node = "";
-            String[] permParts = Patterns.DOT.split(permission);
+            Iterable<String> permParts = Splitter.on('.').split(permission);
             for (String s : permParts) {
                 if (node.equals("")) {
                     node = s;

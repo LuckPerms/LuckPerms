@@ -33,15 +33,9 @@ import java.util.regex.PatternSyntaxException;
 public class Patterns {
     private static final Map<String, Pattern> CACHE = new ConcurrentHashMap<>();
 
-    public static final Pattern SPACE = Pattern.compile(" ");
-    public static final Pattern SERVER_DELIMITER = Pattern.compile("\\/");
-    public static final Pattern WORLD_DELIMITER = Pattern.compile("\\-");
-    public static final Pattern TEMP_DELIMITER = Pattern.compile("\\$");
-    public static final Pattern DOT = Pattern.compile("\\.");
-    public static final Pattern VERTICAL_BAR = Pattern.compile("\\|");
-    public static final Pattern GROUP_MATCH = Pattern.compile("group\\..*");
-    public static final Pattern NON_ALPHA_NUMERIC = Pattern.compile("[\\/\\$\\.\\-]");
-    public static final Pattern NON_USERNAME = Pattern.compile("[^A-Za-z0-9_]");
+    public static final Pattern COMMAND_SEPARATOR = Pattern.compile(" (?=([^\\\"]*\\\"[^\\\"]*\\\")*[^\\\"]*$)");
+    public static final Pattern NON_ALPHA_NUMERIC = Pattern.compile("[\\/\\$\\.\\- ]");
+    public static final Pattern NON_USERNAME = Pattern.compile("[^A-Za-z0-9_ ]");
     public static final Pattern SHORTHAND_NODE = Pattern.compile("\\.\\([^.]+\\)");
     public static final Pattern STRIP_COLOR_PATTERN = Pattern.compile("(?i)" + String.valueOf('§') + "[0-9A-FK-OR]");
     public static final Pattern NODE_CONTEXTS = Pattern.compile("\\(.+\\).*");

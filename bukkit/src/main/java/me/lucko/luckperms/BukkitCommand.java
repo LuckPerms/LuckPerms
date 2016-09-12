@@ -22,8 +22,12 @@
 
 package me.lucko.luckperms;
 
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 import me.lucko.luckperms.api.data.Callback;
 import me.lucko.luckperms.commands.CommandManager;
+import me.lucko.luckperms.commands.Util;
+import me.lucko.luckperms.constants.Patterns;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -39,7 +43,12 @@ class BukkitCommand extends CommandManager implements CommandExecutor, TabExecut
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        onCommand(BukkitSenderFactory.get().wrap(sender), label, Arrays.asList(args), Callback.empty());
+        onCommand(
+                BukkitSenderFactory.get().wrap(sender),
+                label,
+                Util.stripQuotes(Splitter.on(Patterns.COMMAND_SEPARATOR).omitEmptyStrings().splitToList(Joiner.on(' ').join(args))),
+                Callback.empty()
+        );
         return true;
     }
 

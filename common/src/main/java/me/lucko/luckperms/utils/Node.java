@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.utils;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import lombok.*;
 import me.lucko.luckperms.api.Tristate;
@@ -41,6 +42,7 @@ import java.util.stream.IntStream;
 public class Node implements me.lucko.luckperms.api.Node {
     private static final Pattern PREFIX_PATTERN = Pattern.compile("(?i)prefix\\.-?\\d+\\..*");
     private static final Pattern SUFFIX_PATTERN = Pattern.compile("(?i)suffix\\.-?\\d+\\..*");
+    private static final Pattern META_PATTERN = Pattern.compile("meta\\..*\\..*");
 
     public static me.lucko.luckperms.api.Node fromSerialisedNode(String s, Boolean b) {
         return builderFromSerialisedNode(s, b).build();
@@ -48,36 +50,36 @@ public class Node implements me.lucko.luckperms.api.Node {
 
     public static me.lucko.luckperms.api.Node.Builder builderFromSerialisedNode(String s, Boolean b) {
         if (s.contains("/")) {
-            String[] parts = Patterns.SERVER_DELIMITER.split(s, 2);
+            List<String> parts = Splitter.on('/').limit(2).splitToList(s);
             // 0=server(+world)   1=node
 
             // WORLD SPECIFIC
-            if (parts[0].contains("-")) {
-                String[] serverParts = Patterns.WORLD_DELIMITER.split(parts[0], 2);
+            if (parts.get(0).contains("-")) {
+                List<String> serverParts = Splitter.on('-').limit(2).splitToList(parts.get(0));
                 // 0=server   1=world
 
-                if (parts[1].contains("$")) {
-                    String[] tempParts = Patterns.TEMP_DELIMITER.split(parts[1], 2);
-                    return new Node.Builder(tempParts[0], true).setServerRaw(serverParts[0]).setWorld(serverParts[1])
-                            .setExpiry(Long.parseLong(tempParts[1])).setValue(b);
+                if (parts.get(1).contains("$")) {
+                    List<String> tempParts = Splitter.on('$').limit(2).splitToList(parts.get(1));
+                    return new Node.Builder(tempParts.get(0), true).setServerRaw(serverParts.get(0)).setWorld(serverParts.get(1))
+                            .setExpiry(Long.parseLong(tempParts.get(1))).setValue(b);
                 } else {
-                    return new Node.Builder(parts[1], true).setServerRaw(serverParts[0]).setWorld(serverParts[1]).setValue(b);
+                    return new Node.Builder(parts.get(1), true).setServerRaw(serverParts.get(0)).setWorld(serverParts.get(1)).setValue(b);
                 }
 
             } else {
                 // SERVER BUT NOT WORLD SPECIFIC
-                if (parts[1].contains("$")) {
-                    String[] tempParts = Patterns.TEMP_DELIMITER.split(parts[1], 2);
-                    return new Node.Builder(tempParts[0], true).setServerRaw(parts[0]).setExpiry(Long.parseLong(tempParts[1])).setValue(b);
+                if (parts.get(1).contains("$")) {
+                    List<String> tempParts = Splitter.on('$').limit(2).splitToList(parts.get(1));
+                    return new Node.Builder(tempParts.get(0), true).setServerRaw(parts.get(0)).setExpiry(Long.parseLong(tempParts.get(1))).setValue(b);
                 } else {
-                    return new Node.Builder(parts[1], true).setServerRaw(parts[0]).setValue(b);
+                    return new Node.Builder(parts.get(1), true).setServerRaw(parts.get(0)).setValue(b);
                 }
             }
         } else {
             // NOT SERVER SPECIFIC
             if (s.contains("$")) {
-                String[] tempParts = Patterns.TEMP_DELIMITER.split(s, 2);
-                return new Node.Builder(tempParts[0], true).setExpiry(Long.parseLong(tempParts[1])).setValue(b);
+                List<String> tempParts = Splitter.on('$').limit(2).splitToList(s);
+                return new Node.Builder(tempParts.get(0), true).setExpiry(Long.parseLong(tempParts.get(1))).setValue(b);
             } else {
                 return new Node.Builder(s, true).setValue(b);
             }
@@ -99,6 +101,11 @@ public class Node implements me.lucko.luckperms.api.Node {
     private long expireAt = 0L;
 
     private final Map<String, String> extraContexts = new HashMap<>();
+
+    // Cache the state
+    private Tristate isPrefix = Tristate.UNDEFINED;
+    private Tristate isSuffix = Tristate.UNDEFINED;
+    private Tristate isMeta = Tristate.UNDEFINED;
 
     /**
      * Make an immutable node instance
@@ -203,7 +210,7 @@ public class Node implements me.lucko.luckperms.api.Node {
 
         if (world.startsWith("(") && world.endsWith(")") && world.contains("|")) {
             final String bits = world.substring(1, world.length() - 1);
-            String[] parts = Patterns.VERTICAL_BAR.split(bits);
+            Iterable<String> parts = Splitter.on('|').split(bits);
 
             for (String s : parts) {
                 if (s.equalsIgnoreCase(thisWorld)) {
@@ -313,7 +320,7 @@ public class Node implements me.lucko.luckperms.api.Node {
             return Collections.emptyList();
         }
 
-        String[] parts = Patterns.DOT.split(getPermission());
+        Iterable<String> parts = Splitter.on('.').split(getPermission());
         List<Set<String>> nodeParts = new ArrayList<>();
 
         for (String s : parts) {
@@ -324,13 +331,13 @@ public class Node implements me.lucko.luckperms.api.Node {
 
             final String bits = s.substring(1, s.length() - 1);
             if (s.contains("|")) {
-                nodeParts.add(new HashSet<>(Arrays.asList(Patterns.VERTICAL_BAR.split(bits))));
+                nodeParts.add(new HashSet<>(Splitter.on('|').splitToList(bits)));
             } else {
-                String[] range = Patterns.WORLD_DELIMITER.split(bits, 2);
-                if (isChar(range[0], range[1])) {
-                    nodeParts.add(getCharRange(range[0].charAt(0), range[1].charAt(0)));
-                } else if (isInt(range[0], range[1])) {
-                    nodeParts.add(IntStream.rangeClosed(Integer.parseInt(range[0]), Integer.parseInt(range[1])).boxed()
+                List<String> range = Splitter.on('-').limit(2).splitToList(bits);
+                if (isChar(range.get(0), range.get(1))) {
+                    nodeParts.add(getCharRange(range.get(0).charAt(0), range.get(1).charAt(0)));
+                } else if (isInt(range.get(0), range.get(1))) {
+                    nodeParts.add(IntStream.rangeClosed(Integer.parseInt(range.get(0)), Integer.parseInt(range.get(1))).boxed()
                             .map(i -> "" + i)
                             .collect(Collectors.toSet())
                     );
@@ -423,7 +430,7 @@ public class Node implements me.lucko.luckperms.api.Node {
 
     @Override
     public boolean isGroupNode() {
-        return Patterns.GROUP_MATCH.matcher(getPermission()).matches();
+        return getPermission().toLowerCase().startsWith("group.");
     }
 
     @Override
@@ -447,7 +454,11 @@ public class Node implements me.lucko.luckperms.api.Node {
 
     @Override
     public boolean isMeta() {
-        return getPermission().matches("meta\\..*\\..*");
+        if (isMeta == Tristate.UNDEFINED) {
+            isMeta = Tristate.fromBoolean(META_PATTERN.matcher(getPermission()).matches());
+        }
+
+        return isMeta.asBoolean();
     }
 
     @Override
@@ -462,7 +473,11 @@ public class Node implements me.lucko.luckperms.api.Node {
 
     @Override
     public boolean isPrefix() {
-        return PREFIX_PATTERN.matcher(getPermission()).matches();
+        if (isPrefix == Tristate.UNDEFINED) {
+            isPrefix = Tristate.fromBoolean(PREFIX_PATTERN.matcher(getPermission()).matches());
+        }
+
+        return isPrefix.asBoolean();
     }
 
     @Override
@@ -471,15 +486,18 @@ public class Node implements me.lucko.luckperms.api.Node {
             throw new IllegalStateException();
         }
 
-        String[] prefixPart = Patterns.DOT.split(getPermission().substring("prefix.".length()), 2);
-        Integer i = Integer.parseInt(prefixPart[0]);
-
-        return new AbstractMap.SimpleEntry<>(i, prefixPart[1]);
+        List<String> prefixPart = Splitter.on('.').limit(2).splitToList(getPermission().substring("prefix.".length()));
+        Integer i = Integer.parseInt(prefixPart.get(0));
+        return new AbstractMap.SimpleEntry<>(i, prefixPart.get(1));
     }
 
     @Override
     public boolean isSuffix() {
-        return SUFFIX_PATTERN.matcher(getPermission()).matches();
+        if (isSuffix == Tristate.UNDEFINED) {
+            isSuffix = Tristate.fromBoolean(SUFFIX_PATTERN.matcher(getPermission()).matches());
+        }
+
+        return isSuffix.asBoolean();
     }
 
     @Override
@@ -488,10 +506,9 @@ public class Node implements me.lucko.luckperms.api.Node {
             throw new IllegalStateException();
         }
 
-        String[] suffixPart = Patterns.DOT.split(getPermission().substring("suffix.".length()), 2);
-        Integer i = Integer.parseInt(suffixPart[0]);
-
-        return new AbstractMap.SimpleEntry<>(i, suffixPart[1]);
+        List<String> suffixPart = Splitter.on('.').limit(2).splitToList(getPermission().substring("suffix.".length()));
+        Integer i = Integer.parseInt(suffixPart.get(0));
+        return new AbstractMap.SimpleEntry<>(i, suffixPart.get(1));
     }
 
     @Override
@@ -635,18 +652,14 @@ public class Node implements me.lucko.luckperms.api.Node {
                 if (!Patterns.NODE_CONTEXTS.matcher(permission).matches()) {
                     this.permission = permission;
                 } else {
-                    String[] contextParts = permission.substring(1).split("\\)", 2);
+                    List<String> contextParts = Splitter.on(')').limit(2).splitToList(permission.substring(1));
                     // 0 = context, 1 = node
-                    this.permission = contextParts[1];
 
-                    for (String s : contextParts[0].split("\\,")) {
-                        if (!s.contains("=")) {
-                            // Not valid
-                            continue;
-                        }
-
-                        String[] context = s.split("\\=", 2);
-                        extraContexts.put(context[0], context[1]);
+                    this.permission = contextParts.get(1);
+                    try {
+                        extraContexts.putAll(Splitter.on(',').withKeyValueSeparator('=').split(contextParts.get(0)));
+                    } catch (IllegalArgumentException e) {
+                        e.printStackTrace();
                     }
                 }
             }
