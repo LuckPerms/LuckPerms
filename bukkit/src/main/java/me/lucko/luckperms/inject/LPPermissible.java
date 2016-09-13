@@ -94,8 +94,11 @@ public class LPPermissible extends PermissibleBase {
         }
 
         if (plugin.getConfiguration().getApplyWildcards()) {
-            if (luckPermsPermissions.containsKey("*") || luckPermsPermissions.containsKey("'*'")) {
-                return Tristate.TRUE;
+            if (luckPermsPermissions.containsKey("*")) {
+                return Tristate.fromBoolean(luckPermsPermissions.get("*"));
+            }
+            if (luckPermsPermissions.containsKey("'*'")) {
+                return Tristate.fromBoolean(luckPermsPermissions.get("'*'"));
             }
 
             String node = "";
