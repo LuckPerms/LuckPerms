@@ -23,14 +23,17 @@
 package me.lucko.luckperms.commands.migration.subcommands;
 
 import com.github.cheesesoftware.PowerfulPermsAPI.*;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.Cleanup;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.api.Logger;
+import me.lucko.luckperms.api.data.Callback;
 import me.lucko.luckperms.commands.CommandResult;
 import me.lucko.luckperms.commands.Predicate;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.commands.migration.subcommands.utils.LPResultRunnable;
 import me.lucko.luckperms.constants.Constants;
 import me.lucko.luckperms.core.PermissionHolder;
 import me.lucko.luckperms.data.LogEntry;
@@ -45,39 +48,72 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 
 import static me.lucko.luckperms.constants.Permission.MIGRATION;
 
+@SuppressWarnings("unchecked")
 public class MigrationPowerfulPerms extends SubCommand<Object> {
     /* <sadness>
+        The PowerfulPerms API is a complete joke. Seriously, it would probably be easier reflecting into the actual plugin.
+        Methods move about randomly every version...
+
         What kind of API requires reflection to function with multiple versions...
         Doesn't that just defeat the whole god damn point of having an API in the first place?
-        Whatever happened to the concept of depreciation and responsible API creation?
-        I tried to keep reflection to a minimum, but in some places there's no other option.
-        This class is a complete fucking mess for that reason. I sad now :(
-       </sadness> */
+        Whatever happened to depreciation?
+    </sadness> */
+
+    private static Method getPlayerPermissionsMethod = null;
     private static Method getPlayerGroupsMethod = null;
     private static Method getGroupMethod = null;
+
+    // lol
+    private static boolean superLegacy = false;
     private static boolean legacy = false;
 
     static {
         try {
-            getPlayerGroupsMethod = PermissionManager.class.getMethod("getPlayerOwnGroups", UUID.class, ResultRunnable.class);
-            getPlayerGroupsMethod.setAccessible(true);
-        } catch (NoSuchMethodException e) {
+            Class.forName("com.github.cheesesoftware.PowerfulPermsAPI.ResponseRunnable");
+            legacy = true;
+        } catch (ClassNotFoundException ignored) {}
+
+        if (legacy) {
             try {
-                getPlayerGroupsMethod = PermissionManager.class.getMethod("getPlayerGroups", UUID.class, ResultRunnable.class);
-                getPlayerGroupsMethod.setAccessible(true);
-            } catch (NoSuchMethodException e1) {
-                e1.printStackTrace();
-            }
+                getPlayerPermissionsMethod = PermissionManager.class.getMethod("getPlayerOwnPermissions", UUID.class, ResultRunnable.class);
+                getPlayerPermissionsMethod.setAccessible(true);
+            } catch (NoSuchMethodException ignored) {}
+        } else {
+            try {
+                getPlayerPermissionsMethod = PermissionManager.class.getMethod("getPlayerOwnPermissions", UUID.class);
+                getPlayerPermissionsMethod.setAccessible(true);
+            } catch (NoSuchMethodException ignored) {}
         }
 
         try {
             getGroupMethod = CachedGroup.class.getMethod("getGroup");
             getGroupMethod.setAccessible(true);
-            legacy = true;
-        } catch (NoSuchMethodException ignored) {
+            superLegacy = true;
+        } catch (NoSuchMethodException ignored) {}
+
+        if (!legacy) {
+            try {
+                getPlayerGroupsMethod = PermissionManager.class.getMethod("getPlayerOwnGroups", UUID.class);
+                getPlayerGroupsMethod.setAccessible(true);
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            }
+        } else {
+            try {
+                getPlayerGroupsMethod = PermissionManager.class.getMethod("getPlayerOwnGroups", UUID.class, ResultRunnable.class);
+                getPlayerGroupsMethod.setAccessible(true);
+            } catch (NoSuchMethodException e) {
+                try {
+                    getPlayerGroupsMethod = PermissionManager.class.getMethod("getPlayerGroups", UUID.class, ResultRunnable.class);
+                    getPlayerGroupsMethod.setAccessible(true);
+                } catch (NoSuchMethodException e1) {
+                    e1.printStackTrace();
+                }
+            }
         }
     }
 
@@ -94,6 +130,42 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         } catch (Throwable t) {
             t.printStackTrace();
             return CommandResult.FAILURE;
+        }
+    }
+
+    private static void getPlayerPermissions(PermissionManager manager, UUID uuid, Callback<List<Permission>> callback) {
+        if (legacy) {
+            try {
+                getPlayerPermissionsMethod.invoke(manager, uuid, new LPResultRunnable<List<Permission>>() {
+                    @Override
+                    public void run() {
+                        callback.onComplete(getResult());
+                    }
+                });
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
+        } else {
+            try {
+                ListenableFuture<List<Permission>> lf = (ListenableFuture<List<Permission>>) getPlayerPermissionsMethod.invoke(manager, uuid);
+                try {
+                    if (lf.isDone()) {
+                        callback.onComplete(lf.get());
+                    } else {
+                        lf.addListener(() -> {
+                            try {
+                                callback.onComplete(lf.get());
+                            } catch (InterruptedException | ExecutionException e) {
+                                e.printStackTrace();
+                            }
+                        }, Runnable::run);
+                    }
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                }
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -168,7 +240,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
 
         // Groups first.
         log.info("PowerfulPerms Migration: Starting group migration.");
-        Map<Integer, Group> groups = pm.getGroups();
+        Map<Integer, Group> groups = pm.getGroups(); // All versions
         for (Group g : groups.values()) {
             plugin.getDatastore().createAndLoadGroup(g.getName().toLowerCase());
             final me.lucko.luckperms.groups.Group group = plugin.getGroupManager().get(g.getName().toLowerCase());
@@ -181,16 +253,16 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                 ex.printStackTrace();
             }
 
-            for (Permission p : g.getOwnPermissions()) {
+            for (Permission p : g.getOwnPermissions()) { // All versions
                 applyPerm(group, p, plugin);
             }
 
-            for (Group parent : g.getParents()) {
+            for (Group parent : g.getParents()) { // All versions
                 try {
                     group.setPermission("group." + parent.getName().toLowerCase(), true);
                     LogEntry.build()
                             .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
-                            .acted(group).action("setinherit " + parent.getName().toLowerCase())
+                            .acted(group).action("setinherit " + parent.getName().toLowerCase()) // All versions
                             .build().submit(plugin);
                 } catch (Exception ex) {
                     if (!(ex instanceof ObjectAlreadyHasException)) {
@@ -216,156 +288,176 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             User user = plugin.getUserManager().get(uuid);
 
             // Get a list of Permissions held by the user from the PP API.
-            pm.getPlayerOwnPermissions(uuid, new LPResultRunnable<List<Permission>>() {
-                @Override
-                public void run() {
-                    List<Permission> perms = this.getResult();
-                    perms.forEach(p -> applyPerm(user, p, plugin));
+            getPlayerPermissions(pm, uuid, perms -> { // Changes each version
+                perms.forEach(p -> applyPerm(user, p, plugin));
 
-                    // Update the progress so the user can be saved and unloaded.
-                    synchronized (progress) {
-                        progress.get(uuid).countDown();
-                        if (progress.get(uuid).getCount() == 0) {
-                            plugin.getDatastore().saveUser(user);
-                            plugin.getUserManager().cleanup(user);
-                        }
+                // Update the progress so the user can be saved and unloaded.
+                synchronized (progress) {
+                    progress.get(uuid).countDown();
+                    if (progress.get(uuid).getCount() == 0) {
+                        plugin.getDatastore().saveUser(user);
+                        plugin.getUserManager().cleanup(user);
                     }
-
                 }
             });
 
             // Migrate the user's groups to LuckPerms from PP.
-            try {
-                getPlayerGroupsMethod.invoke(pm, uuid, new LPResultRunnable<LinkedHashMap<String, List<CachedGroup>>>() {
-                    @Override
-                    public void run() {
-                        Map<String, List<CachedGroup>> groups = getResult();
-
-                        for (Map.Entry<String, List<CachedGroup>> e : groups.entrySet()) {
-                            final String server;
-                            if (e.getKey() != null && (e.getKey().equals("") || e.getKey().equalsIgnoreCase("all"))) {
-                                server = null;
-                            } else {
-                                server = e.getKey();
-                            }
-
-                            // This is horrible. So many random API changes through versions, no depreciation.
-                            if (legacy) {
-                                e.getValue().stream()
-                                        .filter(cg -> !cg.isNegated())
-                                        .map(cg -> {
-                                            try {
-                                                return (Group) getGroupMethod.invoke(cg);
-                                            } catch (IllegalAccessException | InvocationTargetException e1) {
-                                                e1.printStackTrace();
-                                                return null;
-                                            }
-                                        })
-                                        .forEach(g -> {
-                                            if (g != null) {
-                                                if (server == null) {
-                                                    try {
-                                                        user.setPermission("group." + g.getName().toLowerCase(), true);
-                                                        LogEntry.build()
-                                                                .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
-                                                                .acted(user).action("addgroup " + g.getName().toLowerCase())
-                                                                .build().submit(plugin);
-                                                    } catch (Exception ex) {
-                                                        if (!(ex instanceof ObjectAlreadyHasException)) {
-                                                            ex.printStackTrace();
-                                                        }
-                                                    }
-                                                } else {
-                                                    try {
-                                                        user.setPermission("group." + g.getName().toLowerCase(), true, server);
-                                                        LogEntry.build()
-                                                                .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
-                                                                .acted(user).action("addgroup " + g.getName().toLowerCase() + " " + server)
-                                                                .build().submit(plugin);
-                                                    } catch (Exception ex) {
-                                                        if (!(ex instanceof ObjectAlreadyHasException)) {
-                                                            ex.printStackTrace();
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        });
-                            } else {
-                                e.getValue().stream()
-                                        .filter(g -> !g.hasExpired() && !g.isNegated())
-                                        .forEach(g -> {
-                                            final Group group = pm.getGroup(g.getGroupId());
-                                            if (g.willExpire()) {
-                                                if (server == null) {
-                                                    try {
-                                                        user.setPermission("group." + group.getName().toLowerCase(), true, g.getExpirationDate().getTime() / 1000L);
-                                                        LogEntry.build()
-                                                                .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
-                                                                .acted(user).action("addtempgroup " + group.getName().toLowerCase() + " " + g.getExpirationDate().getTime() / 1000L)
-                                                                .build().submit(plugin);
-                                                    } catch (Exception ex) {
-                                                        if (!(ex instanceof ObjectAlreadyHasException)) {
-                                                            ex.printStackTrace();
-                                                        }
-                                                    }
-                                                } else {
-                                                    try {
-                                                        user.setPermission("group." + group.getName().toLowerCase(), true, server, g.getExpirationDate().getTime() / 1000L);
-                                                        LogEntry.build()
-                                                                .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
-                                                                .acted(user).action("addtempgroup " + group.getName().toLowerCase() + " " + g.getExpirationDate().getTime() / 1000L + " " + server)
-                                                                .build().submit(plugin);
-                                                    } catch (Exception ex) {
-                                                        if (!(ex instanceof ObjectAlreadyHasException)) {
-                                                            ex.printStackTrace();
-                                                        }
-                                                    }
-                                                }
-
-                                            } else {
-                                                if (server == null) {
-                                                    try {
-                                                        user.setPermission("group." + group.getName().toLowerCase(), true);
-                                                        LogEntry.build()
-                                                                .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
-                                                                .acted(user).action("addgroup " + group.getName().toLowerCase())
-                                                                .build().submit(plugin);
-                                                    } catch (Exception ex) {
-                                                        if (!(ex instanceof ObjectAlreadyHasException)) {
-                                                            ex.printStackTrace();
-                                                        }
-                                                    }
-                                                } else {
-                                                    try {
-                                                        user.setPermission("group." + group.getName().toLowerCase(), true, server);
-                                                        LogEntry.build()
-                                                                .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
-                                                                .acted(user).action("addgroup " + group.getName().toLowerCase() + " " + server)
-                                                                .build().submit(plugin);
-                                                    } catch (Exception ex) {
-                                                        if (!(ex instanceof ObjectAlreadyHasException)) {
-                                                            ex.printStackTrace();
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        });
-                            }
-                        }
-
-                        // Update the progress so the user can be saved and unloaded.
-                        synchronized (progress) {
-                            progress.get(uuid).countDown();
-                            if (progress.get(uuid).getCount() == 0) {
-                                plugin.getDatastore().saveUser(user);
-                                plugin.getUserManager().cleanup(user);
-                            }
-                        }
+            Callback<Map<String, List<CachedGroup>>> callback = groups1 -> {
+                for (Map.Entry<String, List<CachedGroup>> e : groups1.entrySet()) {
+                    final String server;
+                    if (e.getKey() != null && (e.getKey().equals("") || e.getKey().equalsIgnoreCase("all"))) {
+                        server = null;
+                    } else {
+                        server = e.getKey();
                     }
-                });
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                log.info("PowerfulPerms Migration: Error");
-                e.printStackTrace();
+
+                    if (superLegacy) {
+                        e.getValue().stream()
+                                .filter(cg -> !cg.isNegated())
+                                .map(cg -> {
+                                    try {
+                                        return (Group) getGroupMethod.invoke(cg);
+                                    } catch (IllegalAccessException | InvocationTargetException e1) {
+                                        e1.printStackTrace();
+                                        return null;
+                                    }
+                                })
+                                .forEach(g -> {
+                                    if (g != null) {
+                                        if (server == null) {
+                                            try {
+                                                user.setPermission("group." + g.getName().toLowerCase(), true);
+                                                LogEntry.build()
+                                                        .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                                        .acted(user).action("addgroup " + g.getName().toLowerCase())
+                                                        .build().submit(plugin);
+                                            } catch (Exception ex) {
+                                                if (!(ex instanceof ObjectAlreadyHasException)) {
+                                                    ex.printStackTrace();
+                                                }
+                                            }
+                                        } else {
+                                            try {
+                                                user.setPermission("group." + g.getName().toLowerCase(), true, server);
+                                                LogEntry.build()
+                                                        .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                                        .acted(user).action("addgroup " + g.getName().toLowerCase() + " " + server)
+                                                        .build().submit(plugin);
+                                            } catch (Exception ex) {
+                                                if (!(ex instanceof ObjectAlreadyHasException)) {
+                                                    ex.printStackTrace();
+                                                }
+                                            }
+                                        }
+                                    }
+                                });
+                    } else {
+                        e.getValue().stream()
+                                .filter(g -> !g.hasExpired() && !g.isNegated())
+                                .forEach(g -> {
+                                    final Group group = pm.getGroup(g.getGroupId());
+                                    if (g.willExpire()) {
+                                        if (server == null) {
+                                            try {
+                                                user.setPermission("group." + group.getName().toLowerCase(), true, g.getExpirationDate().getTime() / 1000L);
+                                                LogEntry.build()
+                                                        .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                                        .acted(user).action("addtempgroup " + group.getName().toLowerCase() + " " + g.getExpirationDate().getTime() / 1000L)
+                                                        .build().submit(plugin);
+                                            } catch (Exception ex) {
+                                                if (!(ex instanceof ObjectAlreadyHasException)) {
+                                                    ex.printStackTrace();
+                                                }
+                                            }
+                                        } else {
+                                            try {
+                                                user.setPermission("group." + group.getName().toLowerCase(), true, server, g.getExpirationDate().getTime() / 1000L);
+                                                LogEntry.build()
+                                                        .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                                        .acted(user).action("addtempgroup " + group.getName().toLowerCase() + " " + g.getExpirationDate().getTime() / 1000L + " " + server)
+                                                        .build().submit(plugin);
+                                            } catch (Exception ex) {
+                                                if (!(ex instanceof ObjectAlreadyHasException)) {
+                                                    ex.printStackTrace();
+                                                }
+                                            }
+                                        }
+
+                                    } else {
+                                        if (server == null) {
+                                            try {
+                                                user.setPermission("group." + group.getName().toLowerCase(), true);
+                                                LogEntry.build()
+                                                        .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                                        .acted(user).action("addgroup " + group.getName().toLowerCase())
+                                                        .build().submit(plugin);
+                                            } catch (Exception ex) {
+                                                if (!(ex instanceof ObjectAlreadyHasException)) {
+                                                    ex.printStackTrace();
+                                                }
+                                            }
+                                        } else {
+                                            try {
+                                                user.setPermission("group." + group.getName().toLowerCase(), true, server);
+                                                LogEntry.build()
+                                                        .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                                        .acted(user).action("addgroup " + group.getName().toLowerCase() + " " + server)
+                                                        .build().submit(plugin);
+                                            } catch (Exception ex) {
+                                                if (!(ex instanceof ObjectAlreadyHasException)) {
+                                                    ex.printStackTrace();
+                                                }
+                                            }
+                                        }
+                                    }
+                                });
+                    }
+                }
+
+                // Update the progress so the user can be saved and unloaded.
+                synchronized (progress) {
+                    progress.get(uuid).countDown();
+                    if (progress.get(uuid).getCount() == 0) {
+                        plugin.getDatastore().saveUser(user);
+                        plugin.getUserManager().cleanup(user);
+                    }
+                }
+            };
+
+            if (!legacy) {
+                try {
+                    ListenableFuture<LinkedHashMap<String, List<CachedGroup>>> future = (ListenableFuture<LinkedHashMap<String, List<CachedGroup>>>) getPlayerGroupsMethod.invoke(pm, uuid);
+                    try {
+                        if (future.isDone()) {
+                            callback.onComplete(future.get());
+                        } else {
+                            future.addListener(() -> {
+                                try {
+                                    callback.onComplete(future.get());
+                                } catch (InterruptedException | ExecutionException e) {
+                                    e.printStackTrace();
+                                }
+                            }, Runnable::run);
+                        }
+                    } catch (InterruptedException | ExecutionException e) {
+                        e.printStackTrace();
+                    }
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    log.info("PowerfulPerms Migration: Error");
+                    e.printStackTrace();
+                }
+            } else {
+                try {
+                    getPlayerGroupsMethod.invoke(pm, uuid, new LPResultRunnable<LinkedHashMap<String, List<CachedGroup>>>() {
+                        @Override
+                        public void run() {
+                            callback.onComplete(getResult());
+                        }
+                    });
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    log.info("PowerfulPerms Migration: Error");
+                    e.printStackTrace();
+                }
             }
         }
 
@@ -417,7 +509,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         }
 
         long expireAt = 0L;
-        if (!legacy) {
+        if (!superLegacy) {
             if (p.willExpire()) {
                 expireAt = p.getExpirationDate().getTime() / 1000L;
             }
@@ -507,23 +599,5 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                 }
             }
         }
-    }
-
-    /**
-     * Overrides the default ResultRunnable, callbacks will always run in the same thread. (an async one, hopefully.)
-     * @param <T> type
-     */
-    @SuppressWarnings("WeakerAccess")
-    public abstract class LPResultRunnable<T> extends ResultRunnable<T> {
-
-        public LPResultRunnable() {
-            super();
-            super.sameThread = true;
-        }
-
-        public T getResult() {
-            return super.result;
-        }
-
     }
 }
