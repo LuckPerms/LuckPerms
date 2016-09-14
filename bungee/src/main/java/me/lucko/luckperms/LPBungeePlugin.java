@@ -30,6 +30,7 @@ import me.lucko.luckperms.commands.CommandManager;
 import me.lucko.luckperms.commands.ConsecutiveExecutor;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.constants.Message;
+import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.core.LPConfiguration;
 import me.lucko.luckperms.core.UuidCache;
 import me.lucko.luckperms.data.Importer;
@@ -161,8 +162,11 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     }
 
     @Override
-    public List<Sender> getSenders() {
-        return getProxy().getPlayers().stream().map(p -> BungeeSenderFactory.get().wrap(p)).collect(Collectors.toList());
+    public List<Sender> getNotifyListeners() {
+        return getProxy().getPlayers().stream()
+                .map(p -> BungeeSenderFactory.get().wrap(p, Collections.singleton(Permission.LOG_NOTIFY)))
+                .filter(Permission.LOG_NOTIFY::isAuthorized)
+                .collect(Collectors.toList());
     }
 
     @Override

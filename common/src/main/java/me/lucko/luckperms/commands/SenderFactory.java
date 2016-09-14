@@ -47,7 +47,11 @@ public abstract class SenderFactory<T> implements Runnable {
     protected abstract boolean hasPermission(T t, String node);
 
     public final Sender wrap(T t) {
-        return new SenderImp(t);
+        return new SenderImp(t, null);
+    }
+
+    public final Sender wrap(T t, Set<Permission> toCheck) {
+        return new SenderImp(t, toCheck);
     }
 
     @Override
@@ -81,15 +85,19 @@ public abstract class SenderFactory<T> implements Runnable {
 
         private final boolean console;
 
-        private SenderImp(T t) {
+        private SenderImp(T t, Set<Permission> toCheck) {
             this.tRef = new WeakReference<>(t);
             this.name = factory.getName(t);
             this.uuid = factory.getUuid(t);
             this.console = this.uuid.equals(Constants.getConsoleUUID()) || this.uuid.equals(Constants.getImporterUUID());
 
             if (!this.console) {
-                this.perms = ImmutableMap.copyOf(Arrays.stream(Permission.values())
-                        .collect(Collectors.toMap(p -> p, p -> factory.hasPermission(t, p.getNode()))));
+                if (toCheck == null || toCheck.isEmpty()) {
+                    this.perms = ImmutableMap.copyOf(Arrays.stream(Permission.values())
+                            .collect(Collectors.toMap(p -> p, p -> factory.hasPermission(t, p.getNode()))));
+                } else {
+                    this.perms = ImmutableMap.copyOf(toCheck.stream().collect(Collectors.toMap(p -> p, p -> factory.hasPermission(t, p.getNode()))));
+                }
             }
         }
 

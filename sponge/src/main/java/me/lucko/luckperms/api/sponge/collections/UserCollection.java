@@ -23,11 +23,11 @@
 package me.lucko.luckperms.api.sponge.collections;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NonNull;
 import me.lucko.luckperms.api.sponge.LuckPermsService;
-import me.lucko.luckperms.api.sponge.LuckPermsSubject;
+import me.lucko.luckperms.api.sponge.LuckPermsUserSubject;
 import me.lucko.luckperms.api.sponge.simple.SimpleSubject;
-import me.lucko.luckperms.core.PermissionHolder;
 import me.lucko.luckperms.users.User;
 import me.lucko.luckperms.users.UserManager;
 import org.spongepowered.api.service.context.Context;
@@ -39,6 +39,7 @@ import org.spongepowered.api.service.permission.SubjectData;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -46,29 +47,46 @@ public class UserCollection implements SubjectCollection {
     private final LuckPermsService service;
     private final UserManager manager;
 
+    @Getter
+    private final Map<UUID, LuckPermsUserSubject> users = new ConcurrentHashMap<>();
+
     @Override
     public String getIdentifier() {
         return PermissionService.SUBJECTS_USER;
     }
 
+    private void load(UUID uuid) {
+        if (!manager.isLoaded(uuid)) {
+            return;
+        }
+
+        User user = manager.get(uuid);
+        users.put(uuid, LuckPermsUserSubject.wrapUser(user, service));
+    }
+
+    public void unload(UUID uuid) {
+        users.remove(uuid);
+    }
+
     @Override
-    public Subject get(@NonNull String id) {
-        PermissionHolder holder = null;
+    public synchronized Subject get(@NonNull String id) {
         try {
             UUID u = UUID.fromString(id);
+            if (users.containsKey(u)) {
+                return users.get(u);
+            }
+
             if (manager.isLoaded(u)) {
-                holder = manager.get(u);
+                load(u);
+                return users.get(u);
             }
 
         } catch (IllegalArgumentException e) {
-            User user = manager.get(id);
-            if (user != null) {
-                holder = user;
+            for (LuckPermsUserSubject subject : users.values()) {
+                if (subject.getUser().getName().equals(id)) {
+                    return subject;
+                }
             }
-        }
-
-        if (holder != null) {
-            return LuckPermsSubject.wrapHolder(holder, service);
         }
 
         service.getPlugin().getLog().warn("Couldn't get subject for: " + id);
@@ -91,9 +109,7 @@ public class UserCollection implements SubjectCollection {
 
     @Override
     public Iterable<Subject> getAllSubjects() {
-        return manager.getAll().values().stream()
-                .map(u -> LuckPermsSubject.wrapHolder(u, service))
-                .collect(Collectors.toList());
+        return users.values().stream().collect(Collectors.toList());
     }
 
     @Override
@@ -103,8 +119,7 @@ public class UserCollection implements SubjectCollection {
 
     @Override
     public Map<Subject, Boolean> getAllWithPermission(@NonNull Set<Context> contexts, @NonNull String node) {
-        return manager.getAll().values().stream()
-                .map(u -> LuckPermsSubject.wrapHolder(u, service))
+        return users.values().stream()
                 .filter(sub -> sub.hasPermission(contexts, node))
                 .collect(Collectors.toMap(sub -> sub, sub -> sub.getPermissionValue(contexts, node).asBoolean()));
     }

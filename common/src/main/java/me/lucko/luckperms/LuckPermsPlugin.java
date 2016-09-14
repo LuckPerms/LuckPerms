@@ -103,7 +103,7 @@ public interface LuckPermsPlugin {
     /**
      * @return a {@link List} of senders online on the platform
      */
-    List<Sender> getSenders();
+    List<Sender> getNotifyListeners();
 
     /**
      * @return the console sender of the instance

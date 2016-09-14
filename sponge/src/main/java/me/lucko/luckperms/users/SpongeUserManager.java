@@ -38,6 +38,7 @@ public class SpongeUserManager extends UserManager {
     public void cleanup(User user) {
         if (!plugin.getGame().getServer().getPlayer(plugin.getUuidCache().getExternalUUID(user.getUuid())).isPresent()) {
             unload(user);
+            plugin.getService().getUserSubjects().unload(user.getUuid());
         }
     }
 

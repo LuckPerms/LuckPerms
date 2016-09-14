@@ -23,7 +23,12 @@
 package me.lucko.luckperms.users;
 
 import me.lucko.luckperms.LPSpongePlugin;
+import me.lucko.luckperms.api.event.events.UserPermissionRefreshEvent;
+import me.lucko.luckperms.api.implementation.internal.UserLink;
+import me.lucko.luckperms.api.sponge.collections.UserCollection;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.UUID;
 
 class SpongeUser extends User {
@@ -41,24 +46,45 @@ class SpongeUser extends User {
 
     @Override
     public void refreshPermissions() {
-        // Do nothing. Should be grabbed from PermissionService.
-        /*
-        plugin.doSync(() -> {
-            Optional<Player> p = plugin.getGame().getServer().getPlayer(plugin.getUuidCache().getExternalUUID(getUuid()));
-            if (!p.isPresent()) return;
+        UserCollection uc = plugin.getService().getUserSubjects();
+        if (!uc.getUsers().containsKey(getUuid())) {
+            return;
+        }
 
-            final Player player = p.get();
+        // Calculate the permissions that should be applied. This is done async, who cares about how long it takes or how often it's done.
+        Map<String, Boolean> toApply = exportNodes(
+                getPlugin().getConfiguration().getServer(),
+                null, // TODO per world perms
+                null,
+                plugin.getConfiguration().getIncludeGlobalPerms(),
+                true,
+                Collections.emptyList()
+        );
 
-            // Clear existing permissions
-            player.getSubjectData().clearParents();
-            player.getSubjectData().clearPermissions();
+        try {
+            Map<String, Boolean> existing = uc.getUsers().get(getUuid()).getPermissionCache();
 
-            // Re-add all defined permissions for the user
-            final String world = player.getWorld().getName();
-            Map<String, Boolean> local = getLocalPermissions(getPlugin().getConfiguration().getServer(), world, null);
-            local.entrySet().forEach(e -> player.getSubjectData().setPermission(Collections.emptySet(), e.getKey(), Tristate.fromBoolean(e.getValue())));
+            boolean different = false;
+            if (toApply.size() != existing.size()) {
+                different = true;
+            } else {
+                for (Map.Entry<String, Boolean> e : existing.entrySet()) {
+                    if (toApply.containsKey(e.getKey()) && toApply.get(e.getKey()) == e.getValue()) {
+                        continue;
+                    }
+                    different = true;
+                    break;
+                }
+            }
+
+            if (!different) return;
+
+            existing.clear();
+            existing.putAll(toApply);
+
             plugin.getApiProvider().fireEventAsync(new UserPermissionRefreshEvent(new UserLink(this)));
-        });
-        */
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

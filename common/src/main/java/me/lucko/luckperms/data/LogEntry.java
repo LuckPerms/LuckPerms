@@ -26,14 +26,12 @@ import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.api.event.events.LogNotifyEvent;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.constants.Message;
-import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.core.PermissionHolder;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.tracks.Track;
 import me.lucko.luckperms.users.User;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class LogEntry extends me.lucko.luckperms.api.LogEntry {
     public static LogEntryBuilder build() {
@@ -58,9 +56,7 @@ public class LogEntry extends me.lucko.luckperms.api.LogEntry {
 
         final String msg = super.getFormatted();
 
-        List<Sender> senders = plugin.getSenders().stream()
-                .filter(Permission.LOG_NOTIFY::isAuthorized)
-                .collect(Collectors.toList());
+        List<Sender> senders = plugin.getNotifyListeners();
         senders.add(plugin.getConsoleSender());
 
         if (sender == null) {

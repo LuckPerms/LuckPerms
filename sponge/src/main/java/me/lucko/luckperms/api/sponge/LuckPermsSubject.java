@@ -60,9 +60,9 @@ public class LuckPermsSubject implements Subject {
     private final PermissionHolder holder;
     private final EnduringData enduringData;
     private final TransientData transientData;
-    private final LuckPermsService service;
+    protected final LuckPermsService service;
 
-    private LuckPermsSubject(PermissionHolder holder, LuckPermsService service) {
+    LuckPermsSubject(PermissionHolder holder, LuckPermsService service) {
         this.holder = holder;
         this.enduringData = new EnduringData(this, service, holder);
         this.transientData = new TransientData(service, holder);
