@@ -22,7 +22,6 @@
 
 package me.lucko.luckperms.api.sponge.collections;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
 import me.lucko.luckperms.api.sponge.LuckPermsService;
@@ -42,14 +41,19 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-@AllArgsConstructor
 public class UserCollection implements SubjectCollection {
     private final LuckPermsService service;
     private final UserManager manager;
-    private final SimpleCollection fallback = new SimpleCollection(service, "fallback-users");
+    private final SimpleCollection fallback;
 
     @Getter
     private final Map<UUID, LuckPermsUserSubject> users = new ConcurrentHashMap<>();
+
+    public UserCollection(LuckPermsService service, UserManager manager) {
+        this.service = service;
+        this.manager = manager;
+        this.fallback = new SimpleCollection(service, "fallback-users");
+    }
 
     @Override
     public String getIdentifier() {

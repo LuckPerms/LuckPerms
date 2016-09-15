@@ -22,7 +22,6 @@
 
 package me.lucko.luckperms.api.sponge.collections;
 
-import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import me.lucko.luckperms.api.sponge.LuckPermsService;
 import me.lucko.luckperms.api.sponge.LuckPermsSubject;
@@ -38,11 +37,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@AllArgsConstructor
 public class GroupCollection implements SubjectCollection {
     private final LuckPermsService service;
     private final GroupManager manager;
-    private final SimpleCollection fallback = new SimpleCollection(service, "fallback-groups");
+    private final SimpleCollection fallback;
+
+    public GroupCollection(LuckPermsService service, GroupManager manager) {
+        this.service = service;
+        this.manager = manager;
+        this.fallback = new SimpleCollection(service, "fallback-groups");
+    }
 
     @Override
     public String getIdentifier() {
