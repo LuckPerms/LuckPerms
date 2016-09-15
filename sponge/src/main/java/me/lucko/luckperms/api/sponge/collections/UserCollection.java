@@ -28,7 +28,6 @@ import lombok.NonNull;
 import me.lucko.luckperms.api.sponge.LuckPermsService;
 import me.lucko.luckperms.api.sponge.LuckPermsUserSubject;
 import me.lucko.luckperms.api.sponge.simple.SimpleCollection;
-import me.lucko.luckperms.api.sponge.simple.SimpleSubject;
 import me.lucko.luckperms.users.User;
 import me.lucko.luckperms.users.UserManager;
 import org.spongepowered.api.service.context.Context;
@@ -128,6 +127,6 @@ public class UserCollection implements SubjectCollection {
 
     @Override
     public Subject getDefaults() {
-        return new SimpleSubject("default", service, this);
+        return service.getDefaults();
     }
 }
