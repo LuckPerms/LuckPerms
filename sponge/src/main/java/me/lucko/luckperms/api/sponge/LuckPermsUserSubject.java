@@ -85,6 +85,7 @@ public class LuckPermsUserSubject extends LuckPermsSubject {
             }
         }
 
-        return Tristate.UNDEFINED;
+
+        return service.getDefaults().getPermissionValue(contexts, permission);
     }
 }

@@ -47,7 +47,7 @@ public class SimpleCollection implements SubjectCollection {
     private final Map<String, Subject> subjects = new ConcurrentHashMap<>();
 
     @Override
-    public Subject get(@NonNull String id) {
+    public synchronized Subject get(@NonNull String id) {
         if (!subjects.containsKey(id)) {
             subjects.put(id, new SimpleSubject(id, service, this));
         }

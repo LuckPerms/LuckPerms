@@ -27,6 +27,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import me.lucko.luckperms.api.sponge.LuckPermsService;
 import me.lucko.luckperms.api.sponge.LuckPermsUserSubject;
+import me.lucko.luckperms.api.sponge.simple.SimpleCollection;
 import me.lucko.luckperms.api.sponge.simple.SimpleSubject;
 import me.lucko.luckperms.users.User;
 import me.lucko.luckperms.users.UserManager;
@@ -46,6 +47,7 @@ import java.util.stream.Collectors;
 public class UserCollection implements SubjectCollection {
     private final LuckPermsService service;
     private final UserManager manager;
+    private final SimpleCollection fallback = new SimpleCollection(service, "fallback-users");
 
     @Getter
     private final Map<UUID, LuckPermsUserSubject> users = new ConcurrentHashMap<>();
@@ -93,7 +95,7 @@ public class UserCollection implements SubjectCollection {
 
         // What am I meant to do here? What if no user is loaded? Load it? Create it?
         // If I do load/create it, this method should always be called async??.... errr.
-        return new SimpleSubject(id, service, this);
+        return fallback.get(id);
     }
 
     @Override
