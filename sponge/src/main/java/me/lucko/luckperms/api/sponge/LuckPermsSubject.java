@@ -171,6 +171,20 @@ public class LuckPermsSubject implements Subject {
 
     @Override
     public Optional<String> getOption(Set<Context> set, String s) {
+        if (s.equalsIgnoreCase("prefix")) {
+            String prefix = getChatMeta(true, holder);
+            if (!prefix.equals("")) {
+                return Optional.of(prefix);
+            }
+        }
+
+        if (s.equalsIgnoreCase("suffix")) {
+            String suffix = getChatMeta(false, holder);
+            if (!suffix.equals("")) {
+                return Optional.of(suffix);
+            }
+        }
+
         Map<String, String> transientOptions = enduringData.getOptions(set);
         if (transientOptions.containsKey(s)) {
             return Optional.of(transientOptions.get(s));
@@ -192,6 +206,41 @@ public class LuckPermsSubject implements Subject {
     @Override
     public Set<Context> getActiveContexts() {
         return SubjectData.GLOBAL_CONTEXT;
+    }
+
+    private String getChatMeta(boolean prefix, PermissionHolder holder) {
+        if (holder == null) return "";
+
+        int priority = Integer.MIN_VALUE;
+        String meta = null;
+
+        for (Node n : holder.getAllNodes(null)) {
+            if (!n.getValue()) {
+                continue;
+            }
+
+            if (prefix ? !n.isPrefix() : !n.isSuffix()) {
+                continue;
+            }
+
+            if (!n.shouldApplyOnServer(service.getPlugin().getConfiguration().getVaultServer(), service.getPlugin().getConfiguration().getVaultIncludeGlobal(), false)) {
+                continue;
+            }
+
+            /* TODO per world
+            if (!n.shouldApplyOnWorld(world, service.getPlugin().getConfiguration().getVaultIncludeGlobal(), false)) {
+                continue;
+            }
+            */
+
+            Map.Entry<Integer, String> value = prefix ? n.getPrefix() : n.getSuffix();
+            if (value.getKey() > priority) {
+                meta = value.getValue();
+                priority = value.getKey();
+            }
+        }
+
+        return meta == null ? "" : unescapeCharacters(meta);
     }
 
     @AllArgsConstructor
