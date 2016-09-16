@@ -26,12 +26,13 @@ import com.google.common.base.Splitter;
 import lombok.Getter;
 import lombok.NonNull;
 import me.lucko.luckperms.users.User;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.util.Tristate;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class LuckPermsUserSubject extends LuckPermsSubject {
@@ -108,5 +109,22 @@ public class LuckPermsUserSubject extends LuckPermsSubject {
 
 
         return service.getDefaults().getPermissionValue(contexts, permission);
+    }
+
+    @Override
+    public String getIdentifier() {
+        return service.getPlugin().getUuidCache().getExternalUUID(user.getUuid()).toString();
+    }
+
+    @Override
+    public Optional<CommandSource> getCommandSource() {
+        final UUID uuid = service.getPlugin().getUuidCache().getExternalUUID(user.getUuid());
+
+        Optional<Player> p = Sponge.getServer().getPlayer(uuid);
+        if (p.isPresent()) {
+            return Optional.of(p.get());
+        }
+
+        return Optional.empty();
     }
 }

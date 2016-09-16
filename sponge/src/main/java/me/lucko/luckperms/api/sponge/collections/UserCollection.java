@@ -61,22 +61,23 @@ public class UserCollection implements SubjectCollection {
     }
 
     private void load(UUID uuid) {
-        if (!manager.isLoaded(uuid)) {
+        UUID internal = service.getPlugin().getUuidCache().getUUID(uuid);
+        if (!manager.isLoaded(internal)) {
             return;
         }
 
-        User user = manager.get(uuid);
-        users.put(uuid, LuckPermsUserSubject.wrapUser(user, service));
+        User user = manager.get(internal);
+        users.put(internal, LuckPermsUserSubject.wrapUser(user, service));
     }
 
     public void unload(UUID uuid) {
-        users.remove(uuid);
+        users.remove(service.getPlugin().getUuidCache().getUUID(uuid));
     }
 
     @Override
     public synchronized Subject get(@NonNull String id) {
         try {
-            UUID u = UUID.fromString(id);
+            UUID u = service.getPlugin().getUuidCache().getUUID(UUID.fromString(id));
             if (users.containsKey(u)) {
                 return users.get(u);
             }
@@ -105,7 +106,7 @@ public class UserCollection implements SubjectCollection {
     public boolean hasRegistered(@NonNull String id) {
         try {
             UUID u = UUID.fromString(id);
-            return manager.isLoaded(u);
+            return manager.isLoaded(service.getPlugin().getUuidCache().getUUID(u));
         } catch (IllegalArgumentException e) {
             User user = manager.get(id);
             return user != null;

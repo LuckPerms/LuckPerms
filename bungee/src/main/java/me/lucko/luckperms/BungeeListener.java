@@ -55,7 +55,7 @@ public class BungeeListener extends AbstractListener implements Listener {
 
         final ProxiedPlayer player = ((ProxiedPlayer) e.getSender());
 
-        BungeePlayerCache playerCache = plugin.getPlayerCache().get(player.getUniqueId());
+        BungeePlayerCache playerCache = plugin.getPlayerCache().get(plugin.getUuidCache().getUUID(player.getUniqueId()));
         if (playerCache == null) {
             return;
         }

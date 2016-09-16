@@ -35,9 +35,7 @@ import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.users.User;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
@@ -86,15 +84,6 @@ public class LuckPermsSubject implements Subject {
 
     @Override
     public Optional<CommandSource> getCommandSource() {
-        if (holder instanceof User) {
-            final UUID uuid = ((User) holder).getUuid();
-
-            Optional<Player> p = Sponge.getServer().getPlayer(uuid);
-            if (p.isPresent()) {
-                return Optional.of(p.get());
-            }
-        }
-
         return Optional.empty();
     }
 

@@ -80,7 +80,7 @@ public class LuckPermsPlaceholderExpansion extends PlaceholderExpansion {
             return "";
         }
 
-        Optional<User> u = api.getUserSafe(player.getUniqueId());
+        Optional<User> u = api.getUserSafe(api.getUuidCache().getUUID(player.getUniqueId()));
         if (!u.isPresent()) {
             return "";
         }

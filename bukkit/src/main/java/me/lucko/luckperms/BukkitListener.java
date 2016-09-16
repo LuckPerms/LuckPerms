@@ -33,6 +33,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.*;
 
+import java.util.UUID;
+
 class BukkitListener extends AbstractListener implements Listener {
     private final LPBukkitPlugin plugin;
 
@@ -80,20 +82,22 @@ class BukkitListener extends AbstractListener implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
         // Refresh permissions again
-        plugin.getUserManager().getWorldCache().put(e.getPlayer().getUniqueId(), e.getPlayer().getWorld().getName());
-        plugin.doAsync(() -> refreshPlayer(e.getPlayer().getUniqueId()));
+        UUID internal = plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId());
+        plugin.getUserManager().getWorldCache().put(internal, e.getPlayer().getWorld().getName());
+        plugin.doAsync(() -> refreshPlayer(internal));
     }
 
     @EventHandler
     public void onPlayerChangedWorld(PlayerChangedWorldEvent e) {
-        plugin.getUserManager().getWorldCache().put(e.getPlayer().getUniqueId(), e.getPlayer().getWorld().getName());
-        plugin.doAsync(() -> refreshPlayer(e.getPlayer().getUniqueId()));
+        UUID internal = plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId());
+        plugin.getUserManager().getWorldCache().put(internal, e.getPlayer().getWorld().getName());
+        plugin.doAsync(() -> refreshPlayer(internal));
 
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent e) {
-        plugin.getUserManager().getWorldCache().remove(e.getPlayer().getUniqueId());
+        plugin.getUserManager().getWorldCache().remove(plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId()));
         onLeave(e.getPlayer().getUniqueId());
     }
 
