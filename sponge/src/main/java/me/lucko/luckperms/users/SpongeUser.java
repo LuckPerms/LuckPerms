@@ -25,6 +25,7 @@ package me.lucko.luckperms.users;
 import me.lucko.luckperms.LPSpongePlugin;
 import me.lucko.luckperms.api.event.events.UserPermissionRefreshEvent;
 import me.lucko.luckperms.api.implementation.internal.UserLink;
+import me.lucko.luckperms.api.sponge.LuckPermsUserSubject;
 import me.lucko.luckperms.api.sponge.collections.UserCollection;
 
 import java.util.Collections;
@@ -62,7 +63,8 @@ class SpongeUser extends User {
         );
 
         try {
-            Map<String, Boolean> existing = uc.getUsers().get(getUuid()).getPermissionCache();
+            LuckPermsUserSubject us = uc.getUsers().get(getUuid());
+            Map<String, Boolean> existing = us.getPermissionCache();
 
             boolean different = false;
             if (toApply.size() != existing.size()) {
@@ -80,6 +82,7 @@ class SpongeUser extends User {
             if (!different) return;
 
             existing.clear();
+            us.invalidateCache();
             existing.putAll(toApply);
 
             plugin.getApiProvider().fireEventAsync(new UserPermissionRefreshEvent(new UserLink(this)));

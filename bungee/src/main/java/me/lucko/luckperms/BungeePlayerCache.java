@@ -20,38 +20,26 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.api.sponge;
+package me.lucko.luckperms;
 
 import com.google.common.base.Splitter;
 import lombok.Getter;
-import lombok.NonNull;
-import me.lucko.luckperms.users.User;
-import org.spongepowered.api.service.context.Context;
-import org.spongepowered.api.util.Tristate;
+import lombok.RequiredArgsConstructor;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class LuckPermsUserSubject extends LuckPermsSubject {
-    public static LuckPermsUserSubject wrapUser(User user, LuckPermsService service) {
-        return new LuckPermsUserSubject(user, service);
-    }
+@RequiredArgsConstructor
+public class BungeePlayerCache {
+    private final LuckPermsPlugin plugin;
+    private final UUID uuid;
+    private final String name;
 
     @Getter
-    private final User user;
-
-    @Getter
-    private final Map<String, Boolean> permissionCache = new ConcurrentHashMap<>();
-
-    @Getter
-    private final Map<String, Tristate> lookupCache = new HashMap<>();
-
-    private LuckPermsUserSubject(User user, LuckPermsService service) {
-        super(user, service);
-        this.user = user;
-    }
+    private final Map<String, Boolean> permissions = new ConcurrentHashMap<>();
+    private final Map<String, Boolean> lookupCache = new HashMap<>();
 
     public void invalidateCache() {
         synchronized (lookupCache) {
@@ -59,11 +47,9 @@ public class LuckPermsUserSubject extends LuckPermsSubject {
         }
     }
 
-    // TODO don't ignore context
-    @Override
-    public Tristate getPermissionValue(@NonNull Set<Context> contexts, @NonNull String permission) {
-        if (service.getPlugin().getConfiguration().getDebugPermissionChecks()) {
-            service.getPlugin().getLog().info("Checking if " + user.getName() + " has permission: " + permission);
+    public boolean getPermissionValue(String permission) {
+        if (plugin.getConfiguration().getDebugPermissionChecks()) {
+            plugin.getLog().info("Checking if " + name + " has permission: " + permission);
         }
 
         permission = permission.toLowerCase();
@@ -71,24 +57,24 @@ public class LuckPermsUserSubject extends LuckPermsSubject {
             if (lookupCache.containsKey(permission)) {
                 return lookupCache.get(permission);
             } else {
-                Tristate t = lookupPermissionValue(contexts, permission);
+                boolean t = lookupPermissionValue(permission);
                 lookupCache.put(permission, t);
                 return t;
             }
         }
     }
 
-    private Tristate lookupPermissionValue(Set<Context> contexts, String permission) {
-        if (permissionCache.containsKey(permission)) {
-            return Tristate.fromBoolean(permissionCache.get(permission));
+    private boolean lookupPermissionValue(String permission) {
+        if (permissions.containsKey(permission)) {
+            return permissions.get(permission);
         }
 
-        if (service.getPlugin().getConfiguration().getApplyWildcards()) {
-            if (permissionCache.containsKey("*")) {
-                return Tristate.fromBoolean(permissionCache.get("*"));
+        if (plugin.getConfiguration().getApplyWildcards()) {
+            if (permissions.containsKey("*")) {
+                return permissions.get("*");
             }
-            if (permissionCache.containsKey("'*'")) {
-                return Tristate.fromBoolean(permissionCache.get("'*'"));
+            if (permissions.containsKey("'*'")) {
+                return permissions.get("'*'");
             }
 
             String node = "";
@@ -100,13 +86,12 @@ public class LuckPermsUserSubject extends LuckPermsSubject {
                     node = node + "." + s;
                 }
 
-                if (permissionCache.containsKey(node + ".*")) {
-                    return Tristate.fromBoolean(permissionCache.get(node + ".*"));
+                if (permissions.containsKey(node + ".*")) {
+                    return permissions.get(node + ".*");
                 }
             }
         }
 
-
-        return service.getDefaults().getPermissionValue(contexts, permission);
+        return false;
     }
 }

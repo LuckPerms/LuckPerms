@@ -33,8 +33,6 @@ import net.md_5.bungee.api.event.*;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
-import java.util.Collections;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -51,30 +49,18 @@ public class BungeeListener extends AbstractListener implements Listener {
     @EventHandler
     public void onPlayerPermissionCheck(PermissionCheckEvent e) {
         if (!(e.getSender() instanceof ProxiedPlayer)) {
+            e.setHasPermission(true);
             return;
         }
 
         final ProxiedPlayer player = ((ProxiedPlayer) e.getSender());
-        final User user = plugin.getUserManager().get(plugin.getUuidCache().getUUID(player.getUniqueId()));
-        if (user == null) return;
 
-
-        final String server = player.getServer() == null ? null : (player.getServer().getInfo() == null ? null : player.getServer().getInfo().getName());
-        Map<String, Boolean> local = user.exportNodes(
-                plugin.getConfiguration().getServer(),
-                server,
-                null,
-                plugin.getConfiguration().getIncludeGlobalPerms(),
-                true,
-                Collections.singletonList(e.getPermission())
-        );
-
-        for (Map.Entry<String, Boolean> en : local.entrySet()) {
-            if (en.getKey().equalsIgnoreCase(e.getPermission())) {
-                e.setHasPermission(en.getValue());
-                return;
-            }
+        BungeePlayerCache playerCache = plugin.getPlayerCache().get(player.getUniqueId());
+        if (playerCache == null) {
+            return;
         }
+
+        e.setHasPermission(playerCache.getPermissionValue(e.getPermission()));
     }
 
     @EventHandler
@@ -116,17 +102,20 @@ public class BungeeListener extends AbstractListener implements Listener {
     @EventHandler
     public void onPlayerPostLogin(PostLoginEvent e) {
         final ProxiedPlayer player = e.getPlayer();
-        final User user = plugin.getUserManager().get(plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId()));
+        final UUID internal = plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId());
+        final User user = plugin.getUserManager().get(internal);
 
         if (user == null) {
             plugin.getProxy().getScheduler().schedule(plugin, () -> player.sendMessage(WARN_MESSAGE), 3, TimeUnit.SECONDS);
         } else {
+            plugin.getPlayerCache().put(internal, new BungeePlayerCache(plugin, internal, e.getPlayer().getName()));
             user.refreshPermissions();
         }
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerDisconnectEvent e) {
+        plugin.getPlayerCache().remove(plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId()));
         onLeave(e.getPlayer().getUniqueId());
     }
 

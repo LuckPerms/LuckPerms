@@ -46,11 +46,12 @@ public class LPPermissible extends PermissibleBase {
     private final CommandSender parent;
     private final LuckPermsPlugin plugin;
 
+    @Getter
+    private final Map<String, Boolean> luckPermsPermissions = new ConcurrentHashMap<>();
     private final List<PermissionAttachment> attachments = new LinkedList<>();
     private final Map<String, PermissionAttachmentInfo> attachmentPermissions = new HashMap<>();
 
-    @Getter
-    private final Map<String, Boolean> luckPermsPermissions = new ConcurrentHashMap<>();
+    private final Map<String, Tristate> lookupCache = new HashMap<>();
 
     public LPPermissible(@NonNull CommandSender sender, LuckPermsPlugin plugin) {
         super(sender);
@@ -58,24 +59,10 @@ public class LPPermissible extends PermissibleBase {
         this.plugin = plugin;
     }
 
-    @Override
-    public boolean isOp() {
-        return parent.isOp();
-    }
-
-    @Override
-    public void setOp(boolean value) {
-        parent.setOp(value);
-    }
-
-    @Override
-    public boolean isPermissionSet(@NonNull String name) {
-        return luckPermsPermissions.containsKey(name.toLowerCase()) || attachmentPermissions.containsKey(name.toLowerCase());
-    }
-
-    @Override
-    public boolean isPermissionSet(@NonNull Permission perm) {
-        return isPermissionSet(perm.getName());
+    public void invalidateCache() {
+        synchronized (lookupCache) {
+            lookupCache.clear();
+        }
     }
 
     private Tristate getPermissionValue(String permission) {
@@ -84,7 +71,18 @@ public class LPPermissible extends PermissibleBase {
         }
 
         permission = permission.toLowerCase();
+        synchronized (lookupCache) {
+            if (lookupCache.containsKey(permission)) {
+                return lookupCache.get(permission);
+            } else {
+                Tristate t = lookupPermissionValue(permission);
+                lookupCache.put(permission, t);
+                return t;
+            }
+        }
+    }
 
+    private Tristate lookupPermissionValue(String permission) {
         if (luckPermsPermissions.containsKey(permission)) {
             return Tristate.fromBoolean(luckPermsPermissions.get(permission));
         }
@@ -122,6 +120,26 @@ public class LPPermissible extends PermissibleBase {
         }
 
         return Tristate.UNDEFINED;
+    }
+
+    @Override
+    public boolean isOp() {
+        return parent.isOp();
+    }
+
+    @Override
+    public void setOp(boolean value) {
+        parent.setOp(value);
+    }
+
+    @Override
+    public boolean isPermissionSet(@NonNull String name) {
+        return luckPermsPermissions.containsKey(name.toLowerCase()) || attachmentPermissions.containsKey(name.toLowerCase());
+    }
+
+    @Override
+    public boolean isPermissionSet(@NonNull Permission perm) {
+        return isPermissionSet(perm.getName());
     }
 
     @Override
@@ -239,6 +257,8 @@ public class LPPermissible extends PermissibleBase {
         for (PermissionAttachment attachment : attachments) {
             calculateChildPermissions(attachment.getPermissions(), false, attachment);
         }
+
+        invalidateCache();
     }
 
     @Override

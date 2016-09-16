@@ -87,6 +87,7 @@ public class BukkitUser extends User {
             if (!different) return;
 
             existing.clear();
+            lpPermissible.invalidateCache();
             existing.putAll(toApply);
 
             if (plugin.getConfiguration().getAutoOp()) {

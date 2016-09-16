@@ -22,21 +22,74 @@
 
 package me.lucko.luckperms.users;
 
+import me.lucko.luckperms.BungeePlayerCache;
 import me.lucko.luckperms.LPBungeePlugin;
+import me.lucko.luckperms.api.event.events.UserPermissionRefreshEvent;
+import me.lucko.luckperms.api.implementation.internal.UserLink;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.UUID;
 
 public class BungeeUser extends User {
+    private final LPBungeePlugin plugin;
+
     BungeeUser(UUID uuid, LPBungeePlugin plugin) {
         super(uuid, plugin);
+        this.plugin = plugin;
     }
 
     BungeeUser(UUID uuid, String username, LPBungeePlugin plugin) {
         super(uuid, username, plugin);
+        this.plugin = plugin;
     }
 
     @Override
     public void refreshPermissions() {
-        // Do nothing. Permissions are applied when needed in a listener.
+        ProxiedPlayer player = plugin.getProxy().getPlayer(plugin.getUuidCache().getExternalUUID(getUuid()));
+        if (player == null) {
+            return;
+        }
+
+        BungeePlayerCache playerCache = plugin.getPlayerCache().get(getUuid());
+        if (playerCache == null) {
+            return;
+        }
+
+        final String server = player.getServer() == null ? null : (player.getServer().getInfo() == null ? null : player.getServer().getInfo().getName());
+
+        // Calculate the permissions that should be applied. This is done async.
+        Map<String, Boolean> toApply = exportNodes(
+                plugin.getConfiguration().getServer(),
+                server,
+                null,
+                plugin.getConfiguration().getIncludeGlobalPerms(),
+                true,
+                Collections.emptyList()
+        );
+
+        Map<String, Boolean> existing = playerCache.getPermissions();
+
+        boolean different = false;
+        if (toApply.size() != existing.size()) {
+            different = true;
+        } else {
+            for (Map.Entry<String, Boolean> e : existing.entrySet()) {
+                if (toApply.containsKey(e.getKey()) && toApply.get(e.getKey()) == e.getValue()) {
+                    continue;
+                }
+                different = true;
+                break;
+            }
+        }
+
+        if (!different) return;
+
+        existing.clear();
+        playerCache.invalidateCache();
+        existing.putAll(toApply);
+
+        plugin.getApiProvider().fireEventAsync(new UserPermissionRefreshEvent(new UserLink(this)));
     }
 }
