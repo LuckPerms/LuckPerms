@@ -245,7 +245,6 @@ public abstract class PermissionHolder {
             if (node.getPermission().equals("*") || node.getPermission().equals("'*'")) {
                 if (possibleNodes != null && plugin.getConfiguration().getApplyWildcards()) {
                     possibleNodes.forEach(n -> perms.put(n, true));
-                    continue;
                 }
             }
 
