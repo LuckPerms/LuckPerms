@@ -108,7 +108,7 @@ public class BungeeListener extends AbstractListener implements Listener {
         if (user == null) {
             plugin.getProxy().getScheduler().schedule(plugin, () -> player.sendMessage(WARN_MESSAGE), 3, TimeUnit.SECONDS);
         } else {
-            plugin.getPlayerCache().put(internal, new BungeePlayerCache(plugin, internal, e.getPlayer().getName()));
+            plugin.getPlayerCache().put(internal, new BungeePlayerCache(plugin, e.getPlayer().getName()));
             user.refreshPermissions();
         }
     }
