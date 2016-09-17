@@ -127,7 +127,10 @@ public enum Message {
             PREFIX + "&f-> &eStorage Method: &6%s" + "\n" +
             PREFIX + "&f-> &eServer Name: &6%s" + "\n" +
             PREFIX + "&f-> &eSync Interval: &6%s minutes" + "\n" +
-            PREFIX + "&f-> &eInclude Global Perms: &6%s" + "\n" +
+            PREFIX + "&f-> &eInclude Global: &6%s" + "\n" +
+            PREFIX + "&f-> &eInclude Global World: &6%s" + "\n" +
+            PREFIX + "&f-> &eApply Global Groups: &6%s" + "\n" +
+            PREFIX + "&f-> &eApply Global World Groups: &6%s" + "\n" +
             PREFIX + "&f-> &eOnline Mode: &6%s" + "\n" +
             PREFIX + "&f-> &eApply Wildcards: &6%s" + "\n" +
             PREFIX + "&f-> &eApply Regex: &6%s" + "\n" +

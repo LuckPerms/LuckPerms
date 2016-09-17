@@ -36,6 +36,7 @@ import me.lucko.luckperms.api.implementation.internal.PermissionHolderLink;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.groups.Group;
+import me.lucko.luckperms.utils.Contexts;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -143,7 +144,7 @@ public abstract class PermissionHolder {
      * @param excludedGroups a list of groups to exclude
      * @return a set of nodes
      */
-    public SortedSet<Node> getAllNodes(List<String> excludedGroups) {
+    public SortedSet<Node> getAllNodes(List<String> excludedGroups, Contexts context) {
         SortedSet<Node> all = getPermissions(true);
 
         if (excludedGroups == null) {
@@ -152,13 +153,27 @@ public abstract class PermissionHolder {
 
         excludedGroups.add(getObjectName().toLowerCase());
 
-        Set<String> parents = getPermissions(true).stream()
+        Set<Node> parents = getPermissions(true).stream()
                 .filter(Node::isGroupNode)
-                .map(Node::getGroupName)
                 .collect(Collectors.toSet());
 
-        for (String parent : parents) {
-            Group group = plugin.getGroupManager().get(parent);
+        Iterator<Node> iterator = parents.iterator();
+        while (iterator.hasNext()) {
+            Node node = iterator.next();
+
+            if (!node.shouldApplyOnServer(context.getServer(), context.isApplyGlobalGroups(), plugin.getConfiguration().getApplyRegex())) {
+                iterator.remove();
+                continue;
+            }
+
+            if (!node.shouldApplyOnWorld(context.getWorld(), context.isApplyGlobalWorldGroups(), plugin.getConfiguration().getApplyRegex())) {
+                iterator.remove();
+                continue;
+            }
+        }
+
+        for (Node parent : parents) {
+            Group group = plugin.getGroupManager().get(parent.getGroupName());
             if (group == null) {
                 continue;
             }
@@ -168,7 +183,7 @@ public abstract class PermissionHolder {
             }
 
             inherited:
-            for (Node inherited : group.getAllNodes(excludedGroups)) {
+            for (Node inherited : group.getAllNodes(excludedGroups, context)) {
                 for (Node existing : all) {
                     if (existing.almostEquals(inherited)) {
                         continue inherited;
@@ -184,34 +199,30 @@ public abstract class PermissionHolder {
 
     /**
      * Gets all of the nodes that this holder has (and inherits), given the context
-     * @param server the server
-     * @param world the world
-     * @param extraContext any extra context to filter by
-     * @param includeGlobal whether to include global nodes
-     * @param applyGroups if inherited group permissions should be included
+     * @param context the context for this request
      * @return a map of permissions
      */
-    public Set<Node> getAllNodesFiltered(String server, String world, Map<String, String> extraContext, boolean includeGlobal, boolean applyGroups) {
+    public Set<Node> getAllNodesFiltered(Contexts context) {
         Set<Node> perms = ConcurrentHashMap.newKeySet();
         SortedSet<Node> allNodes;
 
-        if (applyGroups) {
-            allNodes = getAllNodes(null);
+        if (context.isApplyGroups()) {
+            allNodes = getAllNodes(null, context);
         } else {
             allNodes = getPermissions(true);
         }
 
         all:
         for (Node node : allNodes) {
-            if (!node.shouldApplyOnServer(server, includeGlobal, plugin.getConfiguration().getApplyRegex())) {
+            if (!node.shouldApplyOnServer(context.getServer(), context.isIncludeGlobal(), plugin.getConfiguration().getApplyRegex())) {
                 continue;
             }
 
-            if (!node.shouldApplyOnWorld(world, includeGlobal, plugin.getConfiguration().getApplyRegex())) {
+            if (!node.shouldApplyOnWorld(context.getWorld(), context.isIncludeGlobalWorld(), plugin.getConfiguration().getApplyRegex())) {
                 continue;
             }
 
-            if (!node.shouldApplyWithContext(extraContext)) {
+            if (!node.shouldApplyWithContext(context.getExtraContext())) {
                 continue;
             }
 
@@ -229,19 +240,15 @@ public abstract class PermissionHolder {
     }
 
     /**
-     * Converts the output of {@link #getAllNodesFiltered(String, String, Map, boolean, boolean)}, and expands wildcards/regex/shorthand perms
-     * @param server the server
-     * @param world the world
-     * @param extraContext any extra context to filter by
-     * @param includeGlobal whether to include global nodes
-     * @param applyGroups if inherited group permissions should be included
+     * Converts the output of {@link #getAllNodesFiltered(Contexts)}, and expands wildcards/regex/shorthand perms
+     * @param context the context for this request
      * @param possibleNodes a list of possible nodes for wildcards and regex permissions
      * @return a map of permissions
      */
-    public Map<String, Boolean> exportNodes(String server, String world, Map<String, String> extraContext, boolean includeGlobal, boolean applyGroups, List<String> possibleNodes) {
+    public Map<String, Boolean> exportNodes(Contexts context, List<String> possibleNodes) {
         Map<String, Boolean> perms = new HashMap<>();
 
-        for (Node node : getAllNodesFiltered(server, world, extraContext, includeGlobal, applyGroups)) {
+        for (Node node : getAllNodesFiltered(context)) {
             if (node.getPermission().equals("*") || node.getPermission().equals("'*'")) {
                 if (possibleNodes != null && plugin.getConfiguration().getApplyWildcards()) {
                     possibleNodes.forEach(n -> perms.put(n, true));
@@ -356,7 +363,7 @@ public abstract class PermissionHolder {
      * @return a tristate
      */
     public Tristate inheritsPermission(Node node) {
-        return hasPermission(getAllNodes(null), node);
+        return hasPermission(getAllNodes(null, Contexts.allowAll()), node);
     }
 
     public boolean inheritsPermission(String node, boolean b) {
@@ -539,18 +546,24 @@ public abstract class PermissionHolder {
     /*
      * Don't use these methods, only here for compat reasons
      */
+    @Deprecated
     public Map<String, Boolean> getLocalPermissions(String server, String world, List<String> excludedGroups, List<String> possibleNodes) {
-        return exportNodes(server, world, null, plugin.getConfiguration().getIncludeGlobalPerms(), true, possibleNodes);
+        return exportNodes(new Contexts(server, world, Collections.emptyMap(), plugin.getConfiguration().getIncludeGlobalPerms(), true, true, true, true), Collections.emptyList());
     }
 
+    @Deprecated
     public Map<String, Boolean> getLocalPermissions(String server, String world, List<String> excludedGroups) {
-        return exportNodes(server, world, null, plugin.getConfiguration().getIncludeGlobalPerms(), true, null);
+        return exportNodes(new Contexts(server, world, Collections.emptyMap(), plugin.getConfiguration().getIncludeGlobalPerms(), true, true, true, true), Collections.emptyList());
     }
 
+    @SuppressWarnings("deprecation")
+    @Deprecated
     public Map<String, Boolean> getLocalPermissions(String server, List<String> excludedGroups, List<String> possibleNodes) {
         return getLocalPermissions(server, null, excludedGroups, possibleNodes);
     }
 
+    @SuppressWarnings("deprecation")
+    @Deprecated
     public Map<String, Boolean> getLocalPermissions(String server, List<String> excludedGroups) {
         return getLocalPermissions(server, null, excludedGroups, null);
     }

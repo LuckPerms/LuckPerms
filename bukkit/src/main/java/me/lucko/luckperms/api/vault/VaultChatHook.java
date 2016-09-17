@@ -30,6 +30,7 @@ import me.lucko.luckperms.core.PermissionHolder;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.users.User;
+import me.lucko.luckperms.utils.Contexts;
 import net.milkbowl.vault.chat.Chat;
 
 import java.util.Iterator;
@@ -162,7 +163,7 @@ public class VaultChatHook extends Chat {
         int priority = Integer.MIN_VALUE;
         String meta = null;
 
-        for (Node n : holder.getAllNodes(null)) {
+        for (Node n : holder.getAllNodes(null, Contexts.allowAll())) {
             if (!n.getValue()) {
                 continue;
             }

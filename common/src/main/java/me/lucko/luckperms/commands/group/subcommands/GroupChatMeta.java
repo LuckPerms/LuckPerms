@@ -28,6 +28,7 @@ import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.groups.Group;
+import me.lucko.luckperms.utils.Contexts;
 
 import java.util.*;
 
@@ -42,7 +43,7 @@ public class GroupChatMeta extends SubCommand<Group> {
         SortedSet<Map.Entry<Integer, String>> prefixes = new TreeSet<>(Util.getMetaComparator().reversed());
         SortedSet<Map.Entry<Integer, String>> suffixes = new TreeSet<>(Util.getMetaComparator().reversed());
 
-        for (Node node : group.getAllNodes(null)) {
+        for (Node node : group.getAllNodes(null, Contexts.allowAll())) {
             if (!node.isSuffix() && !node.isPrefix()) {
                 continue;
             }

@@ -26,6 +26,7 @@ import me.lucko.luckperms.BungeePlayerCache;
 import me.lucko.luckperms.LPBungeePlugin;
 import me.lucko.luckperms.api.event.events.UserPermissionRefreshEvent;
 import me.lucko.luckperms.api.implementation.internal.UserLink;
+import me.lucko.luckperms.utils.Contexts;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.util.Collections;
@@ -46,7 +47,7 @@ public class BungeeUser extends User {
     }
 
     @Override
-    public void refreshPermissions() {
+    public synchronized void refreshPermissions() {
         ProxiedPlayer player = plugin.getProxy().getPlayer(plugin.getUuidCache().getExternalUUID(getUuid()));
         if (player == null) {
             return;
@@ -61,11 +62,16 @@ public class BungeeUser extends User {
 
         // Calculate the permissions that should be applied. This is done async.
         Map<String, Boolean> toApply = exportNodes(
-                plugin.getConfiguration().getServer(),
-                server,
-                null,
-                plugin.getConfiguration().getIncludeGlobalPerms(),
-                true,
+                new Contexts(
+                        plugin.getConfiguration().getServer(),
+                        server,
+                        null,
+                        plugin.getConfiguration().getIncludeGlobalPerms(),
+                        plugin.getConfiguration().getIncludeGlobalWorldPerms(),
+                        true,
+                        plugin.getConfiguration().getApplyGlobalGroups(),
+                        plugin.getConfiguration().getApplyGlobalWorldGroups()
+                ),
                 Collections.emptyList()
         );
 

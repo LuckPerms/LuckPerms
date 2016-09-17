@@ -27,6 +27,7 @@ import me.lucko.luckperms.api.event.events.UserPermissionRefreshEvent;
 import me.lucko.luckperms.api.implementation.internal.UserLink;
 import me.lucko.luckperms.api.sponge.LuckPermsUserSubject;
 import me.lucko.luckperms.api.sponge.collections.UserCollection;
+import me.lucko.luckperms.utils.Contexts;
 
 import java.util.Collections;
 import java.util.Map;
@@ -46,7 +47,7 @@ class SpongeUser extends User {
     }
 
     @Override
-    public void refreshPermissions() {
+    public synchronized void refreshPermissions() {
         UserCollection uc = plugin.getService().getUserSubjects();
         if (!uc.getUsers().containsKey(getUuid())) {
             return;
@@ -54,11 +55,16 @@ class SpongeUser extends User {
 
         // Calculate the permissions that should be applied. This is done async, who cares about how long it takes or how often it's done.
         Map<String, Boolean> toApply = exportNodes(
-                getPlugin().getConfiguration().getServer(),
-                null, // TODO per world perms
-                null,
-                plugin.getConfiguration().getIncludeGlobalPerms(),
-                true,
+                new Contexts(
+                        plugin.getConfiguration().getServer(),
+                        null, // TODO per world perms
+                        null,
+                        plugin.getConfiguration().getIncludeGlobalPerms(),
+                        plugin.getConfiguration().getIncludeGlobalWorldPerms(),
+                        true,
+                        plugin.getConfiguration().getApplyGlobalGroups(),
+                        plugin.getConfiguration().getApplyGlobalWorldGroups()
+                ),
                 Collections.emptyList()
         );
 

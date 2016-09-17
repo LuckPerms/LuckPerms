@@ -8,8 +8,19 @@
 # The name of the server, used for server specific permissions. Set to 'global' to disable.
 server: global
 
-# If users on this server should have their global permissions/groups applied.
+# If users on this server should have their global permissions applied.
+# If set to false, only server specific permissions will apply for users on this server
 include-global: true
+
+# If users on this server should have their global world permissions applied.
+# If set to false, only world specific permissions will apply for users on this server
+include-global-world: true
+
+# If users on this server should have global (non-server specific) groups applied
+apply-global-groups: true
+
+# If users on this server should have global (non-world specific) groups applied
+apply-global-world-groups: true
 
 # If this server is in offline or online mode.
 # This setting allows a player to have the same UUID across a network of offline mode/mixed servers.

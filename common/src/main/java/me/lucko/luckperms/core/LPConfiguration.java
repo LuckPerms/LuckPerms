@@ -91,6 +91,18 @@ public abstract class LPConfiguration<T extends LuckPermsPlugin> {
         return getBoolean("include-global", defaultIncludeGlobal);
     }
 
+    public boolean getIncludeGlobalWorldPerms() {
+        return getBoolean("include-global-world", true);
+    }
+
+    public boolean getApplyGlobalGroups() {
+        return getBoolean("apply-global-groups", true);
+    }
+
+    public boolean getApplyGlobalWorldGroups() {
+        return getBoolean("apply-global-world-groups", true);
+    }
+
     public boolean getOnlineMode() {
         return getBoolean("online-mode", true);
     }

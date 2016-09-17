@@ -28,6 +28,7 @@ import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.users.User;
+import me.lucko.luckperms.utils.Contexts;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
@@ -46,7 +47,7 @@ public class UserChatMeta extends SubCommand<User> {
         SortedSet<Map.Entry<Integer, String>> prefixes = new TreeSet<>(Util.getMetaComparator().reversed());
         SortedSet<Map.Entry<Integer, String>> suffixes = new TreeSet<>(Util.getMetaComparator().reversed());
 
-        for (Node node : user.getAllNodes(null)) {
+        for (Node node : user.getAllNodes(null, Contexts.allowAll())) {
             if (!node.isSuffix() && !node.isPrefix()) {
                 continue;
             }

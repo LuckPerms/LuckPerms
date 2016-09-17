@@ -29,6 +29,7 @@ import me.lucko.luckperms.api.PermissionHolder;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
+import me.lucko.luckperms.utils.Contexts;
 
 import java.util.*;
 
@@ -67,7 +68,7 @@ public class PermissionHolderLink implements PermissionHolder {
 
     @Override
     public Set<Node> getAllNodes() {
-        return Collections.unmodifiableSet(master.getAllNodes(null));
+        return Collections.unmodifiableSet(master.getAllNodes(Collections.emptyList(), Contexts.allowAll()));
     }
 
     @Override
@@ -252,7 +253,7 @@ public class PermissionHolderLink implements PermissionHolder {
 
     @Override
     public Map<String, Boolean> getPermissions(String server, String world, Map<String, String> extraContext, boolean includeGlobal, List<String> possibleNodes, boolean applyGroups) {
-        return master.exportNodes(server, world, extraContext, includeGlobal, applyGroups, possibleNodes);
+        return master.exportNodes(new Contexts(server, world, extraContext, includeGlobal, includeGlobal, applyGroups, true, true), possibleNodes);
     }
 
     @Override

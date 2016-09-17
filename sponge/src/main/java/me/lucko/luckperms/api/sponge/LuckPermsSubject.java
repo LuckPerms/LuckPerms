@@ -35,6 +35,7 @@ import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.users.User;
+import me.lucko.luckperms.utils.Contexts;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
@@ -203,7 +204,7 @@ public class LuckPermsSubject implements Subject {
         int priority = Integer.MIN_VALUE;
         String meta = null;
 
-        for (Node n : holder.getAllNodes(null)) {
+        for (Node n : holder.getAllNodes(null, Contexts.allowAll())) {
             if (!n.getValue()) {
                 continue;
             }
@@ -343,7 +344,7 @@ public class LuckPermsSubject implements Subject {
         public Map<Set<Context>, List<Subject>> getAllParents() {
             Map<Set<Context>, List<Subject>> parents = new HashMap<>();
 
-            for (Node n : holder.getAllNodes(null)) {
+            for (Node n : holder.getAllNodes(null, Contexts.allowAll())) {
                 if (!n.isGroupNode()) {
                     continue;
                 }
@@ -470,7 +471,7 @@ public class LuckPermsSubject implements Subject {
         public Map<Set<Context>, Map<String, String>> getAllOptions() {
             Map<Set<Context>, Map<String, String>> options = new HashMap<>();
 
-            for (Node n : holder.getAllNodes(null)) {
+            for (Node n : holder.getAllNodes(null, Contexts.allowAll())) {
                 if (!n.isMeta()) {
                     continue;
                 }

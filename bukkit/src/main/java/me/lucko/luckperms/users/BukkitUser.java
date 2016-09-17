@@ -28,6 +28,7 @@ import me.lucko.luckperms.LPBukkitPlugin;
 import me.lucko.luckperms.api.event.events.UserPermissionRefreshEvent;
 import me.lucko.luckperms.api.implementation.internal.UserLink;
 import me.lucko.luckperms.inject.LPPermissible;
+import me.lucko.luckperms.utils.Contexts;
 import org.bukkit.permissions.Permissible;
 
 import java.util.Collections;
@@ -53,18 +54,23 @@ public class BukkitUser extends User {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void refreshPermissions() {
+    public synchronized void refreshPermissions() {
         if (lpPermissible == null) {
             return;
         }
 
         // Calculate the permissions that should be applied. This is done async, who cares about how long it takes or how often it's done.
         Map<String, Boolean> toApply = exportNodes(
-                getPlugin().getConfiguration().getServer(),
-                plugin.getUserManager().getWorldCache().get(getUuid()),
-                null,
-                plugin.getConfiguration().getIncludeGlobalPerms(),
-                true,
+                new Contexts(
+                        getPlugin().getConfiguration().getServer(),
+                        plugin.getUserManager().getWorldCache().get(getUuid()),
+                        null,
+                        getPlugin().getConfiguration().getIncludeGlobalPerms(),
+                        getPlugin().getConfiguration().getIncludeGlobalWorldPerms(),
+                        true,
+                        getPlugin().getConfiguration().getApplyGlobalGroups(),
+                        getPlugin().getConfiguration().getApplyGlobalWorldGroups()
+                ),
                 Collections.emptyList()
         );
 
