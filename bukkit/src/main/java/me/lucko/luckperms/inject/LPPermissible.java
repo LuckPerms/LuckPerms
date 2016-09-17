@@ -22,11 +22,12 @@
 
 package me.lucko.luckperms.inject;
 
-import com.google.common.base.Splitter;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.utils.PermissionCalculator;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.*;
@@ -34,6 +35,7 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -44,82 +46,29 @@ public class LPPermissible extends PermissibleBase {
 
     @Getter
     private final CommandSender parent;
-    private final LuckPermsPlugin plugin;
+
+    private final PermissionCalculator calculator;
 
     @Getter
     private final Map<String, Boolean> luckPermsPermissions = new ConcurrentHashMap<>();
     private final List<PermissionAttachment> attachments = new LinkedList<>();
     private final Map<String, PermissionAttachmentInfo> attachmentPermissions = new HashMap<>();
 
-    private final Map<String, Tristate> lookupCache = new HashMap<>();
-
     public LPPermissible(@NonNull CommandSender sender, LuckPermsPlugin plugin) {
         super(sender);
         this.parent = sender;
-        this.plugin = plugin;
+
+        List<PermissionCalculator.PermissionProcessor> processors = new ArrayList<>(4);
+        processors.add(new PermissionCalculator.MapProcessor(luckPermsPermissions));
+        processors.add(new AttachmentProcessor(attachmentPermissions));
+        processors.add(new PermissionCalculator.WildcardProcessor(luckPermsPermissions));
+        processors.add(new BukkitDefaultsProcessor(parent::isOp));
+
+        calculator = new PermissionCalculator(plugin, parent.getName(), plugin.getConfiguration().getDebugPermissionChecks(), processors);
     }
 
     public void invalidateCache() {
-        synchronized (lookupCache) {
-            lookupCache.clear();
-        }
-    }
-
-    private Tristate getPermissionValue(String permission) {
-        if (plugin.getConfiguration().getDebugPermissionChecks()) {
-            plugin.getLog().info("Checking if " + parent.getName() + " has permission: " + permission);
-        }
-
-        permission = permission.toLowerCase();
-        synchronized (lookupCache) {
-            if (lookupCache.containsKey(permission)) {
-                return lookupCache.get(permission);
-            } else {
-                Tristate t = lookupPermissionValue(permission);
-                lookupCache.put(permission, t);
-                return t;
-            }
-        }
-    }
-
-    private Tristate lookupPermissionValue(String permission) {
-        if (luckPermsPermissions.containsKey(permission)) {
-            return Tristate.fromBoolean(luckPermsPermissions.get(permission));
-        }
-
-        if (attachmentPermissions.containsKey(permission)) {
-            return Tristate.fromBoolean(attachmentPermissions.get(permission).getValue());
-        }
-
-        if (plugin.getConfiguration().getApplyWildcards()) {
-            if (luckPermsPermissions.containsKey("*")) {
-                return Tristate.fromBoolean(luckPermsPermissions.get("*"));
-            }
-            if (luckPermsPermissions.containsKey("'*'")) {
-                return Tristate.fromBoolean(luckPermsPermissions.get("'*'"));
-            }
-
-            String node = "";
-            Iterable<String> permParts = Splitter.on('.').split(permission);
-            for (String s : permParts) {
-                if (node.equals("")) {
-                    node = s;
-                } else {
-                    node = node + "." + s;
-                }
-
-                if (luckPermsPermissions.containsKey(node + ".*")) {
-                    return Tristate.fromBoolean(luckPermsPermissions.get(node + ".*"));
-                }
-            }
-        }
-
-        Permission defPerm = Bukkit.getServer().getPluginManager().getPermission(permission);
-        if (defPerm != null) {
-            return Tristate.fromBoolean(defPerm.getDefault().getValue(isOp()));
-        }
-
-        return Tristate.UNDEFINED;
+        calculator.invalidateCache();
     }
 
     @Override
@@ -144,7 +93,7 @@ public class LPPermissible extends PermissibleBase {
 
     @Override
     public boolean hasPermission(@NonNull String name) {
-        Tristate ts = getPermissionValue(name);
+        Tristate ts = calculator.getPermissionValue(name);
         if (ts != Tristate.UNDEFINED) {
             return ts.asBoolean();
         }
@@ -154,7 +103,7 @@ public class LPPermissible extends PermissibleBase {
 
     @Override
     public boolean hasPermission(@NonNull Permission perm) {
-        Tristate ts = getPermissionValue(perm.getName());
+        Tristate ts = calculator.getPermissionValue(perm.getName());
         if (ts != Tristate.UNDEFINED) {
             return ts.asBoolean();
         }
@@ -311,6 +260,38 @@ public class LPPermissible extends PermissibleBase {
 
         public void run() {
             attachment.remove();
+        }
+    }
+
+    @AllArgsConstructor
+    private static class AttachmentProcessor implements PermissionCalculator.PermissionProcessor {
+
+        @Getter
+        private final Map<String, PermissionAttachmentInfo> map;
+
+        @Override
+        public Tristate hasPermission(String permission) {
+            if (map.containsKey(permission)) {
+                return Tristate.fromBoolean(map.get(permission).getValue());
+            }
+
+            return Tristate.UNDEFINED;
+        }
+
+    }
+
+    @AllArgsConstructor
+    private static class BukkitDefaultsProcessor implements PermissionCalculator.PermissionProcessor {
+        private final Supplier<Boolean> isOp;
+
+        @Override
+        public Tristate hasPermission(String permission) {
+            Permission defPerm = Bukkit.getServer().getPluginManager().getPermission(permission);
+            if (defPerm != null) {
+                return Tristate.fromBoolean(defPerm.getDefault().getValue(isOp.get()));
+            } else {
+                return Tristate.UNDEFINED;
+            }
         }
     }
 }

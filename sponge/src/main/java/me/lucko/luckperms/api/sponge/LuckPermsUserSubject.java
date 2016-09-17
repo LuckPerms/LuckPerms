@@ -23,9 +23,11 @@
 package me.lucko.luckperms.api.sponge;
 
 import com.google.common.base.Splitter;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
 import me.lucko.luckperms.users.User;
+import me.lucko.luckperms.utils.PermissionCalculator;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
@@ -43,72 +45,37 @@ public class LuckPermsUserSubject extends LuckPermsSubject {
     @Getter
     private final User user;
 
-    @Getter
-    private final Map<String, Boolean> permissionCache = new ConcurrentHashMap<>();
+    private final PermissionCalculator calculator;
 
     @Getter
-    private final Map<String, Tristate> lookupCache = new HashMap<>();
+    private final Map<String, Boolean> permissionCache = new ConcurrentHashMap<>();
 
     private LuckPermsUserSubject(User user, LuckPermsService service) {
         super(user, service);
         this.user = user;
+
+        List<PermissionCalculator.PermissionProcessor> processors = new ArrayList<>(4);
+        processors.add(new PermissionCalculator.MapProcessor(permissionCache));
+        processors.add(new SpongeWildcardProcessor(permissionCache));
+        processors.add(new PermissionCalculator.WildcardProcessor(permissionCache));
+        processors.add(new SpongeDefaultsProcessor(service));
+
+        calculator = new PermissionCalculator(service.getPlugin(), user.getName(), service.getPlugin().getConfiguration().getDebugPermissionChecks(), processors);
     }
 
     public void invalidateCache() {
-        synchronized (lookupCache) {
-            lookupCache.clear();
-        }
+        calculator.invalidateCache();
     }
 
     // TODO don't ignore context
     @Override
     public Tristate getPermissionValue(@NonNull Set<Context> contexts, @NonNull String permission) {
-        if (service.getPlugin().getConfiguration().getDebugPermissionChecks()) {
-            service.getPlugin().getLog().info("Checking if " + user.getName() + " has permission: " + permission);
+        me.lucko.luckperms.api.Tristate t =  calculator.getPermissionValue(permission);
+        if (t != me.lucko.luckperms.api.Tristate.UNDEFINED) {
+            return Tristate.fromBoolean(t.asBoolean());
+        } else {
+            return Tristate.UNDEFINED;
         }
-
-        permission = permission.toLowerCase();
-        synchronized (lookupCache) {
-            if (lookupCache.containsKey(permission)) {
-                return lookupCache.get(permission);
-            } else {
-                Tristate t = lookupPermissionValue(contexts, permission);
-                lookupCache.put(permission, t);
-                return t;
-            }
-        }
-    }
-
-    private Tristate lookupPermissionValue(Set<Context> contexts, String permission) {
-        if (permissionCache.containsKey(permission)) {
-            return Tristate.fromBoolean(permissionCache.get(permission));
-        }
-
-        if (service.getPlugin().getConfiguration().getApplyWildcards()) {
-            if (permissionCache.containsKey("*")) {
-                return Tristate.fromBoolean(permissionCache.get("*"));
-            }
-            if (permissionCache.containsKey("'*'")) {
-                return Tristate.fromBoolean(permissionCache.get("'*'"));
-            }
-
-            String node = "";
-            Iterable<String> permParts = Splitter.on('.').split(permission);
-            for (String s : permParts) {
-                if (node.equals("")) {
-                    node = s;
-                } else {
-                    node = node + "." + s;
-                }
-
-                if (permissionCache.containsKey(node + ".*")) {
-                    return Tristate.fromBoolean(permissionCache.get(node + ".*"));
-                }
-            }
-        }
-
-
-        return service.getDefaults().getPermissionValue(contexts, permission);
     }
 
     @Override
@@ -126,5 +93,47 @@ public class LuckPermsUserSubject extends LuckPermsSubject {
         }
 
         return Optional.empty();
+    }
+
+    // TODO proper implementation.
+    @AllArgsConstructor
+    private static class SpongeWildcardProcessor implements PermissionCalculator.PermissionProcessor {
+
+        @Getter
+        private final Map<String, Boolean> map;
+
+        @Override
+        public me.lucko.luckperms.api.Tristate hasPermission(String permission) {
+            String node = "";
+            Iterable<String> permParts = Splitter.on('.').split(permission);
+            for (String s : permParts) {
+                if (node.equals("")) {
+                    node = s;
+                } else {
+                    node = node + "." + s;
+                }
+
+                if (map.containsKey(node)) {
+                    return me.lucko.luckperms.api.Tristate.fromBoolean(map.get(node));
+                }
+            }
+
+            return me.lucko.luckperms.api.Tristate.UNDEFINED;
+        }
+    }
+
+    @AllArgsConstructor
+    private static class SpongeDefaultsProcessor implements PermissionCalculator.PermissionProcessor {
+        private final LuckPermsService service;
+
+        @Override
+        public me.lucko.luckperms.api.Tristate hasPermission(String permission) {
+            Tristate t =  service.getDefaults().getPermissionValue(Collections.emptySet(), permission);
+            if (t != Tristate.UNDEFINED) {
+                return me.lucko.luckperms.api.Tristate.fromBoolean(t.asBoolean());
+            } else {
+                return me.lucko.luckperms.api.Tristate.UNDEFINED;
+            }
+        }
     }
 }

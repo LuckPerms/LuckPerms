@@ -22,76 +22,34 @@
 
 package me.lucko.luckperms;
 
-import com.google.common.base.Splitter;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import me.lucko.luckperms.utils.PermissionCalculator;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-@RequiredArgsConstructor
 public class BungeePlayerCache {
-    private final LuckPermsPlugin plugin;
-    private final UUID uuid;
-    private final String name;
+
+    private final PermissionCalculator calculator;
 
     @Getter
     private final Map<String, Boolean> permissions = new ConcurrentHashMap<>();
-    private final Map<String, Boolean> lookupCache = new HashMap<>();
+
+    public BungeePlayerCache(LuckPermsPlugin plugin, String name) {
+        List<PermissionCalculator.PermissionProcessor> processors = new ArrayList<>(2);
+        processors.add(new PermissionCalculator.MapProcessor(permissions));
+        processors.add(new PermissionCalculator.WildcardProcessor(permissions));
+
+        calculator = new PermissionCalculator(plugin, name, plugin.getConfiguration().getDebugPermissionChecks(), processors);
+    }
 
     public void invalidateCache() {
-        synchronized (lookupCache) {
-            lookupCache.clear();
-        }
+        calculator.invalidateCache();
     }
 
     public boolean getPermissionValue(String permission) {
-        if (plugin.getConfiguration().getDebugPermissionChecks()) {
-            plugin.getLog().info("Checking if " + name + " has permission: " + permission);
-        }
-
-        permission = permission.toLowerCase();
-        synchronized (lookupCache) {
-            if (lookupCache.containsKey(permission)) {
-                return lookupCache.get(permission);
-            } else {
-                boolean t = lookupPermissionValue(permission);
-                lookupCache.put(permission, t);
-                return t;
-            }
-        }
-    }
-
-    private boolean lookupPermissionValue(String permission) {
-        if (permissions.containsKey(permission)) {
-            return permissions.get(permission);
-        }
-
-        if (plugin.getConfiguration().getApplyWildcards()) {
-            if (permissions.containsKey("*")) {
-                return permissions.get("*");
-            }
-            if (permissions.containsKey("'*'")) {
-                return permissions.get("'*'");
-            }
-
-            String node = "";
-            Iterable<String> permParts = Splitter.on('.').split(permission);
-            for (String s : permParts) {
-                if (node.equals("")) {
-                    node = s;
-                } else {
-                    node = node + "." + s;
-                }
-
-                if (permissions.containsKey(node + ".*")) {
-                    return permissions.get(node + ".*");
-                }
-            }
-        }
-
-        return false;
+        return calculator.getPermissionValue(permission).asBoolean();
     }
 }
