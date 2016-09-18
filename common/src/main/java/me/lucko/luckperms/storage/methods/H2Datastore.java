@@ -38,6 +38,7 @@ public class H2Datastore extends SQLDatastore {
 
     private final File file;
     private Connection connection = null;
+    private final Object connectionLock = new Object();
 
     public H2Datastore(LuckPermsPlugin plugin, File file) {
         super(plugin, "H2");
@@ -107,12 +108,14 @@ public class H2Datastore extends SQLDatastore {
 
     @Override
     Connection getConnection() throws SQLException {
-        if (connection == null || connection.isClosed()) {
-            try {
-                Class.forName("org.h2.Driver");
-            } catch (ClassNotFoundException ignored) {}
+        synchronized (connectionLock) {
+            if (connection == null || connection.isClosed()) {
+                try {
+                    Class.forName("org.h2.Driver");
+                } catch (ClassNotFoundException ignored) {}
 
-            connection = DriverManager.getConnection("jdbc:h2:" + file.getAbsolutePath());
+                connection = DriverManager.getConnection("jdbc:h2:" + file.getAbsolutePath());
+            }
         }
 
         return connection;

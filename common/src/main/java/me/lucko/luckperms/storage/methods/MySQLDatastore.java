@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.storage.methods;
 
+import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.Cleanup;
 import me.lucko.luckperms.LuckPermsPlugin;
@@ -50,20 +51,32 @@ public class MySQLDatastore extends SQLDatastore {
 
     @Override
     public void init() {
-        hikari = new HikariDataSource();
+        HikariConfig config = new HikariConfig();
 
         final String address = configuration.getAddress();
         final String database = configuration.getDatabase();
         final String username = configuration.getUsername();
         final String password = configuration.getPassword();
 
-        hikari.setMaximumPoolSize(10);
-        hikari.setDataSourceClassName("com.mysql.jdbc.jdbc2.optional.MysqlDataSource");
-        hikari.addDataSourceProperty("serverName", address.split(":")[0]);
-        hikari.addDataSourceProperty("port", address.split(":")[1]);
-        hikari.addDataSourceProperty("databaseName", database);
-        hikari.addDataSourceProperty("user", username);
-        hikari.addDataSourceProperty("password", password);
+        config.setMaximumPoolSize(10);
+        config.setPoolName("luckperms");
+        config.setDataSourceClassName("com.mysql.jdbc.jdbc2.optional.MysqlDataSource");
+        config.addDataSourceProperty("serverName", address.split(":")[0]);
+        config.addDataSourceProperty("port", address.split(":")[1]);
+        config.addDataSourceProperty("databaseName", database);
+        config.addDataSourceProperty("user", username);
+        config.addDataSourceProperty("password", password);
+        config.addDataSourceProperty("cachePrepStmts", true);
+        config.addDataSourceProperty("prepStmtCacheSize", 250);
+        config.addDataSourceProperty("prepStmtCacheSqlLimit", 2048);
+        config.addDataSourceProperty("useServerPrepStmts", true);
+        config.addDataSourceProperty("cacheCallableStmts", true);
+        config.addDataSourceProperty("alwaysSendSetIsolation", false);
+        config.addDataSourceProperty("cacheServerConfiguration", true);
+        config.addDataSourceProperty("elideSetAutoCommits", true);
+        config.addDataSourceProperty("useLocalSessionState", true);
+
+        hikari = new HikariDataSource(config);
 
         if (!setupTables(CREATETABLE_UUID, CREATETABLE_USERS, CREATETABLE_GROUPS, CREATETABLE_TRACKS, CREATETABLE_ACTION)) {
             plugin.getLog().severe("Error occurred whilst initialising the database.");

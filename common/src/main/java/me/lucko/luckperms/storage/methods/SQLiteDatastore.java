@@ -38,6 +38,7 @@ public class SQLiteDatastore extends SQLDatastore {
 
     private final File file;
     private Connection connection = null;
+    private final Object connectionLock = new Object();
 
     public SQLiteDatastore(LuckPermsPlugin plugin, File file) {
         super(plugin, "SQLite");
@@ -107,12 +108,14 @@ public class SQLiteDatastore extends SQLDatastore {
 
     @Override
     Connection getConnection() throws SQLException {
-        if (connection == null || connection.isClosed()) {
-            try {
-                Class.forName("org.sqlite.JDBC");
-            } catch (ClassNotFoundException ignored) {}
+        synchronized (connectionLock) {
+            if (connection == null || connection.isClosed()) {
+                try {
+                    Class.forName("org.sqlite.JDBC");
+                } catch (ClassNotFoundException ignored) {}
 
-            connection = DriverManager.getConnection("jdbc:sqlite:" + file.getAbsolutePath());
+                connection = DriverManager.getConnection("jdbc:sqlite:" + file.getAbsolutePath());
+            }
         }
 
         return connection;
