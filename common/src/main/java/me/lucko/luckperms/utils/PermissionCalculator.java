@@ -135,9 +135,4 @@ public class PermissionCalculator {
             return true;
         }
     }
-
-    public interface PermissionProcessor {
-        Tristate hasPermission(String permission);
-    }
-
 }

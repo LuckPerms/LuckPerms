@@ -28,6 +28,7 @@ import lombok.NonNull;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.utils.PermissionCalculator;
+import me.lucko.luckperms.utils.PermissionProcessor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.*;
@@ -58,7 +59,7 @@ public class LPPermissible extends PermissibleBase {
         super(sender);
         this.parent = sender;
 
-        List<PermissionCalculator.PermissionProcessor> processors = new ArrayList<>(4);
+        List<PermissionProcessor> processors = new ArrayList<>(4);
         processors.add(new PermissionCalculator.MapProcessor(luckPermsPermissions));
         processors.add(new AttachmentProcessor(attachmentPermissions));
         processors.add(new PermissionCalculator.WildcardProcessor(luckPermsPermissions));
@@ -264,7 +265,7 @@ public class LPPermissible extends PermissibleBase {
     }
 
     @AllArgsConstructor
-    private static class AttachmentProcessor implements PermissionCalculator.PermissionProcessor {
+    private static class AttachmentProcessor implements PermissionProcessor {
 
         @Getter
         private final Map<String, PermissionAttachmentInfo> map;
@@ -281,7 +282,7 @@ public class LPPermissible extends PermissibleBase {
     }
 
     @AllArgsConstructor
-    private static class BukkitDefaultsProcessor implements PermissionCalculator.PermissionProcessor {
+    private static class BukkitDefaultsProcessor implements PermissionProcessor {
         private final Supplier<Boolean> isOp;
 
         @Override

@@ -20,37 +20,12 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms;
+package me.lucko.luckperms.utils;
 
-import lombok.Getter;
-import me.lucko.luckperms.utils.PermissionCalculator;
-import me.lucko.luckperms.utils.PermissionProcessor;
+import me.lucko.luckperms.api.Tristate;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+public interface PermissionProcessor {
 
-public class BungeePlayerCache {
+    Tristate hasPermission(String permission);
 
-    private final PermissionCalculator calculator;
-
-    @Getter
-    private final Map<String, Boolean> permissions = new ConcurrentHashMap<>();
-
-    public BungeePlayerCache(LuckPermsPlugin plugin, String name) {
-        List<PermissionProcessor> processors = new ArrayList<>(2);
-        processors.add(new PermissionCalculator.MapProcessor(permissions));
-        processors.add(new PermissionCalculator.WildcardProcessor(permissions));
-
-        calculator = new PermissionCalculator(plugin, name, plugin.getConfiguration().getDebugPermissionChecks(), processors);
-    }
-
-    public void invalidateCache() {
-        calculator.invalidateCache();
-    }
-
-    public boolean getPermissionValue(String permission) {
-        return calculator.getPermissionValue(permission).asBoolean();
-    }
 }

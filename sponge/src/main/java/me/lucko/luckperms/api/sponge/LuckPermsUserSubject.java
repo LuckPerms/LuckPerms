@@ -22,12 +22,12 @@
 
 package me.lucko.luckperms.api.sponge;
 
-import com.google.common.base.Splitter;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
 import me.lucko.luckperms.users.User;
 import me.lucko.luckperms.utils.PermissionCalculator;
+import me.lucko.luckperms.utils.PermissionProcessor;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
@@ -54,7 +54,7 @@ public class LuckPermsUserSubject extends LuckPermsSubject {
         super(user, service);
         this.user = user;
 
-        List<PermissionCalculator.PermissionProcessor> processors = new ArrayList<>(4);
+        List<PermissionProcessor> processors = new ArrayList<>(4);
         processors.add(new PermissionCalculator.MapProcessor(permissionCache));
         processors.add(new SpongeWildcardProcessor(permissionCache));
         processors.add(new PermissionCalculator.WildcardProcessor(permissionCache));
@@ -95,9 +95,8 @@ public class LuckPermsUserSubject extends LuckPermsSubject {
         return Optional.empty();
     }
 
-    // TODO proper implementation.
     @AllArgsConstructor
-    public static class SpongeWildcardProcessor implements PermissionCalculator.PermissionProcessor {
+    private static class SpongeWildcardProcessor implements PermissionProcessor {
 
         @Getter
         private final Map<String, Boolean> map;
@@ -148,7 +147,7 @@ public class LuckPermsUserSubject extends LuckPermsSubject {
     }
 
     @AllArgsConstructor
-    private static class SpongeDefaultsProcessor implements PermissionCalculator.PermissionProcessor {
+    private static class SpongeDefaultsProcessor implements PermissionProcessor {
         private final LuckPermsService service;
 
         @Override
