@@ -74,6 +74,6 @@ public class PriorityComparator implements Comparator<Node> {
             return o1.getWildcardLevel() > o2.getWildcardLevel() ? 1 : -1;
         }
 
-        return 1;
+        return o1.getPermission().compareToIgnoreCase(o2.getPermission()) == 1 ? -1 : 1;
     }
 }
