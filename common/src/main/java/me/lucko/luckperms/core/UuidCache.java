@@ -22,12 +22,12 @@
 
 package me.lucko.luckperms.core;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Maps;
 import lombok.Getter;
 
-import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @see me.lucko.luckperms.api.UuidCache for docs
@@ -35,7 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class UuidCache {
 
     // External UUID --> Internal UUID
-    private Map<UUID, UUID> cache;
+    private BiMap<UUID, UUID> cache;
 
     @Getter
     private final boolean onlineMode;
@@ -44,23 +44,16 @@ public class UuidCache {
         this.onlineMode = onlineMode;
 
         if (!onlineMode) {
-            cache = new ConcurrentHashMap<>();
+            cache = Maps.synchronizedBiMap(HashBiMap.create());
         }
     }
 
     public UUID getUUID(UUID external) {
-        return onlineMode ? external : (cache.containsKey(external) ? cache.get(external) : external);
+        return onlineMode ? external : cache.getOrDefault(external, external);
     }
 
     public UUID getExternalUUID(UUID internal) {
-        if (onlineMode) return internal;
-
-        Optional<UUID> external = cache.entrySet().stream()
-                .filter(e -> e.getValue().equals(internal))
-                .map(Map.Entry::getKey)
-                .findFirst();
-
-        return external.isPresent() ? external.get() : internal;
+        return onlineMode ? internal : cache.inverse().getOrDefault(internal, internal);
     }
 
     public void addToCache(UUID external, UUID internal) {
