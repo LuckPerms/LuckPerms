@@ -39,9 +39,14 @@ public class BungeePlayerCache {
     private final Map<String, Boolean> permissions = new ConcurrentHashMap<>();
 
     public BungeePlayerCache(LuckPermsPlugin plugin, String name) {
-        List<PermissionProcessor> processors = new ArrayList<>(2);
+        List<PermissionProcessor> processors = new ArrayList<>(3);
         processors.add(new PermissionCalculator.MapProcessor(permissions));
-        processors.add(new PermissionCalculator.WildcardProcessor(permissions));
+        if (plugin.getConfiguration().getApplyWildcards()) {
+            processors.add(new PermissionCalculator.WildcardProcessor(permissions));
+        }
+        if (plugin.getConfiguration().getApplyRegex()) {
+            processors.add(new PermissionCalculator.RegexProcessor(permissions));
+        }
 
         calculator = new PermissionCalculator(plugin, name, plugin.getConfiguration().getDebugPermissionChecks(), processors);
     }

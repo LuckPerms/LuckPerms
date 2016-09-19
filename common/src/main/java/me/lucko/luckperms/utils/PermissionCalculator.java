@@ -27,10 +27,12 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.constants.Patterns;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 /**
  * Calculates and caches permissions
@@ -79,6 +81,31 @@ public class PermissionCalculator {
         public Tristate hasPermission(String permission) {
             if (map.containsKey(permission)) {
                 return Tristate.fromBoolean(map.get(permission));
+            }
+
+            return Tristate.UNDEFINED;
+        }
+    }
+
+    @AllArgsConstructor
+    public static class RegexProcessor implements PermissionProcessor {
+
+        @Getter
+        private final Map<String, Boolean> map;
+
+        @Override
+        public Tristate hasPermission(String permission) {
+            for (Map.Entry<String, Boolean> e : map.entrySet()) {
+                if (e.getKey().toLowerCase().startsWith("r=")) {
+                    Pattern p = Patterns.compile(e.getKey().substring(2));
+                    if (p == null) {
+                        continue;
+                    }
+
+                    if (p.matcher(permission).matches()) {
+                        return Tristate.fromBoolean(e.getValue());
+                    }
+                }
             }
 
             return Tristate.UNDEFINED;

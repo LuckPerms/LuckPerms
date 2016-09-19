@@ -40,19 +40,18 @@ public class Patterns {
     public static final Pattern STRIP_COLOR_PATTERN = Pattern.compile("(?i)" + String.valueOf('§') + "[0-9A-FK-OR]");
     public static final Pattern NODE_CONTEXTS = Pattern.compile("\\(.+\\).*");
 
-    public static Pattern compile(String regex) throws PatternSyntaxException {
-        if (!CACHE.containsKey(regex)) {
-            Pattern p;
-            try {
-                p = Pattern.compile(regex);
-            } catch (PatternSyntaxException e) {
-                return null;
-            }
-
-            CACHE.put(regex, p);
+    public static Pattern compile(String regex) {
+        try {
+            return CACHE.computeIfAbsent(regex, s -> {
+                try {
+                    return Pattern.compile(regex);
+                } catch (PatternSyntaxException e) {
+                    return null;
+                }
+            });
+        } catch (NullPointerException e) {
+            return null;
         }
-
-        return CACHE.get(regex);
     }
 
 }

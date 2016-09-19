@@ -54,10 +54,15 @@ public class LuckPermsUserSubject extends LuckPermsSubject {
         super(user, service);
         this.user = user;
 
-        List<PermissionProcessor> processors = new ArrayList<>(4);
+        List<PermissionProcessor> processors = new ArrayList<>(5);
         processors.add(new PermissionCalculator.MapProcessor(permissionCache));
-        processors.add(new SpongeWildcardProcessor(permissionCache));
-        processors.add(new PermissionCalculator.WildcardProcessor(permissionCache));
+        if (service.getPlugin().getConfiguration().getApplyWildcards()) {
+            processors.add(new SpongeWildcardProcessor(permissionCache));
+            processors.add(new PermissionCalculator.WildcardProcessor(permissionCache));
+        }
+        if (service.getPlugin().getConfiguration().getApplyRegex()) {
+            processors.add(new PermissionCalculator.RegexProcessor(permissionCache));
+        }
         processors.add(new SpongeDefaultsProcessor(service));
 
         calculator = new PermissionCalculator(service.getPlugin(), user.getName(), service.getPlugin().getConfiguration().getDebugPermissionChecks(), processors);
