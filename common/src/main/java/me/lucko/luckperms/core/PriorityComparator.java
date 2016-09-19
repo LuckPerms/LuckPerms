@@ -30,14 +30,14 @@ import java.util.Comparator;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PriorityComparator implements Comparator<Node> {
-    private static final PriorityComparator instance = new PriorityComparator();
+    private static final PriorityComparator INSTANCE = new PriorityComparator();
 
     public static Comparator<Node> get() {
-        return instance;
+        return INSTANCE;
     }
 
     public static Comparator<Node> reverse() {
-        return instance.reversed();
+        return INSTANCE.reversed();
     }
 
     @Override

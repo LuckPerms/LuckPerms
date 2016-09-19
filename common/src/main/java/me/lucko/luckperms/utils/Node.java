@@ -277,7 +277,6 @@ public class Node implements me.lucko.luckperms.api.Node {
         return false;
     }
 
-    // TODO move this method to resolve time
     @Override
     public List<String> resolveWildcard(List<String> possibleNodes) {
         if (!isWildcard() || possibleNodes == null) {

@@ -249,9 +249,11 @@ public abstract class PermissionHolder {
         Map<String, Boolean> perms = new HashMap<>();
 
         for (Node node : getAllNodesFiltered(context)) {
-            if (node.getPermission().equals("*") || node.getPermission().equals("'*'")) {
-                if (possibleNodes != null && plugin.getConfiguration().getApplyWildcards()) {
-                    possibleNodes.forEach(n -> perms.put(n, true));
+            if (possibleNodes != null && !possibleNodes.isEmpty()) {
+                if (node.getPermission().equals("*") || node.getPermission().equals("'*'")) {
+                    if (plugin.getConfiguration().getApplyWildcards()) {
+                        possibleNodes.forEach(n -> perms.put(n, true));
+                    }
                 }
             }
 
@@ -263,10 +265,12 @@ public abstract class PermissionHolder {
                         .forEach(s -> perms.put(s, node.getValue()));
             }
 
-            if (plugin.getConfiguration().getApplyWildcards()) {
-                node.resolveWildcard(possibleNodes).stream()
-                        .filter(s -> !perms.containsKey(s))
-                        .forEach(s -> perms.put(s, node.getValue()));
+            if (possibleNodes != null && !possibleNodes.isEmpty()) {
+                if (plugin.getConfiguration().getApplyWildcards()) {
+                    node.resolveWildcard(possibleNodes).stream()
+                            .filter(s -> !perms.containsKey(s))
+                            .forEach(s -> perms.put(s, node.getValue()));
+                }
             }
         }
 

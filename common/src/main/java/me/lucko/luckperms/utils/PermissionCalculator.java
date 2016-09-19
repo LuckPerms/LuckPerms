@@ -22,7 +22,6 @@
 
 package me.lucko.luckperms.utils;
 
-import com.google.common.base.Splitter;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -87,35 +86,53 @@ public class PermissionCalculator {
     }
 
     @AllArgsConstructor
-    public static class WildcardProcessor implements PermissionCalculator.PermissionProcessor {
+    public static class WildcardProcessor implements PermissionProcessor {
 
         @Getter
         private final Map<String, Boolean> map;
 
         @Override
         public Tristate hasPermission(String permission) {
-            if (map.containsKey("*")) {
-                return Tristate.fromBoolean(map.get("*"));
+            String node = permission;
+
+            while (node.contains(".")) {
+                int endIndex = node.lastIndexOf('.');
+                if (endIndex == -1) {
+                    break;
+                }
+
+                node = node.substring(0, endIndex);
+                if (!isEmpty(node)) {
+                    if (map.containsKey(node + ".*")) {
+                        return Tristate.fromBoolean(map.get(node + ".*"));
+                    }
+                }
             }
+
             if (map.containsKey("'*'")) {
                 return Tristate.fromBoolean(map.get("'*'"));
             }
 
-            String node = "";
-            Iterable<String> permParts = Splitter.on('.').split(permission);
-            for (String s : permParts) {
-                if (node.equals("")) {
-                    node = s;
-                } else {
-                    node = node + "." + s;
-                }
-
-                if (map.containsKey(node + ".*")) {
-                    return Tristate.fromBoolean(map.get(node + ".*"));
-                }
+            if (map.containsKey("*")) {
+                return Tristate.fromBoolean(map.get("*"));
             }
 
             return Tristate.UNDEFINED;
+        }
+
+        private static boolean isEmpty(String s) {
+            if (s.equals("")) {
+                return true;
+            }
+
+            char[] chars = s.toCharArray();
+            for (char c : chars) {
+                if (c != '.') {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 

@@ -97,28 +97,53 @@ public class LuckPermsUserSubject extends LuckPermsSubject {
 
     // TODO proper implementation.
     @AllArgsConstructor
-    private static class SpongeWildcardProcessor implements PermissionCalculator.PermissionProcessor {
+    public static class SpongeWildcardProcessor implements PermissionCalculator.PermissionProcessor {
 
         @Getter
         private final Map<String, Boolean> map;
 
         @Override
         public me.lucko.luckperms.api.Tristate hasPermission(String permission) {
-            String node = "";
-            Iterable<String> permParts = Splitter.on('.').split(permission);
-            for (String s : permParts) {
-                if (node.equals("")) {
-                    node = s;
-                } else {
-                    node = node + "." + s;
+            String node = permission;
+
+            while (node.contains(".")) {
+                int endIndex = node.lastIndexOf('.');
+                if (endIndex == -1) {
+                    break;
                 }
 
-                if (map.containsKey(node)) {
-                    return me.lucko.luckperms.api.Tristate.fromBoolean(map.get(node));
+                node = node.substring(0, endIndex);
+                if (!isEmpty(node)) {
+                    if (map.containsKey(node)) {
+                        return me.lucko.luckperms.api.Tristate.fromBoolean(map.get(node));
+                    }
                 }
             }
 
+            if (map.containsKey("'*'")) {
+                return me.lucko.luckperms.api.Tristate.fromBoolean(map.get("'*'"));
+            }
+
+            if (map.containsKey("*")) {
+                return me.lucko.luckperms.api.Tristate.fromBoolean(map.get("*"));
+            }
+
             return me.lucko.luckperms.api.Tristate.UNDEFINED;
+        }
+
+        private static boolean isEmpty(String s) {
+            if (s.equals("")) {
+                return true;
+            }
+
+            char[] chars = s.toCharArray();
+            for (char c : chars) {
+                if (c != '.') {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 
