@@ -30,6 +30,7 @@ import me.lucko.luckperms.users.User;
 import me.lucko.luckperms.utils.AbstractListener;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.*;
 
@@ -43,7 +44,7 @@ class BukkitListener extends AbstractListener implements Listener {
         this.plugin = plugin;
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerPreLogin(AsyncPlayerPreLoginEvent e) {
         if (!plugin.getDatastore().isAcceptingLogins()) {
             // The datastore is disabled, prevent players from joining the server
@@ -54,7 +55,7 @@ class BukkitListener extends AbstractListener implements Listener {
         onAsyncLogin(e.getUniqueId(), e.getName());
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerLogin(PlayerLoginEvent e) {
         final Player player = e.getPlayer();
         final User user = plugin.getUserManager().get(plugin.getUuidCache().getUUID(player.getUniqueId()));
@@ -79,7 +80,7 @@ class BukkitListener extends AbstractListener implements Listener {
         plugin.doAsync(user::refreshPermissions);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerJoin(PlayerJoinEvent e) {
         // Refresh permissions again
         UUID internal = plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId());
@@ -87,7 +88,7 @@ class BukkitListener extends AbstractListener implements Listener {
         plugin.doAsync(() -> refreshPlayer(internal));
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerChangedWorld(PlayerChangedWorldEvent e) {
         UUID internal = plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId());
         plugin.getUserManager().getWorldCache().put(internal, e.getPlayer().getWorld().getName());
@@ -95,7 +96,7 @@ class BukkitListener extends AbstractListener implements Listener {
 
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerQuit(PlayerQuitEvent e) {
         plugin.getUserManager().getWorldCache().remove(plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId()));
         onLeave(e.getPlayer().getUniqueId());
