@@ -20,30 +20,36 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.api;
+package me.lucko.luckperms.internal;
 
-/**
- * Represents the platform type that LuckPerms is running on
- * @since 2.7
- */
-public enum PlatformType {
+import me.lucko.luckperms.core.LPConfiguration;
 
-    BUKKIT("Bukkit"),
-    BUNGEE("Bungee"),
-    SPONGE("Sponge"),
-
-    /**
-     * @since 2.9
-     */
-    STANDALONE("Standalone");
-
-    private final String friendlyName;
-
-    PlatformType(String friendlyName) {
-        this.friendlyName = friendlyName;
+public class StandaloneConfiguration extends LPConfiguration<StandaloneBase> {
+    public StandaloneConfiguration(StandaloneBase plugin) {
+        super(plugin, "global", true, "null");
     }
 
-    public String getFriendlyName() {
-        return friendlyName;
+    @Override
+    protected void init() {
+    }
+
+    @Override
+    protected void set(String path, Object value) {
+
+    }
+
+    @Override
+    protected String getString(String path, String def) {
+        return def;
+    }
+
+    @Override
+    protected int getInt(String path, int def) {
+        return def;
+    }
+
+    @Override
+    protected boolean getBoolean(String path, boolean def) {
+        return def;
     }
 }

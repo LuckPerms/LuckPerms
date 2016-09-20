@@ -20,30 +20,8 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.api;
+package me.lucko.luckperms.gui;
 
-/**
- * Represents the platform type that LuckPerms is running on
- * @since 2.7
- */
-public enum PlatformType {
-
-    BUKKIT("Bukkit"),
-    BUNGEE("Bungee"),
-    SPONGE("Sponge"),
-
-    /**
-     * @since 2.9
-     */
-    STANDALONE("Standalone");
-
-    private final String friendlyName;
-
-    PlatformType(String friendlyName) {
-        this.friendlyName = friendlyName;
-    }
-
-    public String getFriendlyName() {
-        return friendlyName;
-    }
+public class InterfaceManager {
+    // TODO
 }

@@ -20,30 +20,24 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.api;
+package me.lucko.luckperms;
 
-/**
- * Represents the platform type that LuckPerms is running on
- * @since 2.7
- */
-public enum PlatformType {
+import me.lucko.luckperms.internal.StandaloneBase;
 
-    BUKKIT("Bukkit"),
-    BUNGEE("Bungee"),
-    SPONGE("Sponge"),
+public class LPStandaloneApp {
+    private StandaloneBase standaloneBase;
 
-    /**
-     * @since 2.9
-     */
-    STANDALONE("Standalone");
-
-    private final String friendlyName;
-
-    PlatformType(String friendlyName) {
-        this.friendlyName = friendlyName;
+    public static void main(String[] args) {
+        new LPStandaloneApp().start();
     }
 
-    public String getFriendlyName() {
-        return friendlyName;
+    public void start() {
+        standaloneBase = new StandaloneBase(this);
+        LuckPerms.registerProvider(standaloneBase.getApiProvider());
     }
+
+    public void stop() {
+        standaloneBase.shutdown();
+    }
+
 }

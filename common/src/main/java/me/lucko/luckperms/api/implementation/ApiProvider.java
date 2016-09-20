@@ -67,7 +67,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public double getApiVersion() {
-        return 2.8;
+        return 2.9;
     }
 
     @Override

@@ -62,6 +62,21 @@ public class LPConfigurationLink implements LPConfiguration {
     }
 
     @Override
+    public boolean getIncludeGlobalWorldPerms() {
+        return master.getIncludeGlobalWorldPerms();
+    }
+
+    @Override
+    public boolean getApplyGlobalGroups() {
+        return master.getApplyGlobalGroups();
+    }
+
+    @Override
+    public boolean getApplyGlobalWorldGroups() {
+        return master.getApplyGlobalWorldGroups();
+    }
+
+    @Override
     public boolean getOnlineMode() {
         return master.getOnlineMode();
     }
@@ -87,6 +102,11 @@ public class LPConfigurationLink implements LPConfiguration {
     }
 
     @Override
+    public boolean getDebugPermissionChecks() {
+        return master.getDebugPermissionChecks();
+    }
+
+    @Override
     public boolean getEnableOps() {
         return master.getEnableOps();
     }
@@ -94,6 +114,11 @@ public class LPConfigurationLink implements LPConfiguration {
     @Override
     public boolean getCommandsAllowOp() {
         return master.getCommandsAllowOp();
+    }
+
+    @Override
+    public boolean getAutoOp() {
+        return master.getAutoOp();
     }
 
     @Override

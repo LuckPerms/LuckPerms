@@ -9,12 +9,12 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>luckperms-bungee</artifactId>
+    <artifactId>luckperms-standalone</artifactId>
     <packaging>jar</packaging>
 
     <build>
         <defaultGoal>clean package</defaultGoal>
-        <finalName>LuckPermsBungee-${release.version}.${git.closest.tag.commit.count}</finalName>
+        <finalName>LuckPermsStandalone-${release.version}.${git.closest.tag.commit.count}</finalName>
         <sourceDirectory>${basedir}/src/main/java</sourceDirectory>
         <resources>
             <resource>
@@ -30,6 +30,18 @@
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.0.2</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>me.lucko.luckperms.LPStandaloneApp</mainClass>
+                        </manifest>
+                    </archive>
                 </configuration>
             </plugin>
             <plugin>
@@ -93,13 +105,6 @@
     </build>
 
     <dependencies>
-        <!-- BungeeCord API -->
-        <dependency>
-            <groupId>net.md-5</groupId>
-            <artifactId>bungeecord-api</artifactId>
-            <version>1.9-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
         <!-- LuckPerms Common -->
         <dependency>
             <groupId>me.lucko.luckperms</groupId>
@@ -120,6 +125,20 @@
             <artifactId>lombok</artifactId>
             <version>1.16.10</version>
             <scope>provided</scope>
+        </dependency>
+        <!-- gson -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.7</version>
+            <scope>compile</scope>
+        </dependency>
+        <!-- guava -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>19.0</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

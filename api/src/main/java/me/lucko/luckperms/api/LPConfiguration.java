@@ -63,6 +63,24 @@ public interface LPConfiguration {
     boolean getIncludeGlobalPerms();
 
     /**
+     * @return if the users on this server will have their global world permissions applied
+     * @since 2.9
+     */
+    boolean getIncludeGlobalWorldPerms();
+
+    /**
+     * @return true if the platform is applying global groups
+     * @since 2.9
+     */
+    boolean getApplyGlobalGroups();
+
+    /**
+     * @return true if the platform is applying global world groups
+     * @since 2.9
+     */
+    boolean getApplyGlobalWorldGroups();
+
+    /**
      * @return the online mode setting in the config
      */
     boolean getOnlineMode();
@@ -89,6 +107,12 @@ public interface LPConfiguration {
     boolean getLogNotify();
 
     /**
+     * @return true if permission checks are being recorded / debugged
+     * @since 2.9
+     */
+    boolean getDebugPermissionChecks();
+
+    /**
      * @return true if the vanilla op system is enabled
      * @since 2.8
      */
@@ -99,6 +123,12 @@ public interface LPConfiguration {
      * @since 2.8
      */
     boolean getCommandsAllowOp();
+
+    /**
+     * @return true if auto op is enabled
+     * @since 2.9
+     */
+    boolean getAutoOp();
 
     /**
      * @return the name of the server used within Vault operations

@@ -187,7 +187,7 @@ public interface LuckPermsApi {
     Track getTrack(String name);
 
     /**
-     * Gets a wrapped tracj object from the track storage. This method does not return null, unlike {@link #getTrack}
+     * Gets a wrapped track object from the track storage. This method does not return null, unlike {@link #getTrack}
      * @param name the name of the track to get
      * @return an optional {@link Track} object
      * @throws NullPointerException if the name is null

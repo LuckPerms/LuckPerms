@@ -20,30 +20,24 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.api;
+package me.lucko.luckperms.users;
 
-/**
- * Represents the platform type that LuckPerms is running on
- * @since 2.7
- */
-public enum PlatformType {
+import me.lucko.luckperms.LuckPermsPlugin;
 
-    BUKKIT("Bukkit"),
-    BUNGEE("Bungee"),
-    SPONGE("Sponge"),
+import java.util.UUID;
 
-    /**
-     * @since 2.9
-     */
-    STANDALONE("Standalone");
+public class StandaloneUser extends User {
 
-    private final String friendlyName;
-
-    PlatformType(String friendlyName) {
-        this.friendlyName = friendlyName;
+    StandaloneUser(UUID uuid, LuckPermsPlugin plugin) {
+        super(uuid, plugin);
     }
 
-    public String getFriendlyName() {
-        return friendlyName;
+    StandaloneUser(UUID uuid, String username, LuckPermsPlugin plugin) {
+        super(uuid, username, plugin);
+    }
+
+    @Override
+    public void refreshPermissions() {
+        // Do nothing.
     }
 }
