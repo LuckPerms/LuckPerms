@@ -71,6 +71,8 @@ public class LPPermissible extends PermissibleBase {
         processors.add(new BukkitDefaultsProcessor(parent::isOp));
 
         calculator = new PermissionCalculator(plugin, parent.getName(), plugin.getConfiguration().getDebugPermissionChecks(), processors);
+
+        recalculatePermissions();
     }
 
     public void invalidateCache() {
