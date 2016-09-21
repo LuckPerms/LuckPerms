@@ -69,7 +69,7 @@ class BukkitListener extends AbstractListener implements Listener {
             BukkitUser u = (BukkitUser) user;
 
             try {
-                LPPermissible lpPermissible = new LPPermissible(player, plugin);
+                LPPermissible lpPermissible = new LPPermissible(player, plugin, plugin.getDefaultsProvider());
                 Injector.inject(player, lpPermissible);
                 u.setLpPermissible(lpPermissible);
             } catch (Throwable t) {

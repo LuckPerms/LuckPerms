@@ -55,7 +55,7 @@ public class LPPermissible extends PermissibleBase {
     private final List<PermissionAttachment> attachments = new LinkedList<>();
     private final Map<String, PermissionAttachmentInfo> attachmentPermissions = new HashMap<>();
 
-    public LPPermissible(@NonNull CommandSender sender, LuckPermsPlugin plugin) {
+    public LPPermissible(@NonNull CommandSender sender, LuckPermsPlugin plugin, DefaultsProvider defaultsProvider) {
         super(sender);
         this.parent = sender;
 
@@ -68,7 +68,7 @@ public class LPPermissible extends PermissibleBase {
         if (plugin.getConfiguration().getApplyRegex()) {
             processors.add(new PermissionCalculator.RegexProcessor(luckPermsPermissions));
         }
-        processors.add(new BukkitDefaultsProcessor(parent::isOp));
+        processors.add(new BukkitDefaultsProcessor(parent::isOp, defaultsProvider));
 
         calculator = new PermissionCalculator(plugin, parent.getName(), plugin.getConfiguration().getDebugPermissionChecks(), processors);
 
@@ -200,16 +200,6 @@ public class LPPermissible extends PermissibleBase {
         }
 
         attachmentPermissions.clear();
-        Set<Permission> defaults = Bukkit.getServer().getPluginManager().getDefaultPermissions(isOp());
-        Bukkit.getServer().getPluginManager().subscribeToDefaultPerms(isOp(), parent);
-
-        for (Permission perm : defaults) {
-            String name = perm.getName().toLowerCase();
-
-            attachmentPermissions.put(name, new PermissionAttachmentInfo(parent, name, null, true));
-            Bukkit.getServer().getPluginManager().subscribeToPermission(name, parent);
-            calculateChildPermissions(perm.getChildren(), false, null);
-        }
 
         for (PermissionAttachment attachment : attachments) {
             calculateChildPermissions(attachment.getPermissions(), false, attachment);
@@ -291,9 +281,15 @@ public class LPPermissible extends PermissibleBase {
     @AllArgsConstructor
     private static class BukkitDefaultsProcessor implements PermissionProcessor {
         private final Supplier<Boolean> isOp;
+        private final DefaultsProvider defaultsProvider;
 
         @Override
         public Tristate hasPermission(String permission) {
+            Tristate t = defaultsProvider.hasDefault(permission, isOp.get());
+            if (t != Tristate.UNDEFINED) {
+                return t;
+            }
+
             Permission defPerm = Bukkit.getServer().getPluginManager().getPermission(permission);
             if (defPerm != null) {
                 return Tristate.fromBoolean(defPerm.getDefault().getValue(isOp.get()));

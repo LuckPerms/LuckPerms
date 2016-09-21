@@ -35,6 +35,7 @@ import me.lucko.luckperms.core.LPConfiguration;
 import me.lucko.luckperms.core.UuidCache;
 import me.lucko.luckperms.data.Importer;
 import me.lucko.luckperms.groups.GroupManager;
+import me.lucko.luckperms.inject.DefaultsProvider;
 import me.lucko.luckperms.runnables.ExpireTemporaryTask;
 import me.lucko.luckperms.runnables.UpdateTask;
 import me.lucko.luckperms.storage.Datastore;
@@ -68,6 +69,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private Logger log;
     private Importer importer;
     private ConsecutiveExecutor consecutiveExecutor;
+    private DefaultsProvider defaultsProvider;
 
     @Override
     public void onEnable() {
@@ -75,6 +77,8 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
         getLog().info("Loading configuration...");
         configuration = new BukkitConfig(this);
+        defaultsProvider = new DefaultsProvider();
+        defaultsProvider.refresh();
 
         // register events
         PluginManager pm = getServer().getPluginManager();
