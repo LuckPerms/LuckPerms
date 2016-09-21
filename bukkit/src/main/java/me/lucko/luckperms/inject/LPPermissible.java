@@ -91,7 +91,7 @@ public class LPPermissible extends PermissibleBase {
 
     @Override
     public boolean isPermissionSet(@NonNull String name) {
-        return luckPermsPermissions.containsKey(name.toLowerCase()) || attachmentPermissions.containsKey(name.toLowerCase());
+        return calculator.getPermissionValue(name) != Tristate.UNDEFINED;
     }
 
     @Override
