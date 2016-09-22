@@ -78,7 +78,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         getLog().info("Loading configuration...");
         configuration = new BukkitConfig(this);
         defaultsProvider = new DefaultsProvider();
-        defaultsProvider.refresh();
+        getServer().getScheduler().runTaskLater(this, () -> defaultsProvider.refresh(), 1L);
 
         // register events
         PluginManager pm = getServer().getPluginManager();
