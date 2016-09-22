@@ -65,8 +65,6 @@ debug-permission-checks: false
 storage-method: h2
 
 # This block enables support for split datastores.
-# Only touch this if you're sure that you know what you're doing.
-# I (the author) do not endorse nor recommend the use of this feature.
 split-storage:
   enabled: false
   methods:
