@@ -39,7 +39,6 @@ import me.lucko.luckperms.commands.track.DeleteTrack;
 import me.lucko.luckperms.commands.track.ListTracks;
 import me.lucko.luckperms.commands.track.TrackMainCommand;
 import me.lucko.luckperms.commands.user.UserMainCommand;
-import me.lucko.luckperms.constants.Message;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -49,6 +48,7 @@ import java.util.stream.Collectors;
 
 @AllArgsConstructor
 public class CommandManager {
+    @Getter
     private final LuckPermsPlugin plugin;
 
     @Getter
@@ -177,7 +177,7 @@ public class CommandManager {
     }
 
     private void sendCommandUsage(Sender sender, String label) {
-        Message.INFO_BRIEF.send(sender, plugin.getVersion());
+        sender.sendMessage(Util.color("&6Running &bLuckPerms v" + plugin.getVersion() + "&6."));
 
         mainCommands.stream()
                 .filter(c -> c.isAuthorized(sender))

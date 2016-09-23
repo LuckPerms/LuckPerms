@@ -22,8 +22,6 @@
 
 package me.lucko.luckperms;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import me.lucko.luckperms.commands.SenderFactory;
 import me.lucko.luckperms.constants.Constants;
 import org.bukkit.command.CommandSender;
@@ -31,12 +29,16 @@ import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BukkitSenderFactory extends SenderFactory<CommandSender> {
     private static BukkitSenderFactory instance = null;
-    public static synchronized BukkitSenderFactory get() {
+
+    private BukkitSenderFactory(LuckPermsPlugin plugin) {
+        super(plugin);
+    }
+
+    public static synchronized BukkitSenderFactory get(LuckPermsPlugin plugin) {
         if (instance == null) {
-            instance = new BukkitSenderFactory();
+            instance = new BukkitSenderFactory(plugin);
         }
         return instance;
     }

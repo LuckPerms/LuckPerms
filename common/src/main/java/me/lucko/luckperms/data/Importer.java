@@ -26,6 +26,7 @@ import com.google.common.base.Splitter;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.commands.CommandManager;
 import me.lucko.luckperms.commands.CommandResult;
 import me.lucko.luckperms.commands.Sender;
@@ -181,6 +182,11 @@ public class Importer {
 
         private FakeSender(Importer instance) {
             this.instance = instance;
+        }
+
+        @Override
+        public LuckPermsPlugin getPlatform() {
+            return instance.commandManager.getPlugin();
         }
 
         @Override

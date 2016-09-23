@@ -43,6 +43,7 @@ import me.lucko.luckperms.storage.StorageFactory;
 import me.lucko.luckperms.tracks.TrackManager;
 import me.lucko.luckperms.users.SpongeUserManager;
 import me.lucko.luckperms.users.UserManager;
+import me.lucko.luckperms.utils.LocaleManager;
 import me.lucko.luckperms.utils.LogFactory;
 import org.slf4j.Logger;
 import org.spongepowered.api.Game;
@@ -95,6 +96,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     private Importer importer;
     private ConsecutiveExecutor consecutiveExecutor;
     private LuckPermsService service;
+    private LocaleManager localeManager;
 
     @Listener
     public void onEnable(GamePreInitializationEvent event) {
@@ -102,6 +104,17 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
         getLog().info("Loading configuration...");
         configuration = new SpongeConfig(this);
+
+        localeManager = new LocaleManager();
+        File locale = new File(getMainDir(), "lang.yml");
+        if (locale.exists()) {
+            getLog().info("Found locale file. Attempting to load from it.");
+            try {
+                localeManager.loadFromFile(locale);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
         // register events
         Sponge.getEventManager().registerListeners(this, new SpongeListener(this));
@@ -139,7 +152,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
             runUpdateTask();
         }
 
-        scheduler.createTaskBuilder().intervalTicks(1L).execute(SpongeSenderFactory.get()).submit(this);
+        scheduler.createTaskBuilder().intervalTicks(1L).execute(SpongeSenderFactory.get(this)).submit(this);
         scheduler.createTaskBuilder().async().intervalTicks(60L).execute(new ExpireTemporaryTask(this)).submit(this);
         scheduler.createTaskBuilder().async().intervalTicks(20L).execute(consecutiveExecutor).submit(this);
 
@@ -219,14 +232,14 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     @Override
     public List<Sender> getNotifyListeners() {
         return game.getServer().getOnlinePlayers().stream()
-                .map(s -> SpongeSenderFactory.get().wrap(s, Collections.singleton(Permission.LOG_NOTIFY)))
+                .map(s -> SpongeSenderFactory.get(this).wrap(s, Collections.singleton(Permission.LOG_NOTIFY)))
                 .filter(Permission.LOG_NOTIFY::isAuthorized)
                 .collect(Collectors.toList());
     }
 
     @Override
     public Sender getConsoleSender() {
-        return SpongeSenderFactory.get().wrap(game.getServer().getConsole());
+        return SpongeSenderFactory.get(this).wrap(game.getServer().getConsole());
     }
 
     @Override

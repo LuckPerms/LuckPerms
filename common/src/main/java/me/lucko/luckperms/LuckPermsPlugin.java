@@ -35,6 +35,7 @@ import me.lucko.luckperms.groups.GroupManager;
 import me.lucko.luckperms.storage.Datastore;
 import me.lucko.luckperms.tracks.TrackManager;
 import me.lucko.luckperms.users.UserManager;
+import me.lucko.luckperms.utils.LocaleManager;
 
 import java.io.File;
 import java.util.List;
@@ -60,6 +61,7 @@ public interface LuckPermsPlugin {
     ApiProvider getApiProvider();
     Importer getImporter();
     ConsecutiveExecutor getConsecutiveExecutor();
+    LocaleManager getLocaleManager();
 
     /**
      * @return the version of the plugin

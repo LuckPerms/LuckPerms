@@ -24,6 +24,8 @@ package me.lucko.luckperms.commands;
 
 import com.google.common.collect.ImmutableMap;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.constants.Constants;
 import me.lucko.luckperms.constants.Permission;
 
@@ -36,7 +38,9 @@ import java.util.stream.Collectors;
  * Factory class to make a thread-safe sender instance
  * @param <T> the command sender type
  */
+@RequiredArgsConstructor
 public abstract class SenderFactory<T> implements Runnable {
+    private final LuckPermsPlugin plugin;
     private final Map<T, List<String>> messages = new HashMap<>();
     private final AtomicBoolean shouldSend = new AtomicBoolean(false);
     private final SenderFactory<T> factory = this;
@@ -47,11 +51,11 @@ public abstract class SenderFactory<T> implements Runnable {
     protected abstract boolean hasPermission(T t, String node);
 
     public final Sender wrap(T t) {
-        return new SenderImp(t, null);
+        return new SenderImp(plugin, t, null);
     }
 
     public final Sender wrap(T t, Set<Permission> toCheck) {
-        return new SenderImp(t, toCheck);
+        return new SenderImp(plugin, t, toCheck);
     }
 
     @Override
@@ -85,7 +89,11 @@ public abstract class SenderFactory<T> implements Runnable {
 
         private final boolean console;
 
-        private SenderImp(T t, Set<Permission> toCheck) {
+        @Getter
+        private final LuckPermsPlugin platform;
+
+        private SenderImp(LuckPermsPlugin platform, T t, Set<Permission> toCheck) {
+            this.platform = platform;
             this.tRef = new WeakReference<>(t);
             this.name = factory.getName(t);
             this.uuid = factory.getUuid(t);

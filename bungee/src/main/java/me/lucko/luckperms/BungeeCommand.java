@@ -45,7 +45,7 @@ class BungeeCommand extends Command implements TabExecutor {
     @Override
     public void execute(CommandSender sender, String[] args) {
         manager.onCommand(
-                BungeeSenderFactory.get().wrap(sender),
+                BungeeSenderFactory.get(manager.getPlugin()).wrap(sender),
                 "bperms",
                 Util.stripQuotes(Splitter.on(Patterns.COMMAND_SEPARATOR).omitEmptyStrings().splitToList(Joiner.on(' ').join(args))),
                 Callback.empty()
@@ -54,6 +54,6 @@ class BungeeCommand extends Command implements TabExecutor {
 
     @Override
     public Iterable<String> onTabComplete(CommandSender sender, String[] args) {
-        return manager.onTabComplete(BungeeSenderFactory.get().wrap(sender), Arrays.asList(args));
+        return manager.onTabComplete(BungeeSenderFactory.get(manager.getPlugin()).wrap(sender), Arrays.asList(args));
     }
 }

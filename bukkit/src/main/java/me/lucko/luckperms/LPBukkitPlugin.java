@@ -42,6 +42,7 @@ import me.lucko.luckperms.storage.Datastore;
 import me.lucko.luckperms.storage.StorageFactory;
 import me.lucko.luckperms.tracks.TrackManager;
 import me.lucko.luckperms.users.BukkitUserManager;
+import me.lucko.luckperms.utils.LocaleManager;
 import me.lucko.luckperms.utils.LogFactory;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
@@ -70,6 +71,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private Importer importer;
     private ConsecutiveExecutor consecutiveExecutor;
     private DefaultsProvider defaultsProvider;
+    private LocaleManager localeManager;
 
     @Override
     public void onEnable() {
@@ -77,6 +79,18 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
         getLog().info("Loading configuration...");
         configuration = new BukkitConfig(this);
+
+        localeManager = new LocaleManager();
+        File locale = new File(getDataFolder(), "lang.yml");
+        if (locale.exists()) {
+            getLog().info("Found locale file. Attempting to load from it.");
+            try {
+                localeManager.loadFromFile(locale);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
         defaultsProvider = new DefaultsProvider();
         getServer().getScheduler().runTaskLater(this, () -> defaultsProvider.refresh(), 1L);
 
@@ -108,7 +122,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
             getServer().getScheduler().runTaskTimerAsynchronously(this, new UpdateTask(this), ticks, ticks);
         }
 
-        getServer().getScheduler().runTaskTimer(this, BukkitSenderFactory.get(), 1L, 1L);
+        getServer().getScheduler().runTaskTimer(this, BukkitSenderFactory.get(this), 1L, 1L);
         getServer().getScheduler().runTaskTimerAsynchronously(this, new ExpireTemporaryTask(this), 60L, 60L);
         getServer().getScheduler().runTaskTimerAsynchronously(this, consecutiveExecutor, 20L, 20L);
 
@@ -200,14 +214,14 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     @Override
     public List<Sender> getNotifyListeners() {
         return getServer().getOnlinePlayers().stream()
-                .map(p -> BukkitSenderFactory.get().wrap(p, Collections.singleton(me.lucko.luckperms.constants.Permission.LOG_NOTIFY)))
+                .map(p -> BukkitSenderFactory.get(this).wrap(p, Collections.singleton(me.lucko.luckperms.constants.Permission.LOG_NOTIFY)))
                 .filter(me.lucko.luckperms.constants.Permission.LOG_NOTIFY::isAuthorized)
                 .collect(Collectors.toList());
     }
 
     @Override
     public Sender getConsoleSender() {
-        return BukkitSenderFactory.get().wrap(getServer().getConsoleSender());
+        return BukkitSenderFactory.get(this).wrap(getServer().getConsoleSender());
     }
 
     @Override

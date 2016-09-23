@@ -44,7 +44,7 @@ class BukkitCommand extends CommandManager implements CommandExecutor, TabExecut
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         onCommand(
-                BukkitSenderFactory.get().wrap(sender),
+                BukkitSenderFactory.get(getPlugin()).wrap(sender),
                 label,
                 Util.stripQuotes(Splitter.on(Patterns.COMMAND_SEPARATOR).omitEmptyStrings().splitToList(Joiner.on(' ').join(args))),
                 Callback.empty()
@@ -55,6 +55,6 @@ class BukkitCommand extends CommandManager implements CommandExecutor, TabExecut
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
-        return onTabComplete(BukkitSenderFactory.get().wrap(sender), Arrays.asList(args));
+        return onTabComplete(BukkitSenderFactory.get(getPlugin()).wrap(sender), Arrays.asList(args));
     }
 }

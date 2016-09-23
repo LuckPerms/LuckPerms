@@ -41,6 +41,7 @@ import me.lucko.luckperms.storage.Datastore;
 import me.lucko.luckperms.tracks.TrackManager;
 import me.lucko.luckperms.users.StandaloneUserManager;
 import me.lucko.luckperms.users.UserManager;
+import me.lucko.luckperms.utils.LocaleManager;
 import me.lucko.luckperms.utils.LogFactory;
 
 import java.io.File;
@@ -65,12 +66,14 @@ public class StandaloneBase implements LuckPermsPlugin {
     private final Logger log;
     private final UuidCache uuidCache;
     private final ApiProvider apiProvider;
+    private final LocaleManager localeManager;
 
     public StandaloneBase(LPStandaloneApp app) {
         logger = java.util.logging.Logger.getGlobal();
         log = LogFactory.wrap(logger);
 
         configuration = new StandaloneConfiguration(this);
+        localeManager = new LocaleManager();
 
         // TODO datastore
         datastore = null;
@@ -165,7 +168,13 @@ public class StandaloneBase implements LuckPermsPlugin {
 
     @Override
     public Sender getConsoleSender() {
+        final LuckPermsPlugin instance = this;
         return new Sender() {
+            @Override
+            public LuckPermsPlugin getPlatform() {
+                return instance;
+            }
+
             @Override
             public String getName() {
                 return Constants.getConsoleName();

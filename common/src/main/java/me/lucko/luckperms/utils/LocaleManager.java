@@ -20,22 +20,37 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.commands;
+package me.lucko.luckperms.utils;
 
-import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.constants.Permission;
+import com.google.common.collect.ImmutableMap;
+import lombok.Cleanup;
+import me.lucko.luckperms.constants.Message;
+import org.yaml.snakeyaml.Yaml;
 
-import java.util.UUID;
+import java.io.File;
+import java.io.FileReader;
+import java.util.Map;
 
 /**
- * Wrapper interface to represent a CommandSender/CommandSource within the luckperms-common command implementations.
+ * Manages translations
  */
-public interface Sender {
+public class LocaleManager {
 
-    LuckPermsPlugin getPlatform();
-    String getName();
-    UUID getUuid();
-    void sendMessage(String s);
-    boolean hasPermission(Permission permission);
+    private Map<String, String> translations = null;
+
+    @SuppressWarnings("unchecked")
+    public void loadFromFile(File file) throws Exception {
+        @Cleanup FileReader fileReader = new FileReader(file);
+        translations = ImmutableMap.copyOf((Map<String, String>) new Yaml().load(fileReader));
+    }
+
+    public String getTranslation(Message key) {
+        if (translations == null) {
+            return null;
+        }
+
+        String k = key.name().toLowerCase().replace('_', '-');
+        return translations.get(k);
+    }
 
 }

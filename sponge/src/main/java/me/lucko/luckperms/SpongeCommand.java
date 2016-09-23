@@ -48,7 +48,7 @@ class SpongeCommand extends CommandManager implements CommandCallable {
     @Override
     public CommandResult process(CommandSource source, String s) throws CommandException {
         onCommand(
-                SpongeSenderFactory.get().wrap(source),
+                SpongeSenderFactory.get(getPlugin()).wrap(source),
                 "perms",
                 Util.stripQuotes(Splitter.on(Patterns.COMMAND_SEPARATOR).omitEmptyStrings().splitToList(s)),
                 Callback.empty()
@@ -58,11 +58,11 @@ class SpongeCommand extends CommandManager implements CommandCallable {
 
     @Override
     public List<String> getSuggestions(CommandSource source, String s, @Nullable Location<World> location) throws CommandException {
-        return onTabComplete(SpongeSenderFactory.get().wrap(source), Splitter.on(' ').splitToList(s));
+        return onTabComplete(SpongeSenderFactory.get(getPlugin()).wrap(source), Splitter.on(' ').splitToList(s));
     }
 
     public List<String> getSuggestions(CommandSource source, String s) throws CommandException {
-        return onTabComplete(SpongeSenderFactory.get().wrap(source), Splitter.on(' ').splitToList(s));
+        return onTabComplete(SpongeSenderFactory.get(getPlugin()).wrap(source), Splitter.on(' ').splitToList(s));
     }
 
     @Override

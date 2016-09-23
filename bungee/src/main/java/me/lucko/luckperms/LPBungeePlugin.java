@@ -42,6 +42,7 @@ import me.lucko.luckperms.storage.StorageFactory;
 import me.lucko.luckperms.tracks.TrackManager;
 import me.lucko.luckperms.users.BungeeUserManager;
 import me.lucko.luckperms.users.UserManager;
+import me.lucko.luckperms.utils.LocaleManager;
 import me.lucko.luckperms.utils.LogFactory;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -66,6 +67,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     private Logger log;
     private Importer importer;
     private ConsecutiveExecutor consecutiveExecutor;
+    private LocaleManager localeManager;
 
     @Override
     public void onEnable() {
@@ -73,6 +75,17 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
         getLog().info("Loading configuration...");
         configuration = new BungeeConfig(this);
+
+        localeManager = new LocaleManager();
+        File locale = new File(getDataFolder(), "lang.yml");
+        if (locale.exists()) {
+            getLog().info("Found locale file. Attempting to load from it.");
+            try {
+                localeManager.loadFromFile(locale);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
         // register events
         getProxy().getPluginManager().registerListener(this, new BungeeListener(this));
@@ -101,7 +114,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         }
 
         // 20 times per second (once per "tick")
-        getProxy().getScheduler().schedule(this, BungeeSenderFactory.get(), 50L, 50L, TimeUnit.MILLISECONDS);
+        getProxy().getScheduler().schedule(this, BungeeSenderFactory.get(this), 50L, 50L, TimeUnit.MILLISECONDS);
         getProxy().getScheduler().schedule(this, new ExpireTemporaryTask(this), 3L, 3L, TimeUnit.SECONDS);
         getProxy().getScheduler().schedule(this, consecutiveExecutor, 1L, 1L, TimeUnit.SECONDS);
 
@@ -162,14 +175,14 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     @Override
     public List<Sender> getNotifyListeners() {
         return getProxy().getPlayers().stream()
-                .map(p -> BungeeSenderFactory.get().wrap(p, Collections.singleton(Permission.LOG_NOTIFY)))
+                .map(p -> BungeeSenderFactory.get(this).wrap(p, Collections.singleton(Permission.LOG_NOTIFY)))
                 .filter(Permission.LOG_NOTIFY::isAuthorized)
                 .collect(Collectors.toList());
     }
 
     @Override
     public Sender getConsoleSender() {
-        return BungeeSenderFactory.get().wrap(getProxy().getConsole());
+        return BungeeSenderFactory.get(this).wrap(getProxy().getConsole());
     }
 
     @Override

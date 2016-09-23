@@ -22,8 +22,6 @@
 
 package me.lucko.luckperms;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import me.lucko.luckperms.commands.SenderFactory;
 import me.lucko.luckperms.constants.Constants;
 import net.md_5.bungee.api.CommandSender;
@@ -32,12 +30,16 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.util.UUID;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BungeeSenderFactory extends SenderFactory<CommandSender> {
     private static BungeeSenderFactory instance = null;
-    public static synchronized BungeeSenderFactory get() {
+
+    private BungeeSenderFactory(LuckPermsPlugin plugin) {
+        super(plugin);
+    }
+
+    public static synchronized BungeeSenderFactory get(LuckPermsPlugin plugin) {
         if (instance == null) {
-            instance = new BungeeSenderFactory();
+            instance = new BungeeSenderFactory(plugin);
         }
         return instance;
     }
