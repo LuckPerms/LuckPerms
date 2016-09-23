@@ -58,67 +58,67 @@ public class LPConfigurationLink implements LPConfiguration {
 
     @Override
     public boolean getIncludeGlobalPerms() {
-        return master.getIncludeGlobalPerms();
+        return master.isIncludingGlobalPerms();
     }
 
     @Override
     public boolean getIncludeGlobalWorldPerms() {
-        return master.getIncludeGlobalWorldPerms();
+        return master.isIncludingGlobalWorldPerms();
     }
 
     @Override
     public boolean getApplyGlobalGroups() {
-        return master.getApplyGlobalGroups();
+        return master.isApplyingGlobalGroups();
     }
 
     @Override
     public boolean getApplyGlobalWorldGroups() {
-        return master.getApplyGlobalWorldGroups();
+        return master.isApplyingGlobalWorldGroups();
     }
 
     @Override
     public boolean getOnlineMode() {
-        return master.getOnlineMode();
+        return master.isOnlineMode();
     }
 
     @Override
     public boolean getApplyWildcards() {
-        return master.getApplyWildcards();
+        return master.isApplyingWildcards();
     }
 
     @Override
     public boolean getApplyRegex() {
-        return master.getApplyRegex();
+        return master.isApplyingRegex();
     }
 
     @Override
     public boolean getApplyShorthand() {
-        return master.getApplyShorthand();
+        return master.isApplyingShorthand();
     }
 
     @Override
     public boolean getLogNotify() {
-        return master.getLogNotify();
+        return master.isLogNotify();
     }
 
     @Override
     public boolean getDebugPermissionChecks() {
-        return master.getDebugPermissionChecks();
+        return master.isDebugPermissionChecks();
     }
 
     @Override
     public boolean getEnableOps() {
-        return master.getEnableOps();
+        return master.isOpsEnabled();
     }
 
     @Override
     public boolean getCommandsAllowOp() {
-        return master.getCommandsAllowOp();
+        return master.isCommandsAllowOp();
     }
 
     @Override
     public boolean getAutoOp() {
-        return master.getAutoOp();
+        return master.isAutoOp();
     }
 
     @Override
@@ -128,7 +128,7 @@ public class LPConfigurationLink implements LPConfiguration {
 
     @Override
     public boolean getVaultIncludeGlobal() {
-        return master.getVaultIncludeGlobal();
+        return master.isVaultIncludingGlobal();
     }
 
     @SuppressWarnings("deprecation")
@@ -149,10 +149,9 @@ public class LPConfigurationLink implements LPConfiguration {
 
     @Override
     public boolean getSplitStorage() {
-        return master.getSplitStorage();
+        return master.isSplitStorage();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Map<String, String> getSplitStorageOptions() {
         return master.getSplitStorageOptions();

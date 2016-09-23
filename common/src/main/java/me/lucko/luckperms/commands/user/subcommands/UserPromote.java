@@ -103,9 +103,9 @@ public class UserPromote extends SubCommand<User> {
         } catch (ObjectAlreadyHasException ignored) {}
         user.setPrimaryGroup(nextGroup.getName());
 
-        Message.USER_PROMOTE_SUCCESS_PROMOTE.send(sender, track.getName(), old, nextGroup.getName());
-        Message.USER_PROMOTE_SUCCESS_REMOVE.send(sender, user.getName(), old, nextGroup.getName(), nextGroup.getName());
-        Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), old, nextGroup.getName(), false));
+        Message.USER_PROMOTE_SUCCESS_PROMOTE.send(sender, track.getName(), old, nextGroup.getDisplayName());
+        Message.USER_PROMOTE_SUCCESS_REMOVE.send(sender, user.getName(), old, nextGroup.getDisplayName(), nextGroup.getDisplayName());
+        Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), old, nextGroup.getDisplayName(), false));
         LogEntry.build().actor(sender).acted(user)
                 .action("promote " + track.getName() + "(from " + old + " to " + nextGroup.getName() + ")")
                 .build().submit(plugin, sender);

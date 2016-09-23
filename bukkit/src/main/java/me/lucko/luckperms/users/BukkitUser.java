@@ -60,16 +60,17 @@ public class BukkitUser extends User {
         }
 
         // Calculate the permissions that should be applied. This is done async, who cares about how long it takes or how often it's done.
+        String world = plugin.getUserManager().getWorldCache().get(getUuid());
         Map<String, Boolean> toApply = exportNodes(
                 new Contexts(
                         getPlugin().getConfiguration().getServer(),
-                        plugin.getUserManager().getWorldCache().get(getUuid()),
+                        getPlugin().getConfiguration().getWorldRewrites().getOrDefault(world, world),
                         null,
-                        getPlugin().getConfiguration().getIncludeGlobalPerms(),
-                        getPlugin().getConfiguration().getIncludeGlobalWorldPerms(),
+                        getPlugin().getConfiguration().isIncludingGlobalPerms(),
+                        getPlugin().getConfiguration().isIncludingGlobalWorldPerms(),
                         true,
-                        getPlugin().getConfiguration().getApplyGlobalGroups(),
-                        getPlugin().getConfiguration().getApplyGlobalWorldGroups()
+                        getPlugin().getConfiguration().isApplyingGlobalGroups(),
+                        getPlugin().getConfiguration().isApplyingGlobalWorldGroups()
                 ),
                 Collections.emptyList()
         );
@@ -96,7 +97,7 @@ public class BukkitUser extends User {
             lpPermissible.invalidateCache();
             existing.putAll(toApply);
 
-            if (plugin.getConfiguration().getAutoOp()) {
+            if (plugin.getConfiguration().isAutoOp()) {
                 boolean op = false;
 
                 for (Map.Entry<String, Boolean> e : toApply.entrySet()) {

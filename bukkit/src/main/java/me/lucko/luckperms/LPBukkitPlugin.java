@@ -95,7 +95,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         datastore = StorageFactory.getDatastore(this, "h2");
 
         getLog().info("Loading internal permission managers...");
-        uuidCache = new UuidCache(getConfiguration().getOnlineMode());
+        uuidCache = new UuidCache(getConfiguration().isOnlineMode());
         userManager = new BukkitUserManager(this);
         groupManager = new GroupManager(this);
         trackManager = new TrackManager();
@@ -139,8 +139,8 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
             e.printStackTrace();
         }
 
-        registerPermissions(getConfiguration().getCommandsAllowOp() ? PermissionDefault.OP : PermissionDefault.FALSE);
-        if (!getConfiguration().getEnableOps()) {
+        registerPermissions(getConfiguration().isCommandsAllowOp() ? PermissionDefault.OP : PermissionDefault.FALSE);
+        if (!getConfiguration().isOpsEnabled()) {
             getServer().getOperators().forEach(o -> o.setOp(false));
         }
 

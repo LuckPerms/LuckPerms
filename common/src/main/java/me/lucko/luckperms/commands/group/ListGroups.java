@@ -29,9 +29,11 @@ import me.lucko.luckperms.commands.SingleMainCommand;
 import me.lucko.luckperms.commands.Util;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.groups.Group;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ListGroups extends SingleMainCommand {
     public ListGroups() {
@@ -45,7 +47,13 @@ public class ListGroups extends SingleMainCommand {
             return CommandResult.LOADING_ERROR;
         }
 
-        Message.GROUPS_LIST.send(sender, Util.listToCommaSep(new ArrayList<>(plugin.getGroupManager().getAll().keySet())));
+        Message.GROUPS_LIST.send(
+                sender,
+                Util.listToCommaSep(new ArrayList<>(plugin.getGroupManager().getAll().values().stream()
+                        .map(Group::getDisplayName)
+                        .collect(Collectors.toList()))
+                )
+        );
         return CommandResult.SUCCESS;
     }
 }

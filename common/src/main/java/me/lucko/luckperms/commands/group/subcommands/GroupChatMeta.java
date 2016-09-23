@@ -68,18 +68,18 @@ public class GroupChatMeta extends SubCommand<Group> {
         }
 
         if (prefixes.isEmpty()) {
-            Message.CHAT_META_PREFIX_NONE.send(sender, group.getName());
+            Message.CHAT_META_PREFIX_NONE.send(sender, group.getDisplayName());
         } else {
-            Message.CHAT_META_PREFIX_HEADER.send(sender, group.getName());
+            Message.CHAT_META_PREFIX_HEADER.send(sender, group.getDisplayName());
             for (Map.Entry<Integer, String> e : prefixes) {
                 Message.CHAT_META_ENTRY.send(sender, e.getKey(), e.getValue());
             }
         }
 
         if (suffixes.isEmpty()) {
-            Message.CHAT_META_SUFFIX_NONE.send(sender, group.getName());
+            Message.CHAT_META_SUFFIX_NONE.send(sender, group.getDisplayName());
         } else {
-            Message.CHAT_META_SUFFIX_HEADER.send(sender, group.getName());
+            Message.CHAT_META_SUFFIX_HEADER.send(sender, group.getDisplayName());
             for (Map.Entry<Integer, String> e : suffixes) {
                 Message.CHAT_META_ENTRY.send(sender, e.getKey(), e.getValue());
             }

@@ -83,14 +83,14 @@ public class GroupAddTempPrefix extends SubCommand<Group> {
 
                 if (args.size() == 4) {
                     group.setPermission(node, true, server, duration);
-                    Message.ADD_TEMP_PREFIX_SERVER_SUCCESS.send(sender, group.getName(), prefix, priority, server, DateUtil.formatDateDiff(duration));
+                    Message.ADD_TEMP_PREFIX_SERVER_SUCCESS.send(sender, group.getDisplayName(), prefix, priority, server, DateUtil.formatDateDiff(duration));
                     LogEntry.build().actor(sender).acted(group)
                             .action("addtempprefix " + priority + " " + args.get(1) + " " + duration + " " + server)
                             .build().submit(plugin, sender);
                 } else {
                     final String world = args.get(4).toLowerCase();
                     group.setPermission(node, true, server, world, duration);
-                    Message.ADD_TEMP_PREFIX_SERVER_WORLD_SUCCESS.send(sender, group.getName(), prefix, priority, server, world, DateUtil.formatDateDiff(duration));
+                    Message.ADD_TEMP_PREFIX_SERVER_WORLD_SUCCESS.send(sender, group.getDisplayName(), prefix, priority, server, world, DateUtil.formatDateDiff(duration));
                     LogEntry.build().actor(sender).acted(group)
                             .action("addtempprefix " + priority + " " + args.get(1) + " " + duration + " " + server + " " + world)
                             .build().submit(plugin, sender);
@@ -98,7 +98,7 @@ public class GroupAddTempPrefix extends SubCommand<Group> {
 
             } else {
                 group.setPermission(node, true, duration);
-                Message.ADD_TEMP_PREFIX_SUCCESS.send(sender, group.getName(), prefix, priority, DateUtil.formatDateDiff(duration));
+                Message.ADD_TEMP_PREFIX_SUCCESS.send(sender, group.getDisplayName(), prefix, priority, DateUtil.formatDateDiff(duration));
                 LogEntry.build().actor(sender).acted(group)
                         .action("addtempprefix " + priority + " " + args.get(1) + " " + duration)
                         .build().submit(plugin, sender);
@@ -107,7 +107,7 @@ public class GroupAddTempPrefix extends SubCommand<Group> {
             save(group, sender, plugin);
             return CommandResult.SUCCESS;
         } catch (ObjectAlreadyHasException e) {
-            Message.ALREADY_HAS_PREFIX.send(sender, group.getName());
+            Message.ALREADY_HAS_PREFIX.send(sender, group.getDisplayName());
             return CommandResult.STATE_ERROR;
         }
     }

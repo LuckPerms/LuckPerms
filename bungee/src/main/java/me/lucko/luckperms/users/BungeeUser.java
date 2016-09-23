@@ -64,13 +64,13 @@ public class BungeeUser extends User {
         Map<String, Boolean> toApply = exportNodes(
                 new Contexts(
                         plugin.getConfiguration().getServer(),
-                        server,
+                        plugin.getConfiguration().getWorldRewrites().getOrDefault(server, server),
                         null,
-                        plugin.getConfiguration().getIncludeGlobalPerms(),
-                        plugin.getConfiguration().getIncludeGlobalWorldPerms(),
+                        plugin.getConfiguration().isIncludingGlobalPerms(),
+                        plugin.getConfiguration().isIncludingGlobalWorldPerms(),
                         true,
-                        plugin.getConfiguration().getApplyGlobalGroups(),
-                        plugin.getConfiguration().getApplyGlobalWorldGroups()
+                        plugin.getConfiguration().isApplyingGlobalGroups(),
+                        plugin.getConfiguration().isApplyingGlobalWorldGroups()
                 ),
                 Collections.emptyList()
         );

@@ -23,7 +23,7 @@
 package me.lucko.luckperms;
 
 import com.google.common.base.Splitter;
-import me.lucko.luckperms.core.LPConfiguration;
+import me.lucko.luckperms.core.AbstractConfiguration;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -34,8 +34,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-class SpongeConfig extends LPConfiguration<LPSpongePlugin> {
+class SpongeConfig extends AbstractConfiguration<LPSpongePlugin> {
     private ConfigurationNode root;
 
     SpongeConfig(LPSpongePlugin plugin) {
@@ -81,11 +83,6 @@ class SpongeConfig extends LPConfiguration<LPSpongePlugin> {
     }
 
     @Override
-    protected void set(String path, Object value) {
-        getNode(path).setValue(value);
-    }
-
-    @Override
     protected String getString(String path, String def) {
         return getNode(path).getString(def);
     }
@@ -98,5 +95,11 @@ class SpongeConfig extends LPConfiguration<LPSpongePlugin> {
     @Override
     protected boolean getBoolean(String path, boolean def) {
         return getNode(path).getBoolean(def);
+    }
+
+    @Override
+    protected Map<String, String> getMap(String path, Map<String, String> def) {
+        ConfigurationNode node = getNode(path);
+        return node.getChildrenList().stream().collect(Collectors.toMap(n -> (String) n.getKey(), ConfigurationNode::getString));
     }
 }

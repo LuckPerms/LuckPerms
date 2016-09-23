@@ -42,12 +42,13 @@ public class GroupInfo extends SubCommand<Group> {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
         Message.GROUP_INFO.send(sender,
-                group.getName(),
+                group.getDisplayName(),
                 group.getPermanentNodes().size(),
                 group.getTemporaryNodes().size(),
                 label,
                 group.getName()
         );
+        // TODO show inheritances
         return CommandResult.SUCCESS;
     }
 }

@@ -37,16 +37,14 @@ import java.util.Set;
 public class StorageFactory {
     private static final Set<String> TYPES = ImmutableSet.of("json", "yaml", "flatfile", "mongodb", "mysql", "sqlite", "h2");
 
-    @SuppressWarnings("unchecked")
     public static Datastore getDatastore(LuckPermsPlugin plugin, String defaultMethod) {
         Datastore datastore;
 
         plugin.getLog().info("Detecting storage method...");
-        if (plugin.getConfiguration().getSplitStorage()) {
+        if (plugin.getConfiguration().isSplitStorage()) {
             plugin.getLog().info("Using split storage.");
 
-            // java sucks
-            Map<String, String> types = (Map<String, String>) plugin.getConfiguration().getSplitStorageOptions();
+            Map<String, String> types = plugin.getConfiguration().getSplitStorageOptions();
 
             types.entrySet().stream()
                     .filter(e -> !TYPES.contains(e.getValue().toLowerCase()))

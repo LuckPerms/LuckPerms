@@ -38,8 +38,8 @@ public class GroupListNodes extends SubCommand<Group> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
-        Message.LISTNODES.send(sender, group.getName(), Util.permNodesToString(group.getPermissions(false)));
-        Message.LISTNODES_TEMP.send(sender, group.getName(), Util.tempNodesToString(group.getPermissions(false)));
+        Message.LISTNODES.send(sender, group.getDisplayName(), Util.permNodesToString(group.getPermissions(false)));
+        Message.LISTNODES_TEMP.send(sender, group.getDisplayName(), Util.tempNodesToString(group.getPermissions(false)));
         return CommandResult.SUCCESS;
     }
 }

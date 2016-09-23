@@ -103,9 +103,9 @@ public class UserDemote extends SubCommand<User> {
         } catch (ObjectAlreadyHasException ignored) {}
         user.setPrimaryGroup(previousGroup.getName());
 
-        Message.USER_DEMOTE_SUCCESS_PROMOTE.send(sender, track.getName(), old, previousGroup.getName());
-        Message.USER_DEMOTE_SUCCESS_REMOVE.send(sender, user.getName(), old, previousGroup.getName(), previousGroup.getName());
-        Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), previousGroup.getName(), old, true));
+        Message.USER_DEMOTE_SUCCESS_PROMOTE.send(sender, track.getName(), old, previousGroup.getDisplayName());
+        Message.USER_DEMOTE_SUCCESS_REMOVE.send(sender, user.getName(), old, previousGroup.getDisplayName(), previousGroup.getDisplayName());
+        Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), previousGroup.getDisplayName(), old, true));
         LogEntry.build().actor(sender).acted(user)
                 .action("demote " + track.getName() + "(from " + old + " to " + previousGroup.getName() + ")")
                 .build().submit(plugin, sender);

@@ -74,14 +74,14 @@ public class GroupSetPermission extends SubCommand<Group> {
 
                 if (args.size() == 3) {
                     group.setPermission(node, b, server);
-                    Message.SETPERMISSION_SERVER_SUCCESS.send(sender, node, bool, group.getName(), server);
+                    Message.SETPERMISSION_SERVER_SUCCESS.send(sender, node, bool, group.getDisplayName(), server);
                     LogEntry.build().actor(sender).acted(group)
                             .action("set " + node + " " + b + " " + server)
                             .build().submit(plugin, sender);
                 } else {
                     final String world = args.get(3).toLowerCase();
                     group.setPermission(node, b, server, world);
-                    Message.SETPERMISSION_SERVER_WORLD_SUCCESS.send(sender, node, bool, group.getName(), server, world);
+                    Message.SETPERMISSION_SERVER_WORLD_SUCCESS.send(sender, node, bool, group.getDisplayName(), server, world);
                     LogEntry.build().actor(sender).acted(group)
                             .action("set " + node + " " + b + " " + server + " " + world)
                             .build().submit(plugin, sender);
@@ -89,7 +89,7 @@ public class GroupSetPermission extends SubCommand<Group> {
 
             } else {
                 group.setPermission(node, b);
-                Message.SETPERMISSION_SUCCESS.send(sender, node, bool, group.getName());
+                Message.SETPERMISSION_SUCCESS.send(sender, node, bool, group.getDisplayName());
                 LogEntry.build().actor(sender).acted(group)
                         .action("set " + node + " " + b)
                         .build().submit(plugin, sender);
@@ -98,7 +98,7 @@ public class GroupSetPermission extends SubCommand<Group> {
             save(group, sender, plugin);
             return CommandResult.SUCCESS;
         } catch (ObjectAlreadyHasException e) {
-            Message.ALREADY_HASPERMISSION.send(sender, group.getName());
+            Message.ALREADY_HASPERMISSION.send(sender, group.getDisplayName());
             return CommandResult.STATE_ERROR;
         }
     }

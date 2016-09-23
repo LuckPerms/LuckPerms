@@ -104,7 +104,7 @@ class BukkitListener extends AbstractListener implements Listener {
 
     @EventHandler
     public void onPlayerCommand(PlayerCommandPreprocessEvent e) {
-        if (plugin.getConfiguration().getEnableOps()) {
+        if (plugin.getConfiguration().isOpsEnabled()) {
             return;
         }
 

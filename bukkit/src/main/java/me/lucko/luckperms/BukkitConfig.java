@@ -22,14 +22,17 @@
 
 package me.lucko.luckperms;
 
-import me.lucko.luckperms.core.LPConfiguration;
+import me.lucko.luckperms.core.AbstractConfiguration;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
-class BukkitConfig extends LPConfiguration<LPBukkitPlugin> {
+class BukkitConfig extends AbstractConfiguration<LPBukkitPlugin> {
     private YamlConfiguration configuration;
 
     BukkitConfig(LPBukkitPlugin plugin) {
@@ -56,11 +59,6 @@ class BukkitConfig extends LPConfiguration<LPBukkitPlugin> {
     }
 
     @Override
-    protected void set(String path, Object value) {
-        configuration.set(path, value);
-    }
-
-    @Override
     protected String getString(String path, String def) {
         return configuration.getString(path, def);
     }
@@ -73,5 +71,21 @@ class BukkitConfig extends LPConfiguration<LPBukkitPlugin> {
     @Override
     protected boolean getBoolean(String path, boolean def) {
         return configuration.getBoolean(path, def);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected Map<String, String> getMap(String path, Map<String, String> def) {
+        Map<String, String> map = new HashMap<>();
+        ConfigurationSection section = configuration.getConfigurationSection(path);
+        if (section == null) {
+            return def;
+        }
+
+        for (String key : section.getKeys(false)) {
+            map.put(key, section.getString(key));
+        }
+
+        return map;
     }
 }

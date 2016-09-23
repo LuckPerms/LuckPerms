@@ -67,14 +67,14 @@ public class GroupUnsetTempPermission extends SubCommand<Group> {
 
                 if (args.size() == 2) {
                     group.unsetPermission(node, server);
-                    Message.UNSET_TEMP_PERMISSION_SERVER_SUCCESS.send(sender, node, group.getName(), server);
+                    Message.UNSET_TEMP_PERMISSION_SERVER_SUCCESS.send(sender, node, group.getDisplayName(), server);
                     LogEntry.build().actor(sender).acted(group)
                             .action("unsettemp " + node + " " + server)
                             .build().submit(plugin, sender);
                 } else {
                     final String world = args.get(2).toLowerCase();
                     group.unsetPermission(node, server, world);
-                    Message.UNSET_TEMP_PERMISSION_SERVER_WORLD_SUCCESS.send(sender, node, group.getName(), server, world);
+                    Message.UNSET_TEMP_PERMISSION_SERVER_WORLD_SUCCESS.send(sender, node, group.getDisplayName(), server, world);
                     LogEntry.build().actor(sender).acted(group)
                             .action("unsettemp " + node + " " + server + " " + world)
                             .build().submit(plugin, sender);
@@ -82,7 +82,7 @@ public class GroupUnsetTempPermission extends SubCommand<Group> {
 
             } else {
                 group.unsetPermission(node, true);
-                Message.UNSET_TEMP_PERMISSION_SUCCESS.send(sender, node, group.getName());
+                Message.UNSET_TEMP_PERMISSION_SUCCESS.send(sender, node, group.getDisplayName());
                 LogEntry.build().actor(sender).acted(group)
                         .action("unsettemp " + node)
                         .build().submit(plugin, sender);
@@ -91,7 +91,7 @@ public class GroupUnsetTempPermission extends SubCommand<Group> {
             save(group, sender, plugin);
             return CommandResult.SUCCESS;
         } catch (ObjectLacksException e) {
-            Message.DOES_NOT_HAVE_TEMP_PERMISSION.send(sender, group.getName());
+            Message.DOES_NOT_HAVE_TEMP_PERMISSION.send(sender, group.getDisplayName());
             return CommandResult.STATE_ERROR;
         }
     }

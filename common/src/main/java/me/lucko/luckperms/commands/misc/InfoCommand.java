@@ -48,14 +48,14 @@ public class InfoCommand extends SingleMainCommand {
                 plugin.getDatastore().getName(),
                 c.getServer(),
                 c.getSyncTime(),
-                formatBoolean(c.getIncludeGlobalPerms()),
-                formatBoolean(c.getIncludeGlobalWorldPerms()),
-                formatBoolean(c.getApplyGlobalGroups()),
-                formatBoolean(c.getApplyGlobalWorldGroups()),
-                formatBoolean(c.getOnlineMode()),
-                formatBoolean(c.getApplyWildcards()),
-                formatBoolean(c.getApplyRegex()),
-                formatBoolean(c.getApplyShorthand())
+                formatBoolean(c.isIncludingGlobalPerms()),
+                formatBoolean(c.isIncludingGlobalWorldPerms()),
+                formatBoolean(c.isApplyingGlobalGroups()),
+                formatBoolean(c.isApplyingGlobalWorldGroups()),
+                formatBoolean(c.isOnlineMode()),
+                formatBoolean(c.isApplyingWildcards()),
+                formatBoolean(c.isApplyingRegex()),
+                formatBoolean(c.isApplyingShorthand())
         );
 
         return CommandResult.SUCCESS;

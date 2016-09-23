@@ -213,7 +213,7 @@ public class LuckPermsSubject implements Subject {
                 continue;
             }
 
-            if (!n.shouldApplyOnServer(service.getPlugin().getConfiguration().getVaultServer(), service.getPlugin().getConfiguration().getVaultIncludeGlobal(), false)) {
+            if (!n.shouldApplyOnServer(service.getPlugin().getConfiguration().getVaultServer(), service.getPlugin().getConfiguration().isVaultIncludingGlobal(), false)) {
                 continue;
             }
 

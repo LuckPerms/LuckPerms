@@ -37,11 +37,11 @@ public class Contexts {
                 configuration.getServer(),
                 null,
                 Collections.emptyMap(),
-                configuration.getIncludeGlobalPerms(),
-                configuration.getIncludeGlobalWorldPerms(),
+                configuration.isIncludingGlobalPerms(),
+                configuration.isIncludingGlobalWorldPerms(),
                 true,
-                configuration.getApplyGlobalGroups(),
-                configuration.getApplyGlobalWorldGroups()
+                configuration.isApplyingGlobalGroups(),
+                configuration.isApplyingGlobalWorldGroups()
         );
     }
 

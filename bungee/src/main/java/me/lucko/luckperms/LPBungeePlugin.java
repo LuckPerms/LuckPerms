@@ -88,7 +88,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         datastore = StorageFactory.getDatastore(this, "h2");
 
         getLog().info("Loading internal permission managers...");
-        uuidCache = new UuidCache(getConfiguration().getOnlineMode());
+        uuidCache = new UuidCache(getConfiguration().isOnlineMode());
         userManager = new BungeeUserManager(this);
         groupManager = new GroupManager(this);
         trackManager = new TrackManager();

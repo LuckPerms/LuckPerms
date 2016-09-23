@@ -22,7 +22,7 @@
 
 package me.lucko.luckperms;
 
-import me.lucko.luckperms.core.LPConfiguration;
+import me.lucko.luckperms.core.AbstractConfiguration;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
@@ -31,8 +31,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.Map;
 
-class BungeeConfig extends LPConfiguration<LPBungeePlugin> {
+class BungeeConfig extends AbstractConfiguration<LPBungeePlugin> {
     private Configuration configuration;
 
     BungeeConfig(LPBungeePlugin plugin) {
@@ -63,11 +64,6 @@ class BungeeConfig extends LPConfiguration<LPBungeePlugin> {
     }
 
     @Override
-    protected void set(String path, Object value) {
-        configuration.set(path, value);
-    }
-
-    @Override
     protected String getString(String path, String def) {
         return configuration.getString(path, def);
     }
@@ -80,5 +76,10 @@ class BungeeConfig extends LPConfiguration<LPBungeePlugin> {
     @Override
     protected boolean getBoolean(String path, boolean def) {
         return configuration.getBoolean(path, def);
+    }
+
+    @Override
+    protected Map<String, String> getMap(String path, Map<String, String> def) {
+        return configuration.get(path, def);
     }
 }

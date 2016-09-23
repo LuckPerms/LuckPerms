@@ -73,14 +73,14 @@ public class GroupSetInherit extends SubCommand<Group> {
 
                 if (args.size() == 2) {
                     group.setInheritGroup(group1, server);
-                    Message.GROUP_SETINHERIT_SERVER_SUCCESS.send(sender, group.getName(), group1.getName(), server);
+                    Message.GROUP_SETINHERIT_SERVER_SUCCESS.send(sender, group.getDisplayName(), group1.getDisplayName(), server);
                     LogEntry.build().actor(sender).acted(group)
                             .action("setinherit " + group1.getName() + " " + server)
                             .build().submit(plugin, sender);
                 } else {
                     final String world = args.get(2).toLowerCase();
                     group.setInheritGroup(group1, server, world);
-                    Message.GROUP_SETINHERIT_SERVER_WORLD_SUCCESS.send(sender, group.getName(), group1.getName(), server, world);
+                    Message.GROUP_SETINHERIT_SERVER_WORLD_SUCCESS.send(sender, group.getDisplayName(), group1.getDisplayName(), server, world);
                     LogEntry.build().actor(sender).acted(group)
                             .action("setinherit " + group1.getName() + " " + server + " " + world)
                             .build().submit(plugin, sender);
@@ -88,7 +88,7 @@ public class GroupSetInherit extends SubCommand<Group> {
 
             } else {
                 group.setInheritGroup(group1);
-                Message.GROUP_SETINHERIT_SUCCESS.send(sender, group.getName(), group1.getName());
+                Message.GROUP_SETINHERIT_SUCCESS.send(sender, group.getDisplayName(), group1.getDisplayName());
                 LogEntry.build().actor(sender).acted(group)
                         .action("setinherit " + group1.getName())
                         .build().submit(plugin, sender);
@@ -97,7 +97,7 @@ public class GroupSetInherit extends SubCommand<Group> {
             save(group, sender, plugin);
             return CommandResult.SUCCESS;
         } catch (ObjectAlreadyHasException e) {
-            Message.GROUP_ALREADY_INHERITS.send(sender, group.getName(), group1.getName());
+            Message.GROUP_ALREADY_INHERITS.send(sender, group.getDisplayName(), group1.getDisplayName());
             return CommandResult.STATE_ERROR;
         }
     }

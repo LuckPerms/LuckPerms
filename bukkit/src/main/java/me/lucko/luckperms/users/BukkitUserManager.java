@@ -55,7 +55,7 @@ public class BukkitUserManager extends UserManager {
                     u.setLpPermissible(null);
                 }
 
-                if (plugin.getConfiguration().getAutoOp()) {
+                if (plugin.getConfiguration().isAutoOp()) {
                     player.setOp(false);
                 }
             }

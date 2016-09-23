@@ -62,15 +62,15 @@ public class LPPermissible extends PermissibleBase {
         List<PermissionProcessor> processors = new ArrayList<>(5);
         processors.add(new PermissionCalculator.MapProcessor(luckPermsPermissions));
         processors.add(new AttachmentProcessor(attachmentPermissions));
-        if (plugin.getConfiguration().getApplyWildcards()) {
+        if (plugin.getConfiguration().isApplyingWildcards()) {
             processors.add(new PermissionCalculator.WildcardProcessor(luckPermsPermissions));
         }
-        if (plugin.getConfiguration().getApplyRegex()) {
+        if (plugin.getConfiguration().isApplyingRegex()) {
             processors.add(new PermissionCalculator.RegexProcessor(luckPermsPermissions));
         }
         processors.add(new BukkitDefaultsProcessor(parent::isOp, defaultsProvider));
 
-        calculator = new PermissionCalculator(plugin, parent.getName(), plugin.getConfiguration().getDebugPermissionChecks(), processors);
+        calculator = new PermissionCalculator(plugin, parent.getName(), plugin.getConfiguration().isDebugPermissionChecks(), processors);
 
         recalculatePermissions();
     }

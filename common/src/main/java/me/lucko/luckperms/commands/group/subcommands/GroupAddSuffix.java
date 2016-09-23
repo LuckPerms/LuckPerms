@@ -65,14 +65,14 @@ public class GroupAddSuffix extends SubCommand<Group> {
 
                 if (args.size() == 3) {
                     group.setPermission(node, true, server);
-                    Message.ADDSUFFIX_SERVER_SUCCESS.send(sender, group.getName(), suffix, priority, server);
+                    Message.ADDSUFFIX_SERVER_SUCCESS.send(sender, group.getDisplayName(), suffix, priority, server);
                     LogEntry.build().actor(sender).acted(group)
                             .action("addsuffix " + priority + " " + args.get(1) + " " + server)
                             .build().submit(plugin, sender);
                 } else {
                     final String world = args.get(3).toLowerCase();
                     group.setPermission(node, true, server, world);
-                    Message.ADDSUFFIX_SERVER_WORLD_SUCCESS.send(sender, group.getName(), suffix, priority, server, world);
+                    Message.ADDSUFFIX_SERVER_WORLD_SUCCESS.send(sender, group.getDisplayName(), suffix, priority, server, world);
                     LogEntry.build().actor(sender).acted(group)
                             .action("addsuffix " + priority + " " + args.get(1) + " " + server + " " + world)
                             .build().submit(plugin, sender);
@@ -80,7 +80,7 @@ public class GroupAddSuffix extends SubCommand<Group> {
 
             } else {
                 group.setPermission(node, true);
-                Message.ADDSUFFIX_SUCCESS.send(sender, group.getName(), suffix, priority);
+                Message.ADDSUFFIX_SUCCESS.send(sender, group.getDisplayName(), suffix, priority);
                 LogEntry.build().actor(sender).acted(group)
                         .action("addsuffix " + priority + " " + args.get(1))
                         .build().submit(plugin, sender);
@@ -89,7 +89,7 @@ public class GroupAddSuffix extends SubCommand<Group> {
             save(group, sender, plugin);
             return CommandResult.SUCCESS;
         } catch (ObjectAlreadyHasException e) {
-            Message.ALREADY_HAS_SUFFIX.send(sender, group.getName());
+            Message.ALREADY_HAS_SUFFIX.send(sender, group.getDisplayName());
             return CommandResult.STATE_ERROR;
         }
     }

@@ -93,7 +93,7 @@ public class GroupSetTempPermission extends SubCommand<Group> {
 
                 if (args.size() == 4) {
                     group.setPermission(node, b, server, duration);
-                    Message.SETPERMISSION_TEMP_SERVER_SUCCESS.send(sender, node, bool, group.getName(), server,
+                    Message.SETPERMISSION_TEMP_SERVER_SUCCESS.send(sender, node, bool, group.getDisplayName(), server,
                             DateUtil.formatDateDiff(duration));
                     LogEntry.build().actor(sender).acted(group)
                             .action("settemp " + node + " " + b + " " + duration + " " + server)
@@ -101,7 +101,7 @@ public class GroupSetTempPermission extends SubCommand<Group> {
                 } else {
                     final String world = args.get(4).toLowerCase();
                     group.setPermission(node, b, server, world, duration);
-                    Message.SETPERMISSION_TEMP_SERVER_WORLD_SUCCESS.send(sender, node, bool, group.getName(), server,
+                    Message.SETPERMISSION_TEMP_SERVER_WORLD_SUCCESS.send(sender, node, bool, group.getDisplayName(), server,
                             world, DateUtil.formatDateDiff(duration));
                     LogEntry.build().actor(sender).acted(group)
                             .action("settemp " + node + " " + b + " " + duration + " " + server + " " + world)
@@ -110,7 +110,7 @@ public class GroupSetTempPermission extends SubCommand<Group> {
 
             } else {
                 group.setPermission(node, b, duration);
-                Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, bool, group.getName(), DateUtil.formatDateDiff(duration));
+                Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, bool, group.getDisplayName(), DateUtil.formatDateDiff(duration));
                 LogEntry.build().actor(sender).acted(group)
                         .action("settemp " + node + " " + b + " " + duration)
                         .build().submit(plugin, sender);
@@ -119,7 +119,7 @@ public class GroupSetTempPermission extends SubCommand<Group> {
             save(group, sender, plugin);
             return CommandResult.SUCCESS;
         } catch (ObjectAlreadyHasException e) {
-            Message.ALREADY_HAS_TEMP_PERMISSION.send(sender, group.getName());
+            Message.ALREADY_HAS_TEMP_PERMISSION.send(sender, group.getDisplayName());
             return CommandResult.STATE_ERROR;
         }
     }

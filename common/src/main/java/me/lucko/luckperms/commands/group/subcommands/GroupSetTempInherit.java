@@ -91,7 +91,7 @@ public class GroupSetTempInherit extends SubCommand<Group> {
 
                 if (args.size() == 3) {
                     group.setInheritGroup(group1, server, duration);
-                    Message.GROUP_SET_TEMP_INHERIT_SERVER_SUCCESS.send(sender, group.getName(), group1.getName(), server,
+                    Message.GROUP_SET_TEMP_INHERIT_SERVER_SUCCESS.send(sender, group.getDisplayName(), group1.getDisplayName(), server,
                             DateUtil.formatDateDiff(duration));
                     LogEntry.build().actor(sender).acted(group)
                             .action("settempinherit " + group1.getName() + " " + duration + " " + server)
@@ -99,7 +99,7 @@ public class GroupSetTempInherit extends SubCommand<Group> {
                 } else {
                     final String world = args.get(3).toLowerCase();
                     group.setInheritGroup(group1, server, world, duration);
-                    Message.GROUP_SET_TEMP_INHERIT_SERVER_WORLD_SUCCESS.send(sender, group.getName(), group1.getName(), server,
+                    Message.GROUP_SET_TEMP_INHERIT_SERVER_WORLD_SUCCESS.send(sender, group.getDisplayName(), group1.getDisplayName(), server,
                             world, DateUtil.formatDateDiff(duration));
                     LogEntry.build().actor(sender).acted(group)
                             .action("settempinherit " + group1.getName() + " " + duration + " " + server + " " + world)
@@ -108,7 +108,7 @@ public class GroupSetTempInherit extends SubCommand<Group> {
 
             } else {
                 group.setInheritGroup(group1, duration);
-                Message.GROUP_SET_TEMP_INHERIT_SUCCESS.send(sender, group.getName(), group1.getName(), DateUtil.formatDateDiff(duration));
+                Message.GROUP_SET_TEMP_INHERIT_SUCCESS.send(sender, group.getDisplayName(), group1.getDisplayName(), DateUtil.formatDateDiff(duration));
                 LogEntry.build().actor(sender).acted(group)
                         .action("settempinherit " + group1.getName() + " " + duration)
                         .build().submit(plugin, sender);
@@ -117,7 +117,7 @@ public class GroupSetTempInherit extends SubCommand<Group> {
             save(group, sender, plugin);
             return CommandResult.SUCCESS;
         } catch (ObjectAlreadyHasException e) {
-            Message.USER_ALREADY_TEMP_MEMBER_OF.send(sender, group.getName(), group1.getName());
+            Message.USER_ALREADY_TEMP_MEMBER_OF.send(sender, group.getDisplayName(), group1.getDisplayName());
             return CommandResult.STATE_ERROR;
         }
     }

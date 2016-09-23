@@ -73,14 +73,14 @@ public class UserAddGroup extends SubCommand<User> {
 
                 if (args.size() == 2) {
                     user.addGroup(group, server);
-                    Message.USER_ADDGROUP_SERVER_SUCCESS.send(sender, user.getName(), groupName, server);
+                    Message.USER_ADDGROUP_SERVER_SUCCESS.send(sender, user.getName(), group.getDisplayName(), server);
                     LogEntry.build().actor(sender).acted(user)
                             .action("addgroup " + group.getName() + " " + server)
                             .build().submit(plugin, sender);
                 } else {
                     final String world = args.get(2).toLowerCase();
                     user.addGroup(group, server, world);
-                    Message.USER_ADDGROUP_SERVER_WORLD_SUCCESS.send(sender, user.getName(), groupName, server, world);
+                    Message.USER_ADDGROUP_SERVER_WORLD_SUCCESS.send(sender, user.getName(), group.getDisplayName(), server, world);
                     LogEntry.build().actor(sender).acted(user)
                             .action("addgroup " + group.getName() + " " + server + " " + world)
                             .build().submit(plugin, sender);
@@ -88,7 +88,7 @@ public class UserAddGroup extends SubCommand<User> {
 
             } else {
                 user.addGroup(group);
-                Message.USER_ADDGROUP_SUCCESS.send(sender, user.getName(), groupName);
+                Message.USER_ADDGROUP_SUCCESS.send(sender, user.getName(), group.getDisplayName());
                 LogEntry.build().actor(sender).acted(user)
                         .action("addgroup " + group.getName())
                         .build().submit(plugin, sender);
@@ -97,7 +97,7 @@ public class UserAddGroup extends SubCommand<User> {
             save(user, sender, plugin);
             return CommandResult.SUCCESS;
         } catch (ObjectAlreadyHasException e) {
-            Message.USER_ALREADY_MEMBER_OF.send(sender, user.getName(), group.getName());
+            Message.USER_ALREADY_MEMBER_OF.send(sender, user.getName(), group.getDisplayName());
             return CommandResult.STATE_ERROR;
         }
     }

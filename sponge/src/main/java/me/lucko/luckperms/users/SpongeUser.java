@@ -59,11 +59,11 @@ class SpongeUser extends User {
                         plugin.getConfiguration().getServer(),
                         null, // TODO per world perms
                         null,
-                        plugin.getConfiguration().getIncludeGlobalPerms(),
-                        plugin.getConfiguration().getIncludeGlobalWorldPerms(),
+                        plugin.getConfiguration().isIncludingGlobalPerms(),
+                        plugin.getConfiguration().isIncludingGlobalWorldPerms(),
                         true,
-                        plugin.getConfiguration().getApplyGlobalGroups(),
-                        plugin.getConfiguration().getApplyGlobalWorldGroups()
+                        plugin.getConfiguration().isApplyingGlobalGroups(),
+                        plugin.getConfiguration().isApplyingGlobalWorldGroups()
                 ),
                 Collections.emptyList()
         );

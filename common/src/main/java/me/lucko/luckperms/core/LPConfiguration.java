@@ -22,156 +22,68 @@
 
 package me.lucko.luckperms.core;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.constants.Patterns;
 import me.lucko.luckperms.storage.DatastoreConfiguration;
 
-import java.util.HashMap;
 import java.util.Map;
 
-public abstract class LPConfiguration<T extends LuckPermsPlugin> {
+public interface LPConfiguration {
 
-    @Getter(AccessLevel.PROTECTED)
-    private final T plugin;
+    String getServer();
 
-    private final String defaultServerName;
-    private final boolean defaultIncludeGlobal;
-    private final String defaultStorage;
-
-    public LPConfiguration(T plugin, String defaultServerName, boolean defaultIncludeGlobal, String defaultStorage) {
-        this.plugin = plugin;
-        this.defaultServerName = defaultServerName;
-        this.defaultIncludeGlobal = defaultIncludeGlobal;
-        this.defaultStorage = defaultStorage;
-        init();
-
-        if (Patterns.NON_ALPHA_NUMERIC.matcher(getServer()).find()) {
-            plugin.getLog().severe("Server name defined in config.yml contains invalid characters. Server names can " +
-                    "only contain alphanumeric characters.\nDefined server name '" + getServer() + "' will be replaced with '" +
-                    defaultServerName + "' (the default)");
-            set("server", defaultServerName);
-        }
-    }
-
-    protected abstract void init();
-    protected abstract void set(String path, Object value);
-    protected abstract String getString(String path, String def);
-    protected abstract int getInt(String path, int def);
-    protected abstract boolean getBoolean(String path, boolean def);
-
-    public String getServer() {
-        return getString("server", defaultServerName);
-    }
-
-    public int getSyncTime() {
-        return getInt("data.sync-minutes", 3);
-    }
+    int getSyncTime();
 
     /**
      * As of 2.6, this value is a constant
      * @return the default group node
      */
-    @SuppressWarnings("SameReturnValue")
-    public String getDefaultGroupNode() {
-        return "group.default";
-    }
+    String getDefaultGroupNode();
 
     /**
      * As of 2.6, this value is a constant
      * @return the name of the default group
      */
-    @SuppressWarnings("SameReturnValue")
-    public String getDefaultGroupName() {
-        return "default";
-    }
+    String getDefaultGroupName();
 
-    public boolean getIncludeGlobalPerms() {
-        return getBoolean("include-global", defaultIncludeGlobal);
-    }
+    boolean isIncludingGlobalPerms();
 
-    public boolean getIncludeGlobalWorldPerms() {
-        return getBoolean("include-global-world", true);
-    }
+    boolean isIncludingGlobalWorldPerms();
 
-    public boolean getApplyGlobalGroups() {
-        return getBoolean("apply-global-groups", true);
-    }
+    boolean isApplyingGlobalGroups();
 
-    public boolean getApplyGlobalWorldGroups() {
-        return getBoolean("apply-global-world-groups", true);
-    }
+    boolean isApplyingGlobalWorldGroups();
 
-    public boolean getOnlineMode() {
-        return getBoolean("online-mode", true);
-    }
+    boolean isOnlineMode();
 
-    public boolean getApplyWildcards() {
-        return getBoolean("apply-wildcards", true);
-    }
+    boolean isApplyingWildcards();
 
-    public boolean getApplyRegex() {
-        return getBoolean("apply-regex", true);
-    }
+    boolean isApplyingRegex();
 
-    public boolean getApplyShorthand() {
-        return getBoolean("apply-shorthand", true);
-    }
+    boolean isApplyingShorthand();
 
-    public boolean getLogNotify() {
-        return getBoolean("log-notify", true);
-    }
+    boolean isLogNotify();
 
-    public boolean getDebugPermissionChecks() {
-        return getBoolean("debug-permission-checks", false);
-    }
+    boolean isDebugPermissionChecks();
 
-    public boolean getEnableOps() {
-        return !getAutoOp() && getBoolean("enable-ops", true);
-    }
+    boolean isOpsEnabled();
 
-    public boolean getCommandsAllowOp() {
-        return getBoolean("commands-allow-op", true);
-    }
+    boolean isCommandsAllowOp();
 
-    public boolean getAutoOp() {
-        return getBoolean("auto-op", false);
-    }
+    boolean isAutoOp();
 
-    public String getVaultServer() {
-        return getString("vault-server", "global");
-    }
+    String getVaultServer();
 
-    public boolean getVaultIncludeGlobal() {
-        return getBoolean("vault-include-global", true);
-    }
+    boolean isVaultIncludingGlobal();
 
-    public DatastoreConfiguration getDatabaseValues() {
-        return new DatastoreConfiguration(
-                getString("data.address", null),
-                getString("data.database", null),
-                getString("data.username", null),
-                getString("data.password", null)
-        );
-    }
+    Map<String, String> getWorldRewrites();
 
-    public String getStorageMethod() {
-        return getString("storage-method", defaultStorage);
-    }
+    Map<String, String> getGroupNameRewrites();
 
-    public boolean getSplitStorage() {
-        return getBoolean("split-storage.enabled", false);
-    }
+    DatastoreConfiguration getDatabaseValues();
 
-    public Map<String, String> getSplitStorageOptions() {
-        Map<String, String> map = new HashMap<>();
-        map.put("user", getString("split-storage.methods.user", defaultStorage));
-        map.put("group", getString("split-storage.methods.group", defaultStorage));
-        map.put("track", getString("split-storage.methods.track", defaultStorage));
-        map.put("uuid", getString("split-storage.methods.uuid", defaultStorage));
-        map.put("log", getString("split-storage.methods.log", defaultStorage));
+    String getStorageMethod();
 
-        return map;
-    }
+    boolean isSplitStorage();
+
+    Map<String, String> getSplitStorageOptions();
+
 }

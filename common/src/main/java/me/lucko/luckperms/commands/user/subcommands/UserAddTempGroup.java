@@ -92,7 +92,7 @@ public class UserAddTempGroup extends SubCommand<User> {
 
                 if (args.size() == 3) {
                     user.addGroup(group, server, duration);
-                    Message.USER_ADDTEMPGROUP_SERVER_SUCCESS.send(sender, user.getName(), groupName, server,
+                    Message.USER_ADDTEMPGROUP_SERVER_SUCCESS.send(sender, user.getName(), group.getDisplayName(), server,
                             DateUtil.formatDateDiff(duration));
                     LogEntry.build().actor(sender).acted(user)
                             .action("addtempgroup " + group.getName() + " " + duration + " " + server)
@@ -100,7 +100,7 @@ public class UserAddTempGroup extends SubCommand<User> {
                 } else {
                     final String world = args.get(3).toLowerCase();
                     user.addGroup(group, server, world, duration);
-                    Message.USER_ADDTEMPGROUP_SERVER_WORLD_SUCCESS.send(sender, user.getName(), groupName, server,
+                    Message.USER_ADDTEMPGROUP_SERVER_WORLD_SUCCESS.send(sender, user.getName(), group.getDisplayName(), server,
                             world, DateUtil.formatDateDiff(duration));
                     LogEntry.build().actor(sender).acted(user)
                             .action("addtempgroup " + group.getName() + " " + duration + " " + server + " " + world)
@@ -109,7 +109,7 @@ public class UserAddTempGroup extends SubCommand<User> {
 
             } else {
                 user.addGroup(group, duration);
-                Message.USER_ADDTEMPGROUP_SUCCESS.send(sender, user.getName(), groupName, DateUtil.formatDateDiff(duration));
+                Message.USER_ADDTEMPGROUP_SUCCESS.send(sender, user.getName(), group.getDisplayName(), DateUtil.formatDateDiff(duration));
                 LogEntry.build().actor(sender).acted(user)
                         .action("addtempgroup " + group.getName() + " " + duration)
                         .build().submit(plugin, sender);
@@ -118,7 +118,7 @@ public class UserAddTempGroup extends SubCommand<User> {
             save(user, sender, plugin);
             return CommandResult.SUCCESS;
         } catch (ObjectAlreadyHasException e) {
-            Message.USER_ALREADY_TEMP_MEMBER_OF.send(sender, user.getName(), group.getName());
+            Message.USER_ALREADY_TEMP_MEMBER_OF.send(sender, user.getName(), group.getDisplayName());
             return CommandResult.STATE_ERROR;
         }
     }

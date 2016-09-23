@@ -66,14 +66,14 @@ public class GroupUnSetPermission extends SubCommand<Group> {
 
                 if (args.size() == 2) {
                     group.unsetPermission(node, server);
-                    Message.UNSETPERMISSION_SERVER_SUCCESS.send(sender, node, group.getName(), server);
+                    Message.UNSETPERMISSION_SERVER_SUCCESS.send(sender, node, group.getDisplayName(), server);
                     LogEntry.build().actor(sender).acted(group)
                             .action("unset " + node + " " + server)
                             .build().submit(plugin, sender);
                 } else {
                     final String world = args.get(2).toLowerCase();
                     group.unsetPermission(node, server, world);
-                    Message.UNSETPERMISSION_SERVER_WORLD_SUCCESS.send(sender, node, group.getName(), server, world);
+                    Message.UNSETPERMISSION_SERVER_WORLD_SUCCESS.send(sender, node, group.getDisplayName(), server, world);
                     LogEntry.build().actor(sender).acted(group)
                             .action("unset " + node + " " + server + " " + world)
                             .build().submit(plugin, sender);
@@ -81,7 +81,7 @@ public class GroupUnSetPermission extends SubCommand<Group> {
 
             } else {
                 group.unsetPermission(node);
-                Message.UNSETPERMISSION_SUCCESS.send(sender, node, group.getName());
+                Message.UNSETPERMISSION_SUCCESS.send(sender, node, group.getDisplayName());
                 LogEntry.build().actor(sender).acted(group)
                         .action("unset " + node)
                         .build().submit(plugin, sender);
@@ -90,7 +90,7 @@ public class GroupUnSetPermission extends SubCommand<Group> {
             save(group, sender, plugin);
             return CommandResult.SUCCESS;
         } catch (ObjectLacksException e) {
-            Message.DOES_NOT_HAVEPERMISSION.send(sender, group.getName());
+            Message.DOES_NOT_HAVEPERMISSION.send(sender, group.getDisplayName());
             return CommandResult.STATE_ERROR;
         }
     }

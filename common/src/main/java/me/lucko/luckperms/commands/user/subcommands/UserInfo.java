@@ -41,7 +41,7 @@ public class UserInfo extends SubCommand<User> {
                 user.getName(),
                 user.getUuid(),
                 plugin.getPlayerStatus(user.getUuid()),
-                Util.listToCommaSep(user.getGroupNames()),
+                Util.listToCommaSep(user.getGroupNames()), // TODO move this to own command
                 user.getPrimaryGroup(),
                 user.getPermanentNodes().size(),
                 user.getTemporaryNodes().size(),

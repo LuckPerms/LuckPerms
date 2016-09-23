@@ -83,14 +83,14 @@ public class GroupAddTempSuffix extends SubCommand<Group> {
 
                 if (args.size() == 4) {
                     group.setPermission(node, true, server, duration);
-                    Message.ADD_TEMP_SUFFIX_SERVER_SUCCESS.send(sender, group.getName(), suffix, priority, server, DateUtil.formatDateDiff(duration));
+                    Message.ADD_TEMP_SUFFIX_SERVER_SUCCESS.send(sender, group.getDisplayName(), suffix, priority, server, DateUtil.formatDateDiff(duration));
                     LogEntry.build().actor(sender).acted(group)
                             .action("addtempsuffix " + priority + " " + args.get(1) + " " + duration + " " + server)
                             .build().submit(plugin, sender);
                 } else {
                     final String world = args.get(4).toLowerCase();
                     group.setPermission(node, true, server, world, duration);
-                    Message.ADD_TEMP_SUFFIX_SERVER_WORLD_SUCCESS.send(sender, group.getName(), suffix, priority, server, world, DateUtil.formatDateDiff(duration));
+                    Message.ADD_TEMP_SUFFIX_SERVER_WORLD_SUCCESS.send(sender, group.getDisplayName(), suffix, priority, server, world, DateUtil.formatDateDiff(duration));
                     LogEntry.build().actor(sender).acted(group)
                             .action("addtempsuffix " + priority + " " + args.get(1) + " " + duration + " " + server + " " + world)
                             .build().submit(plugin, sender);
@@ -98,7 +98,7 @@ public class GroupAddTempSuffix extends SubCommand<Group> {
 
             } else {
                 group.setPermission(node, true, duration);
-                Message.ADD_TEMP_SUFFIX_SUCCESS.send(sender, group.getName(), suffix, priority, DateUtil.formatDateDiff(duration));
+                Message.ADD_TEMP_SUFFIX_SUCCESS.send(sender, group.getDisplayName(), suffix, priority, DateUtil.formatDateDiff(duration));
                 LogEntry.build().actor(sender).acted(group)
                         .action("addtempsuffix " + priority + " " + args.get(1) + " " + duration)
                         .build().submit(plugin, sender);
@@ -107,7 +107,7 @@ public class GroupAddTempSuffix extends SubCommand<Group> {
             save(group, sender, plugin);
             return CommandResult.SUCCESS;
         } catch (ObjectAlreadyHasException e) {
-            Message.ALREADY_HAS_SUFFIX.send(sender, group.getName());
+            Message.ALREADY_HAS_SUFFIX.send(sender, group.getDisplayName());
             return CommandResult.STATE_ERROR;
         }
     }

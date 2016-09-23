@@ -62,14 +62,14 @@ public class GroupUnsetTempInherit extends SubCommand<Group> {
 
                 if (args.size() == 2) {
                     group.unsetPermission("group." + groupName, server, true);
-                    Message.GROUP_UNSET_TEMP_INHERIT_SERVER_SUCCESS.send(sender, group.getName(), groupName, server);
+                    Message.GROUP_UNSET_TEMP_INHERIT_SERVER_SUCCESS.send(sender, group.getDisplayName(), groupName, server);
                     LogEntry.build().actor(sender).acted(group)
                             .action("unsettempinherit " + groupName + " " + server)
                             .build().submit(plugin, sender);
                 } else {
                     final String world = args.get(2).toLowerCase();
                     group.unsetPermission("group." + groupName, server, world, true);
-                    Message.GROUP_UNSET_TEMP_INHERIT_SERVER_WORLD_SUCCESS.send(sender, group.getName(), groupName, server, world);
+                    Message.GROUP_UNSET_TEMP_INHERIT_SERVER_WORLD_SUCCESS.send(sender, group.getDisplayName(), groupName, server, world);
                     LogEntry.build().actor(sender).acted(group)
                             .action("unsettempinherit " + groupName + " " + server + " " + world)
                             .build().submit(plugin, sender);
@@ -77,7 +77,7 @@ public class GroupUnsetTempInherit extends SubCommand<Group> {
 
             } else {
                 group.unsetPermission("group." + groupName, true);
-                Message.GROUP_UNSET_TEMP_INHERIT_SUCCESS.send(sender, group.getName(), groupName);
+                Message.GROUP_UNSET_TEMP_INHERIT_SUCCESS.send(sender, group.getDisplayName(), groupName);
                 LogEntry.build().actor(sender).acted(group)
                         .action("unsettempinherit " + groupName)
                         .build().submit(plugin, sender);
@@ -86,7 +86,7 @@ public class GroupUnsetTempInherit extends SubCommand<Group> {
             save(group, sender, plugin);
             return CommandResult.SUCCESS;
         } catch (ObjectLacksException e) {
-            Message.GROUP_DOES_NOT_TEMP_INHERIT.send(sender, group.getName(), groupName);
+            Message.GROUP_DOES_NOT_TEMP_INHERIT.send(sender, group.getDisplayName(), groupName);
             return CommandResult.STATE_ERROR;
         }
     }

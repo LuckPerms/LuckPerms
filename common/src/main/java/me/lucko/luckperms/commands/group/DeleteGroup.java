@@ -71,7 +71,7 @@ public class DeleteGroup extends SingleMainCommand {
             return CommandResult.FAILURE;
         }
 
-        Message.DELETE_SUCCESS.send(sender, groupName);
+        Message.DELETE_SUCCESS.send(sender, group.getDisplayName());
         LogEntry.build().actor(sender).actedName(groupName).type('G').action("delete").build().submit(plugin, sender);
         plugin.runUpdateTask();
         return CommandResult.SUCCESS;

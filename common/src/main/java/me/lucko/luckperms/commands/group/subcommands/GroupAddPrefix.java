@@ -65,14 +65,14 @@ public class GroupAddPrefix extends SubCommand<Group> {
 
                 if (args.size() == 3) {
                     group.setPermission(node, true, server);
-                    Message.ADDPREFIX_SERVER_SUCCESS.send(sender, group.getName(), prefix, priority, server);
+                    Message.ADDPREFIX_SERVER_SUCCESS.send(sender, group.getDisplayName(), prefix, priority, server);
                     LogEntry.build().actor(sender).acted(group)
                             .action("addprefix " + priority + " " + args.get(1) + " " + server)
                             .build().submit(plugin, sender);
                 } else {
                     final String world = args.get(3).toLowerCase();
                     group.setPermission(node, true, server, world);
-                    Message.ADDPREFIX_SERVER_WORLD_SUCCESS.send(sender, group.getName(), prefix, priority, server, world);
+                    Message.ADDPREFIX_SERVER_WORLD_SUCCESS.send(sender, group.getDisplayName(), prefix, priority, server, world);
                     LogEntry.build().actor(sender).acted(group)
                             .action("addprefix " + priority + " " + args.get(1) + " " + server + " " + world)
                             .build().submit(plugin, sender);
@@ -80,7 +80,7 @@ public class GroupAddPrefix extends SubCommand<Group> {
 
             } else {
                 group.setPermission(node, true);
-                Message.ADDPREFIX_SUCCESS.send(sender, group.getName(), prefix, priority);
+                Message.ADDPREFIX_SUCCESS.send(sender, group.getDisplayName(), prefix, priority);
                 LogEntry.build().actor(sender).acted(group)
                         .action("addprefix " + priority + " " + args.get(1))
                         .build().submit(plugin, sender);
@@ -89,7 +89,7 @@ public class GroupAddPrefix extends SubCommand<Group> {
             save(group, sender, plugin);
             return CommandResult.SUCCESS;
         } catch (ObjectAlreadyHasException e) {
-            Message.ALREADY_HAS_PREFIX.send(sender, group.getName());
+            Message.ALREADY_HAS_PREFIX.send(sender, group.getDisplayName());
             return CommandResult.STATE_ERROR;
         }
     }

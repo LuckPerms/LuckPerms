@@ -58,6 +58,15 @@ public class Group extends PermissionHolder implements Identifiable<String> {
         return name;
     }
 
+    public String getRawDisplayName() {
+        return getPlugin().getConfiguration().getGroupNameRewrites().getOrDefault(name, name);
+    }
+
+    public String getDisplayName() {
+        String dn = getRawDisplayName();
+        return dn.equals(name) ? name : name + " (" + dn + ")";
+    }
+
     /**
      * check to see if a group inherits a group
      * @param group The group to check membership of

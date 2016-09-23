@@ -161,12 +161,12 @@ public abstract class PermissionHolder {
         while (iterator.hasNext()) {
             Node node = iterator.next();
 
-            if (!node.shouldApplyOnServer(context.getServer(), context.isApplyGlobalGroups(), plugin.getConfiguration().getApplyRegex())) {
+            if (!node.shouldApplyOnServer(context.getServer(), context.isApplyGlobalGroups(), plugin.getConfiguration().isApplyingRegex())) {
                 iterator.remove();
                 continue;
             }
 
-            if (!node.shouldApplyOnWorld(context.getWorld(), context.isApplyGlobalWorldGroups(), plugin.getConfiguration().getApplyRegex())) {
+            if (!node.shouldApplyOnWorld(context.getWorld(), context.isApplyGlobalWorldGroups(), plugin.getConfiguration().isApplyingRegex())) {
                 iterator.remove();
                 continue;
             }
@@ -214,11 +214,11 @@ public abstract class PermissionHolder {
 
         all:
         for (Node node : allNodes) {
-            if (!node.shouldApplyOnServer(context.getServer(), context.isIncludeGlobal(), plugin.getConfiguration().getApplyRegex())) {
+            if (!node.shouldApplyOnServer(context.getServer(), context.isIncludeGlobal(), plugin.getConfiguration().isApplyingRegex())) {
                 continue;
             }
 
-            if (!node.shouldApplyOnWorld(context.getWorld(), context.isIncludeGlobalWorld(), plugin.getConfiguration().getApplyRegex())) {
+            if (!node.shouldApplyOnWorld(context.getWorld(), context.isIncludeGlobalWorld(), plugin.getConfiguration().isApplyingRegex())) {
                 continue;
             }
 
@@ -251,7 +251,7 @@ public abstract class PermissionHolder {
         for (Node node : getAllNodesFiltered(context)) {
             if (possibleNodes != null && !possibleNodes.isEmpty()) {
                 if (node.getPermission().equals("*") || node.getPermission().equals("'*'")) {
-                    if (plugin.getConfiguration().getApplyWildcards()) {
+                    if (plugin.getConfiguration().isApplyingWildcards()) {
                         possibleNodes.forEach(n -> perms.put(n, true));
                     }
                 }
@@ -259,14 +259,14 @@ public abstract class PermissionHolder {
 
             perms.put(node.getPermission(), node.getValue());
 
-            if (plugin.getConfiguration().getApplyShorthand()) {
+            if (plugin.getConfiguration().isApplyingShorthand()) {
                 node.resolveShorthand().stream()
                         .filter(s -> !perms.containsKey(s))
                         .forEach(s -> perms.put(s, node.getValue()));
             }
 
             if (possibleNodes != null && !possibleNodes.isEmpty()) {
-                if (plugin.getConfiguration().getApplyWildcards()) {
+                if (plugin.getConfiguration().isApplyingWildcards()) {
                     node.resolveWildcard(possibleNodes).stream()
                             .filter(s -> !perms.containsKey(s))
                             .forEach(s -> perms.put(s, node.getValue()));
@@ -552,12 +552,12 @@ public abstract class PermissionHolder {
      */
     @Deprecated
     public Map<String, Boolean> getLocalPermissions(String server, String world, List<String> excludedGroups, List<String> possibleNodes) {
-        return exportNodes(new Contexts(server, world, Collections.emptyMap(), plugin.getConfiguration().getIncludeGlobalPerms(), true, true, true, true), Collections.emptyList());
+        return exportNodes(new Contexts(server, world, Collections.emptyMap(), plugin.getConfiguration().isIncludingGlobalPerms(), true, true, true, true), Collections.emptyList());
     }
 
     @Deprecated
     public Map<String, Boolean> getLocalPermissions(String server, String world, List<String> excludedGroups) {
-        return exportNodes(new Contexts(server, world, Collections.emptyMap(), plugin.getConfiguration().getIncludeGlobalPerms(), true, true, true, true), Collections.emptyList());
+        return exportNodes(new Contexts(server, world, Collections.emptyMap(), plugin.getConfiguration().isIncludingGlobalPerms(), true, true, true, true), Collections.emptyList());
     }
 
     @SuppressWarnings("deprecation")
