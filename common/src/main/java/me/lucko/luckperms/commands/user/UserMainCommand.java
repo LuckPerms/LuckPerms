@@ -42,6 +42,7 @@ public class UserMainCommand extends MainCommand<User> {
             .add(new UserInfo())
             .add(new UserGetUUID())
             .add(new UserListNodes())
+            .add(new UserListGroups())
             .add(new UserHasPerm())
             .add(new UserInheritsPerm())
             .add(new UserSetPermission())

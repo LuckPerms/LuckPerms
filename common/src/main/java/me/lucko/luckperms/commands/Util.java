@@ -181,6 +181,64 @@ public class Util {
         return sb.toString();
     }
 
+    public static String permGroupsToString(SortedSet<Node> nodes) {
+        StringBuilder sb = new StringBuilder();
+        for (Node node : nodes) {
+            if (!node.isGroupNode()) {
+                continue;
+            }
+
+            if (node.isTemporary()) {
+                continue;
+            }
+
+            sb.append("&a-> &b").append(node.getGroupName());
+            if (node.isServerSpecific()) {
+                sb.append(" &7(&f").append(node.getServer().get()).append("&7)");
+            }
+            if (node.isWorldSpecific()) {
+                sb.append(" &7(&f").append(node.getWorld().get()).append("&7)");
+            }
+            sb.append("\n");
+        }
+
+        if (sb.length() == 0) {
+            return "&6None";
+        }
+
+        return sb.toString();
+    }
+
+    public static String tempGroupsToString(SortedSet<Node> nodes) {
+        StringBuilder sb = new StringBuilder();
+
+        for (Node node : nodes) {
+            if (!node.isGroupNode()) {
+                continue;
+            }
+
+            if (!node.isTemporary()) {
+                continue;
+            }
+
+            sb.append("&a-> &b").append(node.getGroupName());
+            if (node.isServerSpecific()) {
+                sb.append(" &7(&f").append(node.getServer().get()).append("&7)");
+            }
+            if (node.isWorldSpecific()) {
+                sb.append(" &7(&f").append(node.getWorld().get()).append("&7)");
+            }
+
+            sb.append("&6 - expires in ").append(DateUtil.formatDateDiff(node.getExpiryUnixTime())).append("\n");
+        }
+
+        if (sb.length() == 0) {
+            return "&6None";
+        }
+
+        return sb.toString();
+    }
+
     public static UUID parseUuid(String s) {
         try {
             return UUID.fromString(s);

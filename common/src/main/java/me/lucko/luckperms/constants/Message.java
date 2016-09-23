@@ -157,6 +157,10 @@ public enum Message {
 
     LISTNODES("&e%s's Nodes:" + "\n" + "%s", true),
     LISTNODES_TEMP("&e%s's Temporary Nodes:" + "\n" + "%s", true),
+    LISTPARENTS("&e%s's Parent Groups:" + "\n" + "%s", true),
+    LISTPARENTS_TEMP("&e%s's Temporary Parent Groups:" + "\n" + "%s", true),
+    LISTGROUPS("&e%s's Groups:" + "\n" + "%s", true),
+    LISTGROUPS_TEMP("&e%s's Temporary Groups:" + "\n" + "%s", true),
     SETPERMISSION_SUCCESS("&aSet &b%s&a to &b%s&a for &b%s&a.", true),
     SETPERMISSION_SERVER_SUCCESS("&aSet &b%s&a to &b%s&a for &b%s&a on server &b%s&a.", true),
     SETPERMISSION_SERVER_WORLD_SUCCESS("&aSet &b%s&a to &b%s&a for &b%s&a on server &b%s&a, world &b%s&a.", true),
@@ -217,7 +221,6 @@ public enum Message {
             PREFIX + "&d-> &eUser: &6%s" + "\n" +
             PREFIX + "&d-> &eUUID: &6%s" + "\n" +
             PREFIX + "&d-> &eStatus: %s" + "\n" +
-            PREFIX + "&d-> &eGroups: &6%s" + "\n" +
             PREFIX + "&d-> &ePrimary Group: &6%s" + "\n" +
             PREFIX + "&d-> &ePermissions: &6%s" + "\n" +
             PREFIX + "&d-> &eTemporary Permissions: &6%s" + "\n" +

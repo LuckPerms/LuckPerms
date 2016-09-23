@@ -23,7 +23,10 @@
 package me.lucko.luckperms.commands.user.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.*;
+import me.lucko.luckperms.commands.CommandResult;
+import me.lucko.luckperms.commands.Predicate;
+import me.lucko.luckperms.commands.Sender;
+import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.users.User;
@@ -41,7 +44,6 @@ public class UserInfo extends SubCommand<User> {
                 user.getName(),
                 user.getUuid(),
                 plugin.getPlayerStatus(user.getUuid()),
-                Util.listToCommaSep(user.getGroupNames()), // TODO move this to own command
                 user.getPrimaryGroup(),
                 user.getPermanentNodes().size(),
                 user.getTemporaryNodes().size(),

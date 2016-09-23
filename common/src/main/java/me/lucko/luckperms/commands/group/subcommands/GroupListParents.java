@@ -23,31 +23,24 @@
 package me.lucko.luckperms.commands.group.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.CommandResult;
-import me.lucko.luckperms.commands.Predicate;
-import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.groups.Group;
 
 import java.util.List;
 
-public class GroupInfo extends SubCommand<Group> {
-    public GroupInfo() {
-        super("info", "Gives info about the group", "/%s group <group> info", Permission.GROUP_INFO,
-                Predicate.alwaysFalse());
+public class GroupListParents extends SubCommand<Group> {
+    public GroupListParents() {
+        super("listparents", "Lists the groups that this group inherits from", "/%s group <group> listparents",
+                Permission.GROUP_LISTPARENTS, Predicate.alwaysFalse());
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
-        Message.GROUP_INFO.send(sender,
-                group.getDisplayName(),
-                group.getPermanentNodes().size(),
-                group.getTemporaryNodes().size(),
-                label,
-                group.getName()
-        );
+        Message.LISTPARENTS.send(sender, group.getDisplayName(), Util.permGroupsToString(group.getPermissions(false)));
+        Message.LISTPARENTS_TEMP.send(sender, group.getDisplayName(), Util.tempGroupsToString(group.getPermissions(false)));
         return CommandResult.SUCCESS;
     }
 }
+

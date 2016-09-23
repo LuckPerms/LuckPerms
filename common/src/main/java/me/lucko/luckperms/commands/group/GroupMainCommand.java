@@ -39,6 +39,7 @@ public class GroupMainCommand extends MainCommand<Group> {
         super("Group", "/%s group <group>", 2, ImmutableList.<SubCommand<Group>>builder()
             .add(new GroupInfo())
             .add(new GroupListNodes())
+            .add(new GroupListParents())
             .add(new GroupHasPerm())
             .add(new GroupInheritsPerm())
             .add(new GroupSetPermission())

@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.Map;
 
 class BungeeConfig extends AbstractConfiguration<LPBungeePlugin> {
@@ -80,6 +81,16 @@ class BungeeConfig extends AbstractConfiguration<LPBungeePlugin> {
 
     @Override
     protected Map<String, String> getMap(String path, Map<String, String> def) {
-        return configuration.get(path, def);
+        Map<String, String> map = new HashMap<>();
+        Configuration section = configuration.getSection(path);
+        if (section == null) {
+            return def;
+        }
+
+        for (String key : section.getKeys()) {
+            map.put(key, section.getString(key));
+        }
+
+        return map;
     }
 }

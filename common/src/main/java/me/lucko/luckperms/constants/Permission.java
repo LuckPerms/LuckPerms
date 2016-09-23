@@ -47,6 +47,7 @@ public enum Permission {
     USER_INFO("info", "user"),
     USER_GETUUID("getuuid", "user"),
     USER_LISTNODES("listnodes", "user"),
+    USER_LISTGROUPS("listgroups", "user"),
     USER_HASPERMISSION("haspermission", "user"),
     USER_INHERITSPERMISSION("inheritspermission", "user"),
     USER_SETPERMISSION("setpermission", "user"),
@@ -75,6 +76,7 @@ public enum Permission {
 
     GROUP_INFO("info", "group"),
     GROUP_LISTNODES("listnodes", "group"),
+    GROUP_LISTPARENTS("listparents", "group"),
     GROUP_HASPERMISSION("haspermission", "group"),
     GROUP_INHERITSPERMISSION("inheritspermission", "group"),
     GROUP_SETPERMISSION("setpermission", "group"),

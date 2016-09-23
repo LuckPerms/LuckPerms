@@ -20,34 +20,26 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.commands.group.subcommands;
+package me.lucko.luckperms.commands.user.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.CommandResult;
-import me.lucko.luckperms.commands.Predicate;
-import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
-import me.lucko.luckperms.groups.Group;
+import me.lucko.luckperms.users.User;
 
 import java.util.List;
 
-public class GroupInfo extends SubCommand<Group> {
-    public GroupInfo() {
-        super("info", "Gives info about the group", "/%s group <group> info", Permission.GROUP_INFO,
-                Predicate.alwaysFalse());
+public class UserListGroups extends SubCommand<User> {
+    public UserListGroups() {
+        super("listgroups", "Lists the groups a user is in", "/%s user <user> listgroups",
+                Permission.USER_LISTGROUPS, Predicate.alwaysFalse());
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
-        Message.GROUP_INFO.send(sender,
-                group.getDisplayName(),
-                group.getPermanentNodes().size(),
-                group.getTemporaryNodes().size(),
-                label,
-                group.getName()
-        );
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
+        Message.LISTGROUPS.send(sender, user.getName(), Util.permGroupsToString(user.getPermissions(false)));
+        Message.LISTGROUPS_TEMP.send(sender, user.getName(), Util.tempGroupsToString(user.getPermissions(false)));
         return CommandResult.SUCCESS;
     }
 }
