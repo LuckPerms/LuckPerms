@@ -27,8 +27,6 @@ import lombok.Getter;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.Util;
 
-import java.text.MessageFormat;
-
 @SuppressWarnings("SpellCheckingInspection")
 @AllArgsConstructor
 public enum Message {
@@ -367,15 +365,18 @@ public enum Message {
             s = s.replace("{PREFIX}", PREFIX.getMessage()).replace("\\n", "\n");
         }
 
-        try {
-            if (showPrefix) {
-                sender.sendMessage(Util.color(PREFIX + MessageFormat.format(s, objects)));
-            } else {
-                sender.sendMessage(Util.color(MessageFormat.format(s, objects)));
-            }
-        } catch (IllegalArgumentException e) {
-            System.out.println("Could not format message: " + this);
-            e.printStackTrace();
+        if (showPrefix) {
+            sender.sendMessage(Util.color(PREFIX + format(s, objects)));
+        } else {
+            sender.sendMessage(Util.color(format(s, objects)));
         }
+    }
+
+    private static String format(String s, Object... objects) {
+        for (int i = 0, objsLength = objects.length; i < objsLength; i++) {
+            Object o = objects[i];
+            s = s.replace("{" + i + "}", o.toString());
+        }
+        return s;
     }
 }
