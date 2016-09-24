@@ -79,10 +79,6 @@
             <url>http://pex-repo.aoeu.xyz</url>
         </repository>
         <repository>
-            <id>alskebo-repo</id>
-            <url>http://repo.alskebo.com/repository/maven-releases</url>
-        </repository>
-        <repository>
             <id>bungeeperms-repo</id>
             <url>http://repo.wea-ondara.net/repository/public/</url>
         </repository>
