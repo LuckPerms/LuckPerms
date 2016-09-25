@@ -39,6 +39,7 @@ import org.spongepowered.api.util.Tristate;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class LuckPermsUserSubject extends LuckPermsSubject {
@@ -62,7 +63,7 @@ public class LuckPermsUserSubject extends LuckPermsSubject {
     @Override
     public Tristate getPermissionValue(@NonNull Set<Context> contexts, @NonNull String permission) {
         Map<String, String> context = contexts.stream().collect(Collectors.toMap(Context::getKey, Context::getValue));
-        ContextData cd = contextData.computeIfAbsent(context, this::calculatePermissions);
+        ContextData cd = contextData.computeIfAbsent(context, map -> calculatePermissions(map, false));
 
         me.lucko.luckperms.api.Tristate t =  cd.getPermissionValue(permission);
         if (t != me.lucko.luckperms.api.Tristate.UNDEFINED) {
@@ -72,7 +73,7 @@ public class LuckPermsUserSubject extends LuckPermsSubject {
         }
     }
 
-    public ContextData calculatePermissions(Map<String, String> context) {
+    public ContextData calculatePermissions(Map<String, String> context, boolean apply) {
         Map<String, Boolean> toApply = user.exportNodes(
                 new Contexts(
                         context,
@@ -88,7 +89,9 @@ public class LuckPermsUserSubject extends LuckPermsSubject {
         ContextData existing = contextData.get(context);
         if (existing == null) {
             existing = new ContextData(this, context, service);
-            contextData.put(context, existing);
+            if (apply) {
+                contextData.put(context, existing);
+            }
         }
 
         boolean different = false;
@@ -113,13 +116,13 @@ public class LuckPermsUserSubject extends LuckPermsSubject {
         return existing;
     }
 
-    public void calculatePermissions(Set<Context> contexts) {
+    public void calculatePermissions(Set<Context> contexts, boolean apply) {
         Map<String, String> context = contexts.stream().collect(Collectors.toMap(Context::getKey, Context::getValue));
-        calculatePermissions(context);
+        calculatePermissions(context, apply);
     }
 
-    public void calculateActivePermissions() {
-        calculatePermissions(getActiveContexts());
+    public void calculateActivePermissions(boolean apply) {
+        calculatePermissions(getActiveContexts(), apply);
     }
 
 

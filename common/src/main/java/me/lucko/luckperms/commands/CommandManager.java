@@ -177,8 +177,7 @@ public class CommandManager {
     }
 
     private void sendCommandUsage(Sender sender, String label) {
-        sender.sendMessage(Util.color("&6Running &bLuckPerms v" + plugin.getVersion() + "&6."));
-
+        Util.sendPluginMessage(sender, "&6Running &bLuckPerms v" + plugin.getVersion() + "&6.");
         mainCommands.stream()
                 .filter(c -> c.isAuthorized(sender))
                 .forEach(c -> Util.sendPluginMessage(sender, "&e-> &d" + String.format(c.getUsage(), label)));

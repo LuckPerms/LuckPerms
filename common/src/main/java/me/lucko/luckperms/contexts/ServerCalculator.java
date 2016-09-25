@@ -39,6 +39,6 @@ public class ServerCalculator<T> extends ContextCalculator<T> {
 
     @Override
     public boolean isContextApplicable(T subject, Map.Entry<String, String> context) {
-        return context.getKey().equals("server") && server.equals(context.getValue());
+        return context.getKey().equals("server") && server.equalsIgnoreCase(context.getValue());
     }
 }

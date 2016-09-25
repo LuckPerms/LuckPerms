@@ -49,6 +49,6 @@ class SpongeUser extends User {
         }
 
         LuckPermsUserSubject us = uc.getUsers().get(getUuid());
-        us.calculateActivePermissions();
+        us.calculateActivePermissions(true);
     }
 }

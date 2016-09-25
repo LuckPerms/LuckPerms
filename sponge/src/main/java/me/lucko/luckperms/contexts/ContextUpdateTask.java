@@ -38,7 +38,7 @@ public class ContextUpdateTask implements Runnable {
     public void run() {
         for (LuckPermsUserSubject subject : userCollection.getUsers().values()) {
             Set<Map<String, String>> contexts = new HashSet<>(subject.getContextData().keySet());
-            contexts.forEach(subject::calculatePermissions);
+            contexts.forEach(map -> subject.calculatePermissions(map, true));
         }
     }
 
