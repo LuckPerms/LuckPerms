@@ -24,8 +24,6 @@ package me.lucko.luckperms.storage.methods;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.data.Log;
@@ -45,8 +43,8 @@ import java.util.*;
 
 import static me.lucko.luckperms.core.PermissionHolder.exportToLegacy;
 
-@SuppressWarnings("UnnecessaryLocalVariable")
 abstract class SQLDatastore extends Datastore {
+    private static final QueryPS EMPTY_PS = preparedStatement -> {};
 
     private static final Type NM_TYPE = new TypeToken<Map<String, Boolean>>(){}.getType();
     private static final Type T_TYPE = new TypeToken<List<String>>(){}.getType();
@@ -87,13 +85,21 @@ abstract class SQLDatastore extends Datastore {
 
     abstract Connection getConnection() throws SQLException;
 
-    abstract boolean runQuery(QueryPS queryPS);
-    abstract boolean runQuery(QueryRS queryRS);
+    abstract boolean runQuery(String query, QueryPS queryPS);
+    abstract boolean runQuery(String query, QueryPS queryPS, QueryRS queryRS);
+
+    boolean runQuery(String query) {
+        return runQuery(query, EMPTY_PS);
+    }
+
+    boolean runQuery(String query, QueryRS queryRS) {
+        return runQuery(query, EMPTY_PS, queryRS);
+    }
 
     boolean setupTables(String... tableQueries) {
         boolean success = true;
         for (String q : tableQueries) {
-            if (!runQuery(new Query(q))) success = false;
+            if (!runQuery(q)) success = false;
         }
 
         return success && cleanupUsers();
@@ -101,47 +107,35 @@ abstract class SQLDatastore extends Datastore {
 
     @Override
     public boolean logAction(LogEntry entry) {
-        boolean success = runQuery(new QueryPS(ACTION_INSERT) {
-            @Override
-            void onRun(PreparedStatement preparedStatement) throws SQLException {
-                preparedStatement.setLong(1, entry.getTimestamp());
-                preparedStatement.setString(2, entry.getActor().toString());
-                preparedStatement.setString(3, entry.getActorName());
-                preparedStatement.setString(4, Character.toString(entry.getType()));
-                preparedStatement.setString(5, entry.getActed() == null ? "null" : entry.getActed().toString());
-                preparedStatement.setString(6, entry.getActedName());
-                preparedStatement.setString(7, entry.getAction());
-            }
+        return runQuery(ACTION_INSERT, preparedStatement -> {
+            preparedStatement.setLong(1, entry.getTimestamp());
+            preparedStatement.setString(2, entry.getActor().toString());
+            preparedStatement.setString(3, entry.getActorName());
+            preparedStatement.setString(4, Character.toString(entry.getType()));
+            preparedStatement.setString(5, entry.getActed() == null ? "null" : entry.getActed().toString());
+            preparedStatement.setString(6, entry.getActedName());
+            preparedStatement.setString(7, entry.getAction());
         });
-        return success;
     }
 
     @Override
     public Log getLog() {
         final Log.Builder log = Log.builder();
-        boolean success = runQuery(new QueryRS(ACTION_SELECT_ALL) {
-            @Override
-            void onRun(PreparedStatement preparedStatement) throws SQLException {
-
+        boolean success = runQuery(ACTION_SELECT_ALL, resultSet -> {
+            while (resultSet.next()) {
+                final String actedUuid = resultSet.getString("acted_uuid");
+                LogEntry e = new LogEntry(
+                        resultSet.getLong("time"),
+                        UUID.fromString(resultSet.getString("actor_uuid")),
+                        resultSet.getString("actor_name"),
+                        resultSet.getString("type").toCharArray()[0],
+                        actedUuid.equals("null") ? null : UUID.fromString(actedUuid),
+                        resultSet.getString("acted_name"),
+                        resultSet.getString("action")
+                );
+                log.add(e);
             }
-
-            @Override
-            boolean onResult(ResultSet resultSet) throws SQLException {
-                while (resultSet.next()) {
-                    final String actedUuid = resultSet.getString("acted_uuid");
-                    LogEntry e = new LogEntry(
-                            resultSet.getLong("time"),
-                            UUID.fromString(resultSet.getString("actor_uuid")),
-                            resultSet.getString("actor_name"),
-                            resultSet.getString("type").toCharArray()[0],
-                            actedUuid.equals("null") ? null : UUID.fromString(actedUuid),
-                            resultSet.getString("acted_name"),
-                            resultSet.getString("action")
-                    );
-                    log.add(e);
-                }
-                return true;
-            }
+            return true;
         });
         return success ? log.build() : null;
     }
@@ -149,39 +143,31 @@ abstract class SQLDatastore extends Datastore {
     @Override
     public boolean loadUser(UUID uuid, String username) {
         User user = plugin.getUserManager().make(uuid, username);
-        boolean success = runQuery(new QueryRS(USER_SELECT) {
-            @Override
-            void onRun(PreparedStatement preparedStatement) throws SQLException {
-                preparedStatement.setString(1, user.getUuid().toString());
-            }
+        boolean success = runQuery(USER_SELECT,
+                preparedStatement -> preparedStatement.setString(1, user.getUuid().toString()),
+                resultSet -> {
+                    if (resultSet.next()) {
+                        // User exists, let's load.
+                        Map<String, Boolean> nodes = gson.fromJson(resultSet.getString("perms"), NM_TYPE);
+                        user.setNodes(nodes);
+                        user.setPrimaryGroup(resultSet.getString("primary_group"));
 
-            @Override
-            boolean onResult(ResultSet resultSet) throws SQLException {
-                if (resultSet.next()) {
-                    // User exists, let's load.
-                    Map<String, Boolean> nodes = gson.fromJson(resultSet.getString("perms"), NM_TYPE);
-                    user.setNodes(nodes);
-                    user.setPrimaryGroup(resultSet.getString("primary_group"));
-
-                    if (user.getName().equalsIgnoreCase("null")) {
-                        user.setName(resultSet.getString("name"));
-                    } else {
-                        if (!resultSet.getString("name").equals(user.getName())) {
-                            runQuery(new QueryPS(USER_UPDATE) {
-                                @Override
-                                void onRun(PreparedStatement preparedStatement) throws SQLException {
+                        if (user.getName().equalsIgnoreCase("null")) {
+                            user.setName(resultSet.getString("name"));
+                        } else {
+                            if (!resultSet.getString("name").equals(user.getName())) {
+                                runQuery(USER_UPDATE, preparedStatement -> {
                                     preparedStatement.setString(1, user.getName());
                                     preparedStatement.setString(2, user.getPrimaryGroup());
                                     preparedStatement.setString(3, gson.toJson(exportToLegacy(user.getNodes())));
                                     preparedStatement.setString(4, user.getUuid().toString());
-                                }
-                            });
+                                });
+                            }
                         }
                     }
+                    return true;
                 }
-                return true;
-            }
-        });
+        );
 
         if (success) plugin.getUserManager().updateOrSet(user);
         return success;
@@ -190,83 +176,53 @@ abstract class SQLDatastore extends Datastore {
     @Override
     public boolean saveUser(User user) {
         if (!plugin.getUserManager().shouldSave(user)) {
-            boolean success = runQuery(new QueryPS(USER_DELETE) {
-                @Override
-                void onRun(PreparedStatement preparedStatement) throws SQLException {
-                    preparedStatement.setString(1, user.getUuid().toString());
-                }
+            return runQuery(USER_DELETE, preparedStatement -> {
+                preparedStatement.setString(1, user.getUuid().toString());
             });
-            return success;
         }
 
-        boolean success = runQuery(new QueryRS(USER_SELECT) {
-            @Override
-            void onRun(PreparedStatement preparedStatement) throws SQLException {
-                preparedStatement.setString(1, user.getUuid().toString());
-            }
-
-            @Override
-            boolean onResult(ResultSet resultSet) throws SQLException {
-                boolean b;
-                if (!resultSet.next()) {
-                    // Doesn't already exist, let's insert.
-                    b = runQuery(new QueryPS(USER_INSERT) {
-                        @Override
-                        void onRun(PreparedStatement preparedStatement) throws SQLException {
+        return runQuery(USER_SELECT,
+                preparedStatement -> preparedStatement.setString(1, user.getUuid().toString()),
+                resultSet -> {
+                    if (!resultSet.next()) {
+                        // Doesn't already exist, let's insert.
+                        return runQuery(USER_INSERT, preparedStatement -> {
                             preparedStatement.setString(1, user.getUuid().toString());
                             preparedStatement.setString(2, user.getName());
                             preparedStatement.setString(3, user.getPrimaryGroup());
                             preparedStatement.setString(4, gson.toJson(exportToLegacy(user.getNodes())));
-                        }
-                    });
+                        });
 
-                } else {
-                    // User exists, let's update.
-                    b = runQuery(new QueryPS(USER_UPDATE) {
-                        @Override
-                        void onRun(PreparedStatement preparedStatement) throws SQLException {
+                    } else {
+                        // User exists, let's update.
+                        return runQuery(USER_UPDATE, preparedStatement -> {
                             preparedStatement.setString(1, user.getName());
                             preparedStatement.setString(2, user.getPrimaryGroup());
                             preparedStatement.setString(3, gson.toJson(exportToLegacy(user.getNodes())));
                             preparedStatement.setString(4, user.getUuid().toString());
-                        }
-                    });
+                        });
+                    }
                 }
-                return b;
-            }
-        });
-
-        return success;
+        );
     }
 
     @Override
     public boolean cleanupUsers() {
-        boolean success = runQuery(new QueryPS(USER_DELETE_ALL) {
-            @Override
-            void onRun(PreparedStatement preparedStatement) throws SQLException {
-                preparedStatement.setString(1, "{\"group.default\":true}");
-            }
+        return runQuery(USER_DELETE_ALL, preparedStatement -> {
+            preparedStatement.setString(1, "{\"group.default\":true}");
         });
-        return success;
     }
 
     @Override
     public Set<UUID> getUniqueUsers() {
         Set<UUID> uuids = new HashSet<>();
 
-        boolean success = runQuery(new QueryRS(USER_SELECT_ALL) {
-            @Override
-            void onRun(PreparedStatement preparedStatement) throws SQLException {
+        boolean success = runQuery(USER_SELECT_ALL, resultSet -> {
+            while (resultSet.next()) {
+                String uuid = resultSet.getString("uuid");
+                uuids.add(UUID.fromString(uuid));
             }
-
-            @Override
-            boolean onResult(ResultSet resultSet) throws SQLException {
-                while (resultSet.next()) {
-                    String uuid = resultSet.getString("uuid");
-                    uuids.add(UUID.fromString(uuid));
-                }
-                return true;
-            }
+            return true;
         });
 
         return success ? uuids : null;
@@ -275,30 +231,21 @@ abstract class SQLDatastore extends Datastore {
     @Override
     public boolean createAndLoadGroup(String name) {
         Group group = plugin.getGroupManager().make(name);
-        boolean success = runQuery(new QueryRS(GROUP_SELECT) {
-            @Override
-            void onRun(PreparedStatement preparedStatement) throws SQLException {
-                preparedStatement.setString(1, group.getName());
-            }
-
-            @Override
-            boolean onResult(ResultSet resultSet) throws SQLException {
-                boolean success = true;
-                if (!resultSet.next()) {
-                    success = runQuery(new QueryPS(GROUP_INSERT) {
-                        @Override
-                        void onRun(PreparedStatement preparedStatement) throws SQLException {
+        boolean success = runQuery(GROUP_SELECT,
+                preparedStatement -> preparedStatement.setString(1, group.getName()),
+                resultSet -> {
+                    if (!resultSet.next()) {
+                        return runQuery(GROUP_INSERT, preparedStatement -> {
                             preparedStatement.setString(1, group.getName());
                             preparedStatement.setString(2, gson.toJson(exportToLegacy(group.getNodes())));
-                        }
-                    });
-                } else {
-                    Map<String, Boolean> nodes = gson.fromJson(resultSet.getString("perms"), NM_TYPE);
-                    group.setNodes(nodes);
+                        });
+                    } else {
+                        Map<String, Boolean> nodes = gson.fromJson(resultSet.getString("perms"), NM_TYPE);
+                        group.setNodes(nodes);
+                        return true;
+                    }
                 }
-                return success;
-            }
-        });
+        );
 
         if (success) plugin.getGroupManager().updateOrSet(group);
         return success;
@@ -307,22 +254,17 @@ abstract class SQLDatastore extends Datastore {
     @Override
     public boolean loadGroup(String name) {
         Group group = plugin.getGroupManager().make(name);
-        boolean success = runQuery(new QueryRS(GROUP_SELECT) {
-            @Override
-            void onRun(PreparedStatement preparedStatement) throws SQLException {
-                preparedStatement.setString(1, name);
-            }
-
-            @Override
-            boolean onResult(ResultSet resultSet) throws SQLException {
-                if (resultSet.next()) {
-                    Map<String, Boolean> nodes = gson.fromJson(resultSet.getString("perms"), NM_TYPE);
-                    group.setNodes(nodes);
-                    return true;
+        boolean success = runQuery(GROUP_SELECT,
+                preparedStatement -> preparedStatement.setString(1, name),
+                resultSet -> {
+                    if (resultSet.next()) {
+                        Map<String, Boolean> nodes = gson.fromJson(resultSet.getString("perms"), NM_TYPE);
+                        group.setNodes(nodes);
+                        return true;
+                    }
+                    return false;
                 }
-                return false;
-            }
-        });
+        );
 
         if (success) plugin.getGroupManager().updateOrSet(group);
         return success;
@@ -331,22 +273,14 @@ abstract class SQLDatastore extends Datastore {
     @Override
     public boolean loadAllGroups() {
         List<Group> groups = new ArrayList<>();
-        boolean success = runQuery(new QueryRS(GROUP_SELECT_ALL) {
-            @Override
-            void onRun(PreparedStatement preparedStatement) throws SQLException {
-
+        boolean success = runQuery(GROUP_SELECT_ALL, resultSet -> {
+            while (resultSet.next()) {
+                Group group = plugin.getGroupManager().make(resultSet.getString("name"));
+                Map<String, Boolean> nodes = gson.fromJson(resultSet.getString("perms"), NM_TYPE);
+                group.setNodes(nodes);
+                groups.add(group);
             }
-
-            @Override
-            boolean onResult(ResultSet resultSet) throws SQLException {
-                while (resultSet.next()) {
-                    Group group = plugin.getGroupManager().make(resultSet.getString("name"));
-                    Map<String, Boolean> nodes = gson.fromJson(resultSet.getString("perms"), NM_TYPE);
-                    group.setNodes(nodes);
-                    groups.add(group);
-                }
-                return true;
-            }
+            return true;
         });
 
         if (success) {
@@ -359,23 +293,16 @@ abstract class SQLDatastore extends Datastore {
 
     @Override
     public boolean saveGroup(Group group) {
-        boolean success = runQuery(new QueryPS(GROUP_UPDATE) {
-            @Override
-            void onRun(PreparedStatement preparedStatement) throws SQLException {
-                preparedStatement.setString(1, gson.toJson(exportToLegacy(group.getNodes())));
-                preparedStatement.setString(2, group.getName());
-            }
+        return runQuery(GROUP_UPDATE, preparedStatement -> {
+            preparedStatement.setString(1, gson.toJson(exportToLegacy(group.getNodes())));
+            preparedStatement.setString(2, group.getName());
         });
-        return success;
     }
 
     @Override
     public boolean deleteGroup(Group group) {
-        boolean success = runQuery(new QueryPS(GROUP_DELETE) {
-            @Override
-            void onRun(PreparedStatement preparedStatement) throws SQLException {
-                preparedStatement.setString(1, group.getName());
-            }
+        boolean success = runQuery(GROUP_DELETE, preparedStatement -> {
+            preparedStatement.setString(1, group.getName());
         });
 
         if (success) plugin.getGroupManager().unload(group);
@@ -385,29 +312,20 @@ abstract class SQLDatastore extends Datastore {
     @Override
     public boolean createAndLoadTrack(String name) {
         Track track = plugin.getTrackManager().make(name);
-        boolean success = runQuery(new QueryRS(TRACK_SELECT) {
-            @Override
-            void onRun(PreparedStatement preparedStatement) throws SQLException {
-                preparedStatement.setString(1, track.getName());
-            }
-
-            @Override
-            boolean onResult(ResultSet resultSet) throws SQLException {
-                boolean success = true;
-                if (!resultSet.next()) {
-                    success = runQuery(new QueryPS(TRACK_INSERT) {
-                        @Override
-                        void onRun(PreparedStatement preparedStatement) throws SQLException {
+        boolean success = runQuery(TRACK_SELECT,
+                preparedStatement -> preparedStatement.setString(1, track.getName()),
+                resultSet -> {
+                    if (!resultSet.next()) {
+                        return runQuery(TRACK_INSERT, preparedStatement -> {
                             preparedStatement.setString(1, track.getName());
                             preparedStatement.setString(2, gson.toJson(track.getGroups()));
-                        }
-                    });
-                } else {
-                    track.setGroups(gson.fromJson(resultSet.getString("groups"), T_TYPE));
+                        });
+                    } else {
+                        track.setGroups(gson.fromJson(resultSet.getString("groups"), T_TYPE));
+                        return true;
+                    }
                 }
-                return success;
-            }
-        });
+        );
 
         if (success) plugin.getTrackManager().updateOrSet(track);
         return success;
@@ -416,21 +334,16 @@ abstract class SQLDatastore extends Datastore {
     @Override
     public boolean loadTrack(String name) {
         Track track = plugin.getTrackManager().make(name);
-        boolean success = runQuery(new QueryRS(TRACK_SELECT) {
-            @Override
-            void onRun(PreparedStatement preparedStatement) throws SQLException {
-                preparedStatement.setString(1, name);
-            }
-
-            @Override
-            boolean onResult(ResultSet resultSet) throws SQLException {
-                if (resultSet.next()) {
-                    track.setGroups(gson.fromJson(resultSet.getString("groups"), T_TYPE));
-                    return true;
+        boolean success = runQuery(TRACK_SELECT,
+                preparedStatement -> preparedStatement.setString(1, name),
+                resultSet -> {
+                    if (resultSet.next()) {
+                        track.setGroups(gson.fromJson(resultSet.getString("groups"), T_TYPE));
+                        return true;
+                    }
+                    return false;
                 }
-                return false;
-            }
-        });
+        );
 
         if (success) plugin.getTrackManager().updateOrSet(track);
         return success;
@@ -439,21 +352,13 @@ abstract class SQLDatastore extends Datastore {
     @Override
     public boolean loadAllTracks() {
         List<Track> tracks = new ArrayList<>();
-        boolean success = runQuery(new QueryRS(TRACK_SELECT_ALL) {
-            @Override
-            void onRun(PreparedStatement preparedStatement) throws SQLException {
-
+        boolean success = runQuery(TRACK_SELECT_ALL, resultSet -> {
+            while (resultSet.next()) {
+                Track track = plugin.getTrackManager().make(resultSet.getString("name"));
+                track.setGroups(gson.fromJson(resultSet.getString("groups"), T_TYPE));
+                tracks.add(track);
             }
-
-            @Override
-            boolean onResult(ResultSet resultSet) throws SQLException {
-                while (resultSet.next()) {
-                    Track track = plugin.getTrackManager().make(resultSet.getString("name"));
-                    track.setGroups(gson.fromJson(resultSet.getString("groups"), T_TYPE));
-                    tracks.add(track);
-                }
-                return true;
-            }
+            return true;
         });
 
         if (success) {
@@ -466,23 +371,16 @@ abstract class SQLDatastore extends Datastore {
 
     @Override
     public boolean saveTrack(Track track) {
-        boolean success = runQuery(new QueryPS(TRACK_UPDATE) {
-            @Override
-            void onRun(PreparedStatement preparedStatement) throws SQLException {
-                preparedStatement.setString(1, gson.toJson(track.getGroups()));
-                preparedStatement.setString(2, track.getName());
-            }
+        return runQuery(TRACK_UPDATE, preparedStatement -> {
+            preparedStatement.setString(1, gson.toJson(track.getGroups()));
+            preparedStatement.setString(2, track.getName());
         });
-        return success;
     }
 
     @Override
     public boolean deleteTrack(Track track) {
-        boolean success = runQuery(new QueryPS(TRACK_DELETE) {
-            @Override
-            void onRun(PreparedStatement preparedStatement) throws SQLException {
-                preparedStatement.setString(1, track.getName());
-            }
+        boolean success = runQuery(TRACK_DELETE, preparedStatement -> {
+            preparedStatement.setString(1, track.getName());
         });
 
         if (success) plugin.getTrackManager().unload(track);
@@ -492,37 +390,24 @@ abstract class SQLDatastore extends Datastore {
     @Override
     public boolean saveUUIDData(String username, UUID uuid) {
         final String u = username.toLowerCase();
-        boolean success = runQuery(new QueryRS(UUIDCACHE_SELECT) {
-            @Override
-            void onRun(PreparedStatement preparedStatement) throws SQLException {
-                preparedStatement.setString(1, u);
-            }
-
-            @Override
-            boolean onResult(ResultSet resultSet) throws SQLException {
-                boolean success;
-                if (resultSet.next()) {
-                    success = runQuery(new QueryPS(UUIDCACHE_UPDATE) {
-                        @Override
-                        void onRun(PreparedStatement preparedStatement) throws SQLException {
+        return runQuery(UUIDCACHE_SELECT,
+                preparedStatement -> preparedStatement.setString(1, u),
+                resultSet -> {
+                    boolean success;
+                    if (resultSet.next()) {
+                        success = runQuery(UUIDCACHE_UPDATE, preparedStatement -> {
                             preparedStatement.setString(1, uuid.toString());
                             preparedStatement.setString(2, u);
-                        }
-                    });
-                } else {
-                    success = runQuery(new QueryPS(UUIDCACHE_INSERT) {
-                        @Override
-                        void onRun(PreparedStatement preparedStatement) throws SQLException {
+                        });
+                    } else {
+                        success = runQuery(UUIDCACHE_INSERT, preparedStatement -> {
                             preparedStatement.setString(1, u);
                             preparedStatement.setString(2, uuid.toString());
-                        }
-                    });
+                        });
+                    }
+                    return success;
                 }
-                return success;
-            }
-        });
-
-        return success;
+        );
     }
 
     @Override
@@ -530,21 +415,16 @@ abstract class SQLDatastore extends Datastore {
         final String u = username.toLowerCase();
         final UUID[] uuid = {null};
 
-        boolean success = runQuery(new QueryRS(UUIDCACHE_SELECT) {
-            @Override
-            void onRun(PreparedStatement preparedStatement) throws SQLException {
-                preparedStatement.setString(1, u);
-            }
-
-            @Override
-            boolean onResult(ResultSet resultSet) throws SQLException {
-                if (resultSet.next()) {
-                    uuid[0] = UUID.fromString(resultSet.getString("uuid"));
-                    return true;
+        boolean success = runQuery(UUIDCACHE_SELECT,
+                preparedStatement -> preparedStatement.setString(1, u),
+                resultSet -> {
+                    if (resultSet.next()) {
+                        uuid[0] = UUID.fromString(resultSet.getString("uuid"));
+                        return true;
+                    }
+                    return false;
                 }
-                return false;
-            }
-        });
+        );
 
         return success ? uuid[0] : null;
     }
@@ -554,48 +434,25 @@ abstract class SQLDatastore extends Datastore {
         final String u = uuid.toString();
         final String[] name = {null};
 
-        boolean success = runQuery(new QueryRS(UUIDCACHE_SELECT_NAME) {
-            @Override
-            void onRun(PreparedStatement preparedStatement) throws SQLException {
-                preparedStatement.setString(1, u);
-            }
-
-            @Override
-            boolean onResult(ResultSet resultSet) throws SQLException {
-                if (resultSet.next()) {
-                    name[0] = resultSet.getString("name");
-                    return true;
+        boolean success = runQuery(UUIDCACHE_SELECT_NAME,
+                preparedStatement -> preparedStatement.setString(1, u),
+                resultSet -> {
+                    if (resultSet.next()) {
+                        name[0] = resultSet.getString("name");
+                        return true;
+                    }
+                    return false;
                 }
-                return false;
-            }
-        });
+        );
 
         return success ? name[0] : null;
     }
 
-    private class Query extends QueryPS {
-        Query(String query) {
-            super(query);
-        }
-
-        @Override
-        void onRun(PreparedStatement preparedStatement) throws SQLException {
-            // Do nothing
-        }
+    interface QueryPS {
+        void onRun(PreparedStatement preparedStatement) throws SQLException;
     }
 
-    @Getter
-    @AllArgsConstructor
-    abstract class QueryPS {
-        private final String query;
-        abstract void onRun(PreparedStatement preparedStatement) throws SQLException;
-    }
-
-    @Getter
-    @AllArgsConstructor
-    abstract class QueryRS {
-        private final String query;
-        abstract void onRun(PreparedStatement preparedStatement) throws SQLException;
-        abstract boolean onResult(ResultSet resultSet) throws SQLException;
+    interface QueryRS {
+        boolean onResult(ResultSet resultSet) throws SQLException;
     }
 }

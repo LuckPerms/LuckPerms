@@ -169,14 +169,13 @@ public class MongoDBDatastore extends Datastore {
     @Override
     public boolean saveUser(User user) {
         if (!plugin.getUserManager().shouldSave(user)) {
-            boolean success = call(() -> {
+            return call(() -> {
                 MongoCollection<Document> c = database.getCollection("users");
                 return c.deleteOne(new Document("_id", user.getUuid())).wasAcknowledged();
             }, false);
-            return success;
         }
 
-        boolean success = call(() -> {
+        return call(() -> {
             MongoCollection<Document> c = database.getCollection("users");
             try (MongoCursor<Document> cursor = c.find(new Document("_id", user.getUuid())).iterator()) {
                 if (!cursor.hasNext()) {
@@ -187,7 +186,6 @@ public class MongoDBDatastore extends Datastore {
             }
             return true;
         }, false);
-        return success;
     }
 
     @Override

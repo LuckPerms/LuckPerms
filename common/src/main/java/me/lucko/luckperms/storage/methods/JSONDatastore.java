@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 
 import static me.lucko.luckperms.core.PermissionHolder.exportToLegacy;
 
-@SuppressWarnings({"ResultOfMethodCallIgnored", "UnnecessaryLocalVariable"})
+@SuppressWarnings("ResultOfMethodCallIgnored")
 public class JSONDatastore extends FlatfileDatastore {
     public JSONDatastore(LuckPermsPlugin plugin, File pluginDir) {
         super(plugin, "Flatfile - JSON", pluginDir);
@@ -148,7 +148,7 @@ public class JSONDatastore extends FlatfileDatastore {
             }
         }
 
-        boolean success = doWrite(userFile, writer -> {
+        return doWrite(userFile, writer -> {
             writer.beginObject();
             writer.name("uuid").value(user.getUuid().toString());
             writer.name("name").value(user.getName());
@@ -162,7 +162,6 @@ public class JSONDatastore extends FlatfileDatastore {
             writer.endObject();
             return true;
         });
-        return success;
     }
 
     @Override
@@ -323,7 +322,7 @@ public class JSONDatastore extends FlatfileDatastore {
             }
         }
 
-        boolean success = doWrite(groupFile, writer -> {
+        return doWrite(groupFile, writer -> {
             writer.beginObject();
             writer.name("name").value(group.getName());
             writer.name("perms");
@@ -335,8 +334,6 @@ public class JSONDatastore extends FlatfileDatastore {
             writer.endObject();
             return true;
         });
-
-        return success;
     }
 
     @Override
@@ -451,7 +448,7 @@ public class JSONDatastore extends FlatfileDatastore {
             }
         }
 
-        boolean success = doWrite(trackFile, writer -> {
+        return doWrite(trackFile, writer -> {
             writer.beginObject();
             writer.name("name").value(track.getName());
             writer.name("groups");
@@ -463,8 +460,6 @@ public class JSONDatastore extends FlatfileDatastore {
             writer.endObject();
             return true;
         });
-
-        return success;
     }
 
     @Override

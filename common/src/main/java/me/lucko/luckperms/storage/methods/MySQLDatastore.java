@@ -87,7 +87,7 @@ public class MySQLDatastore extends SQLDatastore {
     }
 
     @Override
-    boolean runQuery(QueryPS queryPS) {
+    boolean runQuery(String query, QueryPS queryPS) {
         boolean success = false;
         try {
             @Cleanup Connection connection = getConnection();
@@ -95,7 +95,7 @@ public class MySQLDatastore extends SQLDatastore {
                 throw new IllegalStateException("SQL connection is null");
             }
 
-            @Cleanup PreparedStatement preparedStatement = connection.prepareStatement(queryPS.getQuery());
+            @Cleanup PreparedStatement preparedStatement = connection.prepareStatement(query);
             queryPS.onRun(preparedStatement);
             preparedStatement.execute();
 
@@ -107,7 +107,7 @@ public class MySQLDatastore extends SQLDatastore {
     }
 
     @Override
-    boolean runQuery(QueryRS queryRS) {
+    boolean runQuery(String query, QueryPS queryPS, QueryRS queryRS) {
         boolean success = false;
         try {
             @Cleanup Connection connection = getConnection();
@@ -115,8 +115,8 @@ public class MySQLDatastore extends SQLDatastore {
                 throw new IllegalStateException("SQL connection is null");
             }
 
-            @Cleanup PreparedStatement preparedStatement = connection.prepareStatement(queryRS.getQuery());
-            queryRS.onRun(preparedStatement);
+            @Cleanup PreparedStatement preparedStatement = connection.prepareStatement(query);
+            queryPS.onRun(preparedStatement);
 
             @Cleanup ResultSet resultSet = preparedStatement.executeQuery();
             success = queryRS.onResult(resultSet);
