@@ -26,11 +26,11 @@ import lombok.NonNull;
 import lombok.Setter;
 import me.lucko.luckperms.LPBukkitPlugin;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.contexts.Contexts;
 import me.lucko.luckperms.core.PermissionHolder;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.users.User;
-import me.lucko.luckperms.utils.Contexts;
 import net.milkbowl.vault.chat.Chat;
 
 import java.util.Iterator;
@@ -90,7 +90,7 @@ public class VaultChatHook extends Chat {
             }
         }
 
-        Node.Builder metaNode = new me.lucko.luckperms.utils.Node.Builder("meta." + node + "." + value).setValue(true);
+        Node.Builder metaNode = new me.lucko.luckperms.core.Node.Builder("meta." + node + "." + value).setValue(true);
         if (!perms.getServer().equalsIgnoreCase("global")) {
             metaNode.setServer(perms.getServer());
         }
@@ -140,7 +140,7 @@ public class VaultChatHook extends Chat {
         if (holder == null) return;
         if (value.equals("")) return;
 
-        Node.Builder node = new me.lucko.luckperms.utils.Node.Builder(prefix ? "prefix" : "suffix" + ".1000." + escapeCharacters(value));
+        Node.Builder node = new me.lucko.luckperms.core.Node.Builder(prefix ? "prefix" : "suffix" + ".1000." + escapeCharacters(value));
         node.setValue(true);
         if (!perms.getServer().equalsIgnoreCase("global")) {
             node.setServer(perms.getServer());

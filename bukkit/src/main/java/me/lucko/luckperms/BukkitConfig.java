@@ -22,7 +22,7 @@
 
 package me.lucko.luckperms;
 
-import me.lucko.luckperms.core.AbstractConfiguration;
+import me.lucko.luckperms.config.AbstractConfiguration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;

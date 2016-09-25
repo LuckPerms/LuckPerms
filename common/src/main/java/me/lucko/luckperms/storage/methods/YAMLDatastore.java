@@ -24,10 +24,10 @@ package me.lucko.luckperms.storage.methods;
 
 import lombok.Cleanup;
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.core.Node;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.tracks.Track;
 import me.lucko.luckperms.users.User;
-import me.lucko.luckperms.utils.Node;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 

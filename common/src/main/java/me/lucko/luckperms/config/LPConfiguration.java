@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.core;
+package me.lucko.luckperms.config;
 
 import me.lucko.luckperms.storage.DatastoreConfiguration;
 

@@ -27,6 +27,8 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.api.*;
+import me.lucko.luckperms.api.context.ContextListener;
+import me.lucko.luckperms.api.context.IContextCalculator;
 import me.lucko.luckperms.api.event.LPEvent;
 import me.lucko.luckperms.api.event.LPListener;
 import me.lucko.luckperms.api.implementation.internal.*;
@@ -208,6 +210,18 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public Node.Builder buildNode(@NonNull String permission) throws IllegalArgumentException {
-        return new me.lucko.luckperms.utils.Node.Builder(checkNode(permission));
+        return new me.lucko.luckperms.core.Node.Builder(checkNode(permission));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void registerContextCalculator(IContextCalculator<?> contextCalculator) {
+        plugin.getContextManager().registerCalculator(contextCalculator);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void registerContextListener(ContextListener<?> contextListener) {
+        plugin.getContextManager().registerListener(contextListener);
     }
 }

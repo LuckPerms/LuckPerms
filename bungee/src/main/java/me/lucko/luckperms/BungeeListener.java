@@ -118,9 +118,4 @@ public class BungeeListener extends AbstractListener implements Listener {
         plugin.getPlayerCache().remove(plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId()));
         onLeave(e.getPlayer().getUniqueId());
     }
-
-    @EventHandler
-    public void onPlayerServerSwitch(ServerSwitchEvent e) {
-        refreshPlayer(e.getPlayer().getUniqueId());
-    }
 }

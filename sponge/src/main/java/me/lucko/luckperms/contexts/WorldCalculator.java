@@ -20,35 +20,27 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.users;
+package me.lucko.luckperms.contexts;
 
-import me.lucko.luckperms.LPSpongePlugin;
-import me.lucko.luckperms.api.sponge.LuckPermsUserSubject;
-import me.lucko.luckperms.api.sponge.collections.UserCollection;
+import lombok.RequiredArgsConstructor;
+import me.lucko.luckperms.api.context.ContextCalculator;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.service.context.Context;
 
-import java.util.UUID;
+import java.util.Map;
 
-class SpongeUser extends User {
-    private final LPSpongePlugin plugin;
+@RequiredArgsConstructor
+public class WorldCalculator extends ContextCalculator<Player> {
 
-    SpongeUser(UUID uuid, LPSpongePlugin plugin) {
-        super(uuid, plugin);
-        this.plugin = plugin;
-    }
-
-    SpongeUser(UUID uuid, String username, LPSpongePlugin plugin) {
-        super(uuid, username, plugin);
-        this.plugin = plugin;
+    @Override
+    public Map<String, String> giveApplicableContext(Player subject, Map<String, String> accumulator) {
+        accumulator.put(Context.WORLD_KEY, subject.getWorld().getName());
+        return accumulator;
     }
 
     @Override
-    public synchronized void refreshPermissions() {
-        UserCollection uc = plugin.getService().getUserSubjects();
-        if (!uc.getUsers().containsKey(getUuid())) {
-            return;
-        }
-
-        LuckPermsUserSubject us = uc.getUsers().get(getUuid());
-        us.calculateActivePermissions();
+    public boolean isContextApplicable(Player subject, Map.Entry<String, String> context) {
+        return context.getKey().equals(Context.WORLD_KEY) && subject.getWorld().getName().equals(context.getValue());
     }
+
 }

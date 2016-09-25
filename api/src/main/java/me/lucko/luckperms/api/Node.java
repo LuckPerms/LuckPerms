@@ -105,7 +105,15 @@ public interface Node extends Map.Entry<String, Boolean> {
     boolean shouldApplyOnWorld(String world, boolean includeGlobal, boolean applyRegex);
 
     /**
-     * If this node should apply given the specific context
+     * If this node should apply in the given context
+     * @param context the context key value pairs
+     * @param worldAndServer if world and server contexts should be checked
+     * @return true if the node should apply
+     */
+    boolean shouldApplyWithContext(Map<String, String> context, boolean worldAndServer);
+
+    /**
+     * If this node should apply in the given context
      * @param context the context key value pairs
      * @return true if the node should apply
      */

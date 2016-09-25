@@ -23,10 +23,13 @@
 package me.lucko.luckperms.users;
 
 import me.lucko.luckperms.LPSpongePlugin;
+import me.lucko.luckperms.api.context.ContextListener;
+import org.spongepowered.api.entity.living.player.Player;
 
+import java.util.Map;
 import java.util.UUID;
 
-public class SpongeUserManager extends UserManager {
+public class SpongeUserManager extends UserManager implements ContextListener<Player> {
     private final LPSpongePlugin plugin;
 
     public SpongeUserManager(LPSpongePlugin plugin) {
@@ -57,5 +60,15 @@ public class SpongeUserManager extends UserManager {
         plugin.getGame().getServer().getOnlinePlayers().stream()
                 .map(p -> plugin.getUuidCache().getUUID(p.getUniqueId()))
                 .forEach(u -> plugin.getDatastore().loadUser(u, "null"));
+    }
+
+    @Override
+    public void onContextChange(Player subject, Map.Entry<String, String> before, Map.Entry<String, String> current) throws Exception {
+        UUID internal = plugin.getUuidCache().getUUID(subject.getUniqueId());
+
+        User user = get(internal);
+        if (user != null) {
+            plugin.doAsync(user::refreshPermissions);
+        }
     }
 }

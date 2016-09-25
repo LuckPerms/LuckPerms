@@ -22,22 +22,18 @@
 
 package me.lucko.luckperms.users;
 
-import lombok.Getter;
 import me.lucko.luckperms.LPBukkitPlugin;
+import me.lucko.luckperms.api.context.ContextListener;
 import me.lucko.luckperms.inject.Injector;
 import org.bukkit.entity.Player;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-public class BukkitUserManager extends UserManager {
+public class BukkitUserManager extends UserManager implements ContextListener<Player> {
     private final LPBukkitPlugin plugin;
-
-    @Getter
-    private final Map<UUID, String> worldCache = new ConcurrentHashMap<>();
 
     public BukkitUserManager(LPBukkitPlugin plugin) {
         super(plugin);
@@ -88,5 +84,15 @@ public class BukkitUserManager extends UserManager {
                     .collect(Collectors.toSet());
             plugin.doAsync(() -> players.forEach(u -> plugin.getDatastore().loadUser(u, "null")));
         });
+    }
+
+    @Override
+    public void onContextChange(Player subject, Map.Entry<String, String> before, Map.Entry<String, String> current) throws Exception {
+        UUID internal = plugin.getUuidCache().getUUID(subject.getUniqueId());
+
+        User user = get(internal);
+        if (user != null) {
+            plugin.doAsync(user::refreshPermissions);
+        }
     }
 }

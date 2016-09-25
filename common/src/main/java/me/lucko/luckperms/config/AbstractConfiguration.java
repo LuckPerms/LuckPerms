@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.core;
+package me.lucko.luckperms.config;
 
 import com.google.common.collect.ImmutableMap;
 import lombok.AccessLevel;

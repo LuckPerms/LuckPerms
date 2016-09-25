@@ -20,35 +20,26 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.users;
+package me.lucko.luckperms.contexts;
 
-import me.lucko.luckperms.LPSpongePlugin;
-import me.lucko.luckperms.api.sponge.LuckPermsUserSubject;
-import me.lucko.luckperms.api.sponge.collections.UserCollection;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-import java.util.UUID;
+import java.util.Collections;
+import java.util.Map;
 
-class SpongeUser extends User {
-    private final LPSpongePlugin plugin;
-
-    SpongeUser(UUID uuid, LPSpongePlugin plugin) {
-        super(uuid, plugin);
-        this.plugin = plugin;
+@Getter
+@AllArgsConstructor
+public class Contexts {
+    public static Contexts allowAll() {
+        return new Contexts(Collections.emptyMap(), true, true, true, true, true);
     }
 
-    SpongeUser(UUID uuid, String username, LPSpongePlugin plugin) {
-        super(uuid, username, plugin);
-        this.plugin = plugin;
-    }
+    private final Map<String, String> context;
+    private final boolean includeGlobal;
+    private final boolean includeGlobalWorld;
+    private final boolean applyGroups;
+    private final boolean applyGlobalGroups;
+    private final boolean applyGlobalWorldGroups;
 
-    @Override
-    public synchronized void refreshPermissions() {
-        UserCollection uc = plugin.getService().getUserSubjects();
-        if (!uc.getUsers().containsKey(getUuid())) {
-            return;
-        }
-
-        LuckPermsUserSubject us = uc.getUsers().get(getUuid());
-        us.calculateActivePermissions();
-    }
 }

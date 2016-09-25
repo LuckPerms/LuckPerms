@@ -22,6 +22,8 @@
 
 package me.lucko.luckperms.api;
 
+import me.lucko.luckperms.api.context.ContextListener;
+import me.lucko.luckperms.api.context.IContextCalculator;
 import me.lucko.luckperms.api.event.LPListener;
 
 import java.util.Optional;
@@ -217,5 +219,19 @@ public interface LuckPermsApi {
      * @since 2.6
      */
     Node.Builder buildNode(String permission) throws IllegalArgumentException;
+
+    /**
+     * Register a custom context calculator to the server
+     * @param contextCalculator the context calculator to register. The type MUST be the player class of the platform.
+     * @throws ClassCastException if the type is not the player class of the platform.
+     */
+    void registerContextCalculator(IContextCalculator<?> contextCalculator);
+
+    /**
+     * Registers a custom context listener to the server,
+     * @param contextListener the context listener to register. The type MUST be the player class of the platform.
+     * @throws ClassCastException if the type is not the player class of the platform.
+     */
+    void registerContextListener(ContextListener<?> contextListener);
 
 }

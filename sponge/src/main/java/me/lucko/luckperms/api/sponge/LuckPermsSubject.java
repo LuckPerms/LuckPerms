@@ -30,12 +30,12 @@ import lombok.Getter;
 import lombok.NonNull;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.data.Callback;
+import me.lucko.luckperms.contexts.Contexts;
 import me.lucko.luckperms.core.PermissionHolder;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.users.User;
-import me.lucko.luckperms.utils.Contexts;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
@@ -124,7 +124,7 @@ public class LuckPermsSubject implements Subject {
             context.put(c.getKey(), c.getValue());
         }
 
-        switch (holder.inheritsPermission(new me.lucko.luckperms.utils.Node.Builder(node).withExtraContext(context).build())) {
+        switch (holder.inheritsPermission(new me.lucko.luckperms.core.Node.Builder(node).withExtraContext(context).build())) {
             case UNDEFINED:
                 return Tristate.UNDEFINED;
             case TRUE:
@@ -277,7 +277,7 @@ public class LuckPermsSubject implements Subject {
         public boolean setPermission(Set<Context> set, String s, Tristate tristate) {
             if (tristate == Tristate.UNDEFINED) {
                 // Unset
-                Node.Builder builder = new me.lucko.luckperms.utils.Node.Builder(s);
+                Node.Builder builder = new me.lucko.luckperms.core.Node.Builder(s);
 
                 for (Context ct : set) {
                     builder.withExtraContext(ct.getKey(), ct.getValue());
@@ -290,7 +290,7 @@ public class LuckPermsSubject implements Subject {
                 return true;
             }
 
-            Node.Builder builder = new me.lucko.luckperms.utils.Node.Builder(s)
+            Node.Builder builder = new me.lucko.luckperms.core.Node.Builder(s)
                     .setValue(tristate.asBoolean());
 
             for (Context ct : set) {
@@ -384,7 +384,7 @@ public class LuckPermsSubject implements Subject {
                 Map<String, String> contexts = set.stream().collect(Collectors.toMap(Context::getKey, Context::getValue));
 
                 try {
-                    holder.setPermission(new me.lucko.luckperms.utils.Node.Builder("group." + permsSubject.getIdentifier())
+                    holder.setPermission(new me.lucko.luckperms.core.Node.Builder("group." + permsSubject.getIdentifier())
                             .withExtraContext(contexts)
                             .build());
                 } catch (ObjectAlreadyHasException ignored) {}
@@ -403,7 +403,7 @@ public class LuckPermsSubject implements Subject {
                 Map<String, String> contexts = set.stream().collect(Collectors.toMap(Context::getKey, Context::getValue));
 
                 try {
-                    holder.unsetPermission(new me.lucko.luckperms.utils.Node.Builder("group." + permsSubject.getIdentifier())
+                    holder.unsetPermission(new me.lucko.luckperms.core.Node.Builder("group." + permsSubject.getIdentifier())
                             .withExtraContext(contexts)
                             .build());
                 } catch (ObjectLacksException ignored) {}
@@ -514,7 +514,7 @@ public class LuckPermsSubject implements Subject {
             value = escapeCharacters(value);
 
             try {
-                holder.setPermission(new me.lucko.luckperms.utils.Node.Builder("meta." + key + "." + value)
+                holder.setPermission(new me.lucko.luckperms.core.Node.Builder("meta." + key + "." + value)
                         .withExtraContext(context)
                         .build()
                 );
@@ -613,7 +613,7 @@ public class LuckPermsSubject implements Subject {
             if (tristate == Tristate.UNDEFINED) {
                 // Unset
 
-                Node.Builder builder = new me.lucko.luckperms.utils.Node.Builder(s);
+                Node.Builder builder = new me.lucko.luckperms.core.Node.Builder(s);
 
                 for (Context ct : set) {
                     builder.withExtraContext(ct.getKey(), ct.getValue());
@@ -625,7 +625,7 @@ public class LuckPermsSubject implements Subject {
                 return true;
             }
 
-            Node.Builder builder = new me.lucko.luckperms.utils.Node.Builder(s)
+            Node.Builder builder = new me.lucko.luckperms.core.Node.Builder(s)
                     .setValue(tristate.asBoolean());
 
             for (Context ct : set) {
@@ -709,7 +709,7 @@ public class LuckPermsSubject implements Subject {
                 Map<String, String> contexts = set.stream().collect(Collectors.toMap(Context::getKey, Context::getValue));
 
                 try {
-                    holder.setTransientPermission(new me.lucko.luckperms.utils.Node.Builder("group." + permsSubject.getIdentifier())
+                    holder.setTransientPermission(new me.lucko.luckperms.core.Node.Builder("group." + permsSubject.getIdentifier())
                             .withExtraContext(contexts)
                             .build());
                 } catch (ObjectAlreadyHasException ignored) {}
@@ -727,7 +727,7 @@ public class LuckPermsSubject implements Subject {
                 Map<String, String> contexts = set.stream().collect(Collectors.toMap(Context::getKey, Context::getValue));
 
                 try {
-                    holder.unsetTransientPermission(new me.lucko.luckperms.utils.Node.Builder("group." + permsSubject.getIdentifier())
+                    holder.unsetTransientPermission(new me.lucko.luckperms.core.Node.Builder("group." + permsSubject.getIdentifier())
                             .withExtraContext(contexts)
                             .build());
                 } catch (ObjectLacksException ignored) {}
@@ -827,7 +827,7 @@ public class LuckPermsSubject implements Subject {
             value = escapeCharacters(value);
 
             try {
-                holder.setTransientPermission(new me.lucko.luckperms.utils.Node.Builder("meta." + key + "." + value)
+                holder.setTransientPermission(new me.lucko.luckperms.core.Node.Builder("meta." + key + "." + value)
                         .withExtraContext(context)
                         .build()
                 );

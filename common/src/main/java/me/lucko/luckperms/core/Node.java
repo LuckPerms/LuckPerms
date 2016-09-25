@@ -20,13 +20,14 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.utils;
+package me.lucko.luckperms.core;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import lombok.*;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.constants.Patterns;
+import me.lucko.luckperms.utils.ArgumentChecker;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -100,7 +101,7 @@ public class Node implements me.lucko.luckperms.api.Node {
 
     private long expireAt = 0L;
 
-    private final Map<String, String> extraContexts = new HashMap<>();
+    private final Map<String, String> extraContexts;
 
     // Cache the state
     private Tristate isPrefix = Tristate.UNDEFINED;
@@ -140,9 +141,11 @@ public class Node implements me.lucko.luckperms.api.Node {
         this.server = server;
         this.world = world;
 
+        ImmutableMap.Builder<String, String> contexts = ImmutableMap.builder();
         if (extraContexts != null) {
-            this.extraContexts.putAll(extraContexts);
+            contexts.putAll(extraContexts);
         }
+        this.extraContexts = contexts.build();
     }
 
     @Override
@@ -225,34 +228,63 @@ public class Node implements me.lucko.luckperms.api.Node {
     }
 
     @Override
-    public boolean shouldApplyWithContext(Map<String, String> context) {
-        if (context == null || context.isEmpty()) {
+    public boolean shouldApplyWithContext(Map<String, String> context, boolean worldAndServer) {
+        if (extraContexts.isEmpty() && !isServerSpecific() && !isWorldSpecific()) {
             return true;
         }
 
-        for (Map.Entry<String, String> c : context.entrySet()) {
-            if (c.getKey().equals("server")) {
-                if (shouldApplyOnServer(c.getValue(), false, false)) {
+        if (worldAndServer) {
+            if (isWorldSpecific()) {
+                if (context == null) {
+                    return false;
+                }
+
+                if (!context.containsKey("world")) {
+                    return false;
+                }
+
+                if (!context.get("world").equalsIgnoreCase(world)) {
                     return false;
                 }
             }
 
-            if (c.getKey().equals("world")) {
-                if (shouldApplyOnWorld(c.getValue(), false, false)) {
+            if (isServerSpecific()) {
+                if (context == null) {
+                    return false;
+                }
+
+                if (!context.containsKey("server")) {
+                    return false;
+                }
+
+                if (!context.get("server").equalsIgnoreCase(server)) {
                     return false;
                 }
             }
+        }
 
-            if (!getExtraContexts().containsKey(c.getKey())) {
+        if (!extraContexts.isEmpty()) {
+            if (context == null) {
                 return false;
             }
 
-            if (!getExtraContexts().get(c.getKey()).equalsIgnoreCase(c.getValue())) {
-                return false;
+            for (Map.Entry<String, String> c : extraContexts.entrySet()) {
+                if (!context.containsKey(c.getKey())) {
+                    return false;
+                }
+
+                if (!context.get(c.getKey()).equalsIgnoreCase(c.getValue())) {
+                    return false;
+                }
             }
         }
 
         return true;
+    }
+
+    @Override
+    public boolean shouldApplyWithContext(Map<String, String> context) {
+        return shouldApplyWithContext(context, true);
     }
 
     @Override

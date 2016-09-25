@@ -23,10 +23,13 @@
 package me.lucko.luckperms.users;
 
 import me.lucko.luckperms.LPBungeePlugin;
+import me.lucko.luckperms.api.context.ContextListener;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 
+import java.util.Map;
 import java.util.UUID;
 
-public class BungeeUserManager extends UserManager {
+public class BungeeUserManager extends UserManager implements ContextListener<ProxiedPlayer> {
     private final LPBungeePlugin plugin;
 
     public BungeeUserManager(LPBungeePlugin plugin) {
@@ -56,5 +59,15 @@ public class BungeeUserManager extends UserManager {
         plugin.getProxy().getPlayers().stream()
                 .map(p -> plugin.getUuidCache().getUUID(p.getUniqueId()))
                 .forEach(u -> plugin.getDatastore().loadUser(u, "null"));
+    }
+
+    @Override
+    public void onContextChange(ProxiedPlayer subject, Map.Entry<String, String> before, Map.Entry<String, String> current) throws Exception {
+        UUID internal = plugin.getUuidCache().getUUID(subject.getUniqueId());
+
+        User user = get(internal);
+        if (user != null) {
+            plugin.doAsync(user::refreshPermissions);
+        }
     }
 }

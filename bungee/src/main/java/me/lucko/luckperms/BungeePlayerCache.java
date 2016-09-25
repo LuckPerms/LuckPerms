@@ -23,8 +23,8 @@
 package me.lucko.luckperms;
 
 import lombok.Getter;
-import me.lucko.luckperms.utils.PermissionCalculator;
-import me.lucko.luckperms.utils.PermissionProcessor;
+import me.lucko.luckperms.calculators.PermissionCalculator;
+import me.lucko.luckperms.calculators.PermissionProcessor;
 
 import java.util.ArrayList;
 import java.util.List;

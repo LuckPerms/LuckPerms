@@ -25,17 +25,21 @@ package me.lucko.luckperms.api.sponge;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
+import me.lucko.luckperms.api.event.events.UserPermissionRefreshEvent;
+import me.lucko.luckperms.api.implementation.internal.UserLink;
+import me.lucko.luckperms.calculators.PermissionProcessor;
+import me.lucko.luckperms.contexts.Contexts;
 import me.lucko.luckperms.users.User;
-import me.lucko.luckperms.utils.PermissionCalculator;
-import me.lucko.luckperms.utils.PermissionProcessor;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.context.Context;
+import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.util.Tristate;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class LuckPermsUserSubject extends LuckPermsSubject {
     public static LuckPermsUserSubject wrapUser(User user, LuckPermsService service) {
@@ -45,43 +49,79 @@ public class LuckPermsUserSubject extends LuckPermsSubject {
     @Getter
     private final User user;
 
-    private final PermissionCalculator calculator;
-
     @Getter
-    private final Map<String, Boolean> permissionCache = new ConcurrentHashMap<>();
+    private final Map<Map<String, String>, ContextData> contextData;
 
     private LuckPermsUserSubject(User user, LuckPermsService service) {
         super(user, service);
         this.user = user;
 
-        List<PermissionProcessor> processors = new ArrayList<>(5);
-        processors.add(new PermissionCalculator.MapProcessor(permissionCache));
-        if (service.getPlugin().getConfiguration().isApplyingWildcards()) {
-            processors.add(new SpongeWildcardProcessor(permissionCache));
-            processors.add(new PermissionCalculator.WildcardProcessor(permissionCache));
-        }
-        if (service.getPlugin().getConfiguration().isApplyingRegex()) {
-            processors.add(new PermissionCalculator.RegexProcessor(permissionCache));
-        }
-        processors.add(new SpongeDefaultsProcessor(service));
-
-        calculator = new PermissionCalculator(service.getPlugin(), user.getName(), service.getPlugin().getConfiguration().isDebugPermissionChecks(), processors);
+        contextData = new ConcurrentHashMap<>();
     }
 
-    public void invalidateCache() {
-        calculator.invalidateCache();
-    }
-
-    // TODO don't ignore context
     @Override
     public Tristate getPermissionValue(@NonNull Set<Context> contexts, @NonNull String permission) {
-        me.lucko.luckperms.api.Tristate t =  calculator.getPermissionValue(permission);
+        Map<String, String> context = contexts.stream().collect(Collectors.toMap(Context::getKey, Context::getValue));
+        ContextData cd = contextData.computeIfAbsent(context, this::calculatePermissions);
+
+        me.lucko.luckperms.api.Tristate t =  cd.getPermissionValue(permission);
         if (t != me.lucko.luckperms.api.Tristate.UNDEFINED) {
             return Tristate.fromBoolean(t.asBoolean());
         } else {
             return Tristate.UNDEFINED;
         }
     }
+
+    public ContextData calculatePermissions(Map<String, String> context) {
+        Map<String, Boolean> toApply = user.exportNodes(
+                new Contexts(
+                        context,
+                        service.getPlugin().getConfiguration().isIncludingGlobalPerms(),
+                        service.getPlugin().getConfiguration().isIncludingGlobalWorldPerms(),
+                        true,
+                        service.getPlugin().getConfiguration().isApplyingGlobalGroups(),
+                        service.getPlugin().getConfiguration().isApplyingGlobalWorldGroups()
+                ),
+                Collections.emptyList()
+        );
+
+        ContextData existing = contextData.get(context);
+        if (existing == null) {
+            existing = new ContextData(this, context, service);
+            contextData.put(context, existing);
+        }
+
+        boolean different = false;
+        if (toApply.size() != existing.getPermissionCache().size()) {
+            different = true;
+        } else {
+            for (Map.Entry<String, Boolean> e : existing.getPermissionCache().entrySet()) {
+                if (toApply.containsKey(e.getKey()) && toApply.get(e.getKey()) == e.getValue()) {
+                    continue;
+                }
+                different = true;
+                break;
+            }
+        }
+
+        if (!different) return existing;
+
+        existing.getPermissionCache().clear();
+        existing.invalidateCache();
+        existing.getPermissionCache().putAll(toApply);
+        service.getPlugin().getApiProvider().fireEventAsync(new UserPermissionRefreshEvent(new UserLink(user)));
+        return existing;
+    }
+
+    public void calculatePermissions(Set<Context> contexts) {
+        Map<String, String> context = contexts.stream().collect(Collectors.toMap(Context::getKey, Context::getValue));
+        calculatePermissions(context);
+    }
+
+    public void calculateActivePermissions() {
+        calculatePermissions(getActiveContexts());
+    }
+
 
     @Override
     public String getIdentifier() {
@@ -100,8 +140,22 @@ public class LuckPermsUserSubject extends LuckPermsSubject {
         return Optional.empty();
     }
 
+    @Override
+    public Set<Context> getActiveContexts() {
+        final UUID uuid = service.getPlugin().getUuidCache().getExternalUUID(user.getUuid());
+        Optional<Player> player = Sponge.getServer().getPlayer(uuid);
+
+        if (!player.isPresent()) {
+            return SubjectData.GLOBAL_CONTEXT;
+        }
+
+        Map<String, String> context = new HashMap<>();
+        service.getPlugin().getContextManager().giveApplicableContext(player.get(), context);
+        return context.entrySet().stream().map(e -> new Context(e.getKey(), e.getValue())).collect(Collectors.toSet());
+    }
+
     @AllArgsConstructor
-    private static class SpongeWildcardProcessor implements PermissionProcessor {
+    static class SpongeWildcardProcessor implements PermissionProcessor {
 
         @Getter
         private final Map<String, Boolean> map;
@@ -152,7 +206,7 @@ public class LuckPermsUserSubject extends LuckPermsSubject {
     }
 
     @AllArgsConstructor
-    private static class SpongeDefaultsProcessor implements PermissionProcessor {
+    static class SpongeDefaultsProcessor implements PermissionProcessor {
         private final LuckPermsService service;
 
         @Override

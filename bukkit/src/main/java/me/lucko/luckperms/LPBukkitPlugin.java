@@ -30,8 +30,11 @@ import me.lucko.luckperms.api.implementation.ApiProvider;
 import me.lucko.luckperms.api.vault.VaultHook;
 import me.lucko.luckperms.commands.ConsecutiveExecutor;
 import me.lucko.luckperms.commands.Sender;
+import me.lucko.luckperms.config.LPConfiguration;
 import me.lucko.luckperms.constants.Message;
-import me.lucko.luckperms.core.LPConfiguration;
+import me.lucko.luckperms.contexts.ContextManager;
+import me.lucko.luckperms.contexts.ServerCalculator;
+import me.lucko.luckperms.contexts.WorldCalculator;
 import me.lucko.luckperms.core.UuidCache;
 import me.lucko.luckperms.data.Importer;
 import me.lucko.luckperms.groups.GroupManager;
@@ -72,6 +75,8 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private ConsecutiveExecutor consecutiveExecutor;
     private DefaultsProvider defaultsProvider;
     private LocaleManager localeManager;
+    private ContextManager<Player> contextManager;
+    private WorldCalculator worldCalculator;
 
     @Override
     public void onEnable() {
@@ -115,6 +120,13 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         trackManager = new TrackManager();
         importer = new Importer(commandManager);
         consecutiveExecutor = new ConsecutiveExecutor(commandManager);
+
+        contextManager = new ContextManager<>();
+        worldCalculator = new WorldCalculator(this);
+        pm.registerEvents(worldCalculator, this);
+        contextManager.registerCalculator(worldCalculator);
+        contextManager.registerCalculator(new ServerCalculator<>(getConfiguration().getServer()));
+        contextManager.registerListener(userManager);
 
         int mins = getConfiguration().getSyncTime();
         if (mins > 0) {

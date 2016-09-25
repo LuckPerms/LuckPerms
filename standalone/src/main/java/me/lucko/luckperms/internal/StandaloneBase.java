@@ -30,10 +30,11 @@ import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.api.implementation.ApiProvider;
 import me.lucko.luckperms.commands.ConsecutiveExecutor;
 import me.lucko.luckperms.commands.Sender;
+import me.lucko.luckperms.config.LPConfiguration;
 import me.lucko.luckperms.constants.Constants;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
-import me.lucko.luckperms.core.LPConfiguration;
+import me.lucko.luckperms.contexts.ContextManager;
 import me.lucko.luckperms.core.UuidCache;
 import me.lucko.luckperms.data.Importer;
 import me.lucko.luckperms.groups.GroupManager;
@@ -143,6 +144,11 @@ public class StandaloneBase implements LuckPermsPlugin {
 
     @Override
     public ConsecutiveExecutor getConsecutiveExecutor() {
+        return null;
+    }
+
+    @Override
+    public ContextManager getContextManager() {
         return null;
     }
 

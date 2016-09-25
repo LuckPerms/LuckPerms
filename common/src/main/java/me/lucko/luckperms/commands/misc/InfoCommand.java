@@ -26,9 +26,9 @@ import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.commands.CommandResult;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SingleMainCommand;
+import me.lucko.luckperms.config.LPConfiguration;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
-import me.lucko.luckperms.core.LPConfiguration;
 
 import java.util.List;
 

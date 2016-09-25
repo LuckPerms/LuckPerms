@@ -20,38 +20,34 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.internal;
+package me.lucko.luckperms.contexts;
 
-import me.lucko.luckperms.config.AbstractConfiguration;
+import lombok.AllArgsConstructor;
+import me.lucko.luckperms.api.context.ContextCalculator;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.service.context.Context;
+import org.spongepowered.api.service.permission.Subject;
 
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-public class StandaloneConfiguration extends AbstractConfiguration<StandaloneBase> {
-    public StandaloneConfiguration(StandaloneBase plugin) {
-        super(plugin, "global", true, "null");
+@AllArgsConstructor
+public class SpongeCalculatorLink extends ContextCalculator<Player> {
+    private final org.spongepowered.api.service.context.ContextCalculator<Subject> calculator;
+
+    @Override
+    public Map<String, String> giveApplicableContext(Player subject, Map<String, String> accumulator) {
+        Set<Context> contexts = accumulator.entrySet().stream().map(e -> new Context(e.getKey(), e.getValue())).collect(Collectors.toSet());
+        calculator.accumulateContexts(subject, contexts);
+
+        contexts.forEach(c -> accumulator.put(c.getKey(), c.getValue()));
+        return accumulator;
     }
 
     @Override
-    protected void init() {
-    }
-
-    @Override
-    protected String getString(String path, String def) {
-        return def;
-    }
-
-    @Override
-    protected int getInt(String path, int def) {
-        return def;
-    }
-
-    @Override
-    protected boolean getBoolean(String path, boolean def) {
-        return def;
-    }
-
-    @Override
-    protected Map<String, String> getMap(String path, Map<String, String> def) {
-        return def;
+    public boolean isContextApplicable(Player subject, Map.Entry<String, String> context) {
+        Context c = new Context(context.getKey(), context.getValue());
+        return calculator.matches(c, subject);
     }
 }

@@ -84,21 +84,13 @@ class BukkitListener extends AbstractListener implements Listener {
     public void onPlayerJoin(PlayerJoinEvent e) {
         // Refresh permissions again
         UUID internal = plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId());
-        plugin.getUserManager().getWorldCache().put(internal, e.getPlayer().getWorld().getName());
+        plugin.getWorldCalculator().getWorldCache().put(internal, e.getPlayer().getWorld().getName());
         plugin.doAsync(() -> refreshPlayer(internal));
-    }
-
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onPlayerChangedWorld(PlayerChangedWorldEvent e) {
-        UUID internal = plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId());
-        plugin.getUserManager().getWorldCache().put(internal, e.getPlayer().getWorld().getName());
-        plugin.doAsync(() -> refreshPlayer(internal));
-
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerQuit(PlayerQuitEvent e) {
-        plugin.getUserManager().getWorldCache().remove(plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId()));
+        plugin.getWorldCalculator().getWorldCache().remove(plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId()));
         onLeave(e.getPlayer().getUniqueId());
     }
 

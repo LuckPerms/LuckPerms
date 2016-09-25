@@ -23,7 +23,7 @@
 package me.lucko.luckperms;
 
 import com.google.common.base.Splitter;
-import me.lucko.luckperms.core.AbstractConfiguration;
+import me.lucko.luckperms.config.AbstractConfiguration;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;

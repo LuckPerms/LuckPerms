@@ -33,10 +33,10 @@ import me.lucko.luckperms.api.event.events.PermissionNodeExpireEvent;
 import me.lucko.luckperms.api.event.events.PermissionNodeSetEvent;
 import me.lucko.luckperms.api.event.events.PermissionNodeUnsetEvent;
 import me.lucko.luckperms.api.implementation.internal.PermissionHolderLink;
+import me.lucko.luckperms.contexts.Contexts;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.groups.Group;
-import me.lucko.luckperms.utils.Contexts;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -157,16 +157,27 @@ public abstract class PermissionHolder {
                 .filter(Node::isGroupNode)
                 .collect(Collectors.toSet());
 
+        Map<String, String> contexts = new HashMap<>(context.getContext());
+        String server = contexts.get("server");
+        String world = contexts.get("world");
+        contexts.remove("server");
+        contexts.remove("world");
+
         Iterator<Node> iterator = parents.iterator();
         while (iterator.hasNext()) {
             Node node = iterator.next();
 
-            if (!node.shouldApplyOnServer(context.getServer(), context.isApplyGlobalGroups(), plugin.getConfiguration().isApplyingRegex())) {
+            if (!node.shouldApplyOnServer(server, context.isApplyGlobalGroups(), plugin.getConfiguration().isApplyingRegex())) {
                 iterator.remove();
                 continue;
             }
 
-            if (!node.shouldApplyOnWorld(context.getWorld(), context.isApplyGlobalWorldGroups(), plugin.getConfiguration().isApplyingRegex())) {
+            if (!node.shouldApplyOnWorld(world, context.isApplyGlobalWorldGroups(), plugin.getConfiguration().isApplyingRegex())) {
+                iterator.remove();
+                continue;
+            }
+
+            if (!node.shouldApplyWithContext(contexts, false)) {
                 iterator.remove();
                 continue;
             }
@@ -212,17 +223,23 @@ public abstract class PermissionHolder {
             allNodes = getPermissions(true);
         }
 
+        Map<String, String> contexts = new HashMap<>(context.getContext());
+        String server = contexts.get("server");
+        String world = contexts.get("world");
+        contexts.remove("server");
+        contexts.remove("world");
+
         all:
         for (Node node : allNodes) {
-            if (!node.shouldApplyOnServer(context.getServer(), context.isIncludeGlobal(), plugin.getConfiguration().isApplyingRegex())) {
+            if (!node.shouldApplyOnServer(server, context.isIncludeGlobal(), plugin.getConfiguration().isApplyingRegex())) {
                 continue;
             }
 
-            if (!node.shouldApplyOnWorld(context.getWorld(), context.isIncludeGlobalWorld(), plugin.getConfiguration().isApplyingRegex())) {
+            if (!node.shouldApplyOnWorld(world, context.isIncludeGlobalWorld(), plugin.getConfiguration().isApplyingRegex())) {
                 continue;
             }
 
-            if (!node.shouldApplyWithContext(context.getExtraContext())) {
+            if (!node.shouldApplyWithContext(contexts, false)) {
                 continue;
             }
 
@@ -299,7 +316,7 @@ public abstract class PermissionHolder {
 
     // Convenience method
     private static Node.Builder buildNode(String permission) {
-        return new me.lucko.luckperms.utils.Node.Builder(permission);
+        return new me.lucko.luckperms.core.Node.Builder(permission);
     }
 
     @Deprecated
@@ -307,7 +324,7 @@ public abstract class PermissionHolder {
         this.nodes.clear();
 
         this.nodes.addAll(nodes.entrySet().stream()
-                .map(e -> me.lucko.luckperms.utils.Node.fromSerialisedNode(e.getKey(), e.getValue()))
+                .map(e -> me.lucko.luckperms.core.Node.fromSerialisedNode(e.getKey(), e.getValue()))
                 .collect(Collectors.toList()));
 
         auditTemporaryPermissions();
@@ -552,12 +569,26 @@ public abstract class PermissionHolder {
      */
     @Deprecated
     public Map<String, Boolean> getLocalPermissions(String server, String world, List<String> excludedGroups, List<String> possibleNodes) {
-        return exportNodes(new Contexts(server, world, Collections.emptyMap(), plugin.getConfiguration().isIncludingGlobalPerms(), true, true, true, true), Collections.emptyList());
+        Map<String, String> context = new HashMap<>();
+        if (server != null && !server.equals("")) {
+            context.put("server", server);
+        }
+        if (world != null && !world.equals("")) {
+            context.put("world", world);
+        }
+        return exportNodes(new Contexts(context, plugin.getConfiguration().isIncludingGlobalPerms(), true, true, true, true), Collections.emptyList());
     }
 
     @Deprecated
     public Map<String, Boolean> getLocalPermissions(String server, String world, List<String> excludedGroups) {
-        return exportNodes(new Contexts(server, world, Collections.emptyMap(), plugin.getConfiguration().isIncludingGlobalPerms(), true, true, true, true), Collections.emptyList());
+        Map<String, String> context = new HashMap<>();
+        if (server != null && !server.equals("")) {
+            context.put("server", server);
+        }
+        if (world != null && !world.equals("")) {
+            context.put("world", world);
+        }
+        return exportNodes(new Contexts(context, plugin.getConfiguration().isIncludingGlobalPerms(), true, true, true, true), Collections.emptyList());
     }
 
     @SuppressWarnings("deprecation")

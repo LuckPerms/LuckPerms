@@ -20,35 +20,25 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.users;
+package me.lucko.luckperms.contexts;
 
-import me.lucko.luckperms.LPSpongePlugin;
-import me.lucko.luckperms.api.sponge.LuckPermsUserSubject;
-import me.lucko.luckperms.api.sponge.collections.UserCollection;
+import lombok.AllArgsConstructor;
+import me.lucko.luckperms.api.context.ContextCalculator;
 
-import java.util.UUID;
+import java.util.Map;
 
-class SpongeUser extends User {
-    private final LPSpongePlugin plugin;
+@AllArgsConstructor
+public class ServerCalculator<T> extends ContextCalculator<T> {
+    private final String server;
 
-    SpongeUser(UUID uuid, LPSpongePlugin plugin) {
-        super(uuid, plugin);
-        this.plugin = plugin;
-    }
-
-    SpongeUser(UUID uuid, String username, LPSpongePlugin plugin) {
-        super(uuid, username, plugin);
-        this.plugin = plugin;
+    @Override
+    public Map<String, String> giveApplicableContext(T subject, Map<String, String> accumulator) {
+        accumulator.put("server", server);
+        return accumulator;
     }
 
     @Override
-    public synchronized void refreshPermissions() {
-        UserCollection uc = plugin.getService().getUserSubjects();
-        if (!uc.getUsers().containsKey(getUuid())) {
-            return;
-        }
-
-        LuckPermsUserSubject us = uc.getUsers().get(getUuid());
-        us.calculateActivePermissions();
+    public boolean isContextApplicable(T subject, Map.Entry<String, String> context) {
+        return context.getKey().equals("server") && server.equals(context.getValue());
     }
 }

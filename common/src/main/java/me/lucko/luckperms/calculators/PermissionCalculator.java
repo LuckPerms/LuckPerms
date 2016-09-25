@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.utils;
+package me.lucko.luckperms.calculators;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

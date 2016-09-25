@@ -29,9 +29,12 @@ import me.lucko.luckperms.api.implementation.ApiProvider;
 import me.lucko.luckperms.commands.CommandManager;
 import me.lucko.luckperms.commands.ConsecutiveExecutor;
 import me.lucko.luckperms.commands.Sender;
+import me.lucko.luckperms.config.LPConfiguration;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
-import me.lucko.luckperms.core.LPConfiguration;
+import me.lucko.luckperms.contexts.BackendServerCalculator;
+import me.lucko.luckperms.contexts.ContextManager;
+import me.lucko.luckperms.contexts.ServerCalculator;
 import me.lucko.luckperms.core.UuidCache;
 import me.lucko.luckperms.data.Importer;
 import me.lucko.luckperms.groups.GroupManager;
@@ -41,7 +44,6 @@ import me.lucko.luckperms.storage.Datastore;
 import me.lucko.luckperms.storage.StorageFactory;
 import me.lucko.luckperms.tracks.TrackManager;
 import me.lucko.luckperms.users.BungeeUserManager;
-import me.lucko.luckperms.users.UserManager;
 import me.lucko.luckperms.utils.LocaleManager;
 import me.lucko.luckperms.utils.LogFactory;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -58,7 +60,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     private final Map<UUID, BungeePlayerCache> playerCache = new ConcurrentHashMap<>();
     private final Set<UUID> ignoringLogs = ConcurrentHashMap.newKeySet();
     private LPConfiguration configuration;
-    private UserManager userManager;
+    private BungeeUserManager userManager;
     private GroupManager groupManager;
     private TrackManager trackManager;
     private Datastore datastore;
@@ -68,6 +70,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     private Importer importer;
     private ConsecutiveExecutor consecutiveExecutor;
     private LocaleManager localeManager;
+    private ContextManager<ProxiedPlayer> contextManager;
 
     @Override
     public void onEnable() {
@@ -107,6 +110,13 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         trackManager = new TrackManager();
         importer = new Importer(commandManager);
         consecutiveExecutor = new ConsecutiveExecutor(commandManager);
+
+        contextManager = new ContextManager<>();
+        BackendServerCalculator serverCalculator = new BackendServerCalculator();
+        getProxy().getPluginManager().registerListener(this, serverCalculator);
+        contextManager.registerCalculator(serverCalculator);
+        contextManager.registerCalculator(new ServerCalculator<>(getConfiguration().getServer()));
+        contextManager.registerListener(userManager);
 
         int mins = getConfiguration().getSyncTime();
         if (mins > 0) {

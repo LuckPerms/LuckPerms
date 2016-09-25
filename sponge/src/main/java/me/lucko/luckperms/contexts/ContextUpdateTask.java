@@ -20,42 +20,26 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.utils;
+package me.lucko.luckperms.contexts;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import me.lucko.luckperms.core.LPConfiguration;
+import me.lucko.luckperms.api.sponge.LuckPermsUserSubject;
+import me.lucko.luckperms.api.sponge.collections.UserCollection;
 
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
-@Getter
 @AllArgsConstructor
-public class Contexts {
-    public static Contexts fromConfig(LPConfiguration configuration) {
-        return new Contexts(
-                configuration.getServer(),
-                null,
-                Collections.emptyMap(),
-                configuration.isIncludingGlobalPerms(),
-                configuration.isIncludingGlobalWorldPerms(),
-                true,
-                configuration.isApplyingGlobalGroups(),
-                configuration.isApplyingGlobalWorldGroups()
-        );
-    }
+public class ContextUpdateTask implements Runnable {
+    private final UserCollection userCollection;
 
-    public static Contexts allowAll() {
-        return new Contexts(null, null, Collections.emptyMap(), true, true, true, true, true);
+    @Override
+    public void run() {
+        for (LuckPermsUserSubject subject : userCollection.getUsers().values()) {
+            Set<Map<String, String>> contexts = new HashSet<>(subject.getContextData().keySet());
+            contexts.forEach(subject::calculatePermissions);
+        }
     }
-
-    private final String server;
-    private final String world;
-    private final Map<String, String> extraContext;
-    private final boolean includeGlobal;
-    private final boolean includeGlobalWorld;
-    private final boolean applyGroups;
-    private final boolean applyGlobalGroups;
-    private final boolean applyGlobalWorldGroups;
 
 }

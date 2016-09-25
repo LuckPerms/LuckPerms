@@ -27,8 +27,8 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.contexts.Contexts;
 import me.lucko.luckperms.users.User;
-import me.lucko.luckperms.utils.Contexts;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.List;

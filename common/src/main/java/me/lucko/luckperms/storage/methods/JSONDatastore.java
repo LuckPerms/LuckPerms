@@ -26,10 +26,10 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import lombok.Cleanup;
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.core.Node;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.tracks.Track;
 import me.lucko.luckperms.users.User;
-import me.lucko.luckperms.utils.Node;
 
 import java.io.*;
 import java.util.*;

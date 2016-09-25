@@ -29,6 +29,7 @@ import me.lucko.luckperms.LPSpongePlugin;
 import me.lucko.luckperms.api.sponge.collections.GroupCollection;
 import me.lucko.luckperms.api.sponge.collections.UserCollection;
 import me.lucko.luckperms.api.sponge.simple.SimpleCollection;
+import me.lucko.luckperms.contexts.SpongeCalculatorLink;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.context.ContextCalculator;
 import org.spongepowered.api.service.permission.*;
@@ -54,7 +55,6 @@ public class LuckPermsService implements PermissionService {
     private final Set<PermissionDescription> descriptionSet;
 
     private final Map<String, SubjectCollection> subjects;
-    private final Set<ContextCalculator<Subject>> contextCalculators; // TODO actually use context calculators, idk...
 
     public LuckPermsService(LPSpongePlugin plugin) {
         this.plugin = plugin;
@@ -67,7 +67,6 @@ public class LuckPermsService implements PermissionService {
         subjects.put(PermissionService.SUBJECTS_GROUP, groupSubjects);
 
         descriptionSet = ConcurrentHashMap.newKeySet();
-        contextCalculators = ConcurrentHashMap.newKeySet();
     }
 
     public SubjectData getDefaultData() {
@@ -121,7 +120,7 @@ public class LuckPermsService implements PermissionService {
 
     @Override
     public void registerContextCalculator(@NonNull ContextCalculator<Subject> contextCalculator) {
-        contextCalculators.add(contextCalculator);
+        plugin.getContextManager().registerCalculator(new SpongeCalculatorLink(contextCalculator));
     }
 
     @RequiredArgsConstructor

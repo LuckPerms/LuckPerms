@@ -27,11 +27,13 @@ import lombok.Setter;
 import me.lucko.luckperms.LPBukkitPlugin;
 import me.lucko.luckperms.api.event.events.UserPermissionRefreshEvent;
 import me.lucko.luckperms.api.implementation.internal.UserLink;
+import me.lucko.luckperms.contexts.Contexts;
 import me.lucko.luckperms.inject.LPPermissible;
-import me.lucko.luckperms.utils.Contexts;
+import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permissible;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -60,17 +62,14 @@ public class BukkitUser extends User {
         }
 
         // Calculate the permissions that should be applied. This is done async, who cares about how long it takes or how often it's done.
-        String world = plugin.getUserManager().getWorldCache().get(getUuid());
         Map<String, Boolean> toApply = exportNodes(
                 new Contexts(
-                        getPlugin().getConfiguration().getServer(),
-                        getPlugin().getConfiguration().getWorldRewrites().getOrDefault(world, world),
-                        null,
-                        getPlugin().getConfiguration().isIncludingGlobalPerms(),
-                        getPlugin().getConfiguration().isIncludingGlobalWorldPerms(),
+                        plugin.getContextManager().giveApplicableContext((Player) lpPermissible.getParent(), new HashMap<>()),
+                        plugin.getConfiguration().isIncludingGlobalPerms(),
+                        plugin.getConfiguration().isIncludingGlobalWorldPerms(),
                         true,
-                        getPlugin().getConfiguration().isApplyingGlobalGroups(),
-                        getPlugin().getConfiguration().isApplyingGlobalWorldGroups()
+                        plugin.getConfiguration().isApplyingGlobalGroups(),
+                        plugin.getConfiguration().isApplyingGlobalWorldGroups()
                 ),
                 Collections.emptyList()
         );
