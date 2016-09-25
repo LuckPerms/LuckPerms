@@ -38,8 +38,8 @@ import java.util.List;
 
 public class UserAddSuffix extends SubCommand<User> {
     public UserAddSuffix() {
-        super("addsuffix", "Adds a suffix to the user", "/%s user <user> addsuffix <priority> <suffix> [server] [world]",
-                Permission.USER_ADDSUFFIX, Predicate.notInRange(2, 4));
+        super("addsuffix", "Adds a suffix to the user", "<priority> <suffix> [server] [world]", Permission.USER_ADDSUFFIX,
+                Predicate.notInRange(2, 4));
     }
 
     @Override

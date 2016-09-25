@@ -40,8 +40,7 @@ import java.util.List;
 public class GroupSetTempInherit extends SubCommand<Group> {
     public GroupSetTempInherit() {
         super("settempinherit", "Sets another group for this group to inherit permissions from temporarily",
-                "/%s group <group> settempinherit <group> <duration> [server] [world]",
-                Permission.GROUP_SET_TEMP_INHERIT, Predicate.notInRange(2, 4));
+                "<group> <duration> [server] [world]", Permission.GROUP_SET_TEMP_INHERIT, Predicate.notInRange(2, 4));
     }
 
     @Override
@@ -49,7 +48,7 @@ public class GroupSetTempInherit extends SubCommand<Group> {
         String groupName = args.get(0).toLowerCase();
 
         if (ArgumentChecker.checkNode(groupName)) {
-            sendUsage(sender, label);
+            sendUsage(sender);
             return CommandResult.INVALID_ARGS;
         }
 

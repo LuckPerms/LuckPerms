@@ -41,7 +41,7 @@ import java.util.List;
 
 public class LogExport extends SubCommand<Log> {
     public LogExport() {
-        super("export", "Export the log to a file", "/%s log export <file>", Permission.LOG_EXPORT, Predicate.not(1));
+        super("export", "Export the log to a file", "<file>", Permission.LOG_EXPORT, Predicate.not(1));
     }
 
     @Override

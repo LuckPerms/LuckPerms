@@ -38,8 +38,8 @@ import java.util.List;
 
 public class GroupUnSetPermission extends SubCommand<Group> {
     public GroupUnSetPermission() {
-        super("unset", "Unsets a permission for a group", "/%s group <group> unset <node> [server] [world]",
-                Permission.GROUP_UNSETPERMISSION, Predicate.notInRange(1, 3));
+        super("unset", "Unsets a permission for a group", "<node> [server] [world]", Permission.GROUP_UNSETPERMISSION,
+                Predicate.notInRange(1, 3));
     }
 
     @Override
@@ -47,7 +47,7 @@ public class GroupUnSetPermission extends SubCommand<Group> {
         String node = args.get(0).replace("{SPACE}", " ");
 
         if (ArgumentChecker.checkNode(node)) {
-            sendUsage(sender, label);
+            sendUsage(sender);
             return CommandResult.INVALID_ARGS;
         }
 

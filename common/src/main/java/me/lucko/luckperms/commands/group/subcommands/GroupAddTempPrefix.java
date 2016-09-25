@@ -39,7 +39,7 @@ import java.util.List;
 
 public class GroupAddTempPrefix extends SubCommand<Group> {
     public GroupAddTempPrefix() {
-        super("addtempprefix", "Adds a prefix to the group temporarily", "/%s group <group> addtempprefix <priority> <prefix> <duration> [server] [world]",
+        super("addtempprefix", "Adds a prefix to the group temporarily", "<priority> <prefix> <duration> [server] [world]",
                 Permission.GROUP_ADD_TEMP_PREFIX, Predicate.notInRange(3, 5));
     }
 

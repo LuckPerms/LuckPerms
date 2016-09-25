@@ -38,7 +38,7 @@ import java.util.List;
 
 public class GroupRemoveTempSuffix extends SubCommand<Group> {
     public GroupRemoveTempSuffix() {
-        super("removetempsuffix", "Removes a temporary suffix from a group", "/%s group <group> removetempsuffix <priority> <suffix> [server] [world]",
+        super("removetempsuffix", "Removes a temporary suffix from a group", "<priority> <suffix> [server] [world]",
                 Permission.GROUP_REMOVE_TEMP_SUFFIX, Predicate.notInRange(2, 4));
     }
 

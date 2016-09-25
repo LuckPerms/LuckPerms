@@ -38,8 +38,7 @@ import java.util.TreeSet;
 
 public class UserChatMeta extends SubCommand<User> {
     public UserChatMeta() {
-        super("chatmeta", "Displays a users chat meta", "/%s user <user> chatmeta", Permission.USER_CHATMETA,
-                Predicate.alwaysFalse());
+        super("chatmeta", "Displays a users chat meta", "", Permission.USER_CHATMETA, Predicate.alwaysFalse());
     }
 
     @Override

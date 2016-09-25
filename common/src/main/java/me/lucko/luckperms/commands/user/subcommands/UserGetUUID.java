@@ -35,8 +35,7 @@ import java.util.List;
 
 public class UserGetUUID extends SubCommand<User> {
     public UserGetUUID() {
-        super("getuuid", "Get the UUID of a user", "/%s user <user> getuuid", Permission.USER_GETUUID,
-                Predicate.alwaysFalse());
+        super("getuuid", "Get the UUID of a user", "", Permission.USER_GETUUID, Predicate.alwaysFalse());
     }
 
     @Override

@@ -33,9 +33,8 @@ import java.util.List;
 
 public class GroupInheritsPerm extends SubCommand<Group> {
     public GroupInheritsPerm() {
-        super("inheritspermission", "Checks to see if a group inherits a certain permission node",
-                "/%s group <group> inheritspermission <node> [server] [world]", Permission.GROUP_INHERITSPERMISSION,
-                Predicate.notInRange(1, 3));
+        super("inheritspermission", "Checks to see if a group inherits a certain permission node", "<node> [server] [world]",
+                Permission.GROUP_INHERITSPERMISSION, Predicate.notInRange(1, 3));
     }
 
     @Override

@@ -38,7 +38,7 @@ import java.util.List;
 
 public class GroupRemoveSuffix extends SubCommand<Group> {
     public GroupRemoveSuffix() {
-        super("removesuffix", "Removes a suffix from a group", "/%s group <group> removesuffix <priority> <suffix> [server] [world]",
+        super("removesuffix", "Removes a suffix from a group", "<priority> <suffix> [server] [world]",
                 Permission.GROUP_REMOVESUFFIX, Predicate.notInRange(2, 4));
     }
 

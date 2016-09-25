@@ -32,8 +32,7 @@ import java.util.List;
 
 public class GroupListParents extends SubCommand<Group> {
     public GroupListParents() {
-        super("listparents", "Lists the groups that this group inherits from", "/%s group <group> listparents",
-                Permission.GROUP_LISTPARENTS, Predicate.alwaysFalse());
+        super("listparents", "Lists the groups that this group inherits from", "", Permission.GROUP_LISTPARENTS, Predicate.alwaysFalse());
     }
 
     @Override

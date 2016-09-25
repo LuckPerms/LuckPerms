@@ -35,8 +35,7 @@ import java.util.List;
 
 public class GroupInfo extends SubCommand<Group> {
     public GroupInfo() {
-        super("info", "Gives info about the group", "/%s group <group> info", Permission.GROUP_INFO,
-                Predicate.alwaysFalse());
+        super("info", "Gives info about the group", "", Permission.GROUP_INFO, Predicate.alwaysFalse());
     }
 
     @Override

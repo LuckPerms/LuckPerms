@@ -39,8 +39,7 @@ import java.util.List;
 
 public class UserAddGroup extends SubCommand<User> {
     public UserAddGroup() {
-        super("addgroup", "Adds the user to a group", "/%s user <user> addgroup <group> [server] [world]",
-                Permission.USER_ADDGROUP, Predicate.notInRange(1, 3));
+        super("addgroup", "Adds the user to a group", "<group> [server] [world]", Permission.USER_ADDGROUP, Predicate.notInRange(1, 3));
     }
 
     @Override
@@ -48,7 +47,7 @@ public class UserAddGroup extends SubCommand<User> {
         String groupName = args.get(0).toLowerCase();
 
         if (ArgumentChecker.checkNode(groupName)) {
-            sendUsage(sender, label);
+            sendUsage(sender);
             return CommandResult.INVALID_ARGS;
         }
 

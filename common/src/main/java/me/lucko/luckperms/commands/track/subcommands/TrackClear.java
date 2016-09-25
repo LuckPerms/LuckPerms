@@ -36,8 +36,7 @@ import java.util.List;
 
 public class TrackClear extends SubCommand<Track> {
     public TrackClear() {
-        super("clear", "Clears the groups on the track", "/%s track <track> clear", Permission.TRACK_CLEAR,
-                Predicate.alwaysFalse());
+        super("clear", "Clears the groups on the track", "", Permission.TRACK_CLEAR, Predicate.alwaysFalse());
     }
 
     @Override

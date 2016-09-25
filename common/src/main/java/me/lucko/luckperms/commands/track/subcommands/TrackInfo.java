@@ -32,8 +32,7 @@ import java.util.List;
 
 public class TrackInfo extends SubCommand<Track> {
     public TrackInfo() {
-        super("info", "Gives info about the track", "/%s track <track> info", Permission.TRACK_INFO,
-                Predicate.alwaysFalse());
+        super("info", "Gives info about the track", "", Permission.TRACK_INFO, Predicate.alwaysFalse());
     }
 
     @Override

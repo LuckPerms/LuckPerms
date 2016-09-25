@@ -39,7 +39,7 @@ import java.util.List;
 
 public class UserAddTempPrefix extends SubCommand<User> {
     public UserAddTempPrefix() {
-        super("addtempprefix", "Adds a prefix to the user temporarily", "/%s user <user> addtempprefix <priority> <prefix> <duration> [server] [world]",
+        super("addtempprefix", "Adds a prefix to the user temporarily", "<priority> <prefix> <duration> [server] [world]",
                 Permission.USER_ADD_TEMP_PREFIX, Predicate.notInRange(3, 5));
     }
 

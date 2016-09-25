@@ -38,7 +38,7 @@ import java.util.List;
 
 public class UserRemoveSuffix extends SubCommand<User> {
     public UserRemoveSuffix() {
-        super("removesuffix", "Removes a suffix from a user", "/%s user <user> removesuffix <priority> <suffix> [server] [world]",
+        super("removesuffix", "Removes a suffix from a user", "<priority> <suffix> [server] [world]",
                 Permission.USER_REMOVESUFFIX, Predicate.notInRange(2, 4));
     }
 

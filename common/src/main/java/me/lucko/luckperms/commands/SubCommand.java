@@ -22,7 +22,6 @@
 
 package me.lucko.luckperms.commands;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.constants.Message;
@@ -42,7 +41,6 @@ import java.util.stream.Collectors;
  * Abstract SubCommand class
  */
 @Getter
-@AllArgsConstructor
 public abstract class SubCommand<T> {
 
     /**
@@ -70,6 +68,14 @@ public abstract class SubCommand<T> {
      */
     private final Predicate<? super Integer> isArgumentInvalid;
 
+    public SubCommand(String name, String description, String usage, Permission permission, Predicate<? super Integer> isArgumentInvalid) {
+        this.name = name;
+        this.description = description;
+        this.permission = permission;
+        this.isArgumentInvalid = isArgumentInvalid;
+        this.usage = usage.replace("<", "&8<&7").replace(">", "&8>&7").replace("[", "&8[&7").replace("]", "&8]&7");
+    }
+
     /**
      * Called when this sub command is ran
      * @param plugin a link to the main plugin instance
@@ -95,10 +101,9 @@ public abstract class SubCommand<T> {
     /**
      * Send the command usage to a sender
      * @param sender the sender to send the usage to
-     * @param label the command label used
      */
-    public void sendUsage(Sender sender, String label) {
-        Util.sendPluginMessage(sender, "&e-> &d" + String.format(getUsage(), label));
+    public void sendUsage(Sender sender) {
+        Util.sendPluginMessage(sender, "&e-> &6" + getName() + (usage.isEmpty() ? "" : "&e - &7" + getUsage()));
     }
 
     /**

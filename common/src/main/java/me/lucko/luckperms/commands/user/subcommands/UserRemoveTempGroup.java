@@ -38,9 +38,8 @@ import java.util.List;
 
 public class UserRemoveTempGroup extends SubCommand<User> {
     public UserRemoveTempGroup() {
-        super("removetempgroup", "Removes a user from a temporary group",
-                "/%s user <user> removetempgroup <group> [server] [world]", Permission.USER_REMOVETEMPGROUP,
-                Predicate.notInRange(1, 3));
+        super("removetempgroup", "Removes a user from a temporary group", "<group> [server] [world]",
+                Permission.USER_REMOVETEMPGROUP, Predicate.notInRange(1, 3));
     }
 
     @Override
@@ -48,7 +47,7 @@ public class UserRemoveTempGroup extends SubCommand<User> {
         String groupName = args.get(0).toLowerCase();
 
         if (ArgumentChecker.checkNode(groupName)) {
-            sendUsage(sender, label);
+            sendUsage(sender);
             return CommandResult.INVALID_ARGS;
         }
 

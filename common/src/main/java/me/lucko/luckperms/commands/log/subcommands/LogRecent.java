@@ -38,8 +38,7 @@ import java.util.UUID;
 
 public class LogRecent extends SubCommand<Log> {
     public LogRecent() {
-        super("recent", "View recent actions", "/%s log recent [user] [page]", Permission.LOG_RECENT,
-                Predicate.notInRange(0, 2));
+        super("recent", "View recent actions", "[user] [page]", Permission.LOG_RECENT, Predicate.notInRange(0, 2));
     }
 
     @Override

@@ -37,8 +37,7 @@ import java.util.List;
 
 public class GroupRename extends SubCommand<Group> {
     public GroupRename() {
-        super("rename", "Rename this group", "/%s group <group> rename <new name>",
-                Permission.TRACK_APPEND, Predicate.not(1));
+        super("rename", "Rename this group", "<new name>", Permission.TRACK_APPEND, Predicate.not(1));
     }
 
     @Override

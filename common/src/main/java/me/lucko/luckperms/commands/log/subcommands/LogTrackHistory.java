@@ -40,8 +40,7 @@ import java.util.SortedMap;
 
 public class LogTrackHistory extends SubCommand<Log> {
     public LogTrackHistory() {
-        super("trackhistory", "View an objects history", "/%s log trackhistory <track> [page]", Permission.LOG_TRACK_HISTORY,
-                Predicate.notInRange(1, 2));
+        super("trackhistory", "View an objects history", "<track> [page]", Permission.LOG_TRACK_HISTORY, Predicate.notInRange(1, 2));
     }
 
     @Override

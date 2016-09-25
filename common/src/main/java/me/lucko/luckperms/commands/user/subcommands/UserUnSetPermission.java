@@ -38,8 +38,8 @@ import java.util.List;
 
 public class UserUnSetPermission extends SubCommand<User> {
     public UserUnSetPermission() {
-        super("unset", "Unsets a permission for a user",
-                "/%s user <user> unset <node> [server] [world]", Permission.USER_UNSETPERMISSION, Predicate.notInRange(1, 3));
+        super("unset", "Unsets a permission for a user", "<node> [server] [world]", Permission.USER_UNSETPERMISSION,
+                Predicate.notInRange(1, 3));
     }
 
     @Override
@@ -47,7 +47,7 @@ public class UserUnSetPermission extends SubCommand<User> {
         String node = args.get(0).replace("{SPACE}", " ");
 
         if (ArgumentChecker.checkNode(node)) {
-            sendUsage(sender, label);
+            sendUsage(sender);
             return CommandResult.INVALID_ARGS;
         }
 

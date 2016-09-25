@@ -38,8 +38,7 @@ import java.util.List;
 
 public class UserSetPrimaryGroup extends SubCommand<User> {
     public UserSetPrimaryGroup() {
-        super("setprimarygroup", "Sets a users primary group",
-                "/%s user <user> setprimarygroup <group>", Permission.USER_SETPRIMARYGROUP, Predicate.not(1));
+        super("setprimarygroup", "Sets a users primary group", "<group>", Permission.USER_SETPRIMARYGROUP, Predicate.not(1));
     }
 
     @Override

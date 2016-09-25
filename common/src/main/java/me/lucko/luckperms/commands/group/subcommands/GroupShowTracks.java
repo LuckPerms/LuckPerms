@@ -34,8 +34,7 @@ import java.util.stream.Collectors;
 
 public class GroupShowTracks extends SubCommand<Group> {
     public GroupShowTracks() {
-        super("showtracks", "Lists the tracks that this group features on", "/%s group <group> showtracks",
-                Permission.GROUP_SHOWTRACKS, Predicate.alwaysFalse());
+        super("showtracks", "Lists the tracks that this group features on", "", Permission.GROUP_SHOWTRACKS, Predicate.alwaysFalse());
     }
 
     @Override

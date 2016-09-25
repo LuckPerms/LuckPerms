@@ -39,8 +39,7 @@ import java.util.List;
 public class GroupUnsetTempInherit extends SubCommand<Group> {
     public GroupUnsetTempInherit() {
         super("unsettempinherit", "Unsets another group for this group to inherit permissions from",
-                "/%s group <group> unsettempinherit <group> [server] [world]", Permission.GROUP_UNSET_TEMP_INHERIT,
-                Predicate.notInRange(1, 3));
+                "<group> [server] [world]", Permission.GROUP_UNSET_TEMP_INHERIT, Predicate.notInRange(1, 3));
     }
 
     @Override
@@ -48,7 +47,7 @@ public class GroupUnsetTempInherit extends SubCommand<Group> {
         String groupName = args.get(0).toLowerCase();
 
         if (ArgumentChecker.checkNode(groupName)) {
-            sendUsage(sender, label);
+            sendUsage(sender);
             return CommandResult.INVALID_ARGS;
         }
 

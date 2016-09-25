@@ -32,8 +32,7 @@ import java.util.List;
 
 public class UserListGroups extends SubCommand<User> {
     public UserListGroups() {
-        super("listgroups", "Lists the groups a user is in", "/%s user <user> listgroups",
-                Permission.USER_LISTGROUPS, Predicate.alwaysFalse());
+        super("listgroups", "Lists the groups a user is in", "", Permission.USER_LISTGROUPS, Predicate.alwaysFalse());
     }
 
     @Override

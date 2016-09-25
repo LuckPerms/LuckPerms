@@ -41,8 +41,7 @@ import java.util.List;
 
 public class UserPromote extends SubCommand<User> {
     public UserPromote() {
-        super("promote", "Promotes the user along a track", "/%s user <user> promote <track>", Permission.USER_PROMOTE,
-                Predicate.not(1));
+        super("promote", "Promotes the user along a track", "<track>", Permission.USER_PROMOTE, Predicate.not(1));
     }
 
     @Override

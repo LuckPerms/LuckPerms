@@ -38,9 +38,8 @@ import java.util.List;
 
 public class UserUnsetTempPermission extends SubCommand<User> {
     public UserUnsetTempPermission() {
-        super("unsettemp", "Unsets a temporary permission for a user",
-                "/%s user <user> unsettemp <node> [server] [world]", Permission.USER_UNSET_TEMP_PERMISSION,
-                Predicate.notInRange(1, 3));
+        super("unsettemp", "Unsets a temporary permission for a user", "<node> [server] [world]",
+                Permission.USER_UNSET_TEMP_PERMISSION, Predicate.notInRange(1, 3));
     }
 
     @Override
@@ -48,7 +47,7 @@ public class UserUnsetTempPermission extends SubCommand<User> {
         String node = args.get(0).replace("{SPACE}", " ");
 
         if (ArgumentChecker.checkNode(node)) {
-            sendUsage(sender, label);
+            sendUsage(sender);
             return CommandResult.INVALID_ARGS;
         }
 

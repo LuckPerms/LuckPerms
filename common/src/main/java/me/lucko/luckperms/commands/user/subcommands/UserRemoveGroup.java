@@ -38,8 +38,8 @@ import java.util.List;
 
 public class UserRemoveGroup extends SubCommand<User> {
     public UserRemoveGroup() {
-        super("removegroup", "Removes a user from a group", "/%s user <user> removegroup <group> [server] [world]",
-                Permission.USER_REMOVEGROUP, Predicate.notInRange(1, 3));
+        super("removegroup", "Removes a user from a group", "<group> [server] [world]", Permission.USER_REMOVEGROUP,
+                Predicate.notInRange(1, 3));
     }
 
     @Override
@@ -47,7 +47,7 @@ public class UserRemoveGroup extends SubCommand<User> {
         String groupName = args.get(0).toLowerCase();
 
         if (ArgumentChecker.checkNode(groupName)) {
-            sendUsage(sender, label);
+            sendUsage(sender);
             return CommandResult.INVALID_ARGS;
         }
 

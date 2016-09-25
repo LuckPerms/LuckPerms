@@ -37,8 +37,7 @@ import java.util.List;
 
 public class TrackRename extends SubCommand<Track> {
     public TrackRename() {
-        super("rename", "Rename this track", "/%s track <track> rename <new name>",
-                Permission.TRACK_APPEND, Predicate.not(1));
+        super("rename", "Rename this track", "<new name>", Permission.TRACK_APPEND, Predicate.not(1));
     }
 
     @Override

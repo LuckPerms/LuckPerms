@@ -39,8 +39,7 @@ import java.util.List;
 
 public class UserSetTempPermission extends SubCommand<User> {
     public UserSetTempPermission() {
-        super("settemp", "Sets a temporary permission for a user",
-                "/%s user <user> settemp <node> <true|false> <duration> [server] [world]",
+        super("settemp", "Sets a temporary permission for a user", "<node> <true|false> <duration> [server] [world]",
                 Permission.USER_SET_TEMP_PERMISSION, Predicate.notInRange(3, 5));
     }
 
@@ -50,7 +49,7 @@ public class UserSetTempPermission extends SubCommand<User> {
         String bool = args.get(1).toLowerCase();
 
         if (ArgumentChecker.checkNode(node)) {
-            sendUsage(sender, label);
+            sendUsage(sender);
             return CommandResult.INVALID_ARGS;
         }
 
@@ -60,7 +59,7 @@ public class UserSetTempPermission extends SubCommand<User> {
         }
 
         if (!bool.equalsIgnoreCase("true") && !bool.equalsIgnoreCase("false")) {
-            sendUsage(sender, label);
+            sendUsage(sender);
             return CommandResult.INVALID_ARGS;
         }
 

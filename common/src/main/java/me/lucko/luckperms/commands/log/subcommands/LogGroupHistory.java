@@ -40,7 +40,7 @@ import java.util.SortedMap;
 
 public class LogGroupHistory extends SubCommand<Log> {
     public LogGroupHistory() {
-        super("grouphistory", "View an objects history", "/%s log grouphistory <group> [page]", Permission.LOG_GROUP_HISTORY,
+        super("grouphistory", "View an objects history", "<group> [page]", Permission.LOG_GROUP_HISTORY,
                 Predicate.notInRange(1, 2));
     }
 

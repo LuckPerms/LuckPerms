@@ -119,8 +119,8 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
 
 
     public MigrationPowerfulPerms() {
-        super("powerfulperms", "Migration from PowerfulPerms",
-                "/%s migration powerfulperms <address> <database> <username> <password> <db table>", MIGRATION, Predicate.not(5));
+        super("powerfulperms", "Migration from PowerfulPerms", "<address> <database> <username> <password> <db table>",
+                MIGRATION, Predicate.not(5));
     }
 
     @Override

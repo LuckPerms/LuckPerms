@@ -98,7 +98,7 @@ public abstract class MainCommand<T> {
         }
 
         if (sub.getIsArgumentInvalid().test(strippedArgs.size())) {
-            sub.sendUsage(sender, label);
+            sub.sendUsage(sender);
             return CommandResult.INVALID_ARGS;
         }
 
@@ -146,10 +146,10 @@ public abstract class MainCommand<T> {
                 .collect(Collectors.toList());
 
         if (subs.size() > 0) {
-            Util.sendPluginMessage(sender, "&e" + getName() + " Sub Commands:");
+            Util.sendPluginMessage(sender, "&e" + getName() + " Sub Commands: &7(" + String.format(getUsage(), label) + " ...)");
 
             for (SubCommand s : subs) {
-                s.sendUsage(sender, label);
+                s.sendUsage(sender);
             }
 
         } else {

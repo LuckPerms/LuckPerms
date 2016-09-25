@@ -38,9 +38,8 @@ import java.util.List;
 
 public class GroupSetInherit extends SubCommand<Group> {
     public GroupSetInherit() {
-        super("setinherit", "Sets another group for this group to inherit permissions from",
-                "/%s group <group> setinherit <group> [server] [world]", Permission.GROUP_SETINHERIT,
-                Predicate.notInRange(1, 3));
+        super("setinherit", "Sets another group for this group to inherit permissions from", "<group> [server] [world]",
+                Permission.GROUP_SETINHERIT, Predicate.notInRange(1, 3));
     }
 
     @Override
@@ -48,7 +47,7 @@ public class GroupSetInherit extends SubCommand<Group> {
         String groupName = args.get(0).toLowerCase();
 
         if (ArgumentChecker.checkNode(groupName)) {
-            sendUsage(sender, label);
+            sendUsage(sender);
             return CommandResult.INVALID_ARGS;
         }
 

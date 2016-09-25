@@ -39,8 +39,7 @@ import java.util.List;
 
 public class GroupSetTempPermission extends SubCommand<Group> {
     public GroupSetTempPermission() {
-        super("settemp", "Sets a temporary permission for a group",
-                "/%s group <group> settemp <node> <true|false> <duration> [server] [world]",
+        super("settemp", "Sets a temporary permission for a group", "<node> <true|false> <duration> [server] [world]",
                 Permission.GROUP_SET_TEMP_PERMISSION, Predicate.notInRange(3, 5));
     }
 
@@ -50,7 +49,7 @@ public class GroupSetTempPermission extends SubCommand<Group> {
         String bool = args.get(1).toLowerCase();
 
         if (ArgumentChecker.checkNode(node)) {
-            sendUsage(sender, label);
+            sendUsage(sender);
             return CommandResult.INVALID_ARGS;
         }
 
@@ -60,7 +59,7 @@ public class GroupSetTempPermission extends SubCommand<Group> {
         }
 
         if (!bool.equalsIgnoreCase("true") && !bool.equalsIgnoreCase("false")) {
-            sendUsage(sender, label);
+            sendUsage(sender);
             return CommandResult.INVALID_ARGS;
         }
 

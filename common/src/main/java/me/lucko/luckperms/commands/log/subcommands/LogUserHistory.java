@@ -38,8 +38,7 @@ import java.util.UUID;
 
 public class LogUserHistory extends SubCommand<Log> {
     public LogUserHistory() {
-        super("userhistory", "View an objects history", "/%s log userhistory <user> [page]", Permission.LOG_USER_HISTORY,
-                Predicate.notInRange(1, 2));
+        super("userhistory", "View an objects history", "<user> [page]", Permission.LOG_USER_HISTORY, Predicate.notInRange(1, 2));
     }
 
     @Override

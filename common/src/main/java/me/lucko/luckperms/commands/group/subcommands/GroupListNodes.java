@@ -32,8 +32,7 @@ import java.util.List;
 
 public class GroupListNodes extends SubCommand<Group> {
     public GroupListNodes() {
-        super("listnodes", "Lists the permission nodes the group has", "/%s group <group> listnodes",
-                Permission.GROUP_LISTNODES, Predicate.alwaysFalse());
+        super("listnodes", "Lists the permission nodes the group has", "", Permission.GROUP_LISTNODES, Predicate.alwaysFalse());
     }
 
     @Override

@@ -45,8 +45,7 @@ import java.util.stream.Collectors;
 
 public class MigrationGroupManager extends SubCommand<Object> {
     public MigrationGroupManager() {
-        super("groupmanager", "Migration from GroupManager", "/%s migration groupmanager [world names]",
-                Permission.MIGRATION, Predicate.is(0));
+        super("groupmanager", "Migration from GroupManager", "[world names...]", Permission.MIGRATION, Predicate.is(0));
     }
 
     @Override

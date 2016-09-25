@@ -38,8 +38,7 @@ import java.util.List;
 
 public class UserSetPermission extends SubCommand<User> {
     public UserSetPermission() {
-        super("set", "Sets a permission for a user",
-                "/%s user <user> set <node> <true|false> [server] [world]", Permission.USER_SETPERMISSION,
+        super("set", "Sets a permission for a user", "<node> <true|false> [server] [world]", Permission.USER_SETPERMISSION,
                 Predicate.notInRange(2, 4));
     }
 
@@ -49,7 +48,7 @@ public class UserSetPermission extends SubCommand<User> {
         String bool = args.get(1).toLowerCase();
 
         if (ArgumentChecker.checkNode(node)) {
-            sendUsage(sender, label);
+            sendUsage(sender);
             return CommandResult.INVALID_ARGS;
         }
 
@@ -59,7 +58,7 @@ public class UserSetPermission extends SubCommand<User> {
         }
 
         if (!bool.equalsIgnoreCase("true") && !bool.equalsIgnoreCase("false")) {
-            sendUsage(sender, label);
+            sendUsage(sender);
             return CommandResult.INVALID_ARGS;
         }
 

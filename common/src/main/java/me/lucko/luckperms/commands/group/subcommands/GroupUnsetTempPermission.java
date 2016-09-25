@@ -38,9 +38,8 @@ import java.util.List;
 
 public class GroupUnsetTempPermission extends SubCommand<Group> {
     public GroupUnsetTempPermission() {
-        super("unsettemp", "Unsets a temporary permission for a group",
-                "/%s group <group> unsettemp <node> [server] [world]", Permission.GROUP_UNSET_TEMP_PERMISSION,
-                Predicate.notInRange(1, 3));
+        super("unsettemp", "Unsets a temporary permission for a group", "<node> [server] [world]",
+                Permission.GROUP_UNSET_TEMP_PERMISSION, Predicate.notInRange(1, 3));
     }
 
     @Override
@@ -48,7 +47,7 @@ public class GroupUnsetTempPermission extends SubCommand<Group> {
         String node = args.get(0).replace("{SPACE}", " ");
 
         if (ArgumentChecker.checkNode(node)) {
-            sendUsage(sender, label);
+            sendUsage(sender);
             return CommandResult.INVALID_ARGS;
         }
 

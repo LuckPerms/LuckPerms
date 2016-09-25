@@ -34,8 +34,7 @@ import java.util.List;
 
 public class UserShowPos extends SubCommand<User> {
     public UserShowPos() {
-        super("showpos", "Shows a users position on a track", "/%s user <user> showpos <track>", Permission.USER_SHOWPOS,
-                Predicate.not(1));
+        super("showpos", "Shows a users position on a track", "<track>", Permission.USER_SHOWPOS, Predicate.not(1));
     }
 
     @Override

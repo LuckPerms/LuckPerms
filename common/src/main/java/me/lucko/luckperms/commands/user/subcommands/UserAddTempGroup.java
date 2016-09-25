@@ -40,9 +40,8 @@ import java.util.List;
 
 public class UserAddTempGroup extends SubCommand<User> {
     public UserAddTempGroup() {
-        super("addtempgroup", "Adds the user to a group temporarily",
-                "/%s user <user> addtempgroup <group> <duration> [server] [world]", Permission.USER_ADDTEMPGROUP,
-                Predicate.notInRange(2, 4));
+        super("addtempgroup", "Adds the user to a group temporarily", "<group> <duration> [server] [world]",
+                Permission.USER_ADDTEMPGROUP, Predicate.notInRange(2, 4));
     }
 
     @Override
@@ -50,7 +49,7 @@ public class UserAddTempGroup extends SubCommand<User> {
         String groupName = args.get(0).toLowerCase();
 
         if (ArgumentChecker.checkNode(groupName)) {
-            sendUsage(sender, label);
+            sendUsage(sender);
             return CommandResult.INVALID_ARGS;
         }
 

@@ -38,7 +38,7 @@ import java.util.List;
 
 public class GroupRemovePrefix extends SubCommand<Group> {
     public GroupRemovePrefix() {
-        super("removeprefix", "Removes a prefix from a group", "/%s group <group> removeprefix <priority> <prefix> [server] [world]",
+        super("removeprefix", "Removes a prefix from a group", "<priority> <prefix> [server] [world]",
                 Permission.GROUP_REMOVEPREFIX, Predicate.notInRange(2, 4));
     }
 

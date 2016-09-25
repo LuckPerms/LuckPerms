@@ -37,8 +37,7 @@ import java.util.UUID;
 
 public class LogNotify extends SubCommand<Log> {
     public LogNotify() {
-        super("notify", "Toggle notifications", "/%s log notify [on|off]", Permission.LOG_NOTIFY,
-                Predicate.notInRange(0, 1));
+        super("notify", "Toggle notifications", "[on|off]", Permission.LOG_NOTIFY, Predicate.notInRange(0, 1));
     }
 
     @Override

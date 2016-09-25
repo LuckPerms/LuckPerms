@@ -43,8 +43,7 @@ import java.util.Map;
  */
 public class MigrationBungeePerms extends SubCommand<Object> {
     public MigrationBungeePerms() {
-        super("bungeeperms", "Migration from BungeePerms", "/%s migration bungeeperms",
-                Permission.MIGRATION, Predicate.alwaysFalse());
+        super("bungeeperms", "Migration from BungeePerms", "", Permission.MIGRATION, Predicate.alwaysFalse());
     }
 
     @Override

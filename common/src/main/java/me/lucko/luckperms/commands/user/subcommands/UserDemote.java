@@ -41,8 +41,7 @@ import java.util.List;
 
 public class UserDemote extends SubCommand<User> {
     public UserDemote() {
-        super("demote", "Demotes a user along a track", "/%s user <user> demote <track>", Permission.USER_DEMOTE,
-                Predicate.not(1));
+        super("demote", "Demotes a user along a track", "<track>", Permission.USER_DEMOTE, Predicate.not(1));
     }
 
     @Override

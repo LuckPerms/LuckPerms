@@ -38,8 +38,8 @@ import java.util.List;
 
 public class GroupSetPermission extends SubCommand<Group> {
     public GroupSetPermission() {
-        super("set", "Sets a permission for a group", "/%s group <group> set <node> <true|false> [server] [world]",
-                Permission.GROUP_SETPERMISSION, Predicate.notInRange(2, 4));
+        super("set", "Sets a permission for a group", "<node> <true|false> [server] [world]", Permission.GROUP_SETPERMISSION,
+                Predicate.notInRange(2, 4));
     }
 
     @Override
@@ -48,7 +48,7 @@ public class GroupSetPermission extends SubCommand<Group> {
         String bool = args.get(1).toLowerCase();
 
         if (ArgumentChecker.checkNode(node)) {
-            sendUsage(sender, label);
+            sendUsage(sender);
             return CommandResult.INVALID_ARGS;
         }
 
@@ -58,7 +58,7 @@ public class GroupSetPermission extends SubCommand<Group> {
         }
 
         if (!bool.equalsIgnoreCase("true") && !bool.equalsIgnoreCase("false")) {
-            sendUsage(sender, label);
+            sendUsage(sender);
             return CommandResult.INVALID_ARGS;
         }
 

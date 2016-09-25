@@ -36,8 +36,8 @@ import java.util.List;
 
 public class TrackInsert extends SubCommand<Track> {
     public TrackInsert() {
-        super("insert", "Inserts a group at a given position along the track",
-                "/%s track <track> insert <group> <position>", Permission.TRACK_INSERT, Predicate.not(2));
+        super("insert", "Inserts a group at a given position along the track", "<group> <position>",
+                Permission.TRACK_INSERT, Predicate.not(2));
     }
 
     @Override
@@ -45,7 +45,7 @@ public class TrackInsert extends SubCommand<Track> {
         String groupName = args.get(0).toLowerCase();
 
         if (ArgumentChecker.checkNode(groupName)) {
-            sendUsage(sender, label);
+            sendUsage(sender);
             return CommandResult.INVALID_ARGS;
         }
 

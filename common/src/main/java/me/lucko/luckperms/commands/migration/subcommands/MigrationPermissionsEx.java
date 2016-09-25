@@ -50,8 +50,7 @@ import java.util.stream.Collectors;
 
 public class MigrationPermissionsEx extends SubCommand<Object> {
     public MigrationPermissionsEx() {
-        super("permissionsex", "Migration from PermissionsEx", "/%s migration permissionsex [world names]",
-                Permission.MIGRATION, Predicate.alwaysFalse());
+        super("permissionsex", "Migration from PermissionsEx", "[world names...]", Permission.MIGRATION, Predicate.alwaysFalse());
     }
 
     @SuppressWarnings("deprecation")

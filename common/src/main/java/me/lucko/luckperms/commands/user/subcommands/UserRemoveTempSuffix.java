@@ -38,7 +38,7 @@ import java.util.List;
 
 public class UserRemoveTempSuffix extends SubCommand<User> {
     public UserRemoveTempSuffix() {
-        super("removetempsuffix", "Removes a temporary suffix from a user", "/%s user <user> removetempsuffix <priority> <suffix> [server] [world]",
+        super("removetempsuffix", "Removes a temporary suffix from a user", "<priority> <suffix> [server] [world]",
                 Permission.USER_REMOVE_TEMP_SUFFIX, Predicate.notInRange(2, 4));
     }
 

@@ -40,8 +40,7 @@ import java.util.stream.Collectors;
 
 public class LogSearch extends SubCommand<Log> {
     public LogSearch() {
-        super("search", "Search the log for an entry", "/%s log search <query> [page]", Permission.LOG_SEARCH,
-                Predicate.is(0));
+        super("search", "Search the log for an entry", "<query> [page]", Permission.LOG_SEARCH, Predicate.is(0));
     }
 
     @Override
