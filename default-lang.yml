@@ -171,6 +171,9 @@ remove-temp-suffix-success: "&b{0}&a had temporary suffix &f\"{1}&f\"&a at prior
 remove-temp-suffix-server-success: "&b{0}&a had temporary suffix &f\"{1}&f\"&a at priority &b{2}&a removed on server &b{3}&a."
 remove-temp-suffix-server-world-success: "&b{0}&a had temporary suffix &f\"{1}&f\"&a at priority &b{2}&a removed on server &b{3}&a, world &b{4}&a."
 
+bulk-change-type-error: "Invalid type. Was expecting 'server' or 'world'."
+bulk-change-success: "&aApplied bulk change successfully. {0} records were changed."
+
 user-info: >
   {PREFIX}&d-> &eUser: &6{0}\n
   {PREFIX}&d-> &eUUID: &6{1}\n

@@ -214,7 +214,10 @@ public enum Message {
     REMOVE_TEMP_SUFFIX_SUCCESS("&b{0}&a had temporary suffix &f\"{1}&f\"&a at priority &b{1}&a removed.", true),
     REMOVE_TEMP_SUFFIX_SERVER_SUCCESS("&b{0}&a had temporary suffix &f\"{1}&f\"&a at priority &b{2}&a removed on server &b{3}&a.", true),
     REMOVE_TEMP_SUFFIX_SERVER_WORLD_SUCCESS("&b{0}&a had temporary suffix &f\"{1}&f\"&a at priority &b{2}&a removed on server &b{3}&a, world &b{4}&a.", true),
-    
+
+    BULK_CHANGE_TYPE_ERROR("Invalid type. Was expecting 'server' or 'world'.", true),
+    BULK_CHANGE_SUCCESS("&aApplied bulk change successfully. {0} records were changed.", true),
+
     USER_INFO(
             PREFIX + "&d-> &eUser: &6{0}" + "\n" +
             PREFIX + "&d-> &eUUID: &6{1}" + "\n" +

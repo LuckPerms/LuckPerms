@@ -87,6 +87,10 @@ public class Node implements me.lucko.luckperms.api.Node {
         }
     }
 
+    public static me.lucko.luckperms.api.Node.Builder builderFromExisting(me.lucko.luckperms.api.Node other) {
+        return new Builder(other);
+    }
+
     @Getter
     private final String permission;
 
@@ -695,6 +699,15 @@ public class Node implements me.lucko.luckperms.api.Node {
                     }
                 }
             }
+        }
+
+        Builder(me.lucko.luckperms.api.Node other) {
+            this.permission = other.getPermission();
+            this.value = other.getValue();
+            this.override = other.isOverride();
+            this.server = other.getServer().orElse(null);
+            this.world = other.getWorld().orElse(null);
+            this.expireAt = other.getExpiryUnixTime();
         }
 
         @Override

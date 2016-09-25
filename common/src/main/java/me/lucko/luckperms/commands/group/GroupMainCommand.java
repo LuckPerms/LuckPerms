@@ -60,6 +60,7 @@ public class GroupMainCommand extends MainCommand<Group> {
             .add(new GroupAddTempSuffix())
             .add(new GroupRemoveTempPrefix())
             .add(new GroupRemoveTempSuffix())
+            .add(new GroupBulkChange())
             .add(new GroupClear())
             .add(new GroupRename())
             .build()

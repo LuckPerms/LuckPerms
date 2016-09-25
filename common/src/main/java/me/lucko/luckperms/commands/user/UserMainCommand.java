@@ -67,6 +67,7 @@ public class UserMainCommand extends MainCommand<User> {
             .add(new UserAddTempSuffix())
             .add(new UserRemoveTempPrefix())
             .add(new UserRemoveTempSuffix())
+            .add(new UserBulkChange())
             .add(new UserClear())
             .build()
         );

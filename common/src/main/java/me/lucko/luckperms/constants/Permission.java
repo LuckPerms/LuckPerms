@@ -72,6 +72,7 @@ public enum Permission {
     USER_REMOVE_TEMP_PREFIX("removetempprefix", "user"),
     USER_ADD_TEMP_SUFFIX("addtempsuffix", "user"),
     USER_REMOVE_TEMP_SUFFIX("removetempsuffix", "user"),
+    USER_BULKCHANGE("bulkchange", "user"),
     USER_CLEAR("clear", "user"),
 
     GROUP_INFO("info", "group"),
@@ -97,6 +98,7 @@ public enum Permission {
     GROUP_REMOVE_TEMP_PREFIX("removetempprefix", "group"),
     GROUP_ADD_TEMP_SUFFIX("addtempsuffix", "group"),
     GROUP_REMOVE_TEMP_SUFFIX("removetempsuffix", "group"),
+    GROUP_BULKCHANGE("bulkchange", "group"),
     GROUP_CLEAR("clear", "group"),
     GROUP_RENAME("rename", "group"),
 
