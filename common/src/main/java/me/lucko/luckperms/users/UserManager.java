@@ -74,10 +74,13 @@ public abstract class UserManager extends AbstractManager<UUID, User> {
      */
     public void giveDefaultIfNeeded(User user, boolean save) {
         boolean hasGroup = false;
-        for (Node node : user.getPermissions(false)) {
-            if (node.isGroupNode()) {
-                hasGroup = true;
-                break;
+
+        if (user.getPrimaryGroup() != null && !user.getPrimaryGroup().isEmpty()) {
+            for (Node node : user.getPermissions(false)) {
+                if (node.isGroupNode()) {
+                    hasGroup = true;
+                    break;
+                }
             }
         }
 

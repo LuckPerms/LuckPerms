@@ -39,6 +39,7 @@ import me.lucko.luckperms.commands.track.DeleteTrack;
 import me.lucko.luckperms.commands.track.ListTracks;
 import me.lucko.luckperms.commands.track.TrackMainCommand;
 import me.lucko.luckperms.commands.user.UserMainCommand;
+import me.lucko.luckperms.commands.usersbulkedit.UsersBulkEditMainCommand;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -64,6 +65,7 @@ public class CommandManager {
             .add(new ExportCommand())
             .add(new QueueCommand())
             .add(new MigrationMainCommand())
+            .add(new UsersBulkEditMainCommand())
             .add(new CreateGroup())
             .add(new DeleteGroup())
             .add(new ListGroups())

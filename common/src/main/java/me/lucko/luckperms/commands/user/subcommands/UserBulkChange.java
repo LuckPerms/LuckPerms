@@ -63,6 +63,11 @@ public class UserBulkChange extends SubCommand<User> {
         if (type.equals("world")) {
             while (iterator.hasNext()) {
                 Node element = iterator.next();
+
+                if (element.isGroupNode()) {
+                    continue;
+                }
+
                 String world = element.getWorld().orElse("null");
                 if (!world.equals(from)) {
                     continue;
@@ -74,6 +79,11 @@ public class UserBulkChange extends SubCommand<User> {
         } else {
             while (iterator.hasNext()) {
                 Node element = iterator.next();
+
+                if (element.isGroupNode()) {
+                    continue;
+                }
+
                 String server = element.getServer().orElse("global");
                 if (!server.equals(from)) {
                     continue;
