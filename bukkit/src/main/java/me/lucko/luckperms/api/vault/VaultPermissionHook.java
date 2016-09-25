@@ -27,12 +27,17 @@ import lombok.NonNull;
 import lombok.Setter;
 import me.lucko.luckperms.LPBukkitPlugin;
 import me.lucko.luckperms.api.data.Callback;
+import me.lucko.luckperms.contexts.Contexts;
 import me.lucko.luckperms.core.PermissionHolder;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.users.User;
 import net.milkbowl.vault.permission.Permission;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class VaultPermissionHook extends Permission {
 
@@ -65,11 +70,18 @@ public class VaultPermissionHook extends Permission {
     private boolean objectHas(String world, PermissionHolder object, String permission) {
         if (object == null) return false;
 
+        Map<String, String> context = new HashMap<>();
         if (world != null && !world.equals("")) {
-            return object.hasPermission(permission, true, server, world);
-        } else {
-            return object.hasPermission(permission, true, server);
+            context.put("world", world);
         }
+        context.put("server", server);
+
+        Map<String, Boolean> toApply = object.exportNodes(
+                new Contexts(context, includeGlobal, includeGlobal, true, true, true),
+                Collections.emptyList()
+        );
+
+        return toApply.containsKey(permission) && toApply.get(permission);
     }
 
     private boolean objectAdd(String world, PermissionHolder object, String permission) {
@@ -149,17 +161,7 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public boolean playerInGroup(String world, @NonNull String player, @NonNull String group) {
-        final User user = plugin.getUserManager().get(player);
-        if (user == null) return false;
-
-        final Group group1 = plugin.getGroupManager().get(group);
-        if (group1 == null) return false;
-
-        if (world != null && !world.equals("")) {
-            return user.isInGroup(group1, server, world);
-        } else {
-            return user.isInGroup(group1);
-        }
+        return playerHas(world, player, "group." + group);
     }
 
     @Override
@@ -174,7 +176,7 @@ public class VaultPermissionHook extends Permission {
             if (world != null && !world.equals("")) {
                 user.addGroup(group, server, world);
             } else {
-                user.addGroup(group);
+                user.addGroup(group, server);
             }
         } catch (ObjectAlreadyHasException ignored) {}
         objectSave(user);
@@ -193,7 +195,7 @@ public class VaultPermissionHook extends Permission {
             if (world != null && !world.equals("")) {
                 user.removeGroup(group, server, world);
             } else {
-                user.removeGroup(group);
+                user.removeGroup(group, server);
             }
         } catch (ObjectLacksException ignored) {}
         objectSave(user);
@@ -203,9 +205,26 @@ public class VaultPermissionHook extends Permission {
     @Override
     public String[] getPlayerGroups(String world, @NonNull String player) {
         final User user = plugin.getUserManager().get(player);
-        return (user == null) ? new String[0] :
-                world != null && !world.equals("") ? user.getGroups(server, world, includeGlobal).toArray(new String[0]) :
-                        user.getGroupNames().toArray(new String[0]);
+        if (user == null) {
+            return new String[0];
+        }
+
+        Map<String, String> context = new HashMap<>();
+        if (world != null && !world.equals("")) {
+            context.put("world", world);
+        }
+        context.put("server", server);
+
+        Map<String, Boolean> toApply = user.exportNodes(
+                new Contexts(context, includeGlobal, includeGlobal, true, true, true),
+                Collections.emptyList()
+        );
+
+        return toApply.entrySet().stream()
+                .filter(Map.Entry::getValue)
+                .filter(e -> e.getKey().startsWith("group."))
+                .map(e -> e.getKey().substring("group.".length()))
+                .toArray(String[]::new);
     }
 
     @Override
