@@ -34,7 +34,7 @@ public enum Message {
     /*
      * General & Commands
      */
-    PREFIX("&7&l[&b&lL&a&lP&7&l] &c", false),
+    PREFIX("&7&l[&b&lL&3&lP&7&l] &c", false),
     EMPTY("{0}", true),
     PLAYER_ONLINE("&aOnline", false),
     PLAYER_OFFLINE("&cOffline", false),
@@ -120,7 +120,7 @@ public enum Message {
 
     UPDATE_TASK_RUN("&bRunning update task for all online users.", true),
     INFO(
-            PREFIX + "&6Running &bLuckPerms v{0}&6 by &bLuck&6." + "\n" +
+            PREFIX + "&2Running &bLuckPerms v{0}&2 by &bLuck&2." + "\n" +
             PREFIX + "&f-> &ePlatform: &6{1}" + "\n" +
             PREFIX + "&f-> &eStorage Method: &6{2}" + "\n" +
             PREFIX + "&f-> &eServer Name: &6{3}" + "\n" +

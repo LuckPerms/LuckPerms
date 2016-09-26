@@ -103,7 +103,7 @@ public abstract class SubCommand<T> {
      * @param sender the sender to send the usage to
      */
     public void sendUsage(Sender sender) {
-        Util.sendPluginMessage(sender, "&e-> &6" + getName() + (usage.isEmpty() ? "" : "&e - &7" + getUsage()));
+        Util.sendPluginMessage(sender, "&3> &a" + getName() + (usage.isEmpty() ? "" : "&3 - &7" + getUsage()));
     }
 
     /**

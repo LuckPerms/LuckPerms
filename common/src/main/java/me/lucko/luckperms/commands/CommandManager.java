@@ -179,9 +179,9 @@ public class CommandManager {
     }
 
     private void sendCommandUsage(Sender sender, String label) {
-        Util.sendPluginMessage(sender, "&6Running &bLuckPerms v" + plugin.getVersion() + "&6.");
+        Util.sendPluginMessage(sender, "&2Running &bLuckPerms v" + plugin.getVersion() + "&2.");
         mainCommands.stream()
                 .filter(c -> c.isAuthorized(sender))
-                .forEach(c -> Util.sendPluginMessage(sender, "&e-> &d" + String.format(c.getUsage(), label)));
+                .forEach(c -> Util.sendPluginMessage(sender, "&3> &a" + String.format(c.getUsage(), label)));
     }
 }

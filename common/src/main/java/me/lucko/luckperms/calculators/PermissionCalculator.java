@@ -50,12 +50,14 @@ public class PermissionCalculator {
     }
 
     public Tristate getPermissionValue(String permission) {
+        permission = permission.toLowerCase();
+        Tristate t =  cache.computeIfAbsent(permission, this::lookupPermissionValue);
+
         if (debug) {
-            plugin.getLog().info("Checking if " + objectName + " has permission: " + permission);
+            plugin.getLog().info("Checking if " + objectName + " has permission: " + permission + " - (" + t.toString() + ")");
         }
 
-        permission = permission.toLowerCase();
-        return cache.computeIfAbsent(permission, this::lookupPermissionValue);
+        return t;
     }
 
     private Tristate lookupPermissionValue(String permission) {

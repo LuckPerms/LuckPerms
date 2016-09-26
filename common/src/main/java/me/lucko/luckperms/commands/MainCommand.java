@@ -137,7 +137,7 @@ public abstract class MainCommand<T> {
      */
     protected void sendUsage(Sender sender, String label) {
         if (getSubCommands().isEmpty()) {
-            Util.sendPluginMessage(sender, "&e-> &d" + String.format(getUsage(), label));
+            Util.sendPluginMessage(sender, "&3> &a" + String.format(getUsage(), label));
             return;
         }
 
