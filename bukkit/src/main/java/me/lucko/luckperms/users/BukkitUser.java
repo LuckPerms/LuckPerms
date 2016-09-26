@@ -71,7 +71,8 @@ public class BukkitUser extends User {
                         plugin.getConfiguration().isApplyingGlobalGroups(),
                         plugin.getConfiguration().isApplyingGlobalWorldGroups()
                 ),
-                Collections.emptyList()
+                Collections.emptyList(),
+                true
         );
 
         try {

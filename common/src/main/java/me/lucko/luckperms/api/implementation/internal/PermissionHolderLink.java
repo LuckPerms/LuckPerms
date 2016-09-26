@@ -262,7 +262,7 @@ public class PermissionHolderLink implements PermissionHolder {
         if (world != null && !world.equals("")) {
             extraContext.put("world", world);
         }
-        return master.exportNodes(new Contexts(extraContext, includeGlobal, includeGlobal, applyGroups, true, true), possibleNodes);
+        return master.exportNodes(new Contexts(extraContext, includeGlobal, includeGlobal, applyGroups, true, true), possibleNodes, false);
     }
 
     @Override

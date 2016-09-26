@@ -262,22 +262,23 @@ public abstract class PermissionHolder {
      * @param possibleNodes a list of possible nodes for wildcards and regex permissions
      * @return a map of permissions
      */
-    public Map<String, Boolean> exportNodes(Contexts context, List<String> possibleNodes) {
+    public Map<String, Boolean> exportNodes(Contexts context, List<String> possibleNodes, boolean lowerCase) {
         Map<String, Boolean> perms = new HashMap<>();
 
         for (Node node : getAllNodesFiltered(context)) {
             if (possibleNodes != null && !possibleNodes.isEmpty()) {
                 if (node.getPermission().equals("*") || node.getPermission().equals("'*'")) {
                     if (plugin.getConfiguration().isApplyingWildcards()) {
-                        possibleNodes.forEach(n -> perms.put(n, true));
+                        possibleNodes.forEach(n -> perms.put(lowerCase ? n.toLowerCase() : n, true));
                     }
                 }
             }
 
-            perms.put(node.getPermission(), node.getValue());
+            perms.put(lowerCase ? node.getPermission().toLowerCase() : node.getPermission(), node.getValue());
 
             if (plugin.getConfiguration().isApplyingShorthand()) {
                 node.resolveShorthand().stream()
+                        .map(s -> lowerCase ? s.toLowerCase() : s)
                         .filter(s -> !perms.containsKey(s))
                         .forEach(s -> perms.put(s, node.getValue()));
             }
@@ -285,6 +286,7 @@ public abstract class PermissionHolder {
             if (possibleNodes != null && !possibleNodes.isEmpty()) {
                 if (plugin.getConfiguration().isApplyingWildcards()) {
                     node.resolveWildcard(possibleNodes).stream()
+                            .map(s -> lowerCase ? s.toLowerCase() : s)
                             .filter(s -> !perms.containsKey(s))
                             .forEach(s -> perms.put(s, node.getValue()));
                 }
@@ -576,7 +578,7 @@ public abstract class PermissionHolder {
         if (world != null && !world.equals("")) {
             context.put("world", world);
         }
-        return exportNodes(new Contexts(context, plugin.getConfiguration().isIncludingGlobalPerms(), true, true, true, true), Collections.emptyList());
+        return exportNodes(new Contexts(context, plugin.getConfiguration().isIncludingGlobalPerms(), true, true, true, true), Collections.emptyList(), false);
     }
 
     @Deprecated
@@ -588,7 +590,7 @@ public abstract class PermissionHolder {
         if (world != null && !world.equals("")) {
             context.put("world", world);
         }
-        return exportNodes(new Contexts(context, plugin.getConfiguration().isIncludingGlobalPerms(), true, true, true, true), Collections.emptyList());
+        return exportNodes(new Contexts(context, plugin.getConfiguration().isIncludingGlobalPerms(), true, true, true, true), Collections.emptyList(), false);
     }
 
     @SuppressWarnings("deprecation")

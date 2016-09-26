@@ -78,7 +78,7 @@ public class VaultPermissionHook extends Permission {
 
         Map<String, Boolean> toApply = object.exportNodes(
                 new Contexts(context, includeGlobal, includeGlobal, true, true, true),
-                Collections.emptyList()
+                Collections.emptyList(), true
         );
 
         return toApply.containsKey(permission) && toApply.get(permission);
@@ -217,7 +217,7 @@ public class VaultPermissionHook extends Permission {
 
         Map<String, Boolean> toApply = user.exportNodes(
                 new Contexts(context, includeGlobal, includeGlobal, true, true, true),
-                Collections.emptyList()
+                Collections.emptyList(), true
         );
 
         return toApply.entrySet().stream()

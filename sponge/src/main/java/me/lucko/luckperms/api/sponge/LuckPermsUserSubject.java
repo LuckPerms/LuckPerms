@@ -39,7 +39,6 @@ import org.spongepowered.api.util.Tristate;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class LuckPermsUserSubject extends LuckPermsSubject {
@@ -83,7 +82,8 @@ public class LuckPermsUserSubject extends LuckPermsSubject {
                         service.getPlugin().getConfiguration().isApplyingGlobalGroups(),
                         service.getPlugin().getConfiguration().isApplyingGlobalWorldGroups()
                 ),
-                Collections.emptyList()
+                Collections.emptyList(),
+                true
         );
 
         ContextData existing = contextData.get(context);

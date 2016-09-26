@@ -69,7 +69,8 @@ public class BungeeUser extends User {
                         plugin.getConfiguration().isApplyingGlobalGroups(),
                         plugin.getConfiguration().isApplyingGlobalWorldGroups()
                 ),
-                Collections.emptyList()
+                Collections.emptyList(),
+                true
         );
 
         Map<String, Boolean> existing = playerCache.getPermissions();
