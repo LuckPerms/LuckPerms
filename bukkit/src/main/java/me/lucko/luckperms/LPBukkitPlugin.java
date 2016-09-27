@@ -62,6 +62,8 @@ import java.util.stream.Collectors;
 
 @Getter
 public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
+    private VaultHook vaultHook = null;
+
     private final Set<UUID> ignoringLogs = ConcurrentHashMap.newKeySet();
     private LPConfiguration configuration;
     private BukkitUserManager userManager;
@@ -142,7 +144,8 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         getLog().info("Attempting to hook into Vault...");
         try {
             if (getServer().getPluginManager().isPluginEnabled("Vault")) {
-                VaultHook.hook(this);
+                vaultHook = new VaultHook();
+                vaultHook.hook(this);
                 getLog().info("Registered Vault permission & chat hook.");
             } else {
                 getLog().info("Vault not found.");
@@ -181,6 +184,10 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         getLog().info("Unregistering API...");
         LuckPerms.unregisterProvider();
         getServer().getServicesManager().unregisterAll(this);
+
+        if (vaultHook != null) {
+            vaultHook.unhook(this);
+        }
     }
 
     @Override

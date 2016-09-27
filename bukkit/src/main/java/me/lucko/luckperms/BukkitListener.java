@@ -90,8 +90,12 @@ class BukkitListener extends AbstractListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerQuit(PlayerQuitEvent e) {
-        plugin.getWorldCalculator().getWorldCache().remove(plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId()));
+        final UUID internal = plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId());
+        plugin.getWorldCalculator().getWorldCache().remove(internal);
         onLeave(e.getPlayer().getUniqueId());
+        if (plugin.getVaultHook() != null && plugin.getVaultHook().isHooked()) {
+            plugin.getVaultHook().getPermissionHook().getVaultUserManager().clearUser(internal);
+        }
     }
 
     @EventHandler

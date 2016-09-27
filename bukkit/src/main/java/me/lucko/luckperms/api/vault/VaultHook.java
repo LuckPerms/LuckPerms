@@ -22,18 +22,19 @@
 
 package me.lucko.luckperms.api.vault;
 
+import lombok.Getter;
 import me.lucko.luckperms.LPBukkitPlugin;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.ServicesManager;
 
+@Getter
 public class VaultHook {
+    private VaultChatHook chatHook = null;
+    private VaultPermissionHook permissionHook = null;
 
-    private static VaultChatHook chatHook = null;
-    private static VaultPermissionHook permissionHook = null;
-
-    public static void hook(LPBukkitPlugin plugin) {
+    public void hook(LPBukkitPlugin plugin) {
         try {
             if (permissionHook == null) {
                 permissionHook = new VaultPermissionHook();
@@ -41,21 +42,33 @@ public class VaultHook {
             permissionHook.setPlugin(plugin);
             permissionHook.setServer(plugin.getConfiguration().getVaultServer());
             permissionHook.setIncludeGlobal(plugin.getConfiguration().isVaultIncludingGlobal());
+            permissionHook.setup();
 
             if (chatHook == null) {
                 chatHook = new VaultChatHook(permissionHook);
             }
-            chatHook.setPlugin(plugin);
 
             final ServicesManager sm = plugin.getServer().getServicesManager();
-            sm.unregisterAll(plugin);
             sm.register(Permission.class, permissionHook, plugin, ServicePriority.High);
-            sm.register(Chat.class, chatHook, plugin, ServicePriority.Low);
+            sm.register(Chat.class, chatHook, plugin, ServicePriority.High);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
 
+    public void unhook(LPBukkitPlugin plugin) {
+        final ServicesManager sm = plugin.getServer().getServicesManager();
+        if (permissionHook != null) {
+            sm.unregister(Permission.class, permissionHook);
+        }
+        if (chatHook != null) {
+            sm.unregister(Chat.class, chatHook);
+        }
+    }
+
+    public boolean isHooked() {
+        return permissionHook != null && chatHook != null;
     }
 
 }

@@ -26,7 +26,9 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import me.lucko.luckperms.api.Node;
 
+import java.text.Collator;
 import java.util.Comparator;
+import java.util.Locale;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PriorityComparator implements Comparator<Node> {
@@ -39,6 +41,8 @@ public class PriorityComparator implements Comparator<Node> {
     public static Comparator<Node> reverse() {
         return INSTANCE.reversed();
     }
+
+    private final Collator collator = Collator.getInstance(Locale.ENGLISH);
 
     @Override
     public int compare(Node o1, Node o2) {
@@ -74,6 +78,6 @@ public class PriorityComparator implements Comparator<Node> {
             return o1.getWildcardLevel() > o2.getWildcardLevel() ? 1 : -1;
         }
 
-        return o1.getPermission().compareToIgnoreCase(o2.getPermission()) == 1 ? -1 : 1;
+        return collator.compare(o1.getPermission(), o2.getPermission()) == 1 ? -1 : 1;
     }
 }

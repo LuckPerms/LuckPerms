@@ -20,13 +20,18 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.api.sponge;
+package me.lucko.luckperms.api.vault.cache;
 
 import lombok.Getter;
 import lombok.NonNull;
+import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.calculators.PermissionCalculator;
 import me.lucko.luckperms.calculators.PermissionProcessor;
+import me.lucko.luckperms.inject.DefaultsProvider;
+import me.lucko.luckperms.inject.LPPermissible;
+import me.lucko.luckperms.users.BukkitUser;
+import me.lucko.luckperms.users.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +39,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ContextData {
-    private final LuckPermsUserSubject parent;
 
     @Getter
     private final Map<String, String> context;
@@ -44,22 +48,20 @@ public class ContextData {
 
     private final PermissionCalculator calculator;
 
-    public ContextData(LuckPermsUserSubject parent, Map<String, String> context, LuckPermsService service) {
-        this.parent = parent;
+    public ContextData(User user, Map<String, String> context, LuckPermsPlugin plugin, DefaultsProvider defaultsProvider) {
         this.context = context;
 
         List<PermissionProcessor> processors = new ArrayList<>(5);
         processors.add(new PermissionCalculator.MapProcessor(permissionCache));
-        if (service.getPlugin().getConfiguration().isApplyingWildcards()) {
-            processors.add(new LuckPermsUserSubject.SpongeWildcardProcessor(permissionCache));
+        if (plugin.getConfiguration().isApplyingWildcards()) {
             processors.add(new PermissionCalculator.WildcardProcessor(permissionCache));
         }
-        if (service.getPlugin().getConfiguration().isApplyingRegex()) {
+        if (plugin.getConfiguration().isApplyingRegex()) {
             processors.add(new PermissionCalculator.RegexProcessor(permissionCache));
         }
-        processors.add(new LuckPermsUserSubject.SpongeDefaultsProcessor(service));
 
-        calculator = new PermissionCalculator(service.getPlugin(), parent.getUser().getName(), service.getPlugin().getConfiguration().isDebugPermissionChecks(), processors);
+        processors.add(new LPPermissible.BukkitDefaultsProcessor(() -> ((BukkitUser) user).getLpPermissible().isOp(), defaultsProvider));
+        calculator = new PermissionCalculator(plugin, user.getName(), plugin.getConfiguration().isDebugPermissionChecks(), processors);
     }
 
     public void invalidateCache() {
@@ -67,12 +69,7 @@ public class ContextData {
     }
 
     public Tristate getPermissionValue(@NonNull String permission) {
-        me.lucko.luckperms.api.Tristate t = calculator.getPermissionValue(permission);
-        if (t != me.lucko.luckperms.api.Tristate.UNDEFINED) {
-            return Tristate.fromBoolean(t.asBoolean());
-        } else {
-            return Tristate.UNDEFINED;
-        }
+        return calculator.getPermissionValue(permission);
     }
 
 }

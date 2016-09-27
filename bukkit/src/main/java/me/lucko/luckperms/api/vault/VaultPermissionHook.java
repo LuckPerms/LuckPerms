@@ -27,6 +27,9 @@ import lombok.NonNull;
 import lombok.Setter;
 import me.lucko.luckperms.LPBukkitPlugin;
 import me.lucko.luckperms.api.data.Callback;
+import me.lucko.luckperms.api.vault.cache.ContextData;
+import me.lucko.luckperms.api.vault.cache.VaultUserCache;
+import me.lucko.luckperms.api.vault.cache.VaultUserManager;
 import me.lucko.luckperms.contexts.Contexts;
 import me.lucko.luckperms.core.PermissionHolder;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
@@ -41,8 +44,12 @@ import java.util.Map;
 
 public class VaultPermissionHook extends Permission {
 
+    @Getter
     @Setter
     private LPBukkitPlugin plugin;
+
+    @Getter
+    private VaultUserManager vaultUserManager;
 
     @Getter
     @Setter
@@ -67,8 +74,12 @@ public class VaultPermissionHook extends Permission {
         return true;
     }
 
-    private boolean objectHas(String world, PermissionHolder object, String permission) {
-        if (object == null) return false;
+    public void setup() {
+        vaultUserManager = new VaultUserManager(plugin, this);
+    }
+
+    private boolean objectHas(String world, Group group, String permission) {
+        if (group == null) return false;
 
         Map<String, String> context = new HashMap<>();
         if (world != null && !world.equals("")) {
@@ -76,7 +87,7 @@ public class VaultPermissionHook extends Permission {
         }
         context.put("server", server);
 
-        Map<String, Boolean> toApply = object.exportNodes(
+        Map<String, Boolean> toApply = group.exportNodes(
                 new Contexts(context, includeGlobal, includeGlobal, true, true, true),
                 Collections.emptyList(), true
         );
@@ -126,7 +137,21 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public boolean playerHas(String world, @NonNull String player, @NonNull String permission) {
-        return objectHas(world, plugin.getUserManager().get(player), permission);
+        User user = plugin.getUserManager().get(player);
+        if (user == null) return false;
+
+        if (!vaultUserManager.containsUser(user.getUuid())) {
+            return false;
+        }
+
+        VaultUserCache vaultUser = vaultUserManager.getUser(user.getUuid());
+        Map<String, String> context = new HashMap<>();
+        context.put("server", server);
+        if (world != null) {
+            context.put("world", world);
+        }
+
+        return vaultUser.hasPermission(context, permission);
     }
 
     @Override
@@ -204,23 +229,22 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public String[] getPlayerGroups(String world, @NonNull String player) {
-        final User user = plugin.getUserManager().get(player);
-        if (user == null) {
+        User user = plugin.getUserManager().get(player);
+        if (user == null) return new String[0];
+
+        if (!vaultUserManager.containsUser(user.getUuid())) {
             return new String[0];
         }
 
+        VaultUserCache vaultUser = vaultUserManager.getUser(user.getUuid());
         Map<String, String> context = new HashMap<>();
-        if (world != null && !world.equals("")) {
+        context.put("server", server);
+        if (world != null) {
             context.put("world", world);
         }
-        context.put("server", server);
 
-        Map<String, Boolean> toApply = user.exportNodes(
-                new Contexts(context, includeGlobal, includeGlobal, true, true, true),
-                Collections.emptyList(), true
-        );
-
-        return toApply.entrySet().stream()
+        ContextData cd = vaultUser.getContextData().computeIfAbsent(context, map -> vaultUser.calculatePermissions(map, false));
+        return cd.getPermissionCache().entrySet().stream()
                 .filter(Map.Entry::getValue)
                 .filter(e -> e.getKey().startsWith("group."))
                 .map(e -> e.getKey().substring("group.".length()))

@@ -119,5 +119,9 @@ public class BukkitUser extends User {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        if (plugin.getVaultHook() != null && plugin.getVaultHook().isHooked()) {
+            plugin.getVaultHook().getPermissionHook().getVaultUserManager().setupUser(this);
+        }
     }
 }

@@ -279,7 +279,7 @@ public class LPPermissible extends PermissibleBase {
     }
 
     @AllArgsConstructor
-    private static class BukkitDefaultsProcessor implements PermissionProcessor {
+    public static class BukkitDefaultsProcessor implements PermissionProcessor {
         private final Supplier<Boolean> isOp;
         private final DefaultsProvider defaultsProvider;
 
