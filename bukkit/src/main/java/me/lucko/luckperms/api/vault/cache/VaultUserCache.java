@@ -84,8 +84,4 @@ public class VaultUserCache {
         existing.getPermissionCache().putAll(toApply);
         return existing;
     }
-
-
-
-
 }

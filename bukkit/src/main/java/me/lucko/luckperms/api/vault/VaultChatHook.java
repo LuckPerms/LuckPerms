@@ -52,8 +52,6 @@ import static me.lucko.luckperms.utils.ArgumentChecker.unescapeCharacters;
  *
  * Node that special characters used within LuckPerms are escaped:
  * See {@link me.lucko.luckperms.utils.ArgumentChecker#escapeCharacters(String)}
- *
- * Registered on normal priority so other perms.getPlugin()s can override.
  */
 public class VaultChatHook extends Chat {
     private final VaultPermissionHook perms;
