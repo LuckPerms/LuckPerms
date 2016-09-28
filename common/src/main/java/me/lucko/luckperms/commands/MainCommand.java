@@ -146,7 +146,7 @@ public abstract class MainCommand<T> {
                 .collect(Collectors.toList());
 
         if (subs.size() > 0) {
-            Util.sendPluginMessage(sender, "&e" + getName() + " Sub Commands: &7(" + String.format(getUsage(), label) + " ...)");
+            Util.sendPluginMessage(sender, "&b" + getName() + " Sub Commands: &7(" + String.format(getUsage(), label) + " ...)");
 
             for (SubCommand s : subs) {
                 s.sendUsage(sender);

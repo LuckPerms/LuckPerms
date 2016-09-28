@@ -84,22 +84,22 @@ public class Util {
     }
 
     public static String listToCommaSep(List<String> strings) {
-        if (strings.isEmpty()) return "&6None";
+        if (strings.isEmpty()) return "&bNone";
 
         StringBuilder sb = new StringBuilder();
-        strings.forEach(s -> sb.append("&6").append(s).append("&7, "));
+        strings.forEach(s -> sb.append("&3").append(s).append("&7, "));
         return sb.delete(sb.length() - 2, sb.length()).toString();
     }
 
     public static String listToArrowSep(List<String> strings, String highlight) {
-        if (strings.isEmpty()) return "&6None";
+        if (strings.isEmpty()) return "&bNone";
 
         StringBuilder sb = new StringBuilder();
         for (String s : strings) {
             if (s.equalsIgnoreCase(highlight)) {
-                sb.append("&e").append(s).append("&7 ---> ");
+                sb.append("&b").append(s).append("&7 ---> ");
             } else {
-                sb.append("&6").append(s).append("&7 ---> ");
+                sb.append("&3").append(s).append("&7 ---> ");
             }
         }
         return sb.delete(sb.length() - 6, sb.length()).toString();
@@ -111,11 +111,11 @@ public class Util {
         StringBuilder sb = new StringBuilder();
         for (String s : strings) {
             if (s.equalsIgnoreCase(highlightFirst)) {
-                sb.append("&e").append(s).append("&4").append(reversed ? " <--- " : " ---> ");
+                sb.append("&b").append(s).append("&4").append(reversed ? " <--- " : " ---> ");
             } else if (s.equalsIgnoreCase(highlightSecond)) {
-                sb.append("&e").append(s).append("&7").append(reversed ? " <--- " : " ---> ");
+                sb.append("&b").append(s).append("&7").append(reversed ? " <--- " : " ---> ");
             } else {
-                sb.append("&6").append(s).append("&7").append(reversed ? " <--- " : " ---> ");
+                sb.append("&3").append(s).append("&7").append(reversed ? " <--- " : " ---> ");
             }
         }
         return sb.delete(sb.length() - 6, sb.length()).toString();
@@ -125,7 +125,7 @@ public class Util {
         if (strings.isEmpty()) return "&6None";
 
         StringBuilder sb = new StringBuilder();
-        strings.forEach(s -> sb.append("&6").append(s).append("&e ---> "));
+        strings.forEach(s -> sb.append("&3").append(s).append("&b ---> "));
         return sb.delete(sb.length() - 6, sb.length()).toString();
     }
 
@@ -136,7 +136,7 @@ public class Util {
                 continue;
             }
 
-            sb.append("&6-> ").append(node.getValue() ? "&a" : "&c");
+            sb.append("&3> ").append(node.getValue() ? "&a" : "&c");
             sb.append(node.getPermission());
             if (node.isServerSpecific()) {
                 sb.append(" &7(&f").append(node.getServer().get()).append("&7)");
@@ -148,7 +148,7 @@ public class Util {
         }
 
         if (sb.length() == 0) {
-            return "&6None";
+            return "&3None";
         }
 
         return sb.toString();
@@ -162,7 +162,7 @@ public class Util {
                 continue;
             }
 
-            sb.append("&6-> ").append(node.getValue() ? "&a" : "&c");
+            sb.append("&3> ").append(node.getValue() ? "&a" : "&c");
             sb.append(node.getPermission());
             if (node.isServerSpecific()) {
                 sb.append(" &7(&f").append(node.getServer().get()).append("&7)");
@@ -175,7 +175,7 @@ public class Util {
         }
 
         if (sb.length() == 0) {
-            return "&6None";
+            return "&3None";
         }
 
         return sb.toString();
@@ -192,7 +192,7 @@ public class Util {
                 continue;
             }
 
-            sb.append("&a-> &b").append(node.getGroupName());
+            sb.append("&3> &f").append(node.getGroupName());
             if (node.isServerSpecific()) {
                 sb.append(" &7(&f").append(node.getServer().get()).append("&7)");
             }
@@ -203,7 +203,7 @@ public class Util {
         }
 
         if (sb.length() == 0) {
-            return "&6None";
+            return "&3None";
         }
 
         return sb.toString();
@@ -221,7 +221,7 @@ public class Util {
                 continue;
             }
 
-            sb.append("&a-> &b").append(node.getGroupName());
+            sb.append("&3> &f").append(node.getGroupName());
             if (node.isServerSpecific()) {
                 sb.append(" &7(&f").append(node.getServer().get()).append("&7)");
             }
@@ -233,7 +233,7 @@ public class Util {
         }
 
         if (sb.length() == 0) {
-            return "&6None";
+            return "&3None";
         }
 
         return sb.toString();

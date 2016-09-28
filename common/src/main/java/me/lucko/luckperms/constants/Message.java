@@ -39,7 +39,7 @@ public enum Message {
     PLAYER_ONLINE("&aOnline", false),
     PLAYER_OFFLINE("&cOffline", false),
     LOADING_ERROR("Permissions data could not be loaded. Please contact an administrator.", true),
-    OP_DISABLED("&eThe vanilla OP system is disabled on this server.", false),
+    OP_DISABLED("&bThe vanilla OP system is disabled on this server.", false),
     LOG("&3LOG &3&l> {0}", true),
 
     COMMAND_NOT_RECOGNISED("Command not recognised.", true),
@@ -55,17 +55,17 @@ public enum Message {
     /*
      * Loading / Saving
      */
-    USER_NOT_FOUND("&eUser could not be found.", true),
+    USER_NOT_FOUND("&bUser could not be found.", true),
     USER_SAVE_SUCCESS("&7(User data was saved to the datastore)", true),
     USER_SAVE_ERROR("There was an error whilst saving the user.", true),
     USER_ATTEMPTING_LOOKUP("&7(Attempting UUID lookup, since you specified a username)", true),
     USER_CREATE_FAIL("There was an error whilst creating a new user.", true),
 
-    GROUP_NOT_FOUND("&eGroup could not be found.", true),
+    GROUP_NOT_FOUND("&bGroup could not be found.", true),
     GROUP_SAVE_SUCCESS("&7(Group data was saved to the datastore)", true),
     GROUP_SAVE_ERROR("There was an error whilst saving the group.", true),
 
-    TRACK_NOT_FOUND("&eTrack could not be found.", true),
+    TRACK_NOT_FOUND("&bTrack could not be found.", true),
     TRACK_SAVE_SUCCESS("&7(Track data was saved to the datastore)", true),
     TRACK_SAVE_ERROR("There was an error whilst saving the track.", true),
 
@@ -121,26 +121,26 @@ public enum Message {
     UPDATE_TASK_RUN("&bRunning update task for all online users.", true),
     INFO(
             PREFIX + "&2Running &bLuckPerms v{0}&2 by &bLuck&2." + "\n" +
-            PREFIX + "&f-> &ePlatform: &6{1}" + "\n" +
-            PREFIX + "&f-> &eStorage Method: &6{2}" + "\n" +
-            PREFIX + "&f-> &eServer Name: &6{3}" + "\n" +
-            PREFIX + "&f-> &eSync Interval: &6{4} minutes" + "\n" +
-            PREFIX + "&f-> &eInclude Global: &6{5}" + "\n" +
-            PREFIX + "&f-> &eInclude Global World: &6{6}" + "\n" +
-            PREFIX + "&f-> &eApply Global Groups: &6{7}" + "\n" +
-            PREFIX + "&f-> &eApply Global World Groups: &6{8}" + "\n" +
-            PREFIX + "&f-> &eOnline Mode: &6{9}" + "\n" +
-            PREFIX + "&f-> &eApply Wildcards: &6{10}" + "\n" +
-            PREFIX + "&f-> &eApply Regex: &6{11}" + "\n" +
-            PREFIX + "&f-> &eApply Shorthand: &6{12}",
+            PREFIX + "&f-> &3Platform: &f{1}" + "\n" +
+            PREFIX + "&f-> &3Storage Method: &f{2}" + "\n" +
+            PREFIX + "&f-> &3Server Name: &f{3}" + "\n" +
+            PREFIX + "&f-> &3Sync Interval: &f{4} minutes" + "\n" +
+            PREFIX + "&f-> &3Include Global: &f{5}" + "\n" +
+            PREFIX + "&f-> &3Include Global World: &f{6}" + "\n" +
+            PREFIX + "&f-> &3Apply Global Groups: &f{7}" + "\n" +
+            PREFIX + "&f-> &3Apply Global World Groups: &f{8}" + "\n" +
+            PREFIX + "&f-> &3Online Mode: &f{9}" + "\n" +
+            PREFIX + "&f-> &3Apply Wildcards: &f{10}" + "\n" +
+            PREFIX + "&f-> &3Apply Regex: &f{11}" + "\n" +
+            PREFIX + "&f-> &3Apply Shorthand: &f{12}",
             false
     ),
     DEBUG(
             PREFIX + "&d&l> &dDebug Info" + "\n" +
-            PREFIX + "&f> &eOnline Players: &6{0}" + "\n" +
-            PREFIX + "&f> &eLoaded Users: &6{1}" + "\n" +
-            PREFIX + "&f> &eLoaded Groups: &6{2}" + "\n" +
-            PREFIX + "&f> &eLoaded Tracks: &6{3}",
+            PREFIX + "&f> &3Online Players: &f{0}" + "\n" +
+            PREFIX + "&f> &3Loaded Users: &f{1}" + "\n" +
+            PREFIX + "&f> &3Loaded Groups: &f{2}" + "\n" +
+            PREFIX + "&f> &3Loaded Tracks: &f{3}",
             false
     ),
 
@@ -153,12 +153,12 @@ public enum Message {
     DELETE_TRACK_ERROR("There was an error whilst deleting the track.", true),
     TRACKS_LIST("&aTracks: {0}", true),
 
-    LISTNODES("&e{0}'s Nodes:" + "\n" + "{1}", true),
-    LISTNODES_TEMP("&e{0}'s Temporary Nodes:" + "\n" + "{1}", true),
-    LISTPARENTS("&e{0}'s Parent Groups:" + "\n" + "{1}", true),
-    LISTPARENTS_TEMP("&e{0}'s Temporary Parent Groups:" + "\n" + "{1}", true),
-    LISTGROUPS("&e{0}'s Groups:" + "\n" + "{1}", true),
-    LISTGROUPS_TEMP("&e{0}'s Temporary Groups:" + "\n" + "{1}", true),
+    LISTNODES("&b{0}'s Nodes:" + "\n" + "{1}", true),
+    LISTNODES_TEMP("&b{0}'s Temporary Nodes:" + "\n" + "{1}", true),
+    LISTPARENTS("&b{0}'s Parent Groups:" + "\n" + "{1}", true),
+    LISTPARENTS_TEMP("&b{0}'s Temporary Parent Groups:" + "\n" + "{1}", true),
+    LISTGROUPS("&b{0}'s Groups:" + "\n" + "{1}", true),
+    LISTGROUPS_TEMP("&b{0}'s Temporary Groups:" + "\n" + "{1}", true),
     SETPERMISSION_SUCCESS("&aSet &b{0}&a to &b{1}&a for &b{2}&a.", true),
     SETPERMISSION_SERVER_SUCCESS("&aSet &b{0}&a to &b{1}&a for &b{2}&a on server &b{3}&a.", true),
     SETPERMISSION_SERVER_WORLD_SUCCESS("&aSet &b{0}&a to &b{1}&a for &b{2}&a on server &b{3}&a, world &b{4}&a.", true),
@@ -175,11 +175,11 @@ public enum Message {
     ILLEGAL_DATE_ERROR("Could not parse date '{0}'.", true),
     PAST_DATE_ERROR("You cannot set a date in the past!", true),
 
-    CHAT_META_PREFIX_HEADER("&e{0}'s Prefixes", true),
-    CHAT_META_SUFFIX_HEADER("&e{0}'s Suffixes", true),
-    CHAT_META_ENTRY("&d-> &e{0} &6- &f\"{1}&f\"", true),
-    CHAT_META_PREFIX_NONE("&e{0} has no prefixes.", true),
-    CHAT_META_SUFFIX_NONE("&e{0} has no suffixes.", true),
+    CHAT_META_PREFIX_HEADER("&b{0}'s Prefixes", true),
+    CHAT_META_SUFFIX_HEADER("&b{0}'s Suffixes", true),
+    CHAT_META_ENTRY("&b-> &b{0} &f- &f\"{1}&f\"", true),
+    CHAT_META_PREFIX_NONE("&b{0} has no prefixes.", true),
+    CHAT_META_SUFFIX_NONE("&b{0} has no suffixes.", true),
 
     META_INVALID_PRIORITY("Invalid priority '{0}'. Expected a number.", true),
     ALREADY_HAS_PREFIX("{0} already has that prefix set.", true),
@@ -219,16 +219,16 @@ public enum Message {
     BULK_CHANGE_SUCCESS("&aApplied bulk change successfully. {0} records were changed.", true),
 
     USER_INFO(
-            PREFIX + "&d-> &eUser: &6{0}" + "\n" +
-            PREFIX + "&d-> &eUUID: &6{1}" + "\n" +
-            PREFIX + "&d-> &eStatus: {2}" + "\n" +
-            PREFIX + "&d-> &ePrimary Group: &6{3}" + "\n" +
-            PREFIX + "&d-> &ePermissions: &6{4}" + "\n" +
-            PREFIX + "&d-> &eTemporary Permissions: &6{5}" + "\n" +
-            PREFIX + "&d-> &bUse &a/{6} user {7} listnodes &bto see all permissions.",
+            PREFIX + "&b-> &bUser: &f{0}" + "\n" +
+            PREFIX + "&b-> &bUUID: &f{1}" + "\n" +
+            PREFIX + "&b-> &bStatus: {2}" + "\n" +
+            PREFIX + "&b-> &bPrimary Group: &f{3}" + "\n" +
+            PREFIX + "&b-> &bPermissions: &f{4}" + "\n" +
+            PREFIX + "&b-> &bTemporary Permissions: &f{5}" + "\n" +
+            PREFIX + "&b-> &bUse &a/{6} user {7} listnodes &bto see all permissions.",
             false
     ),
-    USER_GETUUID("&bThe UUID of &e{0}&b is &e{1}&b.", true),
+    USER_GETUUID("&bThe UUID of &b{0}&b is &b{1}&b.", true),
     USER_ADDGROUP_SUCCESS("&b{0}&a successfully added to group &b{1}&a.", true),
     USER_ADDGROUP_SERVER_SUCCESS("&b{0}&a successfully added to group &b{1}&a on server &b{2}&a.", true),
     USER_ADDGROUP_SERVER_WORLD_SUCCESS("&b{0}&a successfully added to group &b{1}&a on server &b{2}&a, world &b{3}&a.", true),
@@ -267,10 +267,10 @@ public enum Message {
     USER_SHOWPOS("&aShowing &b{0}&a's position on track &b{1}&a.\n{2}", true),
 
     GROUP_INFO(
-            PREFIX + "&d-> &eGroup: &6{0}" + "\n" +
-            PREFIX + "&d-> &ePermissions: &6{1}" + "\n" +
-            PREFIX + "&d-> &eTemporary Permissions: &6{2}" + "\n" +
-            PREFIX + "&d-> &bUse &a/{3} group {4} listnodes &bto see all permissions.",
+            PREFIX + "&b-> &bGroup: &f{0}" + "\n" +
+            PREFIX + "&b-> &bPermissions: &f{1}" + "\n" +
+            PREFIX + "&b-> &bTemporary Permissions: &f{2}" + "\n" +
+            PREFIX + "&b-> &bUse &a/{3} group {4} listnodes &bto see all permissions.",
             false
     ),
     GROUP_SETINHERIT_SUCCESS("&b{0}&a now inherits permissions from &b{1}&a.", true),
@@ -287,8 +287,8 @@ public enum Message {
     GROUP_UNSET_TEMP_INHERIT_SERVER_WORLD_SUCCESS("&b{0}&a no longer temporarily inherits permissions from &b{1}&a on server &b{2}&a, world &b{3}&a.", true),
 
     TRACK_INFO(
-            PREFIX + "&d-> &eTrack: &6{0}" + "\n" +
-            PREFIX + "&d-> &ePath: &6{1}",
+            PREFIX + "&b-> &bTrack: &f{0}" + "\n" +
+            PREFIX + "&b-> &bPath: &f{1}",
             false
     ),
     TRACK_CLEAR("&b{0}&a's groups track was cleared.", true),
@@ -301,8 +301,8 @@ public enum Message {
     LOG_LOAD_ERROR("The log could not be loaded.", true),
     LOG_INVALID_PAGE("Invalid page number.", true),
     LOG_INVALID_PAGE_RANGE("Invalid page number. Please enter a value between 1 and {0}.", true),
-    LOG_NO_ENTRIES("&eNo log entries to show.", true),
-    LOG_ENTRY("&e#{0} -> &8(&7{1} ago&8) {2}", true),
+    LOG_NO_ENTRIES("&bNo log entries to show.", true),
+    LOG_ENTRY("&b#{0} -> &8(&7{1} ago&8) {2}", true),
 
     LOG_NOTIFY_TOGGLE_ON("&aEnabled&b logging output.", true),
     LOG_NOTIFY_TOGGLE_OFF("&cDisabled&b logging output.", true),
@@ -330,24 +330,24 @@ public enum Message {
     IMPORT_LOG_NOT_READABLE("Error: File {0} is not readable.", true),
     IMPORT_LOG_FAILURE("An unexpected error occured whilst reading from the log file.", true),
 
-    IMPORT_PROGRESS("&e(Import) &d-> &f{0} &6percent complete &7- &e{1}&6/&e{2} &6operations complete with &c{3} &6errors.", true),
-    IMPORT_PROGRESS_SIN("&e(Import) &d-> &f{0} &6percent complete &7- &e{1}&6/&e{2} &6operations complete with &c{3} &6error.", true),
-    IMPORT_START("&e(Import) &d-> &6Starting import process.", true),
+    IMPORT_PROGRESS("&b(Import) &b-> &f{0} &fpercent complete &7- &b{1}&f/&b{2} &foperations complete with &c{3} &ferrors.", true),
+    IMPORT_PROGRESS_SIN("&b(Import) &b-> &f{0} &fpercent complete &7- &b{1}&f/&b{2} &foperations complete with &c{3} &ferror.", true),
+    IMPORT_START("&b(Import) &b-> &fStarting import process.", true),
 
-    IMPORT_END_COMPLETE("&e(Import) &a&lCOMPLETED &7- took &e{0} &7seconds - &7No errors.", true),
-    IMPORT_END_COMPLETE_ERR("&e(Import) &a&lCOMPLETED &7- took &e{0} &7seconds - &c{1} errors.", true),
-    IMPORT_END_COMPLETE_ERR_SIN("&e(Import) &a&lCOMPLETED &7- took &e{0} &7seconds - &c{1} error.", true),
+    IMPORT_END_COMPLETE("&b(Import) &a&lCOMPLETED &7- took &b{0} &7seconds - &7No errors.", true),
+    IMPORT_END_COMPLETE_ERR("&b(Import) &a&lCOMPLETED &7- took &b{0} &7seconds - &c{1} errors.", true),
+    IMPORT_END_COMPLETE_ERR_SIN("&b(Import) &a&lCOMPLETED &7- took &b{0} &7seconds - &c{1} error.", true),
     IMPORT_END_ERROR_HEADER(
-            PREFIX + "&e(Import) &7------------> &6Showing Error #&e{0} &7<------------" + "\n" +
-            PREFIX + "&e(Import) &6Whilst executing: &fCommand #{1}" + "\n" +
-            PREFIX + "&e(Import) &6Command: &7{2}" + "\n" +
-            PREFIX + "&e(Import) &6Type: &f{3}" + "\n" +
-            PREFIX + "&e(Import) &6Output:",
+            PREFIX + "&b(Import) &7------------> &fShowing Error #&b{0} &7<------------" + "\n" +
+            PREFIX + "&b(Import) &fWhilst executing: &fCommand #{1}" + "\n" +
+            PREFIX + "&b(Import) &fCommand: &7{2}" + "\n" +
+            PREFIX + "&b(Import) &fType: &f{3}" + "\n" +
+            PREFIX + "&b(Import) &fOutput:",
             false
     ),
 
-    IMPORT_END_ERROR_CONTENT("&e(Import) &d-> &c{0}", true),
-    IMPORT_END_ERROR_FOOTER("&e(Import) &7<------------------------------------------>", true),
+    IMPORT_END_ERROR_CONTENT("&b(Import) &b-> &c{0}", true),
+    IMPORT_END_ERROR_FOOTER("&b(Import) &7<------------------------------------------>", true),
 
     MIGRATION_NOT_CONSOLE("Migration must be performed from the Console.", true);
 
