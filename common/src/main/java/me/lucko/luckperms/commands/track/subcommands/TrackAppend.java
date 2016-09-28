@@ -36,7 +36,9 @@ import java.util.List;
 
 public class TrackAppend extends SubCommand<Track> {
     public TrackAppend() {
-        super("append", "Appends a group onto the end of the track", "<group>", Permission.TRACK_APPEND, Predicate.not(1));
+        super("append", "Appends a group onto the end of the track", Permission.TRACK_APPEND, Predicate.not(1),
+                Arg.list(Arg.create("group", true, "the group to append"))
+        );
     }
 
     @Override
@@ -44,7 +46,7 @@ public class TrackAppend extends SubCommand<Track> {
         String groupName = args.get(0).toLowerCase();
 
         if (ArgumentChecker.checkNode(groupName)) {
-            sendUsage(sender);
+            sendDetailedUsage(sender);
             return CommandResult.INVALID_ARGS;
         }
 

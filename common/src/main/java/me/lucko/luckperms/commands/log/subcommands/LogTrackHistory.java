@@ -24,10 +24,7 @@ package me.lucko.luckperms.commands.log.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.api.LogEntry;
-import me.lucko.luckperms.commands.CommandResult;
-import me.lucko.luckperms.commands.Predicate;
-import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.data.Log;
@@ -40,7 +37,12 @@ import java.util.SortedMap;
 
 public class LogTrackHistory extends SubCommand<Log> {
     public LogTrackHistory() {
-        super("trackhistory", "View an objects history", "<track> [page]", Permission.LOG_TRACK_HISTORY, Predicate.notInRange(1, 2));
+        super("trackhistory", "View a track's history", Permission.LOG_TRACK_HISTORY, Predicate.notInRange(1, 2),
+                Arg.list(
+                        Arg.create("track", true, "the name of the track"),
+                        Arg.create("page", false, "the page number to view")
+                )
+        );
     }
 
     @Override

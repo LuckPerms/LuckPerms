@@ -32,7 +32,7 @@ import java.util.List;
 
 public class UserListGroups extends SubCommand<User> {
     public UserListGroups() {
-        super("listgroups", "Lists the groups a user is in", "", Permission.USER_LISTGROUPS, Predicate.alwaysFalse());
+        super("listgroups", "Lists the groups the user is a member of", Permission.USER_LISTGROUPS, Predicate.alwaysFalse(), null);
     }
 
     @Override

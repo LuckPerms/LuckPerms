@@ -22,6 +22,8 @@
 
 package me.lucko.luckperms.commands;
 
+import com.google.common.collect.ImmutableList;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.constants.Message;
@@ -41,6 +43,7 @@ import java.util.stream.Collectors;
  * Abstract SubCommand class
  */
 @Getter
+@AllArgsConstructor
 public abstract class SubCommand<T> {
 
     /**
@@ -54,11 +57,6 @@ public abstract class SubCommand<T> {
     private final String description;
 
     /**
-     * The command usage
-     */
-    private final String usage;
-
-    /**
      * The permission needed to use this command
      */
     private final Permission permission;
@@ -68,13 +66,7 @@ public abstract class SubCommand<T> {
      */
     private final Predicate<? super Integer> isArgumentInvalid;
 
-    public SubCommand(String name, String description, String usage, Permission permission, Predicate<? super Integer> isArgumentInvalid) {
-        this.name = name;
-        this.description = description;
-        this.permission = permission;
-        this.isArgumentInvalid = isArgumentInvalid;
-        this.usage = usage.replace("<", "&8<&7").replace(">", "&8>&7").replace("[", "&8[&7").replace("]", "&8]&7");
-    }
+    private final ImmutableList<Arg> args;
 
     /**
      * Called when this sub command is ran
@@ -103,7 +95,26 @@ public abstract class SubCommand<T> {
      * @param sender the sender to send the usage to
      */
     public void sendUsage(Sender sender) {
-        Util.sendPluginMessage(sender, "&3> &a" + getName() + (usage.isEmpty() ? "" : "&3 - &7" + getUsage()));
+        String usage = "";
+        if (args != null) {
+            usage += "&3 - &7";
+            for (Arg arg : args) {
+                usage += arg.asPrettyString() + " ";
+            }
+        }
+
+        Util.sendPluginMessage(sender, "&3> &a" + getName() + usage);
+    }
+
+    public void sendDetailedUsage(Sender sender) {
+        Util.sendPluginMessage(sender, "&3&lCommand Usage &3- &b" + getName());
+        Util.sendPluginMessage(sender, "&b> &7" + getDescription());
+        if (args != null) {
+            Util.sendPluginMessage(sender, "&3Arguments:");
+            for (Arg arg : args) {
+                Util.sendPluginMessage(sender, "&b- " + arg.asPrettyString() + "&3 -> &7" + arg.getDescription());
+            }
+        }
     }
 
     /**

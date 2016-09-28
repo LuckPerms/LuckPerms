@@ -23,10 +23,7 @@
 package me.lucko.luckperms.commands.group.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.CommandResult;
-import me.lucko.luckperms.commands.Predicate;
-import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.data.LogEntry;
@@ -37,7 +34,9 @@ import java.util.List;
 
 public class GroupRename extends SubCommand<Group> {
     public GroupRename() {
-        super("rename", "Rename this group", "<new name>", Permission.TRACK_APPEND, Predicate.not(1));
+        super("rename", "Rename the group", Permission.TRACK_APPEND, Predicate.not(1),
+                Arg.list(Arg.create("name", true, "the new name"))
+        );
     }
 
     @Override

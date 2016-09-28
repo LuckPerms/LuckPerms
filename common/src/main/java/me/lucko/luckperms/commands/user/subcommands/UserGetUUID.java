@@ -35,7 +35,7 @@ import java.util.List;
 
 public class UserGetUUID extends SubCommand<User> {
     public UserGetUUID() {
-        super("getuuid", "Get the UUID of a user", "", Permission.USER_GETUUID, Predicate.alwaysFalse());
+        super("getuuid", "Displays the user's internal LuckPerms unique id", Permission.USER_GETUUID, Predicate.alwaysFalse(), null);
     }
 
     @Override

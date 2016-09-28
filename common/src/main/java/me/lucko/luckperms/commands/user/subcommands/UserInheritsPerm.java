@@ -33,8 +33,14 @@ import java.util.List;
 
 public class UserInheritsPerm extends SubCommand<User> {
     public UserInheritsPerm() {
-        super("inheritspermission", "Checks to see if a user inherits a certain permission node",
-                "<node> [server] [world]", Permission.USER_INHERITSPERMISSION, Predicate.notInRange(1, 3));
+        super("inheritspermission", "Checks to see if the user inherits a certain permission node",
+                Permission.USER_INHERITSPERMISSION, Predicate.notInRange(1, 3),
+                Arg.list(
+                        Arg.create("node", true, "the permission node to check for"),
+                        Arg.create("server", false, "the server to check on"),
+                        Arg.create("world", false, "the world to check on")
+                )
+        );
     }
 
     @Override

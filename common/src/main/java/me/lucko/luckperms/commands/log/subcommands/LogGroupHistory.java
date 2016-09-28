@@ -24,10 +24,7 @@ package me.lucko.luckperms.commands.log.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.api.LogEntry;
-import me.lucko.luckperms.commands.CommandResult;
-import me.lucko.luckperms.commands.Predicate;
-import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.data.Log;
@@ -40,8 +37,12 @@ import java.util.SortedMap;
 
 public class LogGroupHistory extends SubCommand<Log> {
     public LogGroupHistory() {
-        super("grouphistory", "View an objects history", "<group> [page]", Permission.LOG_GROUP_HISTORY,
-                Predicate.notInRange(1, 2));
+        super("grouphistory", "View an group's history", Permission.LOG_GROUP_HISTORY, Predicate.notInRange(1, 2),
+                Arg.list(
+                        Arg.create("group", true, "the name of the group"),
+                        Arg.create("page", false, "the page number to view")
+                )
+        );
     }
 
     @Override

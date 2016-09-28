@@ -20,26 +20,34 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.commands.group.subcommands;
+package me.lucko.luckperms.commands;
 
-import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.*;
-import me.lucko.luckperms.constants.Message;
-import me.lucko.luckperms.constants.Permission;
-import me.lucko.luckperms.groups.Group;
+import com.google.common.collect.ImmutableList;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-import java.util.List;
-
-public class GroupListParents extends SubCommand<Group> {
-    public GroupListParents() {
-        super("listparents", "Lists the groups that this group inherits from", Permission.GROUP_LISTPARENTS, Predicate.alwaysFalse(), null);
+@Getter
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+public class Arg {
+    public static Arg create(String name, boolean required, String description) {
+        return new Arg(name, required, description);
     }
 
-    @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
-        Message.LISTPARENTS.send(sender, group.getDisplayName(), Util.permGroupsToString(group.getPermissions(false)));
-        Message.LISTPARENTS_TEMP.send(sender, group.getDisplayName(), Util.tempGroupsToString(group.getPermissions(false)));
-        return CommandResult.SUCCESS;
+    public static ImmutableList<Arg> list(Arg... args) {
+        return ImmutableList.copyOf(args);
     }
+
+    private final String name;
+    private final boolean required;
+    private final String description;
+
+    public String asPrettyString() {
+        if (required) {
+            return "&8<&7" + name + "&8>";
+        } else {
+            return "&8[&7" + name + "&8]";
+        }
+    }
+
 }
-

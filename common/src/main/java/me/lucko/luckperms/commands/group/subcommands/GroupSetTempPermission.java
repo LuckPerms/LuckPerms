@@ -23,10 +23,7 @@
 package me.lucko.luckperms.commands.group.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.CommandResult;
-import me.lucko.luckperms.commands.Predicate;
-import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.data.LogEntry;
@@ -39,8 +36,16 @@ import java.util.List;
 
 public class GroupSetTempPermission extends SubCommand<Group> {
     public GroupSetTempPermission() {
-        super("settemp", "Sets a temporary permission for a group", "<node> <true|false> <duration> [server] [world]",
-                Permission.GROUP_SET_TEMP_PERMISSION, Predicate.notInRange(3, 5));
+        super("settemp", "Sets a permission for the group temporarily", Permission.GROUP_SET_TEMP_PERMISSION,
+                Predicate.notInRange(3, 5),
+                Arg.list(
+                        Arg.create("node", true, "the permission node to set"),
+                        Arg.create("true|false", true, "the value of the node"),
+                        Arg.create("duration", true, "the duration until the permission node expires"),
+                        Arg.create("server", false, "the server to add the permission node on"),
+                        Arg.create("world", false, "the world to add the permission node on")
+                )
+        );
     }
 
     @Override
@@ -49,7 +54,7 @@ public class GroupSetTempPermission extends SubCommand<Group> {
         String bool = args.get(1).toLowerCase();
 
         if (ArgumentChecker.checkNode(node)) {
-            sendUsage(sender);
+            sendDetailedUsage(sender);
             return CommandResult.INVALID_ARGS;
         }
 
@@ -59,7 +64,7 @@ public class GroupSetTempPermission extends SubCommand<Group> {
         }
 
         if (!bool.equalsIgnoreCase("true") && !bool.equalsIgnoreCase("false")) {
-            sendUsage(sender);
+            sendDetailedUsage(sender);
             return CommandResult.INVALID_ARGS;
         }
 

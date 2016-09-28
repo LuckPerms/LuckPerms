@@ -34,7 +34,7 @@ import java.util.*;
 
 public class GroupChatMeta extends SubCommand<Group> {
     public GroupChatMeta() {
-        super("chatmeta", "Displays a groups chat meta", "", Permission.GROUP_CHATMETA, Predicate.alwaysFalse());
+        super("chatmeta", "Lists the group's chat meta", Permission.GROUP_CHATMETA, Predicate.alwaysFalse(), null);
     }
 
     @Override

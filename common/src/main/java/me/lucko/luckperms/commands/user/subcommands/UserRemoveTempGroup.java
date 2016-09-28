@@ -23,10 +23,7 @@
 package me.lucko.luckperms.commands.user.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.CommandResult;
-import me.lucko.luckperms.commands.Predicate;
-import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.data.LogEntry;
@@ -38,8 +35,13 @@ import java.util.List;
 
 public class UserRemoveTempGroup extends SubCommand<User> {
     public UserRemoveTempGroup() {
-        super("removetempgroup", "Removes a user from a temporary group", "<group> [server] [world]",
-                Permission.USER_REMOVETEMPGROUP, Predicate.notInRange(1, 3));
+        super("removetempgroup", "Removes the user from a temporary group", Permission.USER_REMOVETEMPGROUP, Predicate.notInRange(1, 3),
+                Arg.list(
+                        Arg.create("group", true, "the group to remove the user from"),
+                        Arg.create("server", false, "the server to remove the group on"),
+                        Arg.create("world", false, "the world to remove the group on")
+                )
+        );
     }
 
     @Override
@@ -47,7 +49,7 @@ public class UserRemoveTempGroup extends SubCommand<User> {
         String groupName = args.get(0).toLowerCase();
 
         if (ArgumentChecker.checkNode(groupName)) {
-            sendUsage(sender);
+            sendDetailedUsage(sender);
             return CommandResult.INVALID_ARGS;
         }
 

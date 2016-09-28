@@ -33,8 +33,14 @@ import java.util.List;
 
 public class GroupHasPerm extends SubCommand<Group> {
     public GroupHasPerm() {
-        super("haspermission", "Checks to see if a group has a certain permission node", "<node> [server] [world]",
-                Permission.GROUP_HASPERMISSION, Predicate.notInRange(1, 3));
+        super("haspermission", "Checks to see if the group has a certain permission node", Permission.GROUP_HASPERMISSION,
+                Predicate.notInRange(1, 3),
+                Arg.list(
+                        Arg.create("node", true, "the permission node to check for"),
+                        Arg.create("server", false, "the server to check on"),
+                        Arg.create("world", false, "the world to check on")
+                )
+        );
     }
 
     @Override

@@ -24,10 +24,7 @@ package me.lucko.luckperms.commands.user.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.commands.CommandResult;
-import me.lucko.luckperms.commands.Predicate;
-import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.users.User;
@@ -39,8 +36,13 @@ import java.util.Set;
 
 public class UserBulkChange extends SubCommand<User> {
     public UserBulkChange() {
-        super("bulkchange", "Applies a bulk permission change to the users permissions", "<server|world> <from> <to>",
-                Permission.USER_BULKCHANGE, Predicate.not(3));
+        super("bulkchange", "Applies a bulk permission change to the user's permissions", Permission.USER_BULKCHANGE, Predicate.not(3),
+                Arg.list(
+                        Arg.create("server|world", true, "if the bulk change is modifying a 'server' or a 'world'"),
+                        Arg.create("from", true, "the server/world to be changed from. can be 'global' or 'null' respectively"),
+                        Arg.create("to", true, "the server/world to replace 'from' (can be 'null')")
+                )
+        );
     }
 
     @Override

@@ -34,8 +34,8 @@ import java.util.stream.Collectors;
 
 public class UserShowTracks extends SubCommand<User> {
     public UserShowTracks() {
-        super("showtracks", "Lists the tracks that this user's primary group features on", "", Permission.USER_SHOWTRACKS,
-                Predicate.alwaysFalse());
+        super("showtracks", "Lists the tracks that the user's primary group features on", Permission.USER_SHOWTRACKS,
+                Predicate.alwaysFalse(), null);
     }
 
     @Override

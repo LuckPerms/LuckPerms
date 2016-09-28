@@ -24,10 +24,7 @@ package me.lucko.luckperms.commands.usersbulkedit.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.commands.CommandResult;
-import me.lucko.luckperms.commands.Predicate;
-import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.storage.Datastore;
@@ -35,10 +32,17 @@ import me.lucko.luckperms.users.User;
 
 import java.util.*;
 
+// "<group|null> <server|world> <from> <to>",
 public class BulkEditGroup extends SubCommand<Datastore> {
     public BulkEditGroup() {
-        super("group", "Bulk edit group memberships", "<group|null> <server|world> <from> <to>", Permission.USER_BULKCHANGE,
-                Predicate.not(4));
+        super("group", "Bulk edit group memberships", Permission.USER_BULKCHANGE, Predicate.not(4),
+                Arg.list(
+                        Arg.create("group|null", true, "the group to edit ('null' to select and edit all groups)"),
+                        Arg.create("server|world", true, "if the bulk change is modifying a 'server' or a 'world'"),
+                        Arg.create("from", true, "the server/world to be changed from. can be 'global' or 'null' respectively"),
+                        Arg.create("to", true, "the server/world to replace 'from' (can be 'null')")
+                )
+        );
     }
 
     @Override

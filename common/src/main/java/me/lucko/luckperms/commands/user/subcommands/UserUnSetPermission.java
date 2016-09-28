@@ -23,10 +23,7 @@
 package me.lucko.luckperms.commands.user.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.CommandResult;
-import me.lucko.luckperms.commands.Predicate;
-import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.data.LogEntry;
@@ -38,8 +35,13 @@ import java.util.List;
 
 public class UserUnSetPermission extends SubCommand<User> {
     public UserUnSetPermission() {
-        super("unset", "Unsets a permission for a user", "<node> [server] [world]", Permission.USER_UNSETPERMISSION,
-                Predicate.notInRange(1, 3));
+        super("unset", "Unsets a permission for the user", Permission.USER_UNSETPERMISSION, Predicate.notInRange(1, 3),
+                Arg.list(
+                        Arg.create("node", true, "the permission node to unset"),
+                        Arg.create("server", false, "the server to remove the permission node on"),
+                        Arg.create("world", false, "the world to remove the permission node on")
+                )
+        );
     }
 
     @Override
@@ -47,7 +49,7 @@ public class UserUnSetPermission extends SubCommand<User> {
         String node = args.get(0).replace("{SPACE}", " ");
 
         if (ArgumentChecker.checkNode(node)) {
-            sendUsage(sender);
+            sendDetailedUsage(sender);
             return CommandResult.INVALID_ARGS;
         }
 

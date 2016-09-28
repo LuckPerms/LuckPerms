@@ -36,7 +36,7 @@ import java.util.List;
 
 public class GroupClear extends SubCommand<Group> {
     public GroupClear() {
-        super("clear", "Clears a groups permissions", "", Permission.GROUP_CLEAR, Predicate.alwaysFalse());
+        super("clear", "Clears the group's permissions", Permission.GROUP_CLEAR, Predicate.alwaysFalse(), null);
     }
 
     @Override

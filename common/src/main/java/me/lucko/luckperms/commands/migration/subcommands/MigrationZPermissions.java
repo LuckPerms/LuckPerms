@@ -24,10 +24,7 @@ package me.lucko.luckperms.commands.migration.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.api.Logger;
-import me.lucko.luckperms.commands.CommandResult;
-import me.lucko.luckperms.commands.Predicate;
-import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Constants;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.data.LogEntry;
@@ -49,7 +46,9 @@ import java.util.stream.Collectors;
  */
 public class MigrationZPermissions extends SubCommand<Object> {
     public MigrationZPermissions() {
-        super("zpermissions", "Migration from zPermissions", "[world names...]", Permission.MIGRATION, Predicate.alwaysFalse());
+        super("zpermissions", "Migration from zPermissions", Permission.MIGRATION, Predicate.alwaysFalse(),
+                Arg.list(Arg.create("world names...", false, "a list of worlds to migrate permissions from"))
+        );
     }
 
     @Override

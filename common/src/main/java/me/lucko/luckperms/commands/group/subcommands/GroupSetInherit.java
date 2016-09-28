@@ -23,10 +23,7 @@
 package me.lucko.luckperms.commands.group.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.CommandResult;
-import me.lucko.luckperms.commands.Predicate;
-import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.data.LogEntry;
@@ -38,8 +35,14 @@ import java.util.List;
 
 public class GroupSetInherit extends SubCommand<Group> {
     public GroupSetInherit() {
-        super("setinherit", "Sets another group for this group to inherit permissions from", "<group> [server] [world]",
-                Permission.GROUP_SETINHERIT, Predicate.notInRange(1, 3));
+        super("setinherit", "Sets another group for the group to inherit permissions from",
+                Permission.GROUP_SETINHERIT, Predicate.notInRange(1, 3),
+                Arg.list(
+                        Arg.create("group", true, "the group to inherit from"),
+                        Arg.create("server", false, "the server to inherit the group on"),
+                        Arg.create("world", false, "the world to inherit the group on")
+                )
+        );
     }
 
     @Override
@@ -47,7 +50,7 @@ public class GroupSetInherit extends SubCommand<Group> {
         String groupName = args.get(0).toLowerCase();
 
         if (ArgumentChecker.checkNode(groupName)) {
-            sendUsage(sender);
+            sendDetailedUsage(sender);
             return CommandResult.INVALID_ARGS;
         }
 

@@ -35,7 +35,7 @@ import java.util.List;
 
 public class UserInfo extends SubCommand<User> {
     public UserInfo() {
-        super("info", "Gives info about the user", "", Permission.USER_INFO, Predicate.alwaysFalse());
+        super("info", "Shows info about the user", Permission.USER_INFO, Predicate.alwaysFalse(), null);
     }
 
     @Override

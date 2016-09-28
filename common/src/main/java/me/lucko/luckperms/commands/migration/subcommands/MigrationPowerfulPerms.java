@@ -29,10 +29,7 @@ import lombok.Cleanup;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.data.Callback;
-import me.lucko.luckperms.commands.CommandResult;
-import me.lucko.luckperms.commands.Predicate;
-import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.commands.migration.subcommands.utils.LPResultRunnable;
 import me.lucko.luckperms.constants.Constants;
 import me.lucko.luckperms.core.PermissionHolder;
@@ -119,8 +116,15 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
 
 
     public MigrationPowerfulPerms() {
-        super("powerfulperms", "Migration from PowerfulPerms", "<address> <database> <username> <password> <db table>",
-                MIGRATION, Predicate.not(5));
+        super("powerfulperms", "Migration from PowerfulPerms", MIGRATION, Predicate.not(5),
+                Arg.list(
+                        Arg.create("address", true, "the address of the PP database"),
+                        Arg.create("database", true, "the name of the PP database"),
+                        Arg.create("username", true, "the username to log into the DB"),
+                        Arg.create("password", true, "the password to log into the DB"),
+                        Arg.create("db table", true, "the name of the PP table where player data is stored")
+                )
+        );
     }
 
     @Override

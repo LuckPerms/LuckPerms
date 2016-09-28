@@ -23,10 +23,7 @@
 package me.lucko.luckperms.commands.group.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.CommandResult;
-import me.lucko.luckperms.commands.Predicate;
-import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.data.LogEntry;
@@ -38,8 +35,14 @@ import java.util.List;
 
 public class GroupAddPrefix extends SubCommand<Group> {
     public GroupAddPrefix() {
-        super("addprefix", "Adds a prefix to the group", "<priority> <prefix> [server] [world]",
-                Permission.GROUP_ADDPREFIX, Predicate.notInRange(2, 4));
+        super("addprefix", "Adds a prefix to the group", Permission.GROUP_ADDPREFIX, Predicate.notInRange(2, 4),
+                Arg.list(
+                        Arg.create("priority", true, "the priority to add the prefix at"),
+                        Arg.create("prefix", true, "the prefix string"),
+                        Arg.create("server", false, "the server to add the prefix on"),
+                        Arg.create("world", false, "the world to add the prefix on")
+                )
+        );
     }
 
     @Override

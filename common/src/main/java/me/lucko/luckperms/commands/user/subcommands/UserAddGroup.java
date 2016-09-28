@@ -23,10 +23,7 @@
 package me.lucko.luckperms.commands.user.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.CommandResult;
-import me.lucko.luckperms.commands.Predicate;
-import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.data.LogEntry;
@@ -39,7 +36,13 @@ import java.util.List;
 
 public class UserAddGroup extends SubCommand<User> {
     public UserAddGroup() {
-        super("addgroup", "Adds the user to a group", "<group> [server] [world]", Permission.USER_ADDGROUP, Predicate.notInRange(1, 3));
+        super("addgroup", "Adds the user to a group", Permission.USER_ADDGROUP, Predicate.notInRange(1, 3),
+                Arg.list(
+                        Arg.create("group", true, "the group to add the user to"),
+                        Arg.create("server", false, "the server to add the group on"),
+                        Arg.create("world", false, "the world to add the group on")
+                )
+        );
     }
 
     @Override
@@ -47,7 +50,7 @@ public class UserAddGroup extends SubCommand<User> {
         String groupName = args.get(0).toLowerCase();
 
         if (ArgumentChecker.checkNode(groupName)) {
-            sendUsage(sender);
+            sendDetailedUsage(sender);
             return CommandResult.INVALID_ARGS;
         }
 

@@ -32,7 +32,7 @@ import java.util.List;
 
 public class UserListNodes extends SubCommand<User> {
     public UserListNodes() {
-        super("listnodes", "Lists the permission nodes the user has", "", Permission.USER_LISTNODES, Predicate.alwaysFalse());
+        super("listnodes", "Lists the permission nodes the user has", Permission.USER_LISTNODES, Predicate.alwaysFalse(), null);
     }
 
     @Override

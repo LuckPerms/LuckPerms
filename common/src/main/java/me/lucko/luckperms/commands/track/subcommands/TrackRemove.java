@@ -35,7 +35,9 @@ import java.util.List;
 
 public class TrackRemove extends SubCommand<Track> {
     public TrackRemove() {
-        super("remove", "Removes a group from the track", "<group>", Permission.TRACK_REMOVE, Predicate.not(1));
+        super("remove", "Removes a group from the track", Permission.TRACK_REMOVE, Predicate.not(1),
+                Arg.list(Arg.create("group", true, "the group to remove"))
+        );
     }
 
     @Override
@@ -43,7 +45,7 @@ public class TrackRemove extends SubCommand<Track> {
         String groupName = args.get(0).toLowerCase();
 
         if (ArgumentChecker.checkNode(groupName)) {
-            sendUsage(sender);
+            sendDetailedUsage(sender);
             return CommandResult.INVALID_ARGS;
         }
 

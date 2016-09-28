@@ -24,10 +24,7 @@ package me.lucko.luckperms.commands.log.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.api.LogEntry;
-import me.lucko.luckperms.commands.CommandResult;
-import me.lucko.luckperms.commands.Predicate;
-import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.data.Log;
@@ -41,7 +38,9 @@ import java.util.List;
 
 public class LogExport extends SubCommand<Log> {
     public LogExport() {
-        super("export", "Export the log to a file", "<file>", Permission.LOG_EXPORT, Predicate.not(1));
+        super("export", "Export the log to a file", Permission.LOG_EXPORT, Predicate.not(1),
+                Arg.list(Arg.create("file", true, "the name of the file"))
+        );
     }
 
     @Override

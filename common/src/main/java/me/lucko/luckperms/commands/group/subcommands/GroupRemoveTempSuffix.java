@@ -23,10 +23,7 @@
 package me.lucko.luckperms.commands.group.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.CommandResult;
-import me.lucko.luckperms.commands.Predicate;
-import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.data.LogEntry;
@@ -38,8 +35,15 @@ import java.util.List;
 
 public class GroupRemoveTempSuffix extends SubCommand<Group> {
     public GroupRemoveTempSuffix() {
-        super("removetempsuffix", "Removes a temporary suffix from a group", "<priority> <suffix> [server] [world]",
-                Permission.GROUP_REMOVE_TEMP_SUFFIX, Predicate.notInRange(2, 4));
+        super("removetempsuffix", "Removes a temporary suffix from the group", Permission.GROUP_REMOVE_TEMP_SUFFIX,
+                Predicate.notInRange(2, 4),
+                Arg.list(
+                        Arg.create("priority", true, "the priority to remove the suffix at"),
+                        Arg.create("suffix", true, "the suffix string to remove"),
+                        Arg.create("server", false, "the server to remove the suffix on"),
+                        Arg.create("world", false, "the world to remove the suffix on")
+                )
+        );
     }
 
     @Override

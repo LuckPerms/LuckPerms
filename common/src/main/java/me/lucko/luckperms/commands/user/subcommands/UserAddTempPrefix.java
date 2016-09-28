@@ -23,10 +23,7 @@
 package me.lucko.luckperms.commands.user.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.CommandResult;
-import me.lucko.luckperms.commands.Predicate;
-import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.data.LogEntry;
@@ -39,8 +36,15 @@ import java.util.List;
 
 public class UserAddTempPrefix extends SubCommand<User> {
     public UserAddTempPrefix() {
-        super("addtempprefix", "Adds a prefix to the user temporarily", "<priority> <prefix> <duration> [server] [world]",
-                Permission.USER_ADD_TEMP_PREFIX, Predicate.notInRange(3, 5));
+        super("addtempprefix", "Adds a prefix to the user temporarily", Permission.USER_ADD_TEMP_PREFIX, Predicate.notInRange(3, 5),
+                Arg.list(
+                        Arg.create("priority", true, "the priority to add the prefix at"),
+                        Arg.create("prefix", true, "the prefix string"),
+                        Arg.create("duration", true, "the duration until the prefix expires"),
+                        Arg.create("server", false, "the server to add the prefix on"),
+                        Arg.create("world", false, "the world to add the prefix on")
+                )
+        );
     }
 
     @Override

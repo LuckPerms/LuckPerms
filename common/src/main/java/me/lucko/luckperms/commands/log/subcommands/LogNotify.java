@@ -23,10 +23,7 @@
 package me.lucko.luckperms.commands.log.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.CommandResult;
-import me.lucko.luckperms.commands.Predicate;
-import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.data.Log;
@@ -37,7 +34,9 @@ import java.util.UUID;
 
 public class LogNotify extends SubCommand<Log> {
     public LogNotify() {
-        super("notify", "Toggle notifications", "[on|off]", Permission.LOG_NOTIFY, Predicate.notInRange(0, 1));
+        super("notify", "Toggle notifications", Permission.LOG_NOTIFY, Predicate.notInRange(0, 1),
+                Arg.list(Arg.create("on|off", false, "whether to toggle on or off"))
+        );
     }
 
     @Override

@@ -33,8 +33,14 @@ import java.util.List;
 
 public class UserHasPerm extends SubCommand<User> {
     public UserHasPerm() {
-        super("haspermission", "Checks to see if a user has a certain permission node", "<node> [server] [world]",
-                Permission.USER_HASPERMISSION, Predicate.notInRange(1, 3));
+        super("haspermission", "Checks to see if the user has a certain permission node", Permission.USER_HASPERMISSION,
+                Predicate.notInRange(1, 3),
+                Arg.list(
+                        Arg.create("node", true, "the permission node to check for"),
+                        Arg.create("server", false, "the server to check on"),
+                        Arg.create("world", false, "the world to check on")
+                )
+        );
     }
 
     @Override

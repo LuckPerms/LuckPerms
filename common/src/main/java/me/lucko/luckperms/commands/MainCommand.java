@@ -98,7 +98,7 @@ public abstract class MainCommand<T> {
         }
 
         if (sub.getIsArgumentInvalid().test(strippedArgs.size())) {
-            sub.sendUsage(sender);
+            sub.sendDetailedUsage(sender);
             return CommandResult.INVALID_ARGS;
         }
 

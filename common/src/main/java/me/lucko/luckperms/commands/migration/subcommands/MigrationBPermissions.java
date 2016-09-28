@@ -82,7 +82,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
     }
 
     public MigrationBPermissions() {
-        super("bpermissions", "Migration from bPermissions", "", MIGRATION, Predicate.alwaysFalse());
+        super("bpermissions", "Migration from bPermissions", MIGRATION, Predicate.alwaysFalse(), null);
     }
 
     @Override

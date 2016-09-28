@@ -36,7 +36,7 @@ import java.util.List;
 
 public class UserClear extends SubCommand<User> {
     public UserClear() {
-        super("clear", "Clears a users permissions and groups", "", Permission.USER_CLEAR, Predicate.alwaysFalse());
+        super("clear", "Clears the user's permissions and groups", Permission.USER_CLEAR, Predicate.alwaysFalse(), null);
     }
 
     @Override

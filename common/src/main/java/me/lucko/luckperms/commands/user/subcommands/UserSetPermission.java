@@ -23,10 +23,7 @@
 package me.lucko.luckperms.commands.user.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.CommandResult;
-import me.lucko.luckperms.commands.Predicate;
-import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.data.LogEntry;
@@ -38,8 +35,14 @@ import java.util.List;
 
 public class UserSetPermission extends SubCommand<User> {
     public UserSetPermission() {
-        super("set", "Sets a permission for a user", "<node> <true|false> [server] [world]", Permission.USER_SETPERMISSION,
-                Predicate.notInRange(2, 4));
+        super("set", "Sets a permission for the user", Permission.USER_SETPERMISSION, Predicate.notInRange(2, 4),
+                Arg.list(
+                        Arg.create("node", true, "the permission node to set"),
+                        Arg.create("true|false", true, "the value of the node"),
+                        Arg.create("server", false, "the server to add the permission node on"),
+                        Arg.create("world", false, "the world to add the permission node on")
+                )
+        );
     }
 
     @Override
@@ -48,7 +51,7 @@ public class UserSetPermission extends SubCommand<User> {
         String bool = args.get(1).toLowerCase();
 
         if (ArgumentChecker.checkNode(node)) {
-            sendUsage(sender);
+            sendDetailedUsage(sender);
             return CommandResult.INVALID_ARGS;
         }
 
@@ -58,7 +61,7 @@ public class UserSetPermission extends SubCommand<User> {
         }
 
         if (!bool.equalsIgnoreCase("true") && !bool.equalsIgnoreCase("false")) {
-            sendUsage(sender);
+            sendDetailedUsage(sender);
             return CommandResult.INVALID_ARGS;
         }
 

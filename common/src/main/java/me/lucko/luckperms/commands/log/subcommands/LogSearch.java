@@ -24,10 +24,7 @@ package me.lucko.luckperms.commands.log.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.api.LogEntry;
-import me.lucko.luckperms.commands.CommandResult;
-import me.lucko.luckperms.commands.Predicate;
-import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.data.Log;
@@ -40,7 +37,12 @@ import java.util.stream.Collectors;
 
 public class LogSearch extends SubCommand<Log> {
     public LogSearch() {
-        super("search", "Search the log for an entry", "<query> [page]", Permission.LOG_SEARCH, Predicate.is(0));
+        super("search", "Search the log for an entry", Permission.LOG_SEARCH, Predicate.is(0),
+                Arg.list(
+                        Arg.create("query", true, "the query to search by"),
+                        Arg.create("page", false, "the page number to view")
+                )
+        );
     }
 
     @Override

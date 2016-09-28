@@ -23,10 +23,7 @@
 package me.lucko.luckperms.commands.user.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.CommandResult;
-import me.lucko.luckperms.commands.Predicate;
-import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.data.LogEntry;
@@ -38,7 +35,9 @@ import java.util.List;
 
 public class UserSetPrimaryGroup extends SubCommand<User> {
     public UserSetPrimaryGroup() {
-        super("setprimarygroup", "Sets a users primary group", "<group>", Permission.USER_SETPRIMARYGROUP, Predicate.not(1));
+        super("setprimarygroup", "Sets the user's primary group", Permission.USER_SETPRIMARYGROUP, Predicate.not(1),
+                Arg.list(Arg.create("group", true, "the group to set as the primary group"))
+        );
     }
 
     @Override

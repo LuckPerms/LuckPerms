@@ -41,7 +41,9 @@ import java.util.List;
 
 public class UserPromote extends SubCommand<User> {
     public UserPromote() {
-        super("promote", "Promotes the user along a track", "<track>", Permission.USER_PROMOTE, Predicate.not(1));
+        super("promote", "Promotes the user up a track", Permission.USER_PROMOTE, Predicate.not(1),
+                Arg.list(Arg.create("track", true, "the track to promote the user up"))
+        );
     }
 
     @Override
