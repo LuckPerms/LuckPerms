@@ -78,6 +78,12 @@ public class VaultPermissionHook extends Permission {
         vaultUserManager = new VaultUserManager(plugin, this);
     }
 
+    public void log(String s) {
+        if (plugin.getConfiguration().isDebugPermissionChecks()) {
+            plugin.getLog().info("[VAULT] " + s);
+        }
+    }
+
     private boolean objectHas(String world, Group group, String permission) {
         if (group == null) return false;
 
@@ -137,6 +143,7 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public boolean playerHas(String world, @NonNull String player, @NonNull String permission) {
+        log("Checking if player " + player + " has permission: " + permission + " on world " + world + ", server " + server);
         User user = plugin.getUserManager().get(player);
         if (user == null) return false;
 
@@ -156,41 +163,48 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public boolean playerAdd(String world, @NonNull String player, @NonNull String permission) {
+        log("Adding permission to player " + player + ": '" + permission + "' on world " + world + ", server " + server);
         final User user = plugin.getUserManager().get(player);
         return objectAdd(world, user, permission);
     }
 
     @Override
     public boolean playerRemove(String world, @NonNull String player, @NonNull String permission) {
+        log("Removing permission from player " + player + ": '" + permission + "' on world " + world + ", server " + server);
         final User user = plugin.getUserManager().get(player);
         return objectRemove(world, user, permission);
     }
 
     @Override
     public boolean groupHas(String world, @NonNull String groupName, @NonNull String permission) {
+        log("Checking if group " + groupName + " has permission: " + permission + " on world " + world + ", server " + server);
         final Group group = plugin.getGroupManager().get(groupName);
         return objectHas(world, group, permission);
     }
 
     @Override
     public boolean groupAdd(String world, @NonNull String groupName, @NonNull String permission) {
+        log("Adding permission to group " + groupName + ": '" + permission + "' on world " + world + ", server " + server);
         final Group group = plugin.getGroupManager().get(groupName);
         return objectAdd(world, group, permission);
     }
 
     @Override
     public boolean groupRemove(String world, @NonNull String groupName, @NonNull String permission) {
+        log("Removing permission from group " + groupName + ": '" + permission + "' on world " + world + ", server " + server);
         final Group group = plugin.getGroupManager().get(groupName);
         return objectRemove(world, group, permission);
     }
 
     @Override
     public boolean playerInGroup(String world, @NonNull String player, @NonNull String group) {
+        log("Checking if player " + player + " is in group: " + group + " on world " + world + ", server " + server);
         return playerHas(world, player, "group." + group);
     }
 
     @Override
     public boolean playerAddGroup(String world, @NonNull String player, @NonNull String groupName) {
+        log("Adding player " + player + " to group: '" + groupName + "' on world " + world + ", server " + server);
         final User user = plugin.getUserManager().get(player);
         if (user == null) return false;
 
@@ -210,6 +224,7 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public boolean playerRemoveGroup(String world, @NonNull String player, @NonNull String groupName) {
+        log("Removing player " + player + " from group: '" + groupName + "' on world " + world + ", server " + server);
         final User user = plugin.getUserManager().get(player);
         if (user == null) return false;
 
@@ -229,6 +244,7 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public String[] getPlayerGroups(String world, @NonNull String player) {
+        log("Getting groups of player: " + player + ", on world " + world + ", server " + server);
         User user = plugin.getUserManager().get(player);
         if (user == null) return new String[0];
 
@@ -253,6 +269,7 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public String getPrimaryGroup(String world, @NonNull String player) {
+        log("Getting primary group of player: " + player);
         final User user = plugin.getUserManager().get(player);
         return (user == null) ? null : user.getPrimaryGroup();
     }
