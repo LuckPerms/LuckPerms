@@ -20,59 +20,54 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.commands.group.subcommands;
+package me.lucko.luckperms.commands.track.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.data.LogEntry;
-import me.lucko.luckperms.groups.Group;
+import me.lucko.luckperms.tracks.Track;
 import me.lucko.luckperms.utils.ArgumentChecker;
 
 import java.util.List;
 
-public class GroupRename extends SubCommand<Group> {
-    public GroupRename() {
-        super("rename", "Rename the group", Permission.GROUP_RENAME, Predicate.not(1),
-                Arg.list(Arg.create("name", true, "the new name"))
+public class TrackClone extends SubCommand<Track> {
+    public TrackClone() {
+        super("clone", "Clone the track", Permission.TRACK_CLONE, Predicate.not(1),
+                Arg.list(Arg.create("name", true, "the name of the clone"))
         );
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
-        String newGroupName = args.get(0).toLowerCase();
-        if (ArgumentChecker.checkName(newGroupName)) {
-            Message.GROUP_INVALID_ENTRY.send(sender);
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args, String label) {
+        String newTrackName = args.get(0).toLowerCase();
+        if (ArgumentChecker.checkName(newTrackName)) {
+            Message.TRACK_INVALID_ENTRY.send(sender);
             return CommandResult.INVALID_ARGS;
         }
 
-        if (plugin.getDatastore().loadGroup(newGroupName)) {
-            Message.GROUP_ALREADY_EXISTS.send(sender);
+        if (plugin.getDatastore().loadTrack(newTrackName)) {
+            Message.TRACK_ALREADY_EXISTS.send(sender);
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!plugin.getDatastore().createAndLoadGroup(newGroupName)) {
-            Message.CREATE_GROUP_ERROR.send(sender);
+        if (!plugin.getDatastore().createAndLoadTrack(newTrackName)) {
+            Message.CREATE_TRACK_ERROR.send(sender);
             return CommandResult.FAILURE;
         }
 
-        Group newGroup = plugin.getGroupManager().get(newGroupName);
-        if (newGroup == null) {
-            Message.GROUP_LOAD_ERROR.send(sender);
+        Track newTrack = plugin.getTrackManager().get(newTrackName);
+        if (newTrack == null) {
+            Message.TRACK_LOAD_ERROR.send(sender);
             return CommandResult.LOADING_ERROR;
         }
 
-        if (!plugin.getDatastore().deleteGroup(group)) {
-            Message.DELETE_GROUP_ERROR.send(sender);
-            return CommandResult.FAILURE;
-        }
+        plugin.getTrackManager().copy(track, newTrack);
 
-        plugin.getGroupManager().copy(group, newGroup);
-
-        Message.RENAME_SUCCESS.send(sender, group.getName(), newGroup.getName());
-        LogEntry.build().actor(sender).acted(group).action("rename " + newGroup.getName()).build().submit(plugin, sender);
-        save(newGroup, sender, plugin);
+        Message.CLONE_SUCCESS.send(sender, track.getName(), newTrack.getName());
+        LogEntry.build().actor(sender).acted(track).action("clone " + newTrack.getName()).build().submit(plugin, sender);
+        save(newTrack, sender, plugin);
         return CommandResult.SUCCESS;
     }
 }

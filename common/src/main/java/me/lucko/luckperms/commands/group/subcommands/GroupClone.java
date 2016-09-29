@@ -32,10 +32,10 @@ import me.lucko.luckperms.utils.ArgumentChecker;
 
 import java.util.List;
 
-public class GroupRename extends SubCommand<Group> {
-    public GroupRename() {
-        super("rename", "Rename the group", Permission.GROUP_RENAME, Predicate.not(1),
-                Arg.list(Arg.create("name", true, "the new name"))
+public class GroupClone extends SubCommand<Group> {
+    public GroupClone() {
+        super("clone", "Clone the group", Permission.GROUP_CLONE, Predicate.not(1),
+                Arg.list(Arg.create("name", true, "the name of the clone"))
         );
     }
 
@@ -63,15 +63,10 @@ public class GroupRename extends SubCommand<Group> {
             return CommandResult.LOADING_ERROR;
         }
 
-        if (!plugin.getDatastore().deleteGroup(group)) {
-            Message.DELETE_GROUP_ERROR.send(sender);
-            return CommandResult.FAILURE;
-        }
-
         plugin.getGroupManager().copy(group, newGroup);
 
-        Message.RENAME_SUCCESS.send(sender, group.getName(), newGroup.getName());
-        LogEntry.build().actor(sender).acted(group).action("rename " + newGroup.getName()).build().submit(plugin, sender);
+        Message.CLONE_SUCCESS.send(sender, group.getName(), newGroup.getName());
+        LogEntry.build().actor(sender).acted(group).action("clone " + newGroup.getName()).build().submit(plugin, sender);
         save(newGroup, sender, plugin);
         return CommandResult.SUCCESS;
     }

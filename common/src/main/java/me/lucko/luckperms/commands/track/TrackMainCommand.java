@@ -43,6 +43,7 @@ public class TrackMainCommand extends MainCommand<Track> {
             .add(new TrackRemove())
             .add(new TrackClear())
             .add(new TrackRename())
+            .add(new TrackClone())
             .build()
         );
     }

@@ -93,6 +93,7 @@ public enum Message {
     CREATE_SUCCESS("&b{0}&a was successfully created.", true),
     DELETE_SUCCESS("&b{0}&a was successfully deleted.", true),
     RENAME_SUCCESS("&b{0}&a was successfully renamed to &b{1}&a.", true),
+    CLONE_SUCCESS("&b{0}&a was successfully cloned to &b{1}&a.", true),
 
     USER_ALREADY_MEMBER_OF("{0} is already a member of '{1}'.", true),
     USER_NOT_MEMBER_OF("{0} is not a member of '{1}'.", true),

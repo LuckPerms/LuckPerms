@@ -63,6 +63,7 @@ public class GroupMainCommand extends MainCommand<Group> {
             .add(new GroupBulkChange())
             .add(new GroupClear())
             .add(new GroupRename())
+            .add(new GroupClone())
             .build()
         );
     }

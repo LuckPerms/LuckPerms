@@ -101,6 +101,7 @@ public enum Permission {
     GROUP_BULKCHANGE("bulkchange", "group"),
     GROUP_CLEAR("clear", "group"),
     GROUP_RENAME("rename", "group"),
+    GROUP_CLONE("clone", "group"),
 
     TRACK_INFO("info", "track"),
     TRACK_APPEND("append", "track"),
@@ -108,6 +109,7 @@ public enum Permission {
     TRACK_REMOVE("remove", "track"),
     TRACK_CLEAR("clear", "track"),
     TRACK_RENAME("rename", "track"),
+    TRACK_CLONE("clone", "track"),
 
     LOG_RECENT("recent", "log"),
     LOG_USER_HISTORY("userhistory", "log"),
