@@ -22,12 +22,10 @@
 
 package me.lucko.luckperms.api.sponge;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
 import me.lucko.luckperms.api.event.events.UserPermissionRefreshEvent;
 import me.lucko.luckperms.api.implementation.internal.UserLink;
-import me.lucko.luckperms.calculators.PermissionProcessor;
 import me.lucko.luckperms.contexts.Contexts;
 import me.lucko.luckperms.users.User;
 import org.spongepowered.api.Sponge;
@@ -155,71 +153,5 @@ public class LuckPermsUserSubject extends LuckPermsSubject {
         Map<String, String> context = new HashMap<>();
         service.getPlugin().getContextManager().giveApplicableContext(player.get(), context);
         return context.entrySet().stream().map(e -> new Context(e.getKey(), e.getValue())).collect(Collectors.toSet());
-    }
-
-    @AllArgsConstructor
-    static class SpongeWildcardProcessor implements PermissionProcessor {
-
-        @Getter
-        private final Map<String, Boolean> map;
-
-        @Override
-        public me.lucko.luckperms.api.Tristate hasPermission(String permission) {
-            String node = permission;
-
-            while (node.contains(".")) {
-                int endIndex = node.lastIndexOf('.');
-                if (endIndex == -1) {
-                    break;
-                }
-
-                node = node.substring(0, endIndex);
-                if (!isEmpty(node)) {
-                    if (map.containsKey(node)) {
-                        return me.lucko.luckperms.api.Tristate.fromBoolean(map.get(node));
-                    }
-                }
-            }
-
-            if (map.containsKey("'*'")) {
-                return me.lucko.luckperms.api.Tristate.fromBoolean(map.get("'*'"));
-            }
-
-            if (map.containsKey("*")) {
-                return me.lucko.luckperms.api.Tristate.fromBoolean(map.get("*"));
-            }
-
-            return me.lucko.luckperms.api.Tristate.UNDEFINED;
-        }
-
-        private static boolean isEmpty(String s) {
-            if (s.equals("")) {
-                return true;
-            }
-
-            char[] chars = s.toCharArray();
-            for (char c : chars) {
-                if (c != '.') {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-    }
-
-    @AllArgsConstructor
-    static class SpongeDefaultsProcessor implements PermissionProcessor {
-        private final LuckPermsService service;
-
-        @Override
-        public me.lucko.luckperms.api.Tristate hasPermission(String permission) {
-            Tristate t =  service.getDefaults().getPermissionValue(Collections.emptySet(), permission);
-            if (t != Tristate.UNDEFINED) {
-                return me.lucko.luckperms.api.Tristate.fromBoolean(t.asBoolean());
-            } else {
-                return me.lucko.luckperms.api.Tristate.UNDEFINED;
-            }
-        }
     }
 }
