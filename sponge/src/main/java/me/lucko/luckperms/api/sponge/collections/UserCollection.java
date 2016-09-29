@@ -95,7 +95,9 @@ public class UserCollection implements SubjectCollection {
             }
         }
 
-        service.getPlugin().getLog().warn("Couldn't get subject for: " + id);
+        if (service.getPlugin().getConfiguration().isDebugPermissionChecks()) {
+            service.getPlugin().getLog().warn("Couldn't get user subject for: " + id);
+        }
 
         // What am I meant to do here? What if no user is loaded? Load it? Create it?
         // If I do load/create it, this method should always be called async??.... errr.
