@@ -25,11 +25,13 @@ package me.lucko.luckperms.api.vault.cache;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import me.lucko.luckperms.LPBukkitPlugin;
+import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.vault.VaultPermissionHook;
 import me.lucko.luckperms.contexts.Contexts;
 import me.lucko.luckperms.users.User;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -44,9 +46,16 @@ public class VaultUserCache {
     @Getter
     private final Map<Map<String, String>, ContextData> contextData = new ConcurrentHashMap<>();
 
+    @Getter
+    private final Map<Map<String, String>, ChatData> chatData = new ConcurrentHashMap<>();
+
     public boolean hasPermission(Map<String, String> context, String permission) {
         ContextData cd = contextData.computeIfAbsent(context, map -> calculatePermissions(map, false));
         return cd.getPermissionValue(permission).asBoolean();
+    }
+
+    public ChatData processChatData(Map<String, String> context) {
+        return chatData.computeIfAbsent(context, map -> calculateChat(map, false));
     }
 
     public ContextData calculatePermissions(Map<String, String> context, boolean apply) {
@@ -82,6 +91,91 @@ public class VaultUserCache {
         existing.getPermissionCache().clear();
         existing.invalidateCache();
         existing.getPermissionCache().putAll(toApply);
+        return existing;
+    }
+
+    public ChatData calculateChat(Map<String, String> context, boolean apply) {
+        ChatData existing = chatData.get(context);
+        if (existing == null) {
+            existing = new ChatData(context);
+            if (apply) {
+                chatData.put(context, existing);
+            }
+        }
+
+        Map<String, String> contexts = new HashMap<>(context);
+        String server = contexts.get("server");
+        String world = contexts.get("world");
+        contexts.remove("server");
+        contexts.remove("world");
+
+        existing.invalidateCache();
+
+        // Load meta
+        for (Node n : user.getPermissions(true)) {
+            if (!n.getValue()) {
+                continue;
+            }
+
+            if (!n.isMeta()) {
+                continue;
+            }
+
+            if (!n.shouldApplyOnServer(server, vault.isIncludeGlobal(), false)) {
+                continue;
+            }
+
+            if (!n.shouldApplyOnWorld(world, true, false)) {
+                continue;
+            }
+
+            if (!n.shouldApplyWithContext(contexts, false)) {
+                continue;
+            }
+
+            Map.Entry<String, String> meta = n.getMeta();
+            existing.getMeta().put(meta.getKey(), meta.getValue());
+        }
+
+        // Load prefixes & suffixes
+
+        int prefixPriority = Integer.MIN_VALUE;
+        int suffixPriority = Integer.MIN_VALUE;
+
+        for (Node n : user.getAllNodes(null, new Contexts(context, vault.isIncludeGlobal(), true, true, true, true))) {
+            if (!n.getValue()) {
+                continue;
+            }
+
+            if (!n.isPrefix() && !n.isSuffix()) {
+                continue;
+            }
+
+            if (!n.shouldApplyOnServer(server, vault.isIncludeGlobal(), false)) {
+                continue;
+            }
+
+            if (!n.shouldApplyOnWorld(world, true, false)) {
+                continue;
+            }
+
+            if (!n.shouldApplyWithContext(contexts, false)) {
+                continue;
+            }
+
+            if (n.isPrefix()) {
+                Map.Entry<Integer, String> value = n.getPrefix();
+                if (value.getKey() > prefixPriority) {
+                    existing.setPrefix(value.getValue());
+                }
+            } else {
+                Map.Entry<Integer, String> value = n.getSuffix();
+                if (value.getKey() > suffixPriority) {
+                    existing.setSuffix(value.getValue());
+                }
+            }
+        }
+
         return existing;
     }
 }

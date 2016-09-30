@@ -43,11 +43,13 @@ public class VaultUserManager {
     public void setupUser(User user) {
         VaultUserCache vaultUser = userCache.computeIfAbsent(user.getUuid(), uuid -> new VaultUserCache(plugin, vault, user));
         vaultUser.calculatePermissions(Collections.singletonMap("server", vault.getServer()), true);
+        vaultUser.calculateChat(Collections.singletonMap("server", vault.getServer()), true);
         for (World world : plugin.getServer().getWorlds()) {
             Map<String, String> context = new HashMap<>();
             context.put("server", vault.getServer());
             context.put("world", world.getName());
             vaultUser.calculatePermissions(context, true);
+            vaultUser.calculateChat(context, true);
         }
     }
 
