@@ -45,52 +45,6 @@ public class Node implements me.lucko.luckperms.api.Node {
     private static final Pattern SUFFIX_PATTERN = Pattern.compile("(?i)suffix\\.-?\\d+\\..*");
     private static final Pattern META_PATTERN = Pattern.compile("meta\\..*\\..*");
 
-    public static me.lucko.luckperms.api.Node fromSerialisedNode(String s, Boolean b) {
-        return builderFromSerialisedNode(s, b).build();
-    }
-
-    public static me.lucko.luckperms.api.Node.Builder builderFromSerialisedNode(String s, Boolean b) {
-        if (s.contains("/")) {
-            List<String> parts = Splitter.on('/').limit(2).splitToList(s);
-            // 0=server(+world)   1=node
-
-            // WORLD SPECIFIC
-            if (parts.get(0).contains("-")) {
-                List<String> serverParts = Splitter.on('-').limit(2).splitToList(parts.get(0));
-                // 0=server   1=world
-
-                if (parts.get(1).contains("$")) {
-                    List<String> tempParts = Splitter.on('$').limit(2).splitToList(parts.get(1));
-                    return new Node.Builder(tempParts.get(0), true).setServerRaw(serverParts.get(0)).setWorld(serverParts.get(1))
-                            .setExpiry(Long.parseLong(tempParts.get(1))).setValue(b);
-                } else {
-                    return new Node.Builder(parts.get(1), true).setServerRaw(serverParts.get(0)).setWorld(serverParts.get(1)).setValue(b);
-                }
-
-            } else {
-                // SERVER BUT NOT WORLD SPECIFIC
-                if (parts.get(1).contains("$")) {
-                    List<String> tempParts = Splitter.on('$').limit(2).splitToList(parts.get(1));
-                    return new Node.Builder(tempParts.get(0), true).setServerRaw(parts.get(0)).setExpiry(Long.parseLong(tempParts.get(1))).setValue(b);
-                } else {
-                    return new Node.Builder(parts.get(1), true).setServerRaw(parts.get(0)).setValue(b);
-                }
-            }
-        } else {
-            // NOT SERVER SPECIFIC
-            if (s.contains("$")) {
-                List<String> tempParts = Splitter.on('$').limit(2).splitToList(s);
-                return new Node.Builder(tempParts.get(0), true).setExpiry(Long.parseLong(tempParts.get(1))).setValue(b);
-            } else {
-                return new Node.Builder(s, true).setValue(b);
-            }
-        }
-    }
-
-    public static me.lucko.luckperms.api.Node.Builder builderFromExisting(me.lucko.luckperms.api.Node other) {
-        return new Builder(other);
-    }
-
     @Getter
     private final String permission;
 
@@ -157,33 +111,162 @@ public class Node implements me.lucko.luckperms.api.Node {
         return Tristate.fromBoolean(value);
     }
 
+    @Override
     public boolean isNegated() {
         return !value;
     }
 
+    @Override
     public Optional<String> getServer() {
-        if (isWorldSpecific() && server == null) {
-            return Optional.of("global");
-        }
         return Optional.ofNullable(server);
     }
 
+    @Override
     public Optional<String> getWorld() {
         return Optional.ofNullable(world);
     }
 
+    @Override
     public boolean isServerSpecific() {
-        return getServer().isPresent() && !getServer().get().equalsIgnoreCase("global");
+        return server != null && !server.equalsIgnoreCase("global");
     }
 
+    @Override
     public boolean isWorldSpecific() {
-        return getWorld().isPresent();
+        return world != null;
+    }
+
+    @Override
+    public boolean isTemporary() {
+        return expireAt != 0L;
+    }
+
+    @Override
+    public boolean isPermanent() {
+        return !isTemporary();
+    }
+
+    @Override
+    public long getExpiryUnixTime(){
+        if (!isTemporary()) {
+            throw new IllegalStateException("Node does not have an expiry time.");
+        }
+        return expireAt;
+    }
+
+    @Override
+    public Date getExpiry() {
+        if (!isTemporary()) {
+            throw new IllegalStateException("Node does not have an expiry time.");
+        }
+        return new Date(expireAt * 1000L);
+    }
+
+    @Override
+    public long getSecondsTilExpiry() {
+        if (!isTemporary()) {
+            throw new IllegalStateException("Node does not have an expiry time.");
+        }
+        return expireAt - (System.currentTimeMillis() / 1000L);
+    }
+
+    @Override
+    public boolean hasExpired() {
+        return isTemporary() && expireAt < (System.currentTimeMillis() / 1000L);
+    }
+
+    @Override
+    public Map<String, String> getExtraContexts() {
+        return ImmutableMap.copyOf(extraContexts);
+    }
+
+    @Override
+    public boolean isGroupNode() {
+        return getPermission().toLowerCase().startsWith("group.");
+    }
+
+    @Override
+    public String getGroupName() {
+        if (!isGroupNode()) {
+            throw new IllegalStateException("Node is not a group node");
+        }
+
+        return getPermission().substring("group.".length());
+    }
+
+    @Override
+    public boolean isWildcard() {
+        return getPermission().endsWith(".*");
+    }
+
+    @Override
+    public int getWildcardLevel() {
+        return (int) getPermission().chars().filter(num -> num == Character.getNumericValue('.')).count();
+    }
+
+    @Override
+    public boolean isMeta() {
+        if (isMeta == Tristate.UNDEFINED) {
+            isMeta = Tristate.fromBoolean(META_PATTERN.matcher(getPermission()).matches());
+        }
+
+        return isMeta.asBoolean();
+    }
+
+    @Override
+    public Map.Entry<String, String> getMeta() {
+        if (!isMeta()) {
+            throw new IllegalStateException();
+        }
+
+        List<String> metaPart = Splitter.on('.').limit(2).splitToList(getPermission().substring("meta.".length()));
+        return new AbstractMap.SimpleEntry<>(metaPart.get(0), metaPart.get(1));
+    }
+
+    @Override
+    public boolean isPrefix() {
+        if (isPrefix == Tristate.UNDEFINED) {
+            isPrefix = Tristate.fromBoolean(PREFIX_PATTERN.matcher(getPermission()).matches());
+        }
+
+        return isPrefix.asBoolean();
+    }
+
+    @Override
+    public Map.Entry<Integer, String> getPrefix() {
+        if (!isPrefix()) {
+            throw new IllegalStateException();
+        }
+
+        List<String> prefixPart = Splitter.on('.').limit(2).splitToList(getPermission().substring("prefix.".length()));
+        Integer i = Integer.parseInt(prefixPart.get(0));
+        return new AbstractMap.SimpleEntry<>(i, prefixPart.get(1));
+    }
+
+    @Override
+    public boolean isSuffix() {
+        if (isSuffix == Tristate.UNDEFINED) {
+            isSuffix = Tristate.fromBoolean(SUFFIX_PATTERN.matcher(getPermission()).matches());
+        }
+
+        return isSuffix.asBoolean();
+    }
+
+    @Override
+    public Map.Entry<Integer, String> getSuffix() {
+        if (!isSuffix()) {
+            throw new IllegalStateException();
+        }
+
+        List<String> suffixPart = Splitter.on('.').limit(2).splitToList(getPermission().substring("suffix.".length()));
+        Integer i = Integer.parseInt(suffixPart.get(0));
+        return new AbstractMap.SimpleEntry<>(i, suffixPart.get(1));
     }
 
     @Override
     public boolean shouldApplyOnServer(String server, boolean includeGlobal, boolean applyRegex) {
         if (server == null || server.equals("")) {
-            return true;
+            return !isServerSpecific() && includeGlobal;
         }
 
         if (isServerSpecific()) {
@@ -196,7 +279,7 @@ public class Node implements me.lucko.luckperms.api.Node {
     @Override
     public boolean shouldApplyOnWorld(String world, boolean includeGlobal, boolean applyRegex) {
         if (world == null || world.equals("")) {
-            return true;
+            return !isWorldSpecific() && includeGlobal;
         }
 
         if (isWorldSpecific()) {
@@ -239,47 +322,24 @@ public class Node implements me.lucko.luckperms.api.Node {
 
         if (worldAndServer) {
             if (isWorldSpecific()) {
-                if (context == null) {
-                    return false;
-                }
-
-                if (!context.containsKey("world")) {
-                    return false;
-                }
-
-                if (!context.get("world").equalsIgnoreCase(world)) {
-                    return false;
-                }
+                if (context == null) return false;
+                if (!context.containsKey("world")) return false;
+                if (!context.get("world").equalsIgnoreCase(world)) return false;
             }
 
             if (isServerSpecific()) {
-                if (context == null) {
-                    return false;
-                }
-
-                if (!context.containsKey("server")) {
-                    return false;
-                }
-
-                if (!context.get("server").equalsIgnoreCase(server)) {
-                    return false;
-                }
+                if (context == null) return false;
+                if (!context.containsKey("server")) return false;
+                if (!context.get("server").equalsIgnoreCase(server)) return false;
             }
         }
 
         if (!extraContexts.isEmpty()) {
-            if (context == null) {
-                return false;
-            }
+            if (context == null) return false;
 
             for (Map.Entry<String, String> c : extraContexts.entrySet()) {
-                if (!context.containsKey(c.getKey())) {
-                    return false;
-                }
-
-                if (!context.get(c.getKey()).equalsIgnoreCase(c.getValue())) {
-                    return false;
-                }
+                if (!context.containsKey(c.getKey())) return false;
+                if (!context.get(c.getKey()).equalsIgnoreCase(c.getValue())) return false;
             }
         }
 
@@ -401,34 +461,6 @@ public class Node implements me.lucko.luckperms.api.Node {
         return new ArrayList<>(nodes);
     }
 
-    public boolean isTemporary() {
-        return expireAt != 0L;
-    }
-
-    public boolean isPermanent() {
-        return !isTemporary();
-    }
-
-    public long getExpiryUnixTime(){
-        return expireAt;
-    }
-
-    public Date getExpiry() {
-        return new Date(expireAt * 1000L);
-    }
-
-    public long getSecondsTilExpiry() {
-        return expireAt - (System.currentTimeMillis() / 1000L);
-    }
-
-    public boolean hasExpired() {
-        return isTemporary() && expireAt < (System.currentTimeMillis() / 1000L);
-    }
-
-    public Map<String, String> getExtraContexts() {
-        return ImmutableMap.copyOf(extraContexts);
-    }
-
     public String toSerializedNode() {
         StringBuilder builder = new StringBuilder();
 
@@ -462,89 +494,6 @@ public class Node implements me.lucko.luckperms.api.Node {
         }
 
         return builder.toString();
-    }
-
-    @Override
-    public boolean isGroupNode() {
-        return getPermission().toLowerCase().startsWith("group.");
-    }
-
-    @Override
-    public String getGroupName() {
-        if (!isGroupNode()) {
-            throw new IllegalStateException("This is not a group node");
-        }
-
-        return getPermission().substring("group.".length());
-    }
-
-    @Override
-    public boolean isWildcard() {
-        return getPermission().endsWith(".*");
-    }
-
-    @Override
-    public int getWildcardLevel() {
-        return (int) getPermission().chars().filter(num -> num == Character.getNumericValue('.')).count();
-    }
-
-    @Override
-    public boolean isMeta() {
-        if (isMeta == Tristate.UNDEFINED) {
-            isMeta = Tristate.fromBoolean(META_PATTERN.matcher(getPermission()).matches());
-        }
-
-        return isMeta.asBoolean();
-    }
-
-    @Override
-    public Map.Entry<String, String> getMeta() {
-        if (!isMeta()) {
-            throw new IllegalStateException();
-        }
-
-        String[] metaPart = getPermission().substring("meta.".length()).split("\\.", 2);
-        return new AbstractMap.SimpleEntry<>(metaPart[0], metaPart[1]);
-    }
-
-    @Override
-    public boolean isPrefix() {
-        if (isPrefix == Tristate.UNDEFINED) {
-            isPrefix = Tristate.fromBoolean(PREFIX_PATTERN.matcher(getPermission()).matches());
-        }
-
-        return isPrefix.asBoolean();
-    }
-
-    @Override
-    public Map.Entry<Integer, String> getPrefix() {
-        if (!isPrefix()) {
-            throw new IllegalStateException();
-        }
-
-        List<String> prefixPart = Splitter.on('.').limit(2).splitToList(getPermission().substring("prefix.".length()));
-        Integer i = Integer.parseInt(prefixPart.get(0));
-        return new AbstractMap.SimpleEntry<>(i, prefixPart.get(1));
-    }
-
-    @Override
-    public boolean isSuffix() {
-        if (isSuffix == Tristate.UNDEFINED) {
-            isSuffix = Tristate.fromBoolean(SUFFIX_PATTERN.matcher(getPermission()).matches());
-        }
-
-        return isSuffix.asBoolean();
-    }
-
-    @Override
-    public Map.Entry<Integer, String> getSuffix() {
-        if (!isSuffix()) {
-            throw new IllegalStateException();
-        }
-
-        List<String> suffixPart = Splitter.on('.').limit(2).splitToList(getPermission().substring("suffix.".length()));
-        Integer i = Integer.parseInt(suffixPart.get(0));
-        return new AbstractMap.SimpleEntry<>(i, suffixPart.get(1));
     }
 
     @Override
@@ -668,6 +617,52 @@ public class Node implements me.lucko.luckperms.api.Node {
     @Override
     public String getKey() {
         return getPermission();
+    }
+
+    public static me.lucko.luckperms.api.Node fromSerialisedNode(String s, Boolean b) {
+        return builderFromSerialisedNode(s, b).build();
+    }
+
+    public static me.lucko.luckperms.api.Node.Builder builderFromSerialisedNode(String s, Boolean b) {
+        if (s.contains("/")) {
+            List<String> parts = Splitter.on('/').limit(2).splitToList(s);
+            // 0=server(+world)   1=node
+
+            // WORLD SPECIFIC
+            if (parts.get(0).contains("-")) {
+                List<String> serverParts = Splitter.on('-').limit(2).splitToList(parts.get(0));
+                // 0=server   1=world
+
+                if (parts.get(1).contains("$")) {
+                    List<String> tempParts = Splitter.on('$').limit(2).splitToList(parts.get(1));
+                    return new Node.Builder(tempParts.get(0), true).setServerRaw(serverParts.get(0)).setWorld(serverParts.get(1))
+                            .setExpiry(Long.parseLong(tempParts.get(1))).setValue(b);
+                } else {
+                    return new Node.Builder(parts.get(1), true).setServerRaw(serverParts.get(0)).setWorld(serverParts.get(1)).setValue(b);
+                }
+
+            } else {
+                // SERVER BUT NOT WORLD SPECIFIC
+                if (parts.get(1).contains("$")) {
+                    List<String> tempParts = Splitter.on('$').limit(2).splitToList(parts.get(1));
+                    return new Node.Builder(tempParts.get(0), true).setServerRaw(parts.get(0)).setExpiry(Long.parseLong(tempParts.get(1))).setValue(b);
+                } else {
+                    return new Node.Builder(parts.get(1), true).setServerRaw(parts.get(0)).setValue(b);
+                }
+            }
+        } else {
+            // NOT SERVER SPECIFIC
+            if (s.contains("$")) {
+                List<String> tempParts = Splitter.on('$').limit(2).splitToList(s);
+                return new Node.Builder(tempParts.get(0), true).setExpiry(Long.parseLong(tempParts.get(1))).setValue(b);
+            } else {
+                return new Node.Builder(s, true).setValue(b);
+            }
+        }
+    }
+
+    public static me.lucko.luckperms.api.Node.Builder builderFromExisting(me.lucko.luckperms.api.Node other) {
+        return new Builder(other);
     }
 
     @RequiredArgsConstructor

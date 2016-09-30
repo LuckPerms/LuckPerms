@@ -26,8 +26,8 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import me.lucko.luckperms.LPBukkitPlugin;
+import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.data.Callback;
-import me.lucko.luckperms.api.vault.cache.ContextData;
 import me.lucko.luckperms.api.vault.cache.VaultUserCache;
 import me.lucko.luckperms.api.vault.cache.VaultUserManager;
 import me.lucko.luckperms.contexts.Contexts;
@@ -248,22 +248,11 @@ public class VaultPermissionHook extends Permission {
         User user = plugin.getUserManager().get(player);
         if (user == null) return new String[0];
 
-        if (!vaultUserManager.containsUser(user.getUuid())) {
-            return new String[0];
-        }
-
-        VaultUserCache vaultUser = vaultUserManager.getUser(user.getUuid());
-        Map<String, String> context = new HashMap<>();
-        context.put("server", server);
-        if (world != null) {
-            context.put("world", world);
-        }
-
-        ContextData cd = vaultUser.getContextData().computeIfAbsent(context, map -> vaultUser.calculatePermissions(map, false));
-        return cd.getPermissionCache().entrySet().stream()
-                .filter(Map.Entry::getValue)
-                .filter(e -> e.getKey().startsWith("group."))
-                .map(e -> e.getKey().substring("group.".length()))
+        return user.getNodes().stream()
+                .filter(Node::isGroupNode)
+                .filter(n -> n.shouldApplyOnServer(server, isIncludeGlobal(), false))
+                .filter(n -> n.shouldApplyOnWorld(world, true, false))
+                .map(Node::getGroupName)
                 .toArray(String[]::new);
     }
 
