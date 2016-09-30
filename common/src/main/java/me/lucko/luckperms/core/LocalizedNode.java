@@ -36,7 +36,6 @@ import java.util.Optional;
  */
 @Getter
 @ToString
-@EqualsAndHashCode
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class LocalizedNode implements me.lucko.luckperms.api.Node {
     public static LocalizedNode of(@NonNull me.lucko.luckperms.api.Node node, @NonNull String location) {
@@ -45,6 +44,16 @@ public class LocalizedNode implements me.lucko.luckperms.api.Node {
 
     private final me.lucko.luckperms.api.Node node;
     private final String location;
+
+    @Override
+    public int hashCode() {
+        return node.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return node.equals(obj);
+    }
 
     @Override
     public String getPermission() {
