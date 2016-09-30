@@ -702,7 +702,7 @@ public class Node implements me.lucko.luckperms.api.Node {
             this.override = other.isOverride();
             this.server = other.getServer().orElse(null);
             this.world = other.getWorld().orElse(null);
-            this.expireAt = other.getExpiryUnixTime();
+            this.expireAt = other.isPermanent() ? 0L : other.getExpiryUnixTime();
         }
 
         @Override
