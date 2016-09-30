@@ -27,7 +27,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.event.events.GroupAddEvent;
 import me.lucko.luckperms.api.implementation.internal.GroupLink;
 import me.lucko.luckperms.api.implementation.internal.PermissionHolderLink;
@@ -37,9 +36,7 @@ import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.utils.Identifiable;
 
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @ToString(of = {"uuid"})
 @EqualsAndHashCode(of = {"uuid"}, callSuper = false)
@@ -93,7 +90,7 @@ public abstract class User extends PermissionHolder implements Identifiable<UUID
      * @return true if the user is a member of the group
      */
     public boolean isInGroup(Group group) {
-        return isInGroup(group, "global");
+        return hasPermission("group." + group.getName(), true);
     }
 
     /**
@@ -134,10 +131,6 @@ public abstract class User extends PermissionHolder implements Identifiable<UUID
      * @throws ObjectAlreadyHasException if the user is already a member of the group on that server
      */
     public void addGroup(Group group, String server) throws ObjectAlreadyHasException {
-        if (server == null) {
-            server = "global";
-        }
-
         setPermission("group." + group.getName(), true, server);
         getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderLink(this), new GroupLink(group), server, null, 0L));
     }
@@ -150,10 +143,6 @@ public abstract class User extends PermissionHolder implements Identifiable<UUID
      * @throws ObjectAlreadyHasException if the user is already a member of the group on that server
      */
     public void addGroup(Group group, String server, String world) throws ObjectAlreadyHasException {
-        if (server == null) {
-            server = "global";
-        }
-
         setPermission("group." + group.getName(), true, server, world);
         getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderLink(this), new GroupLink(group), server, world, 0L));
     }
@@ -177,10 +166,6 @@ public abstract class User extends PermissionHolder implements Identifiable<UUID
      * @throws ObjectAlreadyHasException if the user is already a member of the group on that server
      */
     public void addGroup(Group group, String server, long expireAt) throws ObjectAlreadyHasException {
-        if (server == null) {
-            server = "global";
-        }
-
         setPermission("group." + group.getName(), true, server, expireAt);
         getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderLink(this), new GroupLink(group), server, null, expireAt));
     }
@@ -194,10 +179,6 @@ public abstract class User extends PermissionHolder implements Identifiable<UUID
      * @throws ObjectAlreadyHasException if the user is already a member of the group on that server
      */
     public void addGroup(Group group, String server, String world, long expireAt) throws ObjectAlreadyHasException {
-        if (server == null) {
-            server = "global";
-        }
-
         setPermission("group." + group.getName(), true, server, world, expireAt);
         getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderLink(this), new GroupLink(group), server, world, expireAt));
     }
@@ -208,7 +189,7 @@ public abstract class User extends PermissionHolder implements Identifiable<UUID
      * @throws ObjectLacksException if the user isn't a member of the group
      */
     public void removeGroup(Group group) throws ObjectLacksException {
-        removeGroup(group, "global");
+        unsetPermission("group." + group.getName());
     }
 
     /**
@@ -218,7 +199,7 @@ public abstract class User extends PermissionHolder implements Identifiable<UUID
      * @throws ObjectLacksException if the user isn't a member of the group
      */
     public void removeGroup(Group group, boolean temporary) throws ObjectLacksException {
-        removeGroup(group, "global", temporary);
+        unsetPermission("group." + group.getName(), temporary);
     }
 
     /**
@@ -228,10 +209,6 @@ public abstract class User extends PermissionHolder implements Identifiable<UUID
      * @throws ObjectLacksException if the user isn't a member of the group
      */
     public void removeGroup(Group group, String server) throws ObjectLacksException {
-        if (server == null) {
-            server = "global";
-        }
-
         unsetPermission("group." + group.getName(), server);
     }
 
@@ -243,10 +220,6 @@ public abstract class User extends PermissionHolder implements Identifiable<UUID
      * @throws ObjectLacksException if the user isn't a member of the group
      */
     public void removeGroup(Group group, String server, String world) throws ObjectLacksException {
-        if (server == null) {
-            server = "global";
-        }
-
         unsetPermission("group." + group.getName(), server, world);
     }
 
@@ -258,10 +231,6 @@ public abstract class User extends PermissionHolder implements Identifiable<UUID
      * @throws ObjectLacksException if the user isn't a member of the group
      */
     public void removeGroup(Group group, String server, boolean temporary) throws ObjectLacksException {
-        if (server == null) {
-            server = "global";
-        }
-
         unsetPermission("group." + group.getName(), server, temporary);
     }
 
@@ -274,10 +243,6 @@ public abstract class User extends PermissionHolder implements Identifiable<UUID
      * @throws ObjectLacksException if the user isn't a member of the group
      */
     public void removeGroup(Group group, String server, String world, boolean temporary) throws ObjectLacksException {
-        if (server == null) {
-            server = "global";
-        }
-
         unsetPermission("group." + group.getName(), server, world, temporary);
     }
 
@@ -287,50 +252,5 @@ public abstract class User extends PermissionHolder implements Identifiable<UUID
     public void clearNodes() {
         getNodes().clear();
         getPlugin().getUserManager().giveDefaultIfNeeded(this, false);
-    }
-
-    /**
-     * Get a {@link List} of all of the groups the user is a member of, on all servers
-     * @return a {@link List} of group names
-     */
-    public List<String> getGroupNames() {
-        return getGroups(null, null, true);
-    }
-
-    /**
-     * Get a {@link List} of the groups the user is a member of on a specific server
-     * @param server the server to check
-     * @param world the world to check
-     * @return a {@link List} of group names
-     */
-    public List<String> getLocalGroups(String server, String world) {
-        return getGroups(server, world, false);
-    }
-
-    /**
-     * Get a {@link List} of the groups the user is a member of on a specific server
-     * @param server the server to check
-     * @return a {@link List} of group names
-     */
-    public List<String> getLocalGroups(String server) {
-        return getLocalGroups(server, null);
-    }
-
-    /**
-     * Get a {@link List} of the groups the user is a member of on a specific server with the option to include global
-     * groups or all groups
-     * @param server Which server to check on
-     * @param world Which world to check on
-     * @param includeGlobal Whether to include global groups
-     * @return a {@link List} of group names
-     */
-    public List<String> getGroups(String server, String world, boolean includeGlobal) {
-        // Call super #getPermissions method, and just sort through those
-        return getNodes().stream()
-                .filter(n -> n.shouldApplyOnWorld(world, includeGlobal, true))
-                .filter(n -> n.shouldApplyOnServer(server, includeGlobal, true))
-                .filter(Node::isGroupNode)
-                .map(Node::getGroupName)
-                .collect(Collectors.toList());
     }
 }

@@ -548,17 +548,6 @@ public abstract class PermissionHolder {
         return getPermissions(false).stream().filter(Node::isTemporary).collect(Collectors.toSet());
     }
 
-    @Deprecated
-    public Map<Map.Entry<String, Boolean>, Long> getTemporaryNodesLegacy() {
-        Map<Map.Entry<String, Boolean>, Long> m = new HashMap<>();
-
-        for (Node node : getTemporaryNodes()) {
-            m.put(new AbstractMap.SimpleEntry<>(node.getKey(), node.getValue()), node.getExpiryUnixTime());
-        }
-
-        return m;
-    }
-
     /**
      * @return The permanent nodes held by the holder
      */
@@ -566,9 +555,49 @@ public abstract class PermissionHolder {
         return getPermissions(false).stream().filter(Node::isPermanent).collect(Collectors.toSet());
     }
 
+    /**
+     * Get a {@link List} of all of the groups the group inherits, on all servers
+     * @return a {@link List} of group names
+     */
+    public List<String> getGroupNames() {
+        return getNodes().stream()
+                .filter(Node::isGroupNode)
+                .map(Node::getGroupName)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Get a {@link List} of the groups the group inherits on a specific server
+     * @param server the server to check
+     * @param world the world to check
+     * @return a {@link List} of group names
+     */
+    public List<String> getLocalGroups(String server, String world) {
+        return getNodes().stream()
+                .filter(Node::isGroupNode)
+                .filter(n -> n.shouldApplyOnWorld(world, false, true))
+                .filter(n -> n.shouldApplyOnServer(server, false, true))
+                .map(Node::getGroupName)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Get a {@link List} of the groups the group inherits on a specific server
+     * @param server the server to check
+     * @return a {@link List} of group names
+     */
+    public List<String> getLocalGroups(String server) {
+        return getNodes().stream()
+                .filter(Node::isGroupNode)
+                .filter(n -> n.shouldApplyOnServer(server, false, true))
+                .map(Node::getGroupName)
+                .collect(Collectors.toList());
+    }
+
     /*
      * Don't use these methods, only here for compat reasons
      */
+
     @Deprecated
     public Map<String, Boolean> getLocalPermissions(String server, String world, List<String> excludedGroups, List<String> possibleNodes) {
         Map<String, String> context = new HashMap<>();

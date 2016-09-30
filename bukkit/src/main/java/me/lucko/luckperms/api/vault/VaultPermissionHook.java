@@ -199,7 +199,16 @@ public class VaultPermissionHook extends Permission {
     @Override
     public boolean playerInGroup(String world, @NonNull String player, @NonNull String group) {
         log("Checking if player " + player + " is in group: " + group + " on world " + world + ", server " + server);
-        return playerHas(world, player, "group." + group);
+        final User user = plugin.getUserManager().get(player);
+        if (user == null) return false;
+
+        return user.getNodes().stream()
+                .filter(Node::isGroupNode)
+                .filter(n -> n.shouldApplyOnServer(server, isIncludeGlobal(), false))
+                .filter(n -> n.shouldApplyOnWorld(world, true, false))
+                .map(Node::getGroupName)
+                .filter(s -> s.equalsIgnoreCase(group))
+                .findAny().isPresent();
     }
 
     @Override
