@@ -47,7 +47,7 @@ public interface PermissionHolder {
      * @return an immutable set of permissions in priority order
      * @since 2.6
      */
-    SortedSet<Node> getPermissions();
+    SortedSet<? extends Node> getPermissions();
 
     /**
      * Similar to {@link #getPermissions()}, except excluding transient permissions

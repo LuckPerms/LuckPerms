@@ -31,21 +31,24 @@ import java.util.Comparator;
 import java.util.Locale;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class PriorityComparator implements Comparator<Node> {
+public class PriorityComparator implements Comparator<LocalizedNode> {
     private static final PriorityComparator INSTANCE = new PriorityComparator();
 
-    public static Comparator<Node> get() {
+    public static Comparator<LocalizedNode> get() {
         return INSTANCE;
     }
 
-    public static Comparator<Node> reverse() {
+    public static Comparator<LocalizedNode> reverse() {
         return INSTANCE.reversed();
     }
 
     private final Collator collator = Collator.getInstance(Locale.ENGLISH);
 
     @Override
-    public int compare(Node o1, Node o2) {
+    public int compare(LocalizedNode one, LocalizedNode two) {
+        Node o1 = one.getNode();
+        Node o2 = two.getNode();
+
         if (o1.equals(o2)) {
             return 0;
         }

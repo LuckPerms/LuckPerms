@@ -24,8 +24,10 @@ package me.lucko.luckperms.commands;
 
 import lombok.experimental.UtilityClass;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Patterns;
+import me.lucko.luckperms.core.LocalizedNode;
 import me.lucko.luckperms.utils.DateUtil;
 
 import java.util.*;
@@ -79,8 +81,19 @@ public class Util {
         return b ? "&atrue" : "&cfalse";
     }
 
-    public static void sendBoolean(Sender sender, String node, boolean b) {
-        sender.sendMessage(Util.color("&b" + node + ": " + formatBoolean(b)));
+    public static String formatTristate(Tristate t) {
+        switch (t) {
+            case TRUE:
+                return "&atrue";
+            case FALSE:
+                return "&cfalse";
+            default:
+                return "&cundefined";
+        }
+    }
+
+    public static void sendTristate(Sender sender, String node, Tristate t) {
+        sender.sendMessage(Util.color("&b" + node + ": " + formatTristate(t)));
     }
 
     public static String listToCommaSep(List<String> strings) {
@@ -129,7 +142,7 @@ public class Util {
         return sb.delete(sb.length() - 6, sb.length()).toString();
     }
 
-    public static String permNodesToString(SortedSet<Node> nodes) {
+    public static String permNodesToString(SortedSet<LocalizedNode> nodes) {
         StringBuilder sb = new StringBuilder();
         for (Node node : nodes) {
             if (node.isTemporary()) {
@@ -154,7 +167,7 @@ public class Util {
         return sb.toString();
     }
 
-    public static String tempNodesToString(SortedSet<Node> nodes) {
+    public static String tempNodesToString(SortedSet<LocalizedNode> nodes) {
         StringBuilder sb = new StringBuilder();
 
         for (Node node : nodes) {
@@ -181,7 +194,7 @@ public class Util {
         return sb.toString();
     }
 
-    public static String permGroupsToString(SortedSet<Node> nodes) {
+    public static String permGroupsToString(SortedSet<LocalizedNode> nodes) {
         StringBuilder sb = new StringBuilder();
         for (Node node : nodes) {
             if (!node.isGroupNode()) {
@@ -209,7 +222,7 @@ public class Util {
         return sb.toString();
     }
 
-    public static String tempGroupsToString(SortedSet<Node> nodes) {
+    public static String tempGroupsToString(SortedSet<LocalizedNode> nodes) {
         StringBuilder sb = new StringBuilder();
 
         for (Node node : nodes) {

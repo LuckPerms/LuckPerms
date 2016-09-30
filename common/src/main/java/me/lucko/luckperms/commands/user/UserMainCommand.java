@@ -83,8 +83,6 @@ public class UserMainCommand extends MainCommand<User> {
                     return null;
                 }
 
-                Message.USER_ATTEMPTING_LOOKUP.send(sender);
-
                 u = plugin.getDatastore().getUUID(target);
                 if (u == null) {
                     Message.USER_NOT_FOUND.send(sender);

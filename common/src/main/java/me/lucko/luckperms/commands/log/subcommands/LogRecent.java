@@ -74,8 +74,6 @@ public class LogRecent extends SubCommand<Log> {
                     return CommandResult.INVALID_ARGS;
                 }
 
-                Message.USER_ATTEMPTING_LOOKUP.send(sender);
-
                 UUID uuid = plugin.getDatastore().getUUID(s);
 
                 if (uuid == null) {

@@ -76,8 +76,6 @@ public class LogUserHistory extends SubCommand<Log> {
                 return CommandResult.INVALID_ARGS;
             }
 
-            Message.USER_ATTEMPTING_LOOKUP.send(sender);
-
             UUID uuid1 = plugin.getDatastore().getUUID(user);
 
             if (uuid1 == null) {

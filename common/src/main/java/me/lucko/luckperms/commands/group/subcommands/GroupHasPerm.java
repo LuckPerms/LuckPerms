@@ -26,6 +26,7 @@ import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.core.Node;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.utils.ArgumentChecker;
 
@@ -52,13 +53,13 @@ public class GroupHasPerm extends SubCommand<Group> {
             }
 
             if (args.size() == 2) {
-                Util.sendBoolean(sender, args.get(0), group.hasPermission(args.get(0), true, args.get(1)));
+                Util.sendTristate(sender, args.get(0), group.hasPermission(new Node.Builder(args.get(0)).setServer(args.get(1)).build()));
             } else {
-                Util.sendBoolean(sender, args.get(0), group.hasPermission(args.get(0), true, args.get(1), args.get(2)));
+                Util.sendTristate(sender, args.get(0), group.hasPermission(new Node.Builder(args.get(0)).setServer(args.get(1)).setWorld(args.get(2)).build()));
             }
 
         } else {
-            Util.sendBoolean(sender, args.get(0), group.hasPermission(args.get(0), true, "global"));
+            Util.sendTristate(sender, args.get(0), group.hasPermission(new Node.Builder(args.get(0)).build()));
         }
         return CommandResult.SUCCESS;
     }

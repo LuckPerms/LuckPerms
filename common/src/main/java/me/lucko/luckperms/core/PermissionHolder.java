@@ -78,26 +78,20 @@ public abstract class PermissionHolder {
      * Returns a Set of nodes in priority order
      * @return the holders transient and permanent nodes
      */
-    public SortedSet<Node> getPermissions(boolean mergeTemp) {
+    public SortedSet<LocalizedNode> getPermissions(boolean mergeTemp) {
         // Returns no duplicate nodes. as in, nodes with the same value.
 
-        TreeSet<Node> combined = new TreeSet<>(PriorityComparator.reverse());
-        combined.addAll(nodes);
-        combined.addAll(transientNodes);
+        TreeSet<LocalizedNode> combined = new TreeSet<>(PriorityComparator.reverse());
+        nodes.stream().map(n -> LocalizedNode.of(n, getObjectName())).forEach(combined::add);
+        transientNodes.stream().map(n -> LocalizedNode.of(n, getObjectName())).forEach(combined::add);
 
-        TreeSet<Node> permissions = new TreeSet<>(PriorityComparator.reverse());
+        TreeSet<LocalizedNode> permissions = new TreeSet<>(PriorityComparator.reverse());
 
         combined:
-        for (Node node : combined) {
-            for (Node other : permissions) {
-                if (mergeTemp) {
-                    if (node.equalsIgnoringValueOrTemp(other)) {
-                        continue combined;
-                    }
-                } else {
-                    if (node.almostEquals(other)) {
-                        continue combined;
-                    }
+        for (LocalizedNode node : combined) {
+            for (LocalizedNode other : permissions) {
+                if (mergeTemp ? node.getNode().equalsIgnoringValueOrTemp(other.getNode()) : node.getNode().almostEquals(other.getNode())) {
+                    continue combined;
                 }
             }
 
@@ -144,8 +138,8 @@ public abstract class PermissionHolder {
      * @param excludedGroups a list of groups to exclude
      * @return a set of nodes
      */
-    public SortedSet<Node> getAllNodes(List<String> excludedGroups, Contexts context) {
-        SortedSet<Node> all = getPermissions(true);
+    public SortedSet<LocalizedNode> getAllNodes(List<String> excludedGroups, Contexts context) {
+        SortedSet<LocalizedNode> all = getPermissions(true);
 
         if (excludedGroups == null) {
             excludedGroups = new ArrayList<>();
@@ -154,6 +148,7 @@ public abstract class PermissionHolder {
         excludedGroups.add(getObjectName().toLowerCase());
 
         Set<Node> parents = getPermissions(true).stream()
+                .map(LocalizedNode::getNode)
                 .filter(Node::isGroupNode)
                 .collect(Collectors.toSet());
 
@@ -194,9 +189,9 @@ public abstract class PermissionHolder {
             }
 
             inherited:
-            for (Node inherited : group.getAllNodes(excludedGroups, context)) {
-                for (Node existing : all) {
-                    if (existing.almostEquals(inherited)) {
+            for (LocalizedNode inherited : group.getAllNodes(excludedGroups, context)) {
+                for (LocalizedNode existing : all) {
+                    if (existing.getNode().almostEquals(inherited.getNode())) {
                         continue inherited;
                     }
                 }
@@ -213,9 +208,9 @@ public abstract class PermissionHolder {
      * @param context the context for this request
      * @return a map of permissions
      */
-    public Set<Node> getAllNodesFiltered(Contexts context) {
-        Set<Node> perms = ConcurrentHashMap.newKeySet();
-        SortedSet<Node> allNodes;
+    public Set<LocalizedNode> getAllNodesFiltered(Contexts context) {
+        Set<LocalizedNode> perms = ConcurrentHashMap.newKeySet();
+        SortedSet<LocalizedNode> allNodes;
 
         if (context.isApplyGroups()) {
             allNodes = getAllNodes(null, context);
@@ -230,7 +225,8 @@ public abstract class PermissionHolder {
         contexts.remove("world");
 
         all:
-        for (Node node : allNodes) {
+        for (LocalizedNode ln : allNodes) {
+            Node node = ln.getNode();
             if (!node.shouldApplyOnServer(server, context.isIncludeGlobal(), plugin.getConfiguration().isApplyingRegex())) {
                 continue;
             }
@@ -244,13 +240,13 @@ public abstract class PermissionHolder {
             }
 
             // Force higher priority nodes to override
-            for (Node alreadyIn : perms) {
-                if (node.getPermission().equals(alreadyIn.getPermission())) {
+            for (LocalizedNode alreadyIn : perms) {
+                if (node.getPermission().equals(alreadyIn.getNode().getPermission())) {
                     continue all;
                 }
             }
 
-            perms.add(node);
+            perms.add(ln);
         }
 
         return perms;
@@ -265,7 +261,8 @@ public abstract class PermissionHolder {
     public Map<String, Boolean> exportNodes(Contexts context, List<String> possibleNodes, boolean lowerCase) {
         Map<String, Boolean> perms = new HashMap<>();
 
-        for (Node node : getAllNodesFiltered(context)) {
+        for (LocalizedNode ln : getAllNodesFiltered(context)) {
+            Node node = ln.getNode();
             if (possibleNodes != null && !possibleNodes.isEmpty()) {
                 if (node.getPermission().equals("*") || node.getPermission().equals("'*'")) {
                     if (plugin.getConfiguration().isApplyingWildcards()) {
@@ -332,16 +329,6 @@ public abstract class PermissionHolder {
         auditTemporaryPermissions();
     }
 
-    private static Tristate hasPermission(Set<Node> toQuery, Node node) {
-        for (Node n : toQuery) {
-            if (n.almostEquals(node)) {
-                return n.getTristate();
-            }
-        }
-
-        return Tristate.UNDEFINED;
-    }
-
     /**
      * Check if the holder has a permission node
      * @param node the node to check
@@ -349,7 +336,13 @@ public abstract class PermissionHolder {
      * @return a tristate
      */
     public Tristate hasPermission(Node node, boolean t) {
-        return hasPermission(t ? transientNodes : nodes, node);
+        for (Node n : t ? transientNodes : nodes) {
+            if (n.almostEquals(node)) {
+                return n.getTristate();
+            }
+        }
+
+        return Tristate.UNDEFINED;
     }
 
     public Tristate hasPermission(Node node) {
@@ -383,10 +376,25 @@ public abstract class PermissionHolder {
     /**
      * Check if the holder inherits a node
      * @param node the node to check
-     * @return a tristate
+     * @return the result of the lookup
+     */
+    public InheritanceInfo inheritsPermissionInfo(Node node) {
+        for (LocalizedNode n : getAllNodes(null, Contexts.allowAll())) {
+            if (n.getNode().almostEquals(node)) {
+                return InheritanceInfo.of(n);
+            }
+        }
+
+        return InheritanceInfo.empty();
+    }
+
+    /**
+     * Check if the holder inherits a node
+     * @param node the node to check
+     * @return the Tristate result
      */
     public Tristate inheritsPermission(Node node) {
-        return hasPermission(getAllNodes(null, Contexts.allowAll()), node);
+        return inheritsPermissionInfo(node).getResult();
     }
 
     public boolean inheritsPermission(String node, boolean b) {
@@ -556,7 +564,7 @@ public abstract class PermissionHolder {
     }
 
     /**
-     * Get a {@link List} of all of the groups the group inherits, on all servers
+     * Get a {@link List} of all of the groups the holder inherits, on all servers
      * @return a {@link List} of group names
      */
     public List<String> getGroupNames() {
@@ -567,7 +575,7 @@ public abstract class PermissionHolder {
     }
 
     /**
-     * Get a {@link List} of the groups the group inherits on a specific server
+     * Get a {@link List} of the groups the holder inherits on a specific server and world
      * @param server the server to check
      * @param world the world to check
      * @return a {@link List} of group names
@@ -582,7 +590,7 @@ public abstract class PermissionHolder {
     }
 
     /**
-     * Get a {@link List} of the groups the group inherits on a specific server
+     * Get a {@link List} of the groups the holder inherits on a specific server
      * @param server the server to check
      * @return a {@link List} of group names
      */

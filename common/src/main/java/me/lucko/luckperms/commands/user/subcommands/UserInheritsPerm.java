@@ -26,6 +26,8 @@ import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.core.InheritanceInfo;
+import me.lucko.luckperms.core.Node;
 import me.lucko.luckperms.users.User;
 import me.lucko.luckperms.utils.ArgumentChecker;
 
@@ -45,6 +47,7 @@ public class UserInheritsPerm extends SubCommand<User> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
+        InheritanceInfo result;
         if (args.size() >= 2) {
             if (ArgumentChecker.checkServer(args.get(1))) {
                 Message.SERVER_INVALID_ENTRY.send(sender);
@@ -52,14 +55,26 @@ public class UserInheritsPerm extends SubCommand<User> {
             }
 
             if (args.size() == 2) {
-                Util.sendBoolean(sender, args.get(0), user.inheritsPermission(args.get(0), true, args.get(1)));
+                result = user.inheritsPermissionInfo(new Node.Builder(args.get(0)).setServer(args.get(1)).build());
             } else {
-                Util.sendBoolean(sender, args.get(0), user.inheritsPermission(args.get(0), true, args.get(1), args.get(2)));
+                result = user.inheritsPermissionInfo(new Node.Builder(args.get(0)).setServer(args.get(1)).setWorld(args.get(2)).build());
             }
 
         } else {
-            Util.sendBoolean(sender, args.get(0), user.inheritsPermission(args.get(0), true));
+            result = user.inheritsPermissionInfo(new Node.Builder(args.get(0)).build());
         }
+
+        String location = null;
+        if (result.getLocation().isPresent()) {
+            if (result.getLocation().get().equals(user.getObjectName())) {
+                location = "self";
+            } else {
+                location = result.getLocation().get();
+            }
+        }
+
+        Util.sendPluginMessage(sender, "&b" + args.get(0) + ": " + Util.formatTristate(result.getResult()) +
+                (result.getLocation().isPresent() ? " &7(inherited from &a" + location + "&7)" : ""));
         return CommandResult.SUCCESS;
     }
 }
