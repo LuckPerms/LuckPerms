@@ -33,6 +33,7 @@ import me.lucko.luckperms.storage.Datastore;
 import me.lucko.luckperms.tracks.Track;
 import me.lucko.luckperms.tracks.TrackManager;
 import me.lucko.luckperms.users.User;
+import me.lucko.luckperms.users.UserIdentifier;
 
 import java.lang.reflect.Type;
 import java.sql.Connection;
@@ -142,20 +143,29 @@ abstract class SQLDatastore extends Datastore {
 
     @Override
     public boolean loadUser(UUID uuid, String username) {
-        User user = plugin.getUserManager().make(uuid, username);
-        boolean success = runQuery(USER_SELECT,
-                preparedStatement -> preparedStatement.setString(1, user.getUuid().toString()),
-                resultSet -> {
-                    if (resultSet.next()) {
-                        // User exists, let's load.
-                        Map<String, Boolean> nodes = gson.fromJson(resultSet.getString("perms"), NM_TYPE);
-                        user.setNodes(nodes);
-                        user.setPrimaryGroup(resultSet.getString("primary_group"));
+        User user = plugin.getUserManager().getOrMake(UserIdentifier.of(uuid, username));
+        user.getIoLock().lock();
+        try {
+            return runQuery(USER_SELECT,
+                    preparedStatement -> preparedStatement.setString(1, user.getUuid().toString()),
+                    resultSet -> {
+                        if (resultSet.next()) {
+                            // User exists, let's load.
+                            Map<String, Boolean> nodes = gson.fromJson(resultSet.getString("perms"), NM_TYPE);
+                            user.setNodes(nodes);
+                            user.setPrimaryGroup(resultSet.getString("primary_group"));
 
-                        if (user.getName().equalsIgnoreCase("null")) {
-                            user.setName(resultSet.getString("name"));
-                        } else {
-                            if (!resultSet.getString("name").equals(user.getName())) {
+                            boolean save = plugin.getUserManager().giveDefaultIfNeeded(user, false);
+
+                            if (user.getName().equalsIgnoreCase("null")) {
+                                user.setName(resultSet.getString("name"));
+                            } else {
+                                if (!resultSet.getString("name").equals(user.getName())) {
+                                    save = true;
+                                }
+                            }
+
+                            if (save) {
                                 runQuery(USER_UPDATE, preparedStatement -> {
                                     preparedStatement.setString(1, user.getName());
                                     preparedStatement.setString(2, user.getPrimaryGroup());
@@ -163,47 +173,62 @@ abstract class SQLDatastore extends Datastore {
                                     preparedStatement.setString(4, user.getUuid().toString());
                                 });
                             }
+                        } else {
+                            if (plugin.getUserManager().shouldSave(user)) {
+                                user.clearNodes();
+                                user.setPrimaryGroup(null);
+                                plugin.getUserManager().giveDefaultIfNeeded(user, false);
+                            }
                         }
+                        return true;
                     }
-                    return true;
-                }
-        );
-
-        if (success) plugin.getUserManager().updateOrSet(user);
-        return success;
+            );
+        } finally {
+            user.getIoLock().unlock();
+        }
     }
 
     @Override
     public boolean saveUser(User user) {
         if (!plugin.getUserManager().shouldSave(user)) {
-            return runQuery(USER_DELETE, preparedStatement -> {
-                preparedStatement.setString(1, user.getUuid().toString());
-            });
+            user.getIoLock().lock();
+            try {
+                return runQuery(USER_DELETE, preparedStatement -> {
+                    preparedStatement.setString(1, user.getUuid().toString());
+                });
+            } finally {
+                user.getIoLock().unlock();
+            }
         }
 
-        return runQuery(USER_SELECT,
-                preparedStatement -> preparedStatement.setString(1, user.getUuid().toString()),
-                resultSet -> {
-                    if (!resultSet.next()) {
-                        // Doesn't already exist, let's insert.
-                        return runQuery(USER_INSERT, preparedStatement -> {
-                            preparedStatement.setString(1, user.getUuid().toString());
-                            preparedStatement.setString(2, user.getName());
-                            preparedStatement.setString(3, user.getPrimaryGroup());
-                            preparedStatement.setString(4, gson.toJson(exportToLegacy(user.getNodes())));
-                        });
+        user.getIoLock().lock();
+        try {
+            return runQuery(USER_SELECT,
+                    preparedStatement -> preparedStatement.setString(1, user.getUuid().toString()),
+                    resultSet -> {
+                        if (!resultSet.next()) {
+                            // Doesn't already exist, let's insert.
+                            return runQuery(USER_INSERT, preparedStatement -> {
+                                preparedStatement.setString(1, user.getUuid().toString());
+                                preparedStatement.setString(2, user.getName());
+                                preparedStatement.setString(3, user.getPrimaryGroup());
+                                preparedStatement.setString(4, gson.toJson(exportToLegacy(user.getNodes())));
+                            });
 
-                    } else {
-                        // User exists, let's update.
-                        return runQuery(USER_UPDATE, preparedStatement -> {
-                            preparedStatement.setString(1, user.getName());
-                            preparedStatement.setString(2, user.getPrimaryGroup());
-                            preparedStatement.setString(3, gson.toJson(exportToLegacy(user.getNodes())));
-                            preparedStatement.setString(4, user.getUuid().toString());
-                        });
+                        } else {
+                            // User exists, let's update.
+                            return runQuery(USER_UPDATE, preparedStatement -> {
+                                preparedStatement.setString(1, user.getName());
+                                preparedStatement.setString(2, user.getPrimaryGroup());
+                                preparedStatement.setString(3, gson.toJson(exportToLegacy(user.getNodes())));
+                                preparedStatement.setString(4, user.getUuid().toString());
+                            });
+                        }
                     }
-                }
-        );
+            );
+        } finally {
+            user.getIoLock().unlock();
+        }
     }
 
     @Override
@@ -230,80 +255,101 @@ abstract class SQLDatastore extends Datastore {
 
     @Override
     public boolean createAndLoadGroup(String name) {
-        Group group = plugin.getGroupManager().make(name);
-        boolean success = runQuery(GROUP_SELECT,
-                preparedStatement -> preparedStatement.setString(1, group.getName()),
-                resultSet -> {
-                    if (!resultSet.next()) {
-                        return runQuery(GROUP_INSERT, preparedStatement -> {
-                            preparedStatement.setString(1, group.getName());
-                            preparedStatement.setString(2, gson.toJson(exportToLegacy(group.getNodes())));
-                        });
-                    } else {
-                        Map<String, Boolean> nodes = gson.fromJson(resultSet.getString("perms"), NM_TYPE);
-                        group.setNodes(nodes);
-                        return true;
+        Group group = plugin.getGroupManager().getOrMake(name);
+        group.getIoLock().lock();
+        try {
+            return runQuery(GROUP_SELECT,
+                    preparedStatement -> preparedStatement.setString(1, group.getName()),
+                    resultSet -> {
+                        if (resultSet.next()) {
+                            // Group exists, let's load.
+                            Map<String, Boolean> nodes = gson.fromJson(resultSet.getString("perms"), NM_TYPE);
+                            group.setNodes(nodes);
+                            return true;
+                        } else {
+                            return runQuery(GROUP_INSERT, preparedStatement -> {
+                                preparedStatement.setString(1, group.getName());
+                                preparedStatement.setString(2, gson.toJson(exportToLegacy(group.getNodes())));
+                            });
+                        }
                     }
-                }
-        );
-
-        if (success) plugin.getGroupManager().updateOrSet(group);
-        return success;
+            );
+        } finally {
+            group.getIoLock().unlock();
+        }
     }
 
     @Override
     public boolean loadGroup(String name) {
-        Group group = plugin.getGroupManager().make(name);
-        boolean success = runQuery(GROUP_SELECT,
-                preparedStatement -> preparedStatement.setString(1, name),
-                resultSet -> {
-                    if (resultSet.next()) {
-                        Map<String, Boolean> nodes = gson.fromJson(resultSet.getString("perms"), NM_TYPE);
-                        group.setNodes(nodes);
-                        return true;
+        Group group = plugin.getGroupManager().getOrMake(name);
+        group.getIoLock().lock();
+        try {
+            return runQuery(GROUP_SELECT,
+                    preparedStatement -> preparedStatement.setString(1, name),
+                    resultSet -> {
+                        if (resultSet.next()) {
+                            // Group exists, let's load.
+                            Map<String, Boolean> nodes = gson.fromJson(resultSet.getString("perms"), NM_TYPE);
+                            group.setNodes(nodes);
+                            return true;
+                        }
+                        return false;
                     }
-                    return false;
-                }
-        );
+            );
+        } finally {
+            group.getIoLock().unlock();
+        }
 
-        if (success) plugin.getGroupManager().updateOrSet(group);
-        return success;
     }
 
     @Override
     public boolean loadAllGroups() {
-        List<Group> groups = new ArrayList<>();
+        List<String> groups = new ArrayList<>();
         boolean success = runQuery(GROUP_SELECT_ALL, resultSet -> {
+            boolean b = true;
             while (resultSet.next()) {
-                Group group = plugin.getGroupManager().make(resultSet.getString("name"));
-                Map<String, Boolean> nodes = gson.fromJson(resultSet.getString("perms"), NM_TYPE);
-                group.setNodes(nodes);
-                groups.add(group);
+                String name = resultSet.getString("name");
+                if (!loadGroup(name)) {
+                    b = false;
+                }
+                groups.add(name);
             }
-            return true;
+            return b;
         });
 
         if (success) {
             GroupManager gm = plugin.getGroupManager();
-            gm.unloadAll();
-            groups.forEach(gm::set);
+            gm.getAll().values().stream()
+                    .filter(g -> !groups.contains(g.getName()))
+                    .forEach(gm::unload);
         }
         return success;
     }
 
     @Override
     public boolean saveGroup(Group group) {
-        return runQuery(GROUP_UPDATE, preparedStatement -> {
-            preparedStatement.setString(1, gson.toJson(exportToLegacy(group.getNodes())));
-            preparedStatement.setString(2, group.getName());
-        });
+        group.getIoLock().lock();
+        try {
+            return runQuery(GROUP_UPDATE, preparedStatement -> {
+                preparedStatement.setString(1, gson.toJson(exportToLegacy(group.getNodes())));
+                preparedStatement.setString(2, group.getName());
+            });
+        } finally {
+            group.getIoLock().unlock();
+        }
     }
 
     @Override
     public boolean deleteGroup(Group group) {
-        boolean success = runQuery(GROUP_DELETE, preparedStatement -> {
-            preparedStatement.setString(1, group.getName());
-        });
+        group.getIoLock().lock();
+        boolean success;
+        try {
+            success = runQuery(GROUP_DELETE, preparedStatement -> {
+                preparedStatement.setString(1, group.getName());
+            });
+        } finally {
+            group.getIoLock().unlock();
+        }
 
         if (success) plugin.getGroupManager().unload(group);
         return success;
@@ -311,77 +357,97 @@ abstract class SQLDatastore extends Datastore {
 
     @Override
     public boolean createAndLoadTrack(String name) {
-        Track track = plugin.getTrackManager().make(name);
-        boolean success = runQuery(TRACK_SELECT,
-                preparedStatement -> preparedStatement.setString(1, track.getName()),
-                resultSet -> {
-                    if (!resultSet.next()) {
-                        return runQuery(TRACK_INSERT, preparedStatement -> {
-                            preparedStatement.setString(1, track.getName());
-                            preparedStatement.setString(2, gson.toJson(track.getGroups()));
-                        });
-                    } else {
-                        track.setGroups(gson.fromJson(resultSet.getString("groups"), T_TYPE));
-                        return true;
+        Track track = plugin.getTrackManager().getOrMake(name);
+        track.getIoLock().lock();
+        try {
+            return runQuery(TRACK_SELECT,
+                    preparedStatement -> preparedStatement.setString(1, track.getName()),
+                    resultSet -> {
+                        if (resultSet.next()) {
+                            // Track exists, let's load.
+                            track.setGroups(gson.fromJson(resultSet.getString("groups"), T_TYPE));
+                            return true;
+                        } else {
+                            return runQuery(TRACK_INSERT, preparedStatement -> {
+                                preparedStatement.setString(1, track.getName());
+                                preparedStatement.setString(2, gson.toJson(track.getGroups()));
+                            });
+                        }
                     }
-                }
-        );
-
-        if (success) plugin.getTrackManager().updateOrSet(track);
-        return success;
+            );
+        } finally {
+            track.getIoLock().unlock();
+        }
     }
 
     @Override
     public boolean loadTrack(String name) {
-        Track track = plugin.getTrackManager().make(name);
-        boolean success = runQuery(TRACK_SELECT,
-                preparedStatement -> preparedStatement.setString(1, name),
-                resultSet -> {
-                    if (resultSet.next()) {
-                        track.setGroups(gson.fromJson(resultSet.getString("groups"), T_TYPE));
-                        return true;
+        Track track = plugin.getTrackManager().getOrMake(name);
+        track.getIoLock().lock();
+        try {
+            return runQuery(TRACK_SELECT,
+                    preparedStatement -> preparedStatement.setString(1, name),
+                    resultSet -> {
+                        if (resultSet.next()) {
+                            track.setGroups(gson.fromJson(resultSet.getString("groups"), T_TYPE));
+                            return true;
+                        }
+                        return false;
                     }
-                    return false;
-                }
-        );
-
-        if (success) plugin.getTrackManager().updateOrSet(track);
-        return success;
+            );
+        } finally {
+            track.getIoLock().unlock();
+        }
     }
 
     @Override
     public boolean loadAllTracks() {
-        List<Track> tracks = new ArrayList<>();
+        List<String> tracks = new ArrayList<>();
         boolean success = runQuery(TRACK_SELECT_ALL, resultSet -> {
+            boolean b = true;
             while (resultSet.next()) {
-                Track track = plugin.getTrackManager().make(resultSet.getString("name"));
-                track.setGroups(gson.fromJson(resultSet.getString("groups"), T_TYPE));
-                tracks.add(track);
+                String name = resultSet.getString("name");
+                if (!loadTrack(name)) {
+                    b = false;
+                }
+                tracks.add(name);
             }
-            return true;
+            return b;
         });
 
         if (success) {
             TrackManager tm = plugin.getTrackManager();
-            tm.unloadAll();
-            tracks.forEach(tm::set);
+            tm.getAll().values().stream()
+                    .filter(t -> !tracks.contains(t.getName()))
+                    .forEach(tm::unload);
         }
         return success;
     }
 
     @Override
     public boolean saveTrack(Track track) {
-        return runQuery(TRACK_UPDATE, preparedStatement -> {
-            preparedStatement.setString(1, gson.toJson(track.getGroups()));
-            preparedStatement.setString(2, track.getName());
-        });
+        track.getIoLock().lock();
+        try {
+            return runQuery(TRACK_UPDATE, preparedStatement -> {
+                preparedStatement.setString(1, gson.toJson(track.getGroups()));
+                preparedStatement.setString(2, track.getName());
+            });
+        } finally {
+            track.getIoLock().unlock();
+        }
     }
 
     @Override
     public boolean deleteTrack(Track track) {
-        boolean success = runQuery(TRACK_DELETE, preparedStatement -> {
-            preparedStatement.setString(1, track.getName());
-        });
+        track.getIoLock().lock();
+        boolean success;
+        try {
+            success = runQuery(TRACK_DELETE, preparedStatement -> {
+                preparedStatement.setString(1, track.getName());
+            });
+        } finally {
+            track.getIoLock().unlock();
+        }
 
         if (success) plugin.getTrackManager().unload(track);
         return success;

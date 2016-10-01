@@ -47,7 +47,7 @@ public class BukkitUserManager extends UserManager implements ContextListener<Pl
             Player player = plugin.getServer().getPlayer(plugin.getUuidCache().getExternalUUID(u.getUuid()));
             if (player != null) {
                 if (u.getLpPermissible() != null) {
-                    Injector.unInject(player);
+                    Injector.unInject(player); // TODO is this needed?
                     u.setLpPermissible(null);
                 }
 
@@ -66,18 +66,17 @@ public class BukkitUserManager extends UserManager implements ContextListener<Pl
     }
 
     @Override
-    public User make(UUID uuid) {
-        return new BukkitUser(uuid, plugin);
-    }
-
-    @Override
-    public User make(UUID uuid, String username) {
-        return new BukkitUser(uuid, username, plugin);
+    public User apply(UserIdentifier id) {
+        BukkitUser user = id.getUsername() == null ?
+                new BukkitUser(id.getUuid(), plugin) :
+                new BukkitUser(id.getUuid(), id.getUsername(), plugin);
+        giveDefaultIfNeeded(user, false);
+        return user;
     }
 
     @Override
     public void updateAllUsers() {
-        // Sometimes called async, so we need to get the players on the Bukkit thread.
+        // Sometimes called async, as we need to get the players on the Bukkit thread.
         plugin.doSync(() -> {
             Set<UUID> players = plugin.getServer().getOnlinePlayers().stream()
                     .map(p -> plugin.getUuidCache().getUUID(p.getUniqueId()))

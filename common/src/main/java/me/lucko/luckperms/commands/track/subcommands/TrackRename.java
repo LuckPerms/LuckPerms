@@ -68,7 +68,7 @@ public class TrackRename extends SubCommand<Track> {
             return CommandResult.FAILURE;
         }
 
-        plugin.getTrackManager().copy(track, newTrack);
+        newTrack.setGroups(track.getGroups());
 
         Message.RENAME_SUCCESS.send(sender, track.getName(), newTrack.getName());
         LogEntry.build().actor(sender).acted(track).action("rename " + newTrack.getName()).build().submit(plugin, sender);

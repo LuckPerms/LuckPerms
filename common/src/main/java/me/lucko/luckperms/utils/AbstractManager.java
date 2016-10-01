@@ -26,18 +26,32 @@ import com.google.common.collect.ImmutableMap;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * An abstract manager class
  * @param <I> the class used to identify each object held in this manager
  * @param <T> the class this manager is "managing"
  */
-public abstract class AbstractManager<I, T extends Identifiable<I>> {
+public abstract class AbstractManager<I, T extends Identifiable<I>> implements Function<I, T> {
     private final Map<I, T> objects = new HashMap<>();
 
     public final Map<I, T> getAll() {
+        Map<I, T> map;
         synchronized (objects) {
-            return ImmutableMap.copyOf(objects);
+            map = ImmutableMap.copyOf(objects);
+        }
+        return map;
+    }
+
+    /**
+     * Get an object by id
+     * @param id The id to search by
+     * @return a {@link T} object if the object is loaded or makes and returns a new object
+     */
+    public final T getOrMake(I id) {
+        synchronized (objects) {
+            return objects.computeIfAbsent(id, this);
         }
     }
 
@@ -51,38 +65,6 @@ public abstract class AbstractManager<I, T extends Identifiable<I>> {
             return objects.get(id);
         }
     }
-
-    /**
-     * Add a object to the loaded objects map
-     * @param t The object to add
-     */
-    public final void set(T t) {
-        preSet(t);
-        synchronized (objects) {
-            objects.put(t.getId(), t);
-        }
-    }
-
-    protected void preSet(T t) {
-
-    }
-
-    /**
-     * Updates (or sets if the object wasn't already loaded) an object in the objects map
-     * @param t The object to update or set
-     */
-    public final void updateOrSet(T t) {
-        synchronized (objects) {
-            if (!isLoaded(t.getId())) {
-                // The object isn't already loaded
-                set(t);
-            } else {
-                copy(t, objects.get(t.getId()));
-            }
-        }
-    }
-
-    public abstract void copy(T from, T to);
 
     /**
      * Check to see if a object is loaded or not
@@ -101,9 +83,11 @@ public abstract class AbstractManager<I, T extends Identifiable<I>> {
      */
     public final void unload(T t) {
         if (t != null) {
-            preUnload(t);
             synchronized (objects) {
-                objects.remove(t.getId());
+                objects.computeIfPresent(t.getId(), (i, t1) -> {
+                    preUnload(t1);
+                    return null;
+                });
             }
         }
     }
@@ -117,15 +101,9 @@ public abstract class AbstractManager<I, T extends Identifiable<I>> {
      */
     public final void unloadAll() {
         synchronized (objects) {
+            objects.values().forEach(this::preUnload);
             objects.clear();
         }
     }
-
-    /**
-     * Makes a new object
-     * @param id the id of the object
-     * @return a new {@link T} object
-     */
-    public abstract T make(I id);
 
 }

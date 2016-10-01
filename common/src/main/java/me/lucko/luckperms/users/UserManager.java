@@ -34,7 +34,7 @@ import java.util.NoSuchElementException;
 import java.util.UUID;
 
 @RequiredArgsConstructor
-public abstract class UserManager extends AbstractManager<UUID, User> {
+public abstract class UserManager extends AbstractManager<UserIdentifier, User> {
     private final LuckPermsPlugin plugin;
 
     /**
@@ -53,26 +53,15 @@ public abstract class UserManager extends AbstractManager<UUID, User> {
         }
     }
 
-    @Override
-    public void preSet(User u) {
-        giveDefaultIfNeeded(u, true);
-    }
-
-    @Override
-    public void copy(User from, User to) {
-        if (from.getPrimaryGroup() != null) {
-            // This isn't just a black user. we shouldn't override in that case.
-            to.setNodes(from.getNodes());
-            to.setPrimaryGroup(from.getPrimaryGroup());
-        }
-        to.refreshPermissions();
+    public User get(UUID uuid) {
+        return get(UserIdentifier.of(uuid, null));
     }
 
     /**
      * Set a user to the default group
      * @param user the user to give to
      */
-    public void giveDefaultIfNeeded(User user, boolean save) {
+    public boolean giveDefaultIfNeeded(User user, boolean save) {
         boolean hasGroup = false;
 
         if (user.getPrimaryGroup() != null && !user.getPrimaryGroup().isEmpty()) {
@@ -84,18 +73,22 @@ public abstract class UserManager extends AbstractManager<UUID, User> {
             }
         }
 
-        if (!hasGroup) {
-            user.setPrimaryGroup("default");
-            try {
-                user.setPermission("group.default", true);
-            } catch (ObjectAlreadyHasException ignored) {
-                ignored.printStackTrace();
-            }
-
-            if (save) {
-                plugin.getDatastore().saveUser(user, Callback.empty());
-            }
+        if (hasGroup) {
+            return false;
         }
+
+        user.setPrimaryGroup("default");
+        try {
+            user.setPermission("group.default", true);
+        } catch (ObjectAlreadyHasException ignored) {
+            ignored.printStackTrace();
+        }
+
+        if (save) {
+            plugin.getDatastore().saveUser(user, Callback.empty());
+        }
+
+        return true;
     }
 
     public boolean shouldSave(User user) {
@@ -131,14 +124,6 @@ public abstract class UserManager extends AbstractManager<UUID, User> {
      * @param user The user to be cleaned up
      */
     public abstract void cleanup(User user);
-
-    /**
-     * Makes a new {@link User} object
-     * @param uuid The UUID of the user
-     * @param username The username of the user
-     * @return a new {@link User} object
-     */
-    public abstract User make(UUID uuid, String username);
 
     /**
      * Reloads the data of all online users

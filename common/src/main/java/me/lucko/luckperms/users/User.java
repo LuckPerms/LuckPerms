@@ -40,7 +40,7 @@ import java.util.UUID;
 
 @ToString(of = {"uuid"})
 @EqualsAndHashCode(of = {"uuid"}, callSuper = false)
-public abstract class User extends PermissionHolder implements Identifiable<UUID> {
+public abstract class User extends PermissionHolder implements Identifiable<UserIdentifier> {
 
     /**
      * The users Mojang UUID
@@ -75,8 +75,8 @@ public abstract class User extends PermissionHolder implements Identifiable<UUID
     }
 
     @Override
-    public UUID getId() {
-        return uuid;
+    public UserIdentifier getId() {
+        return UserIdentifier.of(uuid, name);
     }
 
     /**

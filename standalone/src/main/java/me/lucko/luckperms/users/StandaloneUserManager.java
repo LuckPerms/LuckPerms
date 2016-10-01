@@ -24,8 +24,6 @@ package me.lucko.luckperms.users;
 
 import me.lucko.luckperms.LuckPermsPlugin;
 
-import java.util.UUID;
-
 public class StandaloneUserManager extends UserManager {
     private final LuckPermsPlugin plugin;
 
@@ -41,13 +39,12 @@ public class StandaloneUserManager extends UserManager {
     }
 
     @Override
-    public User make(UUID id) {
-        return new StandaloneUser(id, plugin);
-    }
-
-    @Override
-    public User make(UUID uuid, String username) {
-        return new StandaloneUser(uuid, username, plugin);
+    public User apply(UserIdentifier id) {
+        StandaloneUser user = id.getUsername() == null ?
+                new StandaloneUser(id.getUuid(), plugin) :
+                new StandaloneUser(id.getUuid(), id.getUsername(), plugin);
+        giveDefaultIfNeeded(user, false);
+        return user;
     }
 
     @Override

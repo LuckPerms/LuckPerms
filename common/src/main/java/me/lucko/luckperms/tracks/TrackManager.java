@@ -40,18 +40,13 @@ public class TrackManager extends AbstractManager<String, Track> {
                 .collect(Collectors.toSet());
     }
 
-    @Override
-    public void copy(Track from, Track to) {
-        to.setGroups(from.getGroups());
-    }
-
     /**
      * Makes a new track object
      * @param name The name of the track
      * @return a new {@link Track} object
      */
     @Override
-    public Track make(String name) {
+    public Track apply(String name) {
         return new Track(name);
     }
 }

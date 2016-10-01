@@ -40,6 +40,8 @@ import me.lucko.luckperms.groups.Group;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 /**
@@ -73,6 +75,9 @@ public abstract class PermissionHolder {
      */
     @Getter
     private Set<Node> transientNodes = ConcurrentHashMap.newKeySet();
+
+    @Getter
+    private final Lock ioLock = new ReentrantLock();
 
     /**
      * Returns a Set of nodes in priority order

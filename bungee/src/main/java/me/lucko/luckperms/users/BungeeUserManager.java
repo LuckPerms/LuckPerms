@@ -45,13 +45,12 @@ public class BungeeUserManager extends UserManager implements ContextListener<Pr
     }
 
     @Override
-    public User make(UUID uuid) {
-        return new BungeeUser(uuid, plugin);
-    }
-
-    @Override
-    public User make(UUID uuid, String username) {
-        return new BungeeUser(uuid, username, plugin);
+    public User apply(UserIdentifier id) {
+        BungeeUser user = id.getUsername() == null ?
+                new BungeeUser(id.getUuid(), plugin) :
+                new BungeeUser(id.getUuid(), id.getUsername(), plugin);
+        giveDefaultIfNeeded(user, false);
+        return user;
     }
 
     @Override

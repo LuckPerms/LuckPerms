@@ -26,13 +26,17 @@ import lombok.Cleanup;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.core.Node;
 import me.lucko.luckperms.groups.Group;
+import me.lucko.luckperms.groups.GroupManager;
 import me.lucko.luckperms.tracks.Track;
+import me.lucko.luckperms.tracks.TrackManager;
 import me.lucko.luckperms.users.User;
+import me.lucko.luckperms.users.UserIdentifier;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 import static me.lucko.luckperms.core.PermissionHolder.exportToLegacy;
@@ -76,96 +80,117 @@ public class YAMLDatastore extends FlatfileDatastore {
 
     @Override
     public boolean loadUser(UUID uuid, String username) {
-        User user = plugin.getUserManager().make(uuid, username);
-        boolean success = false;
+        User user = plugin.getUserManager().getOrMake(UserIdentifier.of(uuid, username));
+        user.getIoLock().lock();
+        try {
+            return call(() -> {
+                File userFile = new File(usersDir, uuid.toString() + ".yml");
+                if (userFile.exists()) {
+                    return doRead(userFile, values -> {
+                        // User exists, let's load.
+                        String name = (String) values.get("name");
+                        user.setPrimaryGroup((String) values.get("primary-group"));
+                        Map<String, Boolean> perms = (Map<String, Boolean>) values.get("perms");
+                        for (Map.Entry<String, Boolean> e : perms.entrySet()) {
+                            user.getNodes().add(Node.fromSerialisedNode(e.getKey(), e.getValue()));
+                        }
 
-        File userFile = new File(usersDir, uuid.toString() + ".yml");
-        if (userFile.exists()) {
-            final String[] name = {null};
-            success = doRead(userFile, values -> {
-                name[0] = (String) values.get("name");
-                user.setPrimaryGroup((String) values.get("primary-group"));
-                Map<String, Boolean> perms = (Map<String, Boolean>) values.get("perms");
-                for (Map.Entry<String, Boolean> e : perms.entrySet()) {
-                    user.getNodes().add(Node.fromSerialisedNode(e.getKey(), e.getValue()));
+                        boolean save = plugin.getUserManager().giveDefaultIfNeeded(user, false);
+
+                        if (user.getName().equalsIgnoreCase("null")) {
+                            user.setName(name);
+                        } else {
+                            if (!name.equals(user.getName())) {
+                                save = true;
+                            }
+                        }
+
+                        if (save) {
+                            Map<String, Object> data = new HashMap<>();
+                            data.put("uuid", user.getUuid().toString());
+                            data.put("name", user.getName());
+                            data.put("primary-group", user.getPrimaryGroup());
+                            data.put("perms", exportToLegacy(user.getNodes()));
+                            doWrite(userFile, data);
+                        }
+                        return true;
+                    });
+                } else {
+                    if (plugin.getUserManager().shouldSave(user)) {
+                        user.clearNodes();
+                        user.setPrimaryGroup(null);
+                        plugin.getUserManager().giveDefaultIfNeeded(user, false);
+                    }
+                    return true;
                 }
-                return true;
-            });
-
-            if (user.getName().equalsIgnoreCase("null")) {
-                user.setName(name[0]);
-            } else {
-                if (!name[0].equals(user.getName())) {
-                    Map<String, Object> values = new HashMap<>();
-                    values.put("uuid", user.getUuid().toString());
-                    values.put("name", user.getName());
-                    values.put("primary-group", user.getPrimaryGroup());
-                    values.put("perms", exportToLegacy(user.getNodes()));
-                    doWrite(userFile, values);
-                }
-            }
-
-        } else {
-            success = true;
+            }, false);
+        } finally {
+            user.getIoLock().unlock();
         }
-
-        if (success) plugin.getUserManager().updateOrSet(user);
-        return success;
     }
 
     @Override
     public boolean saveUser(User user) {
-        File userFile = new File(usersDir, user.getUuid().toString() + ".yml");
-        if (!plugin.getUserManager().shouldSave(user)) {
-            if (userFile.exists()) {
-                userFile.delete();
-            }
-            return true;
-        }
+        user.getIoLock().lock();
+        try {
+            return call(() -> {
+                File userFile = new File(usersDir, user.getUuid().toString() + ".yml");
+                if (!plugin.getUserManager().shouldSave(user)) {
+                    if (userFile.exists()) {
+                        userFile.delete();
+                    }
+                    return true;
+                }
 
-        if (!userFile.exists()) {
-            try {
-                userFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-                return false;
-            }
-        }
+                if (!userFile.exists()) {
+                    try {
+                        userFile.createNewFile();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        return false;
+                    }
+                }
 
-        Map<String, Object> values = new HashMap<>();
-        values.put("uuid", user.getUuid().toString());
-        values.put("name", user.getName());
-        values.put("primary-group", user.getPrimaryGroup());
-        values.put("perms", exportToLegacy(user.getNodes()));
-        return doWrite(userFile, values);
+                Map<String, Object> values = new HashMap<>();
+                values.put("uuid", user.getUuid().toString());
+                values.put("name", user.getName());
+                values.put("primary-group", user.getPrimaryGroup());
+                values.put("perms", exportToLegacy(user.getNodes()));
+                return doWrite(userFile, values);
+            }, false);
+        } finally {
+            user.getIoLock().unlock();
+        }
     }
 
     @Override
     public boolean cleanupUsers() {
-        File[] files = usersDir.listFiles((dir, name) -> name.endsWith(".yml"));
-        if (files == null) return false;
+        return call(() -> {
+            File[] files = usersDir.listFiles((dir, name1) -> name1.endsWith(".yml"));
+            if (files == null) return false;
 
-        for (File file : files) {
-            Map<String, Boolean> nodes = new HashMap<>();
-            doRead(file, values -> {
-                Map<String, Boolean> perms = (Map<String, Boolean>) values.get("perms");
-                nodes.putAll(perms);
-                return true;
-            });
+            for (File file : files) {
+                Map<String, Boolean> nodes = new HashMap<>();
+                doRead(file, values -> {
+                    Map<String, Boolean> perms = (Map<String, Boolean>) values.get("perms");
+                    nodes.putAll(perms);
+                    return true;
+                });
 
-            boolean shouldDelete = false;
-            if (nodes.size() == 1) {
-                for (Map.Entry<String, Boolean> e : nodes.entrySet()) {
-                    // There's only one
-                    shouldDelete = e.getKey().equalsIgnoreCase("group.default") && e.getValue();
+                boolean shouldDelete = false;
+                if (nodes.size() == 1) {
+                    for (Map.Entry<String, Boolean> e : nodes.entrySet()) {
+                        // There's only one
+                        shouldDelete = e.getKey().equalsIgnoreCase("group.default") && e.getValue();
+                    }
+                }
+
+                if (shouldDelete) {
+                    file.delete();
                 }
             }
-
-            if (shouldDelete) {
-                file.delete();
-            }
-        }
-        return true;
+            return true;
+        }, false);
     }
 
     @Override
@@ -180,57 +205,57 @@ public class YAMLDatastore extends FlatfileDatastore {
 
     @Override
     public boolean createAndLoadGroup(String name) {
-        Group group = plugin.getGroupManager().make(name);
+        Group group = plugin.getGroupManager().getOrMake(name);
+        group.getIoLock().lock();
+        try {
+            return call(() -> {
+                File groupFile = new File(groupsDir, name + ".yml");
+                if (groupFile.exists()) {
+                    return doRead(groupFile, values -> {
+                        Map<String, Boolean> perms = (Map<String, Boolean>) values.get("perms");
+                        for (Map.Entry<String, Boolean> e : perms.entrySet()) {
+                            group.getNodes().add(Node.fromSerialisedNode(e.getKey(), e.getValue()));
+                        }
+                        return true;
+                    });
+                } else {
+                    try {
+                        groupFile.createNewFile();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        return false;
+                    }
 
-        File groupFile = new File(groupsDir, name + ".yml");
-        if (!groupFile.exists()) {
-            try {
-                groupFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-                return false;
-            }
-
-            Map<String, Object> values = new HashMap<>();
-            values.put("name", group.getName());
-            values.put("perms", exportToLegacy(group.getNodes()));
-
-            if (!doWrite(groupFile, values)) {
-                return false;
-            }
+                    Map<String, Object> values = new HashMap<>();
+                    values.put("name", group.getName());
+                    values.put("perms", exportToLegacy(group.getNodes()));
+                    return doWrite(groupFile, values);
+                }
+            }, false);
+        } finally {
+            group.getIoLock().unlock();
         }
-
-        boolean success = doRead(groupFile, values -> {
-            Map<String, Boolean> perms = (Map<String, Boolean>) values.get("perms");
-            for (Map.Entry<String, Boolean> e : perms.entrySet()) {
-                group.getNodes().add(Node.fromSerialisedNode(e.getKey(), e.getValue()));
-            }
-            return true;
-        });
-
-        if (success) plugin.getGroupManager().updateOrSet(group);
-        return success;
     }
 
     @Override
     public boolean loadGroup(String name) {
-        Group group = plugin.getGroupManager().make(name);
+        Group group = plugin.getGroupManager().getOrMake(name);
+        group.getIoLock().lock();
+        try {
+            return call(() -> {
+                File groupFile = new File(groupsDir, name + ".yml");
+                return groupFile.exists() && doRead(groupFile, values -> {
+                    Map<String, Boolean> perms = (Map<String, Boolean>) values.get("perms");
+                    for (Map.Entry<String, Boolean> e : perms.entrySet()) {
+                        group.getNodes().add(Node.fromSerialisedNode(e.getKey(), e.getValue()));
+                    }
+                    return true;
+                });
 
-        File groupFile = new File(groupsDir, name + ".yml");
-        if (!groupFile.exists()) {
-            return false;
+            }, false);
+        } finally {
+            group.getIoLock().unlock();
         }
-
-        boolean success = doRead(groupFile, values -> {
-            Map<String, Boolean> perms = (Map<String, Boolean>) values.get("perms");
-            for (Map.Entry<String, Boolean> e : perms.entrySet()) {
-                group.getNodes().add(Node.fromSerialisedNode(e.getKey(), e.getValue()));
-            }
-            return true;
-        });
-
-        if (success) plugin.getGroupManager().updateOrSet(group);
-        return success;
     }
 
     @Override
@@ -241,89 +266,103 @@ public class YAMLDatastore extends FlatfileDatastore {
                 .map(s -> s.substring(0, s.length() - 4))
                 .collect(Collectors.toList());
 
-        plugin.getGroupManager().unloadAll();
         groups.forEach(this::loadGroup);
+
+        GroupManager gm = plugin.getGroupManager();
+        gm.getAll().values().stream()
+                .filter(g -> !groups.contains(g.getName()))
+                .forEach(gm::unload);
         return true;
     }
 
     @Override
     public boolean saveGroup(Group group) {
-        File groupFile = new File(groupsDir, group.getName() + ".yml");
-        if (!groupFile.exists()) {
-            try {
-                groupFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-                return false;
-            }
-        }
+        group.getIoLock().lock();
+        try {
+            return call(() -> {
+                File groupFile = new File(groupsDir, group.getName() + ".yml");
+                if (!groupFile.exists()) {
+                    try {
+                        groupFile.createNewFile();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        return false;
+                    }
+                }
 
-        Map<String, Object> values = new HashMap<>();
-        values.put("name", group.getName());
-        values.put("perms", exportToLegacy(group.getNodes()));
-        return doWrite(groupFile, values);
+                Map<String, Object> values = new HashMap<>();
+                values.put("name", group.getName());
+                values.put("perms", exportToLegacy(group.getNodes()));
+                return doWrite(groupFile, values);
+            }, false);
+        } finally {
+            group.getIoLock().unlock();
+        }
     }
 
     @Override
     public boolean deleteGroup(Group group) {
-        File groupFile = new File(groupsDir, group.getName() + ".yml");
-        if (groupFile.exists()) {
-            groupFile.delete();
+        group.getIoLock().lock();
+        try {
+            return call(() -> {
+                File groupFile = new File(groupsDir, group.getName() + ".yml");
+                if (groupFile.exists()) {
+                    groupFile.delete();
+                }
+                return true;
+            }, false);
+        } finally {
+            group.getIoLock().unlock();
         }
-        return true;
     }
 
     @Override
     public boolean createAndLoadTrack(String name) {
-        Track track = plugin.getTrackManager().make(name);
-        List<String> groups = new ArrayList<>();
+        Track track = plugin.getTrackManager().getOrMake(name);
+        track.getIoLock().lock();
+        try {
+            return call(() -> {
+                File trackFile = new File(tracksDir, name + ".yml");
+                if (trackFile.exists()) {
+                    return doRead(trackFile, values -> {
+                        track.setGroups((List<String>) values.get("groups"));
+                        return true;
+                    });
+                } else {
+                    try {
+                        trackFile.createNewFile();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        return false;
+                    }
 
-        File trackFile = new File(tracksDir, name + ".yml");
-        if (!trackFile.exists()) {
-            try {
-                trackFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-                return false;
-            }
+                    Map<String, Object> values = new HashMap<>();
+                    values.put("name", track.getName());
+                    values.put("groups", track.getGroups());
 
-            Map<String, Object> values = new HashMap<>();
-            values.put("name", track.getName());
-            values.put("groups", track.getGroups());
-
-            if (!doWrite(trackFile, values)) {
-                return false;
-            }
+                    return doWrite(trackFile, values);
+                }
+            }, false);
+        } finally {
+            track.getIoLock().unlock();
         }
-
-        boolean success = doRead(trackFile, values -> {
-            groups.addAll((List<String>) values.get("groups"));
-            return true;
-        });
-
-        track.setGroups(groups);
-        if (success) plugin.getTrackManager().updateOrSet(track);
-        return success;
     }
 
     @Override
     public boolean loadTrack(String name) {
-        Track track = plugin.getTrackManager().make(name);
-        List<String> groups = new ArrayList<>();
-
-        File trackFile = new File(tracksDir, name + ".yml");
-        if (!trackFile.exists()) {
-            return false;
+        Track track = plugin.getTrackManager().getOrMake(name);
+        track.getIoLock().lock();
+        try {
+            return call(() -> {
+                File trackFile = new File(tracksDir, name + ".yml");
+                return trackFile.exists() && doRead(trackFile, values -> {
+                    track.setGroups((List<String>) values.get("groups"));
+                    return true;
+                });
+            }, false);
+        } finally {
+            track.getIoLock().unlock();
         }
-
-        boolean success = doRead(trackFile, values -> {
-            groups.addAll((List<String>) values.get("groups"));
-            return true;
-        });
-
-        track.setGroups(groups);
-        if (success) plugin.getTrackManager().updateOrSet(track);
-        return success;
     }
 
     @Override
@@ -334,36 +373,63 @@ public class YAMLDatastore extends FlatfileDatastore {
                 .map(s -> s.substring(0, s.length() - 4))
                 .collect(Collectors.toList());
 
-        plugin.getTrackManager().unloadAll();
         tracks.forEach(this::loadTrack);
+
+        TrackManager tm = plugin.getTrackManager();
+        tm.getAll().values().stream()
+                .filter(t -> !tracks.contains(t.getName()))
+                .forEach(tm::unload);
         return true;
     }
 
     @Override
     public boolean saveTrack(Track track) {
-        File trackFile = new File(tracksDir, track.getName() + ".yml");
-        if (!trackFile.exists()) {
-            try {
-                trackFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-                return false;
-            }
-        }
+        track.getIoLock().lock();
+        try {
+            return call(() -> {
+                File trackFile = new File(tracksDir, track.getName() + ".yml");
+                if (!trackFile.exists()) {
+                    try {
+                        trackFile.createNewFile();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        return false;
+                    }
+                }
 
-        Map<String, Object> values = new HashMap<>();
-        values.put("name", track.getName());
-        values.put("groups", track.getGroups());
-        return doWrite(trackFile, values);
+                Map<String, Object> values = new HashMap<>();
+                values.put("name", track.getName());
+                values.put("groups", track.getGroups());
+                return doWrite(trackFile, values);
+            }, false);
+        } finally {
+            track.getIoLock().unlock();
+        }
     }
 
     @Override
     public boolean deleteTrack(Track track) {
-        File trackFile = new File(tracksDir, track.getName() + ".yml");
-        if (trackFile.exists()) {
-            trackFile.delete();
+        track.getIoLock().lock();
+        try {
+            return call(() -> {
+                File trackFile = new File(tracksDir, track.getName() + ".yml");
+                if (trackFile.exists()) {
+                    trackFile.delete();
+                }
+                return true;
+            }, false);
+        } finally {
+            track.getIoLock().unlock();
         }
-        return true;
+    }
+
+    private static <T> T call(Callable<T> c, T def) {
+        try {
+            return c.call();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return def;
+        }
     }
 
     interface ReadOperation {

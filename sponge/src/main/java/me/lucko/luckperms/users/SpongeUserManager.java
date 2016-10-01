@@ -46,13 +46,12 @@ public class SpongeUserManager extends UserManager implements ContextListener<Pl
     }
 
     @Override
-    public User make(UUID uuid) {
-        return new SpongeUser(uuid, plugin);
-    }
-
-    @Override
-    public User make(UUID uuid, String username) {
-        return new SpongeUser(uuid, username, plugin);
+    public User apply(UserIdentifier id) {
+        SpongeUser user = id.getUsername() == null ?
+                new SpongeUser(id.getUuid(), plugin) :
+                new SpongeUser(id.getUuid(), id.getUsername(), plugin);
+        giveDefaultIfNeeded(user, false);
+        return user;
     }
 
     @Override

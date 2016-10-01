@@ -39,6 +39,7 @@ import me.lucko.luckperms.storage.DatastoreConfiguration;
 import me.lucko.luckperms.tracks.Track;
 import me.lucko.luckperms.tracks.TrackManager;
 import me.lucko.luckperms.users.User;
+import me.lucko.luckperms.users.UserIdentifier;
 import org.bson.Document;
 
 import java.util.*;
@@ -140,52 +141,77 @@ public class MongoDBDatastore extends Datastore {
 
     @Override
     public boolean loadUser(UUID uuid, String username) {
-        User user = plugin.getUserManager().make(uuid, username);
-        boolean success =  call(() -> {
-            MongoCollection<Document> c = database.getCollection("users");
+        User user = plugin.getUserManager().getOrMake(UserIdentifier.of(uuid, username));
+        user.getIoLock().lock();
+        try {
+            return call(() -> {
+                MongoCollection<Document> c = database.getCollection("users");
 
-            try (MongoCursor<Document> cursor = c.find(new Document("_id", user.getUuid())).iterator()) {
-                if (cursor.hasNext()) {
-                    Document d = cursor.next();
-                    user.setPrimaryGroup(d.getString("primaryGroup"));
-                    user.setNodes(revert((Map<String, Boolean>) d.get("perms")));
+                try (MongoCursor<Document> cursor = c.find(new Document("_id", user.getUuid())).iterator()) {
+                    if (cursor.hasNext()) {
+                        // User exists, let's load.
+                        Document d = cursor.next();
+                        user.setNodes(revert((Map<String, Boolean>) d.get("perms")));
+                        user.setPrimaryGroup(d.getString("primaryGroup"));
 
-                    if (user.getName().equalsIgnoreCase("null")) {
-                        user.setName(d.getString("name"));
-                    } else {
-                        if (!d.getString("name").equals(user.getName())) {
+                        boolean save = plugin.getUserManager().giveDefaultIfNeeded(user, false);
+
+                        if (user.getName().equalsIgnoreCase("null")) {
+                            user.setName(d.getString("name"));
+                        } else {
+                            if (!d.getString("name").equals(user.getName())) {
+                                save = true;
+                            }
+                        }
+
+                        if (save) {
                             c.replaceOne(new Document("_id", user.getUuid()), fromUser(user));
+                        }
+                    } else {
+                        if (plugin.getUserManager().shouldSave(user)) {
+                            user.clearNodes();
+                            user.setPrimaryGroup(null);
+                            plugin.getUserManager().giveDefaultIfNeeded(user, false);
                         }
                     }
                 }
-            }
-            return true;
-        }, false);
-
-        if (success) plugin.getUserManager().updateOrSet(user);
-        return success;
+                return true;
+            }, false);
+        } finally {
+            user.getIoLock().unlock();
+        }
     }
 
     @Override
     public boolean saveUser(User user) {
         if (!plugin.getUserManager().shouldSave(user)) {
-            return call(() -> {
-                MongoCollection<Document> c = database.getCollection("users");
-                return c.deleteOne(new Document("_id", user.getUuid())).wasAcknowledged();
-            }, false);
+            user.getIoLock().lock();
+            try {
+                return call(() -> {
+                    MongoCollection<Document> c = database.getCollection("users");
+                    return c.deleteOne(new Document("_id", user.getUuid())).wasAcknowledged();
+                }, false);
+            } finally {
+                user.getIoLock().unlock();
+            }
         }
 
-        return call(() -> {
-            MongoCollection<Document> c = database.getCollection("users");
-            try (MongoCursor<Document> cursor = c.find(new Document("_id", user.getUuid())).iterator()) {
-                if (!cursor.hasNext()) {
-                    c.insertOne(fromUser(user));
-                } else {
-                    c.replaceOne(new Document("_id", user.getUuid()), fromUser(user));
+        user.getIoLock().lock();
+        try {
+            return call(() -> {
+                MongoCollection<Document> c = database.getCollection("users");
+                try (MongoCursor<Document> cursor = c.find(new Document("_id", user.getUuid())).iterator()) {
+                    if (!cursor.hasNext()) {
+                        c.insertOne(fromUser(user));
+                    } else {
+                        c.replaceOne(new Document("_id", user.getUuid()), fromUser(user));
+                    }
                 }
-            }
-            return true;
-        }, false);
+                return true;
+            }, false);
+        } finally {
+            user.getIoLock().unlock();
+        }
     }
 
     @Override
@@ -214,85 +240,103 @@ public class MongoDBDatastore extends Datastore {
 
     @Override
     public boolean createAndLoadGroup(String name) {
-        Group group = plugin.getGroupManager().make(name);
-        boolean success =  call(() -> {
-            MongoCollection<Document> c = database.getCollection("groups");
+        Group group = plugin.getGroupManager().getOrMake(name);
+        group.getIoLock().lock();
+        try {
+            return call(() -> {
+                MongoCollection<Document> c = database.getCollection("groups");
 
-            try (MongoCursor<Document> cursor = c.find(new Document("_id", group.getName())).iterator()) {
-                if (!cursor.hasNext()) {
-                    c.insertOne(fromGroup(group));
-                } else {
-                    Document d = cursor.next();
-                    group.setNodes(revert((Map<String, Boolean>) d.get("perms")));
+                try (MongoCursor<Document> cursor = c.find(new Document("_id", group.getName())).iterator()) {
+                    if (cursor.hasNext()) {
+                        // Group exists, let's load.
+                        Document d = cursor.next();
+                        group.setNodes(revert((Map<String, Boolean>) d.get("perms")));
+                    } else {
+                        c.insertOne(fromGroup(group));
+                    }
                 }
-            }
-            return true;
-        }, false);
-
-        if (success) plugin.getGroupManager().updateOrSet(group);
-        return success;
+                return true;
+            }, false);
+        } finally {
+            group.getIoLock().unlock();
+        }
     }
 
     @Override
     public boolean loadGroup(String name) {
-        Group group = plugin.getGroupManager().make(name);
-        boolean success = call(() -> {
-            MongoCollection<Document> c = database.getCollection("groups");
+        Group group = plugin.getGroupManager().getOrMake(name);
+        group.getIoLock().lock();
+        try {
+            return call(() -> {
+                MongoCollection<Document> c = database.getCollection("groups");
 
-            try (MongoCursor<Document> cursor = c.find(new Document("_id", group.getName())).iterator()) {
-                if (cursor.hasNext()) {
-                    Document d = cursor.next();
-                    group.setNodes(revert((Map<String, Boolean>) d.get("perms")));
-                    return true;
+                try (MongoCursor<Document> cursor = c.find(new Document("_id", group.getName())).iterator()) {
+                    if (cursor.hasNext()) {
+                        Document d = cursor.next();
+                        group.setNodes(revert((Map<String, Boolean>) d.get("perms")));
+                        return true;
+                    }
+                    return false;
                 }
-                return false;
-            }
-        }, false);
-
-        if (success) plugin.getGroupManager().updateOrSet(group);
-        return success;
+            }, false);
+        } finally {
+            group.getIoLock().unlock();
+        }
     }
 
     @Override
     public boolean loadAllGroups() {
-        List<Group> groups = new ArrayList<>();
+        List<String> groups = new ArrayList<>();
         boolean success = call(() -> {
             MongoCollection<Document> c = database.getCollection("groups");
 
+            boolean b = true;
             try (MongoCursor<Document> cursor = c.find().iterator()) {
                 while (cursor.hasNext()) {
-                    Document d = cursor.next();
-                    Group group = plugin.getGroupManager().make(d.getString("_id"));
-                    group.setNodes(revert((Map<String, Boolean>) d.get("perms")));
-                    groups.add(group);
+                    String name = cursor.next().getString("_id");
+                    if (!loadGroup(name)) {
+                        b = false;
+                    }
+                    groups.add(name);
                 }
             }
-
-            return true;
+            return b;
         }, false);
 
         if (success) {
             GroupManager gm = plugin.getGroupManager();
-            gm.unloadAll();
-            groups.forEach(gm::set);
+            gm.getAll().values().stream()
+                    .filter(g -> !groups.contains(g.getName()))
+                    .forEach(gm::unload);
         }
         return success;
     }
 
     @Override
     public boolean saveGroup(Group group) {
-        return call(() -> {
-            MongoCollection<Document> c = database.getCollection("groups");
-            return c.replaceOne(new Document("_id", group.getName()), fromGroup(group)).wasAcknowledged();
-        }, false);
+        group.getIoLock().lock();
+        try {
+            return call(() -> {
+                MongoCollection<Document> c = database.getCollection("groups");
+                return c.replaceOne(new Document("_id", group.getName()), fromGroup(group)).wasAcknowledged();
+            }, false);
+        } finally {
+            group.getIoLock().unlock();
+        }
     }
 
     @Override
     public boolean deleteGroup(Group group) {
-        boolean success = call(() -> {
-            MongoCollection<Document> c = database.getCollection("groups");
-            return c.deleteOne(new Document("_id", group.getName())).wasAcknowledged();
-        }, false);
+        group.getIoLock().lock();
+        boolean success;
+        try {
+            success = call(() -> {
+                MongoCollection<Document> c = database.getCollection("groups");
+                return c.deleteOne(new Document("_id", group.getName())).wasAcknowledged();
+            }, false);
+        } finally {
+            group.getIoLock().unlock();
+        }
 
         if (success) plugin.getGroupManager().unload(group);
         return success;
@@ -300,85 +344,102 @@ public class MongoDBDatastore extends Datastore {
 
     @Override
     public boolean createAndLoadTrack(String name) {
-        Track track = plugin.getTrackManager().make(name);
-        boolean success =  call(() -> {
-            MongoCollection<Document> c = database.getCollection("tracks");
+        Track track = plugin.getTrackManager().getOrMake(name);
+        track.getIoLock().lock();
+        try {
+            return call(() -> {
+                MongoCollection<Document> c = database.getCollection("tracks");
 
-            try (MongoCursor<Document> cursor = c.find(new Document("_id", track.getName())).iterator()) {
-                if (!cursor.hasNext()) {
-                    c.insertOne(fromTrack(track));
-                } else {
-                    Document d = cursor.next();
-                    track.setGroups((List<String>) d.get("groups"));
+                try (MongoCursor<Document> cursor = c.find(new Document("_id", track.getName())).iterator()) {
+                    if (!cursor.hasNext()) {
+                        c.insertOne(fromTrack(track));
+                    } else {
+                        Document d = cursor.next();
+                        track.setGroups((List<String>) d.get("groups"));
+                    }
                 }
-            }
-            return true;
-        }, false);
-
-        if (success) plugin.getTrackManager().updateOrSet(track);
-        return success;
+                return true;
+            }, false);
+        } finally {
+            track.getIoLock().unlock();
+        }
     }
 
     @Override
     public boolean loadTrack(String name) {
-        Track track = plugin.getTrackManager().make(name);
-        boolean success = call(() -> {
-            MongoCollection<Document> c = database.getCollection("tracks");
+        Track track = plugin.getTrackManager().getOrMake(name);
+        track.getIoLock().lock();
+        try {
+            return call(() -> {
+                MongoCollection<Document> c = database.getCollection("tracks");
 
-            try (MongoCursor<Document> cursor = c.find(new Document("_id", track.getName())).iterator()) {
-                if (cursor.hasNext()) {
-                    Document d = cursor.next();
-                    track.setGroups((List<String>) d.get("groups"));
-                    return true;
+                try (MongoCursor<Document> cursor = c.find(new Document("_id", track.getName())).iterator()) {
+                    if (cursor.hasNext()) {
+                        Document d = cursor.next();
+                        track.setGroups((List<String>) d.get("groups"));
+                        return true;
+                    }
+                    return false;
                 }
-                return false;
-            }
-        }, false);
-
-        if (success) plugin.getTrackManager().updateOrSet(track);
-        return success;
+            }, false);
+        } finally {
+            track.getIoLock().unlock();
+        }
     }
 
     @Override
     public boolean loadAllTracks() {
-        List<Track> tracks = new ArrayList<>();
+        List<String> tracks = new ArrayList<>();
         boolean success = call(() -> {
             MongoCollection<Document> c = database.getCollection("tracks");
 
+            boolean b = true;
             try (MongoCursor<Document> cursor = c.find().iterator()) {
                 while (cursor.hasNext()) {
-                    Document d = cursor.next();
-                    Track track = plugin.getTrackManager().make(d.getString("_id"));
-                    track.setGroups((List<String>) d.get("groups"));
-                    tracks.add(track);
+                    String name = cursor.next().getString("_id");
+                    if (!loadTrack(name)) {
+                        b = false;
+                    }
+                    tracks.add(name);
                 }
             }
-
-            return true;
+            return b;
         }, false);
 
         if (success) {
             TrackManager tm = plugin.getTrackManager();
-            tm.unloadAll();
-            tracks.forEach(tm::set);
+            tm.getAll().values().stream()
+                    .filter(t -> !tracks.contains(t.getName()))
+                    .forEach(tm::unload);
         }
         return success;
     }
 
     @Override
     public boolean saveTrack(Track track) {
-        return call(() -> {
-            MongoCollection<Document> c = database.getCollection("tracks");
-            return c.replaceOne(new Document("_id", track.getName()), fromTrack(track)).wasAcknowledged();
-        }, false);
+        track.getIoLock().lock();
+        try {
+            return call(() -> {
+                MongoCollection<Document> c = database.getCollection("tracks");
+                return c.replaceOne(new Document("_id", track.getName()), fromTrack(track)).wasAcknowledged();
+            }, false);
+        } finally {
+            track.getIoLock().unlock();
+        }
     }
 
     @Override
     public boolean deleteTrack(Track track) {
-        boolean success = call(() -> {
-            MongoCollection<Document> c = database.getCollection("tracks");
-            return c.deleteOne(new Document("_id", track.getName())).wasAcknowledged();
-        }, false);
+        track.getIoLock().lock();
+        boolean success;
+        try {
+            success = call(() -> {
+                MongoCollection<Document> c = database.getCollection("tracks");
+                return c.deleteOne(new Document("_id", track.getName())).wasAcknowledged();
+            }, false);
+        } finally {
+            track.getIoLock().unlock();
+        }
 
         if (success) plugin.getTrackManager().unload(track);
         return success;

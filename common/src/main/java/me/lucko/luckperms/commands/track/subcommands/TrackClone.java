@@ -63,7 +63,7 @@ public class TrackClone extends SubCommand<Track> {
             return CommandResult.LOADING_ERROR;
         }
 
-        plugin.getTrackManager().copy(track, newTrack);
+        newTrack.setGroups(track.getGroups());
 
         Message.CLONE_SUCCESS.send(sender, track.getName(), newTrack.getName());
         LogEntry.build().actor(sender).acted(track).action("clone " + newTrack.getName()).build().submit(plugin, sender);

@@ -28,6 +28,7 @@ import me.lucko.luckperms.api.sponge.LuckPermsService;
 import me.lucko.luckperms.api.sponge.LuckPermsUserSubject;
 import me.lucko.luckperms.api.sponge.simple.SimpleCollection;
 import me.lucko.luckperms.users.User;
+import me.lucko.luckperms.users.UserIdentifier;
 import me.lucko.luckperms.users.UserManager;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -62,7 +63,7 @@ public class UserCollection implements SubjectCollection {
 
     private void load(UUID uuid) {
         UUID internal = service.getPlugin().getUuidCache().getUUID(uuid);
-        if (!manager.isLoaded(internal)) {
+        if (!manager.isLoaded(UserIdentifier.of(uuid, null))) {
             return;
         }
 
@@ -82,7 +83,7 @@ public class UserCollection implements SubjectCollection {
                 return users.get(u);
             }
 
-            if (manager.isLoaded(u)) {
+            if (manager.isLoaded(UserIdentifier.of(u, null))) {
                 load(u);
                 return users.get(u);
             }
@@ -108,7 +109,7 @@ public class UserCollection implements SubjectCollection {
     public boolean hasRegistered(@NonNull String id) {
         try {
             UUID u = UUID.fromString(id);
-            return manager.isLoaded(service.getPlugin().getUuidCache().getUUID(u));
+            return manager.isLoaded(UserIdentifier.of(service.getPlugin().getUuidCache().getUUID(u), null));
         } catch (IllegalArgumentException e) {
             User user = manager.get(id);
             return user != null;

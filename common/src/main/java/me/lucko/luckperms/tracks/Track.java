@@ -34,6 +34,8 @@ import me.lucko.luckperms.utils.Identifiable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 @ToString
 @EqualsAndHashCode(of = {"name"})
@@ -50,6 +52,9 @@ public class Track implements Identifiable<String> {
      * The groups within this track
      */
     private List<String> groups = Collections.synchronizedList(new ArrayList<>());
+
+    @Getter
+    private final Lock ioLock = new ReentrantLock();
 
     @Override
     public String getId() {

@@ -32,6 +32,7 @@ import me.lucko.luckperms.api.context.IContextCalculator;
 import me.lucko.luckperms.api.event.LPEvent;
 import me.lucko.luckperms.api.event.LPListener;
 import me.lucko.luckperms.api.implementation.internal.*;
+import me.lucko.luckperms.users.UserIdentifier;
 
 import java.util.Optional;
 import java.util.Set;
@@ -149,7 +150,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public boolean isUserLoaded(@NonNull UUID uuid) {
-        return plugin.getUserManager().isLoaded(uuid);
+        return plugin.getUserManager().isLoaded(UserIdentifier.of(uuid, null));
     }
 
     @Override

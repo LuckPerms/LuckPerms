@@ -20,23 +20,42 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.groups;
+package me.lucko.luckperms.users;
 
-import lombok.RequiredArgsConstructor;
-import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.utils.AbstractManager;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.ToString;
+import me.lucko.luckperms.utils.Identifiable;
 
-@RequiredArgsConstructor
-public class GroupManager extends AbstractManager<String, Group> {
-    private final LuckPermsPlugin plugin;
+import java.util.UUID;
 
-    /**
-     * Makes a new group object
-     * @param name The name of the group
-     * @return a new {@link Group} object
-     */
+@Getter
+@ToString
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+public class UserIdentifier implements Identifiable<UUID> {
+    public static UserIdentifier of(UUID uuid, String username) {
+        return new UserIdentifier(uuid, username);
+    }
+
+    private final UUID uuid;
+    private final String username;
+
     @Override
-    public Group apply(String name) {
-        return new Group(name, plugin);
+    public UUID getId() {
+        return getUuid();
+    }
+
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof UserIdentifier)) return false;
+        final UserIdentifier other = (UserIdentifier) o;
+        final Object thisUuid = this.getUuid();
+        final Object otherUuid = other.getUuid();
+        return thisUuid == null ? otherUuid == null : thisUuid.equals(otherUuid);
+    }
+
+    public int hashCode() {
+        return 59 + (this.getUuid() == null ? 43 : this.getUuid().hashCode());
     }
 }
