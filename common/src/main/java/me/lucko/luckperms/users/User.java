@@ -62,13 +62,13 @@ public abstract class User extends PermissionHolder implements Identifiable<User
     @Setter
     private String primaryGroup = null;
 
-    User(UUID uuid, LuckPermsPlugin plugin) {
+    public User(UUID uuid, LuckPermsPlugin plugin) {
         super(uuid.toString(), plugin);
         this.uuid = uuid;
         this.name = null;
     }
 
-    User(UUID uuid, String name, LuckPermsPlugin plugin) {
+    public User(UUID uuid, String name, LuckPermsPlugin plugin) {
         super(uuid.toString(), plugin);
         this.uuid = uuid;
         this.name = name;
