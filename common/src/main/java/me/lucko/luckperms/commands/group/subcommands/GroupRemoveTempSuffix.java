@@ -23,6 +23,7 @@
 package me.lucko.luckperms.commands.group.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
@@ -31,6 +32,7 @@ import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.utils.ArgumentChecker;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class GroupRemoveTempSuffix extends SubCommand<Group> {
@@ -57,44 +59,96 @@ public class GroupRemoveTempSuffix extends SubCommand<Group> {
             return CommandResult.INVALID_ARGS;
         }
 
-        final String node = "suffix." + priority + "." + ArgumentChecker.escapeCharacters(suffix);
+        if (suffix.equalsIgnoreCase("null")) {
+            String server = null;
+            String world = null;
 
-        try {
             if (args.size() >= 3) {
-                final String server = args.get(2).toLowerCase();
+                server = args.get(2).toLowerCase();
                 if (ArgumentChecker.checkServer(server)) {
                     Message.SERVER_INVALID_ENTRY.send(sender);
                     return CommandResult.INVALID_ARGS;
                 }
 
-                if (args.size() == 3) {
-                    group.unsetPermission(node, server, true);
-                    Message.REMOVE_TEMP_SUFFIX_SERVER_SUCCESS.send(sender, group.getDisplayName(), suffix, priority, server);
-                    LogEntry.build().actor(sender).acted(group)
-                            .action("removetempsuffix " + priority + " " + args.get(1) + " " + server)
-                            .build().submit(plugin, sender);
+                if (args.size() != 3) {
+                    world = args.get(3).toLowerCase();
+                }
+            }
+
+            List<Node> toRemove = new ArrayList<>();
+            for (Node node : group.getNodes()) {
+                if (!node.isSuffix()) continue;
+                if (node.getSuffix().getKey() != priority) continue;
+                if (node.isPermanent()) continue;
+
+                if (node.getServer().isPresent()) {
+                    if (server == null) continue;
+                    if (!node.getServer().get().equalsIgnoreCase(server)) continue;
                 } else {
-                    final String world = args.get(3).toLowerCase();
-                    group.unsetPermission(node, server, world, true);
-                    Message.REMOVE_TEMP_SUFFIX_SERVER_WORLD_SUCCESS.send(sender, group.getDisplayName(), suffix, priority, server, world);
+                    if (server != null) continue;
+                }
+
+                if (node.getWorld().isPresent()) {
+                    if (world == null) continue;
+                    if (!node.getWorld().get().equalsIgnoreCase(world)) continue;
+                } else {
+                    if (world != null) continue;
+                }
+
+                toRemove.add(node);
+            }
+
+            toRemove.forEach(n -> {
+                try {
+                    group.unsetPermission(n);
+                } catch (ObjectLacksException ignored) {}
+            });
+
+            Message.BULK_CHANGE_SUCCESS.send(sender, toRemove.size());
+            save(group, sender, plugin);
+            return CommandResult.SUCCESS;
+
+        } else {
+            
+            final String node = "suffix." + priority + "." + ArgumentChecker.escapeCharacters(suffix);
+
+            try {
+                if (args.size() >= 3) {
+                    final String server = args.get(2).toLowerCase();
+                    if (ArgumentChecker.checkServer(server)) {
+                        Message.SERVER_INVALID_ENTRY.send(sender);
+                        return CommandResult.INVALID_ARGS;
+                    }
+
+                    if (args.size() == 3) {
+                        group.unsetPermission(node, server, true);
+                        Message.REMOVE_TEMP_SUFFIX_SERVER_SUCCESS.send(sender, group.getDisplayName(), suffix, priority, server);
+                        LogEntry.build().actor(sender).acted(group)
+                                .action("removetempsuffix " + priority + " " + args.get(1) + " " + server)
+                                .build().submit(plugin, sender);
+                    } else {
+                        final String world = args.get(3).toLowerCase();
+                        group.unsetPermission(node, server, world, true);
+                        Message.REMOVE_TEMP_SUFFIX_SERVER_WORLD_SUCCESS.send(sender, group.getDisplayName(), suffix, priority, server, world);
+                        LogEntry.build().actor(sender).acted(group)
+                                .action("removetempsuffix " + priority + " " + args.get(1) + " " + server + " " + world)
+                                .build().submit(plugin, sender);
+                    }
+
+                } else {
+                    group.unsetPermission(node, true);
+                    Message.REMOVE_TEMP_SUFFIX_SUCCESS.send(sender, group.getDisplayName(), suffix, priority);
                     LogEntry.build().actor(sender).acted(group)
-                            .action("removetempsuffix " + priority + " " + args.get(1) + " " + server + " " + world)
+                            .action("removetempsuffix " + priority + " " + args.get(1))
                             .build().submit(plugin, sender);
                 }
 
-            } else {
-                group.unsetPermission(node, true);
-                Message.REMOVE_TEMP_SUFFIX_SUCCESS.send(sender, group.getDisplayName(), suffix, priority);
-                LogEntry.build().actor(sender).acted(group)
-                        .action("removetempsuffix " + priority + " " + args.get(1))
-                        .build().submit(plugin, sender);
+                save(group, sender, plugin);
+                return CommandResult.SUCCESS;
+            } catch (ObjectLacksException e) {
+                Message.DOES_NOT_HAVE_SUFFIX.send(sender, group.getDisplayName());
+                return CommandResult.STATE_ERROR;
             }
-
-            save(group, sender, plugin);
-            return CommandResult.SUCCESS;
-        } catch (ObjectLacksException e) {
-            Message.DOES_NOT_HAVE_SUFFIX.send(sender, group.getDisplayName());
-            return CommandResult.STATE_ERROR;
         }
     }
 }
