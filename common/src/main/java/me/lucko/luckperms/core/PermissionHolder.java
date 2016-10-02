@@ -111,31 +111,28 @@ public abstract class PermissionHolder {
      * @return true if permissions had expired and were removed
      */
     public boolean auditTemporaryPermissions() {
-        boolean work = false;
+        final boolean[] work = {false};
+        final PermissionHolder instance = this;
 
-        Iterator<Node> iterator = nodes.iterator();
-        while (iterator.hasNext()) {
-            Node element = iterator.next();
-            if (element.hasExpired()) {
-                iterator.remove();
-
-                work = true;
-                plugin.getApiProvider().fireEventAsync(new PermissionNodeExpireEvent(new PermissionHolderLink(this), element));
+        nodes.removeIf(node -> {
+            if (node.hasExpired()) {
+                work[0] = true;
+                plugin.getApiProvider().fireEventAsync(new PermissionNodeExpireEvent(new PermissionHolderLink(instance), node));
+                return true;
             }
-        }
+            return false;
+        });
 
-        Iterator<Node> iterator2 = transientNodes.iterator();
-        while (iterator2.hasNext()) {
-            Node element = iterator2.next();
-            if (element.hasExpired()) {
-                iterator2.remove();
-
-                work = true;
-                plugin.getApiProvider().fireEventAsync(new PermissionNodeExpireEvent(new PermissionHolderLink(this), element));
+        transientNodes.removeIf(node -> {
+            if (node.hasExpired()) {
+                work[0] = true;
+                plugin.getApiProvider().fireEventAsync(new PermissionNodeExpireEvent(new PermissionHolderLink(instance), node));
+                return true;
             }
-        }
+            return false;
+        });
 
-        return work;
+        return work[0];
     }
 
     /**
@@ -163,25 +160,11 @@ public abstract class PermissionHolder {
         contexts.remove("server");
         contexts.remove("world");
 
-        Iterator<Node> iterator = parents.iterator();
-        while (iterator.hasNext()) {
-            Node node = iterator.next();
-
-            if (!node.shouldApplyOnServer(server, context.isApplyGlobalGroups(), plugin.getConfiguration().isApplyingRegex())) {
-                iterator.remove();
-                continue;
-            }
-
-            if (!node.shouldApplyOnWorld(world, context.isApplyGlobalWorldGroups(), plugin.getConfiguration().isApplyingRegex())) {
-                iterator.remove();
-                continue;
-            }
-
-            if (!node.shouldApplyWithContext(contexts, false)) {
-                iterator.remove();
-                continue;
-            }
-        }
+        parents.removeIf(node ->
+                !node.shouldApplyOnServer(server, context.isApplyGlobalGroups(), plugin.getConfiguration().isApplyingRegex()) ||
+                !node.shouldApplyOnWorld(world, context.isApplyGlobalWorldGroups(), plugin.getConfiguration().isApplyingRegex()) ||
+                !node.shouldApplyWithContext(contexts, false)
+        );
 
         for (Node parent : parents) {
             Group group = plugin.getGroupManager().get(parent.getGroupName());
@@ -488,13 +471,7 @@ public abstract class PermissionHolder {
             throw new ObjectLacksException();
         }
 
-        Iterator<Node> iterator = nodes.iterator();
-        while (iterator.hasNext()) {
-            Node entry = iterator.next();
-            if (entry.almostEquals(node)) {
-                iterator.remove();
-            }
-        }
+        nodes.removeIf(e -> e.almostEquals(node));
 
         if (node.isGroupNode()) {
             plugin.getApiProvider().fireEventAsync(new GroupRemoveEvent(new PermissionHolderLink(this),
@@ -514,13 +491,7 @@ public abstract class PermissionHolder {
             throw new ObjectLacksException();
         }
 
-        Iterator<Node> iterator = transientNodes.iterator();
-        while (iterator.hasNext()) {
-            Node entry = iterator.next();
-            if (entry.almostEquals(node)) {
-                iterator.remove();
-            }
-        }
+        transientNodes.removeIf(e -> e.almostEquals(node));
 
         if (node.isGroupNode()) {
             plugin.getApiProvider().fireEventAsync(new GroupRemoveEvent(new PermissionHolderLink(this),
