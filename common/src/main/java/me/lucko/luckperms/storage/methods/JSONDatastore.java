@@ -79,7 +79,6 @@ public class JSONDatastore extends FlatfileDatastore {
     public boolean loadUser(UUID uuid, String username) {
         User user = plugin.getUserManager().getOrMake(UserIdentifier.of(uuid, username));
         user.getIoLock().lock();
-        plugin.getLog().info("#loadUser for: " + user.getName());
         try {
             return call(() -> {
                 File userFile = new File(usersDir, uuid.toString() + ".json");
@@ -140,7 +139,6 @@ public class JSONDatastore extends FlatfileDatastore {
                 }
             }, false);
         } finally {
-            plugin.getLog().info("#loadUser finished for: " + user.getName());
             user.getIoLock().unlock();
         }
     }
@@ -148,7 +146,6 @@ public class JSONDatastore extends FlatfileDatastore {
     @Override
     public boolean saveUser(User user) {
         user.getIoLock().lock();
-        plugin.getLog().info("#saveUser for: " + user.getName());
         try {
             return call(() -> {
                 File userFile = new File(usersDir, user.getUuid().toString() + ".json");
@@ -176,7 +173,6 @@ public class JSONDatastore extends FlatfileDatastore {
                     writer.name("perms");
                     writer.beginObject();
                     for (Map.Entry<String, Boolean> e : exportToLegacy(user.getNodes()).entrySet()) {
-                        plugin.getLog().info("entry: " + e.toString());
                         writer.name(e.getKey()).value(e.getValue().booleanValue());
                     }
                     writer.endObject();
@@ -185,7 +181,6 @@ public class JSONDatastore extends FlatfileDatastore {
                 });
             }, false);
         } finally {
-            plugin.getLog().info("#saveUser ended for: " + user.getName());
             user.getIoLock().unlock();
         }
     }

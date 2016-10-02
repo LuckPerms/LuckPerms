@@ -234,6 +234,7 @@ public class VaultPermissionHook extends Permission implements Runnable {
 
     @Override
     public boolean playerAddGroup(String world, @NonNull String player, @NonNull String groupName) {
+        log("Adding player " + player + " to group: '" + groupName + "' on world " + world + ", server " + server);
         final User user = plugin.getUserManager().get(player);
         if (user == null) return false;
 
@@ -241,7 +242,6 @@ public class VaultPermissionHook extends Permission implements Runnable {
         if (group == null) return false;
 
         scheduleTask(() -> {
-            log("Adding player " + player + " to group: '" + groupName + "' on world " + world + ", server " + server); // todo move
             try {
                 if (world != null && !world.equals("")) {
                     user.addGroup(group, server, world);
@@ -256,6 +256,7 @@ public class VaultPermissionHook extends Permission implements Runnable {
 
     @Override
     public boolean playerRemoveGroup(String world, @NonNull String player, @NonNull String groupName) {
+        log("Removing player " + player + " from group: '" + groupName + "' on world " + world + ", server " + server);
         final User user = plugin.getUserManager().get(player);
         if (user == null) return false;
 
@@ -263,8 +264,6 @@ public class VaultPermissionHook extends Permission implements Runnable {
         if (group == null) return false;
 
         scheduleTask(() -> {
-            log("Removing player " + player + " from group: '" + groupName + "' on world " + world + ", server " + server); // todo move
-            plugin.getLog().info("before: " + user.getNodes().toString());
             try {
                 if (world != null && !world.equals("")) {
                     user.removeGroup(group, server, world);
@@ -272,7 +271,6 @@ public class VaultPermissionHook extends Permission implements Runnable {
                     user.removeGroup(group, server);
                 }
             } catch (ObjectLacksException ignored) {}
-            plugin.getLog().info("after: " + user.getNodes().toString());
             save(user);
         });
         return true;

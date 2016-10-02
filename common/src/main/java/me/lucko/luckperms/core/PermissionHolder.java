@@ -658,11 +658,11 @@ public abstract class PermissionHolder {
     }
 
     public static Map<String, Boolean> exportToLegacy(Set<Node> nodes) {
-        ImmutableMap.Builder<String, Boolean> m = ImmutableMap.builder();
+        Map<String, Boolean> m = new HashMap<>();
         for (Node node : nodes) {
             m.put(node.toSerializedNode(), node.getValue());
         }
-        return m.build();
+        return m;
     }
 
     private static Node.Builder buildNode(String permission) {
