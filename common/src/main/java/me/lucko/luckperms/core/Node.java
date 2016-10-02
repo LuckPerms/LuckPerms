@@ -38,8 +38,8 @@ import java.util.stream.IntStream;
  * An immutable permission node
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
-@ToString
-@EqualsAndHashCode
+@ToString(exclude = {"isPrefix", "isSuffix", "isMeta"})
+@EqualsAndHashCode(exclude = {"isPrefix", "isSuffix", "isMeta"})
 public class Node implements me.lucko.luckperms.api.Node {
     private static final Pattern PREFIX_PATTERN = Pattern.compile("(?i)prefix\\.-?\\d+\\..*");
     private static final Pattern SUFFIX_PATTERN = Pattern.compile("(?i)suffix\\.-?\\d+\\..*");
