@@ -22,6 +22,8 @@
 
 package me.lucko.luckperms.core;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -37,11 +39,13 @@ import me.lucko.luckperms.contexts.Contexts;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.groups.Group;
+import me.lucko.luckperms.utils.Cache;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -64,46 +68,138 @@ public abstract class PermissionHolder {
     @Getter(AccessLevel.PROTECTED)
     private final LuckPermsPlugin plugin;
 
-    /**
-     * The user/group's permissions
-     */
-    @Getter
-    private Set<Node> nodes = ConcurrentHashMap.newKeySet();
+    private final Set<Node> nodes = new HashSet<>();
+    private final Set<Node> transientNodes = new HashSet<>();
 
-    /**
-     * The user/group's transient permissions
-     */
-    @Getter
-    private Set<Node> transientNodes = ConcurrentHashMap.newKeySet();
+    private Cache<SortedSet<LocalizedNode>> cache = new Cache<>();
+    private Cache<SortedSet<LocalizedNode>> mergedCache = new Cache<>();
+    private Cache<ImmutableSet<Node>> enduringCache = new Cache<>();
+    private Cache<ImmutableSet<Node>> transientCache = new Cache<>();
 
     @Getter
     private final Lock ioLock = new ReentrantLock();
 
+    private void invalidateCache(boolean enduring) {
+        if (enduring) {
+            enduringCache.invalidate();
+        } else {
+            transientCache.invalidate();
+        }
+        cache.invalidate();
+        mergedCache.invalidate();
+    }
+
+    public Set<Node> getNodes() {
+        synchronized (nodes) {
+            return enduringCache.get(() -> ImmutableSet.copyOf(nodes));
+        }
+    }
+
+    public Set<Node> getTransientNodes() {
+        synchronized (transientNodes) {
+            return transientCache.get(() -> ImmutableSet.copyOf(transientNodes));
+        }
+    }
+
+    public void setNodes(Set<Node> nodes) {
+        synchronized (this.nodes) {
+            if (!this.nodes.equals(nodes)) {
+                invalidateCache(true);
+            }
+
+            this.nodes.clear();
+            this.nodes.addAll(nodes);
+        }
+
+        auditTemporaryPermissions();
+    }
+
+    public void setTransientNodes(Set<Node> nodes) {
+        synchronized (this.transientNodes) {
+            if (!this.transientNodes.equals(nodes)) {
+                invalidateCache(false);
+            }
+
+            this.transientNodes.clear();
+            this.transientNodes.addAll(nodes);
+        }
+
+        auditTemporaryPermissions();
+    }
+
+    @Deprecated
+    public void setNodes(Map<String, Boolean> nodes) {
+        synchronized (this.nodes) {
+            if (!this.nodes.equals(nodes)) {
+                invalidateCache(true);
+            }
+
+            this.nodes.clear();
+            this.nodes.addAll(nodes.entrySet().stream()
+                    .map(e -> me.lucko.luckperms.core.Node.fromSerialisedNode(e.getKey(), e.getValue()))
+                    .collect(Collectors.toList()));
+        }
+
+        auditTemporaryPermissions();
+    }
+
+    public void addNodeUnchecked(Node node) {
+        synchronized (nodes) {
+            nodes.add(node);
+            invalidateCache(true);
+        }
+    }
+
     /**
-     * Returns a Set of nodes in priority order
+     * Clear all of the holders permission nodes
+     */
+    public void clearNodes() {
+        synchronized (nodes) {
+            nodes.clear();
+            invalidateCache(true);
+        }
+    }
+
+    public void clearTransientNodes() {
+        synchronized (transientNodes) {
+            transientNodes.clear();
+            invalidateCache(false);
+        }
+    }
+
+    /**
+     * Combines and returns this holders nodes in a priority order.
      * @return the holders transient and permanent nodes
      */
     public SortedSet<LocalizedNode> getPermissions(boolean mergeTemp) {
-        // Returns no duplicate nodes. as in, nodes with the same value.
+        Supplier<SortedSet<LocalizedNode>> supplier = () -> {
+            TreeSet<LocalizedNode> combined = new TreeSet<>(PriorityComparator.reverse());
 
-        TreeSet<LocalizedNode> combined = new TreeSet<>(PriorityComparator.reverse());
-        nodes.stream().map(n -> LocalizedNode.of(n, getObjectName())).forEach(combined::add);
-        transientNodes.stream().map(n -> LocalizedNode.of(n, getObjectName())).forEach(combined::add);
+            getNodes().stream()
+                    .map(n -> LocalizedNode.of(n, getObjectName()))
+                    .forEach(combined::add);
 
-        TreeSet<LocalizedNode> permissions = new TreeSet<>(PriorityComparator.reverse());
+            getTransientNodes().stream()
+                    .map(n -> LocalizedNode.of(n, getObjectName()))
+                    .forEach(combined::add);
 
-        combined:
-        for (LocalizedNode node : combined) {
-            for (LocalizedNode other : permissions) {
-                if (mergeTemp ? node.getNode().equalsIgnoringValueOrTemp(other.getNode()) : node.getNode().almostEquals(other.getNode())) {
-                    continue combined;
+            TreeSet<LocalizedNode> permissions = new TreeSet<>(PriorityComparator.reverse());
+
+            combined:
+            for (LocalizedNode node : combined) {
+                for (LocalizedNode other : permissions) {
+                    if (mergeTemp ? node.getNode().equalsIgnoringValueOrTemp(other.getNode()) : node.getNode().almostEquals(other.getNode())) {
+                        continue combined;
+                    }
                 }
+
+                permissions.add(node);
             }
 
-            permissions.add(node);
-        }
+            return permissions;
+        };
 
-        return permissions;
+        return mergeTemp ? mergedCache.get(supplier) : cache.get(supplier);
     }
 
     /**
@@ -111,33 +207,44 @@ public abstract class PermissionHolder {
      * @return true if permissions had expired and were removed
      */
     public boolean auditTemporaryPermissions() {
-        final boolean[] work = {false};
+        boolean work = false;
         final PermissionHolder instance = this;
 
-        nodes.removeIf(node -> {
-            if (node.hasExpired()) {
-                work[0] = true;
-                plugin.getApiProvider().fireEventAsync(new PermissionNodeExpireEvent(new PermissionHolderLink(instance), node));
-                return true;
+        synchronized (nodes) {
+            boolean w = nodes.removeIf(node -> {
+                if (node.hasExpired()) {
+                    plugin.getApiProvider().fireEventAsync(new PermissionNodeExpireEvent(new PermissionHolderLink(instance), node));
+                    return true;
+                }
+                return false;
+            });
+            if (w) {
+                invalidateCache(true);
+                work = true;
             }
-            return false;
-        });
+        }
 
-        transientNodes.removeIf(node -> {
-            if (node.hasExpired()) {
-                work[0] = true;
-                plugin.getApiProvider().fireEventAsync(new PermissionNodeExpireEvent(new PermissionHolderLink(instance), node));
-                return true;
+        synchronized (transientNodes) {
+            boolean w = transientNodes.removeIf(node -> {
+                if (node.hasExpired()) {
+                    plugin.getApiProvider().fireEventAsync(new PermissionNodeExpireEvent(new PermissionHolderLink(instance), node));
+                    return true;
+                }
+                return false;
+            });
+            if (w) {
+                invalidateCache(false);
+                work = true;
             }
-            return false;
-        });
+        }
 
-        return work[0];
+        return work;
     }
 
     /**
-     * Gets all of the nodes that this holder has and inherits
+     * Resolves inherited nodes and returns them
      * @param excludedGroups a list of groups to exclude
+     * @param context context to decide if groups should be applied
      * @return a set of nodes
      */
     public SortedSet<LocalizedNode> getAllNodes(List<String> excludedGroups, Contexts context) {
@@ -197,7 +304,6 @@ public abstract class PermissionHolder {
      * @return a map of permissions
      */
     public Set<LocalizedNode> getAllNodesFiltered(Contexts context) {
-        Set<LocalizedNode> perms = ConcurrentHashMap.newKeySet();
         SortedSet<LocalizedNode> allNodes;
 
         if (context.isApplyGroups()) {
@@ -212,24 +318,19 @@ public abstract class PermissionHolder {
         contexts.remove("server");
         contexts.remove("world");
 
+        allNodes.removeIf(node ->
+                !node.shouldApplyOnServer(server, context.isIncludeGlobal(), plugin.getConfiguration().isApplyingRegex()) ||
+                !node.shouldApplyOnWorld(world, context.isIncludeGlobalWorld(), plugin.getConfiguration().isApplyingRegex()) ||
+                !node.shouldApplyWithContext(contexts, false)
+        );
+
+        Set<LocalizedNode> perms = ConcurrentHashMap.newKeySet();
+
         all:
         for (LocalizedNode ln : allNodes) {
-            Node node = ln.getNode();
-            if (!node.shouldApplyOnServer(server, context.isIncludeGlobal(), plugin.getConfiguration().isApplyingRegex())) {
-                continue;
-            }
-
-            if (!node.shouldApplyOnWorld(world, context.isIncludeGlobalWorld(), plugin.getConfiguration().isApplyingRegex())) {
-                continue;
-            }
-
-            if (!node.shouldApplyWithContext(contexts, false)) {
-                continue;
-            }
-
             // Force higher priority nodes to override
             for (LocalizedNode alreadyIn : perms) {
-                if (node.getPermission().equals(alreadyIn.getNode().getPermission())) {
+                if (ln.getNode().getPermission().equals(alreadyIn.getNode().getPermission())) {
                     continue all;
                 }
             }
@@ -278,43 +379,7 @@ public abstract class PermissionHolder {
             }
         }
 
-        return Collections.unmodifiableMap(perms);
-    }
-
-    public void setNodes(Set<Node> nodes) {
-        this.nodes.clear();
-        this.nodes.addAll(nodes);
-        auditTemporaryPermissions();
-    }
-
-    public void setTransiestNodes(Set<Node> nodes) {
-        this.transientNodes.clear();
-        this.transientNodes.addAll(nodes);
-        auditTemporaryPermissions();
-    }
-
-    public static Map<String, Boolean> exportToLegacy(Set<Node> nodes) {
-        Map<String, Boolean> m = new HashMap<>();
-        for (Node node : nodes) {
-            m.put(node.toSerializedNode(), node.getValue());
-        }
-        return Collections.unmodifiableMap(m);
-    }
-
-    // Convenience method
-    private static Node.Builder buildNode(String permission) {
-        return new me.lucko.luckperms.core.Node.Builder(permission);
-    }
-
-    @Deprecated
-    public void setNodes(Map<String, Boolean> nodes) {
-        this.nodes.clear();
-
-        this.nodes.addAll(nodes.entrySet().stream()
-                .map(e -> me.lucko.luckperms.core.Node.fromSerialisedNode(e.getKey(), e.getValue()))
-                .collect(Collectors.toList()));
-
-        auditTemporaryPermissions();
+        return ImmutableMap.copyOf(perms);
     }
 
     /**
@@ -324,7 +389,7 @@ public abstract class PermissionHolder {
      * @return a tristate
      */
     public Tristate hasPermission(Node node, boolean t) {
-        for (Node n : t ? transientNodes : nodes) {
+        for (Node n : t ? getTransientNodes() : getNodes()) {
             if (n.almostEquals(node)) {
                 return n.getTristate();
             }
@@ -419,7 +484,11 @@ public abstract class PermissionHolder {
             throw new ObjectAlreadyHasException();
         }
 
-        nodes.add(node);
+        synchronized (nodes) {
+            nodes.add(node);
+            invalidateCache(true);
+        }
+
         plugin.getApiProvider().fireEventAsync(new PermissionNodeSetEvent(new PermissionHolderLink(this), node));
     }
 
@@ -433,7 +502,11 @@ public abstract class PermissionHolder {
             throw new ObjectAlreadyHasException();
         }
 
-        transientNodes.add(node);
+        synchronized (transientNodes) {
+            transientNodes.add(node);
+            invalidateCache(false);
+        }
+
         plugin.getApiProvider().fireEventAsync(new PermissionNodeSetEvent(new PermissionHolderLink(this), node));
     }
 
@@ -471,7 +544,10 @@ public abstract class PermissionHolder {
             throw new ObjectLacksException();
         }
 
-        nodes.removeIf(e -> e.almostEquals(node));
+        synchronized (nodes) {
+            nodes.removeIf(e -> e.almostEquals(node));
+            invalidateCache(true);
+        }
 
         if (node.isGroupNode()) {
             plugin.getApiProvider().fireEventAsync(new GroupRemoveEvent(new PermissionHolderLink(this),
@@ -491,7 +567,10 @@ public abstract class PermissionHolder {
             throw new ObjectLacksException();
         }
 
-        transientNodes.removeIf(e -> e.almostEquals(node));
+        synchronized (transientNodes) {
+            transientNodes.removeIf(e -> e.almostEquals(node));
+            invalidateCache(false);
+        }
 
         if (node.isGroupNode()) {
             plugin.getApiProvider().fireEventAsync(new GroupRemoveEvent(new PermissionHolderLink(this),
@@ -578,43 +657,15 @@ public abstract class PermissionHolder {
                 .collect(Collectors.toList());
     }
 
-    /*
-     * Don't use these methods, only here for compat reasons
-     */
-
-    @Deprecated
-    public Map<String, Boolean> getLocalPermissions(String server, String world, List<String> excludedGroups, List<String> possibleNodes) {
-        Map<String, String> context = new HashMap<>();
-        if (server != null && !server.equals("")) {
-            context.put("server", server);
+    public static Map<String, Boolean> exportToLegacy(Set<Node> nodes) {
+        ImmutableMap.Builder<String, Boolean> m = ImmutableMap.builder();
+        for (Node node : nodes) {
+            m.put(node.toSerializedNode(), node.getValue());
         }
-        if (world != null && !world.equals("")) {
-            context.put("world", world);
-        }
-        return exportNodes(new Contexts(context, plugin.getConfiguration().isIncludingGlobalPerms(), true, true, true, true), Collections.emptyList(), false);
+        return m.build();
     }
 
-    @Deprecated
-    public Map<String, Boolean> getLocalPermissions(String server, String world, List<String> excludedGroups) {
-        Map<String, String> context = new HashMap<>();
-        if (server != null && !server.equals("")) {
-            context.put("server", server);
-        }
-        if (world != null && !world.equals("")) {
-            context.put("world", world);
-        }
-        return exportNodes(new Contexts(context, plugin.getConfiguration().isIncludingGlobalPerms(), true, true, true, true), Collections.emptyList(), false);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Deprecated
-    public Map<String, Boolean> getLocalPermissions(String server, List<String> excludedGroups, List<String> possibleNodes) {
-        return getLocalPermissions(server, null, excludedGroups, possibleNodes);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Deprecated
-    public Map<String, Boolean> getLocalPermissions(String server, List<String> excludedGroups) {
-        return getLocalPermissions(server, null, excludedGroups, null);
+    private static Node.Builder buildNode(String permission) {
+        return new me.lucko.luckperms.core.Node.Builder(permission);
     }
 }

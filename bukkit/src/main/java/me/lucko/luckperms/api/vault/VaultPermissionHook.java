@@ -27,7 +27,6 @@ import lombok.NonNull;
 import lombok.Setter;
 import me.lucko.luckperms.LPBukkitPlugin;
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.data.Callback;
 import me.lucko.luckperms.api.vault.cache.VaultUserCache;
 import me.lucko.luckperms.api.vault.cache.VaultUserManager;
 import me.lucko.luckperms.contexts.Contexts;
@@ -38,11 +37,10 @@ import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.users.User;
 import net.milkbowl.vault.permission.Permission;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
-public class VaultPermissionHook extends Permission {
+public class VaultPermissionHook extends Permission implements Runnable {
+    private final List<Runnable> tasks = new ArrayList<>();
 
     @Getter
     @Setter
@@ -76,12 +74,30 @@ public class VaultPermissionHook extends Permission {
 
     public void setup() {
         vaultUserManager = new VaultUserManager(plugin, this);
+        plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, this, 1L, 1L);
     }
 
     public void log(String s) {
         if (plugin.getConfiguration().isDebugPermissionChecks()) {
             plugin.getLog().info("[VAULT] " + s);
         }
+    }
+
+    void scheduleTask(Runnable r) {
+        synchronized (tasks) {
+            tasks.add(r);
+        }
+    }
+
+    @Override
+    public void run() {
+        List<Runnable> toRun = new ArrayList<>();
+        synchronized (tasks) {
+            toRun.addAll(tasks);
+            tasks.clear();
+        }
+
+        toRun.forEach(Runnable::run);
     }
 
     private boolean objectHas(String world, Group group, String permission) {
@@ -101,7 +117,7 @@ public class VaultPermissionHook extends Permission {
         return toApply.containsKey(permission) && toApply.get(permission);
     }
 
-    private boolean objectAdd(String world, PermissionHolder object, String permission) {
+    private boolean add(String world, PermissionHolder object, String permission) {
         if (object == null) return false;
 
         try {
@@ -112,11 +128,11 @@ public class VaultPermissionHook extends Permission {
             }
         } catch (ObjectAlreadyHasException ignored) {}
 
-        objectSave(object);
+        save(object);
         return true;
     }
 
-    private boolean objectRemove(String world, PermissionHolder object, String permission) {
+    private boolean remove(String world, PermissionHolder object, String permission) {
         if (object == null) return false;
 
         try {
@@ -127,17 +143,18 @@ public class VaultPermissionHook extends Permission {
             }
         } catch (ObjectLacksException ignored) {}
 
-        objectSave(object);
+        save(object);
         return true;
     }
 
-    void objectSave(PermissionHolder t) {
+    void save(PermissionHolder t) {
         if (t instanceof User) {
             ((User) t).refreshPermissions();
-            plugin.getDatastore().saveUser(((User) t), Callback.empty());
+            plugin.getDatastore().saveUser(((User) t));
         }
         if (t instanceof Group) {
-            plugin.getDatastore().saveGroup(((Group) t), c -> plugin.runUpdateTask());
+            plugin.getDatastore().saveGroup(((Group) t));
+            plugin.runUpdateTask();
         }
     }
 
@@ -165,14 +182,16 @@ public class VaultPermissionHook extends Permission {
     public boolean playerAdd(String world, @NonNull String player, @NonNull String permission) {
         log("Adding permission to player " + player + ": '" + permission + "' on world " + world + ", server " + server);
         final User user = plugin.getUserManager().get(player);
-        return objectAdd(world, user, permission);
+        scheduleTask(() -> add(world, user, permission));
+        return true;
     }
 
     @Override
     public boolean playerRemove(String world, @NonNull String player, @NonNull String permission) {
         log("Removing permission from player " + player + ": '" + permission + "' on world " + world + ", server " + server);
         final User user = plugin.getUserManager().get(player);
-        return objectRemove(world, user, permission);
+        scheduleTask(() -> remove(world, user, permission));
+        return true;
     }
 
     @Override
@@ -186,14 +205,16 @@ public class VaultPermissionHook extends Permission {
     public boolean groupAdd(String world, @NonNull String groupName, @NonNull String permission) {
         log("Adding permission to group " + groupName + ": '" + permission + "' on world " + world + ", server " + server);
         final Group group = plugin.getGroupManager().get(groupName);
-        return objectAdd(world, group, permission);
+        scheduleTask(() -> add(world, group, permission));
+        return true;
     }
 
     @Override
     public boolean groupRemove(String world, @NonNull String groupName, @NonNull String permission) {
         log("Removing permission from group " + groupName + ": '" + permission + "' on world " + world + ", server " + server);
         final Group group = plugin.getGroupManager().get(groupName);
-        return objectRemove(world, group, permission);
+        scheduleTask(() -> remove(world, group, permission));
+        return true;
     }
 
     @Override
@@ -213,41 +234,47 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public boolean playerAddGroup(String world, @NonNull String player, @NonNull String groupName) {
-        log("Adding player " + player + " to group: '" + groupName + "' on world " + world + ", server " + server);
         final User user = plugin.getUserManager().get(player);
         if (user == null) return false;
 
         final Group group = plugin.getGroupManager().get(groupName);
         if (group == null) return false;
 
-        try {
-            if (world != null && !world.equals("")) {
-                user.addGroup(group, server, world);
-            } else {
-                user.addGroup(group, server);
-            }
-        } catch (ObjectAlreadyHasException ignored) {}
-        objectSave(user);
+        scheduleTask(() -> {
+            log("Adding player " + player + " to group: '" + groupName + "' on world " + world + ", server " + server); // todo move
+            try {
+                if (world != null && !world.equals("")) {
+                    user.addGroup(group, server, world);
+                } else {
+                    user.addGroup(group, server);
+                }
+            } catch (ObjectAlreadyHasException ignored) {}
+            save(user);
+        });
         return true;
     }
 
     @Override
     public boolean playerRemoveGroup(String world, @NonNull String player, @NonNull String groupName) {
-        log("Removing player " + player + " from group: '" + groupName + "' on world " + world + ", server " + server);
         final User user = plugin.getUserManager().get(player);
         if (user == null) return false;
 
         final Group group = plugin.getGroupManager().get(groupName);
         if (group == null) return false;
 
-        try {
-            if (world != null && !world.equals("")) {
-                user.removeGroup(group, server, world);
-            } else {
-                user.removeGroup(group, server);
-            }
-        } catch (ObjectLacksException ignored) {}
-        objectSave(user);
+        scheduleTask(() -> {
+            log("Removing player " + player + " from group: '" + groupName + "' on world " + world + ", server " + server); // todo move
+            plugin.getLog().info("before: " + user.getNodes().toString());
+            try {
+                if (world != null && !world.equals("")) {
+                    user.removeGroup(group, server, world);
+                } else {
+                    user.removeGroup(group, server);
+                }
+            } catch (ObjectLacksException ignored) {}
+            plugin.getLog().info("after: " + user.getNodes().toString());
+            save(user);
+        });
         return true;
     }
 

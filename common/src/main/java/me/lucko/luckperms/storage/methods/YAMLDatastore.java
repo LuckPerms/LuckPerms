@@ -92,7 +92,7 @@ public class YAMLDatastore extends FlatfileDatastore {
                         user.setPrimaryGroup((String) values.get("primary-group"));
                         Map<String, Boolean> perms = (Map<String, Boolean>) values.get("perms");
                         for (Map.Entry<String, Boolean> e : perms.entrySet()) {
-                            user.getNodes().add(Node.fromSerialisedNode(e.getKey(), e.getValue()));
+                            user.addNodeUnchecked(Node.fromSerialisedNode(e.getKey(), e.getValue()));
                         }
 
                         boolean save = plugin.getUserManager().giveDefaultIfNeeded(user, false);
@@ -214,7 +214,7 @@ public class YAMLDatastore extends FlatfileDatastore {
                     return doRead(groupFile, values -> {
                         Map<String, Boolean> perms = (Map<String, Boolean>) values.get("perms");
                         for (Map.Entry<String, Boolean> e : perms.entrySet()) {
-                            group.getNodes().add(Node.fromSerialisedNode(e.getKey(), e.getValue()));
+                            group.addNodeUnchecked(Node.fromSerialisedNode(e.getKey(), e.getValue()));
                         }
                         return true;
                     });
@@ -247,7 +247,7 @@ public class YAMLDatastore extends FlatfileDatastore {
                 return groupFile.exists() && doRead(groupFile, values -> {
                     Map<String, Boolean> perms = (Map<String, Boolean>) values.get("perms");
                     for (Map.Entry<String, Boolean> e : perms.entrySet()) {
-                        group.getNodes().add(Node.fromSerialisedNode(e.getKey(), e.getValue()));
+                        group.addNodeUnchecked(Node.fromSerialisedNode(e.getKey(), e.getValue()));
                     }
                     return true;
                 });

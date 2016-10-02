@@ -29,13 +29,15 @@ import me.lucko.luckperms.api.vault.cache.VaultUserCache;
 import me.lucko.luckperms.contexts.Contexts;
 import me.lucko.luckperms.core.PermissionHolder;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
+import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.users.User;
 import net.milkbowl.vault.chat.Chat;
 
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static me.lucko.luckperms.utils.ArgumentChecker.escapeCharacters;
 import static me.lucko.luckperms.utils.ArgumentChecker.unescapeCharacters;
@@ -75,51 +77,58 @@ public class VaultChatHook extends Chat {
     private void saveMeta(PermissionHolder holder, String world, String node, String value) {
         if (holder == null) return;
         if (node.equals("")) return;
-        node = escapeCharacters(node);
-        value = escapeCharacters(value);
 
-        Iterator<Node> nodes = holder.getNodes().iterator();
-        while (nodes.hasNext()) {
-            Node n = nodes.next();
-            if (n.isMeta() && n.getMeta().getKey().equals(node)) {
-                nodes.remove();
+        perms.scheduleTask(() -> {
+            String k = escapeCharacters(node);
+            String v = escapeCharacters(value);
+
+            List<Node> toRemove = holder.getNodes().stream()
+                    .filter(n -> n.isMeta() && n.getMeta().getKey().equals(k))
+                    .collect(Collectors.toList());
+
+            toRemove.forEach(n -> {
+                try {
+                    holder.unsetPermission(n);
+                } catch (ObjectLacksException ignored) {}
+            });
+
+            Node.Builder metaNode = new me.lucko.luckperms.core.Node.Builder("meta." + k + "." + v).setValue(true);
+            if (!perms.getServer().equalsIgnoreCase("global")) {
+                metaNode.setServer(perms.getServer());
             }
-        }
+            if (world != null && !world.equals("")) {
+                metaNode.setServer(perms.getServer()).setWorld(world);
+            }
 
-        Node.Builder metaNode = new me.lucko.luckperms.core.Node.Builder("meta." + node + "." + value).setValue(true);
-        if (!perms.getServer().equalsIgnoreCase("global")) {
-            metaNode.setServer(perms.getServer());
-        }
-        if (world != null && !world.equals("")) {
-            metaNode.setServer(perms.getServer()).setWorld(world);
-        }
+            try {
+                holder.setPermission(metaNode.build());
+            } catch (ObjectAlreadyHasException ignored) {}
 
-        try {
-            holder.setPermission(metaNode.build());
-        } catch (ObjectAlreadyHasException ignored) {}
-        
-        perms.objectSave(holder);
+            perms.save(holder);
+        });
     }
 
     private void setChatMeta(boolean prefix, PermissionHolder holder, String value, String world) {
         if (holder == null) return;
         if (value.equals("")) return;
 
-        Node.Builder node = new me.lucko.luckperms.core.Node.Builder(prefix ? "prefix" : "suffix" + ".1000." + escapeCharacters(value));
-        node.setValue(true);
-        if (!perms.getServer().equalsIgnoreCase("global")) {
-            node.setServer(perms.getServer());
-        }
+        perms.scheduleTask(() -> {
+            Node.Builder node = new me.lucko.luckperms.core.Node.Builder(prefix ? "prefix" : "suffix" + ".1000." + escapeCharacters(value));
+            node.setValue(true);
+            if (!perms.getServer().equalsIgnoreCase("global")) {
+                node.setServer(perms.getServer());
+            }
 
-        if (world != null && !world.equals("")) {
-            node.setServer(perms.getServer()).setWorld(world);
-        }
+            if (world != null && !world.equals("")) {
+                node.setServer(perms.getServer()).setWorld(world);
+            }
 
-        try {
-            holder.setPermission(node.build());
-        } catch (ObjectAlreadyHasException ignored) {}
+            try {
+                holder.setPermission(node.build());
+            } catch (ObjectAlreadyHasException ignored) {}
 
-        perms.objectSave(holder);
+            perms.save(holder);
+        });
     }
 
     private String getUserMeta(User user, String world, String node, String defaultValue) {

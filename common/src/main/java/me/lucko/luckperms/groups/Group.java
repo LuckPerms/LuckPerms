@@ -248,11 +248,4 @@ public class Group extends PermissionHolder implements Identifiable<String> {
     public void unsetInheritGroup(Group group, String server, String world, boolean temporary) throws ObjectLacksException {
         unsetPermission("group." + group.getName(), server, world, temporary);
     }
-
-    /**
-     * Clear all of the groups permission nodes
-     */
-    public void clearNodes() {
-        getNodes().clear();
-    }
 }

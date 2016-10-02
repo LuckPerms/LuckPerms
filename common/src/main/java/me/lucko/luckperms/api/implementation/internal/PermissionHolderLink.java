@@ -39,7 +39,7 @@ import static me.lucko.luckperms.core.PermissionHolder.exportToLegacy;
 /**
  * Provides a link between {@link PermissionHolder} and {@link me.lucko.luckperms.core.PermissionHolder}
  */
-@SuppressWarnings({"unused", "deprecation"})
+@SuppressWarnings("unused")
 @AllArgsConstructor
 public class PermissionHolderLink implements PermissionHolder {
 
@@ -58,12 +58,12 @@ public class PermissionHolderLink implements PermissionHolder {
 
     @Override
     public Set<Node> getEnduringPermissions() {
-        return Collections.unmodifiableSet(master.getNodes());
+        return master.getNodes();
     }
 
     @Override
     public Set<Node> getTransientPermissions() {
-        return Collections.unmodifiableSet(master.getTransientNodes());
+        return master.getTransientNodes();
     }
 
     @Override
@@ -233,22 +233,36 @@ public class PermissionHolderLink implements PermissionHolder {
 
     @Override
     public Map<String, Boolean> getLocalPermissions(String server, String world, List<String> excludedGroups, List<String> possibleNodes) {
-        return master.getLocalPermissions(server, world, excludedGroups, possibleNodes);
+        Map<String, String> context = new HashMap<>();
+        if (server != null && !server.equals("")) {
+            context.put("server", server);
+        }
+        if (world != null && !world.equals("")) {
+            context.put("world", world);
+        }
+        return master.exportNodes(new Contexts(context, true, true, true, true, true), Collections.emptyList(), false);
     }
 
     @Override
     public Map<String, Boolean> getLocalPermissions(String server, String world, List<String> excludedGroups) {
-        return master.getLocalPermissions(server, world, excludedGroups);
+        Map<String, String> context = new HashMap<>();
+        if (server != null && !server.equals("")) {
+            context.put("server", server);
+        }
+        if (world != null && !world.equals("")) {
+            context.put("world", world);
+        }
+        return master.exportNodes(new Contexts(context, true, true, true, true, true), Collections.emptyList(), false);
     }
 
     @Override
     public Map<String, Boolean> getLocalPermissions(String server, List<String> excludedGroups, List<String> possibleNodes) {
-        return master.getLocalPermissions(server, excludedGroups, possibleNodes);
+        return getLocalPermissions(server, null, excludedGroups, possibleNodes);
     }
 
     @Override
     public Map<String, Boolean> getLocalPermissions(String server, List<String> excludedGroups) {
-        return master.getLocalPermissions(server, excludedGroups);
+        return getLocalPermissions(server, null, excludedGroups, null);
     }
 
     @Override

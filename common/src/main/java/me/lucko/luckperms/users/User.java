@@ -249,8 +249,9 @@ public abstract class User extends PermissionHolder implements Identifiable<User
     /**
      * Clear all of the users permission nodes
      */
+    @Override
     public void clearNodes() {
-        getNodes().clear();
+        super.clearNodes();
         getPlugin().getUserManager().giveDefaultIfNeeded(this, false);
     }
 }

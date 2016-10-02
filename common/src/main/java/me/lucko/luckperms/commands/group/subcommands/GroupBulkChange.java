@@ -27,6 +27,8 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
+import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.groups.Group;
 
 import java.util.HashSet;
@@ -55,6 +57,7 @@ public class GroupBulkChange extends SubCommand<Group> {
         }
 
         Set<Node> toAdd = new HashSet<>();
+        Set<Node> toRemove = new HashSet<>();
 
         if (!type.equals("world") && !type.equals("server")) {
             Message.BULK_CHANGE_TYPE_ERROR.send(sender);
@@ -70,7 +73,7 @@ public class GroupBulkChange extends SubCommand<Group> {
                     continue;
                 }
 
-                iterator.remove();
+                toRemove.add(element);
                 toAdd.add(me.lucko.luckperms.core.Node.builderFromExisting(element).setWorld(to).build());
             }
         } else {
@@ -81,12 +84,23 @@ public class GroupBulkChange extends SubCommand<Group> {
                     continue;
                 }
 
-                iterator.remove();
+                toRemove.add(element);
                 toAdd.add(me.lucko.luckperms.core.Node.builderFromExisting(element).setServer(to).build());
             }
         }
 
-        group.getNodes().addAll(toAdd);
+        toRemove.forEach(n -> {
+            try {
+                group.unsetPermission(n);
+            } catch (ObjectLacksException ignored) {}
+        });
+
+        toAdd.forEach(n -> {
+            try {
+                group.setPermission(n);
+            } catch (ObjectAlreadyHasException ignored) {}
+        });
+
         save(group, sender, plugin);
         Message.BULK_CHANGE_SUCCESS.send(sender, toAdd.size());
         return CommandResult.SUCCESS;

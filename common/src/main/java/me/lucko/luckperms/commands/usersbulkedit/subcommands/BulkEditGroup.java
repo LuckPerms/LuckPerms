@@ -27,6 +27,8 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
+import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.storage.Datastore;
 import me.lucko.luckperms.users.User;
 
@@ -70,6 +72,7 @@ public class BulkEditGroup extends SubCommand<Datastore> {
             }
 
             Set<Node> toAdd = new HashSet<>();
+            Set<Node> toRemove = new HashSet<>();
             Iterator<Node> iterator = user.getNodes().iterator();
             if (type.equals("world")) {
                 while (iterator.hasNext()) {
@@ -92,7 +95,7 @@ public class BulkEditGroup extends SubCommand<Datastore> {
                         continue;
                     }
 
-                    iterator.remove();
+                    toRemove.add(element);
                     toAdd.add(me.lucko.luckperms.core.Node.builderFromExisting(element).setWorld(to).build());
                 }
             } else {
@@ -116,12 +119,23 @@ public class BulkEditGroup extends SubCommand<Datastore> {
                         continue;
                     }
 
-                    iterator.remove();
+                    toRemove.add(element);
                     toAdd.add(me.lucko.luckperms.core.Node.builderFromExisting(element).setServer(to).build());
                 }
             }
 
-            user.getNodes().addAll(toAdd);
+            toRemove.forEach(n -> {
+                try {
+                    user.unsetPermission(n);
+                } catch (ObjectLacksException ignored) {}
+            });
+
+            toAdd.forEach(n -> {
+                try {
+                    user.setPermission(n);
+                } catch (ObjectAlreadyHasException ignored) {}
+            });
+
             plugin.getUserManager().cleanup(user);
             plugin.getDatastore().saveUser(user);
         }
