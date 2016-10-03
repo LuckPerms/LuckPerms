@@ -41,8 +41,12 @@ public class SpongeUserManager extends UserManager implements ContextListener<Pl
     public void cleanup(User user) {
         if (!plugin.getGame().getServer().getPlayer(plugin.getUuidCache().getExternalUUID(user.getUuid())).isPresent()) {
             unload(user);
-            plugin.getService().getUserSubjects().unload(user.getUuid());
         }
+    }
+
+    @Override
+    public void preUnload(User user) {
+        plugin.getService().getUserSubjects().unload(user.getUuid());
     }
 
     @Override
