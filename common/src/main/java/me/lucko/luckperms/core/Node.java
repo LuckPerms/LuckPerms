@@ -30,6 +30,7 @@ import me.lucko.luckperms.constants.Patterns;
 import me.lucko.luckperms.utils.ArgumentChecker;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -619,8 +620,15 @@ public class Node implements me.lucko.luckperms.api.Node {
         return getPermission();
     }
 
+    private static final Map<String, me.lucko.luckperms.api.Node> CACHE = new ConcurrentHashMap<>();
+    private static final Map<String, me.lucko.luckperms.api.Node> CACHE_NEGATED = new ConcurrentHashMap<>();
+
     public static me.lucko.luckperms.api.Node fromSerialisedNode(String s, Boolean b) {
-        return builderFromSerialisedNode(s, b).build();
+        if (b) {
+            return CACHE.computeIfAbsent(s, s1 -> builderFromSerialisedNode(s1, true).build());
+        } else {
+            return CACHE_NEGATED.computeIfAbsent(s, s1 -> builderFromSerialisedNode(s1, false).build());
+        }
     }
 
     public static me.lucko.luckperms.api.Node.Builder builderFromSerialisedNode(String s, Boolean b) {
