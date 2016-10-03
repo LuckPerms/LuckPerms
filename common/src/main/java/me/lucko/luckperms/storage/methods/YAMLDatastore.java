@@ -126,6 +126,7 @@ public class YAMLDatastore extends FlatfileDatastore {
             }, false);
         } finally {
             user.getIoLock().unlock();
+            user.refreshPermissions();
         }
     }
 

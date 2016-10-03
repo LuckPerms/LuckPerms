@@ -179,6 +179,7 @@ public class MongoDBDatastore extends Datastore {
             }, false);
         } finally {
             user.getIoLock().unlock();
+            user.refreshPermissions();
         }
     }
 

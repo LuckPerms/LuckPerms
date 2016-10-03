@@ -140,6 +140,7 @@ public class JSONDatastore extends FlatfileDatastore {
             }, false);
         } finally {
             user.getIoLock().unlock();
+            user.refreshPermissions();
         }
     }
 

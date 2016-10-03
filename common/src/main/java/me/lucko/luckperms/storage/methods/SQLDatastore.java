@@ -185,6 +185,7 @@ abstract class SQLDatastore extends Datastore {
             );
         } finally {
             user.getIoLock().unlock();
+            user.refreshPermissions();
         }
     }
 
