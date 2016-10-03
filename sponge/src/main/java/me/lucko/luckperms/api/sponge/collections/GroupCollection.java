@@ -83,7 +83,7 @@ public class GroupCollection implements SubjectCollection {
     public Map<Subject, Boolean> getAllWithPermission(@NonNull Set<Context> contexts, @NonNull String node) {
         return manager.getAll().values().stream()
                 .map(u -> LuckPermsSubject.wrapHolder(u, service))
-                .filter(sub -> sub.hasPermission(contexts, node))
+                .filter(sub -> sub.isPermissionSet(contexts, node))
                 .collect(Collectors.toMap(sub -> sub, sub -> sub.getPermissionValue(contexts, node).asBoolean()));
     }
 

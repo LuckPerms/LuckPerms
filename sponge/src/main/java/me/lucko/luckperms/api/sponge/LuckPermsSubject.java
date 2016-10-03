@@ -45,7 +45,7 @@ import static me.lucko.luckperms.utils.ArgumentChecker.unescapeCharacters;
 
 @EqualsAndHashCode(of = {"holder"})
 public class LuckPermsSubject implements Subject {
-    public static Subject wrapHolder(PermissionHolder holder, LuckPermsService service) {
+    public static LuckPermsSubject wrapHolder(PermissionHolder holder, LuckPermsService service) {
         return new LuckPermsSubject(holder, service);
     }
 
@@ -102,6 +102,10 @@ public class LuckPermsSubject implements Subject {
     @Override
     public SubjectData getTransientSubjectData() {
         return transientData;
+    }
+
+    public boolean isPermissionSet(@NonNull Set<Context> contexts, @NonNull String node) {
+        return getPermissionValue(contexts, node) != Tristate.UNDEFINED;
     }
 
     @Override

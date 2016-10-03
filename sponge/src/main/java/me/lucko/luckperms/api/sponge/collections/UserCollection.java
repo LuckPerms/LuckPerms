@@ -129,7 +129,7 @@ public class UserCollection implements SubjectCollection {
     @Override
     public Map<Subject, Boolean> getAllWithPermission(@NonNull Set<Context> contexts, @NonNull String node) {
         return users.values().stream()
-                .filter(sub -> sub.hasPermission(contexts, node))
+                .filter(sub -> sub.isPermissionSet(contexts, node))
                 .collect(Collectors.toMap(sub -> sub, sub -> sub.getPermissionValue(contexts, node).asBoolean()));
     }
 
