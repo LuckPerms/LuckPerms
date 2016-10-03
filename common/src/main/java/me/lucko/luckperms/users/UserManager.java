@@ -30,7 +30,6 @@ import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.utils.AbstractManager;
 import me.lucko.luckperms.utils.Identifiable;
 
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -44,13 +43,12 @@ public abstract class UserManager extends AbstractManager<UserIdentifier, User> 
      */
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     public User get(String name) {
-        try {
-            return getAll().values().stream()
-                    .filter(u -> u.getName().equalsIgnoreCase(name))
-                    .limit(1).findAny().get();
-        } catch (NoSuchElementException e) {
-            return null;
+        for (User user : getAll().values()) {
+            if (user.getName().equalsIgnoreCase(name)) {
+                return user;
+            }
         }
+        return null;
     }
 
     public User get(UUID uuid) {
