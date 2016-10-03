@@ -22,48 +22,33 @@
 
 package me.lucko.luckperms.calculators;
 
-import lombok.RequiredArgsConstructor;
-import me.lucko.luckperms.LuckPermsPlugin;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.constants.Patterns;
 
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
-/**
- * Calculates and caches permissions
- */
-@RequiredArgsConstructor
-public class PermissionCalculator {
-    private final LuckPermsPlugin plugin;
-    private final String objectName;
-    private final boolean debug;
-    private final List<PermissionProcessor> processors;
-    private final Map<String, Tristate> cache = new ConcurrentHashMap<>();
+@AllArgsConstructor
+public class RegexProcessor implements PermissionProcessor {
 
-    public void invalidateCache() {
-        cache.clear();
-    }
+    @Getter
+    private final Map<String, Boolean> map;
 
-    public Tristate getPermissionValue(String permission) {
-        permission = permission.toLowerCase();
-        Tristate t =  cache.computeIfAbsent(permission, this::lookupPermissionValue);
+    @Override
+    public Tristate hasPermission(String permission) {
+        for (Map.Entry<String, Boolean> e : map.entrySet()) {
+            if (e.getKey().toLowerCase().startsWith("r=")) {
+                Pattern p = Patterns.compile(e.getKey().substring(2));
+                if (p == null) {
+                    continue;
+                }
 
-        if (debug) {
-            plugin.getLog().info("Checking if " + objectName + " has permission: " + permission + " - (" + t.toString() + ")");
-        }
-
-        return t;
-    }
-
-    private Tristate lookupPermissionValue(String permission) {
-        for (PermissionProcessor processor : processors) {
-            Tristate v = processor.hasPermission(permission);
-            if (v == Tristate.UNDEFINED) {
-                continue;
+                if (p.matcher(permission).matches()) {
+                    return Tristate.fromBoolean(e.getValue());
+                }
             }
-
-            return v;
         }
 
         return Tristate.UNDEFINED;

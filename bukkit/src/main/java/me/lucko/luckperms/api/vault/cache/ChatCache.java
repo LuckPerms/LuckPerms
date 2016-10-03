@@ -20,52 +20,32 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.calculators;
+package me.lucko.luckperms.api.vault.cache;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.api.Tristate;
+import lombok.Setter;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Calculates and caches permissions
- */
+@Getter
 @RequiredArgsConstructor
-public class PermissionCalculator {
-    private final LuckPermsPlugin plugin;
-    private final String objectName;
-    private final boolean debug;
-    private final List<PermissionProcessor> processors;
-    private final Map<String, Tristate> cache = new ConcurrentHashMap<>();
+public class ChatCache {
+    private final Map<String, String> context;
+
+    @Setter
+    private String prefix = null;
+
+    @Setter
+    private String suffix = null;
+
+    private Map<String, String> meta = new ConcurrentHashMap<>();
 
     public void invalidateCache() {
-        cache.clear();
+        prefix = null;
+        suffix = null;
+        meta.clear();
     }
 
-    public Tristate getPermissionValue(String permission) {
-        permission = permission.toLowerCase();
-        Tristate t =  cache.computeIfAbsent(permission, this::lookupPermissionValue);
-
-        if (debug) {
-            plugin.getLog().info("Checking if " + objectName + " has permission: " + permission + " - (" + t.toString() + ")");
-        }
-
-        return t;
-    }
-
-    private Tristate lookupPermissionValue(String permission) {
-        for (PermissionProcessor processor : processors) {
-            Tristate v = processor.hasPermission(permission);
-            if (v == Tristate.UNDEFINED) {
-                continue;
-            }
-
-            return v;
-        }
-
-        return Tristate.UNDEFINED;
-    }
 }

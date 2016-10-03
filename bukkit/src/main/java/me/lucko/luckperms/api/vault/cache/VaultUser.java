@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @RequiredArgsConstructor
-public class VaultUserCache {
+public class VaultUser {
     private final LPBukkitPlugin plugin;
     private final VaultPermissionHook vault;
 
@@ -44,30 +44,30 @@ public class VaultUserCache {
     private final User user;
 
     @Getter
-    private final Map<Map<String, String>, ContextData> contextData = new ConcurrentHashMap<>();
+    private final Map<Map<String, String>, ContextCache> contextData = new ConcurrentHashMap<>();
 
     @Getter
-    private final Map<Map<String, String>, ChatData> chatData = new ConcurrentHashMap<>();
+    private final Map<Map<String, String>, ChatCache> chatData = new ConcurrentHashMap<>();
 
     public boolean hasPermission(Map<String, String> context, String permission) {
-        ContextData cd = contextData.computeIfAbsent(context, map -> calculatePermissions(map, false));
+        ContextCache cd = contextData.computeIfAbsent(context, map -> calculatePermissions(map, false));
         return cd.getPermissionValue(permission).asBoolean();
     }
 
-    public ChatData processChatData(Map<String, String> context) {
+    public ChatCache processChatData(Map<String, String> context) {
         return chatData.computeIfAbsent(context, map -> calculateChat(map, false));
     }
 
-    public ContextData calculatePermissions(Map<String, String> context, boolean apply) {
+    public ContextCache calculatePermissions(Map<String, String> context, boolean apply) {
         Map<String, Boolean> toApply = user.exportNodes(
                 new Contexts(context, vault.isIncludeGlobal(), true, true, true, true),
                 Collections.emptyList(),
                 true
         );
 
-        ContextData existing = contextData.get(context);
+        ContextCache existing = contextData.get(context);
         if (existing == null) {
-            existing = new ContextData(user, context, plugin, plugin.getDefaultsProvider());
+            existing = new ContextCache(user, context, plugin, plugin.getDefaultsProvider());
             if (apply) {
                 contextData.put(context, existing);
             }
@@ -94,10 +94,10 @@ public class VaultUserCache {
         return existing;
     }
 
-    public ChatData calculateChat(Map<String, String> context, boolean apply) {
-        ChatData existing = chatData.get(context);
+    public ChatCache calculateChat(Map<String, String> context, boolean apply) {
+        ChatCache existing = chatData.get(context);
         if (existing == null) {
-            existing = new ChatData(context);
+            existing = new ChatCache(context);
             if (apply) {
                 chatData.put(context, existing);
             }

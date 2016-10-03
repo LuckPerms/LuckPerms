@@ -23,8 +23,7 @@
 package me.lucko.luckperms;
 
 import lombok.Getter;
-import me.lucko.luckperms.calculators.PermissionCalculator;
-import me.lucko.luckperms.calculators.PermissionProcessor;
+import me.lucko.luckperms.calculators.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,12 +39,12 @@ public class BungeePlayerCache {
 
     public BungeePlayerCache(LuckPermsPlugin plugin, String name) {
         List<PermissionProcessor> processors = new ArrayList<>(3);
-        processors.add(new PermissionCalculator.MapProcessor(permissions));
+        processors.add(new MapProcessor(permissions));
         if (plugin.getConfiguration().isApplyingWildcards()) {
-            processors.add(new PermissionCalculator.WildcardProcessor(permissions));
+            processors.add(new WildcardProcessor(permissions));
         }
         if (plugin.getConfiguration().isApplyingRegex()) {
-            processors.add(new PermissionCalculator.RegexProcessor(permissions));
+            processors.add(new RegexProcessor(permissions));
         }
 
         calculator = new PermissionCalculator(plugin, name, plugin.getConfiguration().isDebugPermissionChecks(), processors);

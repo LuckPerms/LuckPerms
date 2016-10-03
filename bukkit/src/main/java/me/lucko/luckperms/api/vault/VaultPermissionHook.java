@@ -27,7 +27,7 @@ import lombok.NonNull;
 import lombok.Setter;
 import me.lucko.luckperms.LPBukkitPlugin;
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.vault.cache.VaultUserCache;
+import me.lucko.luckperms.api.vault.cache.VaultUser;
 import me.lucko.luckperms.api.vault.cache.VaultUserManager;
 import me.lucko.luckperms.contexts.Contexts;
 import me.lucko.luckperms.core.PermissionHolder;
@@ -39,6 +39,10 @@ import net.milkbowl.vault.permission.Permission;
 
 import java.util.*;
 
+/**
+ * The LuckPerms Vault Permission implementation
+ * Most lookups are cached.
+ */
 public class VaultPermissionHook extends Permission implements Runnable {
     private final List<Runnable> tasks = new ArrayList<>();
 
@@ -56,21 +60,6 @@ public class VaultPermissionHook extends Permission implements Runnable {
     @Getter
     @Setter
     private boolean includeGlobal = true;
-
-    @Override
-    public String getName() {
-        return "LuckPerms";
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return plugin.getDatastore().isAcceptingLogins();
-    }
-
-    @Override
-    public boolean hasSuperPermsCompat() {
-        return true;
-    }
 
     public void setup() {
         vaultUserManager = new VaultUserManager(plugin, this);
@@ -98,6 +87,21 @@ public class VaultPermissionHook extends Permission implements Runnable {
         }
 
         toRun.forEach(Runnable::run);
+    }
+
+    @Override
+    public String getName() {
+        return "LuckPerms";
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return plugin.getDatastore().isAcceptingLogins();
+    }
+
+    @Override
+    public boolean hasSuperPermsCompat() {
+        return true;
     }
 
     private boolean objectHas(String world, Group group, String permission) {
@@ -168,7 +172,7 @@ public class VaultPermissionHook extends Permission implements Runnable {
             return false;
         }
 
-        VaultUserCache vaultUser = vaultUserManager.getUser(user.getUuid());
+        VaultUser vaultUser = vaultUserManager.getUser(user.getUuid());
         Map<String, String> context = new HashMap<>();
         context.put("server", server);
         if (world != null) {

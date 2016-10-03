@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.inject;
+package me.lucko.luckperms.calculators;
 
 import lombok.AllArgsConstructor;
 import me.lucko.luckperms.api.Tristate;

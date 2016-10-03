@@ -24,8 +24,8 @@ package me.lucko.luckperms.api.vault;
 
 import lombok.NonNull;
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.vault.cache.ChatData;
-import me.lucko.luckperms.api.vault.cache.VaultUserCache;
+import me.lucko.luckperms.api.vault.cache.ChatCache;
+import me.lucko.luckperms.api.vault.cache.VaultUser;
 import me.lucko.luckperms.contexts.Contexts;
 import me.lucko.luckperms.core.PermissionHolder;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
@@ -139,14 +139,14 @@ public class VaultChatHook extends Chat {
             return defaultValue;
         }
 
-        VaultUserCache vaultUser = perms.getVaultUserManager().getUser(user.getUuid());
+        VaultUser vaultUser = perms.getVaultUserManager().getUser(user.getUuid());
         Map<String, String> context = new HashMap<>();
         context.put("server", perms.getServer());
         if (world != null) {
             context.put("world", world);
         }
 
-        ChatData cd = vaultUser.processChatData(context);
+        ChatCache cd = vaultUser.processChatData(context);
         return unescapeCharacters(cd.getMeta().getOrDefault(node, defaultValue));
     }
 
@@ -157,14 +157,14 @@ public class VaultChatHook extends Chat {
             return "";
         }
 
-        VaultUserCache vaultUser = perms.getVaultUserManager().getUser(user.getUuid());
+        VaultUser vaultUser = perms.getVaultUserManager().getUser(user.getUuid());
         Map<String, String> context = new HashMap<>();
         context.put("server", perms.getServer());
         if (world != null) {
             context.put("world", world);
         }
 
-        ChatData cd = vaultUser.processChatData(context);
+        ChatCache cd = vaultUser.processChatData(context);
         return unescapeCharacters(prefix ? (cd.getPrefix() == null ? "" : cd.getPrefix()) : (cd.getSuffix() == null ? "" : cd.getSuffix()));
     }
 

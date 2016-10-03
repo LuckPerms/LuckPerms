@@ -22,13 +22,11 @@
 
 package me.lucko.luckperms.inject;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.calculators.PermissionCalculator;
-import me.lucko.luckperms.calculators.PermissionProcessor;
+import me.lucko.luckperms.calculators.*;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.*;
@@ -36,7 +34,6 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -60,15 +57,15 @@ public class LPPermissible extends PermissibleBase {
         this.parent = sender;
 
         List<PermissionProcessor> processors = new ArrayList<>(5);
-        processors.add(new PermissionCalculator.MapProcessor(luckPermsPermissions));
+        processors.add(new MapProcessor(luckPermsPermissions));
         processors.add(new AttachmentProcessor(attachmentPermissions));
         if (plugin.getConfiguration().isApplyingWildcards()) {
-            processors.add(new PermissionCalculator.WildcardProcessor(luckPermsPermissions));
+            processors.add(new WildcardProcessor(luckPermsPermissions));
         }
         if (plugin.getConfiguration().isApplyingRegex()) {
-            processors.add(new PermissionCalculator.RegexProcessor(luckPermsPermissions));
+            processors.add(new RegexProcessor(luckPermsPermissions));
         }
-        processors.add(new BukkitDefaultsProcessor(parent::isOp, defaultsProvider));
+        processors.add(new DefaultsProcessor(parent::isOp, defaultsProvider));
 
         calculator = new PermissionCalculator(plugin, parent.getName(), plugin.getConfiguration().isDebugPermissionChecks(), processors);
 
@@ -258,44 +255,6 @@ public class LPPermissible extends PermissibleBase {
 
         public void run() {
             attachment.remove();
-        }
-    }
-
-    @AllArgsConstructor
-    private static class AttachmentProcessor implements PermissionProcessor {
-
-        @Getter
-        private final Map<String, PermissionAttachmentInfo> map;
-
-        @Override
-        public Tristate hasPermission(String permission) {
-            if (map.containsKey(permission)) {
-                return Tristate.fromBoolean(map.get(permission).getValue());
-            }
-
-            return Tristate.UNDEFINED;
-        }
-
-    }
-
-    @AllArgsConstructor
-    public static class BukkitDefaultsProcessor implements PermissionProcessor {
-        private final Supplier<Boolean> isOp;
-        private final DefaultsProvider defaultsProvider;
-
-        @Override
-        public Tristate hasPermission(String permission) {
-            Tristate t = defaultsProvider.hasDefault(permission, isOp.get());
-            if (t != Tristate.UNDEFINED) {
-                return t;
-            }
-
-            Permission defPerm = Bukkit.getServer().getPluginManager().getPermission(permission);
-            if (defPerm != null) {
-                return Tristate.fromBoolean(defPerm.getDefault().getValue(isOp.get()));
-            } else {
-                return Tristate.UNDEFINED;
-            }
         }
     }
 }

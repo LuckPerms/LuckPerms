@@ -38,10 +38,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class VaultUserManager {
     private final LPBukkitPlugin plugin;
     private final VaultPermissionHook vault;
-    private final Map<UUID, VaultUserCache> userCache = new ConcurrentHashMap<>();
+    private final Map<UUID, VaultUser> userCache = new ConcurrentHashMap<>();
 
     public void setupUser(User user) {
-        VaultUserCache vaultUser = userCache.computeIfAbsent(user.getUuid(), uuid -> new VaultUserCache(plugin, vault, user));
+        VaultUser vaultUser = userCache.computeIfAbsent(user.getUuid(), uuid -> new VaultUser(plugin, vault, user));
         vaultUser.calculatePermissions(Collections.singletonMap("server", vault.getServer()), true);
         vaultUser.calculateChat(Collections.singletonMap("server", vault.getServer()), true);
         for (World world : plugin.getServer().getWorlds()) {
@@ -61,7 +61,7 @@ public class VaultUserManager {
         return userCache.containsKey(uuid);
     }
 
-    public VaultUserCache getUser(UUID uuid) {
+    public VaultUser getUser(UUID uuid) {
         return userCache.get(uuid);
     }
 

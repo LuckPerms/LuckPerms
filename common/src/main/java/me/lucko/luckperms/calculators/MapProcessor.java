@@ -20,34 +20,26 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.api.vault.cache;
+package me.lucko.luckperms.calculators;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import me.lucko.luckperms.api.Tristate;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
-@Getter
-@RequiredArgsConstructor
-public class ChatData {
+@AllArgsConstructor
+public class MapProcessor implements PermissionProcessor {
 
     @Getter
-    private final Map<String, String> context;
+    private final Map<String, Boolean> map;
 
-    @Setter
-    private String prefix = null;
+    @Override
+    public Tristate hasPermission(String permission) {
+        if (map.containsKey(permission)) {
+            return Tristate.fromBoolean(map.get(permission));
+        }
 
-    @Setter
-    private String suffix = null;
-
-    private Map<String, String> meta = new ConcurrentHashMap<>();
-
-    public void invalidateCache() {
-        prefix = null;
-        suffix = null;
-        meta.clear();
+        return Tristate.UNDEFINED;
     }
-
 }

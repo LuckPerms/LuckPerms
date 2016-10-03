@@ -22,50 +22,26 @@
 
 package me.lucko.luckperms.calculators;
 
-import lombok.RequiredArgsConstructor;
-import me.lucko.luckperms.LuckPermsPlugin;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import me.lucko.luckperms.api.Tristate;
+import org.bukkit.permissions.PermissionAttachmentInfo;
 
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Calculates and caches permissions
- */
-@RequiredArgsConstructor
-public class PermissionCalculator {
-    private final LuckPermsPlugin plugin;
-    private final String objectName;
-    private final boolean debug;
-    private final List<PermissionProcessor> processors;
-    private final Map<String, Tristate> cache = new ConcurrentHashMap<>();
+@AllArgsConstructor
+public class AttachmentProcessor implements PermissionProcessor {
 
-    public void invalidateCache() {
-        cache.clear();
-    }
+    @Getter
+    private final Map<String, PermissionAttachmentInfo> map;
 
-    public Tristate getPermissionValue(String permission) {
-        permission = permission.toLowerCase();
-        Tristate t =  cache.computeIfAbsent(permission, this::lookupPermissionValue);
-
-        if (debug) {
-            plugin.getLog().info("Checking if " + objectName + " has permission: " + permission + " - (" + t.toString() + ")");
-        }
-
-        return t;
-    }
-
-    private Tristate lookupPermissionValue(String permission) {
-        for (PermissionProcessor processor : processors) {
-            Tristate v = processor.hasPermission(permission);
-            if (v == Tristate.UNDEFINED) {
-                continue;
-            }
-
-            return v;
+    @Override
+    public Tristate hasPermission(String permission) {
+        if (map.containsKey(permission)) {
+            return Tristate.fromBoolean(map.get(permission).getValue());
         }
 
         return Tristate.UNDEFINED;
     }
+
 }

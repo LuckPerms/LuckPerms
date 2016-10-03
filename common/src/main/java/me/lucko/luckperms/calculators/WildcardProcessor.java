@@ -22,50 +22,59 @@
 
 package me.lucko.luckperms.calculators;
 
-import lombok.RequiredArgsConstructor;
-import me.lucko.luckperms.LuckPermsPlugin;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import me.lucko.luckperms.api.Tristate;
 
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Calculates and caches permissions
- */
-@RequiredArgsConstructor
-public class PermissionCalculator {
-    private final LuckPermsPlugin plugin;
-    private final String objectName;
-    private final boolean debug;
-    private final List<PermissionProcessor> processors;
-    private final Map<String, Tristate> cache = new ConcurrentHashMap<>();
+@AllArgsConstructor
+public class WildcardProcessor implements PermissionProcessor {
 
-    public void invalidateCache() {
-        cache.clear();
-    }
+    @Getter
+    private final Map<String, Boolean> map;
 
-    public Tristate getPermissionValue(String permission) {
-        permission = permission.toLowerCase();
-        Tristate t =  cache.computeIfAbsent(permission, this::lookupPermissionValue);
+    @Override
+    public Tristate hasPermission(String permission) {
+        String node = permission;
 
-        if (debug) {
-            plugin.getLog().info("Checking if " + objectName + " has permission: " + permission + " - (" + t.toString() + ")");
-        }
-
-        return t;
-    }
-
-    private Tristate lookupPermissionValue(String permission) {
-        for (PermissionProcessor processor : processors) {
-            Tristate v = processor.hasPermission(permission);
-            if (v == Tristate.UNDEFINED) {
-                continue;
+        while (node.contains(".")) {
+            int endIndex = node.lastIndexOf('.');
+            if (endIndex == -1) {
+                break;
             }
 
-            return v;
+            node = node.substring(0, endIndex);
+            if (!isEmpty(node)) {
+                if (map.containsKey(node + ".*")) {
+                    return Tristate.fromBoolean(map.get(node + ".*"));
+                }
+            }
+        }
+
+        if (map.containsKey("'*'")) {
+            return Tristate.fromBoolean(map.get("'*'"));
+        }
+
+        if (map.containsKey("*")) {
+            return Tristate.fromBoolean(map.get("*"));
         }
 
         return Tristate.UNDEFINED;
+    }
+
+    private static boolean isEmpty(String s) {
+        if (s.equals("")) {
+            return true;
+        }
+
+        char[] chars = s.toCharArray();
+        for (char c : chars) {
+            if (c != '.') {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
