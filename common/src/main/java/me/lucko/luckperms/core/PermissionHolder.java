@@ -24,6 +24,7 @@ package me.lucko.luckperms.core;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSortedSet;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -71,8 +72,8 @@ public abstract class PermissionHolder {
     private final Set<Node> nodes = new HashSet<>();
     private final Set<Node> transientNodes = new HashSet<>();
 
-    private Cache<SortedSet<LocalizedNode>> cache = new Cache<>();
-    private Cache<SortedSet<LocalizedNode>> mergedCache = new Cache<>();
+    private Cache<ImmutableSortedSet<LocalizedNode>> cache = new Cache<>();
+    private Cache<ImmutableSortedSet<LocalizedNode>> mergedCache = new Cache<>();
     private Cache<ImmutableSet<Node>> enduringCache = new Cache<>();
     private Cache<ImmutableSet<Node>> transientCache = new Cache<>();
 
@@ -172,7 +173,7 @@ public abstract class PermissionHolder {
      * @return the holders transient and permanent nodes
      */
     public SortedSet<LocalizedNode> getPermissions(boolean mergeTemp) {
-        Supplier<SortedSet<LocalizedNode>> supplier = () -> {
+        Supplier<ImmutableSortedSet<LocalizedNode>> supplier = () -> {
             TreeSet<LocalizedNode> combined = new TreeSet<>(PriorityComparator.reverse());
 
             getNodes().stream()
@@ -196,7 +197,7 @@ public abstract class PermissionHolder {
                 permissions.add(node);
             }
 
-            return permissions;
+            return ImmutableSortedSet.copyOfSorted(permissions);
         };
 
         return mergeTemp ? mergedCache.get(supplier) : cache.get(supplier);
