@@ -62,7 +62,10 @@ public class Injector {
         try {
             Permissible permissible = getPermissible(sender);
             if (permissible instanceof LPPermissible) {
-                getPermField(sender).set(sender, new PermissibleBase(sender));
+                /* The player is most likely leaving. Bukkit will attempt to call #clearPermissions, so we cannot set to null.
+                   However, there's no need to re-inject a real PermissibleBase, so we just inject a dummy instead.
+                   This saves tick time, pointlessly recalculating defaults when the instance will never be used. */
+                getPermField(sender).set(sender, new DummyPermissibleBase());
             }
             return true;
         } catch (Exception e) {
