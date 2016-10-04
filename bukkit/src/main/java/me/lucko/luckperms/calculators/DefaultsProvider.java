@@ -24,14 +24,10 @@ package me.lucko.luckperms.calculators;
 
 import lombok.AllArgsConstructor;
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.inject.DummyPermissibleBase;
 import org.bukkit.Bukkit;
-import org.bukkit.permissions.Permissible;
 import org.bukkit.permissions.Permission;
-import org.bukkit.permissions.PermissionAttachment;
-import org.bukkit.permissions.PermissionAttachmentInfo;
-import org.bukkit.plugin.Plugin;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -105,72 +101,12 @@ public class DefaultsProvider {
     }
 
     @AllArgsConstructor
-    private static class DummyPermissible implements Permissible {
+    private static class DummyPermissible extends DummyPermissibleBase {
         private final Runnable onRefresh;
 
         @Override
         public void recalculatePermissions() {
             onRefresh.run();
-        }
-
-        @Override
-        public Set<PermissionAttachmentInfo> getEffectivePermissions() {
-            return Collections.emptySet();
-        }
-
-        @Override
-        public boolean isPermissionSet(String name) {
-            return false;
-        }
-
-        @Override
-        public boolean isPermissionSet(Permission perm) {
-            return false;
-        }
-
-        @Override
-        public boolean hasPermission(String name) {
-            return false;
-        }
-
-        @Override
-        public boolean hasPermission(Permission perm) {
-            return false;
-        }
-
-        @Override
-        public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value) {
-            return null;
-        }
-
-        @Override
-        public PermissionAttachment addAttachment(Plugin plugin) {
-            return null;
-        }
-
-        @Override
-        public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value, int ticks) {
-            return null;
-        }
-
-        @Override
-        public PermissionAttachment addAttachment(Plugin plugin, int ticks) {
-            return null;
-        }
-
-        @Override
-        public void removeAttachment(PermissionAttachment attachment) {
-
-        }
-
-        @Override
-        public boolean isOp() {
-            return false;
-        }
-
-        @Override
-        public void setOp(boolean value) {
-
         }
     }
 
