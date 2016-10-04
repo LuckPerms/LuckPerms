@@ -24,11 +24,13 @@ package me.lucko.luckperms.contexts;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.util.Collections;
 import java.util.Map;
 
 @Getter
+@ToString
 @AllArgsConstructor
 public class Contexts {
     public static Contexts allowAll() {

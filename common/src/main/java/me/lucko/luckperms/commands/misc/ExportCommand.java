@@ -127,14 +127,24 @@ public class ExportCommand extends SingleMainCommand {
                 plugin.getDatastore().loadUser(uuid, "null");
                 User user = plugin.getUserManager().get(uuid);
 
+                boolean inDefault = false;
                 for (Node node : user.getNodes()) {
                     if (node.isGroupNode() && node.getGroupName().equalsIgnoreCase("default")) {
+                        inDefault = true;
                         continue;
                     }
+
                     write(writer, nodeToString(node, user.getUuid().toString(), false));
                 }
 
-                write(writer, "/luckperms user " + user.getUuid().toString() + " setprimarygroup " + user.getPrimaryGroup());
+                if (!user.getPrimaryGroup().equalsIgnoreCase("default")) {
+                    write(writer, "/luckperms user " + user.getUuid().toString() + " setprimarygroup " + user.getPrimaryGroup());
+                }
+
+                if (!inDefault) {
+                    write(writer, "/luckperms user " + user.getUuid().toString() + " removegroup default");
+                }
+
                 plugin.getUserManager().cleanup(user);
             }
             log.info("Export: Exported " + userCount + " users.");
