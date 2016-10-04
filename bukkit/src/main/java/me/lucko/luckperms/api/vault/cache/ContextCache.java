@@ -57,7 +57,7 @@ public class ContextCache {
             processors.add(new RegexProcessor(permissionCache));
         }
 
-        processors.add(new DefaultsProcessor(() -> ((BukkitUser) user).getLpPermissible().isOp(), defaultsProvider));
+        processors.add(new DefaultsProcessor(((BukkitUser) user)::isOp, defaultsProvider));
         calculator = new PermissionCalculator(plugin, user.getName(), plugin.getConfiguration().isDebugPermissionChecks(), processors);
     }
 

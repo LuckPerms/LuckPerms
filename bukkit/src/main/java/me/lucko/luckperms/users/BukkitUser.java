@@ -44,6 +44,10 @@ public class BukkitUser extends User {
     @Setter
     private LPPermissible lpPermissible = null;
 
+    @Getter
+    @Setter
+    private Map<String, Boolean> loginPreProcess = null;
+
     BukkitUser(UUID uuid, LPBukkitPlugin plugin) {
         super(uuid, plugin);
         this.plugin = plugin;
@@ -52,6 +56,10 @@ public class BukkitUser extends User {
     BukkitUser(UUID uuid, String username, LPBukkitPlugin plugin) {
         super(uuid, username, plugin);
         this.plugin = plugin;
+    }
+
+    public boolean isOp() {
+        return lpPermissible != null && lpPermissible.isOp();
     }
 
     @SuppressWarnings("unchecked")

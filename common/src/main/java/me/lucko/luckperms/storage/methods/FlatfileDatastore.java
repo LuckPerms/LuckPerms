@@ -41,12 +41,12 @@ abstract class FlatfileDatastore extends Datastore {
     private final Logger actionLogger = Logger.getLogger("lp_actions");
     private Map<String, String> uuidCache = new ConcurrentHashMap<>();
 
-    final File pluginDir;
+    private final File pluginDir;
+    private File uuidData;
+    private File actionLog;
     File usersDir;
     File groupsDir;
     File tracksDir;
-    File uuidData;
-    File actionLog;
 
     FlatfileDatastore(LuckPermsPlugin plugin, String name, File pluginDir) {
         super(plugin, name);

@@ -70,7 +70,9 @@ public class AbstractListener {
         final UuidCache cache = plugin.getUuidCache();
 
         final User user = plugin.getUserManager().get(cache.getUUID(uuid));
-        plugin.getUserManager().unload(user);
+        if (user != null) {
+            plugin.getUserManager().unload(user);
+        }
 
         // Unload the user from memory when they disconnect;
         cache.clearCache(uuid);

@@ -62,7 +62,7 @@ public class Injector {
         try {
             Permissible permissible = getPermissible(sender);
             if (permissible instanceof LPPermissible) {
-                getPermField(sender).set(sender, new PermissibleBase(sender));
+                getPermField(sender).set(sender, null);
             }
             return true;
         } catch (Exception e) {
