@@ -249,7 +249,7 @@ public abstract class PermissionHolder {
      * @return a set of nodes
      */
     public SortedSet<LocalizedNode> getAllNodes(List<String> excludedGroups, Contexts context) {
-        SortedSet<LocalizedNode> all = getPermissions(true);
+        SortedSet<LocalizedNode> all = new TreeSet<>((SortedSet<LocalizedNode>) getPermissions(true));
 
         if (excludedGroups == null) {
             excludedGroups = new ArrayList<>();
@@ -310,7 +310,7 @@ public abstract class PermissionHolder {
         if (context.isApplyGroups()) {
             allNodes = getAllNodes(null, context);
         } else {
-            allNodes = getPermissions(true);
+            allNodes = new TreeSet<>((SortedSet<LocalizedNode>) getPermissions(true));
         }
 
         Map<String, String> contexts = new HashMap<>(context.getContext());
