@@ -29,6 +29,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.event.events.GroupRemoveEvent;
@@ -36,7 +38,6 @@ import me.lucko.luckperms.api.event.events.PermissionNodeExpireEvent;
 import me.lucko.luckperms.api.event.events.PermissionNodeSetEvent;
 import me.lucko.luckperms.api.event.events.PermissionNodeUnsetEvent;
 import me.lucko.luckperms.api.implementation.internal.PermissionHolderLink;
-import me.lucko.luckperms.contexts.Contexts;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.groups.Group;
@@ -177,11 +178,11 @@ public abstract class PermissionHolder {
             TreeSet<LocalizedNode> combined = new TreeSet<>(PriorityComparator.reverse());
 
             getNodes().stream()
-                    .map(n -> LocalizedNode.of(n, getObjectName()))
+                    .map(n -> me.lucko.luckperms.utils.LocalizedNode.of(n, getObjectName()))
                     .forEach(combined::add);
 
             getTransientNodes().stream()
-                    .map(n -> LocalizedNode.of(n, getObjectName()))
+                    .map(n -> me.lucko.luckperms.utils.LocalizedNode.of(n, getObjectName()))
                     .forEach(combined::add);
 
             TreeSet<LocalizedNode> permissions = new TreeSet<>(PriorityComparator.reverse());

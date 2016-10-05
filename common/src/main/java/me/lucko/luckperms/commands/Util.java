@@ -23,11 +23,11 @@
 package me.lucko.luckperms.commands;
 
 import lombok.experimental.UtilityClass;
+import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Patterns;
-import me.lucko.luckperms.core.LocalizedNode;
 import me.lucko.luckperms.utils.DateUtil;
 
 import java.util.*;

@@ -23,6 +23,7 @@
 package me.lucko.luckperms.core;
 
 import lombok.*;
+import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Tristate;
 
 import java.util.Optional;

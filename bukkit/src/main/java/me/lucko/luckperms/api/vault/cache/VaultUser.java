@@ -25,9 +25,9 @@ package me.lucko.luckperms.api.vault.cache;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import me.lucko.luckperms.LPBukkitPlugin;
+import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.vault.VaultPermissionHook;
-import me.lucko.luckperms.contexts.Contexts;
 import me.lucko.luckperms.users.User;
 
 import java.util.Collections;

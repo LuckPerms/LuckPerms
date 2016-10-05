@@ -68,8 +68,33 @@ public interface PermissionHolder {
      * Gets an immutable set of the nodes that this object has and inherits
      * @return an immutable set of permissions
      * @since 2.6
+     * @deprecated in favour of {@link #getAllNodes(Contexts)}
      */
+    @Deprecated
     Set<Node> getAllNodes();
+
+    /**
+     * Gets a mutable sorted set of the nodes that this object has and inherits, filtered by context
+     * Unlike {@link #getAllNodesFiltered(Contexts)}, this method will not filter individual nodes. The context is only
+     * used to determine which groups should apply.
+     * Nodes are sorted into priority order.
+     * @param contexts the context for the lookup,
+     * @return a mutable sorted set of permissions
+     * @throws NullPointerException if the context is null
+     * @since 2.11
+     */
+    SortedSet<LocalizedNode> getAllNodes(Contexts contexts);
+
+    /**
+     * Gets a mutable set of the nodes that is objects has and inherits, filtered by context.
+     * Unlike {@link #getAllNodes(Contexts)}, this method WILL filter individual nodes, and only return ones that fully
+     * meet the context provided.
+     * @param contexts the context for the lookup
+     * @return a mutable set of permissions
+     * @throws NullPointerException if the context is null
+     * @since 2.11
+     */
+    Set<LocalizedNode> getAllNodesFiltered(Contexts contexts);
 
     /**
      * Gets an immutable Map of the objects permission nodes
@@ -499,7 +524,9 @@ public interface PermissionHolder {
      * @param applyGroups if inherited group permissions should be included
      * @return a map of permissions
      * @since 2.6
+     * @deprecated in favour of {@link #getAllNodesFiltered(Contexts)}
      */
+    @Deprecated
     Map<String, Boolean> getPermissions(String server, String world, Map<String, String> extraContext, boolean includeGlobal, List<String> possibleNodes, boolean applyGroups);
 
     /**

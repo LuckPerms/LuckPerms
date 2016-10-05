@@ -24,9 +24,9 @@ package me.lucko.luckperms.api.sponge;
 
 import lombok.Getter;
 import lombok.NonNull;
+import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.event.events.UserPermissionRefreshEvent;
 import me.lucko.luckperms.api.implementation.internal.UserLink;
-import me.lucko.luckperms.contexts.Contexts;
 import me.lucko.luckperms.users.User;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;

@@ -23,10 +23,10 @@
 package me.lucko.luckperms.api.vault;
 
 import lombok.NonNull;
+import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.vault.cache.ChatCache;
 import me.lucko.luckperms.api.vault.cache.VaultUser;
-import me.lucko.luckperms.contexts.Contexts;
 import me.lucko.luckperms.core.PermissionHolder;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;

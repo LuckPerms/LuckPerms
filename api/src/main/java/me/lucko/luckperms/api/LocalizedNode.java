@@ -20,28 +20,25 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.contexts;
+package me.lucko.luckperms.api;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
+/**
+ * Represents a Node and where it was inherited from.
+ * @since 2.11
+ */
+public interface LocalizedNode extends Node {
 
-import java.util.Collections;
-import java.util.Map;
+    /**
+     * Gets the node
+     * @return the node this instance is representing
+     */
+    Node getNode();
 
-@Getter
-@ToString
-@AllArgsConstructor
-public class Contexts {
-    public static Contexts allowAll() {
-        return new Contexts(Collections.emptyMap(), true, true, true, true, true);
-    }
-
-    private final Map<String, String> context;
-    private final boolean includeGlobal;
-    private final boolean includeGlobalWorld;
-    private final boolean applyGroups;
-    private final boolean applyGlobalGroups;
-    private final boolean applyGlobalWorldGroups;
+    /**
+     * Gets the location where the {@link Node} is inherited from
+     * @return where the node was inherited from. Will not return null.
+     * @see PermissionHolder#getObjectName()
+     */
+    String getLocation();
 
 }

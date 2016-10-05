@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.core;
+package me.lucko.luckperms.utils;
 
 import lombok.*;
 import me.lucko.luckperms.api.Node;
@@ -37,7 +37,7 @@ import java.util.Optional;
 @Getter
 @ToString
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class LocalizedNode implements me.lucko.luckperms.api.Node {
+public class LocalizedNode implements me.lucko.luckperms.api.LocalizedNode {
     public static LocalizedNode of(@NonNull me.lucko.luckperms.api.Node node, @NonNull String location) {
         return new LocalizedNode(node, location);
     }

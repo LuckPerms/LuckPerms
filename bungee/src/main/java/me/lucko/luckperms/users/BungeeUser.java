@@ -24,9 +24,9 @@ package me.lucko.luckperms.users;
 
 import me.lucko.luckperms.BungeePlayerCache;
 import me.lucko.luckperms.LPBungeePlugin;
+import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.event.events.UserPermissionRefreshEvent;
 import me.lucko.luckperms.api.implementation.internal.UserLink;
-import me.lucko.luckperms.contexts.Contexts;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.util.Collections;

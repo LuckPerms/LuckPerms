@@ -22,8 +22,8 @@
 
 package me.lucko.luckperms;
 
+import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.constants.Message;
-import me.lucko.luckperms.contexts.Contexts;
 import me.lucko.luckperms.inject.Injector;
 import me.lucko.luckperms.inject.LPPermissible;
 import me.lucko.luckperms.users.BukkitUser;
