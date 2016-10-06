@@ -23,28 +23,56 @@
 package me.lucko.luckperms.commands.user.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.CommandResult;
-import me.lucko.luckperms.commands.Predicate;
-import me.lucko.luckperms.commands.Sender;
-import me.lucko.luckperms.commands.SubCommand;
+import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.data.LogEntry;
 import me.lucko.luckperms.users.User;
+import me.lucko.luckperms.utils.ArgumentChecker;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class UserClear extends SubCommand<User> {
     public UserClear() {
-        super("clear", "Clears the user's permissions and groups", Permission.USER_CLEAR, Predicate.alwaysFalse(), null);
+        super("clear", "Clears the user's permissions and groups", Permission.USER_CLEAR, Predicate.notInRange(0, 2),
+                Arg.list(
+                        Arg.create("server", false, "the server name to filter by"),
+                        Arg.create("world", false, "the world name to filter by")
+                )
+        );
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
-        user.clearNodes();
-        Message.CLEAR_SUCCESS.send(sender, user.getName());
-        LogEntry.build().actor(sender).acted(user).action("clear").build().submit(plugin, sender);
+        int before = user.getNodes().size();
 
+        if (args.size() == 0) {
+            user.clearNodes();
+        } else {
+            final String server = args.get(0);
+            if (ArgumentChecker.checkServer(server)) {
+                Message.SERVER_INVALID_ENTRY.send(sender);
+                return CommandResult.INVALID_ARGS;
+            }
+
+            if (args.size() == 2) {
+                final String world = args.get(1);
+                user.clearNodes(server, world);
+
+            } else {
+                user.clearNodes(server);
+            }
+        }
+
+        int changed = before - user.getNodes().size();
+        if (changed == 1) {
+            Message.CLEAR_SUCCESS_SINGULAR.send(sender, user.getName(), changed);
+        } else {
+            Message.CLEAR_SUCCESS.send(sender, user.getName(), changed);
+        }
+
+        LogEntry.build().actor(sender).acted(user).action("clear " + args.stream().collect(Collectors.joining(" "))).build().submit(plugin, sender);
         save(user, sender, plugin);
         return CommandResult.SUCCESS;
     }

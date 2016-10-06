@@ -171,7 +171,10 @@ public enum Message {
     UNSET_TEMP_PERMISSION_SUCCESS("&aUnset temporary permission &b{0}&a for &b{1}&a.", true),
     UNSET_TEMP_PERMISSION_SERVER_SUCCESS("&aUnset temporary permission &b{0}&a for &b{1}&a on server &b{2}&a.", true),
     UNSET_TEMP_PERMISSION_SERVER_WORLD_SUCCESS("&aUnset temporary permission &b{0}&a for &b{1}&a on server &b{2}&a, world &b{3}&a.", true),
-    CLEAR_SUCCESS("&b{0}&a's permissions were cleared.", true),
+    CLEAR_SUCCESS("&b{0}&a's permissions were cleared. (&b{1}&a nodes were removed.)", true),
+    CLEAR_SUCCESS_SINGULAR("&b{0}&a's permissions were cleared. (&b{1}&a node was removed.)", true),
+    META_CLEAR_SUCCESS("&b{0}&a's meta was cleared. (&b{1}&a nodes were removed.)", true),
+    META_CLEAR_SUCCESS_SINGULAR("&b{0}&a's meta was cleared. (&b{1}&a node was removed.)", true),
     ILLEGAL_DATE_ERROR("Could not parse date '{0}'.", true),
     PAST_DATE_ERROR("You cannot set a date in the past!", true),
 

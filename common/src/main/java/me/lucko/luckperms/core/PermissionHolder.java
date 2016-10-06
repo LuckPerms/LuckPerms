@@ -162,6 +162,76 @@ public abstract class PermissionHolder {
         }
     }
 
+    public void clearNodes(String server) {
+        if (server == null) {
+            server = "global";
+        }
+        String finalServer = server;
+
+        synchronized (nodes) {
+            nodes.removeIf(n -> n.getServer().orElse("global").equalsIgnoreCase(finalServer));
+            invalidateCache(true);
+        }
+    }
+
+    public void clearNodes(String server, String world) {
+        if (server == null) {
+            server = "global";
+        }
+        String finalServer = server;
+
+        if (world == null) {
+            world = "null";
+        }
+        String finalWorld = world;
+
+        synchronized (nodes) {
+            nodes.removeIf(n -> n.getServer().orElse("global").equalsIgnoreCase(finalServer) && n.getWorld().orElse("null").equalsIgnoreCase(finalWorld));
+            invalidateCache(true);
+        }
+    }
+
+    public void clearMeta() {
+        synchronized (nodes) {
+            nodes.removeIf(n -> n.isMeta() || n.isPrefix() || n.isSuffix());
+            invalidateCache(true);
+        }
+    }
+
+    public void clearMeta(String server) {
+        if (server == null) {
+            server = "global";
+        }
+        String finalServer = server;
+
+        synchronized (nodes) {
+            nodes.removeIf(n -> (n.isMeta() || n.isPrefix() || n.isSuffix()) &&
+                    n.getServer().orElse("global").equalsIgnoreCase(finalServer)
+            );
+            invalidateCache(true);
+        }
+    }
+
+    public void clearMeta(String server, String world) {
+        if (server == null) {
+            server = "global";
+        }
+        String finalServer = server;
+
+        if (world == null) {
+            world = "null";
+        }
+        String finalWorld = world;
+
+        synchronized (nodes) {
+            nodes.removeIf(n -> (n.isMeta() || n.isPrefix() || n.isSuffix()) &&
+                    (n.getServer().orElse("global").equalsIgnoreCase(finalServer) &&
+                            n.getWorld().orElse("null").equalsIgnoreCase(finalWorld))
+            );
+            invalidateCache(true);
+        }
+    }
+
     public void clearTransientNodes() {
         synchronized (transientNodes) {
             transientNodes.clear();

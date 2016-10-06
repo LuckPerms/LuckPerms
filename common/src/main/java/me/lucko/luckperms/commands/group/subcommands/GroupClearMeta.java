@@ -33,9 +33,9 @@ import me.lucko.luckperms.utils.ArgumentChecker;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class GroupClear extends SubCommand<Group> {
-    public GroupClear() {
-        super("clear", "Clears the group's permissions and parent groups", Permission.GROUP_CLEAR, Predicate.notInRange(0, 2),
+public class GroupClearMeta extends SubCommand<Group> {
+    public GroupClearMeta() {
+        super("clearmeta", "Clears the groups's meta", Permission.GROUP_CLEARMETA, Predicate.notInRange(0, 2),
                 Arg.list(
                         Arg.create("server", false, "the server name to filter by"),
                         Arg.create("world", false, "the world name to filter by")
@@ -48,7 +48,7 @@ public class GroupClear extends SubCommand<Group> {
         int before = group.getNodes().size();
 
         if (args.size() == 0) {
-            group.clearNodes();
+            group.clearMeta();
         } else {
             final String server = args.get(0);
             if (ArgumentChecker.checkServer(server)) {
@@ -58,21 +58,21 @@ public class GroupClear extends SubCommand<Group> {
 
             if (args.size() == 2) {
                 final String world = args.get(1);
-                group.clearNodes(server, world);
+                group.clearMeta(server, world);
 
             } else {
-                group.clearNodes(server);
+                group.clearMeta(server);
             }
         }
 
         int changed = before - group.getNodes().size();
         if (changed == 1) {
-            Message.CLEAR_SUCCESS_SINGULAR.send(sender, group.getName(), changed);
+            Message.META_CLEAR_SUCCESS_SINGULAR.send(sender, group.getName(), changed);
         } else {
-            Message.CLEAR_SUCCESS.send(sender, group.getName(), changed);
+            Message.META_CLEAR_SUCCESS.send(sender, group.getName(), changed);
         }
 
-        LogEntry.build().actor(sender).acted(group).action("clear " + args.stream().collect(Collectors.joining(" "))).build().submit(plugin, sender);
+        LogEntry.build().actor(sender).acted(group).action("clearmeta " + args.stream().collect(Collectors.joining(" "))).build().submit(plugin, sender);
         save(group, sender, plugin);
         return CommandResult.SUCCESS;
     }
