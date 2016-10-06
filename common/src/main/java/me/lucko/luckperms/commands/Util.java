@@ -36,7 +36,11 @@ import java.util.*;
 public class Util {
 
     public static void sendPluginMessage(Sender sender, String message) {
-        sender.sendMessage(color(Message.PREFIX + message));
+        String prefix = sender.getPlatform().getLocaleManager().getTranslation(Message.PREFIX);
+        if (prefix == null) {
+            prefix = Message.PREFIX.getMessage();
+        }
+        sender.sendMessage(color(prefix + message));
     }
 
     public static List<String> stripQuotes(List<String> input) {

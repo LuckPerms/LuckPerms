@@ -120,27 +120,27 @@ public enum Message {
 
     UPDATE_TASK_RUN("&bRunning update task for all online users.", true),
     INFO(
-            PREFIX + "&2Running &bLuckPerms v{0}&2 by &bLuck&2." + "\n" +
-            PREFIX + "&f-> &3Platform: &f{1}" + "\n" +
-            PREFIX + "&f-> &3Storage Method: &f{2}" + "\n" +
-            PREFIX + "&f-> &3Server Name: &f{3}" + "\n" +
-            PREFIX + "&f-> &3Sync Interval: &f{4} minutes" + "\n" +
-            PREFIX + "&f-> &3Include Global: &f{5}" + "\n" +
-            PREFIX + "&f-> &3Include Global World: &f{6}" + "\n" +
-            PREFIX + "&f-> &3Apply Global Groups: &f{7}" + "\n" +
-            PREFIX + "&f-> &3Apply Global World Groups: &f{8}" + "\n" +
-            PREFIX + "&f-> &3Online Mode: &f{9}" + "\n" +
-            PREFIX + "&f-> &3Apply Wildcards: &f{10}" + "\n" +
-            PREFIX + "&f-> &3Apply Regex: &f{11}" + "\n" +
-            PREFIX + "&f-> &3Apply Shorthand: &f{12}",
+            "{PREFIX}&2Running &bLuckPerms v{0}&2 by &bLuck&2." + "\n" +
+            "{PREFIX}&f-> &3Platform: &f{1}" + "\n" +
+            "{PREFIX}&f-> &3Storage Method: &f{2}" + "\n" +
+            "{PREFIX}&f-> &3Server Name: &f{3}" + "\n" +
+            "{PREFIX}&f-> &3Sync Interval: &f{4} minutes" + "\n" +
+            "{PREFIX}&f-> &3Include Global: &f{5}" + "\n" +
+            "{PREFIX}&f-> &3Include Global World: &f{6}" + "\n" +
+            "{PREFIX}&f-> &3Apply Global Groups: &f{7}" + "\n" +
+            "{PREFIX}&f-> &3Apply Global World Groups: &f{8}" + "\n" +
+            "{PREFIX}&f-> &3Online Mode: &f{9}" + "\n" +
+            "{PREFIX}&f-> &3Apply Wildcards: &f{10}" + "\n" +
+            "{PREFIX}&f-> &3Apply Regex: &f{11}" + "\n" +
+            "{PREFIX}&f-> &3Apply Shorthand: &f{12}",
             false
     ),
     DEBUG(
-            PREFIX + "&d&l> &dDebug Info" + "\n" +
-            PREFIX + "&f> &3Online Players: &f{0}" + "\n" +
-            PREFIX + "&f> &3Loaded Users: &f{1}" + "\n" +
-            PREFIX + "&f> &3Loaded Groups: &f{2}" + "\n" +
-            PREFIX + "&f> &3Loaded Tracks: &f{3}",
+            "{PREFIX}&d&l> &dDebug Info" + "\n" +
+            "{PREFIX}&f> &3Online Players: &f{0}" + "\n" +
+            "{PREFIX}&f> &3Loaded Users: &f{1}" + "\n" +
+            "{PREFIX}&f> &3Loaded Groups: &f{2}" + "\n" +
+            "{PREFIX}&f> &3Loaded Tracks: &f{3}",
             false
     ),
 
@@ -219,13 +219,13 @@ public enum Message {
     BULK_CHANGE_SUCCESS("&aApplied bulk change successfully. {0} records were changed.", true),
 
     USER_INFO(
-            PREFIX + "&b-> &bUser: &f{0}" + "\n" +
-            PREFIX + "&b-> &bUUID: &f{1}" + "\n" +
-            PREFIX + "&b-> &bStatus: {2}" + "\n" +
-            PREFIX + "&b-> &bPrimary Group: &f{3}" + "\n" +
-            PREFIX + "&b-> &bPermissions: &f{4}" + "\n" +
-            PREFIX + "&b-> &bTemporary Permissions: &f{5}" + "\n" +
-            PREFIX + "&b-> &bUse &a/{6} user {7} listnodes &bto see all permissions.",
+            "{PREFIX}&b-> &bUser: &f{0}" + "\n" +
+            "{PREFIX}&b-> &bUUID: &f{1}" + "\n" +
+            "{PREFIX}&b-> &bStatus: {2}" + "\n" +
+            "{PREFIX}&b-> &bPrimary Group: &f{3}" + "\n" +
+            "{PREFIX}&b-> &bPermissions: &f{4}" + "\n" +
+            "{PREFIX}&b-> &bTemporary Permissions: &f{5}" + "\n" +
+            "{PREFIX}&b-> &bUse &a/{6} user {7} listnodes &bto see all permissions.",
             false
     ),
     USER_GETUUID("&bThe UUID of &b{0}&b is &b{1}&b.", true),
@@ -250,8 +250,8 @@ public enum Message {
     USER_PROMOTE_SUCCESS_REMOVE("&b{0}&a was removed from &b{1}&a, added to &b{2}&a, and their primary group was set to &b{3}&a.", true),
     USER_PROMOTE_ERROR_ENDOFTRACK("The end of track &4{0}&c was reached. Unable to promote user.", true),
     USER_PROMOTE_ERROR_MALFORMED(
-            PREFIX + "The next group on the track, {0}, no longer exists. Unable to promote user." + "\n" +
-            PREFIX + "Either create the group, or remove it from the track and try again.",
+            "{PREFIX}The next group on the track, {0}, no longer exists. Unable to promote user." + "\n" +
+            "{PREFIX}Either create the group, or remove it from the track and try again.",
             false
     ),
     USER_PROMOTE_ERROR_NOT_CONTAIN_GROUP("Promotions are done based on primary groups. The users primary group is not on the track specified.", true),
@@ -259,18 +259,18 @@ public enum Message {
     USER_DEMOTE_SUCCESS_REMOVE("&b{0}&a was removed from &b{1}&a, added to &b{2}&a, and their primary group was set to &b{3}&a.", true),
     USER_DEMOTE_ERROR_ENDOFTRACK("The end of track &4{0}&c was reached. Unable to demote user.", true),
     USER_DEMOTE_ERROR_MALFORMED(
-            PREFIX + "The previous group on the track, {0}, no longer exists. Unable to demote user." + "\n" +
-            PREFIX + "Either create the group, or remove it from the track and try again.",
+            "{PREFIX}The previous group on the track, {0}, no longer exists. Unable to demote user." + "\n" +
+            "{PREFIX}Either create the group, or remove it from the track and try again.",
             false
     ),
     USER_DEMOTE_ERROR_NOT_CONTAIN_GROUP("Demotions are done based on primary groups. The users primary group is not on the track specified.", true),
     USER_SHOWPOS("&aShowing &b{0}&a's position on track &b{1}&a.\n{2}", true),
 
     GROUP_INFO(
-            PREFIX + "&b-> &bGroup: &f{0}" + "\n" +
-            PREFIX + "&b-> &bPermissions: &f{1}" + "\n" +
-            PREFIX + "&b-> &bTemporary Permissions: &f{2}" + "\n" +
-            PREFIX + "&b-> &bUse &a/{3} group {4} listnodes &bto see all permissions.",
+            "{PREFIX}&b-> &bGroup: &f{0}" + "\n" +
+            "{PREFIX}&b-> &bPermissions: &f{1}" + "\n" +
+            "{PREFIX}&b-> &bTemporary Permissions: &f{2}" + "\n" +
+            "{PREFIX}&b-> &bUse &a/{3} group {4} listnodes &bto see all permissions.",
             false
     ),
     GROUP_SETINHERIT_SUCCESS("&b{0}&a now inherits permissions from &b{1}&a.", true),
@@ -287,8 +287,8 @@ public enum Message {
     GROUP_UNSET_TEMP_INHERIT_SERVER_WORLD_SUCCESS("&b{0}&a no longer temporarily inherits permissions from &b{1}&a on server &b{2}&a, world &b{3}&a.", true),
 
     TRACK_INFO(
-            PREFIX + "&b-> &bTrack: &f{0}" + "\n" +
-            PREFIX + "&b-> &bPath: &f{1}",
+            "{PREFIX}&b-> &bTrack: &f{0}" + "\n" +
+            "{PREFIX}&b-> &bPath: &f{1}",
             false
     ),
     TRACK_CLEAR("&b{0}&a's groups track was cleared.", true),
@@ -338,11 +338,11 @@ public enum Message {
     IMPORT_END_COMPLETE_ERR("&b(Import) &a&lCOMPLETED &7- took &b{0} &7seconds - &c{1} errors.", true),
     IMPORT_END_COMPLETE_ERR_SIN("&b(Import) &a&lCOMPLETED &7- took &b{0} &7seconds - &c{1} error.", true),
     IMPORT_END_ERROR_HEADER(
-            PREFIX + "&b(Import) &7------------> &fShowing Error #&b{0} &7<------------" + "\n" +
-            PREFIX + "&b(Import) &fWhilst executing: &fCommand #{1}" + "\n" +
-            PREFIX + "&b(Import) &fCommand: &7{2}" + "\n" +
-            PREFIX + "&b(Import) &fType: &f{3}" + "\n" +
-            PREFIX + "&b(Import) &fOutput:",
+            "{PREFIX}&b(Import) &7------------> &fShowing Error #&b{0} &7<------------" + "\n" +
+            "{PREFIX}&b(Import) &fWhilst executing: &fCommand #{1}" + "\n" +
+            "{PREFIX}&b(Import) &fCommand: &7{2}" + "\n" +
+            "{PREFIX}&b(Import) &fType: &f{3}" + "\n" +
+            "{PREFIX}&b(Import) &fOutput:",
             false
     ),
 
@@ -361,15 +361,20 @@ public enum Message {
     }
 
     public void send(Sender sender, Object... objects) {
+        String prefix = sender.getPlatform().getLocaleManager().getTranslation(PREFIX);
+        if (prefix == null) {
+            prefix = PREFIX.getMessage();
+        }
+
         String s = sender.getPlatform().getLocaleManager().getTranslation(this);
         if (s == null) {
             s = message;
-        } else {
-            s = s.replace("{PREFIX}", PREFIX.getMessage()).replace("\\n", "\n");
         }
 
+        s = s.replace("{PREFIX}", prefix).replace("\\n", "\n");
+
         if (showPrefix) {
-            sender.sendMessage(Util.color(PREFIX + format(s, objects)));
+            sender.sendMessage(Util.color(prefix + format(s, objects)));
         } else {
             sender.sendMessage(Util.color(format(s, objects)));
         }
