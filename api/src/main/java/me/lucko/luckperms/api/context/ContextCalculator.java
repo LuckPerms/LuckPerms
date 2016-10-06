@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * A simple implementation of the listener aspects of {@link IContextCalculator<T>}
+ * A simple implementation of the listener aspects of {@link IContextCalculator}
  * @param <T> the subject type
  */
 public abstract class ContextCalculator<T> implements IContextCalculator<T> {

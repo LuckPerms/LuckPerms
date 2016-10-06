@@ -67,6 +67,14 @@
                                     <pattern>org.h2</pattern>
                                     <shadedPattern>me.lucko.luckperms.lib.h2</shadedPattern>
                                 </relocation>
+                                <relocation>
+                                    <pattern>com.google.common</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.guava</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.google.gson</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.gson</shadedPattern>
+                                </relocation>
                             </relocations>
                         </configuration>
                     </execution>
