@@ -42,7 +42,7 @@ public class SimpleSubject implements Subject {
 
     private final PermissionService service;
     private final SubjectCollection containingCollection;
-    private final SubjectData subjectData;
+    private final MemorySubjectData subjectData;
 
     public SimpleSubject(String identifier, PermissionService service, SubjectCollection containingCollection) {
         this.identifier = identifier;
@@ -63,7 +63,7 @@ public class SimpleSubject implements Subject {
 
     @Override
     public boolean hasPermission(@NonNull Set<Context> contexts, @NonNull String node) {
-        return subjectData.getPermissions(contexts).getOrDefault(node, false);
+        return getPermissionValue(contexts, node).asBoolean();
     }
 
     @Override
@@ -73,11 +73,17 @@ public class SimpleSubject implements Subject {
 
     @Override
     public Tristate getPermissionValue(@NonNull Set<Context> contexts, @NonNull String node) {
-        if (!subjectData.getPermissions(contexts).containsKey(node)) {
-            return Tristate.UNDEFINED;
+        Tristate res = subjectData.getNodeTree(contexts).get(node);
+        if (res == Tristate.UNDEFINED) {
+            for (Subject parent : getParents(contexts)) {
+                Tristate tempRes = parent.getPermissionValue(contexts, node);
+                if (tempRes != Tristate.UNDEFINED) {
+                    res = tempRes;
+                    break;
+                }
+            }
         }
-
-        return Tristate.fromBoolean(subjectData.getPermissions(contexts).get(node));
+        return res;
     }
 
     @Override
@@ -101,13 +107,23 @@ public class SimpleSubject implements Subject {
     }
 
     @Override
-    public Optional<String> getOption(Set<Context> set, String s) {
-        return Optional.ofNullable(subjectData.getOptions(set).get(s));
+    public Optional<String> getOption(Set<Context> set, String key) {
+        Optional<String> res = Optional.ofNullable(subjectData.getOptions(getActiveContexts()).get(key));
+        if (!res.isPresent()) {
+            for (Subject parent : getParents(getActiveContexts())) {
+                Optional<String> tempRes = parent.getOption(getActiveContexts(), key);
+                if (tempRes.isPresent()) {
+                    res = tempRes;
+                    break;
+                }
+            }
+        }
+        return res;
     }
 
     @Override
     public Optional<String> getOption(String key) {
-        return Optional.ofNullable(subjectData.getOptions(getActiveContexts()).get(key));
+        return getOption(getActiveContexts(), key);
     }
 
     @Override
