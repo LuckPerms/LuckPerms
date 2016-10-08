@@ -40,9 +40,8 @@ import java.util.UUID;
 public class BukkitUser extends User {
     private final LPBukkitPlugin plugin;
 
-    @Getter
-    @Setter
     private LPPermissible lpPermissible = null;
+    private final Object permissibleLock = new Object();
 
     @Getter
     @Setter
@@ -62,17 +61,30 @@ public class BukkitUser extends User {
         return lpPermissible != null && lpPermissible.isOp();
     }
 
+    public LPPermissible getPermissible() {
+        synchronized (permissibleLock) {
+            return lpPermissible;
+        }
+    }
+
+    public void setPermissible(LPPermissible permissible) {
+        synchronized (permissibleLock) {
+            lpPermissible = permissible;
+        }
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public synchronized void refreshPermissions() {
-        if (lpPermissible == null) {
+        LPPermissible permissible = getPermissible();
+        if (permissible == null) {
             return;
         }
 
         // Calculate the permissions that should be applied. This is done async, who cares about how long it takes or how often it's done.
         Map<String, Boolean> toApply = exportNodes(
                 new Contexts(
-                        plugin.getContextManager().giveApplicableContext((Player) lpPermissible.getParent(), new HashMap<>()),
+                        plugin.getContextManager().giveApplicableContext((Player) permissible.getParent(), new HashMap<>()),
                         plugin.getConfiguration().isIncludingGlobalPerms(),
                         plugin.getConfiguration().isIncludingGlobalWorldPerms(),
                         true,
@@ -84,7 +96,7 @@ public class BukkitUser extends User {
         );
 
         try {
-            Map<String, Boolean> existing = lpPermissible.getLuckPermsPermissions();
+            Map<String, Boolean> existing = permissible.getLuckPermsPermissions();
 
             boolean different = false;
             if (toApply.size() != existing.size()) {
@@ -102,7 +114,7 @@ public class BukkitUser extends User {
             if (!different) return;
 
             existing.clear();
-            lpPermissible.invalidateCache();
+            permissible.invalidateCache();
             existing.putAll(toApply);
 
             if (plugin.getConfiguration().isAutoOp()) {
@@ -116,8 +128,8 @@ public class BukkitUser extends User {
                 }
 
                 final boolean finalOp = op;
-                if (lpPermissible.isOp() != op) {
-                    final Permissible parent = lpPermissible.getParent();
+                if (permissible.isOp() != op) {
+                    final Permissible parent = permissible.getParent();
                     plugin.doSync(() -> parent.setOp(finalOp));
                 }
             }

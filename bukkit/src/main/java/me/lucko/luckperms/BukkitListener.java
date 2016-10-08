@@ -113,7 +113,7 @@ class BukkitListener extends AbstractListener implements Listener {
 
             // Inject into the player
             Injector.inject(player, lpPermissible);
-            u.setLpPermissible(lpPermissible);
+            u.setPermissible(lpPermissible);
 
         } catch (Throwable t) {
             t.printStackTrace();

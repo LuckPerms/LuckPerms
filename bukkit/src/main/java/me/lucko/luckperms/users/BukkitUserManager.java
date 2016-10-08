@@ -46,9 +46,9 @@ public class BukkitUserManager extends UserManager implements ContextListener<Pl
             BukkitUser u = (BukkitUser) user;
             Player player = plugin.getServer().getPlayer(plugin.getUuidCache().getExternalUUID(u.getUuid()));
             if (player != null) {
-                if (u.getLpPermissible() != null) {
-                    Injector.unInject(player); // TODO is this needed?
-                    u.setLpPermissible(null);
+                if (u.getPermissible() != null) {
+                    Injector.unInject(player);
+                    u.setPermissible(null);
                 }
 
                 if (plugin.getConfiguration().isAutoOp()) {
