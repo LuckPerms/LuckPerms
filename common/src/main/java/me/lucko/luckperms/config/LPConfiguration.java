@@ -74,6 +74,8 @@ public interface LPConfiguration {
 
     boolean isVaultIncludingGlobal();
 
+    boolean isVaultIgnoreWorld();
+
     Map<String, String> getWorldRewrites();
 
     Map<String, String> getGroupNameRewrites();

@@ -80,6 +80,9 @@ vault-server: global
 # If global permissions should be considered when retrieving meta or player groups
 vault-include-global: true
 
+# If Vault operations should ignore any world arguments if supplied.
+vault-ignore-world: false
+
 # Mirrors world names. Whenever LuckPerms checks what world a user is in, if the world name is in this list, the value assigned
 # will be sent forward for permission calculation instead.
 world-rewrite:

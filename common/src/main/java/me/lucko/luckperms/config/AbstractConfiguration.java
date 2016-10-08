@@ -62,6 +62,7 @@ public abstract class AbstractConfiguration<T extends LuckPermsPlugin> implement
     private boolean autoOp;
     private String vaultServer;
     private boolean vaultIncludingGlobal;
+    private boolean vaultIgnoreWorld;
     private Map<String, String> worldRewrites;
     private Map<String, String> groupNameRewrites;
     private DatastoreConfiguration databaseValues;
@@ -101,6 +102,7 @@ public abstract class AbstractConfiguration<T extends LuckPermsPlugin> implement
         commandsAllowOp = getBoolean("commands-allow-op", true);
         vaultServer = getString("vault-server", "global");
         vaultIncludingGlobal = getBoolean("vault-include-global", true);
+        vaultIgnoreWorld = getBoolean("vault-ignore-world", false);
         worldRewrites = ImmutableMap.copyOf(getMap("world-rewrite", Collections.emptyMap()));
         groupNameRewrites = ImmutableMap.copyOf(getMap("group-name-rewrite", Collections.emptyMap()));
         databaseValues = new DatastoreConfiguration(

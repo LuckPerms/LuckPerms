@@ -75,6 +75,7 @@ public class VaultChatHook extends Chat {
     }
 
     private void saveMeta(PermissionHolder holder, String world, String node, String value) {
+        String finalWorld = perms.isIgnoreWorld() ? null : world;
         if (holder == null) return;
         if (node.equals("")) return;
 
@@ -96,8 +97,8 @@ public class VaultChatHook extends Chat {
             if (!perms.getServer().equalsIgnoreCase("global")) {
                 metaNode.setServer(perms.getServer());
             }
-            if (world != null && !world.equals("")) {
-                metaNode.setServer(perms.getServer()).setWorld(world);
+            if (finalWorld != null && !finalWorld.equals("")) {
+                metaNode.setServer(perms.getServer()).setWorld(finalWorld);
             }
 
             try {
@@ -109,6 +110,7 @@ public class VaultChatHook extends Chat {
     }
 
     private void setChatMeta(boolean prefix, PermissionHolder holder, String value, String world) {
+        String finalWorld = perms.isIgnoreWorld() ? null : world;
         if (holder == null) return;
         if (value.equals("")) return;
 
@@ -119,8 +121,8 @@ public class VaultChatHook extends Chat {
                 node.setServer(perms.getServer());
             }
 
-            if (world != null && !world.equals("")) {
-                node.setServer(perms.getServer()).setWorld(world);
+            if (finalWorld != null && !finalWorld.equals("")) {
+                node.setServer(perms.getServer()).setWorld(finalWorld);
             }
 
             try {
@@ -132,6 +134,7 @@ public class VaultChatHook extends Chat {
     }
 
     private String getUserMeta(User user, String world, String node, String defaultValue) {
+        world = perms.isIgnoreWorld() ? null : world;
         if (user == null) return defaultValue;
         node = escapeCharacters(node);
 
@@ -151,6 +154,7 @@ public class VaultChatHook extends Chat {
     }
 
     private String getUserChatMeta(boolean prefix, User user, String world) {
+        world = perms.isIgnoreWorld() ? null : world;
         if (user == null) return "";
 
         if (!perms.getVaultUserManager().containsUser(user.getUuid())) {
@@ -169,6 +173,7 @@ public class VaultChatHook extends Chat {
     }
 
     private String getGroupMeta(Group group, String world, String node, String defaultValue) {
+        world = perms.isIgnoreWorld() ? null : world;
         if (group == null) return defaultValue;
         if (node.equals("")) return defaultValue;
         node = escapeCharacters(node);
@@ -200,6 +205,7 @@ public class VaultChatHook extends Chat {
     }
 
     private String getGroupChatMeta(boolean prefix, Group group, String world) {
+        world = perms.isIgnoreWorld() ? null : world;
         if (group == null) return "";
 
         int priority = Integer.MIN_VALUE;

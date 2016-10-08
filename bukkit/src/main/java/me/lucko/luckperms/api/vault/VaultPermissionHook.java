@@ -61,6 +61,10 @@ public class VaultPermissionHook extends Permission implements Runnable {
     @Setter
     private boolean includeGlobal = true;
 
+    @Getter
+    @Setter
+    private boolean ignoreWorld = false;
+
     public void setup() {
         vaultUserManager = new VaultUserManager(plugin, this);
         plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, this, 1L, 1L);
@@ -164,6 +168,7 @@ public class VaultPermissionHook extends Permission implements Runnable {
 
     @Override
     public boolean playerHas(String world, @NonNull String player, @NonNull String permission) {
+        world = ignoreWorld ? null : world;
         log("Checking if player " + player + " has permission: " + permission + " on world " + world + ", server " + server);
         User user = plugin.getUserManager().get(player);
         if (user == null) return false;
@@ -184,22 +189,25 @@ public class VaultPermissionHook extends Permission implements Runnable {
 
     @Override
     public boolean playerAdd(String world, @NonNull String player, @NonNull String permission) {
-        log("Adding permission to player " + player + ": '" + permission + "' on world " + world + ", server " + server);
+        String finalWorld = ignoreWorld ? null : world;
+        log("Adding permission to player " + player + ": '" + permission + "' on world " + finalWorld + ", server " + server);
         final User user = plugin.getUserManager().get(player);
-        scheduleTask(() -> add(world, user, permission));
+        scheduleTask(() -> add(finalWorld, user, permission));
         return true;
     }
 
     @Override
     public boolean playerRemove(String world, @NonNull String player, @NonNull String permission) {
-        log("Removing permission from player " + player + ": '" + permission + "' on world " + world + ", server " + server);
+        String finalWorld = ignoreWorld ? null : world;
+        log("Removing permission from player " + player + ": '" + permission + "' on world " + finalWorld + ", server " + server);
         final User user = plugin.getUserManager().get(player);
-        scheduleTask(() -> remove(world, user, permission));
+        scheduleTask(() -> remove(finalWorld, user, permission));
         return true;
     }
 
     @Override
     public boolean groupHas(String world, @NonNull String groupName, @NonNull String permission) {
+        world = ignoreWorld ? null : world;
         log("Checking if group " + groupName + " has permission: " + permission + " on world " + world + ", server " + server);
         final Group group = plugin.getGroupManager().get(groupName);
         return objectHas(world, group, permission);
@@ -207,30 +215,33 @@ public class VaultPermissionHook extends Permission implements Runnable {
 
     @Override
     public boolean groupAdd(String world, @NonNull String groupName, @NonNull String permission) {
-        log("Adding permission to group " + groupName + ": '" + permission + "' on world " + world + ", server " + server);
+        String finalWorld = ignoreWorld ? null : world;
+        log("Adding permission to group " + groupName + ": '" + permission + "' on world " + finalWorld + ", server " + server);
         final Group group = plugin.getGroupManager().get(groupName);
-        scheduleTask(() -> add(world, group, permission));
+        scheduleTask(() -> add(finalWorld, group, permission));
         return true;
     }
 
     @Override
     public boolean groupRemove(String world, @NonNull String groupName, @NonNull String permission) {
-        log("Removing permission from group " + groupName + ": '" + permission + "' on world " + world + ", server " + server);
+        String finalWorld = ignoreWorld ? null : world;
+        log("Removing permission from group " + groupName + ": '" + permission + "' on world " + finalWorld + ", server " + server);
         final Group group = plugin.getGroupManager().get(groupName);
-        scheduleTask(() -> remove(world, group, permission));
+        scheduleTask(() -> remove(finalWorld, group, permission));
         return true;
     }
 
     @Override
     public boolean playerInGroup(String world, @NonNull String player, @NonNull String group) {
-        log("Checking if player " + player + " is in group: " + group + " on world " + world + ", server " + server);
+        String finalWorld = ignoreWorld ? null : world;
+        log("Checking if player " + player + " is in group: " + group + " on world " + finalWorld + ", server " + server);
         final User user = plugin.getUserManager().get(player);
         if (user == null) return false;
 
         return user.getNodes().stream()
                 .filter(Node::isGroupNode)
                 .filter(n -> n.shouldApplyOnServer(server, isIncludeGlobal(), false))
-                .filter(n -> n.shouldApplyOnWorld(world, true, false))
+                .filter(n -> n.shouldApplyOnWorld(finalWorld, true, false))
                 .map(Node::getGroupName)
                 .filter(s -> s.equalsIgnoreCase(group))
                 .findAny().isPresent();
@@ -238,7 +249,8 @@ public class VaultPermissionHook extends Permission implements Runnable {
 
     @Override
     public boolean playerAddGroup(String world, @NonNull String player, @NonNull String groupName) {
-        log("Adding player " + player + " to group: '" + groupName + "' on world " + world + ", server " + server);
+        String finalWorld = ignoreWorld ? null : world;
+        log("Adding player " + player + " to group: '" + groupName + "' on world " + finalWorld + ", server " + server);
         final User user = plugin.getUserManager().get(player);
         if (user == null) return false;
 
@@ -247,8 +259,8 @@ public class VaultPermissionHook extends Permission implements Runnable {
 
         scheduleTask(() -> {
             try {
-                if (world != null && !world.equals("")) {
-                    user.addGroup(group, server, world);
+                if (finalWorld != null && !finalWorld.equals("")) {
+                    user.addGroup(group, server, finalWorld);
                 } else {
                     user.addGroup(group, server);
                 }
@@ -260,7 +272,8 @@ public class VaultPermissionHook extends Permission implements Runnable {
 
     @Override
     public boolean playerRemoveGroup(String world, @NonNull String player, @NonNull String groupName) {
-        log("Removing player " + player + " from group: '" + groupName + "' on world " + world + ", server " + server);
+        String finalWorld = ignoreWorld ? null : world;
+        log("Removing player " + player + " from group: '" + groupName + "' on world " + finalWorld + ", server " + server);
         final User user = plugin.getUserManager().get(player);
         if (user == null) return false;
 
@@ -269,8 +282,8 @@ public class VaultPermissionHook extends Permission implements Runnable {
 
         scheduleTask(() -> {
             try {
-                if (world != null && !world.equals("")) {
-                    user.removeGroup(group, server, world);
+                if (finalWorld != null && !finalWorld.equals("")) {
+                    user.removeGroup(group, server, finalWorld);
                 } else {
                     user.removeGroup(group, server);
                 }
@@ -282,14 +295,15 @@ public class VaultPermissionHook extends Permission implements Runnable {
 
     @Override
     public String[] getPlayerGroups(String world, @NonNull String player) {
-        log("Getting groups of player: " + player + ", on world " + world + ", server " + server);
+        String finalWorld = ignoreWorld ? null : world;
+        log("Getting groups of player: " + player + ", on world " + finalWorld + ", server " + server);
         User user = plugin.getUserManager().get(player);
         if (user == null) return new String[0];
 
         return user.getNodes().stream()
                 .filter(Node::isGroupNode)
                 .filter(n -> n.shouldApplyOnServer(server, isIncludeGlobal(), false))
-                .filter(n -> n.shouldApplyOnWorld(world, true, false))
+                .filter(n -> n.shouldApplyOnWorld(finalWorld, true, false))
                 .map(Node::getGroupName)
                 .toArray(String[]::new);
     }

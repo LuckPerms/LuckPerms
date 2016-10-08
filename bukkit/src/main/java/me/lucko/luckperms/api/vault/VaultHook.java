@@ -42,6 +42,7 @@ public class VaultHook {
             permissionHook.setPlugin(plugin);
             permissionHook.setServer(plugin.getConfiguration().getVaultServer());
             permissionHook.setIncludeGlobal(plugin.getConfiguration().isVaultIncludingGlobal());
+            permissionHook.setIncludeGlobal(plugin.getConfiguration().isVaultIgnoreWorld());
             permissionHook.setup();
 
             if (chatHook == null) {
