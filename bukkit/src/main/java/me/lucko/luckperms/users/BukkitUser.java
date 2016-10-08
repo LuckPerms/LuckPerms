@@ -40,8 +40,9 @@ import java.util.UUID;
 public class BukkitUser extends User {
     private final LPBukkitPlugin plugin;
 
-    private LPPermissible lpPermissible = null;
-    private final Object permissibleLock = new Object();
+    @Getter
+    @Setter
+    private LPPermissible permissible = null;
 
     @Getter
     @Setter
@@ -58,19 +59,7 @@ public class BukkitUser extends User {
     }
 
     public boolean isOp() {
-        return lpPermissible != null && lpPermissible.isOp();
-    }
-
-    public LPPermissible getPermissible() {
-        synchronized (permissibleLock) {
-            return lpPermissible;
-        }
-    }
-
-    public void setPermissible(LPPermissible permissible) {
-        synchronized (permissibleLock) {
-            lpPermissible = permissible;
-        }
+        return permissible != null && permissible.isOp();
     }
 
     @SuppressWarnings("unchecked")
