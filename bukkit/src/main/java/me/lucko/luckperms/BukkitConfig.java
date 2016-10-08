@@ -24,11 +24,9 @@ package me.lucko.luckperms;
 
 import me.lucko.luckperms.config.AbstractConfiguration;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,13 +47,7 @@ class BukkitConfig extends AbstractConfiguration<LPBukkitPlugin> {
             getPlugin().saveResource("config.yml", false);
         }
 
-        configuration = new YamlConfiguration();
-
-        try {
-            configuration.load(configFile);
-        } catch (InvalidConfigurationException | IOException e) {
-            e.printStackTrace();
-        }
+        configuration = YamlConfiguration.loadConfiguration(configFile);
     }
 
     @Override
