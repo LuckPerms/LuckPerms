@@ -27,7 +27,6 @@ import me.lucko.luckperms.api.context.ContextListener;
 import org.spongepowered.api.entity.living.player.Player;
 
 import java.util.Map;
-import java.util.UUID;
 
 public class SpongeUserManager extends UserManager implements ContextListener<Player> {
     private final LPSpongePlugin plugin;
@@ -67,11 +66,6 @@ public class SpongeUserManager extends UserManager implements ContextListener<Pl
 
     @Override
     public void onContextChange(Player subject, Map.Entry<String, String> before, Map.Entry<String, String> current) throws Exception {
-        UUID internal = plugin.getUuidCache().getUUID(subject.getUniqueId());
-
-        User user = get(internal);
-        if (user != null) {
-            plugin.doAsync(user::refreshPermissions);
-        }
+        // Not needed on Sponge. The context is accumulated on each permission check.
     }
 }

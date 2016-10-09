@@ -48,7 +48,8 @@ public class SpongeListener extends AbstractListener {
         }
 
         final GameProfile p = e.getProfile();
-        onAsyncLogin(p.getUniqueId(), p.getName().get());
+        onAsyncLogin(p.getUniqueId(), p.getName().get()); // Load the user into LuckPerms
+        plugin.getService().getUserSubjects().load(p.getUniqueId()); // Load the user into the PermissionService
     }
 
     @SuppressWarnings("deprecation")
@@ -57,12 +58,14 @@ public class SpongeListener extends AbstractListener {
         final GameProfile player = e.getProfile();
         final User user = plugin.getUserManager().get(plugin.getUuidCache().getUUID(player.getUniqueId()));
 
+        // Check if the user was loaded successfully.
         if (user == null) {
             e.setCancelled(true);
             e.setMessage(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(Message.LOADING_ERROR.toString()));
             return;
         }
 
+        // Refresh permissions again
         user.refreshPermissions();
     }
 

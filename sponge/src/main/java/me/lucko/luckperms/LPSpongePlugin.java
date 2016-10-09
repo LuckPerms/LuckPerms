@@ -100,7 +100,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     private ConsecutiveExecutor consecutiveExecutor;
     private LuckPermsService service;
     private LocaleManager localeManager;
-    private ContextManager<Player> contextManager;
+    private ContextManager<Player> contextManager; // TODO convert this to use Subject instead of Player
 
     @Listener
     public void onEnable(GamePreInitializationEvent event) {

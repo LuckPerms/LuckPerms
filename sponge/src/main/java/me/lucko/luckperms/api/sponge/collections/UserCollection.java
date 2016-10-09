@@ -27,6 +27,7 @@ import lombok.NonNull;
 import me.lucko.luckperms.api.sponge.LuckPermsService;
 import me.lucko.luckperms.api.sponge.LuckPermsUserSubject;
 import me.lucko.luckperms.api.sponge.simple.SimpleCollection;
+import me.lucko.luckperms.commands.Util;
 import me.lucko.luckperms.users.User;
 import me.lucko.luckperms.users.UserIdentifier;
 import me.lucko.luckperms.users.UserManager;
@@ -42,6 +43,10 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+/**
+ * Manages low level Subject instances for the PermissionService.
+ * Most calls are cached.
+ */
 public class UserCollection implements SubjectCollection {
     private final LuckPermsService service;
     private final UserManager manager;
@@ -61,34 +66,45 @@ public class UserCollection implements SubjectCollection {
         return PermissionService.SUBJECTS_USER;
     }
 
-    private void load(UUID uuid) {
+    /**
+     * Load a user into this manager
+     * @param uuid the external uuid of the user
+     */
+    public synchronized void load(UUID uuid) {
         UUID internal = service.getPlugin().getUuidCache().getUUID(uuid);
-        if (!manager.isLoaded(UserIdentifier.of(uuid, null))) {
-            return;
+        if (!manager.isLoaded(UserIdentifier.of(internal, null))) {
+            return; // Not loaded at a higher level
+        }
+
+        if (users.containsKey(internal)) {
+            return; // Already loaded
         }
 
         User user = manager.get(internal);
-        users.put(internal, LuckPermsUserSubject.wrapUser(user, service));
+        LuckPermsUserSubject subject = LuckPermsUserSubject.wrapUser(user, service);
+        subject.calculateActivePermissions(true); // Pre-process some of their permissions
+
+        users.put(internal, subject);
     }
 
+    /**
+     * Unload a user from this manager
+     * @param uuid the internal uuid of the user
+     */
     public void unload(UUID uuid) {
-        users.remove(service.getPlugin().getUuidCache().getUUID(uuid));
+        users.remove(uuid);
     }
 
     @Override
-    public synchronized Subject get(@NonNull String id) {
-        try {
-            UUID u = service.getPlugin().getUuidCache().getUUID(UUID.fromString(id));
-            if (users.containsKey(u)) {
-                return users.get(u);
+    public Subject get(@NonNull String id) {
+        final UUID uuid = Util.parseUuid(id);
+        if (uuid != null) {
+            UUID internal = service.getPlugin().getUuidCache().getUUID(uuid);
+            if (users.containsKey(internal)) {
+                return users.get(internal);
             }
 
-            if (manager.isLoaded(UserIdentifier.of(u, null))) {
-                load(u);
-                return users.get(u);
-            }
-
-        } catch (IllegalArgumentException e) {
+        } else {
             for (LuckPermsUserSubject subject : users.values()) {
                 if (subject.getUser().getName().equals(id)) {
                     return subject;
@@ -100,20 +116,28 @@ public class UserCollection implements SubjectCollection {
             service.getPlugin().getLog().warn("Couldn't get user subject for: " + id);
         }
 
-        // What am I meant to do here? What if no user is loaded? Load it? Create it?
-        // If I do load/create it, this method should always be called async??.... errr.
+        // Fallback to the other collection. This Subject instance will never be persisted.
         return fallback.get(id);
     }
 
     @Override
     public boolean hasRegistered(@NonNull String id) {
-        try {
-            UUID u = UUID.fromString(id);
-            return manager.isLoaded(UserIdentifier.of(service.getPlugin().getUuidCache().getUUID(u), null));
-        } catch (IllegalArgumentException e) {
-            User user = manager.get(id);
-            return user != null;
+        final UUID uuid = Util.parseUuid(id);
+        if (uuid != null) {
+            UUID internal = service.getPlugin().getUuidCache().getUUID(uuid);
+            if (users.containsKey(internal)) {
+                return true;
+            }
+
+        } else {
+            for (LuckPermsUserSubject subject : users.values()) {
+                if (subject.getUser().getName().equals(id)) {
+                    return true;
+                }
+            }
         }
+
+        return false;
     }
 
     @Override
