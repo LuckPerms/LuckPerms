@@ -14,13 +14,16 @@ LuckPerms is an advanced permissions implementation aiming to be a flexible, per
 * [Sponge Plugin Page](https://forums.spongepowered.org/t/luckperms-an-advanced-permissions-system/14274 "Sponge Plugin Page")
 
 ## LuckPerms vs Other Plugins
+### Bukkit
 ![alt text](https://static.lucko.me/luckperms-compare-copy.png "Feature comparison")
 _Features checked on 23rd Aug 2016. If you find any inaccuracies, please do let me know. I tried to be as fair as possible, and copy all major features from the respective plugin pages._
-
+### Sponge
+![alt text](https://static.lucko.me/luckperms-compare-sponge.png "Feature comparison")
+_Features checked on 8th Oct 2016. If you find any inaccuracies, please do let me know. I tried to be as fair as possible, and copy all major features from the respective plugin pages._
 ## License
-See LICENSE.md.
+LuckPerms is licensed under the permissive MIT license. See LICENSE.md for more info.
 
 ## Thanks to:
 [![JProfiler](https://www.ej-technologies.com/images/product_banners/jprofiler_large.png)](http://www.ej-technologies.com/products/jprofiler/overview.html)
 
-Thanks to ej-technologies for granting LuckPerms an open source licence to their [java profiling software](http://www.ej-technologies.com/products/jprofiler/overview.html "Java Profiler").
+Thanks to ej-technologies for granting LuckPerms an open source licence to their [Java Profiling Software](http://www.ej-technologies.com/products/jprofiler/overview.html "Java Profiler").
