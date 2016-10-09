@@ -92,7 +92,9 @@ public class UserCollection implements SubjectCollection {
      * @param uuid the internal uuid of the user
      */
     public void unload(UUID uuid) {
-        users.remove(uuid);
+        if (users.containsKey(uuid)) {
+            users.remove(uuid).deprovision();
+        }
     }
 
     @Override

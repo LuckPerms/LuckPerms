@@ -36,7 +36,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class ContextData {
-    private final LuckPermsUserSubject parent;
 
     @Getter
     private final Map<String, String> context;
@@ -47,7 +46,6 @@ public class ContextData {
     private final PermissionCalculator calculator;
 
     public ContextData(LuckPermsUserSubject parent, Map<String, String> context, LuckPermsService service) {
-        this.parent = parent;
         this.context = context;
 
         Set<Context> contexts = context.entrySet().stream().map(e -> new Context(e.getKey(), e.getValue())).collect(Collectors.toSet());

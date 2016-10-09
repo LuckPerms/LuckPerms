@@ -50,16 +50,23 @@ public class LuckPermsSubject implements Subject {
     }
 
     @Getter
-    private final PermissionHolder holder;
-    private final LuckPermsSubjectData enduringData;
-    private final LuckPermsSubjectData transientData;
-    protected final LuckPermsService service;
+    private PermissionHolder holder;
+    private LuckPermsSubjectData enduringData;
+    private LuckPermsSubjectData transientData;
+    protected LuckPermsService service;
 
     LuckPermsSubject(PermissionHolder holder, LuckPermsService service) {
         this.holder = holder;
         this.enduringData = new LuckPermsSubjectData(true, this, service, holder);
         this.transientData = new LuckPermsSubjectData(true, this, service, holder);
         this.service = service;
+    }
+
+    public void deprovision() {
+        holder = null;
+        enduringData = null;
+        transientData = null;
+        service = null;
     }
 
     void objectSave(PermissionHolder t) {

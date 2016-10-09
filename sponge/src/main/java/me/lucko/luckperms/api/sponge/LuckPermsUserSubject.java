@@ -45,16 +45,25 @@ public class LuckPermsUserSubject extends LuckPermsSubject {
     }
 
     @Getter
-    private final User user;
+    private User user;
 
     @Getter
-    private final Map<Map<String, String>, ContextData> contextData;
+    private Map<Map<String, String>, ContextData> contextData;
 
     private LuckPermsUserSubject(User user, LuckPermsService service) {
         super(user, service);
         this.user = user;
 
         contextData = new ConcurrentHashMap<>();
+    }
+
+    @Override
+    public void deprovision() {
+        /* For some reason, Sponge holds onto User instances in a cache, which in turn, prevents LuckPerms data from being GCed.
+           As well as unloading, we also remove all references to the User instances. */
+        super.deprovision();
+        user = null;
+        contextData = null;
     }
 
     @Override
