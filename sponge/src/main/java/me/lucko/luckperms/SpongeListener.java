@@ -66,13 +66,13 @@ public class SpongeListener extends AbstractListener {
         }
 
         // Refresh permissions again
-        user.refreshPermissions();
+        plugin.doAsync(user::refreshPermissions);
     }
 
     @Listener
     public void onClientJoin(ClientConnectionEvent.Join e) {
         // Refresh permissions again
-        refreshPlayer(e.getTargetEntity().getUniqueId());
+        plugin.doAsync(() -> refreshPlayer(e.getTargetEntity().getUniqueId()));
     }
 
     @Listener
