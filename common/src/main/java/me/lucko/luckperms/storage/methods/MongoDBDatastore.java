@@ -156,7 +156,7 @@ public class MongoDBDatastore extends Datastore {
 
                         boolean save = plugin.getUserManager().giveDefaultIfNeeded(user, false);
 
-                        if (user.getName().equalsIgnoreCase("null")) {
+                        if (user.getName() == null || user.getName().equalsIgnoreCase("null")) {
                             user.setName(d.getString("name"));
                         } else {
                             if (!d.getString("name").equals(user.getName())) {

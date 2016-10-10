@@ -103,7 +103,7 @@ public class JSONDatastore extends FlatfileDatastore {
 
                         boolean save = plugin.getUserManager().giveDefaultIfNeeded(user, false);
 
-                        if (user.getName().equalsIgnoreCase("null")) {
+                        if (user.getName() == null || user.getName().equalsIgnoreCase("null")) {
                             user.setName(name1);
                         } else {
                             if (!name1.equals(user.getName())) {

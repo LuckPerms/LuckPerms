@@ -97,7 +97,7 @@ public class YAMLDatastore extends FlatfileDatastore {
 
                         boolean save = plugin.getUserManager().giveDefaultIfNeeded(user, false);
 
-                        if (user.getName().equalsIgnoreCase("null")) {
+                        if (user.getName() == null || user.getName().equalsIgnoreCase("null")) {
                             user.setName(name);
                         } else {
                             if (!name.equals(user.getName())) {
