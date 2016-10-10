@@ -157,7 +157,7 @@ abstract class SQLDatastore extends Datastore {
 
                             boolean save = plugin.getUserManager().giveDefaultIfNeeded(user, false);
 
-                            if (user.getName().equalsIgnoreCase("null")) {
+						if (user.getName() == null || user.getName().equalsIgnoreCase("null")) {
                                 user.setName(resultSet.getString("name"));
                             } else {
                                 if (!resultSet.getString("name").equals(user.getName())) {
