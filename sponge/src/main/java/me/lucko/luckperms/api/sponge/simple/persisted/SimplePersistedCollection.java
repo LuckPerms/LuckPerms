@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.api.sponge.simple;
+package me.lucko.luckperms.api.sponge.simple.persisted;
 
 import lombok.Getter;
 import lombok.NonNull;
@@ -36,23 +36,33 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
- * Super simple SubjectCollection implementation
+ * A simple persistable subject collection
  */
 @RequiredArgsConstructor
-public class SimpleCollection implements SubjectCollection {
+public class SimplePersistedCollection implements SubjectCollection {
     private final LuckPermsService service;
 
     @Getter
     private final String identifier;
 
-    private final Map<String, Subject> subjects = new ConcurrentHashMap<>();
+    private final Map<String, SimplePersistedSubject> subjects = new ConcurrentHashMap<>();
+
+    public void loadAll() {
+        Map<String, SimpleSubjectDataHolder> holders = service.getStorage().loadAllFromFile(identifier);
+        for (Map.Entry<String, SimpleSubjectDataHolder> e : holders.entrySet()) {
+            SimplePersistedSubject subject = new SimplePersistedSubject(e.getKey(), service, this);
+            subject.loadData(e.getValue());
+            subjects.put(e.getKey(), subject);
+        }
+    }
 
     @Override
     public synchronized Subject get(@NonNull String id) {
         if (!subjects.containsKey(id)) {
-            subjects.put(id, new SimpleSubject(id, service, this));
+            subjects.put(id, new SimplePersistedSubject(id, service, this));
         }
 
         return subjects.get(id);
@@ -65,7 +75,7 @@ public class SimpleCollection implements SubjectCollection {
 
     @Override
     public Iterable<Subject> getAllSubjects() {
-        return subjects.values();
+        return subjects.values().stream().map(s -> (Subject) s).collect(Collectors.toList());
     }
 
     @Override

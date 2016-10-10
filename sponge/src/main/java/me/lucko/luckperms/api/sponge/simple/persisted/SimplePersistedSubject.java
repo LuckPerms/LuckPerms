@@ -20,45 +20,64 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.api.sponge.simple;
+package me.lucko.luckperms.api.sponge.simple.persisted;
 
 import lombok.Getter;
 import lombok.NonNull;
+import me.lucko.luckperms.api.sponge.LuckPermsService;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.context.Context;
-import org.spongepowered.api.service.permission.*;
+import org.spongepowered.api.service.permission.MemorySubjectData;
+import org.spongepowered.api.service.permission.Subject;
+import org.spongepowered.api.service.permission.SubjectCollection;
+import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.util.Tristate;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 /**
- * Super simple Subject implementation.
+ * A simple persistable Subject implementation
  */
 @Getter
-public class SimpleSubject implements Subject {
+public class SimplePersistedSubject implements Subject {
     private final String identifier;
 
-    private final PermissionService service;
+    private final LuckPermsService service;
     private final SubjectCollection containingCollection;
-    private final MemorySubjectData subjectData;
+    private final SimplePersistedSubjectData subjectData;
+    private final MemorySubjectData transientSubjectData;
 
-    public SimpleSubject(String identifier, PermissionService service, SubjectCollection containingCollection) {
+    public SimplePersistedSubject(String identifier, LuckPermsService service, SubjectCollection containingCollection) {
         this.identifier = identifier;
         this.service = service;
         this.containingCollection = containingCollection;
-        this.subjectData = new MemorySubjectData(service);
+        this.subjectData = new SimplePersistedSubjectData(service, this);
+        this.transientSubjectData = new MemorySubjectData(service);
+    }
+
+    public void loadData(SimpleSubjectDataHolder dataHolder) {
+        subjectData.setSave(false);
+        dataHolder.copyTo(subjectData, service);
+        subjectData.setSave(true);
+    }
+
+    public void save() {
+        service.getPlugin().doAsync(() -> {
+            try {
+                service.getStorage().saveToFile(this);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @Override
     public Optional<CommandSource> getCommandSource() {
         return Optional.empty();
-    }
-
-    @Override
-    public SubjectData getTransientSubjectData() {
-        return getSubjectData();
     }
 
     @Override
@@ -69,6 +88,9 @@ public class SimpleSubject implements Subject {
     @Override
     public Tristate getPermissionValue(@NonNull Set<Context> contexts, @NonNull String node) {
         Tristate res = subjectData.getNodeTree(contexts).get(node);
+        if (res == Tristate.UNDEFINED) {
+            transientSubjectData.getNodeTree(contexts).get(node);
+        }
         if (res == Tristate.UNDEFINED) {
             for (Subject parent : getParents(contexts)) {
                 Tristate tempRes = parent.getPermissionValue(contexts, node);
@@ -83,17 +105,23 @@ public class SimpleSubject implements Subject {
 
     @Override
     public boolean isChildOf(@NonNull Set<Context> contexts, @NonNull Subject subject) {
-        return subjectData.getParents(contexts).contains(subject);
+        return subjectData.getParents(contexts).contains(subject) || transientSubjectData.getParents(contexts).contains(subject);
     }
 
     @Override
     public List<Subject> getParents(@NonNull Set<Context> contexts) {
-        return subjectData.getParents(contexts);
+        List<Subject> s = new ArrayList<>();
+        s.addAll(subjectData.getParents(contexts));
+        s.addAll(transientSubjectData.getParents(contexts));
+        return s;
     }
 
     @Override
     public Optional<String> getOption(Set<Context> set, String key) {
         Optional<String> res = Optional.ofNullable(subjectData.getOptions(getActiveContexts()).get(key));
+        if (!res.isPresent()) {
+            res = Optional.ofNullable(transientSubjectData.getOptions(getActiveContexts()).get(key));
+        }
         if (!res.isPresent()) {
             for (Subject parent : getParents(getActiveContexts())) {
                 Optional<String> tempRes = parent.getOption(getActiveContexts(), key);

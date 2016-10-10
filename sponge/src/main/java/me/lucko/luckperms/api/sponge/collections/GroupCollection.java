@@ -89,6 +89,6 @@ public class GroupCollection implements SubjectCollection {
 
     @Override
     public Subject getDefaults() {
-        return service.getDefaults();
+        return service.getDefaultSubjects().get(getIdentifier());
     }
 }

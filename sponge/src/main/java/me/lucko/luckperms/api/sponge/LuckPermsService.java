@@ -29,6 +29,8 @@ import me.lucko.luckperms.LPSpongePlugin;
 import me.lucko.luckperms.api.sponge.collections.GroupCollection;
 import me.lucko.luckperms.api.sponge.collections.UserCollection;
 import me.lucko.luckperms.api.sponge.simple.SimpleCollection;
+import me.lucko.luckperms.api.sponge.simple.persisted.SimplePersistedCollection;
+import me.lucko.luckperms.api.sponge.simple.persisted.SubjectStorage;
 import me.lucko.luckperms.contexts.SpongeCalculatorLink;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.context.ContextCalculator;
@@ -36,9 +38,13 @@ import org.spongepowered.api.service.permission.*;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Tristate;
 
+import java.io.File;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * The LuckPerms implementation of the Sponge Permission Service
+ */
 public class LuckPermsService implements PermissionService {
     public static final String SERVER_CONTEXT = "server";
 
@@ -46,10 +52,16 @@ public class LuckPermsService implements PermissionService {
     private final LPSpongePlugin plugin;
 
     @Getter
+    private final SubjectStorage storage;
+
+    @Getter
     private final UserCollection userSubjects;
 
     @Getter
     private final GroupCollection groupSubjects;
+
+    @Getter
+    private final SimplePersistedCollection defaultSubjects;
 
     @Getter
     private final Set<PermissionDescription> descriptionSet;
@@ -59,12 +71,17 @@ public class LuckPermsService implements PermissionService {
     public LuckPermsService(LPSpongePlugin plugin) {
         this.plugin = plugin;
 
+        storage = new SubjectStorage(new File(plugin.getDataFolder(), "local"));
+
         userSubjects = new UserCollection(this, plugin.getUserManager());
         groupSubjects = new GroupCollection(this, plugin.getGroupManager());
+        defaultSubjects = new SimplePersistedCollection(this, "defaults");
+        defaultSubjects.loadAll();
 
         subjects = new ConcurrentHashMap<>();
         subjects.put(PermissionService.SUBJECTS_USER, userSubjects);
         subjects.put(PermissionService.SUBJECTS_GROUP, groupSubjects);
+        subjects.put("defaults", defaultSubjects);
 
         descriptionSet = ConcurrentHashMap.newKeySet();
     }
@@ -75,7 +92,7 @@ public class LuckPermsService implements PermissionService {
 
     @Override
     public Subject getDefaults() {
-        return getSubjects("defaults").get("default");
+        return getDefaultSubjects().get("default");
     }
 
     @Override
