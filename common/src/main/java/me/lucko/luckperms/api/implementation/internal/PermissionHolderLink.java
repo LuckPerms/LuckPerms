@@ -65,12 +65,12 @@ public class PermissionHolderLink implements PermissionHolder {
 
     @Override
     public Set<Node> getAllNodes() {
-        return Collections.unmodifiableSet(master.getAllNodes(Collections.emptyList(), Contexts.allowAll()));
+        return Collections.unmodifiableSet(master.getAllNodes(new ArrayList<>(), Contexts.allowAll()));
     }
 
     @Override
     public SortedSet<LocalizedNode> getAllNodes(@NonNull Contexts contexts) {
-        return master.getAllNodes(Collections.emptyList(), contexts);
+        return master.getAllNodes(new ArrayList<>(), contexts);
     }
 
     @Override
