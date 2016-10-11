@@ -52,7 +52,7 @@ public class GroupMainCommand extends MainCommand<Group> {
             .add(new GroupSetTempInherit())
             .add(new GroupUnsetTempInherit())
             .add(new GroupShowTracks())
-            .add(new MetaCommands<>())
+            .add(new MetaCommands<>(false))
             .add(new GroupBulkChange())
             .add(new GroupClear())
             .add(new GroupRename())

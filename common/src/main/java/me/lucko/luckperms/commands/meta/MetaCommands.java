@@ -23,6 +23,7 @@
 package me.lucko.luckperms.commands.meta;
 
 import com.google.common.collect.ImmutableList;
+import lombok.RequiredArgsConstructor;
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.commands.*;
 import me.lucko.luckperms.commands.meta.subcommands.*;
@@ -36,6 +37,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class MetaCommands<T extends PermissionHolder> extends SubCommand<T> {
+    private boolean user;
+
     private final List<MetaSubCommand> subCommands = ImmutableList.<MetaSubCommand>builder()
         .add(new MetaInfo())
         .add(new MetaAddPrefix())
@@ -49,14 +52,13 @@ public class MetaCommands<T extends PermissionHolder> extends SubCommand<T> {
         .add(new MetaClear())
         .build();
 
-    public MetaCommands() {
+    public MetaCommands(boolean user) {
         super("meta", "Edit metadata values", null, Predicate.alwaysFalse(), null);
+        this.user = user;
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, T t, List<String> args, String label) {
-        boolean user = t instanceof User;
-
         if (args.size() == 0) {
             sendUsageMeta(sender, user, label);
             return CommandResult.INVALID_ARGS;
@@ -89,6 +91,16 @@ public class MetaCommands<T extends PermissionHolder> extends SubCommand<T> {
         }
 
         return sub.execute(plugin, sender, t, strippedArgs);
+    }
+
+    @Override
+    public boolean isAuthorized(Sender sender) {
+        for (MetaSubCommand subCommand : subCommands) {
+            if (subCommand.isAuthorized(sender, user)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void sendUsageMeta(Sender sender, boolean user, String label) {

@@ -59,7 +59,7 @@ public class UserMainCommand extends MainCommand<User> {
             .add(new UserPromote())
             .add(new UserDemote())
             .add(new UserShowPos())
-            .add(new MetaCommands<>())
+            .add(new MetaCommands<>(true))
             .add(new UserBulkChange())
             .add(new UserClear())
             .build()
