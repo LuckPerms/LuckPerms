@@ -167,11 +167,13 @@ public class VaultUser {
                 Map.Entry<Integer, String> value = n.getPrefix();
                 if (value.getKey() > prefixPriority) {
                     existing.setPrefix(value.getValue());
+                    prefixPriority = value.getKey();
                 }
             } else {
                 Map.Entry<Integer, String> value = n.getSuffix();
                 if (value.getKey() > suffixPriority) {
                     existing.setSuffix(value.getValue());
+                    suffixPriority = value.getKey();
                 }
             }
         }
