@@ -266,8 +266,8 @@ public class Node implements me.lucko.luckperms.api.Node {
 
     @Override
     public boolean shouldApplyOnServer(String server, boolean includeGlobal, boolean applyRegex) {
-        if (server == null || server.equals("")) {
-            return !isServerSpecific() && includeGlobal;
+        if (server == null || server.equals("") || server.equalsIgnoreCase("global")) {
+            return !isServerSpecific();
         }
 
         if (isServerSpecific()) {
@@ -279,8 +279,8 @@ public class Node implements me.lucko.luckperms.api.Node {
 
     @Override
     public boolean shouldApplyOnWorld(String world, boolean includeGlobal, boolean applyRegex) {
-        if (world == null || world.equals("")) {
-            return !isWorldSpecific() && includeGlobal;
+        if (world == null || world.equals("") || world.equalsIgnoreCase("null")) {
+            return !isWorldSpecific();
         }
 
         if (isWorldSpecific()) {
