@@ -79,6 +79,8 @@ public class VaultChatHook extends Chat {
         if (holder == null) return;
         if (node.equals("")) return;
 
+        perms.log("Setting meta: '" + node + "' for " + holder.getObjectName() + " on world " + world + ", server " + perms.getServer());
+
         perms.scheduleTask(() -> {
             String k = escapeCharacters(node);
             String v = escapeCharacters(value);
@@ -114,6 +116,8 @@ public class VaultChatHook extends Chat {
         if (holder == null) return;
         if (value.equals("")) return;
 
+        perms.log("Setting " + (prefix ? "prefix" : "suffix") + " for " + holder.getObjectName() + " on world " + world + ", server " + perms.getServer());
+
         perms.scheduleTask(() -> {
             Node.Builder node = new me.lucko.luckperms.core.Node.Builder(prefix ? "prefix" : "suffix" + ".1000." + escapeCharacters(value));
             node.setValue(true);
@@ -138,6 +142,8 @@ public class VaultChatHook extends Chat {
         if (user == null) return defaultValue;
         node = escapeCharacters(node);
 
+        perms.log("Getting meta: '" + node + "' for user " + user.getName() + " on world " + world + ", server " + perms.getServer());
+
         if (!perms.getVaultUserManager().containsUser(user.getUuid())) {
             return defaultValue;
         }
@@ -156,6 +162,8 @@ public class VaultChatHook extends Chat {
     private String getUserChatMeta(boolean prefix, User user, String world) {
         world = perms.isIgnoreWorld() ? null : world;
         if (user == null) return "";
+
+        perms.log("Getting " + (prefix ? "prefix" : "suffix") + " for user " + user.getName() + " on world " + world + ", server " + perms.getServer());
 
         if (!perms.getVaultUserManager().containsUser(user.getUuid())) {
             return "";
@@ -177,6 +185,8 @@ public class VaultChatHook extends Chat {
         if (group == null) return defaultValue;
         if (node.equals("")) return defaultValue;
         node = escapeCharacters(node);
+
+        perms.log("Getting meta: '" + node + "' for group " + group.getName() + " on world " + world + ", server " + perms.getServer());
 
         for (Node n : group.getPermissions(true)) {
             if (!n.getValue()) {
@@ -207,6 +217,8 @@ public class VaultChatHook extends Chat {
     private String getGroupChatMeta(boolean prefix, Group group, String world) {
         world = perms.isIgnoreWorld() ? null : world;
         if (group == null) return "";
+
+        perms.log("Getting " + (prefix ? "prefix" : "suffix") + " for group " + group + " on world " + world + ", server " + perms.getServer());
 
         int priority = Integer.MIN_VALUE;
         String meta = null;
