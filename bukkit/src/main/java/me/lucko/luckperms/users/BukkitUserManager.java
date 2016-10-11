@@ -70,7 +70,6 @@ public class BukkitUserManager extends UserManager implements ContextListener<Pl
         BukkitUser user = id.getUsername() == null ?
                 new BukkitUser(id.getUuid(), plugin) :
                 new BukkitUser(id.getUuid(), id.getUsername(), plugin);
-        giveDefaultIfNeeded(user, false);
         return user;
     }
 

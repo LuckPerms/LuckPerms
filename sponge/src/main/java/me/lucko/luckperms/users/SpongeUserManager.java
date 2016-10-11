@@ -53,7 +53,6 @@ public class SpongeUserManager extends UserManager implements ContextListener<Pl
         SpongeUser user = id.getUsername() == null ?
                 new SpongeUser(id.getUuid(), plugin) :
                 new SpongeUser(id.getUuid(), id.getUsername(), plugin);
-        giveDefaultIfNeeded(user, false);
         return user;
     }
 

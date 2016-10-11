@@ -49,7 +49,6 @@ public class BungeeUserManager extends UserManager implements ContextListener<Pr
         BungeeUser user = id.getUsername() == null ?
                 new BungeeUser(id.getUuid(), plugin) :
                 new BungeeUser(id.getUuid(), id.getUsername(), plugin);
-        giveDefaultIfNeeded(user, false);
         return user;
     }
 
