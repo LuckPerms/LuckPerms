@@ -20,36 +20,40 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.commands.user.subcommands;
+package me.lucko.luckperms.commands.meta.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.*;
+import me.lucko.luckperms.commands.Arg;
+import me.lucko.luckperms.commands.CommandResult;
+import me.lucko.luckperms.commands.Predicate;
+import me.lucko.luckperms.commands.Sender;
+import me.lucko.luckperms.commands.meta.MetaSubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.core.PermissionHolder;
 import me.lucko.luckperms.data.LogEntry;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
-import me.lucko.luckperms.users.User;
 import me.lucko.luckperms.utils.ArgumentChecker;
 import me.lucko.luckperms.utils.DateUtil;
 
 import java.util.List;
 
-public class UserAddTempPrefix extends SubCommand<User> {
-    public UserAddTempPrefix() {
-        super("addtempprefix", "Adds a prefix to the user temporarily", Permission.USER_ADD_TEMP_PREFIX, Predicate.notInRange(3, 5),
+public class MetaAddTempSuffix extends MetaSubCommand {
+    public MetaAddTempSuffix() {
+        super("addtempsuffix", "Adds a suffix temporarily",  Permission.USER_ADD_TEMP_SUFFIX, Permission.GROUP_ADD_TEMP_SUFFIX, Predicate.notInRange(3, 5),
                 Arg.list(
-                        Arg.create("priority", true, "the priority to add the prefix at"),
-                        Arg.create("prefix", true, "the prefix string"),
-                        Arg.create("duration", true, "the duration until the prefix expires"),
-                        Arg.create("server", false, "the server to add the prefix on"),
-                        Arg.create("world", false, "the world to add the prefix on")
+                        Arg.create("priority", true, "the priority to add the suffix at"),
+                        Arg.create("suffix", true, "the suffix string"),
+                        Arg.create("duration", true, "the duration until the suffix expires"),
+                        Arg.create("server", false, "the server to add the suffix on"),
+                        Arg.create("world", false, "the world to add the suffix on")
                 )
         );
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
-        final String prefix = args.get(1).replace("{SPACE}", " ");
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) {
+        final String suffix = args.get(1).replace("{SPACE}", " ");
         int priority;
         try {
             priority = Integer.parseInt(args.get(0));
@@ -75,7 +79,7 @@ public class UserAddTempPrefix extends SubCommand<User> {
             return CommandResult.INVALID_ARGS;
         }
 
-        final String node = "prefix." + priority + "." + ArgumentChecker.escapeCharacters(prefix);
+        final String node = "suffix." + priority + "." + ArgumentChecker.escapeCharacters(suffix);
 
         try {
             if (args.size() >= 4) {
@@ -86,32 +90,32 @@ public class UserAddTempPrefix extends SubCommand<User> {
                 }
 
                 if (args.size() == 4) {
-                    user.setPermission(node, true, server, duration);
-                    Message.ADD_TEMP_PREFIX_SERVER_SUCCESS.send(sender, user.getName(), prefix, priority, server, DateUtil.formatDateDiff(duration));
-                    LogEntry.build().actor(sender).acted(user)
-                            .action("addtempprefix " + priority + " " + args.get(1) + " " + duration + " " + server)
+                    holder.setPermission(node, true, server, duration);
+                    Message.ADD_TEMP_SUFFIX_SERVER_SUCCESS.send(sender, holder.getFriendlyName(), suffix, priority, server, DateUtil.formatDateDiff(duration));
+                    LogEntry.build().actor(sender).acted(holder)
+                            .action("meta addtempsuffix " + priority + " " + args.get(1) + " " + duration + " " + server)
                             .build().submit(plugin, sender);
                 } else {
                     final String world = args.get(4).toLowerCase();
-                    user.setPermission(node, true, server, world, duration);
-                    Message.ADD_TEMP_PREFIX_SERVER_WORLD_SUCCESS.send(sender, user.getName(), prefix, priority, server, world, DateUtil.formatDateDiff(duration));
-                    LogEntry.build().actor(sender).acted(user)
-                            .action("addtempprefix " + priority + " " + args.get(1) + " " + duration + " " + server + " " + world)
+                    holder.setPermission(node, true, server, world, duration);
+                    Message.ADD_TEMP_SUFFIX_SERVER_WORLD_SUCCESS.send(sender, holder.getFriendlyName(), suffix, priority, server, world, DateUtil.formatDateDiff(duration));
+                    LogEntry.build().actor(sender).acted(holder)
+                            .action("meta addtempsuffix " + priority + " " + args.get(1) + " " + duration + " " + server + " " + world)
                             .build().submit(plugin, sender);
                 }
 
             } else {
-                user.setPermission(node, true, duration);
-                Message.ADD_TEMP_PREFIX_SUCCESS.send(sender, user.getName(), prefix, priority, DateUtil.formatDateDiff(duration));
-                LogEntry.build().actor(sender).acted(user)
-                        .action("addtempprefix " + priority + " " + args.get(1) + " " + duration)
+                holder.setPermission(node, true, duration);
+                Message.ADD_TEMP_SUFFIX_SUCCESS.send(sender, holder.getFriendlyName(), suffix, priority, DateUtil.formatDateDiff(duration));
+                LogEntry.build().actor(sender).acted(holder)
+                        .action("meta addtempsuffix " + priority + " " + args.get(1) + " " + duration)
                         .build().submit(plugin, sender);
             }
 
-            save(user, sender, plugin);
+            save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } catch (ObjectAlreadyHasException e) {
-            Message.ALREADY_HAS_PREFIX.send(sender, user.getName());
+            Message.ALREADY_HAS_SUFFIX.send(sender, holder.getFriendlyName());
             return CommandResult.STATE_ERROR;
         }
     }

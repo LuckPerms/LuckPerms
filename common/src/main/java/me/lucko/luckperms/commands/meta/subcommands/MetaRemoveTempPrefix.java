@@ -20,36 +20,39 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.commands.group.subcommands;
+package me.lucko.luckperms.commands.meta.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.commands.*;
+import me.lucko.luckperms.commands.Arg;
+import me.lucko.luckperms.commands.CommandResult;
+import me.lucko.luckperms.commands.Predicate;
+import me.lucko.luckperms.commands.Sender;
+import me.lucko.luckperms.commands.meta.MetaSubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.core.PermissionHolder;
 import me.lucko.luckperms.data.LogEntry;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
-import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.utils.ArgumentChecker;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class GroupRemoveTempPrefix extends SubCommand<Group> {
-    public GroupRemoveTempPrefix() {
-        super("removetempprefix", "Removes a temporary prefix from the group", Permission.GROUP_REMOVE_TEMP_PREFIX,
-                Predicate.notInRange(2, 4),
+public class MetaRemoveTempPrefix extends MetaSubCommand {
+    public MetaRemoveTempPrefix() {
+        super("removetempprefix", "Removes a temporary prefix",  Permission.USER_REMOVE_TEMP_PREFIX, Permission.GROUP_REMOVE_TEMP_PREFIX, Predicate.notInRange(2, 4),
                 Arg.list(
-                        Arg.create("priority", true, "the priority to remove the prefix at"),
-                        Arg.create("prefix", true, "the prefix string to remove"),
-                        Arg.create("server", false, "the server to remove the prefix on"),
-                        Arg.create("world", false, "the world to remove the prefix on")
+                        Arg.create("priority", true, "the priority to add the prefix at"),
+                        Arg.create("prefix", true, "the prefix string"),
+                        Arg.create("server", false, "the server to add the prefix on"),
+                        Arg.create("world", false, "the world to add the prefix on")
                 )
         );
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) {
         final String prefix = args.get(1).replace("{SPACE}", " ");
         int priority;
         try {
@@ -76,7 +79,7 @@ public class GroupRemoveTempPrefix extends SubCommand<Group> {
             }
 
             List<Node> toRemove = new ArrayList<>();
-            for (Node node : group.getNodes()) {
+            for (Node node : holder.getNodes()) {
                 if (!node.isPrefix()) continue;
                 if (node.getPrefix().getKey() != priority) continue;
                 if (node.isPermanent()) continue;
@@ -100,12 +103,12 @@ public class GroupRemoveTempPrefix extends SubCommand<Group> {
 
             toRemove.forEach(n -> {
                 try {
-                    group.unsetPermission(n);
+                    holder.unsetPermission(n);
                 } catch (ObjectLacksException ignored) {}
             });
 
             Message.BULK_CHANGE_SUCCESS.send(sender, toRemove.size());
-            save(group, sender, plugin);
+            save(holder, sender, plugin);
             return CommandResult.SUCCESS;
 
         } else {
@@ -121,32 +124,32 @@ public class GroupRemoveTempPrefix extends SubCommand<Group> {
                     }
 
                     if (args.size() == 3) {
-                        group.unsetPermission(node, server, true);
-                        Message.REMOVE_TEMP_PREFIX_SERVER_SUCCESS.send(sender, group.getDisplayName(), prefix, priority, server);
-                        LogEntry.build().actor(sender).acted(group)
-                                .action("removetempprefix " + priority + " " + args.get(1) + " " + server)
+                        holder.unsetPermission(node, server, true);
+                        Message.REMOVE_TEMP_PREFIX_SERVER_SUCCESS.send(sender, holder.getFriendlyName(), prefix, priority, server);
+                        LogEntry.build().actor(sender).acted(holder)
+                                .action("meta removetempprefix " + priority + " " + args.get(1) + " " + server)
                                 .build().submit(plugin, sender);
                     } else {
                         final String world = args.get(3).toLowerCase();
-                        group.unsetPermission(node, server, world, true);
-                        Message.REMOVE_TEMP_PREFIX_SERVER_WORLD_SUCCESS.send(sender, group.getDisplayName(), prefix, priority, server, world);
-                        LogEntry.build().actor(sender).acted(group)
-                                .action("removetempprefix " + priority + " " + args.get(1) + " " + server + " " + world)
+                        holder.unsetPermission(node, server, world, true);
+                        Message.REMOVE_TEMP_PREFIX_SERVER_WORLD_SUCCESS.send(sender, holder.getFriendlyName(), prefix, priority, server, world);
+                        LogEntry.build().actor(sender).acted(holder)
+                                .action("meta removetempprefix " + priority + " " + args.get(1) + " " + server + " " + world)
                                 .build().submit(plugin, sender);
                     }
 
                 } else {
-                    group.unsetPermission(node, true);
-                    Message.REMOVE_TEMP_PREFIX_SUCCESS.send(sender, group.getDisplayName(), prefix, priority);
-                    LogEntry.build().actor(sender).acted(group)
-                            .action("removetempprefix " + priority + " " + args.get(1))
+                    holder.unsetPermission(node, true);
+                    Message.REMOVE_TEMP_PREFIX_SUCCESS.send(sender, holder.getFriendlyName(), prefix, priority);
+                    LogEntry.build().actor(sender).acted(holder)
+                            .action("meta removetempprefix " + priority + " " + args.get(1))
                             .build().submit(plugin, sender);
                 }
 
-                save(group, sender, plugin);
+                save(holder, sender, plugin);
                 return CommandResult.SUCCESS;
             } catch (ObjectLacksException e) {
-                Message.DOES_NOT_HAVE_PREFIX.send(sender, group.getDisplayName());
+                Message.DOES_NOT_HAVE_PREFIX.send(sender, holder.getFriendlyName());
                 return CommandResult.STATE_ERROR;
             }
         }

@@ -81,6 +81,8 @@ public abstract class PermissionHolder {
     @Getter
     private final Lock ioLock = new ReentrantLock();
 
+    public abstract String getFriendlyName();
+
     private void invalidateCache(boolean enduring) {
         if (enduring) {
             enduringCache.invalidate();

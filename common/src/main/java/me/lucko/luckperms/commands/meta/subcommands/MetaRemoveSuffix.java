@@ -20,35 +20,39 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.commands.user.subcommands;
+package me.lucko.luckperms.commands.meta.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.commands.*;
+import me.lucko.luckperms.commands.Arg;
+import me.lucko.luckperms.commands.CommandResult;
+import me.lucko.luckperms.commands.Predicate;
+import me.lucko.luckperms.commands.Sender;
+import me.lucko.luckperms.commands.meta.MetaSubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.core.PermissionHolder;
 import me.lucko.luckperms.data.LogEntry;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
-import me.lucko.luckperms.users.User;
 import me.lucko.luckperms.utils.ArgumentChecker;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserRemoveSuffix extends SubCommand<User> {
-    public UserRemoveSuffix() {
-        super("removesuffix", "Removes a suffix from the user", Permission.USER_REMOVESUFFIX, Predicate.notInRange(2, 4),
+public class MetaRemoveSuffix extends MetaSubCommand {
+    public MetaRemoveSuffix() {
+        super("removesuffix", "Removes a suffix",  Permission.USER_REMOVESUFFIX, Permission.GROUP_REMOVESUFFIX, Predicate.notInRange(2, 4),
                 Arg.list(
-                        Arg.create("priority", true, "the priority to remove the suffix at"),
-                        Arg.create("suffix", true, "the suffix string to remove"),
-                        Arg.create("server", false, "the server to remove the suffix on"),
-                        Arg.create("world", false, "the world to remove the suffix on")
+                        Arg.create("priority", true, "the priority to add the suffix at"),
+                        Arg.create("suffix", true, "the suffix string"),
+                        Arg.create("server", false, "the server to add the suffix on"),
+                        Arg.create("world", false, "the world to add the suffix on")
                 )
         );
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) {
         final String suffix = args.get(1).replace("{SPACE}", " ");
         int priority;
         try {
@@ -75,7 +79,7 @@ public class UserRemoveSuffix extends SubCommand<User> {
             }
 
             List<Node> toRemove = new ArrayList<>();
-            for (Node node : user.getNodes()) {
+            for (Node node : holder.getNodes()) {
                 if (!node.isSuffix()) continue;
                 if (node.getSuffix().getKey() != priority) continue;
                 if (node.isTemporary()) continue;
@@ -99,12 +103,12 @@ public class UserRemoveSuffix extends SubCommand<User> {
 
             toRemove.forEach(n -> {
                 try {
-                    user.unsetPermission(n);
+                    holder.unsetPermission(n);
                 } catch (ObjectLacksException ignored) {}
             });
 
             Message.BULK_CHANGE_SUCCESS.send(sender, toRemove.size());
-            save(user, sender, plugin);
+            save(holder, sender, plugin);
             return CommandResult.SUCCESS;
 
         } else {
@@ -120,32 +124,32 @@ public class UserRemoveSuffix extends SubCommand<User> {
                     }
 
                     if (args.size() == 3) {
-                        user.unsetPermission(node, server);
-                        Message.REMOVESUFFIX_SERVER_SUCCESS.send(sender, user.getName(), suffix, priority, server);
-                        LogEntry.build().actor(sender).acted(user)
-                                .action("removesuffix " + priority + " " + args.get(1) + " " + server)
+                        holder.unsetPermission(node, server);
+                        Message.REMOVESUFFIX_SERVER_SUCCESS.send(sender, holder.getFriendlyName(), suffix, priority, server);
+                        LogEntry.build().actor(sender).acted(holder)
+                                .action("meta removesuffix " + priority + " " + args.get(1) + " " + server)
                                 .build().submit(plugin, sender);
                     } else {
                         final String world = args.get(3).toLowerCase();
-                        user.unsetPermission(node, server, world);
-                        Message.REMOVESUFFIX_SERVER_WORLD_SUCCESS.send(sender, user.getName(), suffix, priority, server, world);
-                        LogEntry.build().actor(sender).acted(user)
-                                .action("removesuffix " + priority + " " + args.get(1) + " " + server + " " + world)
+                        holder.unsetPermission(node, server, world);
+                        Message.REMOVESUFFIX_SERVER_WORLD_SUCCESS.send(sender, holder.getFriendlyName(), suffix, priority, server, world);
+                        LogEntry.build().actor(sender).acted(holder)
+                                .action("meta removesuffix " + priority + " " + args.get(1) + " " + server + " " + world)
                                 .build().submit(plugin, sender);
                     }
 
                 } else {
-                    user.unsetPermission(node);
-                    Message.REMOVESUFFIX_SUCCESS.send(sender, user.getName(), suffix, priority);
-                    LogEntry.build().actor(sender).acted(user)
-                            .action("removesuffix " + priority + " " + args.get(1))
+                    holder.unsetPermission(node);
+                    Message.REMOVESUFFIX_SUCCESS.send(sender, holder.getFriendlyName(), suffix, priority);
+                    LogEntry.build().actor(sender).acted(holder)
+                            .action("meta removesuffix " + priority + " " + args.get(1))
                             .build().submit(plugin, sender);
                 }
 
-                save(user, sender, plugin);
+                save(holder, sender, plugin);
                 return CommandResult.SUCCESS;
             } catch (ObjectLacksException e) {
-                Message.DOES_NOT_HAVE_SUFFIX.send(sender, user.getName());
+                Message.DOES_NOT_HAVE_SUFFIX.send(sender, holder.getFriendlyName());
                 return CommandResult.STATE_ERROR;
             }
         }

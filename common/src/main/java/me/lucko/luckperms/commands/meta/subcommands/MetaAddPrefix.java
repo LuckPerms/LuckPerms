@@ -20,27 +20,29 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.commands.group.subcommands;
+package me.lucko.luckperms.commands.meta.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.*;
+import me.lucko.luckperms.commands.Arg;
+import me.lucko.luckperms.commands.CommandResult;
+import me.lucko.luckperms.commands.Predicate;
+import me.lucko.luckperms.commands.Sender;
+import me.lucko.luckperms.commands.meta.MetaSubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.core.PermissionHolder;
 import me.lucko.luckperms.data.LogEntry;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
-import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.utils.ArgumentChecker;
-import me.lucko.luckperms.utils.DateUtil;
 
 import java.util.List;
 
-public class GroupAddTempPrefix extends SubCommand<Group> {
-    public GroupAddTempPrefix() {
-        super("addtempprefix", "Adds a prefix to the group temporarily", Permission.GROUP_ADD_TEMP_PREFIX, Predicate.notInRange(3, 5),
+public class MetaAddPrefix extends MetaSubCommand {
+    public MetaAddPrefix() {
+        super("addprefix", "Adds a prefix",  Permission.USER_ADDPREFIX, Permission.GROUP_ADDPREFIX, Predicate.notInRange(2, 4),
                 Arg.list(
                         Arg.create("priority", true, "the priority to add the prefix at"),
                         Arg.create("prefix", true, "the prefix string"),
-                        Arg.create("duration", true, "the duration until the prefix expires"),
                         Arg.create("server", false, "the server to add the prefix on"),
                         Arg.create("world", false, "the world to add the prefix on")
                 )
@@ -48,7 +50,7 @@ public class GroupAddTempPrefix extends SubCommand<Group> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) {
         final String prefix = args.get(1).replace("{SPACE}", " ");
         int priority;
         try {
@@ -58,60 +60,43 @@ public class GroupAddTempPrefix extends SubCommand<Group> {
             return CommandResult.INVALID_ARGS;
         }
 
-        long duration;
-        try {
-            duration = Long.parseLong(args.get(2));
-        } catch (NumberFormatException e) {
-            try {
-                duration = DateUtil.parseDateDiff(args.get(2), true);
-            } catch (DateUtil.IllegalDateException e1) {
-                Message.ILLEGAL_DATE_ERROR.send(sender, args.get(2));
-                return CommandResult.INVALID_ARGS;
-            }
-        }
-
-        if (DateUtil.shouldExpire(duration)) {
-            Message.PAST_DATE_ERROR.send(sender);
-            return CommandResult.INVALID_ARGS;
-        }
-
         final String node = "prefix." + priority + "." + ArgumentChecker.escapeCharacters(prefix);
 
         try {
-            if (args.size() >= 4) {
-                final String server = args.get(3).toLowerCase();
+            if (args.size() >= 3) {
+                final String server = args.get(2).toLowerCase();
                 if (ArgumentChecker.checkServer(server)) {
                     Message.SERVER_INVALID_ENTRY.send(sender);
                     return CommandResult.INVALID_ARGS;
                 }
 
-                if (args.size() == 4) {
-                    group.setPermission(node, true, server, duration);
-                    Message.ADD_TEMP_PREFIX_SERVER_SUCCESS.send(sender, group.getDisplayName(), prefix, priority, server, DateUtil.formatDateDiff(duration));
-                    LogEntry.build().actor(sender).acted(group)
-                            .action("addtempprefix " + priority + " " + args.get(1) + " " + duration + " " + server)
+                if (args.size() == 3) {
+                    holder.setPermission(node, true, server);
+                    Message.ADDPREFIX_SERVER_SUCCESS.send(sender, holder.getFriendlyName(), prefix, priority, server);
+                    LogEntry.build().actor(sender).acted(holder)
+                            .action("meta addprefix " + priority + " " + args.get(1) + " " + server)
                             .build().submit(plugin, sender);
                 } else {
-                    final String world = args.get(4).toLowerCase();
-                    group.setPermission(node, true, server, world, duration);
-                    Message.ADD_TEMP_PREFIX_SERVER_WORLD_SUCCESS.send(sender, group.getDisplayName(), prefix, priority, server, world, DateUtil.formatDateDiff(duration));
-                    LogEntry.build().actor(sender).acted(group)
-                            .action("addtempprefix " + priority + " " + args.get(1) + " " + duration + " " + server + " " + world)
+                    final String world = args.get(3).toLowerCase();
+                    holder.setPermission(node, true, server, world);
+                    Message.ADDPREFIX_SERVER_WORLD_SUCCESS.send(sender, holder.getFriendlyName(), prefix, priority, server, world);
+                    LogEntry.build().actor(sender).acted(holder)
+                            .action("meta addprefix " + priority + " " + args.get(1) + " " + server + " " + world)
                             .build().submit(plugin, sender);
                 }
 
             } else {
-                group.setPermission(node, true, duration);
-                Message.ADD_TEMP_PREFIX_SUCCESS.send(sender, group.getDisplayName(), prefix, priority, DateUtil.formatDateDiff(duration));
-                LogEntry.build().actor(sender).acted(group)
-                        .action("addtempprefix " + priority + " " + args.get(1) + " " + duration)
+                holder.setPermission(node, true);
+                Message.ADDPREFIX_SUCCESS.send(sender, holder.getFriendlyName(), prefix, priority);
+                LogEntry.build().actor(sender).acted(holder)
+                        .action("meta addprefix " + priority + " " + args.get(1))
                         .build().submit(plugin, sender);
             }
 
-            save(group, sender, plugin);
+            save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } catch (ObjectAlreadyHasException e) {
-            Message.ALREADY_HAS_PREFIX.send(sender, group.getDisplayName());
+            Message.ALREADY_HAS_PREFIX.send(sender, holder.getFriendlyName());
             return CommandResult.STATE_ERROR;
         }
     }

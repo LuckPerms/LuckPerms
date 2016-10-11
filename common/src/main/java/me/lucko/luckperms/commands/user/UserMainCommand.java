@@ -28,6 +28,7 @@ import me.lucko.luckperms.commands.MainCommand;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.commands.Util;
+import me.lucko.luckperms.commands.meta.MetaCommands;
 import me.lucko.luckperms.commands.user.subcommands.*;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Patterns;
@@ -58,16 +59,7 @@ public class UserMainCommand extends MainCommand<User> {
             .add(new UserPromote())
             .add(new UserDemote())
             .add(new UserShowPos())
-            .add(new UserChatMeta())
-            .add(new UserAddPrefix())
-            .add(new UserAddSuffix())
-            .add(new UserRemovePrefix())
-            .add(new UserRemoveSuffix())
-            .add(new UserAddTempPrefix())
-            .add(new UserAddTempSuffix())
-            .add(new UserRemoveTempPrefix())
-            .add(new UserRemoveTempSuffix())
-            .add(new UserClearMeta())
+            .add(new MetaCommands<>())
             .add(new UserBulkChange())
             .add(new UserClear())
             .build()

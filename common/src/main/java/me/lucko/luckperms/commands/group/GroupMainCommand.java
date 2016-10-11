@@ -28,6 +28,7 @@ import me.lucko.luckperms.commands.MainCommand;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.commands.SubCommand;
 import me.lucko.luckperms.commands.group.subcommands.*;
+import me.lucko.luckperms.commands.meta.MetaCommands;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.groups.Group;
 
@@ -51,16 +52,7 @@ public class GroupMainCommand extends MainCommand<Group> {
             .add(new GroupSetTempInherit())
             .add(new GroupUnsetTempInherit())
             .add(new GroupShowTracks())
-            .add(new GroupChatMeta())
-            .add(new GroupAddPrefix())
-            .add(new GroupAddSuffix())
-            .add(new GroupRemovePrefix())
-            .add(new GroupRemoveSuffix())
-            .add(new GroupAddTempPrefix())
-            .add(new GroupAddTempSuffix())
-            .add(new GroupRemoveTempPrefix())
-            .add(new GroupRemoveTempSuffix())
-            .add(new GroupClearMeta())
+            .add(new MetaCommands<>())
             .add(new GroupBulkChange())
             .add(new GroupClear())
             .add(new GroupRename())

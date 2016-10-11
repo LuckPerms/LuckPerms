@@ -20,22 +20,26 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.commands.group.subcommands;
+package me.lucko.luckperms.commands.meta.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.*;
+import me.lucko.luckperms.commands.Arg;
+import me.lucko.luckperms.commands.CommandResult;
+import me.lucko.luckperms.commands.Predicate;
+import me.lucko.luckperms.commands.Sender;
+import me.lucko.luckperms.commands.meta.MetaSubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.core.PermissionHolder;
 import me.lucko.luckperms.data.LogEntry;
-import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.utils.ArgumentChecker;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class GroupClearMeta extends SubCommand<Group> {
-    public GroupClearMeta() {
-        super("clearmeta", "Clears the groups's meta", Permission.GROUP_CLEARMETA, Predicate.notInRange(0, 2),
+public class MetaClear extends MetaSubCommand {
+    public MetaClear() {
+        super("clear", "Clears all chat meta",  Permission.USER_CLEARMETA, Permission.GROUP_CLEARMETA, Predicate.notInRange(0, 2),
                 Arg.list(
                         Arg.create("server", false, "the server name to filter by"),
                         Arg.create("world", false, "the world name to filter by")
@@ -44,11 +48,11 @@ public class GroupClearMeta extends SubCommand<Group> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
-        int before = group.getNodes().size();
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) {
+        int before = holder.getNodes().size();
 
         if (args.size() == 0) {
-            group.clearMeta();
+            holder.clearMeta();
         } else {
             final String server = args.get(0);
             if (ArgumentChecker.checkServer(server)) {
@@ -58,22 +62,22 @@ public class GroupClearMeta extends SubCommand<Group> {
 
             if (args.size() == 2) {
                 final String world = args.get(1);
-                group.clearMeta(server, world);
+                holder.clearMeta(server, world);
 
             } else {
-                group.clearMeta(server);
+                holder.clearMeta(server);
             }
         }
 
-        int changed = before - group.getNodes().size();
+        int changed = before - holder.getNodes().size();
         if (changed == 1) {
-            Message.META_CLEAR_SUCCESS_SINGULAR.send(sender, group.getName(), changed);
+            Message.META_CLEAR_SUCCESS_SINGULAR.send(sender, holder.getFriendlyName(), changed);
         } else {
-            Message.META_CLEAR_SUCCESS.send(sender, group.getName(), changed);
+            Message.META_CLEAR_SUCCESS.send(sender, holder.getFriendlyName(), changed);
         }
 
-        LogEntry.build().actor(sender).acted(group).action("clearmeta " + args.stream().collect(Collectors.joining(" "))).build().submit(plugin, sender);
-        save(group, sender, plugin);
+        LogEntry.build().actor(sender).acted(holder).action("meta clear " + args.stream().collect(Collectors.joining(" "))).build().submit(plugin, sender);
+        save(holder, sender, plugin);
         return CommandResult.SUCCESS;
     }
 }

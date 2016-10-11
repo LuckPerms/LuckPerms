@@ -79,6 +79,11 @@ public abstract class User extends PermissionHolder implements Identifiable<User
         return UserIdentifier.of(uuid, name);
     }
 
+    @Override
+    public String getFriendlyName() {
+        return name;
+    }
+
     /**
      * Refresh and re-assign the users permissions
      */

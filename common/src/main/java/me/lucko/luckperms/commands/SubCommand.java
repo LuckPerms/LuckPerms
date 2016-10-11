@@ -123,7 +123,7 @@ public abstract class SubCommand<T> {
      * @return true if the sender can use the command
      */
     public boolean isAuthorized(Sender sender) {
-        return permission.isAuthorized(sender);
+        return permission == null || permission.isAuthorized(sender);
     }
 
 

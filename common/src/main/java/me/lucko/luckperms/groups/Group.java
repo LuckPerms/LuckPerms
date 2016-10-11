@@ -63,6 +63,11 @@ public class Group extends PermissionHolder implements Identifiable<String> {
         return dn.equals(name) ? name : name + " (" + dn + ")";
     }
 
+    @Override
+    public String getFriendlyName() {
+        return getDisplayName();
+    }
+
     /**
      * check to see if a group inherits a group
      * @param group The group to check membership of

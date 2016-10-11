@@ -20,29 +20,33 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.commands.group.subcommands;
+package me.lucko.luckperms.commands.meta.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.commands.*;
+import me.lucko.luckperms.commands.CommandResult;
+import me.lucko.luckperms.commands.Predicate;
+import me.lucko.luckperms.commands.Sender;
+import me.lucko.luckperms.commands.Util;
+import me.lucko.luckperms.commands.meta.MetaSubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
-import me.lucko.luckperms.groups.Group;
+import me.lucko.luckperms.core.PermissionHolder;
 
 import java.util.*;
 
-public class GroupChatMeta extends SubCommand<Group> {
-    public GroupChatMeta() {
-        super("chatmeta", "Lists the group's chat meta", Permission.GROUP_CHATMETA, Predicate.alwaysFalse(), null);
+public class MetaInfo extends MetaSubCommand {
+    public MetaInfo() {
+        super("info", "Shows all chat meta",  Permission.USER_CHATMETA, Permission.GROUP_CHATMETA, Predicate.alwaysFalse(), null);
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) {
         SortedSet<Map.Entry<Integer, String>> prefixes = new TreeSet<>(Util.getMetaComparator().reversed());
         SortedSet<Map.Entry<Integer, String>> suffixes = new TreeSet<>(Util.getMetaComparator().reversed());
 
-        for (Node node : group.getAllNodes(null, Contexts.allowAll())) {
+        for (Node node : holder.getAllNodes(null, Contexts.allowAll())) {
             if (!node.isSuffix() && !node.isPrefix()) {
                 continue;
             }
@@ -67,18 +71,18 @@ public class GroupChatMeta extends SubCommand<Group> {
         }
 
         if (prefixes.isEmpty()) {
-            Message.CHAT_META_PREFIX_NONE.send(sender, group.getDisplayName());
+            Message.CHAT_META_PREFIX_NONE.send(sender, holder.getFriendlyName());
         } else {
-            Message.CHAT_META_PREFIX_HEADER.send(sender, group.getDisplayName());
+            Message.CHAT_META_PREFIX_HEADER.send(sender, holder.getFriendlyName());
             for (Map.Entry<Integer, String> e : prefixes) {
                 Message.CHAT_META_ENTRY.send(sender, e.getKey(), e.getValue());
             }
         }
 
         if (suffixes.isEmpty()) {
-            Message.CHAT_META_SUFFIX_NONE.send(sender, group.getDisplayName());
+            Message.CHAT_META_SUFFIX_NONE.send(sender, holder.getFriendlyName());
         } else {
-            Message.CHAT_META_SUFFIX_HEADER.send(sender, group.getDisplayName());
+            Message.CHAT_META_SUFFIX_HEADER.send(sender, holder.getFriendlyName());
             for (Map.Entry<Integer, String> e : suffixes) {
                 Message.CHAT_META_ENTRY.send(sender, e.getKey(), e.getValue());
             }

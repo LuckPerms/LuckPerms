@@ -20,34 +20,38 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.commands.user.subcommands;
+package me.lucko.luckperms.commands.meta.subcommands;
 
 import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.commands.*;
+import me.lucko.luckperms.commands.Arg;
+import me.lucko.luckperms.commands.CommandResult;
+import me.lucko.luckperms.commands.Predicate;
+import me.lucko.luckperms.commands.Sender;
+import me.lucko.luckperms.commands.meta.MetaSubCommand;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
+import me.lucko.luckperms.core.PermissionHolder;
 import me.lucko.luckperms.data.LogEntry;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
-import me.lucko.luckperms.users.User;
 import me.lucko.luckperms.utils.ArgumentChecker;
 
 import java.util.List;
 
-public class UserAddPrefix extends SubCommand<User> {
-    public UserAddPrefix() {
-        super("addprefix", "Adds a prefix to the user",  Permission.USER_ADDPREFIX, Predicate.notInRange(2, 4),
+public class MetaAddSuffix extends MetaSubCommand {
+    public MetaAddSuffix() {
+        super("addsuffix", "Adds a suffix",  Permission.USER_ADDSUFFIX, Permission.GROUP_ADDSUFFIX, Predicate.notInRange(2, 4),
                 Arg.list(
-                        Arg.create("priority", true, "the priority to add the prefix at"),
-                        Arg.create("prefix", true, "the prefix string"),
-                        Arg.create("server", false, "the server to add the prefix on"),
-                        Arg.create("world", false, "the world to add the prefix on")
+                        Arg.create("priority", true, "the priority to add the suffix at"),
+                        Arg.create("suffix", true, "the suffix string"),
+                        Arg.create("server", false, "the server to add the suffix on"),
+                        Arg.create("world", false, "the world to add the suffix on")
                 )
         );
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
-        final String prefix = args.get(1).replace("{SPACE}", " ");
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) {
+        final String suffix = args.get(1).replace("{SPACE}", " ");
         int priority;
         try {
             priority = Integer.parseInt(args.get(0));
@@ -56,7 +60,7 @@ public class UserAddPrefix extends SubCommand<User> {
             return CommandResult.INVALID_ARGS;
         }
 
-        final String node = "prefix." + priority + "." + ArgumentChecker.escapeCharacters(prefix);
+        final String node = "suffix." + priority + "." + ArgumentChecker.escapeCharacters(suffix);
 
         try {
             if (args.size() >= 3) {
@@ -67,32 +71,32 @@ public class UserAddPrefix extends SubCommand<User> {
                 }
 
                 if (args.size() == 3) {
-                    user.setPermission(node, true, server);
-                    Message.ADDPREFIX_SERVER_SUCCESS.send(sender, user.getName(), prefix, priority, server);
-                    LogEntry.build().actor(sender).acted(user)
-                            .action("addprefix " + priority + " " + args.get(1) + " " + server)
+                    holder.setPermission(node, true, server);
+                    Message.ADDSUFFIX_SERVER_SUCCESS.send(sender, holder.getFriendlyName(), suffix, priority, server);
+                    LogEntry.build().actor(sender).acted(holder)
+                            .action("meta addsuffix " + priority + " " + args.get(1) + " " + server)
                             .build().submit(plugin, sender);
                 } else {
                     final String world = args.get(3).toLowerCase();
-                    user.setPermission(node, true, server, world);
-                    Message.ADDPREFIX_SERVER_WORLD_SUCCESS.send(sender, user.getName(), prefix, priority, server, world);
-                    LogEntry.build().actor(sender).acted(user)
-                            .action("addprefix " + priority + " " + args.get(1) + " " + server + " " + world)
+                    holder.setPermission(node, true, server, world);
+                    Message.ADDSUFFIX_SERVER_WORLD_SUCCESS.send(sender, holder.getFriendlyName(), suffix, priority, server, world);
+                    LogEntry.build().actor(sender).acted(holder)
+                            .action("meta addsuffix " + priority + " " + args.get(1) + " " + server + " " + world)
                             .build().submit(plugin, sender);
                 }
 
             } else {
-                user.setPermission(node, true);
-                Message.ADDPREFIX_SUCCESS.send(sender, user.getName(), prefix, priority);
-                LogEntry.build().actor(sender).acted(user)
-                        .action("addprefix " + priority + " " + args.get(1))
+                holder.setPermission(node, true);
+                Message.ADDSUFFIX_SUCCESS.send(sender, holder.getFriendlyName(), suffix, priority);
+                LogEntry.build().actor(sender).acted(holder)
+                        .action("meta addsuffix " + priority + " " + args.get(1))
                         .build().submit(plugin, sender);
             }
 
-            save(user, sender, plugin);
+            save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } catch (ObjectAlreadyHasException e) {
-            Message.ALREADY_HAS_PREFIX.send(sender, user.getName());
+            Message.ALREADY_HAS_SUFFIX.send(sender, holder.getFriendlyName());
             return CommandResult.STATE_ERROR;
         }
     }
