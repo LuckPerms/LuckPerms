@@ -23,16 +23,17 @@
 package me.lucko.luckperms;
 
 import lombok.Getter;
+import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.api.implementation.ApiProvider;
+import me.lucko.luckperms.calculators.CalculatorFactory;
 import me.lucko.luckperms.commands.CommandManager;
 import me.lucko.luckperms.commands.ConsecutiveExecutor;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.config.LPConfiguration;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
-import me.lucko.luckperms.contexts.BackendServerCalculator;
 import me.lucko.luckperms.contexts.ContextManager;
 import me.lucko.luckperms.contexts.ServerCalculator;
 import me.lucko.luckperms.core.UuidCache;
@@ -43,9 +44,10 @@ import me.lucko.luckperms.runnables.UpdateTask;
 import me.lucko.luckperms.storage.Datastore;
 import me.lucko.luckperms.storage.StorageFactory;
 import me.lucko.luckperms.tracks.TrackManager;
-import me.lucko.luckperms.users.BungeeUserManager;
+import me.lucko.luckperms.users.UserManager;
 import me.lucko.luckperms.utils.LocaleManager;
 import me.lucko.luckperms.utils.LogFactory;
+import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 
@@ -57,10 +59,9 @@ import java.util.stream.Collectors;
 
 @Getter
 public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
-    private final Map<UUID, BungeePlayerCache> playerCache = new ConcurrentHashMap<>();
     private final Set<UUID> ignoringLogs = ConcurrentHashMap.newKeySet();
     private LPConfiguration configuration;
-    private BungeeUserManager userManager;
+    private UserManager userManager;
     private GroupManager groupManager;
     private TrackManager trackManager;
     private Datastore datastore;
@@ -71,6 +72,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     private ConsecutiveExecutor consecutiveExecutor;
     private LocaleManager localeManager;
     private ContextManager<ProxiedPlayer> contextManager;
+    private CalculatorFactory calculatorFactory;
 
     @Override
     public void onEnable() {
@@ -105,18 +107,18 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
         getLog().info("Loading internal permission managers...");
         uuidCache = new UuidCache(getConfiguration().isOnlineMode());
-        userManager = new BungeeUserManager(this);
+        userManager = new UserManager(this);
         groupManager = new GroupManager(this);
         trackManager = new TrackManager();
         importer = new Importer(commandManager);
         consecutiveExecutor = new ConsecutiveExecutor(commandManager);
+        calculatorFactory = new BungeeCalculatorFactory(this);
 
         contextManager = new ContextManager<>();
         BackendServerCalculator serverCalculator = new BackendServerCalculator();
         getProxy().getPluginManager().registerListener(this, serverCalculator);
         contextManager.registerCalculator(serverCalculator);
         contextManager.registerCalculator(new ServerCalculator<>(getConfiguration().getServer()));
-        contextManager.registerListener(userManager);
 
         int mins = getConfiguration().getSyncTime();
         if (mins > 0) {
@@ -196,9 +198,31 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     }
 
     @Override
-    public List<String> getPossiblePermissions() {
-        // No such thing on Bungee. Wildcards are processed in the listener instead.
-        return Collections.emptyList();
+    public Set<Contexts> getPreProcessContexts(boolean op) {
+        Set<Map<String, String>> c = new HashSet<>();
+        c.add(Collections.emptyMap());
+        c.add(Collections.singletonMap("server", getConfiguration().getServer()));
+        c.addAll(getProxy().getServers().values().stream()
+                .map(ServerInfo::getName)
+                .map(s -> {
+                    Map<String, String> map = new HashMap<>();
+                    map.put("server", getConfiguration().getServer());
+                    map.put("world", s);
+                    return map;
+                })
+                .collect(Collectors.toList())
+        );
+
+        return c.stream()
+                .map(map -> new Contexts(
+                        map,
+                        getConfiguration().isIncludingGlobalPerms(),
+                        getConfiguration().isIncludingGlobalWorldPerms(),
+                        true,
+                        getConfiguration().isApplyingGlobalGroups(),
+                        getConfiguration().isApplyingGlobalWorldGroups()
+                ))
+                .collect(Collectors.toSet());
     }
 
     @Override

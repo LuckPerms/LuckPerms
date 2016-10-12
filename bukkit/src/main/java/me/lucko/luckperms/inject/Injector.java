@@ -27,30 +27,33 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permissible;
-import org.bukkit.permissions.PermissibleBase;
 
 import java.lang.reflect.Field;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Injects a {@link LPPermissible} into a {@link Player}
  */
 @UtilityClass
 public class Injector {
+    private static final Map<UUID, LPPermissible> INJECTED_PERMISSIBLES = new ConcurrentHashMap<>();
     private static Field HUMAN_ENTITY_FIELD;
 
     static {
         try {
-            HUMAN_ENTITY_FIELD = Class.forName(getInternalClassName("entity.CraftHumanEntity")).getDeclaredField("perm");
+            HUMAN_ENTITY_FIELD = Class.forName(getVersionedClassName("entity.CraftHumanEntity")).getDeclaredField("perm");
             HUMAN_ENTITY_FIELD.setAccessible(true);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public static boolean inject(CommandSender sender, PermissibleBase permissible) {
+    public static boolean inject(Player player, LPPermissible permissible) {
         try {
-            Field f = getPermField(sender);
-            f.set(sender, permissible);
+            HUMAN_ENTITY_FIELD.set(player, permissible);
+            INJECTED_PERMISSIBLES.put(player.getUniqueId(), permissible);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -58,15 +61,16 @@ public class Injector {
         }
     }
 
-    public static boolean unInject(CommandSender sender) {
+    public static boolean unInject(Player player) {
         try {
-            Permissible permissible = getPermissible(sender);
+            Permissible permissible = (Permissible) HUMAN_ENTITY_FIELD.get(player);
             if (permissible instanceof LPPermissible) {
                 /* The player is most likely leaving. Bukkit will attempt to call #clearPermissions, so we cannot set to null.
                    However, there's no need to re-inject a real PermissibleBase, so we just inject a dummy instead.
                    This saves tick time, pointlessly recalculating defaults when the instance will never be used. */
-                getPermField(sender).set(sender, new DummyPermissibleBase());
+                HUMAN_ENTITY_FIELD.set(player, new DummyPermissibleBase());
             }
+            INJECTED_PERMISSIBLES.remove(player.getUniqueId());
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -74,23 +78,11 @@ public class Injector {
         }
     }
 
-    private static Permissible getPermissible(CommandSender sender) {
-        try {
-            Field f = getPermField(sender);
-            return (Permissible) f.get(sender);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    public static LPPermissible getPermissible(UUID uuid) {
+        return INJECTED_PERMISSIBLES.get(uuid);
     }
 
-    private static Field getPermField(CommandSender sender) {
-        if (sender instanceof Player) {
-            return HUMAN_ENTITY_FIELD;
-        }
-        throw new RuntimeException("Couldn't get perm field for sender " + sender.getClass().getName());
-    }
-
-    private static String getInternalClassName(String className) {
+    private static String getVersionedClassName(String className) {
         Class server = Bukkit.getServer().getClass();
         if (!server.getSimpleName().equals("CraftServer")) {
             throw new RuntimeException("Couldn't inject into server " + server);

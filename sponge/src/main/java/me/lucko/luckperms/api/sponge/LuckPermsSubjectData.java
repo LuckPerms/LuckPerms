@@ -31,6 +31,7 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.core.PermissionHolder;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
+import me.lucko.luckperms.groups.Group;
 import me.lucko.luckperms.users.User;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
@@ -41,25 +42,34 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static me.lucko.luckperms.utils.ArgumentChecker.escapeCharacters;
-import static me.lucko.luckperms.utils.ArgumentChecker.unescapeCharacters;
 
 @AllArgsConstructor
 public class LuckPermsSubjectData implements SubjectData {
     private final boolean enduring;
-    private final LuckPermsSubject superClass;
     private final LuckPermsService service;
 
     @Getter
     private final PermissionHolder holder;
+
+    private void objectSave(PermissionHolder t) {
+        service.getPlugin().doAsync(() -> {
+            if (t instanceof User) {
+                ((User) t).refreshPermissions();
+                service.getPlugin().getDatastore().saveUser(((User) t));
+            }
+            if (t instanceof Group) {
+                service.getPlugin().getDatastore().saveGroup(((Group) t));
+                service.getPlugin().runUpdateTask();
+            }
+        });
+    }
 
     @Override
     public Map<Set<Context>, Map<String, Boolean>> getAllPermissions() {
         Map<Set<Context>, Map<String, Boolean>> perms = new HashMap<>();
 
         for (Node n : enduring ? holder.getNodes() : holder.getTransientNodes()) {
-            Set<Context> contexts = n.getExtraContexts().entrySet().stream()
-                    .map(entry -> new Context(entry.getKey(), entry.getValue()))
-                    .collect(Collectors.toSet());
+            Set<Context> contexts = LuckPermsService.convertContexts(n.getExtraContexts());
 
             if (n.isServerSpecific()) {
                 contexts.add(new Context(LuckPermsService.SERVER_CONTEXT, n.getServer().get()));
@@ -84,8 +94,14 @@ public class LuckPermsSubjectData implements SubjectData {
     }
 
     @Override
-    public Map<String, Boolean> getPermissions(Set<Context> set) {
-        return getAllPermissions().getOrDefault(set, ImmutableMap.of());
+    public Map<String, Boolean> getPermissions(Set<Context> contexts) {
+        ImmutableMap.Builder<String, Boolean> permissions = ImmutableMap.builder();
+
+        (enduring ? holder.getNodes() : holder.getTransientNodes()).stream()
+                .filter(n -> n.shouldApplyWithContext(LuckPermsService.convertContexts(contexts), true))
+                .forEach(n -> permissions.put(n.getKey(), n.getValue()));
+        
+        return permissions.build();
     }
 
     @Override
@@ -105,7 +121,8 @@ public class LuckPermsSubjectData implements SubjectData {
                     holder.unsetTransientPermission(builder.build());
                 }
             } catch (ObjectLacksException ignored) {}
-            superClass.objectSave(holder);
+
+            objectSave(holder);
             return true;
         }
 
@@ -123,7 +140,8 @@ public class LuckPermsSubjectData implements SubjectData {
                 holder.setTransientPermission(builder.build());
             }
         } catch (ObjectAlreadyHasException ignored) {}
-        superClass.objectSave(holder);
+
+        objectSave(holder);
         return true;
     }
 
@@ -134,15 +152,14 @@ public class LuckPermsSubjectData implements SubjectData {
         } else {
             holder.clearTransientNodes();
         }
-        superClass.objectSave(holder);
+        objectSave(holder);
         return true;
     }
 
     @Override
-    public boolean clearPermissions(Set<Context> set) {
-        Map<String, String> context = set.stream().collect(Collectors.toMap(Context::getKey, Context::getValue));
+    public boolean clearPermissions(Set<Context> contexts) {
         List<Node> toRemove = (enduring ? holder.getNodes() : holder.getTransientNodes()).stream()
-                .filter(node -> node.shouldApplyWithContext(context))
+                .filter(node -> node.shouldApplyWithContext(LuckPermsService.convertContexts(contexts)))
                 .collect(Collectors.toList());
 
         toRemove.forEach(n -> {
@@ -159,7 +176,7 @@ public class LuckPermsSubjectData implements SubjectData {
             service.getPlugin().getUserManager().giveDefaultIfNeeded(((User) holder), false);
         }
 
-        superClass.objectSave(holder);
+        objectSave(holder);
         return !toRemove.isEmpty();
     }
 
@@ -172,9 +189,7 @@ public class LuckPermsSubjectData implements SubjectData {
                 continue;
             }
 
-            Set<Context> contexts = n.getExtraContexts().entrySet().stream()
-                    .map(entry -> new Context(entry.getKey(), entry.getValue()))
-                    .collect(Collectors.toSet());
+            Set<Context> contexts = LuckPermsService.convertContexts(n.getExtraContexts());
 
             if (n.isServerSpecific()) {
                 contexts.add(new Context(LuckPermsService.SERVER_CONTEXT, n.getServer().get()));
@@ -200,14 +215,21 @@ public class LuckPermsSubjectData implements SubjectData {
 
     @Override
     public List<Subject> getParents(Set<Context> contexts) {
-        return getAllParents().getOrDefault(contexts, ImmutableList.of());
+        ImmutableList.Builder<Subject> parents = ImmutableList.builder();
+
+        (enduring ? holder.getNodes() : holder.getTransientNodes()).stream()
+                .filter(Node::isGroupNode)
+                .filter(n -> n.shouldApplyWithContext(LuckPermsService.convertContexts(contexts), true))
+                .forEach(n -> parents.add(service.getGroupSubjects().get(n.getGroupName())));
+
+        return parents.build();
     }
 
     @Override
     public boolean addParent(Set<Context> set, Subject subject) {
-        if (subject instanceof LuckPermsSubject) {
-            LuckPermsSubject permsSubject = ((LuckPermsSubject) subject);
-            Map<String, String> contexts = set.stream().collect(Collectors.toMap(Context::getKey, Context::getValue));
+        if (subject instanceof LuckPermsGroupSubject) {
+            LuckPermsGroupSubject permsSubject = ((LuckPermsGroupSubject) subject);
+            Map<String, String> contexts = LuckPermsService.convertContexts(set);
 
             try {
                 if (enduring) {
@@ -220,18 +242,18 @@ public class LuckPermsSubjectData implements SubjectData {
                             .build());
                 }
             } catch (ObjectAlreadyHasException ignored) {}
-            superClass.objectSave(holder);
-        } else {
-            return false;
+
+            objectSave(holder);
+            return true;
         }
         return false;
     }
 
     @Override
     public boolean removeParent(Set<Context> set, Subject subject) {
-        if (subject instanceof LuckPermsSubject) {
-            LuckPermsSubject permsSubject = ((LuckPermsSubject) subject);
-            Map<String, String> contexts = set.stream().collect(Collectors.toMap(Context::getKey, Context::getValue));
+        if (subject instanceof LuckPermsGroupSubject) {
+            LuckPermsGroupSubject permsSubject = ((LuckPermsGroupSubject) subject);
+            Map<String, String> contexts = LuckPermsService.convertContexts(set);
 
             try {
                 if (enduring) {
@@ -244,9 +266,9 @@ public class LuckPermsSubjectData implements SubjectData {
                             .build());
                 }
             } catch (ObjectLacksException ignored) {}
-            superClass.objectSave(holder);
-        } else {
-            return false;
+
+            objectSave(holder);
+            return true;
         }
         return false;
     }
@@ -271,13 +293,14 @@ public class LuckPermsSubjectData implements SubjectData {
             service.getPlugin().getUserManager().giveDefaultIfNeeded(((User) holder), false);
         }
 
-        superClass.objectSave(holder);
+        objectSave(holder);
         return !toRemove.isEmpty();
     }
 
     @Override
     public boolean clearParents(Set<Context> set) {
-        Map<String, String> context = set.stream().collect(Collectors.toMap(Context::getKey, Context::getValue));
+        Map<String, String> context = LuckPermsService.convertContexts(set);
+
         List<Node> toRemove = (enduring ? holder.getNodes() : holder.getTransientNodes()).stream()
                 .filter(Node::isGroupNode)
                 .filter(node -> node.shouldApplyWithContext(context))
@@ -297,7 +320,7 @@ public class LuckPermsSubjectData implements SubjectData {
             service.getPlugin().getUserManager().giveDefaultIfNeeded(((User) holder), false);
         }
 
-        superClass.objectSave(holder);
+        objectSave(holder);
         return !toRemove.isEmpty();
     }
 
@@ -305,14 +328,19 @@ public class LuckPermsSubjectData implements SubjectData {
     public Map<Set<Context>, Map<String, String>> getAllOptions() {
         Map<Set<Context>, Map<String, String>> options = new HashMap<>();
 
+        int prefixPriority = Integer.MIN_VALUE;
+        int suffixPriority = Integer.MIN_VALUE;
+
         for (Node n : enduring ? holder.getNodes() : holder.getTransientNodes()) {
-            if (!n.isMeta() && !n.isPrefix() && !n.isSuffix()) {
+            if (!n.getValue()) {
                 continue;
             }
 
-            Set<Context> contexts = n.getExtraContexts().entrySet().stream()
-                    .map(entry -> new Context(entry.getKey(), entry.getValue()))
-                    .collect(Collectors.toSet());
+            if (!n.isMeta() || !n.isPrefix() || n.isSuffix()) {
+                continue;
+            }
+
+            Set<Context> contexts = LuckPermsService.convertContexts(n.getExtraContexts());
 
             if (n.isServerSpecific()) {
                 contexts.add(new Context(LuckPermsService.SERVER_CONTEXT, n.getServer().get()));
@@ -326,7 +354,28 @@ public class LuckPermsSubjectData implements SubjectData {
                 options.put(contexts, new HashMap<>());
             }
 
-            options.get(contexts).put(unescapeCharacters(n.getMeta().getKey()), unescapeCharacters(n.getMeta().getValue()));
+            if (n.isPrefix()) {
+                Map.Entry<Integer, String> value = n.getPrefix();
+                if (value.getKey() > prefixPriority) {
+                    options.get(contexts).put("prefix", value.getValue());
+                    prefixPriority = value.getKey();
+                }
+                continue;
+            }
+
+            if (n.isSuffix()) {
+                Map.Entry<Integer, String> value = n.getSuffix();
+                if (value.getKey() > suffixPriority) {
+                    options.get(contexts).put("suffix", value.getValue());
+                    suffixPriority = value.getKey();
+                }
+                continue;
+            }
+
+            if (n.isMeta()) {
+                Map.Entry<String, String> meta = n.getMeta();
+                options.get(contexts).put(meta.getKey(), meta.getValue());
+            }
         }
 
         ImmutableMap.Builder<Set<Context>, Map<String, String>> map = ImmutableMap.builder();
@@ -338,15 +387,55 @@ public class LuckPermsSubjectData implements SubjectData {
 
     @Override
     public Map<String, String> getOptions(Set<Context> set) {
-        return getAllOptions().getOrDefault(set, Collections.emptyMap());
+        ImmutableMap.Builder<String, String> options = ImmutableMap.builder();
+        Map<String, String> contexts = LuckPermsService.convertContexts(set);
+
+        int prefixPriority = Integer.MIN_VALUE;
+        int suffixPriority = Integer.MIN_VALUE;
+
+        for (Node n : enduring ? holder.getNodes() : holder.getTransientNodes()) {
+            if (!n.getValue()) {
+                continue;
+            }
+
+            if (!n.isMeta() || !n.isPrefix() || n.isSuffix()) {
+                continue;
+            }
+
+            if (!n.shouldApplyWithContext(contexts, true)) {
+                continue;
+            }
+
+            if (n.isPrefix()) {
+                Map.Entry<Integer, String> value = n.getPrefix();
+                if (value.getKey() > prefixPriority) {
+                    options.put("prefix", value.getValue());
+                    prefixPriority = value.getKey();
+                }
+                continue;
+            }
+
+            if (n.isSuffix()) {
+                Map.Entry<Integer, String> value = n.getSuffix();
+                if (value.getKey() > suffixPriority) {
+                    options.put("suffix", value.getValue());
+                    suffixPriority = value.getKey();
+                }
+                continue;
+            }
+
+            if (n.isMeta()) {
+                Map.Entry<String, String> meta = n.getMeta();
+                options.put(meta.getKey(), meta.getValue());
+            }
+        }
+
+        return options.build();
     }
 
     @Override
     public boolean setOption(Set<Context> set, String key, String value) {
-        Map<String, String> context = new HashMap<>();
-        for (Context c : set) {
-            context.put(c.getKey(), c.getValue());
-        }
+        Map<String, String> context = LuckPermsService.convertContexts(set);
 
         key = escapeCharacters(key);
         value = escapeCharacters(value);
@@ -364,13 +453,14 @@ public class LuckPermsSubjectData implements SubjectData {
                 );
             }
         } catch (ObjectAlreadyHasException ignored) {}
-        superClass.objectSave(holder);
+        objectSave(holder);
         return true;
     }
 
     @Override
     public boolean clearOptions(Set<Context> set) {
-        Map<String, String> context = set.stream().collect(Collectors.toMap(Context::getKey, Context::getValue));
+        Map<String, String> context = LuckPermsService.convertContexts(set);
+
         List<Node> toRemove = (enduring ? holder.getNodes() : holder.getTransientNodes()).stream()
                 .filter(n -> n.isMeta() || n.isPrefix() || n.isSuffix())
                 .filter(node -> node.shouldApplyWithContext(context))
@@ -386,7 +476,7 @@ public class LuckPermsSubjectData implements SubjectData {
             } catch (ObjectLacksException ignored) {}
         });
 
-        superClass.objectSave(holder);
+        objectSave(holder);
         return !toRemove.isEmpty();
     }
 
@@ -406,7 +496,7 @@ public class LuckPermsSubjectData implements SubjectData {
             } catch (ObjectLacksException ignored) {}
         });
 
-        superClass.objectSave(holder);
+        objectSave(holder);
         return !toRemove.isEmpty();
     }
 }

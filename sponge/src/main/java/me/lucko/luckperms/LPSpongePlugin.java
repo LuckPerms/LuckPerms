@@ -34,7 +34,6 @@ import me.lucko.luckperms.config.LPConfiguration;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.constants.Permission;
 import me.lucko.luckperms.contexts.ContextManager;
-import me.lucko.luckperms.contexts.ContextUpdateTask;
 import me.lucko.luckperms.contexts.ServerCalculator;
 import me.lucko.luckperms.contexts.WorldCalculator;
 import me.lucko.luckperms.core.UuidCache;
@@ -46,6 +45,7 @@ import me.lucko.luckperms.storage.Datastore;
 import me.lucko.luckperms.storage.StorageFactory;
 import me.lucko.luckperms.tracks.TrackManager;
 import me.lucko.luckperms.users.SpongeUserManager;
+import me.lucko.luckperms.users.UserManager;
 import me.lucko.luckperms.utils.LocaleManager;
 import me.lucko.luckperms.utils.LogFactory;
 import org.slf4j.Logger;
@@ -89,7 +89,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
     private final Set<UUID> ignoringLogs = ConcurrentHashMap.newKeySet();
     private LPConfiguration configuration;
-    private SpongeUserManager userManager;
+    private UserManager userManager;
     private GroupManager groupManager;
     private TrackManager trackManager;
     private Datastore datastore;
@@ -133,7 +133,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
         getLog().info("Loading internal permission managers...");
         uuidCache = new UuidCache(getConfiguration().isOnlineMode());
-        userManager = new SpongeUserManager(this);
+        userManager = new UserManager(this);
         groupManager = new GroupManager(this);
         trackManager = new TrackManager();
         importer = new Importer(commandManager);
@@ -142,7 +142,6 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         contextManager = new ContextManager<>();
         contextManager.registerCalculator(new ServerCalculator<>(getConfiguration().getServer()));
         contextManager.registerCalculator(new WorldCalculator());
-        contextManager.registerListener(userManager);
 
         getLog().info("Registering PermissionService...");
         Sponge.getServiceManager().setProvider(this, PermissionService.class, (service = new LuckPermsService(this)));
@@ -164,7 +163,6 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         scheduler.createTaskBuilder().intervalTicks(1L).execute(SpongeSenderFactory.get(this)).submit(this);
         scheduler.createTaskBuilder().async().intervalTicks(60L).execute(new ExpireTemporaryTask(this)).submit(this);
         scheduler.createTaskBuilder().async().intervalTicks(20L).execute(consecutiveExecutor).submit(this);
-        scheduler.createTaskBuilder().async().intervalTicks(600L).execute(new ContextUpdateTask(service.getUserSubjects())).submit(this);
 
         getLog().info("Successfully loaded.");
     }
@@ -250,15 +248,6 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     @Override
     public Sender getConsoleSender() {
         return SpongeSenderFactory.get(this).wrap(game.getServer().getConsole());
-    }
-
-    @Override
-    public List<String> getPossiblePermissions() {
-        Optional<PermissionService> p = game.getServiceManager().provide(PermissionService.class);
-        if (!p.isPresent()) {
-            return Collections.emptyList();
-        }
-        return p.get().getDescriptions().stream().map(PermissionDescription::getId).collect(Collectors.toList());
     }
 
     @Override

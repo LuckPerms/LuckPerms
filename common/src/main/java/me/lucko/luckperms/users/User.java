@@ -30,6 +30,7 @@ import me.lucko.luckperms.LuckPermsPlugin;
 import me.lucko.luckperms.api.event.events.GroupAddEvent;
 import me.lucko.luckperms.api.implementation.internal.GroupLink;
 import me.lucko.luckperms.api.implementation.internal.PermissionHolderLink;
+import me.lucko.luckperms.caching.UserData;
 import me.lucko.luckperms.core.PermissionHolder;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
@@ -40,7 +41,7 @@ import java.util.UUID;
 
 @ToString(of = {"uuid"})
 @EqualsAndHashCode(of = {"uuid"}, callSuper = false)
-public abstract class User extends PermissionHolder implements Identifiable<UserIdentifier> {
+public class User extends PermissionHolder implements Identifiable<UserIdentifier> {
 
     /**
      * The users Mojang UUID
@@ -61,6 +62,9 @@ public abstract class User extends PermissionHolder implements Identifiable<User
     @Getter
     @Setter
     private String primaryGroup = null;
+
+    @Getter
+    private UserData userData = null;
 
     protected User(UUID uuid, LuckPermsPlugin plugin) {
         super(uuid.toString(), plugin);
@@ -85,9 +89,43 @@ public abstract class User extends PermissionHolder implements Identifiable<User
     }
 
     /**
-     * Refresh and re-assign the users permissions
+     * Sets up the UserData cache
+     * Blocking call.
      */
-    public abstract void refreshPermissions();
+    public void setupData(boolean op) {
+        if (userData != null) {
+            throw new IllegalStateException("Data already setup");
+        }
+
+        userData = new UserData(this, null);
+        userData.preCalculate(getPlugin().getPreProcessContexts(op));
+    }
+
+    /**
+     * Removes the UserData cache from this user
+     */
+    public void unregisterData() {
+        if (userData != null) {
+            userData.invalidateCache();
+            userData = null;
+        }
+        // TODO
+    }
+
+    /**
+     * Refresh and re-assign the users permissions
+     * Blocking call.
+     */
+    public synchronized void refreshPermissions() {
+        if (userData == null) {
+            return;
+        }
+
+        UserData ud = userData;
+        ud.recalculatePermissions();
+        ud.recalculateMeta();
+        // TODO api call?
+    }
 
     /**
      * Check to see if the user is a member of a group

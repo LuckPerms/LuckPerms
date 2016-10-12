@@ -33,7 +33,7 @@ import me.lucko.luckperms.utils.Identifiable;
 import java.util.UUID;
 
 @RequiredArgsConstructor
-public abstract class UserManager extends AbstractManager<UserIdentifier, User> {
+public class UserManager extends AbstractManager<UserIdentifier, User> {
     private final LuckPermsPlugin plugin;
 
     /**
@@ -121,10 +121,21 @@ public abstract class UserManager extends AbstractManager<UserIdentifier, User> 
      * Checks to see if the user is online, and if they are not, runs {@link #unload(Identifiable)}
      * @param user The user to be cleaned up
      */
-    public abstract void cleanup(User user);
+    public void cleanup(User user) {
+        // TODO
+    }
 
     /**
      * Reloads the data of all online users
      */
-    public abstract void updateAllUsers();
+    public void updateAllUsers() {
+        // TODO
+    }
+
+    @Override
+    public User apply(UserIdentifier id) {
+        return id.getUsername() == null ?
+                new User(id.getUuid(), plugin) :
+                new User(id.getUuid(), id.getUsername(), plugin);
+    }
 }

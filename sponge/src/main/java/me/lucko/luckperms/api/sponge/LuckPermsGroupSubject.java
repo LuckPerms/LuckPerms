@@ -30,7 +30,6 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.core.PermissionHolder;
 import me.lucko.luckperms.groups.Group;
-import me.lucko.luckperms.users.User;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
@@ -43,48 +42,33 @@ import java.util.stream.Collectors;
 
 import static me.lucko.luckperms.utils.ArgumentChecker.unescapeCharacters;
 
-@EqualsAndHashCode(of = {"holder"})
-public class LuckPermsSubject implements Subject {
-    public static LuckPermsSubject wrapHolder(PermissionHolder holder, LuckPermsService service) {
-        return new LuckPermsSubject(holder, service);
+@EqualsAndHashCode(of = "group")
+public class LuckPermsGroupSubject implements Subject {
+    public static LuckPermsGroupSubject wrapGroup(Group group, LuckPermsService service) {
+        return new LuckPermsGroupSubject(group, service);
     }
 
     @Getter
-    private PermissionHolder holder;
-    private LuckPermsSubjectData enduringData;
-    private LuckPermsSubjectData transientData;
-    protected LuckPermsService service;
+    private PermissionHolder group;
 
-    LuckPermsSubject(PermissionHolder holder, LuckPermsService service) {
-        this.holder = holder;
-        this.enduringData = new LuckPermsSubjectData(true, this, service, holder);
-        this.transientData = new LuckPermsSubjectData(true, this, service, holder);
+    private LuckPermsService service;
+
+    @Getter
+    private LuckPermsSubjectData subjectData;
+
+    @Getter
+    private LuckPermsSubjectData transientSubjectData;
+
+    private LuckPermsGroupSubject(PermissionHolder group, LuckPermsService service) {
+        this.group = group;
+        this.subjectData = new LuckPermsSubjectData(true, service, group);
+        this.transientSubjectData = new LuckPermsSubjectData(false, service, group);
         this.service = service;
-    }
-
-    public void deprovision() {
-        holder = null;
-        enduringData = null;
-        transientData = null;
-        service = null;
-    }
-
-    void objectSave(PermissionHolder t) {
-        service.getPlugin().doAsync(() -> {
-            if (t instanceof User) {
-                ((User) t).refreshPermissions();
-                service.getPlugin().getDatastore().saveUser(((User) t));
-            }
-            if (t instanceof Group) {
-                service.getPlugin().getDatastore().saveGroup(((Group) t));
-                service.getPlugin().runUpdateTask();
-            }
-        });
     }
 
     @Override
     public String getIdentifier() {
-        return holder.getObjectName();
+        return group.getObjectName();
     }
 
     @Override
@@ -94,35 +78,12 @@ public class LuckPermsSubject implements Subject {
 
     @Override
     public SubjectCollection getContainingCollection() {
-        if (holder instanceof Group) {
-            return service.getGroupSubjects();
-        } else {
-            return service.getUserSubjects();
-        }
-    }
-
-    @Override
-    public SubjectData getSubjectData() {
-        return enduringData;
-    }
-
-    @Override
-    public SubjectData getTransientSubjectData() {
-        return transientData;
-    }
-
-    public boolean isPermissionSet(@NonNull Set<Context> contexts, @NonNull String node) {
-        return getPermissionValue(contexts, node) != Tristate.UNDEFINED;
+        return service.getGroupSubjects();
     }
 
     @Override
     public boolean hasPermission(@NonNull Set<Context> contexts, @NonNull String node) {
         return getPermissionValue(contexts, node).asBoolean();
-    }
-
-    @Override
-    public boolean hasPermission(String permission) {
-        return getPermissionValue(getActiveContexts(), permission).asBoolean();
     }
 
     @Override
@@ -132,7 +93,7 @@ public class LuckPermsSubject implements Subject {
             context.put(c.getKey(), c.getValue());
         }
 
-        switch (holder.inheritsPermission(new me.lucko.luckperms.core.Node.Builder(node).withExtraContext(context).build())) {
+        switch (group.inheritsPermission(new me.lucko.luckperms.core.Node.Builder(node).withExtraContext(context).build())) {
             case UNDEFINED:
                 return Tristate.UNDEFINED;
             case TRUE:
@@ -142,63 +103,50 @@ public class LuckPermsSubject implements Subject {
             default:
                 return null;
         }
-    }
 
-    @Override
-    public boolean isChildOf(@NonNull Subject parent) {
-        return isChildOf(getActiveContexts(), parent);
+        // TODO
     }
 
     @Override
     public boolean isChildOf(@NonNull Set<Context> contexts, @NonNull Subject parent) {
-        return parent instanceof PermissionHolder && getPermissionValue(contexts, "group." + parent.getIdentifier()).asBoolean();
-    }
-
-    @Override
-    public List<Subject> getParents() {
-        return getParents(getActiveContexts());
+        return parent instanceof LuckPermsGroupSubject && getPermissionValue(contexts, "group." + parent.getIdentifier()).asBoolean();
     }
 
     @Override
     public List<Subject> getParents(@NonNull Set<Context> contexts) {
         List<Subject> parents = new ArrayList<>();
-        parents.addAll(enduringData.getParents(contexts));
-        parents.addAll(transientData.getParents(contexts));
+        parents.addAll(subjectData.getParents(contexts));
+        parents.addAll(transientSubjectData.getParents(contexts));
         return ImmutableList.copyOf(parents);
     }
 
     @Override
     public Optional<String> getOption(Set<Context> set, String s) {
         if (s.equalsIgnoreCase("prefix")) {
-            String prefix = getChatMeta(set, true, holder);
+            String prefix = getChatMeta(set, true, group);
             if (!prefix.equals("")) {
                 return Optional.of(prefix);
             }
         }
 
         if (s.equalsIgnoreCase("suffix")) {
-            String suffix = getChatMeta(set, false, holder);
+            String suffix = getChatMeta(set, false, group);
             if (!suffix.equals("")) {
                 return Optional.of(suffix);
             }
         }
 
-        Map<String, String> transientOptions = enduringData.getOptions(set);
+        Map<String, String> transientOptions = subjectData.getOptions(set);
         if (transientOptions.containsKey(s)) {
             return Optional.of(transientOptions.get(s));
         }
 
-        Map<String, String> enduringOptions = enduringData.getOptions(set);
+        Map<String, String> enduringOptions = subjectData.getOptions(set);
         if (enduringOptions.containsKey(s)) {
             return Optional.of(enduringOptions.get(s));
         }
 
         return Optional.empty();
-    }
-
-    @Override
-    public Optional<String> getOption(String key) {
-        return getOption(getActiveContexts(), key);
     }
 
     @Override

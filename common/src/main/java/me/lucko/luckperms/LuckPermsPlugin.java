@@ -22,9 +22,11 @@
 
 package me.lucko.luckperms;
 
+import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.api.implementation.ApiProvider;
+import me.lucko.luckperms.calculators.CalculatorFactory;
 import me.lucko.luckperms.commands.ConsecutiveExecutor;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.config.LPConfiguration;
@@ -64,6 +66,7 @@ public interface LuckPermsPlugin {
     ConsecutiveExecutor getConsecutiveExecutor();
     LocaleManager getLocaleManager();
     ContextManager getContextManager();
+    CalculatorFactory getCalculatorFactory();
 
     /**
      * @return the version of the plugin
@@ -114,11 +117,8 @@ public interface LuckPermsPlugin {
      */
     Sender getConsoleSender();
 
-    /**
-     * Gets all possible permission nodes, used for resolving wildcards
-     * @return a {@link List} of permission nodes
-     */
-    List<String> getPossiblePermissions();
+    // TODO javadoc
+    Set<Contexts> getPreProcessContexts(boolean op);
 
     /**
      * Gets a set of players ignoring logging output

@@ -31,19 +31,19 @@ import java.util.function.Supplier;
 
 @AllArgsConstructor
 public class DefaultsProcessor implements PermissionProcessor {
-    private final Supplier<Boolean> isOp;
+    private final boolean isOp;
     private final DefaultsProvider defaultsProvider;
 
     @Override
     public Tristate hasPermission(String permission) {
-        Tristate t = defaultsProvider.hasDefault(permission, isOp.get());
+        Tristate t = defaultsProvider.hasDefault(permission, isOp);
         if (t != Tristate.UNDEFINED) {
             return t;
         }
 
         Permission defPerm = Bukkit.getServer().getPluginManager().getPermission(permission);
         if (defPerm != null) {
-            return Tristate.fromBoolean(defPerm.getDefault().getValue(isOp.get()));
+            return Tristate.fromBoolean(defPerm.getDefault().getValue(isOp));
         } else {
             return Tristate.UNDEFINED;
         }

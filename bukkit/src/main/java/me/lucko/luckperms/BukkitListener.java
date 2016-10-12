@@ -22,21 +22,20 @@
 
 package me.lucko.luckperms;
 
-import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.inject.Injector;
 import me.lucko.luckperms.inject.LPPermissible;
-import me.lucko.luckperms.users.BukkitUser;
 import me.lucko.luckperms.users.User;
 import me.lucko.luckperms.utils.AbstractListener;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.*;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
-import java.util.Collections;
-import java.util.Map;
 import java.util.UUID;
 
 class BukkitListener extends AbstractListener implements Listener {
@@ -50,6 +49,7 @@ class BukkitListener extends AbstractListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerPreLogin(AsyncPlayerPreLoginEvent e) {
         if (!plugin.getDatastore().isAcceptingLogins()) {
+
             // The datastore is disabled, prevent players from joining the server
             e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, Message.LOADING_ERROR.toString());
             return;
@@ -57,38 +57,14 @@ class BukkitListener extends AbstractListener implements Listener {
 
         // Process login
         onAsyncLogin(e.getUniqueId(), e.getName());
-
-        // Pre-process the user's permissions, so they're ready for PLE.
-        BukkitUser user = (BukkitUser) plugin.getUserManager().get(plugin.getUuidCache().getUUID(e.getUniqueId()));
-        Map<String, Boolean> toApply = user.exportNodes(
-                new Contexts(
-                        Collections.singletonMap("server", plugin.getConfiguration().getServer()),
-                        plugin.getConfiguration().isIncludingGlobalPerms(),
-                        plugin.getConfiguration().isIncludingGlobalWorldPerms(),
-                        true,
-                        plugin.getConfiguration().isApplyingGlobalGroups(),
-                        plugin.getConfiguration().isApplyingGlobalWorldGroups()
-                ),
-                Collections.emptyList(),
-                true
-        );
-        user.setLoginPreProcess(toApply);
-
-        // Hook with Vault early
-        if (plugin.getVaultHook() != null && plugin.getVaultHook().isHooked()) {
-            plugin.getVaultHook().getPermissionHook().getVaultUserManager().setupUser(user);
-        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerPreLoginMonitor(AsyncPlayerPreLoginEvent e) {
         if (plugin.getDatastore().isAcceptingLogins() && e.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
+
             // Login event was cancelled by another plugin
-            final UUID internal = plugin.getUuidCache().getUUID(e.getUniqueId());
             onLeave(e.getUniqueId());
-            if (plugin.getVaultHook() != null && plugin.getVaultHook().isHooked()) {
-                plugin.getVaultHook().getPermissionHook().getVaultUserManager().clearUser(internal);
-            }
         }
     }
 
@@ -98,61 +74,56 @@ class BukkitListener extends AbstractListener implements Listener {
         final User user = plugin.getUserManager().get(plugin.getUuidCache().getUUID(player.getUniqueId()));
 
         if (user == null) {
+            // User wasn't loaded for whatever reason.
             e.disallow(PlayerLoginEvent.Result.KICK_OTHER, Message.LOADING_ERROR.toString());
             return;
         }
 
-        BukkitUser u = (BukkitUser) user;
         try {
             // Make a new permissible for the user
-            LPPermissible lpPermissible = new LPPermissible(player, plugin, plugin.getDefaultsProvider());
-
-            // Insert the pre-processed permissions into the permissible
-            lpPermissible.getLuckPermsPermissions().putAll(u.getLoginPreProcess());
-            u.setLoginPreProcess(null);
+            LPPermissible lpPermissible = new LPPermissible(player, user, plugin);
 
             // Inject into the player
             Injector.inject(player, lpPermissible);
-            u.setPermissible(lpPermissible);
 
         } catch (Throwable t) {
             t.printStackTrace();
+        }
+
+        if (player.isOp()) {
+
+            // We assume all users are not op, but those who are need extra calculation.
+            plugin.doAsync(() -> user.getUserData().preCalculate(plugin.getPreProcessContexts(true)));
         }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerLoginMonitor(PlayerLoginEvent e) {
         if (e.getResult() != PlayerLoginEvent.Result.ALLOWED) {
+
             // The player got denied on sync login.
-            final UUID internal = plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId());
             onLeave(e.getPlayer().getUniqueId());
-            if (plugin.getVaultHook() != null && plugin.getVaultHook().isHooked()) {
-                plugin.getVaultHook().getPermissionHook().getVaultUserManager().clearUser(internal);
-            }
-        } else {
-            User user = plugin.getUserManager().get(plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId()));
-
-            // Call another update to calculate full context. (incl. per world permissions)
-            plugin.doAsync(user::refreshPermissions);
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onPlayerJoin(PlayerJoinEvent e) {
-        // Refresh permissions again
-        UUID internal = plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId());
-        plugin.getWorldCalculator().getWorldCache().put(internal, e.getPlayer().getWorld().getName());
-        plugin.doAsync(() -> refreshPlayer(internal));
-    }
-
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST) // Allow other plugins to see data when this event gets called.
     public void onPlayerQuit(PlayerQuitEvent e) {
-        final UUID internal = plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId());
+        final Player player = e.getPlayer();
+        final UUID internal = plugin.getUuidCache().getUUID(player.getUniqueId());
+
+        // Remove from World cache
         plugin.getWorldCalculator().getWorldCache().remove(internal);
-        onLeave(e.getPlayer().getUniqueId());
-        if (plugin.getVaultHook() != null && plugin.getVaultHook().isHooked()) {
-            plugin.getVaultHook().getPermissionHook().getVaultUserManager().clearUser(internal);
+
+        // Remove the custom permissible
+        Injector.unInject(player);
+
+        // Handle auto op
+        if (plugin.getConfiguration().isAutoOp()) {
+            player.setOp(false);
         }
+
+        // Call internal leave handling
+        onLeave(player.getUniqueId());
     }
 
     @EventHandler

@@ -24,61 +24,60 @@ package me.lucko.luckperms.inject;
 
 import lombok.Getter;
 import lombok.NonNull;
-import me.lucko.luckperms.LuckPermsPlugin;
+import me.lucko.luckperms.LPBukkitPlugin;
+import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.calculators.*;
+import me.lucko.luckperms.users.User;
 import org.bukkit.Bukkit;
-import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.permissions.*;
 import org.bukkit.plugin.Plugin;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 /**
  * Modified PermissibleBase for LuckPerms
  */
-public class LPPermissible extends PermissibleBase {
+public class LPPermissible extends PermissibleBase { // TODO autoop stuff
 
     @Getter
-    private final CommandSender parent;
-
-    private final PermissionCalculator calculator;
+    private final User user;
 
     @Getter
-    private final Map<String, Boolean> luckPermsPermissions = new ConcurrentHashMap<>();
-    private final List<PermissionAttachment> attachments = new LinkedList<>();
+    private final Player parent;
+
+    private final LPBukkitPlugin plugin;
+
+    // Attachment stuff.
+    @Getter
     private final Map<String, PermissionAttachmentInfo> attachmentPermissions = new HashMap<>();
+    private final List<PermissionAttachment> attachments = new LinkedList<>();
 
-    public LPPermissible(@NonNull CommandSender sender, LuckPermsPlugin plugin, DefaultsProvider defaultsProvider) {
-        super(sender);
-        this.parent = sender;
-
-        List<PermissionProcessor> processors = new ArrayList<>(5);
-        processors.add(new MapProcessor(luckPermsPermissions));
-        processors.add(new AttachmentProcessor(attachmentPermissions));
-        if (plugin.getConfiguration().isApplyingWildcards()) {
-            processors.add(new WildcardProcessor(luckPermsPermissions));
-        }
-        if (plugin.getConfiguration().isApplyingRegex()) {
-            processors.add(new RegexProcessor(luckPermsPermissions));
-        }
-        processors.add(new DefaultsProcessor(parent::isOp, defaultsProvider));
-
-        calculator = new PermissionCalculator(plugin, parent.getName(), plugin.getConfiguration().isDebugPermissionChecks(), processors);
+    public LPPermissible(@NonNull Player parent, User user, LPBukkitPlugin plugin) {
+        super(parent);
+        this.user = user;
+        this.parent = parent;
+        this.plugin = plugin;
 
         recalculatePermissions();
     }
 
-    public void invalidateCache() {
-        calculator.invalidateCache();
+    private Contexts calculateContexts() {
+        return new Contexts(
+                plugin.getContextManager().giveApplicableContext(parent, new HashMap<>()),
+                plugin.getConfiguration().isIncludingGlobalPerms(),
+                plugin.getConfiguration().isIncludingGlobalWorldPerms(),
+                true,
+                plugin.getConfiguration().isApplyingGlobalGroups(),
+                plugin.getConfiguration().isApplyingGlobalWorldGroups(),
+                parent.isOp()
+        );
     }
 
-    @Override
-    public boolean isOp() {
-        return parent.isOp();
+    private boolean hasData() {
+        return user.getUserData() != null;
     }
 
     @Override
@@ -88,7 +87,7 @@ public class LPPermissible extends PermissibleBase {
 
     @Override
     public boolean isPermissionSet(@NonNull String name) {
-        return calculator.getPermissionValue(name) != Tristate.UNDEFINED;
+        return hasData() && user.getUserData().getPermissionData(calculateContexts()).getPermissionValue(name) != Tristate.UNDEFINED;
     }
 
     @Override
@@ -98,9 +97,11 @@ public class LPPermissible extends PermissibleBase {
 
     @Override
     public boolean hasPermission(@NonNull String name) {
-        Tristate ts = calculator.getPermissionValue(name);
-        if (ts != Tristate.UNDEFINED) {
-            return ts.asBoolean();
+        if (hasData()) {
+            Tristate ts = user.getUserData().getPermissionData(calculateContexts()).getPermissionValue(name);
+            if (ts != Tristate.UNDEFINED) {
+                return ts.asBoolean();
+            }
         }
 
         return Permission.DEFAULT_PERMISSION.getValue(isOp());
@@ -108,12 +109,30 @@ public class LPPermissible extends PermissibleBase {
 
     @Override
     public boolean hasPermission(@NonNull Permission perm) {
-        Tristate ts = calculator.getPermissionValue(perm.getName());
-        if (ts != Tristate.UNDEFINED) {
-            return ts.asBoolean();
+        if (hasData()) {
+            Tristate ts = user.getUserData().getPermissionData(calculateContexts()).getPermissionValue(perm.getName());
+            if (ts != Tristate.UNDEFINED) {
+                return ts.asBoolean();
+            }
         }
 
         return perm.getDefault().getValue(isOp());
+    }
+
+    @Override
+    public Set<PermissionAttachmentInfo> getEffectivePermissions() {
+        Set<PermissionAttachmentInfo> perms = new HashSet<>();
+        perms.addAll(attachmentPermissions.values());
+
+        if (hasData()) {
+            perms.addAll(
+                    user.getUserData().getPermissionData(calculateContexts()).getImmutableBacking().entrySet().stream()
+                            .map(e -> new PermissionAttachmentInfo(parent, e.getKey(), null, e.getValue()))
+                            .collect(Collectors.toList())
+            );
+        }
+
+        return perms;
     }
 
     @Override
@@ -202,7 +221,9 @@ public class LPPermissible extends PermissibleBase {
             calculateChildPermissions(attachment.getPermissions(), false, attachment);
         }
 
-        invalidateCache();
+        if (hasData()) {
+            user.getUserData().invalidateCache();
+        }
     }
 
     @Override
@@ -232,18 +253,6 @@ public class LPPermissible extends PermissibleBase {
                 calculateChildPermissions(perm.getChildren(), !value, attachment);
             }
         }
-    }
-
-    @Override
-    public Set<PermissionAttachmentInfo> getEffectivePermissions() {
-        Set<PermissionAttachmentInfo> perms = new HashSet<>();
-        perms.addAll(attachmentPermissions.values());
-
-        perms.addAll(luckPermsPermissions.entrySet().stream()
-                .map(e -> new PermissionAttachmentInfo(parent, e.getKey(), null, e.getValue()))
-                .collect(Collectors.toList()));
-
-        return perms;
     }
 
     private class RemoveAttachmentRunnable implements Runnable {

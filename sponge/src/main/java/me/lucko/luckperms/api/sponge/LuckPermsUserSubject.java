@@ -22,24 +22,26 @@
 
 package me.lucko.luckperms.api.sponge;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.event.events.UserPermissionRefreshEvent;
-import me.lucko.luckperms.api.implementation.internal.UserLink;
+import me.lucko.luckperms.caching.MetaData;
 import me.lucko.luckperms.users.User;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.context.Context;
+import org.spongepowered.api.service.permission.Subject;
+import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.util.Tristate;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-public class LuckPermsUserSubject extends LuckPermsSubject {
+@EqualsAndHashCode(of = "user")
+public class LuckPermsUserSubject implements Subject {
     public static LuckPermsUserSubject wrapUser(User user, LuckPermsService service) {
         return new LuckPermsUserSubject(user, service);
     }
@@ -47,91 +49,44 @@ public class LuckPermsUserSubject extends LuckPermsSubject {
     @Getter
     private User user;
 
+    private LuckPermsService service;
+
     @Getter
-    private Map<Map<String, String>, ContextData> contextData;
+    private LuckPermsSubjectData subjectData;
+
+    @Getter
+    private LuckPermsSubjectData transientSubjectData;
 
     private LuckPermsUserSubject(User user, LuckPermsService service) {
-        super(user, service);
         this.user = user;
-
-        contextData = new ConcurrentHashMap<>();
+        this.service = service;
+        this.subjectData = new LuckPermsSubjectData(true, service, user);
+        this.transientSubjectData = new LuckPermsSubjectData(false, service, user);
     }
 
-    @Override
     public void deprovision() {
         /* For some reason, Sponge holds onto User instances in a cache, which in turn, prevents LuckPerms data from being GCed.
            As well as unloading, we also remove all references to the User instances. */
-        super.deprovision();
         user = null;
-        contextData = null;
+        service = null;
+        subjectData = null;
+        transientSubjectData = null;
     }
 
-    @Override
-    public Tristate getPermissionValue(@NonNull Set<Context> contexts, @NonNull String permission) {
-        Map<String, String> context = contexts.stream().collect(Collectors.toMap(Context::getKey, Context::getValue));
-        ContextData cd = contextData.computeIfAbsent(context, map -> calculatePermissions(map, false));
-
-        me.lucko.luckperms.api.Tristate t =  cd.getPermissionValue(permission);
-        if (t != me.lucko.luckperms.api.Tristate.UNDEFINED) {
-            return Tristate.fromBoolean(t.asBoolean());
-        } else {
-            return Tristate.UNDEFINED;
-        }
-    }
-
-    public ContextData calculatePermissions(Map<String, String> context, boolean apply) {
-        Map<String, Boolean> toApply = user.exportNodes(
-                new Contexts(
-                        context,
-                        service.getPlugin().getConfiguration().isIncludingGlobalPerms(),
-                        service.getPlugin().getConfiguration().isIncludingGlobalWorldPerms(),
-                        true,
-                        service.getPlugin().getConfiguration().isApplyingGlobalGroups(),
-                        service.getPlugin().getConfiguration().isApplyingGlobalWorldGroups()
-                ),
-                Collections.emptyList(),
-                true
+    private Contexts calculateContexts(Set<Context> contexts) {
+        return new Contexts(
+                LuckPermsService.convertContexts(contexts),
+                service.getPlugin().getConfiguration().isIncludingGlobalPerms(),
+                service.getPlugin().getConfiguration().isIncludingGlobalWorldPerms(),
+                true,
+                service.getPlugin().getConfiguration().isApplyingGlobalGroups(),
+                service.getPlugin().getConfiguration().isApplyingGlobalWorldGroups()
         );
-
-        ContextData existing = contextData.get(context);
-        if (existing == null) {
-            existing = new ContextData(this, context, service);
-            if (apply) {
-                contextData.put(context, existing);
-            }
-        }
-
-        boolean different = false;
-        if (toApply.size() != existing.getPermissionCache().size()) {
-            different = true;
-        } else {
-            for (Map.Entry<String, Boolean> e : existing.getPermissionCache().entrySet()) {
-                if (toApply.containsKey(e.getKey()) && toApply.get(e.getKey()) == e.getValue()) {
-                    continue;
-                }
-                different = true;
-                break;
-            }
-        }
-
-        if (!different) return existing;
-
-        existing.getPermissionCache().clear();
-        existing.invalidateCache();
-        existing.getPermissionCache().putAll(toApply);
-        service.getPlugin().getApiProvider().fireEventAsync(new UserPermissionRefreshEvent(new UserLink(user)));
-        return existing;
     }
 
-    public void calculatePermissions(Set<Context> contexts, boolean apply) {
-        Map<String, String> context = contexts.stream().collect(Collectors.toMap(Context::getKey, Context::getValue));
-        calculatePermissions(context, apply);
+    private boolean hasData() {
+        return user.getUserData() != null;
     }
-
-    public void calculateActivePermissions(boolean apply) {
-        calculatePermissions(getActiveContexts(), apply);
-    }
-
 
     @Override
     public String getIdentifier() {
@@ -148,6 +103,82 @@ public class LuckPermsUserSubject extends LuckPermsSubject {
         }
 
         return Optional.empty();
+    }
+
+    @Override
+    public SubjectCollection getContainingCollection() {
+        return service.getUserSubjects();
+    }
+
+    @Override
+    public boolean hasPermission(Set<Context> contexts, String permission) {
+        return getPermissionValue(contexts, permission).asBoolean();
+    }
+
+    @Override
+    public Tristate getPermissionValue(@NonNull Set<Context> contexts, @NonNull String permission) {
+        if (hasData()) {
+            return LuckPermsService.convertTristate(user.getUserData().getPermissionData(calculateContexts(contexts)).getPermissionValue(permission));
+        }
+
+        return Tristate.UNDEFINED;
+    }
+
+    @Override
+    public boolean isChildOf(@NonNull Set<Context> contexts, @NonNull Subject parent) {
+        return parent instanceof LuckPermsGroupSubject && getPermissionValue(contexts, "group." + parent.getIdentifier()).asBoolean();
+    }
+
+    @Override
+    public List<Subject> getParents(Set<Context> contexts) {
+        List<Subject> subjects = new ArrayList<>();
+
+        if (hasData()) {
+            for (String perm : user.getUserData().getPermissionData(calculateContexts(contexts)).getImmutableBacking().keySet()) {
+                if (!perm.startsWith("group.")) {
+                    continue;
+                }
+
+                String groupName = perm.substring("group.".length());
+                if (service.getPlugin().getGroupManager().isLoaded(groupName)) {
+                    subjects.add(service.getGroupSubjects().get(groupName));
+                }
+            }
+        }
+
+        subjects.addAll(service.getUserSubjects().getDefaults().getParents(contexts));
+        subjects.addAll(service.getDefaults().getParents(contexts));
+
+        return subjects;
+    }
+
+    @Override
+    public Optional<String> getOption(Set<Context> contexts, String s) {
+        if (hasData()) {
+            MetaData data = user.getUserData().getMetaData(calculateContexts(contexts));
+            if (s.equalsIgnoreCase("prefix")) {
+                if (data.getPrefix() != null) {
+                    return Optional.of(data.getPrefix());
+                }
+            }
+
+            if (s.equalsIgnoreCase("suffix")) {
+                if (data.getSuffix() != null) {
+                    return Optional.of(data.getSuffix());
+                }
+            }
+
+            if (data.getMeta().containsKey(s)) {
+                return Optional.of(data.getMeta().get(s));
+            }
+        }
+
+        Optional<String> v = service.getUserSubjects().getDefaults().getOption(contexts, s);
+        if (v.isPresent()) {
+            return v;
+        }
+
+        return service.getDefaults().getOption(contexts, s);
     }
 
     @Override

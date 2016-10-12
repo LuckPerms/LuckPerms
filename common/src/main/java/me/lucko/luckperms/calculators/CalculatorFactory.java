@@ -20,35 +20,18 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.users;
+package me.lucko.luckperms.calculators;
 
-import me.lucko.luckperms.LPSpongePlugin;
-import me.lucko.luckperms.api.sponge.LuckPermsUserSubject;
-import me.lucko.luckperms.api.sponge.collections.UserCollection;
+import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.users.User;
 
-import java.util.UUID;
+import java.util.Map;
 
-class SpongeUser extends User {
-    private final LPSpongePlugin plugin;
+/**
+ * Creates a calculator instance given a set of contexts
+ */
+public interface CalculatorFactory {
 
-    SpongeUser(UUID uuid, LPSpongePlugin plugin) {
-        super(uuid, plugin);
-        this.plugin = plugin;
-    }
+    PermissionCalculator build(Contexts contexts, User user, Map<String, Boolean> map);
 
-    SpongeUser(UUID uuid, String username, LPSpongePlugin plugin) {
-        super(uuid, username, plugin);
-        this.plugin = plugin;
-    }
-
-    @Override
-    public synchronized void refreshPermissions() {
-        UserCollection uc = plugin.getService().getUserSubjects();
-        if (!uc.getUsers().containsKey(getUuid())) {
-            return;
-        }
-
-        LuckPermsUserSubject us = uc.getUsers().get(getUuid());
-        us.calculateActivePermissions(true);
-    }
 }

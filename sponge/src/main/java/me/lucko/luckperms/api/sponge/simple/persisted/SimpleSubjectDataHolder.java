@@ -30,6 +30,8 @@ import org.spongepowered.api.util.Tristate;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static me.lucko.luckperms.api.sponge.LuckPermsService.convertContexts;
+
 /**
  * Holds SubjectData in a "gson friendly" format for serialization
  */
@@ -91,13 +93,5 @@ public class SimpleSubjectDataHolder {
                 subjectData.addParent(convertContexts(e.getKey()), service.getSubjects(parent.getKey()).get(parent.getValue()));
             }
         }
-    }
-
-    public static Map<String, String> convertContexts(Set<Context> contexts) {
-        return contexts.stream().collect(Collectors.toMap(Context::getKey, Context::getValue));
-    }
-
-    public static Set<Context> convertContexts(Map<String, String> contexts) {
-        return contexts.entrySet().stream().map(e -> new Context(e.getKey(), e.getValue())).collect(Collectors.toSet());
     }
 }

@@ -41,14 +41,18 @@ public class Contexts {
      * @return a context that will not apply any filters
      */
     public static Contexts allowAll() {
-        return new Contexts(Collections.emptyMap(), true, true, true, true, true);
+        return new Contexts(Collections.emptyMap(), true, true, true, true, true, true);
     }
 
     public static Contexts of(Map<String, String> context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups) {
         return new Contexts(context, includeGlobal, includeGlobalWorld, applyGroups, applyGlobalGroups, applyGlobalWorldGroups);
     }
 
-    public Contexts(Map<String, String> context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups) {
+    public static Contexts of(Map<String, String> context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups, boolean op) {
+        return new Contexts(context, includeGlobal, includeGlobalWorld, applyGroups, applyGlobalGroups, applyGlobalWorldGroups, op);
+    }
+
+    public Contexts(Map<String, String> context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups, boolean op) {
         if (context == null) {
             throw new NullPointerException("context");
         }
@@ -59,6 +63,11 @@ public class Contexts {
         this.applyGroups = applyGroups;
         this.applyGlobalGroups = applyGlobalGroups;
         this.applyGlobalWorldGroups = applyGlobalWorldGroups;
+        this.op = op;
+    }
+
+    public Contexts(Map<String, String> context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups) {
+        this(context, includeGlobal, includeGlobalWorld, applyGroups, applyGlobalGroups, applyGlobalWorldGroups, false);
     }
 
     /**
@@ -67,6 +76,11 @@ public class Contexts {
      * The keys for servers and worlds are defined as static values.
      */
     private final Map<String, String> context;
+
+    /**
+     * The mode to parse defaults on Bukkit
+     */
+    private final boolean op;
 
     /**
      * If global or non server specific nodes should be applied
@@ -99,6 +113,14 @@ public class Contexts {
      */
     public Map<String, String> getContext() {
         return this.context;
+    }
+
+    /**
+     * Gets if OP defaults should be included
+     * @return true if op defaults should be included
+     */
+    public boolean isOp() {
+        return this.op;
     }
 
     /**
@@ -144,12 +166,58 @@ public class Contexts {
     public String toString() {
         return "Contexts(" +
                 "context=" + this.getContext() + ", " +
+                "op=" + this.isOp() + ", " +
                 "includeGlobal=" + this.isIncludeGlobal() + ", " +
                 "includeGlobalWorld=" + this.isIncludeGlobalWorld() + ", " +
                 "applyGroups=" + this.isApplyGroups() + ", " +
                 "applyGlobalGroups=" + this.isApplyGlobalGroups() + ", " +
                 "applyGlobalWorldGroups=" + this.isApplyGlobalWorldGroups() +
                 ")";
+    }
+
+    /*
+     * Ugly auto-generated lombok code
+     */
+
+    /**
+     * Check for equality
+     * @param o the other
+     * @return true if equal
+     * @since 2.12
+     */
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof Contexts)) return false;
+        final Contexts other = (Contexts) o;
+        final Object this$context = this.getContext();
+        final Object other$context = other.getContext();
+        if (this$context == null ? other$context != null : !this$context.equals(other$context)) return false;
+        if (this.isOp() != other.isOp()) return false;
+        if (this.isIncludeGlobal() != other.isIncludeGlobal()) return false;
+        if (this.isIncludeGlobalWorld() != other.isIncludeGlobalWorld()) return false;
+        if (this.isApplyGroups() != other.isApplyGroups()) return false;
+        if (this.isApplyGlobalGroups() != other.isApplyGlobalGroups()) return false;
+        if (this.isApplyGlobalWorldGroups() != other.isApplyGlobalWorldGroups()) return false;
+        return true;
+    }
+
+    /**
+     * Gets the hashcode
+     * @return the hashcode
+     * @since 2.12
+     */
+    public int hashCode() {
+        final int PRIME = 59;
+        int result = 1;
+        final Object $context = this.getContext();
+        result = result * PRIME + ($context == null ? 43 : $context.hashCode());
+        result = result * PRIME + (this.isOp() ? 79 : 97);
+        result = result * PRIME + (this.isIncludeGlobal() ? 79 : 97);
+        result = result * PRIME + (this.isIncludeGlobalWorld() ? 79 : 97);
+        result = result * PRIME + (this.isApplyGroups() ? 79 : 97);
+        result = result * PRIME + (this.isApplyGlobalGroups() ? 79 : 97);
+        result = result * PRIME + (this.isApplyGlobalWorldGroups() ? 79 : 97);
+        return result;
     }
 
 }

@@ -20,53 +20,42 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.api.vault.cache;
+package me.lucko.luckperms;
 
-import lombok.Getter;
-import lombok.NonNull;
-import me.lucko.luckperms.LuckPermsPlugin;
-import me.lucko.luckperms.api.Tristate;
+import lombok.AllArgsConstructor;
+import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.calculators.*;
-import me.lucko.luckperms.users.BukkitUser;
+import me.lucko.luckperms.inject.Injector;
+import me.lucko.luckperms.inject.LPPermissible;
 import me.lucko.luckperms.users.User;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.UUID;
 
-public class ContextCache {
+@AllArgsConstructor
+public class BukkitCalculatorFactory implements CalculatorFactory {
+    private final LPBukkitPlugin plugin;
 
-    @Getter
-    private final Map<String, String> context;
-
-    @Getter
-    private final Map<String, Boolean> permissionCache = new ConcurrentHashMap<>();
-
-    private final PermissionCalculator calculator;
-
-    public ContextCache(User user, Map<String, String> context, LuckPermsPlugin plugin, DefaultsProvider defaultsProvider) {
-        this.context = context;
+    @Override
+    public PermissionCalculator build(Contexts contexts, User user, Map<String, Boolean> map) {
+        UUID uuid = plugin.getUuidCache().getExternalUUID(user.getUuid());
 
         List<PermissionProcessor> processors = new ArrayList<>(5);
-        processors.add(new MapProcessor(permissionCache));
+        processors.add(new MapProcessor(map));
+        processors.add(new AttachmentProcessor(() -> {
+            LPPermissible permissible = Injector.getPermissible(uuid);
+            return permissible == null ? null : permissible.getAttachmentPermissions();
+        }));
         if (plugin.getConfiguration().isApplyingWildcards()) {
-            processors.add(new WildcardProcessor(permissionCache));
+            processors.add(new WildcardProcessor(map));
         }
         if (plugin.getConfiguration().isApplyingRegex()) {
-            processors.add(new RegexProcessor(permissionCache));
+            processors.add(new RegexProcessor(map));
         }
+        processors.add(new DefaultsProcessor(contexts.isOp(), plugin.getDefaultsProvider()));
 
-        processors.add(new DefaultsProcessor(((BukkitUser) user)::isOp, defaultsProvider));
-        calculator = new PermissionCalculator(plugin, user.getName(), plugin.getConfiguration().isDebugPermissionChecks(), processors);
+        return new PermissionCalculator(plugin, user.getName(), plugin.getConfiguration().isDebugPermissionChecks(), processors);
     }
-
-    public void invalidateCache() {
-        calculator.invalidateCache();
-    }
-
-    public Tristate getPermissionValue(@NonNull String permission) {
-        return calculator.getPermissionValue(permission);
-    }
-
 }

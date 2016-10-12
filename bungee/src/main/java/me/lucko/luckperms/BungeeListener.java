@@ -22,6 +22,8 @@
 
 package me.lucko.luckperms;
 
+import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.event.events.UserFirstLoginEvent;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.core.UuidCache;
 import me.lucko.luckperms.users.User;
@@ -36,6 +38,7 @@ import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
+import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -58,12 +61,26 @@ public class BungeeListener extends AbstractListener implements Listener {
 
         final ProxiedPlayer player = ((ProxiedPlayer) e.getSender());
 
-        BungeePlayerCache playerCache = plugin.getPlayerCache().get(plugin.getUuidCache().getUUID(player.getUniqueId()));
-        if (playerCache == null) {
+        User user = plugin.getUserManager().get(plugin.getUuidCache().getUUID(player.getUniqueId()));
+        if (user == null) {
             return;
         }
 
-        e.setHasPermission(playerCache.getPermissionValue(e.getPermission()));
+        if (user.getUserData() == null) {
+            plugin.getLog().warn("Player " + player.getName() + " does not have any user data setup.");
+            return;
+        }
+
+        Contexts contexts = new Contexts(
+                plugin.getContextManager().giveApplicableContext(player, new HashMap<>()),
+                plugin.getConfiguration().isIncludingGlobalPerms(),
+                plugin.getConfiguration().isIncludingGlobalWorldPerms(),
+                true,
+                plugin.getConfiguration().isApplyingGlobalGroups(),
+                plugin.getConfiguration().isApplyingGlobalWorldGroups()
+        );
+
+        e.setHasPermission(user.getUserData().getPermissionData(contexts).getPermissionValue(e.getPermission()).asBoolean());
     }
 
     @EventHandler
@@ -83,10 +100,16 @@ public class BungeeListener extends AbstractListener implements Listener {
                     cache.addToCache(c.getUniqueId(), uuid);
                 } else {
                     // No previous data for this player
+                    plugin.getApiProvider().fireEventAsync(new UserFirstLoginEvent(c.getUniqueId(), c.getName()));
                     cache.addToCache(c.getUniqueId(), c.getUniqueId());
                     plugin.getDatastore().saveUUIDData(c.getName(), c.getUniqueId());
                 }
             } else {
+                UUID uuid = plugin.getDatastore().getUUID(c.getName());
+                if (uuid == null) {
+                    plugin.getApiProvider().fireEventAsync(new UserFirstLoginEvent(c.getUniqueId(), c.getName()));
+                }
+
                 // Online mode, no cache needed. This is just for name -> uuid lookup.
                 plugin.getDatastore().saveUUIDData(c.getName(), c.getUniqueId());
             }
@@ -94,6 +117,13 @@ public class BungeeListener extends AbstractListener implements Listener {
             // We have to make a new user on this thread whilst the connection is being held, or we get concurrency issues as the Bukkit server
             // and the BungeeCord server try to make a new user at the same time.
             plugin.getDatastore().loadUser(cache.getUUID(c.getUniqueId()), c.getName());
+            User user = plugin.getUserManager().get(cache.getUUID(c.getUniqueId()));
+            if (user == null) {
+                plugin.getLog().warn("Failed to load user: " + c.getName());
+            } else {
+                user.setupData(false); // Pretty nasty calculation call. Sets up the caching system so data is ready when the user joins.
+            }
+
             final long time = System.currentTimeMillis() - startTime;
             if (time >= 1000) {
                 plugin.getLog().warn("Processing login for " + c.getName() + " took " + time + "ms.");
@@ -105,20 +135,15 @@ public class BungeeListener extends AbstractListener implements Listener {
     @EventHandler
     public void onPlayerPostLogin(PostLoginEvent e) {
         final ProxiedPlayer player = e.getPlayer();
-        final UUID internal = plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId());
-        final User user = plugin.getUserManager().get(internal);
+        final User user = plugin.getUserManager().get(plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId()));
 
         if (user == null) {
             plugin.getProxy().getScheduler().schedule(plugin, () -> player.sendMessage(WARN_MESSAGE), 3, TimeUnit.SECONDS);
-        } else {
-            plugin.getPlayerCache().put(internal, new BungeePlayerCache(plugin, e.getPlayer().getName()));
-            user.refreshPermissions();
         }
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerDisconnectEvent e) {
-        plugin.getPlayerCache().remove(plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId()));
         onLeave(e.getPlayer().getUniqueId());
     }
 }

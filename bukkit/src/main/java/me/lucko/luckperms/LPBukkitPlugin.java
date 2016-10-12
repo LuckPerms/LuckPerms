@@ -23,11 +23,13 @@
 package me.lucko.luckperms;
 
 import lombok.Getter;
+import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.api.implementation.ApiProvider;
 import me.lucko.luckperms.api.vault.VaultHook;
+import me.lucko.luckperms.calculators.CalculatorFactory;
 import me.lucko.luckperms.calculators.DefaultsProvider;
 import me.lucko.luckperms.commands.ConsecutiveExecutor;
 import me.lucko.luckperms.commands.Sender;
@@ -35,7 +37,6 @@ import me.lucko.luckperms.config.LPConfiguration;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.contexts.ContextManager;
 import me.lucko.luckperms.contexts.ServerCalculator;
-import me.lucko.luckperms.contexts.WorldCalculator;
 import me.lucko.luckperms.core.UuidCache;
 import me.lucko.luckperms.data.Importer;
 import me.lucko.luckperms.groups.GroupManager;
@@ -44,9 +45,10 @@ import me.lucko.luckperms.runnables.UpdateTask;
 import me.lucko.luckperms.storage.Datastore;
 import me.lucko.luckperms.storage.StorageFactory;
 import me.lucko.luckperms.tracks.TrackManager;
-import me.lucko.luckperms.users.BukkitUserManager;
+import me.lucko.luckperms.users.UserManager;
 import me.lucko.luckperms.utils.LocaleManager;
 import me.lucko.luckperms.utils.LogFactory;
+import org.bukkit.World;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
@@ -66,7 +68,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
     private final Set<UUID> ignoringLogs = ConcurrentHashMap.newKeySet();
     private LPConfiguration configuration;
-    private BukkitUserManager userManager;
+    private UserManager userManager;
     private GroupManager groupManager;
     private TrackManager trackManager;
     private Datastore datastore;
@@ -79,6 +81,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private LocaleManager localeManager;
     private ContextManager<Player> contextManager;
     private WorldCalculator worldCalculator;
+    private CalculatorFactory calculatorFactory;
 
     @Override
     public void onEnable() {
@@ -117,18 +120,18 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
         getLog().info("Loading internal permission managers...");
         uuidCache = new UuidCache(getConfiguration().isOnlineMode());
-        userManager = new BukkitUserManager(this);
+        userManager = new UserManager(this);
         groupManager = new GroupManager(this);
         trackManager = new TrackManager();
         importer = new Importer(commandManager);
         consecutiveExecutor = new ConsecutiveExecutor(commandManager);
+        calculatorFactory = new BukkitCalculatorFactory(this);
 
         contextManager = new ContextManager<>();
         worldCalculator = new WorldCalculator(this);
         pm.registerEvents(worldCalculator, this);
         contextManager.registerCalculator(worldCalculator);
         contextManager.registerCalculator(new ServerCalculator<>(getConfiguration().getServer()));
-        contextManager.registerListener(userManager);
 
         int mins = getConfiguration().getSyncTime();
         if (mins > 0) {
@@ -244,15 +247,68 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     }
 
     @Override
-    public List<String> getPossiblePermissions() {
-        final List<String> perms = new ArrayList<>();
+    public Set<Contexts> getPreProcessContexts(boolean op) {
+        Set<Map<String, String>> c = new HashSet<>();
+        c.add(Collections.emptyMap());
+        c.add(Collections.singletonMap("server", getConfiguration().getServer()));
 
-        getServer().getPluginManager().getPermissions().forEach(p -> {
-            perms.add(p.getName());
-            p.getChildren().keySet().forEach(perms::add);
-        });
+        // Pre process all worlds
+        c.addAll(getServer().getWorlds().stream()
+                .map(World::getName)
+                .map(s -> {
+                    Map<String, String> map = new HashMap<>();
+                    map.put("server", getConfiguration().getServer());
+                    map.put("world", s);
+                    return map;
+                })
+                .collect(Collectors.toList())
+        );
 
-        return perms;
+        // Pre process the separate Vault server, if any
+        if (!getConfiguration().getServer().equals(getConfiguration().getVaultServer())) {
+            c.add(Collections.singletonMap("server", getConfiguration().getVaultServer()));
+            c.addAll(getServer().getWorlds().stream()
+                    .map(World::getName)
+                    .map(s -> {
+                        Map<String, String> map = new HashMap<>();
+                        map.put("server", getConfiguration().getVaultServer());
+                        map.put("world", s);
+                        return map;
+                    })
+                    .collect(Collectors.toList())
+            );
+        }
+
+        Set<Contexts> contexts = new HashSet<>();
+
+        // Convert to full Contexts
+        contexts.addAll(c.stream()
+                .map(map -> new Contexts(
+                        map,
+                        getConfiguration().isIncludingGlobalPerms(),
+                        getConfiguration().isIncludingGlobalWorldPerms(),
+                        true,
+                        getConfiguration().isApplyingGlobalGroups(),
+                        getConfiguration().isApplyingGlobalWorldGroups(),
+                        op
+                ))
+                .collect(Collectors.toSet())
+        );
+
+        // Check for and include varying Vault config options
+        try {
+            assert getConfiguration().isVaultIncludingGlobal() == getConfiguration().isIncludingGlobalPerms();
+            assert getConfiguration().isIncludingGlobalWorldPerms();
+            assert getConfiguration().isApplyingGlobalGroups();
+            assert getConfiguration().isApplyingGlobalWorldGroups();
+        } catch (AssertionError e) {
+            contexts.addAll(c.stream()
+                    .map(map -> new Contexts(map, getConfiguration().isVaultIncludingGlobal(), true, true, true, true, op))
+                    .collect(Collectors.toSet())
+            );
+        }
+
+        return contexts;
     }
 
     @Override

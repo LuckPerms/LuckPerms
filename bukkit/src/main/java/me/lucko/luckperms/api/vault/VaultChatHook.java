@@ -25,8 +25,7 @@ package me.lucko.luckperms.api.vault;
 import lombok.NonNull;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.vault.cache.ChatCache;
-import me.lucko.luckperms.api.vault.cache.VaultUser;
+import me.lucko.luckperms.caching.MetaData;
 import me.lucko.luckperms.core.PermissionHolder;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
@@ -74,14 +73,14 @@ public class VaultChatHook extends Chat {
         return perms.isEnabled();
     }
 
-    private void saveMeta(PermissionHolder holder, String world, String node, String value) {
+    private void setMeta(PermissionHolder holder, String world, String node, String value) {
         String finalWorld = perms.isIgnoreWorld() ? null : world;
         if (holder == null) return;
         if (node.equals("")) return;
 
         perms.log("Setting meta: '" + node + "' for " + holder.getObjectName() + " on world " + world + ", server " + perms.getServer());
 
-        perms.scheduleTask(() -> {
+        perms.getScheduler().scheduleTask(() -> {
             String k = escapeCharacters(node);
             String v = escapeCharacters(value);
 
@@ -118,7 +117,7 @@ public class VaultChatHook extends Chat {
 
         perms.log("Setting " + (prefix ? "prefix" : "suffix") + " for " + holder.getObjectName() + " on world " + world + ", server " + perms.getServer());
 
-        perms.scheduleTask(() -> {
+        perms.getScheduler().scheduleTask(() -> {
             Node.Builder node = new me.lucko.luckperms.core.Node.Builder(prefix ? "prefix" : "suffix" + ".1000." + escapeCharacters(value));
             node.setValue(true);
             if (!perms.getServer().equalsIgnoreCase("global")) {
@@ -138,46 +137,32 @@ public class VaultChatHook extends Chat {
     }
 
     private String getUserMeta(User user, String world, String node, String defaultValue) {
-        world = perms.isIgnoreWorld() ? null : world;
         if (user == null) return defaultValue;
+        world = perms.isIgnoreWorld() ? null : world;
         node = escapeCharacters(node);
 
         perms.log("Getting meta: '" + node + "' for user " + user.getName() + " on world " + world + ", server " + perms.getServer());
 
-        if (!perms.getVaultUserManager().containsUser(user.getUuid())) {
+        if (user.getUserData() == null) {
             return defaultValue;
         }
 
-        VaultUser vaultUser = perms.getVaultUserManager().getUser(user.getUuid());
-        Map<String, String> context = new HashMap<>();
-        context.put("server", perms.getServer());
-        if (world != null) {
-            context.put("world", world);
-        }
-
-        ChatCache cd = vaultUser.processChatData(context);
-        return unescapeCharacters(cd.getMeta().getOrDefault(node, defaultValue));
+        return unescapeCharacters(user.getUserData().getMetaData(perms.createContext(perms.getServer(), world)).getMeta().getOrDefault(node, defaultValue));
     }
 
     private String getUserChatMeta(boolean prefix, User user, String world) {
-        world = perms.isIgnoreWorld() ? null : world;
         if (user == null) return "";
+        world = perms.isIgnoreWorld() ? null : world;
 
         perms.log("Getting " + (prefix ? "prefix" : "suffix") + " for user " + user.getName() + " on world " + world + ", server " + perms.getServer());
 
-        if (!perms.getVaultUserManager().containsUser(user.getUuid())) {
+        if (user.getUserData() == null) {
             return "";
         }
 
-        VaultUser vaultUser = perms.getVaultUserManager().getUser(user.getUuid());
-        Map<String, String> context = new HashMap<>();
-        context.put("server", perms.getServer());
-        if (world != null) {
-            context.put("world", world);
-        }
-
-        ChatCache cd = vaultUser.processChatData(context);
-        return unescapeCharacters(prefix ? (cd.getPrefix() == null ? "" : cd.getPrefix()) : (cd.getSuffix() == null ? "" : cd.getSuffix()));
+        MetaData data = user.getUserData().getMetaData(perms.createContext(perms.getServer(), world));
+        String v = prefix ? data.getPrefix() : data.getSuffix();
+        return v == null ? "" : unescapeCharacters(v);
     }
 
     private String getGroupMeta(Group group, String world, String node, String defaultValue) {
@@ -307,7 +292,7 @@ public class VaultChatHook extends Chat {
 
     public void setPlayerInfoInteger(String world, @NonNull String player, @NonNull String node, int value) {
         final User user = perms.getPlugin().getUserManager().get(player);
-        saveMeta(user, world, node, String.valueOf(value));
+        setMeta(user, world, node, String.valueOf(value));
     }
 
     public int getGroupInfoInteger(String world, @NonNull String group, @NonNull String node, int defaultValue) {
@@ -321,7 +306,7 @@ public class VaultChatHook extends Chat {
 
     public void setGroupInfoInteger(String world, @NonNull String group, @NonNull String node, int value) {
         final Group g = perms.getPlugin().getGroupManager().get(group);
-        saveMeta(g, world, node, String.valueOf(value));
+        setMeta(g, world, node, String.valueOf(value));
     }
 
     public double getPlayerInfoDouble(String world, @NonNull String player, @NonNull String node, double defaultValue) {
@@ -335,7 +320,7 @@ public class VaultChatHook extends Chat {
 
     public void setPlayerInfoDouble(String world, @NonNull String player, @NonNull String node, double value) {
         final User user = perms.getPlugin().getUserManager().get(player);
-        saveMeta(user, world, node, String.valueOf(value));
+        setMeta(user, world, node, String.valueOf(value));
     }
 
     public double getGroupInfoDouble(String world, @NonNull String group, @NonNull String node, double defaultValue) {
@@ -349,7 +334,7 @@ public class VaultChatHook extends Chat {
 
     public void setGroupInfoDouble(String world, @NonNull String group, @NonNull String node, double value) {
         final Group g = perms.getPlugin().getGroupManager().get(group);
-        saveMeta(g, world, node, String.valueOf(value));
+        setMeta(g, world, node, String.valueOf(value));
     }
 
     public boolean getPlayerInfoBoolean(String world, @NonNull String player, @NonNull String node, boolean defaultValue) {
@@ -363,7 +348,7 @@ public class VaultChatHook extends Chat {
 
     public void setPlayerInfoBoolean(String world, @NonNull String player, @NonNull String node, boolean value) {
         final User user = perms.getPlugin().getUserManager().get(player);
-        saveMeta(user, world, node, String.valueOf(value));
+        setMeta(user, world, node, String.valueOf(value));
     }
 
     public boolean getGroupInfoBoolean(String world, @NonNull String group, @NonNull String node, boolean defaultValue) {
@@ -377,7 +362,7 @@ public class VaultChatHook extends Chat {
 
     public void setGroupInfoBoolean(String world, @NonNull String group, @NonNull String node, boolean value) {
         final Group g = perms.getPlugin().getGroupManager().get(group);
-        saveMeta(g, world, node, String.valueOf(value));
+        setMeta(g, world, node, String.valueOf(value));
     }
 
     public String getPlayerInfoString(String world, @NonNull String player, @NonNull String node, String defaultValue) {
@@ -387,7 +372,7 @@ public class VaultChatHook extends Chat {
 
     public void setPlayerInfoString(String world, @NonNull String player, @NonNull String node, String value) {
         final User user = perms.getPlugin().getUserManager().get(player);
-        saveMeta(user, world, node, value);
+        setMeta(user, world, node, value);
     }
 
     public String getGroupInfoString(String world, @NonNull String group, @NonNull String node, String defaultValue) {
@@ -397,7 +382,7 @@ public class VaultChatHook extends Chat {
 
     public void setGroupInfoString(String world, @NonNull String group, @NonNull String node, String value) {
         final Group g = perms.getPlugin().getGroupManager().get(group);
-        saveMeta(g, world, node, value);
+        setMeta(g, world, node, value);
     }
 
 }

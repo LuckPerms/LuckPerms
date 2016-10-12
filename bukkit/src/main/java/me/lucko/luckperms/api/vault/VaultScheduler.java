@@ -20,26 +20,34 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.contexts;
+package me.lucko.luckperms.api.vault;
 
-import lombok.AllArgsConstructor;
-import me.lucko.luckperms.api.sponge.LuckPermsUserSubject;
-import me.lucko.luckperms.api.sponge.collections.UserCollection;
+import me.lucko.luckperms.LPBukkitPlugin;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
-@AllArgsConstructor
-public class ContextUpdateTask implements Runnable {
-    private final UserCollection userCollection;
+public class VaultScheduler implements Runnable {
+    private final List<Runnable> tasks = new ArrayList<>();
 
-    @Override
-    public void run() {
-        for (LuckPermsUserSubject subject : userCollection.getUsers().values()) {
-            Set<Map<String, String>> contexts = new HashSet<>(subject.getContextData().keySet());
-            contexts.forEach(map -> subject.calculatePermissions(map, true));
+    public VaultScheduler(LPBukkitPlugin plugin) {
+        plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, this, 1L, 1L);
+    }
+
+    public void scheduleTask(Runnable r) {
+        synchronized (tasks) {
+            tasks.add(r);
         }
     }
 
+    @Override
+    public void run() {
+        List<Runnable> toRun = new ArrayList<>();
+        synchronized (tasks) {
+            toRun.addAll(tasks);
+            tasks.clear();
+        }
+
+        toRun.forEach(Runnable::run);
+    }
 }

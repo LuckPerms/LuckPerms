@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.contexts;
+package me.lucko.luckperms;
 
 import com.google.common.collect.Maps;
 import lombok.Getter;

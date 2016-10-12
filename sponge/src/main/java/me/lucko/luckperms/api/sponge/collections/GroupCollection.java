@@ -24,7 +24,7 @@ package me.lucko.luckperms.api.sponge.collections;
 
 import lombok.NonNull;
 import me.lucko.luckperms.api.sponge.LuckPermsService;
-import me.lucko.luckperms.api.sponge.LuckPermsSubject;
+import me.lucko.luckperms.api.sponge.LuckPermsGroupSubject;
 import me.lucko.luckperms.api.sponge.simple.SimpleCollection;
 import me.lucko.luckperms.groups.GroupManager;
 import org.spongepowered.api.service.context.Context;
@@ -56,7 +56,7 @@ public class GroupCollection implements SubjectCollection {
     @Override
     public Subject get(@NonNull String id) {
         if (manager.isLoaded(id)) {
-            return LuckPermsSubject.wrapHolder(manager.get(id), service);
+            return LuckPermsGroupSubject.wrapGroup(manager.get(id), service);
         }
 
         return fallback.get(id);
@@ -70,7 +70,7 @@ public class GroupCollection implements SubjectCollection {
     @Override
     public Iterable<Subject> getAllSubjects() {
         return manager.getAll().values().stream()
-                .map(u -> LuckPermsSubject.wrapHolder(u, service))
+                .map(u -> LuckPermsGroupSubject.wrapGroup(u, service))
                 .collect(Collectors.toList());
     }
 
@@ -82,7 +82,7 @@ public class GroupCollection implements SubjectCollection {
     @Override
     public Map<Subject, Boolean> getAllWithPermission(@NonNull Set<Context> contexts, @NonNull String node) {
         return manager.getAll().values().stream()
-                .map(u -> LuckPermsSubject.wrapHolder(u, service))
+                .map(u -> LuckPermsGroupSubject.wrapGroup(u, service))
                 .filter(sub -> sub.isPermissionSet(contexts, node))
                 .collect(Collectors.toMap(sub -> sub, sub -> sub.getPermissionValue(contexts, node).asBoolean()));
     }

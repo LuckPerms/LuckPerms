@@ -33,6 +33,7 @@ import me.lucko.luckperms.api.sponge.simple.persisted.SimplePersistedCollection;
 import me.lucko.luckperms.api.sponge.simple.persisted.SubjectStorage;
 import me.lucko.luckperms.contexts.SpongeCalculatorLink;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.context.ContextCalculator;
 import org.spongepowered.api.service.permission.*;
 import org.spongepowered.api.text.Text;
@@ -41,6 +42,7 @@ import org.spongepowered.api.util.Tristate;
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * The LuckPerms implementation of the Sponge Permission Service
@@ -138,6 +140,36 @@ public class LuckPermsService implements PermissionService {
     @Override
     public void registerContextCalculator(@NonNull ContextCalculator<Subject> contextCalculator) {
         plugin.getContextManager().registerCalculator(new SpongeCalculatorLink(contextCalculator));
+    }
+
+    public static Map<String, String> convertContexts(Set<Context> contexts) {
+        return contexts.stream().collect(Collectors.toMap(Context::getKey, Context::getValue));
+    }
+
+    public static Set<Context> convertContexts(Map<String, String> contexts) {
+        return contexts.entrySet().stream().map(e -> new Context(e.getKey(), e.getValue())).collect(Collectors.toSet());
+    }
+
+    public static Tristate convertTristate(me.lucko.luckperms.api.Tristate tristate) {
+        switch (tristate) {
+            case TRUE:
+                return Tristate.TRUE;
+            case FALSE:
+                return Tristate.FALSE;
+            default:
+                return Tristate.UNDEFINED;
+        }
+    }
+
+    public static me.lucko.luckperms.api.Tristate convertTristate(Tristate tristate) {
+        switch (tristate) {
+            case TRUE:
+                return me.lucko.luckperms.api.Tristate.TRUE;
+            case FALSE:
+                return me.lucko.luckperms.api.Tristate.FALSE;
+            default:
+                return me.lucko.luckperms.api.Tristate.UNDEFINED;
+        }
     }
 
     @RequiredArgsConstructor

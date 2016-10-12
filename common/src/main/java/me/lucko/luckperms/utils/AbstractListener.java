@@ -60,6 +60,13 @@ public class AbstractListener {
         }
 
         plugin.getDatastore().loadUser(cache.getUUID(u), username);
+        User user = plugin.getUserManager().get(cache.getUUID(u));
+        if (user == null) {
+            plugin.getLog().warn("Failed to load user: " + username);
+        } else {
+            user.setupData(false); // Pretty nasty calculation call. Sets up the caching system so data is ready when the user joins.
+        }
+
         final long time = System.currentTimeMillis() - startTime;
         if (time >= 1000) {
             plugin.getLog().warn("Processing login for " + username + " took " + time + "ms.");
@@ -71,6 +78,7 @@ public class AbstractListener {
 
         final User user = plugin.getUserManager().get(cache.getUUID(uuid));
         if (user != null) {
+            user.unregisterData();
             plugin.getUserManager().unload(user);
         }
 

@@ -28,19 +28,24 @@ import me.lucko.luckperms.api.Tristate;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 @AllArgsConstructor
 public class AttachmentProcessor implements PermissionProcessor {
 
     @Getter
-    private final Map<String, PermissionAttachmentInfo> map;
+    private final Supplier<Map<String, PermissionAttachmentInfo>> map;
 
     @Override
     public Tristate hasPermission(String permission) {
-        if (map.containsKey(permission)) {
-            return Tristate.fromBoolean(map.get(permission).getValue());
+        Map<String, PermissionAttachmentInfo> m = map.get();
+        if (m == null) {
+            return Tristate.UNDEFINED;
         }
 
+        if (m.containsKey(permission)) {
+            return Tristate.fromBoolean(m.get(permission).getValue());
+        }
         return Tristate.UNDEFINED;
     }
 

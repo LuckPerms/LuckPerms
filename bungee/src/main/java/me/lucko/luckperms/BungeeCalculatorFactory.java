@@ -20,32 +20,32 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.api.vault.cache;
+package me.lucko.luckperms;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
+import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.calculators.*;
+import me.lucko.luckperms.users.User;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
-@Getter
-@RequiredArgsConstructor
-public class ChatCache {
-    private final Map<String, String> context;
+@AllArgsConstructor
+public class BungeeCalculatorFactory implements CalculatorFactory {
+    private final LPBungeePlugin plugin;
 
-    @Setter
-    private String prefix = null;
+    @Override
+    public PermissionCalculator build(Contexts contexts, User user, Map<String, Boolean> map) {
+        List<PermissionProcessor> processors = new ArrayList<>(3);
+        processors.add(new MapProcessor(map));
+        if (plugin.getConfiguration().isApplyingWildcards()) {
+            processors.add(new WildcardProcessor(map));
+        }
+        if (plugin.getConfiguration().isApplyingRegex()) {
+            processors.add(new RegexProcessor(map));
+        }
 
-    @Setter
-    private String suffix = null;
-
-    private Map<String, String> meta = new ConcurrentHashMap<>();
-
-    public void invalidateCache() {
-        prefix = null;
-        suffix = null;
-        meta.clear();
+        return new PermissionCalculator(plugin, user.getName(), plugin.getConfiguration().isDebugPermissionChecks(), processors);
     }
-
 }

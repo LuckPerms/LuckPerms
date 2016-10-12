@@ -25,8 +25,11 @@ package me.lucko.luckperms.calculators;
 import lombok.AllArgsConstructor;
 import me.lucko.luckperms.api.sponge.LuckPermsService;
 import org.spongepowered.api.service.context.Context;
+import org.spongepowered.api.util.Tristate;
 
 import java.util.Set;
+
+import static me.lucko.luckperms.api.sponge.LuckPermsService.convertTristate;
 
 @AllArgsConstructor
 public class DefaultsProcessor implements PermissionProcessor {
@@ -35,11 +38,16 @@ public class DefaultsProcessor implements PermissionProcessor {
 
     @Override
     public me.lucko.luckperms.api.Tristate hasPermission(String permission) {
-        org.spongepowered.api.util.Tristate t =  service.getDefaults().getPermissionValue(contexts, permission);
-        if (t != org.spongepowered.api.util.Tristate.UNDEFINED) {
-            return me.lucko.luckperms.api.Tristate.fromBoolean(t.asBoolean());
-        } else {
-            return me.lucko.luckperms.api.Tristate.UNDEFINED;
+        Tristate t =  service.getUserSubjects().getDefaults().getPermissionValue(contexts, permission);
+        if (t != Tristate.UNDEFINED) {
+            return convertTristate(Tristate.fromBoolean(t.asBoolean()));
         }
+
+        Tristate t2 =  service.getDefaults().getPermissionValue(contexts, permission);
+        if (t2 != Tristate.UNDEFINED) {
+            return convertTristate(Tristate.fromBoolean(t.asBoolean()));
+        }
+
+        return me.lucko.luckperms.api.Tristate.UNDEFINED;
     }
 }
