@@ -172,15 +172,8 @@ public class LuckPermsUserSubject implements Subject {
 
     @Override
     public Set<Context> getActiveContexts() {
-        final UUID uuid = service.getPlugin().getUuidCache().getExternalUUID(user.getUuid());
-        Optional<Player> player = Sponge.getServer().getPlayer(uuid);
-
-        if (!player.isPresent()) {
-            return SubjectData.GLOBAL_CONTEXT;
-        }
-
-        Map<String, String> context = new HashMap<>();
-        service.getPlugin().getContextManager().giveApplicableContext(player.get(), context);
-        return context.entrySet().stream().map(e -> new Context(e.getKey(), e.getValue())).collect(Collectors.toSet());
+        return service.getPlugin().getContextManager().giveApplicableContext(this, new HashMap<>()).entrySet().stream()
+                .map(e -> new Context(e.getKey(), e.getValue()))
+                .collect(Collectors.toSet());
     }
 }

@@ -24,23 +24,49 @@ package me.lucko.luckperms.sponge.contexts;
 
 import lombok.RequiredArgsConstructor;
 import me.lucko.luckperms.api.context.ContextCalculator;
+import me.lucko.luckperms.common.commands.Util;
+import me.lucko.luckperms.sponge.LPSpongePlugin;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.context.Context;
+import org.spongepowered.api.service.permission.Subject;
 
 import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 @RequiredArgsConstructor
-public class WorldCalculator extends ContextCalculator<Player> {
+public class WorldCalculator extends ContextCalculator<Subject> {
+    private final LPSpongePlugin plugin;
 
     @Override
-    public Map<String, String> giveApplicableContext(Player subject, Map<String, String> accumulator) {
-        accumulator.put(Context.WORLD_KEY, subject.getWorld().getName());
+    public Map<String, String> giveApplicableContext(Subject subject, Map<String, String> accumulator) {
+        UUID uuid = Util.parseUuid(subject.getIdentifier());
+        if (uuid == null) {
+            return accumulator;
+        }
+
+        Optional<Player> p = plugin.getGame().getServer().getPlayer(plugin.getUuidCache().getExternalUUID(uuid));
+        if (!p.isPresent()) {
+            return accumulator;
+        }
+
+        accumulator.put(Context.WORLD_KEY, p.get().getWorld().getName());
         return accumulator;
     }
 
     @Override
-    public boolean isContextApplicable(Player subject, Map.Entry<String, String> context) {
-        return context.getKey().equals(Context.WORLD_KEY) && subject.getWorld().getName().equals(context.getValue());
+    public boolean isContextApplicable(Subject subject, Map.Entry<String, String> context) {
+        UUID uuid = Util.parseUuid(subject.getIdentifier());
+        if (uuid == null) {
+            return false;
+        }
+
+        Optional<Player> p = plugin.getGame().getServer().getPlayer(plugin.getUuidCache().getExternalUUID(uuid));
+        if (!p.isPresent()) {
+            return false;
+        }
+
+        return context.getKey().equals(Context.WORLD_KEY) && p.get().getWorld().getName().equals(context.getValue());
     }
 
 }

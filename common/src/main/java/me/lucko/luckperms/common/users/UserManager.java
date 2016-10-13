@@ -30,6 +30,7 @@ import me.lucko.luckperms.common.utils.AbstractManager;
 import me.lucko.luckperms.common.utils.Identifiable;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
+import java.util.Set;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -120,14 +121,23 @@ public class UserManager extends AbstractManager<UserIdentifier, User> {
      * @param user The user to be cleaned up
      */
     public void cleanup(User user) {
-        // TODO
+        if (!plugin.isOnline(plugin.getUuidCache().getExternalUUID(user.getUuid()))) {
+            unload(user);
+        }
     }
 
     /**
      * Reloads the data of all online users
      */
     public void updateAllUsers() {
-        // TODO
+        plugin.doSync(() -> {
+            Set<UUID> players = plugin.getOnlinePlayers();
+            plugin.doAsync(() -> {
+                for (UUID uuid : players) {
+                    plugin.getDatastore().loadUser(plugin.getUuidCache().getUUID(uuid), "null");
+                }
+            });
+        });
     }
 
     @Override

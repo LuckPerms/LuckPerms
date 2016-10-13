@@ -172,11 +172,6 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     }
 
     @Override
-    public Message getPlayerStatus(UUID uuid) {
-        return getProxy().getPlayer(getUuidCache().getExternalUUID(uuid)) != null ? Message.PLAYER_ONLINE : Message.PLAYER_OFFLINE;
-    }
-
-    @Override
     public int getPlayerCount() {
         return getProxy().getOnlineCount();
     }
@@ -184,6 +179,16 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     @Override
     public List<String> getPlayerList() {
         return getProxy().getPlayers().stream().map(ProxiedPlayer::getName).collect(Collectors.toList());
+    }
+
+    @Override
+    public Set<UUID> getOnlinePlayers() {
+        return getProxy().getPlayers().stream().map(ProxiedPlayer::getUniqueId).collect(Collectors.toSet());
+    }
+
+    @Override
+    public boolean isOnline(UUID external) {
+        return getProxy().getPlayer(external) != null;
     }
 
     @Override

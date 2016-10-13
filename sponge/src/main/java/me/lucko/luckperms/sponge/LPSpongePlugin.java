@@ -65,6 +65,7 @@ import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.service.permission.PermissionDescription;
 import org.spongepowered.api.service.permission.PermissionService;
+import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.text.Text;
 
 import java.io.File;
@@ -103,7 +104,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     private ConsecutiveExecutor consecutiveExecutor;
     private LuckPermsService service;
     private LocaleManager localeManager;
-    private ContextManager<Player> contextManager; // TODO convert this to use Subject instead of Player
+    private ContextManager<Subject> contextManager;
     private CalculatorFactory calculatorFactory;
 
     @Listener
@@ -146,7 +147,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
         contextManager = new ContextManager<>();
         contextManager.registerCalculator(new ServerCalculator<>(getConfiguration().getServer()));
-        contextManager.registerCalculator(new WorldCalculator());
+        contextManager.registerCalculator(new WorldCalculator(this));
 
         getLog().info("Registering PermissionService...");
         Sponge.getServiceManager().setProvider(this, PermissionService.class, (service = new LuckPermsService(this)));
@@ -228,11 +229,6 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     }
 
     @Override
-    public Message getPlayerStatus(UUID uuid) {
-        return game.getServer().getPlayer(getUuidCache().getExternalUUID(uuid)).isPresent() ? Message.PLAYER_ONLINE : Message.PLAYER_OFFLINE;
-    }
-
-    @Override
     public int getPlayerCount() {
         return game.getServer().getOnlinePlayers().size();
     }
@@ -240,6 +236,16 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     @Override
     public List<String> getPlayerList() {
         return game.getServer().getOnlinePlayers().stream().map(Player::getName).collect(Collectors.toList());
+    }
+
+    @Override
+    public Set<UUID> getOnlinePlayers() {
+        return game.getServer().getOnlinePlayers().stream().map(Player::getUniqueId).collect(Collectors.toSet());
+    }
+
+    @Override
+    public boolean isOnline(UUID external) {
+        return game.getServer().getPlayer(external).isPresent();
     }
 
     @Override

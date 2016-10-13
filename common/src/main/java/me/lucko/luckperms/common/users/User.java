@@ -27,9 +27,11 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import me.lucko.luckperms.api.event.events.GroupAddEvent;
+import me.lucko.luckperms.api.event.events.UserPermissionRefreshEvent;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.api.internal.GroupLink;
 import me.lucko.luckperms.common.api.internal.PermissionHolderLink;
+import me.lucko.luckperms.common.api.internal.UserLink;
 import me.lucko.luckperms.common.caching.UserData;
 import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.groups.Group;
@@ -109,7 +111,6 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
             userData.invalidateCache();
             userData = null;
         }
-        // TODO
     }
 
     /**
@@ -124,7 +125,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
         UserData ud = userData;
         ud.recalculatePermissions();
         ud.recalculateMeta();
-        // TODO api call?
+        getPlugin().getApiProvider().fireEventAsync(new UserPermissionRefreshEvent(new UserLink(this)));
     }
 
     /**

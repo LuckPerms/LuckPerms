@@ -93,7 +93,10 @@ public interface LuckPermsPlugin {
      * @param uuid The player's uuid
      * @return a formatted status string
      */
-    Message getPlayerStatus(UUID uuid);
+    default Message getPlayerStatus(UUID uuid) {
+        UUID external = getUuidCache().getExternalUUID(uuid);
+        return isOnline(external) ? Message.PLAYER_ONLINE : Message.PLAYER_OFFLINE;
+    }
 
     /**
      * Gets the number of users online on the platform
@@ -108,6 +111,19 @@ public interface LuckPermsPlugin {
     List<String> getPlayerList();
 
     /**
+     * Gets the UUIDs of the users online on the platform
+     * @return a {@link Set} of UUIDs
+     */
+    Set<UUID> getOnlinePlayers();
+
+    /**
+     * Checks if a user is online
+     * @param external the users external uuid
+     * @return true if the user is online
+     */
+    boolean isOnline(UUID external);
+
+    /**
      * @return a {@link List} of senders online on the platform
      */
     List<Sender> getNotifyListeners();
@@ -117,7 +133,11 @@ public interface LuckPermsPlugin {
      */
     Sender getConsoleSender();
 
-    // TODO javadoc
+    /**
+     * Gets a set of Contexts that should be pre-processed in advance
+     * @param op if the user being processed is op
+     * @return a set of contexts
+     */
     Set<Contexts> getPreProcessContexts(boolean op);
 
     /**

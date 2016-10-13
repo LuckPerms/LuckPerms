@@ -24,7 +24,6 @@ package me.lucko.luckperms.sponge.contexts;
 
 import lombok.AllArgsConstructor;
 import me.lucko.luckperms.api.context.ContextCalculator;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
 
@@ -33,11 +32,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
-public class SpongeCalculatorLink extends ContextCalculator<Player> {
+public class SpongeCalculatorLink extends ContextCalculator<Subject> {
     private final org.spongepowered.api.service.context.ContextCalculator<Subject> calculator;
 
     @Override
-    public Map<String, String> giveApplicableContext(Player subject, Map<String, String> accumulator) {
+    public Map<String, String> giveApplicableContext(Subject subject, Map<String, String> accumulator) {
         Set<Context> contexts = accumulator.entrySet().stream().map(e -> new Context(e.getKey(), e.getValue())).collect(Collectors.toSet());
         calculator.accumulateContexts(subject, contexts);
 
@@ -46,7 +45,7 @@ public class SpongeCalculatorLink extends ContextCalculator<Player> {
     }
 
     @Override
-    public boolean isContextApplicable(Player subject, Map.Entry<String, String> context) {
+    public boolean isContextApplicable(Subject subject, Map.Entry<String, String> context) {
         Context c = new Context(context.getKey(), context.getValue());
         return calculator.matches(c, subject);
     }
