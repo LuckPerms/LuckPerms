@@ -78,9 +78,7 @@ public class UserManager extends AbstractManager<UserIdentifier, User> {
         user.setPrimaryGroup("default");
         try {
             user.setPermission("group.default", true);
-        } catch (ObjectAlreadyHasException ignored) {
-            ignored.printStackTrace();
-        }
+        } catch (ObjectAlreadyHasException ignored) {}
 
         if (save) {
             plugin.getDatastore().saveUser(user, Callback.empty());
