@@ -120,11 +120,15 @@ public class PersistedSubject implements Subject {
 
     @Override
     public boolean isChildOf(@NonNull Set<Context> contexts, @NonNull Subject subject) {
-        return subjectData.getParents(contexts).contains(subject) ||
-                transientSubjectData.getParents(contexts).contains(subject) ||
-                getContainingCollection().getDefaults().getParents(contexts).contains(subject) ||
-                service.getDefaults().getParents(contexts).contains(subject);
-
+        if (getContainingCollection().getIdentifier().equalsIgnoreCase("defaults")) {
+            return subjectData.getParents(contexts).contains(subject) ||
+                    transientSubjectData.getParents(contexts).contains(subject);
+        } else {
+            return subjectData.getParents(contexts).contains(subject) ||
+                    transientSubjectData.getParents(contexts).contains(subject) ||
+                    getContainingCollection().getDefaults().getParents(contexts).contains(subject) ||
+                    service.getDefaults().getParents(contexts).contains(subject);
+        }
     }
 
     @Override
@@ -132,8 +136,12 @@ public class PersistedSubject implements Subject {
         List<Subject> s = new ArrayList<>();
         s.addAll(subjectData.getParents(contexts));
         s.addAll(transientSubjectData.getParents(contexts));
-        s.addAll(getContainingCollection().getDefaults().getParents(contexts));
-        s.addAll(service.getDefaults().getParents(contexts));
+
+        if (!getContainingCollection().getIdentifier().equalsIgnoreCase("defaults")) {
+            s.addAll(getContainingCollection().getDefaults().getParents(contexts));
+            s.addAll(service.getDefaults().getParents(contexts));
+        }
+
         return ImmutableList.copyOf(s);
     }
 
@@ -154,6 +162,10 @@ public class PersistedSubject implements Subject {
             if (tempRes.isPresent()) {
                 return tempRes;
             }
+        }
+
+        if (getContainingCollection().getIdentifier().equalsIgnoreCase("defaults")) {
+            return Optional.empty();
         }
 
         res = getContainingCollection().getDefaults().getOption(set, key);
