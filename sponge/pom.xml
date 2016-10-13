@@ -77,7 +77,7 @@
                     <includeTestClasses>false</includeTestClasses>
                     <transformerClasses>
                         <transformerClass>
-                            <className>me.lucko.luckperms.utils.VersionUtil</className>
+                            <className>me.lucko.luckperms.sponge.utils.VersionUtil</className>
                             <properties>
                                 <property>
                                     <name>version</name>
