@@ -79,6 +79,7 @@ public class Contexts {
 
     /**
      * The mode to parse defaults on Bukkit
+     * @since 2.12
      */
     private final boolean op;
 

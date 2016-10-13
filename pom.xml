@@ -6,7 +6,7 @@
 
     <groupId>me.lucko.luckperms</groupId>
     <artifactId>luckperms</artifactId>
-    <version>2.11-SNAPSHOT</version>
+    <version>2.12-SNAPSHOT</version>
     <modules>
         <module>common</module>
         <module>api</module>
@@ -38,7 +38,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <release.version>2.11</release.version>
+        <release.version>2.12</release.version>
     </properties>
 
     <distributionManagement>
