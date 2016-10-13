@@ -32,6 +32,7 @@ import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.service.permission.SubjectData;
+import org.spongepowered.api.util.Tristate;
 
 import java.util.Map;
 import java.util.Set;
@@ -83,7 +84,7 @@ public class GroupCollection implements SubjectCollection {
     public Map<Subject, Boolean> getAllWithPermission(@NonNull Set<Context> contexts, @NonNull String node) {
         return manager.getAll().values().stream()
                 .map(u -> LuckPermsGroupSubject.wrapGroup(u, service))
-                .filter(sub -> sub.isPermissionSet(contexts, node))
+                .filter(sub -> sub.getPermissionValue(contexts, node) != Tristate.UNDEFINED)
                 .collect(Collectors.toMap(sub -> sub, sub -> sub.getPermissionValue(contexts, node).asBoolean()));
     }
 

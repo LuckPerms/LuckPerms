@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import lombok.*;
 import me.lucko.luckperms.LPSpongePlugin;
+import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.sponge.collections.GroupCollection;
 import me.lucko.luckperms.api.sponge.collections.UserCollection;
 import me.lucko.luckperms.api.sponge.simple.SimpleCollection;
@@ -140,6 +141,17 @@ public class LuckPermsService implements PermissionService {
     @Override
     public void registerContextCalculator(@NonNull ContextCalculator<Subject> contextCalculator) {
         plugin.getContextManager().registerCalculator(new SpongeCalculatorLink(contextCalculator));
+    }
+
+    public Contexts calculateContexts(Set<Context> contexts) {
+        return new Contexts(
+                LuckPermsService.convertContexts(contexts),
+                plugin.getConfiguration().isIncludingGlobalPerms(),
+                plugin.getConfiguration().isIncludingGlobalWorldPerms(),
+                true,
+                plugin.getConfiguration().isApplyingGlobalGroups(),
+                plugin.getConfiguration().isApplyingGlobalWorldGroups()
+        );
     }
 
     public static Map<String, String> convertContexts(Set<Context> contexts) {

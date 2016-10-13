@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.api.sponge.simple.persisted;
 
+import com.google.common.collect.ImmutableList;
 import lombok.Getter;
 import lombok.NonNull;
 import me.lucko.luckperms.api.sponge.LuckPermsService;
@@ -88,24 +89,42 @@ public class SimplePersistedSubject implements Subject {
     @Override
     public Tristate getPermissionValue(@NonNull Set<Context> contexts, @NonNull String node) {
         Tristate res = subjectData.getNodeTree(contexts).get(node);
-        if (res == Tristate.UNDEFINED) {
-            transientSubjectData.getNodeTree(contexts).get(node);
+        if (res != Tristate.UNDEFINED) {
+            return res;
         }
-        if (res == Tristate.UNDEFINED) {
-            for (Subject parent : getParents(contexts)) {
-                Tristate tempRes = parent.getPermissionValue(contexts, node);
-                if (tempRes != Tristate.UNDEFINED) {
-                    res = tempRes;
-                    break;
-                }
+
+        res = transientSubjectData.getNodeTree(contexts).get(node);
+        if (res != Tristate.UNDEFINED) {
+            return res;
+        }
+
+        for (Subject parent : getParents(contexts)) {
+            Tristate tempRes = parent.getPermissionValue(contexts, node);
+            if (tempRes != Tristate.UNDEFINED) {
+                return tempRes;
             }
         }
+
+        if (getContainingCollection().getIdentifier().equalsIgnoreCase("defaults")) {
+            return Tristate.UNDEFINED;
+        }
+
+        res = service.getGroupSubjects().getDefaults().getPermissionValue(contexts, node);
+        if (res != Tristate.UNDEFINED) {
+            return res;
+        }
+
+        res = service.getDefaults().getPermissionValue(contexts, node);
         return res;
     }
 
     @Override
     public boolean isChildOf(@NonNull Set<Context> contexts, @NonNull Subject subject) {
-        return subjectData.getParents(contexts).contains(subject) || transientSubjectData.getParents(contexts).contains(subject);
+        return subjectData.getParents(contexts).contains(subject) ||
+                transientSubjectData.getParents(contexts).contains(subject) ||
+                getContainingCollection().getDefaults().getParents(contexts).contains(subject) ||
+                service.getDefaults().getParents(contexts).contains(subject);
+
     }
 
     @Override
@@ -113,25 +132,36 @@ public class SimplePersistedSubject implements Subject {
         List<Subject> s = new ArrayList<>();
         s.addAll(subjectData.getParents(contexts));
         s.addAll(transientSubjectData.getParents(contexts));
-        return s;
+        s.addAll(getContainingCollection().getDefaults().getParents(contexts));
+        s.addAll(service.getDefaults().getParents(contexts));
+        return ImmutableList.copyOf(s);
     }
 
     @Override
     public Optional<String> getOption(Set<Context> set, String key) {
         Optional<String> res = Optional.ofNullable(subjectData.getOptions(getActiveContexts()).get(key));
-        if (!res.isPresent()) {
-            res = Optional.ofNullable(transientSubjectData.getOptions(getActiveContexts()).get(key));
+        if (res.isPresent()) {
+            return res;
         }
-        if (!res.isPresent()) {
-            for (Subject parent : getParents(getActiveContexts())) {
-                Optional<String> tempRes = parent.getOption(getActiveContexts(), key);
-                if (tempRes.isPresent()) {
-                    res = tempRes;
-                    break;
-                }
+
+        res = Optional.ofNullable(transientSubjectData.getOptions(getActiveContexts()).get(key));
+        if (res.isPresent()) {
+            return res;
+        }
+
+        for (Subject parent : getParents(getActiveContexts())) {
+            Optional<String> tempRes = parent.getOption(getActiveContexts(), key);
+            if (tempRes.isPresent()) {
+                return tempRes;
             }
         }
-        return res;
+
+        res = getContainingCollection().getDefaults().getOption(set, key);
+        if (res.isPresent()) {
+            return res;
+        }
+
+        return service.getDefaults().getOption(set, key);
     }
 
     @Override

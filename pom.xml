@@ -10,7 +10,6 @@
     <modules>
         <module>common</module>
         <module>api</module>
-        <module>standalone</module>
         <module>bukkit</module>
         <module>bukkit-legacy</module>
         <module>bukkit-placeholders</module>

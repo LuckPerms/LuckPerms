@@ -22,10 +22,10 @@
 
 package me.lucko.luckperms.api.sponge;
 
+import com.google.common.collect.ImmutableList;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
-import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.caching.MetaData;
 import me.lucko.luckperms.users.User;
 import org.spongepowered.api.Sponge;
@@ -73,17 +73,6 @@ public class LuckPermsUserSubject implements Subject {
         transientSubjectData = null;
     }
 
-    private Contexts calculateContexts(Set<Context> contexts) {
-        return new Contexts(
-                LuckPermsService.convertContexts(contexts),
-                service.getPlugin().getConfiguration().isIncludingGlobalPerms(),
-                service.getPlugin().getConfiguration().isIncludingGlobalWorldPerms(),
-                true,
-                service.getPlugin().getConfiguration().isApplyingGlobalGroups(),
-                service.getPlugin().getConfiguration().isApplyingGlobalWorldGroups()
-        );
-    }
-
     private boolean hasData() {
         return user.getUserData() != null;
     }
@@ -118,7 +107,7 @@ public class LuckPermsUserSubject implements Subject {
     @Override
     public Tristate getPermissionValue(@NonNull Set<Context> contexts, @NonNull String permission) {
         if (hasData()) {
-            return LuckPermsService.convertTristate(user.getUserData().getPermissionData(calculateContexts(contexts)).getPermissionValue(permission));
+            return LuckPermsService.convertTristate(user.getUserData().getPermissionData(service.calculateContexts(contexts)).getPermissionValue(permission));
         }
 
         return Tristate.UNDEFINED;
@@ -131,10 +120,10 @@ public class LuckPermsUserSubject implements Subject {
 
     @Override
     public List<Subject> getParents(Set<Context> contexts) {
-        List<Subject> subjects = new ArrayList<>();
+        ImmutableList.Builder<Subject> subjects = ImmutableList.builder();
 
         if (hasData()) {
-            for (String perm : user.getUserData().getPermissionData(calculateContexts(contexts)).getImmutableBacking().keySet()) {
+            for (String perm : user.getUserData().getPermissionData(service.calculateContexts(contexts)).getImmutableBacking().keySet()) {
                 if (!perm.startsWith("group.")) {
                     continue;
                 }
@@ -149,13 +138,13 @@ public class LuckPermsUserSubject implements Subject {
         subjects.addAll(service.getUserSubjects().getDefaults().getParents(contexts));
         subjects.addAll(service.getDefaults().getParents(contexts));
 
-        return subjects;
+        return subjects.build();
     }
 
     @Override
     public Optional<String> getOption(Set<Context> contexts, String s) {
         if (hasData()) {
-            MetaData data = user.getUserData().getMetaData(calculateContexts(contexts));
+            MetaData data = user.getUserData().getMetaData(service.calculateContexts(contexts));
             if (s.equalsIgnoreCase("prefix")) {
                 if (data.getPrefix() != null) {
                     return Optional.of(data.getPrefix());

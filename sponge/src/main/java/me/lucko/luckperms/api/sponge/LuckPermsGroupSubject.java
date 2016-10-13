@@ -26,18 +26,21 @@ import com.google.common.collect.ImmutableList;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
-import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.core.PermissionHolder;
 import me.lucko.luckperms.groups.Group;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.context.Context;
+import org.spongepowered.api.service.permission.NodeTree;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.util.Tristate;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static me.lucko.luckperms.utils.ArgumentChecker.unescapeCharacters;
@@ -49,7 +52,7 @@ public class LuckPermsGroupSubject implements Subject {
     }
 
     @Getter
-    private PermissionHolder group;
+    private Group group;
 
     private LuckPermsService service;
 
@@ -59,7 +62,7 @@ public class LuckPermsGroupSubject implements Subject {
     @Getter
     private LuckPermsSubjectData transientSubjectData;
 
-    private LuckPermsGroupSubject(PermissionHolder group, LuckPermsService service) {
+    private LuckPermsGroupSubject(Group group, LuckPermsService service) {
         this.group = group;
         this.subjectData = new LuckPermsSubjectData(true, service, group);
         this.transientSubjectData = new LuckPermsSubjectData(false, service, group);
@@ -88,23 +91,22 @@ public class LuckPermsGroupSubject implements Subject {
 
     @Override
     public Tristate getPermissionValue(@NonNull Set<Context> contexts, @NonNull String node) {
-        Map<String, String> context = new HashMap<>();
-        for (Context c : contexts) {
-            context.put(c.getKey(), c.getValue());
+        Map<String, Boolean> permissions = group.getAllNodesFiltered(service.calculateContexts(contexts)).stream()
+                .map(LocalizedNode::getNode)
+                .collect(Collectors.toMap(Node::getPermission, Node::getValue));
+
+        Tristate t = NodeTree.of(permissions).get(node);
+        if (t != Tristate.UNDEFINED) {
+            return t;
         }
 
-        switch (group.inheritsPermission(new me.lucko.luckperms.core.Node.Builder(node).withExtraContext(context).build())) {
-            case UNDEFINED:
-                return Tristate.UNDEFINED;
-            case TRUE:
-                return Tristate.TRUE;
-            case FALSE:
-                return Tristate.FALSE;
-            default:
-                return null;
+        t = service.getGroupSubjects().getDefaults().getPermissionValue(contexts, node);
+        if (t != Tristate.UNDEFINED) {
+            return t;
         }
 
-        // TODO
+        t = service.getDefaults().getPermissionValue(contexts, node);
+        return t;
     }
 
     @Override
@@ -114,39 +116,42 @@ public class LuckPermsGroupSubject implements Subject {
 
     @Override
     public List<Subject> getParents(@NonNull Set<Context> contexts) {
-        List<Subject> parents = new ArrayList<>();
-        parents.addAll(subjectData.getParents(contexts));
-        parents.addAll(transientSubjectData.getParents(contexts));
-        return ImmutableList.copyOf(parents);
+        List<Subject> subjects = group.getAllNodesFiltered(service.calculateContexts(contexts)).stream()
+                .map(LocalizedNode::getNode)
+                .filter(Node::isGroupNode)
+                .map(Node::getGroupName)
+                .map(s -> service.getGroupSubjects().get(s))
+                .collect(Collectors.toList());
+
+        subjects.addAll(service.getGroupSubjects().getDefaults().getParents(contexts));
+        subjects.addAll(service.getDefaults().getParents(contexts));
+
+        return ImmutableList.copyOf(subjects);
     }
 
     @Override
     public Optional<String> getOption(Set<Context> set, String s) {
+        Optional<String> option;
         if (s.equalsIgnoreCase("prefix")) {
-            String prefix = getChatMeta(set, true, group);
-            if (!prefix.equals("")) {
-                return Optional.of(prefix);
-            }
+            option = getChatMeta(set, true);
+
+        } else if (s.equalsIgnoreCase("suffix")) {
+            option = getChatMeta(set, false);
+
+        } else {
+            option = getMeta(set, s);
         }
 
-        if (s.equalsIgnoreCase("suffix")) {
-            String suffix = getChatMeta(set, false, group);
-            if (!suffix.equals("")) {
-                return Optional.of(suffix);
-            }
+        if (option.isPresent()) {
+            return option;
         }
 
-        Map<String, String> transientOptions = subjectData.getOptions(set);
-        if (transientOptions.containsKey(s)) {
-            return Optional.of(transientOptions.get(s));
+        option = service.getGroupSubjects().getDefaults().getOption(set, s);
+        if (option.isPresent()) {
+            return option;
         }
 
-        Map<String, String> enduringOptions = subjectData.getOptions(set);
-        if (enduringOptions.containsKey(s)) {
-            return Optional.of(enduringOptions.get(s));
-        }
-
-        return Optional.empty();
+        return service.getDefaults().getOption(set, s);
     }
 
     @Override
@@ -154,36 +159,16 @@ public class LuckPermsGroupSubject implements Subject {
         return SubjectData.GLOBAL_CONTEXT;
     }
 
-    private String getChatMeta(Set<Context> contexts, boolean prefix, PermissionHolder holder) {
-        if (holder == null) return "";
-
-        Map<String, String> context = contexts.stream().collect(Collectors.toMap(Context::getKey, Context::getValue));
-        String server = context.get("server");
-        String world = context.get("world");
-        context.remove("server");
-        context.remove("world");
-
+    private Optional<String> getChatMeta(Set<Context> contexts, boolean prefix) {
         int priority = Integer.MIN_VALUE;
         String meta = null;
 
-        for (Node n : holder.getAllNodes(null, Contexts.allowAll())) {
+        for (Node n : group.getAllNodesFiltered(service.calculateContexts(contexts))) {
             if (!n.getValue()) {
                 continue;
             }
 
             if (prefix ? !n.isPrefix() : !n.isSuffix()) {
-                continue;
-            }
-
-            if (!n.shouldApplyOnServer(server, service.getPlugin().getConfiguration().isVaultIncludingGlobal(), false)) {
-                continue;
-            }
-
-            if (!n.shouldApplyOnWorld(world, true, false)) {
-                continue;
-            }
-
-            if (!n.shouldApplyWithContext(context, false)) {
                 continue;
             }
 
@@ -194,6 +179,27 @@ public class LuckPermsGroupSubject implements Subject {
             }
         }
 
-        return meta == null ? "" : unescapeCharacters(meta);
+        return meta == null ? Optional.empty() : Optional.of(unescapeCharacters(meta));
+    }
+
+    private Optional<String> getMeta(Set<Context> contexts, String key) {
+        for (Node n : group.getAllNodesFiltered(service.calculateContexts(contexts))) {
+            if (!n.getValue()) {
+                continue;
+            }
+
+            if (!n.isMeta()) {
+                continue;
+            }
+
+            Map.Entry<String, String> m = n.getMeta();
+            if (!m.getKey().equalsIgnoreCase(key)) {
+                continue;
+            }
+
+            return Optional.of(m.getValue());
+        }
+
+        return Optional.empty();
     }
 }

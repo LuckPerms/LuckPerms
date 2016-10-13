@@ -22,13 +22,23 @@
 
 package me.lucko.luckperms;
 
+import me.lucko.luckperms.api.sponge.LuckPermsService;
+import me.lucko.luckperms.caching.UserData;
 import me.lucko.luckperms.constants.Message;
 import me.lucko.luckperms.users.User;
 import me.lucko.luckperms.utils.AbstractListener;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.serializer.TextSerializers;
+import org.spongepowered.api.world.World;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("WeakerAccess")
 public class SpongeListener extends AbstractListener {
@@ -49,7 +59,6 @@ public class SpongeListener extends AbstractListener {
 
         final GameProfile p = e.getProfile();
         onAsyncLogin(p.getUniqueId(), p.getName().get()); // Load the user into LuckPerms
-        plugin.getService().getUserSubjects().load(p.getUniqueId()); // Load the user into the PermissionService
     }
 
     @SuppressWarnings("deprecation")
@@ -65,8 +74,26 @@ public class SpongeListener extends AbstractListener {
             return;
         }
 
-        // Refresh permissions again
-        plugin.doAsync(user::refreshPermissions);
+        // Attempt to pre-process some permissions for the user to save time later. Might not work, but it's better than nothing.
+        Optional<Player> p = e.getCause().first(Player.class);
+        if (p.isPresent()) {
+            Map<String, String> context = plugin.getContextManager().giveApplicableContext(p.get(), new HashMap<>());
+
+            List<String> worlds = plugin.getGame().getServer().getWorlds().stream()
+                    .map(World::getName)
+                    .collect(Collectors.toList());
+
+            plugin.doAsync(() -> {
+                UserData data = user.getUserData();
+                data.preCalculate(plugin.getService().calculateContexts(LuckPermsService.convertContexts(context)));
+
+                for (String world : worlds) {
+                    Map<String, String> modified = new HashMap<>(context);
+                    modified.put("world", world);
+                    data.preCalculate(plugin.getService().calculateContexts(LuckPermsService.convertContexts(modified)));
+                }
+            });
+        }
     }
 
     @Listener
@@ -78,5 +105,6 @@ public class SpongeListener extends AbstractListener {
     @Listener
     public void onClientLeave(ClientConnectionEvent.Disconnect e) {
         onLeave(e.getTargetEntity().getUniqueId());
+        plugin.getService().getUserSubjects().unload(plugin.getUuidCache().getUUID(e.getTargetEntity().getUniqueId()));
     }
 }

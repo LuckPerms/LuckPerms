@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.api.sponge.simple;
 
+import com.google.common.collect.ImmutableList;
 import lombok.Getter;
 import lombok.NonNull;
 import org.spongepowered.api.command.CommandSource;
@@ -29,6 +30,7 @@ import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.*;
 import org.spongepowered.api.util.Tristate;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -69,41 +71,66 @@ public class SimpleSubject implements Subject {
     @Override
     public Tristate getPermissionValue(@NonNull Set<Context> contexts, @NonNull String node) {
         Tristate res = subjectData.getNodeTree(contexts).get(node);
-        if (res == Tristate.UNDEFINED) {
-            for (Subject parent : getParents(contexts)) {
-                Tristate tempRes = parent.getPermissionValue(contexts, node);
-                if (tempRes != Tristate.UNDEFINED) {
-                    res = tempRes;
-                    break;
-                }
+        if (res != Tristate.UNDEFINED) {
+            return res;
+        }
+
+        for (Subject parent : getParents(contexts)) {
+            Tristate tempRes = parent.getPermissionValue(contexts, node);
+            if (tempRes != Tristate.UNDEFINED) {
+                return tempRes;
             }
         }
+
+        if (getContainingCollection().getIdentifier().equalsIgnoreCase("defaults")) {
+            return Tristate.UNDEFINED;
+        }
+
+        res = service.getGroupSubjects().getDefaults().getPermissionValue(contexts, node);
+        if (res != Tristate.UNDEFINED) {
+            return res;
+        }
+
+        res = service.getDefaults().getPermissionValue(contexts, node);
         return res;
     }
 
     @Override
     public boolean isChildOf(@NonNull Set<Context> contexts, @NonNull Subject subject) {
-        return subjectData.getParents(contexts).contains(subject);
+        return subjectData.getParents(contexts).contains(subject) ||
+                getContainingCollection().getDefaults().getParents(contexts).contains(subject) ||
+                service.getDefaults().getParents(contexts).contains(subject);
     }
 
     @Override
     public List<Subject> getParents(@NonNull Set<Context> contexts) {
-        return subjectData.getParents(contexts);
+        List<Subject> s = new ArrayList<>();
+        s.addAll(subjectData.getParents(contexts));
+        s.addAll(getContainingCollection().getDefaults().getParents(contexts));
+        s.addAll(service.getDefaults().getParents(contexts));
+        return ImmutableList.copyOf(s);
     }
 
     @Override
     public Optional<String> getOption(Set<Context> set, String key) {
         Optional<String> res = Optional.ofNullable(subjectData.getOptions(getActiveContexts()).get(key));
-        if (!res.isPresent()) {
-            for (Subject parent : getParents(getActiveContexts())) {
-                Optional<String> tempRes = parent.getOption(getActiveContexts(), key);
-                if (tempRes.isPresent()) {
-                    res = tempRes;
-                    break;
-                }
+        if (res.isPresent()) {
+            return res;
+        }
+
+        for (Subject parent : getParents(getActiveContexts())) {
+            Optional<String> tempRes = parent.getOption(getActiveContexts(), key);
+            if (tempRes.isPresent()) {
+                return tempRes;
             }
         }
-        return res;
+
+        res = getContainingCollection().getDefaults().getOption(set, key);
+        if (res.isPresent()) {
+            return res;
+        }
+
+        return service.getDefaults().getOption(set, key);
     }
 
     @Override

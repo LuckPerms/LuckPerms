@@ -29,15 +29,16 @@ import me.lucko.luckperms.api.sponge.LuckPermsUserSubject;
 import me.lucko.luckperms.api.sponge.simple.SimpleCollection;
 import me.lucko.luckperms.commands.Util;
 import me.lucko.luckperms.users.User;
-import me.lucko.luckperms.users.UserIdentifier;
 import me.lucko.luckperms.users.UserManager;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.service.permission.SubjectData;
+import org.spongepowered.api.util.Tristate;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -66,31 +67,6 @@ public class UserCollection implements SubjectCollection {
         return PermissionService.SUBJECTS_USER;
     }
 
-    /**
-     * Load a user into this manager
-     * @param uuid the external uuid of the user
-     */
-    public synchronized void load(UUID uuid) {
-        UUID internal = service.getPlugin().getUuidCache().getUUID(uuid);
-        if (!manager.isLoaded(UserIdentifier.of(internal, null))) {
-            return; // Not loaded at a higher level
-        }
-
-        if (users.containsKey(internal)) {
-            return; // Already loaded
-        }
-
-        User user = manager.get(internal);
-        LuckPermsUserSubject subject = LuckPermsUserSubject.wrapUser(user, service);
-        subject.calculateActivePermissions(true); // Pre-process some of their permissions
-
-        users.put(internal, subject);
-    }
-
-    /**
-     * Unload a user from this manager
-     * @param uuid the internal uuid of the user
-     */
     public void unload(UUID uuid) {
         if (users.containsKey(uuid)) {
             users.remove(uuid).deprovision();
@@ -99,19 +75,9 @@ public class UserCollection implements SubjectCollection {
 
     @Override
     public Subject get(@NonNull String id) {
-        final UUID uuid = Util.parseUuid(id);
-        if (uuid != null) {
-            UUID internal = service.getPlugin().getUuidCache().getUUID(uuid);
-            if (users.containsKey(internal)) {
-                return users.get(internal);
-            }
-
-        } else {
-            for (LuckPermsUserSubject subject : users.values()) {
-                if (subject.getUser().getName().equals(id)) {
-                    return subject;
-                }
-            }
+        Optional<Subject> s = getIfLoaded(id);
+        if (s.isPresent()) {
+            return s.get();
         }
 
         if (service.getPlugin().getConfiguration().isDebugPermissionChecks()) {
@@ -122,24 +88,46 @@ public class UserCollection implements SubjectCollection {
         return fallback.get(id);
     }
 
-    @Override
-    public boolean hasRegistered(@NonNull String id) {
-        final UUID uuid = Util.parseUuid(id);
-        if (uuid != null) {
-            UUID internal = service.getPlugin().getUuidCache().getUUID(uuid);
-            if (users.containsKey(internal)) {
-                return true;
-            }
+    private Optional<Subject> getIfLoaded(String id) {
+        UUID uuid = Util.parseUuid(id);
 
-        } else {
+        find:
+        if (uuid == null) {
             for (LuckPermsUserSubject subject : users.values()) {
                 if (subject.getUser().getName().equals(id)) {
-                    return true;
+                    return Optional.of(subject);
+                }
+            }
+
+            for (User user : manager.getAll().values()) {
+                if (user.getName().equalsIgnoreCase(id)) {
+                    uuid = user.getUuid();
+                    break find;
                 }
             }
         }
 
-        return false;
+        if (uuid != null) {
+            UUID internal = service.getPlugin().getUuidCache().getUUID(uuid);
+            Subject s = users.computeIfAbsent(internal, u -> {
+                User user = manager.get(u);
+                if (user == null) return null;
+
+                return LuckPermsUserSubject.wrapUser(user, service);
+            });
+
+
+            if (s != null) {
+                return Optional.of(s);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    @Override
+    public boolean hasRegistered(@NonNull String id) {
+        return getIfLoaded(id).isPresent();
     }
 
     @Override
@@ -155,7 +143,7 @@ public class UserCollection implements SubjectCollection {
     @Override
     public Map<Subject, Boolean> getAllWithPermission(@NonNull Set<Context> contexts, @NonNull String node) {
         return users.values().stream()
-                .filter(sub -> sub.isPermissionSet(contexts, node))
+                .filter(sub -> sub.getPermissionValue(contexts, node) != Tristate.UNDEFINED)
                 .collect(Collectors.toMap(sub -> sub, sub -> sub.getPermissionValue(contexts, node).asBoolean()));
     }
 

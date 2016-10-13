@@ -24,10 +24,12 @@ package me.lucko.luckperms;
 
 import com.google.inject.Inject;
 import lombok.Getter;
+import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.api.implementation.ApiProvider;
 import me.lucko.luckperms.api.sponge.LuckPermsService;
+import me.lucko.luckperms.calculators.CalculatorFactory;
 import me.lucko.luckperms.commands.ConsecutiveExecutor;
 import me.lucko.luckperms.commands.Sender;
 import me.lucko.luckperms.config.LPConfiguration;
@@ -44,7 +46,6 @@ import me.lucko.luckperms.runnables.UpdateTask;
 import me.lucko.luckperms.storage.Datastore;
 import me.lucko.luckperms.storage.StorageFactory;
 import me.lucko.luckperms.tracks.TrackManager;
-import me.lucko.luckperms.users.SpongeUserManager;
 import me.lucko.luckperms.users.UserManager;
 import me.lucko.luckperms.utils.LocaleManager;
 import me.lucko.luckperms.utils.LogFactory;
@@ -101,6 +102,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     private LuckPermsService service;
     private LocaleManager localeManager;
     private ContextManager<Player> contextManager; // TODO convert this to use Subject instead of Player
+    private CalculatorFactory calculatorFactory;
 
     @Listener
     public void onEnable(GamePreInitializationEvent event) {
@@ -138,6 +140,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         trackManager = new TrackManager();
         importer = new Importer(commandManager);
         consecutiveExecutor = new ConsecutiveExecutor(commandManager);
+        calculatorFactory = new SpongeCalculatorFactory(this);
 
         contextManager = new ContextManager<>();
         contextManager.registerCalculator(new ServerCalculator<>(getConfiguration().getServer()));
@@ -248,6 +251,11 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     @Override
     public Sender getConsoleSender() {
         return SpongeSenderFactory.get(this).wrap(game.getServer().getConsole());
+    }
+
+    @Override
+    public Set<Contexts> getPreProcessContexts(boolean op) {
+        return Collections.emptySet();
     }
 
     @Override
