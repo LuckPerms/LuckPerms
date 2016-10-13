@@ -83,7 +83,9 @@ public class BulkEditGroup extends SubCommand<Datastore> {
                     }
 
                     if (element.getGroupName().equals(user.getPrimaryGroup())) {
-                        continue;
+                        if (!element.isServerSpecific() && !element.isWorldSpecific() && !element.isTemporary()) {
+                            continue;
+                        }
                     }
 
                     if (!group.equals("null") && !element.getGroupName().equals(group)) {
