@@ -97,7 +97,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
             throw new IllegalStateException("Data already setup");
         }
 
-        userData = new UserData(this, null);
+        userData = new UserData(this, getPlugin().getCalculatorFactory());
         userData.preCalculate(getPlugin().getPreProcessContexts(op));
     }
 
