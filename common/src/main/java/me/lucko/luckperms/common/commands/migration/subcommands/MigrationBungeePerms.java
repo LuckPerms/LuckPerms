@@ -23,6 +23,7 @@
 package me.lucko.luckperms.common.commands.migration.subcommands;
 
 import me.lucko.luckperms.api.Logger;
+import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.Predicate;
@@ -144,7 +145,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
             String suffix = g.getSuffix();
 
             if (prefix != null && !prefix.equals("")) {
-                prefix = ArgumentChecker.escapeCharacters(prefix);
+                prefix = MetaUtils.escapeCharacters(prefix);
                 try {
                     group.setPermission("prefix.50." + prefix, true);
                     LogEntry.build()
@@ -159,7 +160,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
             }
 
             if (suffix != null && !suffix.equals("")) {
-                suffix = ArgumentChecker.escapeCharacters(suffix);
+                suffix = MetaUtils.escapeCharacters(suffix);
                 try {
                     group.setPermission("suffix.50." + suffix, true);
                     LogEntry.build()
@@ -259,7 +260,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
             String suffix = u.getSuffix();
 
             if (prefix != null && !prefix.equals("")) {
-                prefix = ArgumentChecker.escapeCharacters(prefix);
+                prefix = MetaUtils.escapeCharacters(prefix);
                 try {
                     user.setPermission("prefix.100." + prefix, true);
                     LogEntry.build()
@@ -274,7 +275,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
             }
 
             if (suffix != null && !suffix.equals("")) {
-                suffix = ArgumentChecker.escapeCharacters(suffix);
+                suffix = MetaUtils.escapeCharacters(suffix);
                 try {
                     user.setPermission("suffix.100." + suffix, true);
                     LogEntry.build()

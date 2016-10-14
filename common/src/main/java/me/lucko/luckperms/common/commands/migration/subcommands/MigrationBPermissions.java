@@ -24,6 +24,7 @@ package me.lucko.luckperms.common.commands.migration.subcommands;
 
 import de.bananaco.bpermissions.api.*;
 import me.lucko.luckperms.api.Logger;
+import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.Predicate;
@@ -222,7 +223,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
         // Migrate existing meta
         for (Map.Entry<String, String> meta : c.getMeta().entrySet()) {
             if (meta.getKey().equalsIgnoreCase("prefix") || meta.getKey().equalsIgnoreCase("suffix")) {
-                String chatMeta = ArgumentChecker.escapeCharacters(meta.getValue());
+                String chatMeta = MetaUtils.escapeCharacters(meta.getValue());
                 try {
                     holder.setPermission(meta.getKey().toLowerCase() + "." + c.getPriority() + "." + chatMeta, true);
                     LogEntry.build()

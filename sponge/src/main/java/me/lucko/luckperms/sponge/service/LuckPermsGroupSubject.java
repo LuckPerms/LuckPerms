@@ -43,7 +43,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static me.lucko.luckperms.common.utils.ArgumentChecker.unescapeCharacters;
+import static me.lucko.luckperms.api.MetaUtils.unescapeCharacters;
 
 @EqualsAndHashCode(of = "group")
 public class LuckPermsGroupSubject implements Subject {

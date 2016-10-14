@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.common.commands.generic.meta;
 
+import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.Arg;
@@ -113,7 +114,7 @@ public class MetaRemoveTempSuffix extends SecondarySubCommand {
 
         } else {
 
-            final String node = "suffix." + priority + "." + ArgumentChecker.escapeCharacters(suffix);
+            final String node = "suffix." + priority + "." + MetaUtils.escapeCharacters(suffix);
 
             try {
                 if (args.size() >= 3) {

@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.common.commands.generic.meta;
 
+import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.Arg;
@@ -113,7 +114,7 @@ public class MetaRemovePrefix extends SecondarySubCommand {
 
         } else {
 
-            final String node = "prefix." + priority + "." + ArgumentChecker.escapeCharacters(prefix);
+            final String node = "prefix." + priority + "." + MetaUtils.escapeCharacters(prefix);
 
             try {
                 if (args.size() >= 3) {

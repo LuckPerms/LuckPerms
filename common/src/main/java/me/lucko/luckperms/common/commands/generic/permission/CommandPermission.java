@@ -30,11 +30,11 @@ import me.lucko.luckperms.common.core.PermissionHolder;
 public class CommandPermission<T extends PermissionHolder> extends SecondaryMainCommand<T> {
     public CommandPermission(boolean user) {
         super("Permission", "Edit permissions", user, ImmutableList.<SecondarySubCommand>builder()
-                .add(new PermissionInfo())
-                .add(new PermissionSet())
-                .add(new PermissionUnset())
-                .add(new PermissionSetTemp())
-                .add(new PermissionUnsetTemp())
-                .build());
+            .add(new PermissionInfo())
+            .add(new PermissionSet())
+            .add(new PermissionUnset())
+            .add(new PermissionSetTemp())
+            .add(new PermissionUnsetTemp())
+            .build());
     }
 }

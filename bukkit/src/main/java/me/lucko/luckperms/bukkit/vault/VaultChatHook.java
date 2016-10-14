@@ -29,7 +29,6 @@ import me.lucko.luckperms.common.caching.MetaData;
 import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.users.User;
-import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import net.milkbowl.vault.chat.Chat;
@@ -39,8 +38,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static me.lucko.luckperms.common.utils.ArgumentChecker.escapeCharacters;
-import static me.lucko.luckperms.common.utils.ArgumentChecker.unescapeCharacters;
+import static me.lucko.luckperms.api.MetaUtils.escapeCharacters;
+import static me.lucko.luckperms.api.MetaUtils.unescapeCharacters;
 
 /**
  * Provides the Vault Chat service through the use of normal permission nodes.
@@ -56,7 +55,7 @@ import static me.lucko.luckperms.common.utils.ArgumentChecker.unescapeCharacters
  * Permission Nodes = meta.node.value
  *
  * Node that special characters used within LuckPerms are escaped:
- * See {@link ArgumentChecker#escapeCharacters(String)}
+ * See {@link me.lucko.luckperms.api.MetaUtils#unescapeCharacters(String)}
  */
 public class VaultChatHook extends Chat {
     private final VaultPermissionHook perms;

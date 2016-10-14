@@ -30,16 +30,20 @@ import me.lucko.luckperms.common.core.PermissionHolder;
 public class CommandMeta<T extends PermissionHolder> extends SecondaryMainCommand<T> {
     public CommandMeta(boolean user) {
         super("Meta", "Edit metadata values", user, ImmutableList.<SecondarySubCommand>builder()
-                .add(new MetaInfo())
-                .add(new MetaAddPrefix())
-                .add(new MetaAddSuffix())
-                .add(new MetaRemovePrefix())
-                .add(new MetaRemoveSuffix())
-                .add(new MetaAddTempPrefix())
-                .add(new MetaAddTempSuffix())
-                .add(new MetaRemoveTempPrefix())
-                .add(new MetaRemoveTempSuffix())
-                .add(new MetaClear())
-                .build());
+            .add(new MetaInfo())
+            .add(new MetaSet())
+            .add(new MetaUnset())
+            .add(new MetaSetTemp())
+            .add(new MetaUnsetTemp())
+            .add(new MetaAddPrefix())
+            .add(new MetaAddSuffix())
+            .add(new MetaRemovePrefix())
+            .add(new MetaRemoveSuffix())
+            .add(new MetaAddTempPrefix())
+            .add(new MetaAddTempSuffix())
+            .add(new MetaRemoveTempPrefix())
+            .add(new MetaRemoveTempSuffix())
+            .add(new MetaClear())
+            .build());
     }
 }

@@ -62,7 +62,7 @@ public class MetaData {
                 continue;
             }
 
-            if (!n.isMeta() || !n.isPrefix() || n.isSuffix()) {
+            if (!n.isMeta() && !n.isPrefix() && n.isSuffix()) {
                 continue;
             }
 

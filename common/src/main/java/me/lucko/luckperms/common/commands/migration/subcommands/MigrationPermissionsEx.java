@@ -23,6 +23,7 @@
 package me.lucko.luckperms.common.commands.migration.subcommands;
 
 import me.lucko.luckperms.api.Logger;
+import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.*;
@@ -197,7 +198,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             String suffix = group.getOwnSuffix();
 
             if (prefix != null && !prefix.equals("")) {
-                prefix = ArgumentChecker.escapeCharacters(prefix);
+                prefix = MetaUtils.escapeCharacters(prefix);
                 try {
                     lpGroup.setPermission("prefix." + groupWeight + "." + prefix, true);
                     LogEntry.build()
@@ -212,7 +213,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             }
 
             if (suffix != null && !suffix.equals("")) {
-                suffix = ArgumentChecker.escapeCharacters(suffix);
+                suffix = MetaUtils.escapeCharacters(suffix);
                 try {
                     lpGroup.setPermission("suffix." + groupWeight + "." + suffix, true);
                     LogEntry.build()
@@ -341,7 +342,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             String suffix = user.getOwnSuffix();
 
             if (prefix != null && !prefix.equals("")) {
-                prefix = ArgumentChecker.escapeCharacters(prefix);
+                prefix = MetaUtils.escapeCharacters(prefix);
                 try {
                     lpUser.setPermission("prefix." + maxGroupWeight + "." + prefix, true);
                     LogEntry.build()
@@ -356,7 +357,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             }
 
             if (suffix != null && !suffix.equals("")) {
-                suffix = ArgumentChecker.escapeCharacters(suffix);
+                suffix = MetaUtils.escapeCharacters(suffix);
                 try {
                     lpUser.setPermission("suffix." + maxGroupWeight + "." + suffix, true);
                     LogEntry.build()

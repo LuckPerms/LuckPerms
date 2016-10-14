@@ -90,7 +90,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
      */
     public void setupData(boolean op) {
         if (userData != null) {
-            throw new IllegalStateException("Data already setup");
+            return;
         }
 
         userData = new UserData(this, getPlugin().getCalculatorFactory());

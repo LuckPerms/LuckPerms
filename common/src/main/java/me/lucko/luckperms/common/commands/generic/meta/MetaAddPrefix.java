@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.common.commands.generic.meta;
 
+import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -60,7 +61,7 @@ public class MetaAddPrefix extends SecondarySubCommand {
             return CommandResult.INVALID_ARGS;
         }
 
-        final String node = "prefix." + priority + "." + ArgumentChecker.escapeCharacters(prefix);
+        final String node = "prefix." + priority + "." + MetaUtils.escapeCharacters(prefix);
 
         try {
             if (args.size() >= 3) {

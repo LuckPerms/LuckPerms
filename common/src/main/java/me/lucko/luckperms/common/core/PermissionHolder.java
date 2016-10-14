@@ -232,6 +232,47 @@ public abstract class PermissionHolder {
         }
     }
 
+    public void clearMetaKeys(String key, boolean temp) {
+        synchronized (nodes) {
+            nodes.removeIf(n -> n.isMeta() && (n.isTemporary() == temp) && n.getMeta().getKey().equalsIgnoreCase(key));
+            invalidateCache(true);
+        }
+    }
+
+    public void clearMetaKeys(String key, String server, boolean temp) {
+        if (server == null) {
+            server = "global";
+        }
+        String finalServer = server;
+
+        synchronized (nodes) {
+            nodes.removeIf(n -> n.isMeta() && (n.isTemporary() == temp) && n.getMeta().getKey().equalsIgnoreCase(key) &&
+                    n.getServer().orElse("global").equalsIgnoreCase(finalServer)
+            );
+            invalidateCache(true);
+        }
+    }
+
+    public void clearMetaKeys(String key, String server, String world, boolean temp) {
+        if (server == null) {
+            server = "global";
+        }
+        String finalServer = server;
+
+        if (world == null) {
+            world = "null";
+        }
+        String finalWorld = world;
+
+        synchronized (nodes) {
+            nodes.removeIf(n -> n.isMeta() && (n.isTemporary() == temp) && n.getMeta().getKey().equalsIgnoreCase(key) &&
+                    n.getServer().orElse("global").equalsIgnoreCase(finalServer) &&
+                    n.getWorld().orElse("null").equalsIgnoreCase(finalWorld)
+            );
+            invalidateCache(true);
+        }
+    }
+
     public void clearTransientNodes() {
         synchronized (transientNodes) {
             transientNodes.clear();

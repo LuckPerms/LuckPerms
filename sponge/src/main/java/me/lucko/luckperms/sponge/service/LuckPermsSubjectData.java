@@ -41,7 +41,7 @@ import org.spongepowered.api.util.Tristate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static me.lucko.luckperms.common.utils.ArgumentChecker.escapeCharacters;
+import static me.lucko.luckperms.api.MetaUtils.escapeCharacters;
 
 @AllArgsConstructor
 public class LuckPermsSubjectData implements SubjectData {

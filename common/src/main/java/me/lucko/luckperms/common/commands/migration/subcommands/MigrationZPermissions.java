@@ -23,6 +23,7 @@
 package me.lucko.luckperms.common.commands.migration.subcommands;
 
 import me.lucko.luckperms.api.Logger;
+import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.*;
 import me.lucko.luckperms.common.constants.Constants;
@@ -213,7 +214,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
             String suffix = service.getPlayerSuffix(u);
 
             if (prefix != null && !prefix.equals("")) {
-                prefix = ArgumentChecker.escapeCharacters(prefix);
+                prefix = MetaUtils.escapeCharacters(prefix);
                 try {
                     user.setPermission("prefix.100." + prefix, true);
                     LogEntry.build()
@@ -228,7 +229,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
             }
 
             if (suffix != null && !suffix.equals("")) {
-                suffix = ArgumentChecker.escapeCharacters(suffix);
+                suffix = MetaUtils.escapeCharacters(suffix);
                 try {
                     user.setPermission("suffix.100." + suffix, true);
                     LogEntry.build()

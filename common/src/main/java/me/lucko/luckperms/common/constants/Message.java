@@ -223,6 +223,22 @@ public enum Message {
     REMOVE_TEMP_SUFFIX_SERVER_SUCCESS("&b{0}&a had temporary suffix &f\"{1}&f\"&a at priority &b{2}&a removed on server &b{3}&a.", true),
     REMOVE_TEMP_SUFFIX_SERVER_WORLD_SUCCESS("&b{0}&a had temporary suffix &f\"{1}&f\"&a at priority &b{2}&a removed on server &b{3}&a, world &b{4}&a.", true),
 
+    ALREADY_HAS_META("{0} already has that meta key value pair set.", true),
+
+    SET_META_SUCCESS("&aSet meta value for key &f\"{0}&f\"&a to &f\"{1}&f\"&a for &b{2}&a.", true),
+    SET_META_SERVER_SUCCESS("&aSet meta value for key &f\"{0}&f\"&a to &f\"{1}&f\"&a for &b{2}&a on server &b{3}&a.", true),
+    SET_META_SERVER_WORLD_SUCCESS("&aSet meta value for key &f\"{0}&f\"&a to &f\"{1}&f\"&a for &b{2}&a on server &b{3}&a, world &b{4}&a.", true),
+    SET_META_TEMP_SUCCESS("&aSet meta value for key &f\"{0}&f\"&a to &f\"{1}&f\"&a for &b{2}&a for a duration of &b{3}&a.", true),
+    SET_META_TEMP_SERVER_SUCCESS("&aSet meta value for key &f\"{0}&f\"&a to &f\"{1}&f\"&a for &b{2}&a on server &b{3}&a for a duration of &b{4}&a.", true),
+    SET_META_TEMP_SERVER_WORLD_SUCCESS("&aSet meta value for key &f\"{0}&f\"&a to &f\"{1}&f\"&a for &b{2}&a on server &b{3}&a, world &b{4}&a, for a duration of &b{5}&a.", true),
+
+    UNSET_META_SUCCESS("&aUnset meta value with key &f\"{0}&f\"&a for &b{1}&a.", true),
+    UNSET_META_SERVER_SUCCESS("&aUnset meta value with key &f\"{0}&f\"&a for &b{1}&a on server &b{2}&a.", true),
+    UNSET_META_SERVER_WORLD_SUCCESS("&aUnset meta value with key &f\"{0}&f\"&a for &b{1}&a on server &b{2}&a, world &b{3}&a.", true),
+    UNSET_META_TEMP_SUCCESS("&aUnset temporary meta value with key &f\"{0}&f\"&a for &b{1}&a.", true),
+    UNSET_META_TEMP_SERVER_SUCCESS("&aUnset temporary meta value with key &f\"{0}&f\"&a for &b{1}&a on server &b{2}&a.", true),
+    UNSET_META_TEMP_SERVER_WORLD_SUCCESS("&aUnset temporary meta value with key &f\"{0}&f\"&a for &b{1}&a on server &b{2}&a, world &b{3}&a.", true),
+    
     BULK_CHANGE_TYPE_ERROR("Invalid type. Was expecting 'server' or 'world'.", true),
     BULK_CHANGE_SUCCESS("&aApplied bulk change successfully. {0} records were changed.", true),
 
