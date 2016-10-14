@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.meta.subcommands;
+package me.lucko.luckperms.common.commands.generic.meta;
 
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.LuckPermsPlugin;
@@ -28,7 +28,7 @@ import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.Predicate;
 import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.meta.MetaSubCommand;
+import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.PermissionHolder;
@@ -39,7 +39,7 @@ import me.lucko.luckperms.exceptions.ObjectLacksException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MetaRemoveSuffix extends MetaSubCommand {
+public class MetaRemoveSuffix extends SecondarySubCommand {
     public MetaRemoveSuffix() {
         super("removesuffix", "Removes a suffix",  Permission.USER_REMOVESUFFIX, Permission.GROUP_REMOVESUFFIX, Predicate.notInRange(2, 4),
                 Arg.list(

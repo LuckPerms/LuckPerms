@@ -20,26 +20,26 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.group.subcommands;
+package me.lucko.luckperms.common.commands.generic.meta;
 
-import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.*;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.groups.Group;
+import com.google.common.collect.ImmutableList;
+import me.lucko.luckperms.common.commands.generic.SecondaryMainCommand;
+import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
+import me.lucko.luckperms.common.core.PermissionHolder;
 
-import java.util.List;
-
-public class GroupListParents extends SubCommand<Group> {
-    public GroupListParents() {
-        super("listparents", "Lists the groups that this group inherits from", Permission.GROUP_LISTPARENTS, Predicate.alwaysFalse(), null);
-    }
-
-    @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
-        Message.LISTPARENTS.send(sender, group.getDisplayName(), Util.permGroupsToString(group.getPermissions(false)));
-        Message.LISTPARENTS_TEMP.send(sender, group.getDisplayName(), Util.tempGroupsToString(group.getPermissions(false)));
-        return CommandResult.SUCCESS;
+public class CommandMeta<T extends PermissionHolder> extends SecondaryMainCommand<T> {
+    public CommandMeta(boolean user) {
+        super("Meta", "Edit metadata values", user, ImmutableList.<SecondarySubCommand>builder()
+                .add(new MetaInfo())
+                .add(new MetaAddPrefix())
+                .add(new MetaAddSuffix())
+                .add(new MetaRemovePrefix())
+                .add(new MetaRemoveSuffix())
+                .add(new MetaAddTempPrefix())
+                .add(new MetaAddTempSuffix())
+                .add(new MetaRemoveTempPrefix())
+                .add(new MetaRemoveTempSuffix())
+                .add(new MetaClear())
+                .build());
     }
 }
-

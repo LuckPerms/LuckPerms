@@ -32,11 +32,9 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.api.event.events.GroupRemoveEvent;
-import me.lucko.luckperms.api.event.events.PermissionNodeExpireEvent;
-import me.lucko.luckperms.api.event.events.PermissionNodeSetEvent;
-import me.lucko.luckperms.api.event.events.PermissionNodeUnsetEvent;
+import me.lucko.luckperms.api.event.events.*;
 import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.api.internal.GroupLink;
 import me.lucko.luckperms.common.api.internal.PermissionHolderLink;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.utils.Cache;
@@ -676,6 +674,96 @@ public abstract class PermissionHolder {
 
     public void unsetPermission(String node, String server, String world, boolean temporary) throws ObjectLacksException {
         unsetPermission(buildNode(node).setServer(server).setWorld(world).setExpiry(temporary ? 10L : 0L).build());
+    }
+
+    public boolean inheritsGroup(Group group) {
+        return group.getName().equalsIgnoreCase(this.getObjectName()) || hasPermission("group." + group.getName(), true);
+    }
+
+    public boolean inheritsGroup(Group group, String server) {
+        return group.getName().equalsIgnoreCase(this.getObjectName()) || hasPermission("group." + group.getName(), true, server);
+    }
+
+    public boolean inheritsGroup(Group group, String server, String world) {
+        return group.getName().equalsIgnoreCase(this.getObjectName()) || hasPermission("group." + group.getName(), true, server, world);
+    }
+
+    public void setInheritGroup(Group group) throws ObjectAlreadyHasException {
+        if (group.getName().equalsIgnoreCase(this.getObjectName())) {
+            throw new ObjectAlreadyHasException();
+        }
+
+        setPermission("group." + group.getName(), true);
+        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderLink(this), new GroupLink(group), null, null, 0L));
+    }
+
+    public void setInheritGroup(Group group, String server) throws ObjectAlreadyHasException {
+        if (group.getName().equalsIgnoreCase(this.getObjectName())) {
+            throw new ObjectAlreadyHasException();
+        }
+
+        setPermission("group." + group.getName(), true, server);
+        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderLink(this), new GroupLink(group), server, null, 0L));
+    }
+
+    public void setInheritGroup(Group group, String server, String world) throws ObjectAlreadyHasException {
+        if (group.getName().equalsIgnoreCase(this.getObjectName())) {
+            throw new ObjectAlreadyHasException();
+        }
+
+        setPermission("group." + group.getName(), true, server, world);
+        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderLink(this), new GroupLink(group), server, world, 0L));
+    }
+
+    public void setInheritGroup(Group group, long expireAt) throws ObjectAlreadyHasException {
+        if (group.getName().equalsIgnoreCase(this.getObjectName())) {
+            throw new ObjectAlreadyHasException();
+        }
+
+        setPermission("group." + group.getName(), true, expireAt);
+        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderLink(this), new GroupLink(group), null, null, expireAt));
+    }
+
+    public void setInheritGroup(Group group, String server, long expireAt) throws ObjectAlreadyHasException {
+        if (group.getName().equalsIgnoreCase(this.getObjectName())) {
+            throw new ObjectAlreadyHasException();
+        }
+
+        setPermission("group." + group.getName(), true, server, expireAt);
+        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderLink(this), new GroupLink(group), server, null, expireAt));
+    }
+
+    public void setInheritGroup(Group group, String server, String world, long expireAt) throws ObjectAlreadyHasException {
+        if (group.getName().equalsIgnoreCase(this.getObjectName())) {
+            throw new ObjectAlreadyHasException();
+        }
+
+        setPermission("group." + group.getName(), true, server, world, expireAt);
+        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderLink(this), new GroupLink(group), server, world, expireAt));
+    }
+
+    public void unsetInheritGroup(Group group) throws ObjectLacksException {
+        unsetPermission("group." + group.getName());
+    }
+
+    public void unsetInheritGroup(Group group, boolean temporary) throws ObjectLacksException {
+        unsetPermission("group." + group.getName(), temporary);
+    }
+
+    public void unsetInheritGroup(Group group, String server) throws ObjectLacksException {
+        unsetPermission("group." + group.getName(), server);
+    }
+
+    public void unsetInheritGroup(Group group, String server, String world) throws ObjectLacksException {
+        unsetPermission("group." + group.getName(), server, world);
+    }
+
+    public void unsetInheritGroup(Group group, String server, boolean temporary) throws ObjectLacksException {
+        unsetPermission("group." + group.getName(), server, temporary);
+    }
+
+    public void unsetInheritGroup(Group group, String server, String world, boolean temporary) throws ObjectLacksException {
+        unsetPermission("group." + group.getName(), server, world, temporary);
     }
 
     /**

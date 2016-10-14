@@ -20,12 +20,17 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.group.subcommands;
+package me.lucko.luckperms.common.commands.generic.parent;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.*;
+import me.lucko.luckperms.common.commands.Arg;
+import me.lucko.luckperms.common.commands.CommandResult;
+import me.lucko.luckperms.common.commands.Predicate;
+import me.lucko.luckperms.common.commands.Sender;
+import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
@@ -34,10 +39,12 @@ import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.List;
 
-public class GroupSetTempInherit extends SubCommand<Group> {
-    public GroupSetTempInherit() {
-        super("settempinherit", "Sets another group for the group to inherit permissions from temporarily",
-                Permission.GROUP_SET_TEMP_INHERIT, Predicate.notInRange(2, 4),
+import static me.lucko.luckperms.common.commands.SubCommand.getGroupTabComplete;
+
+public class ParentAddTemp extends SecondarySubCommand {
+    public ParentAddTemp() {
+        super("addtemp", "Sets another group for the object to inherit permissions from temporarily",
+                Permission.USER_ADDTEMPGROUP, Permission.GROUP_SET_TEMP_INHERIT, Predicate.notInRange(2, 4),
                 Arg.list(
                         Arg.create("group", true, "the group to inherit from"),
                         Arg.create("duration", true, "the duration of the group membership"),
@@ -48,7 +55,7 @@ public class GroupSetTempInherit extends SubCommand<Group> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) {
         String groupName = args.get(0).toLowerCase();
 
         if (ArgumentChecker.checkNode(groupName)) {
@@ -78,8 +85,8 @@ public class GroupSetTempInherit extends SubCommand<Group> {
             return CommandResult.INVALID_ARGS;
         }
 
-        Group group1 = plugin.getGroupManager().get(groupName);
-        if (group1 == null) {
+        Group group = plugin.getGroupManager().get(groupName);
+        if (group == null) {
             Message.GROUP_DOES_NOT_EXIST.send(sender);
             return CommandResult.INVALID_ARGS;
         }
@@ -93,34 +100,34 @@ public class GroupSetTempInherit extends SubCommand<Group> {
                 }
 
                 if (args.size() == 3) {
-                    group.setInheritGroup(group1, server, duration);
-                    Message.GROUP_SET_TEMP_INHERIT_SERVER_SUCCESS.send(sender, group.getDisplayName(), group1.getDisplayName(), server,
+                    holder.setInheritGroup(group, server, duration);
+                    Message.SET_TEMP_INHERIT_SERVER_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(), server,
                             DateUtil.formatDateDiff(duration));
-                    LogEntry.build().actor(sender).acted(group)
-                            .action("settempinherit " + group1.getName() + " " + duration + " " + server)
+                    LogEntry.build().actor(sender).acted(holder)
+                            .action("parent addtemp " + group.getName() + " " + duration + " " + server)
                             .build().submit(plugin, sender);
                 } else {
                     final String world = args.get(3).toLowerCase();
-                    group.setInheritGroup(group1, server, world, duration);
-                    Message.GROUP_SET_TEMP_INHERIT_SERVER_WORLD_SUCCESS.send(sender, group.getDisplayName(), group1.getDisplayName(), server,
+                    holder.setInheritGroup(group, server, world, duration);
+                    Message.SET_TEMP_INHERIT_SERVER_WORLD_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(), server,
                             world, DateUtil.formatDateDiff(duration));
-                    LogEntry.build().actor(sender).acted(group)
-                            .action("settempinherit " + group1.getName() + " " + duration + " " + server + " " + world)
+                    LogEntry.build().actor(sender).acted(holder)
+                            .action("parent addtemp " + group.getName() + " " + duration + " " + server + " " + world)
                             .build().submit(plugin, sender);
                 }
 
             } else {
-                group.setInheritGroup(group1, duration);
-                Message.GROUP_SET_TEMP_INHERIT_SUCCESS.send(sender, group.getDisplayName(), group1.getDisplayName(), DateUtil.formatDateDiff(duration));
-                LogEntry.build().actor(sender).acted(group)
-                        .action("settempinherit " + group1.getName() + " " + duration)
+                holder.setInheritGroup(group, duration);
+                Message.SET_TEMP_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(), DateUtil.formatDateDiff(duration));
+                LogEntry.build().actor(sender).acted(holder)
+                        .action("parent addtemp " + group.getName() + " " + duration)
                         .build().submit(plugin, sender);
             }
 
-            save(group, sender, plugin);
+            save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } catch (ObjectAlreadyHasException e) {
-            Message.USER_ALREADY_TEMP_MEMBER_OF.send(sender, group.getDisplayName(), group1.getDisplayName());
+            Message.ALREADY_TEMP_INHERITS.send(sender, holder.getFriendlyName(), group.getDisplayName());
             return CommandResult.STATE_ERROR;
         }
     }

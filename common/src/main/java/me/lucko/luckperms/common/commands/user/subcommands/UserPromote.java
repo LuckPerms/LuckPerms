@@ -100,7 +100,7 @@ public class UserPromote extends SubCommand<User> {
             user.unsetPermission("group." + old);
         } catch (ObjectLacksException ignored) {}
         try {
-            user.addGroup(nextGroup);
+            user.setInheritGroup(nextGroup);
         } catch (ObjectAlreadyHasException ignored) {}
         user.setPrimaryGroup(nextGroup.getName());
 

@@ -133,15 +133,15 @@ public abstract class SubCommand<T> {
      * ----------------------------------------------------------------------------------
      */
 
-    protected static List<String> getGroupTabComplete(List<String> args, LuckPermsPlugin plugin) {
+    public static List<String> getGroupTabComplete(List<String> args, LuckPermsPlugin plugin) {
         return getTabComplete(new ArrayList<>(plugin.getGroupManager().getAll().keySet()), args);
     }
 
-    protected static List<String> getTrackTabComplete(List<String> args, LuckPermsPlugin plugin) {
+    public static List<String> getTrackTabComplete(List<String> args, LuckPermsPlugin plugin) {
         return getTabComplete(new ArrayList<>(plugin.getTrackManager().getAll().keySet()), args);
     }
 
-    protected static List<String> getBoolTabComplete(List<String> args) {
+    public static List<String> getBoolTabComplete(List<String> args) {
         if (args.size() == 2) {
             return Arrays.asList("true", "false");
         } else {
@@ -161,7 +161,7 @@ public abstract class SubCommand<T> {
         return Collections.emptyList();
     }
 
-    protected static void save(User user, Sender sender, LuckPermsPlugin plugin) {
+    public static void save(User user, Sender sender, LuckPermsPlugin plugin) {
         if (plugin.getDatastore().saveUser(user)) {
             Message.USER_SAVE_SUCCESS.send(sender);
         } else {
@@ -171,7 +171,7 @@ public abstract class SubCommand<T> {
         user.refreshPermissions();
     }
 
-    protected static void save(Group group, Sender sender, LuckPermsPlugin plugin) {
+    public static void save(Group group, Sender sender, LuckPermsPlugin plugin) {
         if (plugin.getDatastore().saveGroup(group)) {
             Message.GROUP_SAVE_SUCCESS.send(sender);
         } else {
@@ -181,7 +181,7 @@ public abstract class SubCommand<T> {
         plugin.runUpdateTask();
     }
 
-    protected static void save(Track track, Sender sender, LuckPermsPlugin plugin) {
+    public static void save(Track track, Sender sender, LuckPermsPlugin plugin) {
         if (plugin.getDatastore().saveTrack(track)) {
             Message.TRACK_SAVE_SUCCESS.send(sender);
         } else {

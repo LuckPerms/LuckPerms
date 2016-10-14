@@ -34,7 +34,6 @@ import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.*;
 
-// "<group|null> <server|world> <from> <to>",
 public class BulkEditGroup extends SubCommand<Datastore> {
     public BulkEditGroup() {
         super("group", "Bulk edit group memberships", Permission.USER_BULKCHANGE, Predicate.not(4),

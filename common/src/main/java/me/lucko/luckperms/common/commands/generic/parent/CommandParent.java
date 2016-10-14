@@ -20,25 +20,21 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.user.subcommands;
+package me.lucko.luckperms.common.commands.generic.parent;
 
-import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.*;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.users.User;
+import com.google.common.collect.ImmutableList;
+import me.lucko.luckperms.common.commands.generic.SecondaryMainCommand;
+import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
+import me.lucko.luckperms.common.core.PermissionHolder;
 
-import java.util.List;
-
-public class UserListGroups extends SubCommand<User> {
-    public UserListGroups() {
-        super("listgroups", "Lists the groups the user is a member of", Permission.USER_LISTGROUPS, Predicate.alwaysFalse(), null);
-    }
-
-    @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
-        Message.LISTGROUPS.send(sender, user.getName(), Util.permGroupsToString(user.getPermissions(false)));
-        Message.LISTGROUPS_TEMP.send(sender, user.getName(), Util.tempGroupsToString(user.getPermissions(false)));
-        return CommandResult.SUCCESS;
+public class CommandParent<T extends PermissionHolder> extends SecondaryMainCommand<T> {
+    public CommandParent(boolean user) {
+        super("Parent", "Edit inheritances", user, ImmutableList.<SecondarySubCommand>builder()
+                .add(new ParentInfo())
+                .add(new ParentAdd())
+                .add(new ParentRemove())
+                .add(new ParentAddTemp())
+                .add(new ParentRemoveTemp())
+                .build());
     }
 }

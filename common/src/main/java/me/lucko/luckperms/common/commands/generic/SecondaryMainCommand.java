@@ -20,49 +20,37 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.meta;
+package me.lucko.luckperms.common.commands.generic;
 
-import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.*;
-import me.lucko.luckperms.common.commands.meta.subcommands.*;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.core.PermissionHolder;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class MetaCommands<T extends PermissionHolder> extends SubCommand<T> {
+public class SecondaryMainCommand<T extends PermissionHolder> extends SubCommand<T> {
     private boolean user;
+    private final List<SecondarySubCommand> secondaryCommands;
 
-    private final List<MetaSubCommand> subCommands = ImmutableList.<MetaSubCommand>builder()
-        .add(new MetaInfo())
-        .add(new MetaAddPrefix())
-        .add(new MetaAddSuffix())
-        .add(new MetaRemovePrefix())
-        .add(new MetaRemoveSuffix())
-        .add(new MetaAddTempPrefix())
-        .add(new MetaAddTempSuffix())
-        .add(new MetaRemoveTempPrefix())
-        .add(new MetaRemoveTempSuffix())
-        .add(new MetaClear())
-        .build();
-
-    public MetaCommands(boolean user) {
-        super("meta", "Edit metadata values", null, Predicate.alwaysFalse(), null);
+    public SecondaryMainCommand(String name, String description, boolean user, List<SecondarySubCommand> secondaryCommands) {
+        super(name, description, null, Predicate.alwaysFalse(), null);
+        this.secondaryCommands = secondaryCommands;
         this.user = user;
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, T t, List<String> args, String label) {
         if (args.size() == 0) {
-            sendUsageMeta(sender, user, label);
+            sendUsageDetailed(sender, user, label);
             return CommandResult.INVALID_ARGS;
         }
 
-        Optional<MetaSubCommand> o = subCommands.stream()
+        Optional<SecondarySubCommand> o = secondaryCommands.stream()
                 .filter(s -> s.getName().equalsIgnoreCase(args.get(0)))
                 .limit(1)
                 .findAny();
@@ -72,7 +60,7 @@ public class MetaCommands<T extends PermissionHolder> extends SubCommand<T> {
             return CommandResult.INVALID_ARGS;
         }
 
-        final MetaSubCommand sub = o.get();
+        final SecondarySubCommand sub = o.get();
         if (!sub.isAuthorized(sender, user)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
@@ -92,8 +80,39 @@ public class MetaCommands<T extends PermissionHolder> extends SubCommand<T> {
     }
 
     @Override
+    public List<String> onTabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+        final List<SecondarySubCommand> subs = secondaryCommands.stream()
+                .filter(s -> s.isAuthorized(sender, user))
+                .collect(Collectors.toList());
+
+        if (args.size() <= 1) {
+            if (args.isEmpty() || args.get(0).equalsIgnoreCase("")) {
+                return subs.stream()
+                        .map(m -> m.getName().toLowerCase())
+                        .collect(Collectors.toList());
+            }
+
+            return subs.stream()
+                    .map(m -> m.getName().toLowerCase())
+                    .filter(s -> s.toLowerCase().startsWith(args.get(0).toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+
+        Optional<SecondarySubCommand> o = subs.stream()
+                .filter(s -> s.getName().equalsIgnoreCase(args.get(0)))
+                .limit(1)
+                .findAny();
+
+        if (!o.isPresent()) {
+            return Collections.emptyList();
+        }
+
+        return o.get().onTabComplete(plugin, sender, args.subList(1, args.size()));
+    }
+
+    @Override
     public boolean isAuthorized(Sender sender) {
-        for (MetaSubCommand subCommand : subCommands) {
+        for (SecondarySubCommand subCommand : secondaryCommands) {
             if (subCommand.isAuthorized(sender, user)) {
                 return true;
             }
@@ -101,19 +120,19 @@ public class MetaCommands<T extends PermissionHolder> extends SubCommand<T> {
         return false;
     }
 
-    private void sendUsageMeta(Sender sender, boolean user, String label) {
-        List<MetaSubCommand> subs = subCommands.stream()
+    private void sendUsageDetailed(Sender sender, boolean user, String label) {
+        List<SecondarySubCommand> subs = secondaryCommands.stream()
                 .filter(s -> s.isAuthorized(sender, user))
                 .collect(Collectors.toList());
 
         if (subs.size() > 0) {
             if (user) {
-                Util.sendPluginMessage(sender, "&bMeta Sub Commands: &7(" + String.format("/%s user <user> meta ...)", label));
+                Util.sendPluginMessage(sender, "&b" + getName() + " Sub Commands: &7(" + String.format("/%s user <user> " + getName().toLowerCase() + " ...)", label));
             } else {
-                Util.sendPluginMessage(sender, "&bMeta Sub Commands: &7(" + String.format("/%s group <group> meta ...)", label));
+                Util.sendPluginMessage(sender, "&b" + getName() + " Sub Commands: &7(" + String.format("/%s group <group> " + getName().toLowerCase() + " ...)", label));
             }
 
-            for (MetaSubCommand s : subs) {
+            for (SecondarySubCommand s : subs) {
                 s.sendUsage(sender);
             }
 

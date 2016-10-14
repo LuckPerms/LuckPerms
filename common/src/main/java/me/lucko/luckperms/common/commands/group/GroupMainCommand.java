@@ -27,8 +27,9 @@ import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.MainCommand;
 import me.lucko.luckperms.common.commands.Sender;
 import me.lucko.luckperms.common.commands.SubCommand;
+import me.lucko.luckperms.common.commands.generic.parent.CommandParent;
 import me.lucko.luckperms.common.commands.group.subcommands.*;
-import me.lucko.luckperms.common.commands.meta.MetaCommands;
+import me.lucko.luckperms.common.commands.generic.meta.CommandMeta;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.groups.Group;
 
@@ -39,20 +40,16 @@ public class GroupMainCommand extends MainCommand<Group> {
     public GroupMainCommand() {
         super("Group", "/%s group <group>", 2, ImmutableList.<SubCommand<Group>>builder()
             .add(new GroupInfo())
+            .add(new CommandParent<>(false))
+            .add(new CommandMeta<>(false))
             .add(new GroupListNodes())
-            .add(new GroupListParents())
             .add(new GroupHasPerm())
             .add(new GroupInheritsPerm())
             .add(new GroupSetPermission())
             .add(new GroupUnSetPermission())
-            .add(new GroupSetInherit())
-            .add(new GroupUnsetInherit())
             .add(new GroupSetTempPermission())
             .add(new GroupUnsetTempPermission())
-            .add(new GroupSetTempInherit())
-            .add(new GroupUnsetTempInherit())
             .add(new GroupShowTracks())
-            .add(new MetaCommands<>(false))
             .add(new GroupBulkChange())
             .add(new GroupClear())
             .add(new GroupRename())

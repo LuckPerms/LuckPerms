@@ -53,10 +53,10 @@ public class UserSetPrimaryGroup extends SubCommand<User> {
             return CommandResult.STATE_ERROR;
         }
 
-        if (!user.isInGroup(group)) {
+        if (!user.inheritsGroup(group)) {
             Message.USER_PRIMARYGROUP_ERROR_NOTMEMBER.send(sender, user.getName(), group.getName());
             try {
-                user.addGroup(group);
+                user.setInheritGroup(group);
             } catch (ObjectAlreadyHasException ignored) {}
         }
 

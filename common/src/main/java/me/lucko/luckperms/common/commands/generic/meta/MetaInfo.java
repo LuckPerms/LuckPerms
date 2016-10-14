@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.meta.subcommands;
+package me.lucko.luckperms.common.commands.generic.meta;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
@@ -29,14 +29,14 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.Predicate;
 import me.lucko.luckperms.common.commands.Sender;
 import me.lucko.luckperms.common.commands.Util;
-import me.lucko.luckperms.common.commands.meta.MetaSubCommand;
+import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.PermissionHolder;
 
 import java.util.*;
 
-public class MetaInfo extends MetaSubCommand {
+public class MetaInfo extends SecondarySubCommand {
     public MetaInfo() {
         super("info", "Shows all chat meta",  Permission.USER_CHATMETA, Permission.GROUP_CHATMETA, Predicate.alwaysFalse(), null);
     }

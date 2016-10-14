@@ -258,9 +258,9 @@ public class VaultPermissionHook extends Permission {
         scheduler.scheduleTask(() -> {
             try {
                 if (finalWorld != null && !finalWorld.equals("")) {
-                    user.addGroup(group, server, finalWorld);
+                    user.setInheritGroup(group, server, finalWorld);
                 } else {
-                    user.addGroup(group, server);
+                    user.setInheritGroup(group, server);
                 }
             } catch (ObjectAlreadyHasException ignored) {}
             save(user);
@@ -282,9 +282,9 @@ public class VaultPermissionHook extends Permission {
         scheduler.scheduleTask(() -> {
             try {
                 if (finalWorld != null && !finalWorld.equals("")) {
-                    user.removeGroup(group, server, finalWorld);
+                    user.unsetInheritGroup(group, server, finalWorld);
                 } else {
-                    user.removeGroup(group, server);
+                    user.unsetInheritGroup(group, server);
                 }
             } catch (ObjectLacksException ignored) {}
             save(user);

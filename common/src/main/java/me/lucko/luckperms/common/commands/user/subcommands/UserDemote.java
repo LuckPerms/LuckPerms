@@ -100,7 +100,7 @@ public class UserDemote extends SubCommand<User> {
             user.unsetPermission("group." + old);
         } catch (ObjectLacksException ignored) {}
         try {
-            user.addGroup(previousGroup);
+            user.setInheritGroup(previousGroup);
         } catch (ObjectAlreadyHasException ignored) {}
         user.setPrimaryGroup(previousGroup.getName());
 

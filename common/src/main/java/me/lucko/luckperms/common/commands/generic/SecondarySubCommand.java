@@ -20,28 +20,27 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.meta;
+package me.lucko.luckperms.common.commands.generic;
 
 import com.google.common.collect.ImmutableList;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.Arg;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.Util;
+import me.lucko.luckperms.common.commands.*;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.users.User;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 
 @Getter
 @AllArgsConstructor
-public abstract class MetaSubCommand {
+public abstract class SecondarySubCommand {
+
     /**
      * The name of the sub command
      */
@@ -66,6 +65,10 @@ public abstract class MetaSubCommand {
     private final ImmutableList<Arg> args;
 
     public abstract CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args);
+
+    public List<String> onTabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+        return Collections.emptyList();
+    }
 
     public void sendUsage(Sender sender) {
         String usage = "";
@@ -97,28 +100,17 @@ public abstract class MetaSubCommand {
     protected static void save(PermissionHolder holder, Sender sender, LuckPermsPlugin plugin) {
         if (holder instanceof User) {
             User user = ((User) holder);
-            if (plugin.getDatastore().saveUser(user)) {
-                Message.USER_SAVE_SUCCESS.send(sender);
-            } else {
-                Message.USER_SAVE_ERROR.send(sender);
-            }
-
-            user.refreshPermissions();
+            SubCommand.save(user, sender, plugin);
             return;
         }
 
         if (holder instanceof Group) {
             Group group = ((Group) holder);
-            if (plugin.getDatastore().saveGroup(group)) {
-                Message.GROUP_SAVE_SUCCESS.send(sender);
-            } else {
-                Message.GROUP_SAVE_ERROR.send(sender);
-            }
-
-            plugin.runUpdateTask();
+            SubCommand.save(group, sender, plugin);
             return;
         }
 
         throw new IllegalArgumentException();
     }
+
 }

@@ -20,46 +20,30 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.groups;
+package me.lucko.luckperms.common.commands.generic.parent;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
 import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.commands.CommandResult;
+import me.lucko.luckperms.common.commands.Predicate;
+import me.lucko.luckperms.common.commands.Sender;
+import me.lucko.luckperms.common.commands.Util;
+import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
+import me.lucko.luckperms.common.constants.Message;
+import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.PermissionHolder;
-import me.lucko.luckperms.common.utils.Identifiable;
 
-@ToString(of = {"name"})
-@EqualsAndHashCode(of = {"name"}, callSuper = false)
-public class Group extends PermissionHolder implements Identifiable<String> {
+import java.util.List;
 
-    /**
-     * The name of the group
-     */
-    @Getter
-    private final String name;
-
-    Group(String name, LuckPermsPlugin plugin) {
-        super(name, plugin);
-        this.name = name;
+public class ParentInfo extends SecondarySubCommand {
+    public ParentInfo() {
+        super("info", "Lists the groups that this object inherits from",
+                Permission.USER_LISTGROUPS, Permission.GROUP_LISTPARENTS, Predicate.alwaysFalse(), null);
     }
 
     @Override
-    public String getId() {
-        return name;
-    }
-
-    public String getRawDisplayName() {
-        return getPlugin().getConfiguration().getGroupNameRewrites().getOrDefault(name, name);
-    }
-
-    public String getDisplayName() {
-        String dn = getRawDisplayName();
-        return dn.equals(name) ? name : name + " (" + dn + ")";
-    }
-
-    @Override
-    public String getFriendlyName() {
-        return getDisplayName();
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) {
+        Message.LISTPARENTS.send(sender, holder.getFriendlyName(), Util.permGroupsToString(holder.getPermissions(false)));
+        Message.LISTPARENTS_TEMP.send(sender, holder.getFriendlyName(), Util.tempGroupsToString(holder.getPermissions(false)));
+        return CommandResult.SUCCESS;
     }
 }
