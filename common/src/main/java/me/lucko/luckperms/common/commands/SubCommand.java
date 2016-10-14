@@ -103,7 +103,7 @@ public abstract class SubCommand<T> {
             }
         }
 
-        Util.sendPluginMessage(sender, "&3> &a" + getName() + usage);
+        Util.sendPluginMessage(sender, "&3> &a" + getName().toLowerCase() + usage);
     }
 
     public void sendDetailedUsage(Sender sender) {

@@ -133,8 +133,11 @@ public class CommandManager {
             return CommandResult.INVALID_ARGS;
         }
 
+        List<String> arguments = new ArrayList<>(args);
+        handleRewrites(arguments);
+
         try {
-            return main.execute(plugin, sender, new ArrayList<>(args.subList(1, args.size())), label);
+            return main.execute(plugin, sender, arguments.subList(1, arguments.size()), label);
         } catch (Exception e) {
             e.printStackTrace();
             return CommandResult.FAILURE;
@@ -183,5 +186,94 @@ public class CommandManager {
         mainCommands.stream()
                 .filter(c -> c.isAuthorized(sender))
                 .forEach(c -> Util.sendPluginMessage(sender, "&3> &a" + String.format(c.getUsage(), label)));
+    }
+
+    private static void handleRewrites(List<String> args) {
+        if (args.size() >= 3) {
+            if (!args.get(0).equalsIgnoreCase("user") && !args.get(0).equalsIgnoreCase("group")) {
+                return;
+            }
+
+
+            String s = args.get(2).toLowerCase();
+            switch (s) {
+                // Provide aliases
+                case "p":
+                case "perm":
+                case "perms":
+                    args.remove(2);
+                    args.add(2, "permission");
+                    break;
+                case "m":
+                    args.remove(2);
+                    args.add(2, "meta");
+                    break;
+                case "i":
+                case "inherit":
+                case "inheritances":
+                case "group":
+                case "rank":
+                    args.remove(2);
+                    args.add(2, "parent");
+                    break;
+
+                // Provide backwards compatibility
+                case "listnodes":
+                    args.remove(2);
+                    args.add(2, "permission");
+                    args.add(3, "info");
+                    break;
+                case "set":
+                case "unset":
+                case "settemp":
+                case "unsettemp":
+                    args.add(2, "permission");
+                    break;
+                case "listgroups":
+                    args.remove(2);
+                    args.add(2, "parent");
+                    args.add(3, "info");
+                    break;
+                case "addgroup":
+                case "setinherit":
+                    args.remove(2);
+                    args.add(2, "parent");
+                    args.add(3, "add");
+                    break;
+                case "removegroup":
+                case "unsetinherit":
+                    args.remove(2);
+                    args.add(2, "parent");
+                    args.add(3, "remove");
+                    break;
+                case "addtempgroup":
+                case "settempinherit":
+                    args.remove(2);
+                    args.add(2, "parent");
+                    args.add(3, "addtemp");
+                    break;
+                case "removetempgroup":
+                case "unsettempinherit":
+                    args.remove(2);
+                    args.add(2, "parent");
+                    args.add(3, "removetemp");
+                    break;
+                case "chatmeta":
+                    args.remove(2);
+                    args.add(2, "meta");
+                    args.add(3, "info");
+                    break;
+                case "addprefix":
+                case "addsuffix":
+                case "removeprefix":
+                case "removesuffix":
+                case "addtempprefix":
+                case "addtempsuffix":
+                case "removetempprefix":
+                case "removetempsuffix":
+                    args.add(2, "meta");
+                    break;
+            }
+        }
     }
 }
