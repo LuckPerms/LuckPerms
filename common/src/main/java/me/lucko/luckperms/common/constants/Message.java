@@ -73,17 +73,12 @@ public enum Message {
     /*
      * Command Syntax
      */
-    USER_USE_ADDGROUP("Use the addgroup command instead of specifying the node.", true),
-    USER_USE_REMOVEGROUP("Use the removegroup command instead of specifying the node.", true),
     USER_INVALID_ENTRY("&d{0}&c is not a valid username/uuid.", true),
-
-    GROUP_USE_INHERIT("Use the setinherit command instead of specifying the node.", true),
-    GROUP_USE_UNINHERIT("Use the unsetinherit command instead of specifying the node.", true),
     GROUP_INVALID_ENTRY("Group names can only contain alphanumeric characters.", true),
-
     TRACK_INVALID_ENTRY("Track names can only contain alphanumeric characters.", true),
-
     SERVER_INVALID_ENTRY("Server names can only contain alphanumeric characters.", true),
+    USE_INHERIT_COMMAND("Use the 'parent add' command instead of specifying the node.", true),
+    USE_UNINHERIT_COMMAND("Use the 'parent remove' command instead of specifying the node.", true),
 
 
     /*

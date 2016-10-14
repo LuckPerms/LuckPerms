@@ -20,22 +20,28 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.group.subcommands;
+package me.lucko.luckperms.common.commands.generic.permission;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.*;
+import me.lucko.luckperms.common.commands.Arg;
+import me.lucko.luckperms.common.commands.CommandResult;
+import me.lucko.luckperms.common.commands.Predicate;
+import me.lucko.luckperms.common.commands.Sender;
+import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
-import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.List;
 
-public class GroupSetPermission extends SubCommand<Group> {
-    public GroupSetPermission() {
-        super("set", "Sets a permission for the group", Permission.GROUP_SETPERMISSION, Predicate.notInRange(2, 4),
+import static me.lucko.luckperms.common.commands.SubCommand.getBoolTabComplete;
+
+public class PermissionSet extends SecondarySubCommand {
+    public PermissionSet() {
+        super("set", "Sets a permission for the object", Permission.USER_SETPERMISSION, Permission.GROUP_SETPERMISSION, Predicate.notInRange(2, 4),
                 Arg.list(
                         Arg.create("node", true, "the permission node to set"),
                         Arg.create("true|false", true, "the value of the node"),
@@ -46,7 +52,7 @@ public class GroupSetPermission extends SubCommand<Group> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) {
         String node = args.get(0).replace("{SPACE}", " ");
         String bool = args.get(1).toLowerCase();
 
@@ -56,7 +62,7 @@ public class GroupSetPermission extends SubCommand<Group> {
         }
 
         if (node.toLowerCase().startsWith("group.")) {
-            Message.GROUP_USE_INHERIT.send(sender);
+            Message.USE_INHERIT_COMMAND.send(sender);
             return CommandResult.INVALID_ARGS;
         }
 
@@ -76,32 +82,32 @@ public class GroupSetPermission extends SubCommand<Group> {
                 }
 
                 if (args.size() == 3) {
-                    group.setPermission(node, b, server);
-                    Message.SETPERMISSION_SERVER_SUCCESS.send(sender, node, bool, group.getDisplayName(), server);
-                    LogEntry.build().actor(sender).acted(group)
-                            .action("set " + node + " " + b + " " + server)
+                    holder.setPermission(node, b, server);
+                    Message.SETPERMISSION_SERVER_SUCCESS.send(sender, node, bool, holder.getFriendlyName(), server);
+                    LogEntry.build().actor(sender).acted(holder)
+                            .action("permission set " + node + " " + b + " " + server)
                             .build().submit(plugin, sender);
                 } else {
                     final String world = args.get(3).toLowerCase();
-                    group.setPermission(node, b, server, world);
-                    Message.SETPERMISSION_SERVER_WORLD_SUCCESS.send(sender, node, bool, group.getDisplayName(), server, world);
-                    LogEntry.build().actor(sender).acted(group)
-                            .action("set " + node + " " + b + " " + server + " " + world)
+                    holder.setPermission(node, b, server, world);
+                    Message.SETPERMISSION_SERVER_WORLD_SUCCESS.send(sender, node, bool, holder.getFriendlyName(), server, world);
+                    LogEntry.build().actor(sender).acted(holder)
+                            .action("permission set " + node + " " + b + " " + server + " " + world)
                             .build().submit(plugin, sender);
                 }
 
             } else {
-                group.setPermission(node, b);
-                Message.SETPERMISSION_SUCCESS.send(sender, node, bool, group.getDisplayName());
-                LogEntry.build().actor(sender).acted(group)
-                        .action("set " + node + " " + b)
+                holder.setPermission(node, b);
+                Message.SETPERMISSION_SUCCESS.send(sender, node, bool, holder.getFriendlyName());
+                LogEntry.build().actor(sender).acted(holder)
+                        .action("permission set " + node + " " + b)
                         .build().submit(plugin, sender);
             }
 
-            save(group, sender, plugin);
+            save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } catch (ObjectAlreadyHasException e) {
-            Message.ALREADY_HASPERMISSION.send(sender, group.getDisplayName());
+            Message.ALREADY_HASPERMISSION.send(sender, holder.getFriendlyName());
             return CommandResult.STATE_ERROR;
         }
     }

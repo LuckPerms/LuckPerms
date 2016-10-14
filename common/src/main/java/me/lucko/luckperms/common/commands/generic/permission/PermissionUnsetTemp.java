@@ -20,22 +20,26 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.user.subcommands;
+package me.lucko.luckperms.common.commands.generic.permission;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.*;
+import me.lucko.luckperms.common.commands.Arg;
+import me.lucko.luckperms.common.commands.CommandResult;
+import me.lucko.luckperms.common.commands.Predicate;
+import me.lucko.luckperms.common.commands.Sender;
+import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
-import me.lucko.luckperms.common.users.User;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.List;
 
-public class UserUnsetTempPermission extends SubCommand<User> {
-    public UserUnsetTempPermission() {
-        super("unsettemp", "Unsets a temporary permission for the user", Permission.USER_UNSET_TEMP_PERMISSION,
+public class PermissionUnsetTemp extends SecondarySubCommand {
+    public PermissionUnsetTemp() {
+        super("unsettemp", "Unsets a temporary permission for the object", Permission.USER_UNSET_TEMP_PERMISSION, Permission.GROUP_UNSET_TEMP_PERMISSION,
                 Predicate.notInRange(1, 3),
                 Arg.list(
                         Arg.create("node", true, "the permission node to unset"),
@@ -46,7 +50,7 @@ public class UserUnsetTempPermission extends SubCommand<User> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) {
         String node = args.get(0).replace("{SPACE}", " ");
 
         if (ArgumentChecker.checkNode(node)) {
@@ -55,7 +59,7 @@ public class UserUnsetTempPermission extends SubCommand<User> {
         }
 
         if (node.toLowerCase().startsWith("group.")) {
-            Message.USER_USE_REMOVEGROUP.send(sender);
+            Message.USE_UNINHERIT_COMMAND.send(sender);
             return CommandResult.INVALID_ARGS;
         }
 
@@ -68,32 +72,32 @@ public class UserUnsetTempPermission extends SubCommand<User> {
                 }
 
                 if (args.size() == 2) {
-                    user.unsetPermission(node, server, true);
-                    Message.UNSET_TEMP_PERMISSION_SERVER_SUCCESS.send(sender, node, user.getName(), server);
-                    LogEntry.build().actor(sender).acted(user)
-                            .action("unsettemp " + node + " " + server)
+                    holder.unsetPermission(node, server);
+                    Message.UNSET_TEMP_PERMISSION_SERVER_SUCCESS.send(sender, node, holder.getFriendlyName(), server);
+                    LogEntry.build().actor(sender).acted(holder)
+                            .action("permission unsettemp " + node + " " + server)
                             .build().submit(plugin, sender);
                 } else {
                     final String world = args.get(2).toLowerCase();
-                    user.unsetPermission(node, server, world, true);
-                    Message.UNSET_TEMP_PERMISSION_SERVER_WORLD_SUCCESS.send(sender, node, user.getName(), server, world);
-                    LogEntry.build().actor(sender).acted(user)
-                            .action("unsettemp " + node + " " + server + " " + world)
+                    holder.unsetPermission(node, server, world);
+                    Message.UNSET_TEMP_PERMISSION_SERVER_WORLD_SUCCESS.send(sender, node, holder.getFriendlyName(), server, world);
+                    LogEntry.build().actor(sender).acted(holder)
+                            .action("permission unsettemp " + node + " " + server + " " + world)
                             .build().submit(plugin, sender);
                 }
 
             } else {
-                user.unsetPermission(node, true);
-                Message.UNSET_TEMP_PERMISSION_SUCCESS.send(sender, node, user.getName());
-                LogEntry.build().actor(sender).acted(user)
-                        .action("unsettemp " + node)
+                holder.unsetPermission(node, true);
+                Message.UNSET_TEMP_PERMISSION_SUCCESS.send(sender, node, holder.getFriendlyName());
+                LogEntry.build().actor(sender).acted(holder)
+                        .action("permission unsettemp " + node)
                         .build().submit(plugin, sender);
             }
 
-            save(user, sender, plugin);
+            save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } catch (ObjectLacksException e) {
-            Message.DOES_NOT_HAVE_TEMP_PERMISSION.send(sender, user.getName());
+            Message.DOES_NOT_HAVE_TEMP_PERMISSION.send(sender, holder.getFriendlyName());
             return CommandResult.STATE_ERROR;
         }
     }

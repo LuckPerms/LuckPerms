@@ -20,23 +20,29 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.group.subcommands;
+package me.lucko.luckperms.common.commands.generic.permission;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.*;
+import me.lucko.luckperms.common.commands.Arg;
+import me.lucko.luckperms.common.commands.CommandResult;
+import me.lucko.luckperms.common.commands.Predicate;
+import me.lucko.luckperms.common.commands.Sender;
+import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
-import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.List;
 
-public class GroupSetTempPermission extends SubCommand<Group> {
-    public GroupSetTempPermission() {
-        super("settemp", "Sets a permission for the group temporarily", Permission.GROUP_SET_TEMP_PERMISSION,
+import static me.lucko.luckperms.common.commands.SubCommand.getBoolTabComplete;
+
+public class PermissionSetTemp extends SecondarySubCommand {
+    public PermissionSetTemp() {
+        super("settemp", "Sets a permission for the object temporarily", Permission.USER_SET_TEMP_PERMISSION, Permission.GROUP_SET_TEMP_PERMISSION,
                 Predicate.notInRange(3, 5),
                 Arg.list(
                         Arg.create("node", true, "the permission node to set"),
@@ -49,7 +55,7 @@ public class GroupSetTempPermission extends SubCommand<Group> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) {
         String node = args.get(0).replace("{SPACE}", " ");
         String bool = args.get(1).toLowerCase();
 
@@ -59,7 +65,7 @@ public class GroupSetTempPermission extends SubCommand<Group> {
         }
 
         if (node.toLowerCase().startsWith("group.")) {
-            Message.GROUP_USE_INHERIT.send(sender);
+            Message.USE_INHERIT_COMMAND.send(sender);
             return CommandResult.INVALID_ARGS;
         }
 
@@ -96,34 +102,34 @@ public class GroupSetTempPermission extends SubCommand<Group> {
                 }
 
                 if (args.size() == 4) {
-                    group.setPermission(node, b, server, duration);
-                    Message.SETPERMISSION_TEMP_SERVER_SUCCESS.send(sender, node, bool, group.getDisplayName(), server,
+                    holder.setPermission(node, b, server, duration);
+                    Message.SETPERMISSION_TEMP_SERVER_SUCCESS.send(sender, node, bool, holder.getFriendlyName(), server,
                             DateUtil.formatDateDiff(duration));
-                    LogEntry.build().actor(sender).acted(group)
-                            .action("settemp " + node + " " + b + " " + duration + " " + server)
+                    LogEntry.build().actor(sender).acted(holder)
+                            .action("permission settemp " + node + " " + b + " " + duration + " " + server)
                             .build().submit(plugin, sender);
                 } else {
                     final String world = args.get(4).toLowerCase();
-                    group.setPermission(node, b, server, world, duration);
-                    Message.SETPERMISSION_TEMP_SERVER_WORLD_SUCCESS.send(sender, node, bool, group.getDisplayName(), server,
+                    holder.setPermission(node, b, server, world, duration);
+                    Message.SETPERMISSION_TEMP_SERVER_WORLD_SUCCESS.send(sender, node, bool, holder.getFriendlyName(), server,
                             world, DateUtil.formatDateDiff(duration));
-                    LogEntry.build().actor(sender).acted(group)
-                            .action("settemp " + node + " " + b + " " + duration + " " + server + " " + world)
+                    LogEntry.build().actor(sender).acted(holder)
+                            .action("permission settemp " + node + " " + b + " " + duration + " " + server + " " + world)
                             .build().submit(plugin, sender);
                 }
 
             } else {
-                group.setPermission(node, b, duration);
-                Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, bool, group.getDisplayName(), DateUtil.formatDateDiff(duration));
-                LogEntry.build().actor(sender).acted(group)
-                        .action("settemp " + node + " " + b + " " + duration)
+                holder.setPermission(node, b, duration);
+                Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, bool, holder.getFriendlyName(), DateUtil.formatDateDiff(duration));
+                LogEntry.build().actor(sender).acted(holder)
+                        .action("permission settemp " + node + " " + b + " " + duration)
                         .build().submit(plugin, sender);
             }
 
-            save(group, sender, plugin);
+            save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } catch (ObjectAlreadyHasException e) {
-            Message.ALREADY_HAS_TEMP_PERMISSION.send(sender, group.getDisplayName());
+            Message.ALREADY_HAS_TEMP_PERMISSION.send(sender, holder.getFriendlyName());
             return CommandResult.STATE_ERROR;
         }
     }

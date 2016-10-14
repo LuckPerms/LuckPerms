@@ -20,25 +20,21 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.user.subcommands;
+package me.lucko.luckperms.common.commands.generic.permission;
 
-import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.*;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.users.User;
+import com.google.common.collect.ImmutableList;
+import me.lucko.luckperms.common.commands.generic.SecondaryMainCommand;
+import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
+import me.lucko.luckperms.common.core.PermissionHolder;
 
-import java.util.List;
-
-public class UserListNodes extends SubCommand<User> {
-    public UserListNodes() {
-        super("listnodes", "Lists the permission nodes the user has", Permission.USER_LISTNODES, Predicate.alwaysFalse(), null);
-    }
-
-    @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
-        Message.LISTNODES.send(sender, user.getName(), Util.permNodesToString(user.getPermissions(false)));
-        Message.LISTNODES_TEMP.send(sender, user.getName(), Util.tempNodesToString(user.getPermissions(false)));
-        return CommandResult.SUCCESS;
+public class CommandPermission<T extends PermissionHolder> extends SecondaryMainCommand<T> {
+    public CommandPermission(boolean user) {
+        super("Permission", "Edit permissions", user, ImmutableList.<SecondarySubCommand>builder()
+                .add(new PermissionInfo())
+                .add(new PermissionSet())
+                .add(new PermissionUnset())
+                .add(new PermissionSetTemp())
+                .add(new PermissionUnsetTemp())
+                .build());
     }
 }

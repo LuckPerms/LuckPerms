@@ -30,6 +30,7 @@ import me.lucko.luckperms.common.commands.SubCommand;
 import me.lucko.luckperms.common.commands.Util;
 import me.lucko.luckperms.common.commands.generic.meta.CommandMeta;
 import me.lucko.luckperms.common.commands.generic.parent.CommandParent;
+import me.lucko.luckperms.common.commands.generic.permission.CommandPermission;
 import me.lucko.luckperms.common.commands.user.subcommands.*;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Patterns;
@@ -41,25 +42,21 @@ import java.util.UUID;
 public class UserMainCommand extends MainCommand<User> {
     public UserMainCommand() {
         super("User", "/%s user <user>", 2, ImmutableList.<SubCommand<User>>builder()
-            .add(new UserInfo())
-            .add(new CommandParent<>(true))
-            .add(new CommandMeta<>(true))
-            .add(new UserGetUUID())
-            .add(new UserListNodes())
-            .add(new UserHasPerm())
-            .add(new UserInheritsPerm())
-            .add(new UserSetPermission())
-            .add(new UserUnSetPermission())
-            .add(new UserSetTempPermission())
-            .add(new UserUnsetTempPermission())
-            .add(new UserSetPrimaryGroup())
-            .add(new UserShowTracks())
-            .add(new UserPromote())
-            .add(new UserDemote())
-            .add(new UserShowPos())
-            .add(new UserBulkChange())
-            .add(new UserClear())
-            .build()
+                .add(new UserInfo())
+                .add(new CommandPermission<>(true))
+                .add(new CommandParent<>(true))
+                .add(new CommandMeta<>(true))
+                .add(new UserGetUUID())
+                .add(new UserHasPerm())
+                .add(new UserInheritsPerm())
+                .add(new UserSetPrimaryGroup())
+                .add(new UserShowTracks())
+                .add(new UserPromote())
+                .add(new UserDemote())
+                .add(new UserShowPos())
+                .add(new UserBulkChange())
+                .add(new UserClear())
+                .build()
         );
     }
 

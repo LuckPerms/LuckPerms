@@ -20,25 +20,29 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.group.subcommands;
+package me.lucko.luckperms.common.commands.generic.permission;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.*;
+import me.lucko.luckperms.common.commands.CommandResult;
+import me.lucko.luckperms.common.commands.Predicate;
+import me.lucko.luckperms.common.commands.Sender;
+import me.lucko.luckperms.common.commands.Util;
+import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.groups.Group;
+import me.lucko.luckperms.common.core.PermissionHolder;
 
 import java.util.List;
 
-public class GroupListNodes extends SubCommand<Group> {
-    public GroupListNodes() {
-        super("listnodes", "Lists the permission nodes the group has", Permission.GROUP_LISTNODES, Predicate.alwaysFalse(), null);
+public class PermissionInfo extends SecondarySubCommand {
+    public PermissionInfo() {
+        super("info", "Lists the permission nodes the object has", Permission.USER_LISTNODES, Permission.GROUP_LISTNODES, Predicate.alwaysFalse(), null);
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
-        Message.LISTNODES.send(sender, group.getDisplayName(), Util.permNodesToString(group.getPermissions(false)));
-        Message.LISTNODES_TEMP.send(sender, group.getDisplayName(), Util.tempNodesToString(group.getPermissions(false)));
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) {
+        Message.LISTNODES.send(sender, holder.getFriendlyName(), Util.permNodesToString(holder.getPermissions(false)));
+        Message.LISTNODES_TEMP.send(sender, holder.getFriendlyName(), Util.tempNodesToString(holder.getPermissions(false)));
         return CommandResult.SUCCESS;
     }
 }
