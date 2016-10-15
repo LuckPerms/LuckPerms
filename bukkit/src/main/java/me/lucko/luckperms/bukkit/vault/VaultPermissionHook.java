@@ -35,7 +35,6 @@ import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import net.milkbowl.vault.permission.Permission;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -198,7 +197,7 @@ public class VaultPermissionHook extends Permission {
         if (group == null) return false;
 
         // This is a nasty call. Groups aren't cached. :(
-        Map<String, Boolean> permissions = group.exportNodes(createContext(server, world), Collections.emptyList(), true);
+        Map<String, Boolean> permissions = group.exportNodes(createContext(server, world), true);
 
         return permissions.containsKey(permission) && permissions.get(permission);
     }

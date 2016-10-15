@@ -28,6 +28,7 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.PlatformType;
+import me.lucko.luckperms.bukkit.calculators.AutoOPListener;
 import me.lucko.luckperms.bukkit.calculators.DefaultsProvider;
 import me.lucko.luckperms.bukkit.vault.VaultHook;
 import me.lucko.luckperms.common.LuckPermsPlugin;
@@ -133,6 +134,10 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         pm.registerEvents(worldCalculator, this);
         contextManager.registerCalculator(worldCalculator);
         contextManager.registerCalculator(new ServerCalculator<>(getConfiguration().getServer()));
+
+        if (getConfiguration().isAutoOp()) {
+            contextManager.registerListener(new AutoOPListener());
+        }
 
         int mins = getConfiguration().getSyncTime();
         if (mins > 0) {

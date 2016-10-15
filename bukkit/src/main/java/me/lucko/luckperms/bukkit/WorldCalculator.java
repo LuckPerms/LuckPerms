@@ -32,6 +32,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
 
 import java.util.Map;
 import java.util.UUID;
@@ -75,6 +76,15 @@ public class WorldCalculator extends ContextCalculator<Player> implements Listen
 
         String world = worldCache.get(internal);
         return plugin.getConfiguration().getWorldRewrites().getOrDefault(world, world);
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
+    public void onPlayerJoin(PlayerLoginEvent e) {
+        pushUpdate(
+                e.getPlayer(),
+                Maps.immutableEntry(WORLD_KEY, null),
+                Maps.immutableEntry(WORLD_KEY, e.getPlayer().getWorld().getName())
+        );
     }
 
     @EventHandler(priority = EventPriority.LOWEST)

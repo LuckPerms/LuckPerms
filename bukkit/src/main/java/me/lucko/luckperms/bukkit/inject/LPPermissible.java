@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 /**
  * Modified PermissibleBase for LuckPerms
  */
-public class LPPermissible extends PermissibleBase { // TODO autoop stuff
+public class LPPermissible extends PermissibleBase {
 
     @Getter
     private final User user;
@@ -64,7 +64,7 @@ public class LPPermissible extends PermissibleBase { // TODO autoop stuff
         recalculatePermissions();
     }
 
-    private Contexts calculateContexts() {
+    public Contexts calculateContexts() {
         return new Contexts(
                 plugin.getContextManager().giveApplicableContext(parent, new HashMap<>()),
                 plugin.getConfiguration().isIncludingGlobalPerms(),

@@ -67,6 +67,10 @@ enable-ops: true
 # Additionally, setting this to true will force the "enable-ops" option above to false. All users will be de-opped unless
 # they have the permission node, and the op/deop commands will be disabled.
 #
+# It is important to note that this setting is only checked when a player first joins the server, and when they switch
+# worlds. Therefore, simply removing this permission from a user will not automatically de-op them. A player needs to
+# relog to have the change take effect.
+#
 # It is recommended that you use this option instead of assigning a single '*' permission.
 auto-op: false
 

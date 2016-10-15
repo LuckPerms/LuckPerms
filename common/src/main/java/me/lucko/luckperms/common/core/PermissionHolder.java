@@ -455,23 +455,15 @@ public abstract class PermissionHolder {
     }
 
     /**
-     * Converts the output of {@link #getAllNodesFiltered(Contexts)}, and expands wildcards/regex/shorthand perms
+     * Converts the output of {@link #getAllNodesFiltered(Contexts)}, and expands shorthand perms
      * @param context the context for this request
-     * @param possibleNodes a list of possible nodes for wildcards and regex permissions
      * @return a map of permissions
      */
-    public Map<String, Boolean> exportNodes(Contexts context, List<String> possibleNodes, boolean lowerCase) {
+    public Map<String, Boolean> exportNodes(Contexts context, boolean lowerCase) {
         Map<String, Boolean> perms = new HashMap<>();
 
         for (LocalizedNode ln : getAllNodesFiltered(context)) {
             Node node = ln.getNode();
-            if (possibleNodes != null && !possibleNodes.isEmpty()) {
-                if (node.getPermission().equals("*") || node.getPermission().equals("'*'")) {
-                    if (plugin.getConfiguration().isApplyingWildcards()) {
-                        possibleNodes.forEach(n -> perms.put(lowerCase ? n.toLowerCase() : n, true));
-                    }
-                }
-            }
 
             perms.put(lowerCase ? node.getPermission().toLowerCase() : node.getPermission(), node.getValue());
 
@@ -480,15 +472,6 @@ public abstract class PermissionHolder {
                         .map(s -> lowerCase ? s.toLowerCase() : s)
                         .filter(s -> !perms.containsKey(s))
                         .forEach(s -> perms.put(s, node.getValue()));
-            }
-
-            if (possibleNodes != null && !possibleNodes.isEmpty()) {
-                if (plugin.getConfiguration().isApplyingWildcards()) {
-                    node.resolveWildcard(possibleNodes).stream()
-                            .map(s -> lowerCase ? s.toLowerCase() : s)
-                            .filter(s -> !perms.containsKey(s))
-                            .forEach(s -> perms.put(s, node.getValue()));
-                }
             }
         }
 

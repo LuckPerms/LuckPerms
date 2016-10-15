@@ -27,7 +27,6 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.users.User;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -50,7 +49,7 @@ public class UserData {
 
     public PermissionData calculatePermissions(Contexts contexts) {
         PermissionData data = new PermissionData(contexts, user, calculatorFactory);
-        data.setPermissions(user.exportNodes(contexts, Collections.emptyList(), true));
+        data.setPermissions(user.exportNodes(contexts, true));
         return data;
     }
 
@@ -60,7 +59,7 @@ public class UserData {
                 data = new PermissionData(c, user, calculatorFactory);
             }
 
-            data.comparePermissions(user.exportNodes(c, Collections.emptyList(), true));
+            data.comparePermissions(user.exportNodes(c, true));
             return data;
         });
     }
