@@ -70,38 +70,17 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>de.icongmbh.oss.maven.plugins</groupId>
-                <artifactId>javassist-maven-plugin</artifactId>
-                <version>1.1.0</version>
-                <configuration>
-                    <includeTestClasses>false</includeTestClasses>
-                    <transformerClasses>
-                        <transformerClass>
-                            <className>me.lucko.luckperms.sponge.utils.VersionUtil</className>
-                            <properties>
-                                <property>
-                                    <name>version</name>
-                                    <value>${release.version}.${git.closest.tag.commit.count}</value>
-                                </property>
-                            </properties>
-                        </transformerClass>
-                    </transformerClasses>
-                </configuration>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>templating-maven-plugin</artifactId>
+                <version>1.0.0</version>
                 <executions>
                     <execution>
-                        <phase>process-classes</phase>
+                        <id>filter-src</id>
                         <goals>
-                            <goal>javassist</goal>
+                            <goal>filter-sources</goal>
                         </goals>
                     </execution>
                 </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>me.lucko.luckperms</groupId>
-                        <artifactId>luckperms-sponge</artifactId>
-                        <version>${project.version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
             <plugin>
                 <groupId>pl.project13.maven</groupId>

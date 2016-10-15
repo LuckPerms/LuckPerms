@@ -50,6 +50,7 @@ import me.lucko.luckperms.common.utils.LocaleManager;
 import me.lucko.luckperms.common.utils.LogFactory;
 import me.lucko.luckperms.sponge.contexts.WorldCalculator;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
+import me.lucko.luckperms.sponge.utils.VersionData;
 import org.slf4j.Logger;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
@@ -75,7 +76,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Getter
-@Plugin(id = "luckperms", name = "LuckPerms", version = "null", authors = {"Luck"}, description = "A permissions plugin")
+@Plugin(id = "luckperms", name = "LuckPerms", version = VersionData.VERSION, authors = {"Luck"}, description = "A permissions plugin")
 public class LPSpongePlugin implements LuckPermsPlugin {
 
     @Inject
@@ -219,7 +220,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
     @Override
     public String getVersion() {
-        return "null";
+        return VersionData.VERSION;
     }
 
     @Override
