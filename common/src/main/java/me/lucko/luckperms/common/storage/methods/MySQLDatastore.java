@@ -69,6 +69,7 @@ public class MySQLDatastore extends SQLDatastore {
         config.addDataSourceProperty("cachePrepStmts", true);
         config.addDataSourceProperty("prepStmtCacheSize", 250);
         config.addDataSourceProperty("prepStmtCacheSqlLimit", 2048);
+        config.addDataSourceProperty("leakDetectionThreshold", 5000);
         config.addDataSourceProperty("useServerPrepStmts", true);
         config.addDataSourceProperty("cacheCallableStmts", true);
         config.addDataSourceProperty("alwaysSendSetIsolation", false);
