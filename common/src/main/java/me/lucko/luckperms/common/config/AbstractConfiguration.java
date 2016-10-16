@@ -22,14 +22,18 @@
 
 package me.lucko.luckperms.common.config;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import lombok.AccessLevel;
 import lombok.Getter;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.constants.Patterns;
+import me.lucko.luckperms.common.defaults.Rule;
 import me.lucko.luckperms.common.storage.DatastoreConfiguration;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -65,6 +69,7 @@ public abstract class AbstractConfiguration<T extends LuckPermsPlugin> implement
     private boolean vaultIgnoreWorld;
     private Map<String, String> worldRewrites;
     private Map<String, String> groupNameRewrites;
+    private List<Rule> defaultAssignments;
     private DatastoreConfiguration databaseValues;
     private String storageMethod;
     private boolean splitStorage;
@@ -80,6 +85,8 @@ public abstract class AbstractConfiguration<T extends LuckPermsPlugin> implement
     protected abstract String getString(String path, String def);
     protected abstract int getInt(String path, int def);
     protected abstract boolean getBoolean(String path, boolean def);
+    protected abstract List<String> getList(String path, List<String> def);
+    protected abstract List<String> getObjectList(String path, List<String> def);
     protected abstract Map<String, String> getMap(String path, Map<String, String> def);
     
     public void load(String defaultServerName, boolean defaultIncludeGlobal, String defaultStorage) {
@@ -105,6 +112,19 @@ public abstract class AbstractConfiguration<T extends LuckPermsPlugin> implement
         vaultIgnoreWorld = getBoolean("vault-ignore-world", false);
         worldRewrites = ImmutableMap.copyOf(getMap("world-rewrite", Collections.emptyMap()));
         groupNameRewrites = ImmutableMap.copyOf(getMap("group-name-rewrite", Collections.emptyMap()));
+
+        ImmutableList.Builder<Rule> defs = ImmutableList.builder();
+        List<String> ruleNames = getObjectList("default-assignments", new ArrayList<>());
+        for (String ruleName : ruleNames) {
+            String hasTrue = getString("default-assignments." + ruleName + ".if.has-true", null);
+            String hasFalse = getString("default-assignments." + ruleName + ".if.has-false", null);
+            String lacks = getString("default-assignments." + ruleName + ".if.lacks", null);
+            List<String> give = getList("default-assignments." + ruleName + ".give", new ArrayList<>());
+            List<String> take = getList("default-assignments." + ruleName + ".take", new ArrayList<>());
+            defs.add(new Rule(hasTrue, hasFalse, lacks, give, take));
+        }
+        defaultAssignments = defs.build();
+
         databaseValues = new DatastoreConfiguration(
                 getString("data.address", null),
                 getString("data.database", null),

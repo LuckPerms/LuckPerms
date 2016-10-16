@@ -27,6 +27,7 @@ import me.lucko.luckperms.api.data.Callback;
 import me.lucko.luckperms.api.event.events.UserFirstLoginEvent;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.core.UuidCache;
+import me.lucko.luckperms.common.defaults.Rule;
 import me.lucko.luckperms.common.users.User;
 
 import java.util.UUID;
@@ -64,6 +65,19 @@ public class AbstractListener {
         if (user == null) {
             plugin.getLog().warn("Failed to load user: " + username);
         } else {
+            // Setup defaults for the user
+            boolean save = false;
+            for (Rule rule : plugin.getConfiguration().getDefaultAssignments()) {
+                if (rule.apply(user)) {
+                    save = true;
+                }
+            }
+
+            // If they were given a default, persist the new assignments back to the storage.
+            if (save) {
+                plugin.getDatastore().saveUser(user);
+            }
+
             user.setupData(false); // Pretty nasty calculation call. Sets up the caching system so data is ready when the user joins.
         }
 

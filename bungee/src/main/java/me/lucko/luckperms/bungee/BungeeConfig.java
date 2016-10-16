@@ -32,7 +32,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 class BungeeConfig extends AbstractConfiguration<LPBungeePlugin> {
     private Configuration configuration;
@@ -77,6 +80,21 @@ class BungeeConfig extends AbstractConfiguration<LPBungeePlugin> {
     @Override
     protected boolean getBoolean(String path, boolean def) {
         return configuration.getBoolean(path, def);
+    }
+
+    @Override
+    protected List<String> getList(String path, List<String> def) {
+        return Optional.ofNullable(configuration.getStringList(path)).orElse(def);
+    }
+
+    @Override
+    protected List<String> getObjectList(String path, List<String> def) {
+        Configuration section = configuration.getSection(path);
+        if (section == null) {
+            return def;
+        }
+
+        return Optional.ofNullable(section.getKeys().stream().collect(Collectors.toList())).orElse(def);
     }
 
     @Override

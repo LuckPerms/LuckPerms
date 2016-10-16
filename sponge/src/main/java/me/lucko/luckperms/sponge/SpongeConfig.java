@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -98,8 +99,32 @@ class SpongeConfig extends AbstractConfiguration<LPSpongePlugin> {
     }
 
     @Override
+    protected List<String> getList(String path, List<String> def) {
+        ConfigurationNode node = getNode(path);
+        if (node.isVirtual()) {
+            return def;
+        }
+
+        return node.getList(Object::toString);
+    }
+
+    @Override
+    protected List<String> getObjectList(String path, List<String> def) {
+        ConfigurationNode node = getNode(path);
+        if (node.isVirtual()) {
+            return def;
+        }
+
+        return node.getChildrenList().stream().map(n -> (String) n.getKey()).collect(Collectors.toList());
+    }
+
+    @Override
     protected Map<String, String> getMap(String path, Map<String, String> def) {
         ConfigurationNode node = getNode(path);
+        if (node.isVirtual()) {
+            return def;
+        }
+
         return node.getChildrenList().stream().collect(Collectors.toMap(n -> (String) n.getKey(), ConfigurationNode::getString));
     }
 }

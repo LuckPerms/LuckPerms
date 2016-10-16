@@ -5,6 +5,10 @@
 # +------------------------------------------------------------------------+ #
 ##############################################################################
 
+# +------------------------------------------------------------------------+ #
+# |                               General                                  | #
+# +------------------------------------------------------------------------+ #
+
 # The name of the server, used for server specific permissions. Set to 'global' to disable.
 server: bungee
 
@@ -24,20 +28,43 @@ apply-global-world-groups: true
 
 # If this server is in offline or online mode.
 # This setting allows a player to have the same UUID across a network of offline mode/mixed servers.
-
+#
 # You should generally reflect the setting in server.properties here. Except when...
-
+#
 # 1. You have Spigot servers connected to a BungeeCord proxy, with online-mode set to false, but 'bungeecord' set to true in the spigot.yml
 #    AND 'ip-forward' set to true in the BungeeCord config.yml
 #    In this case, set online-mode in LuckPerms to true, despite the server being in offline mode.
-
+#
 # 2. You are only running one server instance using LuckPerms, (not a network)
 #    In this case, set online-mode to true no matter what is set in server.properties. (we can just fallback to the servers uuid cache)
-
+#
 # 3. If your proxy is running in offline mode, and you are using PaperSpigot (https://ci.destroystokyo.com/job/PaperSpigot/),
 #    you should set "bungee-online-mode" to false in the paper.yml, and set "online-mode" to true in all LuckPerms configs.
 #    This approach is thoroughly recommended for offline mode networks.
 online-mode: true
+
+# If the plugin should send log notifications to users whenever permissions are modified.
+log-notify: true
+
+# If LuckPerms should print to console every time a plugin checks if a player has a permission
+debug-permission-checks: false
+
+# Mirrors world names. Whenever LuckPerms checks what world a user is in, if the world name is in this list, the value assigned
+# will be sent forward for permission calculation instead.
+world-rewrite:
+#  world_nether: world
+#  world_the_end: world
+
+# Rewrites group names. The underlying name of the group does not change, just the output in commands / placeholders / Vault.
+group-name-rewrite:
+#  default: Member
+
+
+
+
+# +------------------------------------------------------------------------+ #
+# |                        Permission Calculation                          | #
+# +------------------------------------------------------------------------+ #
 
 # If the plugin should apply wildcard permissions.
 # If set to true, LuckPerms will detect wildcard permissions, and resolve & apply all registered permissions matching
@@ -53,23 +80,12 @@ apply-regex: true
 # If set to true, LuckPerms will detect and expand shorthand node patterns.
 apply-shorthand: true
 
-# If the plugin should send log notifications to users whenever permissions are modified.
-log-notify: true
 
-# If LuckPerms should print to console every time a plugin checks if a player has a permission
-debug-permission-checks: false
 
-# Mirrors world names. Whenever LuckPerms checks what world a user is in, if the world name is in this list, the value assigned
-# will be sent forward for permission calculation instead.
-# Remember world names on BungeeCord relate to the backend server name a user is connected to.
-world-rewrite:
-  #hub2: hub
-  #hub3: hub
-  #opfactions: factions
 
-# Rewrites group names. The underlying name of the group does not change, just the output in commands / placeholders / Vault.
-group-name-rewrite:
-  #default: Member
+# +------------------------------------------------------------------------+ #
+# |                               Storage                                  | #
+# +------------------------------------------------------------------------+ #
 
 # Which storage method the plugin should use.
 # Currently supported: mysql, sqlite, h2, json, yaml, mongodb
@@ -95,3 +111,62 @@ data:
   # Set to -1 to disable. If this is the only instance accessing the datastore, you can disable syncing.
   # e.g. if you're using sqlite or flatfile, this can be set to -1 to save resources.
   sync-minutes: 3
+
+
+
+
+# +------------------------------------------------------------------------+ #
+# |                         Default Assignments                            | #
+# +------------------------------------------------------------------------+ #
+
+# This section allows you to define defaults to give users whenever they connect to the server.
+# The default assignments are highly configurable and conditional.
+#
+# There is one default assignment built into LuckPerms, which will add all users to the "default" group if they
+# are not a member of any other group. This setting cannot be disabled. However, you can use this section to add more of
+# your own.
+#
+# IMPORTANT:
+# In order to save storage space, LuckPerms does not store users who have no permissions defined, and are only a member
+# of the default group. Adding default assignments to this section will negate this effect. It is HIGHLY RECCOMENDED
+# that instead of assigning defaults here, you add permissions to the "default" group, or set the "default" group to inherit
+# other groups, and then use the group-name-rewrite rule above.
+#
+# It is also important to note that these rules are considered every time a player logs into the server, and are applied
+# directly to the user's data. Simply removing a rule here will not reserse the effect of that rule on any users who have
+# already had it applied to them.
+#
+# The "has" and "lacks" conditions below support standard boolean logic, using the 'and' & 'or' characters used in Java.
+# e.g. "(some.other.permission | some.permission.other) & some.thing.else" == a user has 'some.other.permission', or
+# 'some.permission.other', and they also have 'some.thing.else'
+#
+# Groups are represented by the permission node: group.<group name>
+# Per server and per world nodes are represented by: "server-world/permission" or "server/permission"
+#
+# Within conditions, permission nodes MUST be escaped using "<" and ">". See the example below.
+#
+# Explaination of the examples below: (they're just to demonstrate the features & use cases)
+#
+# rule1:
+# If a user is either in the vip or vip+ group, and they have the "titles.titlecollector" permission set to true, and the
+# "some.random.permission" set to false... if they're not in the group "prison_titlepack" on the "prison" server, then
+# give add them to the "prison_titlepack" group on the "prison" server, and remove "some.random.permission".
+#
+# rule2:
+# If the user isn't in any of the following groups on the skyblock server: sb_level1, sb_level2, sb_level3, then add
+# them to sb_level1 on the skyblock server.
+default-assignments:
+#  rule1:
+#    if:
+#      has-true: (<group.vip> | <group.vip+>) & <titles.tilecollector>
+#      has-false: <some.random.permission>
+#      lacks: <prison/group.prison_titlepack>
+#    give:
+#      - prison/group.prison_titlepack
+#    take:
+#      - some.random.permission
+#  rule2:
+#    if:
+#      lacks: <skyblock/group.sb_level1> & <skyblock/group.sb_level2> & <skyblock/group.sb_level3>
+#    give:
+#      - skyblock/group.sb_level1

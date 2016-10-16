@@ -28,7 +28,10 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 class BukkitConfig extends AbstractConfiguration<LPBukkitPlugin> {
     private YamlConfiguration configuration;
@@ -63,6 +66,21 @@ class BukkitConfig extends AbstractConfiguration<LPBukkitPlugin> {
     @Override
     protected boolean getBoolean(String path, boolean def) {
         return configuration.getBoolean(path, def);
+    }
+
+    @Override
+    protected List<String> getList(String path, List<String> def) {
+        return Optional.ofNullable(configuration.getStringList(path)).orElse(def);
+    }
+
+    @Override
+    protected List<String> getObjectList(String path, List<String> def) {
+        ConfigurationSection section = configuration.getConfigurationSection(path);
+        if (section == null) {
+            return def;
+        }
+
+        return Optional.ofNullable(section.getKeys(false).stream().collect(Collectors.toList())).orElse(def);
     }
 
     @SuppressWarnings("unchecked")

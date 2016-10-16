@@ -90,8 +90,6 @@ class BukkitListener extends AbstractListener implements Listener {
             t.printStackTrace();
         }
 
-
-
         if (player.isOp()) {
 
             // We assume all users are not op, but those who are need extra calculation.

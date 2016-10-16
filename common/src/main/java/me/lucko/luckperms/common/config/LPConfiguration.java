@@ -22,8 +22,10 @@
 
 package me.lucko.luckperms.common.config;
 
+import me.lucko.luckperms.common.defaults.Rule;
 import me.lucko.luckperms.common.storage.DatastoreConfiguration;
 
+import java.util.List;
 import java.util.Map;
 
 public interface LPConfiguration {
@@ -79,6 +81,8 @@ public interface LPConfiguration {
     Map<String, String> getWorldRewrites();
 
     Map<String, String> getGroupNameRewrites();
+
+    List<Rule> getDefaultAssignments();
 
     DatastoreConfiguration getDatabaseValues();
 
