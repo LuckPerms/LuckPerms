@@ -80,6 +80,8 @@ public class WorldCalculator extends ContextCalculator<Player> implements Listen
 
     @EventHandler(priority = EventPriority.LOW)
     public void onPlayerJoin(PlayerLoginEvent e) {
+        UUID internal = plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId());
+        worldCache.put(internal, e.getPlayer().getWorld().getName());
         pushUpdate(
                 e.getPlayer(),
                 Maps.immutableEntry(WORLD_KEY, null),
