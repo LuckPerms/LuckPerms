@@ -27,7 +27,7 @@ import lombok.Getter;
 import lombok.ToString;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.core.Node;
-import me.lucko.luckperms.common.core.PermissionHolder;
+import me.lucko.luckperms.common.users.User;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
@@ -43,11 +43,12 @@ public class Rule {
 
     private final List<String> toGive;
     private final List<String> toTake;
+    private final String setPrimaryGroup;
 
-    public boolean apply(PermissionHolder holder) {
+    public boolean apply(User user) {
         if (hasTrueExpression != null) {
             try {
-                boolean b = LogicParser.parse(hasTrueExpression, holder, Tristate.TRUE);
+                boolean b = LogicParser.parse(hasTrueExpression, user, Tristate.TRUE);
                 if (!b) {
                     // The holder does not meet this requirement
                     return false;
@@ -61,7 +62,7 @@ public class Rule {
 
         if (hasFalseExpression != null) {
             try {
-                boolean b = LogicParser.parse(hasFalseExpression, holder, Tristate.FALSE);
+                boolean b = LogicParser.parse(hasFalseExpression, user, Tristate.FALSE);
                 if (!b) {
                     // The holder does not meet this requirement
                     return false;
@@ -75,7 +76,7 @@ public class Rule {
 
         if (lacksExpression != null) {
             try {
-                boolean b = LogicParser.parse(lacksExpression, holder, Tristate.UNDEFINED);
+                boolean b = LogicParser.parse(lacksExpression, user, Tristate.UNDEFINED);
                 if (!b) {
                     // The holder does not meet this requirement
                     return false;
@@ -90,14 +91,18 @@ public class Rule {
         // The holder meets all of the requirements of this rule.
         for (String s : toTake) {
             try {
-                holder.unsetPermission(Node.fromSerialisedNode(s, true));
+                user.unsetPermission(Node.fromSerialisedNode(s, true));
             } catch (ObjectLacksException ignored) {}
         }
 
         for (String s : toGive) {
             try {
-                holder.setPermission(Node.fromSerialisedNode(s, true));
+                user.setPermission(Node.fromSerialisedNode(s, true));
             } catch (ObjectAlreadyHasException ignored) {}
+        }
+
+        if (setPrimaryGroup != null) {
+            user.setPrimaryGroup(setPrimaryGroup);
         }
 
         return true;

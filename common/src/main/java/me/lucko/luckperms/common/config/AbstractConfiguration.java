@@ -121,7 +121,8 @@ public abstract class AbstractConfiguration<T extends LuckPermsPlugin> implement
             String lacks = getString("default-assignments." + ruleName + ".if.lacks", null);
             List<String> give = getList("default-assignments." + ruleName + ".give", new ArrayList<>());
             List<String> take = getList("default-assignments." + ruleName + ".take", new ArrayList<>());
-            defs.add(new Rule(hasTrue, hasFalse, lacks, give, take));
+            String pg = getString("default-assignments." + ruleName + ".set-primary-group", null);
+            defs.add(new Rule(hasTrue, hasFalse, lacks, give, take, pg));
         }
         defaultAssignments = defs.build();
 
