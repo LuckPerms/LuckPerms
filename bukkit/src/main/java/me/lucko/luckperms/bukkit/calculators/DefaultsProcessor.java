@@ -41,10 +41,6 @@ public class DefaultsProcessor implements PermissionProcessor {
         }
 
         Permission defPerm = Bukkit.getServer().getPluginManager().getPermission(permission);
-        if (defPerm != null) {
-            return Tristate.fromBoolean(defPerm.getDefault().getValue(isOp));
-        } else {
-            return Tristate.UNDEFINED;
-        }
+        return defPerm == null ? Tristate.UNDEFINED : Tristate.fromBoolean(defPerm.getDefault().getValue(isOp));
     }
 }

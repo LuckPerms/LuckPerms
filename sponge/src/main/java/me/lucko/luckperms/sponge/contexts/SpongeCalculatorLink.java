@@ -24,12 +24,12 @@ package me.lucko.luckperms.sponge.contexts;
 
 import lombok.AllArgsConstructor;
 import me.lucko.luckperms.api.context.ContextCalculator;
+import me.lucko.luckperms.sponge.service.LuckPermsService;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @AllArgsConstructor
 public class SpongeCalculatorLink extends ContextCalculator<Subject> {
@@ -37,10 +37,11 @@ public class SpongeCalculatorLink extends ContextCalculator<Subject> {
 
     @Override
     public Map<String, String> giveApplicableContext(Subject subject, Map<String, String> accumulator) {
-        Set<Context> contexts = accumulator.entrySet().stream().map(e -> new Context(e.getKey(), e.getValue())).collect(Collectors.toSet());
+        Set<Context> contexts = LuckPermsService.convertContexts(accumulator);
         calculator.accumulateContexts(subject, contexts);
 
-        contexts.forEach(c -> accumulator.put(c.getKey(), c.getValue()));
+        accumulator.clear();
+        accumulator.putAll(LuckPermsService.convertContexts(contexts));
         return accumulator;
     }
 

@@ -97,11 +97,9 @@ public class DefaultsProvider {
 
     public Tristate hasDefault(String permission, boolean isOp) {
         Map<String, Boolean> map = isOp ? op : nonOp;
-        if (!map.containsKey(permission)) {
-            return Tristate.UNDEFINED;
-        }
 
-        return Tristate.fromBoolean(map.get(permission));
+        Boolean b = map.get(permission);
+        return b == null ? Tristate.UNDEFINED : Tristate.fromBoolean(b);
     }
 
     @AllArgsConstructor

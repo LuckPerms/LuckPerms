@@ -28,6 +28,7 @@ import me.lucko.luckperms.bukkit.inject.LPPermissible;
 import org.bukkit.entity.Player;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class AutoOPListener implements ContextListener<Player> {
 
@@ -39,7 +40,7 @@ public class AutoOPListener implements ContextListener<Player> {
         }
 
         Map<String, Boolean> backing = permissible.getUser().getUserData().getPermissionData(permissible.calculateContexts()).getImmutableBacking();
-        boolean op = backing.containsKey("luckperms.autoop") && backing.get("luckperms.autoop");
+        boolean op = Optional.ofNullable(backing.get("luckperms.autoop")).orElse(false);
         subject.setOp(op);
     }
 

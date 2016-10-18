@@ -38,43 +38,31 @@ public class WildcardProcessor implements PermissionProcessor {
     public Tristate hasPermission(String permission) {
         String node = permission;
 
-        while (node.contains(".")) {
+        while (true) {
             int endIndex = node.lastIndexOf('.');
             if (endIndex == -1) {
                 break;
             }
 
             node = node.substring(0, endIndex);
-            if (!isEmpty(node)) {
-                if (map.containsKey(node + ".*")) {
-                    return Tristate.fromBoolean(map.get(node + ".*"));
+            if (!node.isEmpty()) {
+                Boolean b = map.get(node + ".*");
+                if (b != null) {
+                    return Tristate.fromBoolean(b);
                 }
             }
         }
 
-        if (map.containsKey("'*'")) {
-            return Tristate.fromBoolean(map.get("'*'"));
+        Boolean b = map.get("'*'");
+        if (b != null) {
+            return Tristate.fromBoolean(b);
         }
 
-        if (map.containsKey("*")) {
-            return Tristate.fromBoolean(map.get("*"));
+        b = map.get("*");
+        if (b != null) {
+            return Tristate.fromBoolean(b);
         }
 
         return Tristate.UNDEFINED;
-    }
-
-    private static boolean isEmpty(String s) {
-        if (s.equals("")) {
-            return true;
-        }
-
-        char[] chars = s.toCharArray();
-        for (char c : chars) {
-            if (c != '.') {
-                return false;
-            }
-        }
-
-        return true;
     }
 }

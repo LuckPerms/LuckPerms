@@ -24,6 +24,7 @@ package me.lucko.luckperms.sponge.calculators;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.calculators.PermissionProcessor;
 
 import java.util.Map;
@@ -35,46 +36,24 @@ public class SpongeWildcardProcessor implements PermissionProcessor {
     private final Map<String, Boolean> map;
 
     @Override
-    public me.lucko.luckperms.api.Tristate hasPermission(String permission) {
+    public Tristate hasPermission(String permission) {
         String node = permission;
 
-        while (node.contains(".")) {
+        while (true) {
             int endIndex = node.lastIndexOf('.');
             if (endIndex == -1) {
                 break;
             }
 
             node = node.substring(0, endIndex);
-            if (!isEmpty(node)) {
-                if (map.containsKey(node)) {
-                    return me.lucko.luckperms.api.Tristate.fromBoolean(map.get(node));
+            if (!node.isEmpty()) {
+                Boolean b = map.get(node);
+                    if (b != null) {
+                    return Tristate.fromBoolean(b);
                 }
             }
         }
 
-        if (map.containsKey("'*'")) {
-            return me.lucko.luckperms.api.Tristate.fromBoolean(map.get("'*'"));
-        }
-
-        if (map.containsKey("*")) {
-            return me.lucko.luckperms.api.Tristate.fromBoolean(map.get("*"));
-        }
-
-        return me.lucko.luckperms.api.Tristate.UNDEFINED;
-    }
-
-    private static boolean isEmpty(String s) {
-        if (s.equals("")) {
-            return true;
-        }
-
-        char[] chars = s.toCharArray();
-        for (char c : chars) {
-            if (c != '.') {
-                return false;
-            }
-        }
-
-        return true;
+        return Tristate.UNDEFINED;
     }
 }

@@ -33,14 +33,24 @@ import me.lucko.luckperms.common.users.User;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Holds a user's cached permissions for a given context
+ */
 public class PermissionData {
-    private final Contexts contexts;
+
+    /**
+     * The raw set of permission strings.
+     */
     private final Map<String, Boolean> permissions;
 
+    /**
+     * The calculator instance responsible for resolving the raw permission strings in the permission map.
+     * This calculator will attempt to resolve all regex/wildcard permissions, as well as account for
+     * defaults & attachment permissions (if applicable.)
+     */
     private final PermissionCalculator calculator;
 
     public PermissionData(Contexts contexts, User user, CalculatorFactory calculatorFactory) {
-        this.contexts = contexts;
         permissions = new ConcurrentHashMap<>();
         calculator = calculatorFactory.build(contexts, user, permissions);
     }
@@ -56,20 +66,7 @@ public class PermissionData {
     }
 
     public void comparePermissions(Map<String, Boolean> toApply) {
-        boolean different = false;
-        if (toApply.size() != permissions.size()) {
-            different = true;
-        } else {
-            for (Map.Entry<String, Boolean> e : permissions.entrySet()) {
-                if (toApply.containsKey(e.getKey()) && toApply.get(e.getKey()) == e.getValue()) {
-                    continue;
-                }
-                different = true;
-                break;
-            }
-        }
-
-        if (different) {
+        if (!permissions.equals(toApply)) {
             setPermissions(toApply);
         }
     }
@@ -79,11 +76,6 @@ public class PermissionData {
     }
 
     public Tristate getPermissionValue(@NonNull String permission) {
-        Tristate t = calculator.getPermissionValue(permission);
-        if (t != Tristate.UNDEFINED) {
-            return Tristate.fromBoolean(t.asBoolean());
-        } else {
-            return Tristate.UNDEFINED;
-        }
+        return calculator.getPermissionValue(permission);
     }
 }

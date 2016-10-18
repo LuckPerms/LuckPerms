@@ -41,12 +41,12 @@ public class DefaultsProcessor implements PermissionProcessor {
     public me.lucko.luckperms.api.Tristate hasPermission(String permission) {
         Tristate t =  service.getUserSubjects().getDefaults().getPermissionValue(contexts, permission);
         if (t != Tristate.UNDEFINED) {
-            return convertTristate(Tristate.fromBoolean(t.asBoolean()));
+            return convertTristate(t);
         }
 
         Tristate t2 =  service.getDefaults().getPermissionValue(contexts, permission);
         if (t2 != Tristate.UNDEFINED) {
-            return convertTristate(Tristate.fromBoolean(t.asBoolean()));
+            return convertTristate(t);
         }
 
         return me.lucko.luckperms.api.Tristate.UNDEFINED;

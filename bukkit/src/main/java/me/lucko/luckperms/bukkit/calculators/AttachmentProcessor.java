@@ -44,10 +44,8 @@ public class AttachmentProcessor implements PermissionProcessor {
             return Tristate.UNDEFINED;
         }
 
-        if (m.containsKey(permission)) {
-            return Tristate.fromBoolean(m.get(permission).getValue());
-        }
-        return Tristate.UNDEFINED;
+        PermissionAttachmentInfo pai = m.get(permission);
+        return pai == null ? Tristate.UNDEFINED : Tristate.fromBoolean(pai.getValue());
     }
 
 }
