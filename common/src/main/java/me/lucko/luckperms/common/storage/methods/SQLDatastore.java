@@ -306,25 +306,31 @@ abstract class SQLDatastore extends Datastore {
     @Override
     public boolean loadAllGroups() {
         List<String> groups = new ArrayList<>();
-        boolean success = runQuery(GROUP_SELECT_ALL, resultSet -> {
-            boolean b = true;
+        boolean b = runQuery(GROUP_SELECT_ALL, resultSet -> {
             while (resultSet.next()) {
                 String name = resultSet.getString("name");
-                if (!loadGroup(name)) {
-                    b = false;
-                }
                 groups.add(name);
             }
-            return b;
+            return true;
         });
 
-        if (success) {
+        if (!b) {
+            return false;
+        }
+
+        for (String g : groups) {
+            if (!loadGroup(g)) {
+                b = false;
+            }
+        }
+
+        if (b) {
             GroupManager gm = plugin.getGroupManager();
             gm.getAll().values().stream()
                     .filter(g -> !groups.contains(g.getName()))
                     .forEach(gm::unload);
         }
-        return success;
+        return b;
     }
 
     @Override
@@ -404,25 +410,31 @@ abstract class SQLDatastore extends Datastore {
     @Override
     public boolean loadAllTracks() {
         List<String> tracks = new ArrayList<>();
-        boolean success = runQuery(TRACK_SELECT_ALL, resultSet -> {
-            boolean b = true;
+        boolean b = runQuery(TRACK_SELECT_ALL, resultSet -> {
             while (resultSet.next()) {
                 String name = resultSet.getString("name");
-                if (!loadTrack(name)) {
-                    b = false;
-                }
                 tracks.add(name);
             }
-            return b;
+            return true;
         });
 
-        if (success) {
+        if (!b) {
+            return false;
+        }
+
+        for (String t : tracks) {
+            if (!loadTrack(t)) {
+                b = false;
+            }
+        }
+
+        if (b) {
             TrackManager tm = plugin.getTrackManager();
             tm.getAll().values().stream()
                     .filter(t -> !tracks.contains(t.getName()))
                     .forEach(tm::unload);
         }
-        return success;
+        return b;
     }
 
     @Override
