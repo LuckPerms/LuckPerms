@@ -38,6 +38,7 @@ public class ExpireTemporaryTask implements Runnable {
         for (Group group : plugin.getGroupManager().getAll().values()) {
             if (group.auditTemporaryPermissions()) {
                 changes = true;
+                plugin.getDatastore().saveGroup(group);
             }
         }
 
@@ -48,6 +49,9 @@ public class ExpireTemporaryTask implements Runnable {
 
         plugin.getUserManager().getAll().values().stream()
                 .filter(PermissionHolder::auditTemporaryPermissions)
-                .forEach(User::refreshPermissions);
+                .forEach(user -> {
+                    user.refreshPermissions();
+                    plugin.getDatastore().saveUser(user);    
+                });
     }
 }
