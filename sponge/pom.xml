@@ -64,6 +64,10 @@
                                     <pattern>org.bson</pattern>
                                     <shadedPattern>me.lucko.luckperms.lib.bson</shadedPattern>
                                 </relocation>
+                                <relocation>
+                                    <pattern>com.mysql</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.mysql</shadedPattern>
+                                </relocation>
                             </relocations>
                         </configuration>
                     </execution>
@@ -120,6 +124,13 @@
             <groupId>me.lucko.luckperms</groupId>
             <artifactId>luckperms-api</artifactId>
             <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <!-- MySQL -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.40</version>
             <scope>compile</scope>
         </dependency>
         <!-- Lombok -->
