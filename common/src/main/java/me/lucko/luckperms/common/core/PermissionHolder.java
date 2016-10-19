@@ -112,8 +112,6 @@ public abstract class PermissionHolder {
             this.nodes.clear();
             this.nodes.addAll(nodes);
         }
-
-        auditTemporaryPermissions();
     }
 
     public void setTransientNodes(Set<Node> nodes) {
@@ -125,8 +123,6 @@ public abstract class PermissionHolder {
             this.transientNodes.clear();
             this.transientNodes.addAll(nodes);
         }
-
-        auditTemporaryPermissions();
     }
 
     @Deprecated
@@ -141,8 +137,6 @@ public abstract class PermissionHolder {
                     .map(e -> me.lucko.luckperms.common.core.Node.fromSerialisedNode(e.getKey(), e.getValue()))
                     .collect(Collectors.toList()));
         }
-
-        auditTemporaryPermissions();
     }
 
     public void addNodeUnchecked(Node node) {

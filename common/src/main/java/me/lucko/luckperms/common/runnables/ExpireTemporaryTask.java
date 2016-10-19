@@ -24,7 +24,6 @@ package me.lucko.luckperms.common.runnables;
 
 import lombok.AllArgsConstructor;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.users.User;
 
@@ -34,20 +33,21 @@ public class ExpireTemporaryTask implements Runnable {
 
     @Override
     public void run() {
-        boolean changes = false;
+        boolean groupChanges = false;
         for (Group group : plugin.getGroupManager().getAll().values()) {
             if (group.auditTemporaryPermissions()) {
-                changes = true;
+                plugin.getDatastore().saveGroup(group);
+                groupChanges = true;
             }
         }
 
-        if (changes) {
-            plugin.runUpdateTask();
-            return;
+        for (User user : plugin.getUserManager().getAll().values()) {
+            if (user.auditTemporaryPermissions()) {
+                plugin.getDatastore().saveUser(user);
+                if (!groupChanges) {
+                    user.refreshPermissions();
+                }
+            }
         }
-
-        plugin.getUserManager().getAll().values().stream()
-                .filter(PermissionHolder::auditTemporaryPermissions)
-                .forEach(User::refreshPermissions);
     }
 }

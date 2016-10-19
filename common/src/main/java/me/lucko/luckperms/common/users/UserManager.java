@@ -134,7 +134,10 @@ public class UserManager extends AbstractManager<UserIdentifier, User> {
             Set<UUID> players = plugin.getOnlinePlayers();
             plugin.doAsync(() -> {
                 for (UUID uuid : players) {
-                    plugin.getDatastore().loadUser(plugin.getUuidCache().getUUID(uuid), "null");
+                    UUID internal = plugin.getUuidCache().getUUID(uuid);
+                    plugin.getDatastore().loadUser(internal, "null");
+                    User user = get(internal);
+                    user.refreshPermissions();
                 }
             });
         });
