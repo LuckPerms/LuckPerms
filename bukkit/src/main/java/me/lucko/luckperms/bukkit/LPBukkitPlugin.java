@@ -37,6 +37,7 @@ import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.commands.ConsecutiveExecutor;
 import me.lucko.luckperms.common.commands.Sender;
 import me.lucko.luckperms.common.config.LPConfiguration;
+import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.contexts.ServerCalculator;
 import me.lucko.luckperms.common.core.UuidCache;
@@ -53,7 +54,6 @@ import me.lucko.luckperms.common.utils.LogFactory;
 import org.bukkit.World;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
-import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
@@ -355,30 +355,10 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private void registerPermissions(PermissionDefault def) {
         PluginManager pm = getServer().getPluginManager();
 
-        Map<String, List<String>> wildcards = new HashMap<>();
-        List<String> all = new ArrayList<>();
-        for (me.lucko.luckperms.common.constants.Permission p : me.lucko.luckperms.common.constants.Permission.values()) {
-            pm.addPermission(new Permission(p.getNode(), def));
-            if (p.getGroup() != null) {
-                if (!wildcards.containsKey(p.getGroup())) {
-                    wildcards.put(p.getGroup(), new ArrayList<>());
-                }
-                wildcards.get(p.getGroup()).add(p.getTag());
+        for (Permission p : Permission.values()) {
+            for (String node : p.getNodes()) {
+                pm.addPermission(new org.bukkit.permissions.Permission(node, def));
             }
-
-            all.add(p.getNode());
         }
-
-        for (Map.Entry<String, List<String>> e : wildcards.entrySet()) {
-            pm.addPermission(new Permission(
-                    "luckperms." + e.getKey() + ".*", def,
-                    e.getValue().stream()
-                            .map(tag -> "luckperms." + e.getKey() + "." + tag)
-                            .collect(Collectors.toMap(s -> s, s -> true))
-                    )
-            );
-        }
-
-        pm.addPermission(new Permission("luckperms.*", def, all.stream().collect(Collectors.toMap(s -> s, s -> true))));
     }
 }

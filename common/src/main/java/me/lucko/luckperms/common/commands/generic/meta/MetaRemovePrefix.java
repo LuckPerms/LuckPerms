@@ -42,7 +42,7 @@ import java.util.List;
 
 public class MetaRemovePrefix extends SecondarySubCommand {
     public MetaRemovePrefix() {
-        super("removeprefix", "Removes a prefix",  Permission.USER_REMOVEPREFIX, Permission.GROUP_REMOVEPREFIX, Predicate.notInRange(2, 4),
+        super("removeprefix", "Removes a prefix",  Permission.USER_META_REMOVEPREFIX, Permission.GROUP_META_REMOVEPREFIX, Predicate.notInRange(2, 4),
                 Arg.list(
                         Arg.create("priority", true, "the priority to add the prefix at"),
                         Arg.create("prefix", true, "the prefix string"),

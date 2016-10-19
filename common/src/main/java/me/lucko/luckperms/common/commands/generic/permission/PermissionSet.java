@@ -41,7 +41,7 @@ import static me.lucko.luckperms.common.commands.SubCommand.getBoolTabComplete;
 
 public class PermissionSet extends SecondarySubCommand {
     public PermissionSet() {
-        super("set", "Sets a permission for the object", Permission.USER_SETPERMISSION, Permission.GROUP_SETPERMISSION, Predicate.notInRange(2, 4),
+        super("set", "Sets a permission for the object", Permission.USER_PERM_SET, Permission.GROUP_PERM_SET, Predicate.notInRange(2, 4),
                 Arg.list(
                         Arg.create("node", true, "the permission node to set"),
                         Arg.create("true|false", true, "the value of the node"),

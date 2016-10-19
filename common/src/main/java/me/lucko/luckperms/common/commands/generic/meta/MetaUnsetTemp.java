@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 
 public class MetaUnsetTemp extends SecondarySubCommand {
     public MetaUnsetTemp() {
-        super("unset", "Unsets a temporary meta value",  Permission.USER_UNSET_TEMP_META, Permission.GROUP_UNSET_TEMP_META, Predicate.notInRange(1, 3),
+        super("unsettemp", "Unsets a temporary meta value",  Permission.USER_META_UNSETTEMP, Permission.GROUP_META_UNSETTEMP, Predicate.notInRange(1, 3),
                 Arg.list(
                         Arg.create("key", true, "the key to unset"),
                         Arg.create("server", false, "the server to remove the meta pair on"),

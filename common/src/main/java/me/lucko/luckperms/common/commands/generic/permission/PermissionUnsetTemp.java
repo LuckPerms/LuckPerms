@@ -39,7 +39,7 @@ import java.util.List;
 
 public class PermissionUnsetTemp extends SecondarySubCommand {
     public PermissionUnsetTemp() {
-        super("unsettemp", "Unsets a temporary permission for the object", Permission.USER_UNSET_TEMP_PERMISSION, Permission.GROUP_UNSET_TEMP_PERMISSION,
+        super("unsettemp", "Unsets a temporary permission for the object", Permission.USER_PERM_UNSETTEMP, Permission.GROUP_PERM_UNSETTEMP,
                 Predicate.notInRange(1, 3),
                 Arg.list(
                         Arg.create("node", true, "the permission node to unset"),

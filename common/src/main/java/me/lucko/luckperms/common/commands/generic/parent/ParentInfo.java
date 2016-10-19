@@ -37,7 +37,7 @@ import java.util.List;
 public class ParentInfo extends SecondarySubCommand {
     public ParentInfo() {
         super("info", "Lists the groups that this object inherits from",
-                Permission.USER_LISTGROUPS, Permission.GROUP_LISTPARENTS, Predicate.alwaysFalse(), null);
+                Permission.USER_PARENT_INFO, Permission.GROUP_PARENT_INFO, Predicate.alwaysFalse(), null);
     }
 
     @Override

@@ -41,7 +41,7 @@ import java.util.List;
 
 public class MetaAddTempPrefix extends SecondarySubCommand {
     public MetaAddTempPrefix() {
-        super("addtempprefix", "Adds a prefix temporarily",  Permission.USER_ADD_TEMP_PREFIX, Permission.GROUP_ADD_TEMP_PREFIX, Predicate.notInRange(3, 5),
+        super("addtempprefix", "Adds a prefix temporarily",  Permission.USER_META_ADDTEMP_PREFIX, Permission.GROUP_META_ADDTEMP_PREFIX, Predicate.notInRange(3, 5),
                 Arg.list(
                         Arg.create("priority", true, "the priority to add the prefix at"),
                         Arg.create("prefix", true, "the prefix string"),

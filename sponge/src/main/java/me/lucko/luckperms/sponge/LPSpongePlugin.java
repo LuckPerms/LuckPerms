@@ -200,7 +200,9 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         }
 
         for (Permission perm : Permission.values()) {
-            registerPermission(p, perm.getNode());
+            for (String node : perm.getNodes()) {
+                registerPermission(p, node);
+            }
         }
     }
 

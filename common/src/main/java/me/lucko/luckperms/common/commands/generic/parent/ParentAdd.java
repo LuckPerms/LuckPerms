@@ -43,7 +43,7 @@ import static me.lucko.luckperms.common.commands.SubCommand.getGroupTabComplete;
 public class ParentAdd extends SecondarySubCommand {
     public ParentAdd() {
         super("add", "Sets another group for the object to inherit permissions from",
-                Permission.USER_ADDGROUP, Permission.GROUP_SETINHERIT, Predicate.notInRange(1, 3),
+                Permission.USER_PARENT_ADD, Permission.GROUP_PARENT_ADD, Predicate.notInRange(1, 3),
                 Arg.list(
                         Arg.create("group", true, "the group to inherit from"),
                         Arg.create("server", false, "the server to inherit the group on"),

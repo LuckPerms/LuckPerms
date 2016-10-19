@@ -42,7 +42,7 @@ import static me.lucko.luckperms.common.commands.SubCommand.getGroupTabComplete;
 public class ParentRemoveTemp extends SecondarySubCommand {
     public ParentRemoveTemp() {
         super("removetemp", "Removes a previously set temporary inheritance rule",
-                Permission.USER_REMOVETEMPGROUP, Permission.GROUP_UNSET_TEMP_INHERIT, Predicate.notInRange(1, 3),
+                Permission.USER_PARENT_REMOVETEMP, Permission.GROUP_PARENT_REMOVETEMP, Predicate.notInRange(1, 3),
                 Arg.list(
                         Arg.create("group", true, "the group to remove"),
                         Arg.create("server", false, "the server to remove the group on"),

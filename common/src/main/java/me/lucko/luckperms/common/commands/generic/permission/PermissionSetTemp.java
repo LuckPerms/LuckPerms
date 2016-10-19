@@ -42,7 +42,7 @@ import static me.lucko.luckperms.common.commands.SubCommand.getBoolTabComplete;
 
 public class PermissionSetTemp extends SecondarySubCommand {
     public PermissionSetTemp() {
-        super("settemp", "Sets a permission for the object temporarily", Permission.USER_SET_TEMP_PERMISSION, Permission.GROUP_SET_TEMP_PERMISSION,
+        super("settemp", "Sets a permission for the object temporarily", Permission.USER_PERM_SETTEMP, Permission.GROUP_PERM_SETTEMP,
                 Predicate.notInRange(3, 5),
                 Arg.list(
                         Arg.create("node", true, "the permission node to set"),

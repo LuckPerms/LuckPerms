@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 
 public class MetaClear extends SecondarySubCommand {
     public MetaClear() {
-        super("clear", "Clears all chat meta",  Permission.USER_CLEARMETA, Permission.GROUP_CLEARMETA, Predicate.notInRange(0, 2),
+        super("clear", "Clears all chat meta",  Permission.USER_META_CLEAR, Permission.GROUP_META_CLEAR, Predicate.notInRange(0, 2),
                 Arg.list(
                         Arg.create("server", false, "the server name to filter by"),
                         Arg.create("world", false, "the world name to filter by")

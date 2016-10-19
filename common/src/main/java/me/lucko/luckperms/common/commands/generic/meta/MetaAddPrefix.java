@@ -40,7 +40,7 @@ import java.util.List;
 
 public class MetaAddPrefix extends SecondarySubCommand {
     public MetaAddPrefix() {
-        super("addprefix", "Adds a prefix",  Permission.USER_ADDPREFIX, Permission.GROUP_ADDPREFIX, Predicate.notInRange(2, 4),
+        super("addprefix", "Adds a prefix",  Permission.USER_META_ADDPREFIX, Permission.GROUP_META_ADDPREFIX, Predicate.notInRange(2, 4),
                 Arg.list(
                         Arg.create("priority", true, "the priority to add the prefix at"),
                         Arg.create("prefix", true, "the prefix string"),

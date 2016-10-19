@@ -42,7 +42,7 @@ import java.util.List;
 
 public class MetaRemoveTempSuffix extends SecondarySubCommand {
     public MetaRemoveTempSuffix() {
-        super("removetempsuffix", "Removes a temporary suffix",  Permission.USER_REMOVE_TEMP_SUFFIX, Permission.GROUP_REMOVE_TEMP_SUFFIX, Predicate.notInRange(2, 4),
+        super("removetempsuffix", "Removes a temporary suffix",  Permission.USER_META_REMOVETEMP_SUFFIX, Permission.GROUP_META_REMOVETEMP_SUFFIX, Predicate.notInRange(2, 4),
                 Arg.list(
                         Arg.create("priority", true, "the priority to add the suffix at"),
                         Arg.create("suffix", true, "the suffix string"),

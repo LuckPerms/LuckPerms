@@ -22,17 +22,16 @@
 
 package me.lucko.luckperms.common.commands;
 
-import com.google.common.collect.ImmutableMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
 import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 /**
  * Factory class to make a thread-safe sender instance
@@ -100,12 +99,15 @@ public abstract class SenderFactory<T> implements Runnable {
             this.console = this.uuid.equals(Constants.getConsoleUUID()) || this.uuid.equals(Constants.getImporterUUID());
 
             if (!this.console) {
-                if (toCheck == null || toCheck.isEmpty()) {
-                    this.perms = ImmutableMap.copyOf(Arrays.stream(Permission.values())
-                            .collect(Collectors.toMap(p -> p, p -> factory.hasPermission(t, p.getNode()))));
-                } else {
-                    this.perms = ImmutableMap.copyOf(toCheck.stream().collect(Collectors.toMap(p -> p, p -> factory.hasPermission(t, p.getNode()))));
-                }
+                this.perms = ((toCheck == null || toCheck.isEmpty()) ? Arrays.stream(Permission.values()) : toCheck.stream())
+                        .collect(ImmutableCollectors.toImmutableMap(p -> p, p -> {
+                            for (String s : p.getNodes()) {
+                                if (factory.hasPermission(t, s)) {
+                                    return true;
+                                }
+                            }
+                            return false;
+                        }));
             }
         }
 

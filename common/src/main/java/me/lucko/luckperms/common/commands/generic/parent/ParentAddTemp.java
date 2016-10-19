@@ -44,7 +44,7 @@ import static me.lucko.luckperms.common.commands.SubCommand.getGroupTabComplete;
 public class ParentAddTemp extends SecondarySubCommand {
     public ParentAddTemp() {
         super("addtemp", "Sets another group for the object to inherit permissions from temporarily",
-                Permission.USER_ADDTEMPGROUP, Permission.GROUP_SET_TEMP_INHERIT, Predicate.notInRange(2, 4),
+                Permission.USER_PARENT_ADDTEMP, Permission.GROUP_PARENT_ADDTEMP, Predicate.notInRange(2, 4),
                 Arg.list(
                         Arg.create("group", true, "the group to inherit from"),
                         Arg.create("duration", true, "the duration of the group membership"),

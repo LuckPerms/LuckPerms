@@ -42,7 +42,7 @@ import java.util.List;
 
 public class MetaSetTemp extends SecondarySubCommand {
     public MetaSetTemp() {
-        super("settemp", "Sets a meta value temporarily",  Permission.USER_SET_TEMP_META, Permission.GROUP_SET_TEMP_META, Predicate.notInRange(3, 5),
+        super("settemp", "Sets a meta value temporarily",  Permission.USER_META_SETTEMP, Permission.GROUP_META_SETTEMP, Predicate.notInRange(3, 5),
                 Arg.list(
                         Arg.create("key", true, "the key to set"),
                         Arg.create("value", true, "the value to set"),

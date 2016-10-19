@@ -38,7 +38,7 @@ import java.util.*;
 
 public class MetaInfo extends SecondarySubCommand {
     public MetaInfo() {
-        super("info", "Shows all chat meta",  Permission.USER_CHATMETA, Permission.GROUP_CHATMETA, Predicate.alwaysFalse(), null);
+        super("info", "Shows all chat meta",  Permission.USER_META_INFO, Permission.GROUP_META_INFO, Predicate.alwaysFalse(), null);
     }
 
     @Override

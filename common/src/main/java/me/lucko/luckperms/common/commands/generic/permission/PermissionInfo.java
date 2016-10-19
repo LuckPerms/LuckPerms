@@ -36,7 +36,7 @@ import java.util.List;
 
 public class PermissionInfo extends SecondarySubCommand {
     public PermissionInfo() {
-        super("info", "Lists the permission nodes the object has", Permission.USER_LISTNODES, Permission.GROUP_LISTNODES, Predicate.alwaysFalse(), null);
+        super("info", "Lists the permission nodes the object has", Permission.USER_PERM_INFO, Permission.GROUP_PERM_INFO, Predicate.alwaysFalse(), null);
     }
 
     @Override

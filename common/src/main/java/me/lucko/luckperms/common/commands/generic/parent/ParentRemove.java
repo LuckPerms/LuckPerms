@@ -42,7 +42,7 @@ import static me.lucko.luckperms.common.commands.SubCommand.getGroupTabComplete;
 
 public class ParentRemove extends SecondarySubCommand {
     public ParentRemove() {
-        super("remove", "Removes a previously set inheritance rule", Permission.USER_REMOVEGROUP, Permission.GROUP_UNSETINHERIT,
+        super("remove", "Removes a previously set inheritance rule", Permission.USER_PARENT_REMOVE, Permission.GROUP_PARENT_REMOVE,
                 Predicate.notInRange(1, 3),
                 Arg.list(
                         Arg.create("group", true, "the group to remove"),

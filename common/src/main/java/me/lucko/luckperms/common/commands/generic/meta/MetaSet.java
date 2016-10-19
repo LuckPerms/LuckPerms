@@ -41,7 +41,7 @@ import java.util.List;
 
 public class MetaSet extends SecondarySubCommand {
     public MetaSet() {
-        super("set", "Sets a meta value",  Permission.USER_SET_META, Permission.GROUP_SET_META, Predicate.notInRange(2, 4),
+        super("set", "Sets a meta value",  Permission.USER_META_SET, Permission.GROUP_META_SET, Predicate.notInRange(2, 4),
                 Arg.list(
                         Arg.create("key", true, "the key to set"),
                         Arg.create("value", true, "the value to set"),
