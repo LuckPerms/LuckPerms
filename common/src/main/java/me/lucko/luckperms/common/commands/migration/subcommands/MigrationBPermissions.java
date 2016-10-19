@@ -33,7 +33,6 @@ import me.lucko.luckperms.common.commands.SubCommand;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
-import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.lang.reflect.Field;

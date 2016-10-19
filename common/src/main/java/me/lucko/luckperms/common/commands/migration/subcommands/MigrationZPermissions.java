@@ -32,7 +32,6 @@ import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.tracks.Track;
 import me.lucko.luckperms.common.users.User;
-import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsService;
 
