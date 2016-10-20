@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.methods;
+package me.lucko.luckperms.common.storage.backing;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -33,7 +33,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class MySQLDatastore extends SQLDatastore {
+public class MySQLBacking extends SQLBacking {
 
     private static final String CREATETABLE_UUID = "CREATE TABLE IF NOT EXISTS `lp_uuid` (`name` VARCHAR(16) NOT NULL, `uuid` VARCHAR(36) NOT NULL, PRIMARY KEY (`name`)) DEFAULT CHARSET=utf8;";
     private static final String CREATETABLE_USERS = "CREATE TABLE IF NOT EXISTS `lp_users` (`uuid` VARCHAR(36) NOT NULL, `name` VARCHAR(16) NOT NULL, `primary_group` VARCHAR(36) NOT NULL, `perms` TEXT NOT NULL, PRIMARY KEY (`uuid`)) DEFAULT CHARSET=utf8;";
@@ -44,7 +44,7 @@ public class MySQLDatastore extends SQLDatastore {
     private final DatastoreConfiguration configuration;
     private HikariDataSource hikari;
 
-    public MySQLDatastore(LuckPermsPlugin plugin, DatastoreConfiguration configuration) {
+    public MySQLBacking(LuckPermsPlugin plugin, DatastoreConfiguration configuration) {
         super(plugin, "MySQL");
         this.configuration = configuration;
     }

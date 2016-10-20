@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.methods;
+package me.lucko.luckperms.common.storage.backing;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
@@ -34,7 +34,6 @@ import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.data.Log;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.groups.GroupManager;
-import me.lucko.luckperms.common.storage.Datastore;
 import me.lucko.luckperms.common.storage.DatastoreConfiguration;
 import me.lucko.luckperms.common.tracks.Track;
 import me.lucko.luckperms.common.tracks.TrackManager;
@@ -49,13 +48,13 @@ import java.util.stream.Collectors;
 import static me.lucko.luckperms.common.core.PermissionHolder.exportToLegacy;
 
 @SuppressWarnings("unchecked")
-public class MongoDBDatastore extends Datastore {
+public class MongoDBBacking extends AbstractBacking {
 
     private final DatastoreConfiguration configuration;
     private MongoClient mongoClient;
     private MongoDatabase database;
 
-    public MongoDBDatastore(LuckPermsPlugin plugin, DatastoreConfiguration configuration) {
+    public MongoDBBacking(LuckPermsPlugin plugin, DatastoreConfiguration configuration) {
         super(plugin, "MongoDB");
         this.configuration = configuration;
     }

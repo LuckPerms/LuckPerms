@@ -47,12 +47,12 @@ public class GroupClone extends SubCommand<Group> {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (plugin.getDatastore().loadGroup(newGroupName)) {
+        if (plugin.getDatastore().loadGroup(newGroupName).getOrDefault(false)) {
             Message.GROUP_ALREADY_EXISTS.send(sender);
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!plugin.getDatastore().createAndLoadGroup(newGroupName)) {
+        if (!plugin.getDatastore().createAndLoadGroup(newGroupName).getOrDefault(false)) {
             Message.CREATE_GROUP_ERROR.send(sender);
             return CommandResult.FAILURE;
         }

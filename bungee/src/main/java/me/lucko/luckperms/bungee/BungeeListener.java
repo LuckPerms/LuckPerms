@@ -95,7 +95,7 @@ public class BungeeListener extends AbstractListener implements Listener {
             final PendingConnection c = e.getConnection();
 
             if (!cache.isOnlineMode()) {
-                UUID uuid = plugin.getDatastore().getUUID(c.getName());
+                UUID uuid = plugin.getDatastore().getUUID(c.getName()).getOrDefault(null);
                 if (uuid != null) {
                     cache.addToCache(c.getUniqueId(), uuid);
                 } else {
@@ -105,7 +105,7 @@ public class BungeeListener extends AbstractListener implements Listener {
                     plugin.getDatastore().saveUUIDData(c.getName(), c.getUniqueId());
                 }
             } else {
-                UUID uuid = plugin.getDatastore().getUUID(c.getName());
+                UUID uuid = plugin.getDatastore().getUUID(c.getName()).getOrDefault(null);
                 if (uuid == null) {
                     plugin.getApiProvider().fireEventAsync(new UserFirstLoginEvent(c.getUniqueId(), c.getName()));
                 }

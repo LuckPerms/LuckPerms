@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.methods;
+package me.lucko.luckperms.common.storage.backing;
 
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
@@ -42,8 +42,8 @@ import java.util.stream.Collectors;
 import static me.lucko.luckperms.common.core.PermissionHolder.exportToLegacy;
 
 @SuppressWarnings("ResultOfMethodCallIgnored")
-public class JSONDatastore extends FlatfileDatastore {
-    public JSONDatastore(LuckPermsPlugin plugin, File pluginDir) {
+public class JSONBacking extends FlatfileBacking {
+    public JSONBacking(LuckPermsPlugin plugin, File pluginDir) {
         super(plugin, "Flatfile - JSON", pluginDir);
     }
 

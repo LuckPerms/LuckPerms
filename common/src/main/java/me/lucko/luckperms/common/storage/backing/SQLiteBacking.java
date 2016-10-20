@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.methods;
+package me.lucko.luckperms.common.storage.backing;
 
 import lombok.Cleanup;
 import me.lucko.luckperms.common.LuckPermsPlugin;
@@ -28,7 +28,7 @@ import me.lucko.luckperms.common.LuckPermsPlugin;
 import java.io.File;
 import java.sql.*;
 
-public class SQLiteDatastore extends SQLDatastore {
+public class SQLiteBacking extends SQLBacking {
 
     private static final String CREATETABLE_UUID = "CREATE TABLE IF NOT EXISTS `lp_uuid` (`name` VARCHAR(16) NOT NULL, `uuid` VARCHAR(36) NOT NULL, PRIMARY KEY (`name`));";
     private static final String CREATETABLE_USERS = "CREATE TABLE IF NOT EXISTS `lp_users` (`uuid` VARCHAR(36) NOT NULL, `name` VARCHAR(16) NOT NULL, `primary_group` VARCHAR(36) NOT NULL, `perms` TEXT NOT NULL, PRIMARY KEY (`uuid`));";
@@ -40,7 +40,7 @@ public class SQLiteDatastore extends SQLDatastore {
     private Connection connection = null;
     private final Object connectionLock = new Object();
 
-    public SQLiteDatastore(LuckPermsPlugin plugin, File file) {
+    public SQLiteBacking(LuckPermsPlugin plugin, File file) {
         super(plugin, "SQLite");
         this.file = file;
     }

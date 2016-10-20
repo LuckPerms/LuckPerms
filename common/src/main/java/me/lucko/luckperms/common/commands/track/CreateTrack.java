@@ -51,12 +51,12 @@ public class CreateTrack extends SingleMainCommand {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (plugin.getDatastore().loadTrack(trackName)) {
+        if (plugin.getDatastore().loadTrack(trackName).getOrDefault(false)) {
             Message.TRACK_ALREADY_EXISTS.send(sender);
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!plugin.getDatastore().createAndLoadTrack(trackName)) {
+        if (!plugin.getDatastore().createAndLoadTrack(trackName).getOrDefault(false)) {
             Message.CREATE_TRACK_ERROR.send(sender);
             return CommandResult.FAILURE;
         }

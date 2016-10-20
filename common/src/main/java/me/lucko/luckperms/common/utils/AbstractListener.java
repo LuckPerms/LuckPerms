@@ -41,7 +41,7 @@ public class AbstractListener {
 
         final UuidCache cache = plugin.getUuidCache();
         if (!cache.isOnlineMode()) {
-            UUID uuid = plugin.getDatastore().getUUID(username);
+            UUID uuid = plugin.getDatastore().getUUID(username).getOrDefault(null);
             if (uuid != null) {
                 cache.addToCache(u, uuid);
             } else {
@@ -51,7 +51,7 @@ public class AbstractListener {
                 plugin.getDatastore().saveUUIDData(username, u, Callback.empty());
             }
         } else {
-            UUID uuid = plugin.getDatastore().getUUID(username);
+            UUID uuid = plugin.getDatastore().getUUID(username).getOrDefault(null);
             if (uuid == null) {
                 plugin.getApiProvider().fireEventAsync(new UserFirstLoginEvent(u, username));
             }

@@ -20,14 +20,13 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.methods;
+package me.lucko.luckperms.common.storage.backing;
 
 import lombok.Cleanup;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.data.Log;
-import me.lucko.luckperms.common.storage.Datastore;
 
 import java.io.*;
 import java.util.*;
@@ -35,7 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.*;
 import java.util.logging.Formatter;
 
-abstract class FlatfileDatastore extends Datastore {
+abstract class FlatfileBacking extends AbstractBacking {
     private static final String LOG_FORMAT = "%s(%s): [%s] %s(%s) --> %s";
 
     private final Logger actionLogger = Logger.getLogger("lp_actions");
@@ -48,7 +47,7 @@ abstract class FlatfileDatastore extends Datastore {
     File groupsDir;
     File tracksDir;
 
-    FlatfileDatastore(LuckPermsPlugin plugin, String name, File pluginDir) {
+    FlatfileBacking(LuckPermsPlugin plugin, String name, File pluginDir) {
         super(plugin, name);
         this.pluginDir = pluginDir;
     }

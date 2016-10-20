@@ -61,7 +61,7 @@ public class BulkEditPermission extends SubCommand<Datastore> {
             return CommandResult.FAILURE;
         }
 
-        Set<UUID> uuids = datastore.getUniqueUsers();
+        Set<UUID> uuids = datastore.getUniqueUsers().getOrDefault(null);
 
         for (UUID u : uuids) {
             plugin.getDatastore().loadUser(u, "null");

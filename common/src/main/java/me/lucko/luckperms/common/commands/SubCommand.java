@@ -162,7 +162,7 @@ public abstract class SubCommand<T> {
     }
 
     public static void save(User user, Sender sender, LuckPermsPlugin plugin) {
-        if (plugin.getDatastore().saveUser(user)) {
+        if (plugin.getDatastore().saveUser(user).getOrDefault(false)) {
             Message.USER_SAVE_SUCCESS.send(sender);
         } else {
             Message.USER_SAVE_ERROR.send(sender);
@@ -172,7 +172,7 @@ public abstract class SubCommand<T> {
     }
 
     public static void save(Group group, Sender sender, LuckPermsPlugin plugin) {
-        if (plugin.getDatastore().saveGroup(group)) {
+        if (plugin.getDatastore().saveGroup(group).getOrDefault(false)) {
             Message.GROUP_SAVE_SUCCESS.send(sender);
         } else {
             Message.GROUP_SAVE_ERROR.send(sender);
@@ -182,7 +182,7 @@ public abstract class SubCommand<T> {
     }
 
     public static void save(Track track, Sender sender, LuckPermsPlugin plugin) {
-        if (plugin.getDatastore().saveTrack(track)) {
+        if (plugin.getDatastore().saveTrack(track).getOrDefault(false)) {
             Message.TRACK_SAVE_SUCCESS.send(sender);
         } else {
             Message.TRACK_SAVE_ERROR.send(sender);

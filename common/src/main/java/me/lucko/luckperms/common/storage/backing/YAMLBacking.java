@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.methods;
+package me.lucko.luckperms.common.storage.backing;
 
 import lombok.Cleanup;
 import me.lucko.luckperms.common.LuckPermsPlugin;
@@ -42,8 +42,8 @@ import java.util.stream.Collectors;
 import static me.lucko.luckperms.common.core.PermissionHolder.exportToLegacy;
 
 @SuppressWarnings({"unchecked", "ResultOfMethodCallIgnored"})
-public class YAMLDatastore extends FlatfileDatastore {
-    public YAMLDatastore(LuckPermsPlugin plugin, File pluginDir) {
+public class YAMLBacking extends FlatfileBacking {
+    public YAMLBacking(LuckPermsPlugin plugin, File pluginDir) {
         super(plugin, "Flatfile - YAML", pluginDir);
     }
 

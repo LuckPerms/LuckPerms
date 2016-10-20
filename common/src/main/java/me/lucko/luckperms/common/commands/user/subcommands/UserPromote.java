@@ -54,7 +54,7 @@ public class UserPromote extends SubCommand<User> {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!plugin.getDatastore().loadTrack(trackName)) {
+        if (!plugin.getDatastore().loadTrack(trackName).getOrDefault(false)) {
             Message.TRACK_DOES_NOT_EXIST.send(sender);
             return CommandResult.INVALID_ARGS;
         }
@@ -85,7 +85,7 @@ public class UserPromote extends SubCommand<User> {
             return CommandResult.STATE_ERROR;
         }
 
-        if (!plugin.getDatastore().loadGroup(next)) {
+        if (!plugin.getDatastore().loadGroup(next).getOrDefault(false)) {
             Message.USER_PROMOTE_ERROR_MALFORMED.send(sender, next);
             return CommandResult.STATE_ERROR;
         }

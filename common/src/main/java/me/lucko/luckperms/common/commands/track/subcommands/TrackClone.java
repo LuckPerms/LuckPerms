@@ -47,12 +47,12 @@ public class TrackClone extends SubCommand<Track> {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (plugin.getDatastore().loadTrack(newTrackName)) {
+        if (plugin.getDatastore().loadTrack(newTrackName).getOrDefault(false)) {
             Message.TRACK_ALREADY_EXISTS.send(sender);
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!plugin.getDatastore().createAndLoadTrack(newTrackName)) {
+        if (!plugin.getDatastore().createAndLoadTrack(newTrackName).getOrDefault(false)) {
             Message.CREATE_TRACK_ERROR.send(sender);
             return CommandResult.FAILURE;
         }

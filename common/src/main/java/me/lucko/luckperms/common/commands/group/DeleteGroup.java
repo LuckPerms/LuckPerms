@@ -55,7 +55,7 @@ public class DeleteGroup extends SingleMainCommand {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!plugin.getDatastore().loadGroup(groupName)) {
+        if (!plugin.getDatastore().loadGroup(groupName).getOrDefault(false)) {
             Message.GROUP_DOES_NOT_EXIST.send(sender);
             return CommandResult.INVALID_ARGS;
         }
@@ -66,7 +66,7 @@ public class DeleteGroup extends SingleMainCommand {
             return CommandResult.LOADING_ERROR;
         }
 
-        if (!plugin.getDatastore().deleteGroup(group)) {
+        if (!plugin.getDatastore().deleteGroup(group).getOrDefault(false)) {
             Message.DELETE_GROUP_ERROR.send(sender);
             return CommandResult.FAILURE;
         }

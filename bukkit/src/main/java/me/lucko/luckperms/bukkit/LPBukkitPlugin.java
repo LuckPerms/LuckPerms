@@ -49,6 +49,7 @@ import me.lucko.luckperms.common.storage.Datastore;
 import me.lucko.luckperms.common.storage.StorageFactory;
 import me.lucko.luckperms.common.tracks.TrackManager;
 import me.lucko.luckperms.common.users.UserManager;
+import me.lucko.luckperms.common.utils.BufferedRequest;
 import me.lucko.luckperms.common.utils.LocaleManager;
 import me.lucko.luckperms.common.utils.LogFactory;
 import org.bukkit.World;
@@ -84,6 +85,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private ContextManager<Player> contextManager;
     private WorldCalculator worldCalculator;
     private CalculatorFactory calculatorFactory;
+    private BufferedRequest<Void> updateTaskBuffer;
 
     @Override
     public void onEnable() {
@@ -139,10 +141,19 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
             contextManager.registerListener(new AutoOPListener());
         }
 
+        final LPBukkitPlugin i = this;
+        updateTaskBuffer = new BufferedRequest<Void>(5000L, this::doAsync) {
+            @Override
+            protected Void perform() {
+                getServer().getScheduler().runTaskAsynchronously(i, new UpdateTask(i));
+                return null;
+            }
+        };
+
         int mins = getConfiguration().getSyncTime();
         if (mins > 0) {
             long ticks = mins * 60 * 20;
-            getServer().getScheduler().runTaskTimerAsynchronously(this, new UpdateTask(this), ticks, ticks);
+            getServer().getScheduler().runTaskTimerAsynchronously(this, () -> updateTaskBuffer.request(), ticks, ticks);
         }
 
         getServer().getScheduler().runTaskTimer(this, BukkitSenderFactory.get(this), 1L, 1L);
@@ -188,7 +199,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     @Override
     public void onDisable() {
         getLog().info("Closing datastore...");
-        datastore.shutdown();
+        datastore.shutdown().getOrDefault(null);
 
         getLog().info("Unregistering API...");
         ApiHandler.unregisterProvider();
@@ -207,6 +218,11 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     @Override
     public void doSync(Runnable r) {
         getServer().getScheduler().runTask(this, r);
+    }
+
+    @Override
+    public void doAsyncRepeating(Runnable r, long interval) {
+        getServer().getScheduler().runTaskTimerAsynchronously(this, r, interval, interval);
     }
 
     @Override
@@ -345,11 +361,6 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     @Override
     public boolean isPluginLoaded(String name) {
         return getServer().getPluginManager().isPluginEnabled(name);
-    }
-
-    @Override
-    public void runUpdateTask() {
-        getServer().getScheduler().runTaskAsynchronously(this, new UpdateTask(this));
     }
 
     private void registerPermissions(PermissionDefault def) {

@@ -307,6 +307,11 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         scheduler.createTaskBuilder().execute(r).submit(this);
     }
 
+    @Override
+    public void doAsyncRepeating(Runnable r, long interval) {
+        scheduler.createTaskBuilder().async().intervalTicks(interval).execute(r).submit(this);
+    }
+
     private void registerPermission(PermissionService p, String node) {
         Optional<PermissionDescription.Builder> builder = p.newDescriptionBuilder(this);
         if (!builder.isPresent()) return;

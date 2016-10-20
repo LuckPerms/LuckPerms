@@ -20,32 +20,19 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.track;
+package me.lucko.luckperms.common.utils;
 
-import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.SingleMainCommand;
-import me.lucko.luckperms.common.commands.Util;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Permission;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
-import java.util.ArrayList;
-import java.util.List;
+public interface LPFuture<T> extends Future<T> {
 
-public class ListTracks extends SingleMainCommand {
-    public ListTracks() {
-        super("ListTracks", "/%s listtracks", 0, Permission.LIST_TRACKS);
-    }
-
-    @Override
-    protected CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
-        if (!plugin.getDatastore().loadAllTracks().getOrDefault(false)) {
-            Message.TRACKS_LOAD_ERROR.send(sender);
-            return CommandResult.LOADING_ERROR;
+    default T getOrDefault(T def) {
+        try {
+            return get();
+        } catch (InterruptedException | ExecutionException e) {
+            return def;
         }
-
-        Message.TRACKS_LIST.send(sender, Util.listToCommaSep(new ArrayList<>(plugin.getTrackManager().getAll().keySet())));
-        return CommandResult.SUCCESS;
     }
+
 }

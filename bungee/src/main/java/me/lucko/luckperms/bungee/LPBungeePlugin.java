@@ -268,4 +268,10 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     public void doSync(Runnable r) {
         r.run();
     }
+
+    @Override
+    public void doAsyncRepeating(Runnable r, long interval) {
+        long millis = interval * 50L; // convert from ticks to milliseconds
+        getProxy().getScheduler().schedule(this, r, millis, millis, TimeUnit.MILLISECONDS);
+    }
 }

@@ -22,19 +22,15 @@
 
 package me.lucko.luckperms.common.api.internal;
 
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import me.lucko.luckperms.api.*;
 import me.lucko.luckperms.api.data.Callback;
 import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.storage.AbstractFuture;
 
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import static me.lucko.luckperms.common.api.internal.Utils.*;
 
@@ -210,64 +206,68 @@ public class DatastoreLink implements Datastore {
 
         @Override
         public boolean logAction(@NonNull LogEntry entry) {
-            return master.logAction(entry);
+            return master.logAction(entry).getOrDefault(false);
         }
 
         @Override
         public Log getLog() {
-            return new LogLink(master.getLog());
+            me.lucko.luckperms.common.data.Log log = master.getLog().getOrDefault(null);
+            if (log == null) {
+                return null;
+            }
+            return new LogLink(log);
         }
 
         @Override
         public boolean loadOrCreateUser(@NonNull UUID uuid, @NonNull String username) {
-            return master.loadUser(uuid, checkUsername(username));
+            return master.loadUser(uuid, checkUsername(username)).getOrDefault(false);
         }
 
         @Override
         public boolean loadUser(@NonNull UUID uuid) {
-            return master.loadUser(uuid, "null");
+            return master.loadUser(uuid, "null").getOrDefault(false);
         }
 
         @Override
         public boolean loadUser(@NonNull UUID uuid, @NonNull String username) {
-            return master.loadUser(uuid, checkUsername(username));
+            return master.loadUser(uuid, checkUsername(username)).getOrDefault(false);
         }
 
         @Override
         public boolean saveUser(@NonNull User user) {
             checkUser(user);
-            return master.saveUser(((UserLink) user).getMaster());
+            return master.saveUser(((UserLink) user).getMaster()).getOrDefault(false);
         }
 
         @Override
         public boolean cleanupUsers() {
-            return master.cleanupUsers();
+            return master.cleanupUsers().getOrDefault(false);
         }
 
         @Override
         public Set<UUID> getUniqueUsers() {
-            return master.getUniqueUsers();
+            return master.getUniqueUsers().getOrDefault(null);
         }
 
         @Override
         public boolean createAndLoadGroup(@NonNull String name) {
-            return master.createAndLoadGroup(checkName(name));
+            return master.createAndLoadGroup(checkName(name)).getOrDefault(false);
         }
 
         @Override
         public boolean loadGroup(@NonNull String name) {
-            return master.loadGroup(checkName(name));
+            return master.loadGroup(checkName(name)).getOrDefault(false);
         }
 
         @Override
         public boolean loadAllGroups() {
-            return master.loadAllGroups();
+            return master.loadAllGroups().getOrDefault(false);
         }
 
         @Override
         public boolean saveGroup(@NonNull Group group) {
             checkGroup(group);
-            return master.saveGroup(((GroupLink) group).getMaster());
+            return master.saveGroup(((GroupLink) group).getMaster()).getOrDefault(false);
         }
 
         @Override
@@ -276,44 +276,44 @@ public class DatastoreLink implements Datastore {
             if (group.getName().equalsIgnoreCase(plugin.getConfiguration().getDefaultGroupName())) {
                 throw new IllegalArgumentException("Cannot delete the default group.");
             }
-            return master.deleteGroup(((GroupLink) group).getMaster());
+            return master.deleteGroup(((GroupLink) group).getMaster()).getOrDefault(false);
         }
 
         @Override
         public boolean createAndLoadTrack(@NonNull String name) {
-            return master.createAndLoadTrack(checkName(name));
+            return master.createAndLoadTrack(checkName(name)).getOrDefault(false);
         }
 
         @Override
         public boolean loadTrack(@NonNull String name) {
-            return master.loadTrack(checkName(name));
+            return master.loadTrack(checkName(name)).getOrDefault(false);
         }
 
         @Override
         public boolean loadAllTracks() {
-            return master.loadAllTracks();
+            return master.loadAllTracks().getOrDefault(false);
         }
 
         @Override
         public boolean saveTrack(@NonNull Track track) {
             checkTrack(track);
-            return master.saveTrack(((TrackLink) track).getMaster());
+            return master.saveTrack(((TrackLink) track).getMaster()).getOrDefault(false);
         }
 
         @Override
         public boolean deleteTrack(@NonNull Track track) {
             checkTrack(track);
-            return master.deleteTrack(((TrackLink) track).getMaster());
+            return master.deleteTrack(((TrackLink) track).getMaster()).getOrDefault(false);
         }
 
         @Override
         public boolean saveUUIDData(@NonNull String username, @NonNull UUID uuid) {
-            return master.saveUUIDData(checkUsername(username), uuid);
+            return master.saveUUIDData(checkUsername(username), uuid).getOrDefault(false);
         }
 
         @Override
         public UUID getUUID(@NonNull String username) {
-            return master.getUUID(checkUsername(username));
+            return master.getUUID(checkUsername(username)).getOrDefault(null);
         }
     }
 
@@ -323,193 +323,112 @@ public class DatastoreLink implements Datastore {
 
         @Override
         public java.util.concurrent.Future<Boolean> logAction(@NonNull LogEntry entry) {
-            LPFuture<Boolean> lpf = new LPFuture<>();
-            master.logAction(entry, lpf);
-            return lpf;
+            return master.logAction(entry);
         }
 
         @Override
         public java.util.concurrent.Future<Log> getLog() {
-            LPFuture<Log> lpf = new LPFuture<>();
-            master.getLog(log -> lpf.onComplete(new LogLink(log)));
-            return lpf;
+            AbstractFuture<Log> fut = new AbstractFuture<>();
+            master.getLog(log -> fut.complete(new LogLink(log)));
+            return fut;
         }
 
         @Override
         public java.util.concurrent.Future<Boolean> loadOrCreateUser(@NonNull UUID uuid, @NonNull String username) {
-            LPFuture<Boolean> lpf = new LPFuture<>();
-            master.loadUser(uuid, checkUsername(username), lpf);
-            return lpf;
+            return master.loadUser(uuid, checkUsername(username));
         }
 
         @Override
         public java.util.concurrent.Future<Boolean> loadUser(@NonNull UUID uuid) {
-            LPFuture<Boolean> lpf = new LPFuture<>();
-            master.loadUser(uuid, "null", lpf);
-            return lpf;
+            return master.loadUser(uuid, "null");
         }
 
         @Override
         public java.util.concurrent.Future<Boolean> loadUser(@NonNull UUID uuid, @NonNull String username) {
-            LPFuture<Boolean> lpf = new LPFuture<>();
-            master.loadUser(uuid, checkUsername(username), lpf);
-            return lpf;
+            return master.loadUser(uuid, checkUsername(username));
         }
 
         @Override
         public java.util.concurrent.Future<Boolean> saveUser(@NonNull User user) {
-            LPFuture<Boolean> lpf = new LPFuture<>();
             checkUser(user);
-            master.saveUser(((UserLink) user).getMaster(), lpf);
-            return lpf;
+            return master.saveUser(((UserLink) user).getMaster());
         }
 
         @Override
         public java.util.concurrent.Future<Boolean> cleanupUsers() {
-            LPFuture<Boolean> lpf = new LPFuture<>();
-            master.cleanupUsers(lpf);
-            return lpf;
+            return master.cleanupUsers();
         }
 
         @Override
         public java.util.concurrent.Future<Set<UUID>> getUniqueUsers() {
-            LPFuture<Set<UUID>> lpf = new LPFuture<>();
-            master.getUniqueUsers(lpf);
-            return lpf;
+            return master.getUniqueUsers();
         }
 
         @Override
         public java.util.concurrent.Future<Boolean> createAndLoadGroup(@NonNull String name) {
-            LPFuture<Boolean> lpf = new LPFuture<>();
-            master.createAndLoadGroup(checkName(name), lpf);
-            return lpf;
+            return master.createAndLoadGroup(checkName(name));
         }
 
         @Override
         public java.util.concurrent.Future<Boolean> loadGroup(@NonNull String name) {
-            LPFuture<Boolean> lpf = new LPFuture<>();
-            master.loadGroup(checkName(name), lpf);
-            return lpf;
+            return master.loadGroup(checkName(name));
         }
 
         @Override
         public java.util.concurrent.Future<Boolean> loadAllGroups() {
-            LPFuture<Boolean> lpf = new LPFuture<>();
-            master.loadAllGroups(lpf);
-            return lpf;
+            return master.loadAllGroups();
         }
 
         @Override
         public java.util.concurrent.Future<Boolean> saveGroup(@NonNull Group group) {
-            LPFuture<Boolean> lpf = new LPFuture<>();
             checkGroup(group);
-            master.saveGroup(((GroupLink) group).getMaster(), lpf);
-            return lpf;
+            return master.saveGroup(((GroupLink) group).getMaster());
         }
 
         @Override
         public java.util.concurrent.Future<Boolean> deleteGroup(@NonNull Group group) {
-            LPFuture<Boolean> lpf = new LPFuture<>();
             checkGroup(group);
             if (group.getName().equalsIgnoreCase(plugin.getConfiguration().getDefaultGroupName())) {
                 throw new IllegalArgumentException("Cannot delete the default group.");
             }
-            master.deleteGroup(((GroupLink) group).getMaster(), lpf);
-            return lpf;
+            return master.deleteGroup(((GroupLink) group).getMaster());
         }
 
         @Override
         public java.util.concurrent.Future<Boolean> createAndLoadTrack(@NonNull String name) {
-            LPFuture<Boolean> lpf = new LPFuture<>();
-            master.createAndLoadTrack(checkName(name), lpf);
-            return lpf;
+            return master.createAndLoadTrack(checkName(name));
         }
 
         @Override
         public java.util.concurrent.Future<Boolean> loadTrack(@NonNull String name) {
-            LPFuture<Boolean> lpf = new LPFuture<>();
-            master.loadTrack(checkName(name), lpf);
-            return lpf;
+            return master.loadTrack(checkName(name));
         }
 
         @Override
         public java.util.concurrent.Future<Boolean> loadAllTracks() {
-            LPFuture<Boolean> lpf = new LPFuture<>();
-            master.loadAllTracks(lpf);
-            return lpf;
+            return master.loadAllTracks();
         }
 
         @Override
         public java.util.concurrent.Future<Boolean> saveTrack(@NonNull Track track) {
-            LPFuture<Boolean> lpf = new LPFuture<>();
             checkTrack(track);
-            master.saveTrack(((TrackLink) track).getMaster(), lpf);
-            return lpf;
+            return master.saveTrack(((TrackLink) track).getMaster());
         }
 
         @Override
         public java.util.concurrent.Future<Boolean> deleteTrack(@NonNull Track track) {
-            LPFuture<Boolean> lpf = new LPFuture<>();
             checkTrack(track);
-            master.deleteTrack(((TrackLink) track).getMaster(), lpf);
-            return lpf;
+            return master.deleteTrack(((TrackLink) track).getMaster());
         }
 
         @Override
         public java.util.concurrent.Future<Boolean> saveUUIDData(@NonNull String username, @NonNull UUID uuid) {
-            LPFuture<Boolean> lpf = new LPFuture<>();
-            master.saveUUIDData(checkUsername(username), uuid, lpf);
-            return lpf;
+            return master.saveUUIDData(checkUsername(username), uuid);
         }
 
         @Override
         public java.util.concurrent.Future<UUID> getUUID(@NonNull String username) {
-            LPFuture<UUID> lpf = new LPFuture<>();
-            master.getUUID(checkUsername(username), lpf);
-            return lpf;
-        }
-    }
-
-    @NoArgsConstructor(access = AccessLevel.PRIVATE)
-    public static class LPFuture<T> implements Callback<T>, java.util.concurrent.Future<T> {
-        private final CountDownLatch latch = new CountDownLatch(1);
-        private T value;
-
-        @Override
-        public void onComplete(T t) {
-            value = t;
-            latch.countDown();
-        }
-
-        @Override
-        public boolean cancel(boolean mayInterruptIfRunning) {
-            // Not supported
-            return false;
-        }
-
-        @Override
-        public boolean isCancelled() {
-            return false;
-        }
-
-        @Override
-        public boolean isDone() {
-            return latch.getCount() == 0;
-        }
-
-        @Override
-        public T get() throws InterruptedException {
-            latch.await();
-            return value;
-        }
-
-        @Override
-        public T get(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
-            if (latch.await(timeout, unit)) {
-                return value;
-            } else {
-                throw new TimeoutException();
-            }
+            return master.getUUID(checkUsername(username));
         }
     }
 

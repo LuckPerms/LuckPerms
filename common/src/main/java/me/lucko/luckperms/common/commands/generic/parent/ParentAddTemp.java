@@ -80,7 +80,7 @@ public class ParentAddTemp extends SecondarySubCommand {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!plugin.getDatastore().loadGroup(groupName)) {
+        if (!plugin.getDatastore().loadGroup(groupName).getOrDefault(false)) {
             Message.GROUP_DOES_NOT_EXIST.send(sender);
             return CommandResult.INVALID_ARGS;
         }

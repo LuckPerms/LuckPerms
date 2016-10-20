@@ -1,0 +1,88 @@
+/*
+ * Copyright (c) 2016 Lucko (Luck) <luck@lucko.me>
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *  SOFTWARE.
+ */
+
+package me.lucko.luckperms.common.storage.backing;
+
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.data.Log;
+import me.lucko.luckperms.common.groups.Group;
+import me.lucko.luckperms.common.tracks.Track;
+import me.lucko.luckperms.common.users.User;
+
+import java.util.Set;
+import java.util.UUID;
+
+@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
+public abstract class AbstractBacking {
+    protected final LuckPermsPlugin plugin;
+
+    @Getter
+    public final String name;
+
+    @Getter
+    @Setter
+    private boolean acceptingLogins = false;
+
+    /**
+     * Execute a runnable asynchronously
+     * @param r the task to run
+     */
+    public void doAsync(Runnable r) {
+        plugin.doAsync(r);
+    }
+
+    /**
+     * Execute a runnable synchronously
+     * @param r the task to run
+     */
+    public void doSync(Runnable r) {
+        plugin.doSync(r);
+    }
+
+    public abstract void init();
+    public abstract void shutdown();
+    public abstract boolean logAction(LogEntry entry);
+    public abstract Log getLog();
+    public abstract boolean loadUser(UUID uuid, String username);
+    public abstract boolean saveUser(User user);
+    public abstract boolean cleanupUsers();
+    public abstract Set<UUID> getUniqueUsers();
+    public abstract boolean createAndLoadGroup(String name);
+    public abstract boolean loadGroup(String name);
+    public abstract boolean loadAllGroups();
+    public abstract boolean saveGroup(Group group);
+    public abstract boolean deleteGroup(Group group);
+    public abstract boolean createAndLoadTrack(String name);
+    public abstract boolean loadTrack(String name);
+    public abstract boolean loadAllTracks();
+    public abstract boolean saveTrack(Track track);
+    public abstract boolean deleteTrack(Track track);
+    public abstract boolean saveUUIDData(String username, UUID uuid);
+    public abstract UUID getUUID(String username);
+    public abstract String getName(UUID uuid);
+
+}

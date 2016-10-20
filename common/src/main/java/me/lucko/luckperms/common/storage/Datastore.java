@@ -22,208 +22,191 @@
 
 package me.lucko.luckperms.common.storage;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.data.Callback;
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.data.Log;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.tracks.Track;
 import me.lucko.luckperms.common.users.User;
+import me.lucko.luckperms.common.utils.LPFuture;
 
 import java.util.Set;
 import java.util.UUID;
 
-@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
-public abstract class Datastore {
-    protected final LuckPermsPlugin plugin;
-
-    @Getter
-    public final String name;
-
-    @Getter
-    @Setter
-    private boolean acceptingLogins = false;
+public interface Datastore {
+    
+    String getName();
+    
+    boolean isAcceptingLogins();
+    void setAcceptingLogins(boolean acceptingLogins);
 
     /**
      * Execute a runnable asynchronously
      * @param r the task to run
      */
-    private void doAsync(Runnable r) {
-        plugin.doAsync(r);
-    }
+    void doAsync(Runnable r);
 
     /**
      * Execute a runnable synchronously
      * @param r the task to run
      */
-    private void doSync(Runnable r) {
-        plugin.doSync(r);
+    void doSync(Runnable r);
+
+    default Datastore force() {
+        return this;
     }
 
-    /*
-        These methods are called immediately and in the same thread as they are called in.
-     */
-    public abstract void init();
-    public abstract void shutdown();
-    public abstract boolean logAction(LogEntry entry);
-    public abstract Log getLog();
-    public abstract boolean loadUser(UUID uuid, String username);
-    public abstract boolean saveUser(User user);
-    public abstract boolean cleanupUsers();
-    public abstract Set<UUID> getUniqueUsers();
-    public abstract boolean createAndLoadGroup(String name);
-    public abstract boolean loadGroup(String name);
-    public abstract boolean loadAllGroups();
-    public abstract boolean saveGroup(Group group);
-    public abstract boolean deleteGroup(Group group);
-    public abstract boolean createAndLoadTrack(String name);
-    public abstract boolean loadTrack(String name);
-    public abstract boolean loadAllTracks();
-    public abstract boolean saveTrack(Track track);
-    public abstract boolean deleteTrack(Track track);
-    public abstract boolean saveUUIDData(String username, UUID uuid);
-    public abstract UUID getUUID(String username);
-    public abstract String getName(UUID uuid);
+    LPFuture<Void> init();
+    LPFuture<Void> shutdown();
+    LPFuture<Boolean> logAction(LogEntry entry);
+    LPFuture<Log> getLog();
+    LPFuture<Boolean> loadUser(UUID uuid, String username);
+    LPFuture<Boolean> saveUser(User user);
+    LPFuture<Boolean> cleanupUsers();
+    LPFuture<Set<UUID>> getUniqueUsers();
+    LPFuture<Boolean> createAndLoadGroup(String name);
+    LPFuture<Boolean> loadGroup(String name);
+    LPFuture<Boolean> loadAllGroups();
+    LPFuture<Boolean> saveGroup(Group group);
+    LPFuture<Boolean> deleteGroup(Group group);
+    LPFuture<Boolean> createAndLoadTrack(String name);
+    LPFuture<Boolean> loadTrack(String name);
+    LPFuture<Boolean> loadAllTracks();
+    LPFuture<Boolean> saveTrack(Track track);
+    LPFuture<Boolean> deleteTrack(Track track);
+    LPFuture<Boolean> saveUUIDData(String username, UUID uuid);
+    LPFuture<UUID> getUUID(String username);
+    LPFuture<String> getName(UUID uuid);
 
-
-
-    /*
-        These methods will schedule the operation to run async. The callback will be ran when the task is complete.
-        Callbacks are ran on the main server thread (except on BungeeCord)
-     */
-    public void logAction(LogEntry entry, Callback<Boolean> callback) {
+    default void logAction(LogEntry entry, Callback<Boolean> callback) {
         doAsync(() -> {
-            boolean result = logAction(entry);
+            boolean result = logAction(entry).getOrDefault(false);
             doSync(() -> callback.onComplete(result));
         });
     }
 
-    public void getLog(Callback<Log> callback) {
+    default void getLog(Callback<Log> callback) {
         doAsync(() -> {
-            Log result = getLog();
+            Log result = getLog().getOrDefault(null);
             doSync(() -> callback.onComplete(result));
         });
     }
 
-    public void loadUser(UUID uuid, String username, Callback<Boolean> callback) {
+    default void loadUser(UUID uuid, String username, Callback<Boolean> callback) {
         doAsync(() -> {
-            boolean result = loadUser(uuid, username);
+            boolean result = loadUser(uuid, username).getOrDefault(false);
             doSync(() -> callback.onComplete(result));
         });
     }
 
-    public void saveUser(User user, Callback<Boolean> callback) {
+    default void saveUser(User user, Callback<Boolean> callback) {
         doAsync(() -> {
-            boolean result = saveUser(user);
+            boolean result = saveUser(user).getOrDefault(false);
             doSync(() -> callback.onComplete(result));
         });
     }
 
-    public void cleanupUsers(Callback<Boolean> callback) {
+    default void cleanupUsers(Callback<Boolean> callback) {
         doAsync(() -> {
-            boolean result = cleanupUsers();
+            boolean result = cleanupUsers().getOrDefault(false);
             doSync(() -> callback.onComplete(result));
         });
     }
 
-    public void getUniqueUsers(Callback<Set<UUID>> callback) {
+    default void getUniqueUsers(Callback<Set<UUID>> callback) {
         doAsync(() -> {
-            Set<UUID> result = getUniqueUsers();
+            Set<UUID> result = getUniqueUsers().getOrDefault(null);
             doSync(() -> callback.onComplete(result));
         });
     }
 
-    public void createAndLoadGroup(String name, Callback<Boolean> callback) {
+    default void createAndLoadGroup(String name, Callback<Boolean> callback) {
         doAsync(() -> {
-            boolean result = createAndLoadGroup(name);
+            boolean result = createAndLoadGroup(name).getOrDefault(false);
             doSync(() -> callback.onComplete(result));
         });
     }
 
-    public void loadGroup(String name, Callback<Boolean> callback) {
+    default void loadGroup(String name, Callback<Boolean> callback) {
         doAsync(() -> {
-            boolean result = loadGroup(name);
+            boolean result = loadGroup(name).getOrDefault(false);
             doSync(() -> callback.onComplete(result));
         });
     }
 
-    public void loadAllGroups(Callback<Boolean> callback) {
+    default void loadAllGroups(Callback<Boolean> callback) {
         doAsync(() -> {
-            boolean result = loadAllGroups();
+            boolean result = loadAllGroups().getOrDefault(false);
             doSync(() -> callback.onComplete(result));
         });
     }
 
-    public void saveGroup(Group group, Callback<Boolean> callback) {
+    default void saveGroup(Group group, Callback<Boolean> callback) {
         doAsync(() -> {
-            boolean result = saveGroup(group);
+            boolean result = saveGroup(group).getOrDefault(false);
             doSync(() -> callback.onComplete(result));
         });
     }
 
-    public void deleteGroup(Group group, Callback<Boolean> callback) {
+    default void deleteGroup(Group group, Callback<Boolean> callback) {
         doAsync(() -> {
-            boolean result = deleteGroup(group);
+            boolean result = deleteGroup(group).getOrDefault(false);
             doSync(() -> callback.onComplete(result));
         });
     }
 
-    public void createAndLoadTrack(String name, Callback<Boolean> callback) {
+    default void createAndLoadTrack(String name, Callback<Boolean> callback) {
         doAsync(() -> {
-            boolean result = createAndLoadTrack(name);
+            boolean result = createAndLoadTrack(name).getOrDefault(false);
             doSync(() -> callback.onComplete(result));
         });
     }
 
-    public void loadTrack(String name, Callback<Boolean> callback) {
+    default void loadTrack(String name, Callback<Boolean> callback) {
         doAsync(() -> {
-            boolean result = loadTrack(name);
+            boolean result = loadTrack(name).getOrDefault(false);
             doSync(() -> callback.onComplete(result));
         });
     }
 
-    public void loadAllTracks(Callback<Boolean> callback) {
+    default void loadAllTracks(Callback<Boolean> callback) {
         doAsync(() -> {
-            boolean result = loadAllTracks();
+            boolean result = loadAllTracks().getOrDefault(false);
             doSync(() -> callback.onComplete(result));
         });
     }
 
-    public void saveTrack(Track track, Callback<Boolean> callback) {
+    default void saveTrack(Track track, Callback<Boolean> callback) {
         doAsync(() -> {
-            boolean result = saveTrack(track);
+            boolean result = saveTrack(track).getOrDefault(false);
             doSync(() -> callback.onComplete(result));
         });
     }
 
-    public void deleteTrack(Track track, Callback<Boolean> callback) {
+    default void deleteTrack(Track track, Callback<Boolean> callback) {
         doAsync(() -> {
-            boolean result = deleteTrack(track);
+            boolean result = deleteTrack(track).getOrDefault(false);
             doSync(() -> callback.onComplete(result));
         });
     }
 
-    public void saveUUIDData(String username, UUID uuid, Callback<Boolean> callback) {
+    default void saveUUIDData(String username, UUID uuid, Callback<Boolean> callback) {
         doAsync(() -> {
-            boolean result = saveUUIDData(username, uuid);
+            boolean result = saveUUIDData(username, uuid).getOrDefault(false);
             doSync(() -> callback.onComplete(result));
         });
     }
 
-    public void getUUID(String username, Callback<UUID> callback) {
+    default void getUUID(String username, Callback<UUID> callback) {
         doAsync(() -> {
-            UUID result = getUUID(username);
+            UUID result = getUUID(username).getOrDefault(null);
             doSync(() -> callback.onComplete(result));
         });
     }
 
-    public void getName(UUID uuid, Callback<String> callback) {
+    default void getName(UUID uuid, Callback<String> callback) {
         doAsync(() -> {
-            String result = getName(uuid);
+            String result = getName(uuid).getOrDefault(null);
             doSync(() -> callback.onComplete(result));
         });
     }

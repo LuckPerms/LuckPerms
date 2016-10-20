@@ -51,12 +51,12 @@ public class CreateGroup extends SingleMainCommand {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (plugin.getDatastore().loadGroup(groupName)) {
+        if (plugin.getDatastore().loadGroup(groupName).getOrDefault(false)) {
             Message.GROUP_ALREADY_EXISTS.send(sender);
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!plugin.getDatastore().createAndLoadGroup(groupName)) {
+        if (!plugin.getDatastore().createAndLoadGroup(groupName).getOrDefault(false)) {
             Message.CREATE_GROUP_ERROR.send(sender);
             return CommandResult.FAILURE;
         }

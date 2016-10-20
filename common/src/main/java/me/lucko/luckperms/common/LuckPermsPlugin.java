@@ -38,6 +38,7 @@ import me.lucko.luckperms.common.groups.GroupManager;
 import me.lucko.luckperms.common.storage.Datastore;
 import me.lucko.luckperms.common.tracks.TrackManager;
 import me.lucko.luckperms.common.users.UserManager;
+import me.lucko.luckperms.common.utils.BufferedRequest;
 import me.lucko.luckperms.common.utils.LocaleManager;
 
 import java.io.File;
@@ -177,7 +178,7 @@ public interface LuckPermsPlugin {
     /**
      * Runs an update task
      */
-    void runUpdateTask();
+    BufferedRequest<Void> getUpdateTaskBuffer();
 
     /**
      * Execute a runnable asynchronously
@@ -190,5 +191,12 @@ public interface LuckPermsPlugin {
      * @param r the task to run
      */
     void doSync(Runnable r);
+
+    /**
+     * Execute a runnable asynchronously on a loop
+     * @param r the task to run
+     * @param interval the time between runs in ticks
+     */
+    void doAsyncRepeating(Runnable r, long interval);
 
 }

@@ -118,7 +118,7 @@ public class ExportCommand extends SingleMainCommand {
             // Export users
             log.info("Export: Exporting all users. Finding a list of unique users to export.");
             Datastore ds = plugin.getDatastore();
-            Set<UUID> users = ds.getUniqueUsers();
+            Set<UUID> users = ds.getUniqueUsers().getOrDefault(null);
             log.info("Export: Found " + users.size() + " unique users to export.");
 
             int userCount = 0;

@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.methods;
+package me.lucko.luckperms.common.storage.backing;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -29,7 +29,6 @@ import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.data.Log;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.groups.GroupManager;
-import me.lucko.luckperms.common.storage.Datastore;
 import me.lucko.luckperms.common.tracks.Track;
 import me.lucko.luckperms.common.tracks.TrackManager;
 import me.lucko.luckperms.common.users.User;
@@ -44,7 +43,7 @@ import java.util.*;
 
 import static me.lucko.luckperms.common.core.PermissionHolder.exportToLegacy;
 
-abstract class SQLDatastore extends Datastore {
+abstract class SQLBacking extends AbstractBacking {
     private static final QueryPS EMPTY_PS = preparedStatement -> {};
 
     private static final Type NM_TYPE = new TypeToken<Map<String, Boolean>>(){}.getType();
@@ -79,7 +78,7 @@ abstract class SQLDatastore extends Datastore {
 
     private final Gson gson;
 
-    SQLDatastore(LuckPermsPlugin plugin, String name) {
+    SQLBacking(LuckPermsPlugin plugin, String name) {
         super(plugin, name);
         gson = new Gson();
     }
