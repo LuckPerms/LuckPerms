@@ -85,6 +85,14 @@ abstract class SQLBacking extends AbstractBacking {
 
     abstract Connection getConnection() throws SQLException;
 
+    protected static void close(AutoCloseable closeable) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (Exception ignored) {}
+        }
+    }
+
     abstract boolean runQuery(String query, QueryPS queryPS);
     abstract boolean runQuery(String query, QueryPS queryPS, QueryRS queryRS);
 
@@ -145,43 +153,66 @@ abstract class SQLBacking extends AbstractBacking {
         User user = plugin.getUserManager().getOrMake(UserIdentifier.of(uuid, username));
         user.getIoLock().lock();
         try {
-            return runQuery(USER_SELECT,
+            // screw "effectively final"
+            final String[] perms = new String[1];
+            final String[] pg = new String[1];
+            final String[] name = new String[1];
+            final boolean[] exists = {false};
+
+            boolean s = runQuery(USER_SELECT,
                     preparedStatement -> preparedStatement.setString(1, user.getUuid().toString()),
                     resultSet -> {
                         if (resultSet.next()) {
-                            // User exists, let's load.
-                            Map<String, Boolean> nodes = gson.fromJson(resultSet.getString("perms"), NM_TYPE);
-                            user.setNodes(nodes);
-                            user.setPrimaryGroup(resultSet.getString("primary_group"));
-
-                            boolean save = plugin.getUserManager().giveDefaultIfNeeded(user, false);
-
-                            if (user.getName() == null || user.getName().equalsIgnoreCase("null")) {
-                                user.setName(resultSet.getString("name"));
-                            } else {
-                                if (!resultSet.getString("name").equals(user.getName())) {
-                                    save = true;
-                                }
-                            }
-
-                            if (save) {
-                                runQuery(USER_UPDATE, preparedStatement -> {
-                                    preparedStatement.setString(1, user.getName());
-                                    preparedStatement.setString(2, user.getPrimaryGroup());
-                                    preparedStatement.setString(3, gson.toJson(exportToLegacy(user.getNodes())));
-                                    preparedStatement.setString(4, user.getUuid().toString());
-                                });
-                            }
-                        } else {
-                            if (plugin.getUserManager().shouldSave(user)) {
-                                user.clearNodes();
-                                user.setPrimaryGroup(null);
-                                plugin.getUserManager().giveDefaultIfNeeded(user, false);
-                            }
+                            // User exists.
+                            exists[0] = true;
+                            perms[0] = resultSet.getString("perms");
+                            pg[0] = resultSet.getString("primary_group");
+                            name[0] = resultSet.getString("name");
                         }
                         return true;
                     }
             );
+
+            if (!s) {
+                return false;
+            }
+
+            if (exists[0]) {
+                // User exists, let's load.
+                Map<String, Boolean> nodes = gson.fromJson(perms[0], NM_TYPE);
+
+                user.setNodes(nodes);
+                user.setPrimaryGroup(pg[0]);
+
+                boolean save = plugin.getUserManager().giveDefaultIfNeeded(user, false);
+
+                if (user.getName() == null || user.getName().equalsIgnoreCase("null")) {
+                    user.setName(name[0]);
+                } else {
+                    if (!name[0].equals(user.getName())) {
+                        save = true;
+                    }
+                }
+
+                if (save) {
+                    String json = gson.toJson(exportToLegacy(user.getNodes()));
+                    runQuery(USER_UPDATE, preparedStatement -> {
+                        preparedStatement.setString(1, user.getName());
+                        preparedStatement.setString(2, user.getPrimaryGroup());
+                        preparedStatement.setString(3, json);
+                        preparedStatement.setString(4, user.getUuid().toString());
+                    });
+                }
+
+            } else {
+                if (plugin.getUserManager().shouldSave(user)) {
+                    user.clearNodes();
+                    user.setPrimaryGroup(null);
+                    plugin.getUserManager().giveDefaultIfNeeded(user, false);
+                }
+            }
+
+            return true;
         } finally {
             user.getIoLock().unlock();
             user.getRefreshBuffer().requestDirectly();
@@ -203,29 +234,42 @@ abstract class SQLBacking extends AbstractBacking {
 
         user.getIoLock().lock();
         try {
-            return runQuery(USER_SELECT,
+            final boolean[] exists = {false};
+            boolean success = runQuery(USER_SELECT,
                     preparedStatement -> preparedStatement.setString(1, user.getUuid().toString()),
                     resultSet -> {
-                        if (!resultSet.next()) {
-                            // Doesn't already exist, let's insert.
-                            return runQuery(USER_INSERT, preparedStatement -> {
-                                preparedStatement.setString(1, user.getUuid().toString());
-                                preparedStatement.setString(2, user.getName());
-                                preparedStatement.setString(3, user.getPrimaryGroup());
-                                preparedStatement.setString(4, gson.toJson(exportToLegacy(user.getNodes())));
-                            });
-
-                        } else {
-                            // User exists, let's update.
-                            return runQuery(USER_UPDATE, preparedStatement -> {
-                                preparedStatement.setString(1, user.getName());
-                                preparedStatement.setString(2, user.getPrimaryGroup());
-                                preparedStatement.setString(3, gson.toJson(exportToLegacy(user.getNodes())));
-                                preparedStatement.setString(4, user.getUuid().toString());
-                            });
+                        if (resultSet.next()) {
+                            exists[0] = true;
                         }
+                        return true;
                     }
             );
+
+            if (!success) {
+                return false;
+            }
+
+            final String s = gson.toJson(exportToLegacy(user.getNodes()));
+
+            if (exists[0]) {
+                // User exists, let's update.
+                return runQuery(USER_UPDATE, preparedStatement -> {
+                    preparedStatement.setString(1, user.getName());
+                    preparedStatement.setString(2, user.getPrimaryGroup());
+                    preparedStatement.setString(3, s);
+                    preparedStatement.setString(4, user.getUuid().toString());
+                });
+            } else {
+                // Doesn't already exist, let's insert.
+                return runQuery(USER_INSERT, preparedStatement -> {
+                    preparedStatement.setString(1, user.getUuid().toString());
+                    preparedStatement.setString(2, user.getName());
+                    preparedStatement.setString(3, user.getPrimaryGroup());
+                    preparedStatement.setString(4, s);
+                });
+            }
+
+
         } finally {
             user.getIoLock().unlock();
         }
@@ -258,22 +302,37 @@ abstract class SQLBacking extends AbstractBacking {
         Group group = plugin.getGroupManager().getOrMake(name);
         group.getIoLock().lock();
         try {
-            return runQuery(GROUP_SELECT,
+            final boolean[] exists = {false};
+            final String[] perms = new String[1];
+
+            boolean s = runQuery(GROUP_SELECT,
                     preparedStatement -> preparedStatement.setString(1, group.getName()),
                     resultSet -> {
                         if (resultSet.next()) {
-                            // Group exists, let's load.
-                            Map<String, Boolean> nodes = gson.fromJson(resultSet.getString("perms"), NM_TYPE);
-                            group.setNodes(nodes);
-                            return true;
-                        } else {
-                            return runQuery(GROUP_INSERT, preparedStatement -> {
-                                preparedStatement.setString(1, group.getName());
-                                preparedStatement.setString(2, gson.toJson(exportToLegacy(group.getNodes())));
-                            });
+                            exists[0] = true;
+                            perms[0] = resultSet.getString("perms");
                         }
+                        return true;
                     }
             );
+
+            if (!s) {
+                return false;
+            }
+
+            if (exists[0]) {
+                // Group exists, let's load.
+                Map<String, Boolean> nodes = gson.fromJson(perms[0], NM_TYPE);
+                group.setNodes(nodes);
+                return true;
+            } else {
+                String json = gson.toJson(exportToLegacy(group.getNodes()));
+                return runQuery(GROUP_INSERT, preparedStatement -> {
+                    preparedStatement.setString(1, group.getName());
+                    preparedStatement.setString(2, json);
+                });
+            }
+
         } finally {
             group.getIoLock().unlock();
         }
@@ -284,22 +343,30 @@ abstract class SQLBacking extends AbstractBacking {
         Group group = plugin.getGroupManager().getOrMake(name);
         group.getIoLock().lock();
         try {
-            return runQuery(GROUP_SELECT,
+            final String[] perms = new String[1];
+            boolean s = runQuery(GROUP_SELECT,
                     preparedStatement -> preparedStatement.setString(1, name),
                     resultSet -> {
                         if (resultSet.next()) {
-                            // Group exists, let's load.
-                            Map<String, Boolean> nodes = gson.fromJson(resultSet.getString("perms"), NM_TYPE);
-                            group.setNodes(nodes);
+                            perms[0] = resultSet.getString("perms");
                             return true;
                         }
                         return false;
                     }
             );
+
+            if (!s) {
+                return false;
+            }
+
+            // Group exists, let's load.
+            Map<String, Boolean> nodes = gson.fromJson(perms[0], NM_TYPE);
+            group.setNodes(nodes);
+            return true;
+
         } finally {
             group.getIoLock().unlock();
         }
-
     }
 
     @Override
@@ -336,8 +403,9 @@ abstract class SQLBacking extends AbstractBacking {
     public boolean saveGroup(Group group) {
         group.getIoLock().lock();
         try {
+            String json = gson.toJson(exportToLegacy(group.getNodes()));
             return runQuery(GROUP_UPDATE, preparedStatement -> {
-                preparedStatement.setString(1, gson.toJson(exportToLegacy(group.getNodes())));
+                preparedStatement.setString(1, json);
                 preparedStatement.setString(2, group.getName());
             });
         } finally {
@@ -366,21 +434,36 @@ abstract class SQLBacking extends AbstractBacking {
         Track track = plugin.getTrackManager().getOrMake(name);
         track.getIoLock().lock();
         try {
-            return runQuery(TRACK_SELECT,
+            final boolean[] exists = {false};
+            final String[] groups = new String[1];
+
+            boolean s = runQuery(TRACK_SELECT,
                     preparedStatement -> preparedStatement.setString(1, track.getName()),
                     resultSet -> {
                         if (resultSet.next()) {
-                            // Track exists, let's load.
-                            track.setGroups(gson.fromJson(resultSet.getString("groups"), T_TYPE));
-                            return true;
-                        } else {
-                            return runQuery(TRACK_INSERT, preparedStatement -> {
-                                preparedStatement.setString(1, track.getName());
-                                preparedStatement.setString(2, gson.toJson(track.getGroups()));
-                            });
+                            exists[0] = true;
+                            groups[0] = resultSet.getString("groups");
                         }
+                        return true;
                     }
             );
+
+            if (!s) {
+                return false;
+            }
+
+            if (exists[0]) {
+                // Track exists, let's load.
+                track.setGroups(gson.fromJson(groups[0], T_TYPE));
+                return true;
+            } else {
+                String json = gson.toJson(track.getGroups());
+                return runQuery(TRACK_INSERT, preparedStatement -> {
+                    preparedStatement.setString(1, track.getName());
+                    preparedStatement.setString(2, json);
+                });
+            }
+
         } finally {
             track.getIoLock().unlock();
         }
@@ -391,16 +474,25 @@ abstract class SQLBacking extends AbstractBacking {
         Track track = plugin.getTrackManager().getOrMake(name);
         track.getIoLock().lock();
         try {
-            return runQuery(TRACK_SELECT,
+            final String[] groups = {null};
+            boolean s = runQuery(TRACK_SELECT,
                     preparedStatement -> preparedStatement.setString(1, name),
                     resultSet -> {
                         if (resultSet.next()) {
-                            track.setGroups(gson.fromJson(resultSet.getString("groups"), T_TYPE));
+                            groups[0] = resultSet.getString("groups");
                             return true;
                         }
                         return false;
                     }
             );
+
+            if (!s) {
+                return false;
+            }
+
+            track.setGroups(gson.fromJson(groups[0], T_TYPE));
+            return true;
+
         } finally {
             track.getIoLock().unlock();
         }
@@ -440,8 +532,9 @@ abstract class SQLBacking extends AbstractBacking {
     public boolean saveTrack(Track track) {
         track.getIoLock().lock();
         try {
+            String s = gson.toJson(track.getGroups());
             return runQuery(TRACK_UPDATE, preparedStatement -> {
-                preparedStatement.setString(1, gson.toJson(track.getGroups()));
+                preparedStatement.setString(1, s);
                 preparedStatement.setString(2, track.getName());
             });
         } finally {
@@ -468,24 +561,32 @@ abstract class SQLBacking extends AbstractBacking {
     @Override
     public boolean saveUUIDData(String username, UUID uuid) {
         final String u = username.toLowerCase();
-        return runQuery(UUIDCACHE_SELECT,
+        final boolean[] update = {false};
+        boolean s = runQuery(UUIDCACHE_SELECT,
                 preparedStatement -> preparedStatement.setString(1, u),
                 resultSet -> {
-                    boolean success;
                     if (resultSet.next()) {
-                        success = runQuery(UUIDCACHE_UPDATE, preparedStatement -> {
-                            preparedStatement.setString(1, uuid.toString());
-                            preparedStatement.setString(2, u);
-                        });
-                    } else {
-                        success = runQuery(UUIDCACHE_INSERT, preparedStatement -> {
-                            preparedStatement.setString(1, u);
-                            preparedStatement.setString(2, uuid.toString());
-                        });
+                        update[0] = true;
                     }
-                    return success;
+                    return true;
                 }
         );
+
+        if (!s) {
+            return false;
+        }
+
+        if (update[0]) {
+            return runQuery(UUIDCACHE_UPDATE, preparedStatement -> {
+                preparedStatement.setString(1, uuid.toString());
+                preparedStatement.setString(2, u);
+            });
+        } else {
+            return runQuery(UUIDCACHE_INSERT, preparedStatement -> {
+                preparedStatement.setString(1, u);
+                preparedStatement.setString(2, uuid.toString());
+            });
+        }
     }
 
     @Override

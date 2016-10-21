@@ -24,7 +24,6 @@ package me.lucko.luckperms.common.storage.backing;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import lombok.Cleanup;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.DatastoreConfiguration;
 
@@ -90,19 +89,26 @@ public class MySQLBacking extends SQLBacking {
     @Override
     boolean runQuery(String query, QueryPS queryPS) {
         boolean success = false;
+
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+
         try {
-            @Cleanup Connection connection = getConnection();
+            connection = getConnection();
             if (connection == null || connection.isClosed()) {
                 throw new IllegalStateException("SQL connection is null");
             }
 
-            @Cleanup PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement = connection.prepareStatement(query);
             queryPS.onRun(preparedStatement);
-            preparedStatement.execute();
 
+            preparedStatement.execute();
             success = true;
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            close(preparedStatement);
+            close(connection);
         }
         return success;
     }
@@ -110,19 +116,28 @@ public class MySQLBacking extends SQLBacking {
     @Override
     boolean runQuery(String query, QueryPS queryPS, QueryRS queryRS) {
         boolean success = false;
+
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+
         try {
-            @Cleanup Connection connection = getConnection();
+            connection = getConnection();
             if (connection == null || connection.isClosed()) {
                 throw new IllegalStateException("SQL connection is null");
             }
 
-            @Cleanup PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement = connection.prepareStatement(query);
             queryPS.onRun(preparedStatement);
 
-            @Cleanup ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
             success = queryRS.onResult(resultSet);
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            close(resultSet);
+            close(preparedStatement);
+            close(connection);
         }
         return success;
     }

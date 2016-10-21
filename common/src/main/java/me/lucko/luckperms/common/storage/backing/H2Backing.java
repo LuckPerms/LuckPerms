@@ -22,7 +22,6 @@
 
 package me.lucko.luckperms.common.storage.backing;
 
-import lombok.Cleanup;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 
 import java.io.File;
@@ -58,19 +57,24 @@ public class H2Backing extends SQLBacking {
     @Override
     boolean runQuery(String query, QueryPS queryPS) {
         boolean success = false;
+
+        PreparedStatement preparedStatement = null;
+
         try {
             Connection connection = getConnection();
             if (connection == null || connection.isClosed()) {
                 throw new IllegalStateException("SQL connection is null");
             }
 
-            @Cleanup PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement = connection.prepareStatement(query);
             queryPS.onRun(preparedStatement);
-            preparedStatement.execute();
 
+            preparedStatement.execute();
             success = true;
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            close(preparedStatement);
         }
         return success;
     }
@@ -78,19 +82,26 @@ public class H2Backing extends SQLBacking {
     @Override
     boolean runQuery(String query, QueryPS queryPS, QueryRS queryRS) {
         boolean success = false;
+
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+
         try {
             Connection connection = getConnection();
             if (connection == null || connection.isClosed()) {
                 throw new IllegalStateException("SQL connection is null");
             }
 
-            @Cleanup PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement = connection.prepareStatement(query);
             queryPS.onRun(preparedStatement);
 
-            @Cleanup ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
             success = queryRS.onResult(resultSet);
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            close(resultSet);
+            close(preparedStatement);
         }
         return success;
     }
