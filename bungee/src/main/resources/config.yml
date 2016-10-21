@@ -107,6 +107,7 @@ data:
   database: minecraft
   username: root
   password: ''
+  pool-size: 10 # The size of the MySQL connection pool.
 
   # Set to -1 to disable. If this is the only instance accessing the datastore, you can disable syncing.
   # e.g. if you're using sqlite or flatfile, this can be set to -1 to save resources.

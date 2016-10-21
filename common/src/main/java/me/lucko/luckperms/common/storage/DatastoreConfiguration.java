@@ -33,5 +33,6 @@ public class DatastoreConfiguration implements me.lucko.luckperms.api.data.Datas
     private final String database;
     private final String username;
     private final String password;
+    private int poolSize;
 
 }

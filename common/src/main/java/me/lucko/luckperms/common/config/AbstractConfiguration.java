@@ -130,7 +130,8 @@ public abstract class AbstractConfiguration<T extends LuckPermsPlugin> implement
                 getString("data.address", null),
                 getString("data.database", null),
                 getString("data.username", null),
-                getString("data.password", null)
+                getString("data.password", null),
+                getInt("data.pool-size", 10)
         );
         storageMethod = getString("storage-method", defaultStorage);
         splitStorage = getBoolean("split-storage.enabled", false);

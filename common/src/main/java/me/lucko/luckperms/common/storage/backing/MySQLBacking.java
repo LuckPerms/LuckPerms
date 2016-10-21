@@ -56,8 +56,9 @@ public class MySQLBacking extends SQLBacking {
         final String database = configuration.getDatabase();
         final String username = configuration.getUsername();
         final String password = configuration.getPassword();
+        
+        config.setMaximumPoolSize(configuration.getPoolSize());
 
-        config.setMaximumPoolSize(10);
         config.setPoolName("luckperms");
         config.setDataSourceClassName("com.mysql.jdbc.jdbc2.optional.MysqlDataSource");
         config.addDataSourceProperty("serverName", address.split(":")[0]);
