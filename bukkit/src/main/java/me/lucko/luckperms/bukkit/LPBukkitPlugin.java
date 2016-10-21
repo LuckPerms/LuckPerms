@@ -86,6 +86,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private WorldCalculator worldCalculator;
     private CalculatorFactory calculatorFactory;
     private BufferedRequest<Void> updateTaskBuffer;
+    private boolean started = false;
 
     @Override
     public void onEnable() {
@@ -193,11 +194,13 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
             getServer().getOperators().forEach(o -> o.setOp(false));
         }
 
+        started = true;
         getLog().info("Successfully loaded.");
     }
 
     @Override
     public void onDisable() {
+        started = false;
         getLog().info("Closing datastore...");
         datastore.shutdown().getOrDefault(null);
 
