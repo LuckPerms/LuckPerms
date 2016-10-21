@@ -178,7 +178,7 @@ public class MongoDBBacking extends AbstractBacking {
             }, false);
         } finally {
             user.getIoLock().unlock();
-            user.refreshPermissions();
+            user.getRefreshBuffer().requestDirectly();
         }
     }
 

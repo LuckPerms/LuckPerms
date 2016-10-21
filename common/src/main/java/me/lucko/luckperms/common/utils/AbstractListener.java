@@ -41,14 +41,14 @@ public class AbstractListener {
 
         final UuidCache cache = plugin.getUuidCache();
         if (!cache.isOnlineMode()) {
-            UUID uuid = plugin.getDatastore().getUUID(username).getOrDefault(null);
+            UUID uuid = plugin.getDatastore().force().getUUID(username).getOrDefault(null);
             if (uuid != null) {
                 cache.addToCache(u, uuid);
             } else {
                 // No previous data for this player
                 plugin.getApiProvider().fireEventAsync(new UserFirstLoginEvent(u, username));
                 cache.addToCache(u, u);
-                plugin.getDatastore().saveUUIDData(username, u, Callback.empty());
+                plugin.getDatastore().force().saveUUIDData(username, u, Callback.empty());
             }
         } else {
             UUID uuid = plugin.getDatastore().getUUID(username).getOrDefault(null);
@@ -57,10 +57,10 @@ public class AbstractListener {
             }
 
             // Online mode, no cache needed. This is just for name -> uuid lookup.
-            plugin.getDatastore().saveUUIDData(username, u, Callback.empty());
+            plugin.getDatastore().force().saveUUIDData(username, u, Callback.empty());
         }
 
-        plugin.getDatastore().loadUser(cache.getUUID(u), username);
+        plugin.getDatastore().force().loadUser(cache.getUUID(u), username).getOrDefault(false);
         User user = plugin.getUserManager().get(cache.getUUID(u));
         if (user == null) {
             plugin.getLog().warn("Failed to load user: " + username);
@@ -75,7 +75,7 @@ public class AbstractListener {
 
             // If they were given a default, persist the new assignments back to the storage.
             if (save) {
-                plugin.getDatastore().saveUser(user);
+                plugin.getDatastore().force().saveUser(user).getOrDefault(false);
             }
 
             user.setupData(false); // Pretty nasty calculation call. Sets up the caching system so data is ready when the user joins.
@@ -103,7 +103,7 @@ public class AbstractListener {
     protected void refreshPlayer(UUID uuid) {
         final User user = plugin.getUserManager().get(plugin.getUuidCache().getUUID(uuid));
         if (user != null) {
-            user.refreshPermissions();
+            user.getRefreshBuffer().requestDirectly();
         }
     }
 }

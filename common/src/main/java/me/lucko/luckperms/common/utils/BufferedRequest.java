@@ -27,7 +27,6 @@ import lombok.RequiredArgsConstructor;
 import me.lucko.luckperms.common.storage.AbstractFuture;
 
 import java.lang.ref.WeakReference;
-import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -42,7 +41,7 @@ public abstract class BufferedRequest<T> {
     @Getter
     private ReentrantLock lock = new ReentrantLock();
 
-    public Future<T> request() {
+    public LPFuture<T> request() {
         lock.lock();
         try {
             if (processor != null) {
@@ -60,6 +59,10 @@ public abstract class BufferedRequest<T> {
         } finally {
             lock.unlock();
         }
+    }
+
+    public T requestDirectly() {
+        return perform();
     }
 
     protected abstract T perform();
@@ -109,11 +112,11 @@ public abstract class BufferedRequest<T> {
             future.complete(result);
         }
 
-        public Future<R> get() {
+        public LPFuture<R> get() {
             return future;
         }
 
-        public Future<R> getAndExtend() {
+        public LPFuture<R> getAndExtend() {
             lock.lock();
             try {
                 executionTime = System.currentTimeMillis() + delayMillis;

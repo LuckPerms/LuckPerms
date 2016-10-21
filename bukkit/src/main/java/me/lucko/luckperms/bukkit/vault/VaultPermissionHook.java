@@ -130,12 +130,13 @@ public class VaultPermissionHook extends Permission {
      */
     void save(PermissionHolder holder) {
         if (holder instanceof User) {
-            ((User) holder).refreshPermissions();
-            plugin.getDatastore().saveUser(((User) holder));
+
+            plugin.getDatastore().saveUser(((User) holder), b -> {
+                ((User) holder).getRefreshBuffer().request();
+            });
         }
         if (holder instanceof Group) {
-            plugin.getDatastore().saveGroup(((Group) holder));
-            plugin.runUpdateTask();
+            plugin.getDatastore().saveGroup(((Group) holder), b -> plugin.getUpdateTaskBuffer().request());
         }
     }
 

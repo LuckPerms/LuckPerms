@@ -64,7 +64,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public void runUpdateTask() {
-        plugin.runUpdateTask();
+        plugin.getUpdateTaskBuffer().request();
     }
 
     @Override

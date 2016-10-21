@@ -102,7 +102,7 @@ public class BungeeListener extends AbstractListener implements Listener {
                     // No previous data for this player
                     plugin.getApiProvider().fireEventAsync(new UserFirstLoginEvent(c.getUniqueId(), c.getName()));
                     cache.addToCache(c.getUniqueId(), c.getUniqueId());
-                    plugin.getDatastore().saveUUIDData(c.getName(), c.getUniqueId());
+                    plugin.getDatastore().force().saveUUIDData(c.getName(), c.getUniqueId()).getOrDefault(false);
                 }
             } else {
                 UUID uuid = plugin.getDatastore().getUUID(c.getName()).getOrDefault(null);
@@ -111,12 +111,12 @@ public class BungeeListener extends AbstractListener implements Listener {
                 }
 
                 // Online mode, no cache needed. This is just for name -> uuid lookup.
-                plugin.getDatastore().saveUUIDData(c.getName(), c.getUniqueId());
+                plugin.getDatastore().force().saveUUIDData(c.getName(), c.getUniqueId()).getOrDefault(false);
             }
 
             // We have to make a new user on this thread whilst the connection is being held, or we get concurrency issues as the Bukkit server
             // and the BungeeCord server try to make a new user at the same time.
-            plugin.getDatastore().loadUser(cache.getUUID(c.getUniqueId()), c.getName());
+            plugin.getDatastore().force().loadUser(cache.getUUID(c.getUniqueId()), c.getName()).getOrDefault(false);
             User user = plugin.getUserManager().get(cache.getUUID(c.getUniqueId()));
             if (user == null) {
                 plugin.getLog().warn("Failed to load user: " + c.getName());

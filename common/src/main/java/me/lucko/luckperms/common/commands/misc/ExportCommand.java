@@ -124,7 +124,7 @@ public class ExportCommand extends SingleMainCommand {
             int userCount = 0;
             for (UUID uuid : users) {
                 userCount++;
-                plugin.getDatastore().loadUser(uuid, "null");
+                plugin.getDatastore().loadUser(uuid, "null").getOrDefault(false);
                 User user = plugin.getUserManager().get(uuid);
 
                 boolean inDefault = false;

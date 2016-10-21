@@ -52,16 +52,12 @@ public class LuckPermsSubjectData implements SubjectData {
     private final PermissionHolder holder;
 
     private void objectSave(PermissionHolder t) {
-        service.getPlugin().doAsync(() -> {
-            if (t instanceof User) {
-                ((User) t).refreshPermissions();
-                service.getPlugin().getDatastore().saveUser(((User) t));
-            }
-            if (t instanceof Group) {
-                service.getPlugin().getDatastore().saveGroup(((Group) t));
-                service.getPlugin().runUpdateTask();
-            }
-        });
+        if (t instanceof User) {
+            service.getPlugin().getDatastore().saveUser(((User) t), b -> ((User) t).getRefreshBuffer().request());
+        }
+        if (t instanceof Group) {
+            service.getPlugin().getDatastore().saveGroup(((Group) t), b -> service.getPlugin().getUpdateTaskBuffer().request());
+        }
     }
 
     @Override

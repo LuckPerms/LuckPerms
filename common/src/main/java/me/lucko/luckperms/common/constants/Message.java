@@ -108,7 +108,8 @@ public enum Message {
     TRACKS_LOAD_ERROR("An unexpected error occurred. Unable to load all tracks.", true),
     TRACK_EMPTY("The track cannot be used as it is empty or contains only one group.", true),
 
-    UPDATE_TASK_RUN("&bRunning update task for all online users.", true),
+    UPDATE_TASK_REQUEST("&bUpdate task scheduled.", true),
+    UPDATE_TASK_COMPLETE("&aUpdate task finished.", true),
     INFO(
             "{PREFIX}&2Running &bLuckPerms v{0}&2 by &bLuck&2." + "\n" +
             "{PREFIX}&f-> &3Platform: &f{1}" + "\n" +

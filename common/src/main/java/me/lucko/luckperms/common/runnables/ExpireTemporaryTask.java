@@ -36,16 +36,16 @@ public class ExpireTemporaryTask implements Runnable {
         boolean groupChanges = false;
         for (Group group : plugin.getGroupManager().getAll().values()) {
             if (group.auditTemporaryPermissions()) {
-                plugin.getDatastore().saveGroup(group);
+                plugin.getDatastore().saveGroup(group).getOrDefault(false);
                 groupChanges = true;
             }
         }
 
         for (User user : plugin.getUserManager().getAll().values()) {
             if (user.auditTemporaryPermissions()) {
-                plugin.getDatastore().saveUser(user);
+                plugin.getDatastore().saveUser(user).getOrDefault(false);
                 if (!groupChanges) {
-                    user.refreshPermissions();
+                    user.getRefreshBuffer().request();
                 }
             }
         }

@@ -34,6 +34,8 @@ import me.lucko.luckperms.common.utils.LPFuture;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Phaser;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * A Datastore wrapping that ensures all tasks are completed before {@link Datastore#shutdown()} is called.
@@ -84,8 +86,12 @@ public class TolerantDatastore implements Datastore {
 
     @Override
     public LPFuture<Void> shutdown() {
-        phaser.register(); // Register self
-        phaser.arriveAndAwaitAdvance(); // Wait for other threads to finish.
+        // Wait for other threads to finish.
+        try {
+            phaser.awaitAdvanceInterruptibly(phaser.getPhase(), 5, TimeUnit.SECONDS);
+        } catch (InterruptedException | TimeoutException e) {
+            e.printStackTrace();
+        }
 
         return backing.shutdown();
     }

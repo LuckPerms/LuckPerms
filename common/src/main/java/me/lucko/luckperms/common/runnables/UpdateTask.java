@@ -41,14 +41,14 @@ public class UpdateTask implements Runnable {
         if (event.isCancelled()) return;
 
         // Reload all groups
-        plugin.getDatastore().loadAllGroups();
+        plugin.getDatastore().loadAllGroups().getOrDefault(false);
         String defaultGroup = plugin.getConfiguration().getDefaultGroupName();
         if (!plugin.getGroupManager().isLoaded(defaultGroup)) {
-            plugin.getDatastore().createAndLoadGroup(defaultGroup);
+            plugin.getDatastore().createAndLoadGroup(defaultGroup).getOrDefault(false);
         }
 
         // Reload all tracks
-        plugin.getDatastore().loadAllTracks();
+        plugin.getDatastore().loadAllTracks().getOrDefault(false);
 
         // Refresh all online users.
         plugin.getUserManager().updateAllUsers();

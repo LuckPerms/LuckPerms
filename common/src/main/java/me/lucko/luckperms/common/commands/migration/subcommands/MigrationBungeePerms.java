@@ -63,7 +63,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
             groupCount ++;
 
             // Make a LuckPerms group for the one being migrated
-            plugin.getDatastore().createAndLoadGroup(g.getName().toLowerCase());
+            plugin.getDatastore().createAndLoadGroup(g.getName().toLowerCase()).getOrDefault(false);
             me.lucko.luckperms.common.groups.Group group = plugin.getGroupManager().get(g.getName().toLowerCase());
             try {
                 LogEntry.build()
@@ -173,7 +173,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
                 }
             }
 
-            plugin.getDatastore().saveGroup(group);
+            plugin.getDatastore().saveGroup(group).getOrDefault(false);
         }
 
         log.info("BungeePerms Migration: Migrated " + groupCount + " groups");
@@ -187,7 +187,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
             userCount++;
 
             // Make a LuckPerms user for the one being migrated.
-            plugin.getDatastore().loadUser(u.getUUID(), "null");
+            plugin.getDatastore().loadUser(u.getUUID(), "null").getOrDefault(false);
             me.lucko.luckperms.common.users.User user = plugin.getUserManager().get(u.getUUID());
 
             // Migrate global perms
@@ -288,7 +288,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
                 }
             }
 
-            plugin.getDatastore().saveUser(user);
+            plugin.getDatastore().saveUser(user).getOrDefault(false);
             plugin.getUserManager().cleanup(user);
         }
 

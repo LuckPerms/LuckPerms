@@ -31,6 +31,7 @@ import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.api.internal.UserLink;
 import me.lucko.luckperms.common.caching.UserData;
 import me.lucko.luckperms.common.core.PermissionHolder;
+import me.lucko.luckperms.common.utils.BufferedRequest;
 import me.lucko.luckperms.common.utils.Identifiable;
 
 import java.util.UUID;
@@ -61,6 +62,15 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
 
     @Getter
     private UserData userData = null;
+
+    @Getter
+    private BufferedRequest<Void> refreshBuffer = new BufferedRequest<Void>(1000L, r -> getPlugin().doAsync(r)) {
+        @Override
+        protected Void perform() {
+            refreshPermissions();
+            return null;
+        }
+    };
 
     protected User(UUID uuid, LuckPermsPlugin plugin) {
         super(uuid.toString(), plugin);
@@ -111,7 +121,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
      * Refresh and re-assign the users permissions
      * Blocking call.
      */
-    public synchronized void refreshPermissions() {
+    private synchronized void refreshPermissions() {
         if (userData == null) {
             return;
         }

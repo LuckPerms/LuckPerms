@@ -184,7 +184,7 @@ abstract class SQLBacking extends AbstractBacking {
             );
         } finally {
             user.getIoLock().unlock();
-            user.refreshPermissions();
+            user.getRefreshBuffer().requestDirectly();
         }
     }
 

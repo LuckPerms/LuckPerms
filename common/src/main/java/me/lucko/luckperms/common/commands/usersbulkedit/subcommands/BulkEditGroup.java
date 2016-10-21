@@ -64,7 +64,7 @@ public class BulkEditGroup extends SubCommand<Datastore> {
         Set<UUID> uuids = datastore.getUniqueUsers().getOrDefault(null);
 
         for (UUID u : uuids) {
-            plugin.getDatastore().loadUser(u, "null");
+            plugin.getDatastore().loadUser(u, "null").getOrDefault(false);
             User user = plugin.getUserManager().get(u);
             if (user == null) {
                 continue;
@@ -138,7 +138,7 @@ public class BulkEditGroup extends SubCommand<Datastore> {
             });
 
             plugin.getUserManager().cleanup(user);
-            plugin.getDatastore().saveUser(user);
+            plugin.getDatastore().saveUser(user).getOrDefault(false);
         }
 
         Message.BULK_CHANGE_SUCCESS.send(sender, uuids.size());

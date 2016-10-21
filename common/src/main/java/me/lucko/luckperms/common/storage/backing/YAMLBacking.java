@@ -126,7 +126,7 @@ public class YAMLBacking extends FlatfileBacking {
             }, false);
         } finally {
             user.getIoLock().unlock();
-            user.refreshPermissions();
+            user.getRefreshBuffer().requestDirectly();
         }
     }
 

@@ -46,6 +46,7 @@ import me.lucko.luckperms.common.storage.Datastore;
 import me.lucko.luckperms.common.storage.StorageFactory;
 import me.lucko.luckperms.common.tracks.TrackManager;
 import me.lucko.luckperms.common.users.UserManager;
+import me.lucko.luckperms.common.utils.BufferedRequest;
 import me.lucko.luckperms.common.utils.LocaleManager;
 import me.lucko.luckperms.common.utils.LogFactory;
 import me.lucko.luckperms.sponge.contexts.WorldCalculator;
@@ -106,6 +107,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     private LocaleManager localeManager;
     private ContextManager<Subject> contextManager;
     private CalculatorFactory calculatorFactory;
+    private BufferedRequest<Void> updateTaskBuffer;
 
     @Listener
     public void onEnable(GamePreInitializationEvent event) {
@@ -157,13 +159,22 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         ApiHandler.registerProvider(apiProvider);
         Sponge.getServiceManager().setProvider(this, LuckPermsApi.class, apiProvider);
 
+        final LPSpongePlugin i = this;
+        updateTaskBuffer = new BufferedRequest<Void>(6000L, this::doAsync) {
+            @Override
+            protected Void perform() {
+                scheduler.createTaskBuilder().async().execute(new UpdateTask(i)).submit(i);
+                return null;
+            }
+        };
+
         int mins = getConfiguration().getSyncTime();
         if (mins > 0) {
             scheduler.createTaskBuilder().async().interval(mins, TimeUnit.MINUTES).execute(new UpdateTask(this))
                     .submit(LPSpongePlugin.this);
         } else {
             // Update online users
-            runUpdateTask();
+            updateTaskBuffer.request();
         }
 
         scheduler.createTaskBuilder().intervalTicks(1L).execute(SpongeSenderFactory.get(this)).submit(this);
@@ -290,11 +301,6 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     @Override
     public boolean isPluginLoaded(String name) {
         return game.getPluginManager().isLoaded(name);
-    }
-
-    @Override
-    public void runUpdateTask() {
-        scheduler.createTaskBuilder().async().execute(new UpdateTask(this)).submit(this);
     }
 
     @Override

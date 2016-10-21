@@ -79,7 +79,7 @@ public class UserLink extends PermissionHolderLink implements User {
 
     @Override
     public void refreshPermissions() {
-        master.refreshPermissions();
+        master.getRefreshBuffer().requestDirectly();
     }
 
     @Override

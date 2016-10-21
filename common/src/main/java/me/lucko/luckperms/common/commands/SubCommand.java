@@ -168,7 +168,7 @@ public abstract class SubCommand<T> {
             Message.USER_SAVE_ERROR.send(sender);
         }
 
-        user.refreshPermissions();
+        user.getRefreshBuffer().request().getOrDefault(null);
     }
 
     public static void save(Group group, Sender sender, LuckPermsPlugin plugin) {
@@ -178,7 +178,7 @@ public abstract class SubCommand<T> {
             Message.GROUP_SAVE_ERROR.send(sender);
         }
 
-        plugin.runUpdateTask();
+        plugin.getUpdateTaskBuffer().request();
     }
 
     public static void save(Track track, Sender sender, LuckPermsPlugin plugin) {
@@ -188,6 +188,6 @@ public abstract class SubCommand<T> {
             Message.TRACK_SAVE_ERROR.send(sender);
         }
 
-        plugin.runUpdateTask();
+        plugin.getUpdateTaskBuffer().request();
     }
 }

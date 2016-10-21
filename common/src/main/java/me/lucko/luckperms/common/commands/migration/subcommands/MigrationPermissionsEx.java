@@ -102,7 +102,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             maxGroupWeight = Math.max(maxGroupWeight, groupWeight);
 
             final String name = group.getName().toLowerCase();
-            plugin.getDatastore().createAndLoadGroup(name);
+            plugin.getDatastore().createAndLoadGroup(name).getOrDefault(false);
             Group lpGroup = plugin.getGroupManager().get(name);
             try {
                 LogEntry.build()
@@ -226,7 +226,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 }
             }
 
-            plugin.getDatastore().saveGroup(lpGroup);
+            plugin.getDatastore().saveGroup(lpGroup).getOrDefault(false);
 
         }
 
@@ -254,7 +254,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             }
 
             userCount++;
-            plugin.getDatastore().loadUser(u, "null");
+            plugin.getDatastore().loadUser(u, "null").getOrDefault(false);
             User lpUser = plugin.getUserManager().get(u);
 
             try {
@@ -387,7 +387,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             }
 
             plugin.getUserManager().cleanup(lpUser);
-            plugin.getDatastore().saveUser(lpUser);
+            plugin.getDatastore().saveUser(lpUser).getOrDefault(false);
         }
 
         log.info("PermissionsEx Migration: Migrated " + userCount + " users.");

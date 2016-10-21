@@ -84,8 +84,8 @@ public class StorageFactory {
     private static Datastore fromString(String storageMethod, LuckPermsPlugin plugin) {
         switch (storageMethod) {
             case "mysql":
-                BufferedOutputDatastore bod = BufferedOutputDatastore.wrap(AbstractDatastore.wrap(new MySQLBacking(plugin, plugin.getConfiguration().getDatabaseValues())), 5000L);
-                plugin.doAsyncRepeating(bod, 20L);
+                BufferedOutputDatastore bod = BufferedOutputDatastore.wrap(AbstractDatastore.wrap(new MySQLBacking(plugin, plugin.getConfiguration().getDatabaseValues())), 3000L);
+                plugin.doAsyncRepeating(bod, 10L);
                 return bod;
             case "sqlite":
                 return AbstractDatastore.wrap(new SQLiteBacking(plugin, new File(plugin.getDataFolder(), "luckperms.sqlite")));

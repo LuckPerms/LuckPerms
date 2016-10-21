@@ -46,6 +46,7 @@ import me.lucko.luckperms.common.storage.Datastore;
 import me.lucko.luckperms.common.storage.StorageFactory;
 import me.lucko.luckperms.common.tracks.TrackManager;
 import me.lucko.luckperms.common.users.UserManager;
+import me.lucko.luckperms.common.utils.BufferedRequest;
 import me.lucko.luckperms.common.utils.LocaleManager;
 import me.lucko.luckperms.common.utils.LogFactory;
 import net.md_5.bungee.api.config.ServerInfo;
@@ -74,6 +75,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     private LocaleManager localeManager;
     private ContextManager<ProxiedPlayer> contextManager;
     private CalculatorFactory calculatorFactory;
+    private BufferedRequest<Void> updateTaskBuffer;
 
     @Override
     public void onEnable() {
@@ -120,6 +122,15 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         getProxy().getPluginManager().registerListener(this, serverCalculator);
         contextManager.registerCalculator(serverCalculator);
         contextManager.registerCalculator(new ServerCalculator<>(getConfiguration().getServer()));
+
+        final LPBungeePlugin i = this;
+        updateTaskBuffer = new BufferedRequest<Void>(6000L, this::doAsync) {
+            @Override
+            protected Void perform() {
+                doAsync(new UpdateTask(i));
+                return null;
+            }
+        };
 
         int mins = getConfiguration().getSyncTime();
         if (mins > 0) {
@@ -252,11 +263,6 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
                 .filter(p -> p.getDescription().getName().equalsIgnoreCase(name))
                 .findAny()
                 .isPresent();
-    }
-
-    @Override
-    public void runUpdateTask() {
-        doAsync(new UpdateTask(this));
     }
 
     @Override
