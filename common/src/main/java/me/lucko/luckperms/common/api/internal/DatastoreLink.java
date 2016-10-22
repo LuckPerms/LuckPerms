@@ -27,7 +27,7 @@ import lombok.NonNull;
 import me.lucko.luckperms.api.*;
 import me.lucko.luckperms.api.data.Callback;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.storage.AbstractFuture;
+import me.lucko.luckperms.common.utils.AbstractFuture;
 
 import java.util.Set;
 import java.util.UUID;

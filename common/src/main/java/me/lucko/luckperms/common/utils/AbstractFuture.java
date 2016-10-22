@@ -20,9 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage;
-
-import me.lucko.luckperms.common.utils.LPFuture;
+package me.lucko.luckperms.common.utils;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;

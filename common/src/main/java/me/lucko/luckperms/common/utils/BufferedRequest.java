@@ -24,7 +24,6 @@ package me.lucko.luckperms.common.utils;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import me.lucko.luckperms.common.storage.AbstractFuture;
 
 import java.lang.ref.WeakReference;
 import java.util.concurrent.locks.ReentrantLock;

@@ -31,6 +31,7 @@ import me.lucko.luckperms.common.data.Log;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.tracks.Track;
 import me.lucko.luckperms.common.users.User;
+import me.lucko.luckperms.common.utils.AbstractFuture;
 import me.lucko.luckperms.common.utils.LPFuture;
 
 import java.util.Map;

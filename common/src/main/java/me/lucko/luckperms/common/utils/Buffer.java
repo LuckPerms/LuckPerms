@@ -26,7 +26,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
-import me.lucko.luckperms.common.storage.AbstractFuture;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -38,7 +37,7 @@ import java.util.ListIterator;
  * @param <R> the type of result produced by the final process
  */
 public abstract class Buffer<T, R> implements Runnable {
-    private static final long DEFAULT_FLUSH_TIME = 5000; // 5 seconds
+    private static final long DEFAULT_FLUSH_TIME = 1000; // 1 second
 
     private final List<BufferedObject<T, R>> buffer = new LinkedList<>();
 
