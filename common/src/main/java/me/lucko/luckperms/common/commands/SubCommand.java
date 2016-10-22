@@ -162,17 +162,17 @@ public abstract class SubCommand<T> {
     }
 
     public static void save(User user, Sender sender, LuckPermsPlugin plugin) {
-        if (plugin.getDatastore().saveUser(user).getOrDefault(false)) {
+        if (plugin.getDatastore().saveUser(user).getUnchecked()) {
             Message.USER_SAVE_SUCCESS.send(sender);
         } else {
             Message.USER_SAVE_ERROR.send(sender);
         }
 
-        user.getRefreshBuffer().request().getOrDefault(null);
+        user.getRefreshBuffer().request().getUnchecked();
     }
 
     public static void save(Group group, Sender sender, LuckPermsPlugin plugin) {
-        if (plugin.getDatastore().saveGroup(group).getOrDefault(false)) {
+        if (plugin.getDatastore().saveGroup(group).getUnchecked()) {
             Message.GROUP_SAVE_SUCCESS.send(sender);
         } else {
             Message.GROUP_SAVE_ERROR.send(sender);
@@ -182,7 +182,7 @@ public abstract class SubCommand<T> {
     }
 
     public static void save(Track track, Sender sender, LuckPermsPlugin plugin) {
-        if (plugin.getDatastore().saveTrack(track).getOrDefault(false)) {
+        if (plugin.getDatastore().saveTrack(track).getUnchecked()) {
             Message.TRACK_SAVE_SUCCESS.send(sender);
         } else {
             Message.TRACK_SAVE_ERROR.send(sender);

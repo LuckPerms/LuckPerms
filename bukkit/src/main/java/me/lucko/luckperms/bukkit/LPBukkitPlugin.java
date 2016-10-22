@@ -198,7 +198,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     public void onDisable() {
         started = false;
         getLog().info("Closing datastore...");
-        datastore.shutdown().getOrDefault(null);
+        datastore.shutdown();
 
         getLog().info("Unregistering API...");
         ApiHandler.unregisterProvider();

@@ -246,7 +246,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         log.info("PowerfulPerms Migration: Starting group migration.");
         Map<Integer, Group> groups = pm.getGroups(); // All versions
         for (Group g : groups.values()) {
-            plugin.getDatastore().createAndLoadGroup(g.getName().toLowerCase()).getOrDefault(false);
+            plugin.getDatastore().createAndLoadGroup(g.getName().toLowerCase()).getUnchecked();
             final me.lucko.luckperms.common.groups.Group group = plugin.getGroupManager().get(g.getName().toLowerCase());
             try {
                 LogEntry.build()
@@ -288,7 +288,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             progress.put(uuid, new CountDownLatch(2));
 
             // Create a LuckPerms user for the UUID
-            plugin.getDatastore().loadUser(uuid, "null").getOrDefault(false);
+            plugin.getDatastore().loadUser(uuid, "null").getUnchecked();
             User user = plugin.getUserManager().get(uuid);
 
             // Get a list of Permissions held by the user from the PP API.

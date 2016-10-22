@@ -206,12 +206,12 @@ public class DatastoreLink implements Datastore {
 
         @Override
         public boolean logAction(@NonNull LogEntry entry) {
-            return master.logAction(entry).getOrDefault(false);
+            return master.logAction(entry).getUnchecked();
         }
 
         @Override
         public Log getLog() {
-            me.lucko.luckperms.common.data.Log log = master.getLog().getOrDefault(null);
+            me.lucko.luckperms.common.data.Log log = master.getLog().getUnchecked();
             if (log == null) {
                 return null;
             }
@@ -220,54 +220,54 @@ public class DatastoreLink implements Datastore {
 
         @Override
         public boolean loadOrCreateUser(@NonNull UUID uuid, @NonNull String username) {
-            return master.loadUser(uuid, checkUsername(username)).getOrDefault(false);
+            return master.loadUser(uuid, checkUsername(username)).getUnchecked();
         }
 
         @Override
         public boolean loadUser(@NonNull UUID uuid) {
-            return master.loadUser(uuid, "null").getOrDefault(false);
+            return master.loadUser(uuid, "null").getUnchecked();
         }
 
         @Override
         public boolean loadUser(@NonNull UUID uuid, @NonNull String username) {
-            return master.loadUser(uuid, checkUsername(username)).getOrDefault(false);
+            return master.loadUser(uuid, checkUsername(username)).getUnchecked();
         }
 
         @Override
         public boolean saveUser(@NonNull User user) {
             checkUser(user);
-            return master.saveUser(((UserLink) user).getMaster()).getOrDefault(false);
+            return master.saveUser(((UserLink) user).getMaster()).getUnchecked();
         }
 
         @Override
         public boolean cleanupUsers() {
-            return master.cleanupUsers().getOrDefault(false);
+            return master.cleanupUsers().getUnchecked();
         }
 
         @Override
         public Set<UUID> getUniqueUsers() {
-            return master.getUniqueUsers().getOrDefault(null);
+            return master.getUniqueUsers().getUnchecked();
         }
 
         @Override
         public boolean createAndLoadGroup(@NonNull String name) {
-            return master.createAndLoadGroup(checkName(name)).getOrDefault(false);
+            return master.createAndLoadGroup(checkName(name)).getUnchecked();
         }
 
         @Override
         public boolean loadGroup(@NonNull String name) {
-            return master.loadGroup(checkName(name)).getOrDefault(false);
+            return master.loadGroup(checkName(name)).getUnchecked();
         }
 
         @Override
         public boolean loadAllGroups() {
-            return master.loadAllGroups().getOrDefault(false);
+            return master.loadAllGroups().getUnchecked();
         }
 
         @Override
         public boolean saveGroup(@NonNull Group group) {
             checkGroup(group);
-            return master.saveGroup(((GroupLink) group).getMaster()).getOrDefault(false);
+            return master.saveGroup(((GroupLink) group).getMaster()).getUnchecked();
         }
 
         @Override
@@ -276,44 +276,44 @@ public class DatastoreLink implements Datastore {
             if (group.getName().equalsIgnoreCase(plugin.getConfiguration().getDefaultGroupName())) {
                 throw new IllegalArgumentException("Cannot delete the default group.");
             }
-            return master.deleteGroup(((GroupLink) group).getMaster()).getOrDefault(false);
+            return master.deleteGroup(((GroupLink) group).getMaster()).getUnchecked();
         }
 
         @Override
         public boolean createAndLoadTrack(@NonNull String name) {
-            return master.createAndLoadTrack(checkName(name)).getOrDefault(false);
+            return master.createAndLoadTrack(checkName(name)).getUnchecked();
         }
 
         @Override
         public boolean loadTrack(@NonNull String name) {
-            return master.loadTrack(checkName(name)).getOrDefault(false);
+            return master.loadTrack(checkName(name)).getUnchecked();
         }
 
         @Override
         public boolean loadAllTracks() {
-            return master.loadAllTracks().getOrDefault(false);
+            return master.loadAllTracks().getUnchecked();
         }
 
         @Override
         public boolean saveTrack(@NonNull Track track) {
             checkTrack(track);
-            return master.saveTrack(((TrackLink) track).getMaster()).getOrDefault(false);
+            return master.saveTrack(((TrackLink) track).getMaster()).getUnchecked();
         }
 
         @Override
         public boolean deleteTrack(@NonNull Track track) {
             checkTrack(track);
-            return master.deleteTrack(((TrackLink) track).getMaster()).getOrDefault(false);
+            return master.deleteTrack(((TrackLink) track).getMaster()).getUnchecked();
         }
 
         @Override
         public boolean saveUUIDData(@NonNull String username, @NonNull UUID uuid) {
-            return master.saveUUIDData(checkUsername(username), uuid).getOrDefault(false);
+            return master.saveUUIDData(checkUsername(username), uuid).getUnchecked();
         }
 
         @Override
         public UUID getUUID(@NonNull String username) {
-            return master.getUUID(checkUsername(username)).getOrDefault(null);
+            return master.getUUID(checkUsername(username)).getUnchecked();
         }
     }
 

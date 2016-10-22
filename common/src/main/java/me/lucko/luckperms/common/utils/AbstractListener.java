@@ -41,7 +41,7 @@ public class AbstractListener {
 
         final UuidCache cache = plugin.getUuidCache();
         if (!cache.isOnlineMode()) {
-            UUID uuid = plugin.getDatastore().force().getUUID(username).getOrDefault(null);
+            UUID uuid = plugin.getDatastore().force().getUUID(username).getUnchecked();
             if (uuid != null) {
                 cache.addToCache(u, uuid);
             } else {
@@ -51,7 +51,7 @@ public class AbstractListener {
                 plugin.getDatastore().force().saveUUIDData(username, u, Callback.empty());
             }
         } else {
-            UUID uuid = plugin.getDatastore().getUUID(username).getOrDefault(null);
+            UUID uuid = plugin.getDatastore().getUUID(username).getUnchecked();
             if (uuid == null) {
                 plugin.getApiProvider().fireEventAsync(new UserFirstLoginEvent(u, username));
             }
@@ -60,7 +60,7 @@ public class AbstractListener {
             plugin.getDatastore().force().saveUUIDData(username, u, Callback.empty());
         }
 
-        plugin.getDatastore().force().loadUser(cache.getUUID(u), username).getOrDefault(false);
+        plugin.getDatastore().force().loadUser(cache.getUUID(u), username).getUnchecked();
         User user = plugin.getUserManager().get(cache.getUUID(u));
         if (user == null) {
             plugin.getLog().warn("Failed to load user: " + username);
@@ -75,7 +75,7 @@ public class AbstractListener {
 
             // If they were given a default, persist the new assignments back to the storage.
             if (save) {
-                plugin.getDatastore().force().saveUser(user).getOrDefault(false);
+                plugin.getDatastore().force().saveUser(user).getUnchecked();
             }
 
             user.setupData(false); // Pretty nasty calculation call. Sets up the caching system so data is ready when the user joins.

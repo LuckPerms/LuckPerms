@@ -61,7 +61,7 @@ public class TrackInsert extends SubCommand<Track> {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!plugin.getDatastore().loadGroup(groupName).getOrDefault(false)) {
+        if (!plugin.getDatastore().loadGroup(groupName).getUnchecked()) {
             Message.GROUP_DOES_NOT_EXIST.send(sender);
             return CommandResult.INVALID_ARGS;
         }

@@ -80,7 +80,7 @@ public class TolerantDatastore implements Datastore {
     }
 
     @Override
-    public LPFuture<Void> shutdown() {
+    public void shutdown() {
         // Wait for other threads to finish.
         try {
             phaser.awaitAdvanceInterruptibly(phaser.getPhase(), 5, TimeUnit.SECONDS);
@@ -88,7 +88,7 @@ public class TolerantDatastore implements Datastore {
             e.printStackTrace();
         }
 
-        return backing.shutdown();
+        backing.shutdown();
     }
 
     @Override

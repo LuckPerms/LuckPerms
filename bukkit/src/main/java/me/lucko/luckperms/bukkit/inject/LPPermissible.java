@@ -222,7 +222,7 @@ public class LPPermissible extends PermissibleBase {
         }
 
         if (hasData()) {
-            user.getUserData().invalidateCache();
+            user.getUserData().invalidatePermissionCalculators();
         }
     }
 

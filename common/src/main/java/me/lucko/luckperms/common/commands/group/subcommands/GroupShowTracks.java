@@ -39,7 +39,7 @@ public class GroupShowTracks extends SubCommand<Group> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
-        if (!plugin.getDatastore().loadAllTracks().getOrDefault(false)) {
+        if (!plugin.getDatastore().loadAllTracks().getUnchecked()) {
             Message.TRACKS_LOAD_ERROR.send(sender);
             return CommandResult.LOADING_ERROR;
         }

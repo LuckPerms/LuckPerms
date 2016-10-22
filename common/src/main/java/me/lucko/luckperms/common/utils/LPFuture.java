@@ -22,17 +22,14 @@
 
 package me.lucko.luckperms.common.utils;
 
-import java.util.concurrent.ExecutionException;
+import com.google.common.util.concurrent.Futures;
+
 import java.util.concurrent.Future;
 
 public interface LPFuture<T> extends Future<T> {
 
-    default T getOrDefault(T def) {
-        try {
-            return get();
-        } catch (InterruptedException | ExecutionException e) {
-            return def;
-        }
+    default T getUnchecked() {
+        return Futures.getUnchecked(this);
     }
 
 }

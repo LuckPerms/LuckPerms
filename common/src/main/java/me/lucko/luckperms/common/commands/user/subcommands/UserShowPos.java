@@ -47,7 +47,7 @@ public class UserShowPos extends SubCommand<User> {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!plugin.getDatastore().loadTrack(trackName).getOrDefault(false)) {
+        if (!plugin.getDatastore().loadTrack(trackName).getUnchecked()) {
             Message.TRACK_DOES_NOT_EXIST.send(sender);
             return CommandResult.INVALID_ARGS;
         }

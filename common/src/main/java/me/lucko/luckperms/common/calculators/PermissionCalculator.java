@@ -22,13 +22,14 @@
 
 package me.lucko.luckperms.common.calculators;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import lombok.RequiredArgsConstructor;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Calculates and caches permissions
@@ -39,15 +40,22 @@ public class PermissionCalculator {
     private final String objectName;
     private final boolean debug;
     private final List<PermissionProcessor> processors;
-    private final Map<String, Tristate> cache = new ConcurrentHashMap<>();
+
+    private final LoadingCache<String, Tristate> cache = CacheBuilder.newBuilder()
+            .build(new CacheLoader<String, Tristate>() {
+                @Override
+                public Tristate load(String s) {
+                    return lookupPermissionValue(s);
+                }
+            });
 
     public void invalidateCache() {
-        cache.clear();
+        cache.invalidateAll();
     }
 
     public Tristate getPermissionValue(String permission) {
         permission = permission.toLowerCase();
-        Tristate t =  cache.computeIfAbsent(permission, this::lookupPermissionValue);
+        Tristate t =  cache.getUnchecked(permission);
 
         if (debug) {
             plugin.getLog().info("Checking if " + objectName + " has permission: " + permission + " - (" + t.toString() + ")");

@@ -70,7 +70,7 @@ public class UserMainCommand extends MainCommand<User> {
                     return null;
                 }
 
-                u = plugin.getDatastore().getUUID(target).getOrDefault(null);
+                u = plugin.getDatastore().getUUID(target).getUnchecked();
                 if (u == null) {
                     Message.USER_NOT_FOUND.send(sender);
                     return null;
@@ -80,10 +80,10 @@ public class UserMainCommand extends MainCommand<User> {
             }
         }
 
-        String name = plugin.getDatastore().getName(u).getOrDefault(null);
+        String name = plugin.getDatastore().getName(u).getUnchecked();
         if (name == null) name = "null";
 
-        if (!plugin.getDatastore().loadUser(u, name).getOrDefault(false)) {
+        if (!plugin.getDatastore().loadUser(u, name).getUnchecked()) {
             Message.LOADING_ERROR.send(sender);
         }
 

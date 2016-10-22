@@ -84,19 +84,17 @@ public class StorageFactory {
     private static Datastore fromString(String storageMethod, LuckPermsPlugin plugin) {
         switch (storageMethod) {
             case "mysql":
-                BufferedOutputDatastore bod = BufferedOutputDatastore.wrap(AbstractDatastore.wrap(new MySQLBacking(plugin, plugin.getConfiguration().getDatabaseValues())), 1000L);
-                plugin.doAsyncRepeating(bod, 10L);
-                return bod;
+                return AbstractDatastore.wrap(plugin, new MySQLBacking(plugin, plugin.getConfiguration().getDatabaseValues()));
             case "sqlite":
-                return AbstractDatastore.wrap(new SQLiteBacking(plugin, new File(plugin.getDataFolder(), "luckperms.sqlite")));
+                return AbstractDatastore.wrap(plugin, new SQLiteBacking(plugin, new File(plugin.getDataFolder(), "luckperms.sqlite")));
             case "h2":
-                return AbstractDatastore.wrap(new H2Backing(plugin, new File(plugin.getDataFolder(), "luckperms.db")));
+                return AbstractDatastore.wrap(plugin, new H2Backing(plugin, new File(plugin.getDataFolder(), "luckperms.db")));
             case "mongodb":
-                return AbstractDatastore.wrap(new MongoDBBacking(plugin, plugin.getConfiguration().getDatabaseValues()));
+                return AbstractDatastore.wrap(plugin, new MongoDBBacking(plugin, plugin.getConfiguration().getDatabaseValues()));
             case "yaml":
-                return AbstractDatastore.wrap(new YAMLBacking(plugin, plugin.getDataFolder()));
+                return AbstractDatastore.wrap(plugin, new YAMLBacking(plugin, plugin.getDataFolder()));
             default:
-                return AbstractDatastore.wrap(new JSONBacking(plugin, plugin.getDataFolder()));
+                return AbstractDatastore.wrap(plugin, new JSONBacking(plugin, plugin.getDataFolder()));
         }
     }
 }

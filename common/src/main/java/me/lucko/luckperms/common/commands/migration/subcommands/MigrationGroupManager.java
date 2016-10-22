@@ -73,7 +73,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
         }
 
         for (Group g : gg.getGroupList()) {
-            plugin.getDatastore().createAndLoadGroup(g.getName().toLowerCase()).getOrDefault(false);
+            plugin.getDatastore().createAndLoadGroup(g.getName().toLowerCase()).getUnchecked();
             me.lucko.luckperms.common.groups.Group group = plugin.getGroupManager().get(g.getName().toLowerCase());
             try {
                 LogEntry.build()
@@ -202,7 +202,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
         log.info("GroupManager Migration: Found a total of " + users.size() + " users and " + groups.size() + " groups.");
 
         for (Map.Entry<String, Map<Map.Entry<String, String>, Boolean>> e : groups.entrySet()) {
-            plugin.getDatastore().createAndLoadGroup(e.getKey()).getOrDefault(false);
+            plugin.getDatastore().createAndLoadGroup(e.getKey()).getUnchecked();
             me.lucko.luckperms.common.groups.Group group = plugin.getGroupManager().get(e.getKey());
             try {
                 LogEntry.build()
@@ -245,7 +245,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
         }
 
         for (Map.Entry<UUID, Map<Map.Entry<String, String>, Boolean>> e : users.entrySet()) {
-            plugin.getDatastore().loadUser(e.getKey(), "null").getOrDefault(false);
+            plugin.getDatastore().loadUser(e.getKey(), "null").getUnchecked();
             me.lucko.luckperms.common.users.User user = plugin.getUserManager().get(e.getKey());
 
             for (Map.Entry<Map.Entry<String, String>, Boolean> n : e.getValue().entrySet()) {

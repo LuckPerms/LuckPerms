@@ -54,7 +54,7 @@ public class UserDemote extends SubCommand<User> {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!plugin.getDatastore().loadTrack(trackName).getOrDefault(false)) {
+        if (!plugin.getDatastore().loadTrack(trackName).getUnchecked()) {
             Message.TRACK_DOES_NOT_EXIST.send(sender);
             return CommandResult.INVALID_ARGS;
         }
@@ -85,7 +85,7 @@ public class UserDemote extends SubCommand<User> {
             return CommandResult.STATE_ERROR;
         }
 
-        if (!plugin.getDatastore().loadGroup(previous).getOrDefault(false)) {
+        if (!plugin.getDatastore().loadGroup(previous).getUnchecked()) {
             Message.USER_DEMOTE_ERROR_MALFORMED.send(sender, previous);
             return CommandResult.STATE_ERROR;
         }

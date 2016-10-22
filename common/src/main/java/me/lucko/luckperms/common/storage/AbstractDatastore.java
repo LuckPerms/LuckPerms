@@ -25,6 +25,7 @@ package me.lucko.luckperms.common.storage;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.data.Log;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.storage.backing.AbstractBacking;
@@ -43,10 +44,13 @@ import java.util.function.Supplier;
  */
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class AbstractDatastore implements Datastore {
-    public static Datastore wrap(AbstractBacking backing) {
-        return TolerantDatastore.wrap(new AbstractDatastore(backing));
+
+    public static Datastore wrap(LuckPermsPlugin plugin, AbstractBacking backing) {
+        BufferedOutputDatastore bufferedDs = BufferedOutputDatastore.wrap(TolerantDatastore.wrap(new AbstractDatastore(backing)), 1000L);
+        plugin.doAsyncRepeating(bufferedDs, 10L);
+        return bufferedDs;
     }
-    
+
     private final AbstractBacking backing;
 
     private <T> LPFuture<T> makeFuture(Supplier<T> supplier) {
@@ -89,11 +93,8 @@ public class AbstractDatastore implements Datastore {
     }
 
     @Override
-    public LPFuture<Void> shutdown() {
-        return makeFuture(() -> {
-            backing.shutdown();
-            return null;
-        });
+    public void shutdown() {
+        backing.shutdown();
     }
 
     @Override

@@ -22,14 +22,18 @@
 
 package me.lucko.luckperms.common.caching;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import lombok.RequiredArgsConstructor;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.users.User;
 
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Holds an easily accessible cache of a user's data in a number of contexts
@@ -47,8 +51,33 @@ public class UserData {
      */
     private final CalculatorFactory calculatorFactory;
 
-    private final Map<Contexts, PermissionData> permission = new ConcurrentHashMap<>();
-    private final Map<Contexts, MetaData> meta = new ConcurrentHashMap<>();
+    private final LoadingCache<Contexts, PermissionData> permission = CacheBuilder.newBuilder()
+            .build(new CacheLoader<Contexts, PermissionData>() {
+                @Override
+                public PermissionData load(Contexts contexts) {
+                    return calculatePermissions(contexts);
+                }
+
+                @Override
+                public ListenableFuture<PermissionData> reload(Contexts contexts, PermissionData oldData) {
+                    oldData.comparePermissions(user.exportNodes(contexts, true));
+                    return Futures.immediateFuture(oldData);
+                }
+            });
+
+    private final LoadingCache<Contexts, MetaData> meta = CacheBuilder.newBuilder()
+            .build(new CacheLoader<Contexts, MetaData>() {
+                @Override
+                public MetaData load(Contexts contexts) {
+                    return calculateMeta(contexts);
+                }
+
+                @Override
+                public ListenableFuture<MetaData> reload(Contexts contexts, MetaData oldData) {
+                    oldData.loadMeta(user.getAllNodes(null, contexts));
+                    return Futures.immediateFuture(oldData);
+                }
+            });
 
     /**
      * Gets PermissionData from the cache, given a specified context.
@@ -57,7 +86,7 @@ public class UserData {
      * @return a permission data instance
      */
     public PermissionData getPermissionData(Contexts contexts) {
-        return permission.computeIfAbsent(contexts, this::calculatePermissions);
+        return permission.getUnchecked(contexts);
     }
 
     /**
@@ -67,7 +96,7 @@ public class UserData {
      * @return a meta data instance
      */
     public MetaData getMetaData(Contexts contexts) {
-        return meta.computeIfAbsent(contexts, this::calculateMeta);
+        return meta.getUnchecked(contexts);
     }
 
     /**
@@ -98,14 +127,7 @@ public class UserData {
      * @param contexts the contexts to recalculate in.
      */
     public void recalculatePermissions(Contexts contexts) {
-        permission.compute(contexts, (c, data) -> {
-            if (data == null) {
-                data = new PermissionData(c, user, calculatorFactory);
-            }
-
-            data.comparePermissions(user.exportNodes(c, true));
-            return data;
-        });
+        permission.refresh(contexts);
     }
 
     /**
@@ -114,28 +136,23 @@ public class UserData {
      * @param contexts the contexts to recalculate in.
      */
     public void recalculateMeta(Contexts contexts) {
-        meta.compute(contexts, (c, data) -> {
-            if (data == null) {
-                data = new MetaData(c);
-            }
-
-            data.loadMeta(user.getAllNodes(null, c));
-            return data;
-        });
+        meta.refresh(contexts);
     }
 
     /**
      * Calls {@link #recalculatePermissions(Contexts)} for all current loaded contexts
      */
     public void recalculatePermissions() {
-        permission.keySet().forEach(this::recalculatePermissions);
+        Set<Contexts> keys = ImmutableSet.copyOf(permission.asMap().keySet());
+        keys.forEach(permission::refresh);
     }
 
     /**
      * Calls {@link #recalculateMeta(Contexts)} for all current loaded contexts
      */
     public void recalculateMeta() {
-        meta.keySet().forEach(this::recalculateMeta);
+        Set<Contexts> keys = ImmutableSet.copyOf(meta.asMap().keySet());
+        keys.forEach(meta::refresh);
     }
 
     /**
@@ -152,13 +169,17 @@ public class UserData {
      * @param contexts the contexts to pre-calculate for
      */
     public void preCalculate(Contexts contexts) {
-        getPermissionData(contexts);
-        getMetaData(contexts);
+        permission.getUnchecked(contexts);
+        meta.getUnchecked(contexts);
     }
 
     public void invalidateCache() {
-        permission.clear();
-        meta.clear();
+        permission.invalidateAll();
+        meta.invalidateAll();
+    }
+
+    public void invalidatePermissionCalculators() {
+        permission.asMap().values().forEach(PermissionData::invalidateCache);
     }
 
 }

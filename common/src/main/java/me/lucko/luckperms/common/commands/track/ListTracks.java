@@ -40,7 +40,7 @@ public class ListTracks extends SingleMainCommand {
 
     @Override
     protected CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
-        if (!plugin.getDatastore().loadAllTracks().getOrDefault(false)) {
+        if (!plugin.getDatastore().loadAllTracks().getUnchecked()) {
             Message.TRACKS_LOAD_ERROR.send(sender);
             return CommandResult.LOADING_ERROR;
         }

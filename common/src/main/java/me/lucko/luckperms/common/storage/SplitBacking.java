@@ -31,7 +31,6 @@ import me.lucko.luckperms.common.data.Log;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.tracks.Track;
 import me.lucko.luckperms.common.users.User;
-import me.lucko.luckperms.common.utils.AbstractFuture;
 import me.lucko.luckperms.common.utils.LPFuture;
 
 import java.util.Map;
@@ -83,13 +82,8 @@ public class SplitBacking implements Datastore {
     }
 
     @Override
-    public LPFuture<Void> shutdown() {
-        AbstractFuture<Void> future = new AbstractFuture<>();
-        doAsync(() -> {
-            backing.values().forEach(Datastore::shutdown);
-            future.complete(null);
-        });
-        return future;
+    public void shutdown() {
+        backing.values().forEach(Datastore::shutdown);
     }
 
     @Override

@@ -52,7 +52,7 @@ public class LogMainCommand extends MainCommand<Log> {
 
     @Override
     protected Log getTarget(String target, LuckPermsPlugin plugin, Sender sender) {
-        Log log = plugin.getDatastore().getLog().getOrDefault(null);
+        Log log = plugin.getDatastore().getLog().getUnchecked();
 
         if (log == null) {
             Message.LOG_LOAD_ERROR.send(sender);

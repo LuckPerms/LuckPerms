@@ -57,7 +57,7 @@ public interface Datastore {
     }
 
     void init();
-    LPFuture<Void> shutdown();
+    void shutdown();
     LPFuture<Boolean> logAction(LogEntry entry);
     LPFuture<Log> getLog();
     LPFuture<Boolean> loadUser(UUID uuid, String username);
@@ -80,133 +80,133 @@ public interface Datastore {
 
     default void logAction(LogEntry entry, Callback<Boolean> callback) {
         doAsync(() -> {
-            boolean result = logAction(entry).getOrDefault(false);
+            boolean result = logAction(entry).getUnchecked();
             doSync(() -> callback.onComplete(result));
         });
     }
 
     default void getLog(Callback<Log> callback) {
         doAsync(() -> {
-            Log result = getLog().getOrDefault(null);
+            Log result = getLog().getUnchecked();
             doSync(() -> callback.onComplete(result));
         });
     }
 
     default void loadUser(UUID uuid, String username, Callback<Boolean> callback) {
         doAsync(() -> {
-            boolean result = loadUser(uuid, username).getOrDefault(false);
+            boolean result = loadUser(uuid, username).getUnchecked();
             doSync(() -> callback.onComplete(result));
         });
     }
 
     default void saveUser(User user, Callback<Boolean> callback) {
         doAsync(() -> {
-            boolean result = saveUser(user).getOrDefault(false);
+            boolean result = saveUser(user).getUnchecked();
             doSync(() -> callback.onComplete(result));
         });
     }
 
     default void cleanupUsers(Callback<Boolean> callback) {
         doAsync(() -> {
-            boolean result = cleanupUsers().getOrDefault(false);
+            boolean result = cleanupUsers().getUnchecked();
             doSync(() -> callback.onComplete(result));
         });
     }
 
     default void getUniqueUsers(Callback<Set<UUID>> callback) {
         doAsync(() -> {
-            Set<UUID> result = getUniqueUsers().getOrDefault(null);
+            Set<UUID> result = getUniqueUsers().getUnchecked();
             doSync(() -> callback.onComplete(result));
         });
     }
 
     default void createAndLoadGroup(String name, Callback<Boolean> callback) {
         doAsync(() -> {
-            boolean result = createAndLoadGroup(name).getOrDefault(false);
+            boolean result = createAndLoadGroup(name).getUnchecked();
             doSync(() -> callback.onComplete(result));
         });
     }
 
     default void loadGroup(String name, Callback<Boolean> callback) {
         doAsync(() -> {
-            boolean result = loadGroup(name).getOrDefault(false);
+            boolean result = loadGroup(name).getUnchecked();
             doSync(() -> callback.onComplete(result));
         });
     }
 
     default void loadAllGroups(Callback<Boolean> callback) {
         doAsync(() -> {
-            boolean result = loadAllGroups().getOrDefault(false);
+            boolean result = loadAllGroups().getUnchecked();
             doSync(() -> callback.onComplete(result));
         });
     }
 
     default void saveGroup(Group group, Callback<Boolean> callback) {
         doAsync(() -> {
-            boolean result = saveGroup(group).getOrDefault(false);
+            boolean result = saveGroup(group).getUnchecked();
             doSync(() -> callback.onComplete(result));
         });
     }
 
     default void deleteGroup(Group group, Callback<Boolean> callback) {
         doAsync(() -> {
-            boolean result = deleteGroup(group).getOrDefault(false);
+            boolean result = deleteGroup(group).getUnchecked();
             doSync(() -> callback.onComplete(result));
         });
     }
 
     default void createAndLoadTrack(String name, Callback<Boolean> callback) {
         doAsync(() -> {
-            boolean result = createAndLoadTrack(name).getOrDefault(false);
+            boolean result = createAndLoadTrack(name).getUnchecked();
             doSync(() -> callback.onComplete(result));
         });
     }
 
     default void loadTrack(String name, Callback<Boolean> callback) {
         doAsync(() -> {
-            boolean result = loadTrack(name).getOrDefault(false);
+            boolean result = loadTrack(name).getUnchecked();
             doSync(() -> callback.onComplete(result));
         });
     }
 
     default void loadAllTracks(Callback<Boolean> callback) {
         doAsync(() -> {
-            boolean result = loadAllTracks().getOrDefault(false);
+            boolean result = loadAllTracks().getUnchecked();
             doSync(() -> callback.onComplete(result));
         });
     }
 
     default void saveTrack(Track track, Callback<Boolean> callback) {
         doAsync(() -> {
-            boolean result = saveTrack(track).getOrDefault(false);
+            boolean result = saveTrack(track).getUnchecked();
             doSync(() -> callback.onComplete(result));
         });
     }
 
     default void deleteTrack(Track track, Callback<Boolean> callback) {
         doAsync(() -> {
-            boolean result = deleteTrack(track).getOrDefault(false);
+            boolean result = deleteTrack(track).getUnchecked();
             doSync(() -> callback.onComplete(result));
         });
     }
 
     default void saveUUIDData(String username, UUID uuid, Callback<Boolean> callback) {
         doAsync(() -> {
-            boolean result = saveUUIDData(username, uuid).getOrDefault(false);
+            boolean result = saveUUIDData(username, uuid).getUnchecked();
             doSync(() -> callback.onComplete(result));
         });
     }
 
     default void getUUID(String username, Callback<UUID> callback) {
         doAsync(() -> {
-            UUID result = getUUID(username).getOrDefault(null);
+            UUID result = getUUID(username).getUnchecked();
             doSync(() -> callback.onComplete(result));
         });
     }
 
     default void getName(UUID uuid, Callback<String> callback) {
         doAsync(() -> {
-            String result = getName(uuid).getOrDefault(null);
+            String result = getName(uuid).getUnchecked();
             doSync(() -> callback.onComplete(result));
         });
     }

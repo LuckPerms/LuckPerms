@@ -72,7 +72,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
         // Migrate all groups
         log.info("zPermissions Migration: Starting group migration.");
         for (String g : service.getAllGroups()) {
-            plugin.getDatastore().createAndLoadGroup(g.toLowerCase()).getOrDefault(false);
+            plugin.getDatastore().createAndLoadGroup(g.toLowerCase()).getUnchecked();
             Group group = plugin.getGroupManager().get(g.toLowerCase());
             try {
                 LogEntry.build()
@@ -121,7 +121,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
         // Migrate all tracks
         log.info("zPermissions Migration: Starting track migration.");
         for (String t : service.getAllTracks()) {
-            plugin.getDatastore().createAndLoadTrack(t.toLowerCase()).getOrDefault(false);
+            plugin.getDatastore().createAndLoadTrack(t.toLowerCase()).getUnchecked();
             Track track = plugin.getTrackManager().get(t.toLowerCase());
             try {
                 LogEntry.build()
@@ -150,7 +150,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
         // Migrate all users.
         log.info("zPermissions Migration: Starting user migration.");
         for (UUID u : service.getAllPlayersUUID()) {
-            plugin.getDatastore().loadUser(u, "null").getOrDefault(false);
+            plugin.getDatastore().loadUser(u, "null").getUnchecked();
             User user = plugin.getUserManager().get(u);
 
             for (Map.Entry<String, Boolean> e : service.getPlayerPermissions(null, null, u).entrySet()) {

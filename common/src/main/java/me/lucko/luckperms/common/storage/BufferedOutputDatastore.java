@@ -50,28 +50,28 @@ public class BufferedOutputDatastore implements Datastore, Runnable {
     private final Buffer<User, Boolean> userOutputBuffer = new Buffer<User, Boolean>() {
         @Override
         public Boolean dequeue(User user) {
-            return backing.saveUser(user).getOrDefault(false);
+            return backing.saveUser(user).getUnchecked();
         }
     };
 
     private final Buffer<Group, Boolean> groupOutputBuffer = new Buffer<Group, Boolean>() {
         @Override
         public Boolean dequeue(Group group) {
-            return backing.saveGroup(group).getOrDefault(false);
+            return backing.saveGroup(group).getUnchecked();
         }
     };
 
     private final Buffer<Track, Boolean> trackOutputBuffer = new Buffer<Track, Boolean>() {
         @Override
         public Boolean dequeue(Track track) {
-            return backing.saveTrack(track).getOrDefault(false);
+            return backing.saveTrack(track).getUnchecked();
         }
     };
 
     private final Buffer<UserIdentifier, Boolean> uuidDataOutputBuffer = new Buffer<UserIdentifier, Boolean>() {
         @Override
         protected Boolean dequeue(UserIdentifier userIdentifier) {
-            return backing.saveUUIDData(userIdentifier.getUsername(), userIdentifier.getUuid()).getOrDefault(false);
+            return backing.saveUUIDData(userIdentifier.getUsername(), userIdentifier.getUuid()).getUnchecked();
         }
     };
 
@@ -96,9 +96,9 @@ public class BufferedOutputDatastore implements Datastore, Runnable {
     }
 
     @Override
-    public LPFuture<Void> shutdown() {
+    public void shutdown() {
         forceFlush();
-        return backing.shutdown();
+        backing.shutdown();
     }
 
     @Override
