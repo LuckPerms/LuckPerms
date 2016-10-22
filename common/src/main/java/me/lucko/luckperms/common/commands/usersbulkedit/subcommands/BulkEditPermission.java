@@ -127,8 +127,8 @@ public class BulkEditPermission extends SubCommand<Datastore> {
                 } catch (ObjectAlreadyHasException ignored) {}
             });
 
+            plugin.getDatastore().saveUser(user);
             plugin.getUserManager().cleanup(user);
-            plugin.getDatastore().saveUser(user).getOrDefault(false);
         }
 
         Message.BULK_CHANGE_SUCCESS.send(sender, uuids.size());

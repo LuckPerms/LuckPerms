@@ -133,7 +133,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
                 }
                 
                 migrateHolder(plugin, world, group, lpGroup);
-                plugin.getDatastore().saveGroup(lpGroup).getOrDefault(false);
+                plugin.getDatastore().saveGroup(lpGroup);
             }
             log.info("bPermissions Migration: Migrated " + groupCount + " groups in world " + world.getName() + ".");
 
@@ -162,7 +162,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
 
                 migrateHolder(plugin, world, user, lpUser);
 
-                plugin.getDatastore().saveUser(lpUser).getOrDefault(false);
+                plugin.getDatastore().saveUser(lpUser);
                 plugin.getUserManager().cleanup(lpUser);
             }
 

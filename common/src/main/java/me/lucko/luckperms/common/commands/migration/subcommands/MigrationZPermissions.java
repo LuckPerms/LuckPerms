@@ -115,7 +115,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
                 }
             }
 
-            plugin.getDatastore().saveGroup(group).getOrDefault(false);
+            plugin.getDatastore().saveGroup(group);
         }
 
         // Migrate all tracks
@@ -144,7 +144,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
                 }
             }
 
-            plugin.getDatastore().saveTrack(track).getOrDefault(false);
+            plugin.getDatastore().saveTrack(track);
         }
 
         // Migrate all users.
@@ -243,7 +243,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
             }
 
             plugin.getUserManager().cleanup(user);
-            plugin.getDatastore().saveUser(user).getOrDefault(false);
+            plugin.getDatastore().saveUser(user);
         }
 
         log.info("zPermissions Migration: Success! Completed without any errors.");

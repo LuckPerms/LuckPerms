@@ -275,7 +275,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                 }
             }
 
-            plugin.getDatastore().saveGroup(group).getOrDefault(false);
+            plugin.getDatastore().saveGroup(group);
         }
         log.info("PowerfulPerms Migration: Group migration complete.");
 
@@ -299,7 +299,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                 synchronized (progress) {
                     progress.get(uuid).countDown();
                     if (progress.get(uuid).getCount() == 0) {
-                        plugin.getDatastore().saveUser(user).getOrDefault(false);
+                        plugin.getDatastore().saveUser(user);
                         plugin.getUserManager().cleanup(user);
                     }
                 }
@@ -422,7 +422,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                 synchronized (progress) {
                     progress.get(uuid).countDown();
                     if (progress.get(uuid).getCount() == 0) {
-                        plugin.getDatastore().saveUser(user).getOrDefault(false);
+                        plugin.getDatastore().saveUser(user);
                         plugin.getUserManager().cleanup(user);
                     }
                 }

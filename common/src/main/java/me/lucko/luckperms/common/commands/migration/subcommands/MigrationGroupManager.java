@@ -121,7 +121,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
                 }
             }
 
-            plugin.getDatastore().saveGroup(group).getOrDefault(false);
+            plugin.getDatastore().saveGroup(group);
         }
 
         Map<UUID, Map<Map.Entry<String, String>, Boolean>> users = new HashMap<>();
@@ -241,7 +241,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
                 }
             }
 
-            plugin.getDatastore().saveGroup(group).getOrDefault(false);
+            plugin.getDatastore().saveGroup(group);
         }
 
         for (Map.Entry<UUID, Map<Map.Entry<String, String>, Boolean>> e : users.entrySet()) {
@@ -275,7 +275,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
                 }
             }
 
-            plugin.getDatastore().saveUser(user).getOrDefault(false);
+            plugin.getDatastore().saveUser(user);
             plugin.getUserManager().cleanup(user);
         }
 

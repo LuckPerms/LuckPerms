@@ -173,7 +173,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
                 }
             }
 
-            plugin.getDatastore().saveGroup(group).getOrDefault(false);
+            plugin.getDatastore().saveGroup(group);
         }
 
         log.info("BungeePerms Migration: Migrated " + groupCount + " groups");
@@ -288,7 +288,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
                 }
             }
 
-            plugin.getDatastore().saveUser(user).getOrDefault(false);
+            plugin.getDatastore().saveUser(user);
             plugin.getUserManager().cleanup(user);
         }
 

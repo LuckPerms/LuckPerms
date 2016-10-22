@@ -226,7 +226,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 }
             }
 
-            plugin.getDatastore().saveGroup(lpGroup).getOrDefault(false);
+            plugin.getDatastore().saveGroup(lpGroup);
 
         }
 
@@ -387,7 +387,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             }
 
             plugin.getUserManager().cleanup(lpUser);
-            plugin.getDatastore().saveUser(lpUser).getOrDefault(false);
+            plugin.getDatastore().saveUser(lpUser);
         }
 
         log.info("PermissionsEx Migration: Migrated " + userCount + " users.");
