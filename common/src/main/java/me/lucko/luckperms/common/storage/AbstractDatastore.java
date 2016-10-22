@@ -83,11 +83,8 @@ public class AbstractDatastore implements Datastore {
     }
 
     @Override
-    public LPFuture<Void> init() {
-        return makeFuture(() -> {
-            backing.init();
-            return null;
-        });
+    public void init() {
+        backing.init();
     }
 
     @Override

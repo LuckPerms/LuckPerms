@@ -56,7 +56,7 @@ public interface Datastore {
         return this;
     }
 
-    LPFuture<Void> init();
+    void init();
     LPFuture<Void> shutdown();
     LPFuture<Boolean> logAction(LogEntry entry);
     LPFuture<Log> getLog();

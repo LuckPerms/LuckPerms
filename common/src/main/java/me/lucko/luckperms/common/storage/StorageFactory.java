@@ -77,7 +77,7 @@ public class StorageFactory {
         }
 
         plugin.getLog().info("Initialising datastore...");
-        datastore.init().getOrDefault(null);
+        datastore.init();
         return datastore;
     }
     

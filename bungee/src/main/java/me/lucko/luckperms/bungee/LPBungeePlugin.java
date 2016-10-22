@@ -148,11 +148,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
         // Run update task to refresh any online users
         getLog().info("Scheduling Update Task to refresh any online users.");
-        try {
-            new UpdateTask(this).run();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        updateTaskBuffer.request();
 
         getLog().info("Successfully loaded.");
     }

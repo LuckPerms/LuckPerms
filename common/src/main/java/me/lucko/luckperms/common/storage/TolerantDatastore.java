@@ -75,13 +75,8 @@ public class TolerantDatastore implements Datastore {
     }
 
     @Override
-    public LPFuture<Void> init() {
-        phaser.register();
-        try {
-            return backing.init();
-        } finally {
-            phaser.arriveAndDeregister();
-        }
+    public void init() {
+        backing.init();
     }
 
     @Override

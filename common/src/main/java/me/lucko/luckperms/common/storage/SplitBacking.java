@@ -69,22 +69,16 @@ public class SplitBacking implements Datastore {
     }
 
     @Override
-    public LPFuture<Void> init() {
-        AbstractFuture<Void> future = new AbstractFuture<>();
-        doAsync(() -> {
-            boolean success = true;
-            backing.values().forEach(Datastore::init);
-            for (Datastore ds : backing.values()) {
-                if (!ds.isAcceptingLogins()) {
-                    success = false;
-                }
+    public void init() {
+        boolean success = true;
+        backing.values().forEach(Datastore::init);
+        for (Datastore ds : backing.values()) {
+            if (!ds.isAcceptingLogins()) {
+                success = false;
             }
+        }
 
-            setAcceptingLogins(success);
-            future.complete(null);
-        });
-        return future;
-
+        setAcceptingLogins(success);
     }
 
     @Override
