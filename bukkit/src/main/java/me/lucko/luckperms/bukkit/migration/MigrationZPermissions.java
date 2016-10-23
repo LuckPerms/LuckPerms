@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.migration.subcommands;
+package me.lucko.luckperms.bukkit.migration;
 
 import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.MetaUtils;
@@ -40,10 +40,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-/**
- * <3 <3  zPermissions  <3 <3
- * Finally a permissions plugin with a decent API. *sigh*
- */
 public class MigrationZPermissions extends SubCommand<Object> {
     public MigrationZPermissions() {
         super("zpermissions", "Migration from zPermissions", Permission.MIGRATION, Predicate.alwaysFalse(),

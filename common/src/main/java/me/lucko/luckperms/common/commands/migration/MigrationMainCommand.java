@@ -27,7 +27,6 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.MainCommand;
 import me.lucko.luckperms.common.commands.Sender;
 import me.lucko.luckperms.common.commands.SubCommand;
-import me.lucko.luckperms.common.commands.migration.subcommands.*;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Message;
 
@@ -43,34 +42,33 @@ public class MigrationMainCommand extends MainCommand<Object> {
 
         try {
             Class.forName("org.anjocaido.groupmanager.GroupManager");
-            subCommands.add(new MigrationGroupManager());
+            subCommands.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.bukkit.migration.MigrationGroupManager").newInstance());
         } catch (Throwable ignored) {}
 
         try {
             Class.forName("ru.tehkode.permissions.bukkit.PermissionsEx");
-            subCommands.add(new MigrationPermissionsEx());
+            subCommands.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.bukkit.migration.MigrationPermissionsEx").newInstance());
         } catch (Throwable ignored) {}
 
         try {
             Class.forName("com.github.cheesesoftware.PowerfulPermsAPI.PowerfulPermsPlugin");
-            subCommands.add(new MigrationPowerfulPerms());
+            subCommands.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.bukkit.migration.MigrationPowerfulPerms").newInstance());
         } catch (Throwable ignored) {}
 
         try {
             Class.forName("org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsService");
-            subCommands.add(new MigrationZPermissions());
+            subCommands.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.bukkit.migration.MigrationZPermissions").newInstance());
         } catch (Throwable ignored) {}
 
         try {
             Class.forName("net.alpenblock.bungeeperms.BungeePerms");
-            subCommands.add(new MigrationBungeePerms());
+            subCommands.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.bungee.migration.MigrationBungeePerms").newInstance());
         } catch (Throwable ignored) {}
 
         try {
             Class.forName("de.bananaco.bpermissions.api.WorldManager");
-            subCommands.add(new MigrationBPermissions());
+            subCommands.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.bukkit.migration.MigrationBPermissions").newInstance());
         } catch (Throwable ignored) {}
-
     }
 
     @Override

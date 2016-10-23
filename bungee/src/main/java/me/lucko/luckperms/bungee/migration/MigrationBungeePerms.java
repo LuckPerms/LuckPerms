@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.migration.subcommands;
+package me.lucko.luckperms.bungee.migration;
 
 import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.MetaUtils;
@@ -60,7 +60,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
         log.info("BungeePerms Migration: Starting group migration.");
         int groupCount = 0;
         for (Group g : bp.getPermissionsManager().getBackEnd().loadGroups()) {
-            groupCount ++;
+            groupCount++;
 
             // Make a LuckPerms group for the one being migrated
             plugin.getDatastore().createAndLoadGroup(g.getName().toLowerCase()).getUnchecked();

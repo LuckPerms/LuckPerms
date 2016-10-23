@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.migration.subcommands;
+package me.lucko.luckperms.bukkit.migration;
 
 import de.bananaco.bpermissions.api.*;
 import me.lucko.luckperms.api.Logger;

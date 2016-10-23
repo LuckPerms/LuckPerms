@@ -129,5 +129,46 @@
             <version>1.16.10</version>
             <scope>provided</scope>
         </dependency>
+        <!-- **************Migration Plugins************** -->
+        <dependency>
+            <groupId>org.tyrannyofheaven.bukkit</groupId>
+            <artifactId>zPermissions</artifactId>
+            <version>1.3</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>ru.tehkode</groupId>
+            <artifactId>PermissionsEx</artifactId>
+            <version>1.23</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.bukkit</groupId>
+                    <artifactId>bukkit</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>net.gravitydevelopment.updater</groupId>
+                    <artifactId>updater</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.github.cheesesoftware</groupId>
+            <artifactId>PowerfulPermsAPI</artifactId>
+            <version>1.0.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.anjocaido</groupId>
+            <artifactId>GroupManager</artifactId>
+            <version>1.4</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>de.bananaco</groupId>
+            <artifactId>bpermissions-api</artifactId>
+            <version>2.12</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 </project>

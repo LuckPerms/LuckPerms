@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.migration.subcommands;
+package me.lucko.luckperms.bukkit.migration;
 
 import com.github.cheesesoftware.PowerfulPermsAPI.*;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -28,9 +28,9 @@ import com.zaxxer.hikari.HikariDataSource;
 import lombok.Cleanup;
 import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.data.Callback;
+import me.lucko.luckperms.bukkit.migration.utils.LPResultRunnable;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.*;
-import me.lucko.luckperms.common.commands.migration.subcommands.utils.LPResultRunnable;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;

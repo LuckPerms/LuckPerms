@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.migration.subcommands;
+package me.lucko.luckperms.bukkit.migration;
 
 import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.MetaUtils;
@@ -40,7 +40,6 @@ import ru.tehkode.permissions.PermissionUser;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -72,13 +71,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 .collect(Collectors.toList());
 
         PermissionsEx pex = (PermissionsEx) plugin.getPlugin("PermissionsEx");
-        PermissionManager manager; // The compiler complains if you call the method directly, as Bukkit is not in this module.
-        try {
-            manager = (PermissionManager) PermissionsEx.class.getMethod("getPermissionsManager").invoke(pex);
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            e.printStackTrace();
-            return CommandResult.FAILURE;
-        }
+        PermissionManager manager = pex.getPermissionsManager();
 
         NativeInterface ni;
         try {

@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.migration.subcommands.utils;
+package me.lucko.luckperms.bukkit.migration.utils;
 
 import com.github.cheesesoftware.PowerfulPermsAPI.ResultRunnable;
 

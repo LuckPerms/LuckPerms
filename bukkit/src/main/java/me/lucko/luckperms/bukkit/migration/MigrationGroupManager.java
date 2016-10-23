@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.migration.subcommands;
+package me.lucko.luckperms.bukkit.migration;
 
 import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.common.LuckPermsPlugin;
@@ -36,7 +36,6 @@ import org.anjocaido.groupmanager.data.User;
 import org.anjocaido.groupmanager.dataholder.WorldDataHolder;
 import org.anjocaido.groupmanager.dataholder.worlds.WorldsHolder;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -63,14 +62,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
 
         // Migrate Global Groups
         log.info("GroupManager Migration: Starting Global Group migration.");
-
-        GlobalGroups gg;
-        try {
-            gg = (GlobalGroups) GroupManager.class.getMethod("getGlobalGroups").invoke(gm);
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            e.printStackTrace();
-            return CommandResult.FAILURE;
-        }
+        GlobalGroups gg = GroupManager.getGlobalGroups();
 
         for (Group g : gg.getGroupList()) {
             plugin.getDatastore().createAndLoadGroup(g.getName().toLowerCase()).getUnchecked();
@@ -127,27 +119,14 @@ public class MigrationGroupManager extends SubCommand<Object> {
         Map<UUID, Map<Map.Entry<String, String>, Boolean>> users = new HashMap<>();
         Map<String, Map<Map.Entry<String, String>, Boolean>> groups = new HashMap<>();
 
-        WorldsHolder wh;
-        try {
-            wh = (WorldsHolder) GroupManager.class.getMethod("getWorldsHolder").invoke(gm);
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            e.printStackTrace();
-            return CommandResult.FAILURE;
-        }
+        WorldsHolder wh = gm.getWorldsHolder();
 
         // Collect data for all users and groups.
         log.info("GroupManager Migration: Starting user and group migration.");
         for (String world : worlds) {
             world = world.toLowerCase();
 
-            WorldDataHolder wdh;
-
-            try {
-                wdh = (WorldDataHolder) WorldsHolder.class.getMethod("getWorldData", String.class).invoke(wh, world);
-            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                e.printStackTrace();
-                return CommandResult.FAILURE;
-            }
+            WorldDataHolder wdh = wh.getWorldData(world);
 
             for (Group g : wdh.getGroupList()) {
                 groups.putIfAbsent(g.getName().toLowerCase(), new HashMap<>());
