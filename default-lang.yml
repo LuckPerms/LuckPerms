@@ -7,7 +7,7 @@ empty: "{0}"
 player-online: "&aOnline"
 player-offline: "&cOffline"
 loading-error: "Permissions data could not be loaded. Please contact an administrator."
-op-disabled: "&eThe vanilla OP system is disabled on this server."
+op-disabled: "&bThe vanilla OP system is disabled on this server."
 log: "&3LOG &3&l> {0}"
 
 command-not-recognised: "Command not recognised."
@@ -20,49 +20,40 @@ does-not-have-temp-permission: "{0} does not have this permission set temporaril
 
 
 
-user-not-found: "&eUser could not be found."
+user-not-found: "&bUser could not be found."
 user-save-success: "&7(User data was saved to the datastore)"
 user-save-error: "There was an error whilst saving the user."
-user-attempting-lookup: "&7(Attempting UUID lookup, since you specified a username)"
 user-create-fail: "There was an error whilst creating a new user."
 
-group-not-found: "&eGroup could not be found."
+group-not-found: "&bGroup could not be found."
 group-save-success: "&7(Group data was saved to the datastore)"
 group-save-error: "There was an error whilst saving the group."
 
-track-not-found: "&eTrack could not be found."
+track-not-found: "&bTrack could not be found."
 track-save-success: "&7(Track data was saved to the datastore)"
 track-save-error: "There was an error whilst saving the track."
 
 
 
-user-use-addgroup: "Use the addgroup command instead of specifying the node."
-user-use-removegroup: "Use the removegroup command instead of specifying the node."
 user-invalid-entry: "&d{0}&c is not a valid username/uuid."
-
-group-use-inherit: "Use the setinherit command instead of specifying the node."
-group-use-uninherit: "Use the unsetinherit command instead of specifying the node."
 group-invalid-entry: "Group names can only contain alphanumeric characters."
-
 track-invalid-entry: "Track names can only contain alphanumeric characters."
-
 server-invalid-entry: "Server names can only contain alphanumeric characters."
+
+use-inherit-command: "Use the 'parent add' command instead of specifying the node."
+use-uninherit-command: "Use the 'parent remove' command instead of specifying the node."
 
 
 
 create-success: "&b{0}&a was successfully created."
 delete-success: "&b{0}&a was successfully deleted."
 rename-success: "&b{0}&a was successfully renamed to &b{1}&a."
+clone-success: "&b{0}&a was successfully cloned to &b{1}&a."
 
-user-already-member-of: "{0} is already a member of '{1}'."
-user-not-member-of: "{0} is not a member of '{1}'."
-group-already-inherits: "{0} already inherits '{1}'."
-group-does-not-inherit: "{0} does not inherit '{1}'."
-
-user-already-temp-member-of: "{0} is already a temporary member of '{1}'."
-user-not-temp-member-of: "{0} is not a temporary member of '{1}'."
-group-already-temp-inherits: "{0} already temporarily inherits '{1}'."
-group-does-not-temp-inherit: "{0} does not temporarily inherit '{1}'."
+already-inherits: "{0} already inherits '{1}'."
+does-not-inherit: "{0} does not inherit '{1}'."
+already-temp-inherits: "{0} already temporarily inherits '{1}'."
+does-not-temp-inherit: "{0} does not temporarily inherit '{1}'."
 
 track-already-contains: "Track {0} already contains the group '{1}'."
 track-does-not-contain: "Track {0} does not contain the group '{1}'."
@@ -71,34 +62,35 @@ group-already-exists: "That group already exists!"
 group-does-not-exist: "That group does not exist!"
 group-load-error: "An unexpected error occurred. Group not loaded."
 groups-load-error: "An unexpected error occurred. Unable to load all groups."
-
 track-already-exists: "That track already exists!"
 track-does-not-exist: "That track does not exist!"
 track-load-error: "An unexpected error occurred. Track not loaded."
 tracks-load-error: "An unexpected error occurred. Unable to load all tracks."
+
 track-empty: "The track cannot be used as it is empty or contains only one group."
 
-update-task-run: "&bRunning update task for all online users."
+update-task-request: "&bUpdate task scheduled."
+update-task-complete: "&aUpdate task finished."
 info: >
   {PREFIX}&2Running &bLuckPerms v{0}&2 by &bLuck&2.\n
-  {PREFIX}&f-> &ePlatform: &6{1}\n
-  {PREFIX}&f-> &eStorage Method: &6{2}\n
-  {PREFIX}&f-> &eServer Name: &6{3}\n
-  {PREFIX}&f-> &eSync Interval: &6{4} minutes\n
-  {PREFIX}&f-> &eInclude Global: &6{5}\n
-  {PREFIX}&f-> &eInclude Global World: &6{6}\n
-  {PREFIX}&f-> &eApply Global Groups: &6{7}\n
-  {PREFIX}&f-> &eApply Global World Groups: &6{8}\n
-  {PREFIX}&f-> &eOnline Mode: &6{9}\n
-  {PREFIX}&f-> &eApply Wildcards: &6{10}\n
-  {PREFIX}&f-> &eApply Regex: &6{11}\n
-  {PREFIX}&f-> &eApply Shorthand: &6{12}
+  {PREFIX}&f-> &3Platform: &f{1}\n
+  {PREFIX}&f-> &3Storage Method: &f{2}\n
+  {PREFIX}&f-> &3Server Name: &f{3}\n
+  {PREFIX}&f-> &3Sync Interval: &f{4} minutes\n
+  {PREFIX}&f-> &3Include Global: &f{5}\n
+  {PREFIX}&f-> &3Include Global World: &f{6}\n
+  {PREFIX}&f-> &3Apply Global Groups: &f{7}\n
+  {PREFIX}&f-> &3Apply Global World Groups: &f{8}\n
+  {PREFIX}&f-> &3Online Mode: &f{9}\n
+  {PREFIX}&f-> &3Apply Wildcards: &f{10}\n
+  {PREFIX}&f-> &3Apply Regex: &f{11}\n
+  {PREFIX}&f-> &3Apply Shorthand: &f{12}
 debug: >
   {PREFIX}&d&l> &dDebug Info\n
-  {PREFIX}&f> &eOnline Players: &6{0}\n
-  {PREFIX}&f> &eLoaded Users: &6{1}\n
-  {PREFIX}&f> &eLoaded Groups: &6{2}\n
-  {PREFIX}&f> &eLoaded Tracks: &6{3}
+  {PREFIX}&f> &3Online Players: &f{0}\n
+  {PREFIX}&f> &3Loaded Users: &f{1}\n
+  {PREFIX}&f> &3Loaded Groups: &f{2}\n
+  {PREFIX}&f> &3Loaded Tracks: &f{3}
 
 create-group-error: "There was an error whilst creating the group."
 delete-group-error: "There was an error whilst deleting the group."
@@ -109,12 +101,12 @@ create-track-error: "There was an error whilst creating the track."
 delete-track-error: "There was an error whilst deleting the track."
 tracks-list: "&aTracks: {0}"
 
-listnodes: "&e{0}'s Nodes:\n{1}"
-listnodes-temp: "&e{0}'s Temporary Nodes:\n{1}"
-listparents: "&e{0}'s Parent Groups:\n{1}"
-listparents-temp: "&e{0}'s Temporary Parent Groups:\n{1}"
-listgroups: "&e{0}'s Groups:\n{1}"
-listgroups-temp: "&e{0}'s Temporary Groups:\n{1}"
+listnodes: "&b{0}'s Nodes:\n{1}"
+listnodes-temp: "&b{0}'s Temporary Nodes:\n{1}"
+listparents: "&b{0}'s Parent Groups:\n{1}"
+listparents-temp: "&b{0}'s Temporary Parent Groups:\n{1}"
+listgroups: "&b{0}'s Groups:\n{1}"
+listgroups-temp: "&b{0}'s Temporary Groups:\n{1}"
 setpermission-success: "&aSet &b{0}&a to &b{1}&a for &b{2}&a."
 setpermission-server-success: "&aSet &b{0}&a to &b{1}&a for &b{2}&a on server &b{3}&a."
 setpermission-server-world-success: "&aSet &b{0}&a to &b{1}&a for &b{2}&a on server &b{3}&a, world &b{4}&a."
@@ -127,15 +119,30 @@ unsetpermission-server-world-success: "&aUnset &b{0}&a for &b{1}&a on server &b{
 unset-temp-permission-success: "&aUnset temporary permission &b{0}&a for &b{1}&a."
 unset-temp-permission-server-success: "&aUnset temporary permission &b{0}&a for &b{1}&a on server &b{2}&a."
 unset-temp-permission-server-world-success: "&aUnset temporary permission &b{0}&a for &b{1}&a on server &b{2}&a, world &b{3}&a."
-clear-success: "&b{0}&a's permissions were cleared."
+set-inherit-success: "&b{0}&a now inherits permissions from &b{1}&a."
+set-inherit-server-success: "&b{0}&a now inherits permissions from &b{2}&a on server &b{3}&a."
+set-inherit-server-world-success: "&b{0}&a now inherits permissions from &b{1}&a on server &b{2}&a, world &b{3}&a."
+set-temp-inherit-success: "&b{0}&a now inherits permissions from &b{1}&a for a duration of &b{2}&a."
+set-temp-inherit-server-success: "&b{0}&a now inherits permissions from &b{1}&a on server &b{2}&a for a duration of &b{3}&a."
+set-temp-inherit-server-world-success: "&b{0}&a now inherits permissions from &b{1}&a on server &b{2}&a, world &b{3}&a, for a duration of &b{4}&a."
+unset-inherit-success: "&b{0}&a no longer inherits permissions from &b{1}&a."
+unset-inherit-server-success: "&b{0}&a no longer inherits permissions from &b{1}&a on server &b{2}&a."
+unset-inherit-server-world-success: "&b{0}&a no longer inherits permissions from &b{1}&a on server &b{2}&a, world &b{3}&a."
+unset-temp-inherit-success: "&b{0}&a no longer temporarily inherits permissions from &b{1}&a."
+unset-temp-inherit-server-success: "&b{0}&a no longer temporarily inherits permissions from &b{1}&a on server &b{2}&a."
+unset-temp-inherit-server-world-success: "&b{0}&a no longer temporarily inherits permissions from &b{1}&a on server &b{2}&a, world &b{3}&a."
+clear-success: "&b{0}&a's permissions were cleared. (&b{1}&a nodes were removed.)"
+clear-success-singular: "&b{0}&a's permissions were cleared. (&b{1}&a node was removed.)"
+meta-clear-success: "&b{0}&a's meta was cleared. (&b{1}&a nodes were removed.)"
+meta-clear-success-singular: "&b{0}&a's meta was cleared. (&b{1}&a node was removed.)"
 illegal-date-error: "Could not parse date '{0}'."
 past-date-error: "You cannot set a date in the past!"
 
-chat-meta-prefix-header: "&e{0}'s Prefixes"
-chat-meta-suffix-header: "&e{0}'s Suffixes"
-chat-meta-entry: "&d-> &e{0} &6- &f\"{1}&f\""
-chat-meta-prefix-none: "&e{0} has no prefixes."
-chat-meta-suffix-none: "&e{0} has no suffixes."
+chat-meta-prefix-header: "&b{0}'s Prefixes"
+chat-meta-suffix-header: "&b{0}'s Suffixes"
+chat-meta-entry: "&b-> &b{0} &f- &f\"{1}&f\""
+chat-meta-prefix-none: "&b{0} has no prefixes."
+chat-meta-suffix-none: "&b{0} has no suffixes."
 
 meta-invalid-priority: "Invalid priority '{0}'. Expected a number."
 already-has-prefix: "{0} already has that prefix set."
@@ -171,30 +178,33 @@ remove-temp-suffix-success: "&b{0}&a had temporary suffix &f\"{1}&f\"&a at prior
 remove-temp-suffix-server-success: "&b{0}&a had temporary suffix &f\"{1}&f\"&a at priority &b{2}&a removed on server &b{3}&a."
 remove-temp-suffix-server-world-success: "&b{0}&a had temporary suffix &f\"{1}&f\"&a at priority &b{2}&a removed on server &b{3}&a, world &b{4}&a."
 
+already-has-meta: "{0} already has that meta key value pair set."
+set-meta-success: "&aSet meta value for key &f\"{0}&f\"&a to &f\"{1}&f\"&a for &b{2}&a."
+set-meta-server-success: "&aSet meta value for key &f\"{0}&f\"&a to &f\"{1}&f\"&a for &b{2}&a on server &b{3}&a."
+set-meta-server-world-success: "&aSet meta value for key &f\"{0}&f\"&a to &f\"{1}&f\"&a for &b{2}&a on server &b{3}&a, world &b{4}&a."
+set-meta-temp-success: "&aSet meta value for key &f\"{0}&f\"&a to &f\"{1}&f\"&a for &b{2}&a for a duration of &b{3}&a."
+set-meta-temp-server-success: "&aSet meta value for key &f\"{0}&f\"&a to &f\"{1}&f\"&a for &b{2}&a on server &b{3}&a for a duration of &b{4}&a."
+set-meta-temp-server-world-success: "&aSet meta value for key &f\"{0}&f\"&a to &f\"{1}&f\"&a for &b{2}&a on server &b{3}&a, world &b{4}&a, for a duration of &b{5}&a."
+
+unset-meta-success: "&aUnset meta value with key &f\"{0}&f\"&a for &b{1}&a."
+unset-meta-server-success: "&aUnset meta value with key &f\"{0}&f\"&a for &b{1}&a on server &b{2}&a."
+unset-meta-server-world-success: "&aUnset meta value with key &f\"{0}&f\"&a for &b{1}&a on server &b{2}&a, world &b{3}&a."
+unset-meta-temp-success: "&aUnset temporary meta value with key &f\"{0}&f\"&a for &b{1}&a."
+unset-meta-temp-server-success: "&aUnset temporary meta value with key &f\"{0}&f\"&a for &b{1}&a on server &b{2}&a."
+unset-meta-temp-server-world-success: "&aUnset temporary meta value with key &f\"{0}&f\"&a for &b{1}&a on server &b{2}&a, world &b{3}&a."
+
 bulk-change-type-error: "Invalid type. Was expecting 'server' or 'world'."
 bulk-change-success: "&aApplied bulk change successfully. {0} records were changed."
 
 user-info: >
-  {PREFIX}&d-> &eUser: &6{0}\n
-  {PREFIX}&d-> &eUUID: &6{1}\n
-  {PREFIX}&d-> &eStatus: {2}\n
-  {PREFIX}&d-> &ePrimary Group: &6{3}\n
-  {PREFIX}&d-> &ePermissions: &6{4}\n
-  {PREFIX}&d-> &eTemporary Permissions: &6{5}\n
-  {PREFIX}&d-> &bUse &a/{6} user {7} listnodes &bto see all permissions.
-user-getuuid: "&bThe UUID of &e{0}&b is &e{1}&b."
-user-addgroup-success: "&b{0}&a successfully added to group &b{1}&a."
-user-addgroup-server-success: "&b{0}&a successfully added to group &b{1}&a on server &b{2}&a."
-user-addgroup-server-world-success: "&b{0}&a successfully added to group &b{1}&a on server &b{2}&a, world &b{3}&a."
-user-addtempgroup-success: "&b{0}&a successfully added to group &b{1}&a for a duration of &b{2}&a."
-user-addtempgroup-server-success: "&b{0}&a successfully added to group &b{1}&a on server &b{2}&a for a duration of &b{3}&a."
-user-addtempgroup-server-world-success: "&b{0}&a successfully added to group &b{1}&a on server &b{2}&a, world &b{3}&a, for a duration of &b{4}&a."
-user-removegroup-success: "&b{0}&a was removed from group &b{1}&a."
-user-removegroup-server-success: "&b{0}&a was removed from group &b{1}&a on server &b{2}&a."
-user-removegroup-server-world-success: "&b{0}&a was removed from group &b{1}&a on server &b{2}&a, world &b{3}&a."
-user-removetempgroup-success: "&b{0}&a was removed from temproary group &b{1}&a."
-user-removetempgroup-server-success: "&b{0}&a was removed from temporary group &b{1}&a on server &b{2}&a."
-user-removetempgroup-server-world-success: "&b{0}&a was removed from temporary group &b{1}&a on server &b{2}&a, world &b{3}&a."
+  {PREFIX}&f-> &3User: &f{0}\n
+  {PREFIX}&f-> &3UUID: &f{1}\n
+  {PREFIX}&f-> &3Status: {2}\n
+  {PREFIX}&f-> &3Primary Group: &f{3}\n
+  {PREFIX}&f-> &3Permissions: &f{4}\n
+  {PREFIX}&f-> &3Temporary Permissions: &f{5}\n
+  {PREFIX}&f-> &3Use &b/{6} user {7} listnodes &3to see all permissions.
+user-getuuid: "&bThe UUID of &b{0}&b is &b{1}&b."
 user-removegroup-error-primary: "You cannot remove a user from their primary group."
 user-primarygroup-success: "&b{0}&a's primary group was set to &b{1}&a."
 user-primarygroup-error-alreadyhas: "The user already has this group set as their primary group."
@@ -214,29 +224,17 @@ user-demote-error-malformed: >
   {PREFIX}The previous group on the track, {0}, no longer exists. Unable to demote user.\n
   {PREFIX}Either create the group, or remove it from the track and try again.
 user-demote-error-not-contain-group: "Demotions are done based on primary groups. The users primary group is not on the track specified."
-user-showpos: "&aShowing &b{0}&a's position on track &b{1}&a.\n{2}"
+user-showpos: "&aShowing &b{0}&a's position on track &b{1}&a.{2}"
 
 group-info: >
-  {PREFIX}&d-> &eGroup: &6{0}\n
-  {PREFIX}&d-> &ePermissions: &6{1}\n
-  {PREFIX}&d-> &eTemporary Permissions: &6{2}\n
-  {PREFIX}&d-> &bUse &a/{3} group {4} listnodes &bto see all permissions.
-group-setinherit-success: "&b{0}&a now inherits permissions from &b{1}&a."
-group-setinherit-server-success: "&b{0}&a now inherits permissions from &b{2}&a on server &b{3}&a."
-group-setinherit-server-world-success: "&b{0}&a now inherits permissions from &b{1}&a on server &b{2}&a, world &b{3}&a."
-group-set-temp-inherit-success: "&b{0}&a now inherits permissions from &b{1}&a for a duration of &b{2}&a."
-group-set-temp-inherit-server-success: "&b{0}&a now inherits permissions from &b{1}&a on server &b{2}&a for a duration of &b{3}&a."
-group-set-temp-inherit-server-world-success: "&b{0}&a now inherits permissions from &b{1}&a on server &b{2}&a, world &b{3}&a, for a duration of &b{4}&a."
-group-unsetinherit-success: "&b{0}&a no longer inherits permissions from &b{1}&a."
-group-unsetinherit-server-success: "&b{0}&a no longer inherits permissions from &b{1}&a on server &b{2}&a."
-group-unsetinherit-server-world-success: "&b{0}&a no longer inherits permissions from &b{1}&a on server &b{2}&a, world &b{3}&a."
-group-unset-temp-inherit-success: "&b{0}&a no longer temporarily inherits permissions from &b{1}&a."
-group-unset-temp-inherit-server-success: "&b{0}&a no longer temporarily inherits permissions from &b{1}&a on server &b{2}&a."
-group-unset-temp-inherit-server-world-success: "&b{0}&a no longer temporarily inherits permissions from &b{1}&a on server &b{2}&a, world &b{3}&a."
+  {PREFIX}&f-> &3Group: &6{0}\n
+  {PREFIX}&f-> &3Permissions: &6{1}\n
+  {PREFIX}&f-> &3Temporary Permissions: &6{2}\n
+  {PREFIX}&f-> &3Use &b/{3} group {4} listnodes &3to see all permissions.
 
 track-info: >
-  {PREFIX}&d-> &eTrack: &6{0}\n
-  {PREFIX}&d-> &ePath: &6{1}
+  {PREFIX}&b-> &eTrack: &6{0}\n
+  {PREFIX}&b-> &ePath: &6{1}
 track-clear: "&b{0}&a's groups track was cleared."
 track-append-success: "&aGroup &b{0}&a was successfully appended to track &b{1}&a."
 track-insert-success: "&aGroup &b{0}&a was successfully inserted into track &b{1}&a at position &b{2}&a."
@@ -247,8 +245,8 @@ track-remove-success: "&aGroup &b{0}&a was successfully removed from track &b{1}
 log-load-error: "The log could not be loaded."
 log-invalid-page: "Invalid page number."
 log-invalid-page-range: "Invalid page number. Please enter a value between 1 and {0}."
-log-no-entries: "&eNo log entries to show."
-log-entry: "&e#{0} -> &8(&7{1} ago&8) {2}"
+log-no-entries: "&bNo log entries to show."
+log-entry: "&b#{0} -> &8(&7{1} ago&8) {2}"
 
 log-notify-toggle-on: "&aEnabled&b logging output."
 log-notify-toggle-off: "&cDisabled&b logging output."
@@ -276,21 +274,22 @@ import-log-doesnt-exist: "Error: File {0} does not exist."
 import-log-not-readable: "Error: File {0} is not readable."
 import-log-failure: "An unexpected error occured whilst reading from the log file."
 
-import-progress: "&e(Import) &d-> &f{0} &6percent complete &7- &e{1}&6/&e{2} &6operations complete with &c{3} &6errors."
-import-progress-sin: "&e(Import) &d-> &f{0} &6percent complete &7- &e{1}&6/&e{2} &6operations complete with &c{3} &6error."
-import-start: "&e(Import) &d-> &6Starting import process."
+import-progress: "&b(Import) &b-> &f{0} &fpercent complete &7- &b{1}&f/&b{2} &foperations complete with &c{3} &ferrors."
+import-progress-sin: "&b(Import) &b-> &f{0} &fpercent complete &7- &b{1}&f/&b{2} &foperations complete with &c{3} &ferror."
+import-start: "&b(Import) &b-> &fStarting import process."
 
-import-end-complete: "&e(Import) &a&lCOMPLETED &7- took &e{0} &7seconds - &7No errors."
-import-end-complete-err: "&e(Import) &a&lCOMPLETED &7- took &e{0} &7seconds - &c{1} errors."
-import-end-complete-err-sin: "&e(Import) &a&lCOMPLETED &7- took &e{0} &7seconds - &c{1} error."
+import-end-complete: "&b(Import) &a&lCOMPLETED &7- took &b{0} &7seconds - &7No errors."
+import-end-complete-err: "&b(Import) &a&lCOMPLETED &7- took &b{0} &7seconds - &c{1} errors."
+import-end-complete-err-sin: "&b(Import) &a&lCOMPLETED &7- took &b{0} &7seconds - &c{1} error."
+
 import-end-error-header: >
-  {PREFIX}&e(Import) &7------------> &6Showing Error #&e{0} &7<------------\n
-  {PREFIX}&e(Import) &6Whilst executing: &fCommand #{1}\n
-  {PREFIX}&e(Import) &6Command: &7{2}\n
-  {PREFIX}&e(Import) &6Type: &f{3}\n
-  {PREFIX}&e(Import) &6Output:
+  {PREFIX}&b(Import) &7------------> &fShowing Error #&b{0} &7<------------\n
+  {PREFIX}&b(Import) &fWhilst executing: &3Command #{1}\n
+  {PREFIX}&b(Import) &fCommand: &7{2}\n
+  {PREFIX}&b(Import) &fType: &3{3}\n
+  {PREFIX}&b(Import) &fOutput:
 
-import-end-error-content: "&e(Import) &d-> &c{0}"
-import-end-error-footer: "&e(Import) &7<------------------------------------------>"
+import-end-error-content: "&b(Import) &b-> &c{0}"
+import-end-error-footer: "&b(Import) &7<------------------------------------------>"
 
 migration-not-console: "Migration must be performed from the Console."

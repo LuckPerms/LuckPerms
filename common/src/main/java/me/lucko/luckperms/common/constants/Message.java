@@ -244,13 +244,13 @@ public enum Message {
     BULK_CHANGE_SUCCESS("&aApplied bulk change successfully. {0} records were changed.", true),
 
     USER_INFO(
-            "{PREFIX}&b-> &bUser: &f{0}" + "\n" +
-            "{PREFIX}&b-> &bUUID: &f{1}" + "\n" +
-            "{PREFIX}&b-> &bStatus: {2}" + "\n" +
-            "{PREFIX}&b-> &bPrimary Group: &f{3}" + "\n" +
-            "{PREFIX}&b-> &bPermissions: &f{4}" + "\n" +
-            "{PREFIX}&b-> &bTemporary Permissions: &f{5}" + "\n" +
-            "{PREFIX}&b-> &bUse &a/{6} user {7} listnodes &bto see all permissions.",
+            "{PREFIX}&f-> &3User: &f{0}" + "\n" +
+            "{PREFIX}&f-> &3UUID: &f{1}" + "\n" +
+            "{PREFIX}&f-> &3Status: {2}" + "\n" +
+            "{PREFIX}&f-> &3Primary Group: &f{3}" + "\n" +
+            "{PREFIX}&f-> &3Permissions: &f{4}" + "\n" +
+            "{PREFIX}&f-> &3Temporary Permissions: &f{5}" + "\n" +
+            "{PREFIX}&f-> &3Use &b/{6} user {7} listnodes &3to see all permissions.",
             false
     ),
     USER_GETUUID("&bThe UUID of &b{0}&b is &b{1}&b.", true),
@@ -280,16 +280,16 @@ public enum Message {
     USER_SHOWPOS("&aShowing &b{0}&a's position on track &b{1}&a.\n{2}", true),
 
     GROUP_INFO(
-            "{PREFIX}&b-> &bGroup: &f{0}" + "\n" +
-            "{PREFIX}&b-> &bPermissions: &f{1}" + "\n" +
-            "{PREFIX}&b-> &bTemporary Permissions: &f{2}" + "\n" +
-            "{PREFIX}&b-> &bUse &a/{3} group {4} listnodes &bto see all permissions.",
+            "{PREFIX}&f-> &3Group: &f{0}" + "\n" +
+            "{PREFIX}&f-> &3Permissions: &f{1}" + "\n" +
+            "{PREFIX}&f-> &3Temporary Permissions: &f{2}" + "\n" +
+            "{PREFIX}&f-> &3Use &b/{3} group {4} listnodes &3to see all permissions.",
             false
     ),
 
     TRACK_INFO(
-            "{PREFIX}&b-> &bTrack: &f{0}" + "\n" +
-            "{PREFIX}&b-> &bPath: &f{1}",
+            "{PREFIX}&f-> &3Track: &f{0}" + "\n" +
+            "{PREFIX}&f-> &3Path: &f{1}",
             false
     ),
     TRACK_CLEAR("&b{0}&a's groups track was cleared.", true),
@@ -340,9 +340,9 @@ public enum Message {
     IMPORT_END_COMPLETE_ERR_SIN("&b(Import) &a&lCOMPLETED &7- took &b{0} &7seconds - &c{1} error.", true),
     IMPORT_END_ERROR_HEADER(
             "{PREFIX}&b(Import) &7------------> &fShowing Error #&b{0} &7<------------" + "\n" +
-            "{PREFIX}&b(Import) &fWhilst executing: &fCommand #{1}" + "\n" +
+            "{PREFIX}&b(Import) &fWhilst executing: &3Command #{1}" + "\n" +
             "{PREFIX}&b(Import) &fCommand: &7{2}" + "\n" +
-            "{PREFIX}&b(Import) &fType: &f{3}" + "\n" +
+            "{PREFIX}&b(Import) &fType: &3{3}" + "\n" +
             "{PREFIX}&b(Import) &fOutput:",
             false
     ),
