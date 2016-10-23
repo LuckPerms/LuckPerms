@@ -69,6 +69,11 @@ public class MigrationMainCommand extends MainCommand<Object> {
             Class.forName("de.bananaco.bpermissions.api.WorldManager");
             subCommands.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.bukkit.migration.MigrationBPermissions").newInstance());
         } catch (Throwable ignored) {}
+
+        try {
+            Class.forName("ninja.leaping.permissionsex.sponge.PermissionsExPlugin");
+            subCommands.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.sponge.migration.MigrationPermissionsEx").newInstance());
+        } catch (Throwable ignored) {}
     }
 
     @Override

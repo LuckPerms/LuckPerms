@@ -62,6 +62,7 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
+import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.service.permission.PermissionDescription;
@@ -77,7 +78,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Getter
-@Plugin(id = "luckperms", name = "LuckPerms", version = VersionData.VERSION, authors = {"Luck"}, description = "A permissions plugin")
+@Plugin(id = "luckperms",
+        name = "LuckPerms",
+        version = VersionData.VERSION,
+        authors = {"Luck"},
+        description = "A permissions plugin",
+        dependencies = {
+                @Dependency(id = "permissionsex", optional = true) // Needed for migration.
+        }
+)
 public class LPSpongePlugin implements LuckPermsPlugin {
 
     @Inject
