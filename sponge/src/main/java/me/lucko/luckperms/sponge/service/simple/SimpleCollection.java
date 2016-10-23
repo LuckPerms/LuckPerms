@@ -22,6 +22,9 @@
 
 package me.lucko.luckperms.sponge.service.simple;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +38,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * Super simple SubjectCollection implementation
@@ -47,25 +50,27 @@ public class SimpleCollection implements SubjectCollection {
     @Getter
     private final String identifier;
 
-    private final Map<String, Subject> subjects = new ConcurrentHashMap<>();
+    private final LoadingCache<String, SimpleSubject> subjects = CacheBuilder.newBuilder()
+            .build(new CacheLoader<String, SimpleSubject>() {
+                @Override
+                public SimpleSubject load(String s) {
+                    return new SimpleSubject(s, service, SimpleCollection.this);
+                }
+            });
 
     @Override
-    public synchronized Subject get(@NonNull String id) {
-        if (!subjects.containsKey(id)) {
-            subjects.put(id, new SimpleSubject(id, service, this));
-        }
-
-        return subjects.get(id);
+    public Subject get(@NonNull String id) {
+        return subjects.getUnchecked(id.toLowerCase());
     }
 
     @Override
     public boolean hasRegistered(@NonNull String id) {
-        return subjects.containsKey(id);
+        return subjects.asMap().containsKey(id.toLowerCase());
     }
 
     @Override
     public Iterable<Subject> getAllSubjects() {
-        return subjects.values();
+        return subjects.asMap().values().stream().map(s -> (Subject) s).collect(Collectors.toList());
     }
 
     @Override
@@ -76,7 +81,7 @@ public class SimpleCollection implements SubjectCollection {
     @Override
     public Map<Subject, Boolean> getAllWithPermission(@NonNull Set<Context> contexts, @NonNull String node) {
         Map<Subject, Boolean> m = new HashMap<>();
-        for (Subject subject : subjects.values()) {
+        for (Subject subject : subjects.asMap().values()) {
             Tristate ts = subject.getPermissionValue(contexts, node);
             if (ts != Tristate.UNDEFINED) {
                 m.put(subject, ts.asBoolean());

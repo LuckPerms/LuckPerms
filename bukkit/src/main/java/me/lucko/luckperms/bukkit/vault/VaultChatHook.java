@@ -25,7 +25,8 @@ package me.lucko.luckperms.bukkit.vault;
 import lombok.NonNull;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.common.caching.MetaData;
+import me.lucko.luckperms.api.caching.MetaData;
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.users.User;
@@ -214,7 +215,7 @@ public class VaultChatHook extends Chat {
             context.put("world", world);
         }
 
-        for (Node n : group.getAllNodes(null, new Contexts(context, perms.isIncludeGlobal(), true, true, true, true))) {
+        for (Node n : group.getAllNodes(null, new Contexts(ContextSet.fromMap(context), perms.isIncludeGlobal(), true, true, true, true, false))) {
             if (!n.getValue()) {
                 continue;
             }

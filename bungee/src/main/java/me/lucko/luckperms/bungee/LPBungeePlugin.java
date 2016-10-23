@@ -27,6 +27,8 @@ import me.lucko.luckperms.ApiHandler;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.PlatformType;
+import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.api.ApiProvider;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
@@ -212,28 +214,29 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
     @Override
     public Set<Contexts> getPreProcessContexts(boolean op) {
-        Set<Map<String, String>> c = new HashSet<>();
-        c.add(Collections.emptyMap());
-        c.add(Collections.singletonMap("server", getConfiguration().getServer()));
+        Set<ContextSet> c = new HashSet<>();
+        c.add(ContextSet.empty());
+        c.add(ContextSet.singleton("server", getConfiguration().getServer()));
         c.addAll(getProxy().getServers().values().stream()
                 .map(ServerInfo::getName)
                 .map(s -> {
-                    Map<String, String> map = new HashMap<>();
-                    map.put("server", getConfiguration().getServer());
-                    map.put("world", s);
-                    return map;
+                    MutableContextSet set = new MutableContextSet();
+                    set.add("server", getConfiguration().getServer());
+                    set.add("world", s);
+                    return set.makeImmutable();
                 })
                 .collect(Collectors.toList())
         );
 
         return c.stream()
-                .map(map -> new Contexts(
-                        map,
+                .map(set -> new Contexts(
+                        set,
                         getConfiguration().isIncludingGlobalPerms(),
                         getConfiguration().isIncludingGlobalWorldPerms(),
                         true,
                         getConfiguration().isApplyingGlobalGroups(),
-                        getConfiguration().isApplyingGlobalWorldGroups()
+                        getConfiguration().isApplyingGlobalWorldGroups(),
+                        false
                 ))
                 .collect(Collectors.toSet());
     }

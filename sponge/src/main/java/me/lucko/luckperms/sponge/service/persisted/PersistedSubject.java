@@ -25,13 +25,14 @@ package me.lucko.luckperms.sponge.service.persisted;
 import com.google.common.collect.ImmutableList;
 import lombok.Getter;
 import lombok.NonNull;
+import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.common.utils.BufferedRequest;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
-import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.util.Tristate;
 
 import java.io.IOException;
@@ -51,6 +52,19 @@ public class PersistedSubject implements Subject {
     private final SubjectCollection containingCollection;
     private final PersistedSubjectData subjectData;
     private final MemorySubjectData transientSubjectData;
+    private final BufferedRequest<Void> saveBuffer = new BufferedRequest<Void>(1000L, r -> PersistedSubject.this.service.getPlugin().doAsync(r)) {
+        @Override
+        protected Void perform() {
+            service.getPlugin().doAsync(() -> {
+                try {
+                    service.getStorage().saveToFile(PersistedSubject.this);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+            return null;
+        }
+    };
 
     public PersistedSubject(String identifier, LuckPermsService service, SubjectCollection containingCollection) {
         this.identifier = identifier;
@@ -67,13 +81,7 @@ public class PersistedSubject implements Subject {
     }
 
     public void save() {
-        service.getPlugin().doAsync(() -> {
-            try {
-                service.getStorage().saveToFile(this);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
+        saveBuffer.request();
     }
 
     @Override
@@ -178,6 +186,6 @@ public class PersistedSubject implements Subject {
 
     @Override
     public Set<Context> getActiveContexts() {
-        return SubjectData.GLOBAL_CONTEXT;
+        return LuckPermsService.convertContexts(service.getPlugin().getContextManager().giveApplicableContext(this, MutableContextSet.empty()));
     }
 }

@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableSet;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.users.User;
@@ -65,7 +66,7 @@ public class LuckPermsSubjectData implements SubjectData {
         Map<Set<Context>, Map<String, Boolean>> perms = new HashMap<>();
 
         for (Node n : enduring ? holder.getNodes() : holder.getTransientNodes()) {
-            Set<Context> contexts = LuckPermsService.convertContexts(n.getExtraContexts());
+            Set<Context> contexts = LuckPermsService.convertContexts(n.getContexts());
 
             if (n.isServerSpecific()) {
                 contexts.add(new Context(LuckPermsService.SERVER_CONTEXT, n.getServer().get()));
@@ -185,7 +186,7 @@ public class LuckPermsSubjectData implements SubjectData {
                 continue;
             }
 
-            Set<Context> contexts = LuckPermsService.convertContexts(n.getExtraContexts());
+            Set<Context> contexts = LuckPermsService.convertContexts(n.getContexts());
 
             if (n.isServerSpecific()) {
                 contexts.add(new Context(LuckPermsService.SERVER_CONTEXT, n.getServer().get()));
@@ -225,7 +226,7 @@ public class LuckPermsSubjectData implements SubjectData {
     public boolean addParent(Set<Context> set, Subject subject) {
         if (subject instanceof LuckPermsGroupSubject) {
             LuckPermsGroupSubject permsSubject = ((LuckPermsGroupSubject) subject);
-            Map<String, String> contexts = LuckPermsService.convertContexts(set);
+            ContextSet contexts = LuckPermsService.convertContexts(set);
 
             try {
                 if (enduring) {
@@ -249,7 +250,7 @@ public class LuckPermsSubjectData implements SubjectData {
     public boolean removeParent(Set<Context> set, Subject subject) {
         if (subject instanceof LuckPermsGroupSubject) {
             LuckPermsGroupSubject permsSubject = ((LuckPermsGroupSubject) subject);
-            Map<String, String> contexts = LuckPermsService.convertContexts(set);
+            ContextSet contexts = LuckPermsService.convertContexts(set);
 
             try {
                 if (enduring) {
@@ -295,7 +296,7 @@ public class LuckPermsSubjectData implements SubjectData {
 
     @Override
     public boolean clearParents(Set<Context> set) {
-        Map<String, String> context = LuckPermsService.convertContexts(set);
+        ContextSet context = LuckPermsService.convertContexts(set);
 
         List<Node> toRemove = (enduring ? holder.getNodes() : holder.getTransientNodes()).stream()
                 .filter(Node::isGroupNode)
@@ -336,7 +337,7 @@ public class LuckPermsSubjectData implements SubjectData {
                 continue;
             }
 
-            Set<Context> contexts = LuckPermsService.convertContexts(n.getExtraContexts());
+            Set<Context> contexts = LuckPermsService.convertContexts(n.getContexts());
 
             if (n.isServerSpecific()) {
                 contexts.add(new Context(LuckPermsService.SERVER_CONTEXT, n.getServer().get()));
@@ -384,7 +385,7 @@ public class LuckPermsSubjectData implements SubjectData {
     @Override
     public Map<String, String> getOptions(Set<Context> set) {
         ImmutableMap.Builder<String, String> options = ImmutableMap.builder();
-        Map<String, String> contexts = LuckPermsService.convertContexts(set);
+        ContextSet contexts = LuckPermsService.convertContexts(set);
 
         int prefixPriority = Integer.MIN_VALUE;
         int suffixPriority = Integer.MIN_VALUE;
@@ -431,7 +432,7 @@ public class LuckPermsSubjectData implements SubjectData {
 
     @Override
     public boolean setOption(Set<Context> set, String key, String value) {
-        Map<String, String> context = LuckPermsService.convertContexts(set);
+        ContextSet context = LuckPermsService.convertContexts(set);
 
         key = escapeCharacters(key);
         value = escapeCharacters(value);
@@ -455,7 +456,7 @@ public class LuckPermsSubjectData implements SubjectData {
 
     @Override
     public boolean clearOptions(Set<Context> set) {
-        Map<String, String> context = LuckPermsService.convertContexts(set);
+        ContextSet context = LuckPermsService.convertContexts(set);
 
         List<Node> toRemove = (enduring ? holder.getNodes() : holder.getTransientNodes()).stream()
                 .filter(n -> n.isMeta() || n.isPrefix() || n.isSuffix())

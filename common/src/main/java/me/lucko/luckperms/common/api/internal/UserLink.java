@@ -27,10 +27,12 @@ import lombok.Getter;
 import lombok.NonNull;
 import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.User;
+import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static me.lucko.luckperms.common.api.internal.Utils.*;
@@ -80,6 +82,11 @@ public class UserLink extends PermissionHolderLink implements User {
     @Override
     public void refreshPermissions() {
         master.getRefreshBuffer().requestDirectly();
+    }
+
+    @Override
+    public Optional<UserData> getUserDataCache() {
+        return Optional.ofNullable(master.getUserData());
     }
 
     @Override

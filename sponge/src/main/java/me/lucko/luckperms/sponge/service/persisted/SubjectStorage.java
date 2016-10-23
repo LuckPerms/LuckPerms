@@ -58,7 +58,7 @@ public class SubjectStorage {
             collection.mkdirs();
         }
 
-        File subjectFile = new File(collection, subject.getIdentifier().toLowerCase() + ".json");
+        File subjectFile = new File(collection, subject.getIdentifier() + ".json");
         saveToFile(subject, subjectFile);
     }
 
@@ -110,8 +110,8 @@ public class SubjectStorage {
             return null;
         }
 
-        File subject = new File(collection, subjectName.toLowerCase() + ".json");
-        return new AbstractMap.SimpleEntry<>(subjectName.toLowerCase(), loadFromFile(subject).getValue());
+        File subject = new File(collection, subjectName + ".json");
+        return new AbstractMap.SimpleEntry<>(subjectName, loadFromFile(subject).getValue());
     }
 
     public Map.Entry<String, SubjectDataHolder> loadFromFile(File file) throws IOException {
@@ -120,7 +120,7 @@ public class SubjectStorage {
         }
 
         String s = Files.toString(file, Charset.defaultCharset());
-        return new AbstractMap.SimpleEntry<>(file.getName().substring(file.getName().length() - 5).toLowerCase(), loadFromString(s));
+        return new AbstractMap.SimpleEntry<>(file.getName().substring(0, file.getName().length() - 5), loadFromString(s));
     }
 
     public SubjectDataHolder loadFromString(String s) {

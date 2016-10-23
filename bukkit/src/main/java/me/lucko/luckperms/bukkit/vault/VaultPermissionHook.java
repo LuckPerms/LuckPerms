@@ -27,6 +27,7 @@ import lombok.NonNull;
 import lombok.Setter;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.groups.Group;
@@ -146,7 +147,7 @@ public class VaultPermissionHook extends Permission {
             context.put("world", world);
         }
         context.put("server", server);
-        return new Contexts(context, isIncludeGlobal(), true, true, true, true);
+        return new Contexts(ContextSet.fromMap(context), isIncludeGlobal(), true, true, true, true, false);
     }
 
     @Override

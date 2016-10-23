@@ -22,10 +22,9 @@
 
 package me.lucko.luckperms.api;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import me.lucko.luckperms.api.context.ContextSet;
+
+import java.util.*;
 
 /**
  * Represents an immutable node object
@@ -109,15 +108,40 @@ public interface Node extends Map.Entry<String, Boolean> {
      * @param context the context key value pairs
      * @param worldAndServer if world and server contexts should be checked
      * @return true if the node should apply
+     * @since 2.13
      */
-    boolean shouldApplyWithContext(Map<String, String> context, boolean worldAndServer);
+    boolean shouldApplyWithContext(ContextSet context, boolean worldAndServer);
 
     /**
      * If this node should apply in the given context
      * @param context the context key value pairs
      * @return true if the node should apply
+     * @since 2.13
      */
-    boolean shouldApplyWithContext(Map<String, String> context);
+    boolean shouldApplyWithContext(ContextSet context);
+
+    /**
+     * If this node should apply in the given context
+     * @param context the context key value pairs
+     * @param worldAndServer if world and server contexts should be checked
+     * @return true if the node should apply
+     * @deprecated in favour of {@link #shouldApplyWithContext(ContextSet, boolean)}
+     */
+    @Deprecated
+    default boolean shouldApplyWithContext(Map<String, String> context, boolean worldAndServer) {
+        return shouldApplyWithContext(ContextSet.fromMap(context), worldAndServer);
+    }
+
+    /**
+     * If this node should apply in the given context
+     * @param context the context key value pairs
+     * @return true if the node should apply
+     * @deprecated in favour of {@link #shouldApplyWithContext(ContextSet)}
+     */
+    @Deprecated
+    default boolean shouldApplyWithContext(Map<String, String> context) {
+        return shouldApplyWithContext(ContextSet.fromMap(context));
+    }
 
     /**
      * Similar to {@link #shouldApplyOnServer(String, boolean, boolean)}, except this method accepts a List
@@ -186,8 +210,18 @@ public interface Node extends Map.Entry<String, Boolean> {
 
     /**
      * @return the extra contexts required for this node to apply
+     * @deprecated in favour of {@link #getContexts()}
      */
-    Map<String, String> getExtraContexts();
+    @Deprecated
+    default Map<String, String> getExtraContexts() {
+        return getContexts().toMap();
+    }
+
+    /**
+     * @return the extra contexts required for this node to apply
+     * @since 2.13
+     */
+    ContextSet getContexts();
 
     /**
      * Converts this node into a serialized form
@@ -302,7 +336,9 @@ public interface Node extends Map.Entry<String, Boolean> {
         Builder setServer(String server) throws IllegalArgumentException;
         Builder withExtraContext(String key, String value);
         Builder withExtraContext(Map<String, String> map);
+        Builder withExtraContext(Set<Map.Entry<String, String>> context);
         Builder withExtraContext(Map.Entry<String, String> entry);
+        Builder withExtraContext(ContextSet set);
         Node build();
     }
 

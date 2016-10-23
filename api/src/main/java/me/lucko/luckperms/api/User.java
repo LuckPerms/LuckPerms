@@ -22,10 +22,12 @@
 
 package me.lucko.luckperms.api;
 
+import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -63,6 +65,13 @@ public interface User extends PermissionHolder {
      * Refresh and re-assign the users permissions
      */
     void refreshPermissions();
+
+    /**
+     * Gets the user's {@link UserData} cache, if they have one setup.
+     * @return an optional, possibly containing the user's cached lookup data.
+     * @since 2.13
+     */
+    Optional<UserData> getUserDataCache();
 
     /**
      * Check to see if the user is a member of a group

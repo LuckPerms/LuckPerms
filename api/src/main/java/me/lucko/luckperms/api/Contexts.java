@@ -22,9 +22,8 @@
 
 package me.lucko.luckperms.api;
 
-import com.google.common.collect.ImmutableMap;
+import me.lucko.luckperms.api.context.ContextSet;
 
-import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -41,23 +40,19 @@ public class Contexts {
      * @return a context that will not apply any filters
      */
     public static Contexts allowAll() {
-        return new Contexts(Collections.emptyMap(), true, true, true, true, true, true);
+        return new Contexts(ContextSet.empty(), true, true, true, true, true, true);
     }
 
-    public static Contexts of(Map<String, String> context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups) {
-        return new Contexts(context, includeGlobal, includeGlobalWorld, applyGroups, applyGlobalGroups, applyGlobalWorldGroups);
-    }
-
-    public static Contexts of(Map<String, String> context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups, boolean op) {
+    public static Contexts of(ContextSet context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups, boolean op) {
         return new Contexts(context, includeGlobal, includeGlobalWorld, applyGroups, applyGlobalGroups, applyGlobalWorldGroups, op);
     }
 
-    public Contexts(Map<String, String> context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups, boolean op) {
+    public Contexts(ContextSet context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups, boolean op) {
         if (context == null) {
             throw new NullPointerException("context");
         }
 
-        this.context = ImmutableMap.copyOf(context);
+        this.context = context.makeImmutable();
         this.includeGlobal = includeGlobal;
         this.includeGlobalWorld = includeGlobalWorld;
         this.applyGroups = applyGroups;
@@ -66,16 +61,34 @@ public class Contexts {
         this.op = op;
     }
 
+    @SuppressWarnings("deprecation")
+    @Deprecated
+    public static Contexts of(Map<String, String> context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups) {
+        return new Contexts(context, includeGlobal, includeGlobalWorld, applyGroups, applyGlobalGroups, applyGlobalWorldGroups);
+    }
+
+    @SuppressWarnings("deprecation")
+    @Deprecated
+    public static Contexts of(Map<String, String> context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups, boolean op) {
+        return new Contexts(context, includeGlobal, includeGlobalWorld, applyGroups, applyGlobalGroups, applyGlobalWorldGroups, op);
+    }
+
+    @Deprecated
+    public Contexts(Map<String, String> context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups, boolean op) {
+        this(context == null ? null : ContextSet.fromMap(context), includeGlobal, includeGlobalWorld, applyGroups, applyGlobalGroups, applyGlobalWorldGroups, op);
+    }
+
+    @SuppressWarnings("deprecation")
+    @Deprecated
     public Contexts(Map<String, String> context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups) {
         this(context, includeGlobal, includeGlobalWorld, applyGroups, applyGlobalGroups, applyGlobalWorldGroups, false);
     }
 
     /**
      * The contexts that apply for this lookup
-     *
      * The keys for servers and worlds are defined as static values.
      */
-    private final Map<String, String> context;
+    private final ContextSet context;
 
     /**
      * The mode to parse defaults on Bukkit
@@ -110,10 +123,21 @@ public class Contexts {
 
     /**
      * Gets the contexts that apply for this lookup
-     * @return an immutable map of context key value pairs
+     * @return an immutable set of context key value pairs
+     * @since 2.13
      */
-    public Map<String, String> getContext() {
+    public ContextSet getContexts() {
         return this.context;
+    }
+
+    /**
+     * Gets the contexts that apply for this lookup
+     * @return an immutable map of context key value pairs
+     * @deprecated in favour of {@link #getContexts()}
+     */
+    @Deprecated
+    public Map<String, String> getContext() {
+        return this.context.toMap();
     }
 
     /**
@@ -166,7 +190,7 @@ public class Contexts {
 
     public String toString() {
         return "Contexts(" +
-                "context=" + this.getContext() + ", " +
+                "context=" + this.getContexts() + ", " +
                 "op=" + this.isOp() + ", " +
                 "includeGlobal=" + this.isIncludeGlobal() + ", " +
                 "includeGlobalWorld=" + this.isIncludeGlobalWorld() + ", " +
@@ -190,8 +214,8 @@ public class Contexts {
         if (o == this) return true;
         if (!(o instanceof Contexts)) return false;
         final Contexts other = (Contexts) o;
-        final Object this$context = this.getContext();
-        final Object other$context = other.getContext();
+        final Object this$context = this.getContexts();
+        final Object other$context = other.getContexts();
         if (this$context == null ? other$context != null : !this$context.equals(other$context)) return false;
         if (this.isOp() != other.isOp()) return false;
         if (this.isIncludeGlobal() != other.isIncludeGlobal()) return false;
@@ -210,7 +234,7 @@ public class Contexts {
     public int hashCode() {
         final int PRIME = 59;
         int result = 1;
-        final Object $context = this.getContext();
+        final Object $context = this.getContexts();
         result = result * PRIME + ($context == null ? 43 : $context.hashCode());
         result = result * PRIME + (this.isOp() ? 79 : 97);
         result = result * PRIME + (this.isIncludeGlobal() ? 79 : 97);

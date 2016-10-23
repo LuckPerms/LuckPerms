@@ -32,6 +32,7 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.api.event.events.*;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.api.internal.GroupLink;
@@ -368,11 +369,11 @@ public abstract class PermissionHolder {
                 .filter(Node::isGroupNode)
                 .collect(Collectors.toSet());
 
-        Map<String, String> contexts = new HashMap<>(context.getContext());
-        String server = contexts.get("server");
-        String world = contexts.get("world");
-        contexts.remove("server");
-        contexts.remove("world");
+        MutableContextSet contexts = MutableContextSet.fromSet(context.getContexts());
+        String server = contexts.getValues("server").stream().findAny().orElse(null);
+        String world = contexts.getValues("world").stream().findAny().orElse(null);
+        contexts.removeAll("server");
+        contexts.removeAll("world");
 
         parents.removeIf(node ->
                 !node.shouldApplyOnServer(server, context.isApplyGlobalGroups(), plugin.getConfiguration().isApplyingRegex()) ||
@@ -419,11 +420,11 @@ public abstract class PermissionHolder {
             allNodes = new TreeSet<>((SortedSet<LocalizedNode>) getPermissions(true));
         }
 
-        Map<String, String> contexts = new HashMap<>(context.getContext());
-        String server = contexts.get("server");
-        String world = contexts.get("world");
-        contexts.remove("server");
-        contexts.remove("world");
+        MutableContextSet contexts = MutableContextSet.fromSet(context.getContexts());
+        String server = contexts.getValues("server").stream().findAny().orElse(null);
+        String world = contexts.getValues("world").stream().findAny().orElse(null);
+        contexts.removeAll("server");
+        contexts.removeAll("world");
 
         allNodes.removeIf(node ->
                 !node.shouldApplyOnServer(server, context.isIncludeGlobal(), plugin.getConfiguration().isApplyingRegex()) ||

@@ -22,10 +22,15 @@
 
 package me.lucko.luckperms.sponge.service;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import lombok.*;
 import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.contexts.SpongeCalculatorLink;
 import me.lucko.luckperms.sponge.service.collections.GroupCollection;
@@ -48,28 +53,25 @@ import java.util.stream.Collectors;
 /**
  * The LuckPerms implementation of the Sponge Permission Service
  */
+@Getter
 public class LuckPermsService implements PermissionService {
     public static final String SERVER_CONTEXT = "server";
 
-    @Getter
     private final LPSpongePlugin plugin;
-
-    @Getter
     private final SubjectStorage storage;
-
-    @Getter
     private final UserCollection userSubjects;
-
-    @Getter
     private final GroupCollection groupSubjects;
-
-    @Getter
     private final PersistedCollection defaultSubjects;
-
-    @Getter
     private final Set<PermissionDescription> descriptionSet;
 
-    private final Map<String, SubjectCollection> subjects;
+    @Getter(value = AccessLevel.NONE)
+    private final LoadingCache<String, SubjectCollection> collections = CacheBuilder.newBuilder()
+            .build(new CacheLoader<String, SubjectCollection>() {
+                @Override
+                public SubjectCollection load(String s) {
+                    return new SimpleCollection(LuckPermsService.this, s);
+                }
+            });
 
     public LuckPermsService(LPSpongePlugin plugin) {
         this.plugin = plugin;
@@ -81,10 +83,9 @@ public class LuckPermsService implements PermissionService {
         defaultSubjects = new PersistedCollection(this, "defaults");
         defaultSubjects.loadAll();
 
-        subjects = new ConcurrentHashMap<>();
-        subjects.put(PermissionService.SUBJECTS_USER, userSubjects);
-        subjects.put(PermissionService.SUBJECTS_GROUP, groupSubjects);
-        subjects.put("defaults", defaultSubjects);
+        collections.put(PermissionService.SUBJECTS_USER, userSubjects);
+        collections.put(PermissionService.SUBJECTS_GROUP, groupSubjects);
+        collections.put("defaults", defaultSubjects);
 
         descriptionSet = ConcurrentHashMap.newKeySet();
     }
@@ -100,16 +101,12 @@ public class LuckPermsService implements PermissionService {
 
     @Override
     public SubjectCollection getSubjects(String s) {
-        if (!subjects.containsKey(s)) {
-            subjects.put(s, new SimpleCollection(this, s));
-        }
-
-        return subjects.get(s);
+        return collections.getUnchecked(s.toLowerCase());
     }
 
     @Override
     public Map<String, SubjectCollection> getKnownSubjects() {
-        return ImmutableMap.copyOf(subjects);
+        return ImmutableMap.copyOf(collections.asMap());
     }
 
     @Override
@@ -150,16 +147,17 @@ public class LuckPermsService implements PermissionService {
                 plugin.getConfiguration().isIncludingGlobalWorldPerms(),
                 true,
                 plugin.getConfiguration().isApplyingGlobalGroups(),
-                plugin.getConfiguration().isApplyingGlobalWorldGroups()
+                plugin.getConfiguration().isApplyingGlobalWorldGroups(),
+                false
         );
     }
 
-    public static Map<String, String> convertContexts(Set<Context> contexts) {
-        return contexts.stream().collect(Collectors.toMap(Context::getKey, Context::getValue));
+    public static ContextSet convertContexts(Set<Context> contexts) {
+        return ContextSet.fromEntries(contexts.stream().map(c -> Maps.immutableEntry(c.getKey(), c.getValue())).collect(Collectors.toSet()));
     }
 
-    public static Set<Context> convertContexts(Map<String, String> contexts) {
-        return contexts.entrySet().stream().map(e -> new Context(e.getKey(), e.getValue())).collect(Collectors.toSet());
+    public static Set<Context> convertContexts(ContextSet contexts) {
+        return contexts.toSet().stream().map(e -> new Context(e.getKey(), e.getValue())).collect(Collectors.toSet());
     }
 
     public static Tristate convertTristate(me.lucko.luckperms.api.Tristate tristate) {

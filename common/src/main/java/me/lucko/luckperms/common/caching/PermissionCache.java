@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableMap;
 import lombok.NonNull;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.api.caching.PermissionData;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.calculators.PermissionCalculator;
 import me.lucko.luckperms.common.users.User;
@@ -36,7 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Holds a user's cached permissions for a given context
  */
-public class PermissionData {
+public class PermissionCache implements PermissionData {
 
     /**
      * The raw set of permission strings.
@@ -50,11 +51,12 @@ public class PermissionData {
      */
     private final PermissionCalculator calculator;
 
-    public PermissionData(Contexts contexts, User user, CalculatorFactory calculatorFactory) {
+    public PermissionCache(Contexts contexts, User user, CalculatorFactory calculatorFactory) {
         permissions = new ConcurrentHashMap<>();
         calculator = calculatorFactory.build(contexts, user, permissions);
     }
 
+    @Override
     public void invalidateCache() {
         calculator.invalidateCache();
     }
@@ -71,10 +73,12 @@ public class PermissionData {
         }
     }
 
+    @Override
     public Map<String, Boolean> getImmutableBacking() {
         return ImmutableMap.copyOf(permissions);
     }
 
+    @Override
     public Tristate getPermissionValue(@NonNull String permission) {
         return calculator.getPermissionValue(permission);
     }

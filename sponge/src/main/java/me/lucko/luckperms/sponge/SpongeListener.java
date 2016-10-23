@@ -22,7 +22,8 @@
 
 package me.lucko.luckperms.sponge;
 
-import me.lucko.luckperms.common.caching.UserData;
+import me.lucko.luckperms.api.caching.UserData;
+import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.users.User;
 import me.lucko.luckperms.common.utils.AbstractListener;
@@ -34,9 +35,7 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.world.World;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -77,7 +76,7 @@ public class SpongeListener extends AbstractListener {
         // Attempt to pre-process some permissions for the user to save time later. Might not work, but it's better than nothing.
         Optional<Player> p = e.getCause().first(Player.class);
         if (p.isPresent()) {
-            Map<String, String> context = plugin.getContextManager().giveApplicableContext(p.get(), new HashMap<>());
+            MutableContextSet context = plugin.getContextManager().giveApplicableContext(p.get(), MutableContextSet.empty());
 
             List<String> worlds = plugin.getGame().getServer().getWorlds().stream()
                     .map(World::getName)
@@ -88,8 +87,9 @@ public class SpongeListener extends AbstractListener {
                 data.preCalculate(plugin.getService().calculateContexts(LuckPermsService.convertContexts(context)));
 
                 for (String world : worlds) {
-                    Map<String, String> modified = new HashMap<>(context);
-                    modified.put("world", world);
+                    MutableContextSet modified = MutableContextSet.fromSet(context);
+                    modified.removeAll("world");
+                    modified.add("world", world);
                     data.preCalculate(plugin.getService().calculateContexts(LuckPermsService.convertContexts(modified)));
                 }
             });

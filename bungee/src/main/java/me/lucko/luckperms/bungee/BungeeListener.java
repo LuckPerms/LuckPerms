@@ -23,6 +23,7 @@
 package me.lucko.luckperms.bungee;
 
 import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.api.event.events.UserFirstLoginEvent;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.core.UuidCache;
@@ -38,7 +39,6 @@ import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
-import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -72,12 +72,13 @@ public class BungeeListener extends AbstractListener implements Listener {
         }
 
         Contexts contexts = new Contexts(
-                plugin.getContextManager().giveApplicableContext(player, new HashMap<>()),
+                plugin.getContextManager().giveApplicableContext(player, MutableContextSet.empty()),
                 plugin.getConfiguration().isIncludingGlobalPerms(),
                 plugin.getConfiguration().isIncludingGlobalWorldPerms(),
                 true,
                 plugin.getConfiguration().isApplyingGlobalGroups(),
-                plugin.getConfiguration().isApplyingGlobalWorldGroups()
+                plugin.getConfiguration().isApplyingGlobalWorldGroups(),
+                false
         );
 
         e.setHasPermission(user.getUserData().getPermissionData(contexts).getPermissionValue(e.getPermission()).asBoolean());

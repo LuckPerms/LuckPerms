@@ -26,6 +26,7 @@ import com.google.common.collect.Maps;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import me.lucko.luckperms.api.context.ContextCalculator;
+import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -48,11 +49,11 @@ public class WorldCalculator extends ContextCalculator<Player> implements Listen
     private final Map<UUID, String> worldCache = new ConcurrentHashMap<>();
 
     @Override
-    public Map<String, String> giveApplicableContext(Player subject, Map<String, String> accumulator) {
+    public MutableContextSet giveApplicableContext(Player subject, MutableContextSet accumulator) {
         String world = getWorld(subject);
 
         if (world != null) {
-            accumulator.put(WORLD_KEY, world);
+            accumulator.add(Maps.immutableEntry(WORLD_KEY, world));
         }
 
         return accumulator;

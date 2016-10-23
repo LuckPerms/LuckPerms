@@ -24,6 +24,7 @@ package me.lucko.luckperms.common.contexts;
 
 import me.lucko.luckperms.api.context.ContextListener;
 import me.lucko.luckperms.api.context.IContextCalculator;
+import me.lucko.luckperms.api.context.MutableContextSet;
 
 import java.util.List;
 import java.util.Map;
@@ -47,7 +48,7 @@ public class ContextManager<T> {
         listeners.add(listener);
     }
 
-    public Map<String, String> giveApplicableContext(T subject, Map<String, String> accumulator) {
+    public MutableContextSet giveApplicableContext(T subject, MutableContextSet accumulator) {
         for (IContextCalculator<T> calculator : calculators) {
             calculator.giveApplicableContext(subject, accumulator);
         }

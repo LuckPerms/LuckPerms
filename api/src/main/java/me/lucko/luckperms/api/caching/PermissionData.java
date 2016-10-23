@@ -20,34 +20,36 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.utils;
+package me.lucko.luckperms.api.caching;
 
-import lombok.*;
-import lombok.experimental.Delegate;
-import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.Tristate;
+
+import java.util.Map;
 
 /**
- * Holds a Node and where it was inherited from
+ * Holds cached Permission lookup data for a specific set of contexts
+ * @since 2.13
  */
-@Getter
-@ToString
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class LocalizedNode implements me.lucko.luckperms.api.LocalizedNode {
-    public static LocalizedNode of(@NonNull Node node, @NonNull String location) {
-        return new LocalizedNode(node, location);
-    }
+public interface PermissionData {
 
-    @Delegate
-    private final Node node;
-    private final String location;
+    /**
+     * Gets a permission value for the given permission node
+     * @param permission the permission node
+     * @return a tristate result
+     * @throws NullPointerException if permission is null
+     */
+    Tristate getPermissionValue(String permission);
 
-    @Override
-    public int hashCode() {
-        return node.hashCode();
-    }
+    /**
+     * Invalidates the underlying permission calculator cache.
+     * Can be called to allow for an update in defaults.
+     */
+    void invalidateCache();
 
-    @Override
-    public boolean equals(Object obj) {
-        return node.equals(obj);
-    }
+    /**
+     * Gets an immutable copy of the permission map backing the permission calculator
+     * @return an immutable set of permissions
+     */
+    Map<String, Boolean> getImmutableBacking();
+
 }

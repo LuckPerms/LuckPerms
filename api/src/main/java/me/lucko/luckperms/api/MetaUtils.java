@@ -258,7 +258,7 @@ public class MetaUtils {
 
         int priority = Integer.MIN_VALUE;
         String meta = null;
-        for (Node n : holder.getAllNodes()) {
+        for (Node n : holder.getAllNodes(Contexts.allowAll())) {
             if (!n.getValue()) {
                 continue;
             }

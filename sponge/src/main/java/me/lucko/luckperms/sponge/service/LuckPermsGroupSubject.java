@@ -28,13 +28,13 @@ import lombok.Getter;
 import lombok.NonNull;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.groups.Group;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.NodeTree;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
-import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.util.Tristate;
 
 import java.util.List;
@@ -156,7 +156,7 @@ public class LuckPermsGroupSubject implements Subject {
 
     @Override
     public Set<Context> getActiveContexts() {
-        return SubjectData.GLOBAL_CONTEXT;
+        return LuckPermsService.convertContexts(service.getPlugin().getContextManager().giveApplicableContext(this, MutableContextSet.empty()));
     }
 
     private Optional<String> getChatMeta(Set<Context> contexts, boolean prefix) {

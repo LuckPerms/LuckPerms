@@ -28,6 +28,8 @@ import lombok.RequiredArgsConstructor;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.caching.MetaData;
+import me.lucko.luckperms.api.context.MutableContextSet;
 
 import java.util.*;
 
@@ -35,7 +37,7 @@ import java.util.*;
  * Holds a user's cached meta for a given context
  */
 @RequiredArgsConstructor
-public class MetaData {
+public class MetaCache implements MetaData {
     private final Contexts contexts;
 
     private final SortedMap<Integer, String> prefixes = new TreeMap<>(Comparator.reverseOrder());
@@ -46,9 +48,11 @@ public class MetaData {
     public void loadMeta(SortedSet<LocalizedNode> nodes) {
         invalidateCache();
 
-        Map<String, String> contexts = new HashMap<>(this.contexts.getContext());
-        String server = contexts.remove("server");
-        String world = contexts.remove("world");
+        MutableContextSet contexts = MutableContextSet.fromSet(this.contexts.getContexts());
+        String server = contexts.getValues("server").stream().findAny().orElse(null);
+        String world = contexts.getValues("world").stream().findAny().orElse(null);
+        contexts.removeAll("server");
+        contexts.removeAll("world");
 
         for (LocalizedNode ln : nodes) {
             Node n = ln.getNode();
@@ -105,7 +109,7 @@ public class MetaData {
         }
     }
 
-    public void invalidateCache() {
+    private void invalidateCache() {
         synchronized (meta) {
             meta.clear();
         }
@@ -117,24 +121,28 @@ public class MetaData {
         }
     }
 
+    @Override
     public Map<String, String> getMeta() {
         synchronized (meta) {
             return ImmutableMap.copyOf(meta);
         }
     }
 
+    @Override
     public SortedMap<Integer, String> getPrefixes() {
         synchronized (prefixes) {
             return ImmutableSortedMap.copyOfSorted(prefixes);
         }
     }
 
+    @Override
     public SortedMap<Integer, String> getSuffixes() {
         synchronized (suffixes) {
             return ImmutableSortedMap.copyOfSorted(suffixes);
         }
     }
 
+    @Override
     public String getPrefix() {
         synchronized (prefixes) {
             if (prefixes.isEmpty()) {
@@ -145,6 +153,7 @@ public class MetaData {
         }
     }
 
+    @Override
     public String getSuffix() {
         synchronized (suffixes) {
             if (suffixes.isEmpty()) {

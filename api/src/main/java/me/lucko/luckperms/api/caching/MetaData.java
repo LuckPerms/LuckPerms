@@ -20,34 +20,45 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.utils;
+package me.lucko.luckperms.api.caching;
 
-import lombok.*;
-import lombok.experimental.Delegate;
-import me.lucko.luckperms.api.Node;
+import java.util.Map;
+import java.util.SortedMap;
 
 /**
- * Holds a Node and where it was inherited from
+ * Holds cached Meta lookup data for a specific set of contexts
+ * @since 2.13
  */
-@Getter
-@ToString
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class LocalizedNode implements me.lucko.luckperms.api.LocalizedNode {
-    public static LocalizedNode of(@NonNull Node node, @NonNull String location) {
-        return new LocalizedNode(node, location);
-    }
+public interface MetaData {
 
-    @Delegate
-    private final Node node;
-    private final String location;
+    /**
+     * Gets an immutable copy of the meta this user has
+     * @return an immutable map of meta
+     */
+    Map<String, String> getMeta();
 
-    @Override
-    public int hashCode() {
-        return node.hashCode();
-    }
+    /**
+     * Gets an immutable sorted map of all of the prefixes the user has, whereby the first value is the highest priority prefix.
+     * @return a sorted map of prefixes
+     */
+    SortedMap<Integer, String> getPrefixes();
 
-    @Override
-    public boolean equals(Object obj) {
-        return node.equals(obj);
-    }
+    /**
+     * Gets an immutable sorted map of all of the suffixes the user has, whereby the first value is the highest priority suffix.
+     * @return a sorted map of suffixes
+     */
+    SortedMap<Integer, String> getSuffixes();
+
+    /**
+     * Gets the user's highest priority prefix, or null if the user has no prefixes
+     * @return a prefix string, or null
+     */
+    String getPrefix();
+
+    /**
+     * Gets the user's highest priority suffix, or null if the user has no suffixes
+     * @return a suffix string, or null
+     */
+    String getSuffix();
+
 }

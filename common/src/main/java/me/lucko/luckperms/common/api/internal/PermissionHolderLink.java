@@ -25,6 +25,7 @@ package me.lucko.luckperms.common.api.internal;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import me.lucko.luckperms.api.*;
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
@@ -247,7 +248,7 @@ public class PermissionHolderLink implements PermissionHolder {
         if (world != null && !world.equals("")) {
             context.put("world", world);
         }
-        return master.exportNodes(new Contexts(context, true, true, true, true, true), false);
+        return master.exportNodes(new Contexts(ContextSet.fromMap(context), true, true, true, true, true, false), false);
     }
 
     @Override
@@ -259,7 +260,7 @@ public class PermissionHolderLink implements PermissionHolder {
         if (world != null && !world.equals("")) {
             context.put("world", world);
         }
-        return master.exportNodes(new Contexts(context, true, true, true, true, true), false);
+        return master.exportNodes(new Contexts(ContextSet.fromMap(context), true, true, true, true, true, false), false);
     }
 
     @Override
@@ -283,7 +284,7 @@ public class PermissionHolderLink implements PermissionHolder {
         if (world != null && !world.equals("")) {
             extraContext.put("world", world);
         }
-        return master.exportNodes(new Contexts(extraContext, includeGlobal, includeGlobal, applyGroups, true, true), false);
+        return master.exportNodes(new Contexts(ContextSet.fromMap(extraContext), includeGlobal, includeGlobal, applyGroups, true, true, false), false);
     }
 
     @Override

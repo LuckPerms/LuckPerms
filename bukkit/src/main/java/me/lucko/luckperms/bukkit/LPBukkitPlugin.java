@@ -28,6 +28,8 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.PlatformType;
+import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.bukkit.calculators.AutoOPListener;
 import me.lucko.luckperms.bukkit.calculators.DefaultsProvider;
 import me.lucko.luckperms.bukkit.vault.VaultHook;
@@ -274,32 +276,32 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
     @Override
     public Set<Contexts> getPreProcessContexts(boolean op) {
-        Set<Map<String, String>> c = new HashSet<>();
-        c.add(Collections.emptyMap());
-        c.add(Collections.singletonMap("server", getConfiguration().getServer()));
+        Set<ContextSet> c = new HashSet<>();
+        c.add(ContextSet.empty());
+        c.add(ContextSet.singleton("server", getConfiguration().getServer()));
 
         // Pre process all worlds
         c.addAll(getServer().getWorlds().stream()
                 .map(World::getName)
                 .map(s -> {
-                    Map<String, String> map = new HashMap<>();
-                    map.put("server", getConfiguration().getServer());
-                    map.put("world", s);
-                    return map;
+                    MutableContextSet set = new MutableContextSet();
+                    set.add("server", getConfiguration().getServer());
+                    set.add("world", s);
+                    return set.makeImmutable();
                 })
                 .collect(Collectors.toList())
         );
 
         // Pre process the separate Vault server, if any
         if (!getConfiguration().getServer().equals(getConfiguration().getVaultServer())) {
-            c.add(Collections.singletonMap("server", getConfiguration().getVaultServer()));
+            c.add(ContextSet.singleton("server", getConfiguration().getVaultServer()));
             c.addAll(getServer().getWorlds().stream()
                     .map(World::getName)
                     .map(s -> {
-                        Map<String, String> map = new HashMap<>();
-                        map.put("server", getConfiguration().getVaultServer());
-                        map.put("world", s);
-                        return map;
+                        MutableContextSet set = new MutableContextSet();
+                        set.add("server", getConfiguration().getVaultServer());
+                        set.add("world", s);
+                        return set.makeImmutable();
                     })
                     .collect(Collectors.toList())
             );
@@ -309,8 +311,8 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
         // Convert to full Contexts
         contexts.addAll(c.stream()
-                .map(map -> new Contexts(
-                        map,
+                .map(set -> new Contexts(
+                        set,
                         getConfiguration().isIncludingGlobalPerms(),
                         getConfiguration().isIncludingGlobalWorldPerms(),
                         true,

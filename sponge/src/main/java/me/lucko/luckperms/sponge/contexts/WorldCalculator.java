@@ -24,6 +24,7 @@ package me.lucko.luckperms.sponge.contexts;
 
 import lombok.RequiredArgsConstructor;
 import me.lucko.luckperms.api.context.ContextCalculator;
+import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.commands.Util;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import org.spongepowered.api.entity.living.player.Player;
@@ -39,7 +40,7 @@ public class WorldCalculator extends ContextCalculator<Subject> {
     private final LPSpongePlugin plugin;
 
     @Override
-    public Map<String, String> giveApplicableContext(Subject subject, Map<String, String> accumulator) {
+    public MutableContextSet giveApplicableContext(Subject subject, MutableContextSet accumulator) {
         UUID uuid = Util.parseUuid(subject.getIdentifier());
         if (uuid == null) {
             return accumulator;
@@ -50,7 +51,7 @@ public class WorldCalculator extends ContextCalculator<Subject> {
             return accumulator;
         }
 
-        accumulator.put(Context.WORLD_KEY, p.get().getWorld().getName());
+        accumulator.add(Context.WORLD_KEY, p.get().getWorld().getName());
         return accumulator;
     }
 

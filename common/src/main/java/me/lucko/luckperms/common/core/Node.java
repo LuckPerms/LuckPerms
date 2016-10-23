@@ -23,9 +23,10 @@
 package me.lucko.luckperms.common.core;
 
 import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableMap;
 import lombok.*;
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.constants.Patterns;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
 
@@ -60,7 +61,8 @@ public class Node implements me.lucko.luckperms.api.Node {
 
     private long expireAt = 0L;
 
-    private final Map<String, String> extraContexts;
+    @Getter
+    private final ContextSet contexts;
 
     // Cache the state
     private Tristate isPrefix = Tristate.UNDEFINED;
@@ -74,9 +76,9 @@ public class Node implements me.lucko.luckperms.api.Node {
      * @param expireAt the time when the node will expire
      * @param server the server this node applies on
      * @param world the world this node applies on
-     * @param extraContexts any additional contexts applying to this node
+     * @param contexts any additional contexts applying to this node
      */
-    public Node(String permission, boolean value, boolean override, long expireAt, String server, String world, Map<String, String> extraContexts) {
+    public Node(String permission, boolean value, boolean override, long expireAt, String server, String world, ContextSet contexts) {
         if (permission == null || permission.equals("")) {
             throw new IllegalArgumentException("Empty permission");
         }
@@ -99,12 +101,7 @@ public class Node implements me.lucko.luckperms.api.Node {
         this.expireAt = expireAt;
         this.server = server;
         this.world = world;
-
-        ImmutableMap.Builder<String, String> contexts = ImmutableMap.builder();
-        if (extraContexts != null) {
-            contexts.putAll(extraContexts);
-        }
-        this.extraContexts = contexts.build();
+        this.contexts = contexts == null ? ContextSet.empty() : contexts.makeImmutable();
     }
 
     @Override
@@ -174,11 +171,6 @@ public class Node implements me.lucko.luckperms.api.Node {
     @Override
     public boolean hasExpired() {
         return isTemporary() && expireAt < (System.currentTimeMillis() / 1000L);
-    }
-
-    @Override
-    public Map<String, String> getExtraContexts() {
-        return ImmutableMap.copyOf(extraContexts);
     }
 
     @Override
@@ -316,31 +308,28 @@ public class Node implements me.lucko.luckperms.api.Node {
     }
 
     @Override
-    public boolean shouldApplyWithContext(Map<String, String> context, boolean worldAndServer) {
-        if (extraContexts.isEmpty() && !isServerSpecific() && !isWorldSpecific()) {
+    public boolean shouldApplyWithContext(ContextSet context, boolean worldAndServer) {
+        if (contexts.isEmpty() && !isServerSpecific() && !isWorldSpecific()) {
             return true;
         }
 
         if (worldAndServer) {
             if (isWorldSpecific()) {
                 if (context == null) return false;
-                if (!context.containsKey("world")) return false;
-                if (!context.get("world").equalsIgnoreCase(world)) return false;
+                if (!context.hasIgnoreCase("world", world)) return false;
             }
 
             if (isServerSpecific()) {
                 if (context == null) return false;
-                if (!context.containsKey("server")) return false;
-                if (!context.get("server").equalsIgnoreCase(server)) return false;
+                if (!context.hasIgnoreCase("server", server)) return false;
             }
         }
 
-        if (!extraContexts.isEmpty()) {
+        if (!contexts.isEmpty()) {
             if (context == null) return false;
 
-            for (Map.Entry<String, String> c : extraContexts.entrySet()) {
-                if (!context.containsKey(c.getKey())) return false;
-                if (!context.get(c.getKey()).equalsIgnoreCase(c.getValue())) return false;
+            for (Map.Entry<String, String> c : contexts.toSet()) {
+                if (!context.hasIgnoreCase(c.getKey(), c.getValue())) return false;
             }
         }
 
@@ -348,7 +337,7 @@ public class Node implements me.lucko.luckperms.api.Node {
     }
 
     @Override
-    public boolean shouldApplyWithContext(Map<String, String> context) {
+    public boolean shouldApplyWithContext(ContextSet context) {
         return shouldApplyWithContext(context, true);
     }
 
@@ -478,9 +467,9 @@ public class Node implements me.lucko.luckperms.api.Node {
             }
         }
 
-        if (!extraContexts.isEmpty()) {
+        if (!contexts.isEmpty()) {
             builder.append("(");
-            for (Map.Entry<String, String> entry : extraContexts.entrySet()) {
+            for (Map.Entry<String, String> entry : contexts.toSet()) {
                 builder.append(entry.getKey()).append("=").append(entry.getValue()).append(",");
             }
 
@@ -533,7 +522,7 @@ public class Node implements me.lucko.luckperms.api.Node {
             return false;
         }
 
-        if (!other.getExtraContexts().equals(this.getExtraContexts())) {
+        if (!other.getContexts().equals(this.getContexts())) {
             return false;
         }
 
@@ -570,7 +559,7 @@ public class Node implements me.lucko.luckperms.api.Node {
             return false;
         }
 
-        if (!other.getExtraContexts().equals(this.getExtraContexts())) {
+        if (!other.getContexts().equals(this.getContexts())) {
             return false;
         }
 
@@ -603,7 +592,7 @@ public class Node implements me.lucko.luckperms.api.Node {
             return false;
         }
 
-        if (!other.getExtraContexts().equals(this.getExtraContexts())) {
+        if (!other.getContexts().equals(this.getContexts())) {
             return false;
         }
 
@@ -681,8 +670,7 @@ public class Node implements me.lucko.luckperms.api.Node {
         private String server = null;
         private String world = null;
         private long expireAt = 0L;
-
-        private final Map<String, String> extraContexts = new HashMap<>();
+        private final MutableContextSet extraContexts = new MutableContextSet();
 
         Builder(String permission, boolean shouldConvertContexts) {
             if (!shouldConvertContexts) {
@@ -696,7 +684,7 @@ public class Node implements me.lucko.luckperms.api.Node {
 
                     this.permission = contextParts.get(1);
                     try {
-                        extraContexts.putAll(Splitter.on(',').withKeyValueSeparator('=').split(contextParts.get(0)));
+                        extraContexts.addAll(Splitter.on(',').withKeyValueSeparator('=').split(contextParts.get(0)));
                     } catch (IllegalArgumentException e) {
                         e.printStackTrace();
                     }
@@ -711,6 +699,7 @@ public class Node implements me.lucko.luckperms.api.Node {
             this.server = other.getServer().orElse(null);
             this.world = other.getWorld().orElse(null);
             this.expireAt = other.isPermanent() ? 0L : other.getExpiryUnixTime();
+            this.extraContexts.addAll(other.getContexts());
         }
 
         @Override
@@ -760,7 +749,7 @@ public class Node implements me.lucko.luckperms.api.Node {
 
         @Override
         public me.lucko.luckperms.api.Node.Builder withExtraContext(@NonNull String key, @NonNull String value) {
-            switch (key) {
+            switch (key.toLowerCase()) {
                 case "server":
                     setServer(value);
                     break;
@@ -768,7 +757,7 @@ public class Node implements me.lucko.luckperms.api.Node {
                     setWorld(value);
                     break;
                 default:
-                    this.extraContexts.put(key, value);
+                    this.extraContexts.add(key, value);
                     break;
             }
 
@@ -776,14 +765,26 @@ public class Node implements me.lucko.luckperms.api.Node {
         }
 
         @Override
-        public me.lucko.luckperms.api.Node.Builder withExtraContext(Map<String, String> map) {
-            map.entrySet().forEach(this::withExtraContext);
+        public me.lucko.luckperms.api.Node.Builder withExtraContext(Map.Entry<String, String> entry) {
+            withExtraContext(entry.getKey(), entry.getValue());
             return this;
         }
 
         @Override
-        public me.lucko.luckperms.api.Node.Builder withExtraContext(Map.Entry<String, String> entry) {
-            withExtraContext(entry.getKey(), entry.getValue());
+        public me.lucko.luckperms.api.Node.Builder withExtraContext(Map<String, String> map) {
+            withExtraContext(ContextSet.fromMap(map));
+            return this;
+        }
+
+        @Override
+        public me.lucko.luckperms.api.Node.Builder withExtraContext(Set<Map.Entry<String, String>> context) {
+            withExtraContext(ContextSet.fromEntries(context));
+            return this;
+        }
+
+        @Override
+        public me.lucko.luckperms.api.Node.Builder withExtraContext(ContextSet set) {
+            set.toSet().forEach(this::withExtraContext);
             return this;
         }
 

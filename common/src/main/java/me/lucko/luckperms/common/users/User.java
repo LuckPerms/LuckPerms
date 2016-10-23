@@ -26,10 +26,11 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.api.event.events.UserPermissionRefreshEvent;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.api.internal.UserLink;
-import me.lucko.luckperms.common.caching.UserData;
+import me.lucko.luckperms.common.caching.UserCache;
 import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.utils.BufferedRequest;
 import me.lucko.luckperms.common.utils.Identifiable;
@@ -61,7 +62,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
     private String primaryGroup = null;
 
     @Getter
-    private UserData userData = null;
+    private UserCache userData = null;
 
     @Getter
     private BufferedRequest<Void> refreshBuffer = new BufferedRequest<Void>(1000L, r -> getPlugin().doAsync(r)) {
@@ -103,7 +104,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
             return;
         }
 
-        userData = new UserData(this, getPlugin().getCalculatorFactory());
+        userData = new UserCache(this, getPlugin().getCalculatorFactory());
         userData.preCalculate(getPlugin().getPreProcessContexts(op));
     }
 

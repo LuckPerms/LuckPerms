@@ -28,8 +28,12 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.caching.MetaData;
+import me.lucko.luckperms.api.caching.PermissionData;
+import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.users.User;
 
@@ -39,7 +43,7 @@ import java.util.Set;
  * Holds an easily accessible cache of a user's data in a number of contexts
  */
 @RequiredArgsConstructor
-public class UserData {
+public class UserCache implements UserData {
 
     /**
      * The user whom this data instance is representing
@@ -51,124 +55,87 @@ public class UserData {
      */
     private final CalculatorFactory calculatorFactory;
 
-    private final LoadingCache<Contexts, PermissionData> permission = CacheBuilder.newBuilder()
-            .build(new CacheLoader<Contexts, PermissionData>() {
+    private final LoadingCache<Contexts, PermissionCache> permission = CacheBuilder.newBuilder()
+            .build(new CacheLoader<Contexts, PermissionCache>() {
                 @Override
-                public PermissionData load(Contexts contexts) {
+                public PermissionCache load(Contexts contexts) {
                     return calculatePermissions(contexts);
                 }
 
                 @Override
-                public ListenableFuture<PermissionData> reload(Contexts contexts, PermissionData oldData) {
+                public ListenableFuture<PermissionCache> reload(Contexts contexts, PermissionCache oldData) {
                     oldData.comparePermissions(user.exportNodes(contexts, true));
                     return Futures.immediateFuture(oldData);
                 }
             });
 
-    private final LoadingCache<Contexts, MetaData> meta = CacheBuilder.newBuilder()
-            .build(new CacheLoader<Contexts, MetaData>() {
+    private final LoadingCache<Contexts, MetaCache> meta = CacheBuilder.newBuilder()
+            .build(new CacheLoader<Contexts, MetaCache>() {
                 @Override
-                public MetaData load(Contexts contexts) {
+                public MetaCache load(Contexts contexts) {
                     return calculateMeta(contexts);
                 }
 
                 @Override
-                public ListenableFuture<MetaData> reload(Contexts contexts, MetaData oldData) {
+                public ListenableFuture<MetaCache> reload(Contexts contexts, MetaCache oldData) {
                     oldData.loadMeta(user.getAllNodes(null, contexts));
                     return Futures.immediateFuture(oldData);
                 }
             });
 
-    /**
-     * Gets PermissionData from the cache, given a specified context.
-     * If the data is not cached, it is calculated. Therefore, this call could be costly.
-     * @param contexts the contexts to get the permission data in
-     * @return a permission data instance
-     */
-    public PermissionData getPermissionData(Contexts contexts) {
+    @Override
+    public PermissionData getPermissionData(@NonNull Contexts contexts) {
         return permission.getUnchecked(contexts);
     }
 
-    /**
-     * Gets MetaData from the cache, given a specified context.
-     * If the data is not cached, it is calculated. Therefore, this call could be costly.
-     * @param contexts the contexts to get the permission data in
-     * @return a meta data instance
-     */
-    public MetaData getMetaData(Contexts contexts) {
+    @Override
+    public MetaData getMetaData(@NonNull Contexts contexts) {
         return meta.getUnchecked(contexts);
     }
 
-    /**
-     * Calculates permission data, bypassing the cache.
-     * @param contexts the contexts to get permission data in
-     * @return a permission data instance
-     */
-    public PermissionData calculatePermissions(Contexts contexts) {
-        PermissionData data = new PermissionData(contexts, user, calculatorFactory);
+    @Override
+    public PermissionCache calculatePermissions(@NonNull Contexts contexts) {
+        PermissionCache data = new PermissionCache(contexts, user, calculatorFactory);
         data.setPermissions(user.exportNodes(contexts, true));
         return data;
     }
 
-    /**
-     * Calculates meta data, bypassing the cache.
-     * @param contexts the contexts to get meta data in
-     * @return a meta data instance
-     */
-    public MetaData calculateMeta(Contexts contexts) {
-        MetaData data = new MetaData(contexts);
+    @Override
+    public MetaCache calculateMeta(@NonNull Contexts contexts) {
+        MetaCache data = new MetaCache(contexts);
         data.loadMeta(user.getAllNodes(null, contexts));
         return data;
     }
 
-    /**
-     * Calculates permission data and stores it in the cache. If there is already data cached for the given contexts,
-     * and if the resultant output is different, the cached value is updated.
-     * @param contexts the contexts to recalculate in.
-     */
-    public void recalculatePermissions(Contexts contexts) {
+    @Override
+    public void recalculatePermissions(@NonNull Contexts contexts) {
         permission.refresh(contexts);
     }
 
-    /**
-     * Calculates meta data and stores it in the cache. If there is already data cached for the given contexts,
-     * and if the resultant output is different, the cached value is updated.
-     * @param contexts the contexts to recalculate in.
-     */
-    public void recalculateMeta(Contexts contexts) {
+    @Override
+    public void recalculateMeta(@NonNull Contexts contexts) {
         meta.refresh(contexts);
     }
 
-    /**
-     * Calls {@link #recalculatePermissions(Contexts)} for all current loaded contexts
-     */
+    @Override
     public void recalculatePermissions() {
         Set<Contexts> keys = ImmutableSet.copyOf(permission.asMap().keySet());
         keys.forEach(permission::refresh);
     }
 
-    /**
-     * Calls {@link #recalculateMeta(Contexts)} for all current loaded contexts
-     */
+    @Override
     public void recalculateMeta() {
         Set<Contexts> keys = ImmutableSet.copyOf(meta.asMap().keySet());
         keys.forEach(meta::refresh);
     }
 
-    /**
-     * Calls {@link #preCalculate(Contexts)} for the given contexts
-     * @param contexts a set of contexts
-     */
-    public void preCalculate(Set<Contexts> contexts) {
+    @Override
+    public void preCalculate(@NonNull Set<Contexts> contexts) {
         contexts.forEach(this::preCalculate);
     }
 
-    /**
-     * Ensures that PermissionData and MetaData is cached for a context. If the cache does not contain any data for the
-     * context, it will be calculated and saved.
-     * @param contexts the contexts to pre-calculate for
-     */
-    public void preCalculate(Contexts contexts) {
+    @Override
+    public void preCalculate(@NonNull Contexts contexts) {
         permission.getUnchecked(contexts);
         meta.getUnchecked(contexts);
     }
@@ -178,6 +145,7 @@ public class UserData {
         meta.invalidateAll();
     }
 
+    @Override
     public void invalidatePermissionCalculators() {
         permission.asMap().values().forEach(PermissionData::invalidateCache);
     }

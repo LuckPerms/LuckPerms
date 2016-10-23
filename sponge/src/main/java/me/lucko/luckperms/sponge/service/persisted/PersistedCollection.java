@@ -22,6 +22,9 @@
 
 package me.lucko.luckperms.sponge.service.persisted;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +38,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -48,34 +50,35 @@ public class PersistedCollection implements SubjectCollection {
     @Getter
     private final String identifier;
 
-    private final Map<String, PersistedSubject> subjects = new ConcurrentHashMap<>();
+    private final LoadingCache<String, PersistedSubject> subjects = CacheBuilder.newBuilder()
+            .build(new CacheLoader<String, PersistedSubject>() {
+                @Override
+                public PersistedSubject load(String s) {
+                    return new PersistedSubject(s, service, PersistedCollection.this);
+                }
+            });
 
     public void loadAll() {
         Map<String, SubjectDataHolder> holders = service.getStorage().loadAllFromFile(identifier);
         for (Map.Entry<String, SubjectDataHolder> e : holders.entrySet()) {
-            PersistedSubject subject = new PersistedSubject(e.getKey(), service, this);
+            PersistedSubject subject = get(e.getKey());
             subject.loadData(e.getValue());
-            subjects.put(e.getKey(), subject);
         }
     }
 
     @Override
-    public synchronized Subject get(@NonNull String id) {
-        if (!subjects.containsKey(id)) {
-            subjects.put(id, new PersistedSubject(id, service, this));
-        }
-
-        return subjects.get(id);
+    public PersistedSubject get(@NonNull String id) {
+        return subjects.getUnchecked(id.toLowerCase());
     }
 
     @Override
     public boolean hasRegistered(@NonNull String id) {
-        return subjects.containsKey(id);
+        return subjects.asMap().containsKey(id.toLowerCase());
     }
 
     @Override
     public Iterable<Subject> getAllSubjects() {
-        return subjects.values().stream().map(s -> (Subject) s).collect(Collectors.toList());
+        return subjects.asMap().values().stream().map(s -> (Subject) s).collect(Collectors.toList());
     }
 
     @Override
@@ -86,7 +89,7 @@ public class PersistedCollection implements SubjectCollection {
     @Override
     public Map<Subject, Boolean> getAllWithPermission(@NonNull Set<Context> contexts, @NonNull String node) {
         Map<Subject, Boolean> m = new HashMap<>();
-        for (Subject subject : subjects.values()) {
+        for (Subject subject : subjects.asMap().values()) {
             Tristate ts = subject.getPermissionValue(contexts, node);
             if (ts != Tristate.UNDEFINED) {
                 m.put(subject, ts.asBoolean());

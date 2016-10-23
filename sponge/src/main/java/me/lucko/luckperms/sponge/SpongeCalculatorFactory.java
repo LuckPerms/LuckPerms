@@ -49,7 +49,7 @@ public class SpongeCalculatorFactory implements CalculatorFactory {
         if (plugin.getConfiguration().isApplyingRegex()) {
             processors.add(new RegexProcessor(map));
         }
-        processors.add(new DefaultsProcessor(plugin.getService(), LuckPermsService.convertContexts(contexts.getContext())));
+        processors.add(new DefaultsProcessor(plugin.getService(), LuckPermsService.convertContexts(contexts.getContexts())));
 
         return new PermissionCalculator(plugin, user.getName(), plugin.getConfiguration().isDebugPermissionChecks(), processors);
     }

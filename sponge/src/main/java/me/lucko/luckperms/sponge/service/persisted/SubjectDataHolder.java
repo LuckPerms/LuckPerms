@@ -22,6 +22,8 @@
 
 package me.lucko.luckperms.sponge.service.persisted;
 
+import lombok.ToString;
+import me.lucko.luckperms.api.context.ContextSet;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -35,6 +37,7 @@ import static me.lucko.luckperms.sponge.service.LuckPermsService.convertContexts
 /**
  * Holds SubjectData in a "gson friendly" format for serialization
  */
+@ToString
 public class SubjectDataHolder {
     private final Map<Map<String, String>, Map<String, Boolean>> permissions;
     private final Map<Map<String, String>, Map<String, String>> options;
@@ -43,17 +46,17 @@ public class SubjectDataHolder {
     public SubjectDataHolder(Map<Set<Context>, Map<String, String>> options, Map<Set<Context>, Map<String, Boolean>> permissions, Map<Set<Context>, List<Map.Entry<String, String>>> parents) {
         this.options = new HashMap<>();
         for (Map.Entry<Set<Context>, Map<String, String>> e : options.entrySet()) {
-            this.options.put(convertContexts(e.getKey()), new HashMap<>(e.getValue()));
+            this.options.put(convertContexts(e.getKey()).toMap(), new HashMap<>(e.getValue()));
         }
 
         this.permissions = new HashMap<>();
         for (Map.Entry<Set<Context>, Map<String, Boolean>> e : permissions.entrySet()) {
-            this.permissions.put(convertContexts(e.getKey()), new HashMap<>(e.getValue()));
+            this.permissions.put(convertContexts(e.getKey()).toMap(), new HashMap<>(e.getValue()));
         }
 
         this.parents = new HashMap<>();
         for (Map.Entry<Set<Context>, List<Map.Entry<String, String>>> e : parents.entrySet()) {
-            this.parents.put(convertContexts(e.getKey()), e.getValue().stream().map(p -> new AbstractMap.SimpleEntry<>(p.getKey(), p.getValue())).collect(Collectors.toList()));
+            this.parents.put(convertContexts(e.getKey()).toMap(), e.getValue().stream().map(p -> new AbstractMap.SimpleEntry<>(p.getKey(), p.getValue())).collect(Collectors.toList()));
         }
     }
 
@@ -77,20 +80,23 @@ public class SubjectDataHolder {
 
     public void copyTo(MemorySubjectData subjectData, PermissionService service) {
         for (Map.Entry<Map<String, String>, Map<String, Boolean>> e : permissions.entrySet()) {
+            Set<Context> contexts = convertContexts(ContextSet.fromMap(e.getKey()));
             for (Map.Entry<String, Boolean> perm : e.getValue().entrySet()) {
-                subjectData.setPermission(convertContexts(e.getKey()), perm.getKey(), Tristate.fromBoolean(perm.getValue()));
+                subjectData.setPermission(contexts, perm.getKey(), Tristate.fromBoolean(perm.getValue()));
             }
         }
 
         for (Map.Entry<Map<String, String>, Map<String, String>> e : options.entrySet()) {
+            Set<Context> contexts = convertContexts(ContextSet.fromMap(e.getKey()));
             for (Map.Entry<String, String> option : e.getValue().entrySet()) {
-                subjectData.setOption(convertContexts(e.getKey()), option.getKey(), option.getValue());
+                subjectData.setOption(contexts, option.getKey(), option.getValue());
             }
         }
 
         for (Map.Entry<Map<String, String>, List<Map.Entry<String, String>>> e : parents.entrySet()) {
+            Set<Context> contexts = convertContexts(ContextSet.fromMap(e.getKey()));
             for (Map.Entry<String, String> parent : e.getValue()) {
-                subjectData.addParent(convertContexts(e.getKey()), service.getSubjects(parent.getKey()).get(parent.getValue()));
+                subjectData.addParent(contexts, service.getSubjects(parent.getKey()).get(parent.getValue()));
             }
         }
     }

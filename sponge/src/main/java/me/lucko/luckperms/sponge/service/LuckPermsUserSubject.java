@@ -26,7 +26,8 @@ import com.google.common.collect.ImmutableList;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
-import me.lucko.luckperms.common.caching.MetaData;
+import me.lucko.luckperms.api.caching.MetaData;
+import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.users.User;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
@@ -36,8 +37,10 @@ import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.util.Tristate;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 @EqualsAndHashCode(of = "user")
 public class LuckPermsUserSubject implements Subject {
@@ -171,8 +174,6 @@ public class LuckPermsUserSubject implements Subject {
 
     @Override
     public Set<Context> getActiveContexts() {
-        return service.getPlugin().getContextManager().giveApplicableContext(this, new HashMap<>()).entrySet().stream()
-                .map(e -> new Context(e.getKey(), e.getValue()))
-                .collect(Collectors.toSet());
+        return LuckPermsService.convertContexts(service.getPlugin().getContextManager().giveApplicableContext(this, MutableContextSet.empty()));
     }
 }
