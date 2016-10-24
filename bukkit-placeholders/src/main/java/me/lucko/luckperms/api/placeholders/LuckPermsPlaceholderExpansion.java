@@ -26,16 +26,20 @@ import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.clip.placeholderapi.util.TimeUtil;
 import me.lucko.luckperms.api.*;
+import me.lucko.luckperms.api.caching.UserData;
+import me.lucko.luckperms.api.context.MutableContextSet;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /*
  * PlaceholderAPI Expansion for LuckPerms, implemented using the LuckPerms API.
  *
  * Placeholders:
  * - group_name
+ * - groups
  * - has_permission_<node>
  * - inherits_permission_<node>
  * - in_group_<name>
@@ -71,7 +75,14 @@ public class LuckPermsPlaceholderExpansion extends PlaceholderExpansion {
 
     @Override
     public String getVersion() {
-        return "2.8";
+        return "2.13";
+    }
+
+    private Contexts makeContexts(Player player) {
+        MutableContextSet contextSet = new MutableContextSet();
+        contextSet.add("server", api.getConfiguration().getVaultServer());
+        contextSet.add("world", player.getWorld().getName());// ignore world?
+        return Contexts.of(contextSet.makeImmutable(), api.getConfiguration().getVaultIncludeGlobal(), true, true, true, true, player.isOp());
     }
 
     @Override
@@ -84,12 +95,22 @@ public class LuckPermsPlaceholderExpansion extends PlaceholderExpansion {
         if (!u.isPresent()) {
             return "";
         }
+        final User user = u.get();
+
+        Optional<UserData> d = user.getUserDataCache();
+        if (!d.isPresent()) {
+            return "";
+        }
+        final UserData data = d.get();
 
         identifier = identifier.toLowerCase();
-        final User user = u.get();
 
         if (identifier.equalsIgnoreCase("group_name")) {
             return user.getPrimaryGroup();
+        }
+
+        if (identifier.equalsIgnoreCase("groups")) {
+            return user.getGroupNames().stream().collect(Collectors.joining(", "));
         }
 
         if (identifier.startsWith("has_permission_") && identifier.length() > "has_permission_".length()) {
@@ -99,7 +120,7 @@ public class LuckPermsPlaceholderExpansion extends PlaceholderExpansion {
 
         if (identifier.startsWith("inherits_permission_") && identifier.length() > "inherits_permission_".length()) {
             String node = identifier.substring("inherits_permission_".length());
-            return formatBoolean(user.inheritsPermission(node, true));
+            return formatBoolean(data.getPermissionData(makeContexts(player)).getPermissionValue(node).asBoolean());
         }
 
         if (identifier.startsWith("in_group_") && identifier.length() > "in_group_".length()) {
@@ -109,7 +130,7 @@ public class LuckPermsPlaceholderExpansion extends PlaceholderExpansion {
 
         if (identifier.startsWith("inherits_group_") && identifier.length() > "inherits_group_".length()) {
             String groupName = identifier.substring("inherits_group_".length());
-            return formatBoolean(user.getLocalGroups("global").contains(groupName));
+            return formatBoolean(data.getPermissionData(makeContexts(player)).getPermissionValue("group." + groupName).asBoolean());
         }
 
         if (identifier.startsWith("on_track_") && identifier.length() > "on_track_".length()) {
@@ -125,7 +146,7 @@ public class LuckPermsPlaceholderExpansion extends PlaceholderExpansion {
             String node = identifier.substring("expiry_time_".length());
             long currentTime = System.currentTimeMillis() / 1000L;
             for (Node n : user.getTemporaryPermissionNodes()) {
-                if (n.getPermission().equalsIgnoreCase(node)) {
+                if (n.toSerializedNode().equalsIgnoreCase(node)) {
                     return TimeUtil.getTime((int) (n.getExpiryUnixTime() - currentTime));
                 }
             }
@@ -146,16 +167,28 @@ public class LuckPermsPlaceholderExpansion extends PlaceholderExpansion {
         }
 
         if (identifier.equalsIgnoreCase("prefix")) {
-            return MetaUtils.getPrefix(user, null, null, true);
+            String prefix = data.calculateMeta(makeContexts(player)).getPrefix();
+            if (prefix == null) {
+                prefix = "";
+            }
+            return prefix;
         }
 
         if (identifier.equalsIgnoreCase("suffix")) {
-            return MetaUtils.getSuffix(user, null, null, true);
+            String suffix = data.calculateMeta(makeContexts(player)).getSuffix();
+            if (suffix == null) {
+                suffix = "";
+            }
+            return suffix;
         }
 
         if (identifier.startsWith("meta_") && identifier.length() > "meta_".length()) {
             String node = identifier.substring("meta_".length());
-            return MetaUtils.getMeta(user, null, null, node, "", true);
+            String meta = data.getMetaData(makeContexts(player)).getMeta().get(node);
+            if (meta == null) {
+                meta = "";
+            }
+            return meta;
         }
 
         return null;
