@@ -303,4 +303,9 @@ public class ContextSet {
     public int hashCode() {
         return 59 + (this.contexts == null ? 43 : this.contexts.hashCode());
     }
+
+    @Override
+    public String toString() {
+        return "ContextSet(contexts=" + this.contexts + ")";
+    }
 }
