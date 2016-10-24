@@ -169,7 +169,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         Sponge.getServiceManager().setProvider(this, LuckPermsApi.class, apiProvider);
 
         final LPSpongePlugin i = this;
-        updateTaskBuffer = new BufferedRequest<Void>(6000L, this::doAsync) {
+        updateTaskBuffer = new BufferedRequest<Void>(1000L, this::doAsync) {
             @Override
             protected Void perform() {
                 scheduler.createTaskBuilder().async().execute(new UpdateTask(i)).submit(i);

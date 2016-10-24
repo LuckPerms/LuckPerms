@@ -126,7 +126,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         contextManager.registerCalculator(new ServerCalculator<>(getConfiguration().getServer()));
 
         final LPBungeePlugin i = this;
-        updateTaskBuffer = new BufferedRequest<Void>(6000L, this::doAsync) {
+        updateTaskBuffer = new BufferedRequest<Void>(1000L, this::doAsync) {
             @Override
             protected Void perform() {
                 doAsync(new UpdateTask(i));

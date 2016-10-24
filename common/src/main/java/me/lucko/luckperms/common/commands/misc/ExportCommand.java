@@ -142,7 +142,7 @@ public class ExportCommand extends SingleMainCommand {
                 }
 
                 if (!inDefault) {
-                    write(writer, "/luckperms user " + user.getUuid().toString() + " removegroup default");
+                    write(writer, "/luckperms user " + user.getUuid().toString() + " parent remove default");
                 }
 
                 plugin.getUserManager().cleanup(user);
@@ -183,11 +183,11 @@ public class ExportCommand extends SingleMainCommand {
 
         if (node.isGroupNode()) {
             if (node.isTemporary()) {
-                sb.append(group ? "settempinherit " : "addtempgroup ");
+                sb.append("parent addtemp ");
                 sb.append(node.getGroupName());
                 sb.append(" ").append(node.getExpiryUnixTime());
             } else {
-                sb.append(group ? "setinherit " : "addgroup ");
+                sb.append("parent add ");
                 sb.append(node.getGroupName());
             }
 
@@ -200,8 +200,13 @@ public class ExportCommand extends SingleMainCommand {
             return sb.toString();
         }
 
-        sb.append(node.isTemporary() ? "settemp " : "set ");
-        sb.append(node.getPermission()).append(" ").append(node.getValue());
+        sb.append(node.isTemporary() ? "permission settemp " : "permission set ");
+        if (node.getPermission().contains(" ")) {
+            sb.append("\"").append(node.getPermission()).append("\"");
+        } else {
+            sb.append(node.getPermission());
+        }
+        sb.append(" ").append(node.getValue());
 
         if (node.isTemporary()) {
             sb.append(" ").append(node.getExpiryUnixTime());
