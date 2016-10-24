@@ -22,16 +22,30 @@
 
 package me.lucko.luckperms.common.constants;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import lombok.experimental.UtilityClass;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 @UtilityClass
 public class Patterns {
-    private static final Map<String, Pattern> CACHE = new ConcurrentHashMap<>();
+    private static final LoadingCache<String, Pattern> CACHE = CacheBuilder.newBuilder()
+            .build(new CacheLoader<String, Pattern>() {
+                @Override
+                public Pattern load(String s) throws Exception {
+                    return Pattern.compile(s);
+                }
+
+                @Override
+                public ListenableFuture<Pattern> reload(String s, Pattern pattern) {
+                    return Futures.immediateFuture(pattern);
+                }
+            });
 
     public static final Pattern COMMAND_SEPARATOR = Pattern.compile(" (?=([^\\\"]*\\\"[^\\\"]*\\\")*[^\\\"]*$)");
     public static final Pattern NON_ALPHA_NUMERIC = Pattern.compile("[\\/\\$\\.\\- ]");
@@ -42,14 +56,8 @@ public class Patterns {
 
     public static Pattern compile(String regex) {
         try {
-            return CACHE.computeIfAbsent(regex, s -> {
-                try {
-                    return Pattern.compile(regex);
-                } catch (PatternSyntaxException e) {
-                    return null;
-                }
-            });
-        } catch (NullPointerException e) {
+            return CACHE.get(regex);
+        } catch (ExecutionException e) {
             return null;
         }
     }

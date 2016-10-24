@@ -112,10 +112,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
      * Removes the UserData cache from this user
      */
     public void unregisterData() {
-        if (userData != null) {
-            userData.invalidateCache();
-            userData = null;
-        }
+        userData = null;
     }
 
     /**

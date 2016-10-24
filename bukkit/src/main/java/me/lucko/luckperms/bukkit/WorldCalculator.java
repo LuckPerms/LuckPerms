@@ -71,11 +71,11 @@ public class WorldCalculator extends ContextCalculator<Player> implements Listen
 
     private String getWorld(Player player) {
         UUID internal = plugin.getUuidCache().getUUID(player.getUniqueId());
-        if (!worldCache.containsKey(internal)) {
+        String world = worldCache.get(internal);
+        if (world == null) {
             return null;
         }
 
-        String world = worldCache.get(internal);
         return plugin.getConfiguration().getWorldRewrites().getOrDefault(world, world);
     }
 

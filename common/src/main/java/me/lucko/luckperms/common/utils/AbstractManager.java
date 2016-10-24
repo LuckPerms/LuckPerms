@@ -22,9 +22,14 @@
 
 package me.lucko.luckperms.common.utils;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.cache.RemovalListener;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -34,14 +39,23 @@ import java.util.function.Function;
  * @param <T> the class this manager is "managing"
  */
 public abstract class AbstractManager<I, T extends Identifiable<I>> implements Function<I, T> {
-    private final Map<I, T> objects = new HashMap<>();
+
+    private final LoadingCache<I, T> objects = CacheBuilder.newBuilder()
+            .removalListener((RemovalListener<I, T>) removal -> preUnload(removal.getValue()))
+            .build(new CacheLoader<I, T>() {
+                @Override
+                public T load(I i) {
+                    return apply(i);
+                }
+
+                @Override
+                public ListenableFuture<T> reload(I i, T t) {
+                    return Futures.immediateFuture(t); // Never needs to be refreshed.
+                }
+            });
 
     public final Map<I, T> getAll() {
-        Map<I, T> map;
-        synchronized (objects) {
-            map = ImmutableMap.copyOf(objects);
-        }
-        return map;
+        return ImmutableMap.copyOf(objects.asMap());
     }
 
     /**
@@ -50,9 +64,7 @@ public abstract class AbstractManager<I, T extends Identifiable<I>> implements F
      * @return a {@link T} object if the object is loaded or makes and returns a new object
      */
     public final T getOrMake(I id) {
-        synchronized (objects) {
-            return objects.computeIfAbsent(id, this);
-        }
+        return objects.getUnchecked(id);
     }
 
     /**
@@ -61,9 +73,7 @@ public abstract class AbstractManager<I, T extends Identifiable<I>> implements F
      * @return a {@link T} object if the object is loaded, returns null if the object is not loaded
      */
     public final T get(I id) {
-        synchronized (objects) {
-            return objects.get(id);
-        }
+        return objects.asMap().get(id);
     }
 
     /**
@@ -72,9 +82,7 @@ public abstract class AbstractManager<I, T extends Identifiable<I>> implements F
      * @return true if the object is loaded
      */
     public final boolean isLoaded(I id) {
-        synchronized (objects) {
-            return objects.containsKey(id);
-        }
+        return objects.asMap().containsKey(id);
     }
 
     /**
@@ -83,12 +91,7 @@ public abstract class AbstractManager<I, T extends Identifiable<I>> implements F
      */
     public final void unload(T t) {
         if (t != null) {
-            synchronized (objects) {
-                objects.computeIfPresent(t.getId(), (i, t1) -> {
-                    preUnload(t1);
-                    return null;
-                });
-            }
+            objects.invalidate(t);
         }
     }
 
@@ -100,10 +103,7 @@ public abstract class AbstractManager<I, T extends Identifiable<I>> implements F
      * Unloads all objects from the manager
      */
     public final void unloadAll() {
-        synchronized (objects) {
-            objects.values().forEach(this::preUnload);
-            objects.clear();
-        }
+        objects.invalidateAll();
     }
 
 }

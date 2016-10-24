@@ -39,15 +39,17 @@ public class RegexProcessor implements PermissionProcessor {
     @Override
     public Tristate hasPermission(String permission) {
         for (Map.Entry<String, Boolean> e : map.entrySet()) {
-            if (e.getKey().toLowerCase().startsWith("r=")) {
-                Pattern p = Patterns.compile(e.getKey().substring(2));
-                if (p == null) {
-                    continue;
-                }
+            if (!e.getKey().startsWith("r=") && !e.getKey().startsWith("R=")) {
+                continue;
+            }
 
-                if (p.matcher(permission).matches()) {
-                    return Tristate.fromBoolean(e.getValue());
-                }
+            Pattern p = Patterns.compile(e.getKey().substring(2));
+            if (p == null) {
+                continue;
+            }
+
+            if (p.matcher(permission).matches()) {
+                return Tristate.fromBoolean(e.getValue());
             }
         }
 
