@@ -34,7 +34,6 @@ import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.users.User;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
-import ninja.leaping.permissionsex.sponge.PermissionsExPlugin;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.context.Context;
@@ -59,7 +58,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         }
 
         // Cast to PermissionService. PEX has all of it's damned classes defined as package private.
-        PermissionService pexService = (PermissionsExPlugin) pex.get().getInstance().get();
+        PermissionService pexService = (PermissionService) pex.get().getInstance().get();
 
         // Migrate groups
         log.info("PermissionsEx Migration: Starting group migration.");
