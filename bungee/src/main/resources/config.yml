@@ -113,6 +113,19 @@ data:
   # e.g. if you're using sqlite or flatfile, this can be set to -1 to save resources.
   sync-minutes: 3
 
+# Settings for Redis.
+#
+# If enabled and configured, LuckPerms will use the Redis PubSub system to inform other
+# connected servers of changes. Use the command "/luckpermsbungee networksync" to push changes.
+# Data is NOT stored on redis. It is only used as a messaging platform.
+#
+# If you decide to enable this feature, you should set "sync-minutes" to -1, as there is no need for LuckPerms
+# to poll the database for changes.
+redis:
+  enabled: false
+  address: localhost:6379
+  password: ''
+
 
 
 

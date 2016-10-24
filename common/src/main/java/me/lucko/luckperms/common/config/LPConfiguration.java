@@ -92,4 +92,10 @@ public interface LPConfiguration {
 
     Map<String, String> getSplitStorageOptions();
 
+    boolean isRedisEnabled();
+
+    String getRedisAddress();
+
+    String getRedisPassword();
+
 }

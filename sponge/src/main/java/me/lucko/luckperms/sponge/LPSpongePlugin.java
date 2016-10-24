@@ -40,6 +40,7 @@ import me.lucko.luckperms.common.contexts.ServerCalculator;
 import me.lucko.luckperms.common.core.UuidCache;
 import me.lucko.luckperms.common.data.Importer;
 import me.lucko.luckperms.common.groups.GroupManager;
+import me.lucko.luckperms.common.messaging.RedisMessaging;
 import me.lucko.luckperms.common.runnables.ExpireTemporaryTask;
 import me.lucko.luckperms.common.runnables.UpdateTask;
 import me.lucko.luckperms.common.storage.Datastore;
@@ -107,6 +108,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     private GroupManager groupManager;
     private TrackManager trackManager;
     private Datastore datastore;
+    private RedisMessaging redisMessaging = null;
     private UuidCache uuidCache;
     private ApiProvider apiProvider;
     private me.lucko.luckperms.api.Logger log;
@@ -125,6 +127,37 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         getLog().info("Loading configuration...");
         configuration = new SpongeConfig(this);
 
+        // register events
+        Sponge.getEventManager().registerListeners(this, new SpongeListener(this));
+
+        // initialise datastore
+        datastore = StorageFactory.getDatastore(this, "h2");
+
+        // initialise redis
+        if (getConfiguration().isRedisEnabled()) {
+            getLog().info("Loading redis...");
+            redisMessaging = new RedisMessaging(this);
+            try {
+                redisMessaging.init(getConfiguration().getRedisAddress(), getConfiguration().getRedisPassword());
+                getLog().info("Loaded redis successfully...");
+            } catch (Exception e) {
+                getLog().info("Couldn't load redis...");
+                e.printStackTrace();
+                redisMessaging = null;
+            }
+        }
+
+        // setup the update task buffer
+        final LPSpongePlugin i = this;
+        updateTaskBuffer = new BufferedRequest<Void>(1000L, this::doAsync) {
+            @Override
+            protected Void perform() {
+                scheduler.createTaskBuilder().async().execute(new UpdateTask(i)).submit(i);
+                return null;
+            }
+        };
+
+        // load locale
         localeManager = new LocaleManager();
         File locale = new File(getMainDir(), "lang.yml");
         if (locale.exists()) {
@@ -136,17 +169,13 @@ public class LPSpongePlugin implements LuckPermsPlugin {
             }
         }
 
-        // register events
-        Sponge.getEventManager().registerListeners(this, new SpongeListener(this));
-
         // register commands
         getLog().info("Registering commands...");
         CommandManager cmdService = Sponge.getCommandManager();
         SpongeCommand commandManager = new SpongeCommand(this);
         cmdService.register(this, commandManager, "luckperms", "perms", "lp", "permissions", "p", "perm");
 
-        datastore = StorageFactory.getDatastore(this, "h2");
-
+        // load internal managers
         getLog().info("Loading internal permission managers...");
         uuidCache = new UuidCache(getConfiguration().isOnlineMode());
         userManager = new UserManager(this);
@@ -160,23 +189,17 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         contextManager.registerCalculator(new ServerCalculator<>(getConfiguration().getServer()));
         contextManager.registerCalculator(new WorldCalculator(this));
 
+        // register the PermissionService with Sponge
         getLog().info("Registering PermissionService...");
         Sponge.getServiceManager().setProvider(this, PermissionService.class, (service = new LuckPermsService(this)));
 
+        // register with the LP API
         getLog().info("Registering API...");
         apiProvider = new ApiProvider(this);
         ApiHandler.registerProvider(apiProvider);
         Sponge.getServiceManager().setProvider(this, LuckPermsApi.class, apiProvider);
 
-        final LPSpongePlugin i = this;
-        updateTaskBuffer = new BufferedRequest<Void>(1000L, this::doAsync) {
-            @Override
-            protected Void perform() {
-                scheduler.createTaskBuilder().async().execute(new UpdateTask(i)).submit(i);
-                return null;
-            }
-        };
-
+        // schedule update tasks
         int mins = getConfiguration().getSyncTime();
         if (mins > 0) {
             scheduler.createTaskBuilder().async().interval(mins, TimeUnit.MINUTES).execute(new UpdateTask(this))
@@ -186,6 +209,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
             updateTaskBuffer.request();
         }
 
+        // register tasks
         scheduler.createTaskBuilder().intervalTicks(1L).execute(SpongeSenderFactory.get(this)).submit(this);
         scheduler.createTaskBuilder().async().intervalTicks(60L).execute(new ExpireTemporaryTask(this)).submit(this);
         scheduler.createTaskBuilder().async().intervalTicks(20L).execute(consecutiveExecutor).submit(this);
@@ -197,6 +221,11 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     public void onDisable(GameStoppingServerEvent event) {
         getLog().info("Closing datastore...");
         datastore.shutdown();
+
+        if (redisMessaging != null) {
+            getLog().info("Closing redis...");
+            redisMessaging.shutdown();
+        }
 
         getLog().info("Unregistering API...");
         ApiHandler.unregisterProvider();

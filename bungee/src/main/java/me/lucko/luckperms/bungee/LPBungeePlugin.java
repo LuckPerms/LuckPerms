@@ -42,6 +42,7 @@ import me.lucko.luckperms.common.contexts.ServerCalculator;
 import me.lucko.luckperms.common.core.UuidCache;
 import me.lucko.luckperms.common.data.Importer;
 import me.lucko.luckperms.common.groups.GroupManager;
+import me.lucko.luckperms.common.messaging.RedisMessaging;
 import me.lucko.luckperms.common.runnables.ExpireTemporaryTask;
 import me.lucko.luckperms.common.runnables.UpdateTask;
 import me.lucko.luckperms.common.storage.Datastore;
@@ -69,6 +70,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     private GroupManager groupManager;
     private TrackManager trackManager;
     private Datastore datastore;
+    private RedisMessaging redisMessaging = null;
     private UuidCache uuidCache;
     private ApiProvider apiProvider;
     private Logger log;
@@ -86,6 +88,36 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         getLog().info("Loading configuration...");
         configuration = new BungeeConfig(this);
 
+        // register events
+        getProxy().getPluginManager().registerListener(this, new BungeeListener(this));
+
+        // initialise datastore
+        datastore = StorageFactory.getDatastore(this, "h2");
+
+        // initialise redis
+        if (getConfiguration().isRedisEnabled()) {
+            getLog().info("Loading redis...");
+            redisMessaging = new RedisMessaging(this);
+            try {
+                redisMessaging.init(getConfiguration().getRedisAddress(), getConfiguration().getRedisPassword());
+                getLog().info("Loaded redis successfully...");
+            } catch (Exception e) {
+                getLog().info("Couldn't load redis...");
+                e.printStackTrace();
+            }
+        }
+
+        // setup the update task buffer
+        final LPBungeePlugin i = this;
+        updateTaskBuffer = new BufferedRequest<Void>(1000L, this::doAsync) {
+            @Override
+            protected Void perform() {
+                doAsync(new UpdateTask(i));
+                return null;
+            }
+        };
+
+        // load locale
         localeManager = new LocaleManager();
         File locale = new File(getDataFolder(), "lang.yml");
         if (locale.exists()) {
@@ -97,9 +129,6 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
             }
         }
 
-        // register events
-        getProxy().getPluginManager().registerListener(this, new BungeeListener(this));
-
         // register commands
         getLog().info("Registering commands...");
         CommandManager commandManager = new CommandManager(this);
@@ -108,8 +137,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         // disable the default Bungee /perms command so it gets handled by the Bukkit plugin
         getProxy().getDisabledCommands().add("perms");
 
-        datastore = StorageFactory.getDatastore(this, "h2");
-
+        // load internal managers
         getLog().info("Loading internal permission managers...");
         uuidCache = new UuidCache(getConfiguration().isOnlineMode());
         userManager = new UserManager(this);
@@ -125,32 +153,24 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         contextManager.registerCalculator(serverCalculator);
         contextManager.registerCalculator(new ServerCalculator<>(getConfiguration().getServer()));
 
-        final LPBungeePlugin i = this;
-        updateTaskBuffer = new BufferedRequest<Void>(1000L, this::doAsync) {
-            @Override
-            protected Void perform() {
-                doAsync(new UpdateTask(i));
-                return null;
-            }
-        };
-
-        int mins = getConfiguration().getSyncTime();
-        if (mins > 0) {
-            getProxy().getScheduler().schedule(this, new UpdateTask(this), mins, mins, TimeUnit.MINUTES);
-        }
-
-        // 20 times per second (once per "tick")
-        getProxy().getScheduler().schedule(this, BungeeSenderFactory.get(this), 50L, 50L, TimeUnit.MILLISECONDS);
-        getProxy().getScheduler().schedule(this, new ExpireTemporaryTask(this), 3L, 3L, TimeUnit.SECONDS);
-        getProxy().getScheduler().schedule(this, consecutiveExecutor, 1L, 1L, TimeUnit.SECONDS);
-
+        // register with the LP API
         getLog().info("Registering API...");
         apiProvider = new ApiProvider(this);
         ApiHandler.registerProvider(apiProvider);
 
-        // Run update task to refresh any online users
-        getLog().info("Scheduling Update Task to refresh any online users.");
-        updateTaskBuffer.request();
+        // schedule update tasks
+        int mins = getConfiguration().getSyncTime();
+        if (mins > 0) {
+            getProxy().getScheduler().schedule(this, new UpdateTask(this), mins, mins, TimeUnit.MINUTES);
+        } else {
+            // Update online users
+            updateTaskBuffer.request();
+        }
+
+        // register tasks
+        getProxy().getScheduler().schedule(this, BungeeSenderFactory.get(this), 50L, 50L, TimeUnit.MILLISECONDS);  // 20 times per second (once per "tick")
+        getProxy().getScheduler().schedule(this, new ExpireTemporaryTask(this), 3L, 3L, TimeUnit.SECONDS);
+        getProxy().getScheduler().schedule(this, consecutiveExecutor, 1L, 1L, TimeUnit.SECONDS);
 
         getLog().info("Successfully loaded.");
     }
@@ -159,6 +179,11 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     public void onDisable() {
         getLog().info("Closing datastore...");
         datastore.shutdown();
+
+        if (redisMessaging != null) {
+            getLog().info("Closing redis...");
+            redisMessaging.shutdown();
+        }
 
         getLog().info("Unregistering API...");
         ApiHandler.unregisterProvider();

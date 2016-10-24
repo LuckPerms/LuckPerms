@@ -71,6 +71,9 @@ track-empty: "The track cannot be used as it is empty or contains only one group
 
 update-task-request: "&bUpdate task scheduled."
 update-task-complete: "&aUpdate task finished."
+update-task-complete-network: "&aUpdate task finished. Now attempting to push to other servers."
+update-task-push-success: "&aOther servers were notified successfully."
+update-task-push-failure: "&cError whilst pushing changes to other servers. Is Redis enabled?"
 info: >
   {PREFIX}&2Running &bLuckPerms v{0}&2 by &bLuck&2.\n
   {PREFIX}&f-> &3Platform: &f{1}\n

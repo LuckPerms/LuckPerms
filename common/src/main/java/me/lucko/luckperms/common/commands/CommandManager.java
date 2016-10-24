@@ -59,6 +59,7 @@ public class CommandManager {
             .add(new TrackMainCommand())
             .add(new LogMainCommand())
             .add(new SyncCommand())
+            .add(new NetworkSyncCommand())
             .add(new InfoCommand())
             .add(new DebugCommand())
             .add(new ImportCommand())

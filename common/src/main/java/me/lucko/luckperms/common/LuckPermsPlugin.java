@@ -35,6 +35,7 @@ import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.core.UuidCache;
 import me.lucko.luckperms.common.data.Importer;
 import me.lucko.luckperms.common.groups.GroupManager;
+import me.lucko.luckperms.common.messaging.RedisMessaging;
 import me.lucko.luckperms.common.storage.Datastore;
 import me.lucko.luckperms.common.tracks.TrackManager;
 import me.lucko.luckperms.common.users.UserManager;
@@ -60,6 +61,7 @@ public interface LuckPermsPlugin {
     TrackManager getTrackManager();
     LPConfiguration getConfiguration();
     Datastore getDatastore();
+    RedisMessaging getRedisMessaging();
     Logger getLog();
     UuidCache getUuidCache();
     ApiProvider getApiProvider();

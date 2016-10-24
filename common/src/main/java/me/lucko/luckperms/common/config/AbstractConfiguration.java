@@ -74,6 +74,9 @@ public abstract class AbstractConfiguration<T extends LuckPermsPlugin> implement
     private String storageMethod;
     private boolean splitStorage;
     private Map<String, String> splitStorageOptions;
+    private boolean redisEnabled;
+    private String redisAddress;
+    private String redisPassword;
 
     public AbstractConfiguration(T plugin, String defaultServerName, boolean defaultIncludeGlobal, String defaultStorage) {
         this.plugin = plugin;
@@ -142,6 +145,10 @@ public abstract class AbstractConfiguration<T extends LuckPermsPlugin> implement
                 .put("uuid", getString("split-storage.methods.uuid", defaultStorage))
                 .put("log", getString("split-storage.methods.log", defaultStorage))
                 .build();
+
+        redisEnabled = getBoolean("redis.enabled", false);
+        redisAddress = getString("redis.address", null);
+        redisPassword = getString("redis.password", "");
         
         if (Patterns.NON_ALPHA_NUMERIC.matcher(getServer()).find()) {
             plugin.getLog().severe("Server name defined in config.yml contains invalid characters. Server names can " +

@@ -110,6 +110,9 @@ public enum Message {
 
     UPDATE_TASK_REQUEST("&bUpdate task scheduled.", true),
     UPDATE_TASK_COMPLETE("&aUpdate task finished.", true),
+    UPDATE_TASK_COMPLETE_NETWORK("&aUpdate task finished. Now attempting to push to other servers.", true),
+    UPDATE_TASK_PUSH_SUCCESS("&aOther servers were notified successfully.", true),
+    UPDATE_TASK_PUSH_FAILURE("&cError whilst pushing changes to other servers. Is Redis enabled?", true),
     INFO(
             "{PREFIX}&2Running &bLuckPerms v{0}&2 by &bLuck&2." + "\n" +
             "{PREFIX}&f-> &3Platform: &f{1}" + "\n" +

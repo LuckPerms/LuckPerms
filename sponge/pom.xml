@@ -68,6 +68,18 @@
                                     <pattern>com.mysql</pattern>
                                     <shadedPattern>me.lucko.luckperms.lib.mysql</shadedPattern>
                                 </relocation>
+                                <relocation>
+                                    <pattern>redis.clients.jedis</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.jedis.jedis</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>redis.clients.util</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.jedis.util</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.apache.commons.pool2</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.jedis.pool2</shadedPattern>
+                                </relocation>
                             </relocations>
                         </configuration>
                     </execution>

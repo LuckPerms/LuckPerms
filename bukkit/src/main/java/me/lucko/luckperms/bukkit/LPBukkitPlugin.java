@@ -45,6 +45,7 @@ import me.lucko.luckperms.common.contexts.ServerCalculator;
 import me.lucko.luckperms.common.core.UuidCache;
 import me.lucko.luckperms.common.data.Importer;
 import me.lucko.luckperms.common.groups.GroupManager;
+import me.lucko.luckperms.common.messaging.RedisMessaging;
 import me.lucko.luckperms.common.runnables.ExpireTemporaryTask;
 import me.lucko.luckperms.common.runnables.UpdateTask;
 import me.lucko.luckperms.common.storage.Datastore;
@@ -77,6 +78,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private GroupManager groupManager;
     private TrackManager trackManager;
     private Datastore datastore;
+    private RedisMessaging redisMessaging = null;
     private UuidCache uuidCache;
     private ApiProvider apiProvider;
     private Logger log;
@@ -97,6 +99,42 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         getLog().info("Loading configuration...");
         configuration = new BukkitConfig(this);
 
+        // setup the Bukkit defaults hook
+        defaultsProvider = new DefaultsProvider();
+        // give all plugins a chance to load their defaults, then refresh.
+        getServer().getScheduler().runTaskLater(this, () -> defaultsProvider.refresh(), 1L);
+
+        // register events
+        PluginManager pm = getServer().getPluginManager();
+        pm.registerEvents(new BukkitListener(this), this);
+
+        // initialise datastore
+        datastore = StorageFactory.getDatastore(this, "h2");
+
+        // initialise redis
+        if (getConfiguration().isRedisEnabled()) {
+            getLog().info("Loading redis...");
+            redisMessaging = new RedisMessaging(this);
+            try {
+                redisMessaging.init(getConfiguration().getRedisAddress(), getConfiguration().getRedisPassword());
+                getLog().info("Loaded redis successfully...");
+            } catch (Exception e) {
+                getLog().info("Couldn't load redis...");
+                e.printStackTrace();
+            }
+        }
+
+        // setup the update task buffer
+        final LPBukkitPlugin i = this;
+        updateTaskBuffer = new BufferedRequest<Void>(1000L, this::doAsync) {
+            @Override
+            protected Void perform() {
+                getServer().getScheduler().runTaskAsynchronously(i, new UpdateTask(i));
+                return null;
+            }
+        };
+
+        // load locale
         localeManager = new LocaleManager();
         File locale = new File(getDataFolder(), "lang.yml");
         if (locale.exists()) {
@@ -108,13 +146,6 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
             }
         }
 
-        defaultsProvider = new DefaultsProvider();
-        getServer().getScheduler().runTaskLater(this, () -> defaultsProvider.refresh(), 1L);
-
-        // register events
-        PluginManager pm = getServer().getPluginManager();
-        pm.registerEvents(new BukkitListener(this), this);
-
         // register commands
         getLog().info("Registering commands...");
         BukkitCommand commandManager = new BukkitCommand(this);
@@ -123,8 +154,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         main.setTabCompleter(commandManager);
         main.setAliases(Arrays.asList("perms", "lp", "permissions", "p", "perm"));
 
-        datastore = StorageFactory.getDatastore(this, "h2");
-
+        // load internal managers
         getLog().info("Loading internal permission managers...");
         uuidCache = new UuidCache(getConfiguration().isOnlineMode());
         userManager = new UserManager(this);
@@ -140,28 +170,10 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         contextManager.registerCalculator(worldCalculator);
         contextManager.registerCalculator(new ServerCalculator<>(getConfiguration().getServer()));
 
+        // handle server operators
         if (getConfiguration().isAutoOp()) {
             contextManager.registerListener(new AutoOPListener());
         }
-
-        final LPBukkitPlugin i = this;
-        updateTaskBuffer = new BufferedRequest<Void>(1000L, this::doAsync) {
-            @Override
-            protected Void perform() {
-                getServer().getScheduler().runTaskAsynchronously(i, new UpdateTask(i));
-                return null;
-            }
-        };
-
-        int mins = getConfiguration().getSyncTime();
-        if (mins > 0) {
-            long ticks = mins * 60 * 20;
-            getServer().getScheduler().runTaskTimerAsynchronously(this, () -> updateTaskBuffer.request(), ticks, ticks);
-        }
-
-        getServer().getScheduler().runTaskTimer(this, BukkitSenderFactory.get(this), 1L, 1L);
-        getServer().getScheduler().runTaskTimerAsynchronously(this, new ExpireTemporaryTask(this), 60L, 60L);
-        getServer().getScheduler().runTaskTimerAsynchronously(this, consecutiveExecutor, 20L, 20L);
 
         // Provide vault support
         getLog().info("Attempting to hook into Vault...");
@@ -178,15 +190,29 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
             e.printStackTrace();
         }
 
+        // register with the LP API
         getLog().info("Registering API...");
         apiProvider = new ApiProvider(this);
         ApiHandler.registerProvider(apiProvider);
         getServer().getServicesManager().register(LuckPermsApi.class, apiProvider, this, ServicePriority.Normal);
 
-        // Run update task to refresh any online users
-        getLog().info("Scheduling Update Task to refresh any online users.");
-        updateTaskBuffer.request();
 
+        // schedule update tasks
+        int mins = getConfiguration().getSyncTime();
+        if (mins > 0) {
+            long ticks = mins * 60 * 20;
+            getServer().getScheduler().runTaskTimerAsynchronously(this, () -> updateTaskBuffer.request(), 20L, ticks);
+        } else {
+            // Update online users
+            updateTaskBuffer.request();
+        }
+
+        // register tasks
+        getServer().getScheduler().runTaskTimer(this, BukkitSenderFactory.get(this), 1L, 1L);
+        getServer().getScheduler().runTaskTimerAsynchronously(this, new ExpireTemporaryTask(this), 60L, 60L);
+        getServer().getScheduler().runTaskTimerAsynchronously(this, consecutiveExecutor, 20L, 20L);
+
+        // register permissions
         registerPermissions(getConfiguration().isCommandsAllowOp() ? PermissionDefault.OP : PermissionDefault.FALSE);
         if (!getConfiguration().isOpsEnabled()) {
             getServer().getOperators().forEach(o -> o.setOp(false));
@@ -201,6 +227,11 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         started = false;
         getLog().info("Closing datastore...");
         datastore.shutdown();
+
+        if (redisMessaging != null) {
+            getLog().info("Closing redis...");
+            redisMessaging.shutdown();
+        }
 
         getLog().info("Unregistering API...");
         ApiHandler.unregisterProvider();
