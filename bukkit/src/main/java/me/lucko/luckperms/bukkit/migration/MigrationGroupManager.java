@@ -27,6 +27,7 @@ import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.*;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.core.Node;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import org.anjocaido.groupmanager.GlobalGroups;
@@ -117,6 +118,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
         }
 
         Map<UUID, Map<Map.Entry<String, String>, Boolean>> users = new HashMap<>();
+        Map<UUID, String> primaryGroups = new HashMap<>();
         Map<String, Map<Map.Entry<String, String>, Boolean>> groups = new HashMap<>();
 
         WorldsHolder wh = gm.getWorldsHolder();
@@ -172,7 +174,13 @@ public class MigrationGroupManager extends SubCommand<Object> {
                     users.get(uuid).put(new AbstractMap.SimpleEntry<>(world, node), value);
                 }
 
-                users.get(uuid).put(new AbstractMap.SimpleEntry<>(world, "group." + user.getGroupName().toLowerCase()), true);
+                String finalWorld = world;
+                users.get(uuid).putAll(user.subGroupListStringCopy().stream()
+                        .map(n -> "group." + n)
+                        .map(n -> new AbstractMap.SimpleEntry<>(finalWorld, n))
+                        .collect(Collectors.toMap(n -> n, n -> true))
+                );
+                primaryGroups.put(uuid, user.getGroupName());
             }
 
         }
@@ -198,7 +206,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
                 // n.key.value = node
                 // n.value = true/false
                 try {
-                    group.setPermission("global-" + n.getKey().getKey() + "/" + n.getKey().getValue(), n.getValue());
+                    group.setPermission(Node.fromSerialisedNode("global-" + n.getKey().getKey() + "/" + n.getKey().getValue(), n.getValue()));
 
                     if (n.getKey().getValue().startsWith("group.")) {
                         String groupName = n.getKey().getValue().substring(6);
@@ -232,7 +240,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
                 // n.key.value = node
                 // n.value = true/false
                 try {
-                    user.setPermission("global-" + n.getKey().getKey() + "/" + n.getKey().getValue(), n.getValue());
+                    user.setPermission(Node.fromSerialisedNode("global-" + n.getKey().getKey() + "/" + n.getKey().getValue(), n.getValue()));
 
                     if (n.getKey().getValue().startsWith("group.")) {
                         String group = n.getKey().getValue().substring(6);
@@ -251,6 +259,14 @@ public class MigrationGroupManager extends SubCommand<Object> {
                     if (!(ex instanceof ObjectAlreadyHasException)) {
                         ex.printStackTrace();
                     }
+                }
+
+                String primaryGroup = primaryGroups.get(e.getKey());
+                if (primaryGroup != null) {
+                    try {
+                        user.setPermission("group." + primaryGroup, true);
+                    } catch (ObjectAlreadyHasException ignored) {}
+                    user.setPrimaryGroup(primaryGroup);
                 }
             }
 
