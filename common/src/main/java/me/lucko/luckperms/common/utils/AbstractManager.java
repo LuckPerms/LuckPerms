@@ -73,7 +73,7 @@ public abstract class AbstractManager<I, T extends Identifiable<I>> implements F
      * @return a {@link T} object if the object is loaded, returns null if the object is not loaded
      */
     public final T get(I id) {
-        return objects.asMap().get(id);
+        return objects.getIfPresent(id);
     }
 
     /**
@@ -91,7 +91,7 @@ public abstract class AbstractManager<I, T extends Identifiable<I>> implements F
      */
     public final void unload(T t) {
         if (t != null) {
-            objects.invalidate(t);
+            objects.invalidate(t.getId());
         }
     }
 
