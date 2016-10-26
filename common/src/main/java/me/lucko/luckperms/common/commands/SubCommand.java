@@ -162,44 +162,35 @@ public abstract class SubCommand<T> {
     }
 
     public static void save(User user, Sender sender, LuckPermsPlugin plugin) {
-        plugin.doAsync(() -> {
-            boolean success = plugin.getDatastore().saveUser(user).getUnchecked();
-            user.getRefreshBuffer().request().getUnchecked();
+        boolean success = plugin.getDatastore().force().saveUser(user).getUnchecked();
+        user.getRefreshBuffer().requestDirectly();
 
-            if (success) {
-                Message.USER_SAVE_SUCCESS.send(sender);
-            } else {
-                Message.USER_SAVE_ERROR.send(sender);
-            }
-        });
-
+        if (success) {
+            Message.USER_SAVE_SUCCESS.send(sender);
+        } else {
+            Message.USER_SAVE_ERROR.send(sender);
+        }
     }
 
     public static void save(Group group, Sender sender, LuckPermsPlugin plugin) {
-        plugin.doAsync(() -> {
-            boolean success = plugin.getDatastore().saveGroup(group).getUnchecked();
-            plugin.getUpdateTaskBuffer().request().getUnchecked();
+        boolean success = plugin.getDatastore().force().saveGroup(group).getUnchecked();
+        plugin.getUpdateTaskBuffer().requestDirectly();
 
-            if (success) {
-                Message.GROUP_SAVE_SUCCESS.send(sender);
-            } else {
-                Message.GROUP_SAVE_ERROR.send(sender);
-            }
-        });
-
+        if (success) {
+            Message.GROUP_SAVE_SUCCESS.send(sender);
+        } else {
+            Message.GROUP_SAVE_ERROR.send(sender);
+        }
     }
 
     public static void save(Track track, Sender sender, LuckPermsPlugin plugin) {
-        plugin.doAsync(() -> {
-            boolean success = plugin.getDatastore().saveTrack(track).getUnchecked();
-            plugin.getUpdateTaskBuffer().request().getUnchecked();
+        boolean success = plugin.getDatastore().force().saveTrack(track).getUnchecked();
+        plugin.getUpdateTaskBuffer().requestDirectly();
 
-            if (success) {
-                Message.TRACK_SAVE_SUCCESS.send(sender);
-            } else {
-                Message.TRACK_SAVE_ERROR.send(sender);
-            }
-        });
-
+        if (success) {
+            Message.TRACK_SAVE_SUCCESS.send(sender);
+        } else {
+            Message.TRACK_SAVE_ERROR.send(sender);
+        }
     }
 }
