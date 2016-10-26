@@ -67,6 +67,10 @@ public abstract class AbstractConfiguration<T extends LuckPermsPlugin> implement
     private String vaultServer;
     private boolean vaultIncludingGlobal;
     private boolean vaultIgnoreWorld;
+    private boolean vaultPrimaryGroupOverrides;
+    private boolean vaultPrimaryGroupOverridesCheckInherited;
+    private boolean vaultPrimaryGroupOverridesCheckExists;
+    private boolean vaultPrimaryGroupOverridesCheckMemberOf;
     private Map<String, String> worldRewrites;
     private Map<String, String> groupNameRewrites;
     private List<Rule> defaultAssignments;
@@ -113,6 +117,10 @@ public abstract class AbstractConfiguration<T extends LuckPermsPlugin> implement
         vaultServer = getString("vault-server", "global");
         vaultIncludingGlobal = getBoolean("vault-include-global", true);
         vaultIgnoreWorld = getBoolean("vault-ignore-world", false);
+        vaultPrimaryGroupOverrides = getBoolean("vault-primary-groups-overrides.enabled", false);
+        vaultPrimaryGroupOverridesCheckInherited = getBoolean("vault-primary-groups-overrides.check-inherited-permissions", false);
+        vaultPrimaryGroupOverridesCheckExists = getBoolean("vault-primary-groups-overrides.check-group-exists", true);
+        vaultPrimaryGroupOverridesCheckMemberOf = getBoolean("vault-primary-groups-overrides.check-user-member-of", true);
         worldRewrites = ImmutableMap.copyOf(getMap("world-rewrite", Collections.emptyMap()));
         groupNameRewrites = ImmutableMap.copyOf(getMap("group-name-rewrite", Collections.emptyMap()));
 

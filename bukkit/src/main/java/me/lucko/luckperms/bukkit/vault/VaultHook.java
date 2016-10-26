@@ -43,6 +43,10 @@ public class VaultHook {
             permissionHook.setServer(plugin.getConfiguration().getVaultServer());
             permissionHook.setIncludeGlobal(plugin.getConfiguration().isVaultIncludingGlobal());
             permissionHook.setIgnoreWorld(plugin.getConfiguration().isVaultIgnoreWorld());
+            permissionHook.setPgo(plugin.getConfiguration().isVaultPrimaryGroupOverrides());
+            permissionHook.setPgoCheckInherited(plugin.getConfiguration().isVaultPrimaryGroupOverridesCheckInherited());
+            permissionHook.setPgoCheckExists(plugin.getConfiguration().isVaultPrimaryGroupOverridesCheckExists());
+            permissionHook.setPgoCheckMemberOf(plugin.getConfiguration().isVaultPrimaryGroupOverridesCheckMemberOf());
             permissionHook.setup();
 
             if (chatHook == null) {

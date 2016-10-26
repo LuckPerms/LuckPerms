@@ -22,11 +22,15 @@
 
 package me.lucko.luckperms.bukkit.vault;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.api.caching.PermissionData;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.core.PermissionHolder;
@@ -43,26 +47,23 @@ import java.util.Map;
  * The LuckPerms Vault Permission implementation
  * Most lookups are cached.
  */
+@Getter
+@Setter
 public class VaultPermissionHook extends Permission {
-
-    @Getter
-    @Setter
     private LPBukkitPlugin plugin;
 
-    @Getter
+    @Setter(value = AccessLevel.NONE)
     private VaultScheduler scheduler;
 
-    @Getter
-    @Setter
     private String server = "global";
-
-    @Getter
-    @Setter
     private boolean includeGlobal = true;
-
-    @Getter
-    @Setter
     private boolean ignoreWorld = false;
+
+    // Primary Group override settings
+    private boolean pgo = false;
+    private boolean pgoCheckInherited = false;
+    private boolean pgoCheckExists = true;
+    private boolean pgoCheckMemberOf = true;
 
     public void setup() {
         scheduler = new VaultScheduler(plugin);
@@ -311,9 +312,73 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public String getPrimaryGroup(String world, @NonNull String player) {
+        world = ignoreWorld ? null : world; // Correct world value
         log("Getting primary group of player: " + player);
         final User user = plugin.getUserManager().get(player);
-        return (user == null) ? null : user.getPrimaryGroup();
+
+        if (user == null) {
+            return null;
+        }
+
+        if (!pgo) {
+            return user.getPrimaryGroup();
+        }
+
+        if (pgoCheckInherited) {
+            PermissionData data = user.getUserData().getPermissionData(createContext(server, world));
+            for (Map.Entry<String, Boolean> e : data.getImmutableBacking().entrySet()) {
+                if (!e.getKey().toLowerCase().startsWith("vault.primarygroup.")) {
+                    continue;
+                }
+
+                String group = e.getKey().substring("vault.primarygroup.".length());
+                if (pgoCheckExists) {
+                    if (!plugin.getGroupManager().isLoaded(group)) {
+                        continue;
+                    }
+                }
+
+                if (pgoCheckMemberOf) {
+                    if (data.getPermissionValue("group." + group) != Tristate.TRUE) {
+                        continue;
+                    }
+                }
+
+                return group;
+            }
+        } else {
+            for (LocalizedNode node : user.getPermissions(true)) {
+                if (!node.getPermission().toLowerCase().startsWith("vault.primarygroup.")) {
+                    continue;
+                }
+
+                if (!node.shouldApplyOnServer(server, isIncludeGlobal(), false)) {
+                    continue;
+                }
+
+                if (!node.shouldApplyOnWorld(world, true, false)) {
+                    continue;
+                }
+
+                String group = node.getPermission().substring("vault.primarygroup.".length());
+                if (pgoCheckExists) {
+                    if (!plugin.getGroupManager().isLoaded(group)) {
+                        continue;
+                    }
+                }
+
+                if (pgoCheckMemberOf) {
+                    if (!user.getLocalGroups(server, world).contains(group.toLowerCase())) {
+                        continue;
+                    }
+                }
+
+                return group;
+            }
+        }
+
+        // Fallback
+        return user.getPrimaryGroup();
     }
 
     @Override

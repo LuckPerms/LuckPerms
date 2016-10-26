@@ -78,6 +78,14 @@ public interface LPConfiguration {
 
     boolean isVaultIgnoreWorld();
 
+    boolean isVaultPrimaryGroupOverrides();
+
+    boolean isVaultPrimaryGroupOverridesCheckInherited();
+
+    boolean isVaultPrimaryGroupOverridesCheckExists();
+
+    boolean isVaultPrimaryGroupOverridesCheckMemberOf();
+
     Map<String, String> getWorldRewrites();
 
     Map<String, String> getGroupNameRewrites();
