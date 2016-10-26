@@ -25,7 +25,6 @@ package me.lucko.luckperms.common.utils;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.cache.RemovalListener;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -41,7 +40,6 @@ import java.util.function.Function;
 public abstract class AbstractManager<I, T extends Identifiable<I>> implements Function<I, T> {
 
     private final LoadingCache<I, T> objects = CacheBuilder.newBuilder()
-            .removalListener((RemovalListener<I, T>) removal -> preUnload(removal.getValue()))
             .build(new CacheLoader<I, T>() {
                 @Override
                 public T load(I i) {
@@ -93,10 +91,6 @@ public abstract class AbstractManager<I, T extends Identifiable<I>> implements F
         if (t != null) {
             objects.invalidate(t.getId());
         }
-    }
-
-    protected void preUnload(T t) {
-
     }
 
     /**
