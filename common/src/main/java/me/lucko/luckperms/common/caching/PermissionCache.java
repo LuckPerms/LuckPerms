@@ -53,7 +53,8 @@ public class PermissionCache implements PermissionData {
 
     public PermissionCache(Contexts contexts, User user, CalculatorFactory calculatorFactory) {
         permissions = new ConcurrentHashMap<>();
-        calculator = calculatorFactory.build(contexts, user, permissions);
+        calculator = calculatorFactory.build(contexts, user);
+        calculator.updateBacking(permissions); // Initial setup.
     }
 
     @Override
@@ -64,6 +65,7 @@ public class PermissionCache implements PermissionData {
     public void setPermissions(Map<String, Boolean> permissions) {
         this.permissions.clear();
         this.permissions.putAll(permissions);
+        calculator.updateBacking(this.permissions);
         invalidateCache();
     }
 

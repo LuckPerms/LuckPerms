@@ -24,8 +24,11 @@ package me.lucko.luckperms.common.calculators;
 
 import me.lucko.luckperms.api.Tristate;
 
+import java.util.Map;
+
 public interface PermissionProcessor {
 
     Tristate hasPermission(String permission);
+    void updateBacking(Map<String, Boolean> map);
 
 }

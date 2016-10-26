@@ -22,30 +22,27 @@
 
 package me.lucko.luckperms.bungee;
 
+import com.google.common.collect.ImmutableList;
 import lombok.AllArgsConstructor;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.common.calculators.*;
 import me.lucko.luckperms.common.users.User;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 @AllArgsConstructor
 public class BungeeCalculatorFactory implements CalculatorFactory {
     private final LPBungeePlugin plugin;
 
     @Override
-    public PermissionCalculator build(Contexts contexts, User user, Map<String, Boolean> map) {
-        List<PermissionProcessor> processors = new ArrayList<>(3);
-        processors.add(new MapProcessor(map));
+    public PermissionCalculator build(Contexts contexts, User user) {
+        ImmutableList.Builder<PermissionProcessor> processors = ImmutableList.builder();
+        processors.add(new MapProcessor());
         if (plugin.getConfiguration().isApplyingWildcards()) {
-            processors.add(new WildcardProcessor(map));
+            processors.add(new WildcardProcessor());
         }
         if (plugin.getConfiguration().isApplyingRegex()) {
-            processors.add(new RegexProcessor(map));
+            processors.add(new RegexProcessor());
         }
 
-        return new PermissionCalculator(plugin, user.getName(), plugin.getConfiguration().isDebugPermissionChecks(), processors);
+        return new PermissionCalculator(plugin, user.getName(), plugin.getConfiguration().isDebugPermissionChecks(), processors.build());
     }
 }

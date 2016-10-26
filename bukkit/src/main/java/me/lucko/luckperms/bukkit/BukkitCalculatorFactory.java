@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.bukkit;
 
+import com.google.common.collect.ImmutableList;
 import lombok.AllArgsConstructor;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.bukkit.calculators.AttachmentProcessor;
@@ -31,9 +32,6 @@ import me.lucko.luckperms.bukkit.inject.LPPermissible;
 import me.lucko.luckperms.common.calculators.*;
 import me.lucko.luckperms.common.users.User;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -41,23 +39,23 @@ public class BukkitCalculatorFactory implements CalculatorFactory {
     private final LPBukkitPlugin plugin;
 
     @Override
-    public PermissionCalculator build(Contexts contexts, User user, Map<String, Boolean> map) {
+    public PermissionCalculator build(Contexts contexts, User user) {
         UUID uuid = plugin.getUuidCache().getExternalUUID(user.getUuid());
 
-        List<PermissionProcessor> processors = new ArrayList<>(5);
-        processors.add(new MapProcessor(map));
+        ImmutableList.Builder<PermissionProcessor> processors = ImmutableList.builder();
+        processors.add(new MapProcessor());
         processors.add(new AttachmentProcessor(() -> {
             LPPermissible permissible = Injector.getPermissible(uuid);
             return permissible == null ? null : permissible.getAttachmentPermissions();
         }));
         if (plugin.getConfiguration().isApplyingWildcards()) {
-            processors.add(new WildcardProcessor(map));
+            processors.add(new WildcardProcessor());
         }
         if (plugin.getConfiguration().isApplyingRegex()) {
-            processors.add(new RegexProcessor(map));
+            processors.add(new RegexProcessor());
         }
         processors.add(new DefaultsProcessor(contexts.isOp(), plugin.getDefaultsProvider()));
 
-        return new PermissionCalculator(plugin, user.getName(), plugin.getConfiguration().isDebugPermissionChecks(), processors);
+        return new PermissionCalculator(plugin, user.getName(), plugin.getConfiguration().isDebugPermissionChecks(), processors.build());
     }
 }

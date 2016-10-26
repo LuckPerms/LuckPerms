@@ -28,6 +28,8 @@ import me.lucko.luckperms.common.calculators.PermissionProcessor;
 import org.bukkit.Bukkit;
 import org.bukkit.permissions.Permission;
 
+import java.util.Map;
+
 @AllArgsConstructor
 public class DefaultsProcessor implements PermissionProcessor {
     private final boolean isOp;
@@ -42,5 +44,10 @@ public class DefaultsProcessor implements PermissionProcessor {
 
         Permission defPerm = Bukkit.getServer().getPluginManager().getPermission(permission);
         return defPerm == null ? Tristate.UNDEFINED : Tristate.fromBoolean(defPerm.getDefault().getValue(isOp));
+    }
+
+    @Override
+    public void updateBacking(Map<String, Boolean> map) {
+        // Do nothing, this doesn't use the backing
     }
 }

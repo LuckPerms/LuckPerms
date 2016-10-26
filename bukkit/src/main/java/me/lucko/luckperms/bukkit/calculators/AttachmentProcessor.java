@@ -48,4 +48,9 @@ public class AttachmentProcessor implements PermissionProcessor {
         return pai == null ? Tristate.UNDEFINED : Tristate.fromBoolean(pai.getValue());
     }
 
+    @Override
+    public void updateBacking(Map<String, Boolean> map) {
+        // Do nothing, this doesn't use the backing
+    }
+
 }

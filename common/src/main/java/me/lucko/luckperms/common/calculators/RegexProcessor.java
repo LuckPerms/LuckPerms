@@ -22,28 +22,20 @@
 
 package me.lucko.luckperms.common.calculators;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.constants.Patterns;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
-@AllArgsConstructor
 public class RegexProcessor implements PermissionProcessor {
-
-    @Getter
-    private final Map<String, Boolean> map;
+    private Map<String, Boolean> regexPermissions = new ConcurrentHashMap<>();
 
     @Override
     public Tristate hasPermission(String permission) {
-        for (Map.Entry<String, Boolean> e : map.entrySet()) {
-            if (!e.getKey().startsWith("r=") && !e.getKey().startsWith("R=")) {
-                continue;
-            }
-
-            Pattern p = Patterns.compile(e.getKey().substring(2));
+        for (Map.Entry<String, Boolean> e : regexPermissions.entrySet()) {
+            Pattern p = Patterns.compile(e.getKey());
             if (p == null) {
                 continue;
             }
@@ -54,5 +46,17 @@ public class RegexProcessor implements PermissionProcessor {
         }
 
         return Tristate.UNDEFINED;
+    }
+
+    @Override
+    public void updateBacking(Map<String, Boolean> map) {
+        regexPermissions.clear();
+        for (Map.Entry<String, Boolean> e : map.entrySet()) {
+            if (!e.getKey().startsWith("r=") && !e.getKey().startsWith("R=")) {
+                continue;
+            }
+
+            regexPermissions.put(e.getKey().substring(2), e.getValue());
+        }
     }
 }

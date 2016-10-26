@@ -30,6 +30,7 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Calculates and caches permissions
@@ -75,5 +76,11 @@ public class PermissionCalculator {
         }
 
         return Tristate.UNDEFINED;
+    }
+
+    public synchronized void updateBacking(Map<String, Boolean> map) {
+        for (PermissionProcessor processor : processors) {
+            processor.updateBacking(map);
+        }
     }
 }

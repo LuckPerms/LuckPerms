@@ -22,18 +22,13 @@
 
 package me.lucko.luckperms.sponge.calculators;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.calculators.PermissionProcessor;
 
 import java.util.Map;
 
-@AllArgsConstructor
 public class SpongeWildcardProcessor implements PermissionProcessor {
-
-    @Getter
-    private final Map<String, Boolean> map;
+    private Map<String, Boolean> map = null;
 
     @Override
     public Tristate hasPermission(String permission) {
@@ -55,5 +50,12 @@ public class SpongeWildcardProcessor implements PermissionProcessor {
         }
 
         return Tristate.UNDEFINED;
+    }
+
+    @Override
+    public void updateBacking(Map<String, Boolean> map) {
+        if (this.map == null) {
+            this.map = map;
+        }
     }
 }

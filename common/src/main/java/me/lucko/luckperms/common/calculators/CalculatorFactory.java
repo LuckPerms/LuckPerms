@@ -25,13 +25,11 @@ package me.lucko.luckperms.common.calculators;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.common.users.User;
 
-import java.util.Map;
-
 /**
  * Creates a calculator instance given a set of contexts
  */
 public interface CalculatorFactory {
 
-    PermissionCalculator build(Contexts contexts, User user, Map<String, Boolean> map);
+    PermissionCalculator build(Contexts contexts, User user);
 
 }

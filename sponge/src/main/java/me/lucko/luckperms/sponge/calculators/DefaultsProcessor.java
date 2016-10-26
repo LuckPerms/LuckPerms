@@ -28,6 +28,7 @@ import me.lucko.luckperms.sponge.service.LuckPermsService;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.util.Tristate;
 
+import java.util.Map;
 import java.util.Set;
 
 import static me.lucko.luckperms.sponge.service.LuckPermsService.convertTristate;
@@ -50,5 +51,10 @@ public class DefaultsProcessor implements PermissionProcessor {
         }
 
         return me.lucko.luckperms.api.Tristate.UNDEFINED;
+    }
+
+    @Override
+    public void updateBacking(Map<String, Boolean> map) {
+        // Do nothing, this doesn't use the backing
     }
 }

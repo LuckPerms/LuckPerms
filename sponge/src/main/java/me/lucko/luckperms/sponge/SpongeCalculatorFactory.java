@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.sponge;
 
+import com.google.common.collect.ImmutableList;
 import lombok.AllArgsConstructor;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.common.calculators.*;
@@ -30,27 +31,23 @@ import me.lucko.luckperms.sponge.calculators.DefaultsProcessor;
 import me.lucko.luckperms.sponge.calculators.SpongeWildcardProcessor;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 @AllArgsConstructor
 public class SpongeCalculatorFactory implements CalculatorFactory {
     private final LPSpongePlugin plugin;
 
     @Override
-    public PermissionCalculator build(Contexts contexts, User user, Map<String, Boolean> map) {
-        List<PermissionProcessor> processors = new ArrayList<>(5);
-        processors.add(new MapProcessor(map));
+    public PermissionCalculator build(Contexts contexts, User user) {
+        ImmutableList.Builder<PermissionProcessor> processors = ImmutableList.builder();
+        processors.add(new MapProcessor());
         if (plugin.getConfiguration().isApplyingWildcards()) {
-            processors.add(new SpongeWildcardProcessor(map));
-            processors.add(new WildcardProcessor(map));
+            processors.add(new SpongeWildcardProcessor());
+            processors.add(new WildcardProcessor());
         }
         if (plugin.getConfiguration().isApplyingRegex()) {
-            processors.add(new RegexProcessor(map));
+            processors.add(new RegexProcessor());
         }
         processors.add(new DefaultsProcessor(plugin.getService(), LuckPermsService.convertContexts(contexts.getContexts())));
 
-        return new PermissionCalculator(plugin, user.getName(), plugin.getConfiguration().isDebugPermissionChecks(), processors);
+        return new PermissionCalculator(plugin, user.getName(), plugin.getConfiguration().isDebugPermissionChecks(), processors.build());
     }
 }
