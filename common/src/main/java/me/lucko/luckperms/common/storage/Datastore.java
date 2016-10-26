@@ -52,9 +52,7 @@ public interface Datastore {
      */
     void doSync(Runnable r);
 
-    default Datastore force() {
-        return this;
-    }
+    Datastore force();
 
     void init();
     void shutdown();

@@ -88,6 +88,11 @@ public class AbstractDatastore implements Datastore {
     }
 
     @Override
+    public Datastore force() {
+        return this;
+    }
+
+    @Override
     public void init() {
         backing.init();
     }

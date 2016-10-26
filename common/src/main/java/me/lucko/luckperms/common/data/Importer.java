@@ -174,7 +174,9 @@ public class Importer {
     }
 
     private void logMessage(String msg) {
-        getResult(executing, "").getOutput().add(Util.stripColor(msg));
+        if (executing != -1) {
+            getResult(executing, "").getOutput().add(Util.stripColor(msg));
+        }
     }
 
     private static class FakeSender implements Sender {

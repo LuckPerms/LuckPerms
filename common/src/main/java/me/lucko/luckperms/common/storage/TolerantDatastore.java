@@ -75,6 +75,11 @@ public class TolerantDatastore implements Datastore {
     }
 
     @Override
+    public Datastore force() {
+        return this;
+    }
+
+    @Override
     public void init() {
         backing.init();
     }
