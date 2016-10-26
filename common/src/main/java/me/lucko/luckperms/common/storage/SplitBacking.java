@@ -69,6 +69,11 @@ public class SplitBacking implements Datastore {
     }
 
     @Override
+    public Datastore force() {
+        return this;
+    }
+
+    @Override
     public void init() {
         boolean success = true;
         backing.values().forEach(Datastore::init);
