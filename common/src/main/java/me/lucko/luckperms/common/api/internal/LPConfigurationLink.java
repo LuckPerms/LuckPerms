@@ -103,7 +103,7 @@ public class LPConfigurationLink implements LPConfiguration {
 
     @Override
     public boolean getDebugPermissionChecks() {
-        return master.isDebugPermissionChecks();
+        return false; // Constant  TODO depreciate this
     }
 
     @Override

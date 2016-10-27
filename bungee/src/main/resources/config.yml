@@ -46,9 +46,6 @@ online-mode: true
 # If the plugin should send log notifications to users whenever permissions are modified.
 log-notify: true
 
-# If LuckPerms should print to console every time a plugin checks if a player has a permission
-debug-permission-checks: false
-
 # Mirrors world names. Whenever LuckPerms checks what world a user is in, if the world name is in this list, the value assigned
 # will be sent forward for permission calculation instead.
 world-rewrite:

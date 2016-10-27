@@ -64,8 +64,6 @@ public interface LPConfiguration {
 
     boolean isLogNotify();
 
-    boolean isDebugPermissionChecks();
-
     boolean isOpsEnabled();
 
     boolean isCommandsAllowOp();
@@ -85,6 +83,8 @@ public interface LPConfiguration {
     boolean isVaultPrimaryGroupOverridesCheckExists();
 
     boolean isVaultPrimaryGroupOverridesCheckMemberOf();
+
+    boolean isVaultDebug();
 
     Map<String, String> getWorldRewrites();
 

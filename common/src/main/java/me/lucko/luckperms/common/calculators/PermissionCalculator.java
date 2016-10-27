@@ -39,7 +39,6 @@ import java.util.Map;
 public class PermissionCalculator {
     private final LuckPermsPlugin plugin;
     private final String objectName;
-    private final boolean debug;
     private final List<PermissionProcessor> processors;
 
     private final LoadingCache<String, Tristate> cache = CacheBuilder.newBuilder()
@@ -57,12 +56,7 @@ public class PermissionCalculator {
     public Tristate getPermissionValue(String permission) {
         permission = permission.toLowerCase();
         Tristate t =  cache.getUnchecked(permission);
-
         plugin.getDebugHandler().printOutput(objectName, permission, t);
-        if (debug) {
-            plugin.getLog().info("Checking if " + objectName + " has permission: " + permission + " - (" + t.toString() + ")");
-        }
-
         return t;
     }
 

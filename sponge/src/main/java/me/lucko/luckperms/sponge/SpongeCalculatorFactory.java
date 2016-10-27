@@ -48,6 +48,6 @@ public class SpongeCalculatorFactory implements CalculatorFactory {
         }
         processors.add(new DefaultsProcessor(plugin.getService(), LuckPermsService.convertContexts(contexts.getContexts())));
 
-        return new PermissionCalculator(plugin, user.getName(), plugin.getConfiguration().isDebugPermissionChecks(), processors.build());
+        return new PermissionCalculator(plugin, user.getName(), processors.build());
     }
 }

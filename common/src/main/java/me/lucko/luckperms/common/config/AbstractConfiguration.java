@@ -60,7 +60,6 @@ public abstract class AbstractConfiguration<T extends LuckPermsPlugin> implement
     private boolean applyingRegex;
     private boolean applyingShorthand;
     private boolean logNotify;
-    private boolean debugPermissionChecks;
     private boolean opsEnabled;
     private boolean commandsAllowOp;
     private boolean autoOp;
@@ -71,6 +70,7 @@ public abstract class AbstractConfiguration<T extends LuckPermsPlugin> implement
     private boolean vaultPrimaryGroupOverridesCheckInherited;
     private boolean vaultPrimaryGroupOverridesCheckExists;
     private boolean vaultPrimaryGroupOverridesCheckMemberOf;
+    private boolean vaultDebug;
     private Map<String, String> worldRewrites;
     private Map<String, String> groupNameRewrites;
     private List<Rule> defaultAssignments;
@@ -110,7 +110,6 @@ public abstract class AbstractConfiguration<T extends LuckPermsPlugin> implement
         applyingRegex = getBoolean("apply-regex", true);
         applyingShorthand = getBoolean("apply-shorthand", true);
         logNotify = getBoolean("log-notify", true);
-        debugPermissionChecks = getBoolean("debug-permission-checks", false);
         autoOp = getBoolean("auto-op", false);
         opsEnabled = !isAutoOp() && getBoolean("enable-ops", true);
         commandsAllowOp = getBoolean("commands-allow-op", true);
@@ -121,6 +120,7 @@ public abstract class AbstractConfiguration<T extends LuckPermsPlugin> implement
         vaultPrimaryGroupOverridesCheckInherited = getBoolean("vault-primary-groups-overrides.check-inherited-permissions", false);
         vaultPrimaryGroupOverridesCheckExists = getBoolean("vault-primary-groups-overrides.check-group-exists", true);
         vaultPrimaryGroupOverridesCheckMemberOf = getBoolean("vault-primary-groups-overrides.check-user-member-of", true);
+        vaultDebug = getBoolean("vault-debug", false);
         worldRewrites = ImmutableMap.copyOf(getMap("world-rewrite", Collections.emptyMap()));
         groupNameRewrites = ImmutableMap.copyOf(getMap("group-name-rewrite", Collections.emptyMap()));
 

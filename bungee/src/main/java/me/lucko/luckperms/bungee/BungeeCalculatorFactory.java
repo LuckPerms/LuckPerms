@@ -43,6 +43,6 @@ public class BungeeCalculatorFactory implements CalculatorFactory {
             processors.add(new RegexProcessor());
         }
 
-        return new PermissionCalculator(plugin, user.getName(), plugin.getConfiguration().isDebugPermissionChecks(), processors.build());
+        return new PermissionCalculator(plugin, user.getName(), processors.build());
     }
 }

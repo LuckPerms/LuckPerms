@@ -70,7 +70,7 @@ public class VaultPermissionHook extends Permission {
     }
 
     public void log(String s) {
-        if (plugin.getConfiguration().isDebugPermissionChecks()) {
+        if (plugin.getConfiguration().isVaultDebug()) {
             plugin.getLog().info("[VAULT] " + s);
         }
     }

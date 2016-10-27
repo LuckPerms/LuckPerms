@@ -80,10 +80,6 @@ public class UserCollection implements SubjectCollection {
             return s.get();
         }
 
-        if (service.getPlugin().getConfiguration().isDebugPermissionChecks()) {
-            service.getPlugin().getLog().warn("Couldn't get user subject for: " + id);
-        }
-
         // Fallback to the other collection. This Subject instance will never be persisted.
         return fallback.get(id);
     }

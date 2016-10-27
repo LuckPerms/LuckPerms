@@ -56,6 +56,6 @@ public class BukkitCalculatorFactory implements CalculatorFactory {
         }
         processors.add(new DefaultsProcessor(contexts.isOp(), plugin.getDefaultsProvider()));
 
-        return new PermissionCalculator(plugin, user.getName(), plugin.getConfiguration().isDebugPermissionChecks(), processors.build());
+        return new PermissionCalculator(plugin, user.getName(), processors.build());
     }
 }
