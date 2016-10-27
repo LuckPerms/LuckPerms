@@ -22,18 +22,42 @@
 
 package me.lucko.luckperms.common.contexts;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import me.lucko.luckperms.api.context.ContextListener;
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.IContextCalculator;
 import me.lucko.luckperms.api.context.MutableContextSet;
 
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 
 public class ContextManager<T> {
 
     private final List<IContextCalculator<T>> calculators = new CopyOnWriteArrayList<>();
     private final List<ContextListener<T>> listeners = new CopyOnWriteArrayList<>();
+
+    private final LoadingCache<T, ContextSet> cache = CacheBuilder.newBuilder()
+            .expireAfterWrite(50L, TimeUnit.MILLISECONDS)
+            .build(new CacheLoader<T, ContextSet>() {
+                @Override
+                public ContextSet load(T t) {
+                    return calculateApplicableContext(t, MutableContextSet.empty()).makeImmutable();
+                }
+            });
+
+    private MutableContextSet calculateApplicableContext(T subject, MutableContextSet accumulator) {
+        for (IContextCalculator<T> calculator : calculators) {
+            calculator.giveApplicableContext(subject, accumulator);
+        }
+        return accumulator;
+    }
+
+    public ContextSet getApplicableContext(T subject) {
+        return cache.getUnchecked(subject);
+    }
 
     public void registerCalculator(IContextCalculator<T> calculator) {
         listeners.forEach(calculator::addListener);
@@ -46,21 +70,5 @@ public class ContextManager<T> {
         }
 
         listeners.add(listener);
-    }
-
-    public MutableContextSet giveApplicableContext(T subject, MutableContextSet accumulator) {
-        for (IContextCalculator<T> calculator : calculators) {
-            calculator.giveApplicableContext(subject, accumulator);
-        }
-        return accumulator;
-    }
-
-    public boolean isContextApplicable(T subject, Map.Entry<String, String> context) {
-        for (IContextCalculator<T> calculator : calculators) {
-            if (calculator.isContextApplicable(subject, context)) {
-                return true;
-            }
-        }
-        return false;
     }
 }

@@ -129,7 +129,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             contexts.removeAll("world");
 
             for (Map.Entry<String, String> opt : e.getValue().entrySet()) {
-                if (opt.getKey().equalsIgnoreCase("prefix") || opt.getKey().equalsIgnoreCase("prefix")) {
+                if (opt.getKey().equalsIgnoreCase("prefix") || opt.getKey().equalsIgnoreCase("suffix")) {
                     try {
                         holder.setPermission(new Node.Builder(opt.getKey().toLowerCase() + ".100." + opt.getValue()).setServerRaw(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
                     } catch (ObjectAlreadyHasException ignored) {}

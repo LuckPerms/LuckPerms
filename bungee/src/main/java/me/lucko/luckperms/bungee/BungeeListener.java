@@ -23,7 +23,6 @@
 package me.lucko.luckperms.bungee;
 
 import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.api.event.events.UserFirstLoginEvent;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.core.UuidCache;
@@ -72,7 +71,7 @@ public class BungeeListener extends AbstractListener implements Listener {
         }
 
         Contexts contexts = new Contexts(
-                plugin.getContextManager().giveApplicableContext(player, MutableContextSet.empty()),
+                plugin.getContextManager().getApplicableContext(player),
                 plugin.getConfiguration().isIncludingGlobalPerms(),
                 plugin.getConfiguration().isIncludingGlobalWorldPerms(),
                 true,

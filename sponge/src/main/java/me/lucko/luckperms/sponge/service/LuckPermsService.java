@@ -140,9 +140,9 @@ public class LuckPermsService implements PermissionService {
         plugin.getContextManager().registerCalculator(new SpongeCalculatorLink(contextCalculator));
     }
 
-    public Contexts calculateContexts(Set<Context> contexts) {
+    public Contexts calculateContexts(ContextSet contextSet) {
         return new Contexts(
-                LuckPermsService.convertContexts(contexts),
+                contextSet,
                 plugin.getConfiguration().isIncludingGlobalPerms(),
                 plugin.getConfiguration().isIncludingGlobalWorldPerms(),
                 true,

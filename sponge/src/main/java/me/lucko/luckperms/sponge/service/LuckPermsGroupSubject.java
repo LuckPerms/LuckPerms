@@ -23,15 +23,14 @@
 package me.lucko.luckperms.sponge.service;
 
 import com.google.common.collect.ImmutableList;
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.NonNull;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.groups.Group;
 import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.NodeTree;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
@@ -40,26 +39,22 @@ import org.spongepowered.api.util.Tristate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static me.lucko.luckperms.api.MetaUtils.unescapeCharacters;
 
-@EqualsAndHashCode(of = "group")
-public class LuckPermsGroupSubject implements Subject {
+@Getter
+@EqualsAndHashCode(of = "group", callSuper = false)
+public class LuckPermsGroupSubject extends LuckPermsSubject {
     public static LuckPermsGroupSubject wrapGroup(Group group, LuckPermsService service) {
         return new LuckPermsGroupSubject(group, service);
     }
 
-    @Getter
-    private Group group;
-
+    @Getter(value = AccessLevel.NONE)
     private LuckPermsService service;
 
-    @Getter
+    private Group group;
     private LuckPermsSubjectData subjectData;
-
-    @Getter
     private LuckPermsSubjectData transientSubjectData;
 
     private LuckPermsGroupSubject(Group group, LuckPermsService service) {
@@ -85,37 +80,32 @@ public class LuckPermsGroupSubject implements Subject {
     }
 
     @Override
-    public boolean hasPermission(@NonNull Set<Context> contexts, @NonNull String node) {
-        return getPermissionValue(contexts, node).asBoolean();
-    }
-
-    @Override
-    public Tristate getPermissionValue(@NonNull Set<Context> contexts, @NonNull String node) {
+    protected Tristate getPermissionValue(ContextSet contexts, String permission) {
         Map<String, Boolean> permissions = group.getAllNodesFiltered(service.calculateContexts(contexts)).stream()
                 .map(LocalizedNode::getNode)
                 .collect(Collectors.toMap(Node::getPermission, Node::getValue));
 
-        Tristate t = NodeTree.of(permissions).get(node);
+        Tristate t = NodeTree.of(permissions).get(permission);
         if (t != Tristate.UNDEFINED) {
             return t;
         }
 
-        t = service.getGroupSubjects().getDefaults().getPermissionValue(contexts, node);
+        t = service.getGroupSubjects().getDefaults().getPermissionValue(LuckPermsService.convertContexts(contexts), permission);
         if (t != Tristate.UNDEFINED) {
             return t;
         }
 
-        t = service.getDefaults().getPermissionValue(contexts, node);
+        t = service.getDefaults().getPermissionValue(LuckPermsService.convertContexts(contexts), permission);
         return t;
     }
 
     @Override
-    public boolean isChildOf(@NonNull Set<Context> contexts, @NonNull Subject parent) {
+    public boolean isChildOf(ContextSet contexts, Subject parent) {
         return parent instanceof LuckPermsGroupSubject && getPermissionValue(contexts, "group." + parent.getIdentifier()).asBoolean();
     }
 
     @Override
-    public List<Subject> getParents(@NonNull Set<Context> contexts) {
+    public List<Subject> getParents(ContextSet contexts) {
         List<Subject> subjects = group.getAllNodesFiltered(service.calculateContexts(contexts)).stream()
                 .map(LocalizedNode::getNode)
                 .filter(Node::isGroupNode)
@@ -123,43 +113,43 @@ public class LuckPermsGroupSubject implements Subject {
                 .map(s -> service.getGroupSubjects().get(s))
                 .collect(Collectors.toList());
 
-        subjects.addAll(service.getGroupSubjects().getDefaults().getParents(contexts));
-        subjects.addAll(service.getDefaults().getParents(contexts));
+        subjects.addAll(service.getGroupSubjects().getDefaults().getParents(LuckPermsService.convertContexts(contexts)));
+        subjects.addAll(service.getDefaults().getParents(LuckPermsService.convertContexts(contexts)));
 
         return ImmutableList.copyOf(subjects);
     }
 
     @Override
-    public Optional<String> getOption(Set<Context> set, String s) {
+    public Optional<String> getOption(ContextSet contexts, String s) {
         Optional<String> option;
         if (s.equalsIgnoreCase("prefix")) {
-            option = getChatMeta(set, true);
+            option = getChatMeta(contexts, true);
 
         } else if (s.equalsIgnoreCase("suffix")) {
-            option = getChatMeta(set, false);
+            option = getChatMeta(contexts, false);
 
         } else {
-            option = getMeta(set, s);
+            option = getMeta(contexts, s);
         }
 
         if (option.isPresent()) {
             return option;
         }
 
-        option = service.getGroupSubjects().getDefaults().getOption(set, s);
+        option = service.getGroupSubjects().getDefaults().getOption(LuckPermsService.convertContexts(contexts), s);
         if (option.isPresent()) {
             return option;
         }
 
-        return service.getDefaults().getOption(set, s);
+        return service.getDefaults().getOption(LuckPermsService.convertContexts(contexts), s);
     }
 
     @Override
-    public Set<Context> getActiveContexts() {
-        return LuckPermsService.convertContexts(service.getPlugin().getContextManager().giveApplicableContext(this, MutableContextSet.empty()));
+    public ContextSet getActiveContextSet() {
+        return service.getPlugin().getContextManager().getApplicableContext(this);
     }
 
-    private Optional<String> getChatMeta(Set<Context> contexts, boolean prefix) {
+    private Optional<String> getChatMeta(ContextSet contexts, boolean prefix) {
         int priority = Integer.MIN_VALUE;
         String meta = null;
 
@@ -182,7 +172,7 @@ public class LuckPermsGroupSubject implements Subject {
         return meta == null ? Optional.empty() : Optional.of(unescapeCharacters(meta));
     }
 
-    private Optional<String> getMeta(Set<Context> contexts, String key) {
+    private Optional<String> getMeta(ContextSet contexts, String key) {
         for (Node n : group.getAllNodesFiltered(service.calculateContexts(contexts))) {
             if (!n.getValue()) {
                 continue;

@@ -27,7 +27,6 @@ import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.users.User;
 import me.lucko.luckperms.common.utils.AbstractListener;
-import me.lucko.luckperms.sponge.service.LuckPermsService;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
@@ -76,7 +75,7 @@ public class SpongeListener extends AbstractListener {
         // Attempt to pre-process some permissions for the user to save time later. Might not work, but it's better than nothing.
         Optional<Player> p = e.getCause().first(Player.class);
         if (p.isPresent()) {
-            MutableContextSet context = plugin.getContextManager().giveApplicableContext(p.get(), MutableContextSet.empty());
+            MutableContextSet context = MutableContextSet.fromSet(plugin.getContextManager().getApplicableContext(p.get()));
 
             List<String> worlds = plugin.getGame().getServer().getWorlds().stream()
                     .map(World::getName)
@@ -84,13 +83,13 @@ public class SpongeListener extends AbstractListener {
 
             plugin.doAsync(() -> {
                 UserData data = user.getUserData();
-                data.preCalculate(plugin.getService().calculateContexts(LuckPermsService.convertContexts(context)));
+                data.preCalculate(plugin.getService().calculateContexts(context));
 
                 for (String world : worlds) {
                     MutableContextSet modified = MutableContextSet.fromSet(context);
                     modified.removeAll("world");
                     modified.add("world", world);
-                    data.preCalculate(plugin.getService().calculateContexts(LuckPermsService.convertContexts(modified)));
+                    data.preCalculate(plugin.getService().calculateContexts(modified));
                 }
             });
         }

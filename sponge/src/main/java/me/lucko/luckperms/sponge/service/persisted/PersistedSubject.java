@@ -25,7 +25,6 @@ package me.lucko.luckperms.sponge.service.persisted;
 import com.google.common.collect.ImmutableList;
 import lombok.Getter;
 import lombok.NonNull;
-import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.utils.BufferedRequest;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import org.spongepowered.api.command.CommandSource;
@@ -186,6 +185,6 @@ public class PersistedSubject implements Subject {
 
     @Override
     public Set<Context> getActiveContexts() {
-        return LuckPermsService.convertContexts(service.getPlugin().getContextManager().giveApplicableContext(this, MutableContextSet.empty()));
+        return LuckPermsService.convertContexts(service.getPlugin().getContextManager().getApplicableContext(this));
     }
 }

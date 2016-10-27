@@ -23,40 +23,35 @@
 package me.lucko.luckperms.sponge.service;
 
 import com.google.common.collect.ImmutableList;
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.NonNull;
 import me.lucko.luckperms.api.caching.MetaData;
-import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.users.User;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.util.Tristate;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
-@EqualsAndHashCode(of = "user")
-public class LuckPermsUserSubject implements Subject {
+@Getter
+@EqualsAndHashCode(of = "user", callSuper = false)
+public class LuckPermsUserSubject extends LuckPermsSubject {
     public static LuckPermsUserSubject wrapUser(User user, LuckPermsService service) {
         return new LuckPermsUserSubject(user, service);
     }
 
-    @Getter
-    private User user;
-
+    @Getter(value = AccessLevel.NONE)
     private LuckPermsService service;
 
-    @Getter
+    private User user;
     private LuckPermsSubjectData subjectData;
-
-    @Getter
     private LuckPermsSubjectData transientSubjectData;
 
     private LuckPermsUserSubject(User user, LuckPermsService service) {
@@ -102,26 +97,19 @@ public class LuckPermsUserSubject implements Subject {
     }
 
     @Override
-    public boolean hasPermission(Set<Context> contexts, String permission) {
-        return getPermissionValue(contexts, permission).asBoolean();
+    protected Tristate getPermissionValue(ContextSet contexts, String permission) {
+        return !hasData() ?
+                Tristate.UNDEFINED :
+                LuckPermsService.convertTristate(user.getUserData().getPermissionData(service.calculateContexts(contexts)).getPermissionValue(permission));
     }
 
     @Override
-    public Tristate getPermissionValue(@NonNull Set<Context> contexts, @NonNull String permission) {
-        if (hasData()) {
-            return LuckPermsService.convertTristate(user.getUserData().getPermissionData(service.calculateContexts(contexts)).getPermissionValue(permission));
-        }
-
-        return Tristate.UNDEFINED;
-    }
-
-    @Override
-    public boolean isChildOf(@NonNull Set<Context> contexts, @NonNull Subject parent) {
+    protected boolean isChildOf(ContextSet contexts, Subject parent) {
         return parent instanceof LuckPermsGroupSubject && getPermissionValue(contexts, "group." + parent.getIdentifier()).asBoolean();
     }
 
     @Override
-    public List<Subject> getParents(Set<Context> contexts) {
+    protected List<Subject> getParents(ContextSet contexts) {
         ImmutableList.Builder<Subject> subjects = ImmutableList.builder();
 
         if (hasData()) {
@@ -137,14 +125,14 @@ public class LuckPermsUserSubject implements Subject {
             }
         }
 
-        subjects.addAll(service.getUserSubjects().getDefaults().getParents(contexts));
-        subjects.addAll(service.getDefaults().getParents(contexts));
+        subjects.addAll(service.getUserSubjects().getDefaults().getParents(LuckPermsService.convertContexts(contexts)));
+        subjects.addAll(service.getDefaults().getParents(LuckPermsService.convertContexts(contexts)));
 
         return subjects.build();
     }
 
     @Override
-    public Optional<String> getOption(Set<Context> contexts, String s) {
+    protected Optional<String> getOption(ContextSet contexts, String s) {
         if (hasData()) {
             MetaData data = user.getUserData().getMetaData(service.calculateContexts(contexts));
             if (s.equalsIgnoreCase("prefix")) {
@@ -164,16 +152,16 @@ public class LuckPermsUserSubject implements Subject {
             }
         }
 
-        Optional<String> v = service.getUserSubjects().getDefaults().getOption(contexts, s);
+        Optional<String> v = service.getUserSubjects().getDefaults().getOption(LuckPermsService.convertContexts(contexts), s);
         if (v.isPresent()) {
             return v;
         }
 
-        return service.getDefaults().getOption(contexts, s);
+        return service.getDefaults().getOption(LuckPermsService.convertContexts(contexts), s);
     }
 
     @Override
-    public Set<Context> getActiveContexts() {
-        return LuckPermsService.convertContexts(service.getPlugin().getContextManager().giveApplicableContext(this, MutableContextSet.empty()));
+    protected ContextSet getActiveContextSet() {
+        return service.getPlugin().getContextManager().getApplicableContext(this);
     }
 }
