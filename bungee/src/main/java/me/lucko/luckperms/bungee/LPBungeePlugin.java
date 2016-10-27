@@ -50,6 +50,7 @@ import me.lucko.luckperms.common.storage.StorageFactory;
 import me.lucko.luckperms.common.tracks.TrackManager;
 import me.lucko.luckperms.common.users.UserManager;
 import me.lucko.luckperms.common.utils.BufferedRequest;
+import me.lucko.luckperms.common.utils.DebugHandler;
 import me.lucko.luckperms.common.utils.LocaleManager;
 import me.lucko.luckperms.common.utils.LogFactory;
 import net.md_5.bungee.api.config.ServerInfo;
@@ -80,10 +81,12 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     private ContextManager<ProxiedPlayer> contextManager;
     private CalculatorFactory calculatorFactory;
     private BufferedRequest<Void> updateTaskBuffer;
+    private DebugHandler debugHandler;
 
     @Override
     public void onEnable() {
         log = LogFactory.wrap(getLogger());
+        debugHandler = new DebugHandler();
 
         getLog().info("Loading configuration...");
         configuration = new BungeeConfig(this);

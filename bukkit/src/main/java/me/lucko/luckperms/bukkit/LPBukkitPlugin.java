@@ -53,6 +53,7 @@ import me.lucko.luckperms.common.storage.StorageFactory;
 import me.lucko.luckperms.common.tracks.TrackManager;
 import me.lucko.luckperms.common.users.UserManager;
 import me.lucko.luckperms.common.utils.BufferedRequest;
+import me.lucko.luckperms.common.utils.DebugHandler;
 import me.lucko.luckperms.common.utils.LocaleManager;
 import me.lucko.luckperms.common.utils.LogFactory;
 import org.bukkit.World;
@@ -91,10 +92,12 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private CalculatorFactory calculatorFactory;
     private BufferedRequest<Void> updateTaskBuffer;
     private boolean started = false;
+    private DebugHandler debugHandler;
 
     @Override
     public void onEnable() {
         log = LogFactory.wrap(getLogger());
+        debugHandler = new DebugHandler();
 
         getLog().info("Loading configuration...");
         configuration = new BukkitConfig(this);

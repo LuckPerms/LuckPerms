@@ -37,6 +37,7 @@ public enum Permission {
     SYNC(set("sync"), Type.NONE),
     INFO(set("info"), Type.NONE),
     DEBUG(set("debug"), Type.NONE),
+    VERBOSE(set("verbose"), Type.NONE),
     IMPORT(set("import"), Type.NONE),
 
     CREATE_GROUP(set("creategroup"), Type.NONE),

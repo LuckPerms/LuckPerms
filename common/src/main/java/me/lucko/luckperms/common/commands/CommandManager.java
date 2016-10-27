@@ -62,6 +62,7 @@ public class CommandManager {
             .add(new NetworkSyncCommand())
             .add(new InfoCommand())
             .add(new DebugCommand())
+            .add(new VerboseCommand())
             .add(new ImportCommand())
             .add(new ExportCommand())
             .add(new QueueCommand())

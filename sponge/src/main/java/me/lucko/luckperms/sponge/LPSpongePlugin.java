@@ -48,6 +48,7 @@ import me.lucko.luckperms.common.storage.StorageFactory;
 import me.lucko.luckperms.common.tracks.TrackManager;
 import me.lucko.luckperms.common.users.UserManager;
 import me.lucko.luckperms.common.utils.BufferedRequest;
+import me.lucko.luckperms.common.utils.DebugHandler;
 import me.lucko.luckperms.common.utils.LocaleManager;
 import me.lucko.luckperms.common.utils.LogFactory;
 import me.lucko.luckperms.sponge.contexts.WorldCalculator;
@@ -119,10 +120,12 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     private ContextManager<Subject> contextManager;
     private CalculatorFactory calculatorFactory;
     private BufferedRequest<Void> updateTaskBuffer;
+    private DebugHandler debugHandler;
 
     @Listener
     public void onEnable(GamePreInitializationEvent event) {
         log = LogFactory.wrap(logger);
+        debugHandler = new DebugHandler();
 
         getLog().info("Loading configuration...");
         configuration = new SpongeConfig(this);
