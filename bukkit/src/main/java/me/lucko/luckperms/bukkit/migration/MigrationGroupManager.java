@@ -30,6 +30,7 @@ import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.Node;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
+import me.lucko.luckperms.exceptions.ObjectLacksException;
 import org.anjocaido.groupmanager.GlobalGroups;
 import org.anjocaido.groupmanager.GroupManager;
 import org.anjocaido.groupmanager.data.Group;
@@ -268,6 +269,9 @@ public class MigrationGroupManager extends SubCommand<Object> {
                     user.setPermission("group." + primaryGroup, true);
                 } catch (ObjectAlreadyHasException ignored) {}
                 user.setPrimaryGroup(primaryGroup);
+                try {
+                    user.unsetPermission("group.default");
+                } catch (ObjectLacksException ignored) {}
             }
 
             plugin.getDatastore().saveUser(user);
