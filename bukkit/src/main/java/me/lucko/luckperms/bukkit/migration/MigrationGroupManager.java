@@ -260,14 +260,14 @@ public class MigrationGroupManager extends SubCommand<Object> {
                         ex.printStackTrace();
                     }
                 }
+            }
 
-                String primaryGroup = primaryGroups.get(e.getKey());
-                if (primaryGroup != null) {
-                    try {
-                        user.setPermission("group." + primaryGroup, true);
-                    } catch (ObjectAlreadyHasException ignored) {}
-                    user.setPrimaryGroup(primaryGroup);
-                }
+            String primaryGroup = primaryGroups.get(e.getKey());
+            if (primaryGroup != null) {
+                try {
+                    user.setPermission("group." + primaryGroup, true);
+                } catch (ObjectAlreadyHasException ignored) {}
+                user.setPrimaryGroup(primaryGroup);
             }
 
             plugin.getDatastore().saveUser(user);
