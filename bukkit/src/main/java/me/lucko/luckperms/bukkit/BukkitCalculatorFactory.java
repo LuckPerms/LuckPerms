@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableList;
 import lombok.AllArgsConstructor;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.bukkit.calculators.AttachmentProcessor;
+import me.lucko.luckperms.bukkit.calculators.ChildProcessor;
 import me.lucko.luckperms.bukkit.calculators.DefaultsProcessor;
 import me.lucko.luckperms.bukkit.inject.Injector;
 import me.lucko.luckperms.bukkit.inject.LPPermissible;
@@ -44,6 +45,7 @@ public class BukkitCalculatorFactory implements CalculatorFactory {
 
         ImmutableList.Builder<PermissionProcessor> processors = ImmutableList.builder();
         processors.add(new MapProcessor());
+        processors.add(new ChildProcessor(plugin.getChildPermissionProvider()));
         processors.add(new AttachmentProcessor(() -> {
             LPPermissible permissible = Injector.getPermissible(uuid);
             return permissible == null ? null : permissible.getAttachmentPermissions();

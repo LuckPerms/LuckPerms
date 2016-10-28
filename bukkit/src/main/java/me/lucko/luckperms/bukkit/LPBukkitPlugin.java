@@ -31,6 +31,7 @@ import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.bukkit.calculators.AutoOPListener;
+import me.lucko.luckperms.bukkit.calculators.ChildPermissionProvider;
 import me.lucko.luckperms.bukkit.calculators.DefaultsProvider;
 import me.lucko.luckperms.bukkit.vault.VaultHook;
 import me.lucko.luckperms.common.LuckPermsPlugin;
@@ -86,6 +87,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private Importer importer;
     private ConsecutiveExecutor consecutiveExecutor;
     private DefaultsProvider defaultsProvider;
+    private ChildPermissionProvider childPermissionProvider;
     private LocaleManager localeManager;
     private ContextManager<Player> contextManager;
     private WorldCalculator worldCalculator;
@@ -104,8 +106,13 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
         // setup the Bukkit defaults hook
         defaultsProvider = new DefaultsProvider();
+        childPermissionProvider = new ChildPermissionProvider();
+
         // give all plugins a chance to load their defaults, then refresh.
-        getServer().getScheduler().runTaskLater(this, () -> defaultsProvider.refresh(), 1L);
+        getServer().getScheduler().runTaskLater(this, () -> {
+            defaultsProvider.refresh();
+            childPermissionProvider.setup();
+        }, 1L);
 
         // register events
         PluginManager pm = getServer().getPluginManager();
