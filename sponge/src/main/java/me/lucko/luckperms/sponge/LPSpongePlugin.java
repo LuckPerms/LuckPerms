@@ -206,10 +206,10 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         if (mins > 0) {
             scheduler.createTaskBuilder().async().interval(mins, TimeUnit.MINUTES).execute(new UpdateTask(this))
                     .submit(LPSpongePlugin.this);
-        } else {
-            // Update online users
-            updateTaskBuffer.request();
         }
+
+        // run an update instantly.
+        updateTaskBuffer.requestDirectly();
 
         // register tasks
         scheduler.createTaskBuilder().intervalTicks(1L).execute(SpongeSenderFactory.get(this)).submit(this);

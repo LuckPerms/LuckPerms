@@ -211,10 +211,10 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         if (mins > 0) {
             long ticks = mins * 60 * 20;
             getServer().getScheduler().runTaskTimerAsynchronously(this, () -> updateTaskBuffer.request(), 20L, ticks);
-        } else {
-            // Update online users
-            updateTaskBuffer.request();
         }
+
+        // run an update instantly.
+        updateTaskBuffer.requestDirectly();
 
         // register tasks
         getServer().getScheduler().runTaskTimer(this, BukkitSenderFactory.get(this), 1L, 1L);

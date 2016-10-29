@@ -164,10 +164,10 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         int mins = getConfiguration().getSyncTime();
         if (mins > 0) {
             getProxy().getScheduler().schedule(this, new UpdateTask(this), mins, mins, TimeUnit.MINUTES);
-        } else {
-            // Update online users
-            updateTaskBuffer.request();
         }
+
+        // run an update instantly.
+        updateTaskBuffer.requestDirectly();
 
         // register tasks
         getProxy().getScheduler().schedule(this, BungeeSenderFactory.get(this), 50L, 50L, TimeUnit.MILLISECONDS);  // 20 times per second (once per "tick")
