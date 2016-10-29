@@ -106,7 +106,7 @@ class BukkitListener extends AbstractListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST) // Allow other plugins to see data when this event gets called.
+    @EventHandler(priority = EventPriority.MONITOR) // Allow other plugins to see data when this event gets called.
     public void onPlayerQuit(PlayerQuitEvent e) {
         final Player player = e.getPlayer();
         final UUID internal = plugin.getUuidCache().getUUID(player.getUniqueId());
