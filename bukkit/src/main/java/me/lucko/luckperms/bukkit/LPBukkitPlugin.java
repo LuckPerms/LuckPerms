@@ -236,7 +236,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         }
 
         // shutdown the temporary executor when the Bukkit one starts
-        doAsync(() -> {
+        getServer().getScheduler().runTaskAsynchronously(this, () -> {
             schedulerAvailable = true;
             executorService.shutdown();
         });
