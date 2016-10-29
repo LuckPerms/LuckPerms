@@ -68,6 +68,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @Getter
@@ -96,8 +98,14 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private boolean started = false;
     private DebugHandler debugHandler;
 
+    private ExecutorService executorService;
+    private boolean schedulerAvailable = false;
+
     @Override
     public void onEnable() {
+        // Used whilst the server is still starting
+        executorService = Executors.newCachedThreadPool();
+
         log = LogFactory.wrap(getLogger());
         debugHandler = new DebugHandler();
 
@@ -227,6 +235,12 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
             getServer().getOperators().forEach(o -> o.setOp(false));
         }
 
+        // shutdown the temporary executor when the Bukkit one starts
+        doAsync(() -> {
+            schedulerAvailable = true;
+            executorService.shutdown();
+        });
+
         started = true;
         getLog().info("Successfully loaded.");
     }
@@ -253,7 +267,11 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
     @Override
     public void doAsync(Runnable r) {
-        getServer().getScheduler().runTaskAsynchronously(this, r);
+        if (!schedulerAvailable) {
+            executorService.submit(r);
+        } else {
+            getServer().getScheduler().runTaskAsynchronously(this, r);
+        }
     }
 
     @Override
