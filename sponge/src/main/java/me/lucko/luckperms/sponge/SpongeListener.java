@@ -29,6 +29,7 @@ import me.lucko.luckperms.common.users.User;
 import me.lucko.luckperms.common.utils.AbstractListener;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.serializer.TextSerializers;
@@ -47,7 +48,7 @@ public class SpongeListener extends AbstractListener {
         this.plugin = plugin;
     }
 
-    @Listener
+    @Listener(order = Order.EARLY)
     public void onClientAuth(ClientConnectionEvent.Auth e) {
         if (!plugin.getDatastore().isAcceptingLogins()) {
             /* Datastore is disabled, prevent players from joining the server
@@ -60,7 +61,7 @@ public class SpongeListener extends AbstractListener {
     }
 
     @SuppressWarnings("deprecation")
-    @Listener
+    @Listener(order = Order.EARLY)
     public void onClientLogin(ClientConnectionEvent.Login e) {
         final GameProfile player = e.getProfile();
         final User user = plugin.getUserManager().get(plugin.getUuidCache().getUUID(player.getUniqueId()));
