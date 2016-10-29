@@ -138,7 +138,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         updateTaskBuffer = new BufferedRequest<Void>(1000L, this::doAsync) {
             @Override
             protected Void perform() {
-                doAsync(new UpdateTask(LPBukkitPlugin.this));
+                new UpdateTask(LPBukkitPlugin.this).run();
                 return null;
             }
         };

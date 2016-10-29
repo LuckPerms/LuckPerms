@@ -154,7 +154,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         updateTaskBuffer = new BufferedRequest<Void>(1000L, this::doAsync) {
             @Override
             protected Void perform() {
-                doAsync(new UpdateTask(LPSpongePlugin.this));
+                new UpdateTask(LPSpongePlugin.this).run();
                 return null;
             }
         };

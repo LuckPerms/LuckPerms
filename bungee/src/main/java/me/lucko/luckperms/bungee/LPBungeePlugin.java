@@ -114,7 +114,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         updateTaskBuffer = new BufferedRequest<Void>(1000L, this::doAsync) {
             @Override
             protected Void perform() {
-                doAsync(new UpdateTask(LPBungeePlugin.this));
+                new UpdateTask(LPBungeePlugin.this).run();
                 return null;
             }
         };
