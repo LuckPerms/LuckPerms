@@ -22,11 +22,13 @@
 
 package me.lucko.luckperms.sponge;
 
+import co.aikar.timings.Timing;
 import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.users.User;
 import me.lucko.luckperms.common.utils.AbstractListener;
+import me.lucko.luckperms.sponge.timings.LPTiming;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
@@ -63,36 +65,38 @@ public class SpongeListener extends AbstractListener {
     @SuppressWarnings("deprecation")
     @Listener(order = Order.EARLY)
     public void onClientLogin(ClientConnectionEvent.Login e) {
-        final GameProfile player = e.getProfile();
-        final User user = plugin.getUserManager().get(plugin.getUuidCache().getUUID(player.getUniqueId()));
+        try (Timing ignored = plugin.getTimings().time(LPTiming.ON_CLIENT_LOGIN)) {
+            final GameProfile player = e.getProfile();
+            final User user = plugin.getUserManager().get(plugin.getUuidCache().getUUID(player.getUniqueId()));
 
-        // Check if the user was loaded successfully.
-        if (user == null) {
-            e.setCancelled(true);
-            e.setMessage(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(Message.LOADING_ERROR.toString()));
-            return;
-        }
+            // Check if the user was loaded successfully.
+            if (user == null) {
+                e.setCancelled(true);
+                e.setMessage(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(Message.LOADING_ERROR.toString()));
+                return;
+            }
 
-        // Attempt to pre-process some permissions for the user to save time later. Might not work, but it's better than nothing.
-        Optional<Player> p = e.getCause().first(Player.class);
-        if (p.isPresent()) {
-            MutableContextSet context = MutableContextSet.fromSet(plugin.getContextManager().getApplicableContext(p.get()));
+            // Attempt to pre-process some permissions for the user to save time later. Might not work, but it's better than nothing.
+            Optional<Player> p = e.getCause().first(Player.class);
+            if (p.isPresent()) {
+                MutableContextSet context = MutableContextSet.fromSet(plugin.getContextManager().getApplicableContext(p.get()));
 
-            List<String> worlds = plugin.getGame().getServer().getWorlds().stream()
-                    .map(World::getName)
-                    .collect(Collectors.toList());
+                List<String> worlds = plugin.getGame().getServer().getWorlds().stream()
+                        .map(World::getName)
+                        .collect(Collectors.toList());
 
-            plugin.doAsync(() -> {
-                UserData data = user.getUserData();
-                data.preCalculate(plugin.getService().calculateContexts(context));
+                plugin.doAsync(() -> {
+                    UserData data = user.getUserData();
+                    data.preCalculate(plugin.getService().calculateContexts(context));
 
-                for (String world : worlds) {
-                    MutableContextSet modified = MutableContextSet.fromSet(context);
-                    modified.removeAll("world");
-                    modified.add("world", world);
-                    data.preCalculate(plugin.getService().calculateContexts(modified));
-                }
-            });
+                    for (String world : worlds) {
+                        MutableContextSet modified = MutableContextSet.fromSet(context);
+                        modified.removeAll("world");
+                        modified.add("world", world);
+                        data.preCalculate(plugin.getService().calculateContexts(modified));
+                    }
+                });
+            }
         }
     }
 
@@ -104,7 +108,9 @@ public class SpongeListener extends AbstractListener {
 
     @Listener(order = Order.LAST)
     public void onClientLeave(ClientConnectionEvent.Disconnect e) {
-        onLeave(e.getTargetEntity().getUniqueId());
-        plugin.getService().getUserSubjects().unload(plugin.getUuidCache().getUUID(e.getTargetEntity().getUniqueId()));
+        try (Timing ignored = plugin.getTimings().time(LPTiming.ON_CLIENT_LEAVE)) {
+            onLeave(e.getTargetEntity().getUniqueId());
+            plugin.getService().getUserSubjects().unload(plugin.getUuidCache().getUUID(e.getTargetEntity().getUniqueId()));
+        }
     }
 }

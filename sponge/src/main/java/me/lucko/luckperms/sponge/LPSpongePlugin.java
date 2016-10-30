@@ -53,6 +53,7 @@ import me.lucko.luckperms.common.utils.LocaleManager;
 import me.lucko.luckperms.common.utils.LogFactory;
 import me.lucko.luckperms.sponge.contexts.WorldCalculator;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
+import me.lucko.luckperms.sponge.timings.LPTimings;
 import me.lucko.luckperms.sponge.utils.VersionData;
 import org.slf4j.Logger;
 import org.spongepowered.api.Game;
@@ -102,6 +103,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     private Path configDir;
 
     private Scheduler scheduler = Sponge.getScheduler();
+    private LPTimings timings;
 
     private final Set<UUID> ignoringLogs = ConcurrentHashMap.newKeySet();
     private LPConfiguration configuration;
@@ -126,6 +128,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     public void onEnable(GamePreInitializationEvent event) {
         log = LogFactory.wrap(logger);
         debugHandler = new DebugHandler();
+        timings = new LPTimings(this);
 
         getLog().info("Loading configuration...");
         configuration = new SpongeConfig(this);

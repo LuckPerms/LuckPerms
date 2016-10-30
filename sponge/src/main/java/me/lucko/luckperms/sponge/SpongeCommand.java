@@ -22,12 +22,13 @@
 
 package me.lucko.luckperms.sponge;
 
+import co.aikar.timings.Timing;
 import com.google.common.base.Splitter;
 import me.lucko.luckperms.api.data.Callback;
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.Util;
 import me.lucko.luckperms.common.constants.Patterns;
+import me.lucko.luckperms.sponge.timings.LPTiming;
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -42,28 +43,37 @@ import java.util.Optional;
 
 @SuppressWarnings("NullableProblems")
 class SpongeCommand extends CommandManager implements CommandCallable {
-    SpongeCommand(LuckPermsPlugin plugin) {
+    private final LPSpongePlugin plugin;
+
+    SpongeCommand(LPSpongePlugin plugin) {
         super(plugin);
+        this.plugin = plugin;
     }
 
     @Override
     public CommandResult process(CommandSource source, String s) throws CommandException {
-        onCommand(
-                SpongeSenderFactory.get(getPlugin()).wrap(source),
-                "perms",
-                Util.stripQuotes(Splitter.on(Patterns.COMMAND_SEPARATOR).omitEmptyStrings().splitToList(s)),
-                Callback.empty()
-        );
-        return CommandResult.success();
+        try (Timing ignored = plugin.getTimings().time(LPTiming.ON_COMMAND)) {
+            onCommand(
+                    SpongeSenderFactory.get(getPlugin()).wrap(source),
+                    "perms",
+                    Util.stripQuotes(Splitter.on(Patterns.COMMAND_SEPARATOR).omitEmptyStrings().splitToList(s)),
+                    Callback.empty()
+            );
+            return CommandResult.success();
+        }
     }
 
     @Override
     public List<String> getSuggestions(CommandSource source, String s, @Nullable Location<World> location) throws CommandException {
-        return onTabComplete(SpongeSenderFactory.get(getPlugin()).wrap(source), Splitter.on(' ').splitToList(s));
+        try (Timing ignored = plugin.getTimings().time(LPTiming.COMMAND_TAB_COMPLETE)) {
+            return onTabComplete(SpongeSenderFactory.get(getPlugin()).wrap(source), Splitter.on(' ').splitToList(s));
+        }
     }
 
     public List<String> getSuggestions(CommandSource source, String s) throws CommandException {
-        return onTabComplete(SpongeSenderFactory.get(getPlugin()).wrap(source), Splitter.on(' ').splitToList(s));
+        try (Timing ignored = plugin.getTimings().time(LPTiming.COMMAND_TAB_COMPLETE)) {
+            return onTabComplete(SpongeSenderFactory.get(getPlugin()).wrap(source), Splitter.on(' ').splitToList(s));
+        }
     }
 
     @Override

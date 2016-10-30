@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.sponge.service;
 
+import co.aikar.timings.Timing;
 import com.google.common.collect.ImmutableList;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -30,6 +31,7 @@ import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.groups.Group;
+import me.lucko.luckperms.sponge.timings.LPTiming;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.permission.NodeTree;
 import org.spongepowered.api.service.permission.Subject;
@@ -81,72 +83,82 @@ public class LuckPermsGroupSubject extends LuckPermsSubject {
 
     @Override
     public Tristate getPermissionValue(ContextSet contexts, String permission) {
-        Map<String, Boolean> permissions = group.getAllNodesFiltered(service.calculateContexts(contexts)).stream()
-                .map(LocalizedNode::getNode)
-                .collect(Collectors.toMap(Node::getPermission, Node::getValue));
+        try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.GROUP_GET_PERMISSION_VALUE)) {
+            Map<String, Boolean> permissions = group.getAllNodesFiltered(service.calculateContexts(contexts)).stream()
+                    .map(LocalizedNode::getNode)
+                    .collect(Collectors.toMap(Node::getPermission, Node::getValue));
 
-        Tristate t = NodeTree.of(permissions).get(permission);
-        if (t != Tristate.UNDEFINED) {
+            Tristate t = NodeTree.of(permissions).get(permission);
+            if (t != Tristate.UNDEFINED) {
+                return t;
+            }
+
+            t = service.getGroupSubjects().getDefaults().getPermissionValue(LuckPermsService.convertContexts(contexts), permission);
+            if (t != Tristate.UNDEFINED) {
+                return t;
+            }
+
+            t = service.getDefaults().getPermissionValue(LuckPermsService.convertContexts(contexts), permission);
             return t;
         }
-
-        t = service.getGroupSubjects().getDefaults().getPermissionValue(LuckPermsService.convertContexts(contexts), permission);
-        if (t != Tristate.UNDEFINED) {
-            return t;
-        }
-
-        t = service.getDefaults().getPermissionValue(LuckPermsService.convertContexts(contexts), permission);
-        return t;
     }
 
     @Override
     public boolean isChildOf(ContextSet contexts, Subject parent) {
-        return parent instanceof LuckPermsGroupSubject && getPermissionValue(contexts, "group." + parent.getIdentifier()).asBoolean();
+        try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.GROUP_IS_CHILD_OF)) {
+            return parent instanceof LuckPermsGroupSubject && getPermissionValue(contexts, "group." + parent.getIdentifier()).asBoolean();
+        }
     }
 
     @Override
     public List<Subject> getParents(ContextSet contexts) {
-        List<Subject> subjects = group.getAllNodesFiltered(service.calculateContexts(contexts)).stream()
-                .map(LocalizedNode::getNode)
-                .filter(Node::isGroupNode)
-                .map(Node::getGroupName)
-                .map(s -> service.getGroupSubjects().get(s))
-                .collect(Collectors.toList());
+        try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.GROUP_GET_PARENTS)) {
+            List<Subject> subjects = group.getAllNodesFiltered(service.calculateContexts(contexts)).stream()
+                    .map(LocalizedNode::getNode)
+                    .filter(Node::isGroupNode)
+                    .map(Node::getGroupName)
+                    .map(s -> service.getGroupSubjects().get(s))
+                    .collect(Collectors.toList());
 
-        subjects.addAll(service.getGroupSubjects().getDefaults().getParents(LuckPermsService.convertContexts(contexts)));
-        subjects.addAll(service.getDefaults().getParents(LuckPermsService.convertContexts(contexts)));
+            subjects.addAll(service.getGroupSubjects().getDefaults().getParents(LuckPermsService.convertContexts(contexts)));
+            subjects.addAll(service.getDefaults().getParents(LuckPermsService.convertContexts(contexts)));
 
-        return ImmutableList.copyOf(subjects);
+            return ImmutableList.copyOf(subjects);
+        }
     }
 
     @Override
     public Optional<String> getOption(ContextSet contexts, String s) {
-        Optional<String> option;
-        if (s.equalsIgnoreCase("prefix")) {
-            option = getChatMeta(contexts, true);
+        try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.GROUP_GET_OPTION)) {
+            Optional<String> option;
+            if (s.equalsIgnoreCase("prefix")) {
+                option = getChatMeta(contexts, true);
 
-        } else if (s.equalsIgnoreCase("suffix")) {
-            option = getChatMeta(contexts, false);
+            } else if (s.equalsIgnoreCase("suffix")) {
+                option = getChatMeta(contexts, false);
 
-        } else {
-            option = getMeta(contexts, s);
+            } else {
+                option = getMeta(contexts, s);
+            }
+
+            if (option.isPresent()) {
+                return option;
+            }
+
+            option = service.getGroupSubjects().getDefaults().getOption(LuckPermsService.convertContexts(contexts), s);
+            if (option.isPresent()) {
+                return option;
+            }
+
+            return service.getDefaults().getOption(LuckPermsService.convertContexts(contexts), s);
         }
-
-        if (option.isPresent()) {
-            return option;
-        }
-
-        option = service.getGroupSubjects().getDefaults().getOption(LuckPermsService.convertContexts(contexts), s);
-        if (option.isPresent()) {
-            return option;
-        }
-
-        return service.getDefaults().getOption(LuckPermsService.convertContexts(contexts), s);
     }
 
     @Override
     public ContextSet getActiveContextSet() {
-        return service.getPlugin().getContextManager().getApplicableContext(this);
+        try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.GROUP_GET_ACTIVE_CONTEXTS)) {
+            return service.getPlugin().getContextManager().getApplicableContext(this);
+        }
     }
 
     private Optional<String> getChatMeta(ContextSet contexts, boolean prefix) {

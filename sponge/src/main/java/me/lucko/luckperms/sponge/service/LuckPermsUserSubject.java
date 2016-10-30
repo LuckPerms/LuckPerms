@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.sponge.service;
 
+import co.aikar.timings.Timing;
 import com.google.common.collect.ImmutableList;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -29,6 +30,7 @@ import lombok.Getter;
 import me.lucko.luckperms.api.caching.MetaData;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.users.User;
+import me.lucko.luckperms.sponge.timings.LPTiming;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
@@ -61,15 +63,6 @@ public class LuckPermsUserSubject extends LuckPermsSubject {
         this.transientSubjectData = new LuckPermsSubjectData(false, service, user);
     }
 
-    public void deprovision() {
-        /* For some reason, Sponge holds onto User instances in a cache, which in turn, prevents LuckPerms data from being GCed.
-           As well as unloading, we also remove all references to the User instances. */
-        user = null;
-        service = null;
-        subjectData = null;
-        transientSubjectData = null;
-    }
-
     private boolean hasData() {
         return user.getUserData() != null;
     }
@@ -98,70 +91,82 @@ public class LuckPermsUserSubject extends LuckPermsSubject {
 
     @Override
     public Tristate getPermissionValue(ContextSet contexts, String permission) {
-        return !hasData() ?
-                Tristate.UNDEFINED :
-                LuckPermsService.convertTristate(user.getUserData().getPermissionData(service.calculateContexts(contexts)).getPermissionValue(permission));
+        try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.USER_GET_PERMISSION_VALUE)) {
+            return !hasData() ?
+                    Tristate.UNDEFINED :
+                    LuckPermsService.convertTristate(
+                            user.getUserData().getPermissionData(service.calculateContexts(contexts)).getPermissionValue(permission)
+                    );
+        }
     }
 
     @Override
     public boolean isChildOf(ContextSet contexts, Subject parent) {
-        return parent instanceof LuckPermsGroupSubject && getPermissionValue(contexts, "group." + parent.getIdentifier()).asBoolean();
+        try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.USER_IS_CHILD_OF)) {
+            return parent instanceof LuckPermsGroupSubject && getPermissionValue(contexts, "group." + parent.getIdentifier()).asBoolean();
+        }
     }
 
     @Override
     public List<Subject> getParents(ContextSet contexts) {
-        ImmutableList.Builder<Subject> subjects = ImmutableList.builder();
+        try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.USER_GET_PARENTS)) {
+            ImmutableList.Builder<Subject> subjects = ImmutableList.builder();
 
-        if (hasData()) {
-            for (String perm : user.getUserData().getPermissionData(service.calculateContexts(contexts)).getImmutableBacking().keySet()) {
-                if (!perm.startsWith("group.")) {
-                    continue;
-                }
+            if (hasData()) {
+                for (String perm : user.getUserData().getPermissionData(service.calculateContexts(contexts)).getImmutableBacking().keySet()) {
+                    if (!perm.startsWith("group.")) {
+                        continue;
+                    }
 
-                String groupName = perm.substring("group.".length());
-                if (service.getPlugin().getGroupManager().isLoaded(groupName)) {
-                    subjects.add(service.getGroupSubjects().get(groupName));
+                    String groupName = perm.substring("group.".length());
+                    if (service.getPlugin().getGroupManager().isLoaded(groupName)) {
+                        subjects.add(service.getGroupSubjects().get(groupName));
+                    }
                 }
             }
+
+            subjects.addAll(service.getUserSubjects().getDefaults().getParents(LuckPermsService.convertContexts(contexts)));
+            subjects.addAll(service.getDefaults().getParents(LuckPermsService.convertContexts(contexts)));
+
+            return subjects.build();
         }
-
-        subjects.addAll(service.getUserSubjects().getDefaults().getParents(LuckPermsService.convertContexts(contexts)));
-        subjects.addAll(service.getDefaults().getParents(LuckPermsService.convertContexts(contexts)));
-
-        return subjects.build();
     }
 
     @Override
     public Optional<String> getOption(ContextSet contexts, String s) {
-        if (hasData()) {
-            MetaData data = user.getUserData().getMetaData(service.calculateContexts(contexts));
-            if (s.equalsIgnoreCase("prefix")) {
-                if (data.getPrefix() != null) {
-                    return Optional.of(data.getPrefix());
+        try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.USER_GET_OPTION)) {
+            if (hasData()) {
+                MetaData data = user.getUserData().getMetaData(service.calculateContexts(contexts));
+                if (s.equalsIgnoreCase("prefix")) {
+                    if (data.getPrefix() != null) {
+                        return Optional.of(data.getPrefix());
+                    }
+                }
+
+                if (s.equalsIgnoreCase("suffix")) {
+                    if (data.getSuffix() != null) {
+                        return Optional.of(data.getSuffix());
+                    }
+                }
+
+                if (data.getMeta().containsKey(s)) {
+                    return Optional.of(data.getMeta().get(s));
                 }
             }
 
-            if (s.equalsIgnoreCase("suffix")) {
-                if (data.getSuffix() != null) {
-                    return Optional.of(data.getSuffix());
-                }
+            Optional<String> v = service.getUserSubjects().getDefaults().getOption(LuckPermsService.convertContexts(contexts), s);
+            if (v.isPresent()) {
+                return v;
             }
 
-            if (data.getMeta().containsKey(s)) {
-                return Optional.of(data.getMeta().get(s));
-            }
+            return service.getDefaults().getOption(LuckPermsService.convertContexts(contexts), s);
         }
-
-        Optional<String> v = service.getUserSubjects().getDefaults().getOption(LuckPermsService.convertContexts(contexts), s);
-        if (v.isPresent()) {
-            return v;
-        }
-
-        return service.getDefaults().getOption(LuckPermsService.convertContexts(contexts), s);
     }
 
     @Override
     public ContextSet getActiveContextSet() {
-        return service.getPlugin().getContextManager().getApplicableContext(this);
+        try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.USER_GET_ACTIVE_CONTEXTS)) {
+            return service.getPlugin().getContextManager().getApplicableContext(this);
+        }
     }
 }

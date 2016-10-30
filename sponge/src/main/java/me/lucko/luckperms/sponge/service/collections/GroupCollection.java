@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.sponge.service.collections;
 
+import co.aikar.timings.Timing;
 import lombok.NonNull;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.groups.GroupManager;
@@ -29,6 +30,7 @@ import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.LuckPermsGroupSubject;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.simple.SimpleCollection;
+import me.lucko.luckperms.sponge.timings.LPTiming;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
@@ -58,11 +60,13 @@ public class GroupCollection implements SubjectCollection {
 
     @Override
     public Subject get(@NonNull String id) {
-        if (manager.isLoaded(id)) {
-            return LuckPermsGroupSubject.wrapGroup(manager.get(id), service);
-        }
+        try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.GROUP_COLLECTION_GET)) {
+            if (manager.isLoaded(id)) {
+                return LuckPermsGroupSubject.wrapGroup(manager.get(id), service);
+            }
 
-        return fallback.get(id);
+            return fallback.get(id);
+        }
     }
 
     @Override

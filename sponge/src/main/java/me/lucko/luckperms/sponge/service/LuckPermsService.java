@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.sponge.service;
 
+import co.aikar.timings.Timing;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -38,6 +39,7 @@ import me.lucko.luckperms.sponge.service.collections.UserCollection;
 import me.lucko.luckperms.sponge.service.persisted.PersistedCollection;
 import me.lucko.luckperms.sponge.service.persisted.SubjectStorage;
 import me.lucko.luckperms.sponge.service.simple.SimpleCollection;
+import me.lucko.luckperms.sponge.timings.LPTiming;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.context.ContextCalculator;
@@ -101,7 +103,9 @@ public class LuckPermsService implements PermissionService {
 
     @Override
     public SubjectCollection getSubjects(String s) {
-        return collections.getUnchecked(s.toLowerCase());
+        try (Timing ignored = plugin.getTimings().time(LPTiming.GET_SUBJECTS)) {
+            return collections.getUnchecked(s.toLowerCase());
+        }
     }
 
     @Override

@@ -22,11 +22,13 @@
 
 package me.lucko.luckperms.sponge.service.collections;
 
+import co.aikar.timings.Timing;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import lombok.NonNull;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.commands.Util;
@@ -36,6 +38,7 @@ import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.LuckPermsUserSubject;
 import me.lucko.luckperms.sponge.service.simple.SimpleCollection;
+import me.lucko.luckperms.sponge.timings.LPTiming;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
@@ -71,7 +74,7 @@ public class UserCollection implements SubjectCollection {
                 public LuckPermsUserSubject load(UUID uuid) throws Exception {
                     User user = manager.get(uuid);
                     if (user == null) {
-                        throw new IllegalStateException("user not loaded");
+                        throw new IllegalStateException("User not loaded");
                     }
 
                     return LuckPermsUserSubject.wrapUser(user, service);
@@ -100,13 +103,15 @@ public class UserCollection implements SubjectCollection {
 
     @Override
     public Subject get(@NonNull String id) {
-        Optional<Subject> s = getIfLoaded(id);
-        if (s.isPresent()) {
-            return s.get();
-        }
+        try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.USER_COLLECTION_GET)) {
+            Optional<Subject> s = getIfLoaded(id);
+            if (s.isPresent()) {
+                return s.get();
+            }
 
-        // Fallback to the other collection. This Subject instance will never be persisted.
-        return fallback.get(id);
+            // Fallback to the other collection. This Subject instance will never be persisted.
+            return fallback.get(id);
+        }
     }
 
     private Optional<Subject> getIfLoaded(String id) {
@@ -135,7 +140,7 @@ public class UserCollection implements SubjectCollection {
         UUID internal = service.getPlugin().getUuidCache().getUUID(uuid);
         try {
             return Optional.of(users.get(internal));
-        } catch (ExecutionException e) {
+        } catch (ExecutionException | UncheckedExecutionException e) {
             return Optional.empty();
         }
     }
