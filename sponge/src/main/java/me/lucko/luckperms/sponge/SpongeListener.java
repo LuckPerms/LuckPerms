@@ -96,13 +96,13 @@ public class SpongeListener extends AbstractListener {
         }
     }
 
-    @Listener
+    @Listener(order = Order.EARLY)
     public void onClientJoin(ClientConnectionEvent.Join e) {
         // Refresh permissions again
         plugin.doAsync(() -> refreshPlayer(e.getTargetEntity().getUniqueId()));
     }
 
-    @Listener
+    @Listener(order = Order.LAST)
     public void onClientLeave(ClientConnectionEvent.Disconnect e) {
         onLeave(e.getTargetEntity().getUniqueId());
         plugin.getService().getUserSubjects().unload(plugin.getUuidCache().getUUID(e.getTargetEntity().getUniqueId()));
