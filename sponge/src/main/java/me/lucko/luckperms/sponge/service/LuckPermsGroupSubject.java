@@ -80,7 +80,7 @@ public class LuckPermsGroupSubject extends LuckPermsSubject {
     }
 
     @Override
-    protected Tristate getPermissionValue(ContextSet contexts, String permission) {
+    public Tristate getPermissionValue(ContextSet contexts, String permission) {
         Map<String, Boolean> permissions = group.getAllNodesFiltered(service.calculateContexts(contexts)).stream()
                 .map(LocalizedNode::getNode)
                 .collect(Collectors.toMap(Node::getPermission, Node::getValue));

@@ -23,7 +23,9 @@
 package me.lucko.luckperms.sponge.service.collections;
 
 import lombok.NonNull;
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.groups.GroupManager;
+import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.LuckPermsGroupSubject;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.simple.SimpleCollection;
@@ -72,7 +74,7 @@ public class GroupCollection implements SubjectCollection {
     public Iterable<Subject> getAllSubjects() {
         return manager.getAll().values().stream()
                 .map(u -> LuckPermsGroupSubject.wrapGroup(u, service))
-                .collect(Collectors.toList());
+                .collect(ImmutableCollectors.toImmutableList());
     }
 
     @Override
@@ -82,10 +84,11 @@ public class GroupCollection implements SubjectCollection {
 
     @Override
     public Map<Subject, Boolean> getAllWithPermission(@NonNull Set<Context> contexts, @NonNull String node) {
+        ContextSet cs = LuckPermsService.convertContexts(contexts);
         return manager.getAll().values().stream()
                 .map(u -> LuckPermsGroupSubject.wrapGroup(u, service))
-                .filter(sub -> sub.getPermissionValue(contexts, node) != Tristate.UNDEFINED)
-                .collect(Collectors.toMap(sub -> sub, sub -> sub.getPermissionValue(contexts, node).asBoolean()));
+                .filter(sub -> sub.getPermissionValue(cs, node) != Tristate.UNDEFINED)
+                .collect(Collectors.toMap(sub -> sub, sub -> sub.getPermissionValue(cs, node).asBoolean()));
     }
 
     @Override

@@ -97,19 +97,19 @@ public class LuckPermsUserSubject extends LuckPermsSubject {
     }
 
     @Override
-    protected Tristate getPermissionValue(ContextSet contexts, String permission) {
+    public Tristate getPermissionValue(ContextSet contexts, String permission) {
         return !hasData() ?
                 Tristate.UNDEFINED :
                 LuckPermsService.convertTristate(user.getUserData().getPermissionData(service.calculateContexts(contexts)).getPermissionValue(permission));
     }
 
     @Override
-    protected boolean isChildOf(ContextSet contexts, Subject parent) {
+    public boolean isChildOf(ContextSet contexts, Subject parent) {
         return parent instanceof LuckPermsGroupSubject && getPermissionValue(contexts, "group." + parent.getIdentifier()).asBoolean();
     }
 
     @Override
-    protected List<Subject> getParents(ContextSet contexts) {
+    public List<Subject> getParents(ContextSet contexts) {
         ImmutableList.Builder<Subject> subjects = ImmutableList.builder();
 
         if (hasData()) {
@@ -132,7 +132,7 @@ public class LuckPermsUserSubject extends LuckPermsSubject {
     }
 
     @Override
-    protected Optional<String> getOption(ContextSet contexts, String s) {
+    public Optional<String> getOption(ContextSet contexts, String s) {
         if (hasData()) {
             MetaData data = user.getUserData().getMetaData(service.calculateContexts(contexts));
             if (s.equalsIgnoreCase("prefix")) {
@@ -161,7 +161,7 @@ public class LuckPermsUserSubject extends LuckPermsSubject {
     }
 
     @Override
-    protected ContextSet getActiveContextSet() {
+    public ContextSet getActiveContextSet() {
         return service.getPlugin().getContextManager().getApplicableContext(this);
     }
 }

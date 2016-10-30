@@ -34,11 +34,11 @@ import java.util.Set;
 
 public abstract class LuckPermsSubject implements Subject {
 
-    protected abstract Tristate getPermissionValue(ContextSet contexts, String permission);
-    protected abstract boolean isChildOf(ContextSet contexts, Subject parent);
-    protected abstract List<Subject> getParents(ContextSet contexts);
-    protected abstract Optional<String> getOption(ContextSet contexts, String s);
-    protected abstract ContextSet getActiveContextSet();
+    public abstract Tristate getPermissionValue(ContextSet contexts, String permission);
+    public abstract boolean isChildOf(ContextSet contexts, Subject parent);
+    public abstract List<Subject> getParents(ContextSet contexts);
+    public abstract Optional<String> getOption(ContextSet contexts, String s);
+    public abstract ContextSet getActiveContextSet();
 
     @Override
     @Deprecated

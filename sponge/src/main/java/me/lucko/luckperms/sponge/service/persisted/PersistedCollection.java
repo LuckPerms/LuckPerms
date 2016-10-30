@@ -25,9 +25,11 @@ package me.lucko.luckperms.sponge.service.persisted;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableMap;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
@@ -35,10 +37,8 @@ import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.util.Tristate;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * A simple persistable subject collection
@@ -78,7 +78,7 @@ public class PersistedCollection implements SubjectCollection {
 
     @Override
     public Iterable<Subject> getAllSubjects() {
-        return subjects.asMap().values().stream().map(s -> (Subject) s).collect(Collectors.toList());
+        return subjects.asMap().values().stream().map(s -> (Subject) s).collect(ImmutableCollectors.toImmutableList());
     }
 
     @Override
@@ -88,7 +88,7 @@ public class PersistedCollection implements SubjectCollection {
 
     @Override
     public Map<Subject, Boolean> getAllWithPermission(@NonNull Set<Context> contexts, @NonNull String node) {
-        Map<Subject, Boolean> m = new HashMap<>();
+        ImmutableMap.Builder<Subject, Boolean> m = ImmutableMap.builder();
         for (Subject subject : subjects.asMap().values()) {
             Tristate ts = subject.getPermissionValue(contexts, node);
             if (ts != Tristate.UNDEFINED) {
@@ -96,7 +96,7 @@ public class PersistedCollection implements SubjectCollection {
             }
 
         }
-        return m;
+        return m.build();
     }
 
     @Override

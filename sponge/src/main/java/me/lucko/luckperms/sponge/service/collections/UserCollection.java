@@ -22,11 +22,17 @@
 
 package me.lucko.luckperms.sponge.service.collections;
 
-import lombok.Getter;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import lombok.NonNull;
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.commands.Util;
 import me.lucko.luckperms.common.users.User;
 import me.lucko.luckperms.common.users.UserManager;
+import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.LuckPermsUserSubject;
 import me.lucko.luckperms.sponge.service.simple.SimpleCollection;
@@ -41,8 +47,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Manages low level Subject instances for the PermissionService.
@@ -53,8 +58,30 @@ public class UserCollection implements SubjectCollection {
     private final UserManager manager;
     private final SimpleCollection fallback;
 
-    @Getter
-    private final Map<UUID, LuckPermsUserSubject> users = new ConcurrentHashMap<>();
+    private final LoadingCache<UUID, LuckPermsUserSubject> users = CacheBuilder.newBuilder()
+            /*
+            .removalListener((RemovalListener<UUID, LuckPermsUserSubject>) r -> {
+                if (r.getValue() != null) {
+                    r.getValue().deprovision();
+                }
+            })
+            */
+            .build(new CacheLoader<UUID, LuckPermsUserSubject>() {
+                @Override
+                public LuckPermsUserSubject load(UUID uuid) throws Exception {
+                    User user = manager.get(uuid);
+                    if (user == null) {
+                        throw new IllegalStateException("user not loaded");
+                    }
+
+                    return LuckPermsUserSubject.wrapUser(user, service);
+                }
+
+                @Override
+                public ListenableFuture<LuckPermsUserSubject> reload(UUID uuid, LuckPermsUserSubject s) {
+                    return Futures.immediateFuture(s); // Never needs to be refreshed.
+                }
+            });
 
     public UserCollection(LuckPermsService service, UserManager manager) {
         this.service = service;
@@ -68,9 +95,7 @@ public class UserCollection implements SubjectCollection {
     }
 
     public void unload(UUID uuid) {
-        if (users.containsKey(uuid)) {
-            users.remove(uuid).deprovision();
-        }
+        users.invalidate(uuid);
     }
 
     @Override
@@ -89,7 +114,7 @@ public class UserCollection implements SubjectCollection {
 
         find:
         if (uuid == null) {
-            for (LuckPermsUserSubject subject : users.values()) {
+            for (LuckPermsUserSubject subject : users.asMap().values()) {
                 if (subject.getUser().getName().equals(id)) {
                     return Optional.of(subject);
                 }
@@ -103,22 +128,16 @@ public class UserCollection implements SubjectCollection {
             }
         }
 
-        if (uuid != null) {
-            UUID internal = service.getPlugin().getUuidCache().getUUID(uuid);
-            Subject s = users.computeIfAbsent(internal, u -> {
-                User user = manager.get(u);
-                if (user == null) return null;
-
-                return LuckPermsUserSubject.wrapUser(user, service);
-            });
-
-
-            if (s != null) {
-                return Optional.of(s);
-            }
+        if (uuid == null) {
+            return Optional.empty();
         }
 
-        return Optional.empty();
+        UUID internal = service.getPlugin().getUuidCache().getUUID(uuid);
+        try {
+            return Optional.of(users.get(internal));
+        } catch (ExecutionException e) {
+            return Optional.empty();
+        }
     }
 
     @Override
@@ -128,7 +147,7 @@ public class UserCollection implements SubjectCollection {
 
     @Override
     public Iterable<Subject> getAllSubjects() {
-        return users.values().stream().collect(Collectors.toList());
+        return users.asMap().values().stream().collect(ImmutableCollectors.toImmutableList());
     }
 
     @Override
@@ -138,9 +157,10 @@ public class UserCollection implements SubjectCollection {
 
     @Override
     public Map<Subject, Boolean> getAllWithPermission(@NonNull Set<Context> contexts, @NonNull String node) {
-        return users.values().stream()
-                .filter(sub -> sub.getPermissionValue(contexts, node) != Tristate.UNDEFINED)
-                .collect(Collectors.toMap(sub -> sub, sub -> sub.getPermissionValue(contexts, node).asBoolean()));
+        ContextSet cs = LuckPermsService.convertContexts(contexts);
+        return users.asMap().values().stream()
+                .filter(sub -> sub.getPermissionValue(cs, node) != Tristate.UNDEFINED)
+                .collect(ImmutableCollectors.toImmutableMap(sub -> sub, sub -> sub.getPermissionValue(cs, node).asBoolean()));
     }
 
     @Override
