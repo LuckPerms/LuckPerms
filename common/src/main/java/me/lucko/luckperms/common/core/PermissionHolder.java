@@ -82,6 +82,28 @@ public abstract class PermissionHolder {
 
     public abstract String getFriendlyName();
 
+    public Set<Node> getNodes() {
+        Optional<ImmutableSet<Node>> opt = enduringCache.getIfPresent();
+        if (opt.isPresent()) {
+            return opt.get();
+        }
+
+        synchronized (nodes) {
+            return enduringCache.get(() -> ImmutableSet.copyOf(nodes));
+        }
+    }
+
+    public Set<Node> getTransientNodes() {
+        Optional<ImmutableSet<Node>> opt = transientCache.getIfPresent();
+        if (opt.isPresent()) {
+            return opt.get();
+        }
+
+        synchronized (transientNodes) {
+            return transientCache.get(() -> ImmutableSet.copyOf(transientNodes));
+        }
+    }
+
     private void invalidateCache(boolean enduring) {
         if (enduring) {
             enduringCache.invalidate();
@@ -92,219 +114,51 @@ public abstract class PermissionHolder {
         mergedCache.invalidate();
     }
 
-    public Set<Node> getNodes() {
-        synchronized (nodes) {
-            return enduringCache.get(() -> ImmutableSet.copyOf(nodes));
-        }
-    }
-
-    public Set<Node> getTransientNodes() {
-        synchronized (transientNodes) {
-            return transientCache.get(() -> ImmutableSet.copyOf(transientNodes));
-        }
-    }
-
-    public void setNodes(Set<Node> nodes) {
-        synchronized (this.nodes) {
-            if (!this.nodes.equals(nodes)) {
-                invalidateCache(true);
-            }
-
-            this.nodes.clear();
-            this.nodes.addAll(nodes);
-        }
-    }
-
-    public void setTransientNodes(Set<Node> nodes) {
-        synchronized (this.transientNodes) {
-            if (!this.transientNodes.equals(nodes)) {
-                invalidateCache(false);
-            }
-
-            this.transientNodes.clear();
-            this.transientNodes.addAll(nodes);
-        }
-    }
-
-    @Deprecated
-    public void setNodes(Map<String, Boolean> nodes) {
-        synchronized (this.nodes) {
-            if (!this.nodes.equals(nodes)) {
-                invalidateCache(true);
-            }
-
-            this.nodes.clear();
-            this.nodes.addAll(nodes.entrySet().stream()
-                    .map(e -> me.lucko.luckperms.common.core.Node.fromSerialisedNode(e.getKey(), e.getValue()))
-                    .collect(Collectors.toList()));
-        }
-    }
-
-    public void addNodeUnchecked(Node node) {
-        synchronized (nodes) {
-            nodes.add(node);
-            invalidateCache(true);
-        }
-    }
-
-    /**
-     * Clear all of the holders permission nodes
-     */
-    public void clearNodes() {
-        synchronized (nodes) {
-            nodes.clear();
-            invalidateCache(true);
-        }
-    }
-
-    public void clearNodes(String server) {
-        if (server == null) {
-            server = "global";
-        }
-        String finalServer = server;
-
-        synchronized (nodes) {
-            nodes.removeIf(n -> n.getServer().orElse("global").equalsIgnoreCase(finalServer));
-            invalidateCache(true);
-        }
-    }
-
-    public void clearNodes(String server, String world) {
-        if (server == null) {
-            server = "global";
-        }
-        String finalServer = server;
-
-        if (world == null) {
-            world = "null";
-        }
-        String finalWorld = world;
-
-        synchronized (nodes) {
-            nodes.removeIf(n -> n.getServer().orElse("global").equalsIgnoreCase(finalServer) && n.getWorld().orElse("null").equalsIgnoreCase(finalWorld));
-            invalidateCache(true);
-        }
-    }
-
-    public void clearMeta() {
-        synchronized (nodes) {
-            nodes.removeIf(n -> n.isMeta() || n.isPrefix() || n.isSuffix());
-            invalidateCache(true);
-        }
-    }
-
-    public void clearMeta(String server) {
-        if (server == null) {
-            server = "global";
-        }
-        String finalServer = server;
-
-        synchronized (nodes) {
-            nodes.removeIf(n -> (n.isMeta() || n.isPrefix() || n.isSuffix()) &&
-                    n.getServer().orElse("global").equalsIgnoreCase(finalServer)
-            );
-            invalidateCache(true);
-        }
-    }
-
-    public void clearMeta(String server, String world) {
-        if (server == null) {
-            server = "global";
-        }
-        String finalServer = server;
-
-        if (world == null) {
-            world = "null";
-        }
-        String finalWorld = world;
-
-        synchronized (nodes) {
-            nodes.removeIf(n -> (n.isMeta() || n.isPrefix() || n.isSuffix()) &&
-                    (n.getServer().orElse("global").equalsIgnoreCase(finalServer) &&
-                            n.getWorld().orElse("null").equalsIgnoreCase(finalWorld))
-            );
-            invalidateCache(true);
-        }
-    }
-
-    public void clearMetaKeys(String key, boolean temp) {
-        synchronized (nodes) {
-            nodes.removeIf(n -> n.isMeta() && (n.isTemporary() == temp) && n.getMeta().getKey().equalsIgnoreCase(key));
-            invalidateCache(true);
-        }
-    }
-
-    public void clearMetaKeys(String key, String server, boolean temp) {
-        if (server == null) {
-            server = "global";
-        }
-        String finalServer = server;
-
-        synchronized (nodes) {
-            nodes.removeIf(n -> n.isMeta() && (n.isTemporary() == temp) && n.getMeta().getKey().equalsIgnoreCase(key) &&
-                    n.getServer().orElse("global").equalsIgnoreCase(finalServer)
-            );
-            invalidateCache(true);
-        }
-    }
-
-    public void clearMetaKeys(String key, String server, String world, boolean temp) {
-        if (server == null) {
-            server = "global";
-        }
-        String finalServer = server;
-
-        if (world == null) {
-            world = "null";
-        }
-        String finalWorld = world;
-
-        synchronized (nodes) {
-            nodes.removeIf(n -> n.isMeta() && (n.isTemporary() == temp) && n.getMeta().getKey().equalsIgnoreCase(key) &&
-                    n.getServer().orElse("global").equalsIgnoreCase(finalServer) &&
-                    n.getWorld().orElse("null").equalsIgnoreCase(finalWorld)
-            );
-            invalidateCache(true);
-        }
-    }
-
-    public void clearTransientNodes() {
-        synchronized (transientNodes) {
-            transientNodes.clear();
-            invalidateCache(false);
-        }
-    }
-
     /**
      * Combines and returns this holders nodes in a priority order.
      * @return the holders transient and permanent nodes
      */
     public SortedSet<LocalizedNode> getPermissions(boolean mergeTemp) {
         Supplier<ImmutableSortedSet<LocalizedNode>> supplier = () -> {
+            // Create sorted set
             TreeSet<LocalizedNode> combined = new TreeSet<>(PriorityComparator.reverse());
 
-            getNodes().stream()
-                    .map(n -> me.lucko.luckperms.common.utils.LocalizedNode.of(n, getObjectName()))
-                    .forEach(combined::add);
+            // Flatten enduring and transient nodes
+            combined.addAll(getNodes().stream()
+                    .map(n -> makeLocal(n, getObjectName()))
+                    .collect(Collectors.toList())
+            );
+            combined.addAll(getTransientNodes().stream()
+                    .map(n -> makeLocal(n, getObjectName()))
+                    .collect(Collectors.toList())
+            );
 
-            getTransientNodes().stream()
-                    .map(n -> me.lucko.luckperms.common.utils.LocalizedNode.of(n, getObjectName()))
-                    .forEach(combined::add);
+            // Create an iterator over all permissions being considered
+            Iterator<LocalizedNode> it = combined.iterator();
 
-            TreeSet<LocalizedNode> permissions = new TreeSet<>(PriorityComparator.reverse());
+            // Temporary set to store high priority values
+            Set<LocalizedNode> higherPriority = new HashSet<>();
 
-            combined:
-            for (LocalizedNode node : combined) {
-                for (LocalizedNode other : permissions) {
-                    if (mergeTemp ? node.getNode().equalsIgnoringValueOrTemp(other.getNode()) : node.getNode().almostEquals(other.getNode())) {
-                        continue combined;
+            // Iterate through each node being considered
+            iterate:
+            while (it.hasNext()) {
+                LocalizedNode entry = it.next();
+
+                // Check through all of the higher priority nodes
+                for (LocalizedNode h : higherPriority) {
+
+                    // Check to see if the entry being considered was already processed at a higher priority
+                    if (mergeTemp ? entry.getNode().equalsIgnoringValueOrTemp(h.getNode()) : entry.getNode().almostEquals(h.getNode())) {
+                        it.remove();
+                        continue iterate;
                     }
                 }
 
-                permissions.add(node);
+                // This entry will be kept.
+                higherPriority.add(entry);
             }
 
-            return ImmutableSortedSet.copyOfSorted(permissions);
+            return ImmutableSortedSet.copyOfSorted(combined);
         };
 
         return mergeTemp ? mergedCache.get(supplier) : cache.get(supplier);
@@ -316,16 +170,20 @@ public abstract class PermissionHolder {
      */
     public boolean auditTemporaryPermissions() {
         boolean work = false;
-        final PermissionHolder instance = this;
 
         synchronized (nodes) {
-            boolean w = nodes.removeIf(node -> {
-                if (node.hasExpired()) {
-                    plugin.getApiProvider().fireEventAsync(new PermissionNodeExpireEvent(new PermissionHolderLink(instance), node));
-                    return true;
+            boolean w = false;
+
+            Iterator<Node> it = nodes.iterator();
+            while (it.hasNext()) {
+                Node entry = it.next();
+                if (entry.hasExpired()) {
+                    plugin.getApiProvider().fireEventAsync(new PermissionNodeExpireEvent(new PermissionHolderLink(this), entry));
+                    w = true;
+                    it.remove();
                 }
-                return false;
-            });
+            }
+
             if (w) {
                 invalidateCache(true);
                 work = true;
@@ -333,13 +191,18 @@ public abstract class PermissionHolder {
         }
 
         synchronized (transientNodes) {
-            boolean w = transientNodes.removeIf(node -> {
-                if (node.hasExpired()) {
-                    plugin.getApiProvider().fireEventAsync(new PermissionNodeExpireEvent(new PermissionHolderLink(instance), node));
-                    return true;
+            boolean w = false;
+
+            Iterator<Node> it = transientNodes.iterator();
+            while (it.hasNext()) {
+                Node entry = it.next();
+                if (entry.hasExpired()) {
+                    plugin.getApiProvider().fireEventAsync(new PermissionNodeExpireEvent(new PermissionHolderLink(this), entry));
+                    w = true;
+                    it.remove();
                 }
-                return false;
-            });
+            }
+
             if (w) {
                 invalidateCache(false);
                 work = true;
@@ -366,6 +229,7 @@ public abstract class PermissionHolder {
 
         Set<Node> parents = getPermissions(true).stream()
                 .map(LocalizedNode::getNode)
+                .filter(Node::getValue)
                 .filter(Node::isGroupNode)
                 .collect(Collectors.toSet());
 
@@ -387,7 +251,7 @@ public abstract class PermissionHolder {
                 continue;
             }
 
-            if (excludedGroups.contains(group.getObjectName())) {
+            if (excludedGroups.contains(group.getObjectName().toLowerCase())) {
                 continue;
             }
 
@@ -463,14 +327,60 @@ public abstract class PermissionHolder {
             perms.put(lowerCase ? node.getPermission().toLowerCase() : node.getPermission(), node.getValue());
 
             if (plugin.getConfiguration().isApplyingShorthand()) {
-                node.resolveShorthand().stream()
-                        .map(s -> lowerCase ? s.toLowerCase() : s)
-                        .filter(s -> !perms.containsKey(s))
-                        .forEach(s -> perms.put(s, node.getValue()));
+                List<String> sh = node.resolveShorthand();
+                if (!sh.isEmpty()) {
+                    sh.stream().map(s -> lowerCase ? s.toLowerCase() : s)
+                            .filter(s -> !perms.containsKey(s))
+                            .forEach(s -> perms.put(s, node.getValue()));
+                }
             }
         }
 
         return ImmutableMap.copyOf(perms);
+    }
+
+    public void setNodes(Set<Node> set) {
+        synchronized (nodes) {
+            if (nodes.equals(set)) {
+                return;
+            }
+
+            nodes.clear();
+            nodes.addAll(set);
+            invalidateCache(true);
+        }
+    }
+
+    public void setTransientNodes(Set<Node> set) {
+        synchronized (transientNodes) {
+            if (transientNodes.equals(set)) {
+                return;
+            }
+
+            transientNodes.clear();
+            transientNodes.addAll(set);
+            invalidateCache(false);
+        }
+    }
+
+    @Deprecated
+    public void setNodes(Map<String, Boolean> nodes) {
+        synchronized (this.nodes) {
+            this.nodes.clear();
+            this.nodes.addAll(nodes.entrySet().stream()
+                    .map(e -> makeNode(e.getKey(), e.getValue()))
+                    .collect(Collectors.toList())
+            );
+            invalidateCache(true);
+        }
+    }
+
+    public void addNodeUnchecked(Node node) {
+        synchronized (nodes) {
+            if (nodes.add(node)) {
+                invalidateCache(true);
+            }
+        }
     }
 
     /**
@@ -786,6 +696,128 @@ public abstract class PermissionHolder {
     }
 
     /**
+     * Clear all of the holders permission nodes
+     */
+    public void clearNodes() {
+        synchronized (nodes) {
+            nodes.clear();
+            invalidateCache(true);
+        }
+    }
+
+    public void clearNodes(String server) {
+        String finalServer = Optional.ofNullable(server).orElse("global");
+
+        synchronized (nodes) {
+            boolean b = nodes.removeIf(n -> n.getServer().orElse("global").equalsIgnoreCase(finalServer));
+            if (b) {
+                invalidateCache(true);
+            }
+        }
+    }
+
+    public void clearNodes(String server, String world) {
+        String finalServer = Optional.ofNullable(server).orElse("global");
+        String finalWorld = Optional.ofNullable(world).orElse("null");
+
+        synchronized (nodes) {
+            boolean b = nodes.removeIf(n ->
+                    n.getServer().orElse("global").equalsIgnoreCase(finalServer) &&
+                            n.getWorld().orElse("null").equalsIgnoreCase(finalWorld));
+            if (b) {
+                invalidateCache(true);
+            }
+        }
+    }
+
+    public void clearMeta() {
+        synchronized (nodes) {
+            boolean b = nodes.removeIf(n -> n.isMeta() || n.isPrefix() || n.isSuffix());
+            if (b) {
+                invalidateCache(true);
+            }
+        }
+    }
+
+    public void clearMeta(String server) {
+        String finalServer = Optional.ofNullable(server).orElse("global");
+
+        synchronized (nodes) {
+            boolean b = nodes.removeIf(n ->
+                    (n.isMeta() || n.isPrefix() || n.isSuffix()) &&
+                            n.getServer().orElse("global").equalsIgnoreCase(finalServer)
+            );
+            if (b) {
+                invalidateCache(true);
+            }
+        }
+    }
+
+    public void clearMeta(String server, String world) {
+        String finalServer = Optional.ofNullable(server).orElse("global");
+        String finalWorld = Optional.ofNullable(world).orElse("null");
+
+        synchronized (nodes) {
+            boolean b = nodes.removeIf(n ->
+                    (n.isMeta() || n.isPrefix() || n.isSuffix()) && (
+                            n.getServer().orElse("global").equalsIgnoreCase(finalServer) &&
+                                    n.getWorld().orElse("null").equalsIgnoreCase(finalWorld)
+                    )
+            );
+            if (b) {
+                invalidateCache(true);
+            }
+        }
+    }
+
+    public void clearMetaKeys(String key, boolean temp) {
+        synchronized (nodes) {
+            boolean b = nodes.removeIf(n -> n.isMeta() && (n.isTemporary() == temp) && n.getMeta().getKey().equalsIgnoreCase(key));
+            if (b) {
+                invalidateCache(true);
+            }
+        }
+    }
+
+    public void clearMetaKeys(String key, String server, boolean temp) {
+        String finalServer = Optional.ofNullable(server).orElse("global");
+
+        synchronized (nodes) {
+            boolean b = nodes.removeIf(n ->
+                    n.isMeta() && (n.isTemporary() == temp) &&
+                            n.getMeta().getKey().equalsIgnoreCase(key) &&
+                            n.getServer().orElse("global").equalsIgnoreCase(finalServer)
+            );
+            if (b) {
+                invalidateCache(true);
+            }
+        }
+    }
+
+    public void clearMetaKeys(String key, String server, String world, boolean temp) {
+        String finalServer = Optional.ofNullable(server).orElse("global");
+        String finalWorld = Optional.ofNullable(world).orElse("null");
+
+        synchronized (nodes) {
+            boolean b = nodes.removeIf(n ->
+                    n.isMeta() && (n.isTemporary() == temp) && n.getMeta().getKey().equalsIgnoreCase(key) &&
+                            n.getServer().orElse("global").equalsIgnoreCase(finalServer) &&
+                            n.getWorld().orElse("null").equalsIgnoreCase(finalWorld)
+            );
+            if (b) {
+                invalidateCache(true);
+            }
+        }
+    }
+
+    public void clearTransientNodes() {
+        synchronized (transientNodes) {
+            transientNodes.clear();
+            invalidateCache(false);
+        }
+    }
+
+    /**
      * @return The temporary nodes held by the holder
      */
     public Set<Node> getTemporaryNodes() {
@@ -848,5 +880,13 @@ public abstract class PermissionHolder {
 
     private static Node.Builder buildNode(String permission) {
         return new me.lucko.luckperms.common.core.Node.Builder(permission);
+    }
+
+    private static me.lucko.luckperms.common.utils.LocalizedNode makeLocal(Node node, String location) {
+        return me.lucko.luckperms.common.utils.LocalizedNode.of(node, location);
+    }
+
+    private static Node makeNode(String s, Boolean b) {
+        return me.lucko.luckperms.common.core.Node.fromSerialisedNode(s, b);
     }
 }

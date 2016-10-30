@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.common.utils;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 public class Cache<T> {
@@ -33,6 +34,12 @@ public class Cache<T> {
                 t = supplier.get();
             }
             return t;
+        }
+    }
+
+    public Optional<T> getIfPresent() {
+        synchronized (this) {
+            return Optional.ofNullable(t);
         }
     }
 
