@@ -327,6 +327,10 @@ public class VaultPermissionHook extends Permission {
         if (pgoCheckInherited) {
             PermissionData data = user.getUserData().getPermissionData(createContext(server, world));
             for (Map.Entry<String, Boolean> e : data.getImmutableBacking().entrySet()) {
+                if (!e.getValue()) {
+                    continue;
+                }
+
                 if (!e.getKey().toLowerCase().startsWith("vault.primarygroup.")) {
                     continue;
                 }
@@ -348,6 +352,10 @@ public class VaultPermissionHook extends Permission {
             }
         } else {
             for (LocalizedNode node : user.getPermissions(true)) {
+                if (!node.getValue()) {
+                    continue;
+                }
+
                 if (!node.getPermission().toLowerCase().startsWith("vault.primarygroup.")) {
                     continue;
                 }

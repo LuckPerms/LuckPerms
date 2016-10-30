@@ -172,7 +172,7 @@ public enum Message {
     UNSET_TEMP_PERMISSION_SERVER_WORLD_SUCCESS("&aUnset temporary permission &b{0}&a for &b{1}&a on server &b{2}&a, world &b{3}&a.", true),
 
     SET_INHERIT_SUCCESS("&b{0}&a now inherits permissions from &b{1}&a.", true),
-    SET_INHERIT_SERVER_SUCCESS("&b{0}&a now inherits permissions from &b{2}&a on server &b{3}&a.", true),
+    SET_INHERIT_SERVER_SUCCESS("&b{0}&a now inherits permissions from &b{1}&a on server &b{2}&a.", true),
     SET_INHERIT_SERVER_WORLD_SUCCESS("&b{0}&a now inherits permissions from &b{1}&a on server &b{2}&a, world &b{3}&a.", true),
     SET_TEMP_INHERIT_SUCCESS("&b{0}&a now inherits permissions from &b{1}&a for a duration of &b{2}&a.", true),
     SET_TEMP_INHERIT_SERVER_SUCCESS("&b{0}&a now inherits permissions from &b{1}&a on server &b{2}&a for a duration of &b{3}&a.", true),
