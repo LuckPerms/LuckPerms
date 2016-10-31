@@ -206,6 +206,7 @@ public class CommandManager {
                     args.remove(2);
                     args.add(2, "permission");
                     break;
+                case "chat":
                 case "m":
                     args.remove(2);
                     args.add(2, "meta");
@@ -214,7 +215,10 @@ public class CommandManager {
                 case "inherit":
                 case "inheritances":
                 case "group":
+                case "groups":
                 case "rank":
+                case "ranks":
+                case "parents":
                     args.remove(2);
                     args.add(2, "parent");
                     break;

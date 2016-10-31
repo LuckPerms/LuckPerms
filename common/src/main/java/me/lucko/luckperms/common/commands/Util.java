@@ -156,10 +156,10 @@ public class Util {
             sb.append("&3> ").append(node.getValue() ? "&a" : "&c");
             sb.append(node.getPermission());
             if (node.isServerSpecific()) {
-                sb.append(" &7(&f").append(node.getServer().get()).append("&7)");
+                sb.append(" &8(&7server=&f").append(node.getServer().get()).append("&8)");
             }
             if (node.isWorldSpecific()) {
-                sb.append(" &7(&f").append(node.getWorld().get()).append("&7)");
+                sb.append(" &8(&7world&f").append(node.getWorld().get()).append("&8)");
             }
             sb.append("\n");
         }
@@ -182,13 +182,13 @@ public class Util {
             sb.append("&3> ").append(node.getValue() ? "&a" : "&c");
             sb.append(node.getPermission());
             if (node.isServerSpecific()) {
-                sb.append(" &7(&f").append(node.getServer().get()).append("&7)");
+                sb.append(" &8(&7server=&f").append(node.getServer().get()).append("&8)");
             }
             if (node.isWorldSpecific()) {
-                sb.append(" &7(&f").append(node.getWorld().get()).append("&7)");
+                sb.append(" &8(&7world=&f").append(node.getWorld().get()).append("&8)");
             }
 
-            sb.append("&6 - expires in ").append(DateUtil.formatDateDiff(node.getExpiryUnixTime())).append("\n");
+            sb.append("\n&2-    expires in ").append(DateUtil.formatDateDiff(node.getExpiryUnixTime())).append("\n");
         }
 
         if (sb.length() == 0) {
@@ -211,10 +211,10 @@ public class Util {
 
             sb.append("&3> &f").append(node.getGroupName());
             if (node.isServerSpecific()) {
-                sb.append(" &7(&f").append(node.getServer().get()).append("&7)");
+                sb.append(" &8(&7server=&f").append(node.getServer().get()).append("&8)");
             }
             if (node.isWorldSpecific()) {
-                sb.append(" &7(&f").append(node.getWorld().get()).append("&7)");
+                sb.append(" &8(&7world=&f").append(node.getWorld().get()).append("&8)");
             }
             sb.append("\n");
         }
@@ -240,13 +240,13 @@ public class Util {
 
             sb.append("&3> &f").append(node.getGroupName());
             if (node.isServerSpecific()) {
-                sb.append(" &7(&f").append(node.getServer().get()).append("&7)");
+                sb.append(" &8(&7server=&f").append(node.getServer().get()).append("&8)");
             }
             if (node.isWorldSpecific()) {
-                sb.append(" &7(&f").append(node.getWorld().get()).append("&7)");
+                sb.append(" &8(&7world=&f").append(node.getWorld().get()).append("&8)");
             }
 
-            sb.append("&6 - expires in ").append(DateUtil.formatDateDiff(node.getExpiryUnixTime())).append("\n");
+            sb.append("\n&2-    expires in ").append(DateUtil.formatDateDiff(node.getExpiryUnixTime())).append("\n");
         }
 
         if (sb.length() == 0) {

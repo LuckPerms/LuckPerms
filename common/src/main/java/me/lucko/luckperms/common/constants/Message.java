@@ -119,18 +119,18 @@ public enum Message {
     UPDATE_TASK_PUSH_FAILURE("&cError whilst pushing changes to other servers. Is Redis enabled?", true),
     INFO(
             "{PREFIX}&2Running &bLuckPerms v{0}&2 by &bLuck&2." + "\n" +
-            "{PREFIX}&f-> &3Platform: &f{1}" + "\n" +
-            "{PREFIX}&f-> &3Storage Method: &f{2}" + "\n" +
-            "{PREFIX}&f-> &3Server Name: &f{3}" + "\n" +
-            "{PREFIX}&f-> &3Sync Interval: &f{4} minutes" + "\n" +
-            "{PREFIX}&f-> &3Include Global: &f{5}" + "\n" +
-            "{PREFIX}&f-> &3Include Global World: &f{6}" + "\n" +
-            "{PREFIX}&f-> &3Apply Global Groups: &f{7}" + "\n" +
-            "{PREFIX}&f-> &3Apply Global World Groups: &f{8}" + "\n" +
-            "{PREFIX}&f-> &3Online Mode: &f{9}" + "\n" +
-            "{PREFIX}&f-> &3Apply Wildcards: &f{10}" + "\n" +
-            "{PREFIX}&f-> &3Apply Regex: &f{11}" + "\n" +
-            "{PREFIX}&f-> &3Apply Shorthand: &f{12}",
+            "{PREFIX}&f-  &3Platform: &f{1}" + "\n" +
+            "{PREFIX}&f-  &3Storage Method: &f{2}" + "\n" +
+            "{PREFIX}&f-  &3Server Name: &f{3}" + "\n" +
+            "{PREFIX}&f-  &3Sync Interval: &f{4} minutes" + "\n" +
+            "{PREFIX}&f-  &3Include Global: &f{5}" + "\n" +
+            "{PREFIX}&f-  &3Include Global World: &f{6}" + "\n" +
+            "{PREFIX}&f-  &3Apply Global Groups: &f{7}" + "\n" +
+            "{PREFIX}&f-  &3Apply Global World Groups: &f{8}" + "\n" +
+            "{PREFIX}&f-  &3Online Mode: &f{9}" + "\n" +
+            "{PREFIX}&f-  &3Apply Wildcards: &f{10}" + "\n" +
+            "{PREFIX}&f-  &3Apply Regex: &f{11}" + "\n" +
+            "{PREFIX}&f-  &3Apply Shorthand: &f{12}",
             false
     ),
     DEBUG(
@@ -254,13 +254,13 @@ public enum Message {
     BULK_CHANGE_SUCCESS("&aApplied bulk change successfully. {0} records were changed.", true),
 
     USER_INFO(
-            "{PREFIX}&f-> &3User: &f{0}" + "\n" +
-            "{PREFIX}&f-> &3UUID: &f{1}" + "\n" +
-            "{PREFIX}&f-> &3Status: {2}" + "\n" +
-            "{PREFIX}&f-> &3Primary Group: &f{3}" + "\n" +
-            "{PREFIX}&f-> &3Permissions: &f{4}" + "\n" +
-            "{PREFIX}&f-> &3Temporary Permissions: &f{5}" + "\n" +
-            "{PREFIX}&f-> &3Use &b/{6} user {7} listnodes &3to see all permissions.",
+            "{PREFIX}&b&l> &bUser Info: &f{0}" + "\n" +
+            "{PREFIX}&f- &3UUID: &f{1}" + "\n" +
+            "{PREFIX}&f- &3Status: {2}" + "\n" +
+            "{PREFIX}&f- &3Primary Group: &f{3}" + "\n" +
+            "{PREFIX}&f- &3Permissions: &f{4}" + "\n" +
+            "{PREFIX}&f- &3Temporary Permissions: &f{5}" + "\n" +
+            "{PREFIX}&f- &3Use &b/{6} user {7} permission info &3to see all permissions.",
             false
     ),
     USER_GETUUID("&bThe UUID of &b{0}&b is &b{1}&b.", true),
@@ -290,16 +290,16 @@ public enum Message {
     USER_SHOWPOS("&aShowing &b{0}&a's position on track &b{1}&a.\n{2}", true),
 
     GROUP_INFO(
-            "{PREFIX}&f-> &3Group: &f{0}" + "\n" +
-            "{PREFIX}&f-> &3Permissions: &f{1}" + "\n" +
-            "{PREFIX}&f-> &3Temporary Permissions: &f{2}" + "\n" +
-            "{PREFIX}&f-> &3Use &b/{3} group {4} listnodes &3to see all permissions.",
+            "{PREFIX}&b&l> &bGroup Info: &f{0}" + "\n" +
+            "{PREFIX}&f- &3Permissions: &f{1}" + "\n" +
+            "{PREFIX}&f- &3Temporary Permissions: &f{2}" + "\n" +
+            "{PREFIX}&f- &3Use &b/{3} group {4} permission info &3to see all permissions.",
             false
     ),
 
     TRACK_INFO(
-            "{PREFIX}&f-> &3Track: &f{0}" + "\n" +
-            "{PREFIX}&f-> &3Path: &f{1}",
+            "{PREFIX}&b&l> Showing Track: &f{0}" + "\n" +
+            "{PREFIX}&f- &7Path: &f{1}",
             false
     ),
     TRACK_CLEAR("&b{0}&a's groups track was cleared.", true),
