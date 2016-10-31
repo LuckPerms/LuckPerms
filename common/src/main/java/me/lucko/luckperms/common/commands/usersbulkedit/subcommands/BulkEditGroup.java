@@ -27,6 +27,7 @@ import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.*;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.storage.Datastore;
 import me.lucko.luckperms.common.users.User;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
@@ -97,7 +98,7 @@ public class BulkEditGroup extends SubCommand<Datastore> {
                     }
 
                     toRemove.add(element);
-                    toAdd.add(me.lucko.luckperms.common.core.Node.builderFromExisting(element).setWorld(to).build());
+                    toAdd.add(NodeFactory.builderFromExisting(element).setWorld(to).build());
                 }
             } else {
                 while (iterator.hasNext()) {
@@ -121,7 +122,7 @@ public class BulkEditGroup extends SubCommand<Datastore> {
                     }
 
                     toRemove.add(element);
-                    toAdd.add(me.lucko.luckperms.common.core.Node.builderFromExisting(element).setServer(to).build());
+                    toAdd.add(NodeFactory.builderFromExisting(element).setServer(to).build());
                 }
             }
 

@@ -27,7 +27,7 @@ import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.*;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.Node;
+import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
@@ -207,7 +207,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
                 // n.key.value = node
                 // n.value = true/false
                 try {
-                    group.setPermission(Node.fromSerialisedNode("global-" + n.getKey().getKey() + "/" + n.getKey().getValue(), n.getValue()));
+                    group.setPermission(NodeFactory.fromSerialisedNode("global-" + n.getKey().getKey() + "/" + n.getKey().getValue(), n.getValue()));
 
                     if (n.getKey().getValue().startsWith("group.")) {
                         String groupName = n.getKey().getValue().substring(6);
@@ -241,7 +241,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
                 // n.key.value = node
                 // n.value = true/false
                 try {
-                    user.setPermission(Node.fromSerialisedNode("global-" + n.getKey().getKey() + "/" + n.getKey().getValue(), n.getValue()));
+                    user.setPermission(NodeFactory.fromSerialisedNode("global-" + n.getKey().getKey() + "/" + n.getKey().getValue(), n.getValue()));
 
                     if (n.getKey().getValue().startsWith("group.")) {
                         String group = n.getKey().getValue().substring(6);

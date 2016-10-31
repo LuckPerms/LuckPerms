@@ -26,7 +26,7 @@ import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.*;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.Node;
+import me.lucko.luckperms.common.core.NodeBuilder;
 import me.lucko.luckperms.common.users.User;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
 
@@ -53,13 +53,13 @@ public class UserHasPerm extends SubCommand<User> {
             }
 
             if (args.size() == 2) {
-                Util.sendTristate(sender, args.get(0), user.hasPermission(new Node.Builder(args.get(0)).setServer(args.get(1)).build()));
+                Util.sendTristate(sender, args.get(0), user.hasPermission(new NodeBuilder(args.get(0)).setServer(args.get(1)).build()));
             } else {
-                Util.sendTristate(sender, args.get(0), user.hasPermission(new Node.Builder(args.get(0)).setServer(args.get(1)).setWorld(args.get(2)).build()));
+                Util.sendTristate(sender, args.get(0), user.hasPermission(new NodeBuilder(args.get(0)).setServer(args.get(1)).setWorld(args.get(2)).build()));
             }
 
         } else {
-            Util.sendTristate(sender, args.get(0), user.hasPermission(new Node.Builder(args.get(0)).build()));
+            Util.sendTristate(sender, args.get(0), user.hasPermission(new NodeBuilder(args.get(0)).build()));
         }
         return CommandResult.SUCCESS;
     }

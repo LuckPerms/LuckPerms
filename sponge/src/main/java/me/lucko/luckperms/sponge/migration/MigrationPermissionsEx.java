@@ -28,7 +28,7 @@ import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.*;
 import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.Node;
+import me.lucko.luckperms.common.core.NodeBuilder;
 import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.users.User;
@@ -112,7 +112,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
 
             for (Map.Entry<String, Boolean> perm : e.getValue().entrySet()) {
                 try {
-                    holder.setPermission(new Node.Builder(perm.getKey()).setServerRaw(server).setWorld(world).withExtraContext(contexts).setValue(perm.getValue()).build());
+                    holder.setPermission(new NodeBuilder(perm.getKey()).setServerRaw(server).setWorld(world).withExtraContext(contexts).setValue(perm.getValue()).build());
                 } catch (ObjectAlreadyHasException ignored) {}
             }
         }
@@ -131,11 +131,11 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             for (Map.Entry<String, String> opt : e.getValue().entrySet()) {
                 if (opt.getKey().equalsIgnoreCase("prefix") || opt.getKey().equalsIgnoreCase("suffix")) {
                     try {
-                        holder.setPermission(new Node.Builder(opt.getKey().toLowerCase() + ".100." + opt.getValue()).setServerRaw(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
+                        holder.setPermission(new NodeBuilder(opt.getKey().toLowerCase() + ".100." + opt.getValue()).setServerRaw(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
                     } catch (ObjectAlreadyHasException ignored) {}
                 } else {
                     try {
-                        holder.setPermission(new Node.Builder("meta." + opt.getKey() + "." + opt.getValue()).setServerRaw(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
+                        holder.setPermission(new NodeBuilder("meta." + opt.getKey() + "." + opt.getValue()).setServerRaw(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
                     } catch (ObjectAlreadyHasException ignored) {}
                 }
             }
@@ -158,7 +158,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 }
 
                 try {
-                    holder.setPermission(new Node.Builder("group." + s.getIdentifier().toLowerCase()).setServerRaw(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
+                    holder.setPermission(new NodeBuilder("group." + s.getIdentifier().toLowerCase()).setServerRaw(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
                 } catch (ObjectAlreadyHasException ignored) {}
             }
         }

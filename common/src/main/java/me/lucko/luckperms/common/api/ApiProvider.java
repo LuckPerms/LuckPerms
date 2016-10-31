@@ -31,6 +31,7 @@ import me.lucko.luckperms.api.context.IContextCalculator;
 import me.lucko.luckperms.api.event.LPEvent;
 import me.lucko.luckperms.api.event.LPListener;
 import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.core.NodeBuilder;
 import me.lucko.luckperms.common.users.UserIdentifier;
 
 import java.util.Optional;
@@ -210,7 +211,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public Node.Builder buildNode(@NonNull String permission) throws IllegalArgumentException {
-        return new me.lucko.luckperms.common.core.Node.Builder(checkNode(permission));
+        return new NodeBuilder(checkNode(permission));
     }
 
     @SuppressWarnings("unchecked")

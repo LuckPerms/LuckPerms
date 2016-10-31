@@ -23,7 +23,7 @@
 package me.lucko.luckperms.common.defaults;
 
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.common.core.Node;
+import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.PermissionHolder;
 
 import javax.script.ScriptEngine;
@@ -36,7 +36,7 @@ public class LogicParser {
 
     public static boolean parse(String s, PermissionHolder holder, Tristate tristate) throws IllegalArgumentException {
         try {
-            String expression = generateExpression(s, s1 -> holder.hasPermission(Node.fromSerialisedNode(s1, true)) == tristate);
+            String expression = generateExpression(s, s1 -> holder.hasPermission(NodeFactory.fromSerialisedNode(s1, true)) == tristate);
             String result = SCRIPT_ENGINE.eval(expression).toString();
 
             if (!result.equals("true") && !result.equals("false")) {

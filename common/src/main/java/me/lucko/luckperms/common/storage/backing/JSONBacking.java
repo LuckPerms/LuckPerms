@@ -26,7 +26,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import lombok.Cleanup;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.core.Node;
+import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.groups.GroupManager;
 import me.lucko.luckperms.common.tracks.Track;
@@ -96,7 +96,7 @@ public class JSONBacking extends FlatfileBacking {
                         while (reader.hasNext()) {
                             String node = reader.nextName();
                             boolean b = reader.nextBoolean();
-                            user.addNodeUnchecked(Node.fromSerialisedNode(node, b));
+                            user.addNodeUnchecked(NodeFactory.fromSerialisedNode(node, b));
                         }
                         reader.endObject();
                         reader.endObject();
@@ -258,7 +258,7 @@ public class JSONBacking extends FlatfileBacking {
                         while (reader.hasNext()) {
                             String node = reader.nextName();
                             boolean b = reader.nextBoolean();
-                            group.addNodeUnchecked(Node.fromSerialisedNode(node, b));
+                            group.addNodeUnchecked(NodeFactory.fromSerialisedNode(node, b));
                         }
 
                         reader.endObject();
@@ -308,7 +308,7 @@ public class JSONBacking extends FlatfileBacking {
                     while (reader.hasNext()) {
                         String node = reader.nextName();
                         boolean b = reader.nextBoolean();
-                        group.addNodeUnchecked(Node.fromSerialisedNode(node, b));
+                        group.addNodeUnchecked(NodeFactory.fromSerialisedNode(node, b));
                     }
                     reader.endObject();
                     reader.endObject();

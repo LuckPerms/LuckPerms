@@ -24,7 +24,7 @@ package me.lucko.luckperms.common.storage.backing;
 
 import lombok.Cleanup;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.core.Node;
+import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.groups.GroupManager;
 import me.lucko.luckperms.common.tracks.Track;
@@ -92,7 +92,7 @@ public class YAMLBacking extends FlatfileBacking {
                         user.setPrimaryGroup((String) values.get("primary-group"));
                         Map<String, Boolean> perms = (Map<String, Boolean>) values.get("perms");
                         for (Map.Entry<String, Boolean> e : perms.entrySet()) {
-                            user.addNodeUnchecked(Node.fromSerialisedNode(e.getKey(), e.getValue()));
+                            user.addNodeUnchecked(NodeFactory.fromSerialisedNode(e.getKey(), e.getValue()));
                         }
 
                         boolean save = plugin.getUserManager().giveDefaultIfNeeded(user, false);
@@ -215,7 +215,7 @@ public class YAMLBacking extends FlatfileBacking {
                     return doRead(groupFile, values -> {
                         Map<String, Boolean> perms = (Map<String, Boolean>) values.get("perms");
                         for (Map.Entry<String, Boolean> e : perms.entrySet()) {
-                            group.addNodeUnchecked(Node.fromSerialisedNode(e.getKey(), e.getValue()));
+                            group.addNodeUnchecked(NodeFactory.fromSerialisedNode(e.getKey(), e.getValue()));
                         }
                         return true;
                     });
@@ -248,7 +248,7 @@ public class YAMLBacking extends FlatfileBacking {
                 return groupFile.exists() && doRead(groupFile, values -> {
                     Map<String, Boolean> perms = (Map<String, Boolean>) values.get("perms");
                     for (Map.Entry<String, Boolean> e : perms.entrySet()) {
-                        group.addNodeUnchecked(Node.fromSerialisedNode(e.getKey(), e.getValue()));
+                        group.addNodeUnchecked(NodeFactory.fromSerialisedNode(e.getKey(), e.getValue()));
                     }
                     return true;
                 });

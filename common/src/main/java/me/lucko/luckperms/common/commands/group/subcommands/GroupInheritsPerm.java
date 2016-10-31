@@ -27,7 +27,7 @@ import me.lucko.luckperms.common.commands.*;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.InheritanceInfo;
-import me.lucko.luckperms.common.core.Node;
+import me.lucko.luckperms.common.core.NodeBuilder;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
 
@@ -55,13 +55,13 @@ public class GroupInheritsPerm extends SubCommand<Group> {
             }
 
             if (args.size() == 2) {
-                result = group.inheritsPermissionInfo(new Node.Builder(args.get(0)).setServer(args.get(1)).build());
+                result = group.inheritsPermissionInfo(new NodeBuilder(args.get(0)).setServer(args.get(1)).build());
             } else {
-                result = group.inheritsPermissionInfo(new Node.Builder(args.get(0)).setServer(args.get(1)).setWorld(args.get(2)).build());
+                result = group.inheritsPermissionInfo(new NodeBuilder(args.get(0)).setServer(args.get(1)).setWorld(args.get(2)).build());
             }
 
         } else {
-            result = group.inheritsPermissionInfo(new Node.Builder(args.get(0)).build());
+            result = group.inheritsPermissionInfo(new NodeBuilder(args.get(0)).build());
         }
 
         String location = null;

@@ -30,6 +30,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.common.core.NodeBuilder;
 import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.users.User;
@@ -46,6 +47,7 @@ import java.util.stream.Collectors;
 
 import static me.lucko.luckperms.api.MetaUtils.escapeCharacters;
 
+@SuppressWarnings({"OptionalGetWithoutIsPresent", "unused"})
 @AllArgsConstructor
 public class LuckPermsSubjectData implements SubjectData {
     private final boolean enduring;
@@ -104,7 +106,7 @@ public class LuckPermsSubjectData implements SubjectData {
         try (Timing i = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_SET_PERMISSION)) {
             if (tristate == Tristate.UNDEFINED) {
                 // Unset
-                Node.Builder builder = new me.lucko.luckperms.common.core.Node.Builder(permission);
+                Node.Builder builder = new NodeBuilder(permission);
 
                 for (Context ct : contexts) {
                     builder.withExtraContext(ct.getKey(), ct.getValue());
@@ -122,7 +124,7 @@ public class LuckPermsSubjectData implements SubjectData {
                 return true;
             }
 
-            Node.Builder builder = new me.lucko.luckperms.common.core.Node.Builder(permission)
+            Node.Builder builder = new NodeBuilder(permission)
                     .setValue(tristate.asBoolean());
 
             for (Context ct : contexts) {
@@ -243,11 +245,11 @@ public class LuckPermsSubjectData implements SubjectData {
 
                 try {
                     if (enduring) {
-                        holder.setPermission(new me.lucko.luckperms.common.core.Node.Builder("group." + permsSubject.getIdentifier())
+                        holder.setPermission(new NodeBuilder("group." + permsSubject.getIdentifier())
                                 .withExtraContext(contexts)
                                 .build());
                     } else {
-                        holder.setTransientPermission(new me.lucko.luckperms.common.core.Node.Builder("group." + permsSubject.getIdentifier())
+                        holder.setTransientPermission(new NodeBuilder("group." + permsSubject.getIdentifier())
                                 .withExtraContext(contexts)
                                 .build());
                     }
@@ -269,11 +271,11 @@ public class LuckPermsSubjectData implements SubjectData {
 
                 try {
                     if (enduring) {
-                        holder.unsetPermission(new me.lucko.luckperms.common.core.Node.Builder("group." + permsSubject.getIdentifier())
+                        holder.unsetPermission(new NodeBuilder("group." + permsSubject.getIdentifier())
                                 .withExtraContext(contexts)
                                 .build());
                     } else {
-                        holder.unsetTransientPermission(new me.lucko.luckperms.common.core.Node.Builder("group." + permsSubject.getIdentifier())
+                        holder.unsetTransientPermission(new NodeBuilder("group." + permsSubject.getIdentifier())
                                 .withExtraContext(contexts)
                                 .build());
                     }
@@ -433,12 +435,12 @@ public class LuckPermsSubjectData implements SubjectData {
 
             try {
                 if (enduring) {
-                    holder.setPermission(new me.lucko.luckperms.common.core.Node.Builder("meta." + key + "." + value)
+                    holder.setPermission(new NodeBuilder("meta." + key + "." + value)
                             .withExtraContext(context)
                             .build()
                     );
                 } else {
-                    holder.setTransientPermission(new me.lucko.luckperms.common.core.Node.Builder("meta." + key + "." + value)
+                    holder.setTransientPermission(new NodeBuilder("meta." + key + "." + value)
                             .withExtraContext(context)
                             .build()
                     );

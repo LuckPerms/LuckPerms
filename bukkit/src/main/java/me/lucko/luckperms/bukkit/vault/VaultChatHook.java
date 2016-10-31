@@ -27,6 +27,7 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.caching.MetaData;
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.common.core.NodeBuilder;
 import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.users.User;
@@ -95,7 +96,7 @@ public class VaultChatHook extends Chat {
                 } catch (ObjectLacksException ignored) {}
             });
 
-            Node.Builder metaNode = new me.lucko.luckperms.common.core.Node.Builder("meta." + k + "." + v).setValue(true);
+            Node.Builder metaNode = new NodeBuilder("meta." + k + "." + v).setValue(true);
             if (!perms.getServer().equalsIgnoreCase("global")) {
                 metaNode.setServer(perms.getServer());
             }
@@ -119,7 +120,7 @@ public class VaultChatHook extends Chat {
         perms.log("Setting " + (prefix ? "prefix" : "suffix") + " for " + holder.getObjectName() + " on world " + world + ", server " + perms.getServer());
 
         perms.getScheduler().scheduleTask(() -> {
-            Node.Builder node = new me.lucko.luckperms.common.core.Node.Builder(prefix ? "prefix" : "suffix" + ".1000." + escapeCharacters(value));
+            Node.Builder node = new NodeBuilder(prefix ? "prefix" : "suffix" + ".1000." + escapeCharacters(value));
             node.setValue(true);
             if (!perms.getServer().equalsIgnoreCase("global")) {
                 node.setServer(perms.getServer());

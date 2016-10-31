@@ -119,6 +119,11 @@ public abstract class PermissionHolder {
      * @return the holders transient and permanent nodes
      */
     public SortedSet<LocalizedNode> getPermissions(boolean mergeTemp) {
+        Optional<ImmutableSortedSet<LocalizedNode>> opt = mergeTemp ? mergedCache.getIfPresent() : cache.getIfPresent();
+        if (opt.isPresent()) {
+            return opt.get();
+        }
+
         Supplier<ImmutableSortedSet<LocalizedNode>> supplier = () -> {
             // Create sorted set
             TreeSet<LocalizedNode> combined = new TreeSet<>(PriorityComparator.reverse());
@@ -879,7 +884,7 @@ public abstract class PermissionHolder {
     }
 
     private static Node.Builder buildNode(String permission) {
-        return new me.lucko.luckperms.common.core.Node.Builder(permission);
+        return new NodeBuilder(permission);
     }
 
     private static me.lucko.luckperms.common.utils.LocalizedNode makeLocal(Node node, String location) {
@@ -887,6 +892,6 @@ public abstract class PermissionHolder {
     }
 
     private static Node makeNode(String s, Boolean b) {
-        return me.lucko.luckperms.common.core.Node.fromSerialisedNode(s, b);
+        return NodeFactory.fromSerialisedNode(s, b);
     }
 }

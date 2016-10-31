@@ -23,6 +23,7 @@
 package me.lucko.luckperms.common.commands.generic.meta;
 
 import me.lucko.luckperms.api.MetaUtils;
+import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -31,7 +32,7 @@ import me.lucko.luckperms.common.commands.Sender;
 import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.Node;
+import me.lucko.luckperms.common.core.NodeBuilder;
 import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
@@ -72,7 +73,7 @@ public class MetaSet extends SecondarySubCommand {
             }
         }
 
-        me.lucko.luckperms.api.Node n = new Node.Builder(node).setServer(server).setWorld(world).build();
+        Node n = new NodeBuilder(node).setServer(server).setWorld(world).build();
 
         if (holder.hasPermission(n).asBoolean()) {
             Message.ALREADY_HAS_META.send(sender, holder.getFriendlyName());
