@@ -129,14 +129,21 @@ public abstract class PermissionHolder {
             TreeSet<LocalizedNode> combined = new TreeSet<>(PriorityComparator.reverse());
 
             // Flatten enduring and transient nodes
-            combined.addAll(getNodes().stream()
-                    .map(n -> makeLocal(n, getObjectName()))
-                    .collect(Collectors.toList())
-            );
-            combined.addAll(getTransientNodes().stream()
-                    .map(n -> makeLocal(n, getObjectName()))
-                    .collect(Collectors.toList())
-            );
+            Set<Node> enduring = getNodes();
+            if (!enduring.isEmpty()) {
+                combined.addAll(getNodes().stream()
+                        .map(n -> makeLocal(n, getObjectName()))
+                        .collect(Collectors.toList())
+                );
+            }
+
+            Set<Node> tran = getTransientNodes();
+            if (!tran.isEmpty()) {
+                combined.addAll(getTransientNodes().stream()
+                        .map(n -> makeLocal(n, getObjectName()))
+                        .collect(Collectors.toList())
+                );
+            }
 
             // Create an iterator over all permissions being considered
             Iterator<LocalizedNode> it = combined.iterator();
@@ -729,6 +736,42 @@ public abstract class PermissionHolder {
             boolean b = nodes.removeIf(n ->
                     n.getServer().orElse("global").equalsIgnoreCase(finalServer) &&
                             n.getWorld().orElse("null").equalsIgnoreCase(finalWorld));
+            if (b) {
+                invalidateCache(true);
+            }
+        }
+    }
+
+    public void clearParents() {
+        synchronized (nodes) {
+            boolean b = nodes.removeIf(Node::isGroupNode);
+            if (b) {
+                invalidateCache(true);
+            }
+        }
+    }
+
+    public void clearParents(String server) {
+        String finalServer = Optional.ofNullable(server).orElse("global");
+
+        synchronized (nodes) {
+            boolean b = nodes.removeIf(n -> n.isGroupNode() && n.getServer().orElse("global").equalsIgnoreCase(finalServer));
+            if (b) {
+                invalidateCache(true);
+            }
+        }
+    }
+
+    public void clearParents(String server, String world) {
+        String finalServer = Optional.ofNullable(server).orElse("global");
+        String finalWorld = Optional.ofNullable(world).orElse("null");
+
+        synchronized (nodes) {
+            boolean b = nodes.removeIf(n ->
+                            n.isGroupNode() &&
+                            n.getServer().orElse("global").equalsIgnoreCase(finalServer) &&
+                            n.getWorld().orElse("null").equalsIgnoreCase(finalWorld)
+            );
             if (b) {
                 invalidateCache(true);
             }

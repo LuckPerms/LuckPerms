@@ -32,22 +32,23 @@ import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
+import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.users.User;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
-import me.lucko.luckperms.exceptions.ObjectLacksException;
+import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.List;
 
 import static me.lucko.luckperms.common.commands.SubCommand.getGroupTabComplete;
 
-public class ParentRemove extends SecondarySubCommand {
-    public ParentRemove() {
-        super("remove", "Removes a previously set inheritance rule", Permission.USER_PARENT_REMOVE, Permission.GROUP_PARENT_REMOVE,
-                Predicate.notInRange(1, 3),
+public class ParentSet extends SecondarySubCommand {
+    public ParentSet() {
+        super("set", "Removes all other groups the object inherits already and adds them to the one given",
+                Permission.USER_PARENT_SET, Permission.GROUP_PARENT_SET, Predicate.notInRange(1, 3),
                 Arg.list(
-                        Arg.create("group", true, "the group to remove"),
-                        Arg.create("server", false, "the server to remove the group on"),
-                        Arg.create("world", false, "the world to remove the group on")
+                        Arg.create("group", true, "the group to set to"),
+                        Arg.create("server", false, "the server to set the group on"),
+                        Arg.create("world", false, "the world to set the group on")
                 )
         );
     }
@@ -56,18 +57,20 @@ public class ParentRemove extends SecondarySubCommand {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) {
         String groupName = args.get(0).toLowerCase();
 
-        if (ArgumentChecker.checkName(groupName)) {
+        if (ArgumentChecker.checkNode(groupName)) {
             sendDetailedUsage(sender);
             return CommandResult.INVALID_ARGS;
         }
 
-        if (holder instanceof User) {
-            User user = (User) holder;
-            if ((args.size() == 1 || (args.size() == 2 && args.get(1).equalsIgnoreCase("global")))
-                    && user.getPrimaryGroup().equalsIgnoreCase(groupName)) {
-                Message.USER_REMOVEGROUP_ERROR_PRIMARY.send(sender);
-                return CommandResult.STATE_ERROR;
-            }
+        if (!plugin.getDatastore().loadGroup(groupName).getUnchecked()) {
+            Message.GROUP_DOES_NOT_EXIST.send(sender);
+            return CommandResult.INVALID_ARGS;
+        }
+
+        Group group = plugin.getGroupManager().get(groupName);
+        if (group == null) {
+            Message.GROUP_DOES_NOT_EXIST.send(sender);
+            return CommandResult.LOADING_ERROR;
         }
 
         try {
@@ -79,32 +82,43 @@ public class ParentRemove extends SecondarySubCommand {
                 }
 
                 if (args.size() == 2) {
-                    holder.unsetPermission("group." + groupName, server);
-                    Message.UNSET_INHERIT_SERVER_SUCCESS.send(sender, holder.getFriendlyName(), groupName, server);
+
+                    holder.clearParents(server);
+                    holder.setInheritGroup(group, server);
+
+                    Message.SET_PARENT_SERVER_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(), server);
                     LogEntry.build().actor(sender).acted(holder)
-                            .action("parent remove " + groupName + " " + server)
+                            .action("parent set " + group.getName() + " " + server)
                             .build().submit(plugin, sender);
                 } else {
                     final String world = args.get(2).toLowerCase();
-                    holder.unsetPermission("group." + groupName, server, world);
-                    Message.UNSET_INHERIT_SERVER_WORLD_SUCCESS.send(sender, holder.getFriendlyName(), groupName, server, world);
+
+                    holder.clearParents(server, world);
+                    holder.setInheritGroup(group, server, world);
+
+                    Message.SET_PARENT_SERVER_WORLD_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(), server, world);
                     LogEntry.build().actor(sender).acted(holder)
-                            .action("parent remove " + groupName + " " + server + " " + world)
+                            .action("parent set " + group.getName() + " " + server + " " + world)
                             .build().submit(plugin, sender);
                 }
 
             } else {
-                holder.unsetPermission("group." + groupName);
-                Message.UNSET_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), groupName);
+                holder.clearParents();
+                holder.setInheritGroup(group);
+                if (holder instanceof User) {
+                    ((User) holder).setPrimaryGroup(group.getName());
+                }
+
+                Message.SET_PARENT_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName());
                 LogEntry.build().actor(sender).acted(holder)
-                        .action("parent remove " + groupName)
+                        .action("parent set " + group.getName())
                         .build().submit(plugin, sender);
             }
 
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
-        } catch (ObjectLacksException e) {
-            Message.DOES_NOT_INHERIT.send(sender, holder.getFriendlyName(), groupName);
+        } catch (ObjectAlreadyHasException e) {
+            Message.ALREADY_INHERITS.send(sender, holder.getFriendlyName(), group.getDisplayName());
             return CommandResult.STATE_ERROR;
         }
     }

@@ -231,6 +231,16 @@ public class CommandManager {
                 case "unsettemp":
                     args.add(2, "permission");
                     break;
+                case "haspermission":
+                    args.remove(2);
+                    args.add(2, "permission");
+                    args.add(3, "check");
+                    break;
+                case "inheritspermission":
+                    args.remove(2);
+                    args.add(2, "permission");
+                    args.add(3, "checkinherits");
+                    break;
                 case "listgroups":
                     args.remove(2);
                     args.add(2, "parent");
@@ -241,6 +251,11 @@ public class CommandManager {
                     args.remove(2);
                     args.add(2, "parent");
                     args.add(3, "add");
+                    break;
+                case "setgroup":
+                    args.remove(2);
+                    args.add(2, "parent");
+                    args.add(3, "set");
                     break;
                 case "removegroup":
                 case "unsetinherit":

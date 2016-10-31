@@ -22,7 +22,6 @@
 
 package me.lucko.luckperms.common.commands.generic;
 
-import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.*;
 import me.lucko.luckperms.common.constants.Message;
@@ -39,12 +38,7 @@ public class SecondaryMainCommand<T extends PermissionHolder> extends SubCommand
     private final List<SecondarySubCommand> secondaryCommands;
 
     public SecondaryMainCommand(String name, String description, boolean user, List<SecondarySubCommand> secondaryCommands) {
-        super(name, description, null, Predicate.alwaysFalse(),
-                !name.equals("Meta") ? ImmutableList.copyOf(secondaryCommands.stream()
-                        .map(s -> Arg.create(s.getName(), false, s.getDescription()))
-                        .collect(Collectors.toList())
-                ) : null
-        );
+        super(name, description, null, Predicate.alwaysFalse(), null);
         this.secondaryCommands = secondaryCommands;
         this.user = user;
     }

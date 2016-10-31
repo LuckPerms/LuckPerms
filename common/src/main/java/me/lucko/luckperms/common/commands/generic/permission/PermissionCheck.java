@@ -20,21 +20,22 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.user.subcommands;
+package me.lucko.luckperms.common.commands.generic.permission;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.*;
+import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeBuilder;
-import me.lucko.luckperms.common.users.User;
+import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
 
 import java.util.List;
 
-public class UserHasPerm extends SubCommand<User> {
-    public UserHasPerm() {
-        super("haspermission", "Checks to see if the user has a certain permission node", Permission.USER_HASPERMISSION,
+public class PermissionCheck extends SecondarySubCommand {
+    public PermissionCheck() {
+        super("check", "Checks to see if the object has a certain permission node", Permission.USER_PERM_CHECK, Permission.GROUP_PERM_CHECK,
                 Predicate.notInRange(1, 3),
                 Arg.list(
                         Arg.create("node", true, "the permission node to check for"),
@@ -45,7 +46,7 @@ public class UserHasPerm extends SubCommand<User> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) {
         if (args.size() >= 2) {
             if (ArgumentChecker.checkServer(args.get(1))) {
                 Message.SERVER_INVALID_ENTRY.send(sender);
@@ -53,13 +54,13 @@ public class UserHasPerm extends SubCommand<User> {
             }
 
             if (args.size() == 2) {
-                Util.sendTristate(sender, args.get(0), user.hasPermission(new NodeBuilder(args.get(0)).setServer(args.get(1)).build()));
+                Util.sendTristate(sender, args.get(0), holder.hasPermission(new NodeBuilder(args.get(0)).setServer(args.get(1)).build()));
             } else {
-                Util.sendTristate(sender, args.get(0), user.hasPermission(new NodeBuilder(args.get(0)).setServer(args.get(1)).setWorld(args.get(2)).build()));
+                Util.sendTristate(sender, args.get(0), holder.hasPermission(new NodeBuilder(args.get(0)).setServer(args.get(1)).setWorld(args.get(2)).build()));
             }
 
         } else {
-            Util.sendTristate(sender, args.get(0), user.hasPermission(new NodeBuilder(args.get(0)).build()));
+            Util.sendTristate(sender, args.get(0), holder.hasPermission(new NodeBuilder(args.get(0)).build()));
         }
         return CommandResult.SUCCESS;
     }

@@ -35,6 +35,8 @@ public class CommandPermission<T extends PermissionHolder> extends SecondaryMain
             .add(new PermissionUnset())
             .add(new PermissionSetTemp())
             .add(new PermissionUnsetTemp())
+            .add(new PermissionCheck())
+            .add(new PermissionCheckInherits())
             .build());
     }
 }

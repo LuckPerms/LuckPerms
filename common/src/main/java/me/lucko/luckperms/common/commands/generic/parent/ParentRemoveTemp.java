@@ -55,7 +55,7 @@ public class ParentRemoveTemp extends SecondarySubCommand {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) {
         String groupName = args.get(0).toLowerCase();
 
-        if (ArgumentChecker.checkNode(groupName)) {
+        if (ArgumentChecker.checkName(groupName)) {
             sendDetailedUsage(sender);
             return CommandResult.INVALID_ARGS;
         }

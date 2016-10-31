@@ -31,6 +31,7 @@ public class CommandParent<T extends PermissionHolder> extends SecondaryMainComm
     public CommandParent(boolean user) {
         super("Parent", "Edit inheritances", user, ImmutableList.<SecondarySubCommand>builder()
             .add(new ParentInfo())
+            .add(new ParentSet())
             .add(new ParentAdd())
             .add(new ParentRemove())
             .add(new ParentAddTemp())

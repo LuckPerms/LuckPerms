@@ -20,23 +20,24 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.group.subcommands;
+package me.lucko.luckperms.common.commands.generic.permission;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.*;
+import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.InheritanceInfo;
 import me.lucko.luckperms.common.core.NodeBuilder;
-import me.lucko.luckperms.common.groups.Group;
+import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
 
 import java.util.List;
 
-public class GroupInheritsPerm extends SubCommand<Group> {
-    public GroupInheritsPerm() {
-        super("inheritspermission", "Checks to see if the group inherits a certain permission node",
-                Permission.GROUP_INHERITSPERMISSION, Predicate.notInRange(1, 3),
+public class PermissionCheckInherits extends SecondarySubCommand {
+    public PermissionCheckInherits() {
+        super("checkinherits", "Checks to see if the object inherits a certain permission node", Permission.USER_PERM_CHECK_INHERITS, Permission.GROUP_PERM_CHECK_INHERITS,
+                Predicate.notInRange(1, 3),
                 Arg.list(
                         Arg.create("node", true, "the permission node to check for"),
                         Arg.create("server", false, "the server to check on"),
@@ -46,7 +47,7 @@ public class GroupInheritsPerm extends SubCommand<Group> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) {
         InheritanceInfo result;
         if (args.size() >= 2) {
             if (ArgumentChecker.checkServer(args.get(1))) {
@@ -55,18 +56,18 @@ public class GroupInheritsPerm extends SubCommand<Group> {
             }
 
             if (args.size() == 2) {
-                result = group.inheritsPermissionInfo(new NodeBuilder(args.get(0)).setServer(args.get(1)).build());
+                result = holder.inheritsPermissionInfo(new NodeBuilder(args.get(0)).setServer(args.get(1)).build());
             } else {
-                result = group.inheritsPermissionInfo(new NodeBuilder(args.get(0)).setServer(args.get(1)).setWorld(args.get(2)).build());
+                result = holder.inheritsPermissionInfo(new NodeBuilder(args.get(0)).setServer(args.get(1)).setWorld(args.get(2)).build());
             }
 
         } else {
-            result = group.inheritsPermissionInfo(new NodeBuilder(args.get(0)).build());
+            result = holder.inheritsPermissionInfo(new NodeBuilder(args.get(0)).build());
         }
 
         String location = null;
         if (result.getLocation().isPresent()) {
-            if (result.getLocation().get().equals(group.getObjectName())) {
+            if (result.getLocation().get().equals(holder.getObjectName())) {
                 location = "self";
             } else {
                 location = result.getLocation().get();
