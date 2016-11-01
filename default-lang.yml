@@ -61,6 +61,7 @@ does-not-temp-inherit: "{0} does not temporarily inherit '{1}'."
 
 track-already-contains: "Track {0} already contains the group '{1}'."
 track-does-not-contain: "Track {0} does not contain the group '{1}'."
+track-ambiguous-call: "The user specified is a member of multiple groups on this track. Unable to determine their location."
 
 group-already-exists: "That group already exists!"
 group-does-not-exist: "That group does not exist!"
@@ -219,16 +220,17 @@ user-removegroup-error-primary: "You cannot remove a user from their primary gro
 user-primarygroup-success: "&b{0}&a's primary group was set to &b{1}&a."
 user-primarygroup-error-alreadyhas: "The user already has this group set as their primary group."
 user-primarygroup-error-notmember: "&b{0}&a was not already a member of &b{1}&a, adding them now."
-user-showtracks-info: "&aShowing tracks that contain the group '&b{0}&a' ({1}'s primary group)"
-user-promote-success-promote: "&aPromoting user along track &b{0}&a from &b{1}&a to &b{2}&a."
-user-promote-success-remove: "&b{0}&a was removed from &b{1}&a, added to &b{2}&a, and their primary group was set to &b{3}&a."
+user-track-error-not-contain-group: "The user specified isn't already in any groups on this track."
+user-promote-success: "&aPromoting user along track &b{0}&a from &b{1}&a to &b{2}&a."
+user-promote-success-server: "&aPromoting user along track &b{0}&a from &b{1}&a to &b{2}&a on server &b{3}&a."
+user-promote-success-server-world: "&aPromoting user along track &b{0}&a from &b{1}&a to &b{2}&a on server &b{3}&a, world &b{4}&a."
 user-promote-error-endoftrack: "The end of track &4{0}&c was reached. Unable to promote user."
 user-promote-error-malformed: >
   {PREFIX}The next group on the track, {0}, no longer exists. Unable to promote user.
   {PREFIX}Either create the group, or remove it from the track and try again.
-user-promote-error-not-contain-group: "Promotions are done based on primary groups. The users primary group is not on the track specified."
-user-demote-success-promote: "&aDemoting user along track &b{0}&a from &b{1}&a to &b{2}&a."
-user-demote-success-remove: "&b{0}&a was removed from &b{1}&a, added to &b{2}&a, and their primary group was set to &b{3}&a."
+user-demote-success: "&aDemoting user along track &b{0}&a from &b{1}&a to &b{2}&a."
+user-demote-success-server: "&aDemoting user along track &b{0}&a from &b{1}&a to &b{2}&a on server &b{3}&a."
+user-demote-success-server-world: "&aDemoting user along track &b{0}&a from &b{1}&a to &b{2}&a on server &b{3}&a, world &b{4}&a."
 user-demote-error-endoftrack: "The end of track &4{0}&c was reached. Unable to demote user."
 user-demote-error-malformed: >
   {PREFIX}The previous group on the track, {0}, no longer exists. Unable to demote user.\n
@@ -243,7 +245,7 @@ group-info: >
   {PREFIX}&f- &3Use &b/{3} group {4} permission info &3to see all permissions.
 
 track-info: >
-  {PREFIX}&b&l> Showing Track: &f{0}\n
+  {PREFIX}&b&l> &bShowing Track: &f{0}\n
   {PREFIX}&f- &7Path: &f{1}
 track-clear: "&b{0}&a's groups track was cleared."
 track-append-success: "&aGroup &b{0}&a was successfully appended to track &b{1}&a."

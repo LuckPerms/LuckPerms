@@ -22,6 +22,8 @@
 
 package me.lucko.luckperms.common.commands.user.subcommands;
 
+import com.google.common.base.Objects;
+import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.event.events.UserDemoteEvent;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.api.internal.TrackLink;
@@ -29,6 +31,7 @@ import me.lucko.luckperms.common.api.internal.UserLink;
 import me.lucko.luckperms.common.commands.*;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.tracks.Track;
@@ -37,12 +40,20 @@ import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class UserDemote extends SubCommand<User> {
     public UserDemote() {
-        super("demote", "Demotes the user down a track", Permission.USER_DEMOTE, Predicate.not(1),
-                Arg.list(Arg.create("track", true, "the track to demote the user down"))
+        super("demote", "Demotes the user down a track", Permission.USER_DEMOTE, Predicate.notInRange(1, 3),
+                Arg.list(
+                        Arg.create("track", true, "the track to demote the user down"),
+                        Arg.create("server", false, "the server to promote on"),
+                        Arg.create("world", false, "the world to promote on")
+                )
         );
     }
 
@@ -70,13 +81,68 @@ public class UserDemote extends SubCommand<User> {
             return CommandResult.STATE_ERROR;
         }
 
-        final String old = user.getPrimaryGroup();
+        String server = null;
+        String world = null;
+
+        if (args.size() > 1) {
+            server = args.get(1);
+            if (ArgumentChecker.checkServer(server)) {
+                Message.SERVER_INVALID_ENTRY.send(sender);
+                return CommandResult.INVALID_ARGS;
+            }
+            if (args.size() > 2) {
+                world = args.get(2);
+            }
+        }
+
+        // Load applicable groups
+        Set<Node> nodes = new HashSet<>();
+        for (Node node : user.getNodes()) {
+            if (!node.isGroupNode()) {
+                continue;
+            }
+
+            if (!node.getValue()) {
+                continue;
+            }
+
+            String s = node.getServer().orElse(null);
+            if (!Objects.equal(s, server)) {
+                continue;
+            }
+
+            String w = node.getWorld().orElse(null);
+            if (!Objects.equal(w, world)) {
+                continue;
+            }
+
+            nodes.add(node);
+        }
+
+        Iterator<Node> it = nodes.iterator();
+        while (it.hasNext()) {
+            Node g = it.next();
+            if (!track.containsGroup(g.getGroupName())) {
+                it.remove();
+            }
+        }
+
+        if (nodes.isEmpty()) {
+            Message.USER_TRACK_ERROR_NOT_CONTAIN_GROUP.send(sender);
+            return CommandResult.FAILURE;
+        }
+
+        if (nodes.size() != 1) {
+            Message.TRACK_AMBIGUOUS_CALL.send(sender);
+            return CommandResult.FAILURE;
+        }
+
+        final String old = nodes.stream().findAny().get().getGroupName();
         final String previous;
         try {
             previous = track.getPrevious(old);
         } catch (ObjectLacksException e) {
             Message.TRACK_DOES_NOT_CONTAIN.send(sender, track.getName(), old);
-            Message.USER_DEMOTE_ERROR_NOT_CONTAIN_GROUP.send(sender);
             return CommandResult.STATE_ERROR;
         }
 
@@ -96,19 +162,28 @@ public class UserDemote extends SubCommand<User> {
             return CommandResult.LOADING_ERROR;
         }
 
+        user.clearParents(server, world);
         try {
-            user.unsetPermission("group." + old);
-        } catch (ObjectLacksException ignored) {}
-        try {
-            user.setInheritGroup(previousGroup);
+            user.setPermission(NodeFactory.newBuilder("group." + previousGroup.getName()).setServer(server).setWorld(world).build());
         } catch (ObjectAlreadyHasException ignored) {}
-        user.setPrimaryGroup(previousGroup.getName());
 
-        Message.USER_DEMOTE_SUCCESS_PROMOTE.send(sender, track.getName(), old, previousGroup.getDisplayName());
-        Message.USER_DEMOTE_SUCCESS_REMOVE.send(sender, user.getName(), old, previousGroup.getDisplayName(), previousGroup.getDisplayName());
+        if (server == null && world == null) {
+            user.setPrimaryGroup(previousGroup.getName());
+        }
+
+        if (server == null) {
+            Message.USER_DEMOTE_SUCCESS.send(sender, track.getName(), old, previousGroup.getDisplayName());
+        } else {
+            if (world == null) {
+                Message.USER_DEMOTE_SUCCESS_SERVER.send(sender, track.getName(), old, previousGroup.getDisplayName(), server);
+            } else {
+                Message.USER_DEMOTE_SUCCESS_SERVER_WORLD.send(sender, track.getName(), old, previousGroup.getDisplayName(), server, world);
+            }
+        }
+
         Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), previousGroup.getDisplayName(), old, true));
         LogEntry.build().actor(sender).acted(user)
-                .action("demote " + track.getName() + "(from " + old + " to " + previousGroup.getName() + ")")
+                .action("demote " + args.stream().collect(Collectors.joining(" ")))
                 .build().submit(plugin, sender);
         save(user, sender, plugin);
         plugin.getApiProvider().fireEventAsync(new UserDemoteEvent(new TrackLink(track), new UserLink(user), old, previousGroup.getName()));

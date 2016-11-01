@@ -56,6 +56,10 @@ public class NodeFactory {
         return b ? CACHE.getUnchecked(s) : CACHE_NEGATED.getUnchecked(s);
     }
 
+    public static Node.Builder newBuilder(String s) {
+        return new NodeBuilder(s, false);
+    }
+
     public static Node.Builder builderFromSerialisedNode(String s, Boolean b) {
         if (s.contains("/")) {
             List<String> parts = Splitter.on('/').limit(2).splitToList(s);

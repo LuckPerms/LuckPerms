@@ -48,7 +48,6 @@ public class UserMainCommand extends MainCommand<User> {
                 .add(new CommandMeta<>(true))
                 .add(new UserGetUUID())
                 .add(new UserSetPrimaryGroup())
-                .add(new UserShowTracks())
                 .add(new UserPromote())
                 .add(new UserDemote())
                 .add(new UserShowPos())

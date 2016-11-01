@@ -83,7 +83,7 @@ public class ParentSet extends SecondarySubCommand {
 
                 if (args.size() == 2) {
 
-                    holder.clearParents(server);
+                    holder.clearParents(server, null);
                     holder.setInheritGroup(group, server);
 
                     Message.SET_PARENT_SERVER_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(), server);
@@ -103,7 +103,7 @@ public class ParentSet extends SecondarySubCommand {
                 }
 
             } else {
-                holder.clearParents();
+                holder.clearParents(null, null);
                 holder.setInheritGroup(group);
                 if (holder instanceof User) {
                     ((User) holder).setPrimaryGroup(group.getName());

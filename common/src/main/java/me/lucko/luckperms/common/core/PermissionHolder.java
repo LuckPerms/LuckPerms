@@ -748,26 +748,6 @@ public abstract class PermissionHolder {
         }
     }
 
-    public void clearParents() {
-        synchronized (nodes) {
-            boolean b = nodes.removeIf(Node::isGroupNode);
-            if (b) {
-                invalidateCache(true);
-            }
-        }
-    }
-
-    public void clearParents(String server) {
-        String finalServer = Optional.ofNullable(server).orElse("global");
-
-        synchronized (nodes) {
-            boolean b = nodes.removeIf(n -> n.isGroupNode() && n.getServer().orElse("global").equalsIgnoreCase(finalServer));
-            if (b) {
-                invalidateCache(true);
-            }
-        }
-    }
-
     public void clearParents(String server, String world) {
         String finalServer = Optional.ofNullable(server).orElse("global");
         String finalWorld = Optional.ofNullable(world).orElse("null");
@@ -817,30 +797,6 @@ public abstract class PermissionHolder {
                             n.getServer().orElse("global").equalsIgnoreCase(finalServer) &&
                                     n.getWorld().orElse("null").equalsIgnoreCase(finalWorld)
                     )
-            );
-            if (b) {
-                invalidateCache(true);
-            }
-        }
-    }
-
-    public void clearMetaKeys(String key, boolean temp) {
-        synchronized (nodes) {
-            boolean b = nodes.removeIf(n -> n.isMeta() && (n.isTemporary() == temp) && n.getMeta().getKey().equalsIgnoreCase(key));
-            if (b) {
-                invalidateCache(true);
-            }
-        }
-    }
-
-    public void clearMetaKeys(String key, String server, boolean temp) {
-        String finalServer = Optional.ofNullable(server).orElse("global");
-
-        synchronized (nodes) {
-            boolean b = nodes.removeIf(n ->
-                    n.isMeta() && (n.isTemporary() == temp) &&
-                            n.getMeta().getKey().equalsIgnoreCase(key) &&
-                            n.getServer().orElse("global").equalsIgnoreCase(finalServer)
             );
             if (b) {
                 invalidateCache(true);

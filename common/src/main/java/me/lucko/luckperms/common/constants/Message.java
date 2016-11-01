@@ -100,6 +100,7 @@ public enum Message {
 
     TRACK_ALREADY_CONTAINS("Track {0} already contains the group '{1}'.", true),
     TRACK_DOES_NOT_CONTAIN("Track {0} does not contain the group '{1}'.", true),
+    TRACK_AMBIGUOUS_CALL("The user specified is a member of multiple groups on this track. Unable to determine their location.", true),
 
     GROUP_ALREADY_EXISTS("That group already exists!", true),
     GROUP_DOES_NOT_EXIST("That group does not exist!", true),
@@ -268,25 +269,25 @@ public enum Message {
     USER_PRIMARYGROUP_SUCCESS("&b{0}&a's primary group was set to &b{1}&a.", true),
     USER_PRIMARYGROUP_ERROR_ALREADYHAS("The user already has this group set as their primary group.", true),
     USER_PRIMARYGROUP_ERROR_NOTMEMBER("&b{0}&a was not already a member of &b{1}&a, adding them now.", true),
-    USER_SHOWTRACKS_INFO("&aShowing tracks that contain the group '&b{0}&a' ({1}'s primary group)", true),
-    USER_PROMOTE_SUCCESS_PROMOTE("&aPromoting user along track &b{0}&a from &b{1}&a to &b{2}&a.", true),
-    USER_PROMOTE_SUCCESS_REMOVE("&b{0}&a was removed from &b{1}&a, added to &b{2}&a, and their primary group was set to &b{3}&a.", true),
+    USER_TRACK_ERROR_NOT_CONTAIN_GROUP("The user specified isn't already in any groups on this track.", true),
+    USER_PROMOTE_SUCCESS("&aPromoting user along track &b{0}&a from &b{1}&a to &b{2}&a.", true),
+    USER_PROMOTE_SUCCESS_SERVER("&aPromoting user along track &b{0}&a from &b{1}&a to &b{2}&a on server &b{3}&a.", true),
+    USER_PROMOTE_SUCCESS_SERVER_WORLD("&aPromoting user along track &b{0}&a from &b{1}&a to &b{2}&a on server &b{3}&a, world &b{4}&a.", true),
     USER_PROMOTE_ERROR_ENDOFTRACK("The end of track &4{0}&c was reached. Unable to promote user.", true),
     USER_PROMOTE_ERROR_MALFORMED(
             "{PREFIX}The next group on the track, {0}, no longer exists. Unable to promote user." + "\n" +
             "{PREFIX}Either create the group, or remove it from the track and try again.",
             false
     ),
-    USER_PROMOTE_ERROR_NOT_CONTAIN_GROUP("Promotions are done based on primary groups. The users primary group is not on the track specified.", true),
-    USER_DEMOTE_SUCCESS_PROMOTE("&aDemoting user along track &b{0}&a from &b{1}&a to &b{2}&a.", true),
-    USER_DEMOTE_SUCCESS_REMOVE("&b{0}&a was removed from &b{1}&a, added to &b{2}&a, and their primary group was set to &b{3}&a.", true),
+    USER_DEMOTE_SUCCESS("&aDemoting user along track &b{0}&a from &b{1}&a to &b{2}&a.", true),
+    USER_DEMOTE_SUCCESS_SERVER("&aDemoting user along track &b{0}&a from &b{1}&a to &b{2}&a on server &b{3}&a.", true),
+    USER_DEMOTE_SUCCESS_SERVER_WORLD("&aDemoting user along track &b{0}&a from &b{1}&a to &b{2}&a on server &b{3}&a, world &b{4}&a.", true),
     USER_DEMOTE_ERROR_ENDOFTRACK("The end of track &4{0}&c was reached. Unable to demote user.", true),
     USER_DEMOTE_ERROR_MALFORMED(
             "{PREFIX}The previous group on the track, {0}, no longer exists. Unable to demote user." + "\n" +
             "{PREFIX}Either create the group, or remove it from the track and try again.",
             false
     ),
-    USER_DEMOTE_ERROR_NOT_CONTAIN_GROUP("Demotions are done based on primary groups. The users primary group is not on the track specified.", true),
     USER_SHOWPOS("&aShowing &b{0}&a's position on track &b{1}&a.\n{2}", true),
 
     GROUP_INFO(
@@ -298,7 +299,7 @@ public enum Message {
     ),
 
     TRACK_INFO(
-            "{PREFIX}&b&l> Showing Track: &f{0}" + "\n" +
+            "{PREFIX}&b&l> &bShowing Track: &f{0}" + "\n" +
             "{PREFIX}&f- &7Path: &f{1}",
             false
     ),
