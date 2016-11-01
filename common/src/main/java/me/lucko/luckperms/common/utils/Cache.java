@@ -22,30 +22,62 @@
 
 package me.lucko.luckperms.common.utils;
 
+import lombok.RequiredArgsConstructor;
+
 import java.util.Optional;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Supplier;
 
+/**
+ * Thread-safe caching utility
+ * @param <T> the type being stored
+ */
+@RequiredArgsConstructor
 public class Cache<T> {
-    private T t = null;
+    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    private final Supplier<T> supplier;
 
-    public T get(Supplier<T> supplier) {
-        synchronized (this) {
-            if (t == null) {
-                t = supplier.get();
+    private T cached = null;
+
+    public T get() {
+        lock.readLock().lock();
+        try {
+            if (cached != null) {
+                return cached;
             }
-            return t;
+        } finally {
+            lock.readLock().unlock();
+        }
+
+        lock.writeLock().lock();
+        try {
+            // Check again
+            if (cached != null) {
+                return cached;
+            }
+
+            cached = supplier.get();
+            return cached;
+        } finally {
+            lock.writeLock().unlock();
         }
     }
 
     public Optional<T> getIfPresent() {
-        synchronized (this) {
-            return Optional.ofNullable(t);
+        lock.readLock().lock();
+        try {
+            return Optional.ofNullable(cached);
+        } finally {
+            lock.readLock().unlock();
         }
     }
 
     public void invalidate() {
-        synchronized (this) {
-            t = null;
+        lock.writeLock().lock();
+        try {
+            cached = null;
+        } finally {
+            lock.writeLock().unlock();
         }
     }
 }

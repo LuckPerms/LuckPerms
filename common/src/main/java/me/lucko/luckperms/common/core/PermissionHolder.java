@@ -46,7 +46,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -72,10 +71,85 @@ public abstract class PermissionHolder {
     private final Set<Node> nodes = new HashSet<>();
     private final Set<Node> transientNodes = new HashSet<>();
 
-    private Cache<ImmutableSortedSet<LocalizedNode>> cache = new Cache<>();
-    private Cache<ImmutableSortedSet<LocalizedNode>> mergedCache = new Cache<>();
-    private Cache<ImmutableSet<Node>> enduringCache = new Cache<>();
-    private Cache<ImmutableSet<Node>> transientCache = new Cache<>();
+    private Cache<ImmutableSet<Node>> enduringCache = new Cache<>(() -> {
+        synchronized (nodes) {
+            return ImmutableSet.copyOf(nodes);
+        }
+    });
+
+    private Cache<ImmutableSet<Node>> transientCache = new Cache<>(() -> {
+        synchronized (transientNodes) {
+            return ImmutableSet.copyOf(transientNodes);
+        }
+    });
+
+    private Cache<ImmutableSortedSet<LocalizedNode>> cache = new Cache<>(() -> {
+        TreeSet<LocalizedNode> combined = new TreeSet<>(PriorityComparator.reverse());
+        Set<Node> enduring = getNodes();
+        if (!enduring.isEmpty()) {
+            combined.addAll(getNodes().stream()
+                    .map(n -> makeLocal(n, getObjectName()))
+                    .collect(Collectors.toList())
+            );
+        }
+        Set<Node> tran = getTransientNodes();
+        if (!tran.isEmpty()) {
+            combined.addAll(getTransientNodes().stream()
+                    .map(n -> makeLocal(n, getObjectName()))
+                    .collect(Collectors.toList())
+            );
+        }
+
+        Iterator<LocalizedNode> it = combined.iterator();
+        Set<LocalizedNode> higherPriority = new HashSet<>();
+
+        iterate:
+        while (it.hasNext()) {
+            LocalizedNode entry = it.next();
+            for (LocalizedNode h : higherPriority) {
+                if (entry.getNode().almostEquals(h.getNode())) {
+                    it.remove();
+                    continue iterate;
+                }
+            }
+            higherPriority.add(entry);
+        }
+        return ImmutableSortedSet.copyOfSorted(combined);
+    });
+
+    private Cache<ImmutableSortedSet<LocalizedNode>> mergedCache = new Cache<>(() -> {
+        TreeSet<LocalizedNode> combined = new TreeSet<>(PriorityComparator.reverse());
+        Set<Node> enduring = getNodes();
+        if (!enduring.isEmpty()) {
+            combined.addAll(getNodes().stream()
+                    .map(n -> makeLocal(n, getObjectName()))
+                    .collect(Collectors.toList())
+            );
+        }
+        Set<Node> tran = getTransientNodes();
+        if (!tran.isEmpty()) {
+            combined.addAll(getTransientNodes().stream()
+                    .map(n -> makeLocal(n, getObjectName()))
+                    .collect(Collectors.toList())
+            );
+        }
+
+        Iterator<LocalizedNode> it = combined.iterator();
+        Set<LocalizedNode> higherPriority = new HashSet<>();
+
+        iterate:
+        while (it.hasNext()) {
+            LocalizedNode entry = it.next();
+            for (LocalizedNode h : higherPriority) {
+                if (entry.getNode().equalsIgnoringValueOrTemp(h.getNode())) {
+                    it.remove();
+                    continue iterate;
+                }
+            }
+            higherPriority.add(entry);
+        }
+        return ImmutableSortedSet.copyOfSorted(combined);
+    });
 
     @Getter
     private final Lock ioLock = new ReentrantLock();
@@ -83,25 +157,11 @@ public abstract class PermissionHolder {
     public abstract String getFriendlyName();
 
     public Set<Node> getNodes() {
-        Optional<ImmutableSet<Node>> opt = enduringCache.getIfPresent();
-        if (opt.isPresent()) {
-            return opt.get();
-        }
-
-        synchronized (nodes) {
-            return enduringCache.get(() -> ImmutableSet.copyOf(nodes));
-        }
+        return enduringCache.get();
     }
 
     public Set<Node> getTransientNodes() {
-        Optional<ImmutableSet<Node>> opt = transientCache.getIfPresent();
-        if (opt.isPresent()) {
-            return opt.get();
-        }
-
-        synchronized (transientNodes) {
-            return transientCache.get(() -> ImmutableSet.copyOf(transientNodes));
-        }
+        return transientCache.get();
     }
 
     private void invalidateCache(boolean enduring) {
@@ -119,61 +179,7 @@ public abstract class PermissionHolder {
      * @return the holders transient and permanent nodes
      */
     public SortedSet<LocalizedNode> getPermissions(boolean mergeTemp) {
-        Optional<ImmutableSortedSet<LocalizedNode>> opt = mergeTemp ? mergedCache.getIfPresent() : cache.getIfPresent();
-        if (opt.isPresent()) {
-            return opt.get();
-        }
-
-        Supplier<ImmutableSortedSet<LocalizedNode>> supplier = () -> {
-            // Create sorted set
-            TreeSet<LocalizedNode> combined = new TreeSet<>(PriorityComparator.reverse());
-
-            // Flatten enduring and transient nodes
-            Set<Node> enduring = getNodes();
-            if (!enduring.isEmpty()) {
-                combined.addAll(getNodes().stream()
-                        .map(n -> makeLocal(n, getObjectName()))
-                        .collect(Collectors.toList())
-                );
-            }
-
-            Set<Node> tran = getTransientNodes();
-            if (!tran.isEmpty()) {
-                combined.addAll(getTransientNodes().stream()
-                        .map(n -> makeLocal(n, getObjectName()))
-                        .collect(Collectors.toList())
-                );
-            }
-
-            // Create an iterator over all permissions being considered
-            Iterator<LocalizedNode> it = combined.iterator();
-
-            // Temporary set to store high priority values
-            Set<LocalizedNode> higherPriority = new HashSet<>();
-
-            // Iterate through each node being considered
-            iterate:
-            while (it.hasNext()) {
-                LocalizedNode entry = it.next();
-
-                // Check through all of the higher priority nodes
-                for (LocalizedNode h : higherPriority) {
-
-                    // Check to see if the entry being considered was already processed at a higher priority
-                    if (mergeTemp ? entry.getNode().equalsIgnoringValueOrTemp(h.getNode()) : entry.getNode().almostEquals(h.getNode())) {
-                        it.remove();
-                        continue iterate;
-                    }
-                }
-
-                // This entry will be kept.
-                higherPriority.add(entry);
-            }
-
-            return ImmutableSortedSet.copyOfSorted(combined);
-        };
-
-        return mergeTemp ? mergedCache.get(supplier) : cache.get(supplier);
+        return mergeTemp ? mergedCache.get() : cache.get();
     }
 
     /**
@@ -239,7 +245,7 @@ public abstract class PermissionHolder {
 
         excludedGroups.add(getObjectName().toLowerCase());
 
-        Set<Node> parents = getPermissions(true).stream()
+        Set<Node> parents = all.stream()
                 .map(LocalizedNode::getNode)
                 .filter(Node::getValue)
                 .filter(Node::isGroupNode)
