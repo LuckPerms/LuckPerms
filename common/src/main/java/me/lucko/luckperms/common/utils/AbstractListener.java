@@ -51,7 +51,7 @@ public class AbstractListener {
                 plugin.getDatastore().force().saveUUIDData(username, u, Callback.empty());
             }
         } else {
-            UUID uuid = plugin.getDatastore().getUUID(username).getUnchecked();
+            UUID uuid = plugin.getDatastore().force().getUUID(username).getUnchecked();
             if (uuid == null) {
                 plugin.getApiProvider().fireEventAsync(new UserFirstLoginEvent(u, username));
             }
