@@ -196,7 +196,6 @@ public class CommandManager {
                 return;
             }
 
-
             String s = args.get(2).toLowerCase();
             switch (s) {
                 // Provide aliases
@@ -294,6 +293,20 @@ public class CommandManager {
                 case "removetempsuffix":
                     args.add(2, "meta");
                     break;
+            }
+
+            // Provide lazy set rewrite
+            boolean lazySet = (
+                    args.size() >= 6 &&
+                    args.get(2).equalsIgnoreCase("permission") &&
+                    args.get(3).toLowerCase().startsWith("set") &&
+                    (args.get(5).equalsIgnoreCase("none") || args.get(5).equalsIgnoreCase("0"))
+            );
+
+            if (lazySet) {
+                args.remove(5);
+                args.remove(3);
+                args.add(3, "unset");
             }
         }
     }
