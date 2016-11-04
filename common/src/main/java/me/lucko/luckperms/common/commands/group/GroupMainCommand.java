@@ -28,6 +28,7 @@ import me.lucko.luckperms.common.commands.MainCommand;
 import me.lucko.luckperms.common.commands.Sender;
 import me.lucko.luckperms.common.commands.SubCommand;
 import me.lucko.luckperms.common.commands.generic.meta.CommandMeta;
+import me.lucko.luckperms.common.commands.generic.other.HolderShowTracks;
 import me.lucko.luckperms.common.commands.generic.parent.CommandParent;
 import me.lucko.luckperms.common.commands.generic.permission.CommandPermission;
 import me.lucko.luckperms.common.commands.group.subcommands.*;
@@ -44,7 +45,7 @@ public class GroupMainCommand extends MainCommand<Group> {
             .add(new CommandPermission<>(false))
             .add(new CommandParent<>(false))
             .add(new CommandMeta<>(false))
-            .add(new GroupShowTracks())
+            .add(new HolderShowTracks<>(false))
             .add(new GroupBulkChange())
             .add(new GroupClear())
             .add(new GroupRename())

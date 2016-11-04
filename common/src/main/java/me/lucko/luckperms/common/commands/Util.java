@@ -159,7 +159,7 @@ public class Util {
                 sb.append(" &8(&7server=&f").append(node.getServer().get()).append("&8)");
             }
             if (node.isWorldSpecific()) {
-                sb.append(" &8(&7world&f").append(node.getWorld().get()).append("&8)");
+                sb.append(" &8(&7world=&f").append(node.getWorld().get()).append("&8)");
             }
             sb.append("\n");
         }

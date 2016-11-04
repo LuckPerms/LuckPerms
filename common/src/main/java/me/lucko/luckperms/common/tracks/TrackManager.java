@@ -24,21 +24,7 @@ package me.lucko.luckperms.common.tracks;
 
 import me.lucko.luckperms.common.utils.AbstractManager;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-
 public class TrackManager extends AbstractManager<String, Track> {
-
-    /**
-     * Returns a set of tracks that contain at least one of the groups from the Set provided
-     * @param group the group to filter by
-     * @return a set of tracks that the groups could be a member of
-     */
-    public Set<Track> getApplicableTracks(String group) {
-        return getAll().values().stream()
-                .filter(t -> t.containsGroup(group))
-                .collect(Collectors.toSet());
-    }
 
     /**
      * Makes a new track object

@@ -81,7 +81,6 @@ public enum Permission {
     USER_SHOWTRACKS(set("showtracks"), Type.USER),
     USER_PROMOTE(set("promote"), Type.USER),
     USER_DEMOTE(set("demote"), Type.USER),
-    USER_SHOWPOS(set("showpos"), Type.USER),
     USER_BULKCHANGE(set("bulkchange"), Type.USER),
     USER_CLEAR(set("clear"), Type.USER),
 

@@ -29,6 +29,7 @@ import me.lucko.luckperms.common.commands.Sender;
 import me.lucko.luckperms.common.commands.SubCommand;
 import me.lucko.luckperms.common.commands.Util;
 import me.lucko.luckperms.common.commands.generic.meta.CommandMeta;
+import me.lucko.luckperms.common.commands.generic.other.HolderShowTracks;
 import me.lucko.luckperms.common.commands.generic.parent.CommandParent;
 import me.lucko.luckperms.common.commands.generic.permission.CommandPermission;
 import me.lucko.luckperms.common.commands.user.subcommands.*;
@@ -50,7 +51,7 @@ public class UserMainCommand extends MainCommand<User> {
                 .add(new UserSetPrimaryGroup())
                 .add(new UserPromote())
                 .add(new UserDemote())
-                .add(new UserShowPos())
+                .add(new HolderShowTracks<>(true))
                 .add(new UserBulkChange())
                 .add(new UserClear())
                 .build()

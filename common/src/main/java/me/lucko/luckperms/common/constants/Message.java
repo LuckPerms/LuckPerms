@@ -158,6 +158,8 @@ public enum Message {
     LISTPARENTS_TEMP("&b{0}'s Temporary Parent Groups:" + "\n" + "{1}", true),
     LISTGROUPS("&b{0}'s Groups:" + "\n" + "{1}", true),
     LISTGROUPS_TEMP("&b{0}'s Temporary Groups:" + "\n" + "{1}", true),
+    LIST_TRACKS("&b{0}'s Tracks:" + "\n" + "{1}", true),
+    LIST_TRACKS_EMPTY("{0} is not on any tracks.", true),
 
     SETPERMISSION_SUCCESS("&aSet &b{0}&a to &b{1}&a for &b{2}&a.", true),
     SETPERMISSION_SERVER_SUCCESS("&aSet &b{0}&a to &b{1}&a for &b{2}&a on server &b{3}&a.", true),
