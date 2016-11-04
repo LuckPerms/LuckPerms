@@ -279,15 +279,12 @@ public class Util {
 
 
     private static MetaComparator metaComparator = null;
-    public class MetaComparator implements Comparator<Map.Entry<Integer, String>> {
+    public class MetaComparator implements Comparator<Map.Entry<Integer, Node>> {
 
         @Override
-        public int compare(Map.Entry<Integer, String> o1, Map.Entry<Integer, String> o2) {
+        public int compare(Map.Entry<Integer, Node> o1, Map.Entry<Integer, Node> o2) {
             int result = Integer.compare(o1.getKey(), o2.getKey());
-            if (result == 0) {
-                result = o1.getValue().compareTo(o2.getValue());
-            }
-            return result;
+            return result != 0 ? result : 1;
         }
     }
 }

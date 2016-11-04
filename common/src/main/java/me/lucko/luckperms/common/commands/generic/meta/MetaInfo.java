@@ -43,30 +43,22 @@ public class MetaInfo extends SecondarySubCommand {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) {
-        SortedSet<Map.Entry<Integer, String>> prefixes = new TreeSet<>(Util.getMetaComparator().reversed());
-        SortedSet<Map.Entry<Integer, String>> suffixes = new TreeSet<>(Util.getMetaComparator().reversed());
+        SortedSet<Map.Entry<Integer, Node>> prefixes = new TreeSet<>(Util.getMetaComparator().reversed());
+        SortedSet<Map.Entry<Integer, Node>> suffixes = new TreeSet<>(Util.getMetaComparator().reversed());
+        Set<Node> meta = new HashSet<>();
 
+        // Collect data
         for (Node node : holder.getAllNodes(null, Contexts.allowAll())) {
-            if (!node.isSuffix() && !node.isPrefix()) {
+            if (!node.isSuffix() && !node.isPrefix() && !node.isMeta()) {
                 continue;
             }
 
-            StringBuilder sb = new StringBuilder();
-            if (node.isServerSpecific()) {
-                if (node.isWorldSpecific()) {
-                    sb.append("&6W=").append(node.getWorld().get()).append(" ");
-                }
-                sb.append("&6S=").append(node.getServer().get()).append(" ");
-            }
-
             if (node.isPrefix()) {
-                sb.append(node.getPrefix().getValue());
-                prefixes.add(new AbstractMap.SimpleEntry<>(node.getPrefix().getKey(), sb.toString()));
-            }
-
-            if (node.isSuffix()) {
-                sb.append(node.getSuffix().getValue());
-                suffixes.add(new AbstractMap.SimpleEntry<>(node.getSuffix().getKey(), sb.toString()));
+                prefixes.add(new AbstractMap.SimpleEntry<>(node.getPrefix().getKey(), node));
+            } else if (node.isSuffix()) {
+                suffixes.add(new AbstractMap.SimpleEntry<>(node.getSuffix().getKey(), node));
+            } else if (node.isMeta()) {
+                meta.add(node);
             }
         }
 
@@ -74,8 +66,20 @@ public class MetaInfo extends SecondarySubCommand {
             Message.CHAT_META_PREFIX_NONE.send(sender, holder.getFriendlyName());
         } else {
             Message.CHAT_META_PREFIX_HEADER.send(sender, holder.getFriendlyName());
-            for (Map.Entry<Integer, String> e : prefixes) {
-                Message.CHAT_META_ENTRY.send(sender, e.getKey(), e.getValue());
+            for (Map.Entry<Integer, Node> e : prefixes) {
+                if (e.getValue().isServerSpecific() || e.getValue().isWorldSpecific()) {
+                    StringBuilder sb = new StringBuilder();
+                    if (e.getValue().isServerSpecific()) {
+                        sb.append(" &8(&7server=&f").append(e.getValue().getServer().get()).append("&8)");
+                    }
+                    if (e.getValue().isWorldSpecific()) {
+                        sb.append(" &8(&7world=&f").append(e.getValue().getWorld().get()).append("&8)");
+                    }
+                    
+                    Message.CHAT_META_ENTRY_WITH_CONTEXT.send(sender, e.getKey(), e.getValue().getPrefix().getValue(), sb.toString());
+                } else {
+                    Message.CHAT_META_ENTRY.send(sender, e.getKey(), e.getValue().getPrefix().getValue());
+                }
             }
         }
 
@@ -83,8 +87,41 @@ public class MetaInfo extends SecondarySubCommand {
             Message.CHAT_META_SUFFIX_NONE.send(sender, holder.getFriendlyName());
         } else {
             Message.CHAT_META_SUFFIX_HEADER.send(sender, holder.getFriendlyName());
-            for (Map.Entry<Integer, String> e : suffixes) {
-                Message.CHAT_META_ENTRY.send(sender, e.getKey(), e.getValue());
+            for (Map.Entry<Integer, Node> e : suffixes) {
+                if (e.getValue().isServerSpecific() || e.getValue().isWorldSpecific()) {
+                    StringBuilder sb = new StringBuilder();
+                    if (e.getValue().isServerSpecific()) {
+                        sb.append(" &8(&7server=&f").append(e.getValue().getServer().get()).append("&8)");
+                    }
+                    if (e.getValue().isWorldSpecific()) {
+                        sb.append(" &8(&7world=&f").append(e.getValue().getWorld().get()).append("&8)");
+                    }
+
+                    Message.CHAT_META_ENTRY_WITH_CONTEXT.send(sender, e.getKey(), e.getValue().getSuffix().getValue(), sb.toString());
+                } else {
+                    Message.CHAT_META_ENTRY.send(sender, e.getKey(), e.getValue().getSuffix().getValue());
+                }
+            }
+        }
+
+        if (meta.isEmpty()) {
+            Message.META_NONE.send(sender, holder.getFriendlyName());
+        } else {
+            Message.META_HEADER.send(sender, holder.getFriendlyName());
+            for (Node m : meta) {
+                if (m.isServerSpecific() || m.isWorldSpecific()) {
+                    StringBuilder sb = new StringBuilder();
+                    if (m.isServerSpecific()) {
+                        sb.append(" &8(&7server=&f").append(m.getServer().get()).append("&8)");
+                    }
+                    if (m.isWorldSpecific()) {
+                        sb.append(" &8(&7world=&f").append(m.getWorld().get()).append("&8)");
+                    }
+
+                    Message.META_ENTRY_WITH_CONTEXT.send(sender, m.getMeta().getKey(), m.getMeta().getValue(), sb.toString());
+                } else {
+                    Message.META_ENTRY.send(sender, m.getMeta().getKey(), m.getMeta().getValue());
+                }
             }
         }
 

@@ -199,9 +199,14 @@ public enum Message {
 
     CHAT_META_PREFIX_HEADER("&b{0}'s Prefixes", true),
     CHAT_META_SUFFIX_HEADER("&b{0}'s Suffixes", true),
-    CHAT_META_ENTRY("&b-> &b{0} &f- &f\"{1}&f\"", true),
+    META_HEADER("&b{0}'s Meta", true),
+    CHAT_META_ENTRY("&b-> {0} &f- &f\"{1}&f\"", true),
+    CHAT_META_ENTRY_WITH_CONTEXT("&b-> {0} &f- &f\"{1}&f\"{2}", true),
+    META_ENTRY("&b-> &a{0} &f= &f\"{1}&f\"", true),
+    META_ENTRY_WITH_CONTEXT("&b-> &a{0} &f= &f\"{1}&f\"{2}", true),
     CHAT_META_PREFIX_NONE("&b{0} has no prefixes.", true),
     CHAT_META_SUFFIX_NONE("&b{0} has no suffixes.", true),
+    META_NONE("&b{0} has no meta.", true),
 
     META_INVALID_PRIORITY("Invalid priority '{0}'. Expected a number.", true),
     ALREADY_HAS_PREFIX("{0} already has that prefix set.", true),
