@@ -162,7 +162,9 @@ public class UserPromote extends SubCommand<User> {
             return CommandResult.LOADING_ERROR;
         }
 
-        user.clearParents(server, world);
+        try {
+            user.unsetPermission(nodes.stream().findAny().get());
+        } catch (ObjectLacksException ignored) {}
         try {
             user.setPermission(NodeFactory.newBuilder("group." + nextGroup.getName()).setServer(server).setWorld(world).build());
         } catch (ObjectAlreadyHasException ignored) {}

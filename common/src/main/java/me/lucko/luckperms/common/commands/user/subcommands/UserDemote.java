@@ -162,7 +162,9 @@ public class UserDemote extends SubCommand<User> {
             return CommandResult.LOADING_ERROR;
         }
 
-        user.clearParents(server, world);
+        try {
+            user.unsetPermission(nodes.stream().findAny().get());
+        } catch (ObjectLacksException ignored) {}
         try {
             user.setPermission(NodeFactory.newBuilder("group." + previousGroup.getName()).setServer(server).setWorld(world).build());
         } catch (ObjectAlreadyHasException ignored) {}
