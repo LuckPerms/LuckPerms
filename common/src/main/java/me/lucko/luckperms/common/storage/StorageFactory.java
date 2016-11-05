@@ -57,13 +57,13 @@ public class StorageFactory {
             Set<String> neededTypes = new HashSet<>();
             neededTypes.addAll(types.values());
 
-            Map<String, Datastore> backing = new HashMap<>();
+            Map<String, AbstractBacking> backing = new HashMap<>();
 
             for (String type : neededTypes) {
-                backing.put(type, fromString(type, plugin));
+                backing.put(type, backingFromString(type, plugin));
             }
 
-            datastore = new SplitBacking(plugin, backing, types);
+            datastore = AbstractDatastore.wrap(plugin, new SplitBacking(plugin, backing, types));
 
         } else {
             String storageMethod = plugin.getConfiguration().getStorageMethod().toLowerCase();
@@ -82,19 +82,23 @@ public class StorageFactory {
     }
     
     private static Datastore fromString(String storageMethod, LuckPermsPlugin plugin) {
-        switch (storageMethod) {
+        return AbstractDatastore.wrap(plugin, backingFromString(storageMethod, plugin));
+    }
+
+    private static AbstractBacking backingFromString(String method, LuckPermsPlugin plugin) {
+        switch (method) {
             case "mysql":
-                return AbstractDatastore.wrap(plugin, new MySQLBacking(plugin, plugin.getConfiguration().getDatabaseValues()));
+                return new MySQLBacking(plugin, plugin.getConfiguration().getDatabaseValues());
             case "sqlite":
-                return AbstractDatastore.wrap(plugin, new SQLiteBacking(plugin, new File(plugin.getDataFolder(), "luckperms.sqlite")));
+                return new SQLiteBacking(plugin, new File(plugin.getDataFolder(), "luckperms.sqlite"));
             case "h2":
-                return AbstractDatastore.wrap(plugin, new H2Backing(plugin, new File(plugin.getDataFolder(), "luckperms.db")));
+                return new H2Backing(plugin, new File(plugin.getDataFolder(), "luckperms.db"));
             case "mongodb":
-                return AbstractDatastore.wrap(plugin, new MongoDBBacking(plugin, plugin.getConfiguration().getDatabaseValues()));
+                return new MongoDBBacking(plugin, plugin.getConfiguration().getDatabaseValues());
             case "yaml":
-                return AbstractDatastore.wrap(plugin, new YAMLBacking(plugin, plugin.getDataFolder()));
+                return new YAMLBacking(plugin, plugin.getDataFolder());
             default:
-                return AbstractDatastore.wrap(plugin, new JSONBacking(plugin, plugin.getDataFolder()));
+                return new JSONBacking(plugin, plugin.getDataFolder());
         }
     }
 }
