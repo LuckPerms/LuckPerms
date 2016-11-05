@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 
 public class VerboseCommand extends SingleMainCommand {
     public VerboseCommand() {
-        super("Verbose", "/%s verbose <true|false> [filters]", 1, Permission.VERBOSE);
+        super("Verbose", "/%s verbose <true|false> [filters...]", 1, Permission.VERBOSE);
     }
 
     @Override
@@ -58,7 +58,7 @@ public class VerboseCommand extends SingleMainCommand {
 
         List<String> filters = new ArrayList<>();
         if (args.size() != 1) {
-            filters.addAll(args.subList(1, args.size() + 1));
+            filters.addAll(args.subList(1, args.size()));
         }
 
 

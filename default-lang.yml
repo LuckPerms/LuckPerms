@@ -46,7 +46,7 @@ use-uninherit-command: "Use the 'parent remove' command instead of specifying th
 
 
 verbose-on: "&bVerbose checking output set to &aTRUE &bfor all permissions."
-verbose-on_query: "&bVerbose checking output set to &aTRUE &bfor permissions starting with &f\"{0}\"&b."
+verbose-on_query: "&bVerbose checking output set to &aTRUE &bfor permissions matching the following filters: &f{0}"
 verbose-off: "&bVerbose checking output set to &cFALSE&b."
 
 create-success: "&b{0}&a was successfully created."

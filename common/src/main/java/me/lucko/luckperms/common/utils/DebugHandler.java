@@ -39,22 +39,18 @@ public class DebugHandler {
     private final Map<Reciever, List<String>> listeners = new ConcurrentHashMap<>();
 
     public void printOutput(String checked, String node, Tristate value) {
+        all:
         for (Map.Entry<Reciever, List<String>> e : listeners.entrySet()) {
-            List<String> filters = e.getValue();
-
-            find:
-            if (!filters.isEmpty()) {
-                for (String filter : filters) {
-                    if (node.toLowerCase().startsWith(filter.toLowerCase())) {
-                        break find;
-                    }
-
-                    if (checked.equalsIgnoreCase(filter)) {
-                        break find;
-                    }
+            for (String filter : e.getValue()) {
+                if (node.toLowerCase().startsWith(filter.toLowerCase())) {
+                    continue;
                 }
 
-                continue;
+                if (checked.equalsIgnoreCase(filter)) {
+                    continue;
+                }
+
+                continue all;
             }
 
             Message.LOG.send(e.getKey().getSender(), "&7Checking &a" + checked + "&7 for: &a" + node + " &f(&7" + value.toString() + "&f)");
