@@ -89,14 +89,14 @@ public abstract class PermissionHolder {
         TreeSet<LocalizedNode> combined = new TreeSet<>(PriorityComparator.reverse());
         Set<Node> enduring = getNodes();
         if (!enduring.isEmpty()) {
-            combined.addAll(getNodes().stream()
+            combined.addAll(enduring.stream()
                     .map(n -> makeLocal(n, getObjectName()))
                     .collect(Collectors.toList())
             );
         }
         Set<Node> tran = getTransientNodes();
         if (!tran.isEmpty()) {
-            combined.addAll(getTransientNodes().stream()
+            combined.addAll(tran.stream()
                     .map(n -> makeLocal(n, getObjectName()))
                     .collect(Collectors.toList())
             );
@@ -123,14 +123,14 @@ public abstract class PermissionHolder {
         TreeSet<LocalizedNode> combined = new TreeSet<>(PriorityComparator.reverse());
         Set<Node> enduring = getNodes();
         if (!enduring.isEmpty()) {
-            combined.addAll(getNodes().stream()
+            combined.addAll(enduring.stream()
                     .map(n -> makeLocal(n, getObjectName()))
                     .collect(Collectors.toList())
             );
         }
         Set<Node> tran = getTransientNodes();
         if (!tran.isEmpty()) {
-            combined.addAll(getTransientNodes().stream()
+            combined.addAll(transientNodes.stream()
                     .map(n -> makeLocal(n, getObjectName()))
                     .collect(Collectors.toList())
             );
@@ -190,46 +190,53 @@ public abstract class PermissionHolder {
      */
     public boolean auditTemporaryPermissions() {
         boolean work = false;
+        Set<Node> removed = new HashSet<>();
 
         synchronized (nodes) {
-            boolean w = false;
-
             Iterator<Node> it = nodes.iterator();
             while (it.hasNext()) {
                 Node entry = it.next();
                 if (entry.hasExpired()) {
-                    plugin.getApiProvider().fireEventAsync(new PermissionNodeExpireEvent(new PermissionHolderLink(this), entry));
-                    w = true;
+                    removed.add(entry);
+                    work = true;
                     it.remove();
                 }
             }
+        }
 
-            if (w) {
-                invalidateCache(true);
-                work = true;
-            }
+        if (work) {
+            invalidateCache(true);
+            work = false;
         }
 
         synchronized (transientNodes) {
-            boolean w = false;
-
             Iterator<Node> it = transientNodes.iterator();
             while (it.hasNext()) {
                 Node entry = it.next();
                 if (entry.hasExpired()) {
-                    plugin.getApiProvider().fireEventAsync(new PermissionNodeExpireEvent(new PermissionHolderLink(this), entry));
-                    w = true;
+                    removed.add(entry);
+                    work = true;
                     it.remove();
                 }
             }
 
-            if (w) {
-                invalidateCache(false);
-                work = true;
-            }
+
         }
 
-        return work;
+        if (work) {
+            invalidateCache(false);
+        }
+
+        if (removed.isEmpty()) {
+            return false;
+        }
+
+        PermissionHolderLink link = new PermissionHolderLink(this);
+        for (Node r : removed) {
+            plugin.getApiProvider().fireEventAsync(new PermissionNodeExpireEvent(link, r));
+        }
+
+        return true;
     }
 
     /**
@@ -378,8 +385,8 @@ public abstract class PermissionHolder {
 
             nodes.clear();
             nodes.addAll(set);
-            invalidateCache(true);
         }
+        invalidateCache(true);
     }
 
     public void setTransientNodes(Set<Node> set) {
@@ -390,28 +397,26 @@ public abstract class PermissionHolder {
 
             transientNodes.clear();
             transientNodes.addAll(set);
-            invalidateCache(false);
         }
+        invalidateCache(false);
     }
 
     @Deprecated
     public void setNodes(Map<String, Boolean> nodes) {
-        synchronized (this.nodes) {
-            this.nodes.clear();
-            this.nodes.addAll(nodes.entrySet().stream()
-                    .map(e -> makeNode(e.getKey(), e.getValue()))
-                    .collect(Collectors.toList())
-            );
-            invalidateCache(true);
-        }
+        Set<Node> set = nodes.entrySet().stream()
+                .map(e -> makeNode(e.getKey(), e.getValue()))
+                .collect(Collectors.toSet());
+
+        setNodes(set);
     }
 
     public void addNodeUnchecked(Node node) {
         synchronized (nodes) {
-            if (nodes.add(node)) {
-                invalidateCache(true);
+            if (!nodes.add(node)) {
+                return;
             }
         }
+        invalidateCache(true);
     }
 
     /**
@@ -518,8 +523,8 @@ public abstract class PermissionHolder {
 
         synchronized (nodes) {
             nodes.add(node);
-            invalidateCache(true);
         }
+        invalidateCache(true);
 
         plugin.getApiProvider().fireEventAsync(new PermissionNodeSetEvent(new PermissionHolderLink(this), node));
     }
@@ -536,8 +541,8 @@ public abstract class PermissionHolder {
 
         synchronized (transientNodes) {
             transientNodes.add(node);
-            invalidateCache(false);
         }
+        invalidateCache(false);
 
         plugin.getApiProvider().fireEventAsync(new PermissionNodeSetEvent(new PermissionHolderLink(this), node));
     }
@@ -578,8 +583,8 @@ public abstract class PermissionHolder {
 
         synchronized (nodes) {
             nodes.removeIf(e -> e.almostEquals(node));
-            invalidateCache(true);
         }
+        invalidateCache(true);
 
         if (node.isGroupNode()) {
             plugin.getApiProvider().fireEventAsync(new GroupRemoveEvent(new PermissionHolderLink(this),
@@ -601,8 +606,8 @@ public abstract class PermissionHolder {
 
         synchronized (transientNodes) {
             transientNodes.removeIf(e -> e.almostEquals(node));
-            invalidateCache(false);
         }
+        invalidateCache(false);
 
         if (node.isGroupNode()) {
             plugin.getApiProvider().fireEventAsync(new GroupRemoveEvent(new PermissionHolderLink(this),
@@ -732,19 +737,19 @@ public abstract class PermissionHolder {
     public void clearNodes() {
         synchronized (nodes) {
             nodes.clear();
-            invalidateCache(true);
         }
+        invalidateCache(true);
     }
 
     public void clearNodes(String server) {
         String finalServer = Optional.ofNullable(server).orElse("global");
 
         synchronized (nodes) {
-            boolean b = nodes.removeIf(n -> n.getServer().orElse("global").equalsIgnoreCase(finalServer));
-            if (b) {
-                invalidateCache(true);
+            if (!nodes.removeIf(n -> n.getServer().orElse("global").equalsIgnoreCase(finalServer))) {
+                return;
             }
         }
+        invalidateCache(true);
     }
 
     public void clearNodes(String server, String world) {
@@ -755,10 +760,11 @@ public abstract class PermissionHolder {
             boolean b = nodes.removeIf(n ->
                     n.getServer().orElse("global").equalsIgnoreCase(finalServer) &&
                             n.getWorld().orElse("null").equalsIgnoreCase(finalWorld));
-            if (b) {
-                invalidateCache(true);
+            if (!b) {
+                return;
             }
         }
+        invalidateCache(true);
     }
 
     public void clearParents(String server, String world) {
@@ -771,19 +777,20 @@ public abstract class PermissionHolder {
                             n.getServer().orElse("global").equalsIgnoreCase(finalServer) &&
                             n.getWorld().orElse("null").equalsIgnoreCase(finalWorld)
             );
-            if (b) {
-                invalidateCache(true);
+            if (!b) {
+                return;
             }
         }
+        invalidateCache(true);
     }
 
     public void clearMeta() {
         synchronized (nodes) {
-            boolean b = nodes.removeIf(n -> n.isMeta() || n.isPrefix() || n.isSuffix());
-            if (b) {
-                invalidateCache(true);
+            if (!nodes.removeIf(n -> n.isMeta() || n.isPrefix() || n.isSuffix())) {
+                return;
             }
         }
+        invalidateCache(true);
     }
 
     public void clearMeta(String server) {
@@ -794,10 +801,11 @@ public abstract class PermissionHolder {
                     (n.isMeta() || n.isPrefix() || n.isSuffix()) &&
                             n.getServer().orElse("global").equalsIgnoreCase(finalServer)
             );
-            if (b) {
-                invalidateCache(true);
+            if (!b) {
+                return;
             }
         }
+        invalidateCache(true);
     }
 
     public void clearMeta(String server, String world) {
@@ -811,10 +819,11 @@ public abstract class PermissionHolder {
                                     n.getWorld().orElse("null").equalsIgnoreCase(finalWorld)
                     )
             );
-            if (b) {
-                invalidateCache(true);
+            if (!b) {
+                return;
             }
         }
+        invalidateCache(true);
     }
 
     public void clearMetaKeys(String key, String server, String world, boolean temp) {
@@ -827,17 +836,18 @@ public abstract class PermissionHolder {
                             n.getServer().orElse("global").equalsIgnoreCase(finalServer) &&
                             n.getWorld().orElse("null").equalsIgnoreCase(finalWorld)
             );
-            if (b) {
-                invalidateCache(true);
+            if (!b) {
+                return;
             }
         }
+        invalidateCache(true);
     }
 
     public void clearTransientNodes() {
         synchronized (transientNodes) {
             transientNodes.clear();
-            invalidateCache(false);
         }
+        invalidateCache(false);
     }
 
     /**
