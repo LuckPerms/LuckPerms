@@ -67,6 +67,11 @@ apply-regex: true
 # If set to true, LuckPerms will detect and expand shorthand node patterns.
 apply-shorthand: true
 
+# Define special group weights for this server.
+# Default is just 0.
+group-weight:
+#  admin: 10
+
 
 
 

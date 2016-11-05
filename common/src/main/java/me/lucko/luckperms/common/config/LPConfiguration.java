@@ -62,6 +62,8 @@ public interface LPConfiguration {
 
     boolean isApplyingShorthand();
 
+    Map<String, Integer> getGroupWeights();
+
     boolean isLogNotify();
 
     boolean isOpsEnabled();

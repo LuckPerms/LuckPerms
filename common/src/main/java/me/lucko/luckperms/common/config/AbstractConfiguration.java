@@ -59,6 +59,7 @@ public abstract class AbstractConfiguration<T extends LuckPermsPlugin> implement
     private boolean applyingWildcards;
     private boolean applyingRegex;
     private boolean applyingShorthand;
+    private Map<String, Integer> groupWeights;
     private boolean logNotify;
     private boolean opsEnabled;
     private boolean commandsAllowOp;
@@ -109,6 +110,14 @@ public abstract class AbstractConfiguration<T extends LuckPermsPlugin> implement
         applyingWildcards = getBoolean("apply-wildcards", true);
         applyingRegex = getBoolean("apply-regex", true);
         applyingShorthand = getBoolean("apply-shorthand", true);
+        Map<String, String> weights = getMap("group-weight", Collections.emptyMap());
+        ImmutableMap.Builder<String, Integer> mb = ImmutableMap.builder();
+        for (Map.Entry<String, String> e : weights.entrySet()) {
+            try {
+                mb.put(e.getKey().toLowerCase(), Integer.parseInt(e.getValue()));
+            } catch (NumberFormatException ignored) {}
+        }
+        groupWeights = mb.build();
         logNotify = getBoolean("log-notify", true);
         autoOp = getBoolean("auto-op", false);
         opsEnabled = !isAutoOp() && getBoolean("enable-ops", true);

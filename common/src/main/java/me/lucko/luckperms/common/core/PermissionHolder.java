@@ -25,6 +25,7 @@ package me.lucko.luckperms.common.core;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.Maps;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,7 @@ import me.lucko.luckperms.api.event.events.*;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.api.internal.GroupLink;
 import me.lucko.luckperms.common.api.internal.PermissionHolderLink;
+import me.lucko.luckperms.common.commands.Util;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.utils.Cache;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
@@ -263,7 +265,18 @@ public abstract class PermissionHolder {
                 !node.shouldApplyWithContext(contexts, false)
         );
 
-        for (Node parent : parents) {
+        TreeSet<Map.Entry<Integer, Node>> sortedParents = new TreeSet<>(Util.getMetaComparator().reversed());
+        Map<String, Integer> weights = plugin.getConfiguration().getGroupWeights();
+        for (Node node : parents) {
+            if (weights.containsKey(node.getGroupName().toLowerCase())) {
+                sortedParents.add(Maps.immutableEntry(weights.get(node.getGroupName().toLowerCase()), node));
+            } else {
+                sortedParents.add(Maps.immutableEntry(0, node));
+            }
+        }
+
+        for (Map.Entry<Integer, Node> e : sortedParents) {
+            Node parent = e.getValue();
             Group group = plugin.getGroupManager().get(parent.getGroupName());
             if (group == null) {
                 continue;
