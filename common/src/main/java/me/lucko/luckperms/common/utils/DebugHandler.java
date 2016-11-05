@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.common.utils;
 
+import com.google.common.collect.ImmutableList;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -29,23 +30,39 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.commands.Sender;
 import me.lucko.luckperms.common.constants.Message;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class DebugHandler {
-    private final Map<Reciever, String> listeners = new ConcurrentHashMap<>();
+    private final Map<Reciever, List<String>> listeners = new ConcurrentHashMap<>();
 
     public void printOutput(String checked, String node, Tristate value) {
-        for (Map.Entry<Reciever, String> e : listeners.entrySet()) {
-            if (node.toLowerCase().startsWith(e.getValue().toLowerCase())) {
-                Message.LOG.send(e.getKey().getSender(), "&7Checking &a" + checked + "&7 for: &a" + node + " &f(&7" + value.toString() + "&f)");
+        for (Map.Entry<Reciever, List<String>> e : listeners.entrySet()) {
+            List<String> filters = e.getValue();
+
+            find:
+            if (!filters.isEmpty()) {
+                for (String filter : filters) {
+                    if (node.toLowerCase().startsWith(filter.toLowerCase())) {
+                        break find;
+                    }
+
+                    if (checked.equalsIgnoreCase(filter)) {
+                        break find;
+                    }
+                }
+
+                continue;
             }
+
+            Message.LOG.send(e.getKey().getSender(), "&7Checking &a" + checked + "&7 for: &a" + node + " &f(&7" + value.toString() + "&f)");
         }
     }
 
-    public void register(Sender sender, String s) {
-        listeners.put(new Reciever(sender.getUuid(), sender), s);
+    public void register(Sender sender, List<String> filters) {
+        listeners.put(new Reciever(sender.getUuid(), sender), ImmutableList.copyOf(filters));
     }
 
     public void unregister(UUID uuid) {

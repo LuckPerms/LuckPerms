@@ -29,11 +29,13 @@ import me.lucko.luckperms.common.commands.SingleMainCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class VerboseCommand extends SingleMainCommand {
     public VerboseCommand() {
-        super("Verbose", "/%s verbose <true|false> [query]", 1, Permission.VERBOSE);
+        super("Verbose", "/%s verbose <true|false> [filters]", 1, Permission.VERBOSE);
     }
 
     @Override
@@ -54,10 +56,15 @@ public class VerboseCommand extends SingleMainCommand {
             return CommandResult.SUCCESS;
         }
 
-        String query = args.size() == 1 ? "" : args.get(1);
-        plugin.getDebugHandler().register(sender, query);
-        if (!query.equals("")) {
-            Message.VERBOSE_ON_QUERY.send(sender, query);
+        List<String> filters = new ArrayList<>();
+        if (args.size() != 1) {
+            filters.addAll(args.subList(1, args.size() + 1));
+        }
+
+
+        plugin.getDebugHandler().register(sender, filters);
+        if (!filters.isEmpty()) {
+            Message.VERBOSE_ON_QUERY.send(sender, filters.stream().collect(Collectors.joining("&7, &f")));
         } else {
             Message.VERBOSE_ON.send(sender);
         }
