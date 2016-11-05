@@ -23,6 +23,7 @@
 package me.lucko.luckperms.common.api.internal;
 
 import lombok.AllArgsConstructor;
+import lombok.NonNull;
 import me.lucko.luckperms.api.UuidCache;
 
 import java.util.UUID;
@@ -35,12 +36,12 @@ public class UuidCacheLink implements UuidCache {
     private final me.lucko.luckperms.common.core.UuidCache master;
 
     @Override
-    public UUID getUUID(UUID external) {
+    public UUID getUUID(@NonNull UUID external) {
         return master.getUUID(external);
     }
 
     @Override
-    public UUID getExternalUUID(UUID internal) {
+    public UUID getExternalUUID(@NonNull UUID internal) {
         return master.getExternalUUID(internal);
     }
 }

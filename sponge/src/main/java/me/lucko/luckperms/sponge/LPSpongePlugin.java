@@ -307,7 +307,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     @Override
     public List<Sender> getNotifyListeners() {
         return game.getServer().getOnlinePlayers().stream()
-                .map(s -> SpongeSenderFactory.get(this).wrap(s, Collections.singleton(Permission.LOG_NOTIFY)))
+                .map(s -> SpongeSenderFactory.get(this).wrap(s))
                 .filter(Permission.LOG_NOTIFY::isAuthorized)
                 .collect(Collectors.toList());
     }

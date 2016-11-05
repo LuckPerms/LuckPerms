@@ -322,7 +322,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     @Override
     public List<Sender> getNotifyListeners() {
         return getServer().getOnlinePlayers().stream()
-                .map(p -> BukkitSenderFactory.get(this).wrap(p, Collections.singleton(Permission.LOG_NOTIFY)))
+                .map(p -> BukkitSenderFactory.get(this).wrap(p))
                 .filter(Permission.LOG_NOTIFY::isAuthorized)
                 .collect(Collectors.toList());
     }

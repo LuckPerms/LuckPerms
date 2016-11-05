@@ -25,7 +25,6 @@ package me.lucko.luckperms.common.commands.generic.parent;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Predicate;
 import me.lucko.luckperms.common.commands.Sender;
 import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
 import me.lucko.luckperms.common.constants.Message;
@@ -35,6 +34,7 @@ import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.common.utils.DateUtil;
+import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.List;
@@ -44,7 +44,7 @@ import static me.lucko.luckperms.common.commands.SubCommand.getGroupTabComplete;
 public class ParentAddTemp extends SecondarySubCommand {
     public ParentAddTemp() {
         super("addtemp", "Sets another group for the object to inherit permissions from temporarily",
-                Permission.USER_PARENT_ADDTEMP, Permission.GROUP_PARENT_ADDTEMP, Predicate.notInRange(2, 4),
+                Permission.USER_PARENT_ADDTEMP, Permission.GROUP_PARENT_ADDTEMP, Predicates.notInRange(2, 4),
                 Arg.list(
                         Arg.create("group", true, "the group to inherit from"),
                         Arg.create("duration", true, "the duration of the group membership"),

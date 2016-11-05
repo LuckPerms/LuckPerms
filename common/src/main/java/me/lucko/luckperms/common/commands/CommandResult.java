@@ -34,13 +34,13 @@ public enum CommandResult {
     INVALID_ARGS(false),
     NO_PERMISSION(false);
 
-    private boolean booleanValue;
+    private boolean value;
 
-    public boolean booleanValue() {
-        return booleanValue;
+    public boolean asBoolean() {
+        return value;
     }
 
-    static CommandResult of(boolean b) {
+    public static CommandResult of(boolean b) {
         return b ? SUCCESS : FAILURE;
     }
 

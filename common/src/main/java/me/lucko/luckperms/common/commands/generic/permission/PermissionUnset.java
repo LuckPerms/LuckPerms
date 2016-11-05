@@ -25,7 +25,6 @@ package me.lucko.luckperms.common.commands.generic.permission;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Predicate;
 import me.lucko.luckperms.common.commands.Sender;
 import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
 import me.lucko.luckperms.common.constants.Message;
@@ -33,13 +32,14 @@ import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
+import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.List;
 
 public class PermissionUnset extends SecondarySubCommand {
     public PermissionUnset() {
-        super("unset", "Unsets a permission for the object", Permission.USER_PERM_UNSET, Permission.GROUP_PERM_UNSET, Predicate.notInRange(1, 3),
+        super("unset", "Unsets a permission for the object", Permission.USER_PERM_UNSET, Permission.GROUP_PERM_UNSET, Predicates.notInRange(1, 3),
                 Arg.list(
                         Arg.create("node", true, "the permission node to unset"),
                         Arg.create("server", false, "the server to remove the permission node on"),

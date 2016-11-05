@@ -24,6 +24,7 @@ package me.lucko.luckperms.common.storage;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.Delegate;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.data.Log;
@@ -44,13 +45,13 @@ import java.util.function.Supplier;
  */
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class AbstractDatastore implements Datastore {
-
     public static Datastore wrap(LuckPermsPlugin plugin, AbstractBacking backing) {
         BufferedOutputDatastore bufferedDs = BufferedOutputDatastore.wrap(TolerantDatastore.wrap(new AbstractDatastore(backing)), 1000L);
         plugin.doAsyncRepeating(bufferedDs, 10L);
         return bufferedDs;
     }
 
+    @Delegate(types = Delegated.class)
     private final AbstractBacking backing;
 
     private <T> LPFuture<T> makeFuture(Supplier<T> supplier) {
@@ -63,43 +64,8 @@ public class AbstractDatastore implements Datastore {
     }
 
     @Override
-    public String getName() {
-        return backing.getName();
-    }
-
-    @Override
-    public boolean isAcceptingLogins() {
-        return backing.isAcceptingLogins();
-    }
-
-    @Override
-    public void setAcceptingLogins(boolean acceptingLogins) {
-        backing.setAcceptingLogins(acceptingLogins);
-    }
-
-    @Override
-    public void doAsync(Runnable r) {
-        backing.doAsync(r);
-    }
-
-    @Override
-    public void doSync(Runnable r) {
-        backing.doSync(r);
-    }
-
-    @Override
     public Datastore force() {
         return this;
-    }
-
-    @Override
-    public void init() {
-        backing.init();
-    }
-
-    @Override
-    public void shutdown() {
-        backing.shutdown();
     }
 
     @Override
@@ -195,5 +161,15 @@ public class AbstractDatastore implements Datastore {
     @Override
     public LPFuture<String> getName(UUID uuid) {
         return makeFuture(() -> backing.getName(uuid));
+    }
+
+    private interface Delegated {
+        String getName();
+        boolean isAcceptingLogins();
+        void setAcceptingLogins(boolean b);
+        void doAsync(Runnable r);
+        void doSync(Runnable r);
+        void init();
+        void shutdown();
     }
 }

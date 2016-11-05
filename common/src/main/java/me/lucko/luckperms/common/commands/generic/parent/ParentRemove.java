@@ -25,7 +25,6 @@ package me.lucko.luckperms.common.commands.generic.parent;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Predicate;
 import me.lucko.luckperms.common.commands.Sender;
 import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
 import me.lucko.luckperms.common.constants.Message;
@@ -34,6 +33,7 @@ import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.users.User;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
+import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.List;
@@ -43,7 +43,7 @@ import static me.lucko.luckperms.common.commands.SubCommand.getGroupTabComplete;
 public class ParentRemove extends SecondarySubCommand {
     public ParentRemove() {
         super("remove", "Removes a previously set inheritance rule", Permission.USER_PARENT_REMOVE, Permission.GROUP_PARENT_REMOVE,
-                Predicate.notInRange(1, 3),
+                Predicates.notInRange(1, 3),
                 Arg.list(
                         Arg.create("group", true, "the group to remove"),
                         Arg.create("server", false, "the server to remove the group on"),

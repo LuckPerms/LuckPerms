@@ -30,13 +30,14 @@ import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.tracks.Track;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
+import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.List;
 
 public class TrackAppend extends SubCommand<Track> {
     public TrackAppend() {
-        super("append", "Appends a group onto the end of the track", Permission.TRACK_APPEND, Predicate.not(1),
+        super("append", "Appends a group onto the end of the track", Permission.TRACK_APPEND, Predicates.not(1),
                 Arg.list(Arg.create("group", true, "the group to append"))
         );
     }

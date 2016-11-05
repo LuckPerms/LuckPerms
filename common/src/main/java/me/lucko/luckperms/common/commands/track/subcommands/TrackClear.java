@@ -24,19 +24,19 @@ package me.lucko.luckperms.common.commands.track.subcommands;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Predicate;
 import me.lucko.luckperms.common.commands.Sender;
 import me.lucko.luckperms.common.commands.SubCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.tracks.Track;
+import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 
 public class TrackClear extends SubCommand<Track> {
     public TrackClear() {
-        super("clear", "Clears the groups on the track", Permission.TRACK_CLEAR, Predicate.alwaysFalse(), null);
+        super("clear", "Clears the groups on the track", Permission.TRACK_CLEAR, Predicates.alwaysFalse(), null);
     }
 
     @Override

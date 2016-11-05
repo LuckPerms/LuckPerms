@@ -24,12 +24,16 @@ package me.lucko.luckperms.common.commands.usersbulkedit.subcommands;
 
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.*;
+import me.lucko.luckperms.common.commands.Arg;
+import me.lucko.luckperms.common.commands.CommandResult;
+import me.lucko.luckperms.common.commands.Sender;
+import me.lucko.luckperms.common.commands.SubCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.storage.Datastore;
 import me.lucko.luckperms.common.users.User;
+import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
@@ -37,7 +41,7 @@ import java.util.*;
 
 public class BulkEditPermission extends SubCommand<Datastore> {
     public BulkEditPermission() {
-        super("permission", "Bulk edit permissions", Permission.USER_BULKCHANGE, Predicate.not(4),
+        super("permission", "Bulk edit permissions", Permission.USER_BULKCHANGE, Predicates.not(4),
                 Arg.list(
                         Arg.create("node|null", true, "the node to edit ('null' to select and edit all nodes)"),
                         Arg.create("server|world", true, "if the bulk change is modifying a 'server' or a 'world'"),

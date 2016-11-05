@@ -24,10 +24,14 @@ package me.lucko.luckperms.common.commands.generic.other;
 
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.*;
+import me.lucko.luckperms.common.commands.CommandResult;
+import me.lucko.luckperms.common.commands.Sender;
+import me.lucko.luckperms.common.commands.SubCommand;
+import me.lucko.luckperms.common.commands.Util;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.PermissionHolder;
+import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 import java.util.Set;
@@ -36,7 +40,7 @@ import java.util.stream.Collectors;
 public class HolderShowTracks<T extends PermissionHolder> extends SubCommand<T> {
     public HolderShowTracks(boolean user) {
         super("showtracks", "Lists the tracks that the object is on",
-                user ? Permission.USER_SHOWTRACKS : Permission.GROUP_SHOWTRACKS, Predicate.alwaysFalse(), null);
+                user ? Permission.USER_SHOWTRACKS : Permission.GROUP_SHOWTRACKS, Predicates.alwaysFalse(), null);
     }
 
     @Override

@@ -42,7 +42,6 @@ public class UserManager extends AbstractManager<UserIdentifier, User> {
      * @param name The name to search by
      * @return a {@link User} object if the user is loaded, returns null if the user is not loaded
      */
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
     public User get(String name) {
         for (User user : getAll().values()) {
             if (user.getName().equalsIgnoreCase(name)) {

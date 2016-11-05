@@ -30,6 +30,7 @@ import me.lucko.luckperms.common.constants.Patterns;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.data.Log;
 import me.lucko.luckperms.common.utils.DateUtil;
+import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 import java.util.Map;
@@ -38,7 +39,7 @@ import java.util.UUID;
 
 public class LogUserHistory extends SubCommand<Log> {
     public LogUserHistory() {
-        super("userhistory", "View a user's history", Permission.LOG_USER_HISTORY, Predicate.notInRange(1, 2),
+        super("userhistory", "View a user's history", Permission.LOG_USER_HISTORY, Predicates.notInRange(1, 2),
                 Arg.list(
                         Arg.create("user", true, "the name/uuid of the user"),
                         Arg.create("page", false, "the page number to view")

@@ -23,9 +23,13 @@
 package me.lucko.luckperms.common.commands.generic;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.*;
+import me.lucko.luckperms.common.commands.CommandResult;
+import me.lucko.luckperms.common.commands.Sender;
+import me.lucko.luckperms.common.commands.SubCommand;
+import me.lucko.luckperms.common.commands.Util;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.core.PermissionHolder;
+import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,7 +42,7 @@ public class SecondaryMainCommand<T extends PermissionHolder> extends SubCommand
     private final List<SecondarySubCommand> secondaryCommands;
 
     public SecondaryMainCommand(String name, String description, boolean user, List<SecondarySubCommand> secondaryCommands) {
-        super(name, description, null, Predicate.alwaysFalse(), null);
+        super(name, description, null, Predicates.alwaysFalse(), null);
         this.secondaryCommands = secondaryCommands;
         this.user = user;
     }

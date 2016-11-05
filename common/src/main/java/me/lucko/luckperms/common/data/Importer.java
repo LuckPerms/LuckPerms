@@ -114,7 +114,7 @@ public class Importer {
 
         int errors = 0;
         for (Map.Entry<Integer, Result> e : cmdResult.entrySet()) {
-            if (e.getValue().getResult() != null && !e.getValue().getResult().booleanValue()) {
+            if (e.getValue().getResult() != null && !e.getValue().getResult().asBoolean()) {
                 errors++;
             }
         }
@@ -129,7 +129,7 @@ public class Importer {
 
         int errIndex = 1;
         for (Map.Entry<Integer, Result> e : cmdResult.entrySet()) {
-            if (e.getValue().getResult() != null && !e.getValue().getResult().booleanValue()) {
+            if (e.getValue().getResult() != null && !e.getValue().getResult().asBoolean()) {
                 Message.IMPORT_END_ERROR_HEADER.send(executor, errIndex, e.getKey(), e.getValue().getCommand(), e.getValue().getResult().toString());
                 for (String s : e.getValue().getOutput()) {
                     Message.IMPORT_END_ERROR_CONTENT.send(executor, s);
@@ -147,7 +147,7 @@ public class Importer {
         int errors = 0;
 
         for (Map.Entry<Integer, Result> e : cmdResult.entrySet()) {
-            if (e.getValue().getResult() != null && !e.getValue().getResult().booleanValue()) {
+            if (e.getValue().getResult() != null && !e.getValue().getResult().asBoolean()) {
                 errors++;
             }
         }

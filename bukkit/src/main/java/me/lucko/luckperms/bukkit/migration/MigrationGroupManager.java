@@ -24,11 +24,15 @@ package me.lucko.luckperms.bukkit.migration;
 
 import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.*;
+import me.lucko.luckperms.common.commands.Arg;
+import me.lucko.luckperms.common.commands.CommandResult;
+import me.lucko.luckperms.common.commands.Sender;
+import me.lucko.luckperms.common.commands.SubCommand;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.data.LogEntry;
+import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import org.anjocaido.groupmanager.GlobalGroups;
@@ -43,7 +47,7 @@ import java.util.stream.Collectors;
 
 public class MigrationGroupManager extends SubCommand<Object> {
     public MigrationGroupManager() {
-        super("groupmanager", "Migration from GroupManager", Permission.MIGRATION, Predicate.is(0),
+        super("groupmanager", "Migration from GroupManager", Permission.MIGRATION, Predicates.is(0),
                 Arg.list(Arg.create("world names...", false, "a list of worlds to migrate permissions from"))
         );
     }

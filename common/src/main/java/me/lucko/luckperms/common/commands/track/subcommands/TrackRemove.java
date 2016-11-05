@@ -29,13 +29,14 @@ import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.tracks.Track;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
+import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.List;
 
 public class TrackRemove extends SubCommand<Track> {
     public TrackRemove() {
-        super("remove", "Removes a group from the track", Permission.TRACK_REMOVE, Predicate.not(1),
+        super("remove", "Removes a group from the track", Permission.TRACK_REMOVE, Predicates.not(1),
                 Arg.list(Arg.create("group", true, "the group to remove"))
         );
     }

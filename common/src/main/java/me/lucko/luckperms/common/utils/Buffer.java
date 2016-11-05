@@ -22,10 +22,7 @@
 
 package me.lucko.luckperms.common.utils;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -96,29 +93,15 @@ public abstract class Buffer<T, R> implements Runnable {
         flush(DEFAULT_FLUSH_TIME);
     }
 
+    @Getter
+    @EqualsAndHashCode(of = "object")
     @AllArgsConstructor
     private static class BufferedObject<T, R> {
 
-        @Getter
         @Setter
         private long bufferTime;
-
-        @Getter
         private final T object;
-
-        @Getter
         private final AbstractFuture<R> future;
 
-        public boolean equals(Object o) {
-            if (o == this) return true;
-            if (!(o instanceof Buffer.BufferedObject)) return false;
-
-            final BufferedObject other = (BufferedObject) o;
-            return this.getObject() == null ? other.getObject() == null : this.getObject().equals(other.getObject());
-        }
-
-        public int hashCode() {
-            return 59 + (this.getObject() == null ? 43 : this.getObject().hashCode());
-        }
     }
 }

@@ -24,6 +24,7 @@ package me.lucko.luckperms.common.storage;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.Delegate;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.common.data.Log;
 import me.lucko.luckperms.common.groups.Group;
@@ -46,42 +47,14 @@ public class TolerantDatastore implements Datastore {
         return new TolerantDatastore(datastore);
     }
 
+    @Delegate(types = Delegated.class)
     private final Datastore backing;
+
     private final Phaser phaser = new Phaser();
-
-    @Override
-    public String getName() {
-        return backing.getName();
-    }
-
-    @Override
-    public boolean isAcceptingLogins() {
-        return backing.isAcceptingLogins();
-    }
-
-    @Override
-    public void setAcceptingLogins(boolean acceptingLogins) {
-        backing.setAcceptingLogins(acceptingLogins);
-    }
-
-    @Override
-    public void doAsync(Runnable r) {
-        backing.doAsync(r);
-    }
-
-    @Override
-    public void doSync(Runnable r) {
-        backing.doSync(r);
-    }
 
     @Override
     public Datastore force() {
         return this;
-    }
-
-    @Override
-    public void init() {
-        backing.init();
     }
 
     @Override
@@ -284,5 +257,14 @@ public class TolerantDatastore implements Datastore {
         } finally {
             phaser.arriveAndDeregister();
         }
+    }
+
+    private interface Delegated {
+        String getName();
+        boolean isAcceptingLogins();
+        void setAcceptingLogins(boolean b);
+        void doAsync(Runnable r);
+        void doSync(Runnable r);
+        void init();
     }
 }

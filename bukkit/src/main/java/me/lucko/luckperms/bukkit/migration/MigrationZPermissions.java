@@ -25,13 +25,17 @@ package me.lucko.luckperms.bukkit.migration;
 import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.*;
+import me.lucko.luckperms.common.commands.Arg;
+import me.lucko.luckperms.common.commands.CommandResult;
+import me.lucko.luckperms.common.commands.Sender;
+import me.lucko.luckperms.common.commands.SubCommand;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.tracks.Track;
 import me.lucko.luckperms.common.users.User;
+import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsService;
 
@@ -42,7 +46,7 @@ import java.util.stream.Collectors;
 
 public class MigrationZPermissions extends SubCommand<Object> {
     public MigrationZPermissions() {
-        super("zpermissions", "Migration from zPermissions", Permission.MIGRATION, Predicate.alwaysFalse(),
+        super("zpermissions", "Migration from zPermissions", Permission.MIGRATION, Predicates.alwaysFalse(),
                 Arg.list(Arg.create("world names...", false, "a list of worlds to migrate permissions from"))
         );
     }

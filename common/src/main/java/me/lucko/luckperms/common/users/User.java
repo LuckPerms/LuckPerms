@@ -99,7 +99,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
      * Sets up the UserData cache
      * Blocking call.
      */
-    public void setupData(boolean op) {
+    public synchronized void setupData(boolean op) {
         if (userData != null) {
             return;
         }
@@ -120,11 +120,11 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
      * Blocking call.
      */
     private synchronized void refreshPermissions() {
-        if (userData == null) {
+        UserData ud = userData;
+        if (ud == null) {
             return;
         }
 
-        UserData ud = userData;
         ud.recalculatePermissions();
         ud.recalculateMeta();
         getPlugin().getApiProvider().fireEventAsync(new UserPermissionRefreshEvent(new UserLink(this)));

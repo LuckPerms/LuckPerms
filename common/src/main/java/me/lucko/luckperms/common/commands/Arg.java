@@ -43,11 +43,7 @@ public class Arg {
     private final String description;
 
     public String asPrettyString() {
-        if (required) {
-            return "&8<&7" + name + "&8>";
-        } else {
-            return "&8[&7" + name + "&8]";
-        }
+        return required ? "&8<&7" + name + "&8>" : "&8[&7" + name + "&8]";
     }
 
 }

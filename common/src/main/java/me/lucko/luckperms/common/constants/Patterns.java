@@ -27,6 +27,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import lombok.experimental.UtilityClass;
 
 import java.util.concurrent.ExecutionException;
@@ -57,7 +58,7 @@ public class Patterns {
     public static Pattern compile(String regex) {
         try {
             return CACHE.get(regex);
-        } catch (ExecutionException e) {
+        } catch (UncheckedExecutionException | ExecutionException e) {
             return null;
         }
     }

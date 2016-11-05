@@ -23,19 +23,23 @@
 package me.lucko.luckperms.common.commands.user.subcommands;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.*;
+import me.lucko.luckperms.common.commands.Arg;
+import me.lucko.luckperms.common.commands.CommandResult;
+import me.lucko.luckperms.common.commands.Sender;
+import me.lucko.luckperms.common.commands.SubCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.users.User;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
+import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class UserClear extends SubCommand<User> {
     public UserClear() {
-        super("clear", "Clears the user's permissions and groups", Permission.USER_CLEAR, Predicate.notInRange(0, 2),
+        super("clear", "Clears the user's permissions and groups", Permission.USER_CLEAR, Predicates.notInRange(0, 2),
                 Arg.list(
                         Arg.create("server", false, "the server name to filter by"),
                         Arg.create("world", false, "the world name to filter by")

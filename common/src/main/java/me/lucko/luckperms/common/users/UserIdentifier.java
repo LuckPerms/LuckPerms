@@ -22,16 +22,14 @@
 
 package me.lucko.luckperms.common.users;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
 import me.lucko.luckperms.common.utils.Identifiable;
 
 import java.util.UUID;
 
 @Getter
 @ToString
+@EqualsAndHashCode(of = "uuid")
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserIdentifier implements Identifiable<UUID> {
     public static UserIdentifier of(UUID uuid, String username) {
@@ -44,18 +42,5 @@ public class UserIdentifier implements Identifiable<UUID> {
     @Override
     public UUID getId() {
         return getUuid();
-    }
-
-    public boolean equals(Object o) {
-        if (o == this) return true;
-        if (!(o instanceof UserIdentifier)) return false;
-        final UserIdentifier other = (UserIdentifier) o;
-        final Object thisUuid = this.getUuid();
-        final Object otherUuid = other.getUuid();
-        return thisUuid == null ? otherUuid == null : thisUuid.equals(otherUuid);
-    }
-
-    public int hashCode() {
-        return 59 + (this.getUuid() == null ? 43 : this.getUuid().hashCode());
     }
 }

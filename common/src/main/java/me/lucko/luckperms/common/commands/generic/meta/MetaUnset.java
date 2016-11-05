@@ -26,7 +26,6 @@ import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Predicate;
 import me.lucko.luckperms.common.commands.Sender;
 import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
 import me.lucko.luckperms.common.constants.Message;
@@ -34,13 +33,14 @@ import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
+import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class MetaUnset extends SecondarySubCommand {
     public MetaUnset() {
-        super("unset", "Unsets a meta value",  Permission.USER_META_UNSET, Permission.GROUP_META_UNSET, Predicate.notInRange(1, 3),
+        super("unset", "Unsets a meta value",  Permission.USER_META_UNSET, Permission.GROUP_META_UNSET, Predicates.notInRange(1, 3),
                 Arg.list(
                         Arg.create("key", true, "the key to unset"),
                         Arg.create("server", false, "the server to remove the meta pair on"),

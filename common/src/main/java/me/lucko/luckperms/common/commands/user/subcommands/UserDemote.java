@@ -37,6 +37,7 @@ import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.tracks.Track;
 import me.lucko.luckperms.common.users.User;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
+import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
@@ -48,7 +49,7 @@ import java.util.stream.Collectors;
 
 public class UserDemote extends SubCommand<User> {
     public UserDemote() {
-        super("demote", "Demotes the user down a track", Permission.USER_DEMOTE, Predicate.notInRange(1, 3),
+        super("demote", "Demotes the user down a track", Permission.USER_DEMOTE, Predicates.notInRange(1, 3),
                 Arg.list(
                         Arg.create("track", true, "the track to demote the user down"),
                         Arg.create("server", false, "the server to promote on"),

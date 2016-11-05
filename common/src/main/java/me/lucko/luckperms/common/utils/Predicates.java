@@ -20,38 +20,39 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands;
+package me.lucko.luckperms.common.utils;
 
 import lombok.experimental.UtilityClass;
 
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
 @UtilityClass
-public class Predicate {
-    public static <T> java.util.function.Predicate<T> alwaysFalse() {
+public class Predicates {
+    public static <T> Predicate<T> alwaysFalse() {
         return t -> false;
     }
 
-    public static <T> java.util.function.Predicate<T> alwaysTrue() {
+    public static <T> Predicate<T> alwaysTrue() {
         return t -> true;
     }
 
-    public static java.util.function.Predicate<Integer> notInRange(Integer start, Integer end) {
+    public static Predicate<Integer> notInRange(Integer start, Integer end) {
         return inverse(inRange(start, end));
     }
 
-    public static java.util.function.Predicate<Integer> inRange(Integer start, Integer end) {
+    public static Predicate<Integer> inRange(Integer start, Integer end) {
         return isOneOf(IntStream.rangeClosed(start, end).boxed().collect(Collectors.toSet()));
     }
 
-    public static <T> java.util.function.Predicate<T> notOneOf(Set<T> ts) {
+    public static <T> Predicate<T> notOneOf(Set<T> ts) {
         return inverse(isOneOf(ts));
     }
 
-    public static <T> java.util.function.Predicate<T> isOneOf(Set<T> ta) {
+    public static <T> Predicate<T> isOneOf(Set<T> ta) {
         return t -> {
             for (T i : ta) {
                 if (i == t) {
@@ -62,15 +63,15 @@ public class Predicate {
         };
     }
 
-    public static <T> java.util.function.Predicate<T> not(T t) {
+    public static <T> Predicate<T> not(T t) {
         return inverse(is(t));
     }
 
-    public static <T> java.util.function.Predicate<T> is(T t) {
+    public static <T> Predicate<T> is(T t) {
         return t2 -> t == t2;
     }
 
-    public static <T> java.util.function.Predicate<T> inverse(java.util.function.Predicate<T> t) {
+    public static <T> Predicate<T> inverse(Predicate<T> t) {
         return t2 -> !t.test(t2);
     }
 }

@@ -30,13 +30,14 @@ import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.tracks.Track;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
+import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.List;
 
 public class TrackInsert extends SubCommand<Track> {
     public TrackInsert() {
-        super("insert", "Inserts a group at a given position along the track", Permission.TRACK_INSERT, Predicate.not(2),
+        super("insert", "Inserts a group at a given position along the track", Permission.TRACK_INSERT, Predicates.not(2),
                 Arg.list(
                         Arg.create("group", true, "the group to insert"),
                         Arg.create("position", true, "the position to insert the group at (the first position on the track is 1)")

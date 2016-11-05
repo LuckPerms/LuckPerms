@@ -25,7 +25,6 @@ package me.lucko.luckperms.common.commands.generic.parent;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Predicate;
 import me.lucko.luckperms.common.commands.Sender;
 import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
 import me.lucko.luckperms.common.constants.Message;
@@ -34,6 +33,7 @@ import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
+import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.List;
@@ -43,7 +43,7 @@ import static me.lucko.luckperms.common.commands.SubCommand.getGroupTabComplete;
 public class ParentAdd extends SecondarySubCommand {
     public ParentAdd() {
         super("add", "Sets another group for the object to inherit permissions from",
-                Permission.USER_PARENT_ADD, Permission.GROUP_PARENT_ADD, Predicate.notInRange(1, 3),
+                Permission.USER_PARENT_ADD, Permission.GROUP_PARENT_ADD, Predicates.notInRange(1, 3),
                 Arg.list(
                         Arg.create("group", true, "the group to inherit from"),
                         Arg.create("server", false, "the server to inherit the group on"),

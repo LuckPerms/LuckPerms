@@ -58,7 +58,10 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 
 import java.io.File;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -229,7 +232,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     @Override
     public List<Sender> getNotifyListeners() {
         return getProxy().getPlayers().stream()
-                .map(p -> BungeeSenderFactory.get(this).wrap(p, Collections.singleton(Permission.LOG_NOTIFY)))
+                .map(p -> BungeeSenderFactory.get(this).wrap(p))
                 .filter(Permission.LOG_NOTIFY::isAuthorized)
                 .collect(Collectors.toList());
     }

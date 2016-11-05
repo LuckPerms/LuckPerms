@@ -30,11 +30,15 @@ import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.data.Callback;
 import me.lucko.luckperms.bukkit.migration.utils.LPResultRunnable;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.*;
+import me.lucko.luckperms.common.commands.Arg;
+import me.lucko.luckperms.common.commands.CommandResult;
+import me.lucko.luckperms.common.commands.Sender;
+import me.lucko.luckperms.common.commands.SubCommand;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.users.User;
+import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.lang.reflect.InvocationTargetException;
@@ -116,7 +120,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
 
 
     public MigrationPowerfulPerms() {
-        super("powerfulperms", "Migration from PowerfulPerms", MIGRATION, Predicate.not(5),
+        super("powerfulperms", "Migration from PowerfulPerms", MIGRATION, Predicates.not(5),
                 Arg.list(
                         Arg.create("address", true, "the address of the PP database"),
                         Arg.create("database", true, "the name of the PP database"),

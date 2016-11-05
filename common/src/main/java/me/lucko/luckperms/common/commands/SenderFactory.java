@@ -27,7 +27,6 @@ import lombok.RequiredArgsConstructor;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
 import java.lang.ref.WeakReference;
 import java.util.*;
@@ -50,11 +49,7 @@ public abstract class SenderFactory<T> implements Runnable {
     protected abstract boolean hasPermission(T t, String node);
 
     public final Sender wrap(T t) {
-        return new SenderImp(plugin, t, null);
-    }
-
-    public final Sender wrap(T t, Set<Permission> toCheck) {
-        return new SenderImp(plugin, t, toCheck);
+        return new SenderImp(plugin, t);
     }
 
     @Override
@@ -77,9 +72,6 @@ public abstract class SenderFactory<T> implements Runnable {
     private class SenderImp implements Sender {
         private final WeakReference<T> tRef;
 
-        // Cache these permissions, so they can be accessed async
-        private Map<Permission, Boolean> perms;
-
         @Getter
         private final String name;
 
@@ -91,24 +83,12 @@ public abstract class SenderFactory<T> implements Runnable {
         @Getter
         private final LuckPermsPlugin platform;
 
-        private SenderImp(LuckPermsPlugin platform, T t, Set<Permission> toCheck) {
+        private SenderImp(LuckPermsPlugin platform, T t) {
             this.platform = platform;
             this.tRef = new WeakReference<>(t);
             this.name = factory.getName(t);
             this.uuid = factory.getUuid(t);
             this.console = this.uuid.equals(Constants.getConsoleUUID()) || this.uuid.equals(Constants.getImporterUUID());
-
-            if (!this.console) {
-                this.perms = ((toCheck == null || toCheck.isEmpty()) ? Arrays.stream(Permission.values()) : toCheck.stream())
-                        .collect(ImmutableCollectors.toImmutableMap(p -> p, p -> {
-                            for (String s : p.getNodes()) {
-                                if (factory.hasPermission(t, s)) {
-                                    return true;
-                                }
-                            }
-                            return false;
-                        }));
-            }
         }
 
         @Override
@@ -128,7 +108,17 @@ public abstract class SenderFactory<T> implements Runnable {
 
         @Override
         public boolean hasPermission(Permission permission) {
-            return console || perms.get(permission);
+            if (console) return true;
+
+            T t = tRef.get();
+            if (t == null) return false;
+
+            for (String s : permission.getNodes()) {
+                if (factory.hasPermission(t, s)) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

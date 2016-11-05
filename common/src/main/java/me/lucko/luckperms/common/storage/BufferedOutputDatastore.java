@@ -91,6 +91,7 @@ public class BufferedOutputDatastore implements Datastore, Runnable {
         userOutputBuffer.flush(flushTime);
     }
 
+    @Override
     public Datastore force() {
         return backing;
     }

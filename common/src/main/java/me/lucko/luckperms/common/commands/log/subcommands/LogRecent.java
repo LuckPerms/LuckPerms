@@ -30,6 +30,7 @@ import me.lucko.luckperms.common.constants.Patterns;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.data.Log;
 import me.lucko.luckperms.common.utils.DateUtil;
+import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 import java.util.Map;
@@ -38,7 +39,7 @@ import java.util.UUID;
 
 public class LogRecent extends SubCommand<Log> {
     public LogRecent() {
-        super("recent", "View recent actions", Permission.LOG_RECENT, Predicate.notInRange(0, 2),
+        super("recent", "View recent actions", Permission.LOG_RECENT, Predicates.notInRange(0, 2),
                 Arg.list(
                         Arg.create("user", false, "the name/uuid of the user to filter by"),
                         Arg.create("page", false, "the page number to view")

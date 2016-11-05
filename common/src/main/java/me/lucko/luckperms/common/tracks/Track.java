@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.common.tracks;
 
+import com.google.common.collect.ImmutableList;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -66,7 +67,7 @@ public class Track implements Identifiable<String> {
      * @return am ordered {@link List} of the groups on this track
      */
     public List<String> getGroups() {
-        return Collections.unmodifiableList(groups);
+        return ImmutableList.copyOf(groups);
     }
 
     public void setGroups(List<String> groups) {

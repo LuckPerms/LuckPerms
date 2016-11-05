@@ -25,7 +25,6 @@ package me.lucko.luckperms.common.commands.generic.permission;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Predicate;
 import me.lucko.luckperms.common.commands.Sender;
 import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
 import me.lucko.luckperms.common.constants.Message;
@@ -33,6 +32,7 @@ import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
+import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.List;
@@ -41,7 +41,7 @@ import static me.lucko.luckperms.common.commands.SubCommand.getBoolTabComplete;
 
 public class PermissionSet extends SecondarySubCommand {
     public PermissionSet() {
-        super("set", "Sets a permission for the object", Permission.USER_PERM_SET, Permission.GROUP_PERM_SET, Predicate.notInRange(2, 4),
+        super("set", "Sets a permission for the object", Permission.USER_PERM_SET, Permission.GROUP_PERM_SET, Predicates.notInRange(2, 4),
                 Arg.list(
                         Arg.create("node", true, "the permission node to set"),
                         Arg.create("true|false", true, "the value of the node"),
