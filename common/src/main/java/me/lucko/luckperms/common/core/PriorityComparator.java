@@ -66,6 +66,10 @@ public class PriorityComparator implements Comparator<LocalizedNode> {
             return o1.isWorldSpecific() ? 1 : -1;
         }
 
+        if (o1.getContexts().size() != o2.getContexts().size()) {
+            return o1.getContexts().size() > o2.getContexts().size() ? 1 : -1;
+        }
+
         if (o1.isTemporary() != o2.isTemporary()) {
             return o1.isTemporary() ? 1 : -1;
         }
