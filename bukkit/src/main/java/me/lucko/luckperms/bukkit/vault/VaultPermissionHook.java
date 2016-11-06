@@ -376,7 +376,7 @@ public class VaultPermissionHook extends Permission {
                 }
 
                 if (pgoCheckMemberOf) {
-                    if (!user.getLocalGroups(server, world).contains(group.toLowerCase())) {
+                    if (!user.getLocalGroups(server, world, isIncludeGlobal()).contains(group.toLowerCase())) {
                         continue;
                     }
                 }

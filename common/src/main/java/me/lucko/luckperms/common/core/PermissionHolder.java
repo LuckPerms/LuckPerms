@@ -890,6 +890,15 @@ public abstract class PermissionHolder {
                 .collect(Collectors.toList());
     }
 
+    public List<String> getLocalGroups(String server, String world, boolean includeGlobal) {
+        return getNodes().stream()
+                .filter(Node::isGroupNode)
+                .filter(n -> n.shouldApplyOnWorld(world, includeGlobal, true))
+                .filter(n -> n.shouldApplyOnServer(server, includeGlobal, true))
+                .map(Node::getGroupName)
+                .collect(Collectors.toList());
+    }
+
     /**
      * Get a {@link List} of the groups the holder inherits on a specific server
      * @param server the server to check
