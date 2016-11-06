@@ -215,7 +215,6 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         updateTaskBuffer.requestDirectly();
 
         // register tasks
-        scheduler.createTaskBuilder().intervalTicks(1L).execute(SpongeSenderFactory.get(this)).submit(this);
         scheduler.createTaskBuilder().async().intervalTicks(60L).execute(new ExpireTemporaryTask(this)).submit(this);
         scheduler.createTaskBuilder().async().intervalTicks(20L).execute(consecutiveExecutor).submit(this);
 

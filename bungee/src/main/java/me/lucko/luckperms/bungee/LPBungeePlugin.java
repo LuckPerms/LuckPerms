@@ -173,7 +173,6 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         updateTaskBuffer.requestDirectly();
 
         // register tasks
-        getProxy().getScheduler().schedule(this, BungeeSenderFactory.get(this), 50L, 50L, TimeUnit.MILLISECONDS);  // 20 times per second (once per "tick")
         getProxy().getScheduler().schedule(this, new ExpireTemporaryTask(this), 3L, 3L, TimeUnit.SECONDS);
         getProxy().getScheduler().schedule(this, consecutiveExecutor, 1L, 1L, TimeUnit.SECONDS);
 

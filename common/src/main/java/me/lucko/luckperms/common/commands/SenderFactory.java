@@ -22,26 +22,18 @@
 
 package me.lucko.luckperms.common.commands;
 
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.constants.Constants;
-import me.lucko.luckperms.common.constants.Permission;
 
-import java.lang.ref.WeakReference;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.UUID;
 
 /**
  * Factory class to make a thread-safe sender instance
  * @param <T> the command sender type
  */
 @RequiredArgsConstructor
-public abstract class SenderFactory<T> implements Runnable {
+public abstract class SenderFactory<T> {
     private final LuckPermsPlugin plugin;
-    private final Map<T, List<String>> messages = new HashMap<>();
-    private final AtomicBoolean shouldSend = new AtomicBoolean(false);
-    private final SenderFactory<T> factory = this;
 
     protected abstract String getName(T t);
     protected abstract UUID getUuid(T t);
@@ -49,76 +41,6 @@ public abstract class SenderFactory<T> implements Runnable {
     protected abstract boolean hasPermission(T t, String node);
 
     public final Sender wrap(T t) {
-        return new SenderImp(plugin, t);
-    }
-
-    @Override
-    public final void run() {
-        if (!shouldSend.getAndSet(false)) {
-            return;
-        }
-
-        synchronized (messages) {
-            for (Map.Entry<T, List<String>> e : messages.entrySet()) {
-                for (String s : e.getValue()) {
-                    factory.sendMessage(e.getKey(), s);
-                }
-            }
-
-            messages.clear();
-        }
-    }
-
-    private class SenderImp implements Sender {
-        private final WeakReference<T> tRef;
-
-        @Getter
-        private final String name;
-
-        @Getter
-        private final UUID uuid;
-
-        private final boolean console;
-
-        @Getter
-        private final LuckPermsPlugin platform;
-
-        private SenderImp(LuckPermsPlugin platform, T t) {
-            this.platform = platform;
-            this.tRef = new WeakReference<>(t);
-            this.name = factory.getName(t);
-            this.uuid = factory.getUuid(t);
-            this.console = this.uuid.equals(Constants.getConsoleUUID()) || this.uuid.equals(Constants.getImporterUUID());
-        }
-
-        @Override
-        public void sendMessage(String s) {
-            final T t = tRef.get();
-            if (t != null) {
-                synchronized (messages) {
-                    if (!messages.containsKey(t)) {
-                        messages.put(t, new ArrayList<>());
-                    }
-
-                    messages.get(t).add(s);
-                }
-                shouldSend.set(true);
-            }
-        }
-
-        @Override
-        public boolean hasPermission(Permission permission) {
-            if (console) return true;
-
-            T t = tRef.get();
-            if (t == null) return false;
-
-            for (String s : permission.getNodes()) {
-                if (factory.hasPermission(t, s)) {
-                    return true;
-                }
-            }
-            return false;
-        }
+        return new AbstractSender<>(plugin, this, t);
     }
 }

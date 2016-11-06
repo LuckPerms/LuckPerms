@@ -225,7 +225,6 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         updateTaskBuffer.requestDirectly();
 
         // register tasks
-        getServer().getScheduler().runTaskTimer(this, BukkitSenderFactory.get(this), 1L, 1L);
         getServer().getScheduler().runTaskTimerAsynchronously(this, new ExpireTemporaryTask(this), 60L, 60L);
         getServer().getScheduler().runTaskTimerAsynchronously(this, consecutiveExecutor, 20L, 20L);
 
@@ -382,12 +381,12 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         );
 
         // Check for and include varying Vault config options
-        try {
-            assert getConfiguration().isVaultIncludingGlobal() == getConfiguration().isIncludingGlobalPerms();
-            assert getConfiguration().isIncludingGlobalWorldPerms();
-            assert getConfiguration().isApplyingGlobalGroups();
-            assert getConfiguration().isApplyingGlobalWorldGroups();
-        } catch (AssertionError e) {
+        boolean vaultDiff = getConfiguration().isVaultIncludingGlobal() != getConfiguration().isIncludingGlobalPerms() ||
+                !getConfiguration().isIncludingGlobalWorldPerms() ||
+                !getConfiguration().isApplyingGlobalGroups() ||
+                !getConfiguration().isApplyingGlobalWorldGroups();
+
+        if (vaultDiff) {
             contexts.addAll(c.stream()
                     .map(map -> new Contexts(map, getConfiguration().isVaultIncludingGlobal(), true, true, true, true, op))
                     .collect(Collectors.toSet())

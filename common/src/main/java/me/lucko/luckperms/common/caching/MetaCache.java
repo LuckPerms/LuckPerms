@@ -104,7 +104,6 @@ public class MetaCache implements MetaData {
                         this.meta.put(meta.getKey(), meta.getValue());
                     }
                 }
-                this.meta.put(meta.getKey(), meta.getValue());
             }
         }
     }
