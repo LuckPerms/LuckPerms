@@ -220,8 +220,6 @@ public abstract class PermissionHolder {
                     it.remove();
                 }
             }
-
-
         }
 
         if (work) {
@@ -309,29 +307,6 @@ public abstract class PermissionHolder {
         return all;
     }
 
-    private static void accumulateMetaNode(Node n, MetaHolder holder) {
-        if (n.isPrefix()) {
-            Map.Entry<Integer, String> value = n.getPrefix();
-            if (!holder.getPrefixes().containsKey(value.getKey())) {
-                holder.getPrefixes().put(value.getKey(), value.getValue());
-            }
-        }
-
-        if (n.isSuffix()) {
-            Map.Entry<Integer, String> value = n.getSuffix();
-            if (!holder.getSuffixes().containsKey(value.getKey())) {
-                holder.getSuffixes().put(value.getKey(), value.getValue());
-            }
-        }
-
-        if (n.isMeta()) {
-            Map.Entry<String, String> meta = n.getMeta();
-            if (!holder.getMeta().containsKey(meta.getKey())) {
-                holder.getMeta().put(meta.getKey(), meta.getValue());
-            }
-        }
-    }
-
     public MetaHolder accumulateMeta(MetaHolder holder, List<String> excludedGroups, Contexts context) {
         if (holder == null) {
             holder = new MetaHolder();
@@ -359,7 +334,7 @@ public abstract class PermissionHolder {
             if (!n.shouldApplyOnWorld(world, context.isIncludeGlobalWorld(), false)) continue;
             if (!n.shouldApplyWithContext(contexts, false)) continue;
 
-            accumulateMetaNode(n, holder);
+            holder.accumulateNode(n);
         }
 
         Set<Node> parents = all.stream()
