@@ -24,10 +24,7 @@ package me.lucko.luckperms.bukkit.migration;
 
 import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.Arg;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.SubCommand;
+import me.lucko.luckperms.common.commands.*;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeFactory;
@@ -53,7 +50,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) throws CommandException {
         final Logger log = plugin.getLog();
         if (!plugin.isPluginLoaded("GroupManager")) {
             log.severe("GroupManager Migration: Error -> GroupManager is not loaded.");

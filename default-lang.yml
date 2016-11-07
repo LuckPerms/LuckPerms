@@ -41,7 +41,6 @@ track-invalid-entry: "Track names can only contain alphanumeric characters."
 server-invalid-entry: "Server names can only contain alphanumeric characters."
 
 use-inherit-command: "Use the 'parent add' command instead of specifying the node."
-use-uninherit-command: "Use the 'parent remove' command instead of specifying the node."
 
 
 

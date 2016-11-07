@@ -23,9 +23,7 @@
 package me.lucko.luckperms.common.commands.generic.parent;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.Arg;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Sender;
+import me.lucko.luckperms.common.commands.*;
 import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
@@ -33,11 +31,11 @@ import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.users.User;
-import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static me.lucko.luckperms.common.commands.SubCommand.getGroupTabComplete;
 
@@ -54,13 +52,10 @@ public class ParentSet extends SecondarySubCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) {
-        String groupName = args.get(0).toLowerCase();
-
-        if (ArgumentChecker.checkNode(groupName)) {
-            sendDetailedUsage(sender);
-            return CommandResult.INVALID_ARGS;
-        }
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) throws CommandException {
+        String groupName = ArgumentUtils.handleName(0, args);
+        String server = ArgumentUtils.handleServer(1, args);
+        String world = ArgumentUtils.handleWorld(2, args);
 
         if (!plugin.getDatastore().loadGroup(groupName).getUnchecked()) {
             Message.GROUP_DOES_NOT_EXIST.send(sender);
@@ -73,54 +68,50 @@ public class ParentSet extends SecondarySubCommand {
             return CommandResult.LOADING_ERROR;
         }
 
-        try {
-            if (args.size() >= 2) {
-                final String server = args.get(1).toLowerCase();
-                if (ArgumentChecker.checkServer(server)) {
-                    Message.SERVER_INVALID_ENTRY.send(sender);
-                    return CommandResult.INVALID_ARGS;
-                }
-
-                if (args.size() == 2) {
-
-                    holder.clearParents(server, null);
-                    holder.setInheritGroup(group, server);
-
-                    Message.SET_PARENT_SERVER_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(), server);
-                    LogEntry.build().actor(sender).acted(holder)
-                            .action("parent set " + group.getName() + " " + server)
-                            .build().submit(plugin, sender);
-                } else {
-                    final String world = args.get(2).toLowerCase();
-
-                    holder.clearParents(server, world);
-                    holder.setInheritGroup(group, server, world);
-
-                    Message.SET_PARENT_SERVER_WORLD_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(), server, world);
-                    LogEntry.build().actor(sender).acted(holder)
-                            .action("parent set " + group.getName() + " " + server + " " + world)
-                            .build().submit(plugin, sender);
-                }
-
-            } else {
+        switch (ContextHelper.determine(server, world)) {
+            case NONE:
                 holder.clearParents(null, null);
-                holder.setInheritGroup(group);
+
+                try {
+                    holder.setInheritGroup(group);
+                } catch (ObjectAlreadyHasException ignored) {}
+
                 if (holder instanceof User) {
                     ((User) holder).setPrimaryGroup(group.getName());
                 }
 
                 Message.SET_PARENT_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName());
-                LogEntry.build().actor(sender).acted(holder)
-                        .action("parent set " + group.getName())
-                        .build().submit(plugin, sender);
-            }
+                break;
+            case SERVER:
+                holder.clearParents(server, null);
 
-            save(holder, sender, plugin);
-            return CommandResult.SUCCESS;
-        } catch (ObjectAlreadyHasException e) {
-            Message.ALREADY_INHERITS.send(sender, holder.getFriendlyName(), group.getDisplayName());
-            return CommandResult.STATE_ERROR;
+                try {
+                    holder.setInheritGroup(group, server);
+                } catch (ObjectAlreadyHasException ignored) {}
+
+                if (server.equalsIgnoreCase("global") && holder instanceof User) {
+                    ((User) holder).setPrimaryGroup(group.getName());
+                }
+
+                Message.SET_PARENT_SERVER_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(), server);
+                break;
+            case SERVER_AND_WORLD:
+                holder.clearParents(server, world);
+
+                try {
+                    holder.setInheritGroup(group, server, world);
+                } catch (ObjectAlreadyHasException ignored) {}
+
+                Message.SET_PARENT_SERVER_WORLD_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(), server, world);
+                break;
         }
+
+        LogEntry.build().actor(sender).acted(holder)
+                .action("parent set " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                .build().submit(plugin, sender);
+
+        save(holder, sender, plugin);
+        return CommandResult.SUCCESS;
     }
 
     @Override

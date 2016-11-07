@@ -23,15 +23,12 @@
 package me.lucko.luckperms.common.commands.generic.meta;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.Arg;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Sender;
+import me.lucko.luckperms.common.commands.*;
 import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
-import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
@@ -48,25 +45,22 @@ public class MetaClear extends SecondarySubCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) throws CommandException {
         int before = holder.getNodes().size();
 
-        if (args.size() == 0) {
-            holder.clearMeta();
-        } else {
-            final String server = args.get(0);
-            if (ArgumentChecker.checkServer(server)) {
-                Message.SERVER_INVALID_ENTRY.send(sender);
-                return CommandResult.INVALID_ARGS;
-            }
+        String server = ArgumentUtils.handleServer(0, args);
+        String world = ArgumentUtils.handleWorld(1, args);
 
-            if (args.size() == 2) {
-                final String world = args.get(1);
-                holder.clearMeta(server, world);
-
-            } else {
+        switch (ContextHelper.determine(server, world)) {
+            case NONE:
+                holder.clearMeta();
+                break;
+            case SERVER:
                 holder.clearMeta(server);
-            }
+                break;
+            case SERVER_AND_WORLD:
+                holder.clearMeta(server, world);
+                break;
         }
 
         int changed = before - holder.getNodes().size();
@@ -76,7 +70,10 @@ public class MetaClear extends SecondarySubCommand {
             Message.META_CLEAR_SUCCESS.send(sender, holder.getFriendlyName(), changed);
         }
 
-        LogEntry.build().actor(sender).acted(holder).action("meta clear " + args.stream().collect(Collectors.joining(" "))).build().submit(plugin, sender);
+        LogEntry.build().actor(sender).acted(holder)
+                .action("meta clear " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                .build().submit(plugin, sender);
+
         save(holder, sender, plugin);
         return CommandResult.SUCCESS;
     }

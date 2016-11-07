@@ -24,15 +24,12 @@ package me.lucko.luckperms.common.commands.generic.meta;
 
 import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.Arg;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Sender;
+import me.lucko.luckperms.common.commands.*;
 import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
-import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
@@ -40,7 +37,8 @@ import java.util.stream.Collectors;
 
 public class MetaUnsetTemp extends SecondarySubCommand {
     public MetaUnsetTemp() {
-        super("unsettemp", "Unsets a temporary meta value",  Permission.USER_META_UNSETTEMP, Permission.GROUP_META_UNSETTEMP, Predicates.notInRange(1, 3),
+        super("unsettemp", "Unsets a temporary meta value",  Permission.USER_META_UNSETTEMP, Permission.GROUP_META_UNSETTEMP,
+                Predicates.notInRange(1, 3),
                 Arg.list(
                         Arg.create("key", true, "the key to unset"),
                         Arg.create("server", false, "the server to remove the meta pair on"),
@@ -50,38 +48,27 @@ public class MetaUnsetTemp extends SecondarySubCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) throws CommandException {
         String key = MetaUtils.escapeCharacters(args.get(0));
-
-        String server = null;
-        String world = null;
-
-        if (args.size() >= 2) {
-            server = args.get(1).toLowerCase();
-            if (ArgumentChecker.checkServer(server)) {
-                Message.SERVER_INVALID_ENTRY.send(sender);
-                return CommandResult.INVALID_ARGS;
-            }
-
-            if (args.size() != 2) {
-                world = args.get(2).toLowerCase();
-            }
-        }
+        String server = ArgumentUtils.handleServer(1, args);
+        String world = ArgumentUtils.handleWorld(2, args);
 
         holder.clearMetaKeys(key, server, world, true);
 
-        if (server == null) {
-            Message.UNSET_META_TEMP_SUCCESS.send(sender, key, holder.getFriendlyName());
-        } else {
-            if (world == null) {
+        switch (ContextHelper.determine(server, world)) {
+            case NONE:
+                Message.UNSET_META_TEMP_SUCCESS.send(sender, key, holder.getFriendlyName());
+                break;
+            case SERVER:
                 Message.UNSET_META_TEMP_SERVER_SUCCESS.send(sender, key, holder.getFriendlyName(), server);
-            } else {
+                break;
+            case SERVER_AND_WORLD:
                 Message.UNSET_META_TEMP_SERVER_WORLD_SUCCESS.send(sender, key, holder.getFriendlyName(), server, world);
-            }
+                break;
         }
 
         LogEntry.build().actor(sender).acted(holder)
-                .action("meta unsettemp " + args.stream().collect(Collectors.joining(" ")))
+                .action("meta unsettemp " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
                 .build().submit(plugin, sender);
 
         save(holder, sender, plugin);

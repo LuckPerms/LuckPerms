@@ -76,7 +76,7 @@ public abstract class SubCommand<T> {
      * @param args the stripped arguments given
      * @param label the command label used
      */
-    public abstract CommandResult execute(LuckPermsPlugin plugin, Sender sender, T t, List<String> args, String label);
+    public abstract CommandResult execute(LuckPermsPlugin plugin, Sender sender, T t, List<String> args, String label) throws CommandException;
 
     /**
      * Returns a list of suggestions, which are empty by default. Sub classes that give tab complete suggestions override

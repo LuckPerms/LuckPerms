@@ -24,10 +24,7 @@ package me.lucko.luckperms.common.commands.generic.other;
 
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.SubCommand;
-import me.lucko.luckperms.common.commands.Util;
+import me.lucko.luckperms.common.commands.*;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.PermissionHolder;
@@ -44,7 +41,7 @@ public class HolderShowTracks<T extends PermissionHolder> extends SubCommand<T> 
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, T holder, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, T holder, List<String> args, String label) throws CommandException {
         if (!plugin.getDatastore().loadAllTracks().getUnchecked()) {
             Message.TRACKS_LOAD_ERROR.send(sender);
             return CommandResult.LOADING_ERROR;

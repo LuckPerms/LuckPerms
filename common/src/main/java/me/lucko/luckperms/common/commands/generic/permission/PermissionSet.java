@@ -23,25 +23,24 @@
 package me.lucko.luckperms.common.commands.generic.permission;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.Arg;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Sender;
+import me.lucko.luckperms.common.commands.*;
 import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
-import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static me.lucko.luckperms.common.commands.SubCommand.getBoolTabComplete;
 
 public class PermissionSet extends SecondarySubCommand {
     public PermissionSet() {
-        super("set", "Sets a permission for the object", Permission.USER_PERM_SET, Permission.GROUP_PERM_SET, Predicates.notInRange(2, 4),
+        super("set", "Sets a permission for the object", Permission.USER_PERM_SET, Permission.GROUP_PERM_SET,
+                Predicates.notInRange(2, 4),
                 Arg.list(
                         Arg.create("node", true, "the permission node to set"),
                         Arg.create("true|false", true, "the value of the node"),
@@ -52,60 +51,36 @@ public class PermissionSet extends SecondarySubCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) {
-        String node = args.get(0).replace("{SPACE}", " ");
-        String bool = args.get(1).toLowerCase();
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) throws CommandException {
+        String node = ArgumentUtils.handleNode(0, args);
+        boolean b = ArgumentUtils.handleBoolean(1, args);
 
-        if (ArgumentChecker.checkNode(node)) {
-            sendDetailedUsage(sender);
-            return CommandResult.INVALID_ARGS;
-        }
-
-        if (node.toLowerCase().startsWith("group.")) {
-            Message.USE_INHERIT_COMMAND.send(sender);
-            return CommandResult.INVALID_ARGS;
-        }
-
-        if (!bool.equalsIgnoreCase("true") && !bool.equalsIgnoreCase("false")) {
-            sendDetailedUsage(sender);
-            return CommandResult.INVALID_ARGS;
-        }
-
-        boolean b = Boolean.parseBoolean(bool);
+        String server = ArgumentUtils.handleServer(2, args);
+        String world = ArgumentUtils.handleWorld(3, args);
 
         try {
-            if (args.size() >= 3) {
-                final String server = args.get(2).toLowerCase();
-                if (ArgumentChecker.checkServer(server)) {
-                    Message.SERVER_INVALID_ENTRY.send(sender);
-                    return CommandResult.INVALID_ARGS;
-                }
-
-                if (args.size() == 3) {
+            switch (ContextHelper.determine(server, world)) {
+                case NONE:
+                    holder.setPermission(node, b);
+                    Message.SETPERMISSION_SUCCESS.send(sender, node, b, holder.getFriendlyName());
+                    break;
+                case SERVER:
                     holder.setPermission(node, b, server);
-                    Message.SETPERMISSION_SERVER_SUCCESS.send(sender, node, bool, holder.getFriendlyName(), server);
-                    LogEntry.build().actor(sender).acted(holder)
-                            .action("permission set " + node + " " + b + " " + server)
-                            .build().submit(plugin, sender);
-                } else {
-                    final String world = args.get(3).toLowerCase();
+                    Message.SETPERMISSION_SERVER_SUCCESS.send(sender, node, b, holder.getFriendlyName(), server);
+                    break;
+                case SERVER_AND_WORLD:
                     holder.setPermission(node, b, server, world);
-                    Message.SETPERMISSION_SERVER_WORLD_SUCCESS.send(sender, node, bool, holder.getFriendlyName(), server, world);
-                    LogEntry.build().actor(sender).acted(holder)
-                            .action("permission set " + node + " " + b + " " + server + " " + world)
-                            .build().submit(plugin, sender);
-                }
-
-            } else {
-                holder.setPermission(node, b);
-                Message.SETPERMISSION_SUCCESS.send(sender, node, bool, holder.getFriendlyName());
-                LogEntry.build().actor(sender).acted(holder)
-                        .action("permission set " + node + " " + b)
-                        .build().submit(plugin, sender);
+                    Message.SETPERMISSION_SERVER_WORLD_SUCCESS.send(sender, node, b, holder.getFriendlyName(), server, world);
+                    break;
             }
+
+            LogEntry.build().actor(sender).acted(holder)
+                    .action("permission set " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                    .build().submit(plugin, sender);
 
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
+
         } catch (ObjectAlreadyHasException e) {
             Message.ALREADY_HASPERMISSION.send(sender, holder.getFriendlyName());
             return CommandResult.STATE_ERROR;

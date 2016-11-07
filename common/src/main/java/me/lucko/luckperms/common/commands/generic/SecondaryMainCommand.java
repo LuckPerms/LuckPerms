@@ -23,10 +23,7 @@
 package me.lucko.luckperms.common.commands.generic;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.SubCommand;
-import me.lucko.luckperms.common.commands.Util;
+import me.lucko.luckperms.common.commands.*;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.utils.Predicates;
@@ -48,7 +45,7 @@ public class SecondaryMainCommand<T extends PermissionHolder> extends SubCommand
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, T t, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, T t, List<String> args, String label) throws CommandException {
         if (args.size() == 0) {
             sendUsageDetailed(sender, user, label);
             return CommandResult.INVALID_ARGS;
@@ -80,7 +77,51 @@ public class SecondaryMainCommand<T extends PermissionHolder> extends SubCommand
             return CommandResult.INVALID_ARGS;
         }
 
-        return sub.execute(plugin, sender, t, strippedArgs);
+        CommandResult result;
+        try {
+            result = sub.execute(plugin, sender, t, strippedArgs);
+        } catch (CommandException e) {
+            result = handleException(e, sender, sub);
+        }
+        return result;
+    }
+
+    private static CommandResult handleException(CommandException e, Sender sender, SecondarySubCommand command) {
+        if (e instanceof ArgumentUtils.ArgumentException) {
+            if (e instanceof ArgumentUtils.DetailedUsageException) {
+                command.sendDetailedUsage(sender);
+                return CommandResult.INVALID_ARGS;
+            }
+
+            if (e instanceof ArgumentUtils.UseInheritException) {
+                Message.USE_INHERIT_COMMAND.send(sender);
+                return CommandResult.INVALID_ARGS;
+            }
+
+            if (e instanceof ArgumentUtils.InvalidServerException) {
+                Message.SERVER_INVALID_ENTRY.send(sender);
+                return CommandResult.INVALID_ARGS;
+            }
+
+            if (e instanceof ArgumentUtils.PastDateException) {
+                Message.PAST_DATE_ERROR.send(sender);
+                return CommandResult.INVALID_ARGS;
+            }
+
+            if (e instanceof ArgumentUtils.InvalidDateException) {
+                Message.ILLEGAL_DATE_ERROR.send(sender, ((ArgumentUtils.InvalidDateException) e).getInvalidDate());
+                return CommandResult.INVALID_ARGS;
+            }
+
+            if (e instanceof ArgumentUtils.InvalidPriorityException) {
+                Message.META_INVALID_PRIORITY.send(sender, ((ArgumentUtils.InvalidPriorityException) e).getInvalidPriority());
+                return CommandResult.INVALID_ARGS;
+            }
+        }
+
+        // Not something we can catch.
+        e.printStackTrace();
+        return CommandResult.FAILURE;
     }
 
     @Override

@@ -23,6 +23,7 @@
 package me.lucko.luckperms.common.commands.generic.parent;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.Sender;
 import me.lucko.luckperms.common.commands.Util;
@@ -41,7 +42,7 @@ public class ParentInfo extends SecondarySubCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) throws CommandException {
         Message.LISTPARENTS.send(sender, holder.getFriendlyName(), Util.permGroupsToString(holder.getPermissions(false)));
         Message.LISTPARENTS_TEMP.send(sender, holder.getFriendlyName(), Util.tempGroupsToString(holder.getPermissions(false)));
         return CommandResult.SUCCESS;

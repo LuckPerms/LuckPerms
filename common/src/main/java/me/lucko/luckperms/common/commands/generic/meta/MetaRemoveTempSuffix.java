@@ -25,20 +25,18 @@ package me.lucko.luckperms.common.commands.generic.meta;
 import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.Arg;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Sender;
+import me.lucko.luckperms.common.commands.*;
 import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
-import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class MetaRemoveTempSuffix extends SecondarySubCommand {
     public MetaRemoveTempSuffix() {
@@ -53,32 +51,14 @@ public class MetaRemoveTempSuffix extends SecondarySubCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) {
-        final String suffix = args.get(1).replace("{SPACE}", " ");
-        int priority;
-        try {
-            priority = Integer.parseInt(args.get(0));
-        } catch (NumberFormatException e) {
-            Message.META_INVALID_PRIORITY.send(sender, args.get(0));
-            return CommandResult.INVALID_ARGS;
-        }
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) throws CommandException {
+        int priority = ArgumentUtils.handlePriority(0, args);
+        String suffix = ArgumentUtils.handleNodeWithoutCheck(1, args);
+        String server = ArgumentUtils.handleServer(2, args);
+        String world = ArgumentUtils.handleWorld(3, args);
 
+        // Handle bulk removal
         if (suffix.equalsIgnoreCase("null")) {
-            String server = null;
-            String world = null;
-
-            if (args.size() >= 3) {
-                server = args.get(2).toLowerCase();
-                if (ArgumentChecker.checkServer(server)) {
-                    Message.SERVER_INVALID_ENTRY.send(sender);
-                    return CommandResult.INVALID_ARGS;
-                }
-
-                if (args.size() != 3) {
-                    world = args.get(3).toLowerCase();
-                }
-            }
-
             List<Node> toRemove = new ArrayList<>();
             for (Node node : holder.getNodes()) {
                 if (!node.isSuffix()) continue;
@@ -111,48 +91,36 @@ public class MetaRemoveTempSuffix extends SecondarySubCommand {
             Message.BULK_CHANGE_SUCCESS.send(sender, toRemove.size());
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
+        }
 
-        } else {
+        final String node = "suffix." + priority + "." + MetaUtils.escapeCharacters(suffix);
 
-            final String node = "suffix." + priority + "." + MetaUtils.escapeCharacters(suffix);
-
-            try {
-                if (args.size() >= 3) {
-                    final String server = args.get(2).toLowerCase();
-                    if (ArgumentChecker.checkServer(server)) {
-                        Message.SERVER_INVALID_ENTRY.send(sender);
-                        return CommandResult.INVALID_ARGS;
-                    }
-
-                    if (args.size() == 3) {
-                        holder.unsetPermission(node, server, true);
-                        Message.REMOVE_TEMP_SUFFIX_SERVER_SUCCESS.send(sender, holder.getFriendlyName(), suffix, priority, server);
-                        LogEntry.build().actor(sender).acted(holder)
-                                .action("meta removetempsuffix " + priority + " " + args.get(1) + " " + server)
-                                .build().submit(plugin, sender);
-                    } else {
-                        final String world = args.get(3).toLowerCase();
-                        holder.unsetPermission(node, server, world, true);
-                        Message.REMOVE_TEMP_SUFFIX_SERVER_WORLD_SUCCESS.send(sender, holder.getFriendlyName(), suffix, priority, server, world);
-                        LogEntry.build().actor(sender).acted(holder)
-                                .action("meta removetempsuffix " + priority + " " + args.get(1) + " " + server + " " + world)
-                                .build().submit(plugin, sender);
-                    }
-
-                } else {
+        try {
+            switch (ContextHelper.determine(server, world)) {
+                case NONE:
                     holder.unsetPermission(node, true);
                     Message.REMOVE_TEMP_SUFFIX_SUCCESS.send(sender, holder.getFriendlyName(), suffix, priority);
-                    LogEntry.build().actor(sender).acted(holder)
-                            .action("meta removetempsuffix " + priority + " " + args.get(1))
-                            .build().submit(plugin, sender);
-                }
-
-                save(holder, sender, plugin);
-                return CommandResult.SUCCESS;
-            } catch (ObjectLacksException e) {
-                Message.DOES_NOT_HAVE_SUFFIX.send(sender, holder.getFriendlyName());
-                return CommandResult.STATE_ERROR;
+                    break;
+                case SERVER:
+                    holder.unsetPermission(node, server, true);
+                    Message.REMOVE_TEMP_SUFFIX_SERVER_SUCCESS.send(sender, holder.getFriendlyName(), suffix, priority, server);
+                    break;
+                case SERVER_AND_WORLD:
+                    holder.unsetPermission(node, server, world, true);
+                    Message.REMOVE_TEMP_SUFFIX_SERVER_WORLD_SUCCESS.send(sender, holder.getFriendlyName(), suffix, priority, server, world);
+                    break;
             }
+
+            LogEntry.build().actor(sender).acted(holder)
+                    .action("meta removetempsuffix " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                    .build().submit(plugin, sender);
+
+            save(holder, sender, plugin);
+            return CommandResult.SUCCESS;
+
+        } catch (ObjectLacksException e) {
+            Message.DOES_NOT_HAVE_SUFFIX.send(sender, holder.getFriendlyName());
+            return CommandResult.STATE_ERROR;
         }
     }
 }

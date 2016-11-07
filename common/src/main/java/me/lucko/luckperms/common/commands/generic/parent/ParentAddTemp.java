@@ -23,21 +23,19 @@
 package me.lucko.luckperms.common.commands.generic.parent;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.Arg;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Sender;
+import me.lucko.luckperms.common.commands.*;
 import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.groups.Group;
-import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static me.lucko.luckperms.common.commands.SubCommand.getGroupTabComplete;
 
@@ -55,30 +53,11 @@ public class ParentAddTemp extends SecondarySubCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) {
-        String groupName = args.get(0).toLowerCase();
-
-        if (ArgumentChecker.checkName(groupName)) {
-            sendDetailedUsage(sender);
-            return CommandResult.INVALID_ARGS;
-        }
-
-        long duration;
-        try {
-            duration = Long.parseLong(args.get(1));
-        } catch (NumberFormatException e) {
-            try {
-                duration = DateUtil.parseDateDiff(args.get(1), true);
-            } catch (DateUtil.IllegalDateException e1) {
-                Message.ILLEGAL_DATE_ERROR.send(sender, args.get(1));
-                return CommandResult.INVALID_ARGS;
-            }
-        }
-
-        if (DateUtil.shouldExpire(duration)) {
-            Message.PAST_DATE_ERROR.send(sender);
-            return CommandResult.INVALID_ARGS;
-        }
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) throws CommandException {
+        String groupName = ArgumentUtils.handleName(0, args);
+        long duration = ArgumentUtils.handleDuration(1, args);
+        String server = ArgumentUtils.handleServer(2, args);
+        String world = ArgumentUtils.handleWorld(3, args);
 
         if (!plugin.getDatastore().loadGroup(groupName).getUnchecked()) {
             Message.GROUP_DOES_NOT_EXIST.send(sender);
@@ -92,40 +71,34 @@ public class ParentAddTemp extends SecondarySubCommand {
         }
 
         try {
-            if (args.size() >= 3) {
-                final String server = args.get(2).toLowerCase();
-                if (ArgumentChecker.checkServer(server)) {
-                    Message.SERVER_INVALID_ENTRY.send(sender);
-                    return CommandResult.INVALID_ARGS;
-                }
-
-                if (args.size() == 3) {
+            switch (ContextHelper.determine(server, world)) {
+                case NONE:
+                    holder.setInheritGroup(group, duration);
+                    Message.SET_TEMP_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(),
+                            DateUtil.formatDateDiff(duration)
+                    );
+                    break;
+                case SERVER:
                     holder.setInheritGroup(group, server, duration);
-                    Message.SET_TEMP_INHERIT_SERVER_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(), server,
-                            DateUtil.formatDateDiff(duration));
-                    LogEntry.build().actor(sender).acted(holder)
-                            .action("parent addtemp " + group.getName() + " " + duration + " " + server)
-                            .build().submit(plugin, sender);
-                } else {
-                    final String world = args.get(3).toLowerCase();
+                    Message.SET_TEMP_INHERIT_SERVER_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(),
+                            server, DateUtil.formatDateDiff(duration)
+                    );
+                    break;
+                case SERVER_AND_WORLD:
                     holder.setInheritGroup(group, server, world, duration);
-                    Message.SET_TEMP_INHERIT_SERVER_WORLD_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(), server,
-                            world, DateUtil.formatDateDiff(duration));
-                    LogEntry.build().actor(sender).acted(holder)
-                            .action("parent addtemp " + group.getName() + " " + duration + " " + server + " " + world)
-                            .build().submit(plugin, sender);
-                }
-
-            } else {
-                holder.setInheritGroup(group, duration);
-                Message.SET_TEMP_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(), DateUtil.formatDateDiff(duration));
-                LogEntry.build().actor(sender).acted(holder)
-                        .action("parent addtemp " + group.getName() + " " + duration)
-                        .build().submit(plugin, sender);
+                    Message.SET_TEMP_INHERIT_SERVER_WORLD_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(),
+                            server, world, DateUtil.formatDateDiff(duration)
+                    );
+                    break;
             }
+
+            LogEntry.build().actor(sender).acted(holder)
+                    .action("parent addtemp " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                    .build().submit(plugin, sender);
 
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
+
         } catch (ObjectAlreadyHasException e) {
             Message.ALREADY_TEMP_INHERITS.send(sender, holder.getFriendlyName(), group.getDisplayName());
             return CommandResult.STATE_ERROR;

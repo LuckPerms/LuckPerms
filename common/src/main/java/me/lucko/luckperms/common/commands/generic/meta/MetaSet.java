@@ -25,20 +25,18 @@ package me.lucko.luckperms.common.commands.generic.meta;
 import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.Arg;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Sender;
+import me.lucko.luckperms.common.commands.*;
 import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeBuilder;
 import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
-import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class MetaSet extends SecondarySubCommand {
     public MetaSet() {
@@ -53,25 +51,13 @@ public class MetaSet extends SecondarySubCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) throws CommandException {
         String key = MetaUtils.escapeCharacters(args.get(0));
         String value = MetaUtils.escapeCharacters(args.get(1));
 
         String node = "meta." + key + "." + value;
-        String server = null;
-        String world = null;
-
-        if (args.size() >= 3) {
-            server = args.get(2).toLowerCase();
-            if (ArgumentChecker.checkServer(server)) {
-                Message.SERVER_INVALID_ENTRY.send(sender);
-                return CommandResult.INVALID_ARGS;
-            }
-
-            if (args.size() != 3) {
-                world = args.get(3).toLowerCase();
-            }
-        }
+        String server = ArgumentUtils.handleServer(2, args);
+        String world = ArgumentUtils.handleWorld(3, args);
 
         Node n = new NodeBuilder(node).setServer(server).setWorld(world).build();
 
@@ -86,24 +72,21 @@ public class MetaSet extends SecondarySubCommand {
             holder.setPermission(n);
         } catch (ObjectAlreadyHasException ignored) {}
 
-        if (server == null) {
-            Message.SET_META_SUCCESS.send(sender, key, value, holder.getFriendlyName());
-            LogEntry.build().actor(sender).acted(holder)
-                    .action("meta set " + key + " " + value)
-                    .build().submit(plugin, sender);
-        } else {
-            if (world == null) {
+        switch (ContextHelper.determine(server, world)) {
+            case NONE:
+                Message.SET_META_SUCCESS.send(sender, key, value, holder.getFriendlyName());
+                break;
+            case SERVER:
                 Message.SET_META_SERVER_SUCCESS.send(sender, key, value, holder.getFriendlyName(), server);
-                LogEntry.build().actor(sender).acted(holder)
-                        .action("meta set " + key + " " + value + " " + server)
-                        .build().submit(plugin, sender);
-            } else {
+                break;
+            case SERVER_AND_WORLD:
                 Message.SET_META_SERVER_WORLD_SUCCESS.send(sender, key, value, holder.getFriendlyName(), server, world);
-                LogEntry.build().actor(sender).acted(holder)
-                        .action("meta set " + key + " " + value + " " + server + " " + world)
-                        .build().submit(plugin, sender);
-            }
+                break;
         }
+
+        LogEntry.build().actor(sender).acted(holder)
+                .action("meta set " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                .build().submit(plugin, sender);
 
         save(holder, sender, plugin);
         return CommandResult.SUCCESS;

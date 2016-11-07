@@ -105,12 +105,55 @@ public abstract class MainCommand<T> {
         final String name = args.get(0).toLowerCase();
         T t = getTarget(name, plugin, sender);
         if (t != null) {
-            CommandResult result = sub.execute(plugin, sender, t, strippedArgs, label);
+            CommandResult result;
+            try {
+                result = sub.execute(plugin, sender, t, strippedArgs, label);
+            } catch (CommandException e) {
+                result = handleException(e, sender, sub);
+            }
             cleanup(t, plugin);
             return result;
         }
 
         return CommandResult.LOADING_ERROR;
+    }
+
+    private static CommandResult handleException(CommandException e, Sender sender, SubCommand command) {
+        if (e instanceof ArgumentUtils.ArgumentException) {
+            if (e instanceof ArgumentUtils.DetailedUsageException) {
+                command.sendDetailedUsage(sender);
+                return CommandResult.INVALID_ARGS;
+            }
+
+            if (e instanceof ArgumentUtils.UseInheritException) {
+                Message.USE_INHERIT_COMMAND.send(sender);
+                return CommandResult.INVALID_ARGS;
+            }
+
+            if (e instanceof ArgumentUtils.InvalidServerException) {
+                Message.SERVER_INVALID_ENTRY.send(sender);
+                return CommandResult.INVALID_ARGS;
+            }
+
+            if (e instanceof ArgumentUtils.PastDateException) {
+                Message.PAST_DATE_ERROR.send(sender);
+                return CommandResult.INVALID_ARGS;
+            }
+
+            if (e instanceof ArgumentUtils.InvalidDateException) {
+                Message.ILLEGAL_DATE_ERROR.send(sender, ((ArgumentUtils.InvalidDateException) e).getInvalidDate());
+                return CommandResult.INVALID_ARGS;
+            }
+
+            if (e instanceof ArgumentUtils.InvalidPriorityException) {
+                Message.META_INVALID_PRIORITY.send(sender, ((ArgumentUtils.InvalidPriorityException) e).getInvalidPriority());
+                return CommandResult.INVALID_ARGS;
+            }
+        }
+
+        // Not something we can catch.
+        e.printStackTrace();
+        return CommandResult.FAILURE;
     }
 
     /**

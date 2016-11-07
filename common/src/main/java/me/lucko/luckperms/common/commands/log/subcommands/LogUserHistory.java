@@ -48,7 +48,7 @@ public class LogUserHistory extends SubCommand<Log> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) throws CommandException {
         String user = args.get(0);
         int page = -999;
 

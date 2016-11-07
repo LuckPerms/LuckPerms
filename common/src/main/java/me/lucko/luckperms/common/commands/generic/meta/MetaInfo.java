@@ -25,6 +25,7 @@ package me.lucko.luckperms.common.commands.generic.meta;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.Sender;
 import me.lucko.luckperms.common.commands.Util;
@@ -42,7 +43,7 @@ public class MetaInfo extends SecondarySubCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) throws CommandException {
         SortedSet<Map.Entry<Integer, Node>> prefixes = new TreeSet<>(Util.getMetaComparator().reversed());
         SortedSet<Map.Entry<Integer, Node>> suffixes = new TreeSet<>(Util.getMetaComparator().reversed());
         Set<Node> meta = new HashSet<>();

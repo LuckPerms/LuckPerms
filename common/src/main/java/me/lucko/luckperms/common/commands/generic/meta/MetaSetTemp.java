@@ -25,21 +25,19 @@ package me.lucko.luckperms.common.commands.generic.meta;
 import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.Arg;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Sender;
+import me.lucko.luckperms.common.commands.*;
 import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeBuilder;
 import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
-import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class MetaSetTemp extends SecondarySubCommand {
     public MetaSetTemp() {
@@ -55,42 +53,13 @@ public class MetaSetTemp extends SecondarySubCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) {
-        long duration;
-        try {
-            duration = Long.parseLong(args.get(2));
-        } catch (NumberFormatException e) {
-            try {
-                duration = DateUtil.parseDateDiff(args.get(2), true);
-            } catch (DateUtil.IllegalDateException e1) {
-                Message.ILLEGAL_DATE_ERROR.send(sender, args.get(2));
-                return CommandResult.INVALID_ARGS;
-            }
-        }
-
-        if (DateUtil.shouldExpire(duration)) {
-            Message.PAST_DATE_ERROR.send(sender);
-            return CommandResult.INVALID_ARGS;
-        }
-
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) throws CommandException {
         String key = MetaUtils.escapeCharacters(args.get(0));
         String value = MetaUtils.escapeCharacters(args.get(1));
-
+        long duration = ArgumentUtils.handleDuration(2, args);
         String node = "meta." + key + "." + value;
-        String server = null;
-        String world = null;
-
-        if (args.size() >= 3) {
-            server = args.get(2).toLowerCase();
-            if (ArgumentChecker.checkServer(server)) {
-                Message.SERVER_INVALID_ENTRY.send(sender);
-                return CommandResult.INVALID_ARGS;
-            }
-
-            if (args.size() != 3) {
-                world = args.get(3).toLowerCase();
-            }
-        }
+        String server = ArgumentUtils.handleServer(3, args);
+        String world = ArgumentUtils.handleWorld(4, args);
 
         Node n = new NodeBuilder(node).setServer(server).setWorld(world).setExpiry(duration).build();
 
@@ -105,24 +74,21 @@ public class MetaSetTemp extends SecondarySubCommand {
             holder.setPermission(n);
         } catch (ObjectAlreadyHasException ignored) {}
 
-        if (server == null) {
-            Message.SET_META_TEMP_SUCCESS.send(sender, key, value, holder.getFriendlyName(), DateUtil.formatDateDiff(duration));
-            LogEntry.build().actor(sender).acted(holder)
-                    .action("meta settemp " + key + " " + value + " " + duration)
-                    .build().submit(plugin, sender);
-        } else {
-            if (world == null) {
+        switch (ContextHelper.determine(server, world)) {
+            case NONE:
+                Message.SET_META_TEMP_SUCCESS.send(sender, key, value, holder.getFriendlyName(), DateUtil.formatDateDiff(duration));
+                break;
+            case SERVER:
                 Message.SET_META_TEMP_SERVER_SUCCESS.send(sender, key, value, holder.getFriendlyName(), server, DateUtil.formatDateDiff(duration));
-                LogEntry.build().actor(sender).acted(holder)
-                        .action("meta settemp " + key + " " + value + " " + duration + " " + server)
-                        .build().submit(plugin, sender);
-            } else {
+                break;
+            case SERVER_AND_WORLD:
                 Message.SET_META_TEMP_SERVER_WORLD_SUCCESS.send(sender, key, value, holder.getFriendlyName(), server, world, DateUtil.formatDateDiff(duration));
-                LogEntry.build().actor(sender).acted(holder)
-                        .action("meta settemp " + key + " " + value + " " + duration + " " + server + " " + world)
-                        .build().submit(plugin, sender);
-            }
+                break;
         }
+
+        LogEntry.build().actor(sender).acted(holder)
+                .action("meta settemp " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                .build().submit(plugin, sender);
 
         save(holder, sender, plugin);
         return CommandResult.SUCCESS;

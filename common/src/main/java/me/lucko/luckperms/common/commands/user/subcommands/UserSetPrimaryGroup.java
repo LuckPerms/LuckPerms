@@ -23,10 +23,7 @@
 package me.lucko.luckperms.common.commands.user.subcommands;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.Arg;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.SubCommand;
+import me.lucko.luckperms.common.commands.*;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.data.LogEntry;
@@ -45,7 +42,7 @@ public class UserSetPrimaryGroup extends SubCommand<User> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) throws CommandException {
         Group group = plugin.getGroupManager().get(args.get(0).toLowerCase());
         if (group == null) {
             Message.GROUP_DOES_NOT_EXIST.send(sender);

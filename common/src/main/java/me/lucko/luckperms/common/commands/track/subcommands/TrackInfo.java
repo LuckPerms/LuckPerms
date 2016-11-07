@@ -23,10 +23,7 @@
 package me.lucko.luckperms.common.commands.track.subcommands;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.SubCommand;
-import me.lucko.luckperms.common.commands.Util;
+import me.lucko.luckperms.common.commands.*;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.tracks.Track;
@@ -40,7 +37,7 @@ public class TrackInfo extends SubCommand<Track> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args, String label) throws CommandException {
         Message.TRACK_INFO.send(sender, track.getName(), Util.listToArrowSep(track.getGroups()));
         return CommandResult.SUCCESS;
     }

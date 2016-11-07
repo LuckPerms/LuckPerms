@@ -26,10 +26,7 @@ import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.SubCommand;
-import me.lucko.luckperms.common.commands.Util;
+import me.lucko.luckperms.common.commands.*;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeBuilder;
 import me.lucko.luckperms.common.core.PermissionHolder;
@@ -52,7 +49,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) throws CommandException {
         final Logger log = plugin.getLog();
 
         Optional<PluginContainer> pex = Sponge.getPluginManager().getPlugin("permissionsex");

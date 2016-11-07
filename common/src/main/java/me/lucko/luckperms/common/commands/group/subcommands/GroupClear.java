@@ -23,15 +23,11 @@
 package me.lucko.luckperms.common.commands.group.subcommands;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.Arg;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.SubCommand;
+import me.lucko.luckperms.common.commands.*;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.groups.Group;
-import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
@@ -48,25 +44,22 @@ public class GroupClear extends SubCommand<Group> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) throws CommandException {
         int before = group.getNodes().size();
 
-        if (args.size() == 0) {
-            group.clearNodes();
-        } else {
-            final String server = args.get(0);
-            if (ArgumentChecker.checkServer(server)) {
-                Message.SERVER_INVALID_ENTRY.send(sender);
-                return CommandResult.INVALID_ARGS;
-            }
+        String server = ArgumentUtils.handleServer(0, args);
+        String world = ArgumentUtils.handleWorld(1, args);
 
-            if (args.size() == 2) {
-                final String world = args.get(1);
-                group.clearNodes(server, world);
-
-            } else {
+        switch (ContextHelper.determine(server, world)) {
+            case NONE:
+                group.clearNodes();
+                break;
+            case SERVER:
                 group.clearNodes(server);
-            }
+                break;
+            case SERVER_AND_WORLD:
+                group.clearNodes(server, world);
+                break;
         }
 
         int changed = before - group.getNodes().size();
@@ -76,7 +69,10 @@ public class GroupClear extends SubCommand<Group> {
             Message.CLEAR_SUCCESS.send(sender, group.getName(), changed);
         }
 
-        LogEntry.build().actor(sender).acted(group).action("clear " + args.stream().collect(Collectors.joining(" "))).build().submit(plugin, sender);
+        LogEntry.build().actor(sender).acted(group)
+                .action("clear " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                .build().submit(plugin, sender);
+
         save(group, sender, plugin);
         return CommandResult.SUCCESS;
     }

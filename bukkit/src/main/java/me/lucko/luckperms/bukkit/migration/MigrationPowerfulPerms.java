@@ -30,10 +30,7 @@ import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.data.Callback;
 import me.lucko.luckperms.bukkit.migration.utils.LPResultRunnable;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.Arg;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.SubCommand;
+import me.lucko.luckperms.common.commands.*;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
@@ -132,7 +129,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) throws CommandException {
         try {
             return run(plugin, args);
         } catch (Throwable t) {

@@ -23,25 +23,20 @@
 package me.lucko.luckperms.common.commands.generic.permission;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.Arg;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.Util;
+import me.lucko.luckperms.common.commands.*;
 import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.InheritanceInfo;
 import me.lucko.luckperms.common.core.NodeBuilder;
 import me.lucko.luckperms.common.core.PermissionHolder;
-import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 
 public class PermissionCheckInherits extends SecondarySubCommand {
     public PermissionCheckInherits() {
-        super("checkinherits", "Checks to see if the object inherits a certain permission node", Permission.USER_PERM_CHECK_INHERITS, Permission.GROUP_PERM_CHECK_INHERITS,
-                Predicates.notInRange(1, 3),
+        super("checkinherits", "Checks to see if the object inherits a certain permission node",
+                Permission.USER_PERM_CHECK_INHERITS, Permission.GROUP_PERM_CHECK_INHERITS, Predicates.notInRange(1, 3),
                 Arg.list(
                         Arg.create("node", true, "the permission node to check for"),
                         Arg.create("server", false, "the server to check on"),
@@ -51,22 +46,22 @@ public class PermissionCheckInherits extends SecondarySubCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) {
-        InheritanceInfo result;
-        if (args.size() >= 2) {
-            if (ArgumentChecker.checkServer(args.get(1))) {
-                Message.SERVER_INVALID_ENTRY.send(sender);
-                return CommandResult.INVALID_ARGS;
-            }
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) throws CommandException {
+        String node = ArgumentUtils.handleNodeWithoutCheck(0, args);
+        String server = ArgumentUtils.handleServer(1, args);
+        String world = ArgumentUtils.handleWorld(2, args);
 
-            if (args.size() == 2) {
-                result = holder.inheritsPermissionInfo(new NodeBuilder(args.get(0)).setServer(args.get(1)).build());
-            } else {
-                result = holder.inheritsPermissionInfo(new NodeBuilder(args.get(0)).setServer(args.get(1)).setWorld(args.get(2)).build());
-            }
-
-        } else {
-            result = holder.inheritsPermissionInfo(new NodeBuilder(args.get(0)).build());
+        InheritanceInfo result = null;
+        switch (ContextHelper.determine(server, world)) {
+            case NONE:
+                result = holder.inheritsPermissionInfo(new NodeBuilder(node).build());
+                break;
+            case SERVER:
+                result = holder.inheritsPermissionInfo(new NodeBuilder(node).setServer(server).build());
+                break;
+            case SERVER_AND_WORLD:
+                result = holder.inheritsPermissionInfo(new NodeBuilder(node).setServer(server).setWorld(world).build());
+                break;
         }
 
         String location = null;
@@ -78,7 +73,7 @@ public class PermissionCheckInherits extends SecondarySubCommand {
             }
         }
 
-        Util.sendPluginMessage(sender, "&b" + args.get(0) + ": " + Util.formatTristate(result.getResult()) +
+        Util.sendPluginMessage(sender, "&b" + node + ": " + Util.formatTristate(result.getResult()) +
                 (result.getLocation().isPresent() ? " &7(inherited from &a" + location + "&7)" : ""));
         return CommandResult.SUCCESS;
     }

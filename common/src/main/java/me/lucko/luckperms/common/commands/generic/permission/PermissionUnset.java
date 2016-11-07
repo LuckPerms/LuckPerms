@@ -23,23 +23,22 @@
 package me.lucko.luckperms.common.commands.generic.permission;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.Arg;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Sender;
+import me.lucko.luckperms.common.commands.*;
 import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
-import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class PermissionUnset extends SecondarySubCommand {
     public PermissionUnset() {
-        super("unset", "Unsets a permission for the object", Permission.USER_PERM_UNSET, Permission.GROUP_PERM_UNSET, Predicates.notInRange(1, 3),
+        super("unset", "Unsets a permission for the object", Permission.USER_PERM_UNSET, Permission.GROUP_PERM_UNSET,
+                Predicates.notInRange(1, 3),
                 Arg.list(
                         Arg.create("node", true, "the permission node to unset"),
                         Arg.create("server", false, "the server to remove the permission node on"),
@@ -49,52 +48,34 @@ public class PermissionUnset extends SecondarySubCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) {
-        String node = args.get(0).replace("{SPACE}", " ");
-
-        if (ArgumentChecker.checkNode(node)) {
-            sendDetailedUsage(sender);
-            return CommandResult.INVALID_ARGS;
-        }
-
-        if (node.toLowerCase().startsWith("group.")) {
-            Message.USE_UNINHERIT_COMMAND.send(sender);
-            return CommandResult.INVALID_ARGS;
-        }
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) throws CommandException {
+        String node = ArgumentUtils.handleNode(0, args);
+        String server = ArgumentUtils.handleServer(1, args);
+        String world = ArgumentUtils.handleWorld(2, args);
 
         try {
-            if (args.size() >= 2) {
-                final String server = args.get(1).toLowerCase();
-                if (ArgumentChecker.checkServer(server)) {
-                    Message.SERVER_INVALID_ENTRY.send(sender);
-                    return CommandResult.INVALID_ARGS;
-                }
-
-                if (args.size() == 2) {
+            switch (ContextHelper.determine(server, world)) {
+                case NONE:
+                    holder.unsetPermission(node);
+                    Message.UNSETPERMISSION_SUCCESS.send(sender, node, holder.getFriendlyName());
+                    break;
+                case SERVER:
                     holder.unsetPermission(node, server);
                     Message.UNSETPERMISSION_SERVER_SUCCESS.send(sender, node, holder.getFriendlyName(), server);
-                    LogEntry.build().actor(sender).acted(holder)
-                            .action("permission unset " + node + " " + server)
-                            .build().submit(plugin, sender);
-                } else {
-                    final String world = args.get(2).toLowerCase();
+                    break;
+                case SERVER_AND_WORLD:
                     holder.unsetPermission(node, server, world);
                     Message.UNSETPERMISSION_SERVER_WORLD_SUCCESS.send(sender, node, holder.getFriendlyName(), server, world);
-                    LogEntry.build().actor(sender).acted(holder)
-                            .action("permission unset " + node + " " + server + " " + world)
-                            .build().submit(plugin, sender);
-                }
-
-            } else {
-                holder.unsetPermission(node);
-                Message.UNSETPERMISSION_SUCCESS.send(sender, node, holder.getFriendlyName());
-                LogEntry.build().actor(sender).acted(holder)
-                        .action("permission unset " + node)
-                        .build().submit(plugin, sender);
+                    break;
             }
+
+            LogEntry.build().actor(sender).acted(holder)
+                    .action("permission unset " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                    .build().submit(plugin, sender);
 
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
+
         } catch (ObjectLacksException e) {
             Message.DOES_NOT_HAVEPERMISSION.send(sender, holder.getFriendlyName());
             return CommandResult.STATE_ERROR;

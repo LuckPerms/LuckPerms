@@ -20,28 +20,11 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.user.subcommands;
+package me.lucko.luckperms.common.commands;
 
-import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.CommandException;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.SubCommand;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.users.User;
-import me.lucko.luckperms.common.utils.Predicates;
+/**
+ * Exception to be thrown if there is an error processing a command
+ */
+public class CommandException extends Exception {
 
-import java.util.List;
-
-public class UserGetUUID extends SubCommand<User> {
-    public UserGetUUID() {
-        super("getuuid", "Displays the user's internal LuckPerms unique id", Permission.USER_GETUUID, Predicates.alwaysFalse(), null);
-    }
-
-    @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) throws CommandException {
-        Message.USER_GETUUID.send(sender, user.getName(), user.getUuid().toString());
-        return CommandResult.SUCCESS;
-    }
 }

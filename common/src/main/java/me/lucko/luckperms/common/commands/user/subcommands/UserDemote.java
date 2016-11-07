@@ -59,7 +59,7 @@ public class UserDemote extends SubCommand<User> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) throws CommandException {
         final String trackName = args.get(0).toLowerCase();
         if (ArgumentChecker.checkName(trackName)) {
             Message.TRACK_INVALID_ENTRY.send(sender);
@@ -82,19 +82,8 @@ public class UserDemote extends SubCommand<User> {
             return CommandResult.STATE_ERROR;
         }
 
-        String server = null;
-        String world = null;
-
-        if (args.size() > 1) {
-            server = args.get(1);
-            if (ArgumentChecker.checkServer(server)) {
-                Message.SERVER_INVALID_ENTRY.send(sender);
-                return CommandResult.INVALID_ARGS;
-            }
-            if (args.size() > 2) {
-                world = args.get(2);
-            }
-        }
+        String server = ArgumentUtils.handleServer(1, args);
+        String world = ArgumentUtils.handleWorld(2, args);
 
         // Load applicable groups
         Set<Node> nodes = new HashSet<>();

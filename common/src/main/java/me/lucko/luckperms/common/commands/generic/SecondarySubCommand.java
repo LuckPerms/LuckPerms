@@ -63,7 +63,7 @@ public abstract class SecondarySubCommand {
 
     private final ImmutableList<Arg> args;
 
-    public abstract CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args);
+    public abstract CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) throws CommandException;
 
     public List<String> onTabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         return Collections.emptyList();

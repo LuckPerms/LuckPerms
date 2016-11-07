@@ -23,15 +23,11 @@
 package me.lucko.luckperms.common.commands.user.subcommands;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.Arg;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.SubCommand;
+import me.lucko.luckperms.common.commands.*;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.users.User;
-import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
@@ -48,25 +44,22 @@ public class UserClear extends SubCommand<User> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) throws CommandException {
         int before = user.getNodes().size();
 
-        if (args.size() == 0) {
-            user.clearNodes();
-        } else {
-            final String server = args.get(0);
-            if (ArgumentChecker.checkServer(server)) {
-                Message.SERVER_INVALID_ENTRY.send(sender);
-                return CommandResult.INVALID_ARGS;
-            }
+        String server = ArgumentUtils.handleServer(0, args);
+        String world = ArgumentUtils.handleWorld(1, args);
 
-            if (args.size() == 2) {
-                final String world = args.get(1);
-                user.clearNodes(server, world);
-
-            } else {
+        switch (ContextHelper.determine(server, world)) {
+            case NONE:
+                user.clearNodes();
+                break;
+            case SERVER:
                 user.clearNodes(server);
-            }
+                break;
+            case SERVER_AND_WORLD:
+                user.clearNodes(server, world);
+                break;
         }
 
         int changed = before - user.getNodes().size();
@@ -76,7 +69,10 @@ public class UserClear extends SubCommand<User> {
             Message.CLEAR_SUCCESS.send(sender, user.getName(), changed);
         }
 
-        LogEntry.build().actor(sender).acted(user).action("clear " + args.stream().collect(Collectors.joining(" "))).build().submit(plugin, sender);
+        LogEntry.build().actor(sender).acted(user)
+                .action("clear " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                .build().submit(plugin, sender);
+
         save(user, sender, plugin);
         return CommandResult.SUCCESS;
     }

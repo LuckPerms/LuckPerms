@@ -48,7 +48,7 @@ public class LogRecent extends SubCommand<Log> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) throws CommandException {
         if (args.size() == 0) {
             // No page or user
             return showLog(log.getRecentMaxPages(), null, sender, log);

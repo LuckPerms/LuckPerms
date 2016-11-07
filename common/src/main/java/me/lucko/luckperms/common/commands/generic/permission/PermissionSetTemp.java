@@ -23,27 +23,25 @@
 package me.lucko.luckperms.common.commands.generic.permission;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.Arg;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Sender;
+import me.lucko.luckperms.common.commands.*;
 import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
-import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static me.lucko.luckperms.common.commands.SubCommand.getBoolTabComplete;
 
 public class PermissionSetTemp extends SecondarySubCommand {
     public PermissionSetTemp() {
-        super("settemp", "Sets a permission for the object temporarily", Permission.USER_PERM_SETTEMP, Permission.GROUP_PERM_SETTEMP,
-                Predicates.notInRange(3, 5),
+        super("settemp", "Sets a permission for the object temporarily", Permission.USER_PERM_SETTEMP,
+                Permission.GROUP_PERM_SETTEMP, Predicates.notInRange(3, 5),
                 Arg.list(
                         Arg.create("node", true, "the permission node to set"),
                         Arg.create("true|false", true, "the value of the node"),
@@ -55,79 +53,44 @@ public class PermissionSetTemp extends SecondarySubCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) {
-        String node = args.get(0).replace("{SPACE}", " ");
-        String bool = args.get(1).toLowerCase();
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) throws CommandException {
+        String node = ArgumentUtils.handleNode(0, args);
+        boolean b = ArgumentUtils.handleBoolean(1, args);
 
-        if (ArgumentChecker.checkNode(node)) {
-            sendDetailedUsage(sender);
-            return CommandResult.INVALID_ARGS;
-        }
+        long duration = ArgumentUtils.handleDuration(2, args);
 
-        if (node.toLowerCase().startsWith("group.")) {
-            Message.USE_INHERIT_COMMAND.send(sender);
-            return CommandResult.INVALID_ARGS;
-        }
-
-        if (!bool.equalsIgnoreCase("true") && !bool.equalsIgnoreCase("false")) {
-            sendDetailedUsage(sender);
-            return CommandResult.INVALID_ARGS;
-        }
-
-        boolean b = Boolean.parseBoolean(bool);
-
-        long duration;
-        try {
-            duration = Long.parseLong(args.get(2));
-        } catch (NumberFormatException e) {
-            try {
-                duration = DateUtil.parseDateDiff(args.get(2), true);
-            } catch (DateUtil.IllegalDateException e1) {
-                Message.ILLEGAL_DATE_ERROR.send(sender, args.get(2));
-                return CommandResult.INVALID_ARGS;
-            }
-        }
-
-        if (DateUtil.shouldExpire(duration)) {
-            Message.PAST_DATE_ERROR.send(sender);
-            return CommandResult.INVALID_ARGS;
-        }
+        String server = ArgumentUtils.handleServer(3, args);
+        String world = ArgumentUtils.handleWorld(4, args);
 
         try {
-            if (args.size() >= 4) {
-                final String server = args.get(3).toLowerCase();
-                if (ArgumentChecker.checkServer(server)) {
-                    Message.SERVER_INVALID_ENTRY.send(sender);
-                    return CommandResult.INVALID_ARGS;
-                }
-
-                if (args.size() == 4) {
+            switch (ContextHelper.determine(server, world)) {
+                case NONE:
+                    holder.setPermission(node, b, duration);
+                    Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, b, holder.getFriendlyName(),
+                            DateUtil.formatDateDiff(duration)
+                    );
+                    break;
+                case SERVER:
                     holder.setPermission(node, b, server, duration);
-                    Message.SETPERMISSION_TEMP_SERVER_SUCCESS.send(sender, node, bool, holder.getFriendlyName(), server,
-                            DateUtil.formatDateDiff(duration));
-                    LogEntry.build().actor(sender).acted(holder)
-                            .action("permission settemp " + node + " " + b + " " + duration + " " + server)
-                            .build().submit(plugin, sender);
-                } else {
-                    final String world = args.get(4).toLowerCase();
+                    Message.SETPERMISSION_TEMP_SERVER_SUCCESS.send(sender, node, b, holder.getFriendlyName(), server,
+                            DateUtil.formatDateDiff(duration)
+                    );
+                    break;
+                case SERVER_AND_WORLD:
                     holder.setPermission(node, b, server, world, duration);
-                    Message.SETPERMISSION_TEMP_SERVER_WORLD_SUCCESS.send(sender, node, bool, holder.getFriendlyName(), server,
-                            world, DateUtil.formatDateDiff(duration));
-                    LogEntry.build().actor(sender).acted(holder)
-                            .action("permission settemp " + node + " " + b + " " + duration + " " + server + " " + world)
-                            .build().submit(plugin, sender);
-                }
-
-            } else {
-                holder.setPermission(node, b, duration);
-                Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, bool, holder.getFriendlyName(), DateUtil.formatDateDiff(duration));
-                LogEntry.build().actor(sender).acted(holder)
-                        .action("permission settemp " + node + " " + b + " " + duration)
-                        .build().submit(plugin, sender);
+                    Message.SETPERMISSION_TEMP_SERVER_WORLD_SUCCESS.send(sender, node, b, holder.getFriendlyName(),
+                            server, world, DateUtil.formatDateDiff(duration)
+                    );
+                    break;
             }
+
+            LogEntry.build().actor(sender).acted(holder)
+                    .action("permission settemp " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                    .build().submit(plugin, sender);
 
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
+
         } catch (ObjectAlreadyHasException e) {
             Message.ALREADY_HAS_TEMP_PERMISSION.send(sender, holder.getFriendlyName());
             return CommandResult.STATE_ERROR;

@@ -23,10 +23,7 @@
 package me.lucko.luckperms.common.commands.group.subcommands;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.Arg;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.SubCommand;
+import me.lucko.luckperms.common.commands.*;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.data.LogEntry;
@@ -44,7 +41,7 @@ public class GroupClone extends SubCommand<Group> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) throws CommandException {
         String newGroupName = args.get(0).toLowerCase();
         if (ArgumentChecker.checkName(newGroupName)) {
             Message.GROUP_INVALID_ENTRY.send(sender);

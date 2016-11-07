@@ -24,10 +24,7 @@ package me.lucko.luckperms.common.commands.log.subcommands;
 
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.Arg;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.SubCommand;
+import me.lucko.luckperms.common.commands.*;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.data.Log;
@@ -48,7 +45,7 @@ public class LogExport extends SubCommand<Log> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) throws CommandException {
         File f = new File(plugin.getMainDir(), args.get(0));
         if (f.exists()) {
             Message.LOG_EXPORT_ALREADY_EXISTS.send(sender, f.getAbsolutePath());
