@@ -38,6 +38,7 @@ import me.lucko.luckperms.api.event.events.*;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.api.internal.GroupLink;
 import me.lucko.luckperms.common.api.internal.PermissionHolderLink;
+import me.lucko.luckperms.common.caching.MetaHolder;
 import me.lucko.luckperms.common.commands.Util;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.utils.Cache;
@@ -306,6 +307,98 @@ public abstract class PermissionHolder {
         }
 
         return all;
+    }
+
+    private static void accumulateMetaNode(Node n, MetaHolder holder) {
+        if (n.isPrefix()) {
+            Map.Entry<Integer, String> value = n.getPrefix();
+            if (!holder.getPrefixes().containsKey(value.getKey())) {
+                holder.getPrefixes().put(value.getKey(), value.getValue());
+            }
+        }
+
+        if (n.isSuffix()) {
+            Map.Entry<Integer, String> value = n.getSuffix();
+            if (!holder.getSuffixes().containsKey(value.getKey())) {
+                holder.getSuffixes().put(value.getKey(), value.getValue());
+            }
+        }
+
+        if (n.isMeta()) {
+            Map.Entry<String, String> meta = n.getMeta();
+            if (!holder.getMeta().containsKey(meta.getKey())) {
+                holder.getMeta().put(meta.getKey(), meta.getValue());
+            }
+        }
+    }
+
+    public MetaHolder accumulateMeta(MetaHolder holder, List<String> excludedGroups, Contexts context) {
+        if (holder == null) {
+            holder = new MetaHolder();
+        }
+
+        if (excludedGroups == null) {
+            excludedGroups = new ArrayList<>();
+        }
+
+        excludedGroups.add(getObjectName().toLowerCase());
+
+        MutableContextSet contexts = MutableContextSet.fromSet(context.getContexts());
+        String server = contexts.getValues("server").stream().findAny().orElse(null);
+        String world = contexts.getValues("world").stream().findAny().orElse(null);
+        contexts.removeAll("server");
+        contexts.removeAll("world");
+
+        SortedSet<LocalizedNode> all = new TreeSet<>((SortedSet<LocalizedNode>) getPermissions(true));
+        for (LocalizedNode ln : all) {
+            Node n = ln.getNode();
+
+            if (!n.getValue()) continue;
+            if (!n.isMeta() && !n.isPrefix() && !n.isSuffix()) continue;
+            if (!n.shouldApplyOnServer(server, context.isIncludeGlobal(), false)) continue;
+            if (!n.shouldApplyOnWorld(world, context.isIncludeGlobalWorld(), false)) continue;
+            if (!n.shouldApplyWithContext(contexts, false)) continue;
+
+            accumulateMetaNode(n, holder);
+        }
+
+        Set<Node> parents = all.stream()
+                .map(LocalizedNode::getNode)
+                .filter(Node::getValue)
+                .filter(Node::isGroupNode)
+                .collect(Collectors.toSet());
+
+        parents.removeIf(node ->
+                !node.shouldApplyOnServer(server, context.isApplyGlobalGroups(), plugin.getConfiguration().isApplyingRegex()) ||
+                !node.shouldApplyOnWorld(world, context.isApplyGlobalWorldGroups(), plugin.getConfiguration().isApplyingRegex()) ||
+                !node.shouldApplyWithContext(contexts, false)
+        );
+
+        TreeSet<Map.Entry<Integer, Node>> sortedParents = new TreeSet<>(Util.getMetaComparator().reversed());
+        Map<String, Integer> weights = plugin.getConfiguration().getGroupWeights();
+        for (Node node : parents) {
+            if (weights.containsKey(node.getGroupName().toLowerCase())) {
+                sortedParents.add(Maps.immutableEntry(weights.get(node.getGroupName().toLowerCase()), node));
+            } else {
+                sortedParents.add(Maps.immutableEntry(0, node));
+            }
+        }
+
+        for (Map.Entry<Integer, Node> e : sortedParents) {
+            Node parent = e.getValue();
+            Group group = plugin.getGroupManager().get(parent.getGroupName());
+            if (group == null) {
+                continue;
+            }
+
+            if (excludedGroups.contains(group.getObjectName().toLowerCase())) {
+                continue;
+            }
+
+            group.accumulateMeta(holder, excludedGroups, context);
+        }
+
+        return holder;
     }
 
     /**

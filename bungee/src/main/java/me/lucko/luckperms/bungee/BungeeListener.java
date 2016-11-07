@@ -37,6 +37,7 @@ import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
+import net.md_5.bungee.event.EventPriority;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -83,7 +84,7 @@ public class BungeeListener extends AbstractListener implements Listener {
         e.setHasPermission(user.getUserData().getPermissionData(contexts).getPermissionValue(e.getPermission()).asBoolean());
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerLogin(LoginEvent e) {
         /* Delay the login here, as we want to cache UUID data before the player is connected to a backend bukkit server.
            This means that a player will have the same UUID across the network, even if parts of the network are running in

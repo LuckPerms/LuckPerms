@@ -78,7 +78,7 @@ public class UserCache implements UserData {
 
                 @Override
                 public ListenableFuture<MetaCache> reload(Contexts contexts, MetaCache oldData) {
-                    oldData.loadMeta(user.getAllNodes(null, contexts));
+                    oldData.loadMeta(user.accumulateMeta(null, null, contexts));
                     return Futures.immediateFuture(oldData);
                 }
             });
@@ -102,8 +102,8 @@ public class UserCache implements UserData {
 
     @Override
     public MetaCache calculateMeta(@NonNull Contexts contexts) {
-        MetaCache data = new MetaCache(contexts);
-        data.loadMeta(user.getAllNodes(null, contexts));
+        MetaCache data = new MetaCache();
+        data.loadMeta(user.accumulateMeta(null, null, contexts));
         return data;
     }
 
