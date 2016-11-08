@@ -32,6 +32,9 @@ import me.lucko.luckperms.common.users.User;
 
 import java.util.UUID;
 
+/**
+ * An abstract listener shared by Bukkit & Sponge.
+ */
 @AllArgsConstructor
 public class AbstractListener {
     private final LuckPermsPlugin plugin;

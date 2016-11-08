@@ -26,6 +26,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,6 @@ import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.util.Tristate;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -83,7 +83,7 @@ public class PersistedCollection implements SubjectCollection {
 
     @Override
     public Map<Subject, Boolean> getAllWithPermission(@NonNull String id) {
-        return getAllWithPermission(Collections.emptySet(), id);
+        return getAllWithPermission(ImmutableSet.of(), id);
     }
 
     @Override

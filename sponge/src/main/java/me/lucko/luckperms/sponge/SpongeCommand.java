@@ -54,7 +54,7 @@ class SpongeCommand extends CommandManager implements CommandCallable {
     public CommandResult process(CommandSource source, String s) throws CommandException {
         try (Timing ignored = plugin.getTimings().time(LPTiming.ON_COMMAND)) {
             onCommand(
-                    SpongeSenderFactory.get(getPlugin()).wrap(source),
+                    plugin.getSenderFactory().wrap(source),
                     "perms",
                     Util.stripQuotes(Splitter.on(Patterns.COMMAND_SEPARATOR).omitEmptyStrings().splitToList(s)),
                     Callback.empty()
@@ -66,13 +66,13 @@ class SpongeCommand extends CommandManager implements CommandCallable {
     @Override
     public List<String> getSuggestions(CommandSource source, String s, @Nullable Location<World> location) throws CommandException {
         try (Timing ignored = plugin.getTimings().time(LPTiming.COMMAND_TAB_COMPLETE)) {
-            return onTabComplete(SpongeSenderFactory.get(getPlugin()).wrap(source), Splitter.on(' ').splitToList(s));
+            return onTabComplete(plugin.getSenderFactory().wrap(source), Splitter.on(' ').splitToList(s));
         }
     }
 
     public List<String> getSuggestions(CommandSource source, String s) throws CommandException {
         try (Timing ignored = plugin.getTimings().time(LPTiming.COMMAND_TAB_COMPLETE)) {
-            return onTabComplete(SpongeSenderFactory.get(getPlugin()).wrap(source), Splitter.on(' ').splitToList(s));
+            return onTabComplete(plugin.getSenderFactory().wrap(source), Splitter.on(' ').splitToList(s));
         }
     }
 

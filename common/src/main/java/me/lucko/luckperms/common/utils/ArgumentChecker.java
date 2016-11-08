@@ -25,6 +25,9 @@ package me.lucko.luckperms.common.utils;
 import lombok.experimental.UtilityClass;
 import me.lucko.luckperms.common.constants.Patterns;
 
+/**
+ * Utility for checking arguments for consistency
+ */
 @UtilityClass
 public class ArgumentChecker {
 

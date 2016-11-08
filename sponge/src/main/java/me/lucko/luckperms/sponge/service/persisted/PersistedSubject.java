@@ -24,6 +24,7 @@ package me.lucko.luckperms.sponge.service.persisted;
 
 import co.aikar.timings.Timing;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import lombok.Getter;
 import lombok.NonNull;
 import me.lucko.luckperms.common.utils.BufferedRequest;
@@ -196,7 +197,7 @@ public class PersistedSubject implements Subject {
     @Override
     public Set<Context> getActiveContexts() {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.PERSISTED_SUBJECT_GET_ACTIVE_CONTEXTS)) {
-            return LuckPermsService.convertContexts(service.getPlugin().getContextManager().getApplicableContext(this));
+            return ImmutableSet.copyOf(LuckPermsService.convertContexts(service.getPlugin().getContextManager().getApplicableContext(this)));
         }
     }
 }

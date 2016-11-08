@@ -62,13 +62,6 @@ public class UserCollection implements SubjectCollection {
     private final SimpleCollection fallback;
 
     private final LoadingCache<UUID, LuckPermsUserSubject> users = CacheBuilder.newBuilder()
-            /*
-            .removalListener((RemovalListener<UUID, LuckPermsUserSubject>) r -> {
-                if (r.getValue() != null) {
-                    r.getValue().deprovision();
-                }
-            })
-            */
             .build(new CacheLoader<UUID, LuckPermsUserSubject>() {
                 @Override
                 public LuckPermsUserSubject load(UUID uuid) throws Exception {

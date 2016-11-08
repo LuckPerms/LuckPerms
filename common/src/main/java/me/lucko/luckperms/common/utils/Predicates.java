@@ -29,6 +29,9 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+/**
+ * A collection of predicate utilities used mostly in command classes
+ */
 @SuppressWarnings({"WeakerAccess", "unused"})
 @UtilityClass
 public class Predicates {

@@ -32,17 +32,8 @@ import org.spongepowered.api.text.serializer.TextSerializers;
 import java.util.UUID;
 
 public class SpongeSenderFactory extends SenderFactory<CommandSource> {
-    private static SpongeSenderFactory instance = null;
-
-    private SpongeSenderFactory(LuckPermsPlugin plugin) {
+    public SpongeSenderFactory(LuckPermsPlugin plugin) {
         super(plugin);
-    }
-
-    public static synchronized SpongeSenderFactory get(LuckPermsPlugin plugin) {
-        if (instance == null) {
-            instance = new SpongeSenderFactory(plugin);
-        }
-        return instance;
     }
 
     @Override

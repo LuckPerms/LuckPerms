@@ -24,6 +24,7 @@ package me.lucko.luckperms.sponge.service.simple;
 
 import co.aikar.timings.Timing;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import lombok.Getter;
 import lombok.NonNull;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
@@ -162,7 +163,7 @@ public class SimpleSubject implements Subject {
     @Override
     public Set<Context> getActiveContexts() {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.SIMPLE_SUBJECT_GET_ACTIVE_CONTEXTS)) {
-            return LuckPermsService.convertContexts(service.getPlugin().getContextManager().getApplicableContext(this));
+            return ImmutableSet.copyOf(LuckPermsService.convertContexts(service.getPlugin().getContextManager().getApplicableContext(this)));
         }
     }
 }

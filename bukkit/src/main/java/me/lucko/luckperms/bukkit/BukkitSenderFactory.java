@@ -31,17 +31,8 @@ import org.bukkit.entity.Player;
 import java.util.UUID;
 
 public class BukkitSenderFactory extends SenderFactory<CommandSender> {
-    private static BukkitSenderFactory instance = null;
-
-    private BukkitSenderFactory(LuckPermsPlugin plugin) {
+    public BukkitSenderFactory(LuckPermsPlugin plugin) {
         super(plugin);
-    }
-
-    public static synchronized BukkitSenderFactory get(LuckPermsPlugin plugin) {
-        if (instance == null) {
-            instance = new BukkitSenderFactory(plugin);
-        }
-        return instance;
     }
 
     @Override

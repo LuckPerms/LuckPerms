@@ -61,6 +61,9 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
     @Setter
     private String primaryGroup = null;
 
+    /**
+     * The users data cache instance, if present.
+     */
     @Getter
     private UserCache userData = null;
 

@@ -30,14 +30,20 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+/**
+ * Thread-safe request buffer.
+ *
+ * Waits for the buffer time to pass before performing the operation. If the task is called again in that time, the
+ * buffer time is reset.
+ *
+ * @param <T> the return type
+ */
 @RequiredArgsConstructor
 public abstract class BufferedRequest<T> {
     private final long bufferTimeMillis;
     private final Consumer<Runnable> executor;
 
     private WeakReference<Processor<T>> processor = null;
-
-    @Getter
     private ReentrantLock lock = new ReentrantLock();
 
     public LPFuture<T> request() {
@@ -65,7 +71,6 @@ public abstract class BufferedRequest<T> {
     }
 
     protected abstract T perform();
-
 
     @RequiredArgsConstructor
     private static class Processor<R> implements Runnable {

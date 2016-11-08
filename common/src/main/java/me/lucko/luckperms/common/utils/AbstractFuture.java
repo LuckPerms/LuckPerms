@@ -26,6 +26,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * Basic Future implementation
+ * @param <R> the return type
+ */
 public class AbstractFuture<R> implements LPFuture<R> {
     private final CountDownLatch latch = new CountDownLatch(1);
     private R value;

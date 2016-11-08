@@ -27,7 +27,7 @@ import lombok.experimental.Delegate;
 import me.lucko.luckperms.api.Node;
 
 /**
- * Holds a Node and where it was inherited from
+ * Holds a Node and where it was inherited from. All calls are passed onto the contained Node instance.
  */
 @Getter
 @ToString

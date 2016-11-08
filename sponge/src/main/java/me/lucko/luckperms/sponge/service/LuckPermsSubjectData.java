@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NonNull;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.core.NodeBuilder;
@@ -97,12 +98,12 @@ public class LuckPermsSubjectData implements SubjectData {
     }
 
     @Override
-    public Map<String, Boolean> getPermissions(Set<Context> contexts) {
+    public Map<String, Boolean> getPermissions(@NonNull Set<Context> contexts) {
         return getAllPermissions().getOrDefault(contexts, ImmutableMap.of());
     }
 
     @Override
-    public boolean setPermission(Set<Context> contexts, String permission, Tristate tristate) {
+    public boolean setPermission(@NonNull Set<Context> contexts, @NonNull String permission, @NonNull Tristate tristate) {
         try (Timing i = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_SET_PERMISSION)) {
             if (tristate == Tristate.UNDEFINED) {
                 // Unset
@@ -158,7 +159,7 @@ public class LuckPermsSubjectData implements SubjectData {
     }
 
     @Override
-    public boolean clearPermissions(Set<Context> c) {
+    public boolean clearPermissions(@NonNull Set<Context> c) {
         try (Timing i = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_CLEAR_PERMISSIONS)) {
             List<Node> toRemove = new ArrayList<>();
             for (Node n : enduring ? holder.getNodes() : holder.getTransientNodes()) {
@@ -232,12 +233,12 @@ public class LuckPermsSubjectData implements SubjectData {
     }
 
     @Override
-    public List<Subject> getParents(Set<Context> contexts) {
+    public List<Subject> getParents(@NonNull Set<Context> contexts) {
         return getAllParents().getOrDefault(contexts, ImmutableList.of());
     }
 
     @Override
-    public boolean addParent(Set<Context> set, Subject subject) {
+    public boolean addParent(@NonNull Set<Context> set, @NonNull Subject subject) {
         try (Timing i = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_ADD_PARENT)) {
             if (subject instanceof LuckPermsGroupSubject) {
                 LuckPermsGroupSubject permsSubject = ((LuckPermsGroupSubject) subject);
@@ -263,7 +264,7 @@ public class LuckPermsSubjectData implements SubjectData {
     }
 
     @Override
-    public boolean removeParent(Set<Context> set, Subject subject) {
+    public boolean removeParent(@NonNull Set<Context> set, @NonNull Subject subject) {
         try (Timing i = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_REMOVE_PARENT)) {
             if (subject instanceof LuckPermsGroupSubject) {
                 LuckPermsGroupSubject permsSubject = ((LuckPermsGroupSubject) subject);
@@ -315,7 +316,7 @@ public class LuckPermsSubjectData implements SubjectData {
     }
 
     @Override
-    public boolean clearParents(Set<Context> set) {
+    public boolean clearParents(@NonNull Set<Context> set) {
         try (Timing i = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_CLEAR_PARENTS)) {
             List<Node> toRemove = new ArrayList<>();
             for (Node n : enduring ? holder.getNodes() : holder.getTransientNodes()) {
@@ -421,12 +422,12 @@ public class LuckPermsSubjectData implements SubjectData {
     }
 
     @Override
-    public Map<String, String> getOptions(Set<Context> set) {
+    public Map<String, String> getOptions(@NonNull Set<Context> set) {
         return getAllOptions().getOrDefault(set, ImmutableMap.of());
     }
 
     @Override
-    public boolean setOption(Set<Context> set, String key, String value) {
+    public boolean setOption(@NonNull Set<Context> set, @NonNull String key, @NonNull String value) {
         try (Timing i = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_SET_OPTION)) {
             ContextSet context = LuckPermsService.convertContexts(set);
 
@@ -452,7 +453,7 @@ public class LuckPermsSubjectData implements SubjectData {
     }
 
     @Override
-    public boolean clearOptions(Set<Context> set) {
+    public boolean clearOptions(@NonNull Set<Context> set) {
         try (Timing i = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_CLEAR_OPTIONS)) {
             List<Node> toRemove = new ArrayList<>();
             for (Node n : enduring ? holder.getNodes() : holder.getTransientNodes()) {

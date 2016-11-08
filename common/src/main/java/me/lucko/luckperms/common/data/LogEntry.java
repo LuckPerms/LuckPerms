@@ -26,6 +26,7 @@ import me.lucko.luckperms.api.event.events.LogNotifyEvent;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.Sender;
 import me.lucko.luckperms.common.constants.Message;
+import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.tracks.Track;
@@ -56,15 +57,17 @@ public class LogEntry extends me.lucko.luckperms.api.LogEntry {
 
         final String msg = super.getFormatted();
 
-        List<Sender> senders = plugin.getNotifyListeners();
+        List<Sender> senders = plugin.getSenders();
         senders.add(plugin.getConsoleSender());
 
         if (sender == null) {
             senders.stream()
+                    .filter(Permission.LOG_NOTIFY::isAuthorized)
                     .filter(s -> !plugin.getIgnoringLogs().contains(s.getUuid()))
                     .forEach(s -> Message.LOG.send(s, msg));
         } else {
             senders.stream()
+                    .filter(Permission.LOG_NOTIFY::isAuthorized)
                     .filter(s -> !plugin.getIgnoringLogs().contains(s.getUuid()))
                     .filter(s -> !s.getUuid().equals(sender.getUuid()))
                     .forEach(s -> Message.LOG.send(s, msg));

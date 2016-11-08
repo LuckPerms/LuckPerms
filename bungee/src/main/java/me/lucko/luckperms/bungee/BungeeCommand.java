@@ -35,17 +35,19 @@ import net.md_5.bungee.api.plugin.TabExecutor;
 import java.util.Arrays;
 
 class BungeeCommand extends Command implements TabExecutor {
+    private final LPBungeePlugin plugin;
     private final CommandManager manager;
 
-    BungeeCommand(CommandManager manager) {
+    BungeeCommand(LPBungeePlugin plugin, CommandManager manager) {
         super("luckpermsbungee", null, "bperms", "lpb", "bpermissions", "bp", "bperm");
+        this.plugin = plugin;
         this.manager = manager;
     }
 
     @Override
     public void execute(CommandSender sender, String[] args) {
         manager.onCommand(
-                BungeeSenderFactory.get(manager.getPlugin()).wrap(sender),
+                plugin.getSenderFactory().wrap(sender),
                 "bperms",
                 Util.stripQuotes(Splitter.on(Patterns.COMMAND_SEPARATOR).omitEmptyStrings().splitToList(Joiner.on(' ').join(args))),
                 Callback.empty()
@@ -54,6 +56,6 @@ class BungeeCommand extends Command implements TabExecutor {
 
     @Override
     public Iterable<String> onTabComplete(CommandSender sender, String[] args) {
-        return manager.onTabComplete(BungeeSenderFactory.get(manager.getPlugin()).wrap(sender), Arrays.asList(args));
+        return manager.onTabComplete(plugin.getSenderFactory().wrap(sender), Arrays.asList(args));
     }
 }

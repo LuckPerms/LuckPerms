@@ -97,6 +97,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private BufferedRequest<Void> updateTaskBuffer;
     private boolean started = false;
     private DebugHandler debugHandler;
+    private BukkitSenderFactory senderFactory;
 
     private ExecutorService executorService;
     private boolean schedulerAvailable = false;
@@ -108,6 +109,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
         log = LogFactory.wrap(getLogger());
         debugHandler = new DebugHandler();
+        senderFactory = new BukkitSenderFactory(this);
 
         getLog().info("Loading configuration...");
         configuration = new BukkitConfig(this);
@@ -319,16 +321,15 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     }
 
     @Override
-    public List<Sender> getNotifyListeners() {
+    public List<Sender> getSenders() {
         return getServer().getOnlinePlayers().stream()
-                .map(p -> BukkitSenderFactory.get(this).wrap(p))
-                .filter(Permission.LOG_NOTIFY::isAuthorized)
+                .map(p -> getSenderFactory().wrap(p))
                 .collect(Collectors.toList());
     }
 
     @Override
     public Sender getConsoleSender() {
-        return BukkitSenderFactory.get(this).wrap(getServer().getConsoleSender());
+        return getSenderFactory().wrap(getServer().getConsoleSender());
     }
 
     @Override

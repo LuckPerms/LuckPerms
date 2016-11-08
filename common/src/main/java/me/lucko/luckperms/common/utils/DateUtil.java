@@ -1,23 +1,7 @@
 /*
- * Copyright (c) 2016 Lucko (Luck) <luck@lucko.me>
- *
- *  Permission is hereby granted, free of charge, to any person obtaining a copy
- *  of this software and associated documentation files (the "Software"), to deal
- *  in the Software without restriction, including without limitation the rights
- *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- *  copies of the Software, and to permit persons to whom the Software is
- *  furnished to do so, subject to the following conditions:
- *
- *  The above copyright notice and this permission notice shall be included in all
- *  copies or substantial portions of the Software.
- *
- *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- *  SOFTWARE.
+ *  All credit to Essentials / EssentialsX for this class
+ *  https://github.com/drtshock/Essentials/blob/2.x/Essentials/src/com/earth2me/essentials/utils/DateUtil.java
+ *  https://github.com/essentials/Essentials/blob/2.x/Essentials/src/com/earth2me/essentials/utils/DateUtil.java
  */
 
 package me.lucko.luckperms.common.utils;
@@ -30,9 +14,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * All credit to Essentials / EssentialsX for this class
- * https://github.com/drtshock/Essentials/blob/2.x/Essentials/src/com/earth2me/essentials/utils/DateUtil.java
- * https://github.com/essentials/Essentials/blob/2.x/Essentials/src/com/earth2me/essentials/utils/DateUtil.java
+ * Translates unix timestamps / durations into a readable format
  */
 @UtilityClass
 public class DateUtil {
@@ -52,13 +34,7 @@ public class DateUtil {
      */
     public static long parseDateDiff(String time, boolean future) throws IllegalDateException {
         Matcher m = TIME_PATTERN.matcher(time);
-        int years = 0;
-        int months = 0;
-        int weeks = 0;
-        int days = 0;
-        int hours = 0;
-        int minutes = 0;
-        int seconds = 0;
+        int years = 0, months = 0, weeks = 0, days = 0, hours = 0, minutes = 0, seconds = 0;
         boolean found = false;
         while (m.find()) {
             if (m.group() == null || m.group().isEmpty()) {
@@ -137,8 +113,7 @@ public class DateUtil {
         int fromYear = fromDate.get(year);
         int toYear = toDate.get(year);
         if (Math.abs(fromYear - toYear) > MAX_YEARS) {
-            toDate.set(year, fromYear +
-                    (future ? MAX_YEARS : -MAX_YEARS));
+            toDate.set(year, fromYear + (future ? MAX_YEARS : -MAX_YEARS));
         }
 
         int diff = 0;

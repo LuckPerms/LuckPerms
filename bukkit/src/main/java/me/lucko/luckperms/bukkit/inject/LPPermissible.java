@@ -184,7 +184,7 @@ public class LPPermissible extends PermissibleBase {
         }
 
         PermissionAttachment result = addAttachment(plugin);
-        if (Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new RemoveAttachmentRunnable(result), ticks) == -1) {
+        if (Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin, () -> result.remove(), ticks) == -1) {
             Bukkit.getServer().getLogger().log(Level.WARNING, "Could not add PermissionAttachment to " + parent + " for plugin " + plugin.getDescription().getFullName() + ": Scheduler returned -1");
             result.remove();
             return null;
@@ -252,18 +252,6 @@ public class LPPermissible extends PermissibleBase {
             if (perm != null) {
                 calculateChildPermissions(perm.getChildren(), !value, attachment);
             }
-        }
-    }
-
-    private class RemoveAttachmentRunnable implements Runnable {
-        private PermissionAttachment attachment;
-
-        private RemoveAttachmentRunnable(PermissionAttachment attachment) {
-            this.attachment = attachment;
-        }
-
-        public void run() {
-            attachment.remove();
         }
     }
 }

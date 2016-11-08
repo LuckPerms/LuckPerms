@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.sponge.service;
 
+import com.google.common.collect.ImmutableSet;
 import lombok.NonNull;
 import me.lucko.luckperms.api.context.ContextSet;
 import org.spongepowered.api.service.context.Context;
@@ -97,7 +98,7 @@ public abstract class LuckPermsSubject implements Subject {
     @Override
     @Deprecated
     public Set<Context> getActiveContexts() {
-        return LuckPermsService.convertContexts(getActiveContextSet());
+        return ImmutableSet.copyOf(LuckPermsService.convertContexts(getActiveContextSet()));
     }
 
 }

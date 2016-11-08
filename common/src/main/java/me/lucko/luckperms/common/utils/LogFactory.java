@@ -25,6 +25,9 @@ package me.lucko.luckperms.common.utils;
 import lombok.experimental.UtilityClass;
 import me.lucko.luckperms.api.Logger;
 
+/**
+ * Utility to help create wrapped log instances
+ */
 @UtilityClass
 public class LogFactory {
     public static Logger wrap(org.slf4j.Logger l) {

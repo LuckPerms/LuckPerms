@@ -32,17 +32,8 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import java.util.UUID;
 
 public class BungeeSenderFactory extends SenderFactory<CommandSender> {
-    private static BungeeSenderFactory instance = null;
-
-    private BungeeSenderFactory(LuckPermsPlugin plugin) {
+    public BungeeSenderFactory(LuckPermsPlugin plugin) {
         super(plugin);
-    }
-
-    public static synchronized BungeeSenderFactory get(LuckPermsPlugin plugin) {
-        if (instance == null) {
-            instance = new BungeeSenderFactory(plugin);
-        }
-        return instance;
     }
 
     @Override

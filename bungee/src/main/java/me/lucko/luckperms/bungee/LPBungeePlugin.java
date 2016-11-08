@@ -36,7 +36,6 @@ import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.ConsecutiveExecutor;
 import me.lucko.luckperms.common.commands.Sender;
 import me.lucko.luckperms.common.config.LPConfiguration;
-import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.contexts.ServerCalculator;
 import me.lucko.luckperms.common.core.UuidCache;
@@ -85,11 +84,13 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     private CalculatorFactory calculatorFactory;
     private BufferedRequest<Void> updateTaskBuffer;
     private DebugHandler debugHandler;
+    private BungeeSenderFactory senderFactory;
 
     @Override
     public void onEnable() {
         log = LogFactory.wrap(getLogger());
         debugHandler = new DebugHandler();
+        senderFactory = new BungeeSenderFactory(this);
 
         getLog().info("Loading configuration...");
         configuration = new BungeeConfig(this);
@@ -137,7 +138,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         // register commands
         getLog().info("Registering commands...");
         CommandManager commandManager = new CommandManager(this);
-        getProxy().getPluginManager().registerCommand(this, new BungeeCommand(commandManager));
+        getProxy().getPluginManager().registerCommand(this, new BungeeCommand(this, commandManager));
 
         // disable the default Bungee /perms command so it gets handled by the Bukkit plugin
         getProxy().getDisabledCommands().add("perms");
@@ -229,16 +230,15 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     }
 
     @Override
-    public List<Sender> getNotifyListeners() {
+    public List<Sender> getSenders() {
         return getProxy().getPlayers().stream()
-                .map(p -> BungeeSenderFactory.get(this).wrap(p))
-                .filter(Permission.LOG_NOTIFY::isAuthorized)
+                .map(p -> getSenderFactory().wrap(p))
                 .collect(Collectors.toList());
     }
 
     @Override
     public Sender getConsoleSender() {
-        return BungeeSenderFactory.get(this).wrap(getProxy().getConsole());
+        return getSenderFactory().wrap(getProxy().getConsole());
     }
 
     @Override

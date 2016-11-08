@@ -123,11 +123,13 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     private CalculatorFactory calculatorFactory;
     private BufferedRequest<Void> updateTaskBuffer;
     private DebugHandler debugHandler;
+    private SpongeSenderFactory senderFactory;
 
     @Listener
     public void onEnable(GamePreInitializationEvent event) {
         log = LogFactory.wrap(logger);
         debugHandler = new DebugHandler();
+        senderFactory = new SpongeSenderFactory(this);
         timings = new LPTimings(this);
 
         getLog().info("Loading configuration...");
@@ -304,16 +306,15 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     }
 
     @Override
-    public List<Sender> getNotifyListeners() {
+    public List<Sender> getSenders() {
         return game.getServer().getOnlinePlayers().stream()
-                .map(s -> SpongeSenderFactory.get(this).wrap(s))
-                .filter(Permission.LOG_NOTIFY::isAuthorized)
+                .map(s -> getSenderFactory().wrap(s))
                 .collect(Collectors.toList());
     }
 
     @Override
     public Sender getConsoleSender() {
-        return SpongeSenderFactory.get(this).wrap(game.getServer().getConsole());
+        return getSenderFactory().wrap(game.getServer().getConsole());
     }
 
     @Override

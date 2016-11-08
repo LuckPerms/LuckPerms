@@ -40,7 +40,6 @@ import org.spongepowered.api.util.Tristate;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class GroupCollection implements SubjectCollection {
     private final LuckPermsService service;
@@ -92,7 +91,7 @@ public class GroupCollection implements SubjectCollection {
         return manager.getAll().values().stream()
                 .map(u -> LuckPermsGroupSubject.wrapGroup(u, service))
                 .filter(sub -> sub.getPermissionValue(cs, node) != Tristate.UNDEFINED)
-                .collect(Collectors.toMap(sub -> sub, sub -> sub.getPermissionValue(cs, node).asBoolean()));
+                .collect(ImmutableCollectors.toImmutableMap(sub -> sub, sub -> sub.getPermissionValue(cs, node).asBoolean()));
     }
 
     @Override

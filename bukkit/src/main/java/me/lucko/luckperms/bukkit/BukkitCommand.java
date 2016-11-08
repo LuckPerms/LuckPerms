@@ -25,7 +25,6 @@ package me.lucko.luckperms.bukkit;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import me.lucko.luckperms.api.data.Callback;
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.Util;
 import me.lucko.luckperms.common.constants.Patterns;
@@ -38,14 +37,17 @@ import java.util.Arrays;
 import java.util.List;
 
 class BukkitCommand extends CommandManager implements CommandExecutor, TabExecutor {
-    BukkitCommand(LuckPermsPlugin plugin) {
+    private final LPBukkitPlugin plugin;
+
+    BukkitCommand(LPBukkitPlugin plugin) {
         super(plugin);
+        this.plugin = plugin;
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         onCommand(
-                BukkitSenderFactory.get(getPlugin()).wrap(sender),
+                plugin.getSenderFactory().wrap(sender),
                 label,
                 Util.stripQuotes(Splitter.on(Patterns.COMMAND_SEPARATOR).omitEmptyStrings().splitToList(Joiner.on(' ').join(args))),
                 Callback.empty()
@@ -53,9 +55,8 @@ class BukkitCommand extends CommandManager implements CommandExecutor, TabExecut
         return true;
     }
 
-
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
-        return onTabComplete(BukkitSenderFactory.get(getPlugin()).wrap(sender), Arrays.asList(args));
+        return onTabComplete(plugin.getSenderFactory().wrap(sender), Arrays.asList(args));
     }
 }

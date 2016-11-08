@@ -49,46 +49,142 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Main internal interface for LuckPerms plugins, allowing the luckperms-common module to bind with the plugin instance.
+ * Main internal interface for LuckPerms plugins, providing the base for abstraction throughout the project.
+ *
  * All plugin platforms implement this interface.
  */
 public interface LuckPermsPlugin {
 
-    /*
-     * Access to all of the main internal manager classes
+    /**
+     * Gets the user manager instance for the platform
+     * @return the user manager
      */
     UserManager getUserManager();
+
+    /**
+     * Gets the group manager instance for the platform
+     * @return the group manager
+     */
     GroupManager getGroupManager();
+
+    /**
+     * Gets the track manager instance for the platform
+     * @return the track manager
+     */
     TrackManager getTrackManager();
+
+    /**
+     * Gets the plugin's configuration
+     * @return the plugin config
+     */
     LPConfiguration getConfiguration();
+
+    /**
+     * Gets the primary datastore instance. This is likely to be wrapped with extra layers for caching, etc.
+     * @return the datastore
+     */
     Datastore getDatastore();
+
+    /**
+     * Gets the redis messaging instance if present. Could return null if redis is not enabled.
+     * @return the redis messaging service
+     */
     RedisMessaging getRedisMessaging();
+
+    /**
+     * Gets a wrapped logger instance for the platform.
+     * @return the plugin's logger
+     */
     Logger getLog();
+
+    /**
+     * Gets the UUID caching store for the platform
+     * @return the uuid cache
+     */
     UuidCache getUuidCache();
+
+    /**
+     * Returns the class implementing the LuckPermsAPI on this platform.
+     * @return the api
+     */
     ApiProvider getApiProvider();
+
+    /**
+     * Gets the importer instance
+     * @return the importer
+     */
     Importer getImporter();
+
+    /**
+     * Gets the consecutive command executor instance
+     * @return the consecutive executor
+     */
     ConsecutiveExecutor getConsecutiveExecutor();
+
+    /**
+     * Gets the instance providing locale translations for the plugin
+     * @return the locale manager
+     */
     LocaleManager getLocaleManager();
+
+    /**
+     * Gets the context manager.
+     * This object handles context accumulation for all players on the platform.
+     * @return the context manager
+     */
     ContextManager getContextManager();
+
+    /**
+     * Gets the class responsible for constructing PermissionCalculators on this platform.
+     * @return the permission calculator factory
+     */
     CalculatorFactory getCalculatorFactory();
+
+    /**
+     * Gets the verbose debug handler instance.
+     * @return the debug handler instance
+     */
     DebugHandler getDebugHandler();
 
     /**
+     * Execute a runnable asynchronously
+     * @param r the task to run
+     */
+    void doAsync(Runnable r);
+
+    /**
+     * Execute a runnable synchronously
+     * @param r the task to run
+     */
+    void doSync(Runnable r);
+
+    /**
+     * Execute a runnable asynchronously on a loop
+     * @param r the task to run
+     * @param interval the time between runs in ticks
+     */
+    void doAsyncRepeating(Runnable r, long interval);
+
+    /**
+     * Gets a string of the plugin's version
      * @return the version of the plugin
      */
     String getVersion();
 
     /**
+     * Gets the platform type this instance of LuckPerms is running on.
      * @return the platform type
      */
     PlatformType getType();
 
     /**
+     * Gets the plugins main directory
      * @return the main plugin directory
      */
     File getMainDir();
 
     /**
+     * Gets the plugins main data storage directory
      * @return the platforms data folder
      */
     File getDataFolder();
@@ -129,11 +225,13 @@ public interface LuckPermsPlugin {
     boolean isOnline(UUID external);
 
     /**
+     * Gets a list of online Senders on the platform
      * @return a {@link List} of senders online on the platform
      */
-    List<Sender> getNotifyListeners();
+    List<Sender> getSenders();
 
     /**
+     * Gets the console.
      * @return the console sender of the instance
      */
     Sender getConsoleSender();
@@ -147,7 +245,7 @@ public interface LuckPermsPlugin {
 
     /**
      * Gets a set of players ignoring logging output
-     * @return a {@link Set} of uuids
+     * @return a {@link Set} of {@link UUID}s
      */
     Set<UUID> getIgnoringLogs();
 
@@ -166,7 +264,7 @@ public interface LuckPermsPlugin {
     Object getService(Class clazz);
 
     /**
-     * Used as a backup for migration
+     * Gets the UUID of a player. Used as a backup for migration
      * @param playerName the players name
      * @return a uuid if found, or null if not
      */
@@ -180,27 +278,9 @@ public interface LuckPermsPlugin {
     boolean isPluginLoaded(String name);
 
     /**
-     * Runs an update task
+     * Gets the update task buffer of the platform, used for scheduling and running update tasks.
+     * @return the update task buffer instance
      */
     BufferedRequest<Void> getUpdateTaskBuffer();
-
-    /**
-     * Execute a runnable asynchronously
-     * @param r the task to run
-     */
-    void doAsync(Runnable r);
-
-    /**
-     * Execute a runnable synchronously
-     * @param r the task to run
-     */
-    void doSync(Runnable r);
-
-    /**
-     * Execute a runnable asynchronously on a loop
-     * @param r the task to run
-     * @param interval the time between runs in ticks
-     */
-    void doAsyncRepeating(Runnable r, long interval);
 
 }

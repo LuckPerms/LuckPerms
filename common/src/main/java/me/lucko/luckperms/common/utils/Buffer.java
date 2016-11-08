@@ -27,19 +27,24 @@ import lombok.*;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Holds a buffer of objects to be processed after they've been in the buffer for a given time.
+ * Thread-safe buffer utility. Holds a buffer of objects to be processed after they've been waiting in the buffer
+ * for a given time. If the same object is pushed to the buffer again in that time, its wait time is reset.
+ *
  * @param <T> the type of objects in the buffer
  * @param <R> the type of result produced by the final process
  */
 public abstract class Buffer<T, R> implements Runnable {
     private static final long DEFAULT_FLUSH_TIME = 1000; // 1 second
 
+    private final ReentrantLock lock = new ReentrantLock();
     private final List<BufferedObject<T, R>> buffer = new LinkedList<>();
 
     public LPFuture<R> enqueue(@NonNull T t) {
-        synchronized (buffer) {
+        lock.lock();
+        try {
             ListIterator<BufferedObject<T, R>> it = buffer.listIterator();
 
             BufferedObject<T, R> o = null;
@@ -62,6 +67,8 @@ public abstract class Buffer<T, R> implements Runnable {
 
             buffer.add(o);
             return o.getFuture();
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -70,7 +77,8 @@ public abstract class Buffer<T, R> implements Runnable {
     public void flush(long flushTime) {
         long time = System.currentTimeMillis();
 
-        synchronized (buffer) {
+        lock.lock();
+        try {
             ListIterator<BufferedObject<T, R>> it = buffer.listIterator(buffer.size());
 
             while (it.hasPrevious()) {
@@ -85,6 +93,8 @@ public abstract class Buffer<T, R> implements Runnable {
                     it.remove();
                 }
             }
+        } finally {
+            lock.unlock();
         }
     }
 

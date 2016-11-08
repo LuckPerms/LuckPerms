@@ -36,11 +36,11 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class DebugHandler {
-    private final Map<Reciever, List<String>> listeners = new ConcurrentHashMap<>();
+    private final Map<Receiver, List<String>> listeners = new ConcurrentHashMap<>();
 
     public void printOutput(String checked, String node, Tristate value) {
         all:
-        for (Map.Entry<Reciever, List<String>> e : listeners.entrySet()) {
+        for (Map.Entry<Receiver, List<String>> e : listeners.entrySet()) {
             for (String filter : e.getValue()) {
                 if (node.toLowerCase().startsWith(filter.toLowerCase())) {
                     continue;
@@ -58,17 +58,17 @@ public class DebugHandler {
     }
 
     public void register(Sender sender, List<String> filters) {
-        listeners.put(new Reciever(sender.getUuid(), sender), ImmutableList.copyOf(filters));
+        listeners.put(new Receiver(sender.getUuid(), sender), ImmutableList.copyOf(filters));
     }
 
     public void unregister(UUID uuid) {
-        listeners.remove(new Reciever(uuid, null));
+        listeners.remove(new Receiver(uuid, null));
     }
 
     @Getter
     @EqualsAndHashCode(of = "uuid")
     @AllArgsConstructor
-    private static final class Reciever {
+    private static final class Receiver {
         private final UUID uuid;
         private final Sender sender;
     }
