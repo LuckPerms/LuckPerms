@@ -24,7 +24,7 @@ package me.lucko.luckperms.common.commands.generic.meta;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.*;
-import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
+import me.lucko.luckperms.common.commands.generic.SharedSubCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.PermissionHolder;
@@ -34,7 +34,7 @@ import me.lucko.luckperms.common.utils.Predicates;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MetaClear extends SecondarySubCommand {
+public class MetaClear extends SharedSubCommand {
     public MetaClear() {
         super("clear", "Clears all chat meta",  Permission.USER_META_CLEAR, Permission.GROUP_META_CLEAR, Predicates.notInRange(0, 2),
                 Arg.list(

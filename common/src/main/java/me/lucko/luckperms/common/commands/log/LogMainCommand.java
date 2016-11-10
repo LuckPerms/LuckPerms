@@ -24,9 +24,9 @@ package me.lucko.luckperms.common.commands.log;
 
 import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.commands.Command;
 import me.lucko.luckperms.common.commands.MainCommand;
 import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.SubCommand;
 import me.lucko.luckperms.common.commands.log.subcommands.*;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.data.Log;
@@ -38,15 +38,15 @@ import java.util.stream.Collectors;
 
 public class LogMainCommand extends MainCommand<Log> {
     public LogMainCommand() {
-        super("Log", "/%s log", 1, ImmutableList.<SubCommand<Log>>builder()
-            .add(new LogRecent())
-            .add(new LogSearch())
-            .add(new LogNotify())
-            .add(new LogExport())
-            .add(new LogUserHistory())
-            .add(new LogGroupHistory())
-            .add(new LogTrackHistory())
-            .build()
+        super("Log", "Log commands", "/%s log", 1, ImmutableList.<Command<Log, ?>>builder()
+                .add(new LogRecent())
+                .add(new LogSearch())
+                .add(new LogNotify())
+                .add(new LogExport())
+                .add(new LogUserHistory())
+                .add(new LogGroupHistory())
+                .add(new LogTrackHistory())
+                .build()
         );
     }
 
@@ -67,13 +67,13 @@ public class LogMainCommand extends MainCommand<Log> {
     }
 
     @Override
-    protected List<String> getObjects(LuckPermsPlugin plugin) {
+    protected List<String> getTargets(LuckPermsPlugin plugin) {
         return null;
     }
 
     @Override
-    protected List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin) {
-        final List<SubCommand<Log>> subs = getSubCommands().stream()
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+        final List<Command<Log, ?>> subs = getSubCommands().stream()
                 .filter(s -> s.isAuthorized(sender))
                 .collect(Collectors.toList());
 
@@ -90,7 +90,7 @@ public class LogMainCommand extends MainCommand<Log> {
                     .collect(Collectors.toList());
         }
 
-        Optional<SubCommand<Log>> o = subs.stream()
+        Optional<Command<Log, ?>> o = subs.stream()
                 .filter(s -> s.getName().equalsIgnoreCase(args.get(0)))
                 .limit(1)
                 .findAny();
@@ -99,6 +99,6 @@ public class LogMainCommand extends MainCommand<Log> {
             return Collections.emptyList();
         }
 
-        return o.get().onTabComplete(plugin, sender, args.subList(1, args.size()));
+        return o.get().tabComplete(plugin, sender, args.subList(1, args.size()));
     }
 }

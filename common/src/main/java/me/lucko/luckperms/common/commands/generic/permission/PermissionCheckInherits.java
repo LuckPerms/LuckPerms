@@ -24,7 +24,7 @@ package me.lucko.luckperms.common.commands.generic.permission;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.*;
-import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
+import me.lucko.luckperms.common.commands.generic.SharedSubCommand;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.InheritanceInfo;
 import me.lucko.luckperms.common.core.NodeBuilder;
@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 
-public class PermissionCheckInherits extends SecondarySubCommand {
+public class PermissionCheckInherits extends SharedSubCommand {
     public PermissionCheckInherits() {
         super("checkinherits", "Checks to see if the object inherits a certain permission node",
                 Permission.USER_PERM_CHECK_INHERITS, Permission.GROUP_PERM_CHECK_INHERITS, Predicates.notInRange(1, 3),

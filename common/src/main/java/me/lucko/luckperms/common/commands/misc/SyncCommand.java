@@ -25,19 +25,20 @@ package me.lucko.luckperms.common.commands.misc;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.SingleMainCommand;
+import me.lucko.luckperms.common.commands.SingleCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 
-public class SyncCommand extends SingleMainCommand {
+public class SyncCommand extends SingleCommand {
     public SyncCommand() {
-        super("Sync", "/%s sync", 0, Permission.SYNC);
+        super("Sync", "Sync changes with the storage", "/%s sync", Permission.SYNC, Predicates.alwaysFalse(), null);
     }
 
     @Override
-    protected CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         Message.UPDATE_TASK_REQUEST.send(sender);
         plugin.getUpdateTaskBuffer().request().getUnchecked();
         Message.UPDATE_TASK_COMPLETE.send(sender);

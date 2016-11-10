@@ -26,7 +26,7 @@ import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.*;
-import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
+import me.lucko.luckperms.common.commands.generic.SharedSubCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeBuilder;
@@ -38,7 +38,7 @@ import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MetaSet extends SecondarySubCommand {
+public class MetaSet extends SharedSubCommand {
     public MetaSet() {
         super("set", "Sets a meta value",  Permission.USER_META_SET, Permission.GROUP_META_SET, Predicates.notInRange(2, 4),
                 Arg.list(

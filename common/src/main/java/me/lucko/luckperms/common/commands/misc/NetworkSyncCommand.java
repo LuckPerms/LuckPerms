@@ -25,19 +25,21 @@ package me.lucko.luckperms.common.commands.misc;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.SingleMainCommand;
+import me.lucko.luckperms.common.commands.SingleCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 
-public class NetworkSyncCommand extends SingleMainCommand {
+public class NetworkSyncCommand extends SingleCommand {
     public NetworkSyncCommand() {
-        super("NetworkSync", "/%s networksync", 0, Permission.SYNC);
+        super("NetworkSync", "Sync changes with the storage and request that all other servers on the network do the same",
+                "/%s networksync", Permission.SYNC, Predicates.alwaysFalse(), null);
     }
 
     @Override
-    protected CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         Message.UPDATE_TASK_REQUEST.send(sender);
         plugin.getUpdateTaskBuffer().request().getUnchecked();
         Message.UPDATE_TASK_COMPLETE_NETWORK.send(sender);

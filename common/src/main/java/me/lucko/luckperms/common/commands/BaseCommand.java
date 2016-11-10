@@ -20,33 +20,19 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.track;
+package me.lucko.luckperms.common.commands;
 
-import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.SingleCommand;
-import me.lucko.luckperms.common.commands.Util;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.utils.Predicates;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
-public class ListTracks extends SingleCommand {
-    public ListTracks() {
-        super("ListTracks", "List all tracks on the platform", "/%s listtracks", Permission.LIST_TRACKS, Predicates.alwaysFalse(), null);
+public abstract class BaseCommand<T, S> extends Command<T, S> {
+
+    public BaseCommand(String name, String description, Permission permission, Predicate<Integer> argumentCheck, List<Arg> args, List<Command<S, ?>> children) {
+        super(name, description, permission, argumentCheck, args, children);
     }
 
-    @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
-        if (!plugin.getDatastore().loadAllTracks().getUnchecked()) {
-            Message.TRACKS_LOAD_ERROR.send(sender);
-            return CommandResult.LOADING_ERROR;
-        }
+    public abstract String getUsage();
 
-        Message.TRACKS_LIST.send(sender, Util.listToCommaSep(new ArrayList<>(plugin.getTrackManager().getAll().keySet())));
-        return CommandResult.SUCCESS;
-    }
 }

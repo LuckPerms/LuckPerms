@@ -22,98 +22,91 @@
 
 package me.lucko.luckperms.common.commands.migration;
 
+import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.MainCommand;
-import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.SubCommand;
+import me.lucko.luckperms.common.commands.*;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Message;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class MigrationMainCommand extends MainCommand<Object> {
-    private final List<SubCommand<Object>> subCommands = new ArrayList<>();
-
     public MigrationMainCommand() {
-        super("Migration", "/%s migration", 1, null);
+        super("Migration", "Migration commands", "/%s migration", 1, ImmutableList.copyOf(getAvailableCommands()));
+    }
+
+    private static List<Command<Object, ?>> getAvailableCommands() {
+        List<SubCommand<Object>> l = new ArrayList<>();
 
         try {
             Class.forName("org.anjocaido.groupmanager.GroupManager");
-            subCommands.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.bukkit.migration.MigrationGroupManager").newInstance());
+            l.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.bukkit.migration.MigrationGroupManager").newInstance());
         } catch (Throwable ignored) {}
 
         try {
             Class.forName("ru.tehkode.permissions.bukkit.PermissionsEx");
-            subCommands.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.bukkit.migration.MigrationPermissionsEx").newInstance());
+            l.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.bukkit.migration.MigrationPermissionsEx").newInstance());
         } catch (Throwable ignored) {}
 
         try {
             Class.forName("com.github.cheesesoftware.PowerfulPermsAPI.PowerfulPermsPlugin");
-            subCommands.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.bukkit.migration.MigrationPowerfulPerms").newInstance());
+            l.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.bukkit.migration.MigrationPowerfulPerms").newInstance());
         } catch (Throwable ignored) {}
 
         try {
             Class.forName("org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsService");
-            subCommands.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.bukkit.migration.MigrationZPermissions").newInstance());
+            l.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.bukkit.migration.MigrationZPermissions").newInstance());
         } catch (Throwable ignored) {}
 
         try {
             Class.forName("net.alpenblock.bungeeperms.BungeePerms");
-            subCommands.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.bungee.migration.MigrationBungeePerms").newInstance());
+            l.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.bungee.migration.MigrationBungeePerms").newInstance());
         } catch (Throwable ignored) {}
 
         try {
             Class.forName("de.bananaco.bpermissions.api.WorldManager");
-            subCommands.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.bukkit.migration.MigrationBPermissions").newInstance());
+            l.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.bukkit.migration.MigrationBPermissions").newInstance());
         } catch (Throwable ignored) {}
 
         try {
             Class.forName("ninja.leaping.permissionsex.sponge.PermissionsExPlugin");
-            subCommands.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.sponge.migration.MigrationPermissionsEx").newInstance());
+            l.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.sponge.migration.MigrationPermissionsEx").newInstance());
         } catch (Throwable ignored) {}
+
+        return l.stream().collect(Collectors.toList());
     }
 
     @Override
-    public List<SubCommand<Object>> getSubCommands() {
-        return subCommands;
-    }
-
-    @Override
-    protected boolean isAuthorized(Sender sender) {
+    public boolean isAuthorized(Sender sender) {
         return sender.getUuid().equals(Constants.getConsoleUUID());
     }
 
     @Override
-    protected CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Void v, List<String> args, String label) throws CommandException {
         if (!sender.getUuid().equals(Constants.getConsoleUUID())) {
             Message.MIGRATION_NOT_CONSOLE.send(sender);
             return CommandResult.NO_PERMISSION;
         }
 
-        return super.execute(plugin, sender, args, label);
+        return super.execute(plugin, sender, v, args, label);
     }
 
     @Override
-    protected Object getTarget(String target, LuckPermsPlugin plugin, Sender sender) {
-        return new Object();
-    }
-
-    @Override
-    protected void cleanup(Object object, LuckPermsPlugin plugin) {
-
-    }
-
-    @Override
-    protected List<String> getObjects(LuckPermsPlugin plugin) {
+    protected List<String> getTargets(LuckPermsPlugin plugin) {
         return Collections.emptyList();
     }
 
     @Override
-    protected List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin) {
-        return Collections.emptyList();
+    protected Void getTarget(String target, LuckPermsPlugin plugin, Sender sender) {
+        return null;
+    }
+
+    @Override
+    protected void cleanup(Object o, LuckPermsPlugin plugin) {
+
     }
 
 }

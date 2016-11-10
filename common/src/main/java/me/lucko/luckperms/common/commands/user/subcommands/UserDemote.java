@@ -183,7 +183,7 @@ public class UserDemote extends SubCommand<User> {
     }
 
     @Override
-    public List<String> onTabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         return getTrackTabComplete(args, plugin);
     }
 }

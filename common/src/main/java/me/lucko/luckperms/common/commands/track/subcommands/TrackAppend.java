@@ -47,7 +47,7 @@ public class TrackAppend extends SubCommand<Track> {
         String groupName = args.get(0).toLowerCase();
 
         if (ArgumentChecker.checkNode(groupName)) {
-            sendDetailedUsage(sender);
+            sendDetailedUsage(sender, label);
             return CommandResult.INVALID_ARGS;
         }
 
@@ -80,7 +80,7 @@ public class TrackAppend extends SubCommand<Track> {
     }
 
     @Override
-    public List<String> onTabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         return getGroupTabComplete(args, plugin);
     }
 }

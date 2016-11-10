@@ -25,23 +25,24 @@ package me.lucko.luckperms.common.commands.group;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.SingleMainCommand;
+import me.lucko.luckperms.common.commands.SingleCommand;
 import me.lucko.luckperms.common.commands.Util;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.groups.Group;
+import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ListGroups extends SingleMainCommand {
+public class ListGroups extends SingleCommand {
     public ListGroups() {
-        super("ListGroups", "/%s listgroups", 0, Permission.LIST_GROUPS);
+        super("ListGroups", "List all groups on the platform", "/%s listgroups", Permission.LIST_GROUPS, Predicates.alwaysFalse(), null);
     }
 
     @Override
-    protected CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         if (!plugin.getDatastore().loadAllGroups().getUnchecked()) {
             Message.GROUPS_LOAD_ERROR.send(sender);
             return CommandResult.LOADING_ERROR;

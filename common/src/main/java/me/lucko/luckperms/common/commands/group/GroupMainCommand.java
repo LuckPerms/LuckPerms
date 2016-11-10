@@ -24,9 +24,9 @@ package me.lucko.luckperms.common.commands.group;
 
 import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.commands.Command;
 import me.lucko.luckperms.common.commands.MainCommand;
 import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.SubCommand;
 import me.lucko.luckperms.common.commands.generic.meta.CommandMeta;
 import me.lucko.luckperms.common.commands.generic.other.HolderShowTracks;
 import me.lucko.luckperms.common.commands.generic.parent.CommandParent;
@@ -40,17 +40,17 @@ import java.util.List;
 
 public class GroupMainCommand extends MainCommand<Group> {
     public GroupMainCommand() {
-        super("Group", "/%s group <group>", 2, ImmutableList.<SubCommand<Group>>builder()
-            .add(new GroupInfo())
-            .add(new CommandPermission<>(false))
-            .add(new CommandParent<>(false))
-            .add(new CommandMeta<>(false))
-            .add(new HolderShowTracks<>(false))
-            .add(new GroupBulkChange())
-            .add(new GroupClear())
-            .add(new GroupRename())
-            .add(new GroupClone())
-            .build()
+        super("Group", "Group commands", "/%s group <group>", 2, ImmutableList.<Command<Group, ?>>builder()
+                .add(new GroupInfo())
+                .add(new CommandPermission<>(false))
+                .add(new CommandParent<>(false))
+                .add(new CommandMeta<>(false))
+                .add(new HolderShowTracks<>(false))
+                .add(new GroupBulkChange())
+                .add(new GroupClear())
+                .add(new GroupRename())
+                .add(new GroupClone())
+                .build()
         );
     }
 
@@ -76,7 +76,7 @@ public class GroupMainCommand extends MainCommand<Group> {
     }
 
     @Override
-    protected List<String> getObjects(LuckPermsPlugin plugin) {
+    protected List<String> getTargets(LuckPermsPlugin plugin) {
         return new ArrayList<>(plugin.getGroupManager().getAll().keySet());
     }
 }

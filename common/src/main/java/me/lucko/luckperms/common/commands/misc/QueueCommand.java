@@ -23,22 +23,24 @@
 package me.lucko.luckperms.common.commands.misc;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.ConsecutiveExecutor;
-import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.SingleMainCommand;
+import me.lucko.luckperms.common.commands.*;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 
-public class QueueCommand extends SingleMainCommand {
+public class QueueCommand extends SingleCommand {
     public QueueCommand() {
-        super("QueueCommand", "/%s queuecommand <command args...>", 1, Permission.MIGRATION);
+        super("QueueCommand", "Queue a command for execution",  "/%s queuecommand <command args...>", Permission.MIGRATION, Predicates.not(1),
+                Arg.list(
+                        Arg.create("command args...", true, "the command's arguments")
+                )
+        );
     }
 
     @Override
-    protected CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         if (args.get(0).equalsIgnoreCase(getName())) {
             // Prevent infinite loops
             return CommandResult.FAILURE;
@@ -49,7 +51,7 @@ public class QueueCommand extends SingleMainCommand {
     }
 
     @Override
-    protected boolean isAuthorized(Sender sender) {
+    public boolean isAuthorized(Sender sender) {
         return sender.getUuid().equals(Constants.getConsoleUUID());
     }
 }

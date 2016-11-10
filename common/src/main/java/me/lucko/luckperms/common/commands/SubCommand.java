@@ -22,8 +22,6 @@
 
 package me.lucko.luckperms.common.commands;
 
-import com.google.common.collect.ImmutableList;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.constants.Message;
@@ -43,62 +41,22 @@ import java.util.stream.Collectors;
  * Abstract SubCommand class
  */
 @Getter
-@AllArgsConstructor
-public abstract class SubCommand<T> {
+public abstract class SubCommand<T> extends Command<T, Void> {
 
-    /**
-     * The name of the sub command
-     */
-    private final String name;
-
-    /**
-     * A brief description of what the sub command does
-     */
-    private final String description;
-
-    /**
-     * The permission needed to use this command
-     */
-    private final Permission permission;
-
-    /**
-     * Predicate to test if the argument length given is invalid
-     */
-    private final Predicate<? super Integer> isArgumentInvalid;
-
-    private final ImmutableList<Arg> args;
-
-    /**
-     * Called when this sub command is ran
-     * @param plugin a link to the main plugin instance
-     * @param sender the sender to executed the command
-     * @param t the object the command is operating on
-     * @param args the stripped arguments given
-     * @param label the command label used
-     */
-    public abstract CommandResult execute(LuckPermsPlugin plugin, Sender sender, T t, List<String> args, String label) throws CommandException;
-
-    /**
-     * Returns a list of suggestions, which are empty by default. Sub classes that give tab complete suggestions override
-     * this method to give their own list.
-     * @param plugin the plugin instance
-     * @param sender who is tab completing
-     * @param args the arguments so far
-     * @return a list of suggestions
-     */
-    public List<String> onTabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
-        return Collections.emptyList();
+    public SubCommand(String name, String description, Permission permission, Predicate<Integer> argumentCheck, List<Arg> args) {
+        super(name, description, permission, argumentCheck, args);
     }
 
     /**
      * Send the command usage to a sender
      * @param sender the sender to send the usage to
      */
-    public void sendUsage(Sender sender) {
+    @Override
+    public void sendUsage(Sender sender, String label) {
         String usage = "";
-        if (args != null) {
+        if (getArgs().isPresent()) {
             usage += "&3 - &7";
-            for (Arg arg : args) {
+            for (Arg arg : getArgs().get()) {
                 usage += arg.asPrettyString() + " ";
             }
         }
@@ -106,30 +64,22 @@ public abstract class SubCommand<T> {
         Util.sendPluginMessage(sender, "&3> &a" + getName().toLowerCase() + usage);
     }
 
-    public void sendDetailedUsage(Sender sender) {
+    @Override
+    public void sendDetailedUsage(Sender sender, String label) {
         Util.sendPluginMessage(sender, "&3&lCommand Usage &3- &b" + getName());
         Util.sendPluginMessage(sender, "&b> &7" + getDescription());
-        if (args != null) {
+        if (getArgs().isPresent()) {
             Util.sendPluginMessage(sender, "&3Arguments:");
-            for (Arg arg : args) {
+            for (Arg arg : getArgs().get()) {
                 Util.sendPluginMessage(sender, "&b- " + arg.asPrettyString() + "&3 -> &7" + arg.getDescription());
             }
         }
     }
 
-    /**
-     * If a sender has permission to use this command
-     * @param sender the sender trying to use the command
-     * @return true if the sender can use the command
-     */
-    public boolean isAuthorized(Sender sender) {
-        return permission.isAuthorized(sender);
-    }
-
 
     /*
      * ----------------------------------------------------------------------------------
-     * Utility methods used by #onTabComplete and #execute implementations in sub classes
+     * Utility methods used by #tabComplete and #execute implementations in sub classes
      * ----------------------------------------------------------------------------------
      */
 

@@ -23,13 +23,13 @@
 package me.lucko.luckperms.common.commands.generic.parent;
 
 import com.google.common.collect.ImmutableList;
-import me.lucko.luckperms.common.commands.generic.SecondaryMainCommand;
-import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
+import me.lucko.luckperms.common.commands.generic.SharedMainCommand;
+import me.lucko.luckperms.common.commands.generic.SharedSubCommand;
 import me.lucko.luckperms.common.core.PermissionHolder;
 
-public class CommandParent<T extends PermissionHolder> extends SecondaryMainCommand<T> {
+public class CommandParent<T extends PermissionHolder> extends SharedMainCommand<T> {
     public CommandParent(boolean user) {
-        super("Parent", "Edit inheritances", user, ImmutableList.<SecondarySubCommand>builder()
+        super("Parent", "Edit inheritances", user, ImmutableList.<SharedSubCommand>builder()
             .add(new ParentInfo())
             .add(new ParentSet())
             .add(new ParentAdd())

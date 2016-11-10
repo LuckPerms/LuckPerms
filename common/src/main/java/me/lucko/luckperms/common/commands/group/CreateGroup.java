@@ -23,23 +23,29 @@
 package me.lucko.luckperms.common.commands.group;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.SingleMainCommand;
+import me.lucko.luckperms.common.commands.SingleCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
+import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 
-public class CreateGroup extends SingleMainCommand {
+public class CreateGroup extends SingleCommand {
     public CreateGroup() {
-        super("CreateGroup", "/%s creategroup <group>", 1, Permission.CREATE_GROUP);
+        super("CreateGroup", "Create a new group", "/%s creategroup <group>", Permission.CREATE_GROUP, Predicates.not(1),
+                Arg.list(
+                        Arg.create("name", true, "the name of the group")
+                )
+        );
     }
 
     @Override
-    protected CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         if (args.size() == 0) {
             sendUsage(sender, label);
             return CommandResult.INVALID_ARGS;

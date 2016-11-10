@@ -24,7 +24,7 @@ package me.lucko.luckperms.common.commands.generic.parent;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.*;
-import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
+import me.lucko.luckperms.common.commands.generic.SharedSubCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.PermissionHolder;
@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 
 import static me.lucko.luckperms.common.commands.SubCommand.getGroupTabComplete;
 
-public class ParentAdd extends SecondarySubCommand {
+public class ParentAdd extends SharedSubCommand {
     public ParentAdd() {
         super("add", "Sets another group for the object to inherit permissions from", Permission.USER_PARENT_ADD,
                 Permission.GROUP_PARENT_ADD, Predicates.notInRange(1, 3),

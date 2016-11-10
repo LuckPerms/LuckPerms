@@ -25,7 +25,7 @@ package me.lucko.luckperms.common.commands.generic.meta;
 import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.*;
-import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
+import me.lucko.luckperms.common.commands.generic.SharedSubCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.PermissionHolder;
@@ -36,7 +36,7 @@ import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MetaAddPrefix extends SecondarySubCommand {
+public class MetaAddPrefix extends SharedSubCommand {
     public MetaAddPrefix() {
         super("addprefix", "Adds a prefix",  Permission.USER_META_ADDPREFIX, Permission.GROUP_META_ADDPREFIX,
                 Predicates.notInRange(2, 4),

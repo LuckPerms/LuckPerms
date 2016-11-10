@@ -25,9 +25,10 @@ package me.lucko.luckperms.common.commands.misc;
 import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.SingleMainCommand;
+import me.lucko.luckperms.common.commands.SingleCommand;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
@@ -35,6 +36,7 @@ import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.storage.Datastore;
 import me.lucko.luckperms.common.tracks.Track;
 import me.lucko.luckperms.common.users.User;
+import me.lucko.luckperms.common.utils.Predicates;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -45,13 +47,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-public class ExportCommand extends SingleMainCommand {
+public class ExportCommand extends SingleCommand {
     public ExportCommand() {
-        super("Export", "/%s export <file>", 1, Permission.MIGRATION);
+        super("Export", "Export data to a file", "/%s export <file>", Permission.MIGRATION, Predicates.not(1),
+                Arg.list(
+                        Arg.create("file", true, "the file to export to")
+                )
+        );
     }
 
     @Override
-    protected CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         final Logger log = plugin.getLog();
 
         if (!sender.getUuid().equals(Constants.getConsoleUUID())) {
@@ -164,7 +170,7 @@ public class ExportCommand extends SingleMainCommand {
     }
 
     @Override
-    protected boolean isAuthorized(Sender sender) {
+    public boolean isAuthorized(Sender sender) {
         return sender.getUuid().equals(Constants.getConsoleUUID());
     }
 

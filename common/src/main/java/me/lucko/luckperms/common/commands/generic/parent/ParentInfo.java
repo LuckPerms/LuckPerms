@@ -27,7 +27,7 @@ import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.Sender;
 import me.lucko.luckperms.common.commands.Util;
-import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
+import me.lucko.luckperms.common.commands.generic.SharedSubCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.PermissionHolder;
@@ -35,7 +35,7 @@ import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 
-public class ParentInfo extends SecondarySubCommand {
+public class ParentInfo extends SharedSubCommand {
     public ParentInfo() {
         super("info", "Lists the groups that this object inherits from",
                 Permission.USER_PARENT_INFO, Permission.GROUP_PARENT_INFO, Predicates.alwaysFalse(), null);

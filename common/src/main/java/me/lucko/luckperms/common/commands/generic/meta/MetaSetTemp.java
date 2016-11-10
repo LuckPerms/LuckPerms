@@ -26,7 +26,7 @@ import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.*;
-import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
+import me.lucko.luckperms.common.commands.generic.SharedSubCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeBuilder;
@@ -39,7 +39,7 @@ import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MetaSetTemp extends SecondarySubCommand {
+public class MetaSetTemp extends SharedSubCommand {
     public MetaSetTemp() {
         super("settemp", "Sets a meta value temporarily",  Permission.USER_META_SETTEMP, Permission.GROUP_META_SETTEMP, Predicates.notInRange(3, 5),
                 Arg.list(

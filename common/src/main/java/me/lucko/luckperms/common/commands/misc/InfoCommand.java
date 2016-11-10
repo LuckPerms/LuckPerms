@@ -25,22 +25,23 @@ package me.lucko.luckperms.common.commands.misc;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.SingleMainCommand;
+import me.lucko.luckperms.common.commands.SingleCommand;
 import me.lucko.luckperms.common.config.LPConfiguration;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 
 import static me.lucko.luckperms.common.commands.Util.formatBoolean;
 
-public class InfoCommand extends SingleMainCommand {
+public class InfoCommand extends SingleCommand {
     public InfoCommand() {
-        super("Info", "/%s info", 0, Permission.INFO);
+        super("Info", "Print general plugin info", "/%s info", Permission.INFO, Predicates.alwaysFalse(), null);
     }
 
     @Override
-    protected CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         final LPConfiguration c = plugin.getConfiguration();
         Message.INFO.send(sender,
                 plugin.getVersion(),

@@ -24,9 +24,9 @@ package me.lucko.luckperms.common.commands.user;
 
 import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.commands.Command;
 import me.lucko.luckperms.common.commands.MainCommand;
 import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.SubCommand;
 import me.lucko.luckperms.common.commands.Util;
 import me.lucko.luckperms.common.commands.generic.meta.CommandMeta;
 import me.lucko.luckperms.common.commands.generic.other.HolderShowTracks;
@@ -42,7 +42,7 @@ import java.util.UUID;
 
 public class UserMainCommand extends MainCommand<User> {
     public UserMainCommand() {
-        super("User", "/%s user <user>", 2, ImmutableList.<SubCommand<User>>builder()
+        super("User", "User commands", "/%s user <user>", 2, ImmutableList.<Command<User, ?>>builder()
                 .add(new UserInfo())
                 .add(new CommandPermission<>(true))
                 .add(new CommandParent<>(true))
@@ -100,7 +100,7 @@ public class UserMainCommand extends MainCommand<User> {
     }
 
     @Override
-    protected List<String> getObjects(LuckPermsPlugin plugin) {
+    protected List<String> getTargets(LuckPermsPlugin plugin) {
         return plugin.getPlayerList();
     }
 }

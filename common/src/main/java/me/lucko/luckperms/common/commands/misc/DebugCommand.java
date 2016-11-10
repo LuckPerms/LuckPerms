@@ -25,19 +25,20 @@ package me.lucko.luckperms.common.commands.misc;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.SingleMainCommand;
+import me.lucko.luckperms.common.commands.SingleCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 
-public class DebugCommand extends SingleMainCommand {
+public class DebugCommand extends SingleCommand {
     public DebugCommand() {
-        super("Debug", "/%s debug", 0, Permission.DEBUG);
+        super("Debug", "Print debugging output", "/%s debug", Permission.DEBUG, Predicates.alwaysFalse(), null);
     }
 
     @Override
-    protected CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         plugin.getLog().info(sender.getName() + " used the debug command.");
         Message.DEBUG.send(sender,
                 plugin.getPlayerCount(),

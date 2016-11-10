@@ -23,12 +23,14 @@
 package me.lucko.luckperms.common.commands.misc;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.SingleMainCommand;
+import me.lucko.luckperms.common.commands.SingleCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.data.Importer;
+import me.lucko.luckperms.common.utils.Predicates;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,13 +38,17 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.List;
 
-public class ImportCommand extends SingleMainCommand {
+public class ImportCommand extends SingleCommand {
     public ImportCommand() {
-        super("Import", "/%s import <file>", 1, Permission.IMPORT);
+        super("Import", "Import data from a file", "/%s import <file>", Permission.IMPORT, Predicates.not(1),
+                Arg.list(
+                        Arg.create("file", true, "the file to import from")
+                )
+        );
     }
 
     @Override
-    protected CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         if (args.size() == 0) {
             sendUsage(sender, label);
             return CommandResult.INVALID_ARGS;

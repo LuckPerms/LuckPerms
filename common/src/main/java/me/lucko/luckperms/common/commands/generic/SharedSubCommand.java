@@ -38,7 +38,7 @@ import java.util.function.Predicate;
 
 @Getter
 @AllArgsConstructor
-public abstract class SecondarySubCommand {
+public abstract class SharedSubCommand {
 
     /**
      * The name of the sub command

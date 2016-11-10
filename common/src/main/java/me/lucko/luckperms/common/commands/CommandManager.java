@@ -40,6 +40,7 @@ import me.lucko.luckperms.common.commands.track.ListTracks;
 import me.lucko.luckperms.common.commands.track.TrackMainCommand;
 import me.lucko.luckperms.common.commands.user.UserMainCommand;
 import me.lucko.luckperms.common.commands.usersbulkedit.UsersBulkEditMainCommand;
+import me.lucko.luckperms.common.constants.Message;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,7 +54,7 @@ public class CommandManager {
     private final LuckPermsPlugin plugin;
 
     @Getter
-    private final List<MainCommand> mainCommands = ImmutableList.<MainCommand>builder()
+    private final List<BaseCommand> mainCommands = ImmutableList.<BaseCommand>builder()
             .add(new UserMainCommand())
             .add(new GroupMainCommand())
             .add(new TrackMainCommand())
@@ -75,7 +76,6 @@ public class CommandManager {
             .add(new DeleteTrack())
             .add(new ListTracks())
             .build();
-
 
     /**
      * Generic on command method to be called from the command executor object of the platform
@@ -99,13 +99,14 @@ public class CommandManager {
      * @param args the arguments provided
      * @return if the command was successful
      */
+    @SuppressWarnings("unchecked")
     public CommandResult onCommand(Sender sender, String label, List<String> args) {
         if (args.size() == 0) {
             sendCommandUsage(sender, label);
             return CommandResult.INVALID_ARGS;
         }
 
-        Optional<MainCommand> o = mainCommands.stream()
+        Optional<BaseCommand> o = mainCommands.stream()
                 .filter(m -> m.getName().equalsIgnoreCase(args.get(0)))
                 .limit(1)
                 .findAny();
@@ -115,35 +116,70 @@ public class CommandManager {
             return CommandResult.INVALID_ARGS;
         }
 
-        final MainCommand main = o.get();
+        final Command main = o.get();
         if (!main.isAuthorized(sender)) {
             sendCommandUsage(sender, label);
             return CommandResult.NO_PERMISSION;
         }
 
-        if (main.getRequiredArgsLength() == 0) {
-            try {
-                return main.execute(plugin, sender, null, label);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return CommandResult.FAILURE;
-            }
-        }
+        List<String> arguments = new ArrayList<>(args);
+        handleRewrites(arguments);
+        arguments.remove(0); // remove the first command part.
 
-        if (args.size() == 1) {
+        if (main.getArgumentCheck().test(arguments.size())) {
             main.sendUsage(sender, label);
             return CommandResult.INVALID_ARGS;
         }
 
-        List<String> arguments = new ArrayList<>(args);
-        handleRewrites(arguments);
-
+        CommandResult result;
         try {
-            return main.execute(plugin, sender, arguments.subList(1, arguments.size()), label);
+            result = main.execute(plugin, sender, null, arguments, label);
+        } catch (CommandException e) {
+            result = handleException(e, sender, label, main);
         } catch (Exception e) {
             e.printStackTrace();
-            return CommandResult.FAILURE;
+            result = CommandResult.FAILURE;
         }
+
+        return result;
+    }
+
+    public static CommandResult handleException(CommandException e, Sender sender, String label, Command command) {
+        if (e instanceof ArgumentUtils.ArgumentException) {
+            if (e instanceof ArgumentUtils.DetailedUsageException) {
+                command.sendDetailedUsage(sender, label);
+                return CommandResult.INVALID_ARGS;
+            }
+
+            if (e instanceof ArgumentUtils.UseInheritException) {
+                Message.USE_INHERIT_COMMAND.send(sender);
+                return CommandResult.INVALID_ARGS;
+            }
+
+            if (e instanceof ArgumentUtils.InvalidServerException) {
+                Message.SERVER_INVALID_ENTRY.send(sender);
+                return CommandResult.INVALID_ARGS;
+            }
+
+            if (e instanceof ArgumentUtils.PastDateException) {
+                Message.PAST_DATE_ERROR.send(sender);
+                return CommandResult.INVALID_ARGS;
+            }
+
+            if (e instanceof ArgumentUtils.InvalidDateException) {
+                Message.ILLEGAL_DATE_ERROR.send(sender, ((ArgumentUtils.InvalidDateException) e).getInvalidDate());
+                return CommandResult.INVALID_ARGS;
+            }
+
+            if (e instanceof ArgumentUtils.InvalidPriorityException) {
+                Message.META_INVALID_PRIORITY.send(sender, ((ArgumentUtils.InvalidPriorityException) e).getInvalidPriority());
+                return CommandResult.INVALID_ARGS;
+            }
+        }
+
+        // Not something we can catch.
+        e.printStackTrace();
+        return CommandResult.FAILURE;
     }
 
     /**
@@ -154,7 +190,7 @@ public class CommandManager {
      */
     @SuppressWarnings("unchecked")
     public List<String> onTabComplete(Sender sender, List<String> args) {
-        final List<MainCommand> mains = mainCommands.stream()
+        final List<Command> mains = mainCommands.stream()
                 .filter(m -> m.isAuthorized(sender))
                 .collect(Collectors.toList());
 
@@ -171,7 +207,7 @@ public class CommandManager {
                     .collect(Collectors.toList());
         }
 
-        Optional<MainCommand> o = mains.stream()
+        Optional<Command> o = mains.stream()
                 .filter(m -> m.getName().equalsIgnoreCase(args.get(0)))
                 .limit(1)
                 .findAny();
@@ -180,7 +216,7 @@ public class CommandManager {
             return Collections.emptyList();
         }
 
-        return o.get().onTabComplete(sender, args.subList(1, args.size()), plugin);
+        return o.get().tabComplete(plugin, sender, args.subList(1, args.size()));
     }
 
     private void sendCommandUsage(Sender sender, String label) {

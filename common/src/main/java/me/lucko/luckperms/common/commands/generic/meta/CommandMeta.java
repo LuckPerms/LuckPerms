@@ -23,13 +23,13 @@
 package me.lucko.luckperms.common.commands.generic.meta;
 
 import com.google.common.collect.ImmutableList;
-import me.lucko.luckperms.common.commands.generic.SecondaryMainCommand;
-import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
+import me.lucko.luckperms.common.commands.generic.SharedMainCommand;
+import me.lucko.luckperms.common.commands.generic.SharedSubCommand;
 import me.lucko.luckperms.common.core.PermissionHolder;
 
-public class CommandMeta<T extends PermissionHolder> extends SecondaryMainCommand<T> {
+public class CommandMeta<T extends PermissionHolder> extends SharedMainCommand<T> {
     public CommandMeta(boolean user) {
-        super("Meta", "Edit metadata values", user, ImmutableList.<SecondarySubCommand>builder()
+        super("Meta", "Edit metadata values", user, ImmutableList.<SharedSubCommand>builder()
             .add(new MetaInfo())
             .add(new MetaSet())
             .add(new MetaUnset())

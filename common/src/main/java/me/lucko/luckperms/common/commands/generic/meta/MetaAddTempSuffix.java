@@ -25,7 +25,7 @@ package me.lucko.luckperms.common.commands.generic.meta;
 import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.*;
-import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
+import me.lucko.luckperms.common.commands.generic.SharedSubCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.PermissionHolder;
@@ -37,7 +37,7 @@ import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MetaAddTempSuffix extends SecondarySubCommand {
+public class MetaAddTempSuffix extends SharedSubCommand {
     public MetaAddTempSuffix() {
         super("addtempsuffix", "Adds a suffix temporarily",  Permission.USER_META_ADDTEMP_SUFFIX,
                 Permission.GROUP_META_ADDTEMP_SUFFIX, Predicates.notInRange(3, 5),

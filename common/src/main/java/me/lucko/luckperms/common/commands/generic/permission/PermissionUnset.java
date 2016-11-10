@@ -24,7 +24,7 @@ package me.lucko.luckperms.common.commands.generic.permission;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.*;
-import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
+import me.lucko.luckperms.common.commands.generic.SharedSubCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.PermissionHolder;
@@ -35,7 +35,7 @@ import me.lucko.luckperms.exceptions.ObjectLacksException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class PermissionUnset extends SecondarySubCommand {
+public class PermissionUnset extends SharedSubCommand {
     public PermissionUnset() {
         super("unset", "Unsets a permission for the object", Permission.USER_PERM_UNSET, Permission.GROUP_PERM_UNSET,
                 Predicates.notInRange(1, 3),

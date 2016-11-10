@@ -25,7 +25,7 @@ package me.lucko.luckperms.common.commands.generic.meta;
 import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.*;
-import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
+import me.lucko.luckperms.common.commands.generic.SharedSubCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.PermissionHolder;
@@ -35,7 +35,7 @@ import me.lucko.luckperms.common.utils.Predicates;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MetaUnsetTemp extends SecondarySubCommand {
+public class MetaUnsetTemp extends SharedSubCommand {
     public MetaUnsetTemp() {
         super("unsettemp", "Unsets a temporary meta value",  Permission.USER_META_UNSETTEMP, Permission.GROUP_META_UNSETTEMP,
                 Predicates.notInRange(1, 3),

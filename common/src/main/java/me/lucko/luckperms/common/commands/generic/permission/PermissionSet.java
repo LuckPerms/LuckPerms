@@ -24,7 +24,7 @@ package me.lucko.luckperms.common.commands.generic.permission;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.*;
-import me.lucko.luckperms.common.commands.generic.SecondarySubCommand;
+import me.lucko.luckperms.common.commands.generic.SharedSubCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.PermissionHolder;
@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 
 import static me.lucko.luckperms.common.commands.SubCommand.getBoolTabComplete;
 
-public class PermissionSet extends SecondarySubCommand {
+public class PermissionSet extends SharedSubCommand {
     public PermissionSet() {
         super("set", "Sets a permission for the object", Permission.USER_PERM_SET, Permission.GROUP_PERM_SET,
                 Predicates.notInRange(2, 4),

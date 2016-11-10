@@ -35,12 +35,15 @@ import java.util.stream.IntStream;
 @SuppressWarnings({"WeakerAccess", "unused"})
 @UtilityClass
 public class Predicates {
+    private static final Predicate FALSE = o -> false;
+    private static final Predicate TRUE = o -> true;
+
     public static <T> Predicate<T> alwaysFalse() {
-        return t -> false;
+        return FALSE;
     }
 
     public static <T> Predicate<T> alwaysTrue() {
-        return t -> true;
+        return TRUE;
     }
 
     public static Predicate<Integer> notInRange(Integer start, Integer end) {

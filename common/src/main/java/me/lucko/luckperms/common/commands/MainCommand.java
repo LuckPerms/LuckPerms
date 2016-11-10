@@ -22,11 +22,11 @@
 
 package me.lucko.luckperms.common.commands;
 
-import com.google.common.collect.ImmutableList;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NonNull;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.constants.Message;
+import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,50 +34,27 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Getter
-@AllArgsConstructor
-public abstract class MainCommand<T> {
+public abstract class MainCommand<T> extends BaseCommand<Void, T> {
 
-    /**
-     * The name of the main command
-     */
-    private final String name;
-
-    /**
-     * The command usage
-     */
-    private final String usage;
-
-    /**
-     * How many arguments are required for the command to run
-     */
-    private final int requiredArgsLength;
-
-    /**
-     * A list of the sub commands under this main command
-     */
     @Getter
-    private final List<SubCommand<T>> subCommands;
+    private final String usage;
+    private final int minArgs; // equals 1 if the command doesn't take a mid argument, e.g. /lp user <USER> sub-command....
 
-    MainCommand(String name, String usage, int requiredArgsLength) {
-        this(name, usage, requiredArgsLength, ImmutableList.of());
+    public MainCommand(String name, String description, String usage, int minArgs, @NonNull List<Command<T, ?>> children) {
+        super(name, description, null, Predicates.alwaysFalse(), null, children);
+        this.usage = usage;
+        this.minArgs = minArgs;
     }
 
-    /**
-     * Called when this main command is ran
-     * @param plugin a link to the main plugin instance
-     * @param sender the sender to executed the command
-     * @param args the stripped arguments given
-     * @param label the command label used
-     */
-    protected CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
-        if (args.size() < requiredArgsLength) {
+    @Override
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Void v, List<String> args, String label) throws CommandException {
+        if (args.size() < minArgs) {
             sendUsage(sender, label);
             return CommandResult.INVALID_ARGS;
         }
 
-        Optional<SubCommand<T>> o = getSubCommands().stream()
-                .filter(s -> s.getName().equalsIgnoreCase(args.get(requiredArgsLength - 1)))
+        Optional<Command<T, ?>> o = getSubCommands().stream()
+                .filter(s -> s.getName().equalsIgnoreCase(args.get(minArgs - 1)))
                 .limit(1)
                 .findAny();
 
@@ -86,19 +63,19 @@ public abstract class MainCommand<T> {
             return CommandResult.INVALID_ARGS;
         }
 
-        final SubCommand<T> sub = o.get();
+        final Command<T, ?> sub = o.get();
         if (!sub.isAuthorized(sender)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
         }
 
         List<String> strippedArgs = new ArrayList<>();
-        if (args.size() > requiredArgsLength) {
-            strippedArgs.addAll(args.subList(requiredArgsLength, args.size()));
+        if (args.size() > minArgs) {
+            strippedArgs.addAll(args.subList(minArgs, args.size()));
         }
 
-        if (sub.getIsArgumentInvalid().test(strippedArgs.size())) {
-            sub.sendDetailedUsage(sender);
+        if (sub.getArgumentCheck().test(strippedArgs.size())) {
+            sub.sendDetailedUsage(sender, label);
             return CommandResult.INVALID_ARGS;
         }
 
@@ -106,11 +83,13 @@ public abstract class MainCommand<T> {
         T t = getTarget(name, plugin, sender);
         if (t != null) {
             CommandResult result;
+
             try {
                 result = sub.execute(plugin, sender, t, strippedArgs, label);
             } catch (CommandException e) {
-                result = handleException(e, sender, sub);
+                result = CommandManager.handleException(e, sender, label, sub);
             }
+
             cleanup(t, plugin);
             return result;
         }
@@ -118,99 +97,9 @@ public abstract class MainCommand<T> {
         return CommandResult.LOADING_ERROR;
     }
 
-    private static CommandResult handleException(CommandException e, Sender sender, SubCommand command) {
-        if (e instanceof ArgumentUtils.ArgumentException) {
-            if (e instanceof ArgumentUtils.DetailedUsageException) {
-                command.sendDetailedUsage(sender);
-                return CommandResult.INVALID_ARGS;
-            }
-
-            if (e instanceof ArgumentUtils.UseInheritException) {
-                Message.USE_INHERIT_COMMAND.send(sender);
-                return CommandResult.INVALID_ARGS;
-            }
-
-            if (e instanceof ArgumentUtils.InvalidServerException) {
-                Message.SERVER_INVALID_ENTRY.send(sender);
-                return CommandResult.INVALID_ARGS;
-            }
-
-            if (e instanceof ArgumentUtils.PastDateException) {
-                Message.PAST_DATE_ERROR.send(sender);
-                return CommandResult.INVALID_ARGS;
-            }
-
-            if (e instanceof ArgumentUtils.InvalidDateException) {
-                Message.ILLEGAL_DATE_ERROR.send(sender, ((ArgumentUtils.InvalidDateException) e).getInvalidDate());
-                return CommandResult.INVALID_ARGS;
-            }
-
-            if (e instanceof ArgumentUtils.InvalidPriorityException) {
-                Message.META_INVALID_PRIORITY.send(sender, ((ArgumentUtils.InvalidPriorityException) e).getInvalidPriority());
-                return CommandResult.INVALID_ARGS;
-            }
-        }
-
-        // Not something we can catch.
-        e.printStackTrace();
-        return CommandResult.FAILURE;
-    }
-
-    /**
-     * Gets the object the command is acting upon, and runs the callback if successful
-     * @param target the name of the object to be looked up
-     * @param plugin a link to the main plugin instance
-     * @param sender the user who send the command (used to send error messages if the lookup was unsuccessful)
-     */
-    protected abstract T getTarget(String target, LuckPermsPlugin plugin, Sender sender);
-
-    protected abstract void cleanup(T t, LuckPermsPlugin plugin);
-
-    /**
-     * Get a list of {@link T} objects for tab completion
-     * @param plugin a link to the main plugin instance
-     * @return a list of strings
-     */
-    protected abstract List<String> getObjects(LuckPermsPlugin plugin);
-
-    /**
-     * Send the command usage to a sender
-     * @param sender the sender to send the usage to
-     * @param label the command label used
-     */
-    protected void sendUsage(Sender sender, String label) {
-        if (getSubCommands().isEmpty()) {
-            Util.sendPluginMessage(sender, "&3> &a" + String.format(getUsage(), label));
-            return;
-        }
-
-        List<SubCommand> subs = getSubCommands().stream()
-                .filter(s -> s.isAuthorized(sender))
-                .collect(Collectors.toList());
-
-        if (subs.size() > 0) {
-            Util.sendPluginMessage(sender, "&b" + getName() + " Sub Commands: &7(" + String.format(getUsage(), label) + " ...)");
-
-            for (SubCommand s : subs) {
-                s.sendUsage(sender);
-            }
-
-        } else {
-            Message.COMMAND_NO_PERMISSION.send(sender);
-        }
-    }
-
-    /**
-     * If a sender has permission to use this command
-     * @param sender the sender trying to use the command
-     * @return true if the sender can use the command
-     */
-    protected boolean isAuthorized(Sender sender) {
-        return getSubCommands().stream().filter(sc -> sc.isAuthorized(sender)).count() != 0;
-    }
-
-    protected List<String> onTabComplete(Sender sender, List<String> args, LuckPermsPlugin plugin) {
-        final List<String> objects = getObjects(plugin);
+    @Override
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+        final List<String> objects = getTargets(plugin);
 
         if (args.size() <= 1) {
             if (args.isEmpty() || args.get(0).equalsIgnoreCase("")) {
@@ -222,7 +111,7 @@ public abstract class MainCommand<T> {
                     .collect(Collectors.toList());
         }
 
-        final List<SubCommand<T>> subs = getSubCommands().stream()
+        final List<Command<T, ?>> subs = getSubCommands().stream()
                 .filter(s -> s.isAuthorized(sender))
                 .collect(Collectors.toList());
 
@@ -239,7 +128,7 @@ public abstract class MainCommand<T> {
                     .collect(Collectors.toList());
         }
 
-        Optional<SubCommand<T>> o = subs.stream()
+        Optional<Command<T, ?>> o = subs.stream()
                 .filter(s -> s.getName().equalsIgnoreCase(args.get(1)))
                 .limit(1)
                 .findAny();
@@ -248,6 +137,56 @@ public abstract class MainCommand<T> {
             return Collections.emptyList();
         }
 
-        return o.get().onTabComplete(plugin, sender, args.subList(2, args.size()));
+        return o.get().tabComplete(plugin, sender, args.subList(2, args.size()));
+    }
+
+    protected abstract List<String> getTargets(LuckPermsPlugin plugin);
+    protected abstract T getTarget(String target, LuckPermsPlugin plugin, Sender sender);
+    protected abstract void cleanup(T t, LuckPermsPlugin plugin);
+
+    @Override
+    public void sendUsage(Sender sender, String label) {
+        /*
+        if (getSubCommands().isEmpty()) {
+            Util.sendPluginMessage(sender, "&3> &a" + String.format(getUsage(), label));
+            return;
+        */
+
+        List<Command> subs = getSubCommands().stream()
+                .filter(s -> s.isAuthorized(sender))
+                .collect(Collectors.toList());
+
+        if (subs.size() > 0) {
+            Util.sendPluginMessage(sender, "&b" + getName() + " Sub Commands: &7(" + String.format(usage, label) + " ...)");
+
+            for (Command s : subs) {
+                s.sendUsage(sender, label);
+            }
+
+        } else {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+        }
+    }
+
+    @Override
+    public void sendDetailedUsage(Sender sender, String label) {
+
+    }
+
+    @Override
+    public boolean isAuthorized(Sender sender) {
+        return getSubCommands().stream().filter(sc -> sc.isAuthorized(sender)).count() != 0;
+    }
+
+    @Deprecated
+    @Override
+    public Optional<List<Command<T, ?>>> getChildren() {
+        return super.getChildren();
+    }
+
+
+    @SuppressWarnings("deprecation")
+    public List<Command<T, ?>> getSubCommands() {
+        return getChildren().get();
     }
 }

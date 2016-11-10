@@ -23,23 +23,30 @@
 package me.lucko.luckperms.common.commands.misc;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.SingleMainCommand;
+import me.lucko.luckperms.common.commands.SingleCommand;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class VerboseCommand extends SingleMainCommand {
+public class VerboseCommand extends SingleCommand {
     public VerboseCommand() {
-        super("Verbose", "/%s verbose <true|false> [filters...]", 1, Permission.VERBOSE);
+        super("Verbose", "Enable verbose permission check output", "/%s verbose <true|false> [filters...]", Permission.VERBOSE, Predicates.is(0),
+                Arg.list(
+                        Arg.create("true|false", true, "whether to enable the feature"),
+                        Arg.create("filters...", false, "the name of the user / start of the node to filter by")
+                )
+        );
     }
 
     @Override
-    protected CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         if (args.isEmpty()) {
             sendUsage(sender, label);
             return CommandResult.INVALID_ARGS;

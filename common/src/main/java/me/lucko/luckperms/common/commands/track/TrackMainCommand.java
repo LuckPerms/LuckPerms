@@ -24,9 +24,9 @@ package me.lucko.luckperms.common.commands.track;
 
 import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.commands.Command;
 import me.lucko.luckperms.common.commands.MainCommand;
 import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.SubCommand;
 import me.lucko.luckperms.common.commands.track.subcommands.*;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.tracks.Track;
@@ -36,15 +36,15 @@ import java.util.List;
 
 public class TrackMainCommand extends MainCommand<Track> {
     public TrackMainCommand() {
-        super("Track", "/%s track <track>", 2, ImmutableList.<SubCommand<Track>>builder()
-            .add(new TrackInfo())
-            .add(new TrackAppend())
-            .add(new TrackInsert())
-            .add(new TrackRemove())
-            .add(new TrackClear())
-            .add(new TrackRename())
-            .add(new TrackClone())
-            .build()
+        super("Track", "Track commands", "/%s track <track>", 2, ImmutableList.<Command<Track, ?>>builder()
+                .add(new TrackInfo())
+                .add(new TrackAppend())
+                .add(new TrackInsert())
+                .add(new TrackRemove())
+                .add(new TrackClear())
+                .add(new TrackRename())
+                .add(new TrackClone())
+                .build()
         );
     }
 
@@ -70,7 +70,7 @@ public class TrackMainCommand extends MainCommand<Track> {
     }
 
     @Override
-    protected List<String> getObjects(LuckPermsPlugin plugin) {
+    protected List<String> getTargets(LuckPermsPlugin plugin) {
         return new ArrayList<>(plugin.getTrackManager().getAll().keySet());
     }
 }
