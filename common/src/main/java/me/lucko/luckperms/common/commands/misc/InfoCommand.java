@@ -24,8 +24,8 @@ package me.lucko.luckperms.common.commands.misc;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Sender;
 import me.lucko.luckperms.common.commands.SingleCommand;
+import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.LPConfiguration;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 
-import static me.lucko.luckperms.common.commands.Util.formatBoolean;
+import static me.lucko.luckperms.common.commands.utils.Util.formatBoolean;
 
 public class InfoCommand extends SingleCommand {
     public InfoCommand() {

@@ -25,6 +25,7 @@ package me.lucko.luckperms.common.commands.migration;
 import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.*;
+import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Message;
 

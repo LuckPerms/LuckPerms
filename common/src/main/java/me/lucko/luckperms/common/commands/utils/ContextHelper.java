@@ -20,28 +20,19 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.user.subcommands;
+package me.lucko.luckperms.common.commands.utils;
 
-import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.CommandException;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.SubCommand;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.users.User;
-import me.lucko.luckperms.common.utils.Predicates;
+/**
+ * Utility used to help in commands that take arguments for different contexts
+ */
+public class ContextHelper {
 
-import java.util.List;
-
-public class UserGetUUID extends SubCommand<User> {
-    public UserGetUUID() {
-        super("getuuid", "Displays the user's internal LuckPerms unique id", Permission.USER_GETUUID, Predicates.alwaysFalse(), null);
+    public enum CommandContext {
+        NONE, SERVER, SERVER_AND_WORLD
     }
 
-    @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) throws CommandException {
-        Message.USER_GETUUID.send(sender, user.getName(), user.getUuid().toString());
-        return CommandResult.SUCCESS;
+    public static CommandContext determine(String server, String world) {
+        return server == null ? CommandContext.NONE : (world == null ? CommandContext.SERVER : CommandContext.SERVER_AND_WORLD);
     }
+
 }

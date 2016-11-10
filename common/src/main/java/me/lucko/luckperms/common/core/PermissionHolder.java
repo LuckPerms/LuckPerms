@@ -39,7 +39,7 @@ import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.api.internal.GroupLink;
 import me.lucko.luckperms.common.api.internal.PermissionHolderLink;
 import me.lucko.luckperms.common.caching.MetaHolder;
-import me.lucko.luckperms.common.commands.Util;
+import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.utils.Cache;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
@@ -271,7 +271,7 @@ public abstract class PermissionHolder {
                 !node.shouldApplyWithContext(contexts, false)
         );
 
-        TreeSet<Map.Entry<Integer, Node>> sortedParents = new TreeSet<>(Util.getMetaComparator().reversed());
+        TreeSet<Map.Entry<Integer, Node>> sortedParents = new TreeSet<>(Util.META_COMPARATOR.reversed());
         Map<String, Integer> weights = plugin.getConfiguration().getGroupWeights();
         for (Node node : parents) {
             if (weights.containsKey(node.getGroupName().toLowerCase())) {
@@ -349,7 +349,7 @@ public abstract class PermissionHolder {
                 !node.shouldApplyWithContext(contexts, false)
         );
 
-        TreeSet<Map.Entry<Integer, Node>> sortedParents = new TreeSet<>(Util.getMetaComparator().reversed());
+        TreeSet<Map.Entry<Integer, Node>> sortedParents = new TreeSet<>(Util.META_COMPARATOR.reversed());
         Map<String, Integer> weights = plugin.getConfiguration().getGroupWeights();
         for (Node node : parents) {
             if (weights.containsKey(node.getGroupName().toLowerCase())) {

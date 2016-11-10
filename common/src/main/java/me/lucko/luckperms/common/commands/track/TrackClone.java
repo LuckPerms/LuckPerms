@@ -20,32 +20,59 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.track.subcommands;
+package me.lucko.luckperms.common.commands.track;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Sender;
 import me.lucko.luckperms.common.commands.SubCommand;
+import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.tracks.Track;
+import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 
-public class TrackClear extends SubCommand<Track> {
-    public TrackClear() {
-        super("clear", "Clears the groups on the track", Permission.TRACK_CLEAR, Predicates.alwaysFalse(), null);
+public class TrackClone extends SubCommand<Track> {
+    public TrackClone() {
+        super("clone", "Clone the track", Permission.TRACK_CLONE, Predicates.not(1),
+                Arg.list(Arg.create("name", true, "the name of the clone"))
+        );
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args, String label) throws CommandException {
-        track.clearGroups();
-        Message.TRACK_CLEAR.send(sender, track.getName());
-        LogEntry.build().actor(sender).acted(track).action("clear").build().submit(plugin, sender);
-        save(track, sender, plugin);
+        String newTrackName = args.get(0).toLowerCase();
+        if (ArgumentChecker.checkName(newTrackName)) {
+            Message.TRACK_INVALID_ENTRY.send(sender);
+            return CommandResult.INVALID_ARGS;
+        }
+
+        if (plugin.getDatastore().loadTrack(newTrackName).getUnchecked()) {
+            Message.TRACK_ALREADY_EXISTS.send(sender);
+            return CommandResult.INVALID_ARGS;
+        }
+
+        if (!plugin.getDatastore().createAndLoadTrack(newTrackName).getUnchecked()) {
+            Message.CREATE_TRACK_ERROR.send(sender);
+            return CommandResult.FAILURE;
+        }
+
+        Track newTrack = plugin.getTrackManager().get(newTrackName);
+        if (newTrack == null) {
+            Message.TRACK_LOAD_ERROR.send(sender);
+            return CommandResult.LOADING_ERROR;
+        }
+
+        newTrack.setGroups(track.getGroups());
+
+        Message.CLONE_SUCCESS.send(sender, track.getName(), newTrack.getName());
+        LogEntry.build().actor(sender).acted(track).action("clone " + newTrack.getName()).build().submit(plugin, sender);
+        save(newTrack, sender, plugin);
         return CommandResult.SUCCESS;
     }
 }

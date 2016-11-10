@@ -20,10 +20,14 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.group.subcommands;
+package me.lucko.luckperms.common.commands.group;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.*;
+import me.lucko.luckperms.common.commands.Arg;
+import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandResult;
+import me.lucko.luckperms.common.commands.SubCommand;
+import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.data.LogEntry;
@@ -33,10 +37,10 @@ import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 
-public class GroupClone extends SubCommand<Group> {
-    public GroupClone() {
-        super("clone", "Clone the group", Permission.GROUP_CLONE, Predicates.not(1),
-                Arg.list(Arg.create("name", true, "the name of the clone"))
+public class GroupRename extends SubCommand<Group> {
+    public GroupRename() {
+        super("rename", "Rename the group", Permission.GROUP_RENAME, Predicates.not(1),
+                Arg.list(Arg.create("name", true, "the new name"))
         );
     }
 
@@ -64,10 +68,15 @@ public class GroupClone extends SubCommand<Group> {
             return CommandResult.LOADING_ERROR;
         }
 
+        if (!plugin.getDatastore().deleteGroup(group).getUnchecked()) {
+            Message.DELETE_GROUP_ERROR.send(sender);
+            return CommandResult.FAILURE;
+        }
+
         newGroup.setNodes(group.getNodes());
 
-        Message.CLONE_SUCCESS.send(sender, group.getName(), newGroup.getName());
-        LogEntry.build().actor(sender).acted(group).action("clone " + newGroup.getName()).build().submit(plugin, sender);
+        Message.RENAME_SUCCESS.send(sender, group.getName(), newGroup.getName());
+        LogEntry.build().actor(sender).acted(group).action("rename " + newGroup.getName()).build().submit(plugin, sender);
         save(newGroup, sender, plugin);
         return CommandResult.SUCCESS;
     }

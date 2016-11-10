@@ -20,60 +20,59 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.group.subcommands;
+package me.lucko.luckperms.common.commands.group;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.*;
+import me.lucko.luckperms.common.commands.Arg;
+import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandResult;
+import me.lucko.luckperms.common.commands.SubCommand;
+import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.groups.Group;
+import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class GroupClear extends SubCommand<Group> {
-    public GroupClear() {
-        super("clear", "Clears the group's permissions and parent groups", Permission.GROUP_CLEAR, Predicates.notInRange(0, 2),
-                Arg.list(
-                        Arg.create("server", false, "the server name to filter by"),
-                        Arg.create("world", false, "the world name to filter by")
-                )
+public class GroupClone extends SubCommand<Group> {
+    public GroupClone() {
+        super("clone", "Clone the group", Permission.GROUP_CLONE, Predicates.not(1),
+                Arg.list(Arg.create("name", true, "the name of the clone"))
         );
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) throws CommandException {
-        int before = group.getNodes().size();
-
-        String server = ArgumentUtils.handleServer(0, args);
-        String world = ArgumentUtils.handleWorld(1, args);
-
-        switch (ContextHelper.determine(server, world)) {
-            case NONE:
-                group.clearNodes();
-                break;
-            case SERVER:
-                group.clearNodes(server);
-                break;
-            case SERVER_AND_WORLD:
-                group.clearNodes(server, world);
-                break;
+        String newGroupName = args.get(0).toLowerCase();
+        if (ArgumentChecker.checkName(newGroupName)) {
+            Message.GROUP_INVALID_ENTRY.send(sender);
+            return CommandResult.INVALID_ARGS;
         }
 
-        int changed = before - group.getNodes().size();
-        if (changed == 1) {
-            Message.CLEAR_SUCCESS_SINGULAR.send(sender, group.getName(), changed);
-        } else {
-            Message.CLEAR_SUCCESS.send(sender, group.getName(), changed);
+        if (plugin.getDatastore().loadGroup(newGroupName).getUnchecked()) {
+            Message.GROUP_ALREADY_EXISTS.send(sender);
+            return CommandResult.INVALID_ARGS;
         }
 
-        LogEntry.build().actor(sender).acted(group)
-                .action("clear " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
-                .build().submit(plugin, sender);
+        if (!plugin.getDatastore().createAndLoadGroup(newGroupName).getUnchecked()) {
+            Message.CREATE_GROUP_ERROR.send(sender);
+            return CommandResult.FAILURE;
+        }
 
-        save(group, sender, plugin);
+        Group newGroup = plugin.getGroupManager().get(newGroupName);
+        if (newGroup == null) {
+            Message.GROUP_LOAD_ERROR.send(sender);
+            return CommandResult.LOADING_ERROR;
+        }
+
+        newGroup.setNodes(group.getNodes());
+
+        Message.CLONE_SUCCESS.send(sender, group.getName(), newGroup.getName());
+        LogEntry.build().actor(sender).acted(group).action("clone " + newGroup.getName()).build().submit(plugin, sender);
+        save(newGroup, sender, plugin);
         return CommandResult.SUCCESS;
     }
 }

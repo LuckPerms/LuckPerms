@@ -34,12 +34,15 @@ import me.lucko.luckperms.common.commands.group.ListGroups;
 import me.lucko.luckperms.common.commands.log.LogMainCommand;
 import me.lucko.luckperms.common.commands.migration.MigrationMainCommand;
 import me.lucko.luckperms.common.commands.misc.*;
+import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.track.CreateTrack;
 import me.lucko.luckperms.common.commands.track.DeleteTrack;
 import me.lucko.luckperms.common.commands.track.ListTracks;
 import me.lucko.luckperms.common.commands.track.TrackMainCommand;
 import me.lucko.luckperms.common.commands.user.UserMainCommand;
 import me.lucko.luckperms.common.commands.usersbulkedit.UsersBulkEditMainCommand;
+import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
+import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Message;
 
 import java.util.ArrayList;
@@ -101,21 +104,25 @@ public class CommandManager {
      */
     @SuppressWarnings("unchecked")
     public CommandResult onCommand(Sender sender, String label, List<String> args) {
+        // Handle no arguments
         if (args.size() == 0) {
             sendCommandUsage(sender, label);
             return CommandResult.INVALID_ARGS;
         }
 
+        // Look for the main command.
         Optional<BaseCommand> o = mainCommands.stream()
                 .filter(m -> m.getName().equalsIgnoreCase(args.get(0)))
                 .limit(1)
                 .findAny();
 
+        // Main command not found
         if (!o.isPresent()) {
             sendCommandUsage(sender, label);
             return CommandResult.INVALID_ARGS;
         }
 
+        // Check the Sender has permission to use the main command.
         final Command main = o.get();
         if (!main.isAuthorized(sender)) {
             sendCommandUsage(sender, label);
@@ -124,13 +131,15 @@ public class CommandManager {
 
         List<String> arguments = new ArrayList<>(args);
         handleRewrites(arguments);
-        arguments.remove(0); // remove the first command part.
+        arguments.remove(0); // remove the main command arg.
 
+        // Check the correct number of args were given for the main command
         if (main.getArgumentCheck().test(arguments.size())) {
             main.sendUsage(sender, label);
             return CommandResult.INVALID_ARGS;
         }
 
+        // Try to execute the command.
         CommandResult result;
         try {
             result = main.execute(plugin, sender, null, arguments, label);
@@ -194,19 +203,24 @@ public class CommandManager {
                 .filter(m -> m.isAuthorized(sender))
                 .collect(Collectors.toList());
 
+        // Not yet past the point of entering a main command
         if (args.size() <= 1) {
+
+            // Nothing yet entered
             if (args.isEmpty() || args.get(0).equalsIgnoreCase("")) {
                 return mains.stream()
                         .map(m -> m.getName().toLowerCase())
                         .collect(Collectors.toList());
             }
 
+            // Started typing a main command
             return mains.stream()
                     .map(m -> m.getName().toLowerCase())
                     .filter(s -> s.startsWith(args.get(0).toLowerCase()))
                     .collect(Collectors.toList());
         }
 
+        // Find a main command matching the first arg
         Optional<Command> o = mains.stream()
                 .filter(m -> m.getName().equalsIgnoreCase(args.get(0)))
                 .limit(1)
@@ -216,6 +230,7 @@ public class CommandManager {
             return Collections.emptyList();
         }
 
+        // Pass the processing onto the main command
         return o.get().tabComplete(plugin, sender, args.subList(1, args.size()));
     }
 

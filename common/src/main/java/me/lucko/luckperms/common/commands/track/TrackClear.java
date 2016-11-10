@@ -20,27 +20,32 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands;
+package me.lucko.luckperms.common.commands.track;
 
-import lombok.RequiredArgsConstructor;
 import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandResult;
+import me.lucko.luckperms.common.commands.SubCommand;
+import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.constants.Message;
+import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.data.LogEntry;
+import me.lucko.luckperms.common.tracks.Track;
+import me.lucko.luckperms.common.utils.Predicates;
 
-import java.util.UUID;
+import java.util.List;
 
-/**
- * Factory class to make a thread-safe sender instance
- * @param <T> the command sender type
- */
-@RequiredArgsConstructor
-public abstract class SenderFactory<T> {
-    private final LuckPermsPlugin plugin;
+public class TrackClear extends SubCommand<Track> {
+    public TrackClear() {
+        super("clear", "Clears the groups on the track", Permission.TRACK_CLEAR, Predicates.alwaysFalse(), null);
+    }
 
-    protected abstract String getName(T t);
-    protected abstract UUID getUuid(T t);
-    protected abstract void sendMessage(T t, String s);
-    protected abstract boolean hasPermission(T t, String node);
-
-    public final Sender wrap(T t) {
-        return new AbstractSender<>(plugin, this, t);
+    @Override
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args, String label) throws CommandException {
+        track.clearGroups();
+        Message.TRACK_CLEAR.send(sender, track.getName());
+        LogEntry.build().actor(sender).acted(track).action("clear").build().submit(plugin, sender);
+        save(track, sender, plugin);
+        return CommandResult.SUCCESS;
     }
 }

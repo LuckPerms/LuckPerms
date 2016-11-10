@@ -20,19 +20,27 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands;
+package me.lucko.luckperms.common.commands.sender;
+
+import lombok.RequiredArgsConstructor;
+import me.lucko.luckperms.common.LuckPermsPlugin;
+
+import java.util.UUID;
 
 /**
- * Utility used to help in commands that take arguments for different contexts
+ * Factory class to make a thread-safe sender instance
+ * @param <T> the command sender type
  */
-public class ContextHelper {
+@RequiredArgsConstructor
+public abstract class SenderFactory<T> {
+    private final LuckPermsPlugin plugin;
 
-    public enum CommandContext {
-        NONE, SERVER, SERVER_AND_WORLD
+    protected abstract String getName(T t);
+    protected abstract UUID getUuid(T t);
+    protected abstract void sendMessage(T t, String s);
+    protected abstract boolean hasPermission(T t, String node);
+
+    public final Sender wrap(T t) {
+        return new AbstractSender<>(plugin, this, t);
     }
-
-    public static CommandContext determine(String server, String world) {
-        return server == null ? CommandContext.NONE : (world == null ? CommandContext.SERVER : CommandContext.SERVER_AND_WORLD);
-    }
-
 }

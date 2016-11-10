@@ -20,10 +20,15 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.track.subcommands;
+package me.lucko.luckperms.common.commands.track;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.*;
+import me.lucko.luckperms.common.commands.Arg;
+import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandResult;
+import me.lucko.luckperms.common.commands.SubCommand;
+import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.data.LogEntry;
@@ -35,13 +40,10 @@ import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.List;
 
-public class TrackInsert extends SubCommand<Track> {
-    public TrackInsert() {
-        super("insert", "Inserts a group at a given position along the track", Permission.TRACK_INSERT, Predicates.not(2),
-                Arg.list(
-                        Arg.create("group", true, "the group to insert"),
-                        Arg.create("position", true, "the position to insert the group at (the first position on the track is 1)")
-                )
+public class TrackAppend extends SubCommand<Track> {
+    public TrackAppend() {
+        super("append", "Appends a group onto the end of the track", Permission.TRACK_APPEND, Predicates.not(1),
+                Arg.list(Arg.create("group", true, "the group to append"))
         );
     }
 
@@ -51,14 +53,6 @@ public class TrackInsert extends SubCommand<Track> {
 
         if (ArgumentChecker.checkNode(groupName)) {
             sendDetailedUsage(sender, label);
-            return CommandResult.INVALID_ARGS;
-        }
-
-        int pos;
-        try {
-            pos = Integer.parseInt(args.get(1));
-        } catch (NumberFormatException e) {
-            Message.TRACK_INSERT_ERROR_NUMBER.send(sender, args.get(1));
             return CommandResult.INVALID_ARGS;
         }
 
@@ -74,22 +68,19 @@ public class TrackInsert extends SubCommand<Track> {
         }
 
         try {
-            track.insertGroup(group, pos - 1);
-            Message.TRACK_INSERT_SUCCESS.send(sender, group.getName(), track.getName(), pos);
+            track.appendGroup(group);
+            Message.TRACK_APPEND_SUCCESS.send(sender, group.getName(), track.getName());
             if (track.getGroups().size() > 1) {
                 Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), group.getName()));
             }
             LogEntry.build().actor(sender).acted(track)
-                    .action("insert " + group.getName() + " " + pos)
+                    .action("append " + group.getName())
                     .build().submit(plugin, sender);
             save(track, sender, plugin);
             return CommandResult.SUCCESS;
         } catch (ObjectAlreadyHasException e) {
             Message.TRACK_ALREADY_CONTAINS.send(sender, track.getName(), group.getName());
             return CommandResult.STATE_ERROR;
-        } catch (IndexOutOfBoundsException e) {
-            Message.TRACK_INSERT_ERROR_INVALID_POS.send(sender, pos);
-            return CommandResult.INVALID_ARGS;
         }
     }
 

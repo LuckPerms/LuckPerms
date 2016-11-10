@@ -20,63 +20,59 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.track.subcommands;
+package me.lucko.luckperms.common.commands.user;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.*;
+import me.lucko.luckperms.common.commands.Arg;
+import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandResult;
+import me.lucko.luckperms.common.commands.SubCommand;
+import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.groups.Group;
-import me.lucko.luckperms.common.tracks.Track;
-import me.lucko.luckperms.common.utils.ArgumentChecker;
+import me.lucko.luckperms.common.users.User;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.List;
 
-public class TrackAppend extends SubCommand<Track> {
-    public TrackAppend() {
-        super("append", "Appends a group onto the end of the track", Permission.TRACK_APPEND, Predicates.not(1),
-                Arg.list(Arg.create("group", true, "the group to append"))
+public class UserSetPrimaryGroup extends SubCommand<User> {
+    public UserSetPrimaryGroup() {
+        super("setprimarygroup", "Sets the user's primary group", Permission.USER_SETPRIMARYGROUP, Predicates.not(1),
+                Arg.list(Arg.create("group", true, "the group to set as the primary group"))
         );
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args, String label) throws CommandException {
-        String groupName = args.get(0).toLowerCase();
-
-        if (ArgumentChecker.checkNode(groupName)) {
-            sendDetailedUsage(sender, label);
-            return CommandResult.INVALID_ARGS;
-        }
-
-        if (!plugin.getDatastore().loadGroup(groupName).getUnchecked()) {
-            Message.GROUP_DOES_NOT_EXIST.send(sender);
-            return CommandResult.INVALID_ARGS;
-        }
-
-        Group group = plugin.getGroupManager().get(groupName);
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) throws CommandException {
+        Group group = plugin.getGroupManager().get(args.get(0).toLowerCase());
         if (group == null) {
             Message.GROUP_DOES_NOT_EXIST.send(sender);
-            return CommandResult.LOADING_ERROR;
+            return CommandResult.INVALID_ARGS;
         }
 
-        try {
-            track.appendGroup(group);
-            Message.TRACK_APPEND_SUCCESS.send(sender, group.getName(), track.getName());
-            if (track.getGroups().size() > 1) {
-                Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), group.getName()));
-            }
-            LogEntry.build().actor(sender).acted(track)
-                    .action("append " + group.getName())
-                    .build().submit(plugin, sender);
-            save(track, sender, plugin);
-            return CommandResult.SUCCESS;
-        } catch (ObjectAlreadyHasException e) {
-            Message.TRACK_ALREADY_CONTAINS.send(sender, track.getName(), group.getName());
+        if (user.getPrimaryGroup().equalsIgnoreCase(group.getName())) {
+            Message.USER_PRIMARYGROUP_ERROR_ALREADYHAS.send(sender);
             return CommandResult.STATE_ERROR;
         }
+
+        if (!user.inheritsGroup(group)) {
+            Message.USER_PRIMARYGROUP_ERROR_NOTMEMBER.send(sender, user.getName(), group.getName());
+            try {
+                user.setInheritGroup(group);
+            } catch (ObjectAlreadyHasException ignored) {}
+        }
+
+        user.setPrimaryGroup(group.getName());
+        Message.USER_PRIMARYGROUP_SUCCESS.send(sender, user.getName(), group.getDisplayName());
+        LogEntry.build().actor(sender).acted(user)
+                .action("setprimarygroup " + group.getName())
+                .build().submit(plugin, sender);
+
+        save(user, sender, plugin);
+        return CommandResult.SUCCESS;
     }
 
     @Override

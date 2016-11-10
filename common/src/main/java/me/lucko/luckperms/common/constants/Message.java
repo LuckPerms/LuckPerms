@@ -24,8 +24,8 @@ package me.lucko.luckperms.common.constants;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.Util;
+import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.commands.utils.Util;
 
 @SuppressWarnings("SpellCheckingInspection")
 @AllArgsConstructor

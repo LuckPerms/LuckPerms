@@ -34,7 +34,7 @@ import me.lucko.luckperms.common.api.ApiProvider;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.ConsecutiveExecutor;
-import me.lucko.luckperms.common.commands.Sender;
+import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.LPConfiguration;
 import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.contexts.ServerCalculator;

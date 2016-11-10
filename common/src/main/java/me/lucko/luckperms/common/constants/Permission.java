@@ -25,7 +25,7 @@ package me.lucko.luckperms.common.constants;
 import com.google.common.collect.Sets;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import me.lucko.luckperms.common.commands.Sender;
+import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
 import java.util.Set;

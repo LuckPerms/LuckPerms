@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands;
+package me.lucko.luckperms.common.commands.sender;
 
 import lombok.Getter;
 import me.lucko.luckperms.common.LuckPermsPlugin;

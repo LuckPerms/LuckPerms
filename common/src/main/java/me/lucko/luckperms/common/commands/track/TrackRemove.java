@@ -20,60 +20,60 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.track.subcommands;
+package me.lucko.luckperms.common.commands.track;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.*;
+import me.lucko.luckperms.common.commands.Arg;
+import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandResult;
+import me.lucko.luckperms.common.commands.SubCommand;
+import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.tracks.Track;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.List;
 
-public class TrackRename extends SubCommand<Track> {
-    public TrackRename() {
-        super("rename", "Rename the track", Permission.TRACK_RENAME, Predicates.not(1),
-                Arg.list(Arg.create("name", true, "the new name"))
+public class TrackRemove extends SubCommand<Track> {
+    public TrackRemove() {
+        super("remove", "Removes a group from the track", Permission.TRACK_REMOVE, Predicates.not(1),
+                Arg.list(Arg.create("group", true, "the group to remove"))
         );
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args, String label) throws CommandException {
-        String newTrackName = args.get(0).toLowerCase();
-        if (ArgumentChecker.checkName(newTrackName)) {
-            Message.TRACK_INVALID_ENTRY.send(sender);
+        String groupName = args.get(0).toLowerCase();
+
+        if (ArgumentChecker.checkNode(groupName)) {
+            sendDetailedUsage(sender, label);
             return CommandResult.INVALID_ARGS;
         }
 
-        if (plugin.getDatastore().loadTrack(newTrackName).getUnchecked()) {
-            Message.TRACK_ALREADY_EXISTS.send(sender);
-            return CommandResult.INVALID_ARGS;
+        try {
+            track.removeGroup(groupName);
+            Message.TRACK_REMOVE_SUCCESS.send(sender, groupName, track.getName());
+            if (track.getGroups().size() > 1) {
+                Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups()));
+            }
+            LogEntry.build().actor(sender).acted(track)
+                    .action("remove " + groupName)
+                    .build().submit(plugin, sender);
+            save(track, sender, plugin);
+            return CommandResult.SUCCESS;
+        } catch (ObjectLacksException e) {
+            Message.TRACK_DOES_NOT_CONTAIN.send(sender, track.getName(), groupName);
+            return CommandResult.STATE_ERROR;
         }
+    }
 
-        if (!plugin.getDatastore().createAndLoadTrack(newTrackName).getUnchecked()) {
-            Message.CREATE_TRACK_ERROR.send(sender);
-            return CommandResult.FAILURE;
-        }
-
-        Track newTrack = plugin.getTrackManager().get(newTrackName);
-        if (newTrack == null) {
-            Message.TRACK_LOAD_ERROR.send(sender);
-            return CommandResult.LOADING_ERROR;
-        }
-
-        if (!plugin.getDatastore().deleteTrack(track).getUnchecked()) {
-            Message.DELETE_TRACK_ERROR.send(sender);
-            return CommandResult.FAILURE;
-        }
-
-        newTrack.setGroups(track.getGroups());
-
-        Message.RENAME_SUCCESS.send(sender, track.getName(), newTrack.getName());
-        LogEntry.build().actor(sender).acted(track).action("rename " + newTrack.getName()).build().submit(plugin, sender);
-        save(newTrack, sender, plugin);
-        return CommandResult.SUCCESS;
+    @Override
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+        return getGroupTabComplete(args, plugin);
     }
 }

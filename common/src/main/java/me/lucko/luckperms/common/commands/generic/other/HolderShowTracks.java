@@ -24,7 +24,11 @@ package me.lucko.luckperms.common.commands.generic.other;
 
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.*;
+import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandResult;
+import me.lucko.luckperms.common.commands.SubCommand;
+import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.PermissionHolder;
@@ -59,16 +63,13 @@ public class HolderShowTracks<T extends PermissionHolder> extends SubCommand<T> 
 
             plugin.getTrackManager().getAll().values().stream()
                     .filter(t -> t.containsGroup(name))
-                    .forEach(t -> {
-                        sb.append("&a").append(t.getName()).append(": ").append(Util.listToArrowSep(t.getGroups(), name));
-                        if (node.isServerSpecific()) {
-                            sb.append(" &8(&7server=&f").append(node.getServer().get()).append("&8)");
-                        }
-                        if (node.isWorldSpecific()) {
-                            sb.append(" &8(&7world=&f").append(node.getWorld().get()).append("&8)");
-                        }
-                        sb.append("\n");
-                    });
+                    .forEach(t -> sb.append("&a")
+                            .append(t.getName())
+                            .append(": ")
+                            .append(Util.listToArrowSep(t.getGroups(), name))
+                            .append(Util.getNodeContextDescription(node))
+                            .append("\n")
+                    );
         }
 
         if (sb.length() == 0) {

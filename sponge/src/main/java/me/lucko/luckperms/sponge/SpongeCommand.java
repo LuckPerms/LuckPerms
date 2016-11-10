@@ -26,7 +26,7 @@ import co.aikar.timings.Timing;
 import com.google.common.base.Splitter;
 import me.lucko.luckperms.api.data.Callback;
 import me.lucko.luckperms.common.commands.CommandManager;
-import me.lucko.luckperms.common.commands.Util;
+import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Patterns;
 import me.lucko.luckperms.sponge.timings.LPTiming;
 import org.spongepowered.api.command.CommandCallable;

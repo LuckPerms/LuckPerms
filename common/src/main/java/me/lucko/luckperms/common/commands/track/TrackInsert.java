@@ -20,24 +20,33 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.track.subcommands;
+package me.lucko.luckperms.common.commands.track;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.*;
+import me.lucko.luckperms.common.commands.Arg;
+import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandResult;
+import me.lucko.luckperms.common.commands.SubCommand;
+import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.data.LogEntry;
+import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.tracks.Track;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.exceptions.ObjectLacksException;
+import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.List;
 
-public class TrackRemove extends SubCommand<Track> {
-    public TrackRemove() {
-        super("remove", "Removes a group from the track", Permission.TRACK_REMOVE, Predicates.not(1),
-                Arg.list(Arg.create("group", true, "the group to remove"))
+public class TrackInsert extends SubCommand<Track> {
+    public TrackInsert() {
+        super("insert", "Inserts a group at a given position along the track", Permission.TRACK_INSERT, Predicates.not(2),
+                Arg.list(
+                        Arg.create("group", true, "the group to insert"),
+                        Arg.create("position", true, "the position to insert the group at (the first position on the track is 1)")
+                )
         );
     }
 
@@ -50,20 +59,42 @@ public class TrackRemove extends SubCommand<Track> {
             return CommandResult.INVALID_ARGS;
         }
 
+        int pos;
         try {
-            track.removeGroup(groupName);
-            Message.TRACK_REMOVE_SUCCESS.send(sender, groupName, track.getName());
+            pos = Integer.parseInt(args.get(1));
+        } catch (NumberFormatException e) {
+            Message.TRACK_INSERT_ERROR_NUMBER.send(sender, args.get(1));
+            return CommandResult.INVALID_ARGS;
+        }
+
+        if (!plugin.getDatastore().loadGroup(groupName).getUnchecked()) {
+            Message.GROUP_DOES_NOT_EXIST.send(sender);
+            return CommandResult.INVALID_ARGS;
+        }
+
+        Group group = plugin.getGroupManager().get(groupName);
+        if (group == null) {
+            Message.GROUP_DOES_NOT_EXIST.send(sender);
+            return CommandResult.LOADING_ERROR;
+        }
+
+        try {
+            track.insertGroup(group, pos - 1);
+            Message.TRACK_INSERT_SUCCESS.send(sender, group.getName(), track.getName(), pos);
             if (track.getGroups().size() > 1) {
-                Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups()));
+                Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), group.getName()));
             }
             LogEntry.build().actor(sender).acted(track)
-                    .action("remove " + groupName)
+                    .action("insert " + group.getName() + " " + pos)
                     .build().submit(plugin, sender);
             save(track, sender, plugin);
             return CommandResult.SUCCESS;
-        } catch (ObjectLacksException e) {
-            Message.TRACK_DOES_NOT_CONTAIN.send(sender, track.getName(), groupName);
+        } catch (ObjectAlreadyHasException e) {
+            Message.TRACK_ALREADY_CONTAINS.send(sender, track.getName(), group.getName());
             return CommandResult.STATE_ERROR;
+        } catch (IndexOutOfBoundsException e) {
+            Message.TRACK_INSERT_ERROR_INVALID_POS.send(sender, pos);
+            return CommandResult.INVALID_ARGS;
         }
     }
 

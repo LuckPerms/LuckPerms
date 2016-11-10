@@ -27,9 +27,9 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.Util;
 import me.lucko.luckperms.common.commands.generic.SharedSubCommand;
+import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.PermissionHolder;
@@ -44,8 +44,8 @@ public class MetaInfo extends SharedSubCommand {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) throws CommandException {
-        SortedSet<Map.Entry<Integer, Node>> prefixes = new TreeSet<>(Util.getMetaComparator().reversed());
-        SortedSet<Map.Entry<Integer, Node>> suffixes = new TreeSet<>(Util.getMetaComparator().reversed());
+        SortedSet<Map.Entry<Integer, Node>> prefixes = new TreeSet<>(Util.META_COMPARATOR.reversed());
+        SortedSet<Map.Entry<Integer, Node>> suffixes = new TreeSet<>(Util.META_COMPARATOR.reversed());
         Set<Node> meta = new HashSet<>();
 
         // Collect data
@@ -68,16 +68,9 @@ public class MetaInfo extends SharedSubCommand {
         } else {
             Message.CHAT_META_PREFIX_HEADER.send(sender, holder.getFriendlyName());
             for (Map.Entry<Integer, Node> e : prefixes) {
-                if (e.getValue().isServerSpecific() || e.getValue().isWorldSpecific()) {
-                    StringBuilder sb = new StringBuilder();
-                    if (e.getValue().isServerSpecific()) {
-                        sb.append(" &8(&7server=&f").append(e.getValue().getServer().get()).append("&8)");
-                    }
-                    if (e.getValue().isWorldSpecific()) {
-                        sb.append(" &8(&7world=&f").append(e.getValue().getWorld().get()).append("&8)");
-                    }
-                    
-                    Message.CHAT_META_ENTRY_WITH_CONTEXT.send(sender, e.getKey(), e.getValue().getPrefix().getValue(), sb.toString());
+                if (e.getValue().isServerSpecific() || e.getValue().isWorldSpecific() || !e.getValue().getContexts().isEmpty()) {
+                    String context = Util.getNodeContextDescription(e.getValue());
+                    Message.CHAT_META_ENTRY_WITH_CONTEXT.send(sender, e.getKey(), e.getValue().getPrefix().getValue(), context);
                 } else {
                     Message.CHAT_META_ENTRY.send(sender, e.getKey(), e.getValue().getPrefix().getValue());
                 }
@@ -89,16 +82,9 @@ public class MetaInfo extends SharedSubCommand {
         } else {
             Message.CHAT_META_SUFFIX_HEADER.send(sender, holder.getFriendlyName());
             for (Map.Entry<Integer, Node> e : suffixes) {
-                if (e.getValue().isServerSpecific() || e.getValue().isWorldSpecific()) {
-                    StringBuilder sb = new StringBuilder();
-                    if (e.getValue().isServerSpecific()) {
-                        sb.append(" &8(&7server=&f").append(e.getValue().getServer().get()).append("&8)");
-                    }
-                    if (e.getValue().isWorldSpecific()) {
-                        sb.append(" &8(&7world=&f").append(e.getValue().getWorld().get()).append("&8)");
-                    }
-
-                    Message.CHAT_META_ENTRY_WITH_CONTEXT.send(sender, e.getKey(), e.getValue().getSuffix().getValue(), sb.toString());
+                if (e.getValue().isServerSpecific() || e.getValue().isWorldSpecific() || !e.getValue().getContexts().isEmpty()) {
+                    String context = Util.getNodeContextDescription(e.getValue());
+                    Message.CHAT_META_ENTRY_WITH_CONTEXT.send(sender, e.getKey(), e.getValue().getSuffix().getValue(), context);
                 } else {
                     Message.CHAT_META_ENTRY.send(sender, e.getKey(), e.getValue().getSuffix().getValue());
                 }
@@ -110,16 +96,9 @@ public class MetaInfo extends SharedSubCommand {
         } else {
             Message.META_HEADER.send(sender, holder.getFriendlyName());
             for (Node m : meta) {
-                if (m.isServerSpecific() || m.isWorldSpecific()) {
-                    StringBuilder sb = new StringBuilder();
-                    if (m.isServerSpecific()) {
-                        sb.append(" &8(&7server=&f").append(m.getServer().get()).append("&8)");
-                    }
-                    if (m.isWorldSpecific()) {
-                        sb.append(" &8(&7world=&f").append(m.getWorld().get()).append("&8)");
-                    }
-
-                    Message.META_ENTRY_WITH_CONTEXT.send(sender, m.getMeta().getKey(), m.getMeta().getValue(), sb.toString());
+                if (m.isServerSpecific() || m.isWorldSpecific() || !m.getContexts().isEmpty()) {
+                    String context = Util.getNodeContextDescription(m);
+                    Message.META_ENTRY_WITH_CONTEXT.send(sender, m.getMeta().getKey(), m.getMeta().getValue(), context);
                 } else {
                     Message.META_ENTRY.send(sender, m.getMeta().getKey(), m.getMeta().getValue());
                 }

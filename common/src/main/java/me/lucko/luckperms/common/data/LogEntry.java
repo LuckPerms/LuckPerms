@@ -24,7 +24,7 @@ package me.lucko.luckperms.common.data;
 
 import me.lucko.luckperms.api.event.events.LogNotifyEvent;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.Sender;
+import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.PermissionHolder;

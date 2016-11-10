@@ -27,7 +27,7 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.common.commands.Sender;
+import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Message;
 
 import java.util.List;

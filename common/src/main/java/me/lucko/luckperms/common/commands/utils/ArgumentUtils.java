@@ -20,10 +20,11 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands;
+package me.lucko.luckperms.common.commands.utils;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.common.utils.DateUtil;
 

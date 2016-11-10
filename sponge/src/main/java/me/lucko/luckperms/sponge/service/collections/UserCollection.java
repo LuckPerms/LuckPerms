@@ -31,7 +31,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import lombok.NonNull;
 import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.common.commands.Util;
+import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.users.User;
 import me.lucko.luckperms.common.users.UserManager;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;

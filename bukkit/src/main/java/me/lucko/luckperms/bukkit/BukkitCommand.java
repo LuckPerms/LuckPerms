@@ -26,7 +26,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import me.lucko.luckperms.api.data.Callback;
 import me.lucko.luckperms.common.commands.CommandManager;
-import me.lucko.luckperms.common.commands.Util;
+import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Patterns;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

@@ -24,9 +24,9 @@ package me.lucko.luckperms.common.commands.group;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.Sender;
 import me.lucko.luckperms.common.commands.SingleCommand;
-import me.lucko.luckperms.common.commands.Util;
+import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.groups.Group;

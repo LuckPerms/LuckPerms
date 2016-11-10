@@ -20,63 +20,66 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.generic.meta;
+package me.lucko.luckperms.common.commands.group;
 
-import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.generic.SharedSubCommand;
+import me.lucko.luckperms.common.commands.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.ContextHelper;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
+import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MetaUnsetTemp extends SharedSubCommand {
-    public MetaUnsetTemp() {
-        super("unsettemp", "Unsets a temporary meta value",  Permission.USER_META_UNSETTEMP, Permission.GROUP_META_UNSETTEMP,
-                Predicates.notInRange(1, 3),
+public class GroupClear extends SubCommand<Group> {
+    public GroupClear() {
+        super("clear", "Clears the group's permissions and parent groups", Permission.GROUP_CLEAR, Predicates.notInRange(0, 2),
                 Arg.list(
-                        Arg.create("key", true, "the key to unset"),
-                        Arg.create("server", false, "the server to remove the meta pair on"),
-                        Arg.create("world", false, "the world to remove the meta pair on")
+                        Arg.create("server", false, "the server name to filter by"),
+                        Arg.create("world", false, "the world name to filter by")
                 )
         );
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) throws CommandException {
-        String key = MetaUtils.escapeCharacters(args.get(0));
-        String server = ArgumentUtils.handleServer(1, args);
-        String world = ArgumentUtils.handleWorld(2, args);
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) throws CommandException {
+        int before = group.getNodes().size();
 
-        holder.clearMetaKeys(key, server, world, true);
+        String server = ArgumentUtils.handleServer(0, args);
+        String world = ArgumentUtils.handleWorld(1, args);
 
         switch (ContextHelper.determine(server, world)) {
             case NONE:
-                Message.UNSET_META_TEMP_SUCCESS.send(sender, key, holder.getFriendlyName());
+                group.clearNodes();
                 break;
             case SERVER:
-                Message.UNSET_META_TEMP_SERVER_SUCCESS.send(sender, key, holder.getFriendlyName(), server);
+                group.clearNodes(server);
                 break;
             case SERVER_AND_WORLD:
-                Message.UNSET_META_TEMP_SERVER_WORLD_SUCCESS.send(sender, key, holder.getFriendlyName(), server, world);
+                group.clearNodes(server, world);
                 break;
         }
 
-        LogEntry.build().actor(sender).acted(holder)
-                .action("meta unsettemp " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+        int changed = before - group.getNodes().size();
+        if (changed == 1) {
+            Message.CLEAR_SUCCESS_SINGULAR.send(sender, group.getName(), changed);
+        } else {
+            Message.CLEAR_SUCCESS.send(sender, group.getName(), changed);
+        }
+
+        LogEntry.build().actor(sender).acted(group)
+                .action("clear " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
                 .build().submit(plugin, sender);
 
-        save(holder, sender, plugin);
+        save(group, sender, plugin);
         return CommandResult.SUCCESS;
     }
 }

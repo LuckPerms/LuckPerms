@@ -26,9 +26,7 @@ import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.Command;
 import me.lucko.luckperms.common.commands.MainCommand;
-import me.lucko.luckperms.common.commands.Sender;
-import me.lucko.luckperms.common.commands.usersbulkedit.subcommands.BulkEditGroup;
-import me.lucko.luckperms.common.commands.usersbulkedit.subcommands.BulkEditPermission;
+import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.storage.Datastore;
 
 import java.util.Collections;

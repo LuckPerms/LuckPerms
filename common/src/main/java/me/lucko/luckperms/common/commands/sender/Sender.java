@@ -20,25 +20,48 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.track.subcommands;
+package me.lucko.luckperms.common.commands.sender;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.*;
-import me.lucko.luckperms.common.constants.Message;
+import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.tracks.Track;
-import me.lucko.luckperms.common.utils.Predicates;
 
-import java.util.List;
+import java.util.UUID;
 
-public class TrackInfo extends SubCommand<Track> {
-    public TrackInfo() {
-        super("info", "Gives info about the track", Permission.TRACK_INFO, Predicates.alwaysFalse(), null);
-    }
+/**
+ * Wrapper interface to represent a CommandSender/CommandSource within the common command implementations.
+ */
+public interface Sender {
 
-    @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args, String label) throws CommandException {
-        Message.TRACK_INFO.send(sender, track.getName(), Util.listToArrowSep(track.getGroups()));
-        return CommandResult.SUCCESS;
-    }
+    /**
+     * Gets the platform where the sender is from.
+     * @return the plugin
+     */
+    LuckPermsPlugin getPlatform();
+
+    /**
+     * Gets the sender's username
+     * @return a friendly username for the sender
+     */
+    String getName();
+
+    /**
+     * Gets the sender's unique id. See {@link Constants#getConsoleUUID()} for the console's UUID representation.
+     * @return the sender's uuid
+     */
+    UUID getUuid();
+
+    /**
+     * Send a message back to the Sender
+     * @param s the message to send. Supports '§' for message formatting.
+     */
+    void sendMessage(String s);
+
+    /**
+     * Check if the Sender has a permission.
+     * @param permission the permission to check for
+     * @return true if the sender has the permission
+     */
+    boolean hasPermission(Permission permission);
+
 }

@@ -20,60 +20,64 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.group.subcommands;
+package me.lucko.luckperms.common.commands.track;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.*;
+import me.lucko.luckperms.common.commands.Arg;
+import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandResult;
+import me.lucko.luckperms.common.commands.SubCommand;
+import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.data.LogEntry;
-import me.lucko.luckperms.common.groups.Group;
+import me.lucko.luckperms.common.tracks.Track;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 
-public class GroupRename extends SubCommand<Group> {
-    public GroupRename() {
-        super("rename", "Rename the group", Permission.GROUP_RENAME, Predicates.not(1),
+public class TrackRename extends SubCommand<Track> {
+    public TrackRename() {
+        super("rename", "Rename the track", Permission.TRACK_RENAME, Predicates.not(1),
                 Arg.list(Arg.create("name", true, "the new name"))
         );
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) throws CommandException {
-        String newGroupName = args.get(0).toLowerCase();
-        if (ArgumentChecker.checkName(newGroupName)) {
-            Message.GROUP_INVALID_ENTRY.send(sender);
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args, String label) throws CommandException {
+        String newTrackName = args.get(0).toLowerCase();
+        if (ArgumentChecker.checkName(newTrackName)) {
+            Message.TRACK_INVALID_ENTRY.send(sender);
             return CommandResult.INVALID_ARGS;
         }
 
-        if (plugin.getDatastore().loadGroup(newGroupName).getUnchecked()) {
-            Message.GROUP_ALREADY_EXISTS.send(sender);
+        if (plugin.getDatastore().loadTrack(newTrackName).getUnchecked()) {
+            Message.TRACK_ALREADY_EXISTS.send(sender);
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!plugin.getDatastore().createAndLoadGroup(newGroupName).getUnchecked()) {
-            Message.CREATE_GROUP_ERROR.send(sender);
+        if (!plugin.getDatastore().createAndLoadTrack(newTrackName).getUnchecked()) {
+            Message.CREATE_TRACK_ERROR.send(sender);
             return CommandResult.FAILURE;
         }
 
-        Group newGroup = plugin.getGroupManager().get(newGroupName);
-        if (newGroup == null) {
-            Message.GROUP_LOAD_ERROR.send(sender);
+        Track newTrack = plugin.getTrackManager().get(newTrackName);
+        if (newTrack == null) {
+            Message.TRACK_LOAD_ERROR.send(sender);
             return CommandResult.LOADING_ERROR;
         }
 
-        if (!plugin.getDatastore().deleteGroup(group).getUnchecked()) {
-            Message.DELETE_GROUP_ERROR.send(sender);
+        if (!plugin.getDatastore().deleteTrack(track).getUnchecked()) {
+            Message.DELETE_TRACK_ERROR.send(sender);
             return CommandResult.FAILURE;
         }
 
-        newGroup.setNodes(group.getNodes());
+        newTrack.setGroups(track.getGroups());
 
-        Message.RENAME_SUCCESS.send(sender, group.getName(), newGroup.getName());
-        LogEntry.build().actor(sender).acted(group).action("rename " + newGroup.getName()).build().submit(plugin, sender);
-        save(newGroup, sender, plugin);
+        Message.RENAME_SUCCESS.send(sender, track.getName(), newTrack.getName());
+        LogEntry.build().actor(sender).acted(track).action("rename " + newTrack.getName()).build().submit(plugin, sender);
+        save(newTrack, sender, plugin);
         return CommandResult.SUCCESS;
     }
 }

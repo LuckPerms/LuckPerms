@@ -20,12 +20,13 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands;
+package me.lucko.luckperms.common.commands.utils;
 
 import lombok.experimental.UtilityClass;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Patterns;
 import me.lucko.luckperms.common.utils.DateUtil;
@@ -64,7 +65,6 @@ public class Util {
     }
 
     public static String translateAlternateColorCodes(char altColorChar, String textToTranslate) {
-        // Stolen from Bukkit :>
         char[] b = textToTranslate.toCharArray();
 
         for (int i = 0; i < b.length - 1; ++i) {
@@ -98,6 +98,99 @@ public class Util {
 
     public static void sendTristate(Sender sender, String node, Tristate t) {
         sender.sendMessage(Util.color("&b" + node + ": " + formatTristate(t)));
+    }
+
+    public static String getNodeContextDescription(Node node) {
+        StringBuilder sb = new StringBuilder();
+        if (node.isServerSpecific()) {
+            sb.append(" ").append(contextToString("server", node.getServer().get()));
+        }
+        if (node.isWorldSpecific()) {
+            sb.append(" ").append(contextToString("world", node.getWorld().get()));
+        }
+        for (Map.Entry<String, String> c : node.getContexts().toSet()) {
+            sb.append(" ").append(contextToString(c.getKey(), c.getValue()));
+        }
+
+        return sb.toString();
+    }
+
+    public static String contextToString(String key, String value) {
+        return "&8(&7" + key + "=&f" + value + "&8)";
+    }
+
+    public static String permNodesToString(SortedSet<LocalizedNode> nodes) {
+        StringBuilder sb = new StringBuilder();
+        for (Node node : nodes) {
+            if (node.isTemporary()) continue;
+
+            sb.append("&3> ")
+                    .append(node.getValue() ? "&a" : "&c")
+                    .append(node.getPermission())
+                    .append(getNodeContextDescription(node))
+                    .append("\n");
+        }
+        return sb.length() == 0 ? "&3None" : sb.toString();
+    }
+
+    public static String tempNodesToString(SortedSet<LocalizedNode> nodes) {
+        StringBuilder sb = new StringBuilder();
+        for (Node node : nodes) {
+            if (!node.isTemporary()) continue;
+
+            sb.append("&3> ")
+                    .append(node.getValue() ? "&a" : "&c")
+                    .append(node.getPermission())
+                    .append(getNodeContextDescription(node))
+                    .append("\n&2-    expires in ")
+                    .append(DateUtil.formatDateDiff(node.getExpiryUnixTime()))
+                    .append("\n");
+        }
+        return sb.length() == 0 ? "&3None" : sb.toString();
+    }
+
+    public static String permGroupsToString(SortedSet<LocalizedNode> nodes) {
+        StringBuilder sb = new StringBuilder();
+        for (Node node : nodes) {
+            if (!node.isGroupNode()) continue;
+            if (node.isTemporary()) continue;
+
+            sb.append("&3> &f")
+                    .append(node.getGroupName())
+                    .append(getNodeContextDescription(node))
+                    .append("\n");
+        }
+        return sb.length() == 0 ? "&3None" : sb.toString();
+    }
+
+    public static String tempGroupsToString(SortedSet<LocalizedNode> nodes) {
+        StringBuilder sb = new StringBuilder();
+        for (Node node : nodes) {
+            if (!node.isGroupNode()) continue;
+            if (!node.isTemporary()) continue;
+
+            sb.append("&3> &f")
+                    .append(node.getGroupName())
+                    .append(getNodeContextDescription(node))
+                    .append("\n&2-    expires in ")
+                    .append(DateUtil.formatDateDiff(node.getExpiryUnixTime()))
+                    .append("\n");
+        }
+        return sb.length() == 0 ? "&3None" : sb.toString();
+    }
+
+    public static UUID parseUuid(String s) {
+        try {
+            return UUID.fromString(s);
+        } catch (IllegalArgumentException e) {
+            try {
+                return UUID.fromString(s.replaceAll(
+                        "(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})",
+                        "$1-$2-$3-$4-$5"));
+            } catch (IllegalArgumentException e1) {
+                return null;
+            }
+        }
     }
 
     public static String listToCommaSep(List<String> strings) {
@@ -146,139 +239,7 @@ public class Util {
         return sb.delete(sb.length() - 6, sb.length()).toString();
     }
 
-    public static String permNodesToString(SortedSet<LocalizedNode> nodes) {
-        StringBuilder sb = new StringBuilder();
-        for (Node node : nodes) {
-            if (node.isTemporary()) {
-                continue;
-            }
-
-            sb.append("&3> ").append(node.getValue() ? "&a" : "&c");
-            sb.append(node.getPermission());
-            if (node.isServerSpecific()) {
-                sb.append(" &8(&7server=&f").append(node.getServer().get()).append("&8)");
-            }
-            if (node.isWorldSpecific()) {
-                sb.append(" &8(&7world=&f").append(node.getWorld().get()).append("&8)");
-            }
-            sb.append("\n");
-        }
-
-        if (sb.length() == 0) {
-            return "&3None";
-        }
-
-        return sb.toString();
-    }
-
-    public static String tempNodesToString(SortedSet<LocalizedNode> nodes) {
-        StringBuilder sb = new StringBuilder();
-
-        for (Node node : nodes) {
-            if (!node.isTemporary()) {
-                continue;
-            }
-
-            sb.append("&3> ").append(node.getValue() ? "&a" : "&c");
-            sb.append(node.getPermission());
-            if (node.isServerSpecific()) {
-                sb.append(" &8(&7server=&f").append(node.getServer().get()).append("&8)");
-            }
-            if (node.isWorldSpecific()) {
-                sb.append(" &8(&7world=&f").append(node.getWorld().get()).append("&8)");
-            }
-
-            sb.append("\n&2-    expires in ").append(DateUtil.formatDateDiff(node.getExpiryUnixTime())).append("\n");
-        }
-
-        if (sb.length() == 0) {
-            return "&3None";
-        }
-
-        return sb.toString();
-    }
-
-    public static String permGroupsToString(SortedSet<LocalizedNode> nodes) {
-        StringBuilder sb = new StringBuilder();
-        for (Node node : nodes) {
-            if (!node.isGroupNode()) {
-                continue;
-            }
-
-            if (node.isTemporary()) {
-                continue;
-            }
-
-            sb.append("&3> &f").append(node.getGroupName());
-            if (node.isServerSpecific()) {
-                sb.append(" &8(&7server=&f").append(node.getServer().get()).append("&8)");
-            }
-            if (node.isWorldSpecific()) {
-                sb.append(" &8(&7world=&f").append(node.getWorld().get()).append("&8)");
-            }
-            sb.append("\n");
-        }
-
-        if (sb.length() == 0) {
-            return "&3None";
-        }
-
-        return sb.toString();
-    }
-
-    public static String tempGroupsToString(SortedSet<LocalizedNode> nodes) {
-        StringBuilder sb = new StringBuilder();
-
-        for (Node node : nodes) {
-            if (!node.isGroupNode()) {
-                continue;
-            }
-
-            if (!node.isTemporary()) {
-                continue;
-            }
-
-            sb.append("&3> &f").append(node.getGroupName());
-            if (node.isServerSpecific()) {
-                sb.append(" &8(&7server=&f").append(node.getServer().get()).append("&8)");
-            }
-            if (node.isWorldSpecific()) {
-                sb.append(" &8(&7world=&f").append(node.getWorld().get()).append("&8)");
-            }
-
-            sb.append("\n&2-    expires in ").append(DateUtil.formatDateDiff(node.getExpiryUnixTime())).append("\n");
-        }
-
-        if (sb.length() == 0) {
-            return "&3None";
-        }
-
-        return sb.toString();
-    }
-
-    public static UUID parseUuid(String s) {
-        try {
-            return UUID.fromString(s);
-        } catch (IllegalArgumentException e) {
-            try {
-                return UUID.fromString(s.replaceAll(
-                        "(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})",
-                        "$1-$2-$3-$4-$5"));
-            } catch (IllegalArgumentException e1) {
-                return null;
-            }
-        }
-    }
-
-    public static synchronized MetaComparator getMetaComparator() {
-        if (metaComparator == null) {
-            metaComparator = new MetaComparator();
-        }
-        return metaComparator;
-    }
-
-
-    private static MetaComparator metaComparator = null;
+    public static final MetaComparator META_COMPARATOR = new MetaComparator();
     public class MetaComparator implements Comparator<Map.Entry<Integer, Node>> {
 
         @Override

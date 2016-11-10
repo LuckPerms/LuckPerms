@@ -26,12 +26,11 @@ import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.Command;
 import me.lucko.luckperms.common.commands.MainCommand;
-import me.lucko.luckperms.common.commands.Sender;
 import me.lucko.luckperms.common.commands.generic.meta.CommandMeta;
 import me.lucko.luckperms.common.commands.generic.other.HolderShowTracks;
 import me.lucko.luckperms.common.commands.generic.parent.CommandParent;
 import me.lucko.luckperms.common.commands.generic.permission.CommandPermission;
-import me.lucko.luckperms.common.commands.group.subcommands.*;
+import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.groups.Group;
 
