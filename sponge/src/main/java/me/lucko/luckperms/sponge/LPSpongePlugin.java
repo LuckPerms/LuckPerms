@@ -87,7 +87,9 @@ import java.util.stream.Collectors;
         authors = {"Luck"},
         description = "A permissions plugin",
         dependencies = {
-                @Dependency(id = "permissionsex", optional = true) // Needed for migration.
+                // Needed for migration.
+                @Dependency(id = "permissionsex", optional = true),
+                @Dependency(id = "permissionmanager", optional = true)
         }
 )
 public class LPSpongePlugin implements LuckPermsPlugin {
