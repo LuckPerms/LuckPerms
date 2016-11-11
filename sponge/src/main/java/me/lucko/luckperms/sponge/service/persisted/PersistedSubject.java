@@ -34,7 +34,6 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.util.Tristate;
 
 import java.io.IOException;
@@ -51,7 +50,7 @@ public class PersistedSubject implements Subject {
     private final String identifier;
 
     private final LuckPermsService service;
-    private final SubjectCollection containingCollection;
+    private final PersistedCollection containingCollection;
     private final PersistedSubjectData subjectData;
     private final MemorySubjectData transientSubjectData;
     private final BufferedRequest<Void> saveBuffer = new BufferedRequest<Void>(1000L, r -> PersistedSubject.this.service.getPlugin().doAsync(r)) {
@@ -68,7 +67,7 @@ public class PersistedSubject implements Subject {
         }
     };
 
-    public PersistedSubject(String identifier, LuckPermsService service, SubjectCollection containingCollection) {
+    public PersistedSubject(String identifier, LuckPermsService service, PersistedCollection containingCollection) {
         this.identifier = identifier;
         this.service = service;
         this.containingCollection = containingCollection;

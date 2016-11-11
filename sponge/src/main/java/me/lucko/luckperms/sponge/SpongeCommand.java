@@ -70,6 +70,7 @@ class SpongeCommand extends CommandManager implements CommandCallable {
         }
     }
 
+    // For API 4
     public List<String> getSuggestions(CommandSource source, String s) throws CommandException {
         try (Timing ignored = plugin.getTimings().time(LPTiming.COMMAND_TAB_COMPLETE)) {
             return onTabComplete(plugin.getSenderFactory().wrap(source), Splitter.on(' ').splitToList(s));

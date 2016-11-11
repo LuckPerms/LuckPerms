@@ -60,28 +60,33 @@ public class MigrationUtils {
         }
 
         // Migrate options
-        Map<Set<Context>, Map<String, String>> opts = subject.getSubjectData().getAllOptions();
-        for (Map.Entry<Set<Context>, Map<String, String>> e : opts.entrySet()) {
-            ContextSet context = LuckPermsService.convertContexts(e.getKey());
+        try {
+            Map<Set<Context>, Map<String, String>> opts = subject.getSubjectData().getAllOptions();
+            for (Map.Entry<Set<Context>, Map<String, String>> e : opts.entrySet()) {
+                ContextSet context = LuckPermsService.convertContexts(e.getKey());
 
-            MutableContextSet contexts = MutableContextSet.fromSet(context);
-            String server = contexts.getValues("server").stream().findAny().orElse(null);
-            String world = contexts.getValues("world").stream().findAny().orElse(null);
-            contexts.removeAll("server");
-            contexts.removeAll("world");
+                MutableContextSet contexts = MutableContextSet.fromSet(context);
+                String server = contexts.getValues("server").stream().findAny().orElse(null);
+                String world = contexts.getValues("world").stream().findAny().orElse(null);
+                contexts.removeAll("server");
+                contexts.removeAll("world");
 
-            for (Map.Entry<String, String> opt : e.getValue().entrySet()) {
-                if (opt.getKey().equalsIgnoreCase("prefix") || opt.getKey().equalsIgnoreCase("suffix")) {
-                    try {
-                        holder.setPermission(new NodeBuilder(opt.getKey().toLowerCase() + ".100." + opt.getValue()).setServerRaw(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
-                    } catch (ObjectAlreadyHasException ignored) {}
-                } else {
-                    try {
-                        holder.setPermission(new NodeBuilder("meta." + opt.getKey() + "." + opt.getValue()).setServerRaw(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
-                    } catch (ObjectAlreadyHasException ignored) {}
+                for (Map.Entry<String, String> opt : e.getValue().entrySet()) {
+                    if (opt.getKey().equalsIgnoreCase("prefix") || opt.getKey().equalsIgnoreCase("suffix")) {
+                        try {
+                            holder.setPermission(new NodeBuilder(opt.getKey().toLowerCase() + ".100." + opt.getValue()).setServerRaw(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
+                        } catch (ObjectAlreadyHasException ignored) {}
+                    } else {
+                        try {
+                            holder.setPermission(new NodeBuilder("meta." + opt.getKey() + "." + opt.getValue()).setServerRaw(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
+                        } catch (ObjectAlreadyHasException ignored) {}
+                    }
                 }
             }
+        } catch (Throwable ignored) {
+            // Ignore. This is just so older versions of Sponge API can be used.
         }
+
 
         // Migrate parents
         Map<Set<Context>, List<Subject>> parents = subject.getSubjectData().getAllParents();

@@ -33,7 +33,6 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.util.Tristate;
 
@@ -50,10 +49,10 @@ public class SimpleSubject implements Subject {
     private final String identifier;
 
     private final LuckPermsService service;
-    private final SubjectCollection containingCollection;
+    private final SimpleCollection containingCollection;
     private final MemorySubjectData subjectData;
 
-    public SimpleSubject(String identifier, LuckPermsService service, SubjectCollection containingCollection) {
+    public SimpleSubject(String identifier, LuckPermsService service, SimpleCollection containingCollection) {
         this.identifier = identifier;
         this.service = service;
         this.containingCollection = containingCollection;
