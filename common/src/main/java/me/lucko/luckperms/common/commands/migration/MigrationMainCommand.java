@@ -77,6 +77,11 @@ public class MigrationMainCommand extends MainCommand<Object> {
             l.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.sponge.migration.MigrationPermissionsEx").newInstance());
         } catch (Throwable ignored) {}
 
+        try {
+            Class.forName("io.github.djxy.permissionmanager.PermissionManager");
+            l.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.sponge.migration.MigrationPermissionManager").newInstance());
+        } catch (Throwable ignored) {}
+
         return l.stream().collect(Collectors.toList());
     }
 
