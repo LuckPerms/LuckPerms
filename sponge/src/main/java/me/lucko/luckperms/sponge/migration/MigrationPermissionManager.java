@@ -38,6 +38,7 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
@@ -60,8 +61,17 @@ public class MigrationPermissionManager extends SubCommand<Object> {
             return CommandResult.STATE_ERROR;
         }
 
-        // Cast to PermissionService. PEX has all of it's damned classes defined as package private.
-        PermissionService pmService = (PermissionService) pm.get().getInstance().get();
+        // Get PM's PermissionService
+        PermissionService pmService;
+
+        try {
+            Class clazz = Class.forName("io.github.djxy.permissionmanager.PermissionService");
+            Field instance = clazz.getDeclaredField("instance");
+            pmService = (PermissionService) instance.get(null);
+        } catch (Throwable t) {
+            t.printStackTrace();
+            return CommandResult.FAILURE;
+        }
 
         // Migrate groups
         log.info("PermissionManager Migration: Starting group migration.");
