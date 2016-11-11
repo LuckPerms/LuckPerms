@@ -33,6 +33,7 @@ import lombok.NonNull;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.users.User;
+import me.lucko.luckperms.common.users.UserIdentifier;
 import me.lucko.luckperms.common.users.UserManager;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
@@ -47,7 +48,6 @@ import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.util.Tristate;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -97,50 +97,41 @@ public class UserCollection implements SubjectCollection {
     @Override
     public Subject get(@NonNull String id) {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.USER_COLLECTION_GET)) {
-            Optional<Subject> s = getIfLoaded(id);
-            if (s.isPresent()) {
-                return s.get();
+            UUID uuid = Util.parseUuid(id);
+            if (uuid == null) {
+                service.getPlugin().getLog().warn("Couldn't get user subject for id: " + id + " (not a uuid)");
+                return fallback.get(id); // fallback to the transient collection
             }
 
-            // Fallback to the other collection. This Subject instance will never be persisted.
-            return fallback.get(id);
-        }
-    }
+            UUID u = service.getPlugin().getUuidCache().getUUID(uuid);
 
-    private Optional<Subject> getIfLoaded(String id) {
-        UUID uuid = Util.parseUuid(id);
-
-        find:
-        if (uuid == null) {
-            for (LuckPermsUserSubject subject : users.asMap().values()) {
-                if (subject.getUser().getName().equals(id)) {
-                    return Optional.of(subject);
-                }
+            // check if the user is loaded in memory. hopefully this call is not on the main thread. :(
+            if (!manager.isLoaded(UserIdentifier.of(u, null))) {
+                service.getPlugin().getLog().warn("User Subject '" + u + "' was requested, but is not loaded in memory. Loading them from storage now.");
+                long startTime = System.currentTimeMillis();
+                service.getPlugin().getDatastore().loadUser(u, "null").getUnchecked();
+                service.getPlugin().getLog().warn("Loading '" + u + "' took " + (System.currentTimeMillis() - startTime) + " ms.");
             }
 
-            for (User user : manager.getAll().values()) {
-                if (user.getName().equalsIgnoreCase(id)) {
-                    uuid = user.getUuid();
-                    break find;
-                }
+            try {
+                return users.get(u);
+            } catch (ExecutionException | UncheckedExecutionException e) {
+                service.getPlugin().getLog().warn("Unable to get user subject '" + u + "' from memory.");
+                e.printStackTrace();
+                return fallback.get(u.toString());
             }
-        }
-
-        if (uuid == null) {
-            return Optional.empty();
-        }
-
-        UUID internal = service.getPlugin().getUuidCache().getUUID(uuid);
-        try {
-            return Optional.of(users.get(internal));
-        } catch (ExecutionException | UncheckedExecutionException e) {
-            return Optional.empty();
         }
     }
 
     @Override
     public boolean hasRegistered(@NonNull String id) {
-        return getIfLoaded(id).isPresent();
+        UUID uuid = Util.parseUuid(id);
+        if (uuid == null) {
+            return false;
+        }
+
+        UUID internal = service.getPlugin().getUuidCache().getUUID(uuid);
+        return users.asMap().containsKey(internal) || manager.isLoaded(UserIdentifier.of(internal, null));
     }
 
     @Override

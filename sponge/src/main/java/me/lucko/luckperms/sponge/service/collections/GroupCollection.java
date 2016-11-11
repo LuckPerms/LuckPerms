@@ -23,9 +23,17 @@
 package me.lucko.luckperms.sponge.service.collections;
 
 import co.aikar.timings.Timing;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import lombok.NonNull;
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.groups.GroupManager;
+import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.LuckPermsGroupSubject;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
@@ -40,11 +48,30 @@ import org.spongepowered.api.util.Tristate;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 public class GroupCollection implements SubjectCollection {
     private final LuckPermsService service;
     private final GroupManager manager;
     private final SimpleCollection fallback;
+
+    private final LoadingCache<String, LuckPermsGroupSubject> groups = CacheBuilder.newBuilder()
+            .build(new CacheLoader<String, LuckPermsGroupSubject>() {
+                @Override
+                public LuckPermsGroupSubject load(String id) throws Exception {
+                    Group group = manager.get(id);
+                    if (group == null) {
+                        throw new IllegalStateException("User not loaded");
+                    }
+
+                    return LuckPermsGroupSubject.wrapGroup(group, service);
+                }
+
+                @Override
+                public ListenableFuture<LuckPermsGroupSubject> reload(String str, LuckPermsGroupSubject s) {
+                    return Futures.immediateFuture(s); // Never needs to be refreshed.
+                }
+            });
 
     public GroupCollection(LuckPermsService service, GroupManager manager) {
         this.service = service;
@@ -60,24 +87,39 @@ public class GroupCollection implements SubjectCollection {
     @Override
     public Subject get(@NonNull String id) {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.GROUP_COLLECTION_GET)) {
-            if (manager.isLoaded(id)) {
-                return LuckPermsGroupSubject.wrapGroup(manager.get(id), service);
+            id = id.toLowerCase();
+            if (ArgumentChecker.checkName(id)) {
+                service.getPlugin().getLog().warn("Couldn't get group subject for id: " + id + " (invalid name)");
+                return fallback.get(id); // fallback to transient collection
             }
 
-            return fallback.get(id);
+            // check if the user is loaded in memory. hopefully this call is not on the main thread. :(
+            if (!manager.isLoaded(id)) {
+                service.getPlugin().getLog().warn("Group Subject '" + id + "' was requested, but is not loaded in memory. Loading it from storage now.");
+                long startTime = System.currentTimeMillis();
+                service.getPlugin().getDatastore().createAndLoadGroup(id).getUnchecked();
+                service.getPlugin().getLog().warn("Loading '" + id + "' took " + (System.currentTimeMillis() - startTime) + " ms.");
+            }
+
+            try {
+                return groups.get(id);
+            } catch (ExecutionException | UncheckedExecutionException e) {
+                service.getPlugin().getLog().warn("Unable to get group subject '" + id + "' from memory.");
+                e.printStackTrace();
+                return fallback.get(id);
+            }
         }
     }
 
     @Override
     public boolean hasRegistered(@NonNull String id) {
-        return manager.isLoaded(id);
+        id = id.toLowerCase();
+        return !ArgumentChecker.checkName(id) && (groups.asMap().containsKey(id) || manager.isLoaded(id));
     }
 
     @Override
     public Iterable<Subject> getAllSubjects() {
-        return manager.getAll().values().stream()
-                .map(u -> LuckPermsGroupSubject.wrapGroup(u, service))
-                .collect(ImmutableCollectors.toImmutableList());
+        return groups.asMap().values().stream().collect(ImmutableCollectors.toImmutableList());
     }
 
     @Override
@@ -88,8 +130,7 @@ public class GroupCollection implements SubjectCollection {
     @Override
     public Map<Subject, Boolean> getAllWithPermission(@NonNull Set<Context> contexts, @NonNull String node) {
         ContextSet cs = LuckPermsService.convertContexts(contexts);
-        return manager.getAll().values().stream()
-                .map(u -> LuckPermsGroupSubject.wrapGroup(u, service))
+        return groups.asMap().values().stream()
                 .filter(sub -> sub.getPermissionValue(cs, node) != Tristate.UNDEFINED)
                 .collect(ImmutableCollectors.toImmutableMap(sub -> sub, sub -> sub.getPermissionValue(cs, node).asBoolean()));
     }
