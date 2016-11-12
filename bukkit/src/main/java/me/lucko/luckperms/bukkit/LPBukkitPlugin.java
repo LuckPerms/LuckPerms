@@ -49,7 +49,7 @@ import me.lucko.luckperms.common.groups.GroupManager;
 import me.lucko.luckperms.common.messaging.RedisMessaging;
 import me.lucko.luckperms.common.runnables.ExpireTemporaryTask;
 import me.lucko.luckperms.common.runnables.UpdateTask;
-import me.lucko.luckperms.common.storage.Datastore;
+import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.StorageFactory;
 import me.lucko.luckperms.common.tracks.TrackManager;
 import me.lucko.luckperms.common.users.UserManager;
@@ -68,12 +68,16 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @Getter
 public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
+    private ExecutorService executorService;
+    private Executor syncExecutor;
+    private Executor asyncExecutor;
     private VaultHook vaultHook = null;
 
     private final Set<UUID> ignoringLogs = ConcurrentHashMap.newKeySet();
@@ -81,7 +85,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private UserManager userManager;
     private GroupManager groupManager;
     private TrackManager trackManager;
-    private Datastore datastore;
+    private Storage storage;
     private RedisMessaging redisMessaging = null;
     private UuidCache uuidCache;
     private ApiProvider apiProvider;
@@ -99,13 +103,12 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private DebugHandler debugHandler;
     private BukkitSenderFactory senderFactory;
 
-    private ExecutorService executorService;
-    private boolean schedulerAvailable = false;
-
     @Override
     public void onEnable() {
         // Used whilst the server is still starting
         executorService = Executors.newCachedThreadPool();
+        asyncExecutor = executorService;
+        syncExecutor = r -> getServer().getScheduler().runTask(this, r);
 
         log = LogFactory.wrap(getLogger());
         debugHandler = new DebugHandler();
@@ -129,7 +132,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         pm.registerEvents(new BukkitListener(this), this);
 
         // initialise datastore
-        datastore = StorageFactory.getDatastore(this, "h2");
+        storage = StorageFactory.getInstance(this, "h2");
 
         // initialise redis
         if (getConfiguration().isRedisEnabled()) {
@@ -236,10 +239,9 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
             getServer().getOperators().forEach(o -> o.setOp(false));
         }
 
-        // shutdown the temporary executor when the Bukkit one starts
+        // replace the temporary executor when the Bukkit one starts
         getServer().getScheduler().runTaskAsynchronously(this, () -> {
-            schedulerAvailable = true;
-            executorService.shutdown();
+            asyncExecutor = r -> getServer().getScheduler().runTaskAsynchronously(this, r);
         });
 
         started = true;
@@ -250,7 +252,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     public void onDisable() {
         started = false;
         getLog().info("Closing datastore...");
-        datastore.shutdown();
+        storage.shutdown();
 
         if (redisMessaging != null) {
             getLog().info("Closing redis...");
@@ -268,16 +270,12 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
     @Override
     public void doAsync(Runnable r) {
-        if (!schedulerAvailable) {
-            executorService.submit(r);
-        } else {
-            getServer().getScheduler().runTaskAsynchronously(this, r);
-        }
+        asyncExecutor.execute(r);
     }
 
     @Override
     public void doSync(Runnable r) {
-        getServer().getScheduler().runTask(this, r);
+        syncExecutor.execute(r);
     }
 
     @Override

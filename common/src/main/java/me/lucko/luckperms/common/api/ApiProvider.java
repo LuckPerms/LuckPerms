@@ -71,7 +71,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public double getApiVersion() {
-        return 2.13;
+        return 2.14;
     }
 
     @Override
@@ -100,8 +100,19 @@ public class ApiProvider implements LuckPermsApi {
     }
 
     @Override
+    public Storage getStorage() {
+        return new StorageLink(plugin, plugin.getStorage());
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
     public Datastore getDatastore() {
-        return new DatastoreLink(plugin, plugin.getDatastore());
+        return new DatastoreLink(plugin, plugin.getStorage());
+    }
+
+    @Override
+    public Optional<MessagingService> getMessagingService() {
+        return Optional.ofNullable(plugin.getRedisMessaging());
     }
 
     @Override

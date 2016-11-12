@@ -55,7 +55,7 @@ public class DeleteTrack extends SingleCommand {
         }
 
         String trackName = args.get(0).toLowerCase();
-        if (!plugin.getDatastore().loadTrack(trackName).getUnchecked()) {
+        if (!plugin.getStorage().loadTrack(trackName).join()) {
             Message.TRACK_DOES_NOT_EXIST.send(sender);
             return CommandResult.INVALID_ARGS;
         }
@@ -66,7 +66,7 @@ public class DeleteTrack extends SingleCommand {
             return CommandResult.LOADING_ERROR;
         }
 
-        if (!plugin.getDatastore().deleteTrack(track).getUnchecked()) {
+        if (!plugin.getStorage().deleteTrack(track).join()) {
             Message.DELETE_TRACK_ERROR.send(sender);
             return CommandResult.FAILURE;
         }

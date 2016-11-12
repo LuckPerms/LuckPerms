@@ -67,7 +67,7 @@ public class UserMainCommand extends MainCommand<User> {
                     return null;
                 }
 
-                u = plugin.getDatastore().getUUID(target).getUnchecked();
+                u = plugin.getStorage().getUUID(target).join();
                 if (u == null) {
                     Message.USER_NOT_FOUND.send(sender);
                     return null;
@@ -77,10 +77,10 @@ public class UserMainCommand extends MainCommand<User> {
             }
         }
 
-        String name = plugin.getDatastore().getName(u).getUnchecked();
+        String name = plugin.getStorage().getName(u).join();
         if (name == null) name = "null";
 
-        if (!plugin.getDatastore().loadUser(u, name).getUnchecked()) {
+        if (!plugin.getStorage().loadUser(u, name).join()) {
             Message.LOADING_ERROR.send(sender);
         }
 

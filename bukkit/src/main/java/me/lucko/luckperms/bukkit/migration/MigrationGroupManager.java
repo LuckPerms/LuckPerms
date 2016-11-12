@@ -72,7 +72,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
         GlobalGroups gg = GroupManager.getGlobalGroups();
 
         for (Group g : gg.getGroupList()) {
-            plugin.getDatastore().createAndLoadGroup(g.getName().toLowerCase()).getUnchecked();
+            plugin.getStorage().createAndLoadGroup(g.getName().toLowerCase()).join();
             me.lucko.luckperms.common.groups.Group group = plugin.getGroupManager().get(g.getName().toLowerCase());
             try {
                 LogEntry.build()
@@ -120,7 +120,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
                 }
             }
 
-            plugin.getDatastore().saveGroup(group);
+            plugin.getStorage().saveGroup(group);
         }
 
         Map<UUID, Map<Map.Entry<String, String>, Boolean>> users = new HashMap<>();
@@ -195,7 +195,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
         log.info("GroupManager Migration: Found a total of " + users.size() + " users and " + groups.size() + " groups.");
 
         for (Map.Entry<String, Map<Map.Entry<String, String>, Boolean>> e : groups.entrySet()) {
-            plugin.getDatastore().createAndLoadGroup(e.getKey()).getUnchecked();
+            plugin.getStorage().createAndLoadGroup(e.getKey()).join();
             me.lucko.luckperms.common.groups.Group group = plugin.getGroupManager().get(e.getKey());
             try {
                 LogEntry.build()
@@ -234,11 +234,11 @@ public class MigrationGroupManager extends SubCommand<Object> {
                 }
             }
 
-            plugin.getDatastore().saveGroup(group);
+            plugin.getStorage().saveGroup(group);
         }
 
         for (Map.Entry<UUID, Map<Map.Entry<String, String>, Boolean>> e : users.entrySet()) {
-            plugin.getDatastore().loadUser(e.getKey(), "null").getUnchecked();
+            plugin.getStorage().loadUser(e.getKey(), "null").join();
             me.lucko.luckperms.common.users.User user = plugin.getUserManager().get(e.getKey());
 
             for (Map.Entry<Map.Entry<String, String>, Boolean> n : e.getValue().entrySet()) {
@@ -279,7 +279,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
                 } catch (ObjectLacksException ignored) {}
             }
 
-            plugin.getDatastore().saveUser(user);
+            plugin.getStorage().saveUser(user);
             plugin.getUserManager().cleanup(user);
         }
 

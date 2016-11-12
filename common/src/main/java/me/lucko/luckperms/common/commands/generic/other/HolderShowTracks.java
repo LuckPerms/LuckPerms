@@ -46,7 +46,7 @@ public class HolderShowTracks<T extends PermissionHolder> extends SubCommand<T> 
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, T holder, List<String> args, String label) throws CommandException {
-        if (!plugin.getDatastore().loadAllTracks().getUnchecked()) {
+        if (!plugin.getStorage().loadAllTracks().join()) {
             Message.TRACKS_LOAD_ERROR.send(sender);
             return CommandResult.LOADING_ERROR;
         }

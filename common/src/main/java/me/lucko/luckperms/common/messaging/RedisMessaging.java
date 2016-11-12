@@ -23,6 +23,7 @@
 package me.lucko.luckperms.common.messaging;
 
 import lombok.RequiredArgsConstructor;
+import me.lucko.luckperms.api.MessagingService;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -38,7 +39,7 @@ import java.util.UUID;
  * Uses Redis to push/receive changes to/from other servers
  */
 @RequiredArgsConstructor
-public class RedisMessaging {
+public class RedisMessaging implements MessagingService {
     private static final String CHANNEL = "luckperms";
 
     private final LuckPermsPlugin plugin;
@@ -70,6 +71,7 @@ public class RedisMessaging {
         jedisPool.destroy();
     }
 
+    @Override
     public void pushUpdate() {
         plugin.doAsync(() -> {
             UUID id = sub.generateId();

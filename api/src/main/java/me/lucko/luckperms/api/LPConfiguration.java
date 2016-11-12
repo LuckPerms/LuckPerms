@@ -109,7 +109,9 @@ public interface LPConfiguration {
     /**
      * @return true if permission checks are being recorded / debugged
      * @since 2.9
+     * @deprecated as this value is now always false. Functionality was replaced by the verbose command.
      */
+    @Deprecated
     boolean getDebugPermissionChecks();
 
     /**

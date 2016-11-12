@@ -82,7 +82,7 @@ public class LogUserHistory extends SubCommand<Log> {
                 return CommandResult.INVALID_ARGS;
             }
 
-            UUID uuid1 = plugin.getDatastore().getUUID(user).getUnchecked();
+            UUID uuid1 = plugin.getStorage().getUUID(user).join();
 
             if (uuid1 == null) {
                 Message.USER_NOT_FOUND.send(sender);

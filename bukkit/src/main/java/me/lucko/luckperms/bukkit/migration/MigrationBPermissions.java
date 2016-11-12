@@ -122,7 +122,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
                 }
 
                 // Make a LuckPerms group for the one being migrated.
-                plugin.getDatastore().createAndLoadGroup(groupName).getUnchecked();
+                plugin.getStorage().createAndLoadGroup(groupName).join();
                 me.lucko.luckperms.common.groups.Group lpGroup = plugin.getGroupManager().get(groupName);
                 try {
                     LogEntry.build()
@@ -134,7 +134,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
                 }
                 
                 migrateHolder(plugin, world, group, lpGroup);
-                plugin.getDatastore().saveGroup(lpGroup);
+                plugin.getStorage().saveGroup(lpGroup);
             }
             log.info("bPermissions Migration: Migrated " + groupCount + " groups in world " + world.getName() + ".");
 
@@ -158,12 +158,12 @@ public class MigrationBPermissions extends SubCommand<Object> {
                 }
 
                 // Make a LuckPerms user for the one being migrated.
-                plugin.getDatastore().loadUser(uuid, "null").getUnchecked();
+                plugin.getStorage().loadUser(uuid, "null").join();
                 me.lucko.luckperms.common.users.User lpUser = plugin.getUserManager().get(uuid);
 
                 migrateHolder(plugin, world, user, lpUser);
 
-                plugin.getDatastore().saveUser(lpUser);
+                plugin.getStorage().saveUser(lpUser);
                 plugin.getUserManager().cleanup(lpUser);
             }
 

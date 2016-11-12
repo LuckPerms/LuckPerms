@@ -41,7 +41,7 @@ public class NetworkSyncCommand extends SingleCommand {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         Message.UPDATE_TASK_REQUEST.send(sender);
-        plugin.getUpdateTaskBuffer().request().getUnchecked();
+        plugin.getUpdateTaskBuffer().request().join();
         Message.UPDATE_TASK_COMPLETE_NETWORK.send(sender);
 
         if (plugin.getRedisMessaging() != null) {

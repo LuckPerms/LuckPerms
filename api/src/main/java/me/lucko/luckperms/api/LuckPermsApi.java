@@ -79,10 +79,26 @@ public interface LuckPermsApi {
     LPConfiguration getConfiguration();
 
     /**
-     * Gets a wrapped {@link Datastore} instance, with somewhat limited access
-     * @return a datastore instance
+     * Gets a wrapped {@link Storage} instance.
+     * @return a storage instance
+     * @since 2.14
      */
+    Storage getStorage();
+
+    /**
+     * Gets a wrapped Datastore instance.
+     * @return a datastore instance
+     * @deprecated in favour of {@link #getStorage()}
+     */
+    @SuppressWarnings("deprecation")
+    @Deprecated
     Datastore getDatastore();
+
+    /**
+     * Gets the messaging service in use on the platform, if present.
+     * @return an optional that may contain a messaging service instance.
+     */
+    Optional<MessagingService> getMessagingService();
 
     /**
      * Gets the {@link Logger} wrapping used by the platform
@@ -92,7 +108,7 @@ public interface LuckPermsApi {
 
     /**
      * Gets a wrapped {@link UuidCache} instance, providing read access to the LuckPerms internal uuid caching system
-     * @return a uuidcache instance
+     * @return a uuid cache instance
      */
     UuidCache getUuidCache();
 

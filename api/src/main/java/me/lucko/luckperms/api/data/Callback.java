@@ -28,7 +28,9 @@ import java.util.function.Consumer;
  * A callback used to wait for the completion of asynchronous operations.
  * All callbacks are ran on the main server thread.
  * @param <T> the return type
+ * @deprecated in favour of {@link Consumer}
  */
+@Deprecated
 public interface Callback<T> {
 
     /**
@@ -53,6 +55,19 @@ public interface Callback<T> {
             throw new NullPointerException("consumer");
         }
         return consumer::accept;
+    }
+
+    /**
+     * Helper method for converting old {@link Callback}s to use the new {@link me.lucko.luckperms.api.Storage} interface.
+     * @param callback the callback to convert
+     * @param <T> the return type
+     * @return a consumer instance
+     * @since 2.14
+     * @deprecated in favour of just using {@link Consumer}s.
+     */
+    @Deprecated
+    static <T> Consumer<T> convertToConsumer(Callback<T> callback) {
+        return callback::onComplete;
     }
 
 }

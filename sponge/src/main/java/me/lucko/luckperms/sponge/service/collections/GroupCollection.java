@@ -97,7 +97,7 @@ public class GroupCollection implements SubjectCollection {
             if (!manager.isLoaded(id)) {
                 service.getPlugin().getLog().warn("Group Subject '" + id + "' was requested, but is not loaded in memory. Loading it from storage now.");
                 long startTime = System.currentTimeMillis();
-                service.getPlugin().getDatastore().createAndLoadGroup(id).getUnchecked();
+                service.getPlugin().getStorage().createAndLoadGroup(id).join();
                 service.getPlugin().getLog().warn("Loading '" + id + "' took " + (System.currentTimeMillis() - startTime) + " ms.");
             }
 

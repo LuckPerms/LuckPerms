@@ -43,7 +43,7 @@ import me.lucko.luckperms.common.groups.GroupManager;
 import me.lucko.luckperms.common.messaging.RedisMessaging;
 import me.lucko.luckperms.common.runnables.ExpireTemporaryTask;
 import me.lucko.luckperms.common.runnables.UpdateTask;
-import me.lucko.luckperms.common.storage.Datastore;
+import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.StorageFactory;
 import me.lucko.luckperms.common.tracks.TrackManager;
 import me.lucko.luckperms.common.users.UserManager;
@@ -77,6 +77,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -105,6 +106,8 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     private Path configDir;
 
     private Scheduler scheduler = Sponge.getScheduler();
+    private Executor syncExecutor = Sponge.getScheduler().createSyncExecutor(this);
+    private Executor asyncExecutor = Sponge.getScheduler().createAsyncExecutor(this);
     private LPTimings timings;
 
     private final Set<UUID> ignoringLogs = ConcurrentHashMap.newKeySet();
@@ -112,7 +115,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     private UserManager userManager;
     private GroupManager groupManager;
     private TrackManager trackManager;
-    private Datastore datastore;
+    private Storage storage;
     private RedisMessaging redisMessaging = null;
     private UuidCache uuidCache;
     private ApiProvider apiProvider;
@@ -141,7 +144,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         Sponge.getEventManager().registerListeners(this, new SpongeListener(this));
 
         // initialise datastore
-        datastore = StorageFactory.getDatastore(this, "h2");
+        storage = StorageFactory.getInstance(this, "h2");
 
         // initialise redis
         if (getConfiguration().isRedisEnabled()) {
@@ -228,7 +231,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     @Listener
     public void onDisable(GameStoppingServerEvent event) {
         getLog().info("Closing datastore...");
-        datastore.shutdown();
+        storage.shutdown();
 
         if (redisMessaging != null) {
             getLog().info("Closing redis...");

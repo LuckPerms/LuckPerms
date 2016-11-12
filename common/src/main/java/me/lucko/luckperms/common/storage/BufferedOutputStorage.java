@@ -31,47 +31,47 @@ import me.lucko.luckperms.common.tracks.Track;
 import me.lucko.luckperms.common.users.User;
 import me.lucko.luckperms.common.users.UserIdentifier;
 import me.lucko.luckperms.common.utils.Buffer;
-import me.lucko.luckperms.common.utils.LPFuture;
 
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class BufferedOutputDatastore implements Datastore, Runnable {
-    public static BufferedOutputDatastore wrap(Datastore datastore, long flushTime) {
-        return new BufferedOutputDatastore(datastore, flushTime);
+public class BufferedOutputStorage implements Storage, Runnable {
+    public static BufferedOutputStorage wrap(Storage storage, long flushTime) {
+        return new BufferedOutputStorage(storage, flushTime);
     }
 
     @Getter
     @Delegate(excludes = Exclude.class)
-    private final Datastore backing;
+    private final Storage backing;
 
     private final long flushTime;
 
     private final Buffer<User, Boolean> userOutputBuffer = new Buffer<User, Boolean>() {
         @Override
         public Boolean dequeue(User user) {
-            return backing.saveUser(user).getUnchecked();
+            return backing.saveUser(user).join();
         }
     };
 
     private final Buffer<Group, Boolean> groupOutputBuffer = new Buffer<Group, Boolean>() {
         @Override
         public Boolean dequeue(Group group) {
-            return backing.saveGroup(group).getUnchecked();
+            return backing.saveGroup(group).join();
         }
     };
 
     private final Buffer<Track, Boolean> trackOutputBuffer = new Buffer<Track, Boolean>() {
         @Override
         public Boolean dequeue(Track track) {
-            return backing.saveTrack(track).getUnchecked();
+            return backing.saveTrack(track).join();
         }
     };
 
     private final Buffer<UserIdentifier, Boolean> uuidDataOutputBuffer = new Buffer<UserIdentifier, Boolean>() {
         @Override
         protected Boolean dequeue(UserIdentifier userIdentifier) {
-            return backing.saveUUIDData(userIdentifier.getUsername(), userIdentifier.getUuid()).getUnchecked();
+            return backing.saveUUIDData(userIdentifier.getUsername(), userIdentifier.getUuid()).join();
         }
     };
 
@@ -92,7 +92,7 @@ public class BufferedOutputDatastore implements Datastore, Runnable {
     }
 
     @Override
-    public Datastore force() {
+    public Storage force() {
         return backing;
     }
 
@@ -103,31 +103,31 @@ public class BufferedOutputDatastore implements Datastore, Runnable {
     }
 
     @Override
-    public LPFuture<Boolean> saveUser(User user) {
+    public CompletableFuture<Boolean> saveUser(User user) {
         return userOutputBuffer.enqueue(user);
     }
 
     @Override
-    public LPFuture<Boolean> saveGroup(Group group) {
+    public CompletableFuture<Boolean> saveGroup(Group group) {
         return groupOutputBuffer.enqueue(group);
     }
 
     @Override
-    public LPFuture<Boolean> saveTrack(Track track) {
+    public CompletableFuture<Boolean> saveTrack(Track track) {
         return trackOutputBuffer.enqueue(track);
     }
 
     @Override
-    public LPFuture<Boolean> saveUUIDData(String username, UUID uuid) {
+    public CompletableFuture<Boolean> saveUUIDData(String username, UUID uuid) {
         return uuidDataOutputBuffer.enqueue(UserIdentifier.of(uuid, username));
     }
 
     private interface Exclude {
-        Datastore force();
-        LPFuture<Void> shutdown();
-        LPFuture<Boolean> saveUser(User user);
-        LPFuture<Boolean> saveGroup(Group group);
-        LPFuture<Boolean> saveTrack(Track track);
-        LPFuture<Boolean> saveUUIDData(String username, UUID uuid);
+        Storage force();
+        CompletableFuture<Void> shutdown();
+        CompletableFuture<Boolean> saveUser(User user);
+        CompletableFuture<Boolean> saveGroup(Group group);
+        CompletableFuture<Boolean> saveTrack(Track track);
+        CompletableFuture<Boolean> saveUUIDData(String username, UUID uuid);
     }
 }

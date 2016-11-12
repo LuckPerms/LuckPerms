@@ -43,7 +43,7 @@ public class ListGroups extends SingleCommand {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
-        if (!plugin.getDatastore().loadAllGroups().getUnchecked()) {
+        if (!plugin.getStorage().loadAllGroups().join()) {
             Message.GROUPS_LOAD_ERROR.send(sender);
             return CommandResult.LOADING_ERROR;
         }

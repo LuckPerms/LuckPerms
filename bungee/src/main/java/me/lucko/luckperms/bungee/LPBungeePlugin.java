@@ -44,7 +44,7 @@ import me.lucko.luckperms.common.groups.GroupManager;
 import me.lucko.luckperms.common.messaging.RedisMessaging;
 import me.lucko.luckperms.common.runnables.ExpireTemporaryTask;
 import me.lucko.luckperms.common.runnables.UpdateTask;
-import me.lucko.luckperms.common.storage.Datastore;
+import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.StorageFactory;
 import me.lucko.luckperms.common.tracks.TrackManager;
 import me.lucko.luckperms.common.users.UserManager;
@@ -62,17 +62,20 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Getter
 public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
+    private Executor executor;
+
     private final Set<UUID> ignoringLogs = ConcurrentHashMap.newKeySet();
     private LPConfiguration configuration;
     private UserManager userManager;
     private GroupManager groupManager;
     private TrackManager trackManager;
-    private Datastore datastore;
+    private Storage storage;
     private RedisMessaging redisMessaging = null;
     private UuidCache uuidCache;
     private ApiProvider apiProvider;
@@ -88,6 +91,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
     @Override
     public void onEnable() {
+        executor = r -> getProxy().getScheduler().runAsync(this, r);
         log = LogFactory.wrap(getLogger());
         debugHandler = new DebugHandler();
         senderFactory = new BungeeSenderFactory(this);
@@ -99,7 +103,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         getProxy().getPluginManager().registerListener(this, new BungeeListener(this));
 
         // initialise datastore
-        datastore = StorageFactory.getDatastore(this, "h2");
+        storage = StorageFactory.getInstance(this, "h2");
 
         // initialise redis
         if (getConfiguration().isRedisEnabled()) {
@@ -183,7 +187,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     @Override
     public void onDisable() {
         getLog().info("Closing datastore...");
-        datastore.shutdown();
+        storage.shutdown();
 
         if (redisMessaging != null) {
             getLog().info("Closing redis...");
@@ -300,7 +304,17 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
     @Override
     public void doSync(Runnable r) {
-        r.run();
+        doAsync(r);
+    }
+
+    @Override
+    public Executor getSyncExecutor() {
+        return executor;
+    }
+
+    @Override
+    public Executor getAsyncExecutor() {
+        return executor;
     }
 
     @Override

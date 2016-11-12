@@ -27,17 +27,17 @@ import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.Command;
 import me.lucko.luckperms.common.commands.MainCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.storage.Datastore;
+import me.lucko.luckperms.common.storage.Storage;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class UsersBulkEditMainCommand extends MainCommand<Datastore> {
+public class UsersBulkEditMainCommand extends MainCommand<Storage> {
 
     public UsersBulkEditMainCommand() {
-        super("UsersBulkEdit", "User bulk edit commands", "/%s usersbulkedit", 1, ImmutableList.<Command<Datastore, ?>>builder()
+        super("UsersBulkEdit", "User bulk edit commands", "/%s usersbulkedit", 1, ImmutableList.<Command<Storage, ?>>builder()
                 .add(new BulkEditGroup())
                 .add(new BulkEditPermission())
                 .build()
@@ -45,12 +45,12 @@ public class UsersBulkEditMainCommand extends MainCommand<Datastore> {
     }
 
     @Override
-    protected Datastore getTarget(String target, LuckPermsPlugin plugin, Sender sender) {
-        return plugin.getDatastore();
+    protected Storage getTarget(String target, LuckPermsPlugin plugin, Sender sender) {
+        return plugin.getStorage();
     }
 
     @Override
-    protected void cleanup(Datastore datastore, LuckPermsPlugin plugin) {
+    protected void cleanup(Storage storage, LuckPermsPlugin plugin) {
 
     }
 
@@ -61,7 +61,7 @@ public class UsersBulkEditMainCommand extends MainCommand<Datastore> {
 
     @Override
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
-        final List<Command<Datastore, ?>> subs = getSubCommands().stream()
+        final List<Command<Storage, ?>> subs = getSubCommands().stream()
                 .filter(s -> s.isAuthorized(sender))
                 .collect(Collectors.toList());
 
@@ -78,7 +78,7 @@ public class UsersBulkEditMainCommand extends MainCommand<Datastore> {
                     .collect(Collectors.toList());
         }
 
-        Optional<Command<Datastore, ?>> o = subs.stream()
+        Optional<Command<Storage, ?>> o = subs.stream()
                 .filter(s -> s.getName().equalsIgnoreCase(args.get(0)))
                 .limit(1)
                 .findAny();

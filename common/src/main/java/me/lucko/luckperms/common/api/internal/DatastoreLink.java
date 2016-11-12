@@ -27,26 +27,29 @@ import lombok.NonNull;
 import me.lucko.luckperms.api.*;
 import me.lucko.luckperms.api.data.Callback;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.utils.AbstractFuture;
+import me.lucko.luckperms.common.storage.Storage;
 
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import static me.lucko.luckperms.common.api.internal.Utils.*;
 
 /**
- * Provides a link between {@link Datastore} and {@link me.lucko.luckperms.common.storage.Datastore}
+ * Provides a link between {@link Datastore} and {@link Storage}
+ *
+ * Note that this class only provides for the old deprecated interface, see {@link StorageLink} for the new one.
  */
-@SuppressWarnings({"unused", "WeakerAccess"})
+@SuppressWarnings({"unused", "WeakerAccess", "deprecation"})
 public class DatastoreLink implements Datastore {
 
     private final LuckPermsPlugin plugin;
-    private final me.lucko.luckperms.common.storage.Datastore master;
+    private final Storage master;
     private final Async async;
     private final Sync sync;
     private final Future future;
 
-    public DatastoreLink(@NonNull LuckPermsPlugin plugin, @NonNull me.lucko.luckperms.common.storage.Datastore master) {
+    public DatastoreLink(@NonNull LuckPermsPlugin plugin, @NonNull Storage master) {
         this.plugin = plugin;
         this.master = master;
         this.async = new Async(master);
@@ -54,12 +57,10 @@ public class DatastoreLink implements Datastore {
         this.future = new Future(master);
     }
 
-    private static <T> Callback<T> checkCallback(Callback<T> c) {
-        // If no callback was given, just send an empty one
-        if (c == null) {
-            c = Callback.empty();
+    private <T> void registerCallback(CompletableFuture<T> fut, Callback<T> c) {
+        if (c != null) {
+            fut.thenAcceptAsync(Callback.convertToConsumer(c), plugin.getSyncExecutor());
         }
-        return c;
     }
 
     @Override
@@ -89,68 +90,68 @@ public class DatastoreLink implements Datastore {
 
     @AllArgsConstructor
     public class Async implements Datastore.Async {
-        private final me.lucko.luckperms.common.storage.Datastore master;
+        private final me.lucko.luckperms.common.storage.Storage master;
 
         @Override
         public void logAction(@NonNull LogEntry entry, Callback<Boolean> callback) {
-            master.force().logAction(entry, checkCallback(callback));
+            registerCallback(master.force().logAction(entry), callback);
         }
 
         @Override
-        public void getLog(Callback<Log> callback) {
-            master.force().getLog(log -> callback.onComplete(new LogLink(log)));
+        public void getLog(@NonNull Callback<Log> callback) {
+            master.force().getLog().thenAcceptAsync(log -> callback.onComplete(new LogLink(log)), plugin.getSyncExecutor());
         }
 
         @Override
         public void loadOrCreateUser(@NonNull UUID uuid, @NonNull String username, Callback<Boolean> callback) {
-            master.force().loadUser(uuid, checkUsername(username), checkCallback(callback));
+            registerCallback(master.force().loadUser(uuid, checkUsername(username)) , callback);
         }
 
         @Override
         public void loadUser(@NonNull UUID uuid, Callback<Boolean> callback) {
-            master.force().loadUser(uuid, "null", checkCallback(callback));
+            registerCallback(master.force().loadUser(uuid, "null"), callback);
         }
 
         @Override
         public void loadUser(@NonNull UUID uuid, @NonNull String username, Callback<Boolean> callback) {
-            master.force().loadUser(uuid, checkUsername(username), checkCallback(callback));
+            registerCallback(master.force().loadUser(uuid, checkUsername(username)), callback);
         }
 
         @Override
         public void saveUser(@NonNull User user, Callback<Boolean> callback) {
             checkUser(user);
-            master.force().saveUser(((UserLink) user).getMaster(), checkCallback(callback));
+            registerCallback(master.force().saveUser(((UserLink) user).getMaster()), callback);
         }
 
         @Override
         public void cleanupUsers(Callback<Boolean> callback) {
-            master.force().cleanupUsers(checkCallback(callback));
+            registerCallback(master.force().cleanupUsers(), callback);
         }
 
         @Override
         public void getUniqueUsers(Callback<Set<UUID>> callback) {
-            master.force().getUniqueUsers(checkCallback(callback));
+            registerCallback(master.force().getUniqueUsers(), callback);
         }
 
         @Override
         public void createAndLoadGroup(@NonNull String name, Callback<Boolean> callback) {
-            master.force().createAndLoadGroup(checkName(name), checkCallback(callback));
+            registerCallback(master.force().createAndLoadGroup(checkName(name)), callback);
         }
 
         @Override
         public void loadGroup(@NonNull String name, Callback<Boolean> callback) {
-            master.force().loadGroup(checkName(name), checkCallback(callback));
+            registerCallback(master.force().loadGroup(checkName(name)), callback);
         }
 
         @Override
         public void loadAllGroups(Callback<Boolean> callback) {
-            master.force().loadAllGroups(checkCallback(callback));
+            registerCallback(master.force().loadAllGroups(), callback);
         }
 
         @Override
         public void saveGroup(@NonNull Group group, Callback<Boolean> callback) {
             checkGroup(group);
-            master.force().saveGroup(((GroupLink) group).getMaster(), checkCallback(callback));
+            registerCallback(master.force().saveGroup(((GroupLink) group).getMaster()), callback);
         }
 
         @Override
@@ -159,59 +160,59 @@ public class DatastoreLink implements Datastore {
             if (group.getName().equalsIgnoreCase(plugin.getConfiguration().getDefaultGroupName())) {
                 throw new IllegalArgumentException("Cannot delete the default group.");
             }
-            master.force().deleteGroup(((GroupLink) group).getMaster(), checkCallback(callback));
+            registerCallback(master.force().deleteGroup(((GroupLink) group).getMaster()), callback);
         }
 
         @Override
         public void createAndLoadTrack(@NonNull String name, Callback<Boolean> callback) {
-            master.force().createAndLoadTrack(checkName(name), checkCallback(callback));
+            registerCallback(master.force().createAndLoadTrack(checkName(name)), callback);
         }
 
         @Override
         public void loadTrack(@NonNull String name, Callback<Boolean> callback) {
-            master.force().loadTrack(checkName(name), checkCallback(callback));
+            registerCallback(master.force().loadTrack(checkName(name)), callback);
         }
 
         @Override
         public void loadAllTracks(Callback<Boolean> callback) {
-            master.force().loadAllTracks(checkCallback(callback));
+            registerCallback(master.force().loadAllTracks(), callback);
         }
 
         @Override
         public void saveTrack(@NonNull Track track, Callback<Boolean> callback) {
             checkTrack(track);
-            master.force().saveTrack(((TrackLink) track).getMaster(), checkCallback(callback));
+            registerCallback(master.force().saveTrack(((TrackLink) track).getMaster()), callback);
         }
 
         @Override
         public void deleteTrack(@NonNull Track track, Callback<Boolean> callback) {
             checkTrack(track);
-            master.force().deleteTrack(((TrackLink) track).getMaster(), checkCallback(callback));
+            registerCallback(master.force().deleteTrack(((TrackLink) track).getMaster()), callback);
         }
 
         @Override
         public void saveUUIDData(@NonNull String username, @NonNull UUID uuid, Callback<Boolean> callback) {
-            master.force().saveUUIDData(checkUsername(username), uuid, checkCallback(callback));
+            registerCallback(master.force().saveUUIDData(checkUsername(username), uuid), callback);
         }
 
         @Override
         public void getUUID(@NonNull String username, Callback<UUID> callback) {
-            master.force().getUUID(checkUsername(username), checkCallback(callback));
+            registerCallback(master.force().getUUID(checkUsername(username)), callback);
         }
     }
 
     @AllArgsConstructor
     public class Sync implements Datastore.Sync {
-        private final me.lucko.luckperms.common.storage.Datastore master;
+        private final Storage master;
 
         @Override
         public boolean logAction(@NonNull LogEntry entry) {
-            return master.force().logAction(entry).getUnchecked();
+            return master.force().logAction(entry).join();
         }
 
         @Override
         public Log getLog() {
-            me.lucko.luckperms.common.data.Log log = master.force().getLog().getUnchecked();
+            me.lucko.luckperms.common.data.Log log = master.force().getLog().join();
             if (log == null) {
                 return null;
             }
@@ -220,54 +221,54 @@ public class DatastoreLink implements Datastore {
 
         @Override
         public boolean loadOrCreateUser(@NonNull UUID uuid, @NonNull String username) {
-            return master.force().loadUser(uuid, checkUsername(username)).getUnchecked();
+            return master.force().loadUser(uuid, checkUsername(username)).join();
         }
 
         @Override
         public boolean loadUser(@NonNull UUID uuid) {
-            return master.force().loadUser(uuid, "null").getUnchecked();
+            return master.force().loadUser(uuid, "null").join();
         }
 
         @Override
         public boolean loadUser(@NonNull UUID uuid, @NonNull String username) {
-            return master.force().loadUser(uuid, checkUsername(username)).getUnchecked();
+            return master.force().loadUser(uuid, checkUsername(username)).join();
         }
 
         @Override
         public boolean saveUser(@NonNull User user) {
             checkUser(user);
-            return master.force().saveUser(((UserLink) user).getMaster()).getUnchecked();
+            return master.force().saveUser(((UserLink) user).getMaster()).join();
         }
 
         @Override
         public boolean cleanupUsers() {
-            return master.force().cleanupUsers().getUnchecked();
+            return master.force().cleanupUsers().join();
         }
 
         @Override
         public Set<UUID> getUniqueUsers() {
-            return master.force().getUniqueUsers().getUnchecked();
+            return master.force().getUniqueUsers().join();
         }
 
         @Override
         public boolean createAndLoadGroup(@NonNull String name) {
-            return master.force().createAndLoadGroup(checkName(name)).getUnchecked();
+            return master.force().createAndLoadGroup(checkName(name)).join();
         }
 
         @Override
         public boolean loadGroup(@NonNull String name) {
-            return master.force().loadGroup(checkName(name)).getUnchecked();
+            return master.force().loadGroup(checkName(name)).join();
         }
 
         @Override
         public boolean loadAllGroups() {
-            return master.force().loadAllGroups().getUnchecked();
+            return master.force().loadAllGroups().join();
         }
 
         @Override
         public boolean saveGroup(@NonNull Group group) {
             checkGroup(group);
-            return master.force().saveGroup(((GroupLink) group).getMaster()).getUnchecked();
+            return master.force().saveGroup(((GroupLink) group).getMaster()).join();
         }
 
         @Override
@@ -276,50 +277,50 @@ public class DatastoreLink implements Datastore {
             if (group.getName().equalsIgnoreCase(plugin.getConfiguration().getDefaultGroupName())) {
                 throw new IllegalArgumentException("Cannot delete the default group.");
             }
-            return master.force().deleteGroup(((GroupLink) group).getMaster()).getUnchecked();
+            return master.force().deleteGroup(((GroupLink) group).getMaster()).join();
         }
 
         @Override
         public boolean createAndLoadTrack(@NonNull String name) {
-            return master.force().createAndLoadTrack(checkName(name)).getUnchecked();
+            return master.force().createAndLoadTrack(checkName(name)).join();
         }
 
         @Override
         public boolean loadTrack(@NonNull String name) {
-            return master.force().loadTrack(checkName(name)).getUnchecked();
+            return master.force().loadTrack(checkName(name)).join();
         }
 
         @Override
         public boolean loadAllTracks() {
-            return master.force().loadAllTracks().getUnchecked();
+            return master.force().loadAllTracks().join();
         }
 
         @Override
         public boolean saveTrack(@NonNull Track track) {
             checkTrack(track);
-            return master.force().saveTrack(((TrackLink) track).getMaster()).getUnchecked();
+            return master.force().saveTrack(((TrackLink) track).getMaster()).join();
         }
 
         @Override
         public boolean deleteTrack(@NonNull Track track) {
             checkTrack(track);
-            return master.force().deleteTrack(((TrackLink) track).getMaster()).getUnchecked();
+            return master.force().deleteTrack(((TrackLink) track).getMaster()).join();
         }
 
         @Override
         public boolean saveUUIDData(@NonNull String username, @NonNull UUID uuid) {
-            return master.force().saveUUIDData(checkUsername(username), uuid).getUnchecked();
+            return master.force().saveUUIDData(checkUsername(username), uuid).join();
         }
 
         @Override
         public UUID getUUID(@NonNull String username) {
-            return master.force().getUUID(checkUsername(username)).getUnchecked();
+            return master.force().getUUID(checkUsername(username)).join();
         }
     }
 
     @AllArgsConstructor
     public class Future implements Datastore.Future {
-        private final me.lucko.luckperms.common.storage.Datastore master;
+        private final Storage master;
 
         @Override
         public java.util.concurrent.Future<Boolean> logAction(@NonNull LogEntry entry) {
@@ -328,9 +329,7 @@ public class DatastoreLink implements Datastore {
 
         @Override
         public java.util.concurrent.Future<Log> getLog() {
-            AbstractFuture<Log> fut = new AbstractFuture<>();
-            master.force().getLog(log -> fut.complete(new LogLink(log)));
-            return fut;
+            return master.force().getLog().thenApply(log -> log == null ? null : new LogLink(log));
         }
 
         @Override

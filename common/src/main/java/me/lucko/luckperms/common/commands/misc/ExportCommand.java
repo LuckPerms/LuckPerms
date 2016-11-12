@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.groups.Group;
-import me.lucko.luckperms.common.storage.Datastore;
+import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.tracks.Track;
 import me.lucko.luckperms.common.users.User;
 import me.lucko.luckperms.common.utils.Predicates;
@@ -123,14 +123,14 @@ public class ExportCommand extends SingleCommand {
 
             // Export users
             log.info("Export: Exporting all users. Finding a list of unique users to export.");
-            Datastore ds = plugin.getDatastore();
-            Set<UUID> users = ds.getUniqueUsers().getUnchecked();
+            Storage ds = plugin.getStorage();
+            Set<UUID> users = ds.getUniqueUsers().join();
             log.info("Export: Found " + users.size() + " unique users to export.");
 
             int userCount = 0;
             for (UUID uuid : users) {
                 userCount++;
-                plugin.getDatastore().loadUser(uuid, "null").getUnchecked();
+                plugin.getStorage().loadUser(uuid, "null").join();
                 User user = plugin.getUserManager().get(uuid);
 
                 boolean inDefault = false;

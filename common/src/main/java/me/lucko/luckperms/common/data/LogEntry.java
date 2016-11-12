@@ -48,7 +48,7 @@ public class LogEntry extends me.lucko.luckperms.api.LogEntry {
     }
 
     public void submit(LuckPermsPlugin plugin, Sender sender) {
-        plugin.getDatastore().logAction(this);
+        plugin.getStorage().logAction(this);
 
         LogNotifyEvent event = new LogNotifyEvent(this);
         event.setCancelled(!plugin.getConfiguration().isLogNotify());

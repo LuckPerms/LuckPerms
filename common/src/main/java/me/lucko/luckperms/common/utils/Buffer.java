@@ -27,6 +27,7 @@ import lombok.*;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -42,7 +43,7 @@ public abstract class Buffer<T, R> implements Runnable {
     private final ReentrantLock lock = new ReentrantLock();
     private final List<BufferedObject<T, R>> buffer = new LinkedList<>();
 
-    public LPFuture<R> enqueue(@NonNull T t) {
+    public CompletableFuture<R> enqueue(@NonNull T t) {
         lock.lock();
         try {
             ListIterator<BufferedObject<T, R>> it = buffer.listIterator();
@@ -60,7 +61,7 @@ public abstract class Buffer<T, R> implements Runnable {
             }
 
             if (o == null) {
-                o = new BufferedObject<>(System.currentTimeMillis(), t, new AbstractFuture<R>());
+                o = new BufferedObject<>(System.currentTimeMillis(), t, new CompletableFuture<R>());
             } else {
                 o.setBufferTime(System.currentTimeMillis());
             }
@@ -111,7 +112,7 @@ public abstract class Buffer<T, R> implements Runnable {
         @Setter
         private long bufferTime;
         private final T object;
-        private final AbstractFuture<R> future;
+        private final CompletableFuture<R> future;
 
     }
 }

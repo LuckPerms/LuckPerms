@@ -73,7 +73,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
         // Migrate all groups
         log.info("zPermissions Migration: Starting group migration.");
         for (String g : service.getAllGroups()) {
-            plugin.getDatastore().createAndLoadGroup(g.toLowerCase()).getUnchecked();
+            plugin.getStorage().createAndLoadGroup(g.toLowerCase()).join();
             Group group = plugin.getGroupManager().get(g.toLowerCase());
             try {
                 LogEntry.build()
@@ -116,13 +116,13 @@ public class MigrationZPermissions extends SubCommand<Object> {
                 }
             }
 
-            plugin.getDatastore().saveGroup(group);
+            plugin.getStorage().saveGroup(group);
         }
 
         // Migrate all tracks
         log.info("zPermissions Migration: Starting track migration.");
         for (String t : service.getAllTracks()) {
-            plugin.getDatastore().createAndLoadTrack(t.toLowerCase()).getUnchecked();
+            plugin.getStorage().createAndLoadTrack(t.toLowerCase()).join();
             Track track = plugin.getTrackManager().get(t.toLowerCase());
             try {
                 LogEntry.build()
@@ -145,13 +145,13 @@ public class MigrationZPermissions extends SubCommand<Object> {
                 }
             }
 
-            plugin.getDatastore().saveTrack(track);
+            plugin.getStorage().saveTrack(track);
         }
 
         // Migrate all users.
         log.info("zPermissions Migration: Starting user migration.");
         for (UUID u : service.getAllPlayersUUID()) {
-            plugin.getDatastore().loadUser(u, "null").getUnchecked();
+            plugin.getStorage().loadUser(u, "null").join();
             User user = plugin.getUserManager().get(u);
 
             for (Map.Entry<String, Boolean> e : service.getPlayerPermissions(null, null, u).entrySet()) {
@@ -244,7 +244,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
             }
 
             plugin.getUserManager().cleanup(user);
-            plugin.getDatastore().saveUser(user);
+            plugin.getStorage().saveUser(user);
         }
 
         log.info("zPermissions Migration: Success! Completed without any errors.");

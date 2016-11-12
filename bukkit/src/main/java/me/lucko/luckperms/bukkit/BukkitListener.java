@@ -48,7 +48,7 @@ class BukkitListener extends AbstractListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerPreLogin(AsyncPlayerPreLoginEvent e) {
-        if (!plugin.isStarted() || !plugin.getDatastore().isAcceptingLogins()) {
+        if (!plugin.isStarted() || !plugin.getStorage().isAcceptingLogins()) {
 
             // The datastore is disabled, prevent players from joining the server
             e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, Message.LOADING_ERROR.toString());
@@ -61,7 +61,7 @@ class BukkitListener extends AbstractListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerPreLoginMonitor(AsyncPlayerPreLoginEvent e) {
-        if (plugin.isStarted() && plugin.getDatastore().isAcceptingLogins() && e.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
+        if (plugin.isStarted() && plugin.getStorage().isAcceptingLogins() && e.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
 
             // Login event was cancelled by another plugin
             onLeave(e.getUniqueId());

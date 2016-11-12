@@ -96,28 +96,28 @@ public class BungeeListener extends AbstractListener implements Listener {
             final PendingConnection c = e.getConnection();
 
             if (!cache.isOnlineMode()) {
-                UUID uuid = plugin.getDatastore().getUUID(c.getName()).getUnchecked();
+                UUID uuid = plugin.getStorage().getUUID(c.getName()).join();
                 if (uuid != null) {
                     cache.addToCache(c.getUniqueId(), uuid);
                 } else {
                     // No previous data for this player
                     plugin.getApiProvider().fireEventAsync(new UserFirstLoginEvent(c.getUniqueId(), c.getName()));
                     cache.addToCache(c.getUniqueId(), c.getUniqueId());
-                    plugin.getDatastore().force().saveUUIDData(c.getName(), c.getUniqueId()).getUnchecked();
+                    plugin.getStorage().force().saveUUIDData(c.getName(), c.getUniqueId()).join();
                 }
             } else {
-                UUID uuid = plugin.getDatastore().getUUID(c.getName()).getUnchecked();
+                UUID uuid = plugin.getStorage().getUUID(c.getName()).join();
                 if (uuid == null) {
                     plugin.getApiProvider().fireEventAsync(new UserFirstLoginEvent(c.getUniqueId(), c.getName()));
                 }
 
                 // Online mode, no cache needed. This is just for name -> uuid lookup.
-                plugin.getDatastore().force().saveUUIDData(c.getName(), c.getUniqueId()).getUnchecked();
+                plugin.getStorage().force().saveUUIDData(c.getName(), c.getUniqueId()).join();
             }
 
             // We have to make a new user on this thread whilst the connection is being held, or we get concurrency issues as the Bukkit server
             // and the BungeeCord server try to make a new user at the same time.
-            plugin.getDatastore().force().loadUser(cache.getUUID(c.getUniqueId()), c.getName()).getUnchecked();
+            plugin.getStorage().force().loadUser(cache.getUUID(c.getUniqueId()), c.getName()).join();
             User user = plugin.getUserManager().get(cache.getUUID(c.getUniqueId()));
             if (user == null) {
                 plugin.getLog().warn("Failed to load user: " + c.getName());

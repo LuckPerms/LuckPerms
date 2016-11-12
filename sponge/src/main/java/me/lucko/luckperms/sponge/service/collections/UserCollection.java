@@ -109,7 +109,7 @@ public class UserCollection implements SubjectCollection {
             if (!manager.isLoaded(UserIdentifier.of(u, null))) {
                 service.getPlugin().getLog().warn("User Subject '" + u + "' was requested, but is not loaded in memory. Loading them from storage now.");
                 long startTime = System.currentTimeMillis();
-                service.getPlugin().getDatastore().loadUser(u, "null").getUnchecked();
+                service.getPlugin().getStorage().loadUser(u, "null").join();
                 service.getPlugin().getLog().warn("Loading '" + u + "' took " + (System.currentTimeMillis() - startTime) + " ms.");
             }
 

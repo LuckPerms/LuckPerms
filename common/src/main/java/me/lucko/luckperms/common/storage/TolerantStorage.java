@@ -30,30 +30,30 @@ import me.lucko.luckperms.common.data.Log;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.tracks.Track;
 import me.lucko.luckperms.common.users.User;
-import me.lucko.luckperms.common.utils.LPFuture;
 
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Phaser;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
- * A Datastore wrapping that ensures all tasks are completed before {@link Datastore#shutdown()} is called.
+ * A Datastore wrapping that ensures all tasks are completed before {@link Storage#shutdown()} is called.
  */
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class TolerantDatastore implements Datastore {
-    public static TolerantDatastore wrap(Datastore datastore) {
-        return new TolerantDatastore(datastore);
+public class TolerantStorage implements Storage {
+    public static TolerantStorage wrap(Storage storage) {
+        return new TolerantStorage(storage);
     }
 
     @Delegate(types = Delegated.class)
-    private final Datastore backing;
+    private final Storage backing;
 
     private final Phaser phaser = new Phaser();
 
     @Override
-    public Datastore force() {
+    public Storage force() {
         return this;
     }
 
@@ -70,7 +70,7 @@ public class TolerantDatastore implements Datastore {
     }
 
     @Override
-    public LPFuture<Boolean> logAction(LogEntry entry) {
+    public CompletableFuture<Boolean> logAction(LogEntry entry) {
         phaser.register();
         try {
             return backing.logAction(entry);
@@ -80,7 +80,7 @@ public class TolerantDatastore implements Datastore {
     }
 
     @Override
-    public LPFuture<Log> getLog() {
+    public CompletableFuture<Log> getLog() {
         phaser.register();
         try {
             return backing.getLog();
@@ -90,7 +90,7 @@ public class TolerantDatastore implements Datastore {
     }
 
     @Override
-    public LPFuture<Boolean> loadUser(UUID uuid, String username) {
+    public CompletableFuture<Boolean> loadUser(UUID uuid, String username) {
         phaser.register();
         try {
             return backing.loadUser(uuid, username);
@@ -100,7 +100,7 @@ public class TolerantDatastore implements Datastore {
     }
 
     @Override
-    public LPFuture<Boolean> saveUser(User user) {
+    public CompletableFuture<Boolean> saveUser(User user) {
         phaser.register();
         try {
             return backing.saveUser(user);
@@ -110,7 +110,7 @@ public class TolerantDatastore implements Datastore {
     }
 
     @Override
-    public LPFuture<Boolean> cleanupUsers() {
+    public CompletableFuture<Boolean> cleanupUsers() {
         phaser.register();
         try {
             return backing.cleanupUsers();
@@ -120,7 +120,7 @@ public class TolerantDatastore implements Datastore {
     }
 
     @Override
-    public LPFuture<Set<UUID>> getUniqueUsers() {
+    public CompletableFuture<Set<UUID>> getUniqueUsers() {
         phaser.register();
         try {
             return backing.getUniqueUsers();
@@ -130,7 +130,7 @@ public class TolerantDatastore implements Datastore {
     }
 
     @Override
-    public LPFuture<Boolean> createAndLoadGroup(String name) {
+    public CompletableFuture<Boolean> createAndLoadGroup(String name) {
         phaser.register();
         try {
             return backing.createAndLoadGroup(name);
@@ -140,7 +140,7 @@ public class TolerantDatastore implements Datastore {
     }
 
     @Override
-    public LPFuture<Boolean> loadGroup(String name) {
+    public CompletableFuture<Boolean> loadGroup(String name) {
         phaser.register();
         try {
             return backing.loadGroup(name);
@@ -150,7 +150,7 @@ public class TolerantDatastore implements Datastore {
     }
 
     @Override
-    public LPFuture<Boolean> loadAllGroups() {
+    public CompletableFuture<Boolean> loadAllGroups() {
         phaser.register();
         try {
             return backing.loadAllGroups();
@@ -160,7 +160,7 @@ public class TolerantDatastore implements Datastore {
     }
 
     @Override
-    public LPFuture<Boolean> saveGroup(Group group) {
+    public CompletableFuture<Boolean> saveGroup(Group group) {
         phaser.register();
         try {
             return backing.saveGroup(group);
@@ -170,7 +170,7 @@ public class TolerantDatastore implements Datastore {
     }
 
     @Override
-    public LPFuture<Boolean> deleteGroup(Group group) {
+    public CompletableFuture<Boolean> deleteGroup(Group group) {
         phaser.register();
         try {
             return backing.deleteGroup(group);
@@ -180,7 +180,7 @@ public class TolerantDatastore implements Datastore {
     }
 
     @Override
-    public LPFuture<Boolean> createAndLoadTrack(String name) {
+    public CompletableFuture<Boolean> createAndLoadTrack(String name) {
         phaser.register();
         try {
             return backing.createAndLoadTrack(name);
@@ -190,7 +190,7 @@ public class TolerantDatastore implements Datastore {
     }
 
     @Override
-    public LPFuture<Boolean> loadTrack(String name) {
+    public CompletableFuture<Boolean> loadTrack(String name) {
         phaser.register();
         try {
             return backing.loadTrack(name);
@@ -200,7 +200,7 @@ public class TolerantDatastore implements Datastore {
     }
 
     @Override
-    public LPFuture<Boolean> loadAllTracks() {
+    public CompletableFuture<Boolean> loadAllTracks() {
         phaser.register();
         try {
             return backing.loadAllTracks();
@@ -210,7 +210,7 @@ public class TolerantDatastore implements Datastore {
     }
 
     @Override
-    public LPFuture<Boolean> saveTrack(Track track) {
+    public CompletableFuture<Boolean> saveTrack(Track track) {
         phaser.register();
         try {
             return backing.saveTrack(track);
@@ -220,7 +220,7 @@ public class TolerantDatastore implements Datastore {
     }
 
     @Override
-    public LPFuture<Boolean> deleteTrack(Track track) {
+    public CompletableFuture<Boolean> deleteTrack(Track track) {
         phaser.register();
         try {
             return backing.deleteTrack(track);
@@ -230,7 +230,7 @@ public class TolerantDatastore implements Datastore {
     }
 
     @Override
-    public LPFuture<Boolean> saveUUIDData(String username, UUID uuid) {
+    public CompletableFuture<Boolean> saveUUIDData(String username, UUID uuid) {
         phaser.register();
         try {
             return backing.saveUUIDData(username, uuid);
@@ -240,7 +240,7 @@ public class TolerantDatastore implements Datastore {
     }
 
     @Override
-    public LPFuture<UUID> getUUID(String username) {
+    public CompletableFuture<UUID> getUUID(String username) {
         phaser.register();
         try {
             return backing.getUUID(username);
@@ -250,7 +250,7 @@ public class TolerantDatastore implements Datastore {
     }
 
     @Override
-    public LPFuture<String> getName(UUID uuid) {
+    public CompletableFuture<String> getName(UUID uuid) {
         phaser.register();
         try {
             return backing.getName(uuid);
@@ -263,8 +263,6 @@ public class TolerantDatastore implements Datastore {
         String getName();
         boolean isAcceptingLogins();
         void setAcceptingLogins(boolean b);
-        void doAsync(Runnable r);
-        void doSync(Runnable r);
         void init();
     }
 }

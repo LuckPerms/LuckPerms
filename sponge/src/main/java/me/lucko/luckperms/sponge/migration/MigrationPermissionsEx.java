@@ -69,10 +69,10 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             groupCount++;
 
             // Make a LuckPerms group for the one being migrated
-            plugin.getDatastore().createAndLoadGroup(pexGroup.getIdentifier().toLowerCase()).getUnchecked();
+            plugin.getStorage().createAndLoadGroup(pexGroup.getIdentifier().toLowerCase()).join();
             Group group = plugin.getGroupManager().get(pexGroup.getIdentifier().toLowerCase());
             migrateSubject(pexGroup, group);
-            plugin.getDatastore().saveGroup(group);
+            plugin.getStorage().saveGroup(group);
         }
         log.info("PermissionsEx Migration: Migrated " + groupCount + " groups");
 
@@ -88,10 +88,10 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             }
 
             // Make a LuckPerms user for the one being migrated
-            plugin.getDatastore().loadUser(uuid, "null").getUnchecked();
+            plugin.getStorage().loadUser(uuid, "null").join();
             User user = plugin.getUserManager().get(uuid);
             migrateSubject(pexUser, user);
-            plugin.getDatastore().saveUser(user);
+            plugin.getStorage().saveUser(user);
             plugin.getUserManager().cleanup(user);
         }
 

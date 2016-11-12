@@ -80,7 +80,7 @@ public class LogRecent extends SubCommand<Log> {
                     return CommandResult.INVALID_ARGS;
                 }
 
-                UUID uuid = plugin.getDatastore().getUUID(s).getUnchecked();
+                UUID uuid = plugin.getStorage().getUUID(s).join();
 
                 if (uuid == null) {
                     Message.USER_NOT_FOUND.send(sender);

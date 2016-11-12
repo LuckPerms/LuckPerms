@@ -21,16 +21,16 @@ does-not-have-temp-permission: "{0} does not have this permission set temporaril
 
 
 user-not-found: "&bUser could not be found."
-user-save-success: "&7(User data was saved to the datastore)"
+user-save-success: "&7(User data was saved to storage)"
 user-save-error: "There was an error whilst saving the user."
 user-create-fail: "There was an error whilst creating a new user."
 
 group-not-found: "&bGroup could not be found."
-group-save-success: "&7(Group data was saved to the datastore)"
+group-save-success: "&7(Group data was saved to storage)"
 group-save-error: "There was an error whilst saving the group."
 
 track-not-found: "&bTrack could not be found."
-track-save-success: "&7(Track data was saved to the datastore)"
+track-save-success: "&7(Track data was saved to storage)"
 track-save-error: "There was an error whilst saving the track."
 
 

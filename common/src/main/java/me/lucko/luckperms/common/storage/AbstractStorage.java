@@ -32,21 +32,19 @@ import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.storage.backing.AbstractBacking;
 import me.lucko.luckperms.common.tracks.Track;
 import me.lucko.luckperms.common.users.User;
-import me.lucko.luckperms.common.utils.AbstractFuture;
-import me.lucko.luckperms.common.utils.LPFuture;
 
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Future;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
 /**
- * Converts a {@link AbstractBacking} to use {@link Future}s
+ * Converts a {@link AbstractBacking} to use {@link CompletableFuture}s
  */
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class AbstractDatastore implements Datastore {
-    public static Datastore wrap(LuckPermsPlugin plugin, AbstractBacking backing) {
-        BufferedOutputDatastore bufferedDs = BufferedOutputDatastore.wrap(TolerantDatastore.wrap(new AbstractDatastore(backing)), 1000L);
+public class AbstractStorage implements Storage {
+    public static Storage wrap(LuckPermsPlugin plugin, AbstractBacking backing) {
+        BufferedOutputStorage bufferedDs = BufferedOutputStorage.wrap(TolerantStorage.wrap(new AbstractStorage(backing)), 1000L);
         plugin.doAsyncRepeating(bufferedDs, 10L);
         return bufferedDs;
     }
@@ -54,112 +52,107 @@ public class AbstractDatastore implements Datastore {
     @Delegate(types = Delegated.class)
     private final AbstractBacking backing;
 
-    private <T> LPFuture<T> makeFuture(Supplier<T> supplier) {
-        AbstractFuture<T> future = new AbstractFuture<>();
-        backing.doAsync(() -> {
-            T result = supplier.get();
-            future.complete(result);
-        });
-        return future;
+    private <T> CompletableFuture<T> makeFuture(Supplier<T> supplier) {
+        return CompletableFuture.supplyAsync(supplier, backing.getPlugin().getAsyncExecutor());
     }
 
     @Override
-    public Datastore force() {
+    public Storage force() {
         return this;
     }
 
     @Override
-    public LPFuture<Boolean> logAction(LogEntry entry) {
+    public CompletableFuture<Boolean> logAction(LogEntry entry) {
         return makeFuture(() -> backing.logAction(entry));
     }
 
     @Override
-    public LPFuture<Log> getLog() {
+    public CompletableFuture<Log> getLog() {
         return makeFuture(backing::getLog);
     }
 
     @Override
-    public LPFuture<Boolean> loadUser(UUID uuid, String username) {
+    public CompletableFuture<Boolean> loadUser(UUID uuid, String username) {
         return makeFuture(() -> backing.loadUser(uuid, username));
     }
 
     @Override
-    public LPFuture<Boolean> saveUser(User user) {
+    public CompletableFuture<Boolean> saveUser(User user) {
         return makeFuture(() -> backing.saveUser(user));
     }
 
     @Override
-    public LPFuture<Boolean> cleanupUsers() {
+    public CompletableFuture<Boolean> cleanupUsers() {
         return makeFuture(backing::cleanupUsers);
     }
 
     @Override
-    public LPFuture<Set<UUID>> getUniqueUsers() {
+    public CompletableFuture<Set<UUID>> getUniqueUsers() {
         return makeFuture(backing::getUniqueUsers);
     }
 
     @Override
-    public LPFuture<Boolean> createAndLoadGroup(String name) {
+    public CompletableFuture<Boolean> createAndLoadGroup(String name) {
         return makeFuture(() -> backing.createAndLoadGroup(name));
     }
 
     @Override
-    public LPFuture<Boolean> loadGroup(String name) {
+    public CompletableFuture<Boolean> loadGroup(String name) {
         return makeFuture(() -> backing.loadGroup(name));
     }
 
     @Override
-    public LPFuture<Boolean> loadAllGroups() {
+    public CompletableFuture<Boolean> loadAllGroups() {
         return makeFuture(backing::loadAllGroups);
     }
 
     @Override
-    public LPFuture<Boolean> saveGroup(Group group) {
+    public CompletableFuture<Boolean> saveGroup(Group group) {
         return makeFuture(() -> backing.saveGroup(group));
     }
 
     @Override
-    public LPFuture<Boolean> deleteGroup(Group group) {
+    public CompletableFuture<Boolean> deleteGroup(Group group) {
         return makeFuture(() -> backing.deleteGroup(group));
     }
 
     @Override
-    public LPFuture<Boolean> createAndLoadTrack(String name) {
+    public CompletableFuture<Boolean> createAndLoadTrack(String name) {
         return makeFuture(() -> backing.createAndLoadTrack(name));
     }
 
     @Override
-    public LPFuture<Boolean> loadTrack(String name) {
+    public CompletableFuture<Boolean> loadTrack(String name) {
         return makeFuture(() -> backing.loadTrack(name));
     }
 
     @Override
-    public LPFuture<Boolean> loadAllTracks() {
+    public CompletableFuture<Boolean> loadAllTracks() {
         return makeFuture(backing::loadAllTracks);
     }
 
     @Override
-    public LPFuture<Boolean> saveTrack(Track track) {
+    public CompletableFuture<Boolean> saveTrack(Track track) {
         return makeFuture(() -> backing.saveTrack(track));
     }
 
     @Override
-    public LPFuture<Boolean> deleteTrack(Track track) {
+    public CompletableFuture<Boolean> deleteTrack(Track track) {
         return makeFuture(() -> backing.deleteTrack(track));
     }
 
     @Override
-    public LPFuture<Boolean> saveUUIDData(String username, UUID uuid) {
+    public CompletableFuture<Boolean> saveUUIDData(String username, UUID uuid) {
         return makeFuture(() -> backing.saveUUIDData(username, uuid));
     }
 
     @Override
-    public LPFuture<UUID> getUUID(String username) {
+    public CompletableFuture<UUID> getUUID(String username) {
         return makeFuture(() -> backing.getUUID(username));
     }
 
     @Override
-    public LPFuture<String> getName(UUID uuid) {
+    public CompletableFuture<String> getName(UUID uuid) {
         return makeFuture(() -> backing.getName(uuid));
     }
 
@@ -167,8 +160,6 @@ public class AbstractDatastore implements Datastore {
         String getName();
         boolean isAcceptingLogins();
         void setAcceptingLogins(boolean b);
-        void doAsync(Runnable r);
-        void doSync(Runnable r);
         void init();
         void shutdown();
     }

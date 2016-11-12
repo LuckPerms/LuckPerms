@@ -32,8 +32,8 @@ import java.util.UUID;
  * they first join the server, but this UUID will then not be consistent across the network. LuckPerms will instead check
  * the datastore cache, to get a UUID for a user that is consistent across an entire network.
  *
- * <p> If you want to get a user object from the datastore using the api on a server in offline mode, you will need to use this cache,
- * OR use Datastore#getUUID, for users that are not online.
+ * <p> If you want to get a user object from the Storage using the api on a server in offline mode, you will need to use this cache,
+ * OR use Storage#getUUID, for users that are not online.
  *
  * <p> WARNING: THIS IS ONLY EFFECTIVE FOR ONLINE PLAYERS. USE THE DATASTORE METHODS FOR OFFLINE PLAYERS.
  */

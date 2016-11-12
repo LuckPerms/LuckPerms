@@ -20,53 +20,18 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.utils;
-
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+package me.lucko.luckperms.api;
 
 /**
- * Basic Future implementation
- * @param <R> the return type
+ * Exposes any networking provider being used on the platform. e.g. Redis
+ * @since 2.14
  */
-public class AbstractFuture<R> implements LPFuture<R> {
-    private final CountDownLatch latch = new CountDownLatch(1);
-    private R value;
+public interface MessagingService {
 
-    public void complete(R r) {
-        value = r;
-        latch.countDown();
-    }
+    /**
+     * Uses the messaging service to inform other servers about changes.
+     * This will push the update asynchronously, and this method will return almost immediately.
+     */
+    void pushUpdate();
 
-    @Override
-    public boolean cancel(boolean mayInterruptIfRunning) {
-        // Not supported
-        return false;
-    }
-
-    @Override
-    public boolean isCancelled() {
-        return false;
-    }
-
-    @Override
-    public boolean isDone() {
-        return latch.getCount() == 0;
-    }
-
-    @Override
-    public R get() throws InterruptedException {
-        latch.await();
-        return value;
-    }
-
-    @Override
-    public R get(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
-        if (latch.await(timeout, unit)) {
-            return value;
-        } else {
-            throw new TimeoutException();
-        }
-    }
 }

@@ -52,12 +52,12 @@ public class GroupRename extends SubCommand<Group> {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (plugin.getDatastore().loadGroup(newGroupName).getUnchecked()) {
+        if (plugin.getStorage().loadGroup(newGroupName).join()) {
             Message.GROUP_ALREADY_EXISTS.send(sender);
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!plugin.getDatastore().createAndLoadGroup(newGroupName).getUnchecked()) {
+        if (!plugin.getStorage().createAndLoadGroup(newGroupName).join()) {
             Message.CREATE_GROUP_ERROR.send(sender);
             return CommandResult.FAILURE;
         }
@@ -68,7 +68,7 @@ public class GroupRename extends SubCommand<Group> {
             return CommandResult.LOADING_ERROR;
         }
 
-        if (!plugin.getDatastore().deleteGroup(group).getUnchecked()) {
+        if (!plugin.getStorage().deleteGroup(group).join()) {
             Message.DELETE_GROUP_ERROR.send(sender);
             return CommandResult.FAILURE;
         }

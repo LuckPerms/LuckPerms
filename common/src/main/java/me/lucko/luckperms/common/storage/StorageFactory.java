@@ -37,8 +37,8 @@ import java.util.Set;
 public class StorageFactory {
     private static final Set<String> TYPES = ImmutableSet.of("json", "yaml", "flatfile", "mongodb", "mysql", "sqlite", "h2");
 
-    public static Datastore getDatastore(LuckPermsPlugin plugin, String defaultMethod) {
-        Datastore datastore;
+    public static Storage getInstance(LuckPermsPlugin plugin, String defaultMethod) {
+        Storage storage;
 
         plugin.getLog().info("Detecting storage method...");
         if (plugin.getConfiguration().isSplitStorage()) {
@@ -63,7 +63,7 @@ public class StorageFactory {
                 backing.put(type, backingFromString(type, plugin));
             }
 
-            datastore = AbstractDatastore.wrap(plugin, new SplitBacking(plugin, backing, types));
+            storage = AbstractStorage.wrap(plugin, new SplitBacking(plugin, backing, types));
 
         } else {
             String storageMethod = plugin.getConfiguration().getStorageMethod().toLowerCase();
@@ -72,17 +72,17 @@ public class StorageFactory {
                 storageMethod = defaultMethod;
             }
 
-            datastore = fromString(storageMethod, plugin);
-            plugin.getLog().info("Using " + datastore.getName() + " as storage method.");
+            storage = fromString(storageMethod, plugin);
+            plugin.getLog().info("Using " + storage.getName() + " as storage method.");
         }
 
         plugin.getLog().info("Initialising datastore...");
-        datastore.init();
-        return datastore;
+        storage.init();
+        return storage;
     }
     
-    private static Datastore fromString(String storageMethod, LuckPermsPlugin plugin) {
-        return AbstractDatastore.wrap(plugin, backingFromString(storageMethod, plugin));
+    private static Storage fromString(String storageMethod, LuckPermsPlugin plugin) {
+        return AbstractStorage.wrap(plugin, backingFromString(storageMethod, plugin));
     }
 
     private static AbstractBacking backingFromString(String method, LuckPermsPlugin plugin) {

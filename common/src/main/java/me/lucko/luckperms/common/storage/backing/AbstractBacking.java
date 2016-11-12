@@ -38,6 +38,8 @@ import java.util.UUID;
 
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class AbstractBacking {
+
+    @Getter
     protected final LuckPermsPlugin plugin;
 
     @Getter
@@ -46,22 +48,6 @@ public abstract class AbstractBacking {
     @Getter
     @Setter
     private boolean acceptingLogins = false;
-
-    /**
-     * Execute a runnable asynchronously
-     * @param r the task to run
-     */
-    public void doAsync(Runnable r) {
-        plugin.doAsync(r);
-    }
-
-    /**
-     * Execute a runnable synchronously
-     * @param r the task to run
-     */
-    public void doSync(Runnable r) {
-        plugin.doSync(r);
-    }
 
     public abstract void init();
     public abstract void shutdown();

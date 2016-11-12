@@ -24,7 +24,6 @@ package me.lucko.luckperms.common.users;
 
 import lombok.RequiredArgsConstructor;
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.data.Callback;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.AbstractManager;
 import me.lucko.luckperms.common.utils.Identifiable;
@@ -81,7 +80,7 @@ public class UserManager extends AbstractManager<UserIdentifier, User> {
         } catch (ObjectAlreadyHasException ignored) {}
 
         if (save) {
-            plugin.getDatastore().saveUser(user, Callback.empty());
+            plugin.getStorage().saveUser(user);
         }
 
         return true;
@@ -134,7 +133,7 @@ public class UserManager extends AbstractManager<UserIdentifier, User> {
             plugin.doAsync(() -> {
                 for (UUID uuid : players) {
                     UUID internal = plugin.getUuidCache().getUUID(uuid);
-                    plugin.getDatastore().loadUser(internal, "null").getUnchecked();
+                    plugin.getStorage().loadUser(internal, "null").join();
                     User user = get(internal);
                     user.getRefreshBuffer().request();
                 }

@@ -61,7 +61,7 @@ public class ParentAdd extends SharedSubCommand {
         String server = ArgumentUtils.handleServer(1, args);
         String world = ArgumentUtils.handleWorld(2, args);
 
-        if (!plugin.getDatastore().loadGroup(groupName).getUnchecked()) {
+        if (!plugin.getStorage().loadGroup(groupName).join()) {
             Message.GROUP_DOES_NOT_EXIST.send(sender);
             return CommandResult.INVALID_ARGS;
         }

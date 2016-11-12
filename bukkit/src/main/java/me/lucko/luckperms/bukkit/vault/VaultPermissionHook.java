@@ -82,7 +82,7 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public boolean isEnabled() {
-        return plugin.getDatastore().isAcceptingLogins();
+        return plugin.getStorage().isAcceptingLogins();
     }
 
     @Override
@@ -132,13 +132,12 @@ public class VaultPermissionHook extends Permission {
      */
     void save(PermissionHolder holder) {
         if (holder instanceof User) {
-
-            plugin.getDatastore().saveUser(((User) holder), b -> {
-                ((User) holder).getRefreshBuffer().request();
-            });
+            plugin.getStorage().saveUser(((User) holder))
+                    .thenRunAsync(() -> ((User) holder).getRefreshBuffer().request(), plugin.getAsyncExecutor());
         }
         if (holder instanceof Group) {
-            plugin.getDatastore().saveGroup(((Group) holder), b -> plugin.getUpdateTaskBuffer().request());
+            plugin.getStorage().saveGroup(((Group) holder))
+                    .thenRunAsync(() -> plugin.getUpdateTaskBuffer().request(), plugin.getAsyncExecutor());
         }
     }
 

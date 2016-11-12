@@ -251,7 +251,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         log.info("PowerfulPerms Migration: Starting group migration.");
         Map<Integer, Group> groups = pm.getGroups(); // All versions
         for (Group g : groups.values()) {
-            plugin.getDatastore().createAndLoadGroup(g.getName().toLowerCase()).getUnchecked();
+            plugin.getStorage().createAndLoadGroup(g.getName().toLowerCase()).join();
             final me.lucko.luckperms.common.groups.Group group = plugin.getGroupManager().get(g.getName().toLowerCase());
             try {
                 LogEntry.build()
@@ -280,7 +280,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                 }
             }
 
-            plugin.getDatastore().saveGroup(group);
+            plugin.getStorage().saveGroup(group);
         }
         log.info("PowerfulPerms Migration: Group migration complete.");
 
@@ -293,7 +293,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             progress.put(uuid, new CountDownLatch(2));
 
             // Create a LuckPerms user for the UUID
-            plugin.getDatastore().loadUser(uuid, "null").getUnchecked();
+            plugin.getStorage().loadUser(uuid, "null").join();
             User user = plugin.getUserManager().get(uuid);
 
             // Get a list of Permissions held by the user from the PP API.
@@ -304,7 +304,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                 synchronized (progress) {
                     progress.get(uuid).countDown();
                     if (progress.get(uuid).getCount() == 0) {
-                        plugin.getDatastore().saveUser(user);
+                        plugin.getStorage().saveUser(user);
                         plugin.getUserManager().cleanup(user);
                     }
                 }
@@ -427,7 +427,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                 synchronized (progress) {
                     progress.get(uuid).countDown();
                     if (progress.get(uuid).getCount() == 0) {
-                        plugin.getDatastore().saveUser(user);
+                        plugin.getStorage().saveUser(user);
                         plugin.getUserManager().cleanup(user);
                     }
                 }

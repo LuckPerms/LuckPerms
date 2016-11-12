@@ -64,7 +64,7 @@ public class ParentAddTemp extends SharedSubCommand {
         String server = ArgumentUtils.handleServer(2, args);
         String world = ArgumentUtils.handleWorld(3, args);
 
-        if (!plugin.getDatastore().loadGroup(groupName).getUnchecked()) {
+        if (!plugin.getStorage().loadGroup(groupName).join()) {
             Message.GROUP_DOES_NOT_EXIST.send(sender);
             return CommandResult.INVALID_ARGS;
         }

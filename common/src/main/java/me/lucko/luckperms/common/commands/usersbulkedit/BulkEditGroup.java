@@ -32,7 +32,7 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeFactory;
-import me.lucko.luckperms.common.storage.Datastore;
+import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.users.User;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
@@ -40,7 +40,7 @@ import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.*;
 
-public class BulkEditGroup extends SubCommand<Datastore> {
+public class BulkEditGroup extends SubCommand<Storage> {
     public BulkEditGroup() {
         super("group", "Bulk edit group memberships", Permission.USER_BULKCHANGE, Predicates.not(4),
                 Arg.list(
@@ -53,7 +53,7 @@ public class BulkEditGroup extends SubCommand<Datastore> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Datastore datastore, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Storage storage, List<String> args, String label) throws CommandException {
         String group = args.get(0);
         String type = args.get(1).toLowerCase();
         String from = args.get(2);
@@ -67,10 +67,10 @@ public class BulkEditGroup extends SubCommand<Datastore> {
             return CommandResult.FAILURE;
         }
 
-        Set<UUID> uuids = datastore.getUniqueUsers().getUnchecked();
+        Set<UUID> uuids = storage.getUniqueUsers().join();
 
         for (UUID u : uuids) {
-            plugin.getDatastore().loadUser(u, "null").getUnchecked();
+            plugin.getStorage().loadUser(u, "null").join();
             User user = plugin.getUserManager().get(u);
             if (user == null) {
                 continue;
@@ -143,7 +143,7 @@ public class BulkEditGroup extends SubCommand<Datastore> {
                 } catch (ObjectAlreadyHasException ignored) {}
             });
 
-            plugin.getDatastore().saveUser(user);
+            plugin.getStorage().saveUser(user);
             plugin.getUserManager().cleanup(user);
         }
 

@@ -23,7 +23,6 @@
 package me.lucko.luckperms.common.utils;
 
 import lombok.AllArgsConstructor;
-import me.lucko.luckperms.api.data.Callback;
 import me.lucko.luckperms.api.event.events.UserFirstLoginEvent;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.core.UuidCache;
@@ -44,26 +43,26 @@ public class AbstractListener {
 
         final UuidCache cache = plugin.getUuidCache();
         if (!cache.isOnlineMode()) {
-            UUID uuid = plugin.getDatastore().force().getUUID(username).getUnchecked();
+            UUID uuid = plugin.getStorage().force().getUUID(username).join();
             if (uuid != null) {
                 cache.addToCache(u, uuid);
             } else {
                 // No previous data for this player
                 plugin.getApiProvider().fireEventAsync(new UserFirstLoginEvent(u, username));
                 cache.addToCache(u, u);
-                plugin.getDatastore().force().saveUUIDData(username, u, Callback.empty());
+                plugin.getStorage().force().saveUUIDData(username, u);
             }
         } else {
-            UUID uuid = plugin.getDatastore().force().getUUID(username).getUnchecked();
+            UUID uuid = plugin.getStorage().force().getUUID(username).join();
             if (uuid == null) {
                 plugin.getApiProvider().fireEventAsync(new UserFirstLoginEvent(u, username));
             }
 
             // Online mode, no cache needed. This is just for name -> uuid lookup.
-            plugin.getDatastore().force().saveUUIDData(username, u, Callback.empty());
+            plugin.getStorage().force().saveUUIDData(username, u);
         }
 
-        plugin.getDatastore().force().loadUser(cache.getUUID(u), username).getUnchecked();
+        plugin.getStorage().force().loadUser(cache.getUUID(u), username).join();
         User user = plugin.getUserManager().get(cache.getUUID(u));
         if (user == null) {
             plugin.getLog().warn("Failed to load user: " + username);
@@ -78,7 +77,7 @@ public class AbstractListener {
 
             // If they were given a default, persist the new assignments back to the storage.
             if (save) {
-                plugin.getDatastore().force().saveUser(user).getUnchecked();
+                plugin.getStorage().force().saveUser(user).join();
             }
 
             user.setupData(false); // Pretty nasty calculation call. Sets up the caching system so data is ready when the user joins.

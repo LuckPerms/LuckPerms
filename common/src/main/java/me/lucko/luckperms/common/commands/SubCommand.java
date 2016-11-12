@@ -114,7 +114,7 @@ public abstract class SubCommand<T> extends Command<T, Void> {
     }
 
     public static void save(User user, Sender sender, LuckPermsPlugin plugin) {
-        boolean success = plugin.getDatastore().force().saveUser(user).getUnchecked();
+        boolean success = plugin.getStorage().force().saveUser(user).join();
         user.getRefreshBuffer().requestDirectly();
 
         if (success) {
@@ -125,7 +125,7 @@ public abstract class SubCommand<T> extends Command<T, Void> {
     }
 
     public static void save(Group group, Sender sender, LuckPermsPlugin plugin) {
-        boolean success = plugin.getDatastore().force().saveGroup(group).getUnchecked();
+        boolean success = plugin.getStorage().force().saveGroup(group).join();
         plugin.getUpdateTaskBuffer().requestDirectly();
 
         if (success) {
@@ -136,7 +136,7 @@ public abstract class SubCommand<T> extends Command<T, Void> {
     }
 
     public static void save(Track track, Sender sender, LuckPermsPlugin plugin) {
-        boolean success = plugin.getDatastore().force().saveTrack(track).getUnchecked();
+        boolean success = plugin.getStorage().force().saveTrack(track).join();
         plugin.getUpdateTaskBuffer().requestDirectly();
 
         if (success) {

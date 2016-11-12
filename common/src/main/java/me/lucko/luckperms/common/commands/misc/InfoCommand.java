@@ -46,7 +46,7 @@ public class InfoCommand extends SingleCommand {
         Message.INFO.send(sender,
                 plugin.getVersion(),
                 plugin.getType().getFriendlyName(),
-                plugin.getDatastore().getName(),
+                plugin.getStorage().getName(),
                 c.getServer(),
                 c.getSyncTime(),
                 formatBoolean(c.isIncludingGlobalPerms()),

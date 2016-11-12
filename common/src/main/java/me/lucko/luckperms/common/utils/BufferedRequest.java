@@ -26,8 +26,9 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.lang.ref.WeakReference;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -41,12 +42,12 @@ import java.util.function.Supplier;
 @RequiredArgsConstructor
 public abstract class BufferedRequest<T> {
     private final long bufferTimeMillis;
-    private final Consumer<Runnable> executor;
+    private final Executor executor;
 
     private WeakReference<Processor<T>> processor = null;
     private ReentrantLock lock = new ReentrantLock();
 
-    public LPFuture<T> request() {
+    public CompletableFuture<T> request() {
         lock.lock();
         try {
             if (processor != null) {
@@ -57,7 +58,7 @@ public abstract class BufferedRequest<T> {
             }
 
             Processor<T> p = new Processor<>(bufferTimeMillis, this::perform);
-            executor.accept(p);
+            executor.execute(p);
             processor = new WeakReference<>(p);
             return p.get();
 
@@ -82,7 +83,7 @@ public abstract class BufferedRequest<T> {
 
         private final ReentrantLock lock = new ReentrantLock();
         private long executionTime;
-        private final AbstractFuture<R> future = new AbstractFuture<>();
+        private final CompletableFuture<R> future = new CompletableFuture<R>();
 
         @Override
         public void run() {
@@ -116,11 +117,11 @@ public abstract class BufferedRequest<T> {
             future.complete(result);
         }
 
-        public LPFuture<R> get() {
+        public CompletableFuture<R> get() {
             return future;
         }
 
-        public LPFuture<R> getAndExtend() {
+        public CompletableFuture<R> getAndExtend() {
             lock.lock();
             try {
                 executionTime = System.currentTimeMillis() + delayMillis;

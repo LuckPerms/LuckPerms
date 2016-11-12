@@ -36,7 +36,7 @@ import me.lucko.luckperms.common.core.UuidCache;
 import me.lucko.luckperms.common.data.Importer;
 import me.lucko.luckperms.common.groups.GroupManager;
 import me.lucko.luckperms.common.messaging.RedisMessaging;
-import me.lucko.luckperms.common.storage.Datastore;
+import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.tracks.TrackManager;
 import me.lucko.luckperms.common.users.UserManager;
 import me.lucko.luckperms.common.utils.BufferedRequest;
@@ -47,6 +47,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Executor;
 
 /**
  * Main internal interface for LuckPerms plugins, providing the base for abstraction throughout the project.
@@ -80,10 +81,10 @@ public interface LuckPermsPlugin {
     LPConfiguration getConfiguration();
 
     /**
-     * Gets the primary datastore instance. This is likely to be wrapped with extra layers for caching, etc.
-     * @return the datastore
+     * Gets the primary data storage instance. This is likely to be wrapped with extra layers for caching, etc.
+     * @return the storage handler instance
      */
-    Datastore getDatastore();
+    Storage getStorage();
 
     /**
      * Gets the redis messaging instance if present. Could return null if redis is not enabled.
@@ -157,6 +158,9 @@ public interface LuckPermsPlugin {
      * @param r the task to run
      */
     void doSync(Runnable r);
+
+    Executor getSyncExecutor();
+    Executor getAsyncExecutor();
 
     /**
      * Execute a runnable asynchronously on a loop

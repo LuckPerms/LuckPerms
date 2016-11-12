@@ -61,7 +61,7 @@ public class DeleteGroup extends SingleCommand {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!plugin.getDatastore().loadGroup(groupName).getUnchecked()) {
+        if (!plugin.getStorage().loadGroup(groupName).join()) {
             Message.GROUP_DOES_NOT_EXIST.send(sender);
             return CommandResult.INVALID_ARGS;
         }
@@ -72,7 +72,7 @@ public class DeleteGroup extends SingleCommand {
             return CommandResult.LOADING_ERROR;
         }
 
-        if (!plugin.getDatastore().deleteGroup(group).getUnchecked()) {
+        if (!plugin.getStorage().deleteGroup(group).join()) {
             Message.DELETE_GROUP_ERROR.send(sender);
             return CommandResult.FAILURE;
         }
