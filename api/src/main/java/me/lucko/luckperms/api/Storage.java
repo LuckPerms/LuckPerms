@@ -61,7 +61,7 @@ public interface Storage {
     Executor getSyncExecutor();
 
     /**
-     * Returns an executor which will run all passed runnables asynchronously using the platforms scheduler & thread pools.
+     * Returns an executor which will run all passed runnables asynchronously using the platforms scheduler and thread pools.
      * @return an executor instance
      */
     Executor getAsyncExecutor();
