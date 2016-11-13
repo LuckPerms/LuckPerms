@@ -32,6 +32,7 @@ import lombok.NonNull;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.core.NodeBuilder;
+import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.users.User;
@@ -45,8 +46,6 @@ import org.spongepowered.api.util.Tristate;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static me.lucko.luckperms.api.MetaUtils.escapeCharacters;
 
 @SuppressWarnings({"OptionalGetWithoutIsPresent", "unused"})
 @AllArgsConstructor
@@ -364,16 +363,15 @@ public class LuckPermsSubjectData implements SubjectData {
     public Map<Set<Context>, Map<String, String>> getAllOptions() {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_GET_OPTIONS)) {
             Map<Set<Context>, Map<String, String>> options = new HashMap<>();
-
-            int prefixPriority = Integer.MIN_VALUE;
-            int suffixPriority = Integer.MIN_VALUE;
+            Map<Set<Context>, Integer> minPrefixPriority = new HashMap<>();
+            Map<Set<Context>, Integer> minSuffixPriority = new HashMap<>();
 
             for (Node n : enduring ? holder.getNodes() : holder.getTransientNodes()) {
                 if (!n.getValue()) {
                     continue;
                 }
 
-                if (!n.isMeta() || !n.isPrefix() || n.isSuffix()) {
+                if (!n.isMeta() && !n.isPrefix() && !n.isSuffix()) {
                     continue;
                 }
 
@@ -389,22 +387,24 @@ public class LuckPermsSubjectData implements SubjectData {
 
                 if (!options.containsKey(contexts)) {
                     options.put(contexts, new HashMap<>());
+                    minPrefixPriority.put(contexts, Integer.MIN_VALUE);
+                    minSuffixPriority.put(contexts, Integer.MIN_VALUE);
                 }
 
                 if (n.isPrefix()) {
                     Map.Entry<Integer, String> value = n.getPrefix();
-                    if (value.getKey() > prefixPriority) {
+                    if (value.getKey() > minPrefixPriority.get(contexts)) {
                         options.get(contexts).put("prefix", value.getValue());
-                        prefixPriority = value.getKey();
+                        minPrefixPriority.put(contexts, value.getKey());
                     }
                     continue;
                 }
 
                 if (n.isSuffix()) {
                     Map.Entry<Integer, String> value = n.getSuffix();
-                    if (value.getKey() > suffixPriority) {
+                    if (value.getKey() > minSuffixPriority.get(contexts)) {
                         options.get(contexts).put("suffix", value.getValue());
-                        suffixPriority = value.getKey();
+                        minSuffixPriority.put(contexts, value.getKey());
                     }
                     continue;
                 }
@@ -433,20 +433,21 @@ public class LuckPermsSubjectData implements SubjectData {
         try (Timing i = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_SET_OPTION)) {
             ContextSet context = LuckPermsService.convertContexts(set);
 
-            key = escapeCharacters(key);
-            value = escapeCharacters(value);
+            List<Node> toRemove = holder.getNodes().stream()
+                    .filter(n -> n.isMeta() && n.getMeta().getKey().equals(key))
+                    .collect(Collectors.toList());
+
+            toRemove.forEach(n -> {
+                try {
+                    holder.unsetPermission(n);
+                } catch (ObjectLacksException ignored) {}
+            });
 
             try {
                 if (enduring) {
-                    holder.setPermission(new NodeBuilder("meta." + key + "." + value)
-                            .withExtraContext(context)
-                            .build()
-                    );
+                    holder.setPermission(NodeFactory.makeMetaNode(key, value).withExtraContext(context).build());
                 } else {
-                    holder.setTransientPermission(new NodeBuilder("meta." + key + "." + value)
-                            .withExtraContext(context)
-                            .build()
-                    );
+                    holder.setTransientPermission(NodeFactory.makeMetaNode(key, value).withExtraContext(context).build());
                 }
             } catch (ObjectAlreadyHasException ignored) {}
             objectSave(holder);

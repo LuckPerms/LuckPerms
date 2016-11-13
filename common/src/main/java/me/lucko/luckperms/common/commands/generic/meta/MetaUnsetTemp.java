@@ -22,7 +22,6 @@
 
 package me.lucko.luckperms.common.commands.generic.meta;
 
-import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
@@ -54,7 +53,7 @@ public class MetaUnsetTemp extends SharedSubCommand {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) throws CommandException {
-        String key = MetaUtils.escapeCharacters(args.get(0));
+        String key = args.get(0);
         String server = ArgumentUtils.handleServer(1, args);
         String world = ArgumentUtils.handleWorld(2, args);
 

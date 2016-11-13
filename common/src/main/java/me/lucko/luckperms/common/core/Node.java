@@ -29,6 +29,7 @@ import com.google.common.collect.Maps;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
+import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.constants.Patterns;
@@ -132,21 +133,21 @@ public class Node implements me.lucko.luckperms.api.Node {
         isMeta = META_PATTERN.matcher(permission).matches();
         if (isMeta) {
             List<String> metaPart = Splitter.on('.').limit(2).splitToList(getPermission().substring("meta.".length()));
-            meta = Maps.immutableEntry(metaPart.get(0), metaPart.get(1));
+            meta = Maps.immutableEntry(MetaUtils.unescapeCharacters(metaPart.get(0)), MetaUtils.unescapeCharacters(metaPart.get(1)));
         }
 
         isPrefix = PREFIX_PATTERN.matcher(permission).matches();
         if (isPrefix) {
             List<String> prefixPart = Splitter.on('.').limit(2).splitToList(getPermission().substring("prefix.".length()));
             Integer i = Integer.parseInt(prefixPart.get(0));
-            prefix = Maps.immutableEntry(i, prefixPart.get(1));
+            prefix = Maps.immutableEntry(i, MetaUtils.unescapeCharacters(prefixPart.get(1)));
         }
 
         isSuffix = SUFFIX_PATTERN.matcher(permission).matches();
         if (isSuffix) {
             List<String> suffixPart = Splitter.on('.').limit(2).splitToList(getPermission().substring("suffix.".length()));
             Integer i = Integer.parseInt(suffixPart.get(0));
-            suffix = Maps.immutableEntry(i, suffixPart.get(1));
+            suffix = Maps.immutableEntry(i, MetaUtils.unescapeCharacters(suffixPart.get(1)));
         }
 
         resolvedShorthand = calculateShorthand();

@@ -26,6 +26,7 @@ import lombok.experimental.UtilityClass;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.core.NodeBuilder;
+import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
@@ -72,13 +73,17 @@ public class MigrationUtils {
                 contexts.removeAll("world");
 
                 for (Map.Entry<String, String> opt : e.getValue().entrySet()) {
-                    if (opt.getKey().equalsIgnoreCase("prefix") || opt.getKey().equalsIgnoreCase("suffix")) {
+                    if (opt.getKey().equalsIgnoreCase("prefix")) {
                         try {
-                            holder.setPermission(new NodeBuilder(opt.getKey().toLowerCase() + ".100." + opt.getValue()).setServerRaw(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
+                            holder.setPermission(NodeFactory.makePrefixNode(100, opt.getValue()).setServerRaw(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
+                        } catch (ObjectAlreadyHasException ignored) {}
+                    } else if (opt.getKey().equalsIgnoreCase("suffix")) {
+                        try {
+                            holder.setPermission(NodeFactory.makeSuffixNode(100, opt.getValue()).setServerRaw(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
                         } catch (ObjectAlreadyHasException ignored) {}
                     } else {
                         try {
-                            holder.setPermission(new NodeBuilder("meta." + opt.getKey() + "." + opt.getValue()).setServerRaw(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
+                            holder.setPermission(NodeFactory.makeMetaNode(opt.getKey(), opt.getValue()).setServerRaw(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
                         } catch (ObjectAlreadyHasException ignored) {}
                     }
                 }

@@ -135,6 +135,8 @@ public class LuckPermsUserSubject extends LuckPermsSubject {
     @Override
     public Optional<String> getOption(ContextSet contexts, String s) {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.USER_GET_OPTION)) {
+            service.getPlugin().getLog().warn("#getOption: " + contexts + " - " + s);
+
             if (hasData()) {
                 MetaData data = user.getUserData().getMetaData(service.calculateContexts(contexts));
                 if (s.equalsIgnoreCase("prefix")) {
@@ -149,6 +151,7 @@ public class LuckPermsUserSubject extends LuckPermsSubject {
                     }
                 }
 
+                service.getPlugin().getLog().info(data.getMeta().toString());
                 if (data.getMeta().containsKey(s)) {
                     return Optional.of(data.getMeta().get(s));
                 }

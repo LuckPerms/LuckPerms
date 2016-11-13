@@ -22,7 +22,6 @@
 
 package me.lucko.luckperms.common.commands.generic.meta;
 
-import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.Arg;
@@ -34,7 +33,7 @@ import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.ContextHelper;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.NodeBuilder;
+import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.utils.Predicates;
@@ -57,14 +56,13 @@ public class MetaSet extends SharedSubCommand {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) throws CommandException {
-        String key = MetaUtils.escapeCharacters(args.get(0));
-        String value = MetaUtils.escapeCharacters(args.get(1));
+        String key = args.get(0);
+        String value = args.get(1);
 
-        String node = "meta." + key + "." + value;
         String server = ArgumentUtils.handleServer(2, args);
         String world = ArgumentUtils.handleWorld(3, args);
 
-        Node n = new NodeBuilder(node).setServer(server).setWorld(world).build();
+        Node n = NodeFactory.makeMetaNode(key, value).setServer(server).setWorld(world).build();
 
         if (holder.hasPermission(n).asBoolean()) {
             Message.ALREADY_HAS_META.send(sender, holder.getFriendlyName());

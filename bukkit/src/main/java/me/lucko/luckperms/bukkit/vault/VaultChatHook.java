@@ -28,6 +28,7 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.caching.MetaData;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.core.NodeBuilder;
+import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.users.User;
@@ -83,11 +84,8 @@ public class VaultChatHook extends Chat {
         perms.log("Setting meta: '" + node + "' for " + holder.getObjectName() + " on world " + world + ", server " + perms.getServer());
 
         perms.getScheduler().scheduleTask(() -> {
-            String k = escapeCharacters(node);
-            String v = escapeCharacters(value);
-
             List<Node> toRemove = holder.getNodes().stream()
-                    .filter(n -> n.isMeta() && n.getMeta().getKey().equals(k))
+                    .filter(n -> n.isMeta() && n.getMeta().getKey().equals(node))
                     .collect(Collectors.toList());
 
             toRemove.forEach(n -> {
@@ -96,7 +94,7 @@ public class VaultChatHook extends Chat {
                 } catch (ObjectLacksException ignored) {}
             });
 
-            Node.Builder metaNode = new NodeBuilder("meta." + k + "." + v).setValue(true);
+            Node.Builder metaNode = NodeFactory.makeMetaNode(node, value).setValue(true);
             if (!perms.getServer().equalsIgnoreCase("global")) {
                 metaNode.setServer(perms.getServer());
             }

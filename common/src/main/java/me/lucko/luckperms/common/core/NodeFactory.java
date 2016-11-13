@@ -27,6 +27,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import lombok.experimental.UtilityClass;
+import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.api.Node;
 
 import java.util.List;
@@ -100,5 +101,17 @@ public class NodeFactory {
 
     public static Node.Builder builderFromExisting(Node other) {
         return new NodeBuilder(other);
+    }
+
+    public static NodeBuilder makeMetaNode(String key, String value) {
+        return new NodeBuilder("meta." + MetaUtils.escapeCharacters(key) + "." + MetaUtils.escapeCharacters(value));
+    }
+
+    public static NodeBuilder makePrefixNode(int priority, String prefix) {
+        return new NodeBuilder("prefix." + priority + "." + MetaUtils.escapeCharacters(prefix));
+    }
+
+    public static NodeBuilder makeSuffixNode(int priority, String suffix) {
+        return new NodeBuilder("suffix." + priority + "." + MetaUtils.escapeCharacters(suffix));
     }
 }
