@@ -67,7 +67,10 @@ import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.scheduler.AsynchronousExecutor;
 import org.spongepowered.api.scheduler.Scheduler;
+import org.spongepowered.api.scheduler.SpongeExecutorService;
+import org.spongepowered.api.scheduler.SynchronousExecutor;
 import org.spongepowered.api.service.permission.PermissionDescription;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
@@ -77,7 +80,6 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -106,8 +108,15 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     private Path configDir;
 
     private Scheduler scheduler = Sponge.getScheduler();
-    private Executor syncExecutor = Sponge.getScheduler().createSyncExecutor(this);
-    private Executor asyncExecutor = Sponge.getScheduler().createAsyncExecutor(this);
+
+    @Inject
+    @SynchronousExecutor
+    private SpongeExecutorService syncExecutor;
+
+    @Inject
+    @AsynchronousExecutor
+    private SpongeExecutorService asyncExecutor;
+
     private LPTimings timings;
 
     private final Set<UUID> ignoringLogs = ConcurrentHashMap.newKeySet();
