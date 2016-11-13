@@ -62,7 +62,7 @@ public class LogUserHistory extends SubCommand<Log> {
                 page = Integer.parseInt(args.get(1));
             } catch (NumberFormatException e) {
                 // invalid page
-                return showLog(-1, null, null, null);
+                return showLog(-1, null, sender, log);
             }
         }
 

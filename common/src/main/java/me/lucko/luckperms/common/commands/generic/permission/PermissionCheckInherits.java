@@ -70,17 +70,13 @@ public class PermissionCheckInherits extends SharedSubCommand {
                 break;
         }
 
-        String location = null;
-        if (result.getLocation().isPresent()) {
-            if (result.getLocation().get().equals(holder.getObjectName())) {
-                location = "self";
-            } else {
-                location = result.getLocation().get();
-            }
+        String location = result.getLocation().orElse(null);
+        if (location != null && location.equalsIgnoreCase(holder.getObjectName())) {
+            location = "self";
         }
 
         Util.sendPluginMessage(sender, "&b" + node + ": " + Util.formatTristate(result.getResult()) +
-                (result.getLocation().isPresent() ? " &7(inherited from &a" + location + "&7)" : ""));
+                (location != null ? " &7(inherited from &a" + location + "&7)" : ""));
         return CommandResult.SUCCESS;
     }
 }

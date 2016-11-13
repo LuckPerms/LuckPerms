@@ -98,7 +98,7 @@ public class LogRecent extends SubCommand<Log> {
                     return showLog(p, uuid, sender, log);
                 } catch (NumberFormatException e) {
                     // Invalid page
-                    return showLog(-1, null, null, null);
+                    return showLog(-1, null, sender, log);
                 }
             }
 
@@ -116,7 +116,7 @@ public class LogRecent extends SubCommand<Log> {
                 return showLog(p, u, sender, log);
             } catch (NumberFormatException e) {
                 // Invalid page
-                return showLog(-1, null, null, null);
+                return showLog(-1, null, sender, log);
             }
         }
     }

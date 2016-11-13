@@ -75,15 +75,15 @@ public abstract class SharedSubCommand {
     }
 
     public void sendUsage(Sender sender) {
-        String usage = "";
+        StringBuilder sb = new StringBuilder();
         if (args != null) {
-            usage += "&3 - &7";
+            sb.append("&3 - &7");
             for (Arg arg : args) {
-                usage += arg.asPrettyString() + " ";
+                sb.append(arg.asPrettyString()).append(" ");
             }
         }
 
-        Util.sendPluginMessage(sender, "&3> &a" + getName() + usage);
+        Util.sendPluginMessage(sender, "&3> &a" + getName() + sb.toString());
     }
 
     public void sendDetailedUsage(Sender sender) {

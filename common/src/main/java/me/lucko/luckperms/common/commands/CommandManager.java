@@ -25,7 +25,6 @@ package me.lucko.luckperms.common.commands;
 import com.google.common.collect.ImmutableList;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import me.lucko.luckperms.api.data.Callback;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.group.CreateGroup;
 import me.lucko.luckperms.common.commands.group.DeleteGroup;
@@ -49,6 +48,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -88,10 +88,12 @@ public class CommandManager {
      * @param args the arguments provided
      * @param result the callback to be called when the command has fully executed
      */
-    public void onCommand(Sender sender, String label, List<String> args, Callback<CommandResult> result) {
+    public void onCommand(Sender sender, String label, List<String> args, Consumer<CommandResult> result) {
         plugin.doAsync(() -> {
             CommandResult r = onCommand(sender, label, args);
-            plugin.doSync(() -> result.onComplete(r));
+            if (result != null) {
+                plugin.doSync(() -> result.accept(r));
+            }
         });
     }
 
@@ -343,6 +345,8 @@ public class CommandManager {
                 case "removetempprefix":
                 case "removetempsuffix":
                     args.add(2, "meta");
+                    break;
+                default:
                     break;
             }
 

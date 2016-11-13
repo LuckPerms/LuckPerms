@@ -55,15 +55,15 @@ public abstract class SubCommand<T> extends Command<T, Void> {
      */
     @Override
     public void sendUsage(Sender sender, String label) {
-        String usage = "";
+        StringBuilder sb = new StringBuilder();
         if (getArgs().isPresent()) {
-            usage += "&3 - &7";
+            sb.append("&3 - &7");
             for (Arg arg : getArgs().get()) {
-                usage += arg.asPrettyString() + " ";
+                sb.append(arg.asPrettyString()).append(" ");
             }
         }
 
-        Util.sendPluginMessage(sender, "&3> &a" + getName().toLowerCase() + usage);
+        Util.sendPluginMessage(sender, "&3> &a" + getName().toLowerCase() + sb.toString());
     }
 
     @Override

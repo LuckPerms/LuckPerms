@@ -40,8 +40,6 @@ import static me.lucko.luckperms.common.core.PermissionHolder.exportToLegacy;
 @SuppressWarnings("unused")
 @AllArgsConstructor
 public class PermissionHolderLink implements PermissionHolder {
-
-    @NonNull
     private final me.lucko.luckperms.common.core.PermissionHolder master;
 
     @Override

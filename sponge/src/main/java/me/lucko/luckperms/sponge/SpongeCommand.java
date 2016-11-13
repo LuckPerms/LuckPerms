@@ -24,7 +24,6 @@ package me.lucko.luckperms.sponge;
 
 import co.aikar.timings.Timing;
 import com.google.common.base.Splitter;
-import me.lucko.luckperms.api.data.Callback;
 import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Patterns;
@@ -57,7 +56,7 @@ class SpongeCommand extends CommandManager implements CommandCallable {
                     plugin.getSenderFactory().wrap(source),
                     "perms",
                     Util.stripQuotes(Splitter.on(Patterns.COMMAND_SEPARATOR).omitEmptyStrings().splitToList(s)),
-                    Callback.empty()
+                    null
             );
             return CommandResult.success();
         }
