@@ -23,7 +23,6 @@
 package me.lucko.luckperms.common.commands;
 
 import com.google.common.collect.ImmutableList;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.group.CreateGroup;
@@ -51,34 +50,41 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-@AllArgsConstructor
 public class CommandManager {
     @Getter
     private final LuckPermsPlugin plugin;
 
     @Getter
-    private final List<BaseCommand> mainCommands = ImmutableList.<BaseCommand>builder()
-            .add(new UserMainCommand())
-            .add(new GroupMainCommand())
-            .add(new TrackMainCommand())
-            .add(new LogMainCommand())
-            .add(new SyncCommand())
-            .add(new NetworkSyncCommand())
-            .add(new InfoCommand())
-            .add(new DebugCommand())
-            .add(new VerboseCommand())
-            .add(new ImportCommand())
-            .add(new ExportCommand())
-            .add(new QueueCommand())
-            .add(new MigrationMainCommand())
-            .add(new UsersBulkEditMainCommand())
-            .add(new CreateGroup())
-            .add(new DeleteGroup())
-            .add(new ListGroups())
-            .add(new CreateTrack())
-            .add(new DeleteTrack())
-            .add(new ListTracks())
-            .build();
+    private final List<BaseCommand> mainCommands;
+
+    public CommandManager(LuckPermsPlugin plugin) {
+        this.plugin = plugin;
+
+        ImmutableList.Builder<BaseCommand> l = ImmutableList.builder();
+        l.add(new UserMainCommand())
+         .add(new GroupMainCommand())
+         .add(new TrackMainCommand())
+         .addAll(plugin.getExtraCommands())
+         .add(new LogMainCommand())
+         .add(new SyncCommand())
+         .add(new NetworkSyncCommand())
+         .add(new InfoCommand())
+         .add(new DebugCommand())
+         .add(new VerboseCommand())
+         .add(new ImportCommand())
+         .add(new ExportCommand())
+         .add(new QueueCommand())
+         .add(new MigrationMainCommand())
+         .add(new UsersBulkEditMainCommand())
+         .add(new CreateGroup())
+         .add(new DeleteGroup())
+         .add(new ListGroups())
+         .add(new CreateTrack())
+         .add(new DeleteTrack())
+         .add(new ListTracks());
+
+        mainCommands = l.build();
+    }
 
     /**
      * Generic on command method to be called from the command executor object of the platform

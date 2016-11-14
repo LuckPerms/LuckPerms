@@ -134,6 +134,18 @@ public enum Permission {
     LOG_NOTIFY(set("notify"), Type.LOG),
     LOG_EXPORT(set("export"), Type.LOG),
 
+    SPONGE_PERMISSION_INFO(set("permission.info"), Type.SPONGE),
+    SPONGE_PERMISSION_SET(set("permission.set"), Type.SPONGE),
+    SPONGE_PERMISSION_CLEAR(set("permission.clear"), Type.SPONGE),
+    SPONGE_PARENT_INFO(set("parent.info"), Type.SPONGE),
+    SPONGE_PARENT_ADD(set("parent.add"), Type.SPONGE),
+    SPONGE_PARENT_REMOVE(set("parent.remove"), Type.SPONGE),
+    SPONGE_PARENT_CLEAR(set("parent.clear"), Type.SPONGE),
+    SPONGE_OPTION_INFO(set("option.info"), Type.SPONGE),
+    SPONGE_OPTION_SET(set("option.set"), Type.SPONGE),
+    SPONGE_OPTION_UNSET(set("option.unset"), Type.SPONGE),
+    SPONGE_OPTION_CLEAR(set("option.clear"), Type.SPONGE),
+
     MIGRATION(set("migration"), Type.NONE);
 
     private static final String IDENTIFIER = "luckperms.";
@@ -167,7 +179,8 @@ public enum Permission {
         USER("user"),
         GROUP("group"),
         TRACK("track"),
-        LOG("log");
+        LOG("log"),
+        SPONGE("sponge");
         
         private final String tag;
 

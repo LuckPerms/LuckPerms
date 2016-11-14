@@ -24,6 +24,8 @@ package me.lucko.luckperms.common.commands.utils;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.common.utils.DateUtil;
@@ -110,6 +112,33 @@ public class ArgumentUtils {
         } catch (NumberFormatException e) {
             throw new InvalidPriorityException(args.get(index));
         }
+    }
+
+    public static ContextSet handleContexts(int fromIndex, List<String> args) {
+        if (args.size() <= fromIndex) {
+            return ContextSet.empty();
+        }
+
+        MutableContextSet contextSet = new MutableContextSet();
+        List<String> toQuery = args.subList(fromIndex, args.size());
+        for (String s : toQuery) {
+            int index = s.indexOf('=');
+            if (index != -1) {
+                String key = s.substring(0, index);
+                if (key.equals("")) {
+                    continue;
+                }
+
+                String value = s.substring(index + 1);
+                if (value.equals("")) {
+                    continue;
+                }
+
+                contextSet.add(key, value);
+            }
+        }
+
+        return contextSet.makeImmutable();
     }
 
     public static abstract class ArgumentException extends CommandException {}

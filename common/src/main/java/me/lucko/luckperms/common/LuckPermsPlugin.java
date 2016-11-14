@@ -27,6 +27,7 @@ import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.common.api.ApiProvider;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
+import me.lucko.luckperms.common.commands.BaseCommand;
 import me.lucko.luckperms.common.commands.ConsecutiveExecutor;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.LPConfiguration;
@@ -44,6 +45,7 @@ import me.lucko.luckperms.common.utils.DebugHandler;
 import me.lucko.luckperms.common.utils.LocaleManager;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -246,6 +248,10 @@ public interface LuckPermsPlugin {
      * @return a set of contexts
      */
     Set<Contexts> getPreProcessContexts(boolean op);
+
+    default List<BaseCommand> getExtraCommands() {
+        return Collections.emptyList();
+    }
 
     /**
      * Gets a set of players ignoring logging output

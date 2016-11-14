@@ -31,6 +31,7 @@ import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.api.ApiProvider;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
+import me.lucko.luckperms.common.commands.BaseCommand;
 import me.lucko.luckperms.common.commands.ConsecutiveExecutor;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.LPConfiguration;
@@ -51,6 +52,7 @@ import me.lucko.luckperms.common.utils.BufferedRequest;
 import me.lucko.luckperms.common.utils.DebugHandler;
 import me.lucko.luckperms.common.utils.LocaleManager;
 import me.lucko.luckperms.common.utils.LogFactory;
+import me.lucko.luckperms.sponge.commands.SpongeMainCommand;
 import me.lucko.luckperms.sponge.contexts.WorldCalculator;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.timings.LPTimings;
@@ -373,6 +375,11 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     @Override
     public void doAsyncRepeating(Runnable r, long interval) {
         scheduler.createTaskBuilder().async().intervalTicks(interval).execute(r).submit(this);
+    }
+
+    @Override
+    public List<BaseCommand> getExtraCommands() {
+        return Collections.singletonList(new SpongeMainCommand(this));
     }
 
     private void registerPermission(PermissionService p, String node) {
