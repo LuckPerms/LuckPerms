@@ -120,9 +120,10 @@ public class SpongeMainCommand extends BaseCommand<Void, SubjectData> {
                 int overflow = extra.size();
                 extra.clear();
                 Util.sendPluginMessage(sender, "&aCurrent Subjects:\n" + Util.listToCommaSep(subjects) + "&b ... and &a" + overflow + " &bmore.");
+            } else {
+                Util.sendPluginMessage(sender, "&aCurrent Subjects:\n" + Util.listToCommaSep(subjects));
             }
 
-            Util.sendPluginMessage(sender, "&aCurrent Subjects:\n" + Util.listToCommaSep(subjects));
             return CommandResult.SUCCESS;
         }
 

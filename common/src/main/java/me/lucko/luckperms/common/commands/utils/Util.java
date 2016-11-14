@@ -240,10 +240,10 @@ public class Util {
     }
 
     public static final MetaComparator META_COMPARATOR = new MetaComparator();
-    public class MetaComparator implements Comparator<Map.Entry<Integer, Node>> {
+    public class MetaComparator implements Comparator<Map.Entry<Integer, ? extends Node>> {
 
         @Override
-        public int compare(Map.Entry<Integer, Node> o1, Map.Entry<Integer, Node> o2) {
+        public int compare(Map.Entry<Integer, ? extends Node> o1, Map.Entry<Integer, ? extends Node> o2) {
             int result = Integer.compare(o1.getKey(), o2.getKey());
             return result != 0 ? result : 1;
         }
