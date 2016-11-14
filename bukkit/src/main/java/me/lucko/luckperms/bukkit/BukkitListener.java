@@ -35,6 +35,7 @@ import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.server.PluginEnableEvent;
 
 import java.util.UUID;
 
@@ -141,6 +142,13 @@ class BukkitListener extends AbstractListener implements Listener {
         if (s.startsWith("op") || s.startsWith("deop")) {
             e.setCancelled(true);
             e.getPlayer().sendMessage(Message.OP_DISABLED.toString());
+        }
+    }
+
+    @EventHandler
+    public void onPluginEnable(PluginEnableEvent e) {
+        if (e.getPlugin().getName().equalsIgnoreCase("Vault")) {
+            plugin.tryVaultHook(true);
         }
     }
 }

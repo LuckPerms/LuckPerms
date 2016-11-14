@@ -198,19 +198,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         }
 
         // Provide vault support
-        getLog().info("Attempting to hook into Vault...");
-        try {
-            if (getServer().getPluginManager().isPluginEnabled("Vault")) {
-                vaultHook = new VaultHook();
-                vaultHook.hook(this);
-                getLog().info("Registered Vault permission & chat hook.");
-            } else {
-                getLog().info("Vault not found.");
-            }
-        } catch (Exception e) {
-            getLog().severe("Error occurred whilst hooking into Vault.");
-            e.printStackTrace();
-        }
+        tryVaultHook(false);
 
         // register with the LP API
         getLog().info("Registering API...");
@@ -265,6 +253,27 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
         if (vaultHook != null) {
             vaultHook.unhook(this);
+        }
+    }
+
+    public void tryVaultHook(boolean force) {
+        if (vaultHook != null) {
+            return;
+        }
+
+        getLog().info("Attempting to hook with Vault...");
+        try {
+            if (force || getServer().getPluginManager().isPluginEnabled("Vault")) {
+                vaultHook = new VaultHook();
+                vaultHook.hook(this);
+                getLog().info("Registered Vault permission & chat hook.");
+            } else {
+                getLog().info("Vault not found.");
+            }
+        } catch (Exception e) {
+            vaultHook = null;
+            getLog().severe("Error occurred whilst hooking into Vault.");
+            e.printStackTrace();
         }
     }
 

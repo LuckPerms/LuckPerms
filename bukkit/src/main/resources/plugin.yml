@@ -5,7 +5,8 @@ author: Luck
 website: https://github.com/lucko/LuckPerms
 
 main: me.lucko.luckperms.bukkit.LPBukkitPlugin
-softdepend: [Vault, PermissionsEx, GroupManager, PowerfulPerms, zPermissions, bPermissions] # For migration
+load: STARTUP
+softdepend: [PermissionsEx, GroupManager, PowerfulPerms, zPermissions, bPermissions] # For migration
 
 commands:
   luckperms:
