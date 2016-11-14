@@ -6,7 +6,15 @@ website: https://github.com/lucko/LuckPerms
 
 main: me.lucko.luckperms.bukkit.LPBukkitPlugin
 load: STARTUP
-softdepend: [PermissionsEx, GroupManager, PowerfulPerms, zPermissions, bPermissions] # For migration
+
+# This means that all plugins that (soft-)depend on Vault, depend on LuckPerms too.
+# It in turn fixes issues where plugins using Vault cache the provided instance when their plugin enables, or
+# when they check for the presence of a service provider, before LuckPerms has enabled.
+loadbefore: [Vault]
+
+# These are all soft dependencies for the migration feature. We check to see if these plugins are enabled
+# when setting up LuckPerms commands. That way, commands only appear if the corresponding plugin is loaded.
+softdepend: [PermissionsEx, GroupManager, PowerfulPerms, zPermissions, bPermissions]
 
 commands:
   luckperms:
@@ -15,3 +23,4 @@ commands:
 
 
 # Permissions are registered programmatically instead of here.
+# See: the last method in me.lucko.luckperms.bukkit.LPBukkitPlugin
