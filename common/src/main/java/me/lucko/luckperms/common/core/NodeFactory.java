@@ -26,11 +26,13 @@ import com.google.common.base.Splitter;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import lombok.experimental.UtilityClass;
 import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.api.Node;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Utility class to make Node(Builder) instances from serialised strings or existing Nodes
@@ -40,7 +42,7 @@ public class NodeFactory {
     private static final LoadingCache<String, Node> CACHE = CacheBuilder.newBuilder()
             .build(new CacheLoader<String, Node>() {
                 @Override
-                public Node load(String s) {
+                public Node load(String s) throws Exception {
                     return builderFromSerialisedNode(s, true).build();
                 }
             });
@@ -48,13 +50,17 @@ public class NodeFactory {
     private static final LoadingCache<String, Node> CACHE_NEGATED = CacheBuilder.newBuilder()
             .build(new CacheLoader<String, Node>() {
                 @Override
-                public Node load(String s) {
+                public Node load(String s) throws Exception {
                     return builderFromSerialisedNode(s, false).build();
                 }
             });
 
     public static Node fromSerialisedNode(String s, Boolean b) {
-        return b ? CACHE.getUnchecked(s) : CACHE_NEGATED.getUnchecked(s);
+        try {
+            return b ? CACHE.get(s) : CACHE_NEGATED.get(s);
+        } catch (UncheckedExecutionException | ExecutionException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     public static Node.Builder newBuilder(String s) {
