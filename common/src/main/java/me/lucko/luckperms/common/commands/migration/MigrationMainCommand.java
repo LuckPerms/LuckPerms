@@ -22,7 +22,6 @@
 
 package me.lucko.luckperms.common.commands.migration;
 
-import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.*;
 import me.lucko.luckperms.common.commands.sender.Sender;
@@ -32,13 +31,17 @@ import me.lucko.luckperms.common.constants.Message;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class MigrationMainCommand extends MainCommand<Object> {
+    private List<Command<Object, ?>> commands = null;
+
     public MigrationMainCommand() {
-        super("Migration", "Migration commands", "/%s migration", 1, ImmutableList.copyOf(getAvailableCommands()));
+        super("Migration", "Migration commands", "/%s migration", 1, null);
     }
 
+    @SuppressWarnings("unchecked")
     private static List<Command<Object, ?>> getAvailableCommands() {
         List<SubCommand<Object>> l = new ArrayList<>();
 
@@ -85,6 +88,22 @@ public class MigrationMainCommand extends MainCommand<Object> {
         return l.stream().collect(Collectors.toList());
     }
 
+    @SuppressWarnings("deprecation")
+    @Deprecated
+    @Override
+    public synchronized Optional<List<Command<Object, ?>>> getChildren() {
+        if (commands == null) {
+            commands = getAvailableCommands();
+        }
+
+        return Optional.of(commands);
+    }
+
+    @SuppressWarnings("deprecation")
+    public List<Command<Object, ?>> getSubCommands() {
+        return getChildren().orElse(null);
+    }
+
     @Override
     public boolean isAuthorized(Sender sender) {
         return sender.getUuid().equals(Constants.getConsoleUUID());
@@ -106,8 +125,8 @@ public class MigrationMainCommand extends MainCommand<Object> {
     }
 
     @Override
-    protected Void getTarget(String target, LuckPermsPlugin plugin, Sender sender) {
-        return null;
+    protected Object getTarget(String target, LuckPermsPlugin plugin, Sender sender) {
+        return new Object();
     }
 
     @Override

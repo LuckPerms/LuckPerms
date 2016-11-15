@@ -12,10 +12,6 @@ load: STARTUP
 # when they check for the presence of a service provider, before LuckPerms has enabled.
 loadbefore: [Vault]
 
-# These are all soft dependencies for the migration feature. We check to see if these plugins are enabled
-# when setting up LuckPerms commands. That way, commands only appear if the corresponding plugin is loaded.
-softdepend: [PermissionsEx, GroupManager, PowerfulPerms, zPermissions, bPermissions]
-
 commands:
   luckperms:
     description: Manage permissions

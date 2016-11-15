@@ -23,7 +23,6 @@
 package me.lucko.luckperms.common.commands;
 
 import lombok.Getter;
-import lombok.NonNull;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
@@ -42,7 +41,7 @@ public abstract class MainCommand<T> extends BaseCommand<Void, T> {
     private final String usage;
     private final int minArgs; // equals 1 if the command doesn't take a mid argument, e.g. /lp user <USER> sub-command....
 
-    public MainCommand(String name, String description, String usage, int minArgs, @NonNull List<Command<T, ?>> children) {
+    public MainCommand(String name, String description, String usage, int minArgs, List<Command<T, ?>> children) {
         super(name, description, null, Predicates.alwaysFalse(), null, children);
         this.usage = usage;
         this.minArgs = minArgs;
@@ -85,7 +84,6 @@ public abstract class MainCommand<T> extends BaseCommand<Void, T> {
         T t = getTarget(name, plugin, sender);
         if (t != null) {
             CommandResult result;
-
             try {
                 result = sub.execute(plugin, sender, t, strippedArgs, label);
             } catch (CommandException e) {
