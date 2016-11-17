@@ -33,11 +33,11 @@ import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.constants.Patterns;
+import me.lucko.luckperms.common.utils.ShorthandParser;
 
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * An immutable permission node
@@ -150,7 +150,7 @@ public class Node implements me.lucko.luckperms.api.Node {
             suffix = Maps.immutableEntry(i, MetaUtils.unescapeCharacters(suffixPart.get(1)));
         }
 
-        resolvedShorthand = calculateShorthand();
+        resolvedShorthand = ImmutableList.copyOf(ShorthandParser.parseShorthand(getPermission()));
         serializedNode = calculateSerializedNode();
     }
 
@@ -411,60 +411,6 @@ public class Node implements me.lucko.luckperms.api.Node {
     @Override
     public String toSerializedNode() {
         return serializedNode;
-    }
-
-    private List<String> calculateShorthand() {
-        if (!Patterns.SHORTHAND_NODE.matcher(getPermission()).find()) {
-            return ImmutableList.of();
-        }
-
-        if (!getPermission().contains(".")) {
-            return ImmutableList.of();
-        }
-
-        Iterable<String> parts = Splitter.on('.').split(getPermission());
-        List<Set<String>> nodeParts = new ArrayList<>();
-
-        for (String s : parts) {
-            if ((!s.startsWith("(") || !s.endsWith(")")) || (!s.contains("|") && !s.contains("-"))) {
-                nodeParts.add(Collections.singleton(s));
-                continue;
-            }
-
-            final String bits = s.substring(1, s.length() - 1);
-            if (s.contains("|")) {
-                nodeParts.add(new HashSet<>(Splitter.on('|').splitToList(bits)));
-            } else {
-                List<String> range = Splitter.on('-').limit(2).splitToList(bits);
-                if (isChar(range.get(0), range.get(1))) {
-                    nodeParts.add(getCharRange(range.get(0).charAt(0), range.get(1).charAt(0)));
-                } else if (isInt(range.get(0), range.get(1))) {
-                    nodeParts.add(IntStream.rangeClosed(Integer.parseInt(range.get(0)), Integer.parseInt(range.get(1))).boxed()
-                            .map(i -> "" + i)
-                            .collect(Collectors.toSet())
-                    );
-                } else {
-                    // Fallback
-                    nodeParts.add(Collections.singleton(s));
-                }
-            }
-        }
-
-        Set<String> nodes = new HashSet<>();
-        for (Set<String> set : nodeParts) {
-            final Set<String> newNodes = new HashSet<>();
-            if (nodes.isEmpty()) {
-                newNodes.addAll(set);
-            } else {
-                nodes.forEach(str -> newNodes.addAll(set.stream()
-                        .map(add -> str + "." + add)
-                        .collect(Collectors.toList()))
-                );
-            }
-            nodes = newNodes;
-        }
-
-        return ImmutableList.copyOf(nodes);
     }
 
     private String calculateSerializedNode() {
