@@ -469,22 +469,12 @@ public abstract class PermissionHolder {
         invalidateCache(false);
     }
 
-    @Deprecated
     public void setNodes(Map<String, Boolean> nodes) {
         Set<Node> set = nodes.entrySet().stream()
                 .map(e -> makeNode(e.getKey(), e.getValue()))
                 .collect(Collectors.toSet());
 
         setNodes(set);
-    }
-
-    public void addNodeUnchecked(Node node) {
-        synchronized (nodes) {
-            if (!nodes.add(node)) {
-                return;
-            }
-        }
-        invalidateCache(true);
     }
 
     /**

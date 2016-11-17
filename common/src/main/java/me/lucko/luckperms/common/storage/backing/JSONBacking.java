@@ -26,7 +26,6 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import lombok.Cleanup;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.groups.GroupManager;
 import me.lucko.luckperms.common.tracks.Track;
@@ -93,11 +92,13 @@ public class JSONBacking extends FlatfileBacking {
                         user.setPrimaryGroup(reader.nextString()); // primaryGroup
                         reader.nextName(); // perms
                         reader.beginObject();
+                        Map<String, Boolean> map = new HashMap<>();
                         while (reader.hasNext()) {
                             String node = reader.nextName();
                             boolean b = reader.nextBoolean();
-                            user.addNodeUnchecked(NodeFactory.fromSerialisedNode(node, b));
+                            map.put(node, b);
                         }
+                        user.setNodes(map);
                         reader.endObject();
                         reader.endObject();
 
@@ -255,11 +256,13 @@ public class JSONBacking extends FlatfileBacking {
                         reader.nextString(); // name
                         reader.nextName(); //perms
                         reader.beginObject();
+                        Map<String, Boolean> map = new HashMap<>();
                         while (reader.hasNext()) {
                             String node = reader.nextName();
                             boolean b = reader.nextBoolean();
-                            group.addNodeUnchecked(NodeFactory.fromSerialisedNode(node, b));
+                            map.put(node, b);
                         }
+                        group.setNodes(map);
 
                         reader.endObject();
                         reader.endObject();
@@ -305,11 +308,13 @@ public class JSONBacking extends FlatfileBacking {
                     reader.nextString(); // name
                     reader.nextName(); // perms
                     reader.beginObject();
+                    Map<String, Boolean> map = new HashMap<>();
                     while (reader.hasNext()) {
                         String node = reader.nextName();
                         boolean b = reader.nextBoolean();
-                        group.addNodeUnchecked(NodeFactory.fromSerialisedNode(node, b));
+                        map.put(node, b);
                     }
+                    group.setNodes(map);
                     reader.endObject();
                     reader.endObject();
                     return true;

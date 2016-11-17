@@ -134,8 +134,6 @@ public class UserManager extends AbstractManager<UserIdentifier, User> {
                 for (UUID uuid : players) {
                     UUID internal = plugin.getUuidCache().getUUID(uuid);
                     plugin.getStorage().loadUser(internal, "null").join();
-                    User user = get(internal);
-                    user.getRefreshBuffer().request();
                 }
             });
         });
