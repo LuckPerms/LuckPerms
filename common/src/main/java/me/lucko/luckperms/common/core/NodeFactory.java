@@ -110,6 +110,13 @@ public class NodeFactory {
     }
 
     public static NodeBuilder makeMetaNode(String key, String value) {
+        if (key.equalsIgnoreCase("prefix")) {
+            return makePrefixNode(100, value);
+        }
+        if (key.equalsIgnoreCase("suffix")) {
+            return makeSuffixNode(100, value);
+        }
+
         return new NodeBuilder("meta." + MetaUtils.escapeCharacters(key) + "." + MetaUtils.escapeCharacters(value));
     }
 

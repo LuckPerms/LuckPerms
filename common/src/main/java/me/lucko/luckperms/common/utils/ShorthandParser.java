@@ -24,6 +24,7 @@ package me.lucko.luckperms.common.utils;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
+import lombok.experimental.UtilityClass;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -33,6 +34,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+@UtilityClass
 public class ShorthandParser {
     private static final List<Function<String, List<String>>> PARSERS = ImmutableList.<Function<String, List<String>>>builder()
             .add(new ListParser())
@@ -104,14 +106,10 @@ public class ShorthandParser {
 
         @Override
         public List<String> apply(String s) {
-            if (s.contains("|")) {
-                s = s.replace('|', ',');
-            }
-
+            s = s.replace('|', ',');
             if (!s.contains(",")) {
                 return null;
             }
-
             return Splitter.on(',').splitToList(s);
         }
     }
@@ -124,14 +122,13 @@ public class ShorthandParser {
             if (index == -1) {
                 return null;
             }
-
             String before = s.substring(0, index);
             String after = s.substring(index + 1);
 
             if (isInt(before) && isInt(after)) {
-                return IntStream.rangeClosed(Integer.parseInt(before), Integer.parseInt(after)).boxed().map(i -> "" + i).collect(Collectors.toList());
+                return IntStream.rangeClosed(Integer.parseInt(before), Integer.parseInt(after))
+                        .boxed().map(i -> "" + i).collect(Collectors.toList());
             }
-
             return null;
         }
 
@@ -153,14 +150,12 @@ public class ShorthandParser {
             if (index == -1) {
                 return null;
             }
-
-            String before = s.substring(0, s.indexOf("-"));
-            String after = s.substring(s.indexOf("-") + 1);
+            String before = s.substring(0, index);
+            String after = s.substring(index + 1);
 
             if (before.length() == 1 && after.length() == 1) {
                 return getCharRange(before.charAt(0), after.charAt(0));
             }
-
             return null;
         }
 
