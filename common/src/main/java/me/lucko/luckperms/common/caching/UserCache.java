@@ -36,6 +36,7 @@ import me.lucko.luckperms.api.caching.PermissionData;
 import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.users.User;
+import me.lucko.luckperms.common.utils.ExtractedContexts;
 
 import java.util.Set;
 
@@ -78,7 +79,7 @@ public class UserCache implements UserData {
 
                 @Override
                 public ListenableFuture<MetaCache> reload(Contexts contexts, MetaCache oldData) {
-                    oldData.loadMeta(user.accumulateMeta(null, null, contexts));
+                    oldData.loadMeta(user.accumulateMeta(null, null, ExtractedContexts.generate(contexts)));
                     return Futures.immediateFuture(oldData);
                 }
             });
@@ -103,7 +104,7 @@ public class UserCache implements UserData {
     @Override
     public MetaCache calculateMeta(@NonNull Contexts contexts) {
         MetaCache data = new MetaCache();
-        data.loadMeta(user.accumulateMeta(null, null, contexts));
+        data.loadMeta(user.accumulateMeta(null, null, ExtractedContexts.generate(contexts)));
         return data;
     }
 

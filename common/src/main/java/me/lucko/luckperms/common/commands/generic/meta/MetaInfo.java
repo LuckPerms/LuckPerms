@@ -33,6 +33,7 @@ import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.PermissionHolder;
+import me.lucko.luckperms.common.utils.ExtractedContexts;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.*;
@@ -49,7 +50,7 @@ public class MetaInfo extends SharedSubCommand {
         Set<LocalizedNode> meta = new HashSet<>();
 
         // Collect data
-        for (LocalizedNode node : holder.getAllNodes(null, Contexts.allowAll())) {
+        for (LocalizedNode node : holder.getAllNodes(null, ExtractedContexts.generate(Contexts.allowAll()))) {
             if (!node.isSuffix() && !node.isPrefix() && !node.isMeta()) {
                 continue;
             }

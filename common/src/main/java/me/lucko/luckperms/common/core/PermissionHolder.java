@@ -33,7 +33,6 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.api.event.events.*;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.api.internal.GroupLink;
@@ -42,6 +41,7 @@ import me.lucko.luckperms.common.caching.MetaHolder;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.utils.Cache;
+import me.lucko.luckperms.common.utils.ExtractedContexts;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
@@ -241,10 +241,10 @@ public abstract class PermissionHolder {
     /**
      * Resolves inherited nodes and returns them
      * @param excludedGroups a list of groups to exclude
-     * @param context context to decide if groups should be applied
+     * @param contexts context to decide if groups should be applied
      * @return a set of nodes
      */
-    public SortedSet<LocalizedNode> getAllNodes(List<String> excludedGroups, Contexts context) {
+    public SortedSet<LocalizedNode> getAllNodes(List<String> excludedGroups, ExtractedContexts contexts) {
         SortedSet<LocalizedNode> all = new TreeSet<>((SortedSet<LocalizedNode>) getPermissions(true));
 
         if (excludedGroups == null) {
@@ -259,16 +259,14 @@ public abstract class PermissionHolder {
                 .filter(Node::isGroupNode)
                 .collect(Collectors.toSet());
 
-        MutableContextSet contexts = MutableContextSet.fromSet(context.getContexts());
-        String server = contexts.getValues("server").stream().findAny().orElse(null);
-        String world = contexts.getValues("world").stream().findAny().orElse(null);
-        contexts.removeAll("server");
-        contexts.removeAll("world");
+        Contexts context = contexts.getContexts();
+        String server = contexts.getServer();
+        String world = contexts.getWorld();
 
         parents.removeIf(node ->
                 !node.shouldApplyOnServer(server, context.isApplyGlobalGroups(), plugin.getConfiguration().isApplyingRegex()) ||
                 !node.shouldApplyOnWorld(world, context.isApplyGlobalWorldGroups(), plugin.getConfiguration().isApplyingRegex()) ||
-                !node.shouldApplyWithContext(contexts, false)
+                !node.shouldApplyWithContext(contexts.getContextSet(), false)
         );
 
         TreeSet<Map.Entry<Integer, Node>> sortedParents = new TreeSet<>(Util.META_COMPARATOR.reversed());
@@ -293,7 +291,7 @@ public abstract class PermissionHolder {
             }
 
             inherited:
-            for (LocalizedNode inherited : group.getAllNodes(excludedGroups, context)) {
+            for (LocalizedNode inherited : group.getAllNodes(excludedGroups, contexts)) {
                 for (LocalizedNode existing : all) {
                     if (existing.getNode().almostEquals(inherited.getNode())) {
                         continue inherited;
@@ -307,7 +305,7 @@ public abstract class PermissionHolder {
         return all;
     }
 
-    public MetaHolder accumulateMeta(MetaHolder holder, List<String> excludedGroups, Contexts context) {
+    public MetaHolder accumulateMeta(MetaHolder holder, List<String> excludedGroups, ExtractedContexts contexts) {
         if (holder == null) {
             holder = new MetaHolder();
         }
@@ -318,11 +316,9 @@ public abstract class PermissionHolder {
 
         excludedGroups.add(getObjectName().toLowerCase());
 
-        MutableContextSet contexts = MutableContextSet.fromSet(context.getContexts());
-        String server = contexts.getValues("server").stream().findAny().orElse(null);
-        String world = contexts.getValues("world").stream().findAny().orElse(null);
-        contexts.removeAll("server");
-        contexts.removeAll("world");
+        Contexts context = contexts.getContexts();
+        String server = contexts.getServer();
+        String world = contexts.getWorld();
 
         SortedSet<LocalizedNode> all = new TreeSet<>((SortedSet<LocalizedNode>) getPermissions(true));
         for (LocalizedNode ln : all) {
@@ -332,7 +328,7 @@ public abstract class PermissionHolder {
             if (!n.isMeta() && !n.isPrefix() && !n.isSuffix()) continue;
             if (!n.shouldApplyOnServer(server, context.isIncludeGlobal(), false)) continue;
             if (!n.shouldApplyOnWorld(world, context.isIncludeGlobalWorld(), false)) continue;
-            if (!n.shouldApplyWithContext(contexts, false)) continue;
+            if (!n.shouldApplyWithContext(contexts.getContextSet(), false)) continue;
 
             holder.accumulateNode(n);
         }
@@ -346,7 +342,7 @@ public abstract class PermissionHolder {
         parents.removeIf(node ->
                 !node.shouldApplyOnServer(server, context.isApplyGlobalGroups(), plugin.getConfiguration().isApplyingRegex()) ||
                 !node.shouldApplyOnWorld(world, context.isApplyGlobalWorldGroups(), plugin.getConfiguration().isApplyingRegex()) ||
-                !node.shouldApplyWithContext(contexts, false)
+                !node.shouldApplyWithContext(contexts.getContextSet(), false)
         );
 
         TreeSet<Map.Entry<Integer, Node>> sortedParents = new TreeSet<>(Util.META_COMPARATOR.reversed());
@@ -370,7 +366,7 @@ public abstract class PermissionHolder {
                 continue;
             }
 
-            group.accumulateMeta(holder, excludedGroups, context);
+            group.accumulateMeta(holder, excludedGroups, contexts);
         }
 
         return holder;
@@ -378,28 +374,26 @@ public abstract class PermissionHolder {
 
     /**
      * Gets all of the nodes that this holder has (and inherits), given the context
-     * @param context the context for this request
+     * @param contexts the context for this request
      * @return a map of permissions
      */
-    public Set<LocalizedNode> getAllNodesFiltered(Contexts context) {
+    public Set<LocalizedNode> getAllNodesFiltered(ExtractedContexts contexts) {
         SortedSet<LocalizedNode> allNodes;
 
+        Contexts context = contexts.getContexts();
+        String server = contexts.getServer();
+        String world = contexts.getWorld();
+
         if (context.isApplyGroups()) {
-            allNodes = getAllNodes(null, context);
+            allNodes = getAllNodes(null, contexts);
         } else {
             allNodes = new TreeSet<>((SortedSet<LocalizedNode>) getPermissions(true));
         }
 
-        MutableContextSet contexts = MutableContextSet.fromSet(context.getContexts());
-        String server = contexts.getValues("server").stream().findAny().orElse(null);
-        String world = contexts.getValues("world").stream().findAny().orElse(null);
-        contexts.removeAll("server");
-        contexts.removeAll("world");
-
         allNodes.removeIf(node ->
                 !node.shouldApplyOnServer(server, context.isIncludeGlobal(), plugin.getConfiguration().isApplyingRegex()) ||
                 !node.shouldApplyOnWorld(world, context.isIncludeGlobalWorld(), plugin.getConfiguration().isApplyingRegex()) ||
-                !node.shouldApplyWithContext(contexts, false)
+                !node.shouldApplyWithContext(contexts.getContextSet(), false)
         );
 
         Set<LocalizedNode> perms = ConcurrentHashMap.newKeySet();
@@ -420,14 +414,14 @@ public abstract class PermissionHolder {
     }
 
     /**
-     * Converts the output of {@link #getAllNodesFiltered(Contexts)}, and expands shorthand perms
+     * Converts the output of {@link #getAllNodesFiltered(ExtractedContexts)}, and expands shorthand perms
      * @param context the context for this request
      * @return a map of permissions
      */
     public Map<String, Boolean> exportNodes(Contexts context, boolean lowerCase) {
         Map<String, Boolean> perms = new HashMap<>();
 
-        for (LocalizedNode ln : getAllNodesFiltered(context)) {
+        for (LocalizedNode ln : getAllNodesFiltered(ExtractedContexts.generate(context))) {
             Node node = ln.getNode();
 
             perms.put(lowerCase ? node.getPermission().toLowerCase() : node.getPermission(), node.getValue());
@@ -527,7 +521,7 @@ public abstract class PermissionHolder {
      * @return the result of the lookup
      */
     public InheritanceInfo inheritsPermissionInfo(Node node) {
-        for (LocalizedNode n : getAllNodes(null, Contexts.allowAll())) {
+        for (LocalizedNode n : getAllNodes(null, ExtractedContexts.generate(Contexts.allowAll()))) {
             if (n.getNode().almostEquals(node)) {
                 return InheritanceInfo.of(n);
             }

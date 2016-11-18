@@ -26,6 +26,7 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import me.lucko.luckperms.api.*;
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.common.utils.ExtractedContexts;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
@@ -64,17 +65,17 @@ public class PermissionHolderLink implements PermissionHolder {
 
     @Override
     public Set<Node> getAllNodes() {
-        return Collections.unmodifiableSet(master.getAllNodes(null, Contexts.allowAll()));
+        return Collections.unmodifiableSet(master.getAllNodes(null, ExtractedContexts.generate(Contexts.allowAll())));
     }
 
     @Override
     public SortedSet<LocalizedNode> getAllNodes(@NonNull Contexts contexts) {
-        return master.getAllNodes(null, contexts);
+        return master.getAllNodes(null, ExtractedContexts.generate(contexts));
     }
 
     @Override
     public Set<LocalizedNode> getAllNodesFiltered(@NonNull Contexts contexts) {
-        return master.getAllNodesFiltered(contexts);
+        return master.getAllNodesFiltered(ExtractedContexts.generate(contexts));
     }
 
     @Override

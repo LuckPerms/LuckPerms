@@ -32,6 +32,7 @@ import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.users.User;
+import me.lucko.luckperms.common.utils.ExtractedContexts;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import net.milkbowl.vault.chat.Chat;
@@ -214,7 +215,8 @@ public class VaultChatHook extends Chat {
             context.put("world", world);
         }
 
-        for (Node n : group.getAllNodes(null, new Contexts(ContextSet.fromMap(context), perms.isIncludeGlobal(), true, true, true, true, false))) {
+        ExtractedContexts ec = ExtractedContexts.generate(new Contexts(ContextSet.fromMap(context), perms.isIncludeGlobal(), true, true, true, true, false));
+        for (Node n : group.getAllNodes(null, ec)) {
             if (!n.getValue()) {
                 continue;
             }

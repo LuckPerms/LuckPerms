@@ -31,6 +31,7 @@ import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.groups.Group;
+import me.lucko.luckperms.common.utils.ExtractedContexts;
 import me.lucko.luckperms.sponge.timings.LPTiming;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.permission.NodeTree;
@@ -84,7 +85,7 @@ public class LuckPermsGroupSubject extends LuckPermsSubject {
     @Override
     public Tristate getPermissionValue(ContextSet contexts, String permission) {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.GROUP_GET_PERMISSION_VALUE)) {
-            Map<String, Boolean> permissions = group.getAllNodesFiltered(service.calculateContexts(contexts)).stream()
+            Map<String, Boolean> permissions = group.getAllNodesFiltered(ExtractedContexts.generate(service.calculateContexts(contexts))).stream()
                     .map(LocalizedNode::getNode)
                     .collect(Collectors.toMap(Node::getPermission, Node::getValue));
 
@@ -113,7 +114,7 @@ public class LuckPermsGroupSubject extends LuckPermsSubject {
     @Override
     public List<Subject> getParents(ContextSet contexts) {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.GROUP_GET_PARENTS)) {
-            List<Subject> subjects = group.getAllNodesFiltered(service.calculateContexts(contexts)).stream()
+            List<Subject> subjects = group.getAllNodesFiltered(ExtractedContexts.generate(service.calculateContexts(contexts))).stream()
                     .map(LocalizedNode::getNode)
                     .filter(Node::isGroupNode)
                     .map(Node::getGroupName)
@@ -165,7 +166,7 @@ public class LuckPermsGroupSubject extends LuckPermsSubject {
         int priority = Integer.MIN_VALUE;
         String meta = null;
 
-        for (Node n : group.getAllNodesFiltered(service.calculateContexts(contexts))) {
+        for (Node n : group.getAllNodesFiltered(ExtractedContexts.generate(service.calculateContexts(contexts)))) {
             if (!n.getValue()) {
                 continue;
             }
@@ -185,7 +186,7 @@ public class LuckPermsGroupSubject extends LuckPermsSubject {
     }
 
     private Optional<String> getMeta(ContextSet contexts, String key) {
-        for (Node n : group.getAllNodesFiltered(service.calculateContexts(contexts))) {
+        for (Node n : group.getAllNodesFiltered(ExtractedContexts.generate(service.calculateContexts(contexts)))) {
             if (!n.getValue()) {
                 continue;
             }

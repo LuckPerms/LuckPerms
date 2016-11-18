@@ -24,10 +24,10 @@ package me.lucko.luckperms.sponge.migration;
 
 import lombok.experimental.UtilityClass;
 import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.core.NodeBuilder;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.PermissionHolder;
+import me.lucko.luckperms.common.utils.ExtractedContexts;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import org.spongepowered.api.service.context.Context;
@@ -47,11 +47,10 @@ public class MigrationUtils {
         for (Map.Entry<Set<Context>, Map<String, Boolean>> e : perms.entrySet()) {
             ContextSet context = LuckPermsService.convertContexts(e.getKey());
 
-            MutableContextSet contexts = MutableContextSet.fromSet(context);
-            String server = contexts.getValues("server").stream().findAny().orElse(null);
-            String world = contexts.getValues("world").stream().findAny().orElse(null);
-            contexts.removeAll("server");
-            contexts.removeAll("world");
+            ExtractedContexts extractedContexts = ExtractedContexts.generate(context);
+            ContextSet contexts = extractedContexts.getContextSet();
+            String server = extractedContexts.getServer();
+            String world = extractedContexts.getWorld();
 
             for (Map.Entry<String, Boolean> perm : e.getValue().entrySet()) {
                 try {
@@ -66,11 +65,10 @@ public class MigrationUtils {
             for (Map.Entry<Set<Context>, Map<String, String>> e : opts.entrySet()) {
                 ContextSet context = LuckPermsService.convertContexts(e.getKey());
 
-                MutableContextSet contexts = MutableContextSet.fromSet(context);
-                String server = contexts.getValues("server").stream().findAny().orElse(null);
-                String world = contexts.getValues("world").stream().findAny().orElse(null);
-                contexts.removeAll("server");
-                contexts.removeAll("world");
+                ExtractedContexts extractedContexts = ExtractedContexts.generate(context);
+                ContextSet contexts = extractedContexts.getContextSet();
+                String server = extractedContexts.getServer();
+                String world = extractedContexts.getWorld();
 
                 for (Map.Entry<String, String> opt : e.getValue().entrySet()) {
                     if (opt.getKey().equalsIgnoreCase("prefix")) {
@@ -98,11 +96,10 @@ public class MigrationUtils {
         for (Map.Entry<Set<Context>, List<Subject>> e : parents.entrySet()) {
             ContextSet context = LuckPermsService.convertContexts(e.getKey());
 
-            MutableContextSet contexts = MutableContextSet.fromSet(context);
-            String server = contexts.getValues("server").stream().findAny().orElse(null);
-            String world = contexts.getValues("world").stream().findAny().orElse(null);
-            contexts.removeAll("server");
-            contexts.removeAll("world");
+            ExtractedContexts extractedContexts = ExtractedContexts.generate(context);
+            ContextSet contexts = extractedContexts.getContextSet();
+            String server = extractedContexts.getServer();
+            String world = extractedContexts.getWorld();
 
             for (Subject s : e.getValue()) {
                 if (!s.getContainingCollection().getIdentifier().equalsIgnoreCase(PermissionService.SUBJECTS_GROUP)) {
