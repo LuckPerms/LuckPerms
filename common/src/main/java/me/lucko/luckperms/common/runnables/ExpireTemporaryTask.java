@@ -49,5 +49,9 @@ public class ExpireTemporaryTask implements Runnable {
                 }
             }
         }
+
+        if (groupChanges) {
+            plugin.getUpdateTaskBuffer().request();
+        }
     }
 }

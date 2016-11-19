@@ -44,6 +44,10 @@ public class LocaleManager {
         translations = ImmutableMap.copyOf((Map<String, String>) new Yaml().load(fileReader));
     }
 
+    public int getSize() {
+        return translations == null ? 0 : translations.size();
+    }
+
     public String getTranslation(Message key) {
         if (translations == null) {
             return null;

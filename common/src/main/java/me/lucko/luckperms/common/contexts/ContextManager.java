@@ -71,4 +71,8 @@ public class ContextManager<T> {
 
         listeners.add(listener);
     }
+
+    public int getCalculatorsSize() {
+        return calculators.size();
+    }
 }

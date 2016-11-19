@@ -83,22 +83,28 @@ info: >
   {PREFIX}&f-  &3Platform: &f{1}\n
   {PREFIX}&f-  &3Storage Method: &f{2}\n
   {PREFIX}&f-  &3Server Name: &f{3}\n
-  {PREFIX}&f-  &3Sync Interval: &f{4} minutes\n
-  {PREFIX}&f-  &3Include Global: &f{5}\n
-  {PREFIX}&f-  &3Include Global World: &f{6}\n
-  {PREFIX}&f-  &3Apply Global Groups: &f{7}\n
-  {PREFIX}&f-  &3Apply Global World Groups: &f{8}\n
-  {PREFIX}&f-  &3Online Mode: &f{9}\n
-  {PREFIX}&f-  &3Apply Wildcards: &f{10}\n
-  {PREFIX}&f-  &3Apply Regex: &f{11}\n
-  {PREFIX}&f-  &3Apply Shorthand: &f{12}
-debug: >
-  {PREFIX}&d&l> &dDebug Info\n
-  {PREFIX}&f> &3Online Players: &f{0}\n
-  {PREFIX}&f> &3Loaded Users: &f{1}\n
-  {PREFIX}&f> &3Loaded Groups: &f{2}\n
-  {PREFIX}&f> &3Loaded Tracks: &f{3}
-
+  {PREFIX}&f-  &3Sync Interval: &a{4} &fminutes\n
+  {PREFIX}&f-  &bCounts:\n
+  {PREFIX}&f-     &3Online Players: &a{5}\n
+  {PREFIX}&f-     &3Loaded Users: &a{6}\n
+  {PREFIX}&f-     &3Loaded Groups: &a{7}\n
+  {PREFIX}&f-     &3Loaded Tracks: &a{8}\n
+  {PREFIX}&f-     &3Log size: &a{9}\n
+  {PREFIX}&f-     &3UUID Cache size: &a{10}\n
+  {PREFIX}&f-     &3Translations loaded: &a{11}\n
+  {PREFIX}&f-     &3Pre-process contexts: &a{12}\n
+  {PREFIX}&f-     &3Context Calculators: &a{13}\n
+  {PREFIX}&f-  &bConfiguration:\n
+  {PREFIX}&f-     &3Online Mode: {14}\n
+  {PREFIX}&f-     &3Redis Enabled: {15}\n
+  {PREFIX}&f-     &bPermission Calculation:\n
+  {PREFIX}&f-        &3Including Global: {16}\n
+  {PREFIX}&f-        &3Including Global World: {17}\n
+  {PREFIX}&f-        &3Applying Global Groups: {18}\n
+  {PREFIX}&f-        &3Applying Global World Groups: {19}\n
+  {PREFIX}&f-        &3Applying Wildcards: {20}\n
+  {PREFIX}&f-        &3Applying Regex: {21}\n
+  {PREFIX}&f-        &3Applying Shorthand: {22}"
 create-group-error: "There was an error whilst creating the group."
 delete-group-error: "There was an error whilst deleting the group."
 delete-group-error-default: "You cannot delete the default group."

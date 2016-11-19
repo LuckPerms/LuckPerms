@@ -43,7 +43,7 @@ import static me.lucko.luckperms.common.core.PermissionHolder.exportToLegacy;
 @SuppressWarnings({"unchecked", "ResultOfMethodCallIgnored"})
 public class YAMLBacking extends FlatfileBacking {
     public YAMLBacking(LuckPermsPlugin plugin, File pluginDir) {
-        super(plugin, "Flatfile - YAML", pluginDir);
+        super(plugin, "YAML", pluginDir);
     }
 
     private static Yaml getYaml() {

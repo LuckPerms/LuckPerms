@@ -102,6 +102,10 @@ public class DefaultsProvider {
         return b == null ? Tristate.UNDEFINED : Tristate.fromBoolean(b);
     }
 
+    public int size() {
+        return op.size() + nonOp.size();
+    }
+
     @AllArgsConstructor
     private static class DummyPermissible implements Permissible {
         private final Runnable onRefresh;

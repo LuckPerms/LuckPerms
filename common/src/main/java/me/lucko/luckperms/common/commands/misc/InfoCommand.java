@@ -26,12 +26,15 @@ import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.config.LPConfiguration;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.utils.Predicates;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static me.lucko.luckperms.common.commands.utils.Util.formatBoolean;
 
@@ -49,16 +52,49 @@ public class InfoCommand extends SingleCommand {
                 plugin.getStorage().getName(),
                 c.getServer(),
                 c.getSyncTime(),
+                plugin.getPlayerCount(),
+                plugin.getUserManager().getAll().size(),
+                plugin.getGroupManager().getAll().size(),
+                plugin.getTrackManager().getAll().size(),
+                plugin.getStorage().getLog().join().getContent().size(),
+                plugin.getUuidCache().getSize(),
+                plugin.getLocaleManager().getSize(),
+                plugin.getPreProcessContexts(false).size(),
+                plugin.getContextManager().getCalculatorsSize(),
+                formatBoolean(c.isOnlineMode()),
+                formatBoolean(c.isRedisEnabled()),
                 formatBoolean(c.isIncludingGlobalPerms()),
                 formatBoolean(c.isIncludingGlobalWorldPerms()),
                 formatBoolean(c.isApplyingGlobalGroups()),
                 formatBoolean(c.isApplyingGlobalWorldGroups()),
-                formatBoolean(c.isOnlineMode()),
                 formatBoolean(c.isApplyingWildcards()),
                 formatBoolean(c.isApplyingRegex()),
                 formatBoolean(c.isApplyingShorthand())
         );
 
+        LinkedHashMap<String, Object> platformInfo = plugin.getExtraInfo();
+        if (platformInfo == null || platformInfo.isEmpty()) {
+            return CommandResult.SUCCESS;
+        }
+
+        Message.EMPTY.send(sender, "&f-  &bPlatform Info:");
+        for (Map.Entry<String, Object> e : platformInfo.entrySet()) {
+            Message.EMPTY.send(sender, "&f-     &3" + e.getKey() + ": " + formatValue(e.getValue().toString()));
+        }
+
         return CommandResult.SUCCESS;
+    }
+
+    private static String formatValue(String value) {
+        if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
+            return Util.formatBoolean(Boolean.parseBoolean(value));
+        }
+
+        try {
+            int i = Integer.parseInt(value);
+            return "&a" + i;
+        } catch (NumberFormatException ignored) {}
+
+        return "&f" + value;
     }
 }

@@ -43,7 +43,7 @@ import static me.lucko.luckperms.common.core.PermissionHolder.exportToLegacy;
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class JSONBacking extends FlatfileBacking {
     public JSONBacking(LuckPermsPlugin plugin, File pluginDir) {
-        super(plugin, "Flatfile - JSON", pluginDir);
+        super(plugin, "JSON", pluginDir);
     }
 
     private boolean doWrite(File file, WriteOperation writeOperation) {

@@ -46,10 +46,7 @@ import me.lucko.luckperms.common.utils.DebugHandler;
 import me.lucko.luckperms.common.utils.LocaleManager;
 
 import java.io.File;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.Executor;
 
 /**
@@ -206,7 +203,6 @@ public interface LuckPermsPlugin {
         return isOnline(external) ? Message.PLAYER_ONLINE : Message.PLAYER_OFFLINE;
     }
 
-
     /**
      * Gets a player object linked to this User. The returned object must be the same type
      * as the instance used in the platforms {@link ContextManager}
@@ -268,6 +264,14 @@ public interface LuckPermsPlugin {
 
     default List<BaseCommand> getExtraCommands() {
         return Collections.emptyList();
+    }
+
+    /**
+     * Gets a map of extra information to be shown in the info command
+     * @return a map of options, or null
+     */
+    default LinkedHashMap<String, Object> getExtraInfo() {
+        return null;
     }
 
     /**

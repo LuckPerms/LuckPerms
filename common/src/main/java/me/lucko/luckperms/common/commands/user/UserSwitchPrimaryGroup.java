@@ -38,10 +38,10 @@ import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.List;
 
-public class UserSetPrimaryGroup extends SubCommand<User> {
-    public UserSetPrimaryGroup() {
-        super("setprimarygroup", "Sets the user's primary group", Permission.USER_SETPRIMARYGROUP, Predicates.not(1),
-                Arg.list(Arg.create("group", true, "the group to set as the primary group"))
+public class UserSwitchPrimaryGroup extends SubCommand<User> {
+    public UserSwitchPrimaryGroup() {
+        super("switchprimarygroup", "Switches the user's primary group", Permission.USER_SWITCHPRIMARYGROUP, Predicates.not(1),
+                Arg.list(Arg.create("group", true, "the group to switch to"))
         );
     }
 

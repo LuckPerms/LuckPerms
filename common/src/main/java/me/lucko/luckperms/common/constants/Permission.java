@@ -36,7 +36,6 @@ public enum Permission {
 
     SYNC(set("sync"), Type.NONE),
     INFO(set("info"), Type.NONE),
-    DEBUG(set("debug"), Type.NONE),
     VERBOSE(set("verbose"), Type.NONE),
     IMPORT(set("import"), Type.NONE),
 
@@ -77,7 +76,7 @@ public enum Permission {
     USER_META_REMOVETEMP_SUFFIX(set("meta.removetempsuffix", "removetempsuffix"), Type.USER),
     USER_META_CLEAR(set("meta.clear", "clearmeta"), Type.USER),
     USER_GETUUID(set("getuuid"), Type.USER),
-    USER_SETPRIMARYGROUP(set("setprimarygroup"), Type.USER),
+    USER_SWITCHPRIMARYGROUP(set("switchprimarygroup", "setprimarygroup"), Type.USER),
     USER_SHOWTRACKS(set("showtracks"), Type.USER),
     USER_PROMOTE(set("promote"), Type.USER),
     USER_DEMOTE(set("demote"), Type.USER),

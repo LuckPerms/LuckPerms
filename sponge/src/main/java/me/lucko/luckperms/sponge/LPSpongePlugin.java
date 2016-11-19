@@ -77,6 +77,7 @@ import org.spongepowered.api.scheduler.SynchronousExecutor;
 import org.spongepowered.api.service.permission.PermissionDescription;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
+import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.text.Text;
 
 import java.io.File;
@@ -85,6 +86,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Getter
 @Plugin(id = "luckperms",
@@ -403,6 +405,20 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     @Override
     public List<BaseCommand> getExtraCommands() {
         return Collections.singletonList(new SpongeMainCommand(this));
+    }
+
+    @Override
+    public LinkedHashMap<String, Object> getExtraInfo() {
+        LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+        map.put("SubjectCollection count", service.getKnownSubjects().size());
+        map.put("Subject count",
+                service.getKnownSubjects().values().stream()
+                        .map(SubjectCollection::getAllSubjects)
+                        .flatMap(subjects -> StreamSupport.stream(subjects.spliterator(), false))
+                        .count()
+        );
+        map.put("PermissionDescription count", service.getDescriptions().size());
+        return map;
     }
 
     private void registerPermission(PermissionService p, String node) {

@@ -69,7 +69,6 @@ public class CommandManager {
          .add(new SyncCommand())
          .add(new NetworkSyncCommand())
          .add(new InfoCommand())
-         .add(new DebugCommand())
          .add(new VerboseCommand())
          .add(new ImportCommand())
          .add(new ExportCommand())
@@ -282,6 +281,10 @@ public class CommandManager {
                     break;
 
                 // Provide backwards compatibility
+                case "setprimarygroup":
+                    args.remove(2);
+                    args.add(2, "switchprimarygroup");
+                    break;
                 case "listnodes":
                     args.remove(2);
                     args.add(2, "permission");

@@ -66,4 +66,8 @@ public class UuidCache {
         cache.remove(external);
     }
 
+    public int getSize() {
+        return onlineMode ? 0 : cache.size();
+    }
+
 }

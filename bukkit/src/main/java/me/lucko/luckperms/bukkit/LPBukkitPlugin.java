@@ -428,6 +428,24 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     }
 
     @Override
+    public LinkedHashMap<String, Object> getExtraInfo() {
+        LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+        map.put("Vault Enabled", vaultHook != null);
+        map.put("Vault Server", configuration.getVaultServer());
+        map.put("Bukkit Defaults count", defaultsProvider.size());
+        map.put("Bukkit Child Permissions count", childPermissionProvider.getPermissions().size());
+        map.put("World Cache size", worldCalculator.getWorldCache().size());
+        map.put("Vault Including Global", configuration.isVaultIncludingGlobal());
+        map.put("Vault Ignoring World", configuration.isVaultIgnoreWorld());
+        map.put("Vault Primary Group Overrides", configuration.isVaultPrimaryGroupOverrides());
+        map.put("Vault Debug", configuration.isVaultDebug());
+        map.put("OPs Enabled", configuration.isOpsEnabled());
+        map.put("Auto OP", configuration.isAutoOp());
+        map.put("Commands Allow OPs", configuration.isCommandsAllowOp());
+        return map;
+    }
+
+    @Override
     public Object getPlugin(String name) {
         return getServer().getPluginManager().getPlugin(name);
     }
