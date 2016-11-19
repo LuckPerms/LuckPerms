@@ -22,35 +22,93 @@
 
 package me.lucko.luckperms.common.commands.user;
 
+import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.caching.MetaData;
+import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.users.User;
+import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class UserInfo extends SubCommand<User> {
     public UserInfo() {
         super("info", "Shows info about the user", Permission.USER_INFO, Predicates.alwaysFalse(), null);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) throws CommandException {
-        Message.USER_INFO.send(sender,
+        Message.USER_INFO_GENERAL.send(sender,
                 user.getName(),
                 user.getUuid(),
                 plugin.getPlayerStatus(user.getUuid()),
                 user.getPrimaryGroup(),
                 user.getPermanentNodes().size(),
                 user.getTemporaryNodes().size(),
-                label,
-                user.getName()
+                user.getPrefixNodes().size(),
+                user.getSuffixNodes().size(),
+                user.getMetaNodes().size()
         );
+
+        Set<Node> parents = user.getPermissions(false).stream()
+                .filter(Node::isGroupNode)
+                .filter(Node::isPermanent)
+                .collect(Collectors.toSet());
+
+        Set<Node> tempParents = user.getPermissions(false).stream()
+                .filter(Node::isGroupNode)
+                .filter(Node::isTemporary)
+                .collect(Collectors.toSet());
+
+        if (!parents.isEmpty()) {
+            Message.USER_INFO_PARENT_HEADER.send(sender);
+            for (Node node : parents) {
+                Message.EMPTY.send(sender, "&f-    &3> &f" + node.getGroupName() + Util.getNodeContextDescription(node));
+            }
+        }
+
+        if (!tempParents.isEmpty()) {
+            Message.USER_INFO_TEMP_PARENT_HEADER.send(sender);
+            for (Node node : tempParents) {
+                Message.EMPTY.send(sender, "&f-    &3> &f" + node.getGroupName() + Util.getNodeContextDescription(node));
+                Message.EMPTY.send(sender, "&f-    &2-    expires in " + DateUtil.formatDateDiff(node.getExpiryUnixTime()));
+            }
+        }
+
+        UserData data = user.getUserData();
+        String context = "&bNone";
+        String prefix = "&bNone";
+        String suffix = "&bNone";
+        if (data != null) {
+            Contexts contexts = plugin.getContextForUser(user);
+            if (contexts != null) {
+                context = contexts.getContexts().toSet().stream()
+                        .map(e -> Util.contextToString(e.getKey(), e.getValue()))
+                        .collect(Collectors.joining(" "));
+
+                MetaData meta = data.getMetaData(contexts);
+                if (meta.getPrefix() != null) {
+                    prefix = "&f\"" + meta.getPrefix() + "&f\"";
+                }
+                if (meta.getSuffix() != null) {
+                    suffix = "&f\"" + meta.getSuffix() + "&f\"";
+                }
+            }
+        }
+
+        Message.USER_INFO_DATA.send(sender, Util.formatBoolean(data != null), context, prefix, suffix);
         return CommandResult.SUCCESS;
     }
 }

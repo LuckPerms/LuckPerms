@@ -916,6 +916,18 @@ public abstract class PermissionHolder {
         return getPermissions(false).stream().filter(Node::isPermanent).collect(Collectors.toSet());
     }
 
+    public Set<Node> getPrefixNodes() {
+        return getPermissions(false).stream().filter(Node::isPrefix).collect(Collectors.toSet());
+    }
+
+    public Set<Node> getSuffixNodes() {
+        return getPermissions(false).stream().filter(Node::isSuffix).collect(Collectors.toSet());
+    }
+
+    public Set<Node> getMetaNodes() {
+        return getPermissions(false).stream().filter(Node::isMeta).collect(Collectors.toSet());
+    }
+
     /**
      * Get a {@link List} of all of the groups the holder inherits, on all servers
      * @return a {@link List} of group names

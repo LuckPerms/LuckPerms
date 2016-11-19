@@ -47,6 +47,7 @@ import me.lucko.luckperms.common.runnables.UpdateTask;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.StorageFactory;
 import me.lucko.luckperms.common.tracks.TrackManager;
+import me.lucko.luckperms.common.users.User;
 import me.lucko.luckperms.common.users.UserManager;
 import me.lucko.luckperms.common.utils.BufferedRequest;
 import me.lucko.luckperms.common.utils.DebugHandler;
@@ -211,6 +212,28 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     @Override
     public File getMainDir() {
         return getDataFolder();
+    }
+
+    @Override
+    public ProxiedPlayer getPlayer(User user) {
+        return getProxy().getPlayer(uuidCache.getExternalUUID(user.getUuid()));
+    }
+
+    @Override
+    public Contexts getContextForUser(User user) {
+        ProxiedPlayer player = getPlayer(user);
+        if (player == null) {
+            return null;
+        }
+        return new Contexts(
+                getContextManager().getApplicableContext(player),
+                getConfiguration().isIncludingGlobalPerms(),
+                getConfiguration().isIncludingGlobalWorldPerms(),
+                true,
+                getConfiguration().isApplyingGlobalGroups(),
+                getConfiguration().isApplyingGlobalWorldGroups(),
+                false
+        );
     }
 
     @Override

@@ -260,16 +260,31 @@ public enum Message {
     BULK_CHANGE_TYPE_ERROR("Invalid type. Was expecting 'server' or 'world'.", true),
     BULK_CHANGE_SUCCESS("&aApplied bulk change successfully. {0} records were changed.", true),
 
-    USER_INFO(
+    USER_INFO_GENERAL(
             "{PREFIX}&b&l> &bUser Info: &f{0}" + "\n" +
             "{PREFIX}&f- &3UUID: &f{1}" + "\n" +
             "{PREFIX}&f- &3Status: {2}" + "\n" +
             "{PREFIX}&f- &3Primary Group: &f{3}" + "\n" +
-            "{PREFIX}&f- &3Permissions: &f{4}" + "\n" +
-            "{PREFIX}&f- &3Temporary Permissions: &f{5}" + "\n" +
-            "{PREFIX}&f- &3Use &b/{6} user {7} permission info &3to see all permissions.",
+            "{PREFIX}&f- &aCounts:" + "\n" +
+            "{PREFIX}&f-    &3Permissions: &a{4}" + "\n" +
+            "{PREFIX}&f-    &3Temporary Permissions: &a{5}" + "\n" +
+            "{PREFIX}&f-    &3Prefixes: &a{6}" + "\n" +
+            "{PREFIX}&f-    &3Suffixes: &a{7}" + "\n" +
+            "{PREFIX}&f-    &3Meta: &a{8}",
             false
     ),
+
+    USER_INFO_DATA(
+            "{PREFIX}&f- &aCached Data:" + "\n" +
+            "{PREFIX}&f-    &3Is Loaded: {0}" + "\n" +
+            "{PREFIX}&f-    &3Current Contexts: {1}" + "\n" +
+            "{PREFIX}&f-    &3Current Prefix: {2}" + "\n" +
+            "{PREFIX}&f-    &3Current Suffix: {3}",
+            false
+    ),
+
+    USER_INFO_PARENT_HEADER("&f- &aParent Groups:", true),
+    USER_INFO_TEMP_PARENT_HEADER("&f- &aTemporary Parent Groups:", true),
     USER_GETUUID("&bThe UUID of &b{0}&b is &b{1}&b.", true),
     USER_REMOVEGROUP_ERROR_PRIMARY("You cannot remove a user from their primary group.", true),
     USER_PRIMARYGROUP_SUCCESS("&b{0}&a's primary group was set to &b{1}&a.", true),

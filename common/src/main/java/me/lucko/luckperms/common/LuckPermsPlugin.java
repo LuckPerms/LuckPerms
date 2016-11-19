@@ -39,6 +39,7 @@ import me.lucko.luckperms.common.groups.GroupManager;
 import me.lucko.luckperms.common.messaging.RedisMessaging;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.tracks.TrackManager;
+import me.lucko.luckperms.common.users.User;
 import me.lucko.luckperms.common.users.UserManager;
 import me.lucko.luckperms.common.utils.BufferedRequest;
 import me.lucko.luckperms.common.utils.DebugHandler;
@@ -204,6 +205,22 @@ public interface LuckPermsPlugin {
         UUID external = getUuidCache().getExternalUUID(uuid);
         return isOnline(external) ? Message.PLAYER_ONLINE : Message.PLAYER_OFFLINE;
     }
+
+
+    /**
+     * Gets a player object linked to this User. The returned object must be the same type
+     * as the instance used in the platforms {@link ContextManager}
+     * @param user the user instance
+     * @return a player object, or null, if one couldn't be found.
+     */
+    Object getPlayer(User user);
+
+    /**
+     * Gets a calculated context instance for the user using the rules of the platform.
+     * @param user the user instance
+     * @return a contexts object, or null if one couldn't be generated
+     */
+    Contexts getContextForUser(User user);
 
     /**
      * Gets the number of users online on the platform
