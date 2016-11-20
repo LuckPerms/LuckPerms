@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage;
+package me.lucko.luckperms.common.storage.wrappings;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +28,7 @@ import lombok.experimental.Delegate;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.common.data.Log;
 import me.lucko.luckperms.common.groups.Group;
+import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.tracks.Track;
 import me.lucko.luckperms.common.users.User;
 

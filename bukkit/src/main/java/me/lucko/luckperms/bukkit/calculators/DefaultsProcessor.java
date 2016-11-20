@@ -24,6 +24,7 @@ package me.lucko.luckperms.bukkit.calculators;
 
 import lombok.AllArgsConstructor;
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.bukkit.model.DefaultsProvider;
 import me.lucko.luckperms.common.calculators.PermissionProcessor;
 import org.bukkit.Bukkit;
 import org.bukkit.permissions.Permission;

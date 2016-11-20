@@ -30,6 +30,8 @@ import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.data.Log;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.storage.backing.AbstractBacking;
+import me.lucko.luckperms.common.storage.wrappings.BufferedOutputStorage;
+import me.lucko.luckperms.common.storage.wrappings.TolerantStorage;
 import me.lucko.luckperms.common.tracks.Track;
 import me.lucko.luckperms.common.users.User;
 

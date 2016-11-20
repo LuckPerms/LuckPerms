@@ -29,8 +29,13 @@ import me.lucko.luckperms.bukkit.calculators.AttachmentProcessor;
 import me.lucko.luckperms.bukkit.calculators.ChildProcessor;
 import me.lucko.luckperms.bukkit.calculators.DefaultsProcessor;
 import me.lucko.luckperms.bukkit.inject.Injector;
-import me.lucko.luckperms.bukkit.inject.LPPermissible;
-import me.lucko.luckperms.common.calculators.*;
+import me.lucko.luckperms.bukkit.model.LPPermissible;
+import me.lucko.luckperms.common.calculators.CalculatorFactory;
+import me.lucko.luckperms.common.calculators.PermissionCalculator;
+import me.lucko.luckperms.common.calculators.PermissionProcessor;
+import me.lucko.luckperms.common.calculators.processors.MapProcessor;
+import me.lucko.luckperms.common.calculators.processors.RegexProcessor;
+import me.lucko.luckperms.common.calculators.processors.WildcardProcessor;
 import me.lucko.luckperms.common.users.User;
 
 import java.util.UUID;

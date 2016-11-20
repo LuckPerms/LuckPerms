@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit.inject;
+package me.lucko.luckperms.bukkit.model;
 
 import lombok.Getter;
 import lombok.NonNull;

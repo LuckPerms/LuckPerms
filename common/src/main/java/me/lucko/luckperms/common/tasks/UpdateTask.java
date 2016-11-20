@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.runnables;
+package me.lucko.luckperms.common.tasks;
 
 import lombok.AllArgsConstructor;
 import me.lucko.luckperms.api.event.events.PostSyncEvent;

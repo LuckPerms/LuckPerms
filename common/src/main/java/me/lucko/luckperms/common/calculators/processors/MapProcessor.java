@@ -20,38 +20,26 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.runnables;
+package me.lucko.luckperms.common.calculators.processors;
 
-import lombok.AllArgsConstructor;
-import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.groups.Group;
-import me.lucko.luckperms.common.users.User;
+import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.common.calculators.PermissionProcessor;
 
-@AllArgsConstructor
-public class ExpireTemporaryTask implements Runnable {
-    private final LuckPermsPlugin plugin;
+import java.util.Map;
+
+public class MapProcessor implements PermissionProcessor {
+    private Map<String, Boolean> map = null;
 
     @Override
-    public void run() {
-        boolean groupChanges = false;
-        for (Group group : plugin.getGroupManager().getAll().values()) {
-            if (group.auditTemporaryPermissions()) {
-                plugin.getStorage().saveGroup(group);
-                groupChanges = true;
-            }
-        }
+    public Tristate hasPermission(String permission) {
+        Boolean b = map.get(permission);
+        return b == null ? Tristate.UNDEFINED : Tristate.fromBoolean(b);
+    }
 
-        for (User user : plugin.getUserManager().getAll().values()) {
-            if (user.auditTemporaryPermissions()) {
-                plugin.getStorage().saveUser(user);
-                if (!groupChanges) {
-                    user.getRefreshBuffer().request();
-                }
-            }
-        }
-
-        if (groupChanges) {
-            plugin.getUpdateTaskBuffer().request();
+    @Override
+    public void updateBacking(Map<String, Boolean> map) {
+        if (this.map == null) {
+            this.map = map;
         }
     }
 }

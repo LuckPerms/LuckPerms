@@ -20,34 +20,38 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.utils;
+package me.lucko.luckperms.common.tasks;
 
-import lombok.*;
-import lombok.experimental.Delegate;
-import me.lucko.luckperms.api.Node;
+import lombok.AllArgsConstructor;
+import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.groups.Group;
+import me.lucko.luckperms.common.users.User;
 
-/**
- * Holds a Node and where it was inherited from. All calls are passed onto the contained Node instance.
- */
-@Getter
-@ToString
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class LocalizedNode implements me.lucko.luckperms.api.LocalizedNode {
-    public static LocalizedNode of(@NonNull Node node, @NonNull String location) {
-        return new LocalizedNode(node, location);
-    }
-
-    @Delegate
-    private final Node node;
-    private final String location;
+@AllArgsConstructor
+public class ExpireTemporaryTask implements Runnable {
+    private final LuckPermsPlugin plugin;
 
     @Override
-    public int hashCode() {
-        return node.hashCode();
-    }
+    public void run() {
+        boolean groupChanges = false;
+        for (Group group : plugin.getGroupManager().getAll().values()) {
+            if (group.auditTemporaryPermissions()) {
+                plugin.getStorage().saveGroup(group);
+                groupChanges = true;
+            }
+        }
 
-    @Override
-    public boolean equals(Object obj) {
-        return node.equals(obj);
+        for (User user : plugin.getUserManager().getAll().values()) {
+            if (user.auditTemporaryPermissions()) {
+                plugin.getStorage().saveUser(user);
+                if (!groupChanges) {
+                    user.getRefreshBuffer().request();
+                }
+            }
+        }
+
+        if (groupChanges) {
+            plugin.getUpdateTaskBuffer().request();
+        }
     }
 }

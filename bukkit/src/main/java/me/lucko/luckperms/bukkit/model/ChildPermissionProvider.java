@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit.calculators;
+package me.lucko.luckperms.bukkit.model;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;

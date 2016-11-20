@@ -20,29 +20,43 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.calculators;
+package me.lucko.luckperms.common.calculators.processors;
 
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.common.constants.Patterns;
+import me.lucko.luckperms.common.calculators.PermissionProcessor;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Pattern;
 
-public class RegexProcessor implements PermissionProcessor {
-    private Map<String, Boolean> regexPermissions = new ConcurrentHashMap<>();
+public class WildcardProcessor implements PermissionProcessor {
+    private Map<String, Boolean> map = null;
 
     @Override
     public Tristate hasPermission(String permission) {
-        for (Map.Entry<String, Boolean> e : regexPermissions.entrySet()) {
-            Pattern p = Patterns.compile(e.getKey());
-            if (p == null) {
-                continue;
+        String node = permission;
+
+        while (true) {
+            int endIndex = node.lastIndexOf('.');
+            if (endIndex == -1) {
+                break;
             }
 
-            if (p.matcher(permission).matches()) {
-                return Tristate.fromBoolean(e.getValue());
+            node = node.substring(0, endIndex);
+            if (!node.isEmpty()) {
+                Boolean b = map.get(node + ".*");
+                if (b != null) {
+                    return Tristate.fromBoolean(b);
+                }
             }
+        }
+
+        Boolean b = map.get("'*'");
+        if (b != null) {
+            return Tristate.fromBoolean(b);
+        }
+
+        b = map.get("*");
+        if (b != null) {
+            return Tristate.fromBoolean(b);
         }
 
         return Tristate.UNDEFINED;
@@ -50,13 +64,8 @@ public class RegexProcessor implements PermissionProcessor {
 
     @Override
     public void updateBacking(Map<String, Boolean> map) {
-        regexPermissions.clear();
-        for (Map.Entry<String, Boolean> e : map.entrySet()) {
-            if (!e.getKey().startsWith("r=") && !e.getKey().startsWith("R=")) {
-                continue;
-            }
-
-            regexPermissions.put(e.getKey().substring(2), e.getValue());
+        if (this.map == null) {
+            this.map = map;
         }
     }
 }

@@ -30,6 +30,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import me.lucko.luckperms.api.MetaUtils;
+import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.constants.Patterns;
@@ -45,7 +46,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @ToString(of = {"permission", "value", "override", "server", "world", "expireAt", "contexts"})
 @EqualsAndHashCode(of = {"permission", "value", "override", "server", "world", "expireAt", "contexts"})
-public class Node implements me.lucko.luckperms.api.Node {
+public class ImmutableNode implements Node {
     private static final Pattern PREFIX_PATTERN = Pattern.compile("(?i)prefix\\.-?\\d+\\..*");
     private static final Pattern SUFFIX_PATTERN = Pattern.compile("(?i)suffix\\.-?\\d+\\..*");
     private static final Pattern META_PATTERN = Pattern.compile("meta\\..*\\..*");
@@ -96,7 +97,7 @@ public class Node implements me.lucko.luckperms.api.Node {
      * @param world the world this node applies on
      * @param contexts any additional contexts applying to this node
      */
-    public Node(String permission, boolean value, boolean override, long expireAt, String server, String world, ContextSet contexts) {
+    public ImmutableNode(String permission, boolean value, boolean override, long expireAt, String server, String world, ContextSet contexts) {
         if (permission == null || permission.equals("")) {
             throw new IllegalArgumentException("Empty permission");
         }
@@ -449,7 +450,7 @@ public class Node implements me.lucko.luckperms.api.Node {
     }
 
     @Override
-    public boolean equalsIgnoringValue(me.lucko.luckperms.api.Node other) {
+    public boolean equalsIgnoringValue(Node other) {
         if (!other.getPermission().equalsIgnoreCase(this.getPermission())) {
             return false;
         }
@@ -492,7 +493,7 @@ public class Node implements me.lucko.luckperms.api.Node {
     }
 
     @Override
-    public boolean almostEquals(me.lucko.luckperms.api.Node other) {
+    public boolean almostEquals(Node other) {
         if (!other.getPermission().equalsIgnoreCase(this.getPermission())) {
             return false;
         }
@@ -529,7 +530,7 @@ public class Node implements me.lucko.luckperms.api.Node {
     }
 
     @Override
-    public boolean equalsIgnoringValueOrTemp(me.lucko.luckperms.api.Node other) {
+    public boolean equalsIgnoringValueOrTemp(Node other) {
         if (!other.getPermission().equalsIgnoreCase(this.getPermission())) {
             return false;
         }

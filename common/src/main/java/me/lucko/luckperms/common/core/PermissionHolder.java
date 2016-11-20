@@ -42,6 +42,7 @@ import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.utils.Cache;
 import me.lucko.luckperms.common.utils.ExtractedContexts;
+import me.lucko.luckperms.common.utils.ImmutableLocalizedNode;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
@@ -988,8 +989,8 @@ public abstract class PermissionHolder {
         return new NodeBuilder(permission);
     }
 
-    private static me.lucko.luckperms.common.utils.LocalizedNode makeLocal(Node node, String location) {
-        return me.lucko.luckperms.common.utils.LocalizedNode.of(node, location);
+    private static ImmutableLocalizedNode makeLocal(Node node, String location) {
+        return ImmutableLocalizedNode.of(node, location);
     }
 
     private static Node makeNode(String s, Boolean b) {

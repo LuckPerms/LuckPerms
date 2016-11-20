@@ -25,6 +25,7 @@ package me.lucko.luckperms.common.core;
 import com.google.common.base.Splitter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.constants.Patterns;
@@ -38,7 +39,7 @@ import java.util.Set;
  * Builds Nodes
  */
 @RequiredArgsConstructor
-public class NodeBuilder implements me.lucko.luckperms.api.Node.Builder {
+public class NodeBuilder implements Node.Builder {
     private final String permission;
     private Boolean value = true;
     private boolean override = false;
@@ -67,7 +68,7 @@ public class NodeBuilder implements me.lucko.luckperms.api.Node.Builder {
         }
     }
 
-    NodeBuilder(me.lucko.luckperms.api.Node other) {
+    NodeBuilder(Node other) {
         this.permission = other.getPermission();
         this.value = other.getValue();
         this.override = other.isOverride();
@@ -78,37 +79,37 @@ public class NodeBuilder implements me.lucko.luckperms.api.Node.Builder {
     }
 
     @Override
-    public me.lucko.luckperms.api.Node.Builder setNegated(boolean negated) {
+    public Node.Builder setNegated(boolean negated) {
         value = !negated;
         return this;
     }
 
     @Override
-    public me.lucko.luckperms.api.Node.Builder setValue(boolean value) {
+    public Node.Builder setValue(boolean value) {
         this.value = value;
         return this;
     }
 
     @Override
-    public me.lucko.luckperms.api.Node.Builder setOverride(boolean override) {
+    public Node.Builder setOverride(boolean override) {
         this.override = override;
         return this;
     }
 
     @Override
-    public me.lucko.luckperms.api.Node.Builder setExpiry(long expireAt) {
+    public Node.Builder setExpiry(long expireAt) {
         this.expireAt = expireAt;
         return this;
     }
 
     @Override
-    public me.lucko.luckperms.api.Node.Builder setWorld(String world) {
+    public Node.Builder setWorld(String world) {
         this.world = world;
         return this;
     }
 
     @Override
-    public me.lucko.luckperms.api.Node.Builder setServer(String server) {
+    public Node.Builder setServer(String server) {
         if (server != null && ArgumentChecker.checkServer(server)) {
             throw new IllegalArgumentException("Server name invalid.");
         }
@@ -117,13 +118,13 @@ public class NodeBuilder implements me.lucko.luckperms.api.Node.Builder {
         return this;
     }
 
-    public me.lucko.luckperms.api.Node.Builder setServerRaw(String server) {
+    public Node.Builder setServerRaw(String server) {
         this.server = server;
         return this;
     }
 
     @Override
-    public me.lucko.luckperms.api.Node.Builder withExtraContext(@NonNull String key, @NonNull String value) {
+    public Node.Builder withExtraContext(@NonNull String key, @NonNull String value) {
         switch (key.toLowerCase()) {
             case "server":
                 setServer(value);
@@ -140,31 +141,31 @@ public class NodeBuilder implements me.lucko.luckperms.api.Node.Builder {
     }
 
     @Override
-    public me.lucko.luckperms.api.Node.Builder withExtraContext(Map.Entry<String, String> entry) {
+    public Node.Builder withExtraContext(Map.Entry<String, String> entry) {
         withExtraContext(entry.getKey(), entry.getValue());
         return this;
     }
 
     @Override
-    public me.lucko.luckperms.api.Node.Builder withExtraContext(Map<String, String> map) {
+    public Node.Builder withExtraContext(Map<String, String> map) {
         withExtraContext(ContextSet.fromMap(map));
         return this;
     }
 
     @Override
-    public me.lucko.luckperms.api.Node.Builder withExtraContext(Set<Map.Entry<String, String>> context) {
+    public Node.Builder withExtraContext(Set<Map.Entry<String, String>> context) {
         withExtraContext(ContextSet.fromEntries(context));
         return this;
     }
 
     @Override
-    public me.lucko.luckperms.api.Node.Builder withExtraContext(ContextSet set) {
+    public Node.Builder withExtraContext(ContextSet set) {
         set.toSet().forEach(this::withExtraContext);
         return this;
     }
 
     @Override
-    public me.lucko.luckperms.api.Node build() {
-        return new Node(permission, value, override, expireAt, server, world, extraContexts);
+    public Node build() {
+        return new ImmutableNode(permission, value, override, expireAt, server, world, extraContexts);
     }
 }
