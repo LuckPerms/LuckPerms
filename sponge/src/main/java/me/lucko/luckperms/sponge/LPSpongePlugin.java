@@ -70,6 +70,7 @@ import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.AsynchronousExecutor;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.SpongeExecutorService;
@@ -365,7 +366,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
     @Override
     public Object getPlugin(String name) {
-        return game.getPluginManager().getPlugin(name).get().getInstance().get();
+        return game.getPluginManager().getPlugin(name).map(PluginContainer::getInstance).orElse(null);
     }
 
     @Override
@@ -375,11 +376,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
     @Override
     public UUID getUUID(String playerName) {
-        try {
-            return game.getServer().getPlayer(playerName).get().getUniqueId();
-        } catch (Exception e) {
-            return null;
-        }
+        return game.getServer().getPlayer(playerName).map(Player::getUniqueId).orElse(null);
     }
 
     @Override
