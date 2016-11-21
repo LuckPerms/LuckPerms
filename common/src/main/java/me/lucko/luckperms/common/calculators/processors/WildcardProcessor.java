@@ -26,32 +26,27 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.calculators.PermissionProcessor;
 
 import java.util.Map;
-import java.util.regex.Pattern;
 
 public class WildcardProcessor implements PermissionProcessor {
-    private static final Pattern SPLIT = Pattern.compile("\\.");
     private Map<String, Boolean> map = null;
 
     @Override
-    public Tristate hasPermission(String s) {
-        if (s.startsWith(".") || !s.contains(".")) {
-            throw new IllegalArgumentException();
-        }
+    public Tristate hasPermission(String permission) {
+        String node = permission;
 
-        String[] parts = SPLIT.split(s);
-        StringBuilder sb = new StringBuilder();
-
-        for (int i = parts.length - 2; i >= 0; i--) {
-            for (int i1 = 0; i1 <= i; i1++) {
-                sb.append(parts[i1]).append(".");
+        while (true) {
+            int endIndex = node.lastIndexOf('.');
+            if (endIndex == -1) {
+                break;
             }
 
-            Boolean b = map.get(sb.append("*").toString());
-            if (b != null) {
-                return Tristate.fromBoolean(b);
+            node = node.substring(0, endIndex);
+            if (!node.isEmpty()) {
+                Boolean b = map.get(node + ".*");
+                if (b != null) {
+                    return Tristate.fromBoolean(b);
+                }
             }
-
-            sb.setLength(0);
         }
 
         Boolean b = map.get("'*'");
