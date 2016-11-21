@@ -26,6 +26,7 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.event.events.UserFirstLoginEvent;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.core.UuidCache;
+import me.lucko.luckperms.common.defaults.Rule;
 import me.lucko.luckperms.common.users.User;
 import me.lucko.luckperms.common.utils.AbstractListener;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -122,6 +123,19 @@ public class BungeeListener extends AbstractListener implements Listener {
             if (user == null) {
                 plugin.getLog().warn("Failed to load user: " + c.getName());
             } else {
+                // Setup defaults for the user
+                boolean save = false;
+                for (Rule rule : plugin.getConfiguration().getDefaultAssignments()) {
+                    if (rule.apply(user)) {
+                        save = true;
+                    }
+                }
+
+                // If they were given a default, persist the new assignments back to the storage.
+                if (save) {
+                    plugin.getStorage().force().saveUser(user).join();
+                }
+
                 user.setupData(false); // Pretty nasty calculation call. Sets up the caching system so data is ready when the user joins.
             }
 
