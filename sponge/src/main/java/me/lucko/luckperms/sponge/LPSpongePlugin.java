@@ -65,10 +65,10 @@ import org.spongepowered.api.command.CommandManager;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
-import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.AsynchronousExecutor;
@@ -90,17 +90,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @Getter
-@Plugin(id = "luckperms",
-        name = "LuckPerms",
-        version = VersionData.VERSION,
-        authors = {"Luck"},
-        description = "A permissions plugin",
-        dependencies = {
-                // Needed for migration.
-                @Dependency(id = "permissionsex", optional = true),
-                @Dependency(id = "permissionmanager", optional = true)
-        }
-)
+@Plugin(id = "luckperms", name = "LuckPerms", version = VersionData.VERSION, authors = {"Luck"}, description = "A permissions plugin")
 public class LPSpongePlugin implements LuckPermsPlugin {
 
     @Inject
@@ -125,6 +115,8 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
     private LPTimings timings;
 
+    private boolean lateLoad = false;
+
     private final Set<UUID> ignoringLogs = ConcurrentHashMap.newKeySet();
     private LPConfiguration configuration;
     private UserManager userManager;
@@ -145,7 +137,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     private DebugHandler debugHandler;
     private SpongeSenderFactory senderFactory;
 
-    @Listener
+    @Listener(order = Order.FIRST)
     public void onEnable(GamePreInitializationEvent event) {
         log = LogFactory.wrap(logger);
         debugHandler = new DebugHandler();
@@ -156,7 +148,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         configuration = new SpongeConfig(this);
 
         // register events
-        Sponge.getEventManager().registerListeners(this, new SpongeListener(this));
+        game.getEventManager().registerListeners(this, new SpongeListener(this));
 
         // initialise datastore
         storage = StorageFactory.getInstance(this, "h2");
@@ -198,7 +190,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
         // register commands
         getLog().info("Registering commands...");
-        CommandManager cmdService = Sponge.getCommandManager();
+        CommandManager cmdService = game.getCommandManager();
         SpongeCommand commandManager = new SpongeCommand(this);
         cmdService.register(this, commandManager, "luckperms", "perms", "lp", "permissions", "p", "perm");
 
@@ -218,13 +210,20 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
         // register the PermissionService with Sponge
         getLog().info("Registering PermissionService...");
-        Sponge.getServiceManager().setProvider(this, PermissionService.class, (service = new LuckPermsService(this)));
+
+        if (game.getPluginManager().getPlugin("permissionsex").isPresent()) {
+            getLog().warn("Detected PermissionsEx - assuming it's loaded for migration.");
+            getLog().warn("Delaying LuckPerms PermissionService registration.");
+            lateLoad = true;
+        } else {
+            game.getServiceManager().setProvider(this, PermissionService.class, (service = new LuckPermsService(this)));
+        }
 
         // register with the LP API
         getLog().info("Registering API...");
         apiProvider = new ApiProvider(this);
         ApiHandler.registerProvider(apiProvider);
-        Sponge.getServiceManager().setProvider(this, LuckPermsApi.class, apiProvider);
+        game.getServiceManager().setProvider(this, LuckPermsApi.class, apiProvider);
 
         // schedule update tasks
         int mins = getConfiguration().getSyncTime();
@@ -241,6 +240,12 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         scheduler.createTaskBuilder().async().intervalTicks(20L).execute(consecutiveExecutor).submit(this);
 
         getLog().info("Successfully loaded.");
+    }
+
+    @Listener(order = Order.LATE)
+    public void onLateEnable(GamePreInitializationEvent event) {
+        getLog().info("Providing late registration of PermissionService...");
+        game.getServiceManager().setProvider(this, PermissionService.class, (service = new LuckPermsService(this)));
     }
 
     @Listener
@@ -371,7 +376,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
     @Override
     public Object getService(Class clazz) {
-        return Sponge.getServiceManager().provideUnchecked(clazz);
+        return game.getServiceManager().provideUnchecked(clazz);
     }
 
     @Override
