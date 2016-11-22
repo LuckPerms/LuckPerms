@@ -33,10 +33,13 @@ import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.users.User;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.sponge.LPSpongePlugin;
+import me.lucko.luckperms.sponge.service.LuckPermsService;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
+import org.spongepowered.api.service.permission.SubjectCollection;
 
 import java.util.List;
 import java.util.Optional;
@@ -52,6 +55,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) throws CommandException {
         final Logger log = plugin.getLog();
+        final LuckPermsService lpService = ((LPSpongePlugin) plugin).getService();
 
         Optional<PluginContainer> pex = Sponge.getPluginManager().getPlugin("permissionsex");
         if (!pex.isPresent()) {
@@ -61,6 +65,16 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
 
         // Cast to PermissionService. PEX has all of it's damned classes defined as package private.
         PermissionService pexService = (PermissionService) pex.get().getInstance().get();
+
+        // Migrate defaults
+        for (SubjectCollection collection : pexService.getKnownSubjects().values()) {
+            MigrationUtils.migrateSubjectData(
+                    collection.getDefaults().getSubjectData(),
+                    lpService.getSubjects("defaults").get(collection.getIdentifier()).getSubjectData()
+            );
+        }
+
+        MigrationUtils.migrateSubjectData(pexService.getDefaults().getSubjectData(), lpService.getDefaults().getSubjectData());
 
         // Migrate groups
         log.info("PermissionsEx Migration: Starting group migration.");

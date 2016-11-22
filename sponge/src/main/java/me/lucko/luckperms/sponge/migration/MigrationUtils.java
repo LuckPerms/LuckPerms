@@ -33,6 +33,8 @@ import me.lucko.luckperms.sponge.service.LuckPermsService;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
+import org.spongepowered.api.service.permission.SubjectData;
+import org.spongepowered.api.util.Tristate;
 
 import java.util.List;
 import java.util.Map;
@@ -109,6 +111,26 @@ public class MigrationUtils {
                 try {
                     holder.setPermission(new NodeBuilder("group." + s.getIdentifier().toLowerCase()).setServerRaw(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
                 } catch (ObjectAlreadyHasException ignored) {}
+            }
+        }
+    }
+
+    public static void migrateSubjectData(SubjectData from, SubjectData to) {
+        for (Map.Entry<Set<Context>, Map<String, String>> e : from.getAllOptions().entrySet()) {
+            for (Map.Entry<String, String> e1 : e.getValue().entrySet()) {
+                to.setOption(e.getKey(), e1.getKey(), e1.getValue());
+            }
+        }
+
+        for (Map.Entry<Set<Context>, Map<String, Boolean>> e : from.getAllPermissions().entrySet()) {
+            for (Map.Entry<String, Boolean> e1 : e.getValue().entrySet()) {
+                to.setPermission(e.getKey(), e1.getKey(), Tristate.fromBoolean(e1.getValue()));
+            }
+        }
+
+        for (Map.Entry<Set<Context>, List<Subject>> e : from.getAllParents().entrySet()) {
+            for (Subject s : e.getValue()) {
+                to.addParent(e.getKey(), s);
             }
         }
     }
