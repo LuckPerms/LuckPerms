@@ -244,8 +244,10 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
     @Listener(order = Order.LATE)
     public void onLateEnable(GamePreInitializationEvent event) {
-        getLog().info("Providing late registration of PermissionService...");
-        game.getServiceManager().setProvider(this, PermissionService.class, (service = new LuckPermsService(this)));
+        if (lateLoad) {
+            getLog().info("Providing late registration of PermissionService...");
+            game.getServiceManager().setProvider(this, PermissionService.class, (service = new LuckPermsService(this)));
+        }
     }
 
     @Listener
