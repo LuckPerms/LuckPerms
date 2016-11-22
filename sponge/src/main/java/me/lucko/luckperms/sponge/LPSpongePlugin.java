@@ -210,13 +210,14 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
         // register the PermissionService with Sponge
         getLog().info("Registering PermissionService...");
+        service = new LuckPermsService(this);
 
         if (game.getPluginManager().getPlugin("permissionsex").isPresent()) {
             getLog().warn("Detected PermissionsEx - assuming it's loaded for migration.");
             getLog().warn("Delaying LuckPerms PermissionService registration.");
             lateLoad = true;
         } else {
-            game.getServiceManager().setProvider(this, PermissionService.class, (service = new LuckPermsService(this)));
+            game.getServiceManager().setProvider(this, PermissionService.class, service);
         }
 
         // register with the LP API
@@ -246,7 +247,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     public void onLateEnable(GamePreInitializationEvent event) {
         if (lateLoad) {
             getLog().info("Providing late registration of PermissionService...");
-            game.getServiceManager().setProvider(this, PermissionService.class, (service = new LuckPermsService(this)));
+            game.getServiceManager().setProvider(this, PermissionService.class, service);
         }
     }
 
