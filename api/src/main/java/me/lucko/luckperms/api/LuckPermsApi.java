@@ -250,4 +250,12 @@ public interface LuckPermsApi {
      */
     void registerContextListener(ContextListener<?> contextListener);
 
+    /**
+     * Gets a calculated context instance for the user using the rules of the platform.
+     * These values are calculated using the options in the configuration, and the provided calculators.
+     * @param user the user to get contexts for
+     * @return an optional containing contexts. Will return empty if the user is not online.
+     */
+    Optional<Contexts> getContextForUser(User user);
+
 }

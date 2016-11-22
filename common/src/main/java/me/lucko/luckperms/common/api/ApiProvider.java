@@ -71,7 +71,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public double getApiVersion() {
-        return 2.14;
+        return 2.15;
     }
 
     @Override
@@ -159,7 +159,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public void cleanupUser(@NonNull User user) {
-        me.lucko.luckperms.common.api.internal.Utils.checkUser(user);
+        Utils.checkUser(user);
         plugin.getUserManager().cleanup(((UserLink) user).getMaster());
     }
 
@@ -220,5 +220,11 @@ public class ApiProvider implements LuckPermsApi {
     @Override
     public void registerContextListener(ContextListener<?> contextListener) {
         plugin.getContextManager().registerListener(contextListener);
+    }
+
+    @Override
+    public Optional<Contexts> getContextForUser(User user) {
+        Utils.checkUser(user);
+        return Optional.ofNullable(plugin.getContextForUser(((UserLink) user).getMaster()));
     }
 }

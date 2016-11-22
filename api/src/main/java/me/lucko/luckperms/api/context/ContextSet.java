@@ -37,6 +37,7 @@ import java.util.stream.Collectors;
  * @since 2.13
  */
 public class ContextSet {
+    private static final ContextSet EMPTY = new ContextSet();
 
     /**
      * Make a singleton ContextSet from a context pair
@@ -112,7 +113,7 @@ public class ContextSet {
      * @return a new ContextSet
      */
     public static ContextSet empty() {
-        return new ContextSet();
+        return EMPTY;
     }
 
     final Set<Map.Entry<String, String>> contexts;

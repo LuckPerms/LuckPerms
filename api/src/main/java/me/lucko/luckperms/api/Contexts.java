@@ -32,6 +32,7 @@ import java.util.Map;
  * @since 2.11
  */
 public class Contexts {
+    private static final Contexts ALLOW_ALL = new Contexts(ContextSet.empty(), true, true, true, true, true, true);
     public static final String SERVER_KEY = "server";
     public static final String WORLD_KEY = "world";
 
@@ -40,7 +41,7 @@ public class Contexts {
      * @return a context that will not apply any filters
      */
     public static Contexts allowAll() {
-        return new Contexts(ContextSet.empty(), true, true, true, true, true, true);
+        return ALLOW_ALL;
     }
 
     public static Contexts of(ContextSet context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups, boolean op) {
