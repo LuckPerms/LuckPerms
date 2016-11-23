@@ -133,11 +133,22 @@ public class LuckPermsSubjectData implements SubjectData {
                 builder.withExtraContext(ct.getKey(), ct.getValue());
             }
 
+            Node node = builder.build();
+
+            // Workaround: unset the inverse, to allow false -> true, true -> false overrides.
             try {
                 if (enduring) {
-                    holder.setPermission(builder.build());
+                    holder.unsetPermission(node);
+                }else {
+                    holder.unsetTransientPermission(node);
+                }
+            } catch (ObjectLacksException ignored) {}
+
+            try {
+                if (enduring) {
+                    holder.setPermission(node);
                 } else {
-                    holder.setTransientPermission(builder.build());
+                    holder.setTransientPermission(node);
                 }
             } catch (ObjectAlreadyHasException ignored) {}
 
