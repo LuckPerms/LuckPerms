@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.sponge.service.persisted;
 
+import com.google.common.base.Splitter;
 import lombok.ToString;
 import me.lucko.luckperms.api.context.ContextSet;
 import org.spongepowered.api.service.context.Context;
@@ -41,7 +42,7 @@ import static me.lucko.luckperms.sponge.service.LuckPermsService.convertContexts
 public class SubjectDataHolder {
     private final Map<Map<String, String>, Map<String, Boolean>> permissions;
     private final Map<Map<String, String>, Map<String, String>> options;
-    private final Map<Map<String, String>, List<Map.Entry<String, String>>> parents;
+    private final Map<Map<String, String>, List<String>> parents;
 
     public SubjectDataHolder(Map<Set<Context>, Map<String, String>> options, Map<Set<Context>, Map<String, Boolean>> permissions, Map<Set<Context>, List<Map.Entry<String, String>>> parents) {
         this.options = new HashMap<>();
@@ -56,7 +57,7 @@ public class SubjectDataHolder {
 
         this.parents = new HashMap<>();
         for (Map.Entry<Set<Context>, List<Map.Entry<String, String>>> e : parents.entrySet()) {
-            this.parents.put(convertContexts(e.getKey()).toMap(), e.getValue().stream().map(p -> new AbstractMap.SimpleEntry<>(p.getKey(), p.getValue())).collect(Collectors.toList()));
+            this.parents.put(convertContexts(e.getKey()).toMap(), e.getValue().stream().map(p -> p.getKey() + "/" + p.getValue()).collect(Collectors.toList()));
         }
     }
 
@@ -93,10 +94,11 @@ public class SubjectDataHolder {
             }
         }
 
-        for (Map.Entry<Map<String, String>, List<Map.Entry<String, String>>> e : parents.entrySet()) {
+        for (Map.Entry<Map<String, String>, List<String>> e : parents.entrySet()) {
             Set<Context> contexts = convertContexts(ContextSet.fromMap(e.getKey()));
-            for (Map.Entry<String, String> parent : e.getValue()) {
-                subjectData.addParent(contexts, service.getSubjects(parent.getKey()).get(parent.getValue()));
+            for (String parent : e.getValue()) {
+                List<String> parts = Splitter.on('/').limit(2).splitToList(parent);
+                subjectData.addParent(contexts, service.getSubjects(parts.get(0)).get(parts.get(1)));
             }
         }
     }
