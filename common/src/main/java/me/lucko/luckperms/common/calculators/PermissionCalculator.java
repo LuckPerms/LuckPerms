@@ -56,7 +56,8 @@ public class PermissionCalculator {
     public Tristate getPermissionValue(String permission) {
         permission = permission.toLowerCase();
         Tristate t =  cache.getUnchecked(permission);
-        plugin.getDebugHandler().printOutput(objectName, permission, t);
+        plugin.getDebugHandler().offer(objectName, permission, t);
+        plugin.getPermissionCache().offer(permission);
         return t;
     }
 

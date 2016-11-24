@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static me.lucko.luckperms.common.commands.SubCommand.getBoolTabComplete;
+import static me.lucko.luckperms.common.commands.SubCommand.getPermissionTabComplete;
 
 public class PermissionSetTemp extends SharedSubCommand {
     public PermissionSetTemp() {
@@ -104,6 +105,10 @@ public class PermissionSetTemp extends SharedSubCommand {
 
     @Override
     public List<String> onTabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
-        return getBoolTabComplete(args);
+        List<String> ret = getBoolTabComplete(args);
+        if (!ret.isEmpty()) {
+            return ret;
+        }
+        return getPermissionTabComplete(args, plugin.getPermissionCache());
     }
 }

@@ -49,10 +49,7 @@ import me.lucko.luckperms.common.tasks.UpdateTask;
 import me.lucko.luckperms.common.tracks.TrackManager;
 import me.lucko.luckperms.common.users.User;
 import me.lucko.luckperms.common.users.UserManager;
-import me.lucko.luckperms.common.utils.BufferedRequest;
-import me.lucko.luckperms.common.utils.DebugHandler;
-import me.lucko.luckperms.common.utils.LocaleManager;
-import me.lucko.luckperms.common.utils.LogFactory;
+import me.lucko.luckperms.common.utils.*;
 import me.lucko.luckperms.sponge.commands.SpongeMainCommand;
 import me.lucko.luckperms.sponge.contexts.WorldCalculator;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
@@ -136,12 +133,14 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     private BufferedRequest<Void> updateTaskBuffer;
     private DebugHandler debugHandler;
     private SpongeSenderFactory senderFactory;
+    private PermissionCache permissionCache;
 
     @Listener(order = Order.FIRST)
     public void onEnable(GamePreInitializationEvent event) {
         log = LogFactory.wrap(logger);
-        debugHandler = new DebugHandler();
+        debugHandler = new DebugHandler(asyncExecutor);
         senderFactory = new SpongeSenderFactory(this);
+        permissionCache = new PermissionCache(asyncExecutor);
         timings = new LPTimings(this);
 
         getLog().info("Loading configuration...");

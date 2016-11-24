@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.common.commands;
 
+import com.google.common.base.Splitter;
 import lombok.Getter;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.sender.Sender;
@@ -31,11 +32,9 @@ import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.tracks.Track;
 import me.lucko.luckperms.common.users.User;
+import me.lucko.luckperms.common.utils.PermissionCache;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -99,6 +98,55 @@ public abstract class SubCommand<T> extends Command<T, Void> {
         } else {
             return Collections.emptyList();
         }
+    }
+
+    public static List<String> getPermissionTabComplete(List<String> args, PermissionCache cache) {
+        if (args.size() <= 1) {
+            if (args.isEmpty() || args.get(0).equals("")) {
+                return cache.getRootNode().getChildren()
+                        .map(Map::keySet)
+                        .map(s -> s.stream().collect(Collectors.toList()))
+                        .orElse(Collections.emptyList());
+            }
+
+            String start = args.get(0).toLowerCase();
+            List<String> parts = new ArrayList<>(Splitter.on('.').splitToList(start));
+            PermissionCache.Node root = cache.getRootNode();
+
+            if (parts.size() <= 1) {
+                if (!root.getChildren().isPresent()) {
+                    return Collections.emptyList();
+                }
+
+                return root.getChildren().get().keySet().stream().filter(s -> s.startsWith(start)).collect(Collectors.toList());
+            }
+
+            String incomplete = parts.remove(parts.size() - 1);
+
+            for (String s : parts) {
+                if (!root.getChildren().isPresent()) {
+                    return Collections.emptyList();
+                }
+
+                PermissionCache.Node n = root.getChildren().get().get(s);
+                if (n == null) {
+                    return Collections.emptyList();
+                }
+
+                root = n;
+            }
+
+            if (!root.getChildren().isPresent()) {
+                return Collections.emptyList();
+            }
+
+            return root.getChildren().get().keySet().stream()
+                    .filter(s -> s.startsWith(incomplete))
+                    .map(s -> parts.stream().collect(Collectors.joining(".")) + "." + s)
+                    .collect(Collectors.toList());
+        }
+
+        return Collections.emptyList();
     }
 
     private static List<String> getTabComplete(List<String> options, List<String> args) {

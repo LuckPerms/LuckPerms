@@ -38,7 +38,7 @@ public class ChildPermissionProvider {
     private ImmutableMap<Map.Entry<String, Boolean>, ImmutableMap<String, Boolean>> permissions = ImmutableMap.of();
 
     public void setup() {
-        ImmutableMap.Builder<Map.Entry<String, Boolean>, ImmutableMap<String, Boolean>> permissions = ImmutableMap.builder();
+        Map<Map.Entry<String, Boolean>, ImmutableMap<String, Boolean>> permissions = new HashMap<>();
 
         for (Permission permission : Bukkit.getServer().getPluginManager().getPermissions()) {
             // handle true
@@ -52,7 +52,7 @@ public class ChildPermissionProvider {
             permissions.put(Maps.immutableEntry(permission.getName().toLowerCase(), false), ImmutableMap.copyOf(nChildren));
         }
 
-        this.permissions = permissions.build();
+        this.permissions = ImmutableMap.copyOf(permissions);
     }
 
     private static void resolveChildren(Map<String, Boolean> accumulator, Map<String, Boolean> children, boolean invert) {

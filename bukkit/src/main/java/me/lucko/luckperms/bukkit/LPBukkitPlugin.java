@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.bukkit;
 
+import com.google.common.collect.ImmutableMap;
 import lombok.Getter;
 import me.lucko.luckperms.ApiHandler;
 import me.lucko.luckperms.api.Contexts;
@@ -54,10 +55,7 @@ import me.lucko.luckperms.common.tasks.UpdateTask;
 import me.lucko.luckperms.common.tracks.TrackManager;
 import me.lucko.luckperms.common.users.User;
 import me.lucko.luckperms.common.users.UserManager;
-import me.lucko.luckperms.common.utils.BufferedRequest;
-import me.lucko.luckperms.common.utils.DebugHandler;
-import me.lucko.luckperms.common.utils.LocaleManager;
-import me.lucko.luckperms.common.utils.LogFactory;
+import me.lucko.luckperms.common.utils.*;
 import org.bukkit.World;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
@@ -70,13 +68,11 @@ import java.io.File;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @Getter
 public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
-    private ExecutorService executorService;
     private Executor syncExecutor;
     private Executor asyncExecutor;
     private VaultHook vaultHook = null;
@@ -103,17 +99,19 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private boolean started = false;
     private DebugHandler debugHandler;
     private BukkitSenderFactory senderFactory;
+    private PermissionCache permissionCache;
 
     @Override
     public void onEnable() {
         // Used whilst the server is still starting
-        executorService = Executors.newCachedThreadPool();
-        asyncExecutor = executorService;
+        asyncExecutor = Executors.newCachedThreadPool();
         syncExecutor = r -> getServer().getScheduler().runTask(this, r);
+        Executor bukkitAsyncExecutor = r -> getServer().getScheduler().runTaskAsynchronously(this, r);
 
         log = LogFactory.wrap(getLogger());
-        debugHandler = new DebugHandler();
+        debugHandler = new DebugHandler(bukkitAsyncExecutor);
         senderFactory = new BukkitSenderFactory(this);
+        permissionCache = new PermissionCache(bukkitAsyncExecutor);
 
         getLog().info("Loading configuration...");
         configuration = new BukkitConfig(this);
@@ -126,6 +124,25 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         getServer().getScheduler().runTaskLater(this, () -> {
             defaultsProvider.refresh();
             childPermissionProvider.setup();
+
+            getServer().getScheduler().runTaskAsynchronously(this, () -> {
+                for (Map.Entry<String, Boolean> e : defaultsProvider.getOpDefaults().entrySet()) {
+                    permissionCache.offer(e.getKey());
+                }
+
+                for (Map.Entry<String, Boolean> e : defaultsProvider.getNonOpDefaults().entrySet()) {
+                    permissionCache.offer(e.getKey());
+                }
+
+                ImmutableMap<Map.Entry<String, Boolean>, ImmutableMap<String, Boolean>> permissions = childPermissionProvider.getPermissions();
+                for (Map.Entry<Map.Entry<String, Boolean>, ImmutableMap<String, Boolean>> e : permissions.entrySet()) {
+                    permissionCache.offer(e.getKey().getKey());
+                    for (Map.Entry<String, Boolean> e1 : e.getValue().entrySet()) {
+                        permissionCache.offer(e1.getKey());
+                    }
+                }
+            });
+
         }, 1L);
 
         // register events
@@ -230,7 +247,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
         // replace the temporary executor when the Bukkit one starts
         getServer().getScheduler().runTaskAsynchronously(this, () -> {
-            asyncExecutor = r -> getServer().getScheduler().runTaskAsynchronously(this, r);
+            asyncExecutor = bukkitAsyncExecutor;
         });
 
         started = true;

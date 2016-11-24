@@ -22,7 +22,9 @@
 
 package me.lucko.luckperms.bukkit.model;
 
+import com.google.common.collect.ImmutableMap;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import me.lucko.luckperms.api.Tristate;
 import org.bukkit.Bukkit;
 import org.bukkit.permissions.Permissible;
@@ -41,8 +43,11 @@ public class DefaultsProvider {
     private final DummyPermissible opDummy = new DummyPermissible(this::refreshOp);
     private final DummyPermissible nonOpDummy = new DummyPermissible(this::refreshNonOp);
 
-    private final Map<String, Boolean> op = new HashMap<>();
-    private final Map<String, Boolean> nonOp = new HashMap<>();
+    @Getter
+    private Map<String, Boolean> opDefaults = ImmutableMap.of();
+
+    @Getter
+    private Map<String, Boolean> nonOpDefaults = ImmutableMap.of();
 
     public void refresh() {
         refreshOp();
@@ -50,14 +55,24 @@ public class DefaultsProvider {
     }
 
     private void refreshOp() {
-        calculateDefaults(op, opDummy, true);
+        unregisterDefaults(opDefaults, opDummy);
+
+        Map<String, Boolean> builder = new HashMap<>();
+        calculateDefaults(builder, opDummy, true);
+
+        opDefaults = ImmutableMap.copyOf(builder);
     }
 
     private void refreshNonOp() {
-        calculateDefaults(nonOp, nonOpDummy, false);
+        unregisterDefaults(nonOpDefaults, nonOpDummy);
+
+        Map<String, Boolean> builder = new HashMap<>();
+        calculateDefaults(builder, nonOpDummy, false);
+
+        nonOpDefaults = ImmutableMap.copyOf(builder);
     }
 
-    private static void calculateDefaults(Map<String, Boolean> map, DummyPermissible p, boolean op) {
+    private static void unregisterDefaults(Map<String, Boolean> map, DummyPermissible p) {
         Set<String> perms = map.keySet();
 
         for (String name : perms) {
@@ -66,9 +81,9 @@ public class DefaultsProvider {
 
         Bukkit.getServer().getPluginManager().unsubscribeFromDefaultPerms(false, p);
         Bukkit.getServer().getPluginManager().unsubscribeFromDefaultPerms(true, p);
+    }
 
-        map.clear();
-
+    private static void calculateDefaults(Map<String, Boolean> map, DummyPermissible p, boolean op) {
         Set<Permission> defaults = Bukkit.getServer().getPluginManager().getDefaultPermissions(op);
         Bukkit.getServer().getPluginManager().subscribeToDefaultPerms(op, p);
 
@@ -96,14 +111,14 @@ public class DefaultsProvider {
     }
 
     public Tristate hasDefault(String permission, boolean isOp) {
-        Map<String, Boolean> map = isOp ? op : nonOp;
+        Map<String, Boolean> map = isOp ? opDefaults : nonOpDefaults;
 
         Boolean b = map.get(permission);
         return b == null ? Tristate.UNDEFINED : Tristate.fromBoolean(b);
     }
 
     public int size() {
-        return op.size() + nonOp.size();
+        return opDefaults.size() + nonOpDefaults.size();
     }
 
     @AllArgsConstructor

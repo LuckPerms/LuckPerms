@@ -39,6 +39,8 @@ import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 
+import static me.lucko.luckperms.common.commands.SubCommand.getPermissionTabComplete;
+
 public class PermissionCheckInherits extends SharedSubCommand {
     public PermissionCheckInherits() {
         super("checkinherits", "Checks to see if the object inherits a certain permission node",
@@ -78,5 +80,10 @@ public class PermissionCheckInherits extends SharedSubCommand {
         Util.sendPluginMessage(sender, "&b" + node + ": " + Util.formatTristate(result.getResult()) +
                 (location != null ? " &7(inherited from &a" + location + "&7)" : ""));
         return CommandResult.SUCCESS;
+    }
+
+    @Override
+    public List<String> onTabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+        return getPermissionTabComplete(args, plugin.getPermissionCache());
     }
 }

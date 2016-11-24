@@ -32,13 +32,36 @@ import me.lucko.luckperms.common.constants.Message;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Executor;
 
 public class DebugHandler {
-    private final Map<Receiver, List<String>> listeners = new ConcurrentHashMap<>();
+    private final Map<Receiver, List<String>> listeners;
+    private final Queue<Data> queue;
 
-    public void printOutput(String checked, String node, Tristate value) {
+    public DebugHandler(Executor executor) {
+        listeners = new ConcurrentHashMap<>();
+        queue = new ConcurrentLinkedQueue<>();
+
+        executor.execute(() -> {
+            while (true) {
+                for (Data e; (e = queue.poll()) != null;) {
+                    handleOutput(e.getChecked(), e.getNode(), e.getValue());
+                }
+
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    private void handleOutput(String checked, String node, Tristate value) {
         all:
         for (Map.Entry<Receiver, List<String>> e : listeners.entrySet()) {
             for (String filter : e.getValue()) {
@@ -57,6 +80,10 @@ public class DebugHandler {
         }
     }
 
+    public void offer(String checked, String node, Tristate value) {
+        queue.offer(new Data(checked, node, value));
+    }
+
     public void register(Sender sender, List<String> filters) {
         listeners.put(new Receiver(sender.getUuid(), sender), ImmutableList.copyOf(filters));
     }
@@ -71,5 +98,13 @@ public class DebugHandler {
     private static final class Receiver {
         private final UUID uuid;
         private final Sender sender;
+    }
+
+    @Getter
+    @AllArgsConstructor
+    private static final class Data {
+        private final String checked;
+        private final String node;
+        private final Tristate value;
     }
 }

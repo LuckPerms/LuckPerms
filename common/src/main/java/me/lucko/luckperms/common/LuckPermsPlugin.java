@@ -44,6 +44,7 @@ import me.lucko.luckperms.common.users.UserManager;
 import me.lucko.luckperms.common.utils.BufferedRequest;
 import me.lucko.luckperms.common.utils.DebugHandler;
 import me.lucko.luckperms.common.utils.LocaleManager;
+import me.lucko.luckperms.common.utils.PermissionCache;
 
 import java.io.File;
 import java.util.*;
@@ -146,6 +147,12 @@ public interface LuckPermsPlugin {
      * @return the debug handler instance
      */
     DebugHandler getDebugHandler();
+
+    /**
+     * Gets the permission caching instance for the platform.
+     * @return the permission cache instance
+     */
+    PermissionCache getPermissionCache();
 
     /**
      * Execute a runnable asynchronously

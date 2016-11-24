@@ -38,6 +38,8 @@ import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 
+import static me.lucko.luckperms.common.commands.SubCommand.getPermissionTabComplete;
+
 public class PermissionCheck extends SharedSubCommand {
     public PermissionCheck() {
         super("check", "Checks to see if the object has a certain permission node", Permission.USER_PERM_CHECK,
@@ -69,5 +71,10 @@ public class PermissionCheck extends SharedSubCommand {
         }
 
         return CommandResult.SUCCESS;
+    }
+
+    @Override
+    public List<String> onTabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+        return getPermissionTabComplete(args, plugin.getPermissionCache());
     }
 }

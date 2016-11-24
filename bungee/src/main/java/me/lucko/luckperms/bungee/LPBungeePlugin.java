@@ -49,10 +49,7 @@ import me.lucko.luckperms.common.tasks.UpdateTask;
 import me.lucko.luckperms.common.tracks.TrackManager;
 import me.lucko.luckperms.common.users.User;
 import me.lucko.luckperms.common.users.UserManager;
-import me.lucko.luckperms.common.utils.BufferedRequest;
-import me.lucko.luckperms.common.utils.DebugHandler;
-import me.lucko.luckperms.common.utils.LocaleManager;
-import me.lucko.luckperms.common.utils.LogFactory;
+import me.lucko.luckperms.common.utils.*;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -89,13 +86,15 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     private BufferedRequest<Void> updateTaskBuffer;
     private DebugHandler debugHandler;
     private BungeeSenderFactory senderFactory;
+    private PermissionCache permissionCache;
 
     @Override
     public void onEnable() {
         executor = r -> getProxy().getScheduler().runAsync(this, r);
         log = LogFactory.wrap(getLogger());
-        debugHandler = new DebugHandler();
+        debugHandler = new DebugHandler(executor);
         senderFactory = new BungeeSenderFactory(this);
+        permissionCache = new PermissionCache(executor);
 
         getLog().info("Loading configuration...");
         configuration = new BungeeConfig(this);
