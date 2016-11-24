@@ -40,6 +40,7 @@ public class ContextManager<T> {
     private final List<ContextListener<T>> listeners = new CopyOnWriteArrayList<>();
 
     private final LoadingCache<T, ContextSet> cache = CacheBuilder.newBuilder()
+            .weakKeys()
             .expireAfterWrite(50L, TimeUnit.MILLISECONDS)
             .build(new CacheLoader<T, ContextSet>() {
                 @Override
