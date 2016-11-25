@@ -38,7 +38,6 @@ import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.model.SpongeGroup;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
-import me.lucko.luckperms.sponge.service.simple.SimpleCollection;
 import me.lucko.luckperms.sponge.timings.LPTiming;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -52,7 +51,6 @@ import java.util.Set;
 
 public class SpongeGroupManager implements GroupManager, SubjectCollection {
     private final LPSpongePlugin plugin;
-    private final SimpleCollection fallback;
 
     private final LoadingCache<String, SpongeGroup> objects = CacheBuilder.newBuilder()
             .build(new CacheLoader<String, SpongeGroup>() {
@@ -69,7 +67,6 @@ public class SpongeGroupManager implements GroupManager, SubjectCollection {
 
     public SpongeGroupManager(LPSpongePlugin plugin) {
         this.plugin = plugin;
-        this.fallback = plugin.getService().getFallbackGroupSubjects();
     }
 
     @Override
@@ -130,7 +127,7 @@ public class SpongeGroupManager implements GroupManager, SubjectCollection {
             id = id.toLowerCase();
             if (ArgumentChecker.checkName(id)) {
                 plugin.getLog().warn("Couldn't get group subject for id: " + id + " (invalid name)");
-                return fallback.get(id); // fallback to transient collection
+                return plugin.getService().getFallbackGroupSubjects().get(id); // fallback to transient collection
             }
 
             // check if the group is loaded in memory.
@@ -146,7 +143,7 @@ public class SpongeGroupManager implements GroupManager, SubjectCollection {
 
                 if (group == null) {
                     plugin.getLog().severe("Error whilst loading group '" + id + "'.");
-                    return fallback.get(id);
+                    return plugin.getService().getFallbackGroupSubjects().get(id);
                 }
 
                 plugin.getLog().warn("Loading '" + id + "' took " + (System.currentTimeMillis() - startTime) + " ms.");

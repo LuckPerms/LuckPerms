@@ -40,7 +40,6 @@ import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.model.SpongeUser;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
-import me.lucko.luckperms.sponge.service.simple.SimpleCollection;
 import me.lucko.luckperms.sponge.timings.LPTiming;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -55,7 +54,6 @@ import java.util.UUID;
 
 public class SpongeUserManager implements UserManager, SubjectCollection {
     private final LPSpongePlugin plugin;
-    private final SimpleCollection fallback;
 
     private final LoadingCache<UserIdentifier, SpongeUser> objects = CacheBuilder.newBuilder()
             .build(new CacheLoader<UserIdentifier, SpongeUser>() {
@@ -72,7 +70,6 @@ public class SpongeUserManager implements UserManager, SubjectCollection {
 
     public SpongeUserManager(LPSpongePlugin plugin) {
         this.plugin = plugin;
-        this.fallback = plugin.getService().getFallbackUserSubjects();
     }
 
     @Override
@@ -180,7 +177,7 @@ public class SpongeUserManager implements UserManager, SubjectCollection {
             UUID uuid = Util.parseUuid(id);
             if (uuid == null) {
                 plugin.getLog().warn("Couldn't get user subject for id: " + id + " (not a uuid)");
-                return fallback.get(id); // fallback to the transient collection
+                return plugin.getService().getFallbackUserSubjects().get(id); // fallback to the transient collection
             }
 
             UUID u = plugin.getUuidCache().getUUID(uuid);
@@ -198,7 +195,7 @@ public class SpongeUserManager implements UserManager, SubjectCollection {
 
                 if (user == null) {
                     plugin.getLog().severe("Error whilst loading user '" + u + "'.");
-                    return fallback.get(u.toString());
+                    return plugin.getService().getFallbackUserSubjects().get(u.toString());
                 }
 
                 user.setupData(false);
