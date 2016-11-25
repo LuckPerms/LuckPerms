@@ -28,7 +28,7 @@ import me.lucko.luckperms.common.commands.Command;
 import me.lucko.luckperms.common.commands.MainCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.tracks.Track;
+import me.lucko.luckperms.common.core.model.Track;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -31,7 +31,7 @@ import me.lucko.luckperms.common.calculators.PermissionProcessor;
 import me.lucko.luckperms.common.calculators.processors.MapProcessor;
 import me.lucko.luckperms.common.calculators.processors.RegexProcessor;
 import me.lucko.luckperms.common.calculators.processors.WildcardProcessor;
-import me.lucko.luckperms.common.users.User;
+import me.lucko.luckperms.common.core.model.User;
 
 @AllArgsConstructor
 public class BungeeCalculatorFactory implements CalculatorFactory {

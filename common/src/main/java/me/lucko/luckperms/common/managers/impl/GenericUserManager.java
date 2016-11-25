@@ -20,12 +20,15 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.users;
+package me.lucko.luckperms.common.managers.impl;
 
 import lombok.RequiredArgsConstructor;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.utils.AbstractManager;
+import me.lucko.luckperms.common.core.UserIdentifier;
+import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.managers.AbstractManager;
+import me.lucko.luckperms.common.managers.UserManager;
 import me.lucko.luckperms.common.utils.Identifiable;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
@@ -33,8 +36,15 @@ import java.util.Set;
 import java.util.UUID;
 
 @RequiredArgsConstructor
-public class UserManager extends AbstractManager<UserIdentifier, User> {
+public class GenericUserManager extends AbstractManager<UserIdentifier, User> implements UserManager {
     private final LuckPermsPlugin plugin;
+
+    @Override
+    public User apply(UserIdentifier id) {
+        return id.getUsername() == null ?
+                new User(id.getUuid(), plugin) :
+                new User(id.getUuid(), id.getUsername(), plugin);
+    }
 
     /**
      * Get a user object by name
@@ -137,12 +147,5 @@ public class UserManager extends AbstractManager<UserIdentifier, User> {
                 }
             });
         });
-    }
-
-    @Override
-    public User apply(UserIdentifier id) {
-        return id.getUsername() == null ?
-                new User(id.getUuid(), plugin) :
-                new User(id.getUuid(), id.getUsername(), plugin);
     }
 }

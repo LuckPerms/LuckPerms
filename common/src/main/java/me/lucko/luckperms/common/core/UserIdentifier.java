@@ -20,23 +20,27 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.generic.permission;
+package me.lucko.luckperms.common.core;
 
-import com.google.common.collect.ImmutableList;
-import me.lucko.luckperms.common.commands.generic.SharedMainCommand;
-import me.lucko.luckperms.common.commands.generic.SharedSubCommand;
-import me.lucko.luckperms.common.core.model.PermissionHolder;
+import lombok.*;
+import me.lucko.luckperms.common.utils.Identifiable;
 
-public class CommandPermission<T extends PermissionHolder> extends SharedMainCommand<T> {
-    public CommandPermission(boolean user) {
-        super("Permission", "Edit permissions", user, ImmutableList.<SharedSubCommand>builder()
-            .add(new PermissionInfo())
-            .add(new PermissionSet())
-            .add(new PermissionUnset())
-            .add(new PermissionSetTemp())
-            .add(new PermissionUnsetTemp())
-            .add(new PermissionCheck())
-            .add(new PermissionCheckInherits())
-            .build());
+import java.util.UUID;
+
+@Getter
+@ToString
+@EqualsAndHashCode(of = "uuid")
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+public class UserIdentifier implements Identifiable<UUID> {
+    public static UserIdentifier of(UUID uuid, String username) {
+        return new UserIdentifier(uuid, username);
+    }
+
+    private final UUID uuid;
+    private final String username;
+
+    @Override
+    public UUID getId() {
+        return getUuid();
     }
 }

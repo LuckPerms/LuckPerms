@@ -1,0 +1,75 @@
+/*
+ * Copyright (c) 2016 Lucko (Luck) <luck@lucko.me>
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *  SOFTWARE.
+ */
+
+package me.lucko.luckperms.common.managers;
+
+import me.lucko.luckperms.common.utils.Identifiable;
+
+import java.util.Map;
+import java.util.function.Function;
+
+/**
+ * A class which manages instances of a class
+ * @param <I> the class used to identify each object held in this manager
+ * @param <T> the class this manager is "managing"
+ */
+public interface Manager<I, T extends Identifiable<I>> extends Function<I, T> {
+
+    /**
+     * Gets a map containing all cached instances held by this manager.
+     * @return all instances held in this manager
+     */
+    Map<I, T> getAll();
+
+    /**
+     * Gets or creates an object by id
+     * @param id The id to search by
+     * @return a {@link T} object if the object is loaded or makes and returns a new object
+     */
+    T getOrMake(I id);
+
+    /**
+     * Get an object by id
+     * @param id The id to search by
+     * @return a {@link T} object if the object is loaded, returns null if the object is not loaded
+     */
+    T get(I id);
+
+    /**
+     * Check to see if a object is loaded or not
+     * @param id The id of the object
+     * @return true if the object is loaded
+     */
+    boolean isLoaded(I id);
+
+    /**
+     * Removes and unloads the object from the manager
+     * @param t The object to unload
+     */
+    void unload(T t);
+
+    /**
+     * Unloads all objects from the manager
+     */
+    void unloadAll();
+
+}

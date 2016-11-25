@@ -20,27 +20,21 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.users;
+package me.lucko.luckperms.common.managers.impl;
 
-import lombok.*;
-import me.lucko.luckperms.common.utils.Identifiable;
+import lombok.RequiredArgsConstructor;
+import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.core.model.Group;
+import me.lucko.luckperms.common.managers.AbstractManager;
+import me.lucko.luckperms.common.managers.GroupManager;
 
-import java.util.UUID;
-
-@Getter
-@ToString
-@EqualsAndHashCode(of = "uuid")
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class UserIdentifier implements Identifiable<UUID> {
-    public static UserIdentifier of(UUID uuid, String username) {
-        return new UserIdentifier(uuid, username);
-    }
-
-    private final UUID uuid;
-    private final String username;
+@RequiredArgsConstructor
+public class GenericGroupManager extends AbstractManager<String, Group> implements GroupManager {
+    private final LuckPermsPlugin plugin;
 
     @Override
-    public UUID getId() {
-        return getUuid();
+    public Group apply(String name) {
+        return new Group(name, plugin);
     }
+
 }

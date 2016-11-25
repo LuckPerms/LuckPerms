@@ -27,7 +27,7 @@ import lombok.Getter;
 import lombok.ToString;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.core.NodeFactory;
-import me.lucko.luckperms.common.users.User;
+import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 

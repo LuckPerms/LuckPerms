@@ -20,14 +20,13 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.tracks;
+package me.lucko.luckperms.common.core.model;
 
 import com.google.common.collect.ImmutableList;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
-import me.lucko.luckperms.common.groups.Group;
 import me.lucko.luckperms.common.utils.Identifiable;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;

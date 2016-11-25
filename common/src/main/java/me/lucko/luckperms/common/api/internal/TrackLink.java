@@ -36,19 +36,19 @@ import java.util.List;
 import static me.lucko.luckperms.common.api.internal.Utils.checkGroup;
 
 /**
- * Provides a link between {@link Track} and {@link me.lucko.luckperms.common.tracks.Track}
+ * Provides a link between {@link Track} and {@link me.lucko.luckperms.common.core.model.Track}
  */
 @EqualsAndHashCode(of = {"name"})
 @SuppressWarnings("unused")
 public class TrackLink implements Track {
 
     @Getter(AccessLevel.PACKAGE)
-    private final me.lucko.luckperms.common.tracks.Track master;
+    private final me.lucko.luckperms.common.core.model.Track master;
 
     @Getter
     private final String name;
 
-    public TrackLink(@NonNull me.lucko.luckperms.common.tracks.Track master) {
+    public TrackLink(@NonNull me.lucko.luckperms.common.core.model.Track master) {
         this.master = master;
         this.name = master.getName();
     }

@@ -25,7 +25,7 @@ package me.lucko.luckperms.common.commands.generic.meta;
 import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.common.commands.generic.SharedMainCommand;
 import me.lucko.luckperms.common.commands.generic.SharedSubCommand;
-import me.lucko.luckperms.common.core.PermissionHolder;
+import me.lucko.luckperms.common.core.model.PermissionHolder;
 
 public class CommandMeta<T extends PermissionHolder> extends SharedMainCommand<T> {
     public CommandMeta(boolean user) {

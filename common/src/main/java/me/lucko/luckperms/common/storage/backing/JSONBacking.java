@@ -26,19 +26,19 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import lombok.Cleanup;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.groups.Group;
-import me.lucko.luckperms.common.groups.GroupManager;
-import me.lucko.luckperms.common.tracks.Track;
-import me.lucko.luckperms.common.tracks.TrackManager;
-import me.lucko.luckperms.common.users.User;
-import me.lucko.luckperms.common.users.UserIdentifier;
+import me.lucko.luckperms.common.core.UserIdentifier;
+import me.lucko.luckperms.common.core.model.Group;
+import me.lucko.luckperms.common.core.model.Track;
+import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.managers.GroupManager;
+import me.lucko.luckperms.common.managers.TrackManager;
 
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
-import static me.lucko.luckperms.common.core.PermissionHolder.exportToLegacy;
+import static me.lucko.luckperms.common.core.model.PermissionHolder.exportToLegacy;
 
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class JSONBacking extends FlatfileBacking {

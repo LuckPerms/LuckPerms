@@ -38,19 +38,19 @@ import java.util.UUID;
 import static me.lucko.luckperms.common.api.internal.Utils.*;
 
 /**
- * Provides a link between {@link User} and {@link me.lucko.luckperms.common.users.User}
+ * Provides a link between {@link User} and {@link me.lucko.luckperms.common.core.model.User}
  */
 @EqualsAndHashCode(of = {"uuid"}, callSuper = false)
 @SuppressWarnings("unused")
 public class UserLink extends PermissionHolderLink implements User {
 
     @Getter
-    private final me.lucko.luckperms.common.users.User master;
+    private final me.lucko.luckperms.common.core.model.User master;
 
     @Getter
     private final UUID uuid;
 
-    public UserLink(@NonNull me.lucko.luckperms.common.users.User master) {
+    public UserLink(@NonNull me.lucko.luckperms.common.core.model.User master) {
         super(master);
         this.master = master;
         this.uuid = master.getUuid();

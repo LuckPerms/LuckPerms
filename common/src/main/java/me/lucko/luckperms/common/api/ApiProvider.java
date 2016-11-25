@@ -33,7 +33,7 @@ import me.lucko.luckperms.api.event.LPListener;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.api.internal.*;
 import me.lucko.luckperms.common.core.NodeBuilder;
-import me.lucko.luckperms.common.users.UserIdentifier;
+import me.lucko.luckperms.common.core.UserIdentifier;
 
 import java.util.Optional;
 import java.util.Set;
@@ -127,7 +127,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public User getUser(@NonNull UUID uuid) {
-        final me.lucko.luckperms.common.users.User user = plugin.getUserManager().get(uuid);
+        final me.lucko.luckperms.common.core.model.User user = plugin.getUserManager().get(uuid);
         return user == null ? null : new UserLink(user);
     }
 
@@ -138,7 +138,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public User getUser(@NonNull String name) {
-        final me.lucko.luckperms.common.users.User user = plugin.getUserManager().get(name);
+        final me.lucko.luckperms.common.core.model.User user = plugin.getUserManager().get(name);
         return user == null ? null : new UserLink(user);
     }
 
@@ -165,7 +165,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public Group getGroup(@NonNull String name) {
-        final me.lucko.luckperms.common.groups.Group group = plugin.getGroupManager().get(name);
+        final me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().get(name);
         return group == null ? null : new GroupLink(group);
     }
 
@@ -186,7 +186,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public Track getTrack(@NonNull String name) {
-        final me.lucko.luckperms.common.tracks.Track track = plugin.getTrackManager().get(name);
+        final me.lucko.luckperms.common.core.model.Track track = plugin.getTrackManager().get(name);
         return track == null ? null : new TrackLink(track);
     }
 

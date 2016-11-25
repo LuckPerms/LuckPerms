@@ -25,7 +25,7 @@ package me.lucko.luckperms.bukkit;
 import me.lucko.luckperms.bukkit.inject.Injector;
 import me.lucko.luckperms.bukkit.model.LPPermissible;
 import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.users.User;
+import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.utils.AbstractListener;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

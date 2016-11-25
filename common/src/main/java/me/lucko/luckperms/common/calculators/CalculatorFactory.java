@@ -23,7 +23,7 @@
 package me.lucko.luckperms.common.calculators;
 
 import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.common.users.User;
+import me.lucko.luckperms.common.core.model.User;
 
 /**
  * Creates a calculator instance given a set of contexts

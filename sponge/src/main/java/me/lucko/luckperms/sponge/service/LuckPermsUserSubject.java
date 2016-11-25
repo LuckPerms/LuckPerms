@@ -29,7 +29,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import me.lucko.luckperms.api.caching.MetaData;
 import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.common.users.User;
+import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.sponge.timings.LPTiming;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;

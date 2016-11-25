@@ -34,7 +34,7 @@ import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.InheritanceInfo;
 import me.lucko.luckperms.common.core.NodeBuilder;
-import me.lucko.luckperms.common.core.PermissionHolder;
+import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;

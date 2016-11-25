@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.core;
+package me.lucko.luckperms.common.core.model;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -39,7 +39,10 @@ import me.lucko.luckperms.common.api.internal.GroupLink;
 import me.lucko.luckperms.common.api.internal.PermissionHolderLink;
 import me.lucko.luckperms.common.caching.MetaHolder;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.groups.Group;
+import me.lucko.luckperms.common.core.InheritanceInfo;
+import me.lucko.luckperms.common.core.NodeBuilder;
+import me.lucko.luckperms.common.core.NodeFactory;
+import me.lucko.luckperms.common.core.PriorityComparator;
 import me.lucko.luckperms.common.utils.Cache;
 import me.lucko.luckperms.common.utils.ExtractedContexts;
 import me.lucko.luckperms.common.utils.ImmutableLocalizedNode;

@@ -20,23 +20,10 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.groups;
+package me.lucko.luckperms.common.managers;
 
-import lombok.RequiredArgsConstructor;
-import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.utils.AbstractManager;
+import me.lucko.luckperms.common.core.model.Track;
 
-@RequiredArgsConstructor
-public class GroupManager extends AbstractManager<String, Group> {
-    private final LuckPermsPlugin plugin;
+public interface TrackManager extends Manager<String, Track> {
 
-    /**
-     * Makes a new group object
-     * @param name The name of the group
-     * @return a new {@link Group} object
-     */
-    @Override
-    public Group apply(String name) {
-        return new Group(name, plugin);
-    }
 }

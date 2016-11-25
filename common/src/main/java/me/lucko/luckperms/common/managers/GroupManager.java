@@ -20,19 +20,10 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.tracks;
+package me.lucko.luckperms.common.managers;
 
-import me.lucko.luckperms.common.utils.AbstractManager;
+import me.lucko.luckperms.common.core.model.Group;
 
-public class TrackManager extends AbstractManager<String, Track> {
+public interface GroupManager extends Manager<String, Group> {
 
-    /**
-     * Makes a new track object
-     * @param name The name of the track
-     * @return a new {@link Track} object
-     */
-    @Override
-    public Track apply(String name) {
-        return new Track(name);
-    }
 }

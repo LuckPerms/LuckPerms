@@ -32,10 +32,10 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.groups.Group;
+import me.lucko.luckperms.common.core.model.Group;
+import me.lucko.luckperms.common.core.model.Track;
+import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.storage.Storage;
-import me.lucko.luckperms.common.tracks.Track;
-import me.lucko.luckperms.common.users.User;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.io.BufferedWriter;

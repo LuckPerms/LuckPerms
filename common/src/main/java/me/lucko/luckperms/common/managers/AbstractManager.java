@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.utils;
+package me.lucko.luckperms.common.managers;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -28,16 +28,16 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import me.lucko.luckperms.common.utils.Identifiable;
 
 import java.util.Map;
-import java.util.function.Function;
 
 /**
  * An abstract manager class
  * @param <I> the class used to identify each object held in this manager
  * @param <T> the class this manager is "managing"
  */
-public abstract class AbstractManager<I, T extends Identifiable<I>> implements Function<I, T> {
+public abstract class AbstractManager<I, T extends Identifiable<I>> implements Manager<I, T> {
 
     private final LoadingCache<I, T> objects = CacheBuilder.newBuilder()
             .build(new CacheLoader<I, T>() {
@@ -52,51 +52,35 @@ public abstract class AbstractManager<I, T extends Identifiable<I>> implements F
                 }
             });
 
-    public final Map<I, T> getAll() {
+    @Override
+    public Map<I, T> getAll() {
         return ImmutableMap.copyOf(objects.asMap());
     }
 
-    /**
-     * Get an object by id
-     * @param id The id to search by
-     * @return a {@link T} object if the object is loaded or makes and returns a new object
-     */
-    public final T getOrMake(I id) {
+    @Override
+    public T getOrMake(I id) {
         return objects.getUnchecked(id);
     }
 
-    /**
-     * Get an object by id
-     * @param id The id to search by
-     * @return a {@link T} object if the object is loaded, returns null if the object is not loaded
-     */
-    public final T get(I id) {
+    @Override
+    public T get(I id) {
         return objects.getIfPresent(id);
     }
 
-    /**
-     * Check to see if a object is loaded or not
-     * @param id The id of the object
-     * @return true if the object is loaded
-     */
-    public final boolean isLoaded(I id) {
+    @Override
+    public boolean isLoaded(I id) {
         return objects.asMap().containsKey(id);
     }
 
-    /**
-     * Removes and unloads the object from the manager
-     * @param t The object to unload
-     */
-    public final void unload(T t) {
+    @Override
+    public void unload(T t) {
         if (t != null) {
             objects.invalidate(t.getId());
         }
     }
 
-    /**
-     * Unloads all objects from the manager
-     */
-    public final void unloadAll() {
+    @Override
+    public void unloadAll() {
         objects.invalidateAll();
     }
 

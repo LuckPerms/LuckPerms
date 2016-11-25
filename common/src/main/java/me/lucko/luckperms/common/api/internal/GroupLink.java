@@ -35,19 +35,19 @@ import java.util.List;
 import static me.lucko.luckperms.common.api.internal.Utils.*;
 
 /**
- * Provides a link between {@link Group} and {@link me.lucko.luckperms.common.groups.Group}
+ * Provides a link between {@link Group} and {@link me.lucko.luckperms.common.core.model.Group}
  */
 @EqualsAndHashCode(of = {"name"}, callSuper = false)
 @SuppressWarnings("unused")
 public class GroupLink extends PermissionHolderLink implements Group {
 
     @Getter(AccessLevel.PACKAGE)
-    private final me.lucko.luckperms.common.groups.Group master;
+    private final me.lucko.luckperms.common.core.model.Group master;
 
     @Getter
     private final String name;
 
-    public GroupLink(@NonNull me.lucko.luckperms.common.groups.Group master) {
+    public GroupLink(@NonNull me.lucko.luckperms.common.core.model.Group master) {
         super(master);
         this.master = master;
         this.name = master.getName();

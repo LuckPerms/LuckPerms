@@ -31,7 +31,8 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Constants;
-import me.lucko.luckperms.common.core.PermissionHolder;
+import me.lucko.luckperms.common.core.model.PermissionHolder;
+import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
@@ -123,7 +124,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
 
                 // Make a LuckPerms group for the one being migrated.
                 plugin.getStorage().createAndLoadGroup(groupName).join();
-                me.lucko.luckperms.common.groups.Group lpGroup = plugin.getGroupManager().get(groupName);
+                me.lucko.luckperms.common.core.model.Group lpGroup = plugin.getGroupManager().get(groupName);
                 try {
                     LogEntry.build()
                             .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
@@ -159,7 +160,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
 
                 // Make a LuckPerms user for the one being migrated.
                 plugin.getStorage().loadUser(uuid, "null").join();
-                me.lucko.luckperms.common.users.User lpUser = plugin.getUserManager().get(uuid);
+                User lpUser = plugin.getUserManager().get(uuid);
 
                 migrateHolder(plugin, world, user, lpUser);
 

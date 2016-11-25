@@ -26,7 +26,7 @@ import lombok.experimental.UtilityClass;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.core.NodeBuilder;
 import me.lucko.luckperms.common.core.NodeFactory;
-import me.lucko.luckperms.common.core.PermissionHolder;
+import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.utils.ExtractedContexts;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.sponge.service.LuckPermsService;

@@ -20,13 +20,12 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.groups;
+package me.lucko.luckperms.common.core.model;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.core.PermissionHolder;
 import me.lucko.luckperms.common.utils.Identifiable;
 
 @ToString(of = {"name"})
@@ -39,7 +38,7 @@ public class Group extends PermissionHolder implements Identifiable<String> {
     @Getter
     private final String name;
 
-    Group(String name, LuckPermsPlugin plugin) {
+    public Group(String name, LuckPermsPlugin plugin) {
         super(name, plugin);
         this.name = name;
     }

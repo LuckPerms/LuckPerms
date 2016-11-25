@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.users;
+package me.lucko.luckperms.common.core.model;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -31,7 +31,7 @@ import me.lucko.luckperms.api.event.events.UserPermissionRefreshEvent;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.api.internal.UserLink;
 import me.lucko.luckperms.common.caching.UserCache;
-import me.lucko.luckperms.common.core.PermissionHolder;
+import me.lucko.luckperms.common.core.UserIdentifier;
 import me.lucko.luckperms.common.utils.BufferedRequest;
 import me.lucko.luckperms.common.utils.Identifiable;
 
@@ -76,13 +76,13 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
         }
     };
 
-    protected User(UUID uuid, LuckPermsPlugin plugin) {
+    public User(UUID uuid, LuckPermsPlugin plugin) {
         super(uuid.toString(), plugin);
         this.uuid = uuid;
         this.name = null;
     }
 
-    protected User(UUID uuid, String name, LuckPermsPlugin plugin) {
+    public User(UUID uuid, String name, LuckPermsPlugin plugin) {
         super(uuid.toString(), plugin);
         this.uuid = uuid;
         this.name = name;

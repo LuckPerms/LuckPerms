@@ -29,6 +29,7 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.constants.Patterns;
+import me.lucko.luckperms.common.core.model.ImmutableNode;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
 
 import java.util.List;

@@ -36,9 +36,9 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Constants;
-import me.lucko.luckperms.common.core.PermissionHolder;
+import me.lucko.luckperms.common.core.model.PermissionHolder;
+import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.LogEntry;
-import me.lucko.luckperms.common.users.User;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
@@ -252,7 +252,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         Map<Integer, Group> groups = pm.getGroups(); // All versions
         for (Group g : groups.values()) {
             plugin.getStorage().createAndLoadGroup(g.getName().toLowerCase()).join();
-            final me.lucko.luckperms.common.groups.Group group = plugin.getGroupManager().get(g.getName().toLowerCase());
+            final me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().get(g.getName().toLowerCase());
             try {
                 LogEntry.build()
                         .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())

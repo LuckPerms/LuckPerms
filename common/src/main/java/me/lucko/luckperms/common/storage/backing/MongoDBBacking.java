@@ -31,21 +31,21 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.InsertOneOptions;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.core.UserIdentifier;
+import me.lucko.luckperms.common.core.model.Group;
+import me.lucko.luckperms.common.core.model.Track;
+import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.Log;
-import me.lucko.luckperms.common.groups.Group;
-import me.lucko.luckperms.common.groups.GroupManager;
+import me.lucko.luckperms.common.managers.GroupManager;
+import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.storage.DatastoreConfiguration;
-import me.lucko.luckperms.common.tracks.Track;
-import me.lucko.luckperms.common.tracks.TrackManager;
-import me.lucko.luckperms.common.users.User;
-import me.lucko.luckperms.common.users.UserIdentifier;
 import org.bson.Document;
 
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
-import static me.lucko.luckperms.common.core.PermissionHolder.exportToLegacy;
+import static me.lucko.luckperms.common.core.model.PermissionHolder.exportToLegacy;
 
 @SuppressWarnings("unchecked")
 public class MongoDBBacking extends AbstractBacking {

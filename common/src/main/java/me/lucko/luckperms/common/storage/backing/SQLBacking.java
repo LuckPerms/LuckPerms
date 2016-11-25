@@ -26,13 +26,13 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.core.UserIdentifier;
+import me.lucko.luckperms.common.core.model.Group;
+import me.lucko.luckperms.common.core.model.Track;
+import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.Log;
-import me.lucko.luckperms.common.groups.Group;
-import me.lucko.luckperms.common.groups.GroupManager;
-import me.lucko.luckperms.common.tracks.Track;
-import me.lucko.luckperms.common.tracks.TrackManager;
-import me.lucko.luckperms.common.users.User;
-import me.lucko.luckperms.common.users.UserIdentifier;
+import me.lucko.luckperms.common.managers.GroupManager;
+import me.lucko.luckperms.common.managers.TrackManager;
 
 import java.lang.reflect.Type;
 import java.sql.Connection;
@@ -41,7 +41,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
-import static me.lucko.luckperms.common.core.PermissionHolder.exportToLegacy;
+import static me.lucko.luckperms.common.core.model.PermissionHolder.exportToLegacy;
 
 abstract class SQLBacking extends AbstractBacking {
     private static final QueryPS EMPTY_PS = preparedStatement -> {};

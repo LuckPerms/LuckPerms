@@ -32,8 +32,8 @@ import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.ContextHelper;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.LogEntry;
-import me.lucko.luckperms.common.users.User;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;

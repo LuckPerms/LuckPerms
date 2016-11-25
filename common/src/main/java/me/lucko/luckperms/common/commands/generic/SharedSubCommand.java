@@ -33,9 +33,9 @@ import me.lucko.luckperms.common.commands.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.PermissionHolder;
-import me.lucko.luckperms.common.groups.Group;
-import me.lucko.luckperms.common.users.User;
+import me.lucko.luckperms.common.core.model.Group;
+import me.lucko.luckperms.common.core.model.PermissionHolder;
+import me.lucko.luckperms.common.core.model.User;
 
 import java.util.Collections;
 import java.util.List;

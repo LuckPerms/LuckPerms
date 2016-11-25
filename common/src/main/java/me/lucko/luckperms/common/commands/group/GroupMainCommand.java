@@ -32,7 +32,7 @@ import me.lucko.luckperms.common.commands.generic.parent.CommandParent;
 import me.lucko.luckperms.common.commands.generic.permission.CommandPermission;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.groups.Group;
+import me.lucko.luckperms.common.core.model.Group;
 
 import java.util.ArrayList;
 import java.util.List;

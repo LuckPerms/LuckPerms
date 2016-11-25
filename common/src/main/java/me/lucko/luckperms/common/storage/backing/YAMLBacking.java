@@ -24,12 +24,12 @@ package me.lucko.luckperms.common.storage.backing;
 
 import lombok.Cleanup;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.groups.Group;
-import me.lucko.luckperms.common.groups.GroupManager;
-import me.lucko.luckperms.common.tracks.Track;
-import me.lucko.luckperms.common.tracks.TrackManager;
-import me.lucko.luckperms.common.users.User;
-import me.lucko.luckperms.common.users.UserIdentifier;
+import me.lucko.luckperms.common.core.UserIdentifier;
+import me.lucko.luckperms.common.core.model.Group;
+import me.lucko.luckperms.common.core.model.Track;
+import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.managers.GroupManager;
+import me.lucko.luckperms.common.managers.TrackManager;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
@@ -38,7 +38,7 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
-import static me.lucko.luckperms.common.core.PermissionHolder.exportToLegacy;
+import static me.lucko.luckperms.common.core.model.PermissionHolder.exportToLegacy;
 
 @SuppressWarnings({"unchecked", "ResultOfMethodCallIgnored"})
 public class YAMLBacking extends FlatfileBacking {

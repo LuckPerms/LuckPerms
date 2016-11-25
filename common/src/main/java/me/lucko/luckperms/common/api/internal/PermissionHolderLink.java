@@ -33,15 +33,15 @@ import me.lucko.luckperms.exceptions.ObjectLacksException;
 import java.util.*;
 
 import static me.lucko.luckperms.common.api.internal.Utils.*;
-import static me.lucko.luckperms.common.core.PermissionHolder.exportToLegacy;
+import static me.lucko.luckperms.common.core.model.PermissionHolder.exportToLegacy;
 
 /**
- * Provides a link between {@link PermissionHolder} and {@link me.lucko.luckperms.common.core.PermissionHolder}
+ * Provides a link between {@link PermissionHolder} and {@link me.lucko.luckperms.common.core.model.PermissionHolder}
  */
 @SuppressWarnings("unused")
 @AllArgsConstructor
 public class PermissionHolderLink implements PermissionHolder {
-    private final me.lucko.luckperms.common.core.PermissionHolder master;
+    private final me.lucko.luckperms.common.core.model.PermissionHolder master;
 
     @Override
     public String getObjectName() {

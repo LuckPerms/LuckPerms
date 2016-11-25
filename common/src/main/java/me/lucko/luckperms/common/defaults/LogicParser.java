@@ -24,7 +24,7 @@ package me.lucko.luckperms.common.defaults;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.core.NodeFactory;
-import me.lucko.luckperms.common.core.PermissionHolder;
+import me.lucko.luckperms.common.core.model.PermissionHolder;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;

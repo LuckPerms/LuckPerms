@@ -65,7 +65,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
 
             // Make a LuckPerms group for the one being migrated
             plugin.getStorage().createAndLoadGroup(g.getName().toLowerCase()).join();
-            me.lucko.luckperms.common.groups.Group group = plugin.getGroupManager().get(g.getName().toLowerCase());
+            me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().get(g.getName().toLowerCase());
             try {
                 LogEntry.build()
                         .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
@@ -189,7 +189,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
 
             // Make a LuckPerms user for the one being migrated.
             plugin.getStorage().loadUser(u.getUUID(), "null").join();
-            me.lucko.luckperms.common.users.User user = plugin.getUserManager().get(u.getUUID());
+            me.lucko.luckperms.common.core.model.User user = plugin.getUserManager().get(u.getUUID());
 
             // Migrate global perms
             for (String perm : u.getPerms()) {

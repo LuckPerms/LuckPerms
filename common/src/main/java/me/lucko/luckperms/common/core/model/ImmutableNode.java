@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.core;
+package me.lucko.luckperms.common.core.model;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;

@@ -30,7 +30,7 @@ import lombok.Getter;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.common.groups.Group;
+import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.utils.ExtractedContexts;
 import me.lucko.luckperms.sponge.timings.LPTiming;
 import org.spongepowered.api.command.CommandSource;
