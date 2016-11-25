@@ -285,7 +285,7 @@ public abstract class PermissionHolder {
 
         for (Map.Entry<Integer, Node> e : sortedParents) {
             Node parent = e.getValue();
-            Group group = plugin.getGroupManager().get(parent.getGroupName());
+            Group group = plugin.getGroupManager().getIfLoaded(parent.getGroupName());
             if (group == null) {
                 continue;
             }
@@ -361,7 +361,7 @@ public abstract class PermissionHolder {
 
         for (Map.Entry<Integer, Node> e : sortedParents) {
             Node parent = e.getValue();
-            Group group = plugin.getGroupManager().get(parent.getGroupName());
+            Group group = plugin.getGroupManager().getIfLoaded(parent.getGroupName());
             if (group == null) {
                 continue;
             }

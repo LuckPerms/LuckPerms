@@ -155,7 +155,7 @@ public class VaultPermissionHook extends Permission {
         world = ignoreWorld ? null : world; // Correct world value
         log("Checking if player " + player + " has permission: " + permission + " on world " + world + ", server " + server);
 
-        User user = plugin.getUserManager().get(player);
+        User user = plugin.getUserManager().getByUsername(player);
         if (user == null) return false;
 
         if (user.getUserData() == null) {
@@ -171,7 +171,7 @@ public class VaultPermissionHook extends Permission {
         String finalWorld = ignoreWorld ? null : world; // Correct world value
         log("Adding permission to player " + player + ": '" + permission + "' on world " + finalWorld + ", server " + server);
 
-        final User user = plugin.getUserManager().get(player);
+        final User user = plugin.getUserManager().getByUsername(player);
         if (user == null) return false;
 
         scheduler.scheduleTask(() -> add(finalWorld, user, permission));
@@ -183,7 +183,7 @@ public class VaultPermissionHook extends Permission {
         String finalWorld = ignoreWorld ? null : world; // Correct world value
         log("Removing permission from player " + player + ": '" + permission + "' on world " + finalWorld + ", server " + server);
 
-        final User user = plugin.getUserManager().get(player);
+        final User user = plugin.getUserManager().getByUsername(player);
         if (user == null) return false;
 
         scheduler.scheduleTask(() -> remove(finalWorld, user, permission));
@@ -195,7 +195,7 @@ public class VaultPermissionHook extends Permission {
         world = ignoreWorld ? null : world; // Correct world value
         log("Checking if group " + groupName + " has permission: " + permission + " on world " + world + ", server " + server);
 
-        final Group group = plugin.getGroupManager().get(groupName);
+        final Group group = plugin.getGroupManager().getIfLoaded(groupName);
         if (group == null) return false;
 
         // This is a nasty call. Groups aren't cached. :(
@@ -209,7 +209,7 @@ public class VaultPermissionHook extends Permission {
         String finalWorld = ignoreWorld ? null : world; // Correct world value
         log("Adding permission to group " + groupName + ": '" + permission + "' on world " + finalWorld + ", server " + server);
 
-        final Group group = plugin.getGroupManager().get(groupName);
+        final Group group = plugin.getGroupManager().getIfLoaded(groupName);
         if (group == null) return false;
 
         scheduler.scheduleTask(() -> add(finalWorld, group, permission));
@@ -221,7 +221,7 @@ public class VaultPermissionHook extends Permission {
         String finalWorld = ignoreWorld ? null : world; // Correct world value
         log("Removing permission from group " + groupName + ": '" + permission + "' on world " + finalWorld + ", server " + server);
 
-        final Group group = plugin.getGroupManager().get(groupName);
+        final Group group = plugin.getGroupManager().getIfLoaded(groupName);
         if (group == null) return false;
 
         scheduler.scheduleTask(() -> remove(finalWorld, group, permission));
@@ -233,7 +233,7 @@ public class VaultPermissionHook extends Permission {
         String finalWorld = ignoreWorld ? null : world; // Correct world value
         log("Checking if player " + player + " is in group: " + group + " on world " + finalWorld + ", server " + server);
 
-        final User user = plugin.getUserManager().get(player);
+        final User user = plugin.getUserManager().getByUsername(player);
         if (user == null) return false;
 
         return user.getNodes().stream()
@@ -250,10 +250,10 @@ public class VaultPermissionHook extends Permission {
         String finalWorld = ignoreWorld ? null : world; // Correct world value
         log("Adding player " + player + " to group: '" + groupName + "' on world " + finalWorld + ", server " + server);
 
-        final User user = plugin.getUserManager().get(player);
+        final User user = plugin.getUserManager().getByUsername(player);
         if (user == null) return false;
 
-        final Group group = plugin.getGroupManager().get(groupName);
+        final Group group = plugin.getGroupManager().getIfLoaded(groupName);
         if (group == null) return false;
 
         scheduler.scheduleTask(() -> {
@@ -274,10 +274,10 @@ public class VaultPermissionHook extends Permission {
         String finalWorld = ignoreWorld ? null : world; // Correct world value
         log("Removing player " + player + " from group: '" + groupName + "' on world " + finalWorld + ", server " + server);
 
-        final User user = plugin.getUserManager().get(player);
+        final User user = plugin.getUserManager().getByUsername(player);
         if (user == null) return false;
 
-        final Group group = plugin.getGroupManager().get(groupName);
+        final Group group = plugin.getGroupManager().getIfLoaded(groupName);
         if (group == null) return false;
 
         scheduler.scheduleTask(() -> {
@@ -298,7 +298,7 @@ public class VaultPermissionHook extends Permission {
         String finalWorld = ignoreWorld ? null : world; // Correct world value
         log("Getting groups of player: " + player + ", on world " + finalWorld + ", server " + server);
 
-        User user = plugin.getUserManager().get(player);
+        User user = plugin.getUserManager().getByUsername(player);
         if (user == null) return new String[0];
 
         return user.getNodes().stream()
@@ -313,7 +313,7 @@ public class VaultPermissionHook extends Permission {
     public String getPrimaryGroup(String world, @NonNull String player) {
         world = ignoreWorld ? null : world; // Correct world value
         log("Getting primary group of player: " + player);
-        final User user = plugin.getUserManager().get(player);
+        final User user = plugin.getUserManager().getByUsername(player);
 
         if (user == null) {
             return null;

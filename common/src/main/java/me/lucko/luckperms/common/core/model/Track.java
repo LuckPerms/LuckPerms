@@ -58,7 +58,7 @@ public class Track implements Identifiable<String> {
 
     @Override
     public String getId() {
-        return name;
+        return name.toLowerCase();
     }
 
     /**

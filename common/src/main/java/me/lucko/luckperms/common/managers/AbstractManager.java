@@ -59,17 +59,30 @@ public abstract class AbstractManager<I, T extends Identifiable<I>> implements M
 
     @Override
     public T getOrMake(I id) {
-        return objects.getUnchecked(id);
+        if (id instanceof String) {
+            return objects.getUnchecked((I) ((String) id).toLowerCase());
+        } else {
+            return objects.getUnchecked(id);
+        }
+
     }
 
     @Override
-    public T get(I id) {
-        return objects.getIfPresent(id);
+    public T getIfLoaded(I id) {
+        if (id instanceof String) {
+            return objects.getIfPresent(((String) id).toLowerCase());
+        } else {
+            return objects.getIfPresent(id);
+        }
     }
 
     @Override
     public boolean isLoaded(I id) {
-        return objects.asMap().containsKey(id);
+        if (id instanceof String) {
+            return objects.asMap().containsKey(((String) id).toLowerCase());
+        } else {
+            return objects.asMap().containsKey(id);
+        }
     }
 
     @Override

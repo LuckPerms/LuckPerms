@@ -33,6 +33,7 @@ import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.Log;
 import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.managers.TrackManager;
+import me.lucko.luckperms.common.managers.impl.GenericUserManager;
 
 import java.lang.reflect.Type;
 import java.sql.Connection;
@@ -205,7 +206,7 @@ abstract class SQLBacking extends AbstractBacking {
                 }
 
             } else {
-                if (plugin.getUserManager().shouldSave(user)) {
+                if (GenericUserManager.shouldSave(user)) {
                     user.clearNodes();
                     user.setPrimaryGroup(null);
                     plugin.getUserManager().giveDefaultIfNeeded(user, false);
@@ -221,7 +222,7 @@ abstract class SQLBacking extends AbstractBacking {
 
     @Override
     public boolean saveUser(User user) {
-        if (!plugin.getUserManager().shouldSave(user)) {
+        if (!GenericUserManager.shouldSave(user)) {
             user.getIoLock().lock();
             try {
                 return runQuery(USER_DELETE, preparedStatement -> {

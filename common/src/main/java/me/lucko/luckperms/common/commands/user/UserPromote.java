@@ -77,7 +77,7 @@ public class UserPromote extends SubCommand<User> {
             return CommandResult.INVALID_ARGS;
         }
 
-        Track track = plugin.getTrackManager().get(trackName);
+        Track track = plugin.getTrackManager().getIfLoaded(trackName);
         if (track == null) {
             Message.TRACK_DOES_NOT_EXIST.send(sender);
             return CommandResult.LOADING_ERROR;
@@ -152,7 +152,7 @@ public class UserPromote extends SubCommand<User> {
             return CommandResult.STATE_ERROR;
         }
 
-        Group nextGroup = plugin.getGroupManager().get(next);
+        Group nextGroup = plugin.getGroupManager().getIfLoaded(next);
         if (nextGroup == null) {
             Message.USER_PROMOTE_ERROR_MALFORMED.send(sender, next);
             return CommandResult.LOADING_ERROR;

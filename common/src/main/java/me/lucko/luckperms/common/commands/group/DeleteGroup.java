@@ -66,7 +66,7 @@ public class DeleteGroup extends SingleCommand {
             return CommandResult.INVALID_ARGS;
         }
 
-        Group group = plugin.getGroupManager().get(groupName);
+        Group group = plugin.getGroupManager().getIfLoaded(groupName);
         if (group == null) {
             Message.GROUP_LOAD_ERROR.send(sender);
             return CommandResult.LOADING_ERROR;

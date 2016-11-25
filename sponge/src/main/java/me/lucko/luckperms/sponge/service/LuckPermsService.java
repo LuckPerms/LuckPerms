@@ -29,13 +29,15 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import lombok.*;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.contexts.SpongeCalculatorLink;
-import me.lucko.luckperms.sponge.service.collections.GroupCollection;
-import me.lucko.luckperms.sponge.service.collections.UserCollection;
+import me.lucko.luckperms.sponge.managers.SpongeGroupManager;
+import me.lucko.luckperms.sponge.managers.SpongeUserManager;
 import me.lucko.luckperms.sponge.service.persisted.PersistedCollection;
 import me.lucko.luckperms.sponge.service.persisted.SubjectStorage;
 import me.lucko.luckperms.sponge.service.simple.SimpleCollection;
@@ -61,8 +63,10 @@ public class LuckPermsService implements PermissionService {
 
     private final LPSpongePlugin plugin;
     private final SubjectStorage storage;
-    private final UserCollection userSubjects;
-    private final GroupCollection groupSubjects;
+    private final SpongeUserManager userSubjects;
+    private final SimpleCollection fallbackUserSubjects;
+    private final SpongeGroupManager groupSubjects;
+    private final SimpleCollection fallbackGroupSubjects;
     private final PersistedCollection defaultSubjects;
     private final Set<PermissionDescription> descriptionSet;
 
@@ -73,6 +77,11 @@ public class LuckPermsService implements PermissionService {
                 public SubjectCollection load(String s) {
                     return new SimpleCollection(LuckPermsService.this, s);
                 }
+
+                @Override
+                public ListenableFuture<SubjectCollection> reload(String s, SubjectCollection collection) {
+                    return Futures.immediateFuture(collection); // Never needs to be refreshed.
+                }
             });
 
     public LuckPermsService(LPSpongePlugin plugin) {
@@ -80,13 +89,17 @@ public class LuckPermsService implements PermissionService {
 
         storage = new SubjectStorage(new File(plugin.getDataFolder(), "local"));
 
-        userSubjects = new UserCollection(this, plugin.getUserManager());
-        groupSubjects = new GroupCollection(this, plugin.getGroupManager());
+        userSubjects = plugin.getUserManager();
+        fallbackUserSubjects = new SimpleCollection(this, "fallback-users");
+        groupSubjects = plugin.getGroupManager();
+        fallbackGroupSubjects = new SimpleCollection(this, "fallback-groups");
         defaultSubjects = new PersistedCollection(this, "defaults");
         defaultSubjects.loadAll();
 
         collections.put(PermissionService.SUBJECTS_USER, userSubjects);
+        collections.put("fallback-users", fallbackUserSubjects);
         collections.put(PermissionService.SUBJECTS_GROUP, groupSubjects);
+        collections.put("fallback-groups", fallbackGroupSubjects);
         collections.put("defaults", defaultSubjects);
 
         descriptionSet = ConcurrentHashMap.newKeySet();

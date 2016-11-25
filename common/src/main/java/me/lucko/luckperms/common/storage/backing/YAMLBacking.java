@@ -30,6 +30,7 @@ import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.managers.TrackManager;
+import me.lucko.luckperms.common.managers.impl.GenericUserManager;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
@@ -113,7 +114,7 @@ public class YAMLBacking extends FlatfileBacking {
                         return true;
                     });
                 } else {
-                    if (plugin.getUserManager().shouldSave(user)) {
+                    if (GenericUserManager.shouldSave(user)) {
                         user.clearNodes();
                         user.setPrimaryGroup(null);
                         plugin.getUserManager().giveDefaultIfNeeded(user, false);
@@ -133,7 +134,7 @@ public class YAMLBacking extends FlatfileBacking {
         try {
             return call(() -> {
                 File userFile = new File(usersDir, user.getUuid().toString() + ".yml");
-                if (!plugin.getUserManager().shouldSave(user)) {
+                if (!GenericUserManager.shouldSave(user)) {
                     if (userFile.exists()) {
                         userFile.delete();
                     }

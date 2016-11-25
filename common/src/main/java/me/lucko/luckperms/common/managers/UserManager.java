@@ -35,7 +35,7 @@ public interface UserManager extends Manager<UserIdentifier, User> {
      * @param name The name to search by
      * @return a {@link User} object if the user is loaded, returns null if the user is not loaded
      */
-    User get(String name);
+    User getByUsername(String name);
 
     /**
      * Get a user object by uuid
@@ -49,13 +49,6 @@ public interface UserManager extends Manager<UserIdentifier, User> {
      * @param user the user to give to
      */
     boolean giveDefaultIfNeeded(User user, boolean save);
-
-    /**
-     * Check whether the user's state indicates that they should be persisted to storage.
-     * @param user the user to check
-     * @return true if the user should be saved
-     */
-    boolean shouldSave(User user);
 
     /**
      * Checks to see if the user is online, and if they are not, runs {@link #unload(Identifiable)}

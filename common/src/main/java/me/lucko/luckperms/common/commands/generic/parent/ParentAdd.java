@@ -66,7 +66,7 @@ public class ParentAdd extends SharedSubCommand {
             return CommandResult.INVALID_ARGS;
         }
 
-        Group group = plugin.getGroupManager().get(groupName);
+        Group group = plugin.getGroupManager().getIfLoaded(groupName);
         if (group == null) {
             Message.GROUP_DOES_NOT_EXIST.send(sender);
             return CommandResult.LOADING_ERROR;

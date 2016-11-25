@@ -47,7 +47,7 @@ public class UserSwitchPrimaryGroup extends SubCommand<User> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) throws CommandException {
-        Group group = plugin.getGroupManager().get(args.get(0).toLowerCase());
+        Group group = plugin.getGroupManager().getIfLoaded(args.get(0).toLowerCase());
         if (group == null) {
             Message.GROUP_DOES_NOT_EXIST.send(sender);
             return CommandResult.INVALID_ARGS;

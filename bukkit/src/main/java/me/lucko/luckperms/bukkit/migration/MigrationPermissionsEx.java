@@ -101,7 +101,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
 
             final String name = group.getName().toLowerCase();
             plugin.getStorage().createAndLoadGroup(name).join();
-            Group lpGroup = plugin.getGroupManager().get(name);
+            Group lpGroup = plugin.getGroupManager().getIfLoaded(name);
             try {
                 LogEntry.build()
                         .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())

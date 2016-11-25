@@ -252,7 +252,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         Map<Integer, Group> groups = pm.getGroups(); // All versions
         for (Group g : groups.values()) {
             plugin.getStorage().createAndLoadGroup(g.getName().toLowerCase()).join();
-            final me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().get(g.getName().toLowerCase());
+            final me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().getIfLoaded(g.getName().toLowerCase());
             try {
                 LogEntry.build()
                         .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())

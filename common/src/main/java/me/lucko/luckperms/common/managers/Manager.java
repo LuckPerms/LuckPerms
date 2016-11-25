@@ -38,7 +38,7 @@ public interface Manager<I, T extends Identifiable<I>> extends Function<I, T> {
      * Gets a map containing all cached instances held by this manager.
      * @return all instances held in this manager
      */
-    Map<I, T> getAll();
+    Map<I, ? extends T> getAll();
 
     /**
      * Gets or creates an object by id
@@ -52,7 +52,7 @@ public interface Manager<I, T extends Identifiable<I>> extends Function<I, T> {
      * @param id The id to search by
      * @return a {@link T} object if the object is loaded, returns null if the object is not loaded
      */
-    T get(I id);
+    T getIfLoaded(I id);
 
     /**
      * Check to see if a object is loaded or not

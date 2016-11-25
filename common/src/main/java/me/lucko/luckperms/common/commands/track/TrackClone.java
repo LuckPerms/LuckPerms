@@ -62,7 +62,7 @@ public class TrackClone extends SubCommand<Track> {
             return CommandResult.FAILURE;
         }
 
-        Track newTrack = plugin.getTrackManager().get(newTrackName);
+        Track newTrack = plugin.getTrackManager().getIfLoaded(newTrackName);
         if (newTrack == null) {
             Message.TRACK_LOAD_ERROR.send(sender);
             return CommandResult.LOADING_ERROR;

@@ -54,7 +54,7 @@ public class TrackMainCommand extends MainCommand<Track> {
             return null;
         }
 
-        Track track = plugin.getTrackManager().get(target);
+        Track track = plugin.getTrackManager().getIfLoaded(target);
         if (track == null) {
             Message.TRACK_NOT_FOUND.send(sender);
             return null;

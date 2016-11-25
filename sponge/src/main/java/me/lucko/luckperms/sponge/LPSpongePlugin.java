@@ -41,12 +41,8 @@ import me.lucko.luckperms.common.contexts.ServerCalculator;
 import me.lucko.luckperms.common.core.UuidCache;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.Importer;
-import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.managers.TrackManager;
-import me.lucko.luckperms.common.managers.UserManager;
-import me.lucko.luckperms.common.managers.impl.GenericGroupManager;
 import me.lucko.luckperms.common.managers.impl.GenericTrackManager;
-import me.lucko.luckperms.common.managers.impl.GenericUserManager;
 import me.lucko.luckperms.common.messaging.RedisMessaging;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.StorageFactory;
@@ -55,6 +51,8 @@ import me.lucko.luckperms.common.tasks.UpdateTask;
 import me.lucko.luckperms.common.utils.*;
 import me.lucko.luckperms.sponge.commands.SpongeMainCommand;
 import me.lucko.luckperms.sponge.contexts.WorldCalculator;
+import me.lucko.luckperms.sponge.managers.SpongeGroupManager;
+import me.lucko.luckperms.sponge.managers.SpongeUserManager;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.timings.LPTimings;
 import me.lucko.luckperms.sponge.utils.VersionData;
@@ -119,8 +117,8 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
     private final Set<UUID> ignoringLogs = ConcurrentHashMap.newKeySet();
     private LPConfiguration configuration;
-    private UserManager userManager;
-    private GroupManager groupManager;
+    private SpongeUserManager userManager;
+    private SpongeGroupManager groupManager;
     private TrackManager trackManager;
     private Storage storage;
     private RedisMessaging redisMessaging = null;
@@ -199,8 +197,8 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         // load internal managers
         getLog().info("Loading internal permission managers...");
         uuidCache = new UuidCache(getConfiguration().isOnlineMode());
-        userManager = new GenericUserManager(this);
-        groupManager = new GenericGroupManager(this);
+        userManager = new SpongeUserManager(this);
+        groupManager = new SpongeGroupManager(this);
         trackManager = new GenericTrackManager();
         importer = new Importer(commandManager);
         consecutiveExecutor = new ConsecutiveExecutor(commandManager);

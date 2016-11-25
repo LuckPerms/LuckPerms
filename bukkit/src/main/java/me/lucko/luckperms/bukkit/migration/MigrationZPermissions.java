@@ -81,7 +81,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
         log.info("zPermissions Migration: Starting group migration.");
         for (String g : service.getAllGroups()) {
             plugin.getStorage().createAndLoadGroup(g.toLowerCase()).join();
-            Group group = plugin.getGroupManager().get(g.toLowerCase());
+            Group group = plugin.getGroupManager().getIfLoaded(g.toLowerCase());
 
             PermissionEntity entity = internalService.getEntity(g, null, true);
             migrateEntity(group, entity);
@@ -93,7 +93,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
         log.info("zPermissions Migration: Starting track migration.");
         for (String t : service.getAllTracks()) {
             plugin.getStorage().createAndLoadTrack(t.toLowerCase()).join();
-            Track track = plugin.getTrackManager().get(t.toLowerCase());
+            Track track = plugin.getTrackManager().getIfLoaded(t.toLowerCase());
             track.setGroups(service.getTrackGroups(t));
             plugin.getStorage().saveTrack(track);
         }

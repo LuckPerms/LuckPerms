@@ -29,7 +29,6 @@ import me.lucko.luckperms.common.core.UserIdentifier;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.managers.AbstractManager;
 import me.lucko.luckperms.common.managers.UserManager;
-import me.lucko.luckperms.common.utils.Identifiable;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.Set;
@@ -46,12 +45,8 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
                 new User(id.getUuid(), id.getUsername(), plugin);
     }
 
-    /**
-     * Get a user object by name
-     * @param name The name to search by
-     * @return a {@link User} object if the user is loaded, returns null if the user is not loaded
-     */
-    public User get(String name) {
+    @Override
+    public User getByUsername(String name) {
         for (User user : getAll().values()) {
             if (user.getName().equalsIgnoreCase(name)) {
                 return user;
@@ -60,15 +55,37 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
         return null;
     }
 
+    @Override
     public User get(UUID uuid) {
-        return get(UserIdentifier.of(uuid, null));
+        return getIfLoaded(UserIdentifier.of(uuid, null));
     }
 
-    /**
-     * Set a user to the default group
-     * @param user the user to give to
-     */
+    @Override
     public boolean giveDefaultIfNeeded(User user, boolean save) {
+        return giveDefaultIfNeeded(user, save, plugin);
+    }
+
+    @Override
+    public void cleanup(User user) {
+        if (!plugin.isOnline(plugin.getUuidCache().getExternalUUID(user.getUuid()))) {
+            unload(user);
+        }
+    }
+
+    @Override
+    public void updateAllUsers() {
+        plugin.doSync(() -> {
+            Set<UUID> players = plugin.getOnlinePlayers();
+            plugin.doAsync(() -> {
+                for (UUID uuid : players) {
+                    UUID internal = plugin.getUuidCache().getUUID(uuid);
+                    plugin.getStorage().loadUser(internal, "null").join();
+                }
+            });
+        });
+    }
+
+    public static boolean giveDefaultIfNeeded(User user, boolean save, LuckPermsPlugin plugin) {
         boolean hasGroup = false;
 
         if (user.getPrimaryGroup() != null && !user.getPrimaryGroup().isEmpty()) {
@@ -96,7 +113,12 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
         return true;
     }
 
-    public boolean shouldSave(User user) {
+    /**
+     * Check whether the user's state indicates that they should be persisted to storage.
+     * @param user the user to check
+     * @return true if the user should be saved
+     */
+    public static boolean shouldSave(User user) {
         if (user.getNodes().size() != 1) {
             return true;
         }
@@ -122,30 +144,5 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
         }
 
         return false;
-    }
-
-    /**
-     * Checks to see if the user is online, and if they are not, runs {@link #unload(Identifiable)}
-     * @param user The user to be cleaned up
-     */
-    public void cleanup(User user) {
-        if (!plugin.isOnline(plugin.getUuidCache().getExternalUUID(user.getUuid()))) {
-            unload(user);
-        }
-    }
-
-    /**
-     * Reloads the data of all online users
-     */
-    public void updateAllUsers() {
-        plugin.doSync(() -> {
-            Set<UUID> players = plugin.getOnlinePlayers();
-            plugin.doAsync(() -> {
-                for (UUID uuid : players) {
-                    UUID internal = plugin.getUuidCache().getUUID(uuid);
-                    plugin.getStorage().loadUser(internal, "null").join();
-                }
-            });
-        });
     }
 }

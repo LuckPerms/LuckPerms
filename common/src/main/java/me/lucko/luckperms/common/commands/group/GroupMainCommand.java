@@ -60,7 +60,7 @@ public class GroupMainCommand extends MainCommand<Group> {
             return null;
         }
 
-        Group group = plugin.getGroupManager().get(target);
+        Group group = plugin.getGroupManager().getIfLoaded(target);
 
         if (group == null) {
             Message.GROUP_NOT_FOUND.send(sender);

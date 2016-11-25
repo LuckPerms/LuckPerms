@@ -110,7 +110,6 @@ public class SpongeListener extends AbstractListener {
     public void onClientLeave(ClientConnectionEvent.Disconnect e) {
         try (Timing ignored = plugin.getTimings().time(LPTiming.ON_CLIENT_LEAVE)) {
             onLeave(e.getTargetEntity().getUniqueId());
-            plugin.getService().getUserSubjects().unload(plugin.getUuidCache().getUUID(e.getTargetEntity().getUniqueId()));
         }
     }
 }

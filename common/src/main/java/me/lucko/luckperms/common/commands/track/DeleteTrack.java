@@ -60,7 +60,7 @@ public class DeleteTrack extends SingleCommand {
             return CommandResult.INVALID_ARGS;
         }
 
-        Track track = plugin.getTrackManager().get(trackName);
+        Track track = plugin.getTrackManager().getIfLoaded(trackName);
         if (track == null) {
             Message.TRACK_LOAD_ERROR.send(sender);
             return CommandResult.LOADING_ERROR;

@@ -124,7 +124,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
 
                 // Make a LuckPerms group for the one being migrated.
                 plugin.getStorage().createAndLoadGroup(groupName).join();
-                me.lucko.luckperms.common.core.model.Group lpGroup = plugin.getGroupManager().get(groupName);
+                me.lucko.luckperms.common.core.model.Group lpGroup = plugin.getGroupManager().getIfLoaded(groupName);
                 try {
                     LogEntry.build()
                             .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())

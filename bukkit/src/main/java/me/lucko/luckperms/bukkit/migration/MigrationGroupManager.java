@@ -73,7 +73,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
 
         for (Group g : gg.getGroupList()) {
             plugin.getStorage().createAndLoadGroup(g.getName().toLowerCase()).join();
-            me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().get(g.getName().toLowerCase());
+            me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().getIfLoaded(g.getName().toLowerCase());
             try {
                 LogEntry.build()
                         .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
@@ -196,7 +196,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
 
         for (Map.Entry<String, Map<Map.Entry<String, String>, Boolean>> e : groups.entrySet()) {
             plugin.getStorage().createAndLoadGroup(e.getKey()).join();
-            me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().get(e.getKey());
+            me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().getIfLoaded(e.getKey());
             try {
                 LogEntry.build()
                         .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())

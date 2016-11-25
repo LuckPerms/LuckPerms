@@ -38,6 +38,7 @@ import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.Log;
 import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.managers.TrackManager;
+import me.lucko.luckperms.common.managers.impl.GenericUserManager;
 import me.lucko.luckperms.common.storage.DatastoreConfiguration;
 import org.bson.Document;
 
@@ -167,7 +168,7 @@ public class MongoDBBacking extends AbstractBacking {
                             c.replaceOne(new Document("_id", user.getUuid()), fromUser(user));
                         }
                     } else {
-                        if (plugin.getUserManager().shouldSave(user)) {
+                        if (GenericUserManager.shouldSave(user)) {
                             user.clearNodes();
                             user.setPrimaryGroup(null);
                             plugin.getUserManager().giveDefaultIfNeeded(user, false);
@@ -184,7 +185,7 @@ public class MongoDBBacking extends AbstractBacking {
 
     @Override
     public boolean saveUser(User user) {
-        if (!plugin.getUserManager().shouldSave(user)) {
+        if (!GenericUserManager.shouldSave(user)) {
             user.getIoLock().lock();
             try {
                 return call(() -> {

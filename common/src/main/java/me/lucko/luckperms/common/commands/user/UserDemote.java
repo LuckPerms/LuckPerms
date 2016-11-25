@@ -77,7 +77,7 @@ public class UserDemote extends SubCommand<User> {
             return CommandResult.INVALID_ARGS;
         }
 
-        Track track = plugin.getTrackManager().get(trackName);
+        Track track = plugin.getTrackManager().getIfLoaded(trackName);
         if (track == null) {
             Message.TRACK_DOES_NOT_EXIST.send(sender);
             return CommandResult.LOADING_ERROR;
@@ -152,7 +152,7 @@ public class UserDemote extends SubCommand<User> {
             return CommandResult.STATE_ERROR;
         }
 
-        Group previousGroup = plugin.getGroupManager().get(previous);
+        Group previousGroup = plugin.getGroupManager().getIfLoaded(previous);
         if (previousGroup == null) {
             Message.USER_DEMOTE_ERROR_MALFORMED.send(sender, previous);
             return CommandResult.LOADING_ERROR;

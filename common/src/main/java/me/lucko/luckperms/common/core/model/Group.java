@@ -45,7 +45,7 @@ public class Group extends PermissionHolder implements Identifiable<String> {
 
     @Override
     public String getId() {
-        return name;
+        return name.toLowerCase();
     }
 
     public String getRawDisplayName() {
