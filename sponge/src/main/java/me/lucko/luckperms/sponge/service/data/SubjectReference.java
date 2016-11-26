@@ -20,27 +20,41 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.calculators;
+package me.lucko.luckperms.sponge.service.data;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.common.core.model.User;
+import com.google.common.base.Splitter;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+import org.spongepowered.api.service.permission.PermissionService;
+import org.spongepowered.api.service.permission.Subject;
 
-/**
- * Creates a calculator instance given a set of contexts
- */
-public interface CalculatorFactory {
+import java.util.List;
 
-    /**
-     * Builds a PermissionCalculator for the user in the given context
-     * @param contexts the contexts to build the calculator in
-     * @param user the user to build for
-     * @return a permission calculator instance
-     */
-    PermissionCalculator build(Contexts contexts, User user);
+@Getter
+@ToString
+@EqualsAndHashCode
+@AllArgsConstructor(staticName = "of")
+public class SubjectReference {
+    public static SubjectReference deserialize(String s) {
+        List<String> parts = Splitter.on('/').limit(2).splitToList(s);
+        return of(parts.get(0), parts.get(1));
+    }
 
-    /**
-     * Invalidates all calculators build by this factory
-     */
-    void invalidateAll();
+    public static SubjectReference of(Subject subject) {
+        return of(subject.getContainingCollection().getIdentifier(), subject.getIdentifier());
+    }
+
+    private final String collection;
+    private final String identifier;
+
+    public Subject resolve(PermissionService service) {
+        return service.getSubjects(collection).get(identifier);
+    }
+
+    public String serialize() {
+        return collection + "/" + identifier;
+    }
 
 }

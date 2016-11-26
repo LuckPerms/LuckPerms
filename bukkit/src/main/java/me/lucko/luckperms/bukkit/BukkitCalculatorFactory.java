@@ -30,7 +30,7 @@ import me.lucko.luckperms.bukkit.calculators.ChildProcessor;
 import me.lucko.luckperms.bukkit.calculators.DefaultsProcessor;
 import me.lucko.luckperms.bukkit.inject.Injector;
 import me.lucko.luckperms.bukkit.model.LPPermissible;
-import me.lucko.luckperms.common.calculators.CalculatorFactory;
+import me.lucko.luckperms.common.calculators.AbstractCalculatorFactory;
 import me.lucko.luckperms.common.calculators.PermissionCalculator;
 import me.lucko.luckperms.common.calculators.PermissionProcessor;
 import me.lucko.luckperms.common.calculators.processors.MapProcessor;
@@ -41,7 +41,7 @@ import me.lucko.luckperms.common.core.model.User;
 import java.util.UUID;
 
 @AllArgsConstructor
-public class BukkitCalculatorFactory implements CalculatorFactory {
+public class BukkitCalculatorFactory extends AbstractCalculatorFactory {
     private final LPBukkitPlugin plugin;
 
     @Override
@@ -63,6 +63,6 @@ public class BukkitCalculatorFactory implements CalculatorFactory {
         }
         processors.add(new DefaultsProcessor(contexts.isOp(), plugin.getDefaultsProvider()));
 
-        return new PermissionCalculator(plugin, user.getName(), processors.build());
+        return registerCalculator(new PermissionCalculator(plugin, user.getName(), processors.build()));
     }
 }

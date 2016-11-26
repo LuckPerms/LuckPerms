@@ -28,12 +28,11 @@ import com.google.common.collect.ImmutableSet;
 import lombok.Getter;
 import lombok.NonNull;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
+import me.lucko.luckperms.sponge.service.data.CalculatedSubjectData;
 import me.lucko.luckperms.sponge.timings.LPTiming;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.context.Context;
-import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.util.Tristate;
 
 import java.util.ArrayList;
@@ -50,23 +49,20 @@ public class SimpleSubject implements Subject {
 
     private final LuckPermsService service;
     private final SimpleCollection containingCollection;
-    private final MemorySubjectData subjectData;
+    private final CalculatedSubjectData subjectData;
+    private final CalculatedSubjectData transientSubjectData;
 
     public SimpleSubject(String identifier, LuckPermsService service, SimpleCollection containingCollection) {
         this.identifier = identifier;
         this.service = service;
         this.containingCollection = containingCollection;
-        this.subjectData = new MemorySubjectData(service);
+        this.subjectData = new CalculatedSubjectData(service, "local:" + containingCollection.getIdentifier() + "/" + identifier + "(p)");
+        this.transientSubjectData = new CalculatedSubjectData(service, "local:" + containingCollection.getIdentifier() + "/" + identifier + "(t)");
     }
 
     @Override
     public Optional<CommandSource> getCommandSource() {
         return Optional.empty();
-    }
-
-    @Override
-    public SubjectData getTransientSubjectData() {
-        return getSubjectData();
     }
 
     @Override
@@ -77,15 +73,20 @@ public class SimpleSubject implements Subject {
     @Override
     public Tristate getPermissionValue(@NonNull Set<Context> contexts, @NonNull String node) {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.SIMPLE_SUBJECT_GET_PERMISSION_VALUE)) {
-            Tristate res = subjectData.getNodeTree(contexts).get(node);
+            Tristate res = transientSubjectData.getPermissionValue(contexts, node);
+            if (res != Tristate.UNDEFINED) {
+                return res;
+            }
+
+            res = subjectData.getPermissionValue(contexts, node);
             if (res != Tristate.UNDEFINED) {
                 return res;
             }
 
             for (Subject parent : getParents(contexts)) {
-                Tristate tempRes = parent.getPermissionValue(contexts, node);
-                if (tempRes != Tristate.UNDEFINED) {
-                    return tempRes;
+                res = parent.getPermissionValue(contexts, node);
+                if (res != Tristate.UNDEFINED) {
+                    return res;
                 }
             }
 
@@ -93,7 +94,7 @@ public class SimpleSubject implements Subject {
                 return Tristate.UNDEFINED;
             }
 
-            res = service.getGroupSubjects().getDefaults().getPermissionValue(contexts, node);
+            res = getContainingCollection().getDefaults().getPermissionValue(contexts, node);
             if (res != Tristate.UNDEFINED) {
                 return res;
             }

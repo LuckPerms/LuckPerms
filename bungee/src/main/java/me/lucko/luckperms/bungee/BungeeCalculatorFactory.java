@@ -25,7 +25,7 @@ package me.lucko.luckperms.bungee;
 import com.google.common.collect.ImmutableList;
 import lombok.AllArgsConstructor;
 import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.common.calculators.CalculatorFactory;
+import me.lucko.luckperms.common.calculators.AbstractCalculatorFactory;
 import me.lucko.luckperms.common.calculators.PermissionCalculator;
 import me.lucko.luckperms.common.calculators.PermissionProcessor;
 import me.lucko.luckperms.common.calculators.processors.MapProcessor;
@@ -34,7 +34,7 @@ import me.lucko.luckperms.common.calculators.processors.WildcardProcessor;
 import me.lucko.luckperms.common.core.model.User;
 
 @AllArgsConstructor
-public class BungeeCalculatorFactory implements CalculatorFactory {
+public class BungeeCalculatorFactory extends AbstractCalculatorFactory {
     private final LPBungeePlugin plugin;
 
     @Override
@@ -48,6 +48,6 @@ public class BungeeCalculatorFactory implements CalculatorFactory {
             processors.add(new RegexProcessor());
         }
 
-        return new PermissionCalculator(plugin, user.getName(), processors.build());
+        return registerCalculator(new PermissionCalculator(plugin, user.getName(), processors.build()));
     }
 }

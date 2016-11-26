@@ -29,10 +29,10 @@ import lombok.Getter;
 import lombok.NonNull;
 import me.lucko.luckperms.common.utils.BufferedRequest;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
+import me.lucko.luckperms.sponge.service.data.CalculatedSubjectData;
 import me.lucko.luckperms.sponge.timings.LPTiming;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.context.Context;
-import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.util.Tristate;
 
@@ -52,7 +52,7 @@ public class PersistedSubject implements Subject {
     private final LuckPermsService service;
     private final PersistedCollection containingCollection;
     private final PersistedSubjectData subjectData;
-    private final MemorySubjectData transientSubjectData;
+    private final CalculatedSubjectData transientSubjectData;
     private final BufferedRequest<Void> saveBuffer = new BufferedRequest<Void>(1000L, r -> PersistedSubject.this.service.getPlugin().doAsync(r)) {
         @Override
         protected Void perform() {
@@ -71,13 +71,13 @@ public class PersistedSubject implements Subject {
         this.identifier = identifier;
         this.service = service;
         this.containingCollection = containingCollection;
-        this.subjectData = new PersistedSubjectData(service, this);
-        this.transientSubjectData = new MemorySubjectData(service);
+        this.subjectData = new PersistedSubjectData(service, "local:" + containingCollection.getIdentifier() + "/" + identifier + "(p)", this);
+        this.transientSubjectData = new CalculatedSubjectData(service, "local:" + containingCollection.getIdentifier() + "/" + identifier + "(t)");
     }
 
     public void loadData(SubjectDataHolder dataHolder) {
         subjectData.setSave(false);
-        dataHolder.copyTo(subjectData, service);
+        dataHolder.copyTo(subjectData);
         subjectData.setSave(true);
     }
 
@@ -98,12 +98,12 @@ public class PersistedSubject implements Subject {
     @Override
     public Tristate getPermissionValue(@NonNull Set<Context> contexts, @NonNull String node) {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.PERSISTED_SUBJECT_GET_PERMISSION_VALUE)) {
-            Tristate res = subjectData.getNodeTree(contexts).get(node);
+            Tristate res = subjectData.getPermissionValue(contexts, node);
             if (res != Tristate.UNDEFINED) {
                 return res;
             }
 
-            res = transientSubjectData.getNodeTree(contexts).get(node);
+            res = transientSubjectData.getPermissionValue(contexts, node);
             if (res != Tristate.UNDEFINED) {
                 return res;
             }

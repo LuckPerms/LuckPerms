@@ -25,7 +25,7 @@ package me.lucko.luckperms.sponge;
 import com.google.common.collect.ImmutableList;
 import lombok.AllArgsConstructor;
 import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.common.calculators.CalculatorFactory;
+import me.lucko.luckperms.common.calculators.AbstractCalculatorFactory;
 import me.lucko.luckperms.common.calculators.PermissionCalculator;
 import me.lucko.luckperms.common.calculators.PermissionProcessor;
 import me.lucko.luckperms.common.calculators.processors.MapProcessor;
@@ -37,7 +37,7 @@ import me.lucko.luckperms.sponge.calculators.SpongeWildcardProcessor;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 
 @AllArgsConstructor
-public class SpongeCalculatorFactory implements CalculatorFactory {
+public class SpongeCalculatorFactory extends AbstractCalculatorFactory {
     private final LPSpongePlugin plugin;
 
     @Override
@@ -53,6 +53,6 @@ public class SpongeCalculatorFactory implements CalculatorFactory {
         }
         processors.add(new DefaultsProcessor(plugin.getService(), LuckPermsService.convertContexts(contexts.getContexts())));
 
-        return new PermissionCalculator(plugin, user.getName(), processors.build());
+        return registerCalculator(new PermissionCalculator(plugin, user.getName(), processors.build()));
     }
 }

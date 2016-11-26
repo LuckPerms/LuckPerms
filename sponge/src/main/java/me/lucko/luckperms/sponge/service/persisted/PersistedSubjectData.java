@@ -24,9 +24,9 @@ package me.lucko.luckperms.sponge.service.persisted;
 
 import lombok.Getter;
 import lombok.Setter;
+import me.lucko.luckperms.sponge.service.LuckPermsService;
+import me.lucko.luckperms.sponge.service.data.CalculatedSubjectData;
 import org.spongepowered.api.service.context.Context;
-import org.spongepowered.api.service.permission.MemorySubjectData;
-import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.util.Tristate;
 
@@ -36,15 +36,15 @@ import java.util.Set;
 /**
  * Extension of MemorySubjectData which persists data when modified
  */
-public class PersistedSubjectData extends MemorySubjectData {
+public class PersistedSubjectData extends CalculatedSubjectData {
     private final PersistedSubject subject;
 
     @Getter
     @Setter
     private boolean save = true;
 
-    public PersistedSubjectData(PermissionService service, PersistedSubject subject) {
-        super(service);
+    public PersistedSubjectData(LuckPermsService service, String calculatorDisplayName, PersistedSubject subject) {
+        super(service, calculatorDisplayName);
         this.subject = subject;
     }
 

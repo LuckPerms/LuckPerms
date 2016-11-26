@@ -22,25 +22,23 @@
 
 package me.lucko.luckperms.common.calculators;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.common.core.model.User;
+import com.google.common.collect.MapMaker;
 
-/**
- * Creates a calculator instance given a set of contexts
- */
-public interface CalculatorFactory {
+import java.util.Collections;
+import java.util.Set;
 
-    /**
-     * Builds a PermissionCalculator for the user in the given context
-     * @param contexts the contexts to build the calculator in
-     * @param user the user to build for
-     * @return a permission calculator instance
-     */
-    PermissionCalculator build(Contexts contexts, User user);
+public abstract class AbstractCalculatorFactory implements CalculatorFactory {
+    private final Set<PermissionCalculator> calculators = Collections.newSetFromMap(new MapMaker().weakKeys().makeMap());
 
-    /**
-     * Invalidates all calculators build by this factory
-     */
-    void invalidateAll();
+    protected PermissionCalculator registerCalculator(PermissionCalculator calculator) {
+        calculators.add(calculator);
+        return calculator;
+    }
 
+    @Override
+    public void invalidateAll() {
+        for (PermissionCalculator calculator : calculators) {
+            calculator.invalidateCache();
+        }
+    }
 }
