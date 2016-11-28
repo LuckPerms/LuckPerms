@@ -245,7 +245,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         // register permissions
         registerPermissions(getConfiguration().isCommandsAllowOp() ? PermissionDefault.OP : PermissionDefault.FALSE);
         if (!getConfiguration().isOpsEnabled()) {
-            getServer().getOperators().forEach(o -> o.setOp(false));
+            getServer().getScheduler().runTask(this, () -> getServer().getOperators().forEach(o -> o.setOp(false)));
         }
 
         // replace the temporary executor when the Bukkit one starts
