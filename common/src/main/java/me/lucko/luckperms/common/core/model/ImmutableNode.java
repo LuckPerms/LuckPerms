@@ -290,21 +290,21 @@ public class ImmutableNode implements Node {
         return isWorldSpecific() ? shouldApply(world, applyRegex, this.world) : includeGlobal;
     }
 
-    private static boolean shouldApply(String world, boolean applyRegex, String thisWorld) {
-        if (world.toLowerCase().startsWith("r=") && applyRegex) {
-            Pattern p = Patterns.compile(world.substring(2));
+    private static boolean shouldApply(String str, boolean applyRegex, String thisStr) {
+        if (str.toLowerCase().startsWith("r=") && applyRegex) {
+            Pattern p = Patterns.compile(str.substring(2));
             if (p == null) {
                 return false;
             }
-            return p.matcher(thisWorld).matches();
+            return p.matcher(thisStr).matches();
         }
 
-        if (world.startsWith("(") && world.endsWith(")") && world.contains("|")) {
-            final String bits = world.substring(1, world.length() - 1);
+        if (str.startsWith("(") && str.endsWith(")") && str.contains("|")) {
+            final String bits = str.substring(1, str.length() - 1);
             Iterable<String> parts = Splitter.on('|').split(bits);
 
             for (String s : parts) {
-                if (s.equalsIgnoreCase(thisWorld)) {
+                if (s.equalsIgnoreCase(thisStr)) {
                     return true;
                 }
             }
@@ -312,7 +312,7 @@ public class ImmutableNode implements Node {
             return false;
         }
 
-        return thisWorld.equalsIgnoreCase(world);
+        return thisStr.equalsIgnoreCase(str);
     }
 
     @Override

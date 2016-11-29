@@ -46,7 +46,7 @@ class BukkitListener extends AbstractListener implements Listener {
         super(plugin);
         this.plugin = plugin;
     }
-    
+
     @EventHandler(priority = EventPriority.LOW)
     public void onPlayerPreLogin(AsyncPlayerPreLoginEvent e) {
         if (!plugin.isStarted() || !plugin.getStorage().isAcceptingLogins()) {
