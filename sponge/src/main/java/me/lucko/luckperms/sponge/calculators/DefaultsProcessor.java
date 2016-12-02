@@ -42,8 +42,8 @@ public class DefaultsProcessor implements PermissionProcessor {
             return t;
         }
 
-        Tristate t2 =  service.getDefaults().getPermissionValue(contexts, permission);
-        if (t2 != Tristate.UNDEFINED) {
+        t = service.getDefaults().getPermissionValue(contexts, permission);
+        if (t != Tristate.UNDEFINED) {
             return t;
         }
 
