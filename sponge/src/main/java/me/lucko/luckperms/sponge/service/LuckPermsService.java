@@ -28,31 +28,40 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
+import com.google.common.collect.MapMaker;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import lombok.*;
 import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.contexts.SpongeCalculatorLink;
 import me.lucko.luckperms.sponge.managers.SpongeGroupManager;
 import me.lucko.luckperms.sponge.managers.SpongeUserManager;
+import me.lucko.luckperms.sponge.service.base.LPSubject;
+import me.lucko.luckperms.sponge.service.base.LPSubjectCollection;
+import me.lucko.luckperms.sponge.service.base.LPSubjectData;
+import me.lucko.luckperms.sponge.service.calculated.OptionLookup;
+import me.lucko.luckperms.sponge.service.calculated.PermissionLookup;
 import me.lucko.luckperms.sponge.service.persisted.PersistedCollection;
 import me.lucko.luckperms.sponge.service.persisted.SubjectStorage;
+import me.lucko.luckperms.sponge.service.references.SubjectReference;
 import me.lucko.luckperms.sponge.service.simple.SimpleCollection;
 import me.lucko.luckperms.sponge.timings.LPTiming;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.context.ContextCalculator;
-import org.spongepowered.api.service.permission.*;
+import org.spongepowered.api.service.permission.PermissionDescription;
+import org.spongepowered.api.service.permission.PermissionService;
+import org.spongepowered.api.service.permission.Subject;
+import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.util.Tristate;
 
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
  * The LuckPerms implementation of the Sponge Permission Service
@@ -70,22 +79,30 @@ public class LuckPermsService implements PermissionService {
     private final PersistedCollection defaultSubjects;
     private final Set<PermissionDescription> descriptionSet;
 
+    private final Set<LoadingCache<PermissionLookup, Tristate>> localPermissionCaches;
+    private final Set<LoadingCache<Set<Context>, List<SubjectReference>>> localParentCaches;
+    private final Set<LoadingCache<OptionLookup, Optional<String>>> localOptionCaches;
+
     @Getter(value = AccessLevel.NONE)
-    private final LoadingCache<String, SubjectCollection> collections = CacheBuilder.newBuilder()
-            .build(new CacheLoader<String, SubjectCollection>() {
+    private final LoadingCache<String, LPSubjectCollection> collections = CacheBuilder.newBuilder()
+            .build(new CacheLoader<String, LPSubjectCollection>() {
                 @Override
-                public SubjectCollection load(String s) {
+                public LPSubjectCollection load(String s) {
                     return new SimpleCollection(LuckPermsService.this, s);
                 }
 
                 @Override
-                public ListenableFuture<SubjectCollection> reload(String s, SubjectCollection collection) {
+                public ListenableFuture<LPSubjectCollection> reload(String s, LPSubjectCollection collection) {
                     return Futures.immediateFuture(collection); // Never needs to be refreshed.
                 }
             });
 
     public LuckPermsService(LPSpongePlugin plugin) {
         this.plugin = plugin;
+
+        localPermissionCaches = Collections.newSetFromMap(new MapMaker().weakKeys().makeMap());
+        localParentCaches = Collections.newSetFromMap(new MapMaker().weakKeys().makeMap());
+        localOptionCaches = Collections.newSetFromMap(new MapMaker().weakKeys().makeMap());
 
         storage = new SubjectStorage(new File(plugin.getDataFolder(), "local"));
 
@@ -105,25 +122,30 @@ public class LuckPermsService implements PermissionService {
         descriptionSet = ConcurrentHashMap.newKeySet();
     }
 
-    public SubjectData getDefaultData() {
+    public LPSubjectData getDefaultData() {
         return getDefaults().getSubjectData();
     }
 
     @Override
-    public Subject getDefaults() {
+    public LPSubject getDefaults() {
         return getDefaultSubjects().get("default");
     }
 
     @Override
-    public SubjectCollection getSubjects(String s) {
+    public LPSubjectCollection getSubjects(String s) {
         try (Timing ignored = plugin.getTimings().time(LPTiming.GET_SUBJECTS)) {
             return collections.getUnchecked(s.toLowerCase());
         }
     }
 
+    public Map<String, LPSubjectCollection> getCollections() {
+        return ImmutableMap.copyOf(collections.asMap());
+    }
+
+    @Deprecated
     @Override
     public Map<String, SubjectCollection> getKnownSubjects() {
-        return ImmutableMap.copyOf(collections.asMap());
+        return getCollections().entrySet().stream().collect(ImmutableCollectors.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     @Override
@@ -169,36 +191,6 @@ public class LuckPermsService implements PermissionService {
         );
     }
 
-    public static ContextSet convertContexts(Set<Context> contexts) {
-        return ContextSet.fromEntries(contexts.stream().map(c -> Maps.immutableEntry(c.getKey(), c.getValue())).collect(Collectors.toSet()));
-    }
-
-    public static Set<Context> convertContexts(ContextSet contexts) {
-        return contexts.toSet().stream().map(e -> new Context(e.getKey(), e.getValue())).collect(Collectors.toSet());
-    }
-
-    public static Tristate convertTristate(me.lucko.luckperms.api.Tristate tristate) {
-        switch (tristate) {
-            case TRUE:
-                return Tristate.TRUE;
-            case FALSE:
-                return Tristate.FALSE;
-            default:
-                return Tristate.UNDEFINED;
-        }
-    }
-
-    public static me.lucko.luckperms.api.Tristate convertTristate(Tristate tristate) {
-        switch (tristate) {
-            case TRUE:
-                return me.lucko.luckperms.api.Tristate.TRUE;
-            case FALSE:
-                return me.lucko.luckperms.api.Tristate.FALSE;
-            default:
-                return me.lucko.luckperms.api.Tristate.UNDEFINED;
-        }
-    }
-
     @RequiredArgsConstructor
     @EqualsAndHashCode
     @ToString
@@ -241,10 +233,10 @@ public class LuckPermsService implements PermissionService {
             service.getDescriptionSet().add(d);
 
             // Set role-templates
-            SubjectCollection subjects = service.getSubjects(PermissionService.SUBJECTS_ROLE_TEMPLATE);
+            LPSubjectCollection subjects = service.getSubjects(PermissionService.SUBJECTS_ROLE_TEMPLATE);
             for (Map.Entry<String, Tristate> assignment : roles.entrySet()) {
-                Subject subject = subjects.get(assignment.getKey());
-                subject.getTransientSubjectData().setPermission(SubjectData.GLOBAL_CONTEXT, id, assignment.getValue());
+                LPSubject subject = subjects.get(assignment.getKey());
+                subject.getTransientSubjectData().setPermission(ContextSet.empty(), id, assignment.getValue());
             }
 
             service.getPlugin().getPermissionCache().offer(id);

@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import lombok.NonNull;
+import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.core.UserIdentifier;
@@ -40,19 +41,18 @@ import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.model.SpongeUser;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
+import me.lucko.luckperms.sponge.service.base.LPSubject;
+import me.lucko.luckperms.sponge.service.base.LPSubjectCollection;
+import me.lucko.luckperms.sponge.service.references.SubjectReference;
 import me.lucko.luckperms.sponge.timings.LPTiming;
-import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.PermissionService;
-import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.service.permission.SubjectCollection;
-import org.spongepowered.api.service.permission.SubjectData;
-import org.spongepowered.api.util.Tristate;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-public class SpongeUserManager implements UserManager, SubjectCollection {
+public class SpongeUserManager implements UserManager, LPSubjectCollection {
     private final LPSpongePlugin plugin;
 
     private final LoadingCache<UserIdentifier, SpongeUser> objects = CacheBuilder.newBuilder()
@@ -170,7 +170,12 @@ public class SpongeUserManager implements UserManager, SubjectCollection {
     }
 
     @Override
-    public Subject get(@NonNull String id) {
+    public LuckPermsService getService() {
+        return plugin.getService();
+    }
+
+    @Override
+    public LPSubject get(@NonNull String id) {
         // Special Sponge method. This call will actually load the user from the datastore if not already present.
 
         try (Timing ignored = plugin.getTimings().time(LPTiming.USER_COLLECTION_GET)) {
@@ -217,26 +222,20 @@ public class SpongeUserManager implements UserManager, SubjectCollection {
     }
 
     @Override
-    public Iterable<Subject> getAllSubjects() {
+    public Collection<LPSubject> getSubjects() {
         return objects.asMap().values().stream().map(SpongeUser::getSpongeData).collect(ImmutableCollectors.toImmutableList());
     }
 
     @Override
-    public Map<Subject, Boolean> getAllWithPermission(@NonNull String id) {
-        return getAllWithPermission(SubjectData.GLOBAL_CONTEXT, id);
-    }
-
-    @Override
-    public Map<Subject, Boolean> getAllWithPermission(@NonNull Set<Context> contexts, @NonNull String node) {
-        ContextSet cs = LuckPermsService.convertContexts(contexts);
+    public Map<LPSubject, Boolean> getWithPermission(@NonNull ContextSet contexts, @NonNull String node) {
         return objects.asMap().values().stream()
                 .map(SpongeUser::getSpongeData)
-                .filter(sub -> sub.getPermissionValue(cs, node) != Tristate.UNDEFINED)
-                .collect(ImmutableCollectors.toImmutableMap(sub -> sub, sub -> sub.getPermissionValue(cs, node).asBoolean()));
+                .filter(sub -> sub.getPermissionValue(contexts, node) != Tristate.UNDEFINED)
+                .collect(ImmutableCollectors.toImmutableMap(sub -> sub, sub -> sub.getPermissionValue(contexts, node).asBoolean()));
     }
 
     @Override
-    public Subject getDefaults() {
-        return plugin.getService().getDefaultSubjects().get(getIdentifier());
+    public SubjectReference getDefaultSubject() {
+        return SubjectReference.of("defaults", getIdentifier());
     }
 }

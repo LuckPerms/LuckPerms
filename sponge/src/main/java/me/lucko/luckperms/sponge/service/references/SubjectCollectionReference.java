@@ -20,35 +20,24 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.contexts;
+package me.lucko.luckperms.sponge.service.references;
 
 import lombok.AllArgsConstructor;
-import me.lucko.luckperms.api.context.ContextCalculator;
-import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.sponge.service.base.Util;
-import org.spongepowered.api.service.context.Context;
-import org.spongepowered.api.service.permission.Subject;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+import me.lucko.luckperms.sponge.service.LuckPermsService;
+import me.lucko.luckperms.sponge.service.base.LPSubjectCollection;
 
-import java.util.Map;
-import java.util.Set;
+@Getter
+@ToString
+@EqualsAndHashCode
+@AllArgsConstructor(staticName = "of")
+public class SubjectCollectionReference {
 
-@AllArgsConstructor
-public class SpongeCalculatorLink extends ContextCalculator<Subject> {
-    private final org.spongepowered.api.service.context.ContextCalculator<Subject> calculator;
+    private final String collection;
 
-    @Override
-    public MutableContextSet giveApplicableContext(Subject subject, MutableContextSet accumulator) {
-        Set<Context> contexts = Util.convertContexts(accumulator);
-        calculator.accumulateContexts(subject, contexts);
-
-        accumulator.clear();
-        accumulator.addAll(Util.convertContexts(contexts));
-        return accumulator;
-    }
-
-    @Override
-    public boolean isContextApplicable(Subject subject, Map.Entry<String, String> context) {
-        Context c = new Context(context.getKey(), context.getValue());
-        return calculator.matches(c, subject);
+    public LPSubjectCollection resolve(LuckPermsService service) {
+        return service.getSubjects(collection);
     }
 }

@@ -20,14 +20,16 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.data;
+package me.lucko.luckperms.sponge.service.references;
 
 import com.google.common.base.Splitter;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
-import org.spongepowered.api.service.permission.PermissionService;
+import me.lucko.luckperms.sponge.service.LuckPermsService;
+import me.lucko.luckperms.sponge.service.base.LPSubject;
+import me.lucko.luckperms.sponge.service.base.LPSubjectCollection;
 import org.spongepowered.api.service.permission.Subject;
 
 import java.util.List;
@@ -49,8 +51,12 @@ public class SubjectReference {
     private final String collection;
     private final String identifier;
 
-    public Subject resolve(PermissionService service) {
+    public LPSubject resolve(LuckPermsService service) {
         return service.getSubjects(collection).get(identifier);
+    }
+
+    public LPSubjectCollection resolveCollection(LuckPermsService service) {
+        return service.getSubjects(collection);
     }
 
     public String serialize() {

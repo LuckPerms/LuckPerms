@@ -23,25 +23,26 @@
 package me.lucko.luckperms.sponge.model;
 
 import co.aikar.timings.Timing;
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import lombok.Getter;
+import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.caching.MetaData;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
-import me.lucko.luckperms.sponge.service.LuckPermsSubject;
 import me.lucko.luckperms.sponge.service.LuckPermsSubjectData;
+import me.lucko.luckperms.sponge.service.base.LPSubject;
+import me.lucko.luckperms.sponge.service.references.SubjectCollectionReference;
+import me.lucko.luckperms.sponge.service.references.SubjectReference;
 import me.lucko.luckperms.sponge.timings.LPTiming;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.service.permission.SubjectCollection;
-import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.service.permission.PermissionService;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 public class SpongeUser extends User {
@@ -59,7 +60,7 @@ public class SpongeUser extends User {
         this.spongeData = new UserSubject(plugin, this);
     }
 
-    public static class UserSubject extends LuckPermsSubject {
+    public static class UserSubject implements LPSubject {
         private final SpongeUser parent;
         private final LPSpongePlugin plugin;
 
@@ -98,8 +99,13 @@ public class SpongeUser extends User {
         }
 
         @Override
-        public SubjectCollection getContainingCollection() {
-            return plugin.getService().getUserSubjects();
+        public SubjectCollectionReference getParentCollection() {
+            return plugin.getService().getUserSubjects().toReference();
+        }
+
+        @Override
+        public LuckPermsService getService() {
+            return plugin.getService();
         }
 
         @Override
@@ -109,21 +115,21 @@ public class SpongeUser extends User {
                     return Tristate.UNDEFINED;
                 }
 
-                return LuckPermsService.convertTristate(parent.getUserData().getPermissionData(plugin.getService().calculateContexts(contexts)).getPermissionValue(permission));
+                return parent.getUserData().getPermissionData(plugin.getService().calculateContexts(contexts)).getPermissionValue(permission);
             }
         }
 
         @Override
-        public boolean isChildOf(ContextSet contexts, Subject parent) {
+        public boolean isChildOf(ContextSet contexts, SubjectReference parent) {
             try (Timing ignored = plugin.getTimings().time(LPTiming.USER_IS_CHILD_OF)) {
-                return parent instanceof SpongeGroup && getPermissionValue(contexts, "group." + parent.getIdentifier()).asBoolean();
+                return parent.getCollection().equals(PermissionService.SUBJECTS_GROUP) && getPermissionValue(contexts, "group." + parent.getIdentifier()).asBoolean();
             }
         }
 
         @Override
-        public List<Subject> getParents(ContextSet contexts) {
+        public Set<SubjectReference> getParents(ContextSet contexts) {
             try (Timing ignored = plugin.getTimings().time(LPTiming.USER_GET_PARENTS)) {
-                ImmutableList.Builder<Subject> subjects = ImmutableList.builder();
+                ImmutableSet.Builder<SubjectReference> subjects = ImmutableSet.builder();
 
                 if (hasData()) {
                     for (String perm : parent.getUserData().getPermissionData(plugin.getService().calculateContexts(contexts)).getImmutableBacking().keySet()) {
@@ -133,13 +139,13 @@ public class SpongeUser extends User {
 
                         String groupName = perm.substring("group.".length());
                         if (plugin.getGroupManager().isLoaded(groupName)) {
-                            subjects.add(plugin.getService().getGroupSubjects().get(groupName));
+                            subjects.add(plugin.getService().getGroupSubjects().get(groupName).toReference());
                         }
                     }
                 }
 
-                subjects.addAll(plugin.getService().getUserSubjects().getDefaults().getParents(LuckPermsService.convertContexts(contexts)));
-                subjects.addAll(plugin.getService().getDefaults().getParents(LuckPermsService.convertContexts(contexts)));
+                subjects.addAll(plugin.getService().getUserSubjects().getDefaultSubject().resolve(getService()).getParents(contexts));
+                subjects.addAll(plugin.getService().getDefaults().getParents(contexts));
 
                 return subjects.build();
             }
@@ -167,12 +173,12 @@ public class SpongeUser extends User {
                     }
                 }
 
-                Optional<String> v = plugin.getService().getUserSubjects().getDefaults().getOption(LuckPermsService.convertContexts(contexts), s);
+                Optional<String> v = plugin.getService().getUserSubjects().getDefaultSubject().resolve(getService()).getOption(contexts, s);
                 if (v.isPresent()) {
                     return v;
                 }
 
-                return plugin.getService().getDefaults().getOption(LuckPermsService.convertContexts(contexts), s);
+                return plugin.getService().getDefaults().getOption(contexts, s);
             }
         }
 
@@ -183,6 +189,5 @@ public class SpongeUser extends User {
             }
         }
     }
-
 
 }

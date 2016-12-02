@@ -24,14 +24,10 @@ package me.lucko.luckperms.sponge.service.persisted;
 
 import lombok.Getter;
 import lombok.Setter;
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
-import me.lucko.luckperms.sponge.service.data.CalculatedSubjectData;
-import org.spongepowered.api.service.context.Context;
-import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.util.Tristate;
-
-import javax.annotation.Nullable;
-import java.util.Set;
+import me.lucko.luckperms.sponge.service.calculated.CalculatedSubjectData;
+import me.lucko.luckperms.sponge.service.references.SubjectReference;
 
 /**
  * Extension of MemorySubjectData which persists data when modified
@@ -44,7 +40,7 @@ public class PersistedSubjectData extends CalculatedSubjectData {
     private boolean save = true;
 
     public PersistedSubjectData(LuckPermsService service, String calculatorDisplayName, PersistedSubject subject) {
-        super(service, calculatorDisplayName);
+        super(subject, service, calculatorDisplayName);
         this.subject = subject;
     }
 
@@ -59,7 +55,7 @@ public class PersistedSubjectData extends CalculatedSubjectData {
     }
 
     @Override
-    public boolean setPermission(Set<Context> contexts, String permission, Tristate value) {
+    public boolean setPermission(ContextSet contexts, String permission, me.lucko.luckperms.api.Tristate value) {
         boolean r = super.setPermission(contexts, permission, value);
         save();
         return r;
@@ -73,21 +69,21 @@ public class PersistedSubjectData extends CalculatedSubjectData {
     }
 
     @Override
-    public boolean clearPermissions(Set<Context> context) {
-        boolean r = super.clearPermissions(context);
+    public boolean clearPermissions(ContextSet contexts) {
+        boolean r = super.clearPermissions(contexts);
         save();
         return r;
     }
 
     @Override
-    public boolean addParent(Set<Context> contexts, Subject parent) {
+    public boolean addParent(ContextSet contexts, SubjectReference parent) {
         boolean r = super.addParent(contexts, parent);
         save();
         return r;
     }
 
     @Override
-    public boolean removeParent(Set<Context> contexts, Subject parent) {
+    public boolean removeParent(ContextSet contexts, SubjectReference parent) {
         boolean r = super.removeParent(contexts, parent);
         save();
         return r;
@@ -101,21 +97,28 @@ public class PersistedSubjectData extends CalculatedSubjectData {
     }
 
     @Override
-    public boolean clearParents(Set<Context> contexts) {
+    public boolean clearParents(ContextSet contexts) {
         boolean r = super.clearParents(contexts);
         save();
         return r;
     }
 
     @Override
-    public boolean setOption(Set<Context> contexts, String key, @Nullable String value) {
+    public boolean setOption(ContextSet contexts, String key, String value) {
         boolean r = super.setOption(contexts, key, value);
         save();
         return r;
     }
 
     @Override
-    public boolean clearOptions(Set<Context> contexts) {
+    public boolean unsetOption(ContextSet contexts, String key) {
+        boolean r = super.unsetOption(contexts, key);
+        save();
+        return r;
+    }
+
+    @Override
+    public boolean clearOptions(ContextSet contexts) {
         boolean r = super.clearOptions(contexts);
         save();
         return r;

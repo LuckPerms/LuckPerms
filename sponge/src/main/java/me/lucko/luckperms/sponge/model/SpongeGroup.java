@@ -23,28 +23,30 @@
 package me.lucko.luckperms.sponge.model;
 
 import co.aikar.timings.Timing;
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import lombok.Getter;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.utils.ExtractedContexts;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
-import me.lucko.luckperms.sponge.service.LuckPermsSubject;
 import me.lucko.luckperms.sponge.service.LuckPermsSubjectData;
+import me.lucko.luckperms.sponge.service.base.LPSubject;
+import me.lucko.luckperms.sponge.service.base.Util;
+import me.lucko.luckperms.sponge.service.references.SubjectCollectionReference;
+import me.lucko.luckperms.sponge.service.references.SubjectReference;
 import me.lucko.luckperms.sponge.timings.LPTiming;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.permission.NodeTree;
-import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.service.permission.SubjectCollection;
-import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.service.permission.PermissionService;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class SpongeGroup extends Group {
@@ -57,7 +59,7 @@ public class SpongeGroup extends Group {
         this.spongeData = new GroupSubject(plugin, this);
     }
 
-    public static class GroupSubject extends LuckPermsSubject {
+    public static class GroupSubject implements LPSubject {
         private final SpongeGroup parent;
         private final LPSpongePlugin plugin;
 
@@ -80,58 +82,70 @@ public class SpongeGroup extends Group {
         }
 
         @Override
+        public Optional<String> getFriendlyIdentifier() {
+            return Optional.of(parent.getFriendlyName());
+        }
+
+        @Override
         public Optional<CommandSource> getCommandSource() {
             return Optional.empty();
         }
 
         @Override
-        public SubjectCollection getContainingCollection() {
-            return plugin.getService().getGroupSubjects();
+        public SubjectCollectionReference getParentCollection() {
+            return plugin.getService().getGroupSubjects().toReference();
+        }
+
+        @Override
+        public LuckPermsService getService() {
+            return plugin.getService();
         }
 
         @Override
         public Tristate getPermissionValue(ContextSet contexts, String permission) {
             try (Timing ignored = plugin.getTimings().time(LPTiming.GROUP_GET_PERMISSION_VALUE)) {
+                // TODO move this away from NodeTree
                 Map<String, Boolean> permissions = parent.getAllNodesFiltered(ExtractedContexts.generate(plugin.getService().calculateContexts(contexts))).stream()
                         .map(LocalizedNode::getNode)
                         .collect(Collectors.toMap(Node::getPermission, Node::getValue));
 
-                Tristate t = NodeTree.of(permissions).get(permission);
+                Tristate t = Util.convertTristate(NodeTree.of(permissions).get(permission));
                 if (t != Tristate.UNDEFINED) {
                     return t;
                 }
 
-                t = plugin.getService().getGroupSubjects().getDefaults().getPermissionValue(LuckPermsService.convertContexts(contexts), permission);
+                t = plugin.getService().getGroupSubjects().getDefaultSubject().resolve(getService()).getPermissionValue(contexts, permission);
                 if (t != Tristate.UNDEFINED) {
                     return t;
                 }
 
-                t = plugin.getService().getDefaults().getPermissionValue(LuckPermsService.convertContexts(contexts), permission);
+                t = plugin.getService().getDefaults().getPermissionValue(contexts, permission);
                 return t;
             }
         }
 
         @Override
-        public boolean isChildOf(ContextSet contexts, Subject parent) {
+        public boolean isChildOf(ContextSet contexts, SubjectReference parent) {
             try (Timing ignored = plugin.getTimings().time(LPTiming.GROUP_IS_CHILD_OF)) {
-                return parent instanceof SpongeGroup && getPermissionValue(contexts, "group." + parent.getIdentifier()).asBoolean();
+                return parent.getCollection().equals(PermissionService.SUBJECTS_GROUP) && getPermissionValue(contexts, "group." + parent.getIdentifier()).asBoolean();
             }
         }
 
         @Override
-        public List<Subject> getParents(ContextSet contexts) {
+        public Set<SubjectReference> getParents(ContextSet contexts) {
             try (Timing ignored = plugin.getTimings().time(LPTiming.GROUP_GET_PARENTS)) {
-                List<Subject> subjects = parent.getAllNodesFiltered(ExtractedContexts.generate(plugin.getService().calculateContexts(contexts))).stream()
+                Set<SubjectReference> subjects = parent.getAllNodesFiltered(ExtractedContexts.generate(plugin.getService().calculateContexts(contexts))).stream()
                         .map(LocalizedNode::getNode)
                         .filter(Node::isGroupNode)
                         .map(Node::getGroupName)
                         .map(s -> plugin.getService().getGroupSubjects().get(s))
-                        .collect(Collectors.toList());
+                        .map(LPSubject::toReference)
+                        .collect(Collectors.toSet());
 
-                subjects.addAll(plugin.getService().getGroupSubjects().getDefaults().getParents(LuckPermsService.convertContexts(contexts)));
-                subjects.addAll(plugin.getService().getDefaults().getParents(LuckPermsService.convertContexts(contexts)));
+                subjects.addAll(plugin.getService().getGroupSubjects().getDefaultSubject().resolve(getService()).getParents(contexts));
+                subjects.addAll(plugin.getService().getDefaults().getParents(contexts));
 
-                return ImmutableList.copyOf(subjects);
+                return ImmutableSet.copyOf(subjects);
             }
         }
 
@@ -153,12 +167,12 @@ public class SpongeGroup extends Group {
                     return option;
                 }
 
-                option = plugin.getService().getGroupSubjects().getDefaults().getOption(LuckPermsService.convertContexts(contexts), s);
+                option = plugin.getService().getGroupSubjects().getDefaultSubject().resolve(getService()).getOption(contexts, s);
                 if (option.isPresent()) {
                     return option;
                 }
 
-                return plugin.getService().getDefaults().getOption(LuckPermsService.convertContexts(contexts), s);
+                return plugin.getService().getDefaults().getOption(contexts, s);
             }
         }
 

@@ -23,22 +23,22 @@
 package me.lucko.luckperms.sponge.service.persisted;
 
 import co.aikar.timings.Timing;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import lombok.Getter;
 import lombok.NonNull;
+import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.utils.BufferedRequest;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
-import me.lucko.luckperms.sponge.service.data.CalculatedSubjectData;
+import me.lucko.luckperms.sponge.service.base.LPSubject;
+import me.lucko.luckperms.sponge.service.calculated.CalculatedSubjectData;
+import me.lucko.luckperms.sponge.service.references.SubjectCollectionReference;
+import me.lucko.luckperms.sponge.service.references.SubjectReference;
 import me.lucko.luckperms.sponge.timings.LPTiming;
 import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.service.context.Context;
-import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.util.Tristate;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -46,11 +46,12 @@ import java.util.Set;
  * A simple persistable Subject implementation
  */
 @Getter
-public class PersistedSubject implements Subject {
+public class PersistedSubject implements LPSubject {
     private final String identifier;
 
+    @Getter
     private final LuckPermsService service;
-    private final PersistedCollection containingCollection;
+    private final SubjectCollectionReference parentCollection;
     private final PersistedSubjectData subjectData;
     private final CalculatedSubjectData transientSubjectData;
     private final BufferedRequest<Void> saveBuffer = new BufferedRequest<Void>(1000L, r -> PersistedSubject.this.service.getPlugin().doAsync(r)) {
@@ -70,9 +71,9 @@ public class PersistedSubject implements Subject {
     public PersistedSubject(String identifier, LuckPermsService service, PersistedCollection containingCollection) {
         this.identifier = identifier;
         this.service = service;
-        this.containingCollection = containingCollection;
+        this.parentCollection = containingCollection.toReference();
         this.subjectData = new PersistedSubjectData(service, "local:" + containingCollection.getIdentifier() + "/" + identifier + "(p)", this);
-        this.transientSubjectData = new CalculatedSubjectData(service, "local:" + containingCollection.getIdentifier() + "/" + identifier + "(t)");
+        this.transientSubjectData = new CalculatedSubjectData(this, service, "local:" + containingCollection.getIdentifier() + "/" + identifier + "(t)");
     }
 
     public void loadData(SubjectDataHolder dataHolder) {
@@ -91,12 +92,7 @@ public class PersistedSubject implements Subject {
     }
 
     @Override
-    public boolean hasPermission(@NonNull Set<Context> contexts, @NonNull String node) {
-        return getPermissionValue(contexts, node).asBoolean();
-    }
-
-    @Override
-    public Tristate getPermissionValue(@NonNull Set<Context> contexts, @NonNull String node) {
+    public Tristate getPermissionValue(@NonNull ContextSet contexts, @NonNull String node) {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.PERSISTED_SUBJECT_GET_PERMISSION_VALUE)) {
             Tristate res = subjectData.getPermissionValue(contexts, node);
             if (res != Tristate.UNDEFINED) {
@@ -108,18 +104,18 @@ public class PersistedSubject implements Subject {
                 return res;
             }
 
-            for (Subject parent : getParents(contexts)) {
-                Tristate tempRes = parent.getPermissionValue(contexts, node);
+            for (SubjectReference parent : getParents(contexts)) {
+                Tristate tempRes = parent.resolve(service).getPermissionValue(contexts, node);
                 if (tempRes != Tristate.UNDEFINED) {
                     return tempRes;
                 }
             }
 
-            if (getContainingCollection().getIdentifier().equalsIgnoreCase("defaults")) {
+            if (getParentCollection().resolve(service).getIdentifier().equalsIgnoreCase("defaults")) {
                 return Tristate.UNDEFINED;
             }
 
-            res = service.getGroupSubjects().getDefaults().getPermissionValue(contexts, node);
+            res = service.getGroupSubjects().getDefaultSubject().resolve(service).getPermissionValue(contexts, node);
             if (res != Tristate.UNDEFINED) {
                 return res;
             }
@@ -130,61 +126,61 @@ public class PersistedSubject implements Subject {
     }
 
     @Override
-    public boolean isChildOf(@NonNull Set<Context> contexts, @NonNull Subject subject) {
+    public boolean isChildOf(@NonNull ContextSet contexts, @NonNull SubjectReference subject) {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.PERSISTED_SUBJECT_IS_CHILD_OF)) {
-            if (getContainingCollection().getIdentifier().equalsIgnoreCase("defaults")) {
+            if (getParentCollection().resolve(service).getIdentifier().equalsIgnoreCase("defaults")) {
                 return subjectData.getParents(contexts).contains(subject) ||
                         transientSubjectData.getParents(contexts).contains(subject);
             } else {
                 return subjectData.getParents(contexts).contains(subject) ||
                         transientSubjectData.getParents(contexts).contains(subject) ||
-                        getContainingCollection().getDefaults().getParents(contexts).contains(subject) ||
+                        getParentCollection().resolve(service).getDefaultSubject().resolve(service).getParents(contexts).contains(subject) ||
                         service.getDefaults().getParents(contexts).contains(subject);
             }
         }
     }
 
     @Override
-    public List<Subject> getParents(@NonNull Set<Context> contexts) {
+    public Set<SubjectReference> getParents(@NonNull ContextSet contexts) {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.PERSISTED_SUBJECT_GET_PARENTS)) {
-            List<Subject> s = new ArrayList<>();
+            Set<SubjectReference> s = new HashSet<>();
             s.addAll(subjectData.getParents(contexts));
             s.addAll(transientSubjectData.getParents(contexts));
 
-            if (!getContainingCollection().getIdentifier().equalsIgnoreCase("defaults")) {
-                s.addAll(getContainingCollection().getDefaults().getParents(contexts));
+            if (!getParentCollection().resolve(service).getIdentifier().equalsIgnoreCase("defaults")) {
+                s.addAll(getParentCollection().resolve(service).getDefaultSubject().resolve(service).getParents(contexts));
                 s.addAll(service.getDefaults().getParents(contexts));
             }
 
-            return ImmutableList.copyOf(s);
+            return ImmutableSet.copyOf(s);
         }
     }
 
     @Override
-    public Optional<String> getOption(Set<Context> set, String key) {
+    public Optional<String> getOption(ContextSet set, String key) {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.PERSISTED_SUBJECT_GET_OPTION)) {
-            Optional<String> res = Optional.ofNullable(subjectData.getOptions(getActiveContexts()).get(key));
+            Optional<String> res = Optional.ofNullable(subjectData.getOptions(getActiveContextSet()).get(key));
             if (res.isPresent()) {
                 return res;
             }
 
-            res = Optional.ofNullable(transientSubjectData.getOptions(getActiveContexts()).get(key));
+            res = Optional.ofNullable(transientSubjectData.getOptions(getActiveContextSet()).get(key));
             if (res.isPresent()) {
                 return res;
             }
 
-            for (Subject parent : getParents(getActiveContexts())) {
-                Optional<String> tempRes = parent.getOption(getActiveContexts(), key);
+            for (SubjectReference parent : getParents(getActiveContextSet())) {
+                Optional<String> tempRes = parent.resolve(service).getOption(getActiveContextSet(), key);
                 if (tempRes.isPresent()) {
                     return tempRes;
                 }
             }
 
-            if (getContainingCollection().getIdentifier().equalsIgnoreCase("defaults")) {
+            if (getParentCollection().resolve(service).getIdentifier().equalsIgnoreCase("defaults")) {
                 return Optional.empty();
             }
 
-            res = getContainingCollection().getDefaults().getOption(set, key);
+            res = getParentCollection().resolve(service).getDefaultSubject().resolve(service).getOption(set, key);
             if (res.isPresent()) {
                 return res;
             }
@@ -194,9 +190,9 @@ public class PersistedSubject implements Subject {
     }
 
     @Override
-    public Set<Context> getActiveContexts() {
+    public ContextSet getActiveContextSet() {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.PERSISTED_SUBJECT_GET_ACTIVE_CONTEXTS)) {
-            return ImmutableSet.copyOf(LuckPermsService.convertContexts(service.getPlugin().getContextManager().getApplicableContext(this)));
+            return service.getPlugin().getContextManager().getApplicableContext(this);
         }
     }
 }

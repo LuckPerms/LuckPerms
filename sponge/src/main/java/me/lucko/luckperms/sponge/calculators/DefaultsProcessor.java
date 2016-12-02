@@ -23,34 +23,31 @@
 package me.lucko.luckperms.sponge.calculators;
 
 import lombok.AllArgsConstructor;
+import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.calculators.PermissionProcessor;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
-import org.spongepowered.api.service.context.Context;
-import org.spongepowered.api.util.Tristate;
 
 import java.util.Map;
-import java.util.Set;
-
-import static me.lucko.luckperms.sponge.service.LuckPermsService.convertTristate;
 
 @AllArgsConstructor
 public class DefaultsProcessor implements PermissionProcessor {
     private final LuckPermsService service;
-    private final Set<Context> contexts;
+    private final ContextSet contexts;
 
     @Override
-    public me.lucko.luckperms.api.Tristate hasPermission(String permission) {
-        Tristate t =  service.getUserSubjects().getDefaults().getPermissionValue(contexts, permission);
+    public Tristate hasPermission(String permission) {
+        Tristate t =  service.getUserSubjects().getDefaultSubject().resolve(service).getPermissionValue(contexts, permission);
         if (t != Tristate.UNDEFINED) {
-            return convertTristate(t);
+            return t;
         }
 
         Tristate t2 =  service.getDefaults().getPermissionValue(contexts, permission);
         if (t2 != Tristate.UNDEFINED) {
-            return convertTristate(t);
+            return t;
         }
 
-        return me.lucko.luckperms.api.Tristate.UNDEFINED;
+        return Tristate.UNDEFINED;
     }
 
     @Override

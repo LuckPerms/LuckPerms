@@ -23,20 +23,24 @@
 package me.lucko.luckperms.sponge.service.simple;
 
 import co.aikar.timings.Timing;
-import com.google.common.collect.ImmutableList;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableSet;
 import lombok.Getter;
 import lombok.NonNull;
+import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
-import me.lucko.luckperms.sponge.service.data.CalculatedSubjectData;
+import me.lucko.luckperms.sponge.service.base.LPSubject;
+import me.lucko.luckperms.sponge.service.calculated.CalculatedSubjectData;
+import me.lucko.luckperms.sponge.service.calculated.OptionLookup;
+import me.lucko.luckperms.sponge.service.calculated.PermissionLookup;
+import me.lucko.luckperms.sponge.service.references.SubjectCollectionReference;
+import me.lucko.luckperms.sponge.service.references.SubjectReference;
 import me.lucko.luckperms.sponge.timings.LPTiming;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.service.context.Context;
-import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.util.Tristate;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -44,126 +48,153 @@ import java.util.Set;
  * Super simple Subject implementation.
  */
 @Getter
-public class SimpleSubject implements Subject {
+public class SimpleSubject implements LPSubject {
     private final String identifier;
 
     private final LuckPermsService service;
-    private final SimpleCollection containingCollection;
+    private final SubjectCollectionReference parentCollection;
     private final CalculatedSubjectData subjectData;
     private final CalculatedSubjectData transientSubjectData;
+
+    private final LoadingCache<PermissionLookup, Tristate> permissionLookupCache = CacheBuilder.newBuilder()
+            .build(new CacheLoader<PermissionLookup, Tristate>() {
+                @Override
+                public Tristate load(PermissionLookup lookup) {
+                    return lookupPermissionValue(lookup.getContexts(), lookup.getNode());
+                }
+            });
+
+    private final LoadingCache<ContextSet, Set<SubjectReference>> parentLookupCache = CacheBuilder.newBuilder()
+            .build(new CacheLoader<ContextSet, Set<SubjectReference>>() {
+                @Override
+                public Set<SubjectReference> load(ContextSet contexts) {
+                    return lookupParents(contexts);
+                }
+            });
+
+    private final LoadingCache<OptionLookup, Optional<String>> optionLookupCache = CacheBuilder.newBuilder()
+            .build(new CacheLoader<OptionLookup, Optional<String>>() {
+                @Override
+                public Optional<String> load(OptionLookup lookup) {
+                    return lookupOptionValue(lookup.getContexts(), lookup.getKey());
+                }
+            });
 
     public SimpleSubject(String identifier, LuckPermsService service, SimpleCollection containingCollection) {
         this.identifier = identifier;
         this.service = service;
-        this.containingCollection = containingCollection;
-        this.subjectData = new CalculatedSubjectData(service, "local:" + containingCollection.getIdentifier() + "/" + identifier + "(p)");
-        this.transientSubjectData = new CalculatedSubjectData(service, "local:" + containingCollection.getIdentifier() + "/" + identifier + "(t)");
+        this.parentCollection = containingCollection.toReference();
+        this.subjectData = new CalculatedSubjectData(this, service, "local:" + containingCollection.getIdentifier() + "/" + identifier + "(p)");
+        this.transientSubjectData = new CalculatedSubjectData(this, service, "local:" + containingCollection.getIdentifier() + "/" + identifier + "(t)");
+        service.getLocalPermissionCaches().add(permissionLookupCache);
     }
 
-    @Override
-    public Optional<CommandSource> getCommandSource() {
-        return Optional.empty();
-    }
-
-    @Override
-    public boolean hasPermission(@NonNull Set<Context> contexts, @NonNull String node) {
-        return getPermissionValue(contexts, node).asBoolean();
-    }
-
-    @Override
-    public Tristate getPermissionValue(@NonNull Set<Context> contexts, @NonNull String node) {
-        try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.SIMPLE_SUBJECT_GET_PERMISSION_VALUE)) {
-            Tristate res = transientSubjectData.getPermissionValue(contexts, node);
-            if (res != Tristate.UNDEFINED) {
-                return res;
-            }
-
-            res = subjectData.getPermissionValue(contexts, node);
-            if (res != Tristate.UNDEFINED) {
-                return res;
-            }
-
-            for (Subject parent : getParents(contexts)) {
-                res = parent.getPermissionValue(contexts, node);
-                if (res != Tristate.UNDEFINED) {
-                    return res;
-                }
-            }
-
-            if (getContainingCollection().getIdentifier().equalsIgnoreCase("defaults")) {
-                return Tristate.UNDEFINED;
-            }
-
-            res = getContainingCollection().getDefaults().getPermissionValue(contexts, node);
-            if (res != Tristate.UNDEFINED) {
-                return res;
-            }
-
-            res = service.getDefaults().getPermissionValue(contexts, node);
+    private Tristate lookupPermissionValue(ContextSet contexts, String node) {
+        Tristate res = transientSubjectData.getPermissionValue(contexts, node);
+        if (res != Tristate.UNDEFINED) {
             return res;
+        }
+
+        res = subjectData.getPermissionValue(contexts, node);
+        if (res != Tristate.UNDEFINED) {
+            return res;
+        }
+
+        for (SubjectReference parent : getParents(contexts)) {
+            res = parent.resolve(service).getPermissionValue(contexts, node);
+            if (res != Tristate.UNDEFINED) {
+                return res;
+            }
+        }
+
+        if (getParentCollection().resolve(service).getIdentifier().equalsIgnoreCase("defaults")) {
+            return Tristate.UNDEFINED;
+        }
+
+        res = getParentCollection().resolve(service).getDefaultSubject().resolve(service).getPermissionValue(contexts, node);
+        if (res != Tristate.UNDEFINED) {
+            return res;
+        }
+
+        res = service.getDefaults().getPermissionValue(contexts, node);
+        return res;
+    }
+
+    private Set<SubjectReference> lookupParents(ContextSet contexts) {
+        Set<SubjectReference> s = new HashSet<>();
+        s.addAll(subjectData.getParents(contexts));
+
+        if (!getParentCollection().resolve(service).getIdentifier().equalsIgnoreCase("defaults")){
+            s.addAll(getParentCollection().resolve(service).getDefaultSubject().resolve(service).getParents(contexts));
+            s.addAll(service.getDefaults().getParents(contexts));
+        }
+
+        return ImmutableSet.copyOf(s);
+    }
+
+    private Optional<String> lookupOptionValue(ContextSet contexts, String key) {
+        Optional<String> res = Optional.ofNullable(subjectData.getOptions(contexts).get(key));
+        if (res.isPresent()) {
+            return res;
+        }
+
+        for (SubjectReference parent : getParents(getActiveContextSet())) {
+            Optional<String> tempRes = parent.resolve(service).getOption(contexts, key);
+            if (tempRes.isPresent()) {
+                return tempRes;
+            }
+        }
+
+        if (getParentCollection().resolve(service).getIdentifier().equalsIgnoreCase("defaults")) {
+            return Optional.empty();
+        }
+
+        res = getParentCollection().resolve(service).getDefaultSubject().resolve(service).getOption(contexts, key);
+        if (res.isPresent()) {
+            return res;
+        }
+
+        return service.getDefaults().getOption(contexts, key);
+    }
+
+    @Override
+    public Tristate getPermissionValue(@NonNull ContextSet contexts, @NonNull String node) {
+        try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.SIMPLE_SUBJECT_GET_PERMISSION_VALUE)) {
+            return permissionLookupCache.getUnchecked(PermissionLookup.of(node, contexts));
         }
     }
 
     @Override
-    public boolean isChildOf(@NonNull Set<Context> contexts, @NonNull Subject subject) {
+    public boolean isChildOf(@NonNull ContextSet contexts, @NonNull SubjectReference subject) {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.SIMPLE_SUBJECT_IS_CHILD_OF)) {
-            if (getContainingCollection().getIdentifier().equalsIgnoreCase("defaults")) {
+            if (getParentCollection().resolve(service).getIdentifier().equalsIgnoreCase("defaults")) {
                 return subjectData.getParents(contexts).contains(subject);
             } else {
                 return subjectData.getParents(contexts).contains(subject) ||
-                        getContainingCollection().getDefaults().getParents(contexts).contains(subject) ||
+                        getParentCollection().resolve(service).getDefaultSubject().resolve(service).getParents(contexts).contains(subject) ||
                         service.getDefaults().getParents(contexts).contains(subject);
             }
         }
     }
 
     @Override
-    public List<Subject> getParents(@NonNull Set<Context> contexts) {
+    public Set<SubjectReference> getParents(@NonNull ContextSet contexts) {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.SIMPLE_SUBJECT_GET_PARENTS)) {
-            List<Subject> s = new ArrayList<>();
-            s.addAll(subjectData.getParents(contexts));
-
-            if (!getContainingCollection().getIdentifier().equalsIgnoreCase("defaults")){
-                s.addAll(getContainingCollection().getDefaults().getParents(contexts));
-                s.addAll(service.getDefaults().getParents(contexts));
-            }
-
-            return ImmutableList.copyOf(s);
+            return parentLookupCache.getUnchecked(contexts);
         }
     }
 
     @Override
-    public Optional<String> getOption(Set<Context> set, String key) {
+    public Optional<String> getOption(ContextSet contexts, String key) {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.SIMPLE_SUBJECT_GET_OPTION)) {
-            Optional<String> res = Optional.ofNullable(subjectData.getOptions(getActiveContexts()).get(key));
-            if (res.isPresent()) {
-                return res;
-            }
-
-            for (Subject parent : getParents(getActiveContexts())) {
-                Optional<String> tempRes = parent.getOption(getActiveContexts(), key);
-                if (tempRes.isPresent()) {
-                    return tempRes;
-                }
-            }
-
-            if (getContainingCollection().getIdentifier().equalsIgnoreCase("defaults")) {
-                return Optional.empty();
-            }
-
-            res = getContainingCollection().getDefaults().getOption(set, key);
-            if (res.isPresent()) {
-                return res;
-            }
-
-            return service.getDefaults().getOption(set, key);
+            return optionLookupCache.getUnchecked(OptionLookup.of(key, contexts));
         }
     }
 
     @Override
-    public Set<Context> getActiveContexts() {
+    public ContextSet getActiveContextSet() {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.SIMPLE_SUBJECT_GET_ACTIVE_CONTEXTS)) {
-            return ImmutableSet.copyOf(LuckPermsService.convertContexts(service.getPlugin().getContextManager().getApplicableContext(this)));
+            return service.getPlugin().getContextManager().getApplicableContext(this);
         }
     }
 }

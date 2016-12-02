@@ -29,7 +29,7 @@ import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.utils.ExtractedContexts;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
-import me.lucko.luckperms.sponge.service.LuckPermsService;
+import me.lucko.luckperms.sponge.service.base.Util;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
@@ -47,7 +47,7 @@ public class MigrationUtils {
         // Migrate permissions
         Map<Set<Context>, Map<String, Boolean>> perms = subject.getSubjectData().getAllPermissions();
         for (Map.Entry<Set<Context>, Map<String, Boolean>> e : perms.entrySet()) {
-            ContextSet context = LuckPermsService.convertContexts(e.getKey());
+            ContextSet context = Util.convertContexts(e.getKey());
 
             ExtractedContexts extractedContexts = ExtractedContexts.generate(context);
             ContextSet contexts = extractedContexts.getContextSet();
@@ -65,7 +65,7 @@ public class MigrationUtils {
         try {
             Map<Set<Context>, Map<String, String>> opts = subject.getSubjectData().getAllOptions();
             for (Map.Entry<Set<Context>, Map<String, String>> e : opts.entrySet()) {
-                ContextSet context = LuckPermsService.convertContexts(e.getKey());
+                ContextSet context = Util.convertContexts(e.getKey());
 
                 ExtractedContexts extractedContexts = ExtractedContexts.generate(context);
                 ContextSet contexts = extractedContexts.getContextSet();
@@ -96,7 +96,7 @@ public class MigrationUtils {
         // Migrate parents
         Map<Set<Context>, List<Subject>> parents = subject.getSubjectData().getAllParents();
         for (Map.Entry<Set<Context>, List<Subject>> e : parents.entrySet()) {
-            ContextSet context = LuckPermsService.convertContexts(e.getKey());
+            ContextSet context = Util.convertContexts(e.getKey());
 
             ExtractedContexts extractedContexts = ExtractedContexts.generate(context);
             ContextSet contexts = extractedContexts.getContextSet();

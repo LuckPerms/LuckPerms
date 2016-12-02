@@ -26,30 +26,31 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
-import org.spongepowered.api.service.context.Context;
-import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.service.permission.SubjectCollection;
-import org.spongepowered.api.util.Tristate;
+import me.lucko.luckperms.sponge.service.base.LPSubject;
+import me.lucko.luckperms.sponge.service.base.LPSubjectCollection;
+import me.lucko.luckperms.sponge.service.references.SubjectReference;
 
+import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Super simple SubjectCollection implementation
  */
+@Getter
 @RequiredArgsConstructor
-public class SimpleCollection implements SubjectCollection {
+public class SimpleCollection implements LPSubjectCollection {
     private final LuckPermsService service;
-
-    @Getter
     private final String identifier;
 
+    @Getter(AccessLevel.NONE)
     private final LoadingCache<String, SimpleSubject> subjects = CacheBuilder.newBuilder()
             .build(new CacheLoader<String, SimpleSubject>() {
                 @Override
@@ -59,7 +60,7 @@ public class SimpleCollection implements SubjectCollection {
             });
 
     @Override
-    public Subject get(@NonNull String id) {
+    public LPSubject get(@NonNull String id) {
         return subjects.getUnchecked(id.toLowerCase());
     }
 
@@ -69,19 +70,14 @@ public class SimpleCollection implements SubjectCollection {
     }
 
     @Override
-    public Iterable<Subject> getAllSubjects() {
-        return subjects.asMap().values().stream().map(s -> (Subject) s).collect(ImmutableCollectors.toImmutableList());
+    public Collection<LPSubject> getSubjects() {
+        return subjects.asMap().values().stream().map(s -> (LPSubject) s).collect(ImmutableCollectors.toImmutableList());
     }
 
     @Override
-    public Map<Subject, Boolean> getAllWithPermission(@NonNull String id) {
-        return getAllWithPermission(ImmutableSet.of(), id);
-    }
-
-    @Override
-    public Map<Subject, Boolean> getAllWithPermission(@NonNull Set<Context> contexts, @NonNull String node) {
-        ImmutableMap.Builder<Subject, Boolean> m = ImmutableMap.builder();
-        for (Subject subject : subjects.asMap().values()) {
+    public Map<LPSubject, Boolean> getWithPermission(@NonNull ContextSet contexts, @NonNull String node) {
+        ImmutableMap.Builder<LPSubject, Boolean> m = ImmutableMap.builder();
+        for (LPSubject subject : subjects.asMap().values()) {
             Tristate ts = subject.getPermissionValue(contexts, node);
             if (ts != Tristate.UNDEFINED) {
                 m.put(subject, ts.asBoolean());
@@ -92,7 +88,7 @@ public class SimpleCollection implements SubjectCollection {
     }
 
     @Override
-    public Subject getDefaults() {
-        return service.getDefaultSubjects().get(identifier);
+    public SubjectReference getDefaultSubject() {
+        return SubjectReference.of("defaults", identifier);
     }
 }
