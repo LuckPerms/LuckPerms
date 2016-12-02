@@ -119,7 +119,7 @@ public class VaultChatHook extends Chat {
         perms.log("Setting " + (prefix ? "prefix" : "suffix") + " for " + holder.getObjectName() + " on world " + world + ", server " + perms.getServer());
 
         perms.getScheduler().scheduleTask(() -> {
-            Node.Builder node = new NodeBuilder(prefix ? "prefix" : "suffix" + ".1000." + escapeCharacters(value));
+            Node.Builder node = new NodeBuilder((prefix ? "prefix" : "suffix") + ".1000." + escapeCharacters(value));
             node.setValue(true);
             if (!perms.getServer().equalsIgnoreCase("global")) {
                 node.setServer(perms.getServer());
