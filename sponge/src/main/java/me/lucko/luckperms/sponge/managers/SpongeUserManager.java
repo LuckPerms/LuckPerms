@@ -22,14 +22,15 @@
 
 package me.lucko.luckperms.sponge.managers;
 
-import co.aikar.timings.Timing;
+import lombok.NonNull;
+
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import lombok.NonNull;
+
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.commands.utils.Util;
@@ -45,12 +46,15 @@ import me.lucko.luckperms.sponge.service.base.LPSubject;
 import me.lucko.luckperms.sponge.service.base.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.references.SubjectReference;
 import me.lucko.luckperms.sponge.timings.LPTiming;
+
 import org.spongepowered.api.service.permission.PermissionService;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+
+import co.aikar.timings.Timing;
 
 public class SpongeUserManager implements UserManager, LPSubjectCollection {
     private final LPSpongePlugin plugin;

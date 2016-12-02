@@ -36,31 +36,54 @@ import java.util.concurrent.CompletableFuture;
  * Main interface for all Storage providers.
  */
 public interface Storage {
-    
+
     String getName();
+
     boolean isAcceptingLogins();
+
     void setAcceptingLogins(boolean acceptingLogins);
+
     Storage force();
 
     void init();
+
     void shutdown();
+
     CompletableFuture<Boolean> logAction(LogEntry entry);
+
     CompletableFuture<Log> getLog();
+
     CompletableFuture<Boolean> loadUser(UUID uuid, String username);
+
     CompletableFuture<Boolean> saveUser(User user);
+
     CompletableFuture<Boolean> cleanupUsers();
+
     CompletableFuture<Set<UUID>> getUniqueUsers();
+
     CompletableFuture<Boolean> createAndLoadGroup(String name);
+
     CompletableFuture<Boolean> loadGroup(String name);
+
     CompletableFuture<Boolean> loadAllGroups();
+
     CompletableFuture<Boolean> saveGroup(Group group);
+
     CompletableFuture<Boolean> deleteGroup(Group group);
+
     CompletableFuture<Boolean> createAndLoadTrack(String name);
+
     CompletableFuture<Boolean> loadTrack(String name);
+
     CompletableFuture<Boolean> loadAllTracks();
+
     CompletableFuture<Boolean> saveTrack(Track track);
+
     CompletableFuture<Boolean> deleteTrack(Track track);
+
     CompletableFuture<Boolean> saveUUIDData(String username, UUID uuid);
+
     CompletableFuture<UUID> getUUID(String username);
+
     CompletableFuture<String> getName(UUID uuid);
 }

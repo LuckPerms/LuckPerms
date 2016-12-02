@@ -23,6 +23,7 @@
 package me.lucko.luckperms.bungee;
 
 import lombok.Getter;
+
 import me.lucko.luckperms.ApiHandler;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Logger;
@@ -52,7 +53,12 @@ import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.StorageFactory;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.tasks.UpdateTask;
-import me.lucko.luckperms.common.utils.*;
+import me.lucko.luckperms.common.utils.BufferedRequest;
+import me.lucko.luckperms.common.utils.DebugHandler;
+import me.lucko.luckperms.common.utils.LocaleManager;
+import me.lucko.luckperms.common.utils.LogFactory;
+import me.lucko.luckperms.common.utils.PermissionCache;
+
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -69,9 +75,8 @@ import java.util.stream.Collectors;
 
 @Getter
 public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
-    private Executor executor;
-
     private final Set<UUID> ignoringLogs = ConcurrentHashMap.newKeySet();
+    private Executor executor;
     private LPConfiguration configuration;
     private UserManager userManager;
     private GroupManager groupManager;
@@ -278,7 +283,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         c.addAll(getProxy().getServers().values().stream()
                 .map(ServerInfo::getName)
                 .map(s -> {
-                    MutableContextSet set = new MutableContextSet();
+                    MutableContextSet set = MutableContextSet.create();
                     set.add("server", getConfiguration().getServer());
                     set.add("world", s);
                     return set.makeImmutable();

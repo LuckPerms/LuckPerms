@@ -77,13 +77,11 @@ public abstract class BufferedRequest<T> {
     private static class Processor<R> implements Runnable {
         private final long delayMillis;
         private final Supplier<R> supplier;
-
+        private final ReentrantLock lock = new ReentrantLock();
+        private final CompletableFuture<R> future = new CompletableFuture<R>();
         @Getter
         private boolean usable = true;
-
-        private final ReentrantLock lock = new ReentrantLock();
         private long executionTime;
-        private final CompletableFuture<R> future = new CompletableFuture<R>();
 
         @Override
         public void run() {

@@ -28,6 +28,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * A simple implementation of the listener aspects of {@link IContextCalculator}
+ *
  * @param <T> the subject type
  */
 public abstract class ContextCalculator<T> implements IContextCalculator<T> {
@@ -36,8 +37,9 @@ public abstract class ContextCalculator<T> implements IContextCalculator<T> {
     /**
      * Pushes an update to all registered {@link ContextListener}s.
      * Make sure any changes are applied internally before this method is called.
+     *
      * @param subject the subject that changed
-     * @param before the context state before the change
+     * @param before  the context state before the change
      * @param current the context state after the change (now)
      * @throws NullPointerException if any parameters are null
      */

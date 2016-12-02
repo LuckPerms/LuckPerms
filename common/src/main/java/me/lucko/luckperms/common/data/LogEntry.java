@@ -73,7 +73,7 @@ public class LogEntry extends me.lucko.luckperms.api.LogEntry {
                     .forEach(s -> Message.LOG.send(s, msg));
         }
     }
-    
+
     public static class LogEntryBuilder extends AbstractLogEntryBuilder<LogEntry, LogEntry.LogEntryBuilder> {
 
         @Override

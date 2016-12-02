@@ -25,6 +25,7 @@ package me.lucko.luckperms.common.storage;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Delegate;
+
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.core.model.Group;
@@ -160,9 +161,13 @@ public class AbstractStorage implements Storage {
 
     private interface Delegated {
         String getName();
+
         boolean isAcceptingLogins();
+
         void setAcceptingLogins(boolean b);
+
         void init();
+
         void shutdown();
     }
 }

@@ -30,6 +30,7 @@ import java.util.function.Supplier;
 
 /**
  * Thread-safe caching utility
+ *
  * @param <T> the type being stored
  */
 @RequiredArgsConstructor

@@ -23,6 +23,7 @@
 package me.lucko.luckperms.common.storage.backing;
 
 import lombok.Cleanup;
+
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.core.UserIdentifier;
 import me.lucko.luckperms.common.core.model.Group;
@@ -31,11 +32,22 @@ import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.managers.impl.GenericUserManager;
+
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
@@ -43,14 +55,23 @@ import static me.lucko.luckperms.common.core.model.PermissionHolder.exportToLega
 
 @SuppressWarnings({"unchecked", "ResultOfMethodCallIgnored"})
 public class YAMLBacking extends FlatfileBacking {
-    public YAMLBacking(LuckPermsPlugin plugin, File pluginDir) {
-        super(plugin, "YAML", pluginDir);
-    }
-
     private static Yaml getYaml() {
         DumperOptions options = new DumperOptions();
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
         return new Yaml(options);
+    }
+
+    private static <T> T call(Callable<T> c, T def) {
+        try {
+            return c.call();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return def;
+        }
+    }
+
+    public YAMLBacking(LuckPermsPlugin plugin, File pluginDir) {
+        super(plugin, "YAML", pluginDir);
     }
 
     private boolean doRead(File file, ReadOperation readOperation) {
@@ -415,15 +436,6 @@ public class YAMLBacking extends FlatfileBacking {
             }, false);
         } finally {
             track.getIoLock().unlock();
-        }
-    }
-
-    private static <T> T call(Callable<T> c, T def) {
-        try {
-            return c.call();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return def;
         }
     }
 

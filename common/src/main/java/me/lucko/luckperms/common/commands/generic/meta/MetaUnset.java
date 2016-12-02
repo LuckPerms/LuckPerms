@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 
 public class MetaUnset extends SharedSubCommand {
     public MetaUnset() {
-        super("unset", "Unsets a meta value",  Permission.USER_META_UNSET, Permission.GROUP_META_UNSET,
+        super("unset", "Unsets a meta value", Permission.USER_META_UNSET, Permission.GROUP_META_UNSET,
                 Predicates.notInRange(1, 3),
                 Arg.list(
                         Arg.create("key", true, "the key to unset"),

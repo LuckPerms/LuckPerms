@@ -22,9 +22,11 @@
 
 package me.lucko.luckperms.common.core;
 
-import com.google.common.base.Splitter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+
+import com.google.common.base.Splitter;
+
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
@@ -42,12 +44,12 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class NodeBuilder implements Node.Builder {
     private final String permission;
+    private final MutableContextSet extraContexts = MutableContextSet.create();
     private Boolean value = true;
     private boolean override = false;
     private String server = null;
     private String world = null;
     private long expireAt = 0L;
-    private final MutableContextSet extraContexts = new MutableContextSet();
 
     NodeBuilder(String permission, boolean shouldConvertContexts) {
         if (!shouldConvertContexts) {

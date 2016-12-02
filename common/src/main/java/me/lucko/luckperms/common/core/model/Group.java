@@ -25,6 +25,7 @@ package me.lucko.luckperms.common.core.model;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
+
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Identifiable;
 

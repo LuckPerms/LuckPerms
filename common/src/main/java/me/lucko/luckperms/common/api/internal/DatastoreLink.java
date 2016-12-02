@@ -24,7 +24,13 @@ package me.lucko.luckperms.common.api.internal;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
-import me.lucko.luckperms.api.*;
+
+import me.lucko.luckperms.api.Datastore;
+import me.lucko.luckperms.api.Group;
+import me.lucko.luckperms.api.Log;
+import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.api.Track;
+import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.data.Callback;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.Storage;
@@ -33,7 +39,11 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-import static me.lucko.luckperms.common.api.internal.Utils.*;
+import static me.lucko.luckperms.common.api.internal.Utils.checkGroup;
+import static me.lucko.luckperms.common.api.internal.Utils.checkName;
+import static me.lucko.luckperms.common.api.internal.Utils.checkTrack;
+import static me.lucko.luckperms.common.api.internal.Utils.checkUser;
+import static me.lucko.luckperms.common.api.internal.Utils.checkUsername;
 
 /**
  * Provides a link between {@link Datastore} and {@link Storage}
@@ -104,7 +114,7 @@ public class DatastoreLink implements Datastore {
 
         @Override
         public void loadOrCreateUser(@NonNull UUID uuid, @NonNull String username, Callback<Boolean> callback) {
-            registerCallback(master.force().loadUser(uuid, checkUsername(username)) , callback);
+            registerCallback(master.force().loadUser(uuid, checkUsername(username)), callback);
         }
 
         @Override

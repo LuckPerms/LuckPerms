@@ -22,10 +22,11 @@
 
 package me.lucko.luckperms.common.utils;
 
+import lombok.experimental.UtilityClass;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import lombok.experimental.UtilityClass;
 
 import java.util.function.Function;
 import java.util.stream.Collector;

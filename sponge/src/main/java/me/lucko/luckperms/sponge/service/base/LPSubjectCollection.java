@@ -23,11 +23,13 @@
 package me.lucko.luckperms.sponge.service.base;
 
 import lombok.NonNull;
+
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.references.SubjectCollectionReference;
 import me.lucko.luckperms.sponge.service.references.SubjectReference;
+
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;

@@ -26,14 +26,16 @@ import java.util.Map;
 
 /**
  * Listens to context changes
+ *
  * @param <T> the subject type, Is ALWAYS the player class of the platform.
  */
 public interface ContextListener<T> {
 
     /**
      * Called whenever a context changes on the
+     *
      * @param subject the subject that had context changed
-     * @param before the context state before the change
+     * @param before  the context state before the change
      * @param current the context state after the change (now)
      */
     void onContextChange(T subject, Map.Entry<String, String> before, Map.Entry<String, String> current) throws Exception;

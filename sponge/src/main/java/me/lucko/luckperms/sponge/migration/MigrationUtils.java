@@ -23,6 +23,7 @@
 package me.lucko.luckperms.sponge.migration;
 
 import lombok.experimental.UtilityClass;
+
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.core.NodeBuilder;
 import me.lucko.luckperms.common.core.NodeFactory;
@@ -30,6 +31,7 @@ import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.utils.ExtractedContexts;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.sponge.service.base.Util;
+
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
@@ -57,7 +59,8 @@ public class MigrationUtils {
             for (Map.Entry<String, Boolean> perm : e.getValue().entrySet()) {
                 try {
                     holder.setPermission(new NodeBuilder(perm.getKey()).setServerRaw(server).setWorld(world).withExtraContext(contexts).setValue(perm.getValue()).build());
-                } catch (ObjectAlreadyHasException ignored) {}
+                } catch (ObjectAlreadyHasException ignored) {
+                }
             }
         }
 
@@ -76,15 +79,18 @@ public class MigrationUtils {
                     if (opt.getKey().equalsIgnoreCase("prefix")) {
                         try {
                             holder.setPermission(NodeFactory.makePrefixNode(100, opt.getValue()).setServerRaw(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
-                        } catch (ObjectAlreadyHasException ignored) {}
+                        } catch (ObjectAlreadyHasException ignored) {
+                        }
                     } else if (opt.getKey().equalsIgnoreCase("suffix")) {
                         try {
                             holder.setPermission(NodeFactory.makeSuffixNode(100, opt.getValue()).setServerRaw(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
-                        } catch (ObjectAlreadyHasException ignored) {}
+                        } catch (ObjectAlreadyHasException ignored) {
+                        }
                     } else {
                         try {
                             holder.setPermission(NodeFactory.makeMetaNode(opt.getKey(), opt.getValue()).setServerRaw(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
-                        } catch (ObjectAlreadyHasException ignored) {}
+                        } catch (ObjectAlreadyHasException ignored) {
+                        }
                     }
                 }
             }
@@ -110,7 +116,8 @@ public class MigrationUtils {
 
                 try {
                     holder.setPermission(new NodeBuilder("group." + s.getIdentifier().toLowerCase()).setServerRaw(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
-                } catch (ObjectAlreadyHasException ignored) {}
+                } catch (ObjectAlreadyHasException ignored) {
+                }
             }
         }
     }

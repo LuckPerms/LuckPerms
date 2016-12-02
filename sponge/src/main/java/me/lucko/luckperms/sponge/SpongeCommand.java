@@ -22,12 +22,13 @@
 
 package me.lucko.luckperms.sponge;
 
-import co.aikar.timings.Timing;
 import com.google.common.base.Splitter;
+
 import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Patterns;
 import me.lucko.luckperms.sponge.timings.LPTiming;
+
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -36,9 +37,12 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
+
+import javax.annotation.Nullable;
+
+import co.aikar.timings.Timing;
 
 @SuppressWarnings("NullableProblems")
 class SpongeCommand extends CommandManager implements CommandCallable {

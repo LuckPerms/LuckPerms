@@ -24,6 +24,7 @@ package me.lucko.luckperms.api.event;
 
 /**
  * Represents an event acting upon a target
+ *
  * @param <T> the target type
  */
 public class TargetedEvent<T> extends LPEvent {

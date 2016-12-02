@@ -24,6 +24,7 @@ package me.lucko.luckperms.api;
 
 /**
  * Exposes any networking provider being used on the platform. e.g. Redis
+ *
  * @since 2.14
  */
 public interface MessagingService {

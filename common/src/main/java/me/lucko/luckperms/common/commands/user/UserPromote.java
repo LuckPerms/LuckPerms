@@ -23,6 +23,7 @@
 package me.lucko.luckperms.common.commands.user;
 
 import com.google.common.base.Objects;
+
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.event.events.UserPromoteEvent;
 import me.lucko.luckperms.common.LuckPermsPlugin;
@@ -160,10 +161,12 @@ public class UserPromote extends SubCommand<User> {
 
         try {
             user.unsetPermission(nodes.stream().findAny().get());
-        } catch (ObjectLacksException ignored) {}
+        } catch (ObjectLacksException ignored) {
+        }
         try {
             user.setPermission(NodeFactory.newBuilder("group." + nextGroup.getName()).setServer(server).setWorld(world).build());
-        } catch (ObjectAlreadyHasException ignored) {}
+        } catch (ObjectAlreadyHasException ignored) {
+        }
 
         if (server == null && world == null) {
             user.setPrimaryGroup(nextGroup.getName());

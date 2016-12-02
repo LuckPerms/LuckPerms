@@ -79,7 +79,8 @@ public class ParentSet extends SharedSubCommand {
 
                 try {
                     holder.setInheritGroup(group);
-                } catch (ObjectAlreadyHasException ignored) {}
+                } catch (ObjectAlreadyHasException ignored) {
+                }
 
                 if (holder instanceof User) {
                     ((User) holder).setPrimaryGroup(group.getName());
@@ -92,7 +93,8 @@ public class ParentSet extends SharedSubCommand {
 
                 try {
                     holder.setInheritGroup(group, server);
-                } catch (ObjectAlreadyHasException ignored) {}
+                } catch (ObjectAlreadyHasException ignored) {
+                }
 
                 if (server.equalsIgnoreCase("global") && holder instanceof User) {
                     ((User) holder).setPrimaryGroup(group.getName());
@@ -105,7 +107,8 @@ public class ParentSet extends SharedSubCommand {
 
                 try {
                     holder.setInheritGroup(group, server, world);
-                } catch (ObjectAlreadyHasException ignored) {}
+                } catch (ObjectAlreadyHasException ignored) {
+                }
 
                 Message.SET_PARENT_SERVER_WORLD_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(), server, world);
                 break;

@@ -22,9 +22,11 @@
 
 package me.lucko.luckperms.common.commands.generic;
 
-import com.google.common.collect.ImmutableList;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import com.google.common.collect.ImmutableList;
+
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
@@ -45,27 +47,39 @@ import java.util.function.Predicate;
 @AllArgsConstructor
 public abstract class SharedSubCommand {
 
+    protected static void save(PermissionHolder holder, Sender sender, LuckPermsPlugin plugin) {
+        if (holder instanceof User) {
+            User user = ((User) holder);
+            SubCommand.save(user, sender, plugin);
+            return;
+        }
+
+        if (holder instanceof Group) {
+            Group group = ((Group) holder);
+            SubCommand.save(group, sender, plugin);
+            return;
+        }
+
+        throw new IllegalArgumentException();
+    }
+
     /**
      * The name of the sub command
      */
     private final String name;
-
     /**
      * A brief description of what the sub command does
      */
     private final String description;
-
     /**
      * The permission needed to use this command
      */
     private final Permission userPermission;
     private final Permission groupPermission;
-
     /**
      * Predicate to test if the argument length given is invalid
      */
     private final Predicate<? super Integer> isArgumentInvalid;
-
     private final ImmutableList<Arg> args;
 
     public abstract CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) throws CommandException;
@@ -99,22 +113,6 @@ public abstract class SharedSubCommand {
 
     public boolean isAuthorized(Sender sender, boolean user) {
         return user ? userPermission.isAuthorized(sender) : groupPermission.isAuthorized(sender);
-    }
-
-    protected static void save(PermissionHolder holder, Sender sender, LuckPermsPlugin plugin) {
-        if (holder instanceof User) {
-            User user = ((User) holder);
-            SubCommand.save(user, sender, plugin);
-            return;
-        }
-
-        if (holder instanceof Group) {
-            Group group = ((Group) holder);
-            SubCommand.save(group, sender, plugin);
-            return;
-        }
-
-        throw new IllegalArgumentException();
     }
 
 }

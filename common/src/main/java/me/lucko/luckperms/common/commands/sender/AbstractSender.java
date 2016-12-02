@@ -23,6 +23,7 @@
 package me.lucko.luckperms.common.commands.sender;
 
 import lombok.Getter;
+
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Permission;
@@ -32,6 +33,7 @@ import java.util.UUID;
 
 /**
  * Simple implementation of {@link Sender} using a {@link SenderFactory}
+ *
  * @param <T> the command sender type
  */
 @Getter

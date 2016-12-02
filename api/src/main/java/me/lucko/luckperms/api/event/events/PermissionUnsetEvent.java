@@ -27,6 +27,7 @@ import me.lucko.luckperms.api.event.AbstractPermissionRemoveEvent;
 
 /**
  * Called whenever a user or group has a permission unset.
+ *
  * @deprecated in favour of {@link PermissionNodeUnsetEvent}
  */
 @Deprecated

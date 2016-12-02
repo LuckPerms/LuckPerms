@@ -23,6 +23,7 @@
 package me.lucko.luckperms.bukkit.vault;
 
 import lombok.NonNull;
+
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.caching.MetaData;
@@ -35,6 +36,7 @@ import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.utils.ExtractedContexts;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
+
 import net.milkbowl.vault.chat.Chat;
 
 import java.util.HashMap;
@@ -92,7 +94,8 @@ public class VaultChatHook extends Chat {
             toRemove.forEach(n -> {
                 try {
                     holder.unsetPermission(n);
-                } catch (ObjectLacksException ignored) {}
+                } catch (ObjectLacksException ignored) {
+                }
             });
 
             Node.Builder metaNode = NodeFactory.makeMetaNode(node, value).setValue(true);
@@ -105,7 +108,8 @@ public class VaultChatHook extends Chat {
 
             try {
                 holder.setPermission(metaNode.build());
-            } catch (ObjectAlreadyHasException ignored) {}
+            } catch (ObjectAlreadyHasException ignored) {
+            }
 
             perms.save(holder);
         });
@@ -131,7 +135,8 @@ public class VaultChatHook extends Chat {
 
             try {
                 holder.setPermission(node.build());
-            } catch (ObjectAlreadyHasException ignored) {}
+            } catch (ObjectAlreadyHasException ignored) {
+            }
 
             perms.save(holder);
         });

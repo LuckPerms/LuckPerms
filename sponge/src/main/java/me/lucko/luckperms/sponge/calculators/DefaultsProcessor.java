@@ -23,6 +23,7 @@
 package me.lucko.luckperms.sponge.calculators;
 
 import lombok.AllArgsConstructor;
+
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.calculators.PermissionProcessor;
@@ -37,7 +38,7 @@ public class DefaultsProcessor implements PermissionProcessor {
 
     @Override
     public Tristate hasPermission(String permission) {
-        Tristate t =  service.getUserSubjects().getDefaultSubject().resolve(service).getPermissionValue(contexts, permission);
+        Tristate t = service.getUserSubjects().getDefaultSubject().resolve(service).getPermissionValue(contexts, permission);
         if (t != Tristate.UNDEFINED) {
             return t;
         }

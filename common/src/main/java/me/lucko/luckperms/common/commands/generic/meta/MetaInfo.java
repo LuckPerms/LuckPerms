@@ -36,11 +36,21 @@ import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.utils.ExtractedContexts;
 import me.lucko.luckperms.common.utils.Predicates;
 
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class MetaInfo extends SharedSubCommand {
+    private static String processLocation(LocalizedNode node, PermissionHolder holder) {
+        return node.getLocation().equalsIgnoreCase(holder.getObjectName()) ? "self" : node.getLocation();
+    }
+
     public MetaInfo() {
-        super("info", "Shows all chat meta",  Permission.USER_META_INFO, Permission.GROUP_META_INFO, Predicates.alwaysFalse(), null);
+        super("info", "Shows all chat meta", Permission.USER_META_INFO, Permission.GROUP_META_INFO, Predicates.alwaysFalse(), null);
     }
 
     @Override
@@ -110,9 +120,5 @@ public class MetaInfo extends SharedSubCommand {
         }
 
         return CommandResult.SUCCESS;
-    }
-
-    private static String processLocation(LocalizedNode node, PermissionHolder holder) {
-        return node.getLocation().equalsIgnoreCase(holder.getObjectName()) ? "self" : node.getLocation();
     }
 }

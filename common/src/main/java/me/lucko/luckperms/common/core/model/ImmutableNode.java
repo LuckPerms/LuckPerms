@@ -22,13 +22,15 @@
 
 package me.lucko.luckperms.common.core.model;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
+
 import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
@@ -36,7 +38,13 @@ import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.constants.Patterns;
 import me.lucko.luckperms.common.utils.ShorthandParser;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -50,6 +58,54 @@ public class ImmutableNode implements Node {
     private static final Pattern PREFIX_PATTERN = Pattern.compile("(?i)prefix\\.-?\\d+\\..*");
     private static final Pattern SUFFIX_PATTERN = Pattern.compile("(?i)suffix\\.-?\\d+\\..*");
     private static final Pattern META_PATTERN = Pattern.compile("meta\\..*\\..*");
+
+    private static boolean shouldApply(String str, boolean applyRegex, String thisStr) {
+        if (str.toLowerCase().startsWith("r=") && applyRegex) {
+            Pattern p = Patterns.compile(str.substring(2));
+            if (p == null) {
+                return false;
+            }
+            return p.matcher(thisStr).matches();
+        }
+
+        if (str.startsWith("(") && str.endsWith(")") && str.contains("|")) {
+            final String bits = str.substring(1, str.length() - 1);
+            Iterable<String> parts = Splitter.on('|').split(bits);
+
+            for (String s : parts) {
+                if (s.equalsIgnoreCase(thisStr)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        return thisStr.equalsIgnoreCase(str);
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    private static boolean isInt(String a, String b) {
+        try {
+            Integer.parseInt(a);
+            Integer.parseInt(b);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private static boolean isChar(String a, String b) {
+        return a.length() == 1 && b.length() == 1;
+    }
+
+    private static Set<String> getCharRange(char a, char b) {
+        Set<String> s = new HashSet<>();
+        for (char c = a; c <= b; c++) {
+            s.add(Character.toString(c));
+        }
+        return s;
+    }
 
     @Getter
     private final String permission;
@@ -90,12 +146,13 @@ public class ImmutableNode implements Node {
 
     /**
      * Make an immutable node instance
+     *
      * @param permission the actual permission node
-     * @param value the value (if it's *not* negated)
-     * @param expireAt the time when the node will expire
-     * @param server the server this node applies on
-     * @param world the world this node applies on
-     * @param contexts any additional contexts applying to this node
+     * @param value      the value (if it's *not* negated)
+     * @param expireAt   the time when the node will expire
+     * @param server     the server this node applies on
+     * @param world      the world this node applies on
+     * @param contexts   any additional contexts applying to this node
      */
     public ImmutableNode(String permission, boolean value, boolean override, long expireAt, String server, String world, ContextSet contexts) {
         if (permission == null || permission.equals("")) {
@@ -196,7 +253,7 @@ public class ImmutableNode implements Node {
     }
 
     @Override
-    public long getExpiryUnixTime(){
+    public long getExpiryUnixTime() {
         Preconditions.checkState(isTemporary(), "Node does not have an expiry time.");
         return expireAt;
     }
@@ -290,31 +347,6 @@ public class ImmutableNode implements Node {
         return isWorldSpecific() ? shouldApply(world, applyRegex, this.world) : includeGlobal;
     }
 
-    private static boolean shouldApply(String str, boolean applyRegex, String thisStr) {
-        if (str.toLowerCase().startsWith("r=") && applyRegex) {
-            Pattern p = Patterns.compile(str.substring(2));
-            if (p == null) {
-                return false;
-            }
-            return p.matcher(thisStr).matches();
-        }
-
-        if (str.startsWith("(") && str.endsWith(")") && str.contains("|")) {
-            final String bits = str.substring(1, str.length() - 1);
-            Iterable<String> parts = Splitter.on('|').split(bits);
-
-            for (String s : parts) {
-                if (s.equalsIgnoreCase(thisStr)) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        return thisStr.equalsIgnoreCase(str);
-    }
-
     @Override
     public boolean shouldApplyWithContext(ContextSet context, boolean worldAndServer) {
         if (contexts.isEmpty() && !isServerSpecific() && !isWorldSpecific()) {
@@ -379,29 +411,6 @@ public class ImmutableNode implements Node {
 
         String match = getPermission().substring(0, getPermission().length() - 2);
         return possibleNodes.stream().filter(pn -> pn.startsWith(match)).collect(Collectors.toList());
-    }
-
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    private static boolean isInt(String a, String b) {
-        try {
-            Integer.parseInt(a);
-            Integer.parseInt(b);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
-
-    private static boolean isChar(String a, String b) {
-        return a.length() == 1 && b.length() == 1;
-    }
-
-    private static Set<String> getCharRange(char a, char b) {
-        Set<String> s = new HashSet<>();
-        for (char c = a; c <= b; c++) {
-            s.add(Character.toString(c));
-        }
-        return s;
     }
 
     @Override

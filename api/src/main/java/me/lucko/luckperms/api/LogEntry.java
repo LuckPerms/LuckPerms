@@ -29,11 +29,11 @@ import java.util.UUID;
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class LogEntry implements Comparable<LogEntry> {
+    private static final String FORMAT = "&8(&e%s&8) [&a%s&8] (&b%s&8) &7--> &f%s";
+
     public static LogEntryBuilder builder() {
         return new LogEntryBuilder();
     }
-
-    private static final String FORMAT = "&8(&e%s&8) [&a%s&8] (&b%s&8) &7--> &f%s";
 
     private long timestamp;
     private UUID actor;
@@ -100,52 +100,52 @@ public class LogEntry implements Comparable<LogEntry> {
         return timestamp;
     }
 
-    public UUID getActor() {
-        return actor;
-    }
-
-    public String getActorName() {
-        return actorName;
-    }
-
-    public char getType() {
-        return type;
-    }
-
-    public UUID getActed() {
-        return acted;
-    }
-
-    public String getActedName() {
-        return actedName;
-    }
-
-    public String getAction() {
-        return action;
-    }
-
     void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public UUID getActor() {
+        return actor;
     }
 
     void setActor(UUID actor) {
         this.actor = actor;
     }
 
+    public String getActorName() {
+        return actorName;
+    }
+
     void setActorName(String actorName) {
         this.actorName = actorName;
+    }
+
+    public char getType() {
+        return type;
     }
 
     void setType(char type) {
         this.type = type;
     }
 
+    public UUID getActed() {
+        return acted;
+    }
+
     void setActed(UUID acted) {
         this.acted = acted;
     }
 
+    public String getActedName() {
+        return actedName;
+    }
+
     void setActedName(String actedName) {
         this.actedName = actedName;
+    }
+
+    public String getAction() {
+        return action;
     }
 
     void setAction(String action) {
@@ -226,6 +226,7 @@ public class LogEntry implements Comparable<LogEntry> {
         }
 
         protected abstract T createObj();
+
         protected abstract B getThis();
 
         public long getTimestamp() {

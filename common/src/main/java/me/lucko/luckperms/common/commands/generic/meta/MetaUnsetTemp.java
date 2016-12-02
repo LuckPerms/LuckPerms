@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 
 public class MetaUnsetTemp extends SharedSubCommand {
     public MetaUnsetTemp() {
-        super("unsettemp", "Unsets a temporary meta value",  Permission.USER_META_UNSETTEMP, Permission.GROUP_META_UNSETTEMP,
+        super("unsettemp", "Unsets a temporary meta value", Permission.USER_META_UNSETTEMP, Permission.GROUP_META_UNSETTEMP,
                 Predicates.notInRange(1, 3),
                 Arg.list(
                         Arg.create("key", true, "the key to unset"),

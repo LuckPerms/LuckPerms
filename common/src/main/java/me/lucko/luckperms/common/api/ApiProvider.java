@@ -22,16 +22,37 @@
 
 package me.lucko.luckperms.common.api;
 
-import com.google.common.eventbus.EventBus;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
-import me.lucko.luckperms.api.*;
+
+import com.google.common.eventbus.EventBus;
+
+import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.Datastore;
+import me.lucko.luckperms.api.Group;
+import me.lucko.luckperms.api.LPConfiguration;
+import me.lucko.luckperms.api.Logger;
+import me.lucko.luckperms.api.LuckPermsApi;
+import me.lucko.luckperms.api.MessagingService;
+import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.PlatformType;
+import me.lucko.luckperms.api.Storage;
+import me.lucko.luckperms.api.Track;
+import me.lucko.luckperms.api.User;
+import me.lucko.luckperms.api.UuidCache;
 import me.lucko.luckperms.api.context.ContextListener;
 import me.lucko.luckperms.api.context.IContextCalculator;
 import me.lucko.luckperms.api.event.LPEvent;
 import me.lucko.luckperms.api.event.LPListener;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.api.internal.*;
+import me.lucko.luckperms.common.api.internal.DatastoreLink;
+import me.lucko.luckperms.common.api.internal.GroupLink;
+import me.lucko.luckperms.common.api.internal.LPConfigurationLink;
+import me.lucko.luckperms.common.api.internal.StorageLink;
+import me.lucko.luckperms.common.api.internal.TrackLink;
+import me.lucko.luckperms.common.api.internal.UserLink;
+import me.lucko.luckperms.common.api.internal.Utils;
+import me.lucko.luckperms.common.api.internal.UuidCacheLink;
 import me.lucko.luckperms.common.core.NodeBuilder;
 import me.lucko.luckperms.common.core.UserIdentifier;
 
@@ -71,7 +92,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public double getApiVersion() {
-        return 2.15;
+        return 2.16;
     }
 
     @Override

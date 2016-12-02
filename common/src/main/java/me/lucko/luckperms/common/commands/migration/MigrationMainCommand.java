@@ -23,7 +23,11 @@
 package me.lucko.luckperms.common.commands.migration;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.*;
+import me.lucko.luckperms.common.commands.Command;
+import me.lucko.luckperms.common.commands.CommandException;
+import me.lucko.luckperms.common.commands.CommandResult;
+import me.lucko.luckperms.common.commands.MainCommand;
+import me.lucko.luckperms.common.commands.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Message;
@@ -35,12 +39,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class MigrationMainCommand extends MainCommand<Object> {
-    private List<Command<Object, ?>> commands = null;
-
-    public MigrationMainCommand() {
-        super("Migration", "Migration commands", "/%s migration", 1, null);
-    }
-
     @SuppressWarnings("unchecked")
     private static List<Command<Object, ?>> getAvailableCommands() {
         List<SubCommand<Object>> l = new ArrayList<>();
@@ -48,44 +46,58 @@ public class MigrationMainCommand extends MainCommand<Object> {
         try {
             Class.forName("org.anjocaido.groupmanager.GroupManager");
             l.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.bukkit.migration.MigrationGroupManager").newInstance());
-        } catch (Throwable ignored) {}
+        } catch (Throwable ignored) {
+        }
 
         try {
             Class.forName("ru.tehkode.permissions.bukkit.PermissionsEx");
             l.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.bukkit.migration.MigrationPermissionsEx").newInstance());
-        } catch (Throwable ignored) {}
+        } catch (Throwable ignored) {
+        }
 
         try {
             Class.forName("com.github.cheesesoftware.PowerfulPermsAPI.PowerfulPermsPlugin");
             l.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.bukkit.migration.MigrationPowerfulPerms").newInstance());
-        } catch (Throwable ignored) {}
+        } catch (Throwable ignored) {
+        }
 
         try {
             Class.forName("org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsService");
             l.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.bukkit.migration.MigrationZPermissions").newInstance());
-        } catch (Throwable ignored) {}
+        } catch (Throwable ignored) {
+        }
 
         try {
             Class.forName("net.alpenblock.bungeeperms.BungeePerms");
             l.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.bungee.migration.MigrationBungeePerms").newInstance());
-        } catch (Throwable ignored) {}
+        } catch (Throwable ignored) {
+        }
 
         try {
             Class.forName("de.bananaco.bpermissions.api.WorldManager");
             l.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.bukkit.migration.MigrationBPermissions").newInstance());
-        } catch (Throwable ignored) {}
+        } catch (Throwable ignored) {
+        }
 
         try {
             Class.forName("ninja.leaping.permissionsex.sponge.PermissionsExPlugin");
             l.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.sponge.migration.MigrationPermissionsEx").newInstance());
-        } catch (Throwable ignored) {}
+        } catch (Throwable ignored) {
+        }
 
         try {
             Class.forName("io.github.djxy.permissionmanager.PermissionManager");
             l.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.sponge.migration.MigrationPermissionManager").newInstance());
-        } catch (Throwable ignored) {}
+        } catch (Throwable ignored) {
+        }
 
         return l.stream().collect(Collectors.toList());
+    }
+
+    private List<Command<Object, ?>> commands = null;
+
+    public MigrationMainCommand() {
+        super("Migration", "Migration commands", "/%s migration", 1, null);
     }
 
     @SuppressWarnings("deprecation")

@@ -26,13 +26,16 @@ import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
+
 import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.List;
 
-import static me.lucko.luckperms.common.api.internal.Utils.*;
+import static me.lucko.luckperms.common.api.internal.Utils.checkGroup;
+import static me.lucko.luckperms.common.api.internal.Utils.checkServer;
+import static me.lucko.luckperms.common.api.internal.Utils.checkTime;
 
 /**
  * Provides a link between {@link Group} and {@link me.lucko.luckperms.common.core.model.Group}

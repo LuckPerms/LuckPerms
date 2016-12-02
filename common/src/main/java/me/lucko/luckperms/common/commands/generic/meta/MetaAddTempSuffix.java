@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
 
 public class MetaAddTempSuffix extends SharedSubCommand {
     public MetaAddTempSuffix() {
-        super("addtempsuffix", "Adds a suffix temporarily",  Permission.USER_META_ADDTEMP_SUFFIX,
+        super("addtempsuffix", "Adds a suffix temporarily", Permission.USER_META_ADDTEMP_SUFFIX,
                 Permission.GROUP_META_ADDTEMP_SUFFIX, Predicates.notInRange(3, 5),
                 Arg.list(
                         Arg.create("priority", true, "the priority to add the suffix at"),

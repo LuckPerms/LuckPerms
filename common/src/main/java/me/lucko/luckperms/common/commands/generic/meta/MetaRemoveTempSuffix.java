@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 
 public class MetaRemoveTempSuffix extends SharedSubCommand {
     public MetaRemoveTempSuffix() {
-        super("removetempsuffix", "Removes a temporary suffix",  Permission.USER_META_REMOVETEMP_SUFFIX, Permission.GROUP_META_REMOVETEMP_SUFFIX, Predicates.notInRange(2, 4),
+        super("removetempsuffix", "Removes a temporary suffix", Permission.USER_META_REMOVETEMP_SUFFIX, Permission.GROUP_META_REMOVETEMP_SUFFIX, Predicates.notInRange(2, 4),
                 Arg.list(
                         Arg.create("priority", true, "the priority to add the suffix at"),
                         Arg.create("suffix", true, "the suffix string"),
@@ -90,7 +90,8 @@ public class MetaRemoveTempSuffix extends SharedSubCommand {
             toRemove.forEach(n -> {
                 try {
                     holder.unsetPermission(n);
-                } catch (ObjectLacksException ignored) {}
+                } catch (ObjectLacksException ignored) {
+                }
             });
 
             Message.BULK_CHANGE_SUCCESS.send(sender, toRemove.size());

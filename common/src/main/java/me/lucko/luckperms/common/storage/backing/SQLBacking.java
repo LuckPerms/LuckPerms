@@ -24,6 +24,7 @@ package me.lucko.luckperms.common.storage.backing;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.core.UserIdentifier;
@@ -40,15 +41,23 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 import static me.lucko.luckperms.common.core.model.PermissionHolder.exportToLegacy;
 
 abstract class SQLBacking extends AbstractBacking {
-    private static final QueryPS EMPTY_PS = preparedStatement -> {};
+    private static final QueryPS EMPTY_PS = preparedStatement -> {
+    };
 
-    private static final Type NM_TYPE = new TypeToken<Map<String, Boolean>>(){}.getType();
-    private static final Type T_TYPE = new TypeToken<List<String>>(){}.getType();
+    private static final Type NM_TYPE = new TypeToken<Map<String, Boolean>>() {
+    }.getType();
+    private static final Type T_TYPE = new TypeToken<List<String>>() {
+    }.getType();
 
     private static final String USER_INSERT = "INSERT INTO lp_users VALUES(?, ?, ?, ?)";
     private static final String USER_SELECT = "SELECT * FROM lp_users WHERE uuid=?";
@@ -77,6 +86,15 @@ abstract class SQLBacking extends AbstractBacking {
     private static final String ACTION_INSERT = "INSERT INTO lp_actions(`time`, `actor_uuid`, `actor_name`, `type`, `acted_uuid`, `acted_name`, `action`) VALUES(?, ?, ?, ?, ?, ?, ?)";
     private static final String ACTION_SELECT_ALL = "SELECT * FROM lp_actions";
 
+    protected static void close(AutoCloseable closeable) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (Exception ignored) {
+            }
+        }
+    }
+
     private final Gson gson;
 
     SQLBacking(LuckPermsPlugin plugin, String name) {
@@ -86,15 +104,8 @@ abstract class SQLBacking extends AbstractBacking {
 
     abstract Connection getConnection() throws SQLException;
 
-    protected static void close(AutoCloseable closeable) {
-        if (closeable != null) {
-            try {
-                closeable.close();
-            } catch (Exception ignored) {}
-        }
-    }
-
     abstract boolean runQuery(String query, QueryPS queryPS);
+
     abstract boolean runQuery(String query, QueryPS queryPS, QueryRS queryRS);
 
     boolean runQuery(String query) {

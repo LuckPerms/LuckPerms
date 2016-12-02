@@ -22,12 +22,14 @@
 
 package me.lucko.luckperms.common.core;
 
+import lombok.experimental.UtilityClass;
+
 import com.google.common.base.Splitter;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.UncheckedExecutionException;
-import lombok.experimental.UtilityClass;
+
 import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.api.Node;
 

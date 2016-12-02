@@ -22,10 +22,18 @@
 
 package me.lucko.luckperms.common.storage;
 
-import com.google.common.collect.ImmutableSet;
 import lombok.experimental.UtilityClass;
+
+import com.google.common.collect.ImmutableSet;
+
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.storage.backing.*;
+import me.lucko.luckperms.common.storage.backing.AbstractBacking;
+import me.lucko.luckperms.common.storage.backing.H2Backing;
+import me.lucko.luckperms.common.storage.backing.JSONBacking;
+import me.lucko.luckperms.common.storage.backing.MongoDBBacking;
+import me.lucko.luckperms.common.storage.backing.MySQLBacking;
+import me.lucko.luckperms.common.storage.backing.SQLiteBacking;
+import me.lucko.luckperms.common.storage.backing.YAMLBacking;
 
 import java.io.File;
 import java.util.HashMap;
@@ -80,7 +88,7 @@ public class StorageFactory {
         storage.init();
         return storage;
     }
-    
+
     private static Storage fromString(String storageMethod, LuckPermsPlugin plugin) {
         return AbstractStorage.wrap(plugin, backingFromString(storageMethod, plugin));
     }

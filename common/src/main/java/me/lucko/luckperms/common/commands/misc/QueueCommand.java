@@ -36,7 +36,7 @@ import java.util.List;
 
 public class QueueCommand extends SingleCommand {
     public QueueCommand() {
-        super("QueueCommand", "Queue a command for execution",  "/%s queuecommand <command args...>", Permission.MIGRATION, Predicates.not(1),
+        super("QueueCommand", "Queue a command for execution", "/%s queuecommand <command args...>", Permission.MIGRATION, Predicates.not(1),
                 Arg.list(
                         Arg.create("command args...", true, "the command's arguments")
                 )

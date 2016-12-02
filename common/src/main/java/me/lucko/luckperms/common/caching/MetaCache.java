@@ -22,10 +22,12 @@
 
 package me.lucko.luckperms.common.caching;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSortedMap;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSortedMap;
+
 import me.lucko.luckperms.api.caching.MetaData;
 
 import java.util.Map;

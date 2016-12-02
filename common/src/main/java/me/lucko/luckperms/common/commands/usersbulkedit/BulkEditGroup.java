@@ -38,7 +38,11 @@ import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 public class BulkEditGroup extends SubCommand<Storage> {
     public BulkEditGroup() {
@@ -134,13 +138,15 @@ public class BulkEditGroup extends SubCommand<Storage> {
             toRemove.forEach(n -> {
                 try {
                     user.unsetPermission(n);
-                } catch (ObjectLacksException ignored) {}
+                } catch (ObjectLacksException ignored) {
+                }
             });
 
             toAdd.forEach(n -> {
                 try {
                     user.setPermission(n);
-                } catch (ObjectAlreadyHasException ignored) {}
+                } catch (ObjectAlreadyHasException ignored) {
+                }
             });
 
             plugin.getStorage().saveUser(user);

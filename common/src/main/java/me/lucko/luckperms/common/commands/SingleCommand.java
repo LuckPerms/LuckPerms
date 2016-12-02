@@ -23,6 +23,7 @@
 package me.lucko.luckperms.common.commands;
 
 import lombok.Getter;
+
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;

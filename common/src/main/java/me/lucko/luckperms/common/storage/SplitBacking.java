@@ -23,6 +23,7 @@
 package me.lucko.luckperms.common.storage;
 
 import com.google.common.collect.ImmutableMap;
+
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.core.model.Group;

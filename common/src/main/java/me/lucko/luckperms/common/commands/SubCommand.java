@@ -22,8 +22,10 @@
 
 package me.lucko.luckperms.common.commands;
 
-import com.google.common.base.Splitter;
 import lombok.Getter;
+
+import com.google.common.base.Splitter;
+
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
@@ -34,7 +36,11 @@ import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.utils.PermissionCache;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -43,46 +49,6 @@ import java.util.stream.Collectors;
  */
 @Getter
 public abstract class SubCommand<T> extends Command<T, Void> {
-
-    public SubCommand(String name, String description, Permission permission, Predicate<Integer> argumentCheck, List<Arg> args) {
-        super(name, description, permission, argumentCheck, args);
-    }
-
-    /**
-     * Send the command usage to a sender
-     * @param sender the sender to send the usage to
-     */
-    @Override
-    public void sendUsage(Sender sender, String label) {
-        StringBuilder sb = new StringBuilder();
-        if (getArgs().isPresent()) {
-            sb.append("&3 - &7");
-            for (Arg arg : getArgs().get()) {
-                sb.append(arg.asPrettyString()).append(" ");
-            }
-        }
-
-        Util.sendPluginMessage(sender, "&3> &a" + getName().toLowerCase() + sb.toString());
-    }
-
-    @Override
-    public void sendDetailedUsage(Sender sender, String label) {
-        Util.sendPluginMessage(sender, "&3&lCommand Usage &3- &b" + getName());
-        Util.sendPluginMessage(sender, "&b> &7" + getDescription());
-        if (getArgs().isPresent()) {
-            Util.sendPluginMessage(sender, "&3Arguments:");
-            for (Arg arg : getArgs().get()) {
-                Util.sendPluginMessage(sender, "&b- " + arg.asPrettyString() + "&3 -> &7" + arg.getDescription());
-            }
-        }
-    }
-
-
-    /*
-     * ----------------------------------------------------------------------------------
-     * Utility methods used by #tabComplete and #execute implementations in sub classes
-     * ----------------------------------------------------------------------------------
-     */
 
     public static List<String> getGroupTabComplete(List<String> args, LuckPermsPlugin plugin) {
         return getTabComplete(new ArrayList<>(plugin.getGroupManager().getAll().keySet()), args);
@@ -99,6 +65,13 @@ public abstract class SubCommand<T> extends Command<T, Void> {
             return Collections.emptyList();
         }
     }
+
+
+    /*
+     * ----------------------------------------------------------------------------------
+     * Utility methods used by #tabComplete and #execute implementations in sub classes
+     * ----------------------------------------------------------------------------------
+     */
 
     public static List<String> getPermissionTabComplete(List<String> args, PermissionCache cache) {
         if (args.size() <= 1) {
@@ -191,6 +164,40 @@ public abstract class SubCommand<T> extends Command<T, Void> {
             Message.TRACK_SAVE_SUCCESS.send(sender);
         } else {
             Message.TRACK_SAVE_ERROR.send(sender);
+        }
+    }
+
+    public SubCommand(String name, String description, Permission permission, Predicate<Integer> argumentCheck, List<Arg> args) {
+        super(name, description, permission, argumentCheck, args);
+    }
+
+    /**
+     * Send the command usage to a sender
+     *
+     * @param sender the sender to send the usage to
+     */
+    @Override
+    public void sendUsage(Sender sender, String label) {
+        StringBuilder sb = new StringBuilder();
+        if (getArgs().isPresent()) {
+            sb.append("&3 - &7");
+            for (Arg arg : getArgs().get()) {
+                sb.append(arg.asPrettyString()).append(" ");
+            }
+        }
+
+        Util.sendPluginMessage(sender, "&3> &a" + getName().toLowerCase() + sb.toString());
+    }
+
+    @Override
+    public void sendDetailedUsage(Sender sender, String label) {
+        Util.sendPluginMessage(sender, "&3&lCommand Usage &3- &b" + getName());
+        Util.sendPluginMessage(sender, "&b> &7" + getDescription());
+        if (getArgs().isPresent()) {
+            Util.sendPluginMessage(sender, "&3Arguments:");
+            for (Arg arg : getArgs().get()) {
+                Util.sendPluginMessage(sender, "&b- " + arg.asPrettyString() + "&3 -> &7" + arg.getDescription());
+            }
         }
     }
 }

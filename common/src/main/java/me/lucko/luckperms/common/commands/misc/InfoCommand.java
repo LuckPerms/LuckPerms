@@ -39,6 +39,20 @@ import java.util.Map;
 import static me.lucko.luckperms.common.commands.utils.Util.formatBoolean;
 
 public class InfoCommand extends SingleCommand {
+    private static String formatValue(String value) {
+        if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
+            return Util.formatBoolean(Boolean.parseBoolean(value));
+        }
+
+        try {
+            int i = Integer.parseInt(value);
+            return "&a" + i;
+        } catch (NumberFormatException ignored) {
+        }
+
+        return "&f" + value;
+    }
+
     public InfoCommand() {
         super("Info", "Print general plugin info", "/%s info", Permission.INFO, Predicates.alwaysFalse(), null);
     }
@@ -83,18 +97,5 @@ public class InfoCommand extends SingleCommand {
         }
 
         return CommandResult.SUCCESS;
-    }
-
-    private static String formatValue(String value) {
-        if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
-            return Util.formatBoolean(Boolean.parseBoolean(value));
-        }
-
-        try {
-            int i = Integer.parseInt(value);
-            return "&a" + i;
-        } catch (NumberFormatException ignored) {}
-
-        return "&f" + value;
     }
 }

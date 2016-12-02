@@ -26,6 +26,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.core.model.Group;
@@ -50,25 +51,45 @@ public abstract class AbstractBacking {
     private boolean acceptingLogins = false;
 
     public abstract void init();
+
     public abstract void shutdown();
+
     public abstract boolean logAction(LogEntry entry);
+
     public abstract Log getLog();
+
     public abstract boolean loadUser(UUID uuid, String username);
+
     public abstract boolean saveUser(User user);
+
     public abstract boolean cleanupUsers();
+
     public abstract Set<UUID> getUniqueUsers();
+
     public abstract boolean createAndLoadGroup(String name);
+
     public abstract boolean loadGroup(String name);
+
     public abstract boolean loadAllGroups();
+
     public abstract boolean saveGroup(Group group);
+
     public abstract boolean deleteGroup(Group group);
+
     public abstract boolean createAndLoadTrack(String name);
+
     public abstract boolean loadTrack(String name);
+
     public abstract boolean loadAllTracks();
+
     public abstract boolean saveTrack(Track track);
+
     public abstract boolean deleteTrack(Track track);
+
     public abstract boolean saveUUIDData(String username, UUID uuid);
+
     public abstract UUID getUUID(String username);
+
     public abstract String getName(UUID uuid);
 
 }

@@ -22,8 +22,10 @@
 
 package me.lucko.luckperms.common.commands;
 
-import com.google.common.collect.ImmutableList;
 import lombok.Getter;
+
+import com.google.common.collect.ImmutableList;
+
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.group.CreateGroup;
 import me.lucko.luckperms.common.commands.group.DeleteGroup;
@@ -31,7 +33,13 @@ import me.lucko.luckperms.common.commands.group.GroupMainCommand;
 import me.lucko.luckperms.common.commands.group.ListGroups;
 import me.lucko.luckperms.common.commands.log.LogMainCommand;
 import me.lucko.luckperms.common.commands.migration.MigrationMainCommand;
-import me.lucko.luckperms.common.commands.misc.*;
+import me.lucko.luckperms.common.commands.misc.ExportCommand;
+import me.lucko.luckperms.common.commands.misc.ImportCommand;
+import me.lucko.luckperms.common.commands.misc.InfoCommand;
+import me.lucko.luckperms.common.commands.misc.NetworkSyncCommand;
+import me.lucko.luckperms.common.commands.misc.QueueCommand;
+import me.lucko.luckperms.common.commands.misc.SyncCommand;
+import me.lucko.luckperms.common.commands.misc.VerboseCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.track.CreateTrack;
 import me.lucko.luckperms.common.commands.track.DeleteTrack;
@@ -51,115 +59,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class CommandManager {
-    @Getter
-    private final LuckPermsPlugin plugin;
-
-    @Getter
-    private final List<BaseCommand> mainCommands;
-
-    public CommandManager(LuckPermsPlugin plugin) {
-        this.plugin = plugin;
-
-        ImmutableList.Builder<BaseCommand> l = ImmutableList.builder();
-        l.add(new UserMainCommand())
-         .add(new GroupMainCommand())
-         .add(new TrackMainCommand())
-         .addAll(plugin.getExtraCommands())
-         .add(new LogMainCommand())
-         .add(new SyncCommand())
-         .add(new NetworkSyncCommand())
-         .add(new InfoCommand())
-         .add(new VerboseCommand())
-         .add(new ImportCommand())
-         .add(new ExportCommand())
-         .add(new QueueCommand())
-         .add(new MigrationMainCommand())
-         .add(new UsersBulkEditMainCommand())
-         .add(new CreateGroup())
-         .add(new DeleteGroup())
-         .add(new ListGroups())
-         .add(new CreateTrack())
-         .add(new DeleteTrack())
-         .add(new ListTracks());
-
-        mainCommands = l.build();
-    }
-
-    /**
-     * Generic on command method to be called from the command executor object of the platform
-     * Unlike {@link #onCommand(Sender, String, List)}, this method is called in a new thread
-     * @param sender who sent the command
-     * @param label the command label used
-     * @param args the arguments provided
-     * @param result the callback to be called when the command has fully executed
-     */
-    public void onCommand(Sender sender, String label, List<String> args, Consumer<CommandResult> result) {
-        plugin.doAsync(() -> {
-            CommandResult r = onCommand(sender, label, args);
-            if (result != null) {
-                plugin.doSync(() -> result.accept(r));
-            }
-        });
-    }
-
-    /**
-     * Generic on command method to be called from the command executor object of the platform
-     * @param sender who sent the command
-     * @param label the command label used
-     * @param args the arguments provided
-     * @return if the command was successful
-     */
-    @SuppressWarnings("unchecked")
-    public CommandResult onCommand(Sender sender, String label, List<String> args) {
-        // Handle no arguments
-        if (args.size() == 0) {
-            sendCommandUsage(sender, label);
-            return CommandResult.INVALID_ARGS;
-        }
-
-        // Look for the main command.
-        Optional<BaseCommand> o = mainCommands.stream()
-                .filter(m -> m.getName().equalsIgnoreCase(args.get(0)))
-                .limit(1)
-                .findAny();
-
-        // Main command not found
-        if (!o.isPresent()) {
-            sendCommandUsage(sender, label);
-            return CommandResult.INVALID_ARGS;
-        }
-
-        // Check the Sender has permission to use the main command.
-        final Command main = o.get();
-        if (!main.isAuthorized(sender)) {
-            sendCommandUsage(sender, label);
-            return CommandResult.NO_PERMISSION;
-        }
-
-        List<String> arguments = new ArrayList<>(args);
-        handleRewrites(arguments);
-        arguments.remove(0); // remove the main command arg.
-
-        // Check the correct number of args were given for the main command
-        if (main.getArgumentCheck().test(arguments.size())) {
-            main.sendUsage(sender, label);
-            return CommandResult.INVALID_ARGS;
-        }
-
-        // Try to execute the command.
-        CommandResult result;
-        try {
-            result = main.execute(plugin, sender, null, arguments, label);
-        } catch (CommandException e) {
-            result = handleException(e, sender, label, main);
-        } catch (Exception e) {
-            e.printStackTrace();
-            result = CommandResult.FAILURE;
-        }
-
-        return result;
-    }
-
     public static CommandResult handleException(CommandException e, Sender sender, String label, Command command) {
         if (e instanceof ArgumentUtils.ArgumentException) {
             if (e instanceof ArgumentUtils.DetailedUsageException) {
@@ -196,56 +95,6 @@ public class CommandManager {
         // Not something we can catch.
         e.printStackTrace();
         return CommandResult.FAILURE;
-    }
-
-    /**
-     * Generic tab complete method to be called from the command executor object of the platform
-     * @param sender who is tab completing
-     * @param args the arguments provided so far
-     * @return a list of suggestions
-     */
-    @SuppressWarnings("unchecked")
-    public List<String> onTabComplete(Sender sender, List<String> args) {
-        final List<Command> mains = mainCommands.stream()
-                .filter(m -> m.isAuthorized(sender))
-                .collect(Collectors.toList());
-
-        // Not yet past the point of entering a main command
-        if (args.size() <= 1) {
-
-            // Nothing yet entered
-            if (args.isEmpty() || args.get(0).equalsIgnoreCase("")) {
-                return mains.stream()
-                        .map(m -> m.getName().toLowerCase())
-                        .collect(Collectors.toList());
-            }
-
-            // Started typing a main command
-            return mains.stream()
-                    .map(m -> m.getName().toLowerCase())
-                    .filter(s -> s.startsWith(args.get(0).toLowerCase()))
-                    .collect(Collectors.toList());
-        }
-
-        // Find a main command matching the first arg
-        Optional<Command> o = mains.stream()
-                .filter(m -> m.getName().equalsIgnoreCase(args.get(0)))
-                .limit(1)
-                .findAny();
-
-        if (!o.isPresent()) {
-            return Collections.emptyList();
-        }
-
-        // Pass the processing onto the main command
-        return o.get().tabComplete(plugin, sender, args.subList(1, args.size()));
-    }
-
-    private void sendCommandUsage(Sender sender, String label) {
-        Util.sendPluginMessage(sender, "&2Running &bLuckPerms v" + plugin.getVersion() + "&2.");
-        mainCommands.stream()
-                .filter(c -> c.isAuthorized(sender))
-                .forEach(c -> Util.sendPluginMessage(sender, "&3> &a" + String.format(c.getUsage(), label)));
     }
 
     private static void handleRewrites(List<String> args) {
@@ -362,9 +211,9 @@ public class CommandManager {
             // Provide lazy set rewrite
             boolean lazySet = (
                     args.size() >= 6 &&
-                    args.get(2).equalsIgnoreCase("permission") &&
-                    args.get(3).toLowerCase().startsWith("set") &&
-                    (args.get(5).equalsIgnoreCase("none") || args.get(5).equalsIgnoreCase("0"))
+                            args.get(2).equalsIgnoreCase("permission") &&
+                            args.get(3).toLowerCase().startsWith("set") &&
+                            (args.get(5).equalsIgnoreCase("none") || args.get(5).equalsIgnoreCase("0"))
             );
 
             if (lazySet) {
@@ -373,5 +222,166 @@ public class CommandManager {
                 args.add(3, "unset");
             }
         }
+    }
+
+    @Getter
+    private final LuckPermsPlugin plugin;
+    @Getter
+    private final List<BaseCommand> mainCommands;
+
+    public CommandManager(LuckPermsPlugin plugin) {
+        this.plugin = plugin;
+
+        ImmutableList.Builder<BaseCommand> l = ImmutableList.builder();
+        l.add(new UserMainCommand())
+                .add(new GroupMainCommand())
+                .add(new TrackMainCommand())
+                .addAll(plugin.getExtraCommands())
+                .add(new LogMainCommand())
+                .add(new SyncCommand())
+                .add(new NetworkSyncCommand())
+                .add(new InfoCommand())
+                .add(new VerboseCommand())
+                .add(new ImportCommand())
+                .add(new ExportCommand())
+                .add(new QueueCommand())
+                .add(new MigrationMainCommand())
+                .add(new UsersBulkEditMainCommand())
+                .add(new CreateGroup())
+                .add(new DeleteGroup())
+                .add(new ListGroups())
+                .add(new CreateTrack())
+                .add(new DeleteTrack())
+                .add(new ListTracks());
+
+        mainCommands = l.build();
+    }
+
+    /**
+     * Generic on command method to be called from the command executor object of the platform
+     * Unlike {@link #onCommand(Sender, String, List)}, this method is called in a new thread
+     *
+     * @param sender who sent the command
+     * @param label  the command label used
+     * @param args   the arguments provided
+     * @param result the callback to be called when the command has fully executed
+     */
+    public void onCommand(Sender sender, String label, List<String> args, Consumer<CommandResult> result) {
+        plugin.doAsync(() -> {
+            CommandResult r = onCommand(sender, label, args);
+            if (result != null) {
+                plugin.doSync(() -> result.accept(r));
+            }
+        });
+    }
+
+    /**
+     * Generic on command method to be called from the command executor object of the platform
+     *
+     * @param sender who sent the command
+     * @param label  the command label used
+     * @param args   the arguments provided
+     * @return if the command was successful
+     */
+    @SuppressWarnings("unchecked")
+    public CommandResult onCommand(Sender sender, String label, List<String> args) {
+        // Handle no arguments
+        if (args.size() == 0) {
+            sendCommandUsage(sender, label);
+            return CommandResult.INVALID_ARGS;
+        }
+
+        // Look for the main command.
+        Optional<BaseCommand> o = mainCommands.stream()
+                .filter(m -> m.getName().equalsIgnoreCase(args.get(0)))
+                .limit(1)
+                .findAny();
+
+        // Main command not found
+        if (!o.isPresent()) {
+            sendCommandUsage(sender, label);
+            return CommandResult.INVALID_ARGS;
+        }
+
+        // Check the Sender has permission to use the main command.
+        final Command main = o.get();
+        if (!main.isAuthorized(sender)) {
+            sendCommandUsage(sender, label);
+            return CommandResult.NO_PERMISSION;
+        }
+
+        List<String> arguments = new ArrayList<>(args);
+        handleRewrites(arguments);
+        arguments.remove(0); // remove the main command arg.
+
+        // Check the correct number of args were given for the main command
+        if (main.getArgumentCheck().test(arguments.size())) {
+            main.sendUsage(sender, label);
+            return CommandResult.INVALID_ARGS;
+        }
+
+        // Try to execute the command.
+        CommandResult result;
+        try {
+            result = main.execute(plugin, sender, null, arguments, label);
+        } catch (CommandException e) {
+            result = handleException(e, sender, label, main);
+        } catch (Exception e) {
+            e.printStackTrace();
+            result = CommandResult.FAILURE;
+        }
+
+        return result;
+    }
+
+    /**
+     * Generic tab complete method to be called from the command executor object of the platform
+     *
+     * @param sender who is tab completing
+     * @param args   the arguments provided so far
+     * @return a list of suggestions
+     */
+    @SuppressWarnings("unchecked")
+    public List<String> onTabComplete(Sender sender, List<String> args) {
+        final List<Command> mains = mainCommands.stream()
+                .filter(m -> m.isAuthorized(sender))
+                .collect(Collectors.toList());
+
+        // Not yet past the point of entering a main command
+        if (args.size() <= 1) {
+
+            // Nothing yet entered
+            if (args.isEmpty() || args.get(0).equalsIgnoreCase("")) {
+                return mains.stream()
+                        .map(m -> m.getName().toLowerCase())
+                        .collect(Collectors.toList());
+            }
+
+            // Started typing a main command
+            return mains.stream()
+                    .map(m -> m.getName().toLowerCase())
+                    .filter(s -> s.startsWith(args.get(0).toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+
+        // Find a main command matching the first arg
+        Optional<Command> o = mains.stream()
+                .filter(m -> m.getName().equalsIgnoreCase(args.get(0)))
+                .limit(1)
+                .findAny();
+
+        if (!o.isPresent()) {
+            return Collections.emptyList();
+        }
+
+        // Pass the processing onto the main command
+        return o.get().tabComplete(plugin, sender, args.subList(1, args.size()));
+    }
+
+    private void sendCommandUsage(Sender sender, String label) {
+        Util.sendPluginMessage(sender, "&2Running &bLuckPerms v" + plugin.getVersion() + "&2.");
+        mainCommands.stream()
+                .filter(c -> c.isAuthorized(sender))
+                .forEach(c -> Util.sendPluginMessage(sender, "&3> &a" + String.format(c.getUsage(), label)));
     }
 }

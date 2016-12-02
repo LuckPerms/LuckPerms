@@ -22,10 +22,17 @@
 
 package me.lucko.luckperms.bukkit.migration;
 
-import com.github.cheesesoftware.PowerfulPermsAPI.*;
+import lombok.Cleanup;
+
+import com.github.cheesesoftware.PowerfulPermsAPI.CachedGroup;
+import com.github.cheesesoftware.PowerfulPermsAPI.Group;
+import com.github.cheesesoftware.PowerfulPermsAPI.Permission;
+import com.github.cheesesoftware.PowerfulPermsAPI.PermissionManager;
+import com.github.cheesesoftware.PowerfulPermsAPI.PowerfulPermsPlugin;
+import com.github.cheesesoftware.PowerfulPermsAPI.ResultRunnable;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.zaxxer.hikari.HikariDataSource;
-import lombok.Cleanup;
+
 import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.data.Callback;
 import me.lucko.luckperms.bukkit.migration.utils.LPResultRunnable;
@@ -48,7 +55,13 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 
@@ -77,25 +90,29 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         try {
             Class.forName("com.github.cheesesoftware.PowerfulPermsAPI.ResponseRunnable");
             legacy = true;
-        } catch (ClassNotFoundException ignored) {}
+        } catch (ClassNotFoundException ignored) {
+        }
 
         if (legacy) {
             try {
                 getPlayerPermissionsMethod = PermissionManager.class.getMethod("getPlayerOwnPermissions", UUID.class, ResultRunnable.class);
                 getPlayerPermissionsMethod.setAccessible(true);
-            } catch (NoSuchMethodException ignored) {}
+            } catch (NoSuchMethodException ignored) {
+            }
         } else {
             try {
                 getPlayerPermissionsMethod = PermissionManager.class.getMethod("getPlayerOwnPermissions", UUID.class);
                 getPlayerPermissionsMethod.setAccessible(true);
-            } catch (NoSuchMethodException ignored) {}
+            } catch (NoSuchMethodException ignored) {
+            }
         }
 
         try {
             getGroupMethod = CachedGroup.class.getMethod("getGroup");
             getGroupMethod.setAccessible(true);
             superLegacy = true;
-        } catch (NoSuchMethodException ignored) {}
+        } catch (NoSuchMethodException ignored) {
+        }
 
         if (!legacy) {
             try {
@@ -116,29 +133,6 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                     e1.printStackTrace();
                 }
             }
-        }
-    }
-
-
-    public MigrationPowerfulPerms() {
-        super("powerfulperms", "Migration from PowerfulPerms", MIGRATION, Predicates.not(5),
-                Arg.list(
-                        Arg.create("address", true, "the address of the PP database"),
-                        Arg.create("database", true, "the name of the PP database"),
-                        Arg.create("username", true, "the username to log into the DB"),
-                        Arg.create("password", true, "the password to log into the DB"),
-                        Arg.create("db table", true, "the name of the PP table where player data is stored")
-                )
-        );
-    }
-
-    @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) throws CommandException {
-        try {
-            return run(plugin, args);
-        } catch (Throwable t) {
-            t.printStackTrace();
-            return CommandResult.FAILURE;
         }
     }
 
@@ -175,6 +169,28 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             } catch (IllegalAccessException | InvocationTargetException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    public MigrationPowerfulPerms() {
+        super("powerfulperms", "Migration from PowerfulPerms", MIGRATION, Predicates.not(5),
+                Arg.list(
+                        Arg.create("address", true, "the address of the PP database"),
+                        Arg.create("database", true, "the name of the PP database"),
+                        Arg.create("username", true, "the username to log into the DB"),
+                        Arg.create("password", true, "the password to log into the DB"),
+                        Arg.create("db table", true, "the name of the PP table where player data is stored")
+                )
+        );
+    }
+
+    @Override
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) throws CommandException {
+        try {
+            return run(plugin, args);
+        } catch (Throwable t) {
+            t.printStackTrace();
+            return CommandResult.FAILURE;
         }
     }
 

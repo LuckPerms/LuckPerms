@@ -35,30 +35,35 @@ public interface Sender {
 
     /**
      * Gets the platform where the sender is from.
+     *
      * @return the plugin
      */
     LuckPermsPlugin getPlatform();
 
     /**
      * Gets the sender's username
+     *
      * @return a friendly username for the sender
      */
     String getName();
 
     /**
      * Gets the sender's unique id. See {@link Constants#getConsoleUUID()} for the console's UUID representation.
+     *
      * @return the sender's uuid
      */
     UUID getUuid();
 
     /**
      * Send a message back to the Sender
+     *
      * @param s the message to send. Supports '§' for message formatting.
      */
     void sendMessage(String s);
 
     /**
      * Check if the Sender has a permission.
+     *
      * @param permission the permission to check for
      * @return true if the sender has the permission
      */

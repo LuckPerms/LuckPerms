@@ -23,12 +23,14 @@
 package me.lucko.luckperms.common.commands.sender;
 
 import lombok.RequiredArgsConstructor;
+
 import me.lucko.luckperms.common.LuckPermsPlugin;
 
 import java.util.UUID;
 
 /**
  * Factory class to make a thread-safe sender instance
+ *
  * @param <T> the command sender type
  */
 @RequiredArgsConstructor
@@ -36,8 +38,11 @@ public abstract class SenderFactory<T> {
     private final LuckPermsPlugin plugin;
 
     protected abstract String getName(T t);
+
     protected abstract UUID getUuid(T t);
+
     protected abstract void sendMessage(T t, String s);
+
     protected abstract boolean hasPermission(T t, String node);
 
     public final Sender wrap(T t) {

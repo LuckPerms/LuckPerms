@@ -22,13 +22,13 @@
 
 package me.lucko.luckperms.sponge;
 
-import co.aikar.timings.Timing;
 import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.utils.AbstractListener;
 import me.lucko.luckperms.sponge.timings.LPTiming;
+
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
@@ -40,6 +40,8 @@ import org.spongepowered.api.world.World;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import co.aikar.timings.Timing;
 
 @SuppressWarnings("WeakerAccess")
 public class SpongeListener extends AbstractListener {

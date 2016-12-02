@@ -22,9 +22,11 @@
 
 package me.lucko.luckperms.bukkit.model;
 
+import lombok.Getter;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import lombok.Getter;
+
 import org.bukkit.Bukkit;
 import org.bukkit.permissions.Permission;
 
@@ -33,6 +35,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ChildPermissionProvider {
+
+    private static void resolveChildren(Map<String, Boolean> accumulator, Map<String, Boolean> children, boolean invert) {
+        for (Map.Entry<String, Boolean> e : children.entrySet()) {
+            if (accumulator.containsKey(e.getKey())) {
+                continue; // Prevent infinite loops
+            }
+
+            Permission perm = Bukkit.getServer().getPluginManager().getPermission(e.getKey());
+            boolean value = e.getValue() ^ invert;
+            String lName = e.getKey().toLowerCase();
+
+            accumulator.put(lName, value);
+
+            if (perm != null) {
+                resolveChildren(accumulator, perm.getChildren(), !value);
+            }
+        }
+    }
 
     @Getter
     private ImmutableMap<Map.Entry<String, Boolean>, ImmutableMap<String, Boolean>> permissions = ImmutableMap.of();
@@ -53,23 +73,5 @@ public class ChildPermissionProvider {
         }
 
         this.permissions = ImmutableMap.copyOf(permissions);
-    }
-
-    private static void resolveChildren(Map<String, Boolean> accumulator, Map<String, Boolean> children, boolean invert) {
-        for (Map.Entry<String, Boolean> e : children.entrySet()) {
-            if (accumulator.containsKey(e.getKey())) {
-                continue; // Prevent infinite loops
-            }
-
-            Permission perm = Bukkit.getServer().getPluginManager().getPermission(e.getKey());
-            boolean value = e.getValue() ^ invert;
-            String lName = e.getKey().toLowerCase();
-
-            accumulator.put(lName, value);
-
-            if (perm != null) {
-                resolveChildren(accumulator, perm.getChildren(), !value);
-            }
-        }
     }
 }

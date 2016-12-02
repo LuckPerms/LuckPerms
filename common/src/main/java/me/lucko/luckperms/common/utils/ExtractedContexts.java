@@ -24,6 +24,7 @@ package me.lucko.luckperms.common.utils;
 
 import lombok.Getter;
 import lombok.ToString;
+
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;

@@ -22,10 +22,12 @@
 
 package me.lucko.luckperms.common.utils;
 
-import com.google.common.collect.ImmutableList;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+
+import com.google.common.collect.ImmutableList;
+
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Message;
@@ -48,13 +50,14 @@ public class DebugHandler {
 
         executor.execute(() -> {
             while (true) {
-                for (Data e; (e = queue.poll()) != null;) {
+                for (Data e; (e = queue.poll()) != null; ) {
                     handleOutput(e.getChecked(), e.getNode(), e.getValue());
                 }
 
                 try {
                     Thread.sleep(200);
-                } catch (InterruptedException ignored) {}
+                } catch (InterruptedException ignored) {
+                }
             }
         });
     }

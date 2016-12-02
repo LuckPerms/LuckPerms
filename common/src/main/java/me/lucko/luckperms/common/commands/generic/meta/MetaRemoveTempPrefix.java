@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 
 public class MetaRemoveTempPrefix extends SharedSubCommand {
     public MetaRemoveTempPrefix() {
-        super("removetempprefix", "Removes a temporary prefix",  Permission.USER_META_REMOVETEMP_PREFIX, Permission.GROUP_META_REMOVETEMP_PREFIX, Predicates.notInRange(2, 4),
+        super("removetempprefix", "Removes a temporary prefix", Permission.USER_META_REMOVETEMP_PREFIX, Permission.GROUP_META_REMOVETEMP_PREFIX, Predicates.notInRange(2, 4),
                 Arg.list(
                         Arg.create("priority", true, "the priority to add the prefix at"),
                         Arg.create("prefix", true, "the prefix string"),
@@ -90,7 +90,8 @@ public class MetaRemoveTempPrefix extends SharedSubCommand {
             toRemove.forEach(n -> {
                 try {
                     holder.unsetPermission(n);
-                } catch (ObjectLacksException ignored) {}
+                } catch (ObjectLacksException ignored) {
+                }
             });
 
             Message.BULK_CHANGE_SUCCESS.send(sender, toRemove.size());

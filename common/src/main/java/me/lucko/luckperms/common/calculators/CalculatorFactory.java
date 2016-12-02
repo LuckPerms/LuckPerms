@@ -32,8 +32,9 @@ public interface CalculatorFactory {
 
     /**
      * Builds a PermissionCalculator for the user in the given context
+     *
      * @param contexts the contexts to build the calculator in
-     * @param user the user to build for
+     * @param user     the user to build for
      * @return a permission calculator instance
      */
     PermissionCalculator build(Contexts contexts, User user);

@@ -22,10 +22,12 @@
 
 package me.lucko.luckperms.common.calculators;
 
+import lombok.RequiredArgsConstructor;
+
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import lombok.RequiredArgsConstructor;
+
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 
@@ -55,7 +57,7 @@ public class PermissionCalculator {
 
     public Tristate getPermissionValue(String permission) {
         permission = permission.toLowerCase();
-        Tristate t =  cache.getUnchecked(permission);
+        Tristate t = cache.getUnchecked(permission);
         plugin.getDebugHandler().offer(objectName, permission, t);
         plugin.getPermissionCache().offer(permission);
         return t;

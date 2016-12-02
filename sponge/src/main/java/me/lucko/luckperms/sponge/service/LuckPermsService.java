@@ -22,7 +22,14 @@
 
 package me.lucko.luckperms.sponge.service;
 
-import co.aikar.timings.Timing;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -31,7 +38,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.MapMaker;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import lombok.*;
+
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
@@ -50,6 +57,7 @@ import me.lucko.luckperms.sponge.service.persisted.SubjectStorage;
 import me.lucko.luckperms.sponge.service.references.SubjectReference;
 import me.lucko.luckperms.sponge.service.simple.SimpleCollection;
 import me.lucko.luckperms.sponge.timings.LPTiming;
+
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.context.ContextCalculator;
@@ -60,8 +68,16 @@ import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.text.Text;
 
 import java.io.File;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
+import co.aikar.timings.Timing;
 
 /**
  * The LuckPerms implementation of the Sponge Permission Service
@@ -197,10 +213,9 @@ public class LuckPermsService implements PermissionService {
     public static class DescriptionBuilder implements PermissionDescription.Builder {
         private final LuckPermsService service;
         private final PluginContainer container;
-
+        private final Map<String, Tristate> roles = new HashMap<>();
         private String id = null;
         private Text description = null;
-        private final Map<String, Tristate> roles = new HashMap<>();
 
         @Override
         public PermissionDescription.Builder id(@NonNull String s) {

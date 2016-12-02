@@ -98,13 +98,15 @@ public class GroupBulkChange extends SubCommand<Group> {
         toRemove.forEach(n -> {
             try {
                 group.unsetPermission(n);
-            } catch (ObjectLacksException ignored) {}
+            } catch (ObjectLacksException ignored) {
+            }
         });
 
         toAdd.forEach(n -> {
             try {
                 group.setPermission(n);
-            } catch (ObjectAlreadyHasException ignored) {}
+            } catch (ObjectAlreadyHasException ignored) {
+            }
         });
 
         save(group, sender, plugin);

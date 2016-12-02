@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 
 public class MetaAddPrefix extends SharedSubCommand {
     public MetaAddPrefix() {
-        super("addprefix", "Adds a prefix",  Permission.USER_META_ADDPREFIX, Permission.GROUP_META_ADDPREFIX,
+        super("addprefix", "Adds a prefix", Permission.USER_META_ADDPREFIX, Permission.GROUP_META_ADDPREFIX,
                 Predicates.notInRange(2, 4),
                 Arg.list(
                         Arg.create("priority", true, "the priority to add the prefix at"),

@@ -32,14 +32,14 @@ import java.util.Set;
 
 /**
  * A collection of utilities to help retrieve meta values for {@link PermissionHolder}s
+ *
  * @since 2.7
  */
 public class MetaUtils {
 
-    private MetaUtils(){}
-
     /**
      * Escapes special characters used within LuckPerms, so the string can be saved without issues
+     *
      * @param s the string to escape
      * @return an escaped string
      * @throws NullPointerException if the string is null
@@ -48,7 +48,7 @@ public class MetaUtils {
         if (s == null) {
             throw new NullPointerException();
         }
-        
+
         s = s.replace(".", "{SEP}");
         s = s.replace("/", "{FSEP}");
         s = s.replace("$", "{DSEP}");
@@ -58,6 +58,7 @@ public class MetaUtils {
 
     /**
      * Unescapes special characters used within LuckPerms, the inverse of {@link #escapeCharacters(String)}
+     *
      * @param s the string to unescape
      * @return an unescaped string
      * @throws NullPointerException if the string is null
@@ -66,7 +67,7 @@ public class MetaUtils {
         if (s == null) {
             throw new NullPointerException();
         }
-        
+
         s = s.replace("{SEP}", ".");
         s = s.replace("{FSEP}", "/");
         s = s.replace("{DSEP}", "$");
@@ -76,19 +77,20 @@ public class MetaUtils {
 
     /**
      * Sets a meta value on a holder
+     *
      * @param holder the holder to apply the meta node to
      * @param server the server to apply the meta on, can be null
-     * @param world the world to apply the meta on, can be null
-     * @param node the meta node
-     * @param value the meta value
-     * @throws NullPointerException if the holder, node or value is null
+     * @param world  the world to apply the meta on, can be null
+     * @param node   the meta node
+     * @param value  the meta value
+     * @throws NullPointerException     if the holder, node or value is null
      * @throws IllegalArgumentException if the node or value is empty
      */
     public static void setMeta(PermissionHolder holder, String server, String world, String node, String value) {
         if (holder == null) {
             throw new NullPointerException("holder");
         }
-        
+
         if (node == null) {
             throw new NullPointerException("node");
         }
@@ -108,7 +110,7 @@ public class MetaUtils {
         if (server == null || server.equals("")) {
             server = "global";
         }
-        
+
         node = escapeCharacters(node);
         value = escapeCharacters(value);
 
@@ -118,11 +120,12 @@ public class MetaUtils {
                 toRemove.add(n);
             }
         }
-        
+
         for (Node n : toRemove) {
             try {
                 holder.unsetPermission(n);
-            } catch (ObjectLacksException ignored) {}
+            } catch (ObjectLacksException ignored) {
+            }
         }
 
         Node.Builder metaNode = LuckPerms.getApi().buildNode("meta." + node + "." + value).setValue(true);
@@ -135,19 +138,21 @@ public class MetaUtils {
 
         try {
             holder.setPermission(metaNode.build());
-        } catch (ObjectAlreadyHasException ignored) {}
+        } catch (ObjectAlreadyHasException ignored) {
+        }
     }
 
     /**
      * Gets a meta value for the holder
-     * @param holder the holder to get the meta from
-     * @param server the server to retrieve the meta on, can be null
-     * @param world the world to retrieve the meta on, can be null
-     * @param node the node to get
-     * @param defaultValue the default value to return if the node is not set
+     *
+     * @param holder        the holder to get the meta from
+     * @param server        the server to retrieve the meta on, can be null
+     * @param world         the world to retrieve the meta on, can be null
+     * @param node          the node to get
+     * @param defaultValue  the default value to return if the node is not set
      * @param includeGlobal if global nodes should be considered when retrieving the meta
      * @return a meta string, or the default value if the user does not have the meta node
-     * @throws NullPointerException if the holder or node is null
+     * @throws NullPointerException     if the holder or node is null
      * @throws IllegalArgumentException if the node is empty
      */
     public static String getMeta(PermissionHolder holder, String server, String world, String node, String defaultValue, boolean includeGlobal) {
@@ -217,17 +222,19 @@ public class MetaUtils {
 
         try {
             holder.setPermission(node.build());
-        } catch (ObjectAlreadyHasException ignored) {}
+        } catch (ObjectAlreadyHasException ignored) {
+        }
     }
 
     /**
      * Adds a prefix to a holder on a specific server and world
-     * @param holder the holder to set the prefix for
-     * @param prefix the prefix value
+     *
+     * @param holder   the holder to set the prefix for
+     * @param prefix   the prefix value
      * @param priority the priority to set the prefix at
-     * @param server the server to set the prefix on, can be null
-     * @param world the world to set the prefix on, can be null
-     * @throws NullPointerException if the holder is null
+     * @param server   the server to set the prefix on, can be null
+     * @param world    the world to set the prefix on, can be null
+     * @throws NullPointerException     if the holder is null
      * @throws IllegalArgumentException if the prefix is null or empty
      */
     public static void setPrefix(PermissionHolder holder, String prefix, int priority, String server, String world) {
@@ -236,12 +243,13 @@ public class MetaUtils {
 
     /**
      * Adds a suffix to a holder on a specific server and world
-     * @param holder the holder to set the suffix for
-     * @param suffix the suffix value
+     *
+     * @param holder   the holder to set the suffix for
+     * @param suffix   the suffix value
      * @param priority the priority to set the suffix at
-     * @param server the server to set the suffix on, can be null
-     * @param world the world to set the suffix on, can be null
-     * @throws NullPointerException if the holder is null
+     * @param server   the server to set the suffix on, can be null
+     * @param world    the world to set the suffix on, can be null
+     * @throws NullPointerException     if the holder is null
      * @throws IllegalArgumentException if the suffix is null or empty
      */
     public static void setSuffix(PermissionHolder holder, String suffix, int priority, String server, String world) {
@@ -272,7 +280,7 @@ public class MetaUtils {
             if (!n.shouldApplyOnWorld(world, includeGlobal, false)) {
                 continue;
             }
-            
+
             if (prefix ? !n.isPrefix() : !n.isSuffix()) {
                 continue;
             }
@@ -289,9 +297,10 @@ public class MetaUtils {
 
     /**
      * Returns a holders highest priority prefix, if they have one
-     * @param holder the holder
-     * @param server the server to retrieve the prefix on
-     * @param world the world to retrieve the prefix on
+     *
+     * @param holder        the holder
+     * @param server        the server to retrieve the prefix on
+     * @param world         the world to retrieve the prefix on
      * @param includeGlobal if global nodes should be considered when retrieving the prefix
      * @return a prefix string, if the holder has one, or an empty string if not.
      * @throws NullPointerException if the holder is null
@@ -302,9 +311,10 @@ public class MetaUtils {
 
     /**
      * Returns a holders highest priority suffix, if they have one
-     * @param holder the holder
-     * @param server the server to retrieve the suffix on
-     * @param world the world to retrieve the suffix on
+     *
+     * @param holder        the holder
+     * @param server        the server to retrieve the suffix on
+     * @param world         the world to retrieve the suffix on
      * @param includeGlobal if global nodes should be considered when retrieving the suffix
      * @return a suffix string, if the holder has one, or an empty string if not.
      * @throws NullPointerException if the holder is null
@@ -312,5 +322,8 @@ public class MetaUtils {
     public static String getSuffix(PermissionHolder holder, String server, String world, boolean includeGlobal) {
         return getChatMeta(false, holder, server, world, includeGlobal);
     }
-    
+
+    private MetaUtils() {
+    }
+
 }

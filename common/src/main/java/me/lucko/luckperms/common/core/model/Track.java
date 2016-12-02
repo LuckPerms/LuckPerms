@@ -22,11 +22,13 @@
 
 package me.lucko.luckperms.common.core.model;
 
-import com.google.common.collect.ImmutableList;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
+
+import com.google.common.collect.ImmutableList;
+
 import me.lucko.luckperms.common.utils.Identifiable;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
@@ -47,14 +49,12 @@ public class Track implements Identifiable<String> {
      */
     @Getter
     private final String name;
-
+    @Getter
+    private final Lock ioLock = new ReentrantLock();
     /**
      * The groups within this track
      */
     private List<String> groups = Collections.synchronizedList(new ArrayList<>());
-
-    @Getter
-    private final Lock ioLock = new ReentrantLock();
 
     @Override
     public String getId() {
@@ -63,6 +63,7 @@ public class Track implements Identifiable<String> {
 
     /**
      * Gets an ordered list of the groups on this track
+     *
      * @return am ordered {@link List} of the groups on this track
      */
     public List<String> getGroups() {
@@ -76,6 +77,7 @@ public class Track implements Identifiable<String> {
 
     /**
      * Gets the number of groups on this track
+     *
      * @return the number of groups on this track
      */
     public int getSize() {
@@ -84,6 +86,7 @@ public class Track implements Identifiable<String> {
 
     /**
      * Gets the next group on the track, after the one provided
+     *
      * @param current the group before the group being requested
      * @return the group name, or null if the end of the track has been reached
      * @throws ObjectLacksException if the track does not contain the group given
@@ -94,6 +97,7 @@ public class Track implements Identifiable<String> {
 
     /**
      * Gets the group before the group provided
+     *
      * @param current the group after the group being requested
      * @return the group name, or null if the start of the track has been reached
      * @throws ObjectLacksException if the track does not contain the group given
@@ -104,6 +108,7 @@ public class Track implements Identifiable<String> {
 
     /**
      * Gets the next group on the track, after the one provided
+     *
      * @param current the group before the group being requested
      * @return the group name, or null if the end of the track has been reached
      * @throws ObjectLacksException if the track does not contain the group given
@@ -120,6 +125,7 @@ public class Track implements Identifiable<String> {
 
     /**
      * Gets the group before the group provided
+     *
      * @param current the group after the group being requested
      * @return the group name, or null if the start of the track has been reached
      * @throws ObjectLacksException if the track does not contain the group given
@@ -136,6 +142,7 @@ public class Track implements Identifiable<String> {
 
     /**
      * Appends a group to the end of this track
+     *
      * @param group the group to append
      * @throws ObjectAlreadyHasException if the group is already on this track somewhere
      */
@@ -146,7 +153,8 @@ public class Track implements Identifiable<String> {
 
     /**
      * Inserts a group at a certain position on this track
-     * @param group the group to be inserted
+     *
+     * @param group    the group to be inserted
      * @param position the index position (a value of 0 inserts at the start)
      * @throws ObjectAlreadyHasException if the group is already on this track somewhere
      * @throws IndexOutOfBoundsException if the position is less than 0 or greater than the size of the track
@@ -158,6 +166,7 @@ public class Track implements Identifiable<String> {
 
     /**
      * Removes a group from this track
+     *
      * @param group the group to remove
      * @throws ObjectLacksException if the group is not on this track
      */
@@ -167,6 +176,7 @@ public class Track implements Identifiable<String> {
 
     /**
      * Removes a group from this track
+     *
      * @param group the group to remove
      * @throws ObjectLacksException if the group is not on this track
      */
@@ -177,6 +187,7 @@ public class Track implements Identifiable<String> {
 
     /**
      * Checks if a group features on this track
+     *
      * @param group the group to check
      * @return true if the group is on this track
      */
@@ -186,6 +197,7 @@ public class Track implements Identifiable<String> {
 
     /**
      * Checks if a group features on this track
+     *
      * @param group the group to check
      * @return true if the group is on this track
      */

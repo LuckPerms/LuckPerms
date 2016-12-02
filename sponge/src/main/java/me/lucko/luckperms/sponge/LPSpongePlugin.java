@@ -22,8 +22,10 @@
 
 package me.lucko.luckperms.sponge;
 
-import com.google.inject.Inject;
 import lombok.Getter;
+
+import com.google.inject.Inject;
+
 import me.lucko.luckperms.ApiHandler;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LuckPermsApi;
@@ -48,7 +50,11 @@ import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.StorageFactory;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.tasks.UpdateTask;
-import me.lucko.luckperms.common.utils.*;
+import me.lucko.luckperms.common.utils.BufferedRequest;
+import me.lucko.luckperms.common.utils.DebugHandler;
+import me.lucko.luckperms.common.utils.LocaleManager;
+import me.lucko.luckperms.common.utils.LogFactory;
+import me.lucko.luckperms.common.utils.PermissionCache;
 import me.lucko.luckperms.sponge.commands.SpongeMainCommand;
 import me.lucko.luckperms.sponge.contexts.WorldCalculator;
 import me.lucko.luckperms.sponge.managers.SpongeGroupManager;
@@ -56,6 +62,7 @@ import me.lucko.luckperms.sponge.managers.SpongeUserManager;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.timings.LPTimings;
 import me.lucko.luckperms.sponge.utils.VersionData;
+
 import org.slf4j.Logger;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
@@ -81,7 +88,12 @@ import org.spongepowered.api.text.Text;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -91,31 +103,23 @@ import java.util.stream.StreamSupport;
 @Plugin(id = "luckperms", name = "LuckPerms", version = VersionData.VERSION, authors = {"Luck"}, description = "A permissions plugin")
 public class LPSpongePlugin implements LuckPermsPlugin {
 
+    private final Set<UUID> ignoringLogs = ConcurrentHashMap.newKeySet();
     @Inject
     private Logger logger;
-
     @Inject
     private Game game;
-
     @Inject
     @ConfigDir(sharedRoot = false)
     private Path configDir;
-
     private Scheduler scheduler = Sponge.getScheduler();
-
     @Inject
     @SynchronousExecutor
     private SpongeExecutorService syncExecutor;
-
     @Inject
     @AsynchronousExecutor
     private SpongeExecutorService asyncExecutor;
-
     private LPTimings timings;
-
     private boolean lateLoad = false;
-
-    private final Set<UUID> ignoringLogs = ConcurrentHashMap.newKeySet();
     private LPConfiguration configuration;
     private SpongeUserManager userManager;
     private SpongeGroupManager groupManager;

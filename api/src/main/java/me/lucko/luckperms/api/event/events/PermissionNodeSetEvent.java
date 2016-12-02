@@ -28,6 +28,7 @@ import me.lucko.luckperms.api.event.AbstractPermissionEvent;
 
 /**
  * Called when a permission node is set on a holder
+ *
  * @since 2.6
  */
 public class PermissionNodeSetEvent extends AbstractPermissionEvent {

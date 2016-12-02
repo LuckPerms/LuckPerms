@@ -23,17 +23,19 @@
 package me.lucko.luckperms.common.messaging;
 
 import lombok.RequiredArgsConstructor;
+
 import me.lucko.luckperms.api.MessagingService;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
-import redis.clients.jedis.JedisPubSub;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.JedisPubSub;
 
 /**
  * Uses Redis to push/receive changes to/from other servers

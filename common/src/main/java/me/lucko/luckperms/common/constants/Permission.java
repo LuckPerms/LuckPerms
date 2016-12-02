@@ -22,9 +22,11 @@
 
 package me.lucko.luckperms.common.constants;
 
-import com.google.common.collect.Sets;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import com.google.common.collect.Sets;
+
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
@@ -149,6 +151,10 @@ public enum Permission {
 
     private static final String IDENTIFIER = "luckperms.";
 
+    private static Set<String> set(String... args) {
+        return Sets.newHashSet(args);
+    }
+
     private Set<String> nodes;
     private Type type;
 
@@ -166,21 +172,17 @@ public enum Permission {
         return sender.hasPermission(this);
     }
 
-    private static Set<String> set(String... args) {
-        return Sets.newHashSet(args);
-    }
-    
     @Getter
     @AllArgsConstructor
     public enum Type {
-        
+
         NONE(null),
         USER("user"),
         GROUP("group"),
         TRACK("track"),
         LOG("log"),
         SPONGE("sponge");
-        
+
         private final String tag;
 
     }

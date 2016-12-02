@@ -24,9 +24,14 @@ package me.lucko.luckperms.common.caching;
 
 import lombok.Getter;
 import lombok.ToString;
+
 import me.lucko.luckperms.api.Node;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * Holds temporary mutable meta whilst this object is passed up the inheritance tree to accumulate meta from parents

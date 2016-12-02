@@ -24,18 +24,21 @@ package me.lucko.luckperms.sponge.service.base;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.references.SubjectReference;
+
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.util.Tristate;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.annotation.Nullable;
 
 import static me.lucko.luckperms.sponge.service.base.Util.convertContexts;
 import static me.lucko.luckperms.sponge.service.base.Util.convertTristate;

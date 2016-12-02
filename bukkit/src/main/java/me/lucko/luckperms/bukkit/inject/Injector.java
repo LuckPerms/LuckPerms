@@ -23,7 +23,9 @@
 package me.lucko.luckperms.bukkit.inject;
 
 import lombok.experimental.UtilityClass;
+
 import me.lucko.luckperms.bukkit.model.LPPermissible;
+
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permissible;

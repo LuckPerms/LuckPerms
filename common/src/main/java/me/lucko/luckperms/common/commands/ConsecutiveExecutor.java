@@ -25,6 +25,7 @@ package me.lucko.luckperms.common.commands;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+
 import me.lucko.luckperms.common.commands.sender.Sender;
 
 import java.util.ArrayList;

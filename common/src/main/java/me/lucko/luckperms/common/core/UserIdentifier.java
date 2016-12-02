@@ -22,7 +22,12 @@
 
 package me.lucko.luckperms.common.core;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+
 import me.lucko.luckperms.common.utils.Identifiable;
 
 import java.util.UUID;

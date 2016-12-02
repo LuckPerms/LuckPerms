@@ -22,9 +22,11 @@
 
 package me.lucko.luckperms.common.storage.backing;
 
+import lombok.Cleanup;
+
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import lombok.Cleanup;
+
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.core.UserIdentifier;
 import me.lucko.luckperms.common.core.model.Group;
@@ -34,8 +36,19 @@ import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.managers.impl.GenericUserManager;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
@@ -43,6 +56,15 @@ import static me.lucko.luckperms.common.core.model.PermissionHolder.exportToLega
 
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class JSONBacking extends FlatfileBacking {
+    private static <T> T call(Callable<T> c, T def) {
+        try {
+            return c.call();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return def;
+        }
+    }
+
     public JSONBacking(LuckPermsPlugin plugin, File pluginDir) {
         super(plugin, "JSON", pluginDir);
     }
@@ -534,15 +556,6 @@ public class JSONBacking extends FlatfileBacking {
             }, false);
         } finally {
             track.getIoLock().unlock();
-        }
-    }
-
-    private static <T> T call(Callable<T> c, T def) {
-        try {
-            return c.call();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return def;
         }
     }
 

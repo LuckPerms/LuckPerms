@@ -27,12 +27,12 @@ package me.lucko.luckperms.common.commands.utils;
  */
 public class ContextHelper {
 
-    public enum CommandContext {
-        NONE, SERVER, SERVER_AND_WORLD
-    }
-
     public static CommandContext determine(String server, String world) {
         return server == null ? CommandContext.NONE : (world == null ? CommandContext.SERVER : CommandContext.SERVER_AND_WORLD);
+    }
+
+    public enum CommandContext {
+        NONE, SERVER, SERVER_AND_WORLD
     }
 
 }

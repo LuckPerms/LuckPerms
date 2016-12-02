@@ -22,8 +22,10 @@
 
 package me.lucko.luckperms.bukkit;
 
-import com.google.common.collect.ImmutableList;
 import lombok.AllArgsConstructor;
+
+import com.google.common.collect.ImmutableList;
+
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.bukkit.calculators.AttachmentProcessor;
 import me.lucko.luckperms.bukkit.calculators.ChildProcessor;

@@ -22,18 +22,24 @@
 
 package me.lucko.luckperms.common.core.model;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Maps;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.api.event.events.*;
+import me.lucko.luckperms.api.event.events.GroupAddEvent;
+import me.lucko.luckperms.api.event.events.GroupRemoveEvent;
+import me.lucko.luckperms.api.event.events.PermissionNodeExpireEvent;
+import me.lucko.luckperms.api.event.events.PermissionNodeSetEvent;
+import me.lucko.luckperms.api.event.events.PermissionNodeUnsetEvent;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.api.internal.GroupLink;
 import me.lucko.luckperms.common.api.internal.PermissionHolderLink;
@@ -49,7 +55,16 @@ import me.lucko.luckperms.common.utils.ImmutableLocalizedNode;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -61,6 +76,26 @@ import java.util.stream.Collectors;
  */
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class PermissionHolder {
+
+    public static Map<String, Boolean> exportToLegacy(Set<Node> nodes) {
+        Map<String, Boolean> m = new HashMap<>();
+        for (Node node : nodes) {
+            m.put(node.toSerializedNode(), node.getValue());
+        }
+        return m;
+    }
+
+    private static Node.Builder buildNode(String permission) {
+        return new NodeBuilder(permission);
+    }
+
+    private static ImmutableLocalizedNode makeLocal(Node node, String location) {
+        return ImmutableLocalizedNode.of(node, location);
+    }
+
+    private static Node makeNode(String s, Boolean b) {
+        return NodeFactory.fromSerialisedNode(s, b);
+    }
 
     /**
      * The UUID of the user / name of the group.
@@ -77,6 +112,9 @@ public abstract class PermissionHolder {
 
     private final Set<Node> nodes = new HashSet<>();
     private final Set<Node> transientNodes = new HashSet<>();
+
+    @Getter
+    private final Lock ioLock = new ReentrantLock();
 
     private Cache<ImmutableSet<Node>> enduringCache = new Cache<>(() -> {
         synchronized (nodes) {
@@ -158,17 +196,46 @@ public abstract class PermissionHolder {
         return ImmutableSortedSet.copyOfSorted(combined);
     });
 
-    @Getter
-    private final Lock ioLock = new ReentrantLock();
-
     public abstract String getFriendlyName();
 
     public Set<Node> getNodes() {
         return enduringCache.get();
     }
 
+    public void setNodes(Map<String, Boolean> nodes) {
+        Set<Node> set = nodes.entrySet().stream()
+                .map(e -> makeNode(e.getKey(), e.getValue()))
+                .collect(Collectors.toSet());
+
+        setNodes(set);
+    }
+
+    public void setNodes(Set<Node> set) {
+        synchronized (nodes) {
+            if (nodes.equals(set)) {
+                return;
+            }
+
+            nodes.clear();
+            nodes.addAll(set);
+        }
+        invalidateCache(true);
+    }
+
     public Set<Node> getTransientNodes() {
         return transientCache.get();
+    }
+
+    public void setTransientNodes(Set<Node> set) {
+        synchronized (transientNodes) {
+            if (transientNodes.equals(set)) {
+                return;
+            }
+
+            transientNodes.clear();
+            transientNodes.addAll(set);
+        }
+        invalidateCache(false);
     }
 
     private void invalidateCache(boolean enduring) {
@@ -183,6 +250,7 @@ public abstract class PermissionHolder {
 
     /**
      * Combines and returns this holders nodes in a priority order.
+     *
      * @return the holders transient and permanent nodes
      */
     public SortedSet<LocalizedNode> getPermissions(boolean mergeTemp) {
@@ -191,6 +259,7 @@ public abstract class PermissionHolder {
 
     /**
      * Removes temporary permissions that have expired
+     *
      * @return true if permissions had expired and were removed
      */
     public boolean auditTemporaryPermissions() {
@@ -244,8 +313,9 @@ public abstract class PermissionHolder {
 
     /**
      * Resolves inherited nodes and returns them
+     *
      * @param excludedGroups a list of groups to exclude
-     * @param contexts context to decide if groups should be applied
+     * @param contexts       context to decide if groups should be applied
      * @return a set of nodes
      */
     public SortedSet<LocalizedNode> getAllNodes(List<String> excludedGroups, ExtractedContexts contexts) {
@@ -269,8 +339,8 @@ public abstract class PermissionHolder {
 
         parents.removeIf(node ->
                 !node.shouldApplyOnServer(server, context.isApplyGlobalGroups(), plugin.getConfiguration().isApplyingRegex()) ||
-                !node.shouldApplyOnWorld(world, context.isApplyGlobalWorldGroups(), plugin.getConfiguration().isApplyingRegex()) ||
-                !node.shouldApplyWithContext(contexts.getContextSet(), false)
+                        !node.shouldApplyOnWorld(world, context.isApplyGlobalWorldGroups(), plugin.getConfiguration().isApplyingRegex()) ||
+                        !node.shouldApplyWithContext(contexts.getContextSet(), false)
         );
 
         TreeSet<Map.Entry<Integer, Node>> sortedParents = new TreeSet<>(Util.META_COMPARATOR.reversed());
@@ -345,8 +415,8 @@ public abstract class PermissionHolder {
 
         parents.removeIf(node ->
                 !node.shouldApplyOnServer(server, context.isApplyGlobalGroups(), plugin.getConfiguration().isApplyingRegex()) ||
-                !node.shouldApplyOnWorld(world, context.isApplyGlobalWorldGroups(), plugin.getConfiguration().isApplyingRegex()) ||
-                !node.shouldApplyWithContext(contexts.getContextSet(), false)
+                        !node.shouldApplyOnWorld(world, context.isApplyGlobalWorldGroups(), plugin.getConfiguration().isApplyingRegex()) ||
+                        !node.shouldApplyWithContext(contexts.getContextSet(), false)
         );
 
         TreeSet<Map.Entry<Integer, Node>> sortedParents = new TreeSet<>(Util.META_COMPARATOR.reversed());
@@ -378,6 +448,7 @@ public abstract class PermissionHolder {
 
     /**
      * Gets all of the nodes that this holder has (and inherits), given the context
+     *
      * @param contexts the context for this request
      * @return a map of permissions
      */
@@ -396,8 +467,8 @@ public abstract class PermissionHolder {
 
         allNodes.removeIf(node ->
                 !node.shouldApplyOnServer(server, context.isIncludeGlobal(), plugin.getConfiguration().isApplyingRegex()) ||
-                !node.shouldApplyOnWorld(world, context.isIncludeGlobalWorld(), plugin.getConfiguration().isApplyingRegex()) ||
-                !node.shouldApplyWithContext(contexts.getContextSet(), false)
+                        !node.shouldApplyOnWorld(world, context.isIncludeGlobalWorld(), plugin.getConfiguration().isApplyingRegex()) ||
+                        !node.shouldApplyWithContext(contexts.getContextSet(), false)
         );
 
         Set<LocalizedNode> perms = ConcurrentHashMap.newKeySet();
@@ -419,6 +490,7 @@ public abstract class PermissionHolder {
 
     /**
      * Converts the output of {@link #getAllNodesFiltered(ExtractedContexts)}, and expands shorthand perms
+     *
      * @param context the context for this request
      * @return a map of permissions
      */
@@ -443,42 +515,11 @@ public abstract class PermissionHolder {
         return ImmutableMap.copyOf(perms);
     }
 
-    public void setNodes(Set<Node> set) {
-        synchronized (nodes) {
-            if (nodes.equals(set)) {
-                return;
-            }
-
-            nodes.clear();
-            nodes.addAll(set);
-        }
-        invalidateCache(true);
-    }
-
-    public void setTransientNodes(Set<Node> set) {
-        synchronized (transientNodes) {
-            if (transientNodes.equals(set)) {
-                return;
-            }
-
-            transientNodes.clear();
-            transientNodes.addAll(set);
-        }
-        invalidateCache(false);
-    }
-
-    public void setNodes(Map<String, Boolean> nodes) {
-        Set<Node> set = nodes.entrySet().stream()
-                .map(e -> makeNode(e.getKey(), e.getValue()))
-                .collect(Collectors.toSet());
-
-        setNodes(set);
-    }
-
     /**
      * Check if the holder has a permission node
+     *
      * @param node the node to check
-     * @param t whether to check transient nodes
+     * @param t    whether to check transient nodes
      * @return a tristate
      */
     public Tristate hasPermission(Node node, boolean t) {
@@ -521,6 +562,7 @@ public abstract class PermissionHolder {
 
     /**
      * Check if the holder inherits a node
+     *
      * @param node the node to check
      * @return the result of the lookup
      */
@@ -536,6 +578,7 @@ public abstract class PermissionHolder {
 
     /**
      * Check if the holder inherits a node
+     *
      * @param node the node to check
      * @return the Tristate result
      */
@@ -569,6 +612,7 @@ public abstract class PermissionHolder {
 
     /**
      * Sets a permission node
+     *
      * @param node the node to set
      * @throws ObjectAlreadyHasException if the holder has this permission already
      */
@@ -587,6 +631,7 @@ public abstract class PermissionHolder {
 
     /**
      * Sets a transient permission node
+     *
      * @param node the node to set
      * @throws ObjectAlreadyHasException if the holder has this permission already
      */
@@ -629,6 +674,7 @@ public abstract class PermissionHolder {
 
     /**
      * Unsets a permission node
+     *
      * @param node the node to unset
      * @throws ObjectLacksException if the holder doesn't have this node already
      */
@@ -652,6 +698,7 @@ public abstract class PermissionHolder {
 
     /**
      * Unsets a transient permission node
+     *
      * @param node the node to unset
      * @throws ObjectLacksException if the holder doesn't have this node already
      */
@@ -829,7 +876,7 @@ public abstract class PermissionHolder {
 
         synchronized (nodes) {
             boolean b = nodes.removeIf(n ->
-                            n.isGroupNode() &&
+                    n.isGroupNode() &&
                             n.getServer().orElse("global").equalsIgnoreCase(finalServer) &&
                             n.getWorld().orElse("null").equalsIgnoreCase(finalWorld)
             );
@@ -934,6 +981,7 @@ public abstract class PermissionHolder {
 
     /**
      * Get a {@link List} of all of the groups the holder inherits, on all servers
+     *
      * @return a {@link List} of group names
      */
     public List<String> getGroupNames() {
@@ -945,8 +993,9 @@ public abstract class PermissionHolder {
 
     /**
      * Get a {@link List} of the groups the holder inherits on a specific server and world
+     *
      * @param server the server to check
-     * @param world the world to check
+     * @param world  the world to check
      * @return a {@link List} of group names
      */
     public List<String> getLocalGroups(String server, String world) {
@@ -969,6 +1018,7 @@ public abstract class PermissionHolder {
 
     /**
      * Get a {@link List} of the groups the holder inherits on a specific server
+     *
      * @param server the server to check
      * @return a {@link List} of group names
      */
@@ -978,25 +1028,5 @@ public abstract class PermissionHolder {
                 .filter(n -> n.shouldApplyOnServer(server, false, true))
                 .map(Node::getGroupName)
                 .collect(Collectors.toList());
-    }
-
-    public static Map<String, Boolean> exportToLegacy(Set<Node> nodes) {
-        Map<String, Boolean> m = new HashMap<>();
-        for (Node node : nodes) {
-            m.put(node.toSerializedNode(), node.getValue());
-        }
-        return m;
-    }
-
-    private static Node.Builder buildNode(String permission) {
-        return new NodeBuilder(permission);
-    }
-
-    private static ImmutableLocalizedNode makeLocal(Node node, String location) {
-        return ImmutableLocalizedNode.of(node, location);
-    }
-
-    private static Node makeNode(String s, Boolean b) {
-        return NodeFactory.fromSerialisedNode(s, b);
     }
 }

@@ -34,7 +34,12 @@ import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
-import net.alpenblock.bungeeperms.*;
+
+import net.alpenblock.bungeeperms.BungeePerms;
+import net.alpenblock.bungeeperms.Group;
+import net.alpenblock.bungeeperms.Server;
+import net.alpenblock.bungeeperms.User;
+import net.alpenblock.bungeeperms.World;
 
 import java.util.List;
 import java.util.Map;

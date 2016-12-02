@@ -22,10 +22,11 @@
 
 package me.lucko.luckperms.sponge.service.persisted;
 
-import co.aikar.timings.Timing;
-import com.google.common.collect.ImmutableSet;
 import lombok.Getter;
 import lombok.NonNull;
+
+import com.google.common.collect.ImmutableSet;
+
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.utils.BufferedRequest;
@@ -35,12 +36,15 @@ import me.lucko.luckperms.sponge.service.calculated.CalculatedSubjectData;
 import me.lucko.luckperms.sponge.service.references.SubjectCollectionReference;
 import me.lucko.luckperms.sponge.service.references.SubjectReference;
 import me.lucko.luckperms.sponge.timings.LPTiming;
+
 import org.spongepowered.api.command.CommandSource;
 
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+
+import co.aikar.timings.Timing;
 
 /**
  * A simple persistable Subject implementation

@@ -22,9 +22,12 @@
 
 package me.lucko.luckperms.common.utils;
 
-import com.google.common.collect.ImmutableMap;
 import lombok.Cleanup;
+
+import com.google.common.collect.ImmutableMap;
+
 import me.lucko.luckperms.common.constants.Message;
+
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;

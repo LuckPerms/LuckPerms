@@ -22,10 +22,11 @@
 
 package me.lucko.luckperms.common.commands;
 
-import com.google.common.collect.ImmutableList;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import com.google.common.collect.ImmutableList;
 
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)

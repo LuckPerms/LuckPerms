@@ -43,6 +43,29 @@ import java.util.SortedMap;
 import java.util.UUID;
 
 public class LogUserHistory extends SubCommand<Log> {
+    private static CommandResult showLog(int page, UUID user, Sender sender, Log log) {
+        int maxPage = log.getUserHistoryMaxPages(user);
+        if (maxPage == 0) {
+            Message.LOG_NO_ENTRIES.send(sender);
+            return CommandResult.STATE_ERROR;
+        }
+
+        if (page < 1 || page > maxPage) {
+            Message.LOG_INVALID_PAGE_RANGE.send(sender, maxPage);
+            return CommandResult.INVALID_ARGS;
+        }
+
+        SortedMap<Integer, LogEntry> entries = log.getUserHistory(page, user);
+        String name = entries.values().stream().findAny().get().getActedName();
+        Message.LOG_HISTORY_USER_HEADER.send(sender, name, page, maxPage);
+
+        for (Map.Entry<Integer, LogEntry> e : entries.entrySet()) {
+            Message.LOG_ENTRY.send(sender, e.getKey(), DateUtil.formatDateDiff(e.getValue().getTimestamp()), e.getValue().getFormatted());
+        }
+
+        return CommandResult.SUCCESS;
+    }
+
     public LogUserHistory() {
         super("userhistory", "View a user's history", Permission.LOG_USER_HISTORY, Predicates.notInRange(1, 2),
                 Arg.list(
@@ -98,28 +121,5 @@ public class LogUserHistory extends SubCommand<Log> {
 
         Message.USER_INVALID_ENTRY.send(sender, user);
         return CommandResult.INVALID_ARGS;
-    }
-
-    private static CommandResult showLog(int page, UUID user, Sender sender, Log log) {
-        int maxPage = log.getUserHistoryMaxPages(user);
-        if (maxPage == 0) {
-            Message.LOG_NO_ENTRIES.send(sender);
-            return CommandResult.STATE_ERROR;
-        }
-
-        if (page < 1 || page > maxPage) {
-            Message.LOG_INVALID_PAGE_RANGE.send(sender, maxPage);
-            return CommandResult.INVALID_ARGS;
-        }
-
-        SortedMap<Integer, LogEntry> entries = log.getUserHistory(page, user);
-        String name = entries.values().stream().findAny().get().getActedName();
-        Message.LOG_HISTORY_USER_HEADER.send(sender, name, page, maxPage);
-
-        for (Map.Entry<Integer, LogEntry> e : entries.entrySet()) {
-            Message.LOG_ENTRY.send(sender, e.getKey(), DateUtil.formatDateDiff(e.getValue().getTimestamp()), e.getValue().getFormatted());
-        }
-
-        return CommandResult.SUCCESS;
     }
 }

@@ -23,6 +23,7 @@
 package me.lucko.luckperms.bukkit.calculators;
 
 import lombok.RequiredArgsConstructor;
+
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.bukkit.model.ChildPermissionProvider;
 import me.lucko.luckperms.common.calculators.PermissionProcessor;

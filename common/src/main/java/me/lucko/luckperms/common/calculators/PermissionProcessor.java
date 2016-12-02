@@ -29,6 +29,7 @@ import java.util.Map;
 public interface PermissionProcessor {
 
     Tristate hasPermission(String permission);
+
     void updateBacking(Map<String, Boolean> map);
 
 }

@@ -27,36 +27,44 @@ import java.util.SortedMap;
 
 /**
  * Holds cached Meta lookup data for a specific set of contexts
+ *
  * @since 2.13
  */
 public interface MetaData {
 
     /**
      * Gets an immutable copy of the meta this user has
+     *
      * @return an immutable map of meta
      */
     Map<String, String> getMeta();
 
     /**
-     * Gets an immutable sorted map of all of the prefixes the user has, whereby the first value is the highest priority prefix.
+     * Gets an immutable sorted map of all of the prefixes the user has, whereby the first value is the highest priority
+     * prefix.
+     *
      * @return a sorted map of prefixes
      */
     SortedMap<Integer, String> getPrefixes();
 
     /**
-     * Gets an immutable sorted map of all of the suffixes the user has, whereby the first value is the highest priority suffix.
+     * Gets an immutable sorted map of all of the suffixes the user has, whereby the first value is the highest priority
+     * suffix.
+     *
      * @return a sorted map of suffixes
      */
     SortedMap<Integer, String> getSuffixes();
 
     /**
      * Gets the user's highest priority prefix, or null if the user has no prefixes
+     *
      * @return a prefix string, or null
      */
     String getPrefix();
 
     /**
      * Gets the user's highest priority suffix, or null if the user has no suffixes
+     *
      * @return a suffix string, or null
      */
     String getSuffix();

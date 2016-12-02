@@ -36,6 +36,7 @@ import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
+
 import org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsService;
 import org.tyrannyofheaven.bukkit.zPermissions.dao.PermissionService;
 import org.tyrannyofheaven.bukkit.zPermissions.model.EntityMetadata;
@@ -122,11 +123,13 @@ public class MigrationZPermissions extends SubCommand<Object> {
             if (e.getWorld() != null) {
                 try {
                     group.setPermission(e.getPermission(), true, "global", e.getWorld().getName());
-                } catch (ObjectAlreadyHasException ignored) {}
+                } catch (ObjectAlreadyHasException ignored) {
+                }
             } else {
                 try {
                     group.setPermission(e.getPermission(), true); // TODO handle negated.
-                } catch (ObjectAlreadyHasException ignored) {}
+                } catch (ObjectAlreadyHasException ignored) {
+                }
             }
         }
 
@@ -138,7 +141,8 @@ public class MigrationZPermissions extends SubCommand<Object> {
 
             try {
                 group.setPermission("group." + inheritance.getParent(), true);
-            } catch (ObjectAlreadyHasException ignored) {}
+            } catch (ObjectAlreadyHasException ignored) {
+            }
         }
 
         for (EntityMetadata metadata : entity.getMetadata()) {

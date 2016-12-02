@@ -28,12 +28,14 @@ import java.util.Map;
 
 /**
  * Holds cached Permission lookup data for a specific set of contexts
+ *
  * @since 2.13
  */
 public interface PermissionData {
 
     /**
      * Gets a permission value for the given permission node
+     *
      * @param permission the permission node
      * @return a tristate result
      * @throws NullPointerException if permission is null
@@ -48,6 +50,7 @@ public interface PermissionData {
 
     /**
      * Gets an immutable copy of the permission map backing the permission calculator
+     *
      * @return an immutable set of permissions
      */
     Map<String, Boolean> getImmutableBacking();

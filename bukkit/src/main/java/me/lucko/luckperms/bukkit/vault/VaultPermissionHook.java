@@ -26,6 +26,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
@@ -38,6 +39,7 @@ import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
+
 import net.milkbowl.vault.permission.Permission;
 
 import java.util.HashMap;
@@ -92,8 +94,9 @@ public class VaultPermissionHook extends Permission {
 
     /**
      * Generic method to add a permission to a holder
-     * @param world the world to add in
-     * @param holder the holder to add the permission to
+     *
+     * @param world      the world to add in
+     * @param holder     the holder to add the permission to
      * @param permission the permission to add
      */
     private void add(String world, PermissionHolder holder, String permission) {
@@ -103,15 +106,17 @@ public class VaultPermissionHook extends Permission {
             } else {
                 holder.setPermission(permission, true, server);
             }
-        } catch (ObjectAlreadyHasException ignored) {}
+        } catch (ObjectAlreadyHasException ignored) {
+        }
 
         save(holder);
     }
 
     /**
      * Generic method to remove a permission from a holder
-     * @param world the world to remove in
-     * @param holder the holder to remove the permission from
+     *
+     * @param world      the world to remove in
+     * @param holder     the holder to remove the permission from
      * @param permission the permission to remove
      */
     private void remove(String world, PermissionHolder holder, String permission) {
@@ -121,13 +126,15 @@ public class VaultPermissionHook extends Permission {
             } else {
                 holder.unsetPermission(permission, server);
             }
-        } catch (ObjectLacksException ignored) {}
+        } catch (ObjectLacksException ignored) {
+        }
 
         save(holder);
     }
 
     /**
      * Utility method for saving a user or group
+     *
      * @param holder the holder instance
      */
     void save(PermissionHolder holder) {
@@ -263,7 +270,8 @@ public class VaultPermissionHook extends Permission {
                 } else {
                     user.setInheritGroup(group, server);
                 }
-            } catch (ObjectAlreadyHasException ignored) {}
+            } catch (ObjectAlreadyHasException ignored) {
+            }
             save(user);
         });
         return true;
@@ -287,7 +295,8 @@ public class VaultPermissionHook extends Permission {
                 } else {
                     user.unsetInheritGroup(group, server);
                 }
-            } catch (ObjectLacksException ignored) {}
+            } catch (ObjectLacksException ignored) {
+            }
             save(user);
         });
         return true;

@@ -22,13 +22,14 @@
 
 package me.lucko.luckperms.sponge.service.simple;
 
-import co.aikar.timings.Timing;
+import lombok.Getter;
+import lombok.NonNull;
+
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableSet;
-import lombok.Getter;
-import lombok.NonNull;
+
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
@@ -44,6 +45,8 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import co.aikar.timings.Timing;
+
 /**
  * Super simple Subject implementation.
  */
@@ -55,15 +58,6 @@ public class SimpleSubject implements LPSubject {
     private final SubjectCollectionReference parentCollection;
     private final CalculatedSubjectData subjectData;
     private final CalculatedSubjectData transientSubjectData;
-
-    private final LoadingCache<PermissionLookup, Tristate> permissionLookupCache = CacheBuilder.newBuilder()
-            .build(new CacheLoader<PermissionLookup, Tristate>() {
-                @Override
-                public Tristate load(PermissionLookup lookup) {
-                    return lookupPermissionValue(lookup.getContexts(), lookup.getNode());
-                }
-            });
-
     private final LoadingCache<ContextSet, Set<SubjectReference>> parentLookupCache = CacheBuilder.newBuilder()
             .build(new CacheLoader<ContextSet, Set<SubjectReference>>() {
                 @Override
@@ -71,7 +65,13 @@ public class SimpleSubject implements LPSubject {
                     return lookupParents(contexts);
                 }
             });
-
+    private final LoadingCache<PermissionLookup, Tristate> permissionLookupCache = CacheBuilder.newBuilder()
+            .build(new CacheLoader<PermissionLookup, Tristate>() {
+                @Override
+                public Tristate load(PermissionLookup lookup) {
+                    return lookupPermissionValue(lookup.getContexts(), lookup.getNode());
+                }
+            });
     private final LoadingCache<OptionLookup, Optional<String>> optionLookupCache = CacheBuilder.newBuilder()
             .build(new CacheLoader<OptionLookup, Optional<String>>() {
                 @Override
@@ -124,7 +124,7 @@ public class SimpleSubject implements LPSubject {
         Set<SubjectReference> s = new HashSet<>();
         s.addAll(subjectData.getParents(contexts));
 
-        if (!getParentCollection().resolve(service).getIdentifier().equalsIgnoreCase("defaults")){
+        if (!getParentCollection().resolve(service).getIdentifier().equalsIgnoreCase("defaults")) {
             s.addAll(getParentCollection().resolve(service).getDefaultSubject().resolve(service).getParents(contexts));
             s.addAll(service.getDefaults().getParents(contexts));
         }

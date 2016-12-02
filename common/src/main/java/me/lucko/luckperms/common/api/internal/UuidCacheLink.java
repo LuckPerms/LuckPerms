@@ -24,6 +24,7 @@ package me.lucko.luckperms.common.api.internal;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
+
 import me.lucko.luckperms.api.UuidCache;
 
 import java.util.UUID;

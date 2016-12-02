@@ -22,14 +22,17 @@
 
 package me.lucko.luckperms.sponge.service.references;
 
-import com.google.common.base.Splitter;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
+
+import com.google.common.base.Splitter;
+
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.base.LPSubject;
 import me.lucko.luckperms.sponge.service.base.LPSubjectCollection;
+
 import org.spongepowered.api.service.permission.Subject;
 
 import java.util.List;

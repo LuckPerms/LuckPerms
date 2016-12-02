@@ -26,6 +26,7 @@ import com.github.cheesesoftware.PowerfulPermsAPI.ResultRunnable;
 
 /**
  * Overrides the default ResultRunnable, callbacks will always run in the same thread. (an async one, hopefully.)
+ *
  * @param <T> type
  */
 public abstract class LPResultRunnable<T> extends ResultRunnable<T> {

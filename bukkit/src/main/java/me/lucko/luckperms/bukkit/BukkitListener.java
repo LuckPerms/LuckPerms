@@ -27,6 +27,7 @@ import me.lucko.luckperms.bukkit.model.LPPermissible;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.utils.AbstractListener;
+
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;

@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 
 public class MetaClear extends SharedSubCommand {
     public MetaClear() {
-        super("clear", "Clears all chat meta",  Permission.USER_META_CLEAR, Permission.GROUP_META_CLEAR, Predicates.notInRange(0, 2),
+        super("clear", "Clears all chat meta", Permission.USER_META_CLEAR, Permission.GROUP_META_CLEAR, Predicates.notInRange(0, 2),
                 Arg.list(
                         Arg.create("server", false, "the server name to filter by"),
                         Arg.create("world", false, "the world name to filter by")

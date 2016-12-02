@@ -22,10 +22,13 @@
 
 package me.lucko.luckperms.sponge.commands;
 
-import com.google.common.collect.Maps;
 import lombok.experimental.UtilityClass;
+
+import com.google.common.collect.Maps;
+
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
+
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.util.Tristate;

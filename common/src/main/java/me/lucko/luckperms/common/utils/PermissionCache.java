@@ -22,9 +22,10 @@
 
 package me.lucko.luckperms.common.utils;
 
-import com.google.common.base.Splitter;
 import lombok.Getter;
 import lombok.NonNull;
+
+import com.google.common.base.Splitter;
 
 import java.util.List;
 import java.util.Map;
@@ -46,13 +47,14 @@ public class PermissionCache {
 
         executor.execute(() -> {
             while (true) {
-                for (String e; (e = queue.poll()) != null;) {
+                for (String e; (e = queue.poll()) != null; ) {
                     insert(e.toLowerCase());
                 }
 
                 try {
                     Thread.sleep(5000);
-                } catch (InterruptedException ignored) {}
+                } catch (InterruptedException ignored) {
+                }
             }
         });
     }

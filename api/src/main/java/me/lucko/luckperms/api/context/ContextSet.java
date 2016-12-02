@@ -22,135 +22,114 @@
 
 package me.lucko.luckperms.api.context;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Holds contexts.
- * All contained contexts are immutable, and unlike {@link MutableContextSet}, contexts cannot be added or removed.
+ * Implementations may be either mutable or immutable.
  *
  * @since 2.13
  */
-public class ContextSet {
-    private static final ContextSet EMPTY = new ContextSet();
+public interface ContextSet {
 
     /**
-     * Make a singleton ContextSet from a context pair
-     * @param key the key
+     * Make a singleton ImmutableContextSet from a context pair
+     *
+     * @param key   the key
      * @param value the value
-     * @return a new ContextSet containing one KV pair
+     * @return a new ImmutableContextSet containing one KV pair
      * @throws NullPointerException if key or value is null
      */
-    public static ContextSet singleton(String key, String value) {
-        if (key == null) {
-            throw new NullPointerException("key");
-        }
-        if (value == null) {
-            throw new NullPointerException("value");
-        }
-
-        MutableContextSet set = new MutableContextSet();
-        set.add(key, value);
-        return set.immutableCopy();
+    static ImmutableContextSet singleton(String key, String value) {
+        return ImmutableContextSet.singleton(key, value);
     }
 
     /**
-     * Creates a ContextSet from an existing map
+     * Creates a ImmutableContextSet from an existing map
+     *
      * @param map the map to copy from
-     * @return a new ContextSet representing the pairs from the map
+     * @return a new ImmutableContextSet representing the pairs from the map
      * @throws NullPointerException if the map is null
      */
-    public static ContextSet fromMap(Map<String, String> map) {
-        if (map == null) {
-            throw new NullPointerException("map");
-        }
-
-        MutableContextSet set = new MutableContextSet();
-        set.addAll(map);
-        return set.immutableCopy();
+    static ImmutableContextSet fromMap(Map<String, String> map) {
+        return ImmutableContextSet.fromMap(map);
     }
 
     /**
-     * Creates a ContextSet from an existing iterable of Map Entries
+     * Creates a ImmutableContextSet from an existing iterable of Map Entries
+     *
      * @param iterable the iterable to copy from
-     * @return a new ContextSet representing the pairs in the iterable
+     * @return a new ImmutableContextSet representing the pairs in the iterable
      * @throws NullPointerException if the iterable is null
      */
-    public static ContextSet fromEntries(Iterable<Map.Entry<String, String>> iterable) {
-        if (iterable == null) {
-            throw new NullPointerException("iterable");
-        }
-
-        MutableContextSet set = new MutableContextSet();
-        set.addAll(iterable);
-        return set.immutableCopy();
+    static ImmutableContextSet fromEntries(Iterable<Map.Entry<String, String>> iterable) {
+        return ImmutableContextSet.fromEntries(iterable);
     }
 
     /**
-     * Creates a new ContextSet from an existing set.
+     * Creates a ImmutableContextSet from an existing multimap
+     *
+     * @param multimap the multimap to copy from
+     * @return a new ImmutableContextSet representing the pairs in the multimap
+     * @throws NullPointerException if the multimap is null
+     * @since 2.16
+     */
+    static ImmutableContextSet fromMultimap(Multimap<String, String> multimap) {
+        return ImmutableContextSet.fromMultimap(multimap);
+    }
+
+    /**
+     * Creates a new ImmutableContextSet from an existing set.
      * Only really useful for converting between mutable and immutable types.
+     *
      * @param contextSet the context set to copy from
-     * @return a new ContextSet with the same content and the one provided
+     * @return a new ImmutableContextSet with the same content and the one provided
      * @throws NullPointerException if contextSet is null
      */
-    public static ContextSet fromSet(ContextSet contextSet) {
-        if (contextSet == null) {
-            throw new NullPointerException("contextSet");
-        }
-
-        MutableContextSet set = new MutableContextSet();
-        set.addAll(contextSet.toSet());
-        return set.immutableCopy();
+    static ImmutableContextSet fromSet(ContextSet contextSet) {
+        return ImmutableContextSet.fromSet(contextSet);
     }
 
     /**
-     * Creates a new empty ContextSet.
-     * @return a new ContextSet
+     * Creates a new empty ImmutableContextSet.
+     *
+     * @return a new ImmutableContextSet
      */
-    public static ContextSet empty() {
-        return EMPTY;
-    }
-
-    final Set<Map.Entry<String, String>> contexts;
-
-    public ContextSet() {
-        this.contexts = new HashSet<>();
-    }
-
-    protected ContextSet(Set<Map.Entry<String, String>> contexts) {
-        this.contexts = contexts;
+    static ImmutableContextSet empty() {
+        return ImmutableContextSet.empty();
     }
 
     /**
      * Check to see if this set is in an immutable form
+     *
      * @return true if the set is immutable
      */
-    public boolean isImmutable() {
-        return true;
-    }
+    boolean isImmutable();
 
     /**
      * If the set is mutable, this method will return an immutable copy. Otherwise just returns itself.
+     *
      * @return an immutable ContextSet
      */
-    public ContextSet makeImmutable() {
-        return this;
-    }
+    ImmutableContextSet makeImmutable();
+
+    /**
+     * Creates a mutable copy of this set.
+     *
+     * @return a mutable ContextSet
+     * @since 2.16
+     */
+    MutableContextSet mutableCopy();
 
     /**
      * Converts this ContextSet to an immutable {@link Set} of {@link Map.Entry}s.
+     *
      * @return an immutable set
      */
-    public Set<Map.Entry<String, String>> toSet() {
-        synchronized (contexts) {
-            return ImmutableSet.copyOf(contexts);
-        }
-    }
+    Set<Map.Entry<String, String>> toSet();
 
     /**
      * Converts this ContextSet to an immutable {@link Map}
@@ -160,153 +139,66 @@ public class ContextSet {
      *
      * @return an immutable map
      */
-    public Map<String, String> toMap() {
-        synchronized (contexts) {
-            return ImmutableMap.copyOf(contexts.stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-        }
-    }
+    Map<String, String> toMap();
+
+    /**
+     * Converts this ContextSet to an immutable {@link Multimap}
+     *
+     * @return a multimap
+     * @since 2.16
+     */
+    Multimap<String, String> toMultimap();
 
     /**
      * Check if the set contains at least one value for the given key.
+     *
      * @param key the key to check for
      * @return true if the set contains a value for the key
      * @throws NullPointerException if the key is null
      */
-    public boolean containsKey(String key) {
-        if (key == null) {
-            throw new NullPointerException("key");
-        }
-
-        synchronized (contexts) {
-            for (Map.Entry<String, String> e : contexts) {
-                if (e.getKey().equalsIgnoreCase(key)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
+    boolean containsKey(String key);
 
     /**
      * Gets a set of all of the values mapped to the given key
+     *
      * @param key the key to find values for
      * @return a set of values
      * @throws NullPointerException if the key is null
      */
-    public Set<String> getValues(String key) {
-        if (key == null) {
-            throw new NullPointerException("key");
-        }
-
-        synchronized (contexts) {
-            return ImmutableSet.copyOf(contexts.stream()
-                    .filter(e -> e.getKey().equalsIgnoreCase(key))
-                    .map(Map.Entry::getValue)
-                    .collect(Collectors.toSet())
-            );
-        }
-    }
+    Set<String> getValues(String key);
 
     /**
      * Check if thr set contains a given key mapped to a given value
-     * @param key the key to look for
+     *
+     * @param key   the key to look for
      * @param value the value to look for (case sensitive)
      * @return true if the set contains the KV pair
      * @throws NullPointerException if the key or value is null
      */
-    public boolean has(String key, String value) {
-        if (key == null) {
-            throw new NullPointerException("key");
-        }
-        if (value == null) {
-            throw new NullPointerException("value");
-        }
-
-        synchronized (contexts) {
-            for (Map.Entry<String, String> e : contexts) {
-                if (!e.getKey().equalsIgnoreCase(key)) {
-                    continue;
-                }
-
-                if (!e.getValue().equals(value)) {
-                    continue;
-                }
-
-                return true;
-            }
-        }
-        return false;
-    }
+    boolean has(String key, String value);
 
     /**
      * Same as {@link #has(String, String)}, except ignores the case of the value.
-     * @param key the key to look for
+     *
+     * @param key   the key to look for
      * @param value the value to look for
      * @return true if the set contains the KV pair
      * @throws NullPointerException if the key or value is null
      */
-    public boolean hasIgnoreCase(String key, String value) {
-        if (key == null) {
-            throw new NullPointerException("key");
-        }
-        if (value == null) {
-            throw new NullPointerException("value");
-        }
-
-        synchronized (contexts) {
-            for (Map.Entry<String, String> e : contexts) {
-                if (!e.getKey().equalsIgnoreCase(key)) {
-                    continue;
-                }
-
-                if (!e.getValue().equalsIgnoreCase(value)) {
-                    continue;
-                }
-
-                return true;
-            }
-        }
-        return false;
-    }
+    boolean hasIgnoreCase(String key, String value);
 
     /**
      * Check if the set is empty
+     *
      * @return true if the set is empty
      */
-    public boolean isEmpty() {
-        synchronized (contexts) {
-            return contexts.isEmpty();
-        }
-    }
+    boolean isEmpty();
 
     /**
      * Gets the number of key-value context pairs in the set
+     *
      * @return the size of the set
      */
-    public int size() {
-        synchronized (contexts) {
-            return contexts.size();
-        }
-    }
+    int size();
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == this) return true;
-        if (!(o instanceof ContextSet)) return false;
-        final ContextSet other = (ContextSet) o;
-
-        final Object thisContexts = this.contexts;
-        final Object otherContexts = other.contexts;
-        return thisContexts == null ? otherContexts == null : thisContexts.equals(otherContexts);
-    }
-
-    @Override
-    public int hashCode() {
-        return 59 + (this.contexts == null ? 43 : this.contexts.hashCode());
-    }
-
-    @Override
-    public String toString() {
-        return "ContextSet(contexts=" + this.contexts + ")";
-    }
 }

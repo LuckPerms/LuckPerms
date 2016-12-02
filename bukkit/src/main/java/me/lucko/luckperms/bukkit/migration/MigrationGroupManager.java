@@ -36,6 +36,7 @@ import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
+
 import org.anjocaido.groupmanager.GlobalGroups;
 import org.anjocaido.groupmanager.GroupManager;
 import org.anjocaido.groupmanager.data.Group;
@@ -43,7 +44,11 @@ import org.anjocaido.groupmanager.data.User;
 import org.anjocaido.groupmanager.dataholder.WorldDataHolder;
 import org.anjocaido.groupmanager.dataholder.worlds.WorldsHolder;
 
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class MigrationGroupManager extends SubCommand<Object> {
@@ -161,7 +166,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
                 UUID uuid;
                 try {
                     uuid = UUID.fromString(user.getUUID());
-                } catch (IllegalArgumentException e){
+                } catch (IllegalArgumentException e) {
                     continue;
                 }
 
@@ -272,11 +277,13 @@ public class MigrationGroupManager extends SubCommand<Object> {
             if (primaryGroup != null) {
                 try {
                     user.setPermission("group." + primaryGroup, true);
-                } catch (ObjectAlreadyHasException ignored) {}
+                } catch (ObjectAlreadyHasException ignored) {
+                }
                 user.setPrimaryGroup(primaryGroup);
                 try {
                     user.unsetPermission("group.default");
-                } catch (ObjectLacksException ignored) {}
+                } catch (ObjectLacksException ignored) {
+                }
             }
 
             plugin.getStorage().saveUser(user);

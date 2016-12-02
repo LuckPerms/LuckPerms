@@ -22,10 +22,12 @@
 
 package me.lucko.luckperms.common.config;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import lombok.AccessLevel;
 import lombok.Getter;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.constants.Patterns;
 import me.lucko.luckperms.common.defaults.Rule;
@@ -38,6 +40,7 @@ import java.util.Map;
 
 /**
  * A thread-safe config abstraction
+ *
  * @param <T> the plugin type
  */
 @Getter
@@ -90,13 +93,19 @@ public abstract class AbstractConfiguration<T extends LuckPermsPlugin> implement
     }
 
     protected abstract void init();
+
     protected abstract String getString(String path, String def);
+
     protected abstract int getInt(String path, int def);
+
     protected abstract boolean getBoolean(String path, boolean def);
+
     protected abstract List<String> getList(String path, List<String> def);
+
     protected abstract List<String> getObjectList(String path, List<String> def);
+
     protected abstract Map<String, String> getMap(String path, Map<String, String> def);
-    
+
     public void load(String defaultServerName, boolean defaultIncludeGlobal, String defaultStorage) {
         server = getString("server", defaultServerName);
         syncTime = getInt("data.sync-minutes", 3);
@@ -115,7 +124,8 @@ public abstract class AbstractConfiguration<T extends LuckPermsPlugin> implement
         for (Map.Entry<String, String> e : weights.entrySet()) {
             try {
                 mb.put(e.getKey().toLowerCase(), Integer.parseInt(e.getValue()));
-            } catch (NumberFormatException ignored) {}
+            } catch (NumberFormatException ignored) {
+            }
         }
         groupWeights = mb.build();
         logNotify = getBoolean("log-notify", true);
@@ -166,7 +176,7 @@ public abstract class AbstractConfiguration<T extends LuckPermsPlugin> implement
         redisEnabled = getBoolean("redis.enabled", false);
         redisAddress = getString("redis.address", null);
         redisPassword = getString("redis.password", "");
-        
+
         if (Patterns.NON_ALPHA_NUMERIC.matcher(getServer()).find()) {
             plugin.getLog().severe("Server name defined in config.yml contains invalid characters. Server names can " +
                     "only contain alphanumeric characters.\nDefined server name '" + getServer() + "' will be replaced with '" +

@@ -25,6 +25,7 @@ package me.lucko.luckperms.common.contexts;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+
 import me.lucko.luckperms.api.context.ContextListener;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.IContextCalculator;
@@ -45,7 +46,7 @@ public class ContextManager<T> {
             .build(new CacheLoader<T, ContextSet>() {
                 @Override
                 public ContextSet load(T t) {
-                    return calculateApplicableContext(t, MutableContextSet.empty()).makeImmutable();
+                    return calculateApplicableContext(t, MutableContextSet.create()).makeImmutable();
                 }
             });
 

@@ -37,13 +37,14 @@ import java.util.SortedSet;
 public interface PermissionHolder {
 
     /**
-     * @return the identifier for this object. either a uuid string or name
-     * However, you should really just use {@link User#getUuid()}, {@link User#getName()} or {@link Group#getName()}
+     * @return the identifier for this object. either a uuid string or name However, you should really just use {@link
+     * User#getUuid()}, {@link User#getName()} or {@link Group#getName()}
      */
     String getObjectName();
 
     /**
      * Gets an immutable Set of the objects permission nodes
+     *
      * @return an immutable set of permissions in priority order
      * @since 2.6
      */
@@ -51,6 +52,7 @@ public interface PermissionHolder {
 
     /**
      * Similar to {@link #getPermissions()}, except excluding transient permissions
+     *
      * @return a set of nodes
      * @since 2.6
      */
@@ -58,6 +60,7 @@ public interface PermissionHolder {
 
     /**
      * Similar to {@link #getPermissions()}, except excluding non-transient permissions
+     *
      * @return a set of nodes
      * @since 2.6
      */
@@ -66,6 +69,7 @@ public interface PermissionHolder {
 
     /**
      * Gets an immutable set of the nodes that this object has and inherits
+     *
      * @return an immutable set of permissions
      * @since 2.6
      * @deprecated in favour of {@link #getAllNodes(Contexts)}
@@ -78,6 +82,7 @@ public interface PermissionHolder {
      * Unlike {@link #getAllNodesFiltered(Contexts)}, this method will not filter individual nodes. The context is only
      * used to determine which groups should apply.
      * Nodes are sorted into priority order.
+     *
      * @param contexts the context for the lookup,
      * @return a mutable sorted set of permissions
      * @throws NullPointerException if the context is null
@@ -89,6 +94,7 @@ public interface PermissionHolder {
      * Gets a mutable set of the nodes that is objects has and inherits, filtered by context.
      * Unlike {@link #getAllNodes(Contexts)}, this method WILL filter individual nodes, and only return ones that fully
      * meet the context provided.
+     *
      * @param contexts the context for the lookup
      * @return a mutable set of permissions
      * @throws NullPointerException if the context is null
@@ -98,6 +104,7 @@ public interface PermissionHolder {
 
     /**
      * Gets an immutable Map of the objects permission nodes
+     *
      * @return an immutable map of permissions
      * @deprecated in favour of {@link #getPermissions()}
      */
@@ -106,6 +113,7 @@ public interface PermissionHolder {
 
     /**
      * Checks to see if the object has a certain permission
+     *
      * @param node the node to check for
      * @return a Tristate for the holders permission status for the node
      * @throws NullPointerException if the node is null
@@ -115,6 +123,7 @@ public interface PermissionHolder {
 
     /**
      * Checks to see if the object has a certain permission
+     *
      * @param node the node to check for
      * @return a Tristate for the holders permission status for the node
      * @throws NullPointerException if the node is null
@@ -124,75 +133,82 @@ public interface PermissionHolder {
 
     /**
      * Checks to see if the object has a certain permission
+     *
      * @param node The permission node
-     * @param b If the node is true/false(negated)
+     * @param b    If the node is true/false(negated)
      * @return true if the object has the permission
-     * @throws NullPointerException if the node is null
+     * @throws NullPointerException     if the node is null
      * @throws IllegalArgumentException if the node is invalid
      */
     boolean hasPermission(String node, boolean b);
 
     /**
      * Checks to see the the object has a permission on a certain server
-     * @param node The permission node
-     * @param b If the node is true/false(negated)
+     *
+     * @param node   The permission node
+     * @param b      If the node is true/false(negated)
      * @param server The server
      * @return true if the object has the permission
-     * @throws NullPointerException if the node or server is null
+     * @throws NullPointerException     if the node or server is null
      * @throws IllegalArgumentException if the node or server is invalid
      */
     boolean hasPermission(String node, boolean b, String server);
 
     /**
      * Checks to see the the object has a permission on a certain server and world
-     * @param node The permission node
-     * @param b If the node is true/false(negated)
+     *
+     * @param node   The permission node
+     * @param b      If the node is true/false(negated)
      * @param server The server
-     * @param world The world
+     * @param world  The world
      * @return true if the object has the permission
-     * @throws NullPointerException if the node, server or world is null
+     * @throws NullPointerException     if the node, server or world is null
      * @throws IllegalArgumentException if the node, server or world is invalid
      */
     boolean hasPermission(String node, boolean b, String server, String world);
 
     /**
      * Checks to see the the object has a permission
-     * @param node The permission node
-     * @param b If the node is true/false(negated)
+     *
+     * @param node      The permission node
+     * @param b         If the node is true/false(negated)
      * @param temporary if the permission is temporary
      * @return true if the object has the permission
-     * @throws NullPointerException if the node is null
+     * @throws NullPointerException     if the node is null
      * @throws IllegalArgumentException if the node is invalid
      */
     boolean hasPermission(String node, boolean b, boolean temporary);
 
     /**
      * Checks to see the the object has a permission on a certain server
-     * @param node The permission node
-     * @param b If the node is true/false(negated)
-     * @param server The server to check on
+     *
+     * @param node      The permission node
+     * @param b         If the node is true/false(negated)
+     * @param server    The server to check on
      * @param temporary if the permission is temporary
      * @return true if the object has the permission
-     * @throws NullPointerException if the node or server is null
+     * @throws NullPointerException     if the node or server is null
      * @throws IllegalArgumentException if the node or server is invalid
      */
     boolean hasPermission(String node, boolean b, String server, boolean temporary);
 
     /**
      * Checks to see the the object has a permission on a certain server and world
-     * @param node The permission node
-     * @param b If the node is true/false(negated)
-     * @param server The server to check on
-     * @param world The world to check on
+     *
+     * @param node      The permission node
+     * @param b         If the node is true/false(negated)
+     * @param server    The server to check on
+     * @param world     The world to check on
      * @param temporary if the permission is temporary
      * @return true if the object has the permission
-     * @throws NullPointerException if the node, server or world is null
+     * @throws NullPointerException     if the node, server or world is null
      * @throws IllegalArgumentException if the node, server or world is invalid
      */
     boolean hasPermission(String node, boolean b, String server, String world, boolean temporary);
 
     /**
      * Cheks to see if the object inherits a certain permission
+     *
      * @param node the node to check for
      * @return a Tristate for the holders inheritance status for the node
      * @throws NullPointerException if the node is null
@@ -202,78 +218,85 @@ public interface PermissionHolder {
 
     /**
      * Checks to see if the object inherits a certain permission
+     *
      * @param node The permission node
-     * @param b If the node is true/false(negated)
+     * @param b    If the node is true/false(negated)
      * @return true if the object inherits the permission
-     * @throws NullPointerException if the node is null
+     * @throws NullPointerException     if the node is null
      * @throws IllegalArgumentException if the node is invalid
      */
     boolean inheritsPermission(String node, boolean b);
 
     /**
      * Checks to see the the object inherits a permission on a certain server
-     * @param node The permission node
-     * @param b If the node is true/false(negated)
+     *
+     * @param node   The permission node
+     * @param b      If the node is true/false(negated)
      * @param server The server
      * @return true if the object inherits the permission
-     * @throws NullPointerException if the node or server is null
+     * @throws NullPointerException     if the node or server is null
      * @throws IllegalArgumentException if the node or server is invalid
      */
     boolean inheritsPermission(String node, boolean b, String server);
 
     /**
      * Checks to see the the object inherits a permission on a certain server and world
-     * @param node The permission node
-     * @param b If the node is true/false(negated)
+     *
+     * @param node   The permission node
+     * @param b      If the node is true/false(negated)
      * @param server The server
-     * @param world The world
+     * @param world  The world
      * @return true if the object inherits the permission
-     * @throws NullPointerException if the node, server or world is null
+     * @throws NullPointerException     if the node, server or world is null
      * @throws IllegalArgumentException if the node server or world is invalid
      */
     boolean inheritsPermission(String node, boolean b, String server, String world);
 
     /**
      * Checks to see if the object inherits a permission
-     * @param node The permission node
-     * @param b If the node is true/false(negated)
+     *
+     * @param node      The permission node
+     * @param b         If the node is true/false(negated)
      * @param temporary if the permission is temporary
      * @return true if the object inherits the permission
-     * @throws NullPointerException if the node is null
+     * @throws NullPointerException     if the node is null
      * @throws IllegalArgumentException if the node is invalid
      */
     boolean inheritsPermission(String node, boolean b, boolean temporary);
 
     /**
      * Checks to see if the object inherits a permission on a certain server
-     * @param node The permission node
-     * @param b If the node is true/false(negated)
-     * @param server The server
+     *
+     * @param node      The permission node
+     * @param b         If the node is true/false(negated)
+     * @param server    The server
      * @param temporary if the permission is temporary
      * @return true if the object inherits the permission
-     * @throws NullPointerException if the node or server is null
+     * @throws NullPointerException     if the node or server is null
      * @throws IllegalArgumentException if the node or server is invalid
      */
     boolean inheritsPermission(String node, boolean b, String server, boolean temporary);
 
     /**
      * Checks to see if the object inherits a permission on a certain server and world
-     * @param node The permission node
-     * @param b If the node is true/false(negated)
-     * @param server The server
-     * @param world The world
+     *
+     * @param node      The permission node
+     * @param b         If the node is true/false(negated)
+     * @param server    The server
+     * @param world     The world
      * @param temporary if the permission is temporary
      * @return true if the object inherits the permission
-     * @throws NullPointerException if the node, server or world is null
+     * @throws NullPointerException     if the node, server or world is null
      * @throws IllegalArgumentException if the node, server or world if invalid
      */
     boolean inheritsPermission(String node, boolean b, String server, String world, boolean temporary);
 
     /**
      * Sets a permission for the object
+     *
      * @param node The node to be set
      * @throws ObjectAlreadyHasException if the object already has the permission
-     * @throws NullPointerException if the node is null
+     * @throws NullPointerException      if the node is null
      * @since 2.6
      */
     void setPermission(Node node) throws ObjectAlreadyHasException;
@@ -289,20 +312,22 @@ public interface PermissionHolder {
      * want it to persist, and have to worry about removing it when they log out.
      *
      * <p> For unsetting a transient permission, see {@link #unsetTransientPermission(Node)}
+     *
      * @param node The node to be set
      * @throws ObjectAlreadyHasException if the object already has the permission
-     * @throws NullPointerException if the node is null
+     * @throws NullPointerException      if the node is null
      * @since 2.6
      */
     void setTransientPermission(Node node) throws ObjectAlreadyHasException;
 
     /**
      * Sets a permission for the object
-     * @param node The node to be set
+     *
+     * @param node  The node to be set
      * @param value What to set the node to - true/false(negated)
      * @throws ObjectAlreadyHasException if the object already has the permission
-     * @throws NullPointerException if the node is null
-     * @throws IllegalArgumentException if the node is invalid
+     * @throws NullPointerException      if the node is null
+     * @throws IllegalArgumentException  if the node is invalid
      * @deprecated in favour of {@link #setPermission(Node)}
      */
     @Deprecated
@@ -310,12 +335,13 @@ public interface PermissionHolder {
 
     /**
      * Sets a permission for the object on a specific server
-     * @param node The node to set
-     * @param value What to set the node to - true/false(negated)
+     *
+     * @param node   The node to set
+     * @param value  What to set the node to - true/false(negated)
      * @param server The server to set the permission on
      * @throws ObjectAlreadyHasException if the object already has the permission
-     * @throws NullPointerException if the node or server is null
-     * @throws IllegalArgumentException if the node or server is invalid
+     * @throws NullPointerException      if the node or server is null
+     * @throws IllegalArgumentException  if the node or server is invalid
      * @deprecated in favour of {@link #setPermission(Node)}
      */
     @Deprecated
@@ -323,13 +349,14 @@ public interface PermissionHolder {
 
     /**
      * Sets a permission for the object on a specific server and world
-     * @param node The node to set
-     * @param value What to set the node to - true/false(negated)
+     *
+     * @param node   The node to set
+     * @param value  What to set the node to - true/false(negated)
      * @param server The server to set the permission on
-     * @param world The world to set the permission on
+     * @param world  The world to set the permission on
      * @throws ObjectAlreadyHasException if the object already has the permission
-     * @throws NullPointerException if the node, server or world is null
-     * @throws IllegalArgumentException if the node, server or world is invalid
+     * @throws NullPointerException      if the node, server or world is null
+     * @throws IllegalArgumentException  if the node, server or world is invalid
      * @deprecated in favour of {@link #setPermission(Node)}
      */
     @Deprecated
@@ -337,12 +364,13 @@ public interface PermissionHolder {
 
     /**
      * Sets a temporary permission for the object
-     * @param node The node to set
-     * @param value What to set the node to - true/false(negated)
+     *
+     * @param node     The node to set
+     * @param value    What to set the node to - true/false(negated)
      * @param expireAt The time in unixtime when the permission will expire
      * @throws ObjectAlreadyHasException if the object already has the permission
-     * @throws NullPointerException if the node is null
-     * @throws IllegalArgumentException if the node is invalid or if the expiry time is in the past
+     * @throws NullPointerException      if the node is null
+     * @throws IllegalArgumentException  if the node is invalid or if the expiry time is in the past
      * @deprecated in favour of {@link #setPermission(Node)}
      */
     @Deprecated
@@ -350,13 +378,14 @@ public interface PermissionHolder {
 
     /**
      * Sets a temporary permission for the object on a specific server
-     * @param node The node to set
-     * @param value What to set the node to - true/false(negated)
-     * @param server The server to set the permission on
+     *
+     * @param node     The node to set
+     * @param value    What to set the node to - true/false(negated)
+     * @param server   The server to set the permission on
      * @param expireAt The time in unixtime when the permission will expire
      * @throws ObjectAlreadyHasException if the object already has the permission
-     * @throws NullPointerException if the node or server is null
-     * @throws IllegalArgumentException if the node/server is invalid or if the expiry time is in the past
+     * @throws NullPointerException      if the node or server is null
+     * @throws IllegalArgumentException  if the node/server is invalid or if the expiry time is in the past
      * @deprecated in favour of {@link #setPermission(Node)}
      */
     @Deprecated
@@ -364,14 +393,15 @@ public interface PermissionHolder {
 
     /**
      * Sets a temporary permission for the object on a specific server and world
-     * @param node The node to set
-     * @param value What to set the node to - true/false(negated)
-     * @param server The server to set the permission on
-     * @param world The world to set the permission on
+     *
+     * @param node     The node to set
+     * @param value    What to set the node to - true/false(negated)
+     * @param server   The server to set the permission on
+     * @param world    The world to set the permission on
      * @param expireAt The time in unixtime when the permission will expire
      * @throws ObjectAlreadyHasException if the object already has the permission
-     * @throws NullPointerException if the node, server or world is null
-     * @throws IllegalArgumentException if the node/server/world is invalid, or if the expiry time is in the past
+     * @throws NullPointerException      if the node, server or world is null
+     * @throws IllegalArgumentException  if the node/server/world is invalid, or if the expiry time is in the past
      * @deprecated in favour of {@link #setPermission(Node)}
      */
     @Deprecated
@@ -379,6 +409,7 @@ public interface PermissionHolder {
 
     /**
      * Unsets a permission for the object
+     *
      * @param node The node to be unset
      * @throws ObjectLacksException if the node wasn't already set
      * @throws NullPointerException if the node is null
@@ -388,6 +419,7 @@ public interface PermissionHolder {
 
     /**
      * Unsets a transient permission for the object
+     *
      * @param node The node to be unset
      * @throws ObjectLacksException if the node wasn't already set
      * @throws NullPointerException if the node is null
@@ -397,10 +429,11 @@ public interface PermissionHolder {
 
     /**
      * Unsets a permission for the object
-     * @param node The node to be unset
+     *
+     * @param node      The node to be unset
      * @param temporary if the permission being removed is temporary
-     * @throws ObjectLacksException if the node wasn't already set
-     * @throws NullPointerException if the node is null
+     * @throws ObjectLacksException     if the node wasn't already set
+     * @throws NullPointerException     if the node is null
      * @throws IllegalArgumentException if the node is invalid
      * @deprecated in favour of {@link #unsetPermission(Node)}
      */
@@ -409,9 +442,10 @@ public interface PermissionHolder {
 
     /**
      * Unsets a permission for the object
+     *
      * @param node The node to be unset
-     * @throws ObjectLacksException if the node wasn't already set
-     * @throws NullPointerException if the node is null
+     * @throws ObjectLacksException     if the node wasn't already set
+     * @throws NullPointerException     if the node is null
      * @throws IllegalArgumentException if the node is invalid
      * @deprecated in favour of {@link #unsetPermission(Node)}
      */
@@ -420,10 +454,11 @@ public interface PermissionHolder {
 
     /**
      * Unsets a permission for the object on a specific server
-     * @param node The node to be unset
+     *
+     * @param node   The node to be unset
      * @param server The server to unset the node on
-     * @throws ObjectLacksException if the node wasn't already set
-     * @throws NullPointerException if the node or server is null
+     * @throws ObjectLacksException     if the node wasn't already set
+     * @throws NullPointerException     if the node or server is null
      * @throws IllegalArgumentException if the node or server is invalid
      * @deprecated in favour of {@link #unsetPermission(Node)}
      */
@@ -432,11 +467,12 @@ public interface PermissionHolder {
 
     /**
      * Unsets a permission for the object on a specific server and world
-     * @param node The node to be unset
+     *
+     * @param node   The node to be unset
      * @param server The server to unset the node on
-     * @param world The world to unset the node on
-     * @throws ObjectLacksException if the node wasn't already set
-     * @throws NullPointerException if the node, server or world is null
+     * @param world  The world to unset the node on
+     * @throws ObjectLacksException     if the node wasn't already set
+     * @throws NullPointerException     if the node, server or world is null
      * @throws IllegalArgumentException if the node, server or world is invalid
      * @deprecated in favour of {@link #unsetPermission(Node)}
      */
@@ -445,11 +481,12 @@ public interface PermissionHolder {
 
     /**
      * Unsets a permission for the object on a specific server
-     * @param node The node to be unset
-     * @param server The server to unset the node on
+     *
+     * @param node      The node to be unset
+     * @param server    The server to unset the node on
      * @param temporary if the permission being unset is temporary
-     * @throws ObjectLacksException if the node wasn't already set
-     * @throws NullPointerException if the node or server is null
+     * @throws ObjectLacksException     if the node wasn't already set
+     * @throws NullPointerException     if the node or server is null
      * @throws IllegalArgumentException if the node or server is invalid
      * @deprecated in favour of {@link #unsetPermission(Node)}
      */
@@ -458,12 +495,13 @@ public interface PermissionHolder {
 
     /**
      * Unsets a permission for the object on a specific server and world
-     * @param node The node to be unset
-     * @param server The server to unset the node on
-     * @param world The world to unset the node on
+     *
+     * @param node      The node to be unset
+     * @param server    The server to unset the node on
+     * @param world     The world to unset the node on
      * @param temporary if the permission being unset is temporary
-     * @throws ObjectLacksException if the node wasn't already set
-     * @throws NullPointerException if the node, server or world is null
+     * @throws ObjectLacksException     if the node wasn't already set
+     * @throws NullPointerException     if the node, server or world is null
      * @throws IllegalArgumentException if the node, server or world is invalid
      * @deprecated in favour of {@link #unsetPermission(Node)}
      */
@@ -472,10 +510,11 @@ public interface PermissionHolder {
 
     /**
      * Gets the permissions and inherited permissions that apply to a specific server and world
-     * @param server The server to get nodes for
-     * @param world The world to get nodes for
+     *
+     * @param server         The server to get nodes for
+     * @param world          The world to get nodes for
      * @param excludedGroups Groups that shouldn't be inherited (to prevent circular inheritance issues)
-     * @param possibleNodes A list of possible permission nodes for wildcard permission handling
+     * @param possibleNodes  A list of possible permission nodes for wildcard permission handling
      * @return a {@link Map} of the permissions
      * @deprecated in favour of {@link #getPermissions(String, String, Map, boolean, List, boolean)}
      */
@@ -484,8 +523,9 @@ public interface PermissionHolder {
 
     /**
      * Gets the permissions and inherited permissions that apply to a specific server and world
-     * @param server The server to get nodes for
-     * @param world The world to get nodes for
+     *
+     * @param server         The server to get nodes for
+     * @param world          The world to get nodes for
      * @param excludedGroups Groups that shouldn't be inherited (to prevent circular inheritance issues)
      * @return a {@link Map} of the permissions
      * @deprecated in favour of {@link #getPermissions(String, String, Map, boolean, List, boolean)}
@@ -495,9 +535,10 @@ public interface PermissionHolder {
 
     /**
      * Gets the permissions and inherited permissions that apply to a specific server
-     * @param server The server to get nodes for
+     *
+     * @param server         The server to get nodes for
      * @param excludedGroups Groups that shouldn't be inherited (to prevent circular inheritance issues)
-     * @param possibleNodes A list of possible permission nodes for wildcard permission handling
+     * @param possibleNodes  A list of possible permission nodes for wildcard permission handling
      * @return a {@link Map} of the permissions
      * @deprecated in favour of {@link #getPermissions(String, String, Map, boolean, List, boolean)}
      */
@@ -506,7 +547,8 @@ public interface PermissionHolder {
 
     /**
      * Gets the permissions and inherited permissions that apply to a specific server
-     * @param server The server to get nodes for
+     *
+     * @param server         The server to get nodes for
      * @param excludedGroups Groups that shouldn't be inherited (to prevent circular inheritance issues)
      * @return a {@link Map} of the permissions
      * @deprecated in favour of {@link #getPermissions(String, String, Map, boolean, List, boolean)}
@@ -516,12 +558,13 @@ public interface PermissionHolder {
 
     /**
      * Convert the holders nodes into a Map of permissions to be applied on the platform
-     * @param server the server
-     * @param world the world
-     * @param extraContext any extra context to filter by
+     *
+     * @param server        the server
+     * @param world         the world
+     * @param extraContext  any extra context to filter by
      * @param includeGlobal whether to include global nodes
      * @param possibleNodes a list of possible permissions for resolving wildcards
-     * @param applyGroups if inherited group permissions should be included
+     * @param applyGroups   if inherited group permissions should be included
      * @return a map of permissions
      * @since 2.6
      * @deprecated in favour of {@link #getAllNodesFiltered(Contexts)}
@@ -531,6 +574,7 @@ public interface PermissionHolder {
 
     /**
      * Processes the nodes and returns the temporary ones.
+     *
      * @return a map of temporary nodes
      * @deprecated in favour of {@link #getTemporaryPermissionNodes()}
      */
@@ -539,6 +583,7 @@ public interface PermissionHolder {
 
     /**
      * Processes the nodes and returns the temporary ones.
+     *
      * @return a set of temporary nodes
      * @since 2.6
      */
@@ -546,6 +591,7 @@ public interface PermissionHolder {
 
     /**
      * Processes the nodes and returns the non-temporary ones.
+     *
      * @return a map of permanent nodes
      * @deprecated in favour of {@link #getPermanentPermissionNodes()}
      */
@@ -554,6 +600,7 @@ public interface PermissionHolder {
 
     /**
      * Processes the nodes and returns the non-temporary ones.
+     *
      * @return a set of permanent nodes
      * @since 2.6
      */

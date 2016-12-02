@@ -22,7 +22,13 @@
 
 package me.lucko.luckperms.bukkit.migration;
 
-import de.bananaco.bpermissions.api.*;
+import de.bananaco.bpermissions.api.Calculable;
+import de.bananaco.bpermissions.api.CalculableType;
+import de.bananaco.bpermissions.api.Group;
+import de.bananaco.bpermissions.api.Permission;
+import de.bananaco.bpermissions.api.World;
+import de.bananaco.bpermissions.api.WorldManager;
+
 import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.common.LuckPermsPlugin;
@@ -39,7 +45,11 @@ import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 import static me.lucko.luckperms.common.constants.Permission.MIGRATION;
 
@@ -83,98 +93,6 @@ public class MigrationBPermissions extends SubCommand<Object> {
         }
     }
 
-    public MigrationBPermissions() {
-        super("bpermissions", "Migration from bPermissions", MIGRATION, Predicates.alwaysFalse(), null);
-    }
-
-    @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) throws CommandException {
-        final Logger log = plugin.getLog();
-
-        WorldManager worldManager = WorldManager.getInstance();
-        if (worldManager == null) {
-            log.severe("bPermissions Migration: Error -> bPermissions is not loaded.");
-            return CommandResult.STATE_ERROR;
-        }
-
-        log.info("bPermissions Migration: Forcing the plugin to load all data. This could take a while.");
-        for (World world : worldManager.getAllWorlds()) {
-            Set<String> users = getUsers(world);
-            if (users == null) {
-                log.severe("bPermissions Migration: Couldn't get a list of users.");
-                return CommandResult.FAILURE;
-            }
-            users.forEach(s -> world.loadOne(s, CalculableType.USER));
-        }
-
-        // Migrate one world at a time.
-        log.info("bPermissions Migration: Starting world migration.");
-        for (World world : worldManager.getAllWorlds()) {
-            log.info("bPermissions Migration: Migrating world: " + world.getName());
-            
-            // Migrate all groups
-            log.info("bPermissions Migration: Starting group migration in world " + world.getName() + ".");
-            int groupCount = 0;
-            for (Calculable group : world.getAll(CalculableType.GROUP)) {
-                groupCount++;
-                String groupName = group.getName().toLowerCase();
-                if (group.getName().equalsIgnoreCase(world.getDefaultGroup())) {
-                    groupName = "default";
-                }
-
-                // Make a LuckPerms group for the one being migrated.
-                plugin.getStorage().createAndLoadGroup(groupName).join();
-                me.lucko.luckperms.common.core.model.Group lpGroup = plugin.getGroupManager().getIfLoaded(groupName);
-                try {
-                    LogEntry.build()
-                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
-                            .acted(lpGroup).action("create")
-                            .build().submit(plugin);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-                
-                migrateHolder(plugin, world, group, lpGroup);
-                plugin.getStorage().saveGroup(lpGroup);
-            }
-            log.info("bPermissions Migration: Migrated " + groupCount + " groups in world " + world.getName() + ".");
-
-            // Migrate all users
-            log.info("bPermissions Migration: Starting user migration in world " + world.getName() + ".");
-            int userCount = 0;
-            for (Calculable user : world.getAll(CalculableType.USER)) {
-                userCount++;
-
-                // There is no mention of UUIDs in the API. I assume that name = uuid. idk?
-                UUID uuid;
-                try {
-                    uuid = UUID.fromString(user.getName());
-                } catch (IllegalArgumentException e) {
-                    uuid = plugin.getUUID(user.getName());
-                }
-
-                if (uuid == null) {
-                    log.info("bPermissions Migration: Unable to migrate user " + user.getName() + ". Unable to get UUID.");
-                    continue;
-                }
-
-                // Make a LuckPerms user for the one being migrated.
-                plugin.getStorage().loadUser(uuid, "null").join();
-                User lpUser = plugin.getUserManager().get(uuid);
-
-                migrateHolder(plugin, world, user, lpUser);
-
-                plugin.getStorage().saveUser(lpUser);
-                plugin.getUserManager().cleanup(lpUser);
-            }
-
-            log.info("bPermissions Migration: Migrated " + userCount + " users in world " + world.getName() + ".");
-        }
-
-        log.info("bPermissions Migration: Success! Completed without any errors.");
-        return CommandResult.SUCCESS;
-    }
-    
     private static void migrateHolder(LuckPermsPlugin plugin, World world, Calculable c, PermissionHolder holder) {
         // Migrate the groups permissions in this world
         for (Permission p : c.getPermissions()) {
@@ -251,5 +169,97 @@ public class MigrationBPermissions extends SubCommand<Object> {
                 }
             }
         }
+    }
+
+    public MigrationBPermissions() {
+        super("bpermissions", "Migration from bPermissions", MIGRATION, Predicates.alwaysFalse(), null);
+    }
+
+    @Override
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) throws CommandException {
+        final Logger log = plugin.getLog();
+
+        WorldManager worldManager = WorldManager.getInstance();
+        if (worldManager == null) {
+            log.severe("bPermissions Migration: Error -> bPermissions is not loaded.");
+            return CommandResult.STATE_ERROR;
+        }
+
+        log.info("bPermissions Migration: Forcing the plugin to load all data. This could take a while.");
+        for (World world : worldManager.getAllWorlds()) {
+            Set<String> users = getUsers(world);
+            if (users == null) {
+                log.severe("bPermissions Migration: Couldn't get a list of users.");
+                return CommandResult.FAILURE;
+            }
+            users.forEach(s -> world.loadOne(s, CalculableType.USER));
+        }
+
+        // Migrate one world at a time.
+        log.info("bPermissions Migration: Starting world migration.");
+        for (World world : worldManager.getAllWorlds()) {
+            log.info("bPermissions Migration: Migrating world: " + world.getName());
+
+            // Migrate all groups
+            log.info("bPermissions Migration: Starting group migration in world " + world.getName() + ".");
+            int groupCount = 0;
+            for (Calculable group : world.getAll(CalculableType.GROUP)) {
+                groupCount++;
+                String groupName = group.getName().toLowerCase();
+                if (group.getName().equalsIgnoreCase(world.getDefaultGroup())) {
+                    groupName = "default";
+                }
+
+                // Make a LuckPerms group for the one being migrated.
+                plugin.getStorage().createAndLoadGroup(groupName).join();
+                me.lucko.luckperms.common.core.model.Group lpGroup = plugin.getGroupManager().getIfLoaded(groupName);
+                try {
+                    LogEntry.build()
+                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .acted(lpGroup).action("create")
+                            .build().submit(plugin);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+
+                migrateHolder(plugin, world, group, lpGroup);
+                plugin.getStorage().saveGroup(lpGroup);
+            }
+            log.info("bPermissions Migration: Migrated " + groupCount + " groups in world " + world.getName() + ".");
+
+            // Migrate all users
+            log.info("bPermissions Migration: Starting user migration in world " + world.getName() + ".");
+            int userCount = 0;
+            for (Calculable user : world.getAll(CalculableType.USER)) {
+                userCount++;
+
+                // There is no mention of UUIDs in the API. I assume that name = uuid. idk?
+                UUID uuid;
+                try {
+                    uuid = UUID.fromString(user.getName());
+                } catch (IllegalArgumentException e) {
+                    uuid = plugin.getUUID(user.getName());
+                }
+
+                if (uuid == null) {
+                    log.info("bPermissions Migration: Unable to migrate user " + user.getName() + ". Unable to get UUID.");
+                    continue;
+                }
+
+                // Make a LuckPerms user for the one being migrated.
+                plugin.getStorage().loadUser(uuid, "null").join();
+                User lpUser = plugin.getUserManager().get(uuid);
+
+                migrateHolder(plugin, world, user, lpUser);
+
+                plugin.getStorage().saveUser(lpUser);
+                plugin.getUserManager().cleanup(lpUser);
+            }
+
+            log.info("bPermissions Migration: Migrated " + userCount + " users in world " + world.getName() + ".");
+        }
+
+        log.info("bPermissions Migration: Success! Completed without any errors.");
+        return CommandResult.SUCCESS;
     }
 }

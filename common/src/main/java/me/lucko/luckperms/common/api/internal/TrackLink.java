@@ -26,6 +26,7 @@ import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
+
 import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;

@@ -25,6 +25,7 @@ package me.lucko.luckperms.common.defaults;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
+
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.User;
@@ -92,13 +93,15 @@ public class Rule {
         for (String s : toTake) {
             try {
                 user.unsetPermission(NodeFactory.fromSerialisedNode(s, true));
-            } catch (ObjectLacksException ignored) {}
+            } catch (ObjectLacksException ignored) {
+            }
         }
 
         for (String s : toGive) {
             try {
                 user.setPermission(NodeFactory.fromSerialisedNode(s, true));
-            } catch (ObjectAlreadyHasException ignored) {}
+            } catch (ObjectAlreadyHasException ignored) {
+            }
         }
 
         if (setPrimaryGroup != null) {

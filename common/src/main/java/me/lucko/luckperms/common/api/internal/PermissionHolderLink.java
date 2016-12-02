@@ -24,15 +24,28 @@ package me.lucko.luckperms.common.api.internal;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
-import me.lucko.luckperms.api.*;
+
+import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.LocalizedNode;
+import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.PermissionHolder;
+import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.utils.ExtractedContexts;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
 
-import static me.lucko.luckperms.common.api.internal.Utils.*;
+import static me.lucko.luckperms.common.api.internal.Utils.checkNode;
+import static me.lucko.luckperms.common.api.internal.Utils.checkServer;
+import static me.lucko.luckperms.common.api.internal.Utils.checkTime;
 import static me.lucko.luckperms.common.core.model.PermissionHolder.exportToLegacy;
 
 /**

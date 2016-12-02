@@ -24,6 +24,7 @@ package me.lucko.luckperms.common.core;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 

@@ -32,6 +32,7 @@ public interface UserManager extends Manager<UserIdentifier, User> {
 
     /**
      * Get a user object by name
+     *
      * @param name The name to search by
      * @return a {@link User} object if the user is loaded, returns null if the user is not loaded
      */
@@ -39,6 +40,7 @@ public interface UserManager extends Manager<UserIdentifier, User> {
 
     /**
      * Get a user object by uuid
+     *
      * @param uuid The uuid to search by
      * @return a {@link User} object if the user is loaded, returns null if the user is not loaded
      */
@@ -46,12 +48,14 @@ public interface UserManager extends Manager<UserIdentifier, User> {
 
     /**
      * Gives the user the default group if necessary.
+     *
      * @param user the user to give to
      */
     boolean giveDefaultIfNeeded(User user, boolean save);
 
     /**
      * Checks to see if the user is online, and if they are not, runs {@link #unload(Identifiable)}
+     *
      * @param user The user to be cleaned up
      */
     void cleanup(User user);

@@ -108,13 +108,15 @@ public class UserBulkChange extends SubCommand<User> {
         toRemove.forEach(n -> {
             try {
                 user.unsetPermission(n);
-            } catch (ObjectLacksException ignored) {}
+            } catch (ObjectLacksException ignored) {
+            }
         });
 
         toAdd.forEach(n -> {
             try {
                 user.setPermission(n);
-            } catch (ObjectAlreadyHasException ignored) {}
+            } catch (ObjectAlreadyHasException ignored) {
+            }
         });
 
         save(user, sender, plugin);

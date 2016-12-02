@@ -36,12 +36,14 @@ public interface LPConfiguration {
 
     /**
      * As of 2.6, this value is a constant
+     *
      * @return the default group node
      */
     String getDefaultGroupNode();
 
     /**
      * As of 2.6, this value is a constant
+     *
      * @return the name of the default group
      */
     String getDefaultGroupName();

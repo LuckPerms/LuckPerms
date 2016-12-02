@@ -22,10 +22,12 @@
 
 package me.lucko.luckperms.common.data;
 
-import com.google.common.base.Splitter;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+
+import com.google.common.base.Splitter;
+
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -35,7 +37,11 @@ import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -214,12 +220,10 @@ public class Importer {
 
     private static class Result {
         @Getter
+        private final List<String> output = new ArrayList<>();
+        @Getter
         @Setter
         private String command;
-
-        @Getter
-        private final List<String> output = new ArrayList<>();
-
         @Getter
         @Setter
         private CommandResult result = CommandResult.FAILURE;

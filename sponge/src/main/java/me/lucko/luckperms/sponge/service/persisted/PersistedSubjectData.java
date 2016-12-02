@@ -24,6 +24,7 @@ package me.lucko.luckperms.sponge.service.persisted;
 
 import lombok.Getter;
 import lombok.Setter;
+
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.calculated.CalculatedSubjectData;

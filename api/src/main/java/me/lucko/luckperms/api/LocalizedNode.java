@@ -24,18 +24,21 @@ package me.lucko.luckperms.api;
 
 /**
  * Represents a Node and where it was inherited from.
+ *
  * @since 2.11
  */
 public interface LocalizedNode extends Node {
 
     /**
      * Gets the node
+     *
      * @return the node this instance is representing
      */
     Node getNode();
 
     /**
      * Gets the location where the {@link Node} is inherited from
+     *
      * @return where the node was inherited from. Will not return null.
      * @see PermissionHolder#getObjectName()
      */

@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 
 public class MetaRemoveSuffix extends SharedSubCommand {
     public MetaRemoveSuffix() {
-        super("removesuffix", "Removes a suffix",  Permission.USER_META_REMOVESUFFIX, Permission.GROUP_META_REMOVESUFFIX,
+        super("removesuffix", "Removes a suffix", Permission.USER_META_REMOVESUFFIX, Permission.GROUP_META_REMOVESUFFIX,
                 Predicates.notInRange(2, 4),
                 Arg.list(
                         Arg.create("priority", true, "the priority to add the suffix at"),
@@ -91,7 +91,8 @@ public class MetaRemoveSuffix extends SharedSubCommand {
             toRemove.forEach(n -> {
                 try {
                     holder.unsetPermission(n);
-                } catch (ObjectLacksException ignored) {}
+                } catch (ObjectLacksException ignored) {
+                }
             });
 
             Message.BULK_CHANGE_SUCCESS.send(sender, toRemove.size());

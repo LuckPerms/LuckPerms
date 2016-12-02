@@ -27,8 +27,8 @@ import java.util.SortedSet;
 import java.util.UUID;
 
 /**
- * Represents the internal LuckPerms log.
- * All content internally is immutable. You can add to the log using the {@link Datastore}, and then request an updated copy.
+ * Represents the internal LuckPerms log. All content internally is immutable. You can add to the log using the {@link
+ * Datastore}, and then request an updated copy.
  */
 @SuppressWarnings("unused")
 public interface Log {
@@ -45,6 +45,7 @@ public interface Log {
 
     /**
      * Gets the recent content separated by page
+     *
      * @param pageNo the page number
      * @return the page content
      */
@@ -64,8 +65,9 @@ public interface Log {
 
     /**
      * Gets the recent content for the uuid, separated into pages
+     *
      * @param pageNo the page number
-     * @param actor the uuid of the actor to filter by
+     * @param actor  the uuid of the actor to filter by
      * @return the page content
      */
     SortedMap<Integer, LogEntry> getRecent(int pageNo, UUID actor);
@@ -85,8 +87,9 @@ public interface Log {
 
     /**
      * Gets the user history content, separated by pages
+     *
      * @param pageNo the page number
-     * @param uuid the uuid of the acted user to filter by
+     * @param uuid   the uuid of the acted user to filter by
      * @return the page content
      */
     SortedMap<Integer, LogEntry> getUserHistory(int pageNo, UUID uuid);
@@ -97,7 +100,7 @@ public interface Log {
      */
     int getUserHistoryMaxPages(UUID uuid);
 
-    
+
     /**
      * @param name the name to filter by
      * @return all content in this log where the group = name
@@ -106,8 +109,9 @@ public interface Log {
 
     /**
      * Gets the group history content, separated by pages
+     *
      * @param pageNo the page number
-     * @param name the name of the acted group to filter by
+     * @param name   the name of the acted group to filter by
      * @return the page content
      */
     SortedMap<Integer, LogEntry> getGroupHistory(int pageNo, String name);
@@ -127,8 +131,9 @@ public interface Log {
 
     /**
      * Gets the track history content, separated by pages
+     *
      * @param pageNo the page number
-     * @param name the name of the acted track to filter by
+     * @param name   the name of the acted track to filter by
      * @return the page content
      */
     SortedMap<Integer, LogEntry> getTrackHistory(int pageNo, String name);
@@ -147,8 +152,9 @@ public interface Log {
 
     /**
      * Gets the search content, separated by pages
+     *
      * @param pageNo the page number
-     * @param query the query to filter by
+     * @param query  the query to filter by
      * @return the page content
      */
     SortedMap<Integer, LogEntry> getSearch(int pageNo, String query);

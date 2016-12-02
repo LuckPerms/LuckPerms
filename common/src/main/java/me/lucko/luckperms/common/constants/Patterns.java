@@ -22,19 +22,26 @@
 
 package me.lucko.luckperms.common.constants;
 
+import lombok.experimental.UtilityClass;
+
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.UncheckedExecutionException;
-import lombok.experimental.UtilityClass;
 
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
 @UtilityClass
 public class Patterns {
+    public static final Pattern COMMAND_SEPARATOR = Pattern.compile(" (?=([^\\\"]*\\\"[^\\\"]*\\\")*[^\\\"]*$)");
+    public static final Pattern NON_ALPHA_NUMERIC = Pattern.compile("[\\/\\$\\.\\- ]");
+    public static final Pattern NON_USERNAME = Pattern.compile("[^A-Za-z0-9_ ]");
+    public static final Pattern SHORTHAND_NODE = Pattern.compile("\\.\\([^.]+\\)");
+    public static final Pattern STRIP_COLOR_PATTERN = Pattern.compile("(?i)" + String.valueOf('§') + "[0-9A-FK-OR]");
+    public static final Pattern NODE_CONTEXTS = Pattern.compile("\\(.+\\).*");
     private static final LoadingCache<String, Pattern> CACHE = CacheBuilder.newBuilder()
             .build(new CacheLoader<String, Pattern>() {
                 @Override
@@ -47,13 +54,6 @@ public class Patterns {
                     return Futures.immediateFuture(pattern);
                 }
             });
-
-    public static final Pattern COMMAND_SEPARATOR = Pattern.compile(" (?=([^\\\"]*\\\"[^\\\"]*\\\")*[^\\\"]*$)");
-    public static final Pattern NON_ALPHA_NUMERIC = Pattern.compile("[\\/\\$\\.\\- ]");
-    public static final Pattern NON_USERNAME = Pattern.compile("[^A-Za-z0-9_ ]");
-    public static final Pattern SHORTHAND_NODE = Pattern.compile("\\.\\([^.]+\\)");
-    public static final Pattern STRIP_COLOR_PATTERN = Pattern.compile("(?i)" + String.valueOf('§') + "[0-9A-FK-OR]");
-    public static final Pattern NODE_CONTEXTS = Pattern.compile("\\(.+\\).*");
 
     public static Pattern compile(String regex) {
         try {

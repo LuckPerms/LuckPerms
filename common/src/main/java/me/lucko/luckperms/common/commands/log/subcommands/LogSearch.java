@@ -57,7 +57,8 @@ public class LogSearch extends SubCommand<Log> {
             try {
                 page = Integer.parseInt(args.get(args.size() - 1));
                 args.remove(args.size() - 1);
-            } catch (NumberFormatException ignored) {}
+            } catch (NumberFormatException ignored) {
+            }
         }
 
         final String query = args.stream().collect(Collectors.joining(" "));

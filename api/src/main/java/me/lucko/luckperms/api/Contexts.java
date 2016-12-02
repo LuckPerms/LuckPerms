@@ -29,15 +29,17 @@ import java.util.Map;
 /**
  * Represents the context and options for a permission lookup.
  * All values are immutable.
+ *
  * @since 2.11
  */
 public class Contexts {
-    private static final Contexts ALLOW_ALL = new Contexts(ContextSet.empty(), true, true, true, true, true, true);
     public static final String SERVER_KEY = "server";
     public static final String WORLD_KEY = "world";
+    private static final Contexts ALLOW_ALL = new Contexts(ContextSet.empty(), true, true, true, true, true, true);
 
     /**
      * Gets a context that will allow all nodes
+     *
      * @return a context that will not apply any filters
      */
     public static Contexts allowAll() {
@@ -47,6 +49,50 @@ public class Contexts {
     public static Contexts of(ContextSet context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups, boolean op) {
         return new Contexts(context, includeGlobal, includeGlobalWorld, applyGroups, applyGlobalGroups, applyGlobalWorldGroups, op);
     }
+
+    @SuppressWarnings("deprecation")
+    @Deprecated
+    public static Contexts of(Map<String, String> context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups) {
+        return new Contexts(context, includeGlobal, includeGlobalWorld, applyGroups, applyGlobalGroups, applyGlobalWorldGroups);
+    }
+
+    @SuppressWarnings("deprecation")
+    @Deprecated
+    public static Contexts of(Map<String, String> context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups, boolean op) {
+        return new Contexts(context, includeGlobal, includeGlobalWorld, applyGroups, applyGlobalGroups, applyGlobalWorldGroups, op);
+    }
+
+    /**
+     * The contexts that apply for this lookup
+     * The keys for servers and worlds are defined as static values.
+     */
+    private final ContextSet context;
+    /**
+     * The mode to parse defaults on Bukkit
+     *
+     * @since 2.12
+     */
+    private final boolean op;
+    /**
+     * If global or non server specific nodes should be applied
+     */
+    private final boolean includeGlobal;
+    /**
+     * If global or non world specific nodes should be applied
+     */
+    private final boolean includeGlobalWorld;
+    /**
+     * If parent groups should be applied
+     */
+    private final boolean applyGroups;
+    /**
+     * If global or non server specific group memberships should be applied
+     */
+    private final boolean applyGlobalGroups;
+    /**
+     * If global or non world specific group memberships should be applied
+     */
+    private final boolean applyGlobalWorldGroups;
 
     public Contexts(ContextSet context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups, boolean op) {
         if (context == null) {
@@ -62,18 +108,6 @@ public class Contexts {
         this.op = op;
     }
 
-    @SuppressWarnings("deprecation")
-    @Deprecated
-    public static Contexts of(Map<String, String> context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups) {
-        return new Contexts(context, includeGlobal, includeGlobalWorld, applyGroups, applyGlobalGroups, applyGlobalWorldGroups);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Deprecated
-    public static Contexts of(Map<String, String> context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups, boolean op) {
-        return new Contexts(context, includeGlobal, includeGlobalWorld, applyGroups, applyGlobalGroups, applyGlobalWorldGroups, op);
-    }
-
     @Deprecated
     public Contexts(Map<String, String> context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups, boolean op) {
         this(context == null ? null : ContextSet.fromMap(context), includeGlobal, includeGlobalWorld, applyGroups, applyGlobalGroups, applyGlobalWorldGroups, op);
@@ -86,44 +120,8 @@ public class Contexts {
     }
 
     /**
-     * The contexts that apply for this lookup
-     * The keys for servers and worlds are defined as static values.
-     */
-    private final ContextSet context;
-
-    /**
-     * The mode to parse defaults on Bukkit
-     * @since 2.12
-     */
-    private final boolean op;
-
-    /**
-     * If global or non server specific nodes should be applied
-     */
-    private final boolean includeGlobal;
-
-    /**
-     * If global or non world specific nodes should be applied
-     */
-    private final boolean includeGlobalWorld;
-
-    /**
-     * If parent groups should be applied
-     */
-    private final boolean applyGroups;
-
-    /**
-     * If global or non server specific group memberships should be applied
-     */
-    private final boolean applyGlobalGroups;
-
-    /**
-     * If global or non world specific group memberships should be applied
-     */
-    private final boolean applyGlobalWorldGroups;
-
-    /**
      * Gets the contexts that apply for this lookup
+     *
      * @return an immutable set of context key value pairs
      * @since 2.13
      */
@@ -133,6 +131,7 @@ public class Contexts {
 
     /**
      * Gets the contexts that apply for this lookup
+     *
      * @return an immutable map of context key value pairs
      * @deprecated in favour of {@link #getContexts()}
      */
@@ -143,6 +142,7 @@ public class Contexts {
 
     /**
      * Gets if OP defaults should be included
+     *
      * @return true if op defaults should be included
      */
     public boolean isOp() {
@@ -151,6 +151,7 @@ public class Contexts {
 
     /**
      * Gets if global or non server specific nodes should be applied
+     *
      * @return true if global or non server specific nodes should be applied
      */
     public boolean isIncludeGlobal() {
@@ -159,6 +160,7 @@ public class Contexts {
 
     /**
      * Gets if global or non world specific nodes should be applied
+     *
      * @return true if global or non world specific nodes should be applied
      */
     public boolean isIncludeGlobalWorld() {
@@ -167,6 +169,7 @@ public class Contexts {
 
     /**
      * Gets if parent groups should be applied
+     *
      * @return true if parent groups should be applied
      */
     public boolean isApplyGroups() {
@@ -175,6 +178,7 @@ public class Contexts {
 
     /**
      * Gets if global or non server specific group memberships should be applied
+     *
      * @return true if global or non server specific group memberships should be applied
      */
     public boolean isApplyGlobalGroups() {
@@ -183,6 +187,7 @@ public class Contexts {
 
     /**
      * Gets if global or non world specific group memberships should be applied
+     *
      * @return true if global or non world specific group memberships should be applied
      */
     public boolean isApplyGlobalWorldGroups() {
@@ -207,6 +212,7 @@ public class Contexts {
 
     /**
      * Check for equality
+     *
      * @param o the other
      * @return true if equal
      * @since 2.12
@@ -229,6 +235,7 @@ public class Contexts {
 
     /**
      * Gets the hashcode
+     *
      * @return the hashcode
      * @since 2.12
      */

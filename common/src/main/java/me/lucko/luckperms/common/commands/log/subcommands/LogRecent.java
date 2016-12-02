@@ -43,6 +43,32 @@ import java.util.SortedMap;
 import java.util.UUID;
 
 public class LogRecent extends SubCommand<Log> {
+    private static CommandResult showLog(int page, UUID filter, Sender sender, Log log) {
+        int maxPage = (filter != null) ? log.getRecentMaxPages(filter) : log.getRecentMaxPages();
+        if (maxPage == 0) {
+            Message.LOG_NO_ENTRIES.send(sender);
+            return CommandResult.STATE_ERROR;
+        }
+
+        if (page < 1 || page > maxPage) {
+            Message.LOG_INVALID_PAGE_RANGE.send(sender, maxPage);
+            return CommandResult.INVALID_ARGS;
+        }
+
+        SortedMap<Integer, LogEntry> entries = (filter != null) ? log.getRecent(page, filter) : log.getRecent(page);
+        if (filter != null) {
+            String name = entries.values().stream().findAny().get().getActorName();
+            Message.LOG_RECENT_BY_HEADER.send(sender, name, page, maxPage);
+        } else {
+            Message.LOG_RECENT_HEADER.send(sender, page, maxPage);
+        }
+
+        for (Map.Entry<Integer, LogEntry> e : entries.entrySet()) {
+            Message.LOG_ENTRY.send(sender, e.getKey(), DateUtil.formatDateDiff(e.getValue().getTimestamp()), e.getValue().getFormatted());
+        }
+        return CommandResult.SUCCESS;
+    }
+
     public LogRecent() {
         super("recent", "View recent actions", Permission.LOG_RECENT, Predicates.notInRange(0, 2),
                 Arg.list(
@@ -65,7 +91,8 @@ public class LogRecent extends SubCommand<Log> {
                 int p = Integer.parseInt(args.get(0));
                 // page
                 return showLog(p, null, sender, log);
-            } catch (NumberFormatException ignored) {}
+            } catch (NumberFormatException ignored) {
+            }
         }
 
         // User and possibly page
@@ -119,31 +146,5 @@ public class LogRecent extends SubCommand<Log> {
                 return showLog(-1, null, sender, log);
             }
         }
-    }
-
-    private static CommandResult showLog(int page, UUID filter, Sender sender, Log log) {
-        int maxPage = (filter != null) ? log.getRecentMaxPages(filter) : log.getRecentMaxPages();
-        if (maxPage == 0) {
-            Message.LOG_NO_ENTRIES.send(sender);
-            return CommandResult.STATE_ERROR;
-        }
-
-        if (page < 1 || page > maxPage) {
-            Message.LOG_INVALID_PAGE_RANGE.send(sender, maxPage);
-            return CommandResult.INVALID_ARGS;
-        }
-
-        SortedMap<Integer, LogEntry> entries = (filter != null) ? log.getRecent(page, filter) : log.getRecent(page);
-        if (filter != null) {
-            String name = entries.values().stream().findAny().get().getActorName();
-            Message.LOG_RECENT_BY_HEADER.send(sender, name, page, maxPage);
-        } else {
-            Message.LOG_RECENT_HEADER.send(sender, page, maxPage);
-        }
-
-        for (Map.Entry<Integer, LogEntry> e : entries.entrySet()) {
-            Message.LOG_ENTRY.send(sender, e.getKey(), DateUtil.formatDateDiff(e.getValue().getTimestamp()), e.getValue().getFormatted());
-        }
-        return CommandResult.SUCCESS;
     }
 }

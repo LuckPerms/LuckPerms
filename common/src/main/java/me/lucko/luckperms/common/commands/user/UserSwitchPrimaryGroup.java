@@ -62,7 +62,8 @@ public class UserSwitchPrimaryGroup extends SubCommand<User> {
             Message.USER_PRIMARYGROUP_ERROR_NOTMEMBER.send(sender, user.getName(), group.getName());
             try {
                 user.setInheritGroup(group);
-            } catch (ObjectAlreadyHasException ignored) {}
+            } catch (ObjectAlreadyHasException ignored) {
+            }
         }
 
         user.setPrimaryGroup(group.getName());

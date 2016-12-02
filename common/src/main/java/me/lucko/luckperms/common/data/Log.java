@@ -22,19 +22,62 @@
 
 package me.lucko.luckperms.common.data;
 
-import com.google.common.collect.ImmutableSortedSet;
 import lombok.Getter;
+
+import com.google.common.collect.ImmutableSortedSet;
+
 import me.lucko.luckperms.api.LogEntry;
 
-import java.util.*;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class Log {
+    private static final int PAGE_ENTRIES = 5;
+
     public static Builder builder() {
         return new Builder();
     }
 
-    private static final int PAGE_ENTRIES = 5;
+    private static SortedMap<Integer, LogEntry> getPage(Set<LogEntry> set, int pageNo, int entries) {
+        if (pageNo < 1) {
+            throw new IllegalArgumentException("pageNo cannot be less than 1: " + pageNo);
+        }
+
+        int minimumEntries = ((pageNo * 5) - entries) + 1;
+        if (set.size() < minimumEntries) {
+            throw new IllegalStateException("Log does not contain that many entries. " +
+                    "Requested: " + minimumEntries + ", Log Count: " + set.size());
+        }
+
+        final SortedMap<Integer, LogEntry> out = new TreeMap<>();
+
+        final int max = minimumEntries + entries - 1;
+        int index = 0;
+        for (LogEntry e : set) {
+            index++;
+            if (index >= minimumEntries) {
+                out.put(index, e);
+            }
+            if (index == max) {
+                break;
+            }
+        }
+
+        return out;
+    }
+
+    private static int getMaxPages(int size, int entries) {
+        return (int) Math.ceil((double) size / entries);
+    }
+
+    private static int getMaxPages(long size, int entries) {
+        return (int) Math.ceil((double) size / entries);
+    }
 
     @Getter
     private final SortedSet<LogEntry> content;
@@ -139,42 +182,6 @@ public class Log {
         return getMaxPages(content.stream()
                 .filter(e -> e.matchesSearch(query))
                 .count(), PAGE_ENTRIES);
-    }
-
-    private static SortedMap<Integer, LogEntry> getPage(Set<LogEntry> set, int pageNo, int entries) {
-        if (pageNo < 1) {
-            throw new IllegalArgumentException("pageNo cannot be less than 1: " + pageNo);
-        }
-
-        int minimumEntries = ((pageNo * 5) - entries) + 1;
-        if (set.size() < minimumEntries) {
-            throw new IllegalStateException("Log does not contain that many entries. " +
-                    "Requested: " + minimumEntries + ", Log Count: " + set.size());
-        }
-
-        final SortedMap<Integer, LogEntry> out = new TreeMap<>();
-
-        final int max = minimumEntries + entries - 1;
-        int index = 0;
-        for (LogEntry e : set) {
-            index++;
-            if (index >= minimumEntries) {
-                out.put(index, e);
-            }
-            if (index == max) {
-                break;
-            }
-        }
-
-        return out;
-    }
-
-    private static int getMaxPages(int size, int entries) {
-        return (int) Math.ceil((double) size / entries);
-    }
-
-    private static int getMaxPages(long size, int entries) {
-        return (int) Math.ceil((double) size / entries);
     }
 
     @SuppressWarnings("WeakerAccess")

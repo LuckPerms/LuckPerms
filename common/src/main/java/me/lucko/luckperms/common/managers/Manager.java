@@ -29,6 +29,7 @@ import java.util.function.Function;
 
 /**
  * A class which manages instances of a class
+ *
  * @param <I> the class used to identify each object held in this manager
  * @param <T> the class this manager is "managing"
  */
@@ -36,12 +37,14 @@ public interface Manager<I, T extends Identifiable<I>> extends Function<I, T> {
 
     /**
      * Gets a map containing all cached instances held by this manager.
+     *
      * @return all instances held in this manager
      */
     Map<I, ? extends T> getAll();
 
     /**
      * Gets or creates an object by id
+     *
      * @param id The id to search by
      * @return a {@link T} object if the object is loaded or makes and returns a new object
      */
@@ -49,6 +52,7 @@ public interface Manager<I, T extends Identifiable<I>> extends Function<I, T> {
 
     /**
      * Get an object by id
+     *
      * @param id The id to search by
      * @return a {@link T} object if the object is loaded, returns null if the object is not loaded
      */
@@ -56,6 +60,7 @@ public interface Manager<I, T extends Identifiable<I>> extends Function<I, T> {
 
     /**
      * Check to see if a object is loaded or not
+     *
      * @param id The id of the object
      * @return true if the object is loaded
      */
@@ -63,6 +68,7 @@ public interface Manager<I, T extends Identifiable<I>> extends Function<I, T> {
 
     /**
      * Removes and unloads the object from the manager
+     *
      * @param t The object to unload
      */
     void unload(T t);

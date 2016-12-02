@@ -24,6 +24,7 @@ package me.lucko.luckperms.common.storage.backing;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.DatastoreConfiguration;
 
@@ -56,7 +57,7 @@ public class MySQLBacking extends SQLBacking {
         final String database = configuration.getDatabase();
         final String username = configuration.getUsername();
         final String password = configuration.getPassword();
-        
+
         config.setMaximumPoolSize(configuration.getPoolSize());
 
         config.setPoolName("luckperms");

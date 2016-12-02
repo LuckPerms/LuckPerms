@@ -34,6 +34,7 @@ public final class LuckPerms {
 
     /**
      * Gets an instance of {@link LuckPermsApi}
+     *
      * @return an api instance
      * @throws IllegalStateException if the api is not loaded
      */
@@ -47,6 +48,7 @@ public final class LuckPerms {
     /**
      * Gets an instance of {@link LuckPermsApi} safely. Unlike {@link LuckPerms#getApi}, this method will not throw an
      * {@link IllegalStateException} if the api is not loaded, rather return an empty {@link Optional}.
+     *
      * @return an optional api instance
      */
     public static Optional<LuckPermsApi> getApiSafe() {

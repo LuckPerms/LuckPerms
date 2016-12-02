@@ -29,17 +29,19 @@ import java.util.Map;
  * Calculates whether contexts are applicable to {@link T}
  *
  * <p>Somewhat inspired by the system used on Sponge.
+ *
  * @param <T> the subject type. Is ALWAYS the player class of the platform.
  */
 public interface IContextCalculator<T> {
 
     /**
      * Gives the subject all of the applicable contexts they meet
-     * @param subject the subject to add contexts to
+     *
+     * @param subject     the subject to add contexts to
      * @param accumulator a map of contexts to add to
      * @return the map
-     * @deprecated in favour of {@link #giveApplicableContext(Object, MutableContextSet)}. Older implementations of this interface
-     * will still work, as the replacement method is given as a default, and falls back to using this method.
+     * @deprecated in favour of {@link #giveApplicableContext(Object, MutableContextSet)}. Older implementations of this
+     * interface will still work, as the replacement method is given as a default, and falls back to using this method.
      */
     @Deprecated
     default Map<String, String> giveApplicableContext(T subject, Map<String, String> accumulator) {
@@ -56,7 +58,7 @@ public interface IContextCalculator<T> {
      * <p><b>You MUST implement this method. The default is only provided for backwards compatibility with
      * {@link #giveApplicableContext(Object, Map)}.</b>
      *
-     * @param subject the subject to add contexts to
+     * @param subject     the subject to add contexts to
      * @param accumulator a map of contexts to add to
      * @return the map
      * @since 2.13
@@ -72,6 +74,7 @@ public interface IContextCalculator<T> {
 
     /**
      * Checks to see if a context is applicable to a subject
+     *
      * @param subject the subject to check against
      * @param context the context to check for
      * @return true if met, or false if not. If this calculator does not calculate the given context, return false.
@@ -80,6 +83,7 @@ public interface IContextCalculator<T> {
 
     /**
      * Adds a listener to be called whenever a context handled by this calculator changes
+     *
      * @param listener the listener instance
      * @throws NullPointerException if listener is null
      */

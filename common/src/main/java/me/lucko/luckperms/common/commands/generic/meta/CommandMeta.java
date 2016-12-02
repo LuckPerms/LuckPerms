@@ -23,6 +23,7 @@
 package me.lucko.luckperms.common.commands.generic.meta;
 
 import com.google.common.collect.ImmutableList;
+
 import me.lucko.luckperms.common.commands.generic.SharedMainCommand;
 import me.lucko.luckperms.common.commands.generic.SharedSubCommand;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
@@ -30,20 +31,20 @@ import me.lucko.luckperms.common.core.model.PermissionHolder;
 public class CommandMeta<T extends PermissionHolder> extends SharedMainCommand<T> {
     public CommandMeta(boolean user) {
         super("Meta", "Edit metadata values", user, ImmutableList.<SharedSubCommand>builder()
-            .add(new MetaInfo())
-            .add(new MetaSet())
-            .add(new MetaUnset())
-            .add(new MetaSetTemp())
-            .add(new MetaUnsetTemp())
-            .add(new MetaAddPrefix())
-            .add(new MetaAddSuffix())
-            .add(new MetaRemovePrefix())
-            .add(new MetaRemoveSuffix())
-            .add(new MetaAddTempPrefix())
-            .add(new MetaAddTempSuffix())
-            .add(new MetaRemoveTempPrefix())
-            .add(new MetaRemoveTempSuffix())
-            .add(new MetaClear())
-            .build());
+                .add(new MetaInfo())
+                .add(new MetaSet())
+                .add(new MetaUnset())
+                .add(new MetaSetTemp())
+                .add(new MetaUnsetTemp())
+                .add(new MetaAddPrefix())
+                .add(new MetaAddSuffix())
+                .add(new MetaRemovePrefix())
+                .add(new MetaRemoveSuffix())
+                .add(new MetaAddTempPrefix())
+                .add(new MetaAddTempSuffix())
+                .add(new MetaRemoveTempPrefix())
+                .add(new MetaRemoveTempSuffix())
+                .add(new MetaClear())
+                .build());
     }
 }

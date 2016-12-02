@@ -22,9 +22,10 @@
 
 package me.lucko.luckperms.sponge.model;
 
-import co.aikar.timings.Timing;
-import com.google.common.collect.ImmutableSet;
 import lombok.Getter;
+
+import com.google.common.collect.ImmutableSet;
+
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.caching.MetaData;
 import me.lucko.luckperms.api.context.ContextSet;
@@ -36,6 +37,7 @@ import me.lucko.luckperms.sponge.service.base.LPSubject;
 import me.lucko.luckperms.sponge.service.references.SubjectCollectionReference;
 import me.lucko.luckperms.sponge.service.references.SubjectReference;
 import me.lucko.luckperms.sponge.timings.LPTiming;
+
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
@@ -44,6 +46,8 @@ import org.spongepowered.api.service.permission.PermissionService;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+
+import co.aikar.timings.Timing;
 
 public class SpongeUser extends User {
 

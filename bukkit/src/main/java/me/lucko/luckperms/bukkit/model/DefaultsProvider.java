@@ -22,10 +22,13 @@
 
 package me.lucko.luckperms.bukkit.model;
 
-import com.google.common.collect.ImmutableMap;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import com.google.common.collect.ImmutableMap;
+
 import me.lucko.luckperms.api.Tristate;
+
 import org.bukkit.Bukkit;
 import org.bukkit.permissions.Permissible;
 import org.bukkit.permissions.Permission;
@@ -39,38 +42,6 @@ import java.util.Map;
 import java.util.Set;
 
 public class DefaultsProvider {
-
-    private final DummyPermissible opDummy = new DummyPermissible(this::refreshOp);
-    private final DummyPermissible nonOpDummy = new DummyPermissible(this::refreshNonOp);
-
-    @Getter
-    private Map<String, Boolean> opDefaults = ImmutableMap.of();
-
-    @Getter
-    private Map<String, Boolean> nonOpDefaults = ImmutableMap.of();
-
-    public void refresh() {
-        refreshOp();
-        refreshNonOp();
-    }
-
-    private void refreshOp() {
-        unregisterDefaults(opDefaults, opDummy);
-
-        Map<String, Boolean> builder = new HashMap<>();
-        calculateDefaults(builder, opDummy, true);
-
-        opDefaults = ImmutableMap.copyOf(builder);
-    }
-
-    private void refreshNonOp() {
-        unregisterDefaults(nonOpDefaults, nonOpDummy);
-
-        Map<String, Boolean> builder = new HashMap<>();
-        calculateDefaults(builder, nonOpDummy, false);
-
-        nonOpDefaults = ImmutableMap.copyOf(builder);
-    }
 
     private static void unregisterDefaults(Map<String, Boolean> map, DummyPermissible p) {
         Set<String> perms = map.keySet();
@@ -108,6 +79,36 @@ public class DefaultsProvider {
                 calculateChildPermissions(map, p, perm.getChildren(), !value);
             }
         }
+    }
+
+    @Getter
+    private Map<String, Boolean> opDefaults = ImmutableMap.of();
+    private final DummyPermissible opDummy = new DummyPermissible(this::refreshOp);
+    @Getter
+    private Map<String, Boolean> nonOpDefaults = ImmutableMap.of();
+    private final DummyPermissible nonOpDummy = new DummyPermissible(this::refreshNonOp);
+
+    public void refresh() {
+        refreshOp();
+        refreshNonOp();
+    }
+
+    private void refreshOp() {
+        unregisterDefaults(opDefaults, opDummy);
+
+        Map<String, Boolean> builder = new HashMap<>();
+        calculateDefaults(builder, opDummy, true);
+
+        opDefaults = ImmutableMap.copyOf(builder);
+    }
+
+    private void refreshNonOp() {
+        unregisterDefaults(nonOpDefaults, nonOpDummy);
+
+        Map<String, Boolean> builder = new HashMap<>();
+        calculateDefaults(builder, nonOpDummy, false);
+
+        nonOpDefaults = ImmutableMap.copyOf(builder);
     }
 
     public Tristate hasDefault(String permission, boolean isOp) {

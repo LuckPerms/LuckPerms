@@ -23,29 +23,41 @@
 package me.lucko.luckperms.common.storage.backing;
 
 import lombok.Cleanup;
+
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.data.Log;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.*;
+import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 abstract class FlatfileBacking extends AbstractBacking {
     private static final String LOG_FORMAT = "%s(%s): [%s] %s(%s) --> %s";
 
     private final Logger actionLogger = Logger.getLogger("lp_actions");
-    private Map<String, String> uuidCache = new ConcurrentHashMap<>();
-
     private final File pluginDir;
-    private File uuidData;
-    private File actionLog;
     File usersDir;
     File groupsDir;
     File tracksDir;
+    private Map<String, String> uuidCache = new ConcurrentHashMap<>();
+    private File uuidData;
+    private File actionLog;
 
     FlatfileBacking(LuckPermsPlugin plugin, String name, File pluginDir) {
         super(plugin, name);

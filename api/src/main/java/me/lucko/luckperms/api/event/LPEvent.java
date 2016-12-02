@@ -30,14 +30,13 @@ import me.lucko.luckperms.api.LuckPermsApi;
 public abstract class LPEvent {
 
     /**
-     * A link to the API instance provided for convenience.
-     */
-    private LuckPermsApi api = null;
-
-    /**
      * A friendly name of the event
      */
     private final String eventName;
+    /**
+     * A link to the API instance provided for convenience.
+     */
+    private LuckPermsApi api = null;
 
     protected LPEvent(String eventName) {
         this.eventName = eventName;

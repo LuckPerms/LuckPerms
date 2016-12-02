@@ -22,8 +22,10 @@
 
 package me.lucko.luckperms.common.caching;
 
-import com.google.common.collect.ImmutableMap;
 import lombok.NonNull;
+
+import com.google.common.collect.ImmutableMap;
+
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.caching.PermissionData;

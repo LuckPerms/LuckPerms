@@ -23,6 +23,7 @@
 package me.lucko.luckperms.common.commands.utils;
 
 import lombok.experimental.UtilityClass;
+
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
@@ -31,10 +32,18 @@ import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Patterns;
 import me.lucko.luckperms.common.utils.DateUtil;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.UUID;
 
 @UtilityClass
 public class Util {
+
+    public static final MetaComparator META_COMPARATOR = new MetaComparator();
 
     public static void sendPluginMessage(Sender sender, String message) {
         String prefix = sender.getPlatform().getLocaleManager().getTranslation(Message.PREFIX);
@@ -239,7 +248,6 @@ public class Util {
         return sb.delete(sb.length() - 6, sb.length()).toString();
     }
 
-    public static final MetaComparator META_COMPARATOR = new MetaComparator();
     public class MetaComparator implements Comparator<Map.Entry<Integer, ? extends Node>> {
 
         @Override

@@ -26,10 +26,11 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 
 public class LogicParser {
     private static final ScriptEngine SCRIPT_ENGINE = new ScriptEngineManager().getEngineByName("nashorn");

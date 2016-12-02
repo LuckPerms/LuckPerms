@@ -23,10 +23,12 @@
 package me.lucko.luckperms.sponge.contexts;
 
 import lombok.RequiredArgsConstructor;
+
 import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
+
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;

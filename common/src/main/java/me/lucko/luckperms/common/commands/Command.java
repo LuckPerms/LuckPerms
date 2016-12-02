@@ -22,8 +22,10 @@
 
 package me.lucko.luckperms.common.commands;
 
-import com.google.common.collect.ImmutableList;
 import lombok.Getter;
+
+import com.google.common.collect.ImmutableList;
+
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Permission;
@@ -77,6 +79,7 @@ public abstract class Command<T, S> {
     }
 
     public abstract void sendUsage(Sender sender, String label);
+
     public abstract void sendDetailedUsage(Sender sender, String label);
 
     public boolean isAuthorized(Sender sender) {

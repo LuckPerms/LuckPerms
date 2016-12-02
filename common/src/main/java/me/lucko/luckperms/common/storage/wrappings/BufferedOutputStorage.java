@@ -26,6 +26,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Delegate;
+
 import me.lucko.luckperms.common.core.UserIdentifier;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.Track;
@@ -125,10 +126,15 @@ public class BufferedOutputStorage implements Storage, Runnable {
 
     private interface Exclude {
         Storage force();
+
         CompletableFuture<Void> shutdown();
+
         CompletableFuture<Boolean> saveUser(User user);
+
         CompletableFuture<Boolean> saveGroup(Group group);
+
         CompletableFuture<Boolean> saveTrack(Track track);
+
         CompletableFuture<Boolean> saveUUIDData(String username, UUID uuid);
     }
 }

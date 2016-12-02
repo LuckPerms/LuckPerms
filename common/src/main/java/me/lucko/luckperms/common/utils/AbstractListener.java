@@ -23,6 +23,7 @@
 package me.lucko.luckperms.common.utils;
 
 import lombok.AllArgsConstructor;
+
 import me.lucko.luckperms.api.event.events.UserFirstLoginEvent;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.core.UuidCache;

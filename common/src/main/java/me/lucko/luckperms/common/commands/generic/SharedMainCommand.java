@@ -40,8 +40,46 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class SharedMainCommand<T extends PermissionHolder> extends SubCommand<T> {
-    private boolean user;
+    private static CommandResult handleException(CommandException e, Sender sender, SharedSubCommand command) {
+        if (e instanceof ArgumentUtils.ArgumentException) {
+            if (e instanceof ArgumentUtils.DetailedUsageException) {
+                command.sendDetailedUsage(sender);
+                return CommandResult.INVALID_ARGS;
+            }
+
+            if (e instanceof ArgumentUtils.UseInheritException) {
+                Message.USE_INHERIT_COMMAND.send(sender);
+                return CommandResult.INVALID_ARGS;
+            }
+
+            if (e instanceof ArgumentUtils.InvalidServerException) {
+                Message.SERVER_INVALID_ENTRY.send(sender);
+                return CommandResult.INVALID_ARGS;
+            }
+
+            if (e instanceof ArgumentUtils.PastDateException) {
+                Message.PAST_DATE_ERROR.send(sender);
+                return CommandResult.INVALID_ARGS;
+            }
+
+            if (e instanceof ArgumentUtils.InvalidDateException) {
+                Message.ILLEGAL_DATE_ERROR.send(sender, ((ArgumentUtils.InvalidDateException) e).getInvalidDate());
+                return CommandResult.INVALID_ARGS;
+            }
+
+            if (e instanceof ArgumentUtils.InvalidPriorityException) {
+                Message.META_INVALID_PRIORITY.send(sender, ((ArgumentUtils.InvalidPriorityException) e).getInvalidPriority());
+                return CommandResult.INVALID_ARGS;
+            }
+        }
+
+        // Not something we can catch.
+        e.printStackTrace();
+        return CommandResult.FAILURE;
+    }
+
     private final List<SharedSubCommand> secondaryCommands;
+    private boolean user;
 
     public SharedMainCommand(String name, String description, boolean user, List<SharedSubCommand> secondaryCommands) {
         super(name, description, null, Predicates.alwaysFalse(), null);
@@ -89,44 +127,6 @@ public class SharedMainCommand<T extends PermissionHolder> extends SubCommand<T>
             result = handleException(e, sender, sub);
         }
         return result;
-    }
-
-    private static CommandResult handleException(CommandException e, Sender sender, SharedSubCommand command) {
-        if (e instanceof ArgumentUtils.ArgumentException) {
-            if (e instanceof ArgumentUtils.DetailedUsageException) {
-                command.sendDetailedUsage(sender);
-                return CommandResult.INVALID_ARGS;
-            }
-
-            if (e instanceof ArgumentUtils.UseInheritException) {
-                Message.USE_INHERIT_COMMAND.send(sender);
-                return CommandResult.INVALID_ARGS;
-            }
-
-            if (e instanceof ArgumentUtils.InvalidServerException) {
-                Message.SERVER_INVALID_ENTRY.send(sender);
-                return CommandResult.INVALID_ARGS;
-            }
-
-            if (e instanceof ArgumentUtils.PastDateException) {
-                Message.PAST_DATE_ERROR.send(sender);
-                return CommandResult.INVALID_ARGS;
-            }
-
-            if (e instanceof ArgumentUtils.InvalidDateException) {
-                Message.ILLEGAL_DATE_ERROR.send(sender, ((ArgumentUtils.InvalidDateException) e).getInvalidDate());
-                return CommandResult.INVALID_ARGS;
-            }
-
-            if (e instanceof ArgumentUtils.InvalidPriorityException) {
-                Message.META_INVALID_PRIORITY.send(sender, ((ArgumentUtils.InvalidPriorityException) e).getInvalidPriority());
-                return CommandResult.INVALID_ARGS;
-            }
-        }
-
-        // Not something we can catch.
-        e.printStackTrace();
-        return CommandResult.FAILURE;
     }
 
     @Override

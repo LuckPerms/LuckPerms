@@ -24,6 +24,7 @@ package me.lucko.luckperms.common.api.internal;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
+
 import me.lucko.luckperms.api.Log;
 import me.lucko.luckperms.api.LogEntry;
 
@@ -39,7 +40,7 @@ import static me.lucko.luckperms.common.api.internal.Utils.checkName;
 @AllArgsConstructor
 public class LogLink implements Log {
     private final me.lucko.luckperms.common.data.Log master;
-    
+
     @Override
     public SortedSet<LogEntry> getContent() {
         return master.getContent();

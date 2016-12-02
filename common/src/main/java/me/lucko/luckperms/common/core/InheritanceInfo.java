@@ -22,7 +22,13 @@
 
 package me.lucko.luckperms.common.core;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.ToString;
+
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Tristate;
 

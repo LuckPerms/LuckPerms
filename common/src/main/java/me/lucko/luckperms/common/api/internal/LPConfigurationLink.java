@@ -23,6 +23,7 @@
 package me.lucko.luckperms.common.api.internal;
 
 import lombok.AllArgsConstructor;
+
 import me.lucko.luckperms.api.LPConfiguration;
 import me.lucko.luckperms.api.data.DatastoreConfiguration;
 import me.lucko.luckperms.api.data.MySQLConfiguration;

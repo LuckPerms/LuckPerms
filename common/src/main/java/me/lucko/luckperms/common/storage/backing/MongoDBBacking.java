@@ -29,6 +29,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.InsertOneOptions;
+
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.core.UserIdentifier;
@@ -40,9 +41,16 @@ import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.managers.impl.GenericUserManager;
 import me.lucko.luckperms.common.storage.DatastoreConfiguration;
+
 import org.bson.Document;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
@@ -50,6 +58,58 @@ import static me.lucko.luckperms.common.core.model.PermissionHolder.exportToLega
 
 @SuppressWarnings("unchecked")
 public class MongoDBBacking extends AbstractBacking {
+
+    private static <T> T call(Callable<T> c, T def) {
+        try {
+            return c.call();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return def;
+        }
+    }
+
+    /*  MongoDB does not allow '.' or '$' in key names.
+        See: https://docs.mongodb.com/manual/reference/limits/#Restrictions-on-Field-Names
+        The following two methods convert the node maps so they can be stored. */
+    private static <V> Map<String, V> convert(Map<String, V> map) {
+        return map.entrySet().stream()
+                .collect(Collectors.toMap(e -> e.getKey().replace(".", "[**DOT**]").replace("$", "[**DOLLAR**]"), Map.Entry::getValue));
+    }
+
+    private static <V> Map<String, V> revert(Map<String, V> map) {
+        return map.entrySet().stream()
+                .collect(Collectors.toMap(e -> e.getKey().replace("[**DOT**]", ".").replace("[**DOLLAR**]", "$"), Map.Entry::getValue));
+    }
+
+    private static Document fromUser(User user) {
+        Document main = new Document("_id", user.getUuid())
+                .append("name", user.getName())
+                .append("primaryGroup", user.getPrimaryGroup());
+
+        Document perms = new Document();
+        for (Map.Entry<String, Boolean> e : convert(exportToLegacy(user.getNodes())).entrySet()) {
+            perms.append(e.getKey(), e.getValue());
+        }
+
+        main.append("perms", perms);
+        return main;
+    }
+
+    private static Document fromGroup(Group group) {
+        Document main = new Document("_id", group.getName());
+
+        Document perms = new Document();
+        for (Map.Entry<String, Boolean> e : convert(exportToLegacy(group.getNodes())).entrySet()) {
+            perms.append(e.getKey(), e.getValue());
+        }
+
+        main.append("perms", perms);
+        return main;
+    }
+
+    private static Document fromTrack(Track track) {
+        return new Document("_id", track.getName()).append("groups", track.getGroups());
+    }
 
     private final DatastoreConfiguration configuration;
     private MongoClient mongoClient;
@@ -489,57 +549,5 @@ public class MongoDBBacking extends AbstractBacking {
             }
             return null;
         }, null);
-    }
-
-    private static <T> T call(Callable<T> c, T def) {
-        try {
-            return c.call();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return def;
-        }
-    }
-
-    /*  MongoDB does not allow '.' or '$' in key names.
-        See: https://docs.mongodb.com/manual/reference/limits/#Restrictions-on-Field-Names
-        The following two methods convert the node maps so they can be stored. */
-    private static <V> Map<String, V> convert(Map<String, V> map) {
-        return map.entrySet().stream()
-                .collect(Collectors.toMap(e -> e.getKey().replace(".", "[**DOT**]").replace("$", "[**DOLLAR**]"), Map.Entry::getValue));
-    }
-
-    private static <V> Map<String, V> revert(Map<String, V> map) {
-        return map.entrySet().stream()
-                .collect(Collectors.toMap(e -> e.getKey().replace("[**DOT**]", ".").replace("[**DOLLAR**]", "$"), Map.Entry::getValue));
-    }
-
-    private static Document fromUser(User user) {
-        Document main = new Document("_id", user.getUuid())
-                .append("name", user.getName())
-                .append("primaryGroup", user.getPrimaryGroup());
-
-        Document perms = new Document();
-        for (Map.Entry<String, Boolean> e : convert(exportToLegacy(user.getNodes())).entrySet()) {
-            perms.append(e.getKey(), e.getValue());
-        }
-
-        main.append("perms", perms);
-        return main;
-    }
-
-    private static Document fromGroup(Group group) {
-        Document main = new Document("_id", group.getName());
-
-        Document perms = new Document();
-        for (Map.Entry<String, Boolean> e : convert(exportToLegacy(group.getNodes())).entrySet()) {
-            perms.append(e.getKey(), e.getValue());
-        }
-
-        main.append("perms", perms);
-        return main;
-    }
-
-    private static Document fromTrack(Track track) {
-        return new Document("_id", track.getName()).append("groups", track.getGroups());
     }
 }

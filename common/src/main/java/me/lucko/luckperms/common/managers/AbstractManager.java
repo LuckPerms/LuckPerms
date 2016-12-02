@@ -28,12 +28,14 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+
 import me.lucko.luckperms.common.utils.Identifiable;
 
 import java.util.Map;
 
 /**
  * An abstract manager class
+ *
  * @param <I> the class used to identify each object held in this manager
  * @param <T> the class this manager is "managing"
  */

@@ -23,6 +23,7 @@
 package me.lucko.luckperms.bukkit;
 
 import me.lucko.luckperms.common.config.AbstractConfiguration;
+
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 

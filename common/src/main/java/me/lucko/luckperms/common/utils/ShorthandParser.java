@@ -22,9 +22,10 @@
 
 package me.lucko.luckperms.common.utils;
 
+import lombok.experimental.UtilityClass;
+
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
-import lombok.experimental.UtilityClass;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -116,6 +117,15 @@ public class ShorthandParser {
 
     private static class NumericRangeParser implements Function<String, List<String>> {
 
+        private static boolean isInt(String a) {
+            try {
+                Integer.parseInt(a);
+                return true;
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
+
         @Override
         public List<String> apply(String s) {
             int index = s.indexOf("-");
@@ -131,18 +141,17 @@ public class ShorthandParser {
             }
             return null;
         }
-
-        private static boolean isInt(String a) {
-            try {
-                Integer.parseInt(a);
-                return true;
-            } catch (NumberFormatException e) {
-                return false;
-            }
-        }
     }
 
     private static class CharacterRangeParser implements Function<String, List<String>> {
+
+        private static List<String> getCharRange(char a, char b) {
+            List<String> s = new ArrayList<>();
+            for (char c = a; c <= b; c++) {
+                s.add(Character.toString(c));
+            }
+            return s;
+        }
 
         @Override
         public List<String> apply(String s) {
@@ -157,14 +166,6 @@ public class ShorthandParser {
                 return getCharRange(before.charAt(0), after.charAt(0));
             }
             return null;
-        }
-
-        private static List<String> getCharRange(char a, char b) {
-            List<String> s = new ArrayList<>();
-            for (char c = a; c <= b; c++) {
-                s.add(Character.toString(c));
-            }
-            return s;
         }
     }
 

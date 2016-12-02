@@ -25,7 +25,11 @@ package me.lucko.luckperms.common.storage.backing;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 
 import java.io.File;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class SQLiteBacking extends SQLBacking {
 
@@ -36,8 +40,8 @@ public class SQLiteBacking extends SQLBacking {
     private static final String CREATETABLE_ACTION = "CREATE TABLE IF NOT EXISTS `lp_actions` (`id` INTEGER PRIMARY KEY NOT NULL, `time` BIG INT NOT NULL, `actor_uuid` VARCHAR(36) NOT NULL, `actor_name` VARCHAR(16) NOT NULL, `type` CHAR(1) NOT NULL, `acted_uuid` VARCHAR(36) NOT NULL, `acted_name` VARCHAR(36) NOT NULL, `action` VARCHAR(256) NOT NULL);";
 
     private final File file;
-    private Connection connection = null;
     private final Object connectionLock = new Object();
+    private Connection connection = null;
 
     public SQLiteBacking(LuckPermsPlugin plugin, File file) {
         super(plugin, "SQLite");
@@ -123,7 +127,8 @@ public class SQLiteBacking extends SQLBacking {
             if (connection == null || connection.isClosed()) {
                 try {
                     Class.forName("org.sqlite.JDBC");
-                } catch (ClassNotFoundException ignored) {}
+                } catch (ClassNotFoundException ignored) {
+                }
 
                 connection = DriverManager.getConnection("jdbc:sqlite:" + file.getAbsolutePath());
             }

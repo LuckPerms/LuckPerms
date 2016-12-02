@@ -22,14 +22,16 @@
 
 package me.lucko.luckperms.common.caching;
 
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.caching.MetaData;
 import me.lucko.luckperms.api.caching.PermissionData;

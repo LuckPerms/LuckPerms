@@ -23,6 +23,7 @@
 package me.lucko.luckperms.common.managers.impl;
 
 import lombok.RequiredArgsConstructor;
+
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.managers.AbstractManager;

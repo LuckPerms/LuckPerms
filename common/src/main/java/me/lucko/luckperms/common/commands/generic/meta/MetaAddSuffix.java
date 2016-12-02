@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 
 public class MetaAddSuffix extends SharedSubCommand {
     public MetaAddSuffix() {
-        super("addsuffix", "Adds a suffix",  Permission.USER_META_ADDSUFFIX, Permission.GROUP_META_ADDSUFFIX,
+        super("addsuffix", "Adds a suffix", Permission.USER_META_ADDSUFFIX, Permission.GROUP_META_ADDSUFFIX,
                 Predicates.notInRange(2, 4),
                 Arg.list(
                         Arg.create("priority", true, "the priority to add the suffix at"),

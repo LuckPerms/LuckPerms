@@ -25,6 +25,7 @@ package me.lucko.luckperms.bukkit.calculators;
 import me.lucko.luckperms.api.context.ContextListener;
 import me.lucko.luckperms.bukkit.inject.Injector;
 import me.lucko.luckperms.bukkit.model.LPPermissible;
+
 import org.bukkit.entity.Player;
 
 import java.util.Map;

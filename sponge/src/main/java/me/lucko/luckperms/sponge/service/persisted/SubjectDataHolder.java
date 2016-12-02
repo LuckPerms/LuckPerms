@@ -23,6 +23,7 @@
 package me.lucko.luckperms.sponge.service.persisted;
 
 import lombok.ToString;
+
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.sponge.service.calculated.CalculatedSubjectData;
 import me.lucko.luckperms.sponge.service.references.SubjectReference;

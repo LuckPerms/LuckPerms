@@ -60,6 +60,7 @@ public interface LuckPermsApi {
 
     /**
      * Registers a listener to be sent LuckPerms events
+     *
      * @param listener the listener instance
      * @throws NullPointerException if the listener is null
      */
@@ -67,6 +68,7 @@ public interface LuckPermsApi {
 
     /**
      * Unregisters a previously registered listener from the EventBus
+     *
      * @param listener the listener instance to unregister
      * @throws NullPointerException if the listener is null
      */
@@ -74,12 +76,14 @@ public interface LuckPermsApi {
 
     /**
      * Gets a wrapped {@link LPConfiguration} instance, with read only access
+     *
      * @return a configuration instance
      */
     LPConfiguration getConfiguration();
 
     /**
      * Gets a wrapped {@link Storage} instance.
+     *
      * @return a storage instance
      * @since 2.14
      */
@@ -87,6 +91,7 @@ public interface LuckPermsApi {
 
     /**
      * Gets a wrapped Datastore instance.
+     *
      * @return a datastore instance
      * @deprecated in favour of {@link #getStorage()}
      */
@@ -96,24 +101,28 @@ public interface LuckPermsApi {
 
     /**
      * Gets the messaging service in use on the platform, if present.
+     *
      * @return an optional that may contain a messaging service instance.
      */
     Optional<MessagingService> getMessagingService();
 
     /**
      * Gets the {@link Logger} wrapping used by the platform
+     *
      * @return the logger instance
      */
     Logger getLogger();
 
     /**
      * Gets a wrapped {@link UuidCache} instance, providing read access to the LuckPerms internal uuid caching system
+     *
      * @return a uuid cache instance
      */
     UuidCache getUuidCache();
 
     /**
      * Gets a wrapped user object from the user storage
+     *
      * @param uuid the uuid of the user to get
      * @return a {@link User} object, if one matching the uuid is loaded, or null if not
      * @throws NullPointerException if the uuid is null
@@ -122,6 +131,7 @@ public interface LuckPermsApi {
 
     /**
      * Gets a wrapped user object from the user storage. This method does not return null, unlike {@link #getUser(UUID)}
+     *
      * @param uuid the uuid of the user to get
      * @return an optional {@link User} object
      * @throws NullPointerException if the uuid is null
@@ -130,6 +140,7 @@ public interface LuckPermsApi {
 
     /**
      * Gets a wrapped user object from the user storage
+     *
      * @param name the username of the user to get
      * @return a {@link User} object, if one matching the uuid is loaded, or null if not
      * @throws NullPointerException if the name is null
@@ -137,7 +148,9 @@ public interface LuckPermsApi {
     User getUser(String name);
 
     /**
-     * Gets a wrapped user object from the user storage. This method does not return null, unlike {@link #getUser(String)}
+     * Gets a wrapped user object from the user storage. This method does not return null, unlike {@link
+     * #getUser(String)}
+     *
      * @param name the username of the user to get
      * @return an optional {@link User} object
      * @throws NullPointerException if the name is null
@@ -146,12 +159,14 @@ public interface LuckPermsApi {
 
     /**
      * Gets a set of all loaded users.
+     *
      * @return a {@link Set} of {@link User} objects
      */
     Set<User> getUsers();
 
     /**
      * Check if a user is loaded in memory
+     *
      * @param uuid the uuid to check for
      * @return true if the user is loaded
      * @throws NullPointerException if the uuid is null
@@ -160,6 +175,7 @@ public interface LuckPermsApi {
 
     /**
      * Unload a user from the internal storage, if they're not currently online.
+     *
      * @param user the user to unload
      * @throws NullPointerException if the user is null
      * @since 2.6
@@ -168,6 +184,7 @@ public interface LuckPermsApi {
 
     /**
      * Gets a wrapped group object from the group storage
+     *
      * @param name the name of the group to get
      * @return a {@link Group} object, if one matching the name exists, or null if not
      * @throws NullPointerException if the name is null
@@ -176,6 +193,7 @@ public interface LuckPermsApi {
 
     /**
      * Gets a wrapped group object from the group storage. This method does not return null, unlike {@link #getGroup}
+     *
      * @param name the name of the group to get
      * @return an optional {@link Group} object
      * @throws NullPointerException if the name is null
@@ -184,12 +202,14 @@ public interface LuckPermsApi {
 
     /**
      * Gets a set of all loaded groups.
+     *
      * @return a {@link Set} of {@link Group} objects
      */
     Set<Group> getGroups();
 
     /**
      * Check if a group is loaded in memory
+     *
      * @param name the name to check for
      * @return true if the group is loaded
      * @throws NullPointerException if the name is null
@@ -198,6 +218,7 @@ public interface LuckPermsApi {
 
     /**
      * Gets a wrapped track object from the track storage
+     *
      * @param name the name of the track to get
      * @return a {@link Track} object, if one matching the name exists, or null if not
      * @throws NullPointerException if the name is null
@@ -206,6 +227,7 @@ public interface LuckPermsApi {
 
     /**
      * Gets a wrapped track object from the track storage. This method does not return null, unlike {@link #getTrack}
+     *
      * @param name the name of the track to get
      * @return an optional {@link Track} object
      * @throws NullPointerException if the name is null
@@ -214,12 +236,14 @@ public interface LuckPermsApi {
 
     /**
      * Gets a set of all loaded tracks.
+     *
      * @return a {@link Set} of {@link Track} objects
      */
     Set<Track> getTracks();
 
     /**
      * Check if a track is loaded in memory
+     *
      * @param name the name to check for
      * @return true if the track is loaded
      * @throws NullPointerException if the name is null
@@ -228,16 +252,18 @@ public interface LuckPermsApi {
 
     /**
      * Returns a permission builder instance
+     *
      * @param permission the main permission node to build
      * @return a {@link Node.Builder} instance
      * @throws IllegalArgumentException if the permission is invalid
-     * @throws NullPointerException if the permission is null
+     * @throws NullPointerException     if the permission is null
      * @since 2.6
      */
     Node.Builder buildNode(String permission) throws IllegalArgumentException;
 
     /**
      * Register a custom context calculator to the server
+     *
      * @param contextCalculator the context calculator to register. The type MUST be the player class of the platform.
      * @throws ClassCastException if the type is not the player class of the platform.
      */
@@ -245,6 +271,7 @@ public interface LuckPermsApi {
 
     /**
      * Registers a custom context listener to the server,
+     *
      * @param contextListener the context listener to register. The type MUST be the player class of the platform.
      * @throws ClassCastException if the type is not the player class of the platform.
      */
@@ -253,6 +280,7 @@ public interface LuckPermsApi {
     /**
      * Gets a calculated context instance for the user using the rules of the platform.
      * These values are calculated using the options in the configuration, and the provided calculators.
+     *
      * @param user the user to get contexts for
      * @return an optional containing contexts. Will return empty if the user is not online.
      */

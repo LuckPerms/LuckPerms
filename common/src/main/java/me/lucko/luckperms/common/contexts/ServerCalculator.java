@@ -22,8 +22,10 @@
 
 package me.lucko.luckperms.common.contexts;
 
-import com.google.common.collect.Maps;
 import lombok.AllArgsConstructor;
+
+import com.google.common.collect.Maps;
+
 import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.MutableContextSet;
 

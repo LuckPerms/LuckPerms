@@ -169,8 +169,8 @@ public interface LPConfiguration {
     boolean getSplitStorage();
 
     /**
-     * @return a map of split storage options, where the key is the storage section, and the value is the storage method.
-     * For example: key = user, value = json
+     * @return a map of split storage options, where the key is the storage section, and the value is the storage
+     * method. For example: key = user, value = json
      * @since 2.7
      */
     Map<String, String> getSplitStorageOptions();

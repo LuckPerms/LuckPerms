@@ -24,7 +24,13 @@ package me.lucko.luckperms.common.api.internal;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
-import me.lucko.luckperms.api.*;
+
+import me.lucko.luckperms.api.Group;
+import me.lucko.luckperms.api.Log;
+import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.api.Storage;
+import me.lucko.luckperms.api.Track;
+import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 
 import java.util.Set;
@@ -32,7 +38,11 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-import static me.lucko.luckperms.common.api.internal.Utils.*;
+import static me.lucko.luckperms.common.api.internal.Utils.checkGroup;
+import static me.lucko.luckperms.common.api.internal.Utils.checkName;
+import static me.lucko.luckperms.common.api.internal.Utils.checkTrack;
+import static me.lucko.luckperms.common.api.internal.Utils.checkUser;
+import static me.lucko.luckperms.common.api.internal.Utils.checkUsername;
 
 /**
  * Provides a link between {@link Storage} and {@link me.lucko.luckperms.common.storage.Storage}

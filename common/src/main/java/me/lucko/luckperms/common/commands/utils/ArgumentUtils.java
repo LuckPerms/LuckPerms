@@ -24,6 +24,7 @@ package me.lucko.luckperms.common.commands.utils;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.commands.CommandException;
@@ -119,7 +120,7 @@ public class ArgumentUtils {
             return ContextSet.empty();
         }
 
-        MutableContextSet contextSet = new MutableContextSet();
+        MutableContextSet contextSet = MutableContextSet.create();
         List<String> toQuery = args.subList(fromIndex, args.size());
         for (String s : toQuery) {
             int index = s.indexOf('=');
@@ -141,11 +142,20 @@ public class ArgumentUtils {
         return contextSet.makeImmutable();
     }
 
-    public static abstract class ArgumentException extends CommandException {}
-    public static class DetailedUsageException extends ArgumentException {}
-    public static class UseInheritException extends ArgumentException {}
-    public static class InvalidServerException extends ArgumentException {}
-    public static class PastDateException extends ArgumentException {}
+    public static abstract class ArgumentException extends CommandException {
+    }
+
+    public static class DetailedUsageException extends ArgumentException {
+    }
+
+    public static class UseInheritException extends ArgumentException {
+    }
+
+    public static class InvalidServerException extends ArgumentException {
+    }
+
+    public static class PastDateException extends ArgumentException {
+    }
 
     @Getter
     @AllArgsConstructor

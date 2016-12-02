@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 
 public class MetaRemovePrefix extends SharedSubCommand {
     public MetaRemovePrefix() {
-        super("removeprefix", "Removes a prefix",  Permission.USER_META_REMOVEPREFIX, Permission.GROUP_META_REMOVEPREFIX,
+        super("removeprefix", "Removes a prefix", Permission.USER_META_REMOVEPREFIX, Permission.GROUP_META_REMOVEPREFIX,
                 Predicates.notInRange(2, 4),
                 Arg.list(
                         Arg.create("priority", true, "the priority to add the prefix at"),
@@ -91,7 +91,8 @@ public class MetaRemovePrefix extends SharedSubCommand {
             toRemove.forEach(n -> {
                 try {
                     holder.unsetPermission(n);
-                } catch (ObjectLacksException ignored) {}
+                } catch (ObjectLacksException ignored) {
+                }
             });
 
             Message.BULK_CHANGE_SUCCESS.send(sender, toRemove.size());

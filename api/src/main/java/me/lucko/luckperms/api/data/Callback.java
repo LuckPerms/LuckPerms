@@ -27,20 +27,16 @@ import java.util.function.Consumer;
 /**
  * A callback used to wait for the completion of asynchronous operations.
  * All callbacks are ran on the main server thread.
+ *
  * @param <T> the return type
  * @deprecated in favour of {@link Consumer}
  */
 @Deprecated
 public interface Callback<T> {
 
-    /**
-     * Called when the operation completes.
-     * @param t the return value, may be null
-     */
-    void onComplete(T t);
-
     static <T> Callback<T> empty() {
-        return t -> {};
+        return t -> {
+        };
     }
 
     static <T> Callback<T> of(Runnable runnable) {
@@ -58,9 +54,11 @@ public interface Callback<T> {
     }
 
     /**
-     * Helper method for converting old {@link Callback}s to use the new {@link me.lucko.luckperms.api.Storage} interface.
+     * Helper method for converting old {@link Callback}s to use the new {@link me.lucko.luckperms.api.Storage}
+     * interface.
+     *
      * @param callback the callback to convert
-     * @param <T> the return type
+     * @param <T>      the return type
      * @return a consumer instance
      * @since 2.14
      * @deprecated in favour of just using {@link Consumer}s.
@@ -69,5 +67,12 @@ public interface Callback<T> {
     static <T> Consumer<T> convertToConsumer(Callback<T> callback) {
         return callback::onComplete;
     }
+
+    /**
+     * Called when the operation completes.
+     *
+     * @param t the return value, may be null
+     */
+    void onComplete(T t);
 
 }

@@ -22,6 +22,9 @@
 
 package me.lucko.luckperms.sponge.service.calculated;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -29,8 +32,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedMap;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.calculators.PermissionCalculator;
@@ -42,19 +44,60 @@ import me.lucko.luckperms.sponge.service.base.LPSubject;
 import me.lucko.luckperms.sponge.service.base.LPSubjectData;
 import me.lucko.luckperms.sponge.service.references.SubjectReference;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.SortedMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 @RequiredArgsConstructor
 public class CalculatedSubjectData implements LPSubjectData {
     private static final ContextComparator CONTEXT_COMPARATOR = new ContextComparator();
 
+    private static <V> Map<String, V> flattenMap(ContextSet contexts, Map<ContextSet, Map<String, V>> source) {
+        Map<String, V> map = new HashMap<>();
+
+        SortedMap<ContextSet, Map<String, V>> ret = getRelevantEntries(contexts, source);
+        for (Map<String, V> m : ret.values()) {
+            for (Map.Entry<String, V> e : m.entrySet()) {
+                if (!map.containsKey(e.getKey())) {
+                    map.put(e.getKey(), e.getValue());
+                }
+            }
+        }
+
+        return ImmutableMap.copyOf(map);
+    }
+
+    private static <K, V> SortedMap<ContextSet, Map<K, V>> getRelevantEntries(ContextSet set, Map<ContextSet, Map<K, V>> map) {
+        ImmutableSortedMap.Builder<ContextSet, Map<K, V>> perms = ImmutableSortedMap.orderedBy(CONTEXT_COMPARATOR);
+
+        loop:
+        for (Map.Entry<ContextSet, Map<K, V>> e : map.entrySet()) {
+
+            for (Map.Entry<String, String> c : e.getKey().toSet()) {
+                if (!set.has(c.getKey(), c.getValue())) {
+                    continue loop;
+                }
+            }
+
+            perms.put(e.getKey().makeImmutable(), ImmutableMap.copyOf(e.getValue()));
+        }
+
+        return perms.build();
+    }
+
+    private static boolean stringEquals(String a, String b) {
+        return a == null && b == null || a != null && b != null && a.equalsIgnoreCase(b);
+    }
+
     @Getter
     private final LPSubject parentSubject;
-
     private final LuckPermsService service;
     private final String calculatorDisplayName;
-
+    private final Map<ContextSet, Map<String, Boolean>> permissions = new ConcurrentHashMap<>();
     private final LoadingCache<ContextSet, CalculatorHolder> permissionCache = CacheBuilder.newBuilder()
             .build(new CacheLoader<ContextSet, CalculatorHolder>() {
                 @Override
@@ -69,7 +112,8 @@ public class CalculatedSubjectData implements LPSubjectData {
                     return holder;
                 }
             });
-
+    private final Map<ContextSet, Set<SubjectReference>> parents = new ConcurrentHashMap<>();
+    private final Map<ContextSet, Map<String, String>> options = new ConcurrentHashMap<>();
     private final LoadingCache<ContextSet, Map<String, String>> optionCache = CacheBuilder.newBuilder()
             .build(new CacheLoader<ContextSet, Map<String, String>>() {
                 @Override
@@ -77,10 +121,6 @@ public class CalculatedSubjectData implements LPSubjectData {
                     return flattenMap(contexts, options);
                 }
             });
-
-    private final Map<ContextSet, Map<String, Boolean>> permissions = new ConcurrentHashMap<>();
-    private final Map<ContextSet, Set<SubjectReference>> parents = new ConcurrentHashMap<>();
-    private final Map<ContextSet, Map<String, String>> options = new ConcurrentHashMap<>();
 
     public Tristate getPermissionValue(ContextSet contexts, String permission) {
         return permissionCache.getUnchecked(contexts).getCalculator().getPermissionValue(permission);
@@ -272,43 +312,6 @@ public class CalculatedSubjectData implements LPSubjectData {
             return true;
         }
         return false;
-    }
-
-    private static <V> Map<String, V> flattenMap(ContextSet contexts, Map<ContextSet, Map<String, V>> source) {
-        Map<String, V> map = new HashMap<>();
-
-        SortedMap<ContextSet, Map<String, V>> ret = getRelevantEntries(contexts, source);
-        for (Map<String, V> m : ret.values()) {
-            for (Map.Entry<String, V> e : m.entrySet()) {
-                if (!map.containsKey(e.getKey())) {
-                    map.put(e.getKey(), e.getValue());
-                }
-            }
-        }
-
-        return ImmutableMap.copyOf(map);
-    }
-
-    private static <K, V> SortedMap<ContextSet, Map<K, V>> getRelevantEntries(ContextSet set, Map<ContextSet, Map<K, V>> map) {
-        ImmutableSortedMap.Builder<ContextSet, Map<K, V>> perms = ImmutableSortedMap.orderedBy(CONTEXT_COMPARATOR);
-
-        loop:
-        for (Map.Entry<ContextSet, Map<K, V>> e : map.entrySet()) {
-
-            for (Map.Entry<String, String> c : e.getKey().toSet()) {
-                if (!set.has(c.getKey(), c.getValue())) {
-                    continue loop;
-                }
-            }
-
-            perms.put(e.getKey().makeImmutable(), ImmutableMap.copyOf(e.getValue()));
-        }
-
-        return perms.build();
-    }
-
-    private static boolean stringEquals(String a, String b) {
-        return a == null && b == null || a != null && b != null && a.equalsIgnoreCase(b);
     }
 
     private static class ContextComparator implements Comparator<ContextSet> {

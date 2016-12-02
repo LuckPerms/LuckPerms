@@ -23,6 +23,7 @@
 package me.lucko.luckperms.common.tasks;
 
 import lombok.AllArgsConstructor;
+
 import me.lucko.luckperms.api.event.events.PostSyncEvent;
 import me.lucko.luckperms.api.event.events.PreSyncEvent;
 import me.lucko.luckperms.common.LuckPermsPlugin;

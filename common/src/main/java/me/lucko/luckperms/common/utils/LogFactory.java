@@ -23,6 +23,7 @@
 package me.lucko.luckperms.common.utils;
 
 import lombok.experimental.UtilityClass;
+
 import me.lucko.luckperms.api.Logger;
 
 /**

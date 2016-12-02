@@ -24,6 +24,7 @@ package me.lucko.luckperms.api;
 
 /**
  * Represents the platform type that LuckPerms is running on
+ *
  * @since 2.7
  */
 public enum PlatformType {

@@ -22,7 +22,11 @@
 
 package me.lucko.luckperms.common.utils;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
 
 import java.util.LinkedList;
 import java.util.List;

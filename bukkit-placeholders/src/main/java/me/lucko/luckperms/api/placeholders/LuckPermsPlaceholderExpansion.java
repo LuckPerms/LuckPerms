@@ -25,9 +25,14 @@ package me.lucko.luckperms.api.placeholders;
 import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.clip.placeholderapi.util.TimeUtil;
-import me.lucko.luckperms.api.*;
+import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.LuckPermsApi;
+import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.Track;
+import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.api.context.MutableContextSet;
+
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -55,6 +60,10 @@ public class LuckPermsPlaceholderExpansion extends PlaceholderExpansion {
     private static final String IDENTIFIER = "luckperms";
     private static final String PLUGIN_NAME = "LuckPerms";
     private static final String AUTHOR = "Luck";
+
+    private static String formatBoolean(boolean b) {
+        return b ? PlaceholderAPIPlugin.booleanTrue() : PlaceholderAPIPlugin.booleanFalse();
+    }
 
     private LuckPermsApi api = null;
 
@@ -207,9 +216,5 @@ public class LuckPermsPlaceholderExpansion extends PlaceholderExpansion {
     @Override
     public String getAuthor() {
         return AUTHOR;
-    }
-
-    private static String formatBoolean(boolean b) {
-        return b ? PlaceholderAPIPlugin.booleanTrue() : PlaceholderAPIPlugin.booleanFalse();
     }
 }

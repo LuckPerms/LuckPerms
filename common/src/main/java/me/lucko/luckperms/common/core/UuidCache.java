@@ -22,10 +22,11 @@
 
 package me.lucko.luckperms.common.core;
 
+import lombok.Getter;
+
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
-import lombok.Getter;
 
 import java.util.UUID;
 
@@ -34,11 +35,10 @@ import java.util.UUID;
  */
 public class UuidCache {
 
-    // External UUID --> Internal UUID
-    private BiMap<UUID, UUID> cache;
-
     @Getter
     private final boolean onlineMode;
+    // External UUID --> Internal UUID
+    private BiMap<UUID, UUID> cache;
 
     public UuidCache(boolean onlineMode) {
         this.onlineMode = onlineMode;

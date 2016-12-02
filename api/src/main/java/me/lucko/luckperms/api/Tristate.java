@@ -31,6 +31,10 @@ public enum Tristate {
     FALSE(false),
     UNDEFINED(false);
 
+    public static Tristate fromBoolean(boolean b) {
+        return b ? TRUE : FALSE;
+    }
+
     private final boolean booleanValue;
 
     Tristate(boolean booleanValue) {
@@ -39,9 +43,5 @@ public enum Tristate {
 
     public boolean asBoolean() {
         return booleanValue;
-    }
-
-    public static Tristate fromBoolean(boolean b) {
-        return b ? TRUE : FALSE;
     }
 }

@@ -24,13 +24,13 @@ package me.lucko.luckperms.common.utils;
 
 /**
  * Interface to represent an identifiable object
- * @param <T>
  */
 public interface Identifiable<T> {
 
     /**
      * Returns the objects identifier.
      * If the type is a {@link String}, this method must return a {@link String#toLowerCase()} representation
+     *
      * @return the identifier
      */
     T getId();

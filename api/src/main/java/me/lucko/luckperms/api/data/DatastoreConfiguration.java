@@ -30,8 +30,11 @@ package me.lucko.luckperms.api.data;
 public interface DatastoreConfiguration extends MySQLConfiguration {
 
     String getAddress();
+
     String getDatabase();
+
     String getUsername();
+
     String getPassword();
 
 }

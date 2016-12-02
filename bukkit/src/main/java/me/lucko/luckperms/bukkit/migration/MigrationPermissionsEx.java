@@ -38,16 +38,17 @@ import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
-import ru.tehkode.permissions.NativeInterface;
-import ru.tehkode.permissions.PermissionGroup;
-import ru.tehkode.permissions.PermissionManager;
-import ru.tehkode.permissions.PermissionUser;
-import ru.tehkode.permissions.bukkit.PermissionsEx;
 
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import ru.tehkode.permissions.NativeInterface;
+import ru.tehkode.permissions.PermissionGroup;
+import ru.tehkode.permissions.PermissionManager;
+import ru.tehkode.permissions.PermissionUser;
+import ru.tehkode.permissions.bukkit.PermissionsEx;
 
 public class MigrationPermissionsEx extends SubCommand<Object> {
     public MigrationPermissionsEx() {
@@ -96,7 +97,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
 
         for (PermissionGroup group : manager.getGroupList()) {
             int groupWeight = group.getWeight() * -1;
-            groupCount ++;
+            groupCount++;
             maxGroupWeight = Math.max(maxGroupWeight, groupWeight);
 
             final String name = group.getName().toLowerCase();
@@ -380,7 +381,8 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             if (primary != null) {
                 try {
                     lpUser.setPermission("group." + primary.toLowerCase(), true);
-                } catch (ObjectAlreadyHasException ignored) {}
+                } catch (ObjectAlreadyHasException ignored) {
+                }
                 lpUser.setPrimaryGroup(primary);
             }
 

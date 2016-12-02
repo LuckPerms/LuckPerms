@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
 
 public class MetaSet extends SharedSubCommand {
     public MetaSet() {
-        super("set", "Sets a meta value",  Permission.USER_META_SET, Permission.GROUP_META_SET, Predicates.notInRange(2, 4),
+        super("set", "Sets a meta value", Permission.USER_META_SET, Permission.GROUP_META_SET, Predicates.notInRange(2, 4),
                 Arg.list(
                         Arg.create("key", true, "the key to set"),
                         Arg.create("value", true, "the value to set"),
@@ -73,7 +73,8 @@ public class MetaSet extends SharedSubCommand {
 
         try {
             holder.setPermission(n);
-        } catch (ObjectAlreadyHasException ignored) {}
+        } catch (ObjectAlreadyHasException ignored) {
+        }
 
         switch (ContextHelper.determine(server, world)) {
             case NONE:

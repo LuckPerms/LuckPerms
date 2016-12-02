@@ -23,6 +23,7 @@
 package me.lucko.luckperms.common.commands.user;
 
 import com.google.common.collect.ImmutableList;
+
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.Command;
 import me.lucko.luckperms.common.commands.MainCommand;

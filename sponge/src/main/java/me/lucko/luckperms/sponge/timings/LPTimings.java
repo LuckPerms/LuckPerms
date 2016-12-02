@@ -22,13 +22,16 @@
 
 package me.lucko.luckperms.sponge.timings;
 
-import co.aikar.timings.Timing;
-import co.aikar.timings.Timings;
-import com.google.common.collect.ImmutableMap;
 import lombok.NonNull;
+
+import com.google.common.collect.ImmutableMap;
+
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 
 import java.util.Map;
+
+import co.aikar.timings.Timing;
+import co.aikar.timings.Timings;
 
 public class LPTimings {
     private final Map<LPTiming, Timing> timings;

@@ -22,8 +22,10 @@
 
 package me.lucko.luckperms.bukkit;
 
-import com.google.common.collect.ImmutableMap;
 import lombok.Getter;
+
+import com.google.common.collect.ImmutableMap;
+
 import me.lucko.luckperms.ApiHandler;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Logger;
@@ -58,7 +60,12 @@ import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.StorageFactory;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.tasks.UpdateTask;
-import me.lucko.luckperms.common.utils.*;
+import me.lucko.luckperms.common.utils.BufferedRequest;
+import me.lucko.luckperms.common.utils.DebugHandler;
+import me.lucko.luckperms.common.utils.LocaleManager;
+import me.lucko.luckperms.common.utils.LogFactory;
+import me.lucko.luckperms.common.utils.PermissionCache;
+
 import org.bukkit.World;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
@@ -68,7 +75,13 @@ import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -76,11 +89,10 @@ import java.util.stream.Collectors;
 
 @Getter
 public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
+    private final Set<UUID> ignoringLogs = ConcurrentHashMap.newKeySet();
     private Executor syncExecutor;
     private Executor asyncExecutor;
     private VaultHook vaultHook = null;
-
-    private final Set<UUID> ignoringLogs = ConcurrentHashMap.newKeySet();
     private LPConfiguration configuration;
     private UserManager userManager;
     private GroupManager groupManager;
@@ -392,7 +404,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         c.addAll(getServer().getWorlds().stream()
                 .map(World::getName)
                 .map(s -> {
-                    MutableContextSet set = new MutableContextSet();
+                    MutableContextSet set = MutableContextSet.create();
                     set.add("server", getConfiguration().getServer());
                     set.add("world", s);
                     return set.makeImmutable();
@@ -406,7 +418,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
             c.addAll(getServer().getWorlds().stream()
                     .map(World::getName)
                     .map(s -> {
-                        MutableContextSet set = new MutableContextSet();
+                        MutableContextSet set = MutableContextSet.create();
                         set.add("server", getConfiguration().getVaultServer());
                         set.add("world", s);
                         return set.makeImmutable();

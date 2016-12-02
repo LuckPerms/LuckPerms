@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 
 public class MetaSetTemp extends SharedSubCommand {
     public MetaSetTemp() {
-        super("settemp", "Sets a meta value temporarily",  Permission.USER_META_SETTEMP, Permission.GROUP_META_SETTEMP, Predicates.notInRange(3, 5),
+        super("settemp", "Sets a meta value temporarily", Permission.USER_META_SETTEMP, Permission.GROUP_META_SETTEMP, Predicates.notInRange(3, 5),
                 Arg.list(
                         Arg.create("key", true, "the key to set"),
                         Arg.create("value", true, "the value to set"),
@@ -75,7 +75,8 @@ public class MetaSetTemp extends SharedSubCommand {
 
         try {
             holder.setPermission(n);
-        } catch (ObjectAlreadyHasException ignored) {}
+        } catch (ObjectAlreadyHasException ignored) {
+        }
 
         switch (ContextHelper.determine(server, world)) {
             case NONE:

@@ -23,6 +23,7 @@
 package me.lucko.luckperms.common.managers.impl;
 
 import lombok.RequiredArgsConstructor;
+
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.core.UserIdentifier;
@@ -36,6 +37,69 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 public class GenericUserManager extends AbstractManager<UserIdentifier, User> implements UserManager {
+    public static boolean giveDefaultIfNeeded(User user, boolean save, LuckPermsPlugin plugin) {
+        boolean hasGroup = false;
+
+        if (user.getPrimaryGroup() != null && !user.getPrimaryGroup().isEmpty()) {
+            for (Node node : user.getPermissions(false)) {
+                if (node.isGroupNode()) {
+                    hasGroup = true;
+                    break;
+                }
+            }
+        }
+
+        if (hasGroup) {
+            return false;
+        }
+
+        user.setPrimaryGroup("default");
+        try {
+            user.setPermission("group.default", true);
+        } catch (ObjectAlreadyHasException ignored) {
+        }
+
+        if (save) {
+            plugin.getStorage().saveUser(user);
+        }
+
+        return true;
+    }
+
+    /**
+     * Check whether the user's state indicates that they should be persisted to storage.
+     *
+     * @param user the user to check
+     * @return true if the user should be saved
+     */
+    public static boolean shouldSave(User user) {
+        if (user.getNodes().size() != 1) {
+            return true;
+        }
+
+        for (Node node : user.getNodes()) {
+            // There's only one.
+            if (!node.isGroupNode()) {
+                return true;
+            }
+
+            if (node.isTemporary() || node.isServerSpecific() || node.isWorldSpecific()) {
+                return true;
+            }
+
+            if (!node.getGroupName().equalsIgnoreCase("default")) {
+                // The user's only node is not the default group one.
+                return true;
+            }
+        }
+
+        if (!user.getPrimaryGroup().equalsIgnoreCase("default")) {
+            return true; // Not in the default primary group
+        }
+
+        return false;
+    }
+
     private final LuckPermsPlugin plugin;
 
     @Override
@@ -83,66 +147,5 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
                 }
             });
         });
-    }
-
-    public static boolean giveDefaultIfNeeded(User user, boolean save, LuckPermsPlugin plugin) {
-        boolean hasGroup = false;
-
-        if (user.getPrimaryGroup() != null && !user.getPrimaryGroup().isEmpty()) {
-            for (Node node : user.getPermissions(false)) {
-                if (node.isGroupNode()) {
-                    hasGroup = true;
-                    break;
-                }
-            }
-        }
-
-        if (hasGroup) {
-            return false;
-        }
-
-        user.setPrimaryGroup("default");
-        try {
-            user.setPermission("group.default", true);
-        } catch (ObjectAlreadyHasException ignored) {}
-
-        if (save) {
-            plugin.getStorage().saveUser(user);
-        }
-
-        return true;
-    }
-
-    /**
-     * Check whether the user's state indicates that they should be persisted to storage.
-     * @param user the user to check
-     * @return true if the user should be saved
-     */
-    public static boolean shouldSave(User user) {
-        if (user.getNodes().size() != 1) {
-            return true;
-        }
-
-        for (Node node : user.getNodes()) {
-            // There's only one.
-            if (!node.isGroupNode()) {
-                return true;
-            }
-
-            if (node.isTemporary() || node.isServerSpecific() || node.isWorldSpecific()) {
-                return true;
-            }
-
-            if (!node.getGroupName().equalsIgnoreCase("default")) {
-                // The user's only node is not the default group one.
-                return true;
-            }
-        }
-
-        if (!user.getPrimaryGroup().equalsIgnoreCase("default")) {
-            return true; // Not in the default primary group
-        }
-
-        return false;
     }
 }

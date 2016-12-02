@@ -25,6 +25,7 @@ package me.lucko.luckperms.common.storage.wrappings;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Delegate;
+
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.Track;
@@ -262,8 +263,11 @@ public class TolerantStorage implements Storage {
 
     private interface Delegated {
         String getName();
+
         boolean isAcceptingLogins();
+
         void setAcceptingLogins(boolean b);
+
         void init();
     }
 }

@@ -22,8 +22,10 @@
 
 package me.lucko.luckperms.common.api.internal;
 
-import com.google.common.base.Preconditions;
 import lombok.experimental.UtilityClass;
+
+import com.google.common.base.Preconditions;
+
 import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.User;

@@ -23,6 +23,7 @@
 package me.lucko.luckperms.common.commands;
 
 import lombok.Getter;
+
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
@@ -141,7 +142,9 @@ public abstract class MainCommand<T> extends BaseCommand<Void, T> {
     }
 
     protected abstract List<String> getTargets(LuckPermsPlugin plugin);
+
     protected abstract T getTarget(String target, LuckPermsPlugin plugin, Sender sender);
+
     protected abstract void cleanup(T t, LuckPermsPlugin plugin);
 
     @Override

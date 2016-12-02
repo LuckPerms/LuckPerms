@@ -22,12 +22,13 @@
 
 package me.lucko.luckperms.sponge.service;
 
-import co.aikar.timings.Timing;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
@@ -44,11 +45,19 @@ import me.lucko.luckperms.sponge.service.base.LPSubject;
 import me.lucko.luckperms.sponge.service.base.LPSubjectData;
 import me.lucko.luckperms.sponge.service.references.SubjectReference;
 import me.lucko.luckperms.sponge.timings.LPTiming;
+
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.PermissionService;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import co.aikar.timings.Timing;
 
 @SuppressWarnings({"OptionalGetWithoutIsPresent", "unused"})
 @AllArgsConstructor
@@ -119,7 +128,8 @@ public class LuckPermsSubjectData implements LPSubjectData {
                     } else {
                         holder.unsetTransientPermission(node);
                     }
-                } catch (ObjectLacksException ignored) {}
+                } catch (ObjectLacksException ignored) {
+                }
 
                 objectSave(holder);
                 return true;
@@ -131,10 +141,11 @@ public class LuckPermsSubjectData implements LPSubjectData {
             try {
                 if (enduring) {
                     holder.unsetPermission(node);
-                }else {
+                } else {
                     holder.unsetTransientPermission(node);
                 }
-            } catch (ObjectLacksException ignored) {}
+            } catch (ObjectLacksException ignored) {
+            }
 
             try {
                 if (enduring) {
@@ -142,7 +153,8 @@ public class LuckPermsSubjectData implements LPSubjectData {
                 } else {
                     holder.setTransientPermission(node);
                 }
-            } catch (ObjectAlreadyHasException ignored) {}
+            } catch (ObjectAlreadyHasException ignored) {
+            }
 
             objectSave(holder);
             return true;
@@ -189,7 +201,8 @@ public class LuckPermsSubjectData implements LPSubjectData {
                     } else {
                         holder.unsetTransientPermission(n);
                     }
-                } catch (ObjectLacksException ignored) {}
+                } catch (ObjectLacksException ignored) {
+                }
             });
 
             if (holder instanceof User) {
@@ -252,7 +265,8 @@ public class LuckPermsSubjectData implements LPSubjectData {
                                 .withExtraContext(contexts)
                                 .build());
                     }
-                } catch (ObjectAlreadyHasException ignored) {}
+                } catch (ObjectAlreadyHasException ignored) {
+                }
 
                 objectSave(holder);
                 return true;
@@ -277,7 +291,8 @@ public class LuckPermsSubjectData implements LPSubjectData {
                                 .withExtraContext(contexts)
                                 .build());
                     }
-                } catch (ObjectLacksException ignored) {}
+                } catch (ObjectLacksException ignored) {
+                }
 
                 objectSave(holder);
                 return true;
@@ -300,7 +315,8 @@ public class LuckPermsSubjectData implements LPSubjectData {
                     } else {
                         holder.unsetTransientPermission(n);
                     }
-                } catch (ObjectLacksException ignored) {}
+                } catch (ObjectLacksException ignored) {
+                }
             });
 
             if (holder instanceof User) {
@@ -343,7 +359,8 @@ public class LuckPermsSubjectData implements LPSubjectData {
                     } else {
                         holder.unsetTransientPermission(n);
                     }
-                } catch (ObjectLacksException ignored) {}
+                } catch (ObjectLacksException ignored) {
+                }
             });
 
             if (holder instanceof User) {
@@ -429,7 +446,8 @@ public class LuckPermsSubjectData implements LPSubjectData {
             toRemove.forEach(n -> {
                 try {
                     holder.unsetPermission(n);
-                } catch (ObjectLacksException ignored) {}
+                } catch (ObjectLacksException ignored) {
+                }
             });
 
             try {
@@ -438,7 +456,8 @@ public class LuckPermsSubjectData implements LPSubjectData {
                 } else {
                     holder.setTransientPermission(NodeFactory.makeMetaNode(key, value).withExtraContext(context).build());
                 }
-            } catch (ObjectAlreadyHasException ignored) {}
+            } catch (ObjectAlreadyHasException ignored) {
+            }
             objectSave(holder);
             return true;
         }
@@ -454,7 +473,8 @@ public class LuckPermsSubjectData implements LPSubjectData {
             toRemove.forEach(n -> {
                 try {
                     holder.unsetPermission(n);
-                } catch (ObjectLacksException ignored) {}
+                } catch (ObjectLacksException ignored) {
+                }
             });
 
             objectSave(holder);
@@ -493,7 +513,8 @@ public class LuckPermsSubjectData implements LPSubjectData {
                     } else {
                         holder.unsetTransientPermission(n);
                     }
-                } catch (ObjectLacksException ignored) {}
+                } catch (ObjectLacksException ignored) {
+                }
             });
 
             objectSave(holder);
@@ -515,7 +536,8 @@ public class LuckPermsSubjectData implements LPSubjectData {
                     } else {
                         holder.unsetTransientPermission(n);
                     }
-                } catch (ObjectLacksException ignored) {}
+                } catch (ObjectLacksException ignored) {
+                }
             });
 
             objectSave(holder);

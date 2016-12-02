@@ -24,6 +24,7 @@ package me.lucko.luckperms.common.constants;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
 
@@ -51,7 +52,6 @@ public enum Message {
     DOES_NOT_HAVE_TEMP_PERMISSION("{0} does not have this permission set temporarily.", true),
 
 
-
     /*
      * Loading / Saving
      */
@@ -67,7 +67,6 @@ public enum Message {
     TRACK_NOT_FOUND("&bTrack could not be found.", true),
     TRACK_SAVE_SUCCESS("&7(Track data was saved to storage)", true),
     TRACK_SAVE_ERROR("There was an error whilst saving the track.", true),
-
 
 
     /*
@@ -86,7 +85,7 @@ public enum Message {
     VERBOSE_ON("&bVerbose checking output set to &aTRUE &bfor all permissions.", true),
     VERBOSE_ON_QUERY("&bVerbose checking output set to &aTRUE &bfor permissions matching the following filters: &f{0}", true),
     VERBOSE_OFF("&bVerbose checking output set to &cFALSE&b.", true),
-    
+
     CREATE_SUCCESS("&b{0}&a was successfully created.", true),
     DELETE_SUCCESS("&b{0}&a was successfully deleted.", true),
     RENAME_SUCCESS("&b{0}&a was successfully renamed to &b{1}&a.", true),
@@ -119,31 +118,31 @@ public enum Message {
     UPDATE_TASK_PUSH_FAILURE("&cError whilst pushing changes to other servers. Is Redis enabled?", true),
     INFO(
             "{PREFIX}&2Running &bLuckPerms v{0}&2 by &bLuck&2." + "\n" +
-            "{PREFIX}&f-  &3Platform: &f{1}" + "\n" +
-            "{PREFIX}&f-  &3Storage Method: &f{2}" + "\n" +
-            "{PREFIX}&f-  &3Server Name: &f{3}" + "\n" +
-            "{PREFIX}&f-  &3Sync Interval: &a{4} &fminutes" + "\n" +
-            "{PREFIX}&f-  &bCounts:" + "\n" +
-            "{PREFIX}&f-     &3Online Players: &a{5}" + "\n" +
-            "{PREFIX}&f-     &3Loaded Users: &a{6}" + "\n" +
-            "{PREFIX}&f-     &3Loaded Groups: &a{7}" + "\n" +
-            "{PREFIX}&f-     &3Loaded Tracks: &a{8}" + "\n" +
-            "{PREFIX}&f-     &3Log size: &a{9}" + "\n" +
-            "{PREFIX}&f-     &3UUID Cache size: &a{10}" + "\n" +
-            "{PREFIX}&f-     &3Translations loaded: &a{11}" + "\n" +
-            "{PREFIX}&f-     &3Pre-process contexts: &a{12}" + "\n" +
-            "{PREFIX}&f-     &3Context Calculators: &a{13}" + "\n" +
-            "{PREFIX}&f-  &bConfiguration:" + "\n" +
-            "{PREFIX}&f-     &3Online Mode: {14}" + "\n" +
-            "{PREFIX}&f-     &3Redis Enabled: {15}" + "\n" +
-            "{PREFIX}&f-     &bPermission Calculation:" + "\n" +
-            "{PREFIX}&f-        &3Including Global: {16}" + "\n" +
-            "{PREFIX}&f-        &3Including Global World: {17}" + "\n" +
-            "{PREFIX}&f-        &3Applying Global Groups: {18}" + "\n" +
-            "{PREFIX}&f-        &3Applying Global World Groups: {19}" + "\n" +
-            "{PREFIX}&f-        &3Applying Wildcards: {20}" + "\n" +
-            "{PREFIX}&f-        &3Applying Regex: {21}" + "\n" +
-            "{PREFIX}&f-        &3Applying Shorthand: {22}",
+                    "{PREFIX}&f-  &3Platform: &f{1}" + "\n" +
+                    "{PREFIX}&f-  &3Storage Method: &f{2}" + "\n" +
+                    "{PREFIX}&f-  &3Server Name: &f{3}" + "\n" +
+                    "{PREFIX}&f-  &3Sync Interval: &a{4} &fminutes" + "\n" +
+                    "{PREFIX}&f-  &bCounts:" + "\n" +
+                    "{PREFIX}&f-     &3Online Players: &a{5}" + "\n" +
+                    "{PREFIX}&f-     &3Loaded Users: &a{6}" + "\n" +
+                    "{PREFIX}&f-     &3Loaded Groups: &a{7}" + "\n" +
+                    "{PREFIX}&f-     &3Loaded Tracks: &a{8}" + "\n" +
+                    "{PREFIX}&f-     &3Log size: &a{9}" + "\n" +
+                    "{PREFIX}&f-     &3UUID Cache size: &a{10}" + "\n" +
+                    "{PREFIX}&f-     &3Translations loaded: &a{11}" + "\n" +
+                    "{PREFIX}&f-     &3Pre-process contexts: &a{12}" + "\n" +
+                    "{PREFIX}&f-     &3Context Calculators: &a{13}" + "\n" +
+                    "{PREFIX}&f-  &bConfiguration:" + "\n" +
+                    "{PREFIX}&f-     &3Online Mode: {14}" + "\n" +
+                    "{PREFIX}&f-     &3Redis Enabled: {15}" + "\n" +
+                    "{PREFIX}&f-     &bPermission Calculation:" + "\n" +
+                    "{PREFIX}&f-        &3Including Global: {16}" + "\n" +
+                    "{PREFIX}&f-        &3Including Global World: {17}" + "\n" +
+                    "{PREFIX}&f-        &3Applying Global Groups: {18}" + "\n" +
+                    "{PREFIX}&f-        &3Applying Global World Groups: {19}" + "\n" +
+                    "{PREFIX}&f-        &3Applying Wildcards: {20}" + "\n" +
+                    "{PREFIX}&f-        &3Applying Regex: {21}" + "\n" +
+                    "{PREFIX}&f-        &3Applying Shorthand: {22}",
             false
     ),
     CREATE_GROUP_ERROR("There was an error whilst creating the group.", true),
@@ -260,30 +259,30 @@ public enum Message {
     UNSET_META_TEMP_SUCCESS("&aUnset temporary meta value with key &f\"{0}&f\"&a for &b{1}&a.", true),
     UNSET_META_TEMP_SERVER_SUCCESS("&aUnset temporary meta value with key &f\"{0}&f\"&a for &b{1}&a on server &b{2}&a.", true),
     UNSET_META_TEMP_SERVER_WORLD_SUCCESS("&aUnset temporary meta value with key &f\"{0}&f\"&a for &b{1}&a on server &b{2}&a, world &b{3}&a.", true),
-    
+
     BULK_CHANGE_TYPE_ERROR("Invalid type. Was expecting 'server' or 'world'.", true),
     BULK_CHANGE_SUCCESS("&aApplied bulk change successfully. {0} records were changed.", true),
 
     USER_INFO_GENERAL(
             "{PREFIX}&b&l> &bUser Info: &f{0}" + "\n" +
-            "{PREFIX}&f- &3UUID: &f{1}" + "\n" +
-            "{PREFIX}&f- &3Status: {2}" + "\n" +
-            "{PREFIX}&f- &3Primary Group: &f{3}" + "\n" +
-            "{PREFIX}&f- &aCounts:" + "\n" +
-            "{PREFIX}&f-    &3Permissions: &a{4}" + "\n" +
-            "{PREFIX}&f-    &3Temporary Permissions: &a{5}" + "\n" +
-            "{PREFIX}&f-    &3Prefixes: &a{6}" + "\n" +
-            "{PREFIX}&f-    &3Suffixes: &a{7}" + "\n" +
-            "{PREFIX}&f-    &3Meta: &a{8}",
+                    "{PREFIX}&f- &3UUID: &f{1}" + "\n" +
+                    "{PREFIX}&f- &3Status: {2}" + "\n" +
+                    "{PREFIX}&f- &3Primary Group: &f{3}" + "\n" +
+                    "{PREFIX}&f- &aCounts:" + "\n" +
+                    "{PREFIX}&f-    &3Permissions: &a{4}" + "\n" +
+                    "{PREFIX}&f-    &3Temporary Permissions: &a{5}" + "\n" +
+                    "{PREFIX}&f-    &3Prefixes: &a{6}" + "\n" +
+                    "{PREFIX}&f-    &3Suffixes: &a{7}" + "\n" +
+                    "{PREFIX}&f-    &3Meta: &a{8}",
             false
     ),
 
     USER_INFO_DATA(
             "{PREFIX}&f- &aCached Data:" + "\n" +
-            "{PREFIX}&f-    &3Is Loaded: {0}" + "\n" +
-            "{PREFIX}&f-    &3Current Contexts: {1}" + "\n" +
-            "{PREFIX}&f-    &3Current Prefix: {2}" + "\n" +
-            "{PREFIX}&f-    &3Current Suffix: {3}",
+                    "{PREFIX}&f-    &3Is Loaded: {0}" + "\n" +
+                    "{PREFIX}&f-    &3Current Contexts: {1}" + "\n" +
+                    "{PREFIX}&f-    &3Current Prefix: {2}" + "\n" +
+                    "{PREFIX}&f-    &3Current Suffix: {3}",
             false
     ),
 
@@ -301,7 +300,7 @@ public enum Message {
     USER_PROMOTE_ERROR_ENDOFTRACK("The end of track &4{0}&c was reached. Unable to promote user.", true),
     USER_PROMOTE_ERROR_MALFORMED(
             "{PREFIX}The next group on the track, {0}, no longer exists. Unable to promote user." + "\n" +
-            "{PREFIX}Either create the group, or remove it from the track and try again.",
+                    "{PREFIX}Either create the group, or remove it from the track and try again.",
             false
     ),
     USER_DEMOTE_SUCCESS("&aDemoting user along track &b{0}&a from &b{1}&a to &b{2}&a.", true),
@@ -310,22 +309,22 @@ public enum Message {
     USER_DEMOTE_ERROR_ENDOFTRACK("The end of track &4{0}&c was reached. Unable to demote user.", true),
     USER_DEMOTE_ERROR_MALFORMED(
             "{PREFIX}The previous group on the track, {0}, no longer exists. Unable to demote user." + "\n" +
-            "{PREFIX}Either create the group, or remove it from the track and try again.",
+                    "{PREFIX}Either create the group, or remove it from the track and try again.",
             false
     ),
     USER_SHOWPOS("&aShowing &b{0}&a's position on track &b{1}&a.\n{2}", true),
 
     GROUP_INFO(
             "{PREFIX}&b&l> &bGroup Info: &f{0}" + "\n" +
-            "{PREFIX}&f- &3Permissions: &f{1}" + "\n" +
-            "{PREFIX}&f- &3Temporary Permissions: &f{2}" + "\n" +
-            "{PREFIX}&f- &3Use &b/{3} group {4} permission info &3to see all permissions.",
+                    "{PREFIX}&f- &3Permissions: &f{1}" + "\n" +
+                    "{PREFIX}&f- &3Temporary Permissions: &f{2}" + "\n" +
+                    "{PREFIX}&f- &3Use &b/{3} group {4} permission info &3to see all permissions.",
             false
     ),
 
     TRACK_INFO(
             "{PREFIX}&b&l> &bShowing Track: &f{0}" + "\n" +
-            "{PREFIX}&f- &7Path: &f{1}",
+                    "{PREFIX}&f- &7Path: &f{1}",
             false
     ),
     TRACK_CLEAR("&b{0}&a's groups track was cleared.", true),
@@ -376,10 +375,10 @@ public enum Message {
     IMPORT_END_COMPLETE_ERR_SIN("&b(Import) &a&lCOMPLETED &7- took &b{0} &7seconds - &c{1} error.", true),
     IMPORT_END_ERROR_HEADER(
             "{PREFIX}&b(Import) &7------------> &fShowing Error #&b{0} &7<------------" + "\n" +
-            "{PREFIX}&b(Import) &fWhilst executing: &3Command #{1}" + "\n" +
-            "{PREFIX}&b(Import) &fCommand: &7{2}" + "\n" +
-            "{PREFIX}&b(Import) &fType: &3{3}" + "\n" +
-            "{PREFIX}&b(Import) &fOutput:",
+                    "{PREFIX}&b(Import) &fWhilst executing: &3Command #{1}" + "\n" +
+                    "{PREFIX}&b(Import) &fCommand: &7{2}" + "\n" +
+                    "{PREFIX}&b(Import) &fType: &3{3}" + "\n" +
+                    "{PREFIX}&b(Import) &fOutput:",
             false
     ),
 
@@ -387,6 +386,14 @@ public enum Message {
     IMPORT_END_ERROR_FOOTER("&b(Import) &7<------------------------------------------>", true),
 
     MIGRATION_NOT_CONSOLE("Migration must be performed from the Console.", true);
+
+    private static String format(String s, Object... objects) {
+        for (int i = 0, objsLength = objects.length; i < objsLength; i++) {
+            Object o = objects[i];
+            s = s.replace("{" + i + "}", o.toString());
+        }
+        return s;
+    }
 
     @Getter
     private String message;
@@ -415,13 +422,5 @@ public enum Message {
         } else {
             sender.sendMessage(Util.color(format(s, objects)));
         }
-    }
-
-    private static String format(String s, Object... objects) {
-        for (int i = 0, objsLength = objects.length; i < objsLength; i++) {
-            Object o = objects[i];
-            s = s.replace("{" + i + "}", o.toString());
-        }
-        return s;
     }
 }
