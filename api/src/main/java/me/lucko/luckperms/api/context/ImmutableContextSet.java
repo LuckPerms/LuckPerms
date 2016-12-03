@@ -87,7 +87,7 @@ public final class ImmutableContextSet implements ContextSet {
      * @return a new ImmutableContextSet representing the pairs in the iterable
      * @throws NullPointerException if the iterable is null
      */
-    public static ImmutableContextSet fromEntries(Iterable<Map.Entry<String, String>> iterable) {
+    public static ImmutableContextSet fromEntries(Iterable<? extends Map.Entry<String, String>> iterable) {
         if (iterable == null) {
             throw new NullPointerException("iterable");
         }

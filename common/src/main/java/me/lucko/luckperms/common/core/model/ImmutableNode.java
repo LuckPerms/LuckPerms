@@ -35,6 +35,7 @@ import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.constants.Patterns;
 import me.lucko.luckperms.common.utils.ShorthandParser;
 
@@ -122,7 +123,7 @@ public class ImmutableNode implements Node {
     private long expireAt = 0L;
 
     @Getter
-    private final ContextSet contexts;
+    private final ImmutableContextSet contexts;
 
     // Cached state
     private final boolean isGroup;

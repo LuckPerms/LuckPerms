@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.sponge.service.persisted;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Files;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -33,6 +34,8 @@ import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Handles persisted Subject I/O and (de)serialization
@@ -49,6 +52,17 @@ public class SubjectStorage {
 
     private void checkContainer() {
         this.container.getParentFile().mkdirs();
+    }
+
+    public Set<String> getSavedCollections() {
+        checkContainer();
+
+        File[] dirs = container.listFiles(File::isDirectory);
+        if (dirs == null) {
+            return Collections.emptySet();
+        }
+
+        return ImmutableSet.copyOf(dirs).stream().map(File::getName).collect(Collectors.toSet());
     }
 
     public void saveToFile(PersistedSubject subject) throws IOException {

@@ -35,6 +35,7 @@ import com.google.common.collect.ImmutableSortedMap;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.calculators.PermissionCalculator;
 import me.lucko.luckperms.common.calculators.PermissionProcessor;
 import me.lucko.luckperms.common.calculators.processors.MapProcessor;
@@ -95,8 +96,10 @@ public class CalculatedSubjectData implements LPSubjectData {
 
     @Getter
     private final LPSubject parentSubject;
+
     private final LuckPermsService service;
     private final String calculatorDisplayName;
+
     private final Map<ContextSet, Map<String, Boolean>> permissions = new ConcurrentHashMap<>();
     private final LoadingCache<ContextSet, CalculatorHolder> permissionCache = CacheBuilder.newBuilder()
             .build(new CacheLoader<ContextSet, CalculatorHolder>() {
@@ -112,15 +115,9 @@ public class CalculatedSubjectData implements LPSubjectData {
                     return holder;
                 }
             });
+
     private final Map<ContextSet, Set<SubjectReference>> parents = new ConcurrentHashMap<>();
     private final Map<ContextSet, Map<String, String>> options = new ConcurrentHashMap<>();
-    private final LoadingCache<ContextSet, Map<String, String>> optionCache = CacheBuilder.newBuilder()
-            .build(new CacheLoader<ContextSet, Map<String, String>>() {
-                @Override
-                public Map<String, String> load(ContextSet contexts) {
-                    return flattenMap(contexts, options);
-                }
-            });
 
     public Tristate getPermissionValue(ContextSet contexts, String permission) {
         return permissionCache.getUnchecked(contexts).getCalculator().getPermissionValue(permission);
@@ -132,6 +129,7 @@ public class CalculatedSubjectData implements LPSubjectData {
             permissions.put(e.getKey().makeImmutable(), new ConcurrentHashMap<>(e.getValue()));
         }
         permissionCache.invalidateAll();
+        service.invalidatePermissionCaches();
     }
 
     public void replaceParents(Map<ContextSet, Set<SubjectReference>> map) {
@@ -141,6 +139,7 @@ public class CalculatedSubjectData implements LPSubjectData {
             set.addAll(e.getValue());
             parents.put(e.getKey().makeImmutable(), set);
         }
+        service.invalidateParentCaches();
     }
 
     public void replaceOptions(Map<ContextSet, Map<String, String>> map) {
@@ -148,12 +147,12 @@ public class CalculatedSubjectData implements LPSubjectData {
         for (Map.Entry<ContextSet, Map<String, String>> e : map.entrySet()) {
             options.put(e.getKey().makeImmutable(), new ConcurrentHashMap<>(e.getValue()));
         }
-        optionCache.invalidateAll();
+        service.invalidateOptionCaches();
     }
 
     @Override
-    public Map<ContextSet, Map<String, Boolean>> getPermissions() {
-        ImmutableMap.Builder<ContextSet, Map<String, Boolean>> map = ImmutableMap.builder();
+    public Map<ImmutableContextSet, Map<String, Boolean>> getPermissions() {
+        ImmutableMap.Builder<ImmutableContextSet, Map<String, Boolean>> map = ImmutableMap.builder();
         for (Map.Entry<ContextSet, Map<String, Boolean>> e : permissions.entrySet()) {
             map.put(e.getKey().makeImmutable(), ImmutableMap.copyOf(e.getValue()));
         }
@@ -177,6 +176,7 @@ public class CalculatedSubjectData implements LPSubjectData {
         }
         if (b) {
             permissionCache.invalidateAll();
+            service.invalidatePermissionCaches();
         }
         return b;
     }
@@ -188,6 +188,7 @@ public class CalculatedSubjectData implements LPSubjectData {
         } else {
             permissions.clear();
             permissionCache.invalidateAll();
+            service.invalidatePermissionCaches();
             return true;
         }
     }
@@ -202,14 +203,15 @@ public class CalculatedSubjectData implements LPSubjectData {
         permissions.remove(contexts);
         if (!perms.isEmpty()) {
             permissionCache.invalidateAll();
+            service.invalidatePermissionCaches();
             return true;
         }
         return false;
     }
 
     @Override
-    public Map<ContextSet, Set<SubjectReference>> getParents() {
-        ImmutableMap.Builder<ContextSet, Set<SubjectReference>> map = ImmutableMap.builder();
+    public Map<ImmutableContextSet, Set<SubjectReference>> getParents() {
+        ImmutableMap.Builder<ImmutableContextSet, Set<SubjectReference>> map = ImmutableMap.builder();
         for (Map.Entry<ContextSet, Set<SubjectReference>> e : parents.entrySet()) {
             map.put(e.getKey().makeImmutable(), ImmutableSet.copyOf(e.getValue()));
         }
@@ -224,13 +226,21 @@ public class CalculatedSubjectData implements LPSubjectData {
     @Override
     public boolean addParent(ContextSet contexts, SubjectReference parent) {
         Set<SubjectReference> set = parents.computeIfAbsent(contexts.makeImmutable(), c -> ConcurrentHashMap.newKeySet());
-        return set.add(parent);
+        boolean b = set.add(parent);
+        if (b) {
+            service.invalidateParentCaches();
+        }
+        return b;
     }
 
     @Override
     public boolean removeParent(ContextSet contexts, SubjectReference parent) {
         Set<SubjectReference> set = parents.get(contexts);
-        return set != null && set.remove(parent);
+        boolean b = set != null && set.remove(parent);
+        if (b) {
+            service.invalidateParentCaches();
+        }
+        return b;
     }
 
     @Override
@@ -239,6 +249,7 @@ public class CalculatedSubjectData implements LPSubjectData {
             return false;
         } else {
             parents.clear();
+            service.invalidateOptionCaches();
             return true;
         }
     }
@@ -251,12 +262,13 @@ public class CalculatedSubjectData implements LPSubjectData {
         }
 
         parents.remove(contexts);
+        service.invalidateParentCaches();
         return !set.isEmpty();
     }
 
     @Override
-    public Map<ContextSet, Map<String, String>> getOptions() {
-        ImmutableMap.Builder<ContextSet, Map<String, String>> map = ImmutableMap.builder();
+    public Map<ImmutableContextSet, Map<String, String>> getOptions() {
+        ImmutableMap.Builder<ImmutableContextSet, Map<String, String>> map = ImmutableMap.builder();
         for (Map.Entry<ContextSet, Map<String, String>> e : options.entrySet()) {
             map.put(e.getKey().makeImmutable(), ImmutableMap.copyOf(e.getValue()));
         }
@@ -273,7 +285,7 @@ public class CalculatedSubjectData implements LPSubjectData {
         Map<String, String> options = this.options.computeIfAbsent(contexts.makeImmutable(), c -> new ConcurrentHashMap<>());
         boolean b = !stringEquals(options.put(key.toLowerCase(), value), value);
         if (b) {
-            optionCache.invalidateAll();
+            service.invalidateOptionCaches();
         }
         return b;
     }
@@ -283,7 +295,7 @@ public class CalculatedSubjectData implements LPSubjectData {
         Map<String, String> options = this.options.get(contexts);
         boolean b = options != null && options.remove(key.toLowerCase()) != null;
         if (b) {
-            optionCache.invalidateAll();
+            service.invalidateOptionCaches();
         }
         return b;
     }
@@ -294,7 +306,7 @@ public class CalculatedSubjectData implements LPSubjectData {
             return false;
         } else {
             options.clear();
-            optionCache.invalidateAll();
+            service.invalidateOptionCaches();
             return true;
         }
     }
@@ -307,11 +319,8 @@ public class CalculatedSubjectData implements LPSubjectData {
         }
 
         options.remove(contexts);
-        if (!map.isEmpty()) {
-            optionCache.invalidateAll();
-            return true;
-        }
-        return false;
+        service.invalidateOptionCaches();
+        return !map.isEmpty();
     }
 
     private static class ContextComparator implements Comparator<ContextSet> {

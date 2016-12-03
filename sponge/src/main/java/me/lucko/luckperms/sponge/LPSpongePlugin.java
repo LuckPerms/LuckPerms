@@ -104,22 +104,30 @@ import java.util.stream.StreamSupport;
 public class LPSpongePlugin implements LuckPermsPlugin {
 
     private final Set<UUID> ignoringLogs = ConcurrentHashMap.newKeySet();
+
     @Inject
     private Logger logger;
+
     @Inject
     private Game game;
+
     @Inject
     @ConfigDir(sharedRoot = false)
     private Path configDir;
+
     private Scheduler scheduler = Sponge.getScheduler();
+
     @Inject
     @SynchronousExecutor
     private SpongeExecutorService syncExecutor;
+
     @Inject
     @AsynchronousExecutor
     private SpongeExecutorService asyncExecutor;
+
     private LPTimings timings;
     private boolean lateLoad = false;
+
     private LPConfiguration configuration;
     private SpongeUserManager userManager;
     private SpongeGroupManager groupManager;
@@ -419,9 +427,9 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     @Override
     public LinkedHashMap<String, Object> getExtraInfo() {
         LinkedHashMap<String, Object> map = new LinkedHashMap<>();
-        map.put("SubjectCollection count", service.getKnownSubjects().size());
+        map.put("SubjectCollection count", service.getCollections().size());
         map.put("Subject count",
-                service.getKnownSubjects().values().stream()
+                service.getCollections().values().stream()
                         .map(SubjectCollection::getAllSubjects)
                         .flatMap(subjects -> StreamSupport.stream(subjects.spliterator(), false))
                         .count()

@@ -65,7 +65,7 @@ public interface ContextSet {
      * @return a new ImmutableContextSet representing the pairs in the iterable
      * @throws NullPointerException if the iterable is null
      */
-    static ImmutableContextSet fromEntries(Iterable<Map.Entry<String, String>> iterable) {
+    static ImmutableContextSet fromEntries(Iterable<? extends Map.Entry<String, String>> iterable) {
         return ImmutableContextSet.fromEntries(iterable);
     }
 

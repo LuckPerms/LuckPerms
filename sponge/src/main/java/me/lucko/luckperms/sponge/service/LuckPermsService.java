@@ -42,6 +42,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.contexts.SpongeCalculatorLink;
@@ -55,11 +56,9 @@ import me.lucko.luckperms.sponge.service.calculated.PermissionLookup;
 import me.lucko.luckperms.sponge.service.persisted.PersistedCollection;
 import me.lucko.luckperms.sponge.service.persisted.SubjectStorage;
 import me.lucko.luckperms.sponge.service.references.SubjectReference;
-import me.lucko.luckperms.sponge.service.simple.SimpleCollection;
 import me.lucko.luckperms.sponge.timings.LPTiming;
 
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.context.ContextCalculator;
 import org.spongepowered.api.service.permission.PermissionDescription;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -71,7 +70,6 @@ import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -89,14 +87,14 @@ public class LuckPermsService implements PermissionService {
     private final LPSpongePlugin plugin;
     private final SubjectStorage storage;
     private final SpongeUserManager userSubjects;
-    private final SimpleCollection fallbackUserSubjects;
+    private final PersistedCollection fallbackUserSubjects;
     private final SpongeGroupManager groupSubjects;
-    private final SimpleCollection fallbackGroupSubjects;
+    private final PersistedCollection fallbackGroupSubjects;
     private final PersistedCollection defaultSubjects;
     private final Set<PermissionDescription> descriptionSet;
 
     private final Set<LoadingCache<PermissionLookup, Tristate>> localPermissionCaches;
-    private final Set<LoadingCache<Set<Context>, List<SubjectReference>>> localParentCaches;
+    private final Set<LoadingCache<ImmutableContextSet, Set<SubjectReference>>> localParentCaches;
     private final Set<LoadingCache<OptionLookup, Optional<String>>> localOptionCaches;
 
     @Getter(value = AccessLevel.NONE)
@@ -104,7 +102,7 @@ public class LuckPermsService implements PermissionService {
             .build(new CacheLoader<String, LPSubjectCollection>() {
                 @Override
                 public LPSubjectCollection load(String s) {
-                    return new SimpleCollection(LuckPermsService.this, s);
+                    return new PersistedCollection(LuckPermsService.this, s, true);
                 }
 
                 @Override
@@ -123,10 +121,10 @@ public class LuckPermsService implements PermissionService {
         storage = new SubjectStorage(new File(plugin.getDataFolder(), "local"));
 
         userSubjects = plugin.getUserManager();
-        fallbackUserSubjects = new SimpleCollection(this, "fallback-users");
+        fallbackUserSubjects = new PersistedCollection(this, "fallback-users", true);
         groupSubjects = plugin.getGroupManager();
-        fallbackGroupSubjects = new SimpleCollection(this, "fallback-groups");
-        defaultSubjects = new PersistedCollection(this, "defaults");
+        fallbackGroupSubjects = new PersistedCollection(this, "fallback-groups", true);
+        defaultSubjects = new PersistedCollection(this, "defaults", false);
         defaultSubjects.loadAll();
 
         collections.put(PermissionService.SUBJECTS_USER, userSubjects);
@@ -134,6 +132,16 @@ public class LuckPermsService implements PermissionService {
         collections.put(PermissionService.SUBJECTS_GROUP, groupSubjects);
         collections.put("fallback-groups", fallbackGroupSubjects);
         collections.put("defaults", defaultSubjects);
+
+        for (String collection : storage.getSavedCollections()) {
+            if (collections.asMap().containsKey(collection.toLowerCase())) {
+                continue;
+            }
+
+            PersistedCollection c = new PersistedCollection(this, collection.toLowerCase(), true);
+            c.loadAll();
+            collections.put(c.getIdentifier(), c);
+        }
 
         descriptionSet = ConcurrentHashMap.newKeySet();
     }
@@ -205,6 +213,26 @@ public class LuckPermsService implements PermissionService {
                 plugin.getConfiguration().isApplyingGlobalWorldGroups(),
                 false
         );
+    }
+
+    public void invalidatePermissionCaches() {
+        for (LoadingCache<PermissionLookup, Tristate> c : localPermissionCaches) {
+            c.invalidateAll();
+        }
+    }
+
+    public void invalidateParentCaches() {
+        for (LoadingCache<ImmutableContextSet, Set<SubjectReference>> c : localParentCaches) {
+            c.invalidateAll();
+        }
+        invalidateOptionCaches();
+        invalidatePermissionCaches();
+    }
+
+    public void invalidateOptionCaches() {
+        for (LoadingCache<OptionLookup, Optional<String>> c : localOptionCaches) {
+            c.invalidateAll();
+        }
     }
 
     @RequiredArgsConstructor

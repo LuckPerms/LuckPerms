@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.references.SubjectReference;
 
@@ -47,7 +48,7 @@ public interface LPSubjectData extends SubjectData {
 
     LPSubject getParentSubject();
 
-    Map<ContextSet, Map<String, Boolean>> getPermissions();
+    Map<ImmutableContextSet, Map<String, Boolean>> getPermissions();
 
     default Map<String, Boolean> getPermissions(ContextSet contexts) {
         return ImmutableMap.copyOf(getPermissions().getOrDefault(contexts, ImmutableMap.of()));
@@ -60,7 +61,7 @@ public interface LPSubjectData extends SubjectData {
 
     boolean clearPermissions(ContextSet contexts);
 
-    Map<ContextSet, Set<SubjectReference>> getParents();
+    Map<ImmutableContextSet, Set<SubjectReference>> getParents();
 
     default Set<SubjectReference> getParents(ContextSet contexts) {
         return ImmutableSet.copyOf(getParents().getOrDefault(contexts, ImmutableSet.of()));
@@ -75,7 +76,7 @@ public interface LPSubjectData extends SubjectData {
 
     boolean clearParents(ContextSet contexts);
 
-    Map<ContextSet, Map<String, String>> getOptions();
+    Map<ImmutableContextSet, Map<String, String>> getOptions();
 
     default Map<String, String> getOptions(ContextSet contexts) {
         return ImmutableMap.copyOf(getOptions().getOrDefault(contexts, ImmutableMap.of()));

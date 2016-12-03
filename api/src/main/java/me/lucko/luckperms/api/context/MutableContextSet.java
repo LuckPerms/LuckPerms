@@ -84,7 +84,7 @@ public final class MutableContextSet implements ContextSet {
      * @return a new MutableContextSet representing the pairs in the iterable
      * @throws NullPointerException if the iterable is null
      */
-    public static MutableContextSet fromEntries(Iterable<Map.Entry<String, String>> iterable) {
+    public static MutableContextSet fromEntries(Iterable<? extends Map.Entry<String, String>> iterable) {
         if (iterable == null) {
             throw new NullPointerException("iterable");
         }
@@ -277,7 +277,7 @@ public final class MutableContextSet implements ContextSet {
      * @param iterable an iterable of key value context pairs
      * @throws NullPointerException if iterable is null
      */
-    public void addAll(Iterable<Map.Entry<String, String>> iterable) {
+    public void addAll(Iterable<? extends Map.Entry<String, String>> iterable) {
         if (iterable == null) {
             throw new NullPointerException("contexts");
         }

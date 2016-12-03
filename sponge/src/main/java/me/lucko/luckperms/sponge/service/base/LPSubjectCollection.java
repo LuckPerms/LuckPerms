@@ -67,6 +67,8 @@ public interface LPSubjectCollection extends SubjectCollection {
 
     SubjectReference getDefaultSubject();
 
+    boolean getTransientHasPriority();
+
     @Deprecated
     @Override
     default Subject getDefaults() {

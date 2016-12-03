@@ -57,17 +57,11 @@ public enum LPTiming {
     LP_SUBJECT_SET_OPTION("lpSubjectSetOption"),
     LP_SUBJECT_CLEAR_OPTIONS("lpSubjectClearOptions"),
 
-    SIMPLE_SUBJECT_GET_PERMISSION_VALUE("simpleSubjectGetPermissionValue"),
-    SIMPLE_SUBJECT_IS_CHILD_OF("simpleSubjectIsChildOf"),
-    SIMPLE_SUBJECT_GET_PARENTS("simpleSubjectGetParents"),
-    SIMPLE_SUBJECT_GET_OPTION("simpleSubjectGetOption"),
-    SIMPLE_SUBJECT_GET_ACTIVE_CONTEXTS("simpleSubjectGetActiveContexts"),
-
-    PERSISTED_SUBJECT_GET_PERMISSION_VALUE("persistedSubjectGetPermissionValue"),
-    PERSISTED_SUBJECT_IS_CHILD_OF("persistedSubjectIsChildOf"),
-    PERSISTED_SUBJECT_GET_PARENTS("persistedSubjectGetParents"),
-    PERSISTED_SUBJECT_GET_OPTION("persistedSubjectGetOption"),
-    PERSISTED_SUBJECT_GET_ACTIVE_CONTEXTS("persistedSubjectGetActiveContexts"),
+    INTERNAL_SUBJECT_GET_PERMISSION_VALUE("internalSubjectGetPermissionValue"),
+    INTERNAL_SUBJECT_IS_CHILD_OF("internalSubjectIsChildOf"),
+    INTERNAL_SUBJECT_GET_PARENTS("internalSubjectGetParents"),
+    INTERNAL_SUBJECT_GET_OPTION("internalSubjectGetOption"),
+    INTERNAL_SUBJECT_GET_ACTIVE_CONTEXTS("internalSubjectGetActiveContexts"),
 
     ON_COMMAND("onCommand"),
     COMMAND_TAB_COMPLETE("commandTabComplete"),

@@ -183,4 +183,9 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
     public SubjectReference getDefaultSubject() {
         return SubjectReference.of("defaults", getIdentifier());
     }
+
+    @Override
+    public boolean getTransientHasPriority() {
+        return true;
+    }
 }

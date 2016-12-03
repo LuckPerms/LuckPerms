@@ -22,23 +22,35 @@
 
 package me.lucko.luckperms.sponge.service.references;
 
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.base.LPSubjectCollection;
 
+import java.lang.ref.WeakReference;
+
 @Getter
 @ToString
 @EqualsAndHashCode
-@AllArgsConstructor(staticName = "of")
+@RequiredArgsConstructor(staticName = "of")
 public class SubjectCollectionReference {
 
     private final String collection;
+    private WeakReference<LPSubjectCollection> ref = null;
 
-    public LPSubjectCollection resolve(LuckPermsService service) {
-        return service.getSubjects(collection);
+    public synchronized LPSubjectCollection resolve(LuckPermsService service) {
+        if (ref != null) {
+            LPSubjectCollection sc = ref.get();
+            if (sc != null) {
+                return sc;
+            }
+        }
+
+        LPSubjectCollection sc = service.getSubjects(collection);
+        ref = new WeakReference<>(sc);
+        return sc;
     }
 }

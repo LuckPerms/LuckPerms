@@ -32,6 +32,7 @@ import com.google.common.collect.ImmutableSet;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.core.NodeBuilder;
 import me.lucko.luckperms.common.core.NodeFactory;
@@ -85,7 +86,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
     }
 
     @Override
-    public Map<ContextSet, Map<String, Boolean>> getPermissions() {
+    public Map<ImmutableContextSet, Map<String, Boolean>> getPermissions() {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_GET_PERMISSIONS)) {
             Map<ContextSet, Map<String, Boolean>> perms = new HashMap<>();
 
@@ -107,7 +108,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
                 perms.get(contexts).put(n.getPermission(), n.getValue());
             }
 
-            ImmutableMap.Builder<ContextSet, Map<String, Boolean>> map = ImmutableMap.builder();
+            ImmutableMap.Builder<ImmutableContextSet, Map<String, Boolean>> map = ImmutableMap.builder();
             for (Map.Entry<ContextSet, Map<String, Boolean>> e : perms.entrySet()) {
                 map.put(e.getKey().makeImmutable(), ImmutableMap.copyOf(e.getValue()));
             }
@@ -215,9 +216,9 @@ public class LuckPermsSubjectData implements LPSubjectData {
     }
 
     @Override
-    public Map<ContextSet, Set<SubjectReference>> getParents() {
+    public Map<ImmutableContextSet, Set<SubjectReference>> getParents() {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_GET_PARENTS)) {
-            Map<ContextSet, Set<SubjectReference>> parents = new HashMap<>();
+            Map<ImmutableContextSet, Set<SubjectReference>> parents = new HashMap<>();
 
             for (Node n : enduring ? holder.getNodes() : holder.getTransientNodes()) {
                 if (!n.isGroupNode()) {
@@ -241,9 +242,9 @@ public class LuckPermsSubjectData implements LPSubjectData {
                 parents.get(contexts).add(service.getGroupSubjects().get(n.getGroupName()).toReference());
             }
 
-            ImmutableMap.Builder<ContextSet, Set<SubjectReference>> map = ImmutableMap.builder();
-            for (Map.Entry<ContextSet, Set<SubjectReference>> e : parents.entrySet()) {
-                map.put(e.getKey().makeImmutable(), ImmutableSet.copyOf(e.getValue()));
+            ImmutableMap.Builder<ImmutableContextSet, Set<SubjectReference>> map = ImmutableMap.builder();
+            for (Map.Entry<ImmutableContextSet, Set<SubjectReference>> e : parents.entrySet()) {
+                map.put(e.getKey(), ImmutableSet.copyOf(e.getValue()));
             }
             return map.build();
         }
@@ -373,7 +374,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
     }
 
     @Override
-    public Map<ContextSet, Map<String, String>> getOptions() {
+    public Map<ImmutableContextSet, Map<String, String>> getOptions() {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_GET_OPTIONS)) {
             Map<ContextSet, Map<String, String>> options = new HashMap<>();
             Map<ContextSet, Integer> minPrefixPriority = new HashMap<>();
@@ -428,7 +429,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
                 }
             }
 
-            ImmutableMap.Builder<ContextSet, Map<String, String>> map = ImmutableMap.builder();
+            ImmutableMap.Builder<ImmutableContextSet, Map<String, String>> map = ImmutableMap.builder();
             for (Map.Entry<ContextSet, Map<String, String>> e : options.entrySet()) {
                 map.put(e.getKey().makeImmutable(), ImmutableMap.copyOf(e.getValue()));
             }

@@ -22,25 +22,25 @@
 
 package me.lucko.luckperms.sponge.service.references;
 
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import com.google.common.base.Splitter;
 
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.base.LPSubject;
-import me.lucko.luckperms.sponge.service.base.LPSubjectCollection;
 
 import org.spongepowered.api.service.permission.Subject;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 @Getter
 @ToString
 @EqualsAndHashCode
-@AllArgsConstructor(staticName = "of")
+@RequiredArgsConstructor(staticName = "of")
 public class SubjectReference {
     public static SubjectReference deserialize(String s) {
         List<String> parts = Splitter.on('/').limit(2).splitToList(s);
@@ -54,12 +54,19 @@ public class SubjectReference {
     private final String collection;
     private final String identifier;
 
-    public LPSubject resolve(LuckPermsService service) {
-        return service.getSubjects(collection).get(identifier);
-    }
+    private WeakReference<LPSubject> ref = null;
 
-    public LPSubjectCollection resolveCollection(LuckPermsService service) {
-        return service.getSubjects(collection);
+    public synchronized LPSubject resolve(LuckPermsService service) {
+        if (ref != null) {
+            LPSubject s = ref.get();
+            if (s != null) {
+                return s;
+            }
+        }
+
+        LPSubject s = service.getSubjects(collection).get(identifier);
+        ref = new WeakReference<>(s);
+        return s;
     }
 
     public String serialize() {

@@ -27,7 +27,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
-import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 
 @Getter
 @ToString
@@ -36,6 +36,6 @@ import me.lucko.luckperms.api.context.ContextSet;
 public class PermissionLookup {
 
     private final String node;
-    private final ContextSet contexts;
+    private final ImmutableContextSet contexts;
 
 }

@@ -25,6 +25,7 @@ package me.lucko.luckperms.sponge.service.persisted;
 import lombok.ToString;
 
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.sponge.service.calculated.CalculatedSubjectData;
 import me.lucko.luckperms.sponge.service.references.SubjectReference;
 
@@ -43,19 +44,19 @@ public class SubjectDataHolder {
     private final Map<Map<String, String>, Map<String, String>> options;
     private final Map<Map<String, String>, List<String>> parents;
 
-    public SubjectDataHolder(Map<ContextSet, Map<String, String>> options, Map<ContextSet, Map<String, Boolean>> permissions, Map<ContextSet, Set<SubjectReference>> parents) {
+    public SubjectDataHolder(Map<ImmutableContextSet, Map<String, String>> options, Map<ImmutableContextSet, Map<String, Boolean>> permissions, Map<ImmutableContextSet, Set<SubjectReference>> parents) {
         this.options = new HashMap<>();
-        for (Map.Entry<ContextSet, Map<String, String>> e : options.entrySet()) {
+        for (Map.Entry<ImmutableContextSet, Map<String, String>> e : options.entrySet()) {
             this.options.put(e.getKey().toMap(), new HashMap<>(e.getValue()));
         }
 
         this.permissions = new HashMap<>();
-        for (Map.Entry<ContextSet, Map<String, Boolean>> e : permissions.entrySet()) {
+        for (Map.Entry<ImmutableContextSet, Map<String, Boolean>> e : permissions.entrySet()) {
             this.permissions.put(e.getKey().toMap(), new HashMap<>(e.getValue()));
         }
 
         this.parents = new HashMap<>();
-        for (Map.Entry<ContextSet, Set<SubjectReference>> e : parents.entrySet()) {
+        for (Map.Entry<ImmutableContextSet, Set<SubjectReference>> e : parents.entrySet()) {
             this.parents.put(e.getKey().toMap(), e.getValue().stream().map(SubjectReference::serialize).collect(Collectors.toList()));
         }
     }

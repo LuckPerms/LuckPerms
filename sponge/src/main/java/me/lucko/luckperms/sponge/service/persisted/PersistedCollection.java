@@ -51,6 +51,7 @@ import java.util.Map;
 public class PersistedCollection implements LPSubjectCollection {
     private final LuckPermsService service;
     private final String identifier;
+    private final boolean transientHasPriority;
 
     @Getter(AccessLevel.NONE)
     private final LoadingCache<String, PersistedSubject> subjects = CacheBuilder.newBuilder()
@@ -100,5 +101,10 @@ public class PersistedCollection implements LPSubjectCollection {
     @Override
     public SubjectReference getDefaultSubject() {
         return SubjectReference.of("defaults", identifier);
+    }
+
+    @Override
+    public boolean getTransientHasPriority() {
+        return transientHasPriority;
     }
 }

@@ -83,7 +83,6 @@ public interface LPSubject extends Subject {
 
     /* Compat */
 
-    @Deprecated
     @Override
     default LPSubjectCollection getContainingCollection() {
         return getParentCollection().resolve(getService());
