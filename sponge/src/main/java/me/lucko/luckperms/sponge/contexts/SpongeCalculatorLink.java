@@ -31,6 +31,7 @@ import me.lucko.luckperms.sponge.service.base.Util;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -40,10 +41,9 @@ public class SpongeCalculatorLink extends ContextCalculator<Subject> {
 
     @Override
     public MutableContextSet giveApplicableContext(Subject subject, MutableContextSet accumulator) {
-        Set<Context> contexts = Util.convertContexts(accumulator);
+        Set<Context> contexts = new HashSet<>();
         calculator.accumulateContexts(subject, contexts);
 
-        accumulator.clear();
         accumulator.addAll(Util.convertContexts(contexts));
         return accumulator;
     }
