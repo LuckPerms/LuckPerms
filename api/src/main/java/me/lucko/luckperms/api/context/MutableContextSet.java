@@ -168,7 +168,12 @@ public final class MutableContextSet implements ContextSet {
 
     @Override
     public Map<String, String> toMap() {
-        return ImmutableMap.copyOf(map.entries());
+        ImmutableMap.Builder<String, String> m = ImmutableMap.builder();
+        for (Map.Entry<String, String> e : map.entries()) {
+            m.put(e.getKey(), e.getValue());
+        }
+
+        return m.build();
     }
 
     @Override

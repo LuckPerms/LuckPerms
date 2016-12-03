@@ -30,7 +30,6 @@ import com.google.common.collect.Multimap;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * An immutable implementation of {@link ContextSet}.
@@ -71,13 +70,12 @@ public final class ImmutableContextSet implements ContextSet {
             throw new NullPointerException("map");
         }
 
-        return new ImmutableContextSet(ImmutableMultimap.copyOf(
-                map.entrySet().stream()
-                        .collect(Collectors.toMap(
-                                e -> e.getKey().toLowerCase(),
-                                Map.Entry::getValue
-                        )).entrySet()
-        ));
+        ImmutableMultimap.Builder<String, String> b = ImmutableMultimap.builder();
+        for (Map.Entry<String, String> e : map.entrySet()) {
+            b.put(e.getKey(), e.getValue());
+        }
+
+        return new ImmutableContextSet(b.build());
     }
 
     /**
@@ -160,7 +158,12 @@ public final class ImmutableContextSet implements ContextSet {
 
     @Override
     public Map<String, String> toMap() {
-        return ImmutableMap.copyOf(map.entries());
+        ImmutableMap.Builder<String, String> m = ImmutableMap.builder();
+        for (Map.Entry<String, String> e : map.entries()) {
+            m.put(e.getKey(), e.getValue());
+        }
+
+        return m.build();
     }
 
     @Override
