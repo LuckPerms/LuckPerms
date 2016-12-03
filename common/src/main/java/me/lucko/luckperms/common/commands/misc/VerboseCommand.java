@@ -22,6 +22,8 @@
 
 package me.lucko.luckperms.common.commands.misc;
 
+import com.google.common.collect.ImmutableList;
+
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -39,7 +41,7 @@ public class VerboseCommand extends SingleCommand {
     public VerboseCommand() {
         super("Verbose", "Enable verbose permission check output", "/%s verbose <true|false> [filters...]", Permission.VERBOSE, Predicates.is(0),
                 Arg.list(
-                        Arg.create("true|false", true, "whether to enable the feature"),
+                        Arg.create("true|false|record|paste", true, "whether to enable/disable logging, or start/stop recording"),
                         Arg.create("filters...", false, "the name of the user / start of the node to filter by")
                 )
         );
@@ -52,30 +54,63 @@ public class VerboseCommand extends SingleCommand {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!args.get(0).equalsIgnoreCase("true") && !args.get(0).equalsIgnoreCase("false")) {
-            sendUsage(sender, label);
-            return CommandResult.INVALID_ARGS;
+        String mode = args.get(0).toLowerCase();
+
+        if (mode.equals("on") || mode.equals("true")) {
+            List<String> filters = new ArrayList<>();
+            if (args.size() != 1) {
+                filters.addAll(args.subList(1, args.size()));
+            }
+
+
+            plugin.getDebugHandler().register(sender, filters);
+            if (!filters.isEmpty()) {
+                Message.VERBOSE_ON_QUERY.send(sender, filters.stream().collect(Collectors.joining("&7, &f")));
+            } else {
+                Message.VERBOSE_ON.send(sender);
+            }
+
+            return CommandResult.SUCCESS;
         }
 
-        if (args.get(0).equalsIgnoreCase("false")) {
+        if (mode.equals("off") || mode.equals("false")) {
             plugin.getDebugHandler().unregister(sender.getUuid());
             Message.VERBOSE_OFF.send(sender);
             return CommandResult.SUCCESS;
         }
 
-        List<String> filters = new ArrayList<>();
-        if (args.size() != 1) {
-            filters.addAll(args.subList(1, args.size()));
+        if (mode.equals("record")) {
+            List<String> filters = new ArrayList<>();
+            if (args.size() != 1) {
+                filters.addAll(args.subList(1, args.size()));
+            }
+
+            plugin.getDebugHandler().setPastedFilters(ImmutableList.copyOf(filters));
+            plugin.getDebugHandler().setPasted(true);
+
+            if (!filters.isEmpty()) {
+                Message.VERBOSE_RECORDING_ON_QUERY.send(sender, filters.stream().collect(Collectors.joining("&7, &f")));
+            } else {
+                Message.VERBOSE_RECORDING_ON.send(sender);
+            }
+
+            return CommandResult.SUCCESS;
         }
 
+        if (mode.equals("paste")) {
+            plugin.getDebugHandler().setPasted(false);
+            Message.VERBOSE_RECORDING_UPLOAD_START.send(sender);
 
-        plugin.getDebugHandler().register(sender, filters);
-        if (!filters.isEmpty()) {
-            Message.VERBOSE_ON_QUERY.send(sender, filters.stream().collect(Collectors.joining("&7, &f")));
-        } else {
-            Message.VERBOSE_ON.send(sender);
+            String url = plugin.getDebugHandler().uploadPastedData();
+            if (url == null) {
+                url = "null";
+            }
+
+            Message.VERBOSE_RECORDING_URL.send(sender, url);
+            return CommandResult.SUCCESS;
         }
 
-        return CommandResult.SUCCESS;
+        sendUsage(sender, label);
+        return CommandResult.INVALID_ARGS;
     }
 }

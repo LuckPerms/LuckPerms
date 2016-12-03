@@ -151,7 +151,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     @Listener(order = Order.FIRST)
     public void onEnable(GamePreInitializationEvent event) {
         log = LogFactory.wrap(logger);
-        debugHandler = new DebugHandler(asyncExecutor);
+        debugHandler = new DebugHandler(asyncExecutor, getVersion());
         senderFactory = new SpongeSenderFactory(this);
         permissionCache = new PermissionCache(asyncExecutor);
         timings = new LPTimings(this);

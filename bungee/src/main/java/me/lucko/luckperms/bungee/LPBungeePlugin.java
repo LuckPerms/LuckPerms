@@ -100,7 +100,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     public void onEnable() {
         executor = r -> getProxy().getScheduler().runAsync(this, r);
         log = LogFactory.wrap(getLogger());
-        debugHandler = new DebugHandler(executor);
+        debugHandler = new DebugHandler(executor, getVersion());
         senderFactory = new BungeeSenderFactory(this);
         permissionCache = new PermissionCache(executor);
 

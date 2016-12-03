@@ -124,7 +124,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         Executor bukkitAsyncExecutor = r -> getServer().getScheduler().runTaskAsynchronously(this, r);
 
         log = LogFactory.wrap(getLogger());
-        debugHandler = new DebugHandler(bukkitAsyncExecutor);
+        debugHandler = new DebugHandler(bukkitAsyncExecutor, getVersion());
         senderFactory = new BukkitSenderFactory(this);
         permissionCache = new PermissionCache(bukkitAsyncExecutor);
 
