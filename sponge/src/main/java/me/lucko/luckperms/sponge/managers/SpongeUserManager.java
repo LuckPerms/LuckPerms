@@ -197,7 +197,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
             } else {
 
                 // User isn't already loaded. hopefully this call is not on the main thread. :(
-                plugin.getLog().warn("User Subject '" + u + "' was requested, but is not loaded in memory. Loading them from storage now.");
+                //plugin.getLog().warn("User Subject '" + u + "' was requested, but is not loaded in memory. Loading them from storage now.");
                 long startTime = System.currentTimeMillis();
                 plugin.getStorage().loadUser(u, "null").join();
                 SpongeUser user = get(u);
@@ -208,7 +208,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
                 }
 
                 user.setupData(false);
-                plugin.getLog().warn("Loading '" + u + "' took " + (System.currentTimeMillis() - startTime) + " ms.");
+                //plugin.getLog().warn("Loading '" + u + "' took " + (System.currentTimeMillis() - startTime) + " ms.");
                 return user.getSpongeData();
             }
         }

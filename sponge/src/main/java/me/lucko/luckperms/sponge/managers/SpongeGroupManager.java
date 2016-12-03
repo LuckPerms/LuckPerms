@@ -144,7 +144,7 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
             } else {
 
                 // Group isn't already loaded. hopefully this call is not on the main thread. :(
-                plugin.getLog().warn("Group Subject '" + id + "' was requested, but is not loaded in memory. Loading it from storage now.");
+                //plugin.getLog().warn("Group Subject '" + id + "' was requested, but is not loaded in memory. Loading it from storage now.");
                 long startTime = System.currentTimeMillis();
                 plugin.getStorage().createAndLoadGroup(id).join();
                 SpongeGroup group = getIfLoaded(id);
@@ -154,7 +154,7 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
                     return plugin.getService().getFallbackGroupSubjects().get(id);
                 }
 
-                plugin.getLog().warn("Loading '" + id + "' took " + (System.currentTimeMillis() - startTime) + " ms.");
+                //plugin.getLog().warn("Loading '" + id + "' took " + (System.currentTimeMillis() - startTime) + " ms.");
                 return group.getSpongeData();
             }
         }
