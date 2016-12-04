@@ -76,8 +76,8 @@ public class SpongeGroup extends Group {
         private GroupSubject(LPSpongePlugin plugin, SpongeGroup parent) {
             this.parent = parent;
             this.plugin = plugin;
-            this.subjectData = new LuckPermsSubjectData(true, plugin.getService(), parent);
-            this.transientSubjectData = new LuckPermsSubjectData(false, plugin.getService(), parent);
+            this.subjectData = new LuckPermsSubjectData(true, plugin.getService(), parent, this);
+            this.transientSubjectData = new LuckPermsSubjectData(false, plugin.getService(), parent, this);
         }
 
         @Override

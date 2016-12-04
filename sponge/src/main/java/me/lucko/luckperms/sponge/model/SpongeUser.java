@@ -77,8 +77,8 @@ public class SpongeUser extends User {
         private UserSubject(LPSpongePlugin plugin, SpongeUser parent) {
             this.parent = parent;
             this.plugin = plugin;
-            this.subjectData = new LuckPermsSubjectData(true, plugin.getService(), parent);
-            this.transientSubjectData = new LuckPermsSubjectData(false, plugin.getService(), parent);
+            this.subjectData = new LuckPermsSubjectData(true, plugin.getService(), parent, this);
+            this.transientSubjectData = new LuckPermsSubjectData(false, plugin.getService(), parent, this);
         }
 
         private boolean hasData() {

@@ -69,6 +69,9 @@ public class LuckPermsSubjectData implements LPSubjectData {
     @Getter
     private final PermissionHolder holder;
 
+    @Getter
+    LPSubject parentSubject;
+
     private void objectSave(PermissionHolder t) {
         if (t instanceof User) {
             service.getPlugin().getStorage().saveUser(((User) t))
@@ -78,11 +81,6 @@ public class LuckPermsSubjectData implements LPSubjectData {
             service.getPlugin().getStorage().saveGroup((Group) t)
                     .thenRunAsync(() -> service.getPlugin().getUpdateTaskBuffer().request(), service.getPlugin().getAsyncExecutor());
         }
-    }
-
-    @Override
-    public LPSubject getParentSubject() {
-        return null;
     }
 
     @Override
