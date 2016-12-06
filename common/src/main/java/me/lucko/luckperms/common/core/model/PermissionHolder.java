@@ -173,9 +173,7 @@ public abstract class PermissionHolder {
         mergedCache.invalidate();
 
         // Invalidate inheritance caches
-        getAllNodesCache.invalidateAll();
-        getAllNodesFilteredCache.invalidateAll();
-        exportNodesCache.invalidateAll();
+        invalidateInheritanceCaches();
 
         // Get previous references
         Set<HolderReference> refs = plugin.getCachedStateManager().getInheritances(toReference());
@@ -188,6 +186,13 @@ public abstract class PermissionHolder {
 
         // Invalidate all affected children.
         CachedStateManager.invalidateInheritances(plugin, refs);
+    }
+
+    public void invalidateInheritanceCaches() {
+        getAllNodesCache.invalidateAll();
+        getAllNodesFilteredCache.invalidateAll();
+        exportNodesCache.invalidateAll();
+        declareState();
     }
 
     private ImmutableSortedSet<LocalizedNode> cacheApply() {
