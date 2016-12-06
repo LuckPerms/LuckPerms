@@ -339,8 +339,8 @@ public abstract class PermissionHolder {
 
         parents.removeIf(node ->
                 !node.shouldApplyOnServer(server, context.isApplyGlobalGroups(), plugin.getConfiguration().isApplyingRegex()) ||
-                        !node.shouldApplyOnWorld(world, context.isApplyGlobalWorldGroups(), plugin.getConfiguration().isApplyingRegex()) ||
-                        !node.shouldApplyWithContext(contexts.getContextSet(), false)
+                !node.shouldApplyOnWorld(world, context.isApplyGlobalWorldGroups(), plugin.getConfiguration().isApplyingRegex()) ||
+                !node.shouldApplyWithContext(contexts.getContextSet(), false)
         );
 
         TreeSet<Map.Entry<Integer, Node>> sortedParents = new TreeSet<>(Util.META_COMPARATOR.reversed());
@@ -467,8 +467,8 @@ public abstract class PermissionHolder {
 
         allNodes.removeIf(node ->
                 !node.shouldApplyOnServer(server, context.isIncludeGlobal(), plugin.getConfiguration().isApplyingRegex()) ||
-                        !node.shouldApplyOnWorld(world, context.isIncludeGlobalWorld(), plugin.getConfiguration().isApplyingRegex()) ||
-                        !node.shouldApplyWithContext(contexts.getContextSet(), false)
+                !node.shouldApplyOnWorld(world, context.isIncludeGlobalWorld(), plugin.getConfiguration().isApplyingRegex()) ||
+                !node.shouldApplyWithContext(contexts.getContextSet(), false)
         );
 
         Set<LocalizedNode> perms = ConcurrentHashMap.newKeySet();
