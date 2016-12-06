@@ -23,7 +23,9 @@
 package me.lucko.luckperms.common.caching.handlers;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.ToString;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.core.UserIdentifier;
@@ -33,6 +35,8 @@ import me.lucko.luckperms.common.core.model.User;
 import java.util.function.Consumer;
 
 @Getter
+@ToString
+@EqualsAndHashCode
 @AllArgsConstructor(staticName = "of")
 public class UserReference implements HolderReference<UserIdentifier> {
     private final UserIdentifier id;

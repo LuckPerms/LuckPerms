@@ -119,7 +119,11 @@ public class CachedStateManager {
 
     public void invalidateInheritances(HolderReference holder) {
         Set<HolderReference> toInvalidate = getInheritances(holder);
-        toInvalidate.forEach(hr -> hr.apply(plugin, INVALIDATE_CONSUMER));
+        invalidateInheritances(plugin, toInvalidate);
+    }
+
+    public static void invalidateInheritances(LuckPermsPlugin plugin, Set<HolderReference> references) {
+        references.forEach(hr -> hr.apply(plugin, INVALIDATE_CONSUMER));
     }
 
 }

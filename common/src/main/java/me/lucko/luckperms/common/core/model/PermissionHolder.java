@@ -48,6 +48,8 @@ import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.api.internal.GroupLink;
 import me.lucko.luckperms.common.api.internal.PermissionHolderLink;
 import me.lucko.luckperms.common.caching.MetaHolder;
+import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
+import me.lucko.luckperms.common.caching.handlers.GroupReference;
 import me.lucko.luckperms.common.caching.handlers.HolderReference;
 import me.lucko.luckperms.common.caching.holder.ExportNodesHolder;
 import me.lucko.luckperms.common.caching.holder.GetAllNodesHolder;
@@ -169,8 +171,23 @@ public abstract class PermissionHolder {
         }
         cache.invalidate();
         mergedCache.invalidate();
-        invalidateInheritanceCaches();
-        plugin.getCachedStateManager().invalidateInheritances(toReference());
+
+        // Invalidate inheritance caches
+        getAllNodesCache.invalidateAll();
+        getAllNodesFilteredCache.invalidateAll();
+        exportNodesCache.invalidateAll();
+
+        // Get previous references
+        Set<HolderReference> refs = plugin.getCachedStateManager().getInheritances(toReference());
+
+        // Declare new state to the state manager
+        declareState();
+
+        // Add all new references affected by the state change.
+        refs.addAll(plugin.getCachedStateManager().getInheritances(toReference()));
+
+        // Invalidate all affected children.
+        CachedStateManager.invalidateInheritances(plugin, refs);
     }
 
     private ImmutableSortedSet<LocalizedNode> cacheApply() {
@@ -239,12 +256,6 @@ public abstract class PermissionHolder {
             higherPriority.add(entry);
         }
         return ImmutableSortedSet.copyOfSorted(combined);
-    }
-
-    public void invalidateInheritanceCaches() {
-        getAllNodesCache.invalidateAll();
-        getAllNodesFilteredCache.invalidateAll();
-        exportNodesCache.invalidateAll();
     }
 
     private SortedSet<LocalizedNode> getAllNodesCacheApply(GetAllNodesHolder getAllNodesHolder) {
@@ -367,6 +378,9 @@ public abstract class PermissionHolder {
         return ImmutableMap.copyOf(perms);
     }
 
+    protected void declareState() {
+        plugin.getCachedStateManager().putAll(toReference(), getGroupReferences());
+    }
 
     public abstract String getFriendlyName();
     public abstract HolderReference<?> toReference();
@@ -1046,6 +1060,15 @@ public abstract class PermissionHolder {
                 .filter(Node::isGroupNode)
                 .map(Node::getGroupName)
                 .collect(Collectors.toList());
+    }
+
+    public Set<HolderReference> getGroupReferences() {
+        return getNodes().stream()
+                .filter(Node::isGroupNode)
+                .map(Node::getGroupName)
+                .map(String::toLowerCase)
+                .map(GroupReference::of)
+                .collect(Collectors.toSet());
     }
 
     /**
