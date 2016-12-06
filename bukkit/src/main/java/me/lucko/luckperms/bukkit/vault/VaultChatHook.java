@@ -270,7 +270,7 @@ public class VaultChatHook extends Chat {
 
     public String getGroupPrefix(String world, @NonNull String group) {
         final Group g = perms.getPlugin().getGroupManager().getIfLoaded(group);
-        return getGroupChatMeta(false, g, world);
+        return getGroupChatMeta(true, g, world);
     }
 
     public void setGroupPrefix(String world, @NonNull String group, @NonNull String prefix) {
