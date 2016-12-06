@@ -39,6 +39,7 @@ import me.lucko.luckperms.bukkit.model.DefaultsProvider;
 import me.lucko.luckperms.bukkit.vault.VaultHook;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.api.ApiProvider;
+import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.commands.ConsecutiveExecutor;
 import me.lucko.luckperms.common.commands.sender.Sender;
@@ -107,6 +108,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private DefaultsProvider defaultsProvider;
     private ChildPermissionProvider childPermissionProvider;
     private LocaleManager localeManager;
+    private CachedStateManager cachedStateManager;
     private ContextManager<Player> contextManager;
     private WorldCalculator worldCalculator;
     private CalculatorFactory calculatorFactory;
@@ -218,6 +220,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         importer = new Importer(commandManager);
         consecutiveExecutor = new ConsecutiveExecutor(commandManager);
         calculatorFactory = new BukkitCalculatorFactory(this);
+        cachedStateManager = new CachedStateManager(this);
 
         contextManager = new ContextManager<>();
         worldCalculator = new WorldCalculator(this);

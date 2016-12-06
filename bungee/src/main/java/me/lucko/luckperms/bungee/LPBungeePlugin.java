@@ -32,6 +32,7 @@ import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.api.ApiProvider;
+import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.ConsecutiveExecutor;
@@ -89,6 +90,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     private Importer importer;
     private ConsecutiveExecutor consecutiveExecutor;
     private LocaleManager localeManager;
+    private CachedStateManager cachedStateManager;
     private ContextManager<ProxiedPlayer> contextManager;
     private CalculatorFactory calculatorFactory;
     private BufferedRequest<Void> updateTaskBuffer;
@@ -164,6 +166,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         importer = new Importer(commandManager);
         consecutiveExecutor = new ConsecutiveExecutor(commandManager);
         calculatorFactory = new BungeeCalculatorFactory(this);
+        cachedStateManager = new CachedStateManager(this);
 
         contextManager = new ContextManager<>();
         BackendServerCalculator serverCalculator = new BackendServerCalculator();

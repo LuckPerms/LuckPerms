@@ -20,53 +20,34 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.core.model;
+package me.lucko.luckperms.common.caching.handlers;
 
-import lombok.EqualsAndHashCode;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.ToString;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.caching.handlers.GroupReference;
-import me.lucko.luckperms.common.caching.handlers.HolderReference;
-import me.lucko.luckperms.common.utils.Identifiable;
+import me.lucko.luckperms.common.core.model.Group;
+import me.lucko.luckperms.common.core.model.PermissionHolder;
 
-@ToString(of = {"name"})
-@EqualsAndHashCode(of = {"name"}, callSuper = false)
-public class Group extends PermissionHolder implements Identifiable<String> {
+import java.util.function.Consumer;
 
-    /**
-     * The name of the group
-     */
-    @Getter
-    private final String name;
+@Getter
+@AllArgsConstructor(staticName = "of")
+public class GroupReference implements HolderReference<String> {
 
-    public Group(String name, LuckPermsPlugin plugin) {
-        super(name, plugin);
-        this.name = name;
+    private final String id;
+
+    @Override
+    public HolderType getType() {
+        return HolderType.GROUP;
     }
 
     @Override
-    public String getId() {
-        return name.toLowerCase();
+    public void apply(LuckPermsPlugin plugin, Consumer<PermissionHolder> consumer) {
+        Group group = plugin.getGroupManager().getIfLoaded(id);
+        if (group == null) return;
+
+        consumer.accept(group);
     }
 
-    public String getRawDisplayName() {
-        return getPlugin().getConfiguration().getGroupNameRewrites().getOrDefault(name, name);
-    }
-
-    public String getDisplayName() {
-        String dn = getRawDisplayName();
-        return dn.equals(name) ? name : name + " (" + dn + ")";
-    }
-
-    @Override
-    public String getFriendlyName() {
-        return getDisplayName();
-    }
-
-    @Override
-    public HolderReference<String> toReference() {
-        return GroupReference.of(getId());
-    }
 }

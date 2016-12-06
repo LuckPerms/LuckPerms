@@ -26,6 +26,7 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.common.api.ApiProvider;
+import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.commands.BaseCommand;
 import me.lucko.luckperms.common.commands.ConsecutiveExecutor;
@@ -152,6 +153,13 @@ public interface LuckPermsPlugin {
      * @return the context manager
      */
     ContextManager getContextManager();
+
+    /**
+     * Gets the cached state manager for the platform.
+     *
+     * @return the cached state manager
+     */
+    CachedStateManager getCachedStateManager();
 
     /**
      * Gets the class responsible for constructing PermissionCalculators on this platform.

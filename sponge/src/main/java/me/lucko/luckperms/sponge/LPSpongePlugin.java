@@ -32,6 +32,7 @@ import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.api.ApiProvider;
+import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.commands.BaseCommand;
 import me.lucko.luckperms.common.commands.ConsecutiveExecutor;
@@ -141,6 +142,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     private ConsecutiveExecutor consecutiveExecutor;
     private LuckPermsService service;
     private LocaleManager localeManager;
+    private CachedStateManager cachedStateManager;
     private ContextManager<Subject> contextManager;
     private CalculatorFactory calculatorFactory;
     private BufferedRequest<Void> updateTaskBuffer;
@@ -215,6 +217,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         importer = new Importer(commandManager);
         consecutiveExecutor = new ConsecutiveExecutor(commandManager);
         calculatorFactory = new SpongeCalculatorFactory(this);
+        cachedStateManager = new CachedStateManager(this);
 
         contextManager = new ContextManager<>();
         contextManager.registerCalculator(new ServerCalculator<>(getConfiguration().getServer()));

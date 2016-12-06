@@ -32,6 +32,8 @@ import me.lucko.luckperms.api.event.events.UserPermissionRefreshEvent;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.api.internal.UserLink;
 import me.lucko.luckperms.common.caching.UserCache;
+import me.lucko.luckperms.common.caching.handlers.HolderReference;
+import me.lucko.luckperms.common.caching.handlers.UserReference;
 import me.lucko.luckperms.common.core.UserIdentifier;
 import me.lucko.luckperms.common.utils.BufferedRequest;
 import me.lucko.luckperms.common.utils.Identifiable;
@@ -97,6 +99,11 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
     @Override
     public String getFriendlyName() {
         return name;
+    }
+
+    @Override
+    public HolderReference<UserIdentifier> toReference() {
+        return UserReference.of(getId());
     }
 
     /**

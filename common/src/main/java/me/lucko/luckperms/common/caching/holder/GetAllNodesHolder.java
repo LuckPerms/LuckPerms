@@ -20,53 +20,24 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.core.model;
+package me.lucko.luckperms.common.caching.holder;
 
+import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
-import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.caching.handlers.GroupReference;
-import me.lucko.luckperms.common.caching.handlers.HolderReference;
-import me.lucko.luckperms.common.utils.Identifiable;
+import com.google.common.collect.ImmutableList;
 
-@ToString(of = {"name"})
-@EqualsAndHashCode(of = {"name"}, callSuper = false)
-public class Group extends PermissionHolder implements Identifiable<String> {
+import me.lucko.luckperms.common.utils.ExtractedContexts;
 
-    /**
-     * The name of the group
-     */
-    @Getter
-    private final String name;
+@Getter
+@ToString
+@EqualsAndHashCode
+@AllArgsConstructor(staticName = "of")
+public class GetAllNodesHolder {
 
-    public Group(String name, LuckPermsPlugin plugin) {
-        super(name, plugin);
-        this.name = name;
-    }
+    private final ImmutableList<String> excludedGroups;
+    private final ExtractedContexts contexts;
 
-    @Override
-    public String getId() {
-        return name.toLowerCase();
-    }
-
-    public String getRawDisplayName() {
-        return getPlugin().getConfiguration().getGroupNameRewrites().getOrDefault(name, name);
-    }
-
-    public String getDisplayName() {
-        String dn = getRawDisplayName();
-        return dn.equals(name) ? name : name + " (" + dn + ")";
-    }
-
-    @Override
-    public String getFriendlyName() {
-        return getDisplayName();
-    }
-
-    @Override
-    public HolderReference<String> toReference() {
-        return GroupReference.of(getId());
-    }
 }

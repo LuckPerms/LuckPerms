@@ -20,53 +20,17 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.core.model;
-
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
+package me.lucko.luckperms.common.caching.handlers;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.caching.handlers.GroupReference;
-import me.lucko.luckperms.common.caching.handlers.HolderReference;
+import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.utils.Identifiable;
 
-@ToString(of = {"name"})
-@EqualsAndHashCode(of = {"name"}, callSuper = false)
-public class Group extends PermissionHolder implements Identifiable<String> {
+import java.util.function.Consumer;
 
-    /**
-     * The name of the group
-     */
-    @Getter
-    private final String name;
+public interface HolderReference<T> extends Identifiable<T> {
 
-    public Group(String name, LuckPermsPlugin plugin) {
-        super(name, plugin);
-        this.name = name;
-    }
+    HolderType getType();
+    void apply(LuckPermsPlugin plugin, Consumer<PermissionHolder> consumer);
 
-    @Override
-    public String getId() {
-        return name.toLowerCase();
-    }
-
-    public String getRawDisplayName() {
-        return getPlugin().getConfiguration().getGroupNameRewrites().getOrDefault(name, name);
-    }
-
-    public String getDisplayName() {
-        String dn = getRawDisplayName();
-        return dn.equals(name) ? name : name + " (" + dn + ")";
-    }
-
-    @Override
-    public String getFriendlyName() {
-        return getDisplayName();
-    }
-
-    @Override
-    public HolderReference<String> toReference() {
-        return GroupReference.of(getId());
-    }
 }
