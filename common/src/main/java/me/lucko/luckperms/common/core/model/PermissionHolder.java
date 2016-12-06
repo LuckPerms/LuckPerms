@@ -173,7 +173,9 @@ public abstract class PermissionHolder {
         mergedCache.invalidate();
 
         // Invalidate inheritance caches
-        invalidateInheritanceCaches();
+        getAllNodesCache.invalidateAll();
+        getAllNodesFilteredCache.invalidateAll();
+        exportNodesCache.invalidateAll();
 
         // Get previous references
         Set<HolderReference> refs = plugin.getCachedStateManager().getInheritances(toReference());
