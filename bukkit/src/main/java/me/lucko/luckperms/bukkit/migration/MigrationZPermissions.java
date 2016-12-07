@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class MigrationZPermissions extends SubCommand<Object> {
+
     public MigrationZPermissions() {
         super("zpermissions", "Migration from zPermissions", Permission.MIGRATION, Predicates.alwaysFalse(), null);
     }
@@ -82,7 +83,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
             Group group = plugin.getGroupManager().getIfLoaded(g.toLowerCase());
 
             PermissionEntity entity = internalService.getEntity(g, null, true);
-            migrateEntity(group, entity);
+            migrateEntity(group, entity, null);
 
             plugin.getStorage().saveGroup(group);
         }
@@ -103,7 +104,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
             User user = plugin.getUserManager().get(u);
 
             PermissionEntity entity = internalService.getEntity(null, u, false);
-            migrateEntity(user, entity);
+            migrateEntity(user, entity, internalService.getGroups(u));
 
             user.setPrimaryGroup(service.getPlayerPrimaryGroup(u));
 
@@ -119,7 +120,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
         return CommandResult.SUCCESS;
     }
 
-    private void migrateEntity(PermissionHolder group, PermissionEntity entity) {
+    private void migrateEntity(PermissionHolder group, PermissionEntity entity, List<Membership> memberships) {
         for (Entry e : entity.getPermissions()) {
             if (e.getWorld() != null) {
                 try {
@@ -134,17 +135,22 @@ public class MigrationZPermissions extends SubCommand<Object> {
             }
         }
 
-        for (Inheritance inheritance : entity.getInheritancesAsChild()) {
-            try {
-                group.setPermission("group." + inheritance.getParent().getName(), true);
-            } catch (ObjectAlreadyHasException ignored) {
+        if (entity.isGroup()) {
+            for (Inheritance inheritance : entity.getInheritancesAsChild()) {
+                try {
+                    if (!inheritance.getParent().getName().equals(group.getObjectName())) {
+                        group.setPermission("group." + inheritance.getParent().getName(), true);
+                    }
+                } catch (ObjectAlreadyHasException ignored) {
+                }
             }
-        }
-
-        for (Membership membership : entity.getMemberships()) {
-            try {
-                group.setPermission("group." + membership.getGroup().getName(), true);
-            } catch (ObjectAlreadyHasException ignored) {
+        } else {
+            // entity.getMemberships() doesn't work (always returns 0 records)
+            for (Membership membership : memberships) {
+                try {
+                    group.setPermission("group." + membership.getGroup().getDisplayName(), true);
+                } catch (ObjectAlreadyHasException ignored) {
+                }
             }
         }
 
