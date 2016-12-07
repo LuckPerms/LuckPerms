@@ -83,9 +83,11 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         for (Subject pexGroup : pexService.getGroupSubjects().getAllSubjects()) {
             groupCount++;
 
+            String pexName = MigrationUtils.convertGroupName(pexGroup.getIdentifier().toLowerCase());
+
             // Make a LuckPerms group for the one being migrated
-            plugin.getStorage().createAndLoadGroup(pexGroup.getIdentifier().toLowerCase()).join();
-            Group group = plugin.getGroupManager().getIfLoaded(pexGroup.getIdentifier().toLowerCase());
+            plugin.getStorage().createAndLoadGroup(pexName).join();
+            Group group = plugin.getGroupManager().getIfLoaded(pexName);
             migrateSubject(pexGroup, group);
             plugin.getStorage().saveGroup(group);
         }

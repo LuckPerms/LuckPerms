@@ -89,9 +89,11 @@ public class MigrationPermissionManager extends SubCommand<Object> {
         for (Subject pmGroup : pmService.getGroupSubjects().getAllSubjects()) {
             groupCount++;
 
+            String pmName = MigrationUtils.convertGroupName(pmGroup.getIdentifier().toLowerCase());
+
             // Make a LuckPerms group for the one being migrated
-            plugin.getStorage().createAndLoadGroup(pmGroup.getIdentifier().toLowerCase()).join();
-            Group group = plugin.getGroupManager().getIfLoaded(pmGroup.getIdentifier().toLowerCase());
+            plugin.getStorage().createAndLoadGroup(pmName).join();
+            Group group = plugin.getGroupManager().getIfLoaded(pmName);
             migrateSubject(pmGroup, group);
             plugin.getStorage().saveGroup(group);
         }
