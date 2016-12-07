@@ -39,10 +39,7 @@ import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsService;
 import org.tyrannyofheaven.bukkit.zPermissions.dao.PermissionService;
-import org.tyrannyofheaven.bukkit.zPermissions.model.EntityMetadata;
-import org.tyrannyofheaven.bukkit.zPermissions.model.Entry;
-import org.tyrannyofheaven.bukkit.zPermissions.model.Inheritance;
-import org.tyrannyofheaven.bukkit.zPermissions.model.PermissionEntity;
+import org.tyrannyofheaven.bukkit.zPermissions.model.*;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -135,7 +132,14 @@ public class MigrationZPermissions extends SubCommand<Object> {
 
         for (Inheritance inheritance : entity.getInheritancesAsChild()) {
             try {
-                group.setPermission("group." + inheritance.getParent(), true);
+                group.setPermission("group." + inheritance.getParent().getName(), true);
+            } catch (ObjectAlreadyHasException ignored) {
+            }
+        }
+
+        for (Membership membership : entity.getMemberships()) {
+            try {
+                group.setPermission("group." + membership.getGroup().getName(), true);
             } catch (ObjectAlreadyHasException ignored) {
             }
         }
