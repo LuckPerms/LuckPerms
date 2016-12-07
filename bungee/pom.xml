@@ -46,6 +46,10 @@
                             <minimizeJar>false</minimizeJar>
                             <relocations>
                                 <relocation>
+                                    <pattern>io.github.mkremins.fanciful</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.fanciful</shadedPattern>
+                                </relocation>
+                                <relocation>
                                     <pattern>org.slf4j</pattern>
                                     <shadedPattern>me.lucko.luckperms.lib.slf4j</shadedPattern>
                                 </relocation>

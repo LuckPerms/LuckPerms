@@ -20,36 +20,21 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.sender;
+package me.lucko.luckperms.bukkit.compat;
 
-import lombok.RequiredArgsConstructor;
+import net.md_5.bungee.chat.ComponentSerializer;
 
-import me.lucko.luckperms.common.LuckPermsPlugin;
+import org.bukkit.entity.Player;
 
-import java.util.UUID;
+public class SpigotJsonMessageHandler {
 
-import io.github.mkremins.fanciful.FancyMessage;
-
-/**
- * Factory class to make a thread-safe sender instance
- *
- * @param <T> the command sender type
- */
-@RequiredArgsConstructor
-public abstract class SenderFactory<T> {
-    private final LuckPermsPlugin plugin;
-
-    protected abstract String getName(T t);
-
-    protected abstract UUID getUuid(T t);
-
-    protected abstract void sendMessage(T t, String s);
-
-    protected abstract void sendMessage(T t, FancyMessage message);
-
-    protected abstract boolean hasPermission(T t, String node);
-
-    public final Sender wrap(T t) {
-        return new AbstractSender<>(plugin, this, t);
+    public boolean sendJsonMessage(Player player, String json) {
+        try {
+            player.spigot().sendMessage(ComponentSerializer.parse(json));
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
+
 }

@@ -28,6 +28,8 @@ import me.lucko.luckperms.common.constants.Permission;
 
 import java.util.UUID;
 
+import io.github.mkremins.fanciful.FancyMessage;
+
 /**
  * Wrapper interface to represent a CommandSender/CommandSource within the common command implementations.
  */
@@ -60,6 +62,13 @@ public interface Sender {
      * @param s the message to send. Supports '§' for message formatting.
      */
     void sendMessage(String s);
+
+    /**
+     * Send a json message to the Sender.
+     *
+     * @param message the message to send.
+     */
+    void sendMessage(FancyMessage message);
 
     /**
      * Check if the Sender has a permission.

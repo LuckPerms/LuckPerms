@@ -53,6 +53,10 @@
                             </artifactSet>
                             <relocations>
                                 <relocation>
+                                    <pattern>io.github.mkremins.fanciful</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.fanciful</shadedPattern>
+                                </relocation>
+                                <relocation>
                                     <pattern>com.zaxxer.hikari</pattern>
                                     <shadedPattern>me.lucko.luckperms.lib.hikari</shadedPattern>
                                 </relocation>

@@ -29,8 +29,11 @@ import me.lucko.luckperms.common.constants.Constants;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.chat.ComponentSerializer;
 
 import java.util.UUID;
+
+import io.github.mkremins.fanciful.FancyMessage;
 
 public class BungeeSenderFactory extends SenderFactory<CommandSender> {
     public BungeeSenderFactory(LuckPermsPlugin plugin) {
@@ -56,6 +59,15 @@ public class BungeeSenderFactory extends SenderFactory<CommandSender> {
     @Override
     protected void sendMessage(CommandSender sender, String s) {
         sender.sendMessage(new TextComponent(s));
+    }
+
+    @Override
+    protected void sendMessage(CommandSender sender, FancyMessage message) {
+        try {
+            sender.sendMessage(ComponentSerializer.parse(message.toJSONString()));
+        } catch (Exception e) {
+            sendMessage(sender, message.toOldMessageFormat());
+        }
     }
 
     @Override

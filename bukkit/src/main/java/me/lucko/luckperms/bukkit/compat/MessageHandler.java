@@ -20,56 +20,49 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit;
-
-import me.lucko.luckperms.bukkit.compat.MessageHandler;
-import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.commands.sender.SenderFactory;
-import me.lucko.luckperms.common.constants.Constants;
+package me.lucko.luckperms.bukkit.compat;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.UUID;
-
 import io.github.mkremins.fanciful.FancyMessage;
 
-public class BukkitSenderFactory extends SenderFactory<CommandSender> {
-    private final MessageHandler messageHandler;
+public class MessageHandler {
+    private final BukkitJsonMessageHandler bukkitHandler;
+    private final SpigotJsonMessageHandler spigotHandler;
 
-    public BukkitSenderFactory(LuckPermsPlugin plugin) {
-        super(plugin);
-        messageHandler = new MessageHandler();
+    public MessageHandler() {
+        bukkitHandler = new BukkitJsonMessageHandler();
+        spigotHandler = isSpigot() ? new SpigotJsonMessageHandler() : null;
     }
 
-    @Override
-    protected String getName(CommandSender sender) {
+    public void sendJsonMessage(CommandSender sender, FancyMessage message) {
         if (sender instanceof Player) {
-            return sender.getName();
+            Player player = (Player) sender;
+            String json = message.toJSONString();
+
+            // Try Bukkit.
+            if (bukkitHandler.sendJsonMessage(player, json)) {
+                return;
+            }
+
+            // Try Spigot.
+            if (spigotHandler != null && spigotHandler.sendJsonMessage(player, json)) {
+                return;
+            }
         }
-        return Constants.getConsoleName();
+
+        // Fallback to Bukkit
+        sender.sendMessage(message.toOldMessageFormat());
     }
 
-    @Override
-    protected UUID getUuid(CommandSender sender) {
-        if (sender instanceof Player) {
-            return ((Player) sender).getUniqueId();
+    private static boolean isSpigot() {
+        try {
+            Class.forName("net.md_5.bungee.chat.ComponentSerializer");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
         }
-        return Constants.getConsoleUUID();
     }
 
-    @Override
-    protected void sendMessage(CommandSender sender, String s) {
-        sender.sendMessage(s);
-    }
-
-    @Override
-    protected void sendMessage(CommandSender sender, FancyMessage message) {
-        messageHandler.sendJsonMessage(sender, message);
-    }
-
-    @Override
-    protected boolean hasPermission(CommandSender sender, String node) {
-        return sender.hasPermission(node);
-    }
 }

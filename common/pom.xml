@@ -32,6 +32,13 @@
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
+        <!-- fanciful -->
+        <dependency>
+            <groupId>io.github.mkremins</groupId>
+            <artifactId>fanciful</artifactId>
+            <version>1.1.0</version>
+            <scope>compile</scope>
+        </dependency>
         <!-- HikariCP -->
         <dependency>
             <groupId>com.zaxxer</groupId>

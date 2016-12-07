@@ -44,6 +44,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import io.github.mkremins.fanciful.FancyMessage;
+
 /**
  * Class to handle import operations
  */
@@ -210,6 +212,11 @@ public class Importer {
         @Override
         public void sendMessage(String s) {
             instance.logMessage(s);
+        }
+
+        @Override
+        public void sendMessage(FancyMessage message) {
+            instance.logMessage(message.toOldMessageFormat());
         }
 
         @Override

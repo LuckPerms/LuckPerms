@@ -32,6 +32,8 @@ import org.spongepowered.api.text.serializer.TextSerializers;
 
 import java.util.UUID;
 
+import io.github.mkremins.fanciful.FancyMessage;
+
 public class SpongeSenderFactory extends SenderFactory<CommandSource> {
     public SpongeSenderFactory(LuckPermsPlugin plugin) {
         super(plugin);
@@ -57,6 +59,15 @@ public class SpongeSenderFactory extends SenderFactory<CommandSource> {
     @Override
     protected void sendMessage(CommandSource source, String s) {
         source.sendMessage(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(s));
+    }
+
+    @Override
+    protected void sendMessage(CommandSource source, FancyMessage message) {
+        try {
+            source.sendMessage(TextSerializers.JSON.deserialize(message.toJSONString()));
+        } catch (Exception e) {
+            sendMessage(source, message.toOldMessageFormat());
+        }
     }
 
     @Override

@@ -31,6 +31,8 @@ import me.lucko.luckperms.common.constants.Permission;
 import java.lang.ref.WeakReference;
 import java.util.UUID;
 
+import io.github.mkremins.fanciful.FancyMessage;
+
 /**
  * Simple implementation of {@link Sender} using a {@link SenderFactory}
  *
@@ -57,6 +59,14 @@ public class AbstractSender<T> implements Sender {
         final T t = ref.get();
         if (t != null) {
             factory.sendMessage(t, s);
+        }
+    }
+
+    @Override
+    public void sendMessage(FancyMessage message) {
+        final T t = ref.get();
+        if (t != null) {
+            factory.sendMessage(t, message);
         }
     }
 
