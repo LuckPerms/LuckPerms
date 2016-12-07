@@ -248,8 +248,7 @@ public class VaultPermissionHook extends Permission {
                 .filter(n -> n.shouldApplyOnServer(server, isIncludeGlobal(), false))
                 .filter(n -> n.shouldApplyOnWorld(finalWorld, true, false))
                 .map(Node::getGroupName)
-                .filter(s -> s.equalsIgnoreCase(group))
-                .findAny().isPresent();
+                .anyMatch(s -> s.equalsIgnoreCase(group));
     }
 
     @Override
@@ -329,7 +328,8 @@ public class VaultPermissionHook extends Permission {
         }
 
         if (!pgo) {
-            return user.getPrimaryGroup();
+            String g = user.getPrimaryGroup();
+            return plugin.getConfiguration().getGroupNameRewrites().getOrDefault(g, g);
         }
 
         if (pgoCheckInherited) {
@@ -394,7 +394,8 @@ public class VaultPermissionHook extends Permission {
         }
 
         // Fallback
-        return user.getPrimaryGroup();
+        String g = user.getPrimaryGroup();
+        return plugin.getConfiguration().getGroupNameRewrites().getOrDefault(g, g);
     }
 
     @Override
