@@ -46,12 +46,12 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.permission.NodeTree;
 import org.spongepowered.api.service.permission.PermissionService;
 
+import co.aikar.timings.Timing;
+
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import co.aikar.timings.Timing;
 
 public class SpongeGroup extends Group {
 

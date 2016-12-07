@@ -26,9 +26,9 @@ import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Permission;
 
-import java.util.UUID;
-
 import io.github.mkremins.fanciful.FancyMessage;
+
+import java.util.UUID;
 
 /**
  * Wrapper interface to represent a CommandSender/CommandSource within the common command implementations.

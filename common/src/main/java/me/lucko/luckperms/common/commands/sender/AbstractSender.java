@@ -28,10 +28,10 @@ import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Permission;
 
+import io.github.mkremins.fanciful.FancyMessage;
+
 import java.lang.ref.WeakReference;
 import java.util.UUID;
-
-import io.github.mkremins.fanciful.FancyMessage;
 
 /**
  * Simple implementation of {@link Sender} using a {@link SenderFactory}

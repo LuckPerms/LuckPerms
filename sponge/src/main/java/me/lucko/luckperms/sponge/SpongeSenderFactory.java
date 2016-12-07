@@ -30,9 +30,9 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
-import java.util.UUID;
-
 import io.github.mkremins.fanciful.FancyMessage;
+
+import java.util.UUID;
 
 public class SpongeSenderFactory extends SenderFactory<CommandSource> {
     public SpongeSenderFactory(LuckPermsPlugin plugin) {

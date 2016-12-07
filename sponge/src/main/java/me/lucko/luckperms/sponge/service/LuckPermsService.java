@@ -66,6 +66,8 @@ import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.text.Text;
 
+import co.aikar.timings.Timing;
+
 import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
@@ -74,8 +76,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
-import co.aikar.timings.Timing;
 
 /**
  * The LuckPerms implementation of the Sponge Permission Service

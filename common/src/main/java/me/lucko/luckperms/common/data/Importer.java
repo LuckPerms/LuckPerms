@@ -37,14 +37,14 @@ import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 
+import io.github.mkremins.fanciful.FancyMessage;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import io.github.mkremins.fanciful.FancyMessage;
 
 /**
  * Class to handle import operations

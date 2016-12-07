@@ -50,6 +50,8 @@ import me.lucko.luckperms.sponge.timings.LPTiming;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.PermissionService;
 
+import co.aikar.timings.Timing;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -57,8 +59,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import co.aikar.timings.Timing;
 
 @SuppressWarnings({"OptionalGetWithoutIsPresent", "unused"})
 @AllArgsConstructor

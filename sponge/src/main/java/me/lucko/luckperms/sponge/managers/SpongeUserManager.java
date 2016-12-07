@@ -49,12 +49,12 @@ import me.lucko.luckperms.sponge.timings.LPTiming;
 
 import org.spongepowered.api.service.permission.PermissionService;
 
+import co.aikar.timings.Timing;
+
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-
-import co.aikar.timings.Timing;
 
 public class SpongeUserManager implements UserManager, LPSubjectCollection {
     private final LPSpongePlugin plugin;

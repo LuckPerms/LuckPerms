@@ -30,9 +30,9 @@ import me.lucko.luckperms.common.constants.Constants;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.UUID;
-
 import io.github.mkremins.fanciful.FancyMessage;
+
+import java.util.UUID;
 
 public class BukkitSenderFactory extends SenderFactory<CommandSender> {
     private final MessageHandler messageHandler;

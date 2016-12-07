@@ -31,9 +31,9 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.chat.ComponentSerializer;
 
-import java.util.UUID;
-
 import io.github.mkremins.fanciful.FancyMessage;
+
+import java.util.UUID;
 
 public class BungeeSenderFactory extends SenderFactory<CommandSender> {
     public BungeeSenderFactory(LuckPermsPlugin plugin) {

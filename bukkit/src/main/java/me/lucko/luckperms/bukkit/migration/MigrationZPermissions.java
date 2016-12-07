@@ -39,7 +39,11 @@ import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsService;
 import org.tyrannyofheaven.bukkit.zPermissions.dao.PermissionService;
-import org.tyrannyofheaven.bukkit.zPermissions.model.*;
+import org.tyrannyofheaven.bukkit.zPermissions.model.EntityMetadata;
+import org.tyrannyofheaven.bukkit.zPermissions.model.Entry;
+import org.tyrannyofheaven.bukkit.zPermissions.model.Inheritance;
+import org.tyrannyofheaven.bukkit.zPermissions.model.Membership;
+import org.tyrannyofheaven.bukkit.zPermissions.model.PermissionEntity;
 
 import java.lang.reflect.Field;
 import java.util.List;

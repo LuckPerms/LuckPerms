@@ -37,12 +37,12 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
+import co.aikar.timings.Timing;
+
 import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
-
-import co.aikar.timings.Timing;
 
 @SuppressWarnings("NullableProblems")
 class SpongeCommand extends CommandManager implements CommandCallable {

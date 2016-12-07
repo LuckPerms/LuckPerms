@@ -39,11 +39,11 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.world.World;
 
+import co.aikar.timings.Timing;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import co.aikar.timings.Timing;
 
 @SuppressWarnings("WeakerAccess")
 public class SpongeListener extends AbstractListener {

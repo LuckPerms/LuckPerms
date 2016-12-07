@@ -43,11 +43,11 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.permission.PermissionService;
 
+import co.aikar.timings.Timing;
+
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-
-import co.aikar.timings.Timing;
 
 public class SpongeUser extends User {
 

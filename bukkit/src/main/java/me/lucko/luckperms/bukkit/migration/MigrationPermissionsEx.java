@@ -39,16 +39,16 @@ import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
-import java.lang.reflect.Field;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 import ru.tehkode.permissions.NativeInterface;
 import ru.tehkode.permissions.PermissionGroup;
 import ru.tehkode.permissions.PermissionManager;
 import ru.tehkode.permissions.PermissionUser;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
+
+import java.lang.reflect.Field;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class MigrationPermissionsEx extends SubCommand<Object> {
     public MigrationPermissionsEx() {

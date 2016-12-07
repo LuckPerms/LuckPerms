@@ -26,9 +26,9 @@ import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
 
-import java.util.UUID;
-
 import io.github.mkremins.fanciful.FancyMessage;
+
+import java.util.UUID;
 
 /**
  * Factory class to make a thread-safe sender instance

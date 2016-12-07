@@ -45,12 +45,12 @@ import me.lucko.luckperms.sponge.timings.LPTiming;
 
 import org.spongepowered.api.command.CommandSource;
 
+import co.aikar.timings.Timing;
+
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-
-import co.aikar.timings.Timing;
 
 /**
  * A simple persistable Subject implementation

@@ -28,10 +28,10 @@ import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 
-import java.util.Map;
-
 import co.aikar.timings.Timing;
 import co.aikar.timings.Timings;
+
+import java.util.Map;
 
 public class LPTimings {
     private final Map<LPTiming, Timing> timings;

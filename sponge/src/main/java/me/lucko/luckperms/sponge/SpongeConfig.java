@@ -26,6 +26,11 @@ import com.google.common.base.Splitter;
 
 import me.lucko.luckperms.common.config.AbstractConfiguration;
 
+import ninja.leaping.configurate.ConfigurationNode;
+import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
+import ninja.leaping.configurate.loader.ConfigurationLoader;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,11 +40,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
 
 class SpongeConfig extends AbstractConfiguration<LPSpongePlugin> {
     private ConfigurationNode root;
