@@ -41,6 +41,7 @@ public enum Message {
     PLAYER_OFFLINE("&cOffline", false),
     LOADING_ERROR("Permissions data could not be loaded. Please contact an administrator.", true),
     OP_DISABLED("&bThe vanilla OP system is disabled on this server.", false),
+    OP_DISABLED_SPONGE("&2Server Operator status has no effect when a permission plugin is installed. Please edit user data directly.", true),
     LOG("&3LOG &3&l> {0}", true),
 
     COMMAND_NOT_RECOGNISED("Command not recognised.", true),

@@ -8,6 +8,7 @@ player-online: "&aOnline"
 player-offline: "&cOffline"
 loading-error: "Permissions data could not be loaded. Please contact an administrator."
 op-disabled: "&bThe vanilla OP system is disabled on this server."
+op-disabled-sponge: "&2Server Operator status has no effect when a permission plugin is installed. Please edit user data directly."
 log: "&3LOG &3&l> {0}"
 
 command-not-recognised: "Command not recognised."

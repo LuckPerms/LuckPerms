@@ -29,9 +29,11 @@ import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.utils.AbstractListener;
 import me.lucko.luckperms.sponge.timings.LPTiming;
 
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
+import org.spongepowered.api.event.command.SendCommandEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.serializer.TextSerializers;
@@ -112,6 +114,17 @@ public class SpongeListener extends AbstractListener {
     public void onClientLeave(ClientConnectionEvent.Disconnect e) {
         try (Timing ignored = plugin.getTimings().time(LPTiming.ON_CLIENT_LEAVE)) {
             onLeave(e.getTargetEntity().getUniqueId());
+        }
+    }
+
+    @Listener
+    public void onSendCommand(SendCommandEvent e) {
+        CommandSource source = e.getCause().first(CommandSource.class).orElse(null);
+        if (source == null) return;
+
+        final String name = e.getCommand().toLowerCase();
+        if (name.equals("op") || name.equals("deop")) {
+            Message.OP_DISABLED_SPONGE.send(plugin.getSenderFactory().wrap(source));
         }
     }
 }
