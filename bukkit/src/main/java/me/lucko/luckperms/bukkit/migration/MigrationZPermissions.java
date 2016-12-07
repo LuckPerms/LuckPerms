@@ -107,6 +107,10 @@ public class MigrationZPermissions extends SubCommand<Object> {
 
             user.setPrimaryGroup(service.getPlayerPrimaryGroup(u));
 
+            if (!entity.isGroup()) {
+                user.setName(entity.getDisplayName());
+            }
+
             plugin.getUserManager().cleanup(user);
             plugin.getStorage().saveUser(user);
         }
