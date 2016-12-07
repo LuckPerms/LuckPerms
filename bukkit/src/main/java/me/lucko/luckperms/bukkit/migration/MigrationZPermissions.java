@@ -134,11 +134,6 @@ public class MigrationZPermissions extends SubCommand<Object> {
         }
 
         for (Inheritance inheritance : entity.getInheritancesAsChild()) {
-            if (!inheritance.getChild().getId().equals(entity.getId())) {
-                new Throwable("Illegal inheritance").printStackTrace();
-                continue;
-            }
-
             try {
                 group.setPermission("group." + inheritance.getParent(), true);
             } catch (ObjectAlreadyHasException ignored) {
