@@ -58,7 +58,7 @@ public class UuidCache {
 
     public void addToCache(UUID external, UUID internal) {
         if (onlineMode) return;
-        cache.put(external, internal);
+        cache.forcePut(external, internal);
     }
 
     public void clearCache(UUID external) {
