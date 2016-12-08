@@ -14,7 +14,7 @@
 
     <build>
         <defaultGoal>clean package</defaultGoal>
-        <finalName>LuckPerms-${release.version}.${git.closest.tag.commit.count}</finalName>
+        <finalName>LuckPerms-Bukkit-${release.version}.${git.closest.tag.commit.count}</finalName>
         <sourceDirectory>${basedir}/src/main/java</sourceDirectory>
         <resources>
             <resource>

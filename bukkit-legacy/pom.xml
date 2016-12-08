@@ -12,7 +12,7 @@
     <artifactId>luckperms-bukkit-legacy</artifactId>
     <build>
         <defaultGoal>clean package</defaultGoal>
-        <finalName>LuckPerms-bukkit-legacy-${release.version}.${git.closest.tag.commit.count}</finalName>
+        <finalName>LuckPerms-Bukkit-Legacy-${release.version}.${git.closest.tag.commit.count}</finalName>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>

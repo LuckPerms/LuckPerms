@@ -14,7 +14,7 @@
 
     <build>
         <defaultGoal>clean package</defaultGoal>
-        <finalName>LuckPermsBungee-${release.version}.${git.closest.tag.commit.count}</finalName>
+        <finalName>LuckPerms-Bungee-${release.version}.${git.closest.tag.commit.count}</finalName>
         <sourceDirectory>${basedir}/src/main/java</sourceDirectory>
         <resources>
             <resource>
