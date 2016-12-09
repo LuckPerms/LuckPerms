@@ -140,7 +140,7 @@ class BukkitListener extends AbstractListener implements Listener {
                 .replace("spigot:", "")
                 .replace("minecraft:", "");
 
-        if (s.startsWith("op") || s.startsWith("deop")) {
+        if (s.equals("op") || s.startsWith("op ") || s.equals("deop") || s.startsWith("deop ")) {
             e.setCancelled(true);
             e.getPlayer().sendMessage(Message.OP_DISABLED.toString());
         }
