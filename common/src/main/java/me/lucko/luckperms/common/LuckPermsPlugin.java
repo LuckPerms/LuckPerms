@@ -29,7 +29,6 @@ import me.lucko.luckperms.common.api.ApiProvider;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.commands.BaseCommand;
-import me.lucko.luckperms.common.commands.ConsecutiveExecutor;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.LPConfiguration;
 import me.lucko.luckperms.common.constants.Message;
@@ -131,13 +130,6 @@ public interface LuckPermsPlugin {
      * @return the importer
      */
     Importer getImporter();
-
-    /**
-     * Gets the consecutive command executor instance
-     *
-     * @return the consecutive executor
-     */
-    ConsecutiveExecutor getConsecutiveExecutor();
 
     /**
      * Gets the instance providing locale translations for the plugin

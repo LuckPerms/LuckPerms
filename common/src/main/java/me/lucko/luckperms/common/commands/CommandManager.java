@@ -37,7 +37,6 @@ import me.lucko.luckperms.common.commands.misc.ExportCommand;
 import me.lucko.luckperms.common.commands.misc.ImportCommand;
 import me.lucko.luckperms.common.commands.misc.InfoCommand;
 import me.lucko.luckperms.common.commands.misc.NetworkSyncCommand;
-import me.lucko.luckperms.common.commands.misc.QueueCommand;
 import me.lucko.luckperms.common.commands.misc.SyncCommand;
 import me.lucko.luckperms.common.commands.misc.VerboseCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
@@ -59,18 +58,24 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 public class CommandManager {
 
     @Getter
     private final LuckPermsPlugin plugin;
+
+    private final ExecutorService executor;
+
     @Getter
     private final List<BaseCommand> mainCommands;
 
     public CommandManager(LuckPermsPlugin plugin) {
         this.plugin = plugin;
+        this.executor = Executors.newSingleThreadExecutor();
 
         ImmutableList.Builder<BaseCommand> l = ImmutableList.builder();
         l.add(new UserMainCommand())
@@ -84,7 +89,6 @@ public class CommandManager {
                 .add(new VerboseCommand())
                 .add(new ImportCommand())
                 .add(new ExportCommand())
-                .add(new QueueCommand())
                 .add(new MigrationMainCommand())
                 .add(new UsersBulkEditMainCommand())
                 .add(new CreateGroup())
@@ -100,31 +104,16 @@ public class CommandManager {
     /**
      * Generic on command method to be called from the command executor object of the platform
      * Unlike {@link #onCommand(Sender, String, List)}, this method is called in a new thread
-     *
-     * @param sender who sent the command
+     *  @param sender who sent the command
      * @param label  the command label used
      * @param args   the arguments provided
-     * @param result the callback to be called when the command has fully executed
      */
-    public void onCommand(Sender sender, String label, List<String> args, Consumer<CommandResult> result) {
-        plugin.doAsync(() -> {
-            CommandResult r = onCommand(sender, label, args);
-            if (result != null) {
-                plugin.doSync(() -> result.accept(r));
-            }
-        });
+    public Future<CommandResult> onCommand(Sender sender, String label, List<String> args) {
+        return executor.submit(() -> execute(sender, label, args));
     }
 
-    /**
-     * Generic on command method to be called from the command executor object of the platform
-     *
-     * @param sender who sent the command
-     * @param label  the command label used
-     * @param args   the arguments provided
-     * @return if the command was successful
-     */
     @SuppressWarnings("unchecked")
-    public CommandResult onCommand(Sender sender, String label, List<String> args) {
+    private CommandResult execute(Sender sender, String label, List<String> args) {
         // Handle no arguments
         if (args.size() == 0) {
             sendCommandUsage(sender, label);

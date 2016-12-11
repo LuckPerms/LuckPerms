@@ -50,8 +50,7 @@ class BukkitCommand extends CommandManager implements CommandExecutor, TabExecut
         onCommand(
                 plugin.getSenderFactory().wrap(sender),
                 label,
-                Util.stripQuotes(Splitter.on(Patterns.COMMAND_SEPARATOR).omitEmptyStrings().splitToList(Joiner.on(' ').join(args))),
-                null
+                Util.stripQuotes(Splitter.on(Patterns.COMMAND_SEPARATOR).omitEmptyStrings().splitToList(Joiner.on(' ').join(args)))
         );
         return true;
     }

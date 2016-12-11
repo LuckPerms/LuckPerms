@@ -35,7 +35,6 @@ import me.lucko.luckperms.common.api.ApiProvider;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.commands.BaseCommand;
-import me.lucko.luckperms.common.commands.ConsecutiveExecutor;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.LPConfiguration;
 import me.lucko.luckperms.common.constants.Permission;
@@ -139,7 +138,6 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     private ApiProvider apiProvider;
     private me.lucko.luckperms.api.Logger log;
     private Importer importer;
-    private ConsecutiveExecutor consecutiveExecutor;
     private LuckPermsService service;
     private LocaleManager localeManager;
     private CachedStateManager cachedStateManager;
@@ -215,7 +213,6 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         groupManager = new SpongeGroupManager(this);
         trackManager = new GenericTrackManager();
         importer = new Importer(commandManager);
-        consecutiveExecutor = new ConsecutiveExecutor(commandManager);
         calculatorFactory = new SpongeCalculatorFactory(this);
         cachedStateManager = new CachedStateManager(this);
 
@@ -253,7 +250,6 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
         // register tasks
         scheduler.createTaskBuilder().async().intervalTicks(60L).execute(new ExpireTemporaryTask(this)).submit(this);
-        scheduler.createTaskBuilder().async().intervalTicks(20L).execute(consecutiveExecutor).submit(this);
 
         getLog().info("Successfully loaded.");
     }

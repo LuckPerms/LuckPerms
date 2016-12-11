@@ -50,8 +50,7 @@ class BungeeCommand extends Command implements TabExecutor {
         manager.onCommand(
                 plugin.getSenderFactory().wrap(sender),
                 "bperms",
-                Util.stripQuotes(Splitter.on(Patterns.COMMAND_SEPARATOR).omitEmptyStrings().splitToList(Joiner.on(' ').join(args))),
-                null
+                Util.stripQuotes(Splitter.on(Patterns.COMMAND_SEPARATOR).omitEmptyStrings().splitToList(Joiner.on(' ').join(args)))
         );
     }
 

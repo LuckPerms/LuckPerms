@@ -107,7 +107,7 @@ public class Importer {
 
             executing = index;
             try {
-                CommandResult result = commandManager.onCommand(fake, "perms", Splitter.on(' ').splitToList(command));
+                CommandResult result = commandManager.onCommand(fake, "perms", Splitter.on(' ').splitToList(command)).get();
                 getResult(index, command).setResult(result);
 
             } catch (Exception e) {

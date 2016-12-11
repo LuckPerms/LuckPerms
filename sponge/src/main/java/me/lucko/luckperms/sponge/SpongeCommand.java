@@ -59,8 +59,7 @@ class SpongeCommand extends CommandManager implements CommandCallable {
             onCommand(
                     plugin.getSenderFactory().wrap(source),
                     "perms",
-                    Util.stripQuotes(Splitter.on(Patterns.COMMAND_SEPARATOR).omitEmptyStrings().splitToList(s)),
-                    null
+                    Util.stripQuotes(Splitter.on(Patterns.COMMAND_SEPARATOR).omitEmptyStrings().splitToList(s))
             );
             return CommandResult.success();
         }

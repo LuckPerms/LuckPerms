@@ -35,7 +35,6 @@ import me.lucko.luckperms.common.api.ApiProvider;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.commands.CommandManager;
-import me.lucko.luckperms.common.commands.ConsecutiveExecutor;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.LPConfiguration;
 import me.lucko.luckperms.common.contexts.ContextManager;
@@ -88,7 +87,6 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     private ApiProvider apiProvider;
     private Logger log;
     private Importer importer;
-    private ConsecutiveExecutor consecutiveExecutor;
     private LocaleManager localeManager;
     private CachedStateManager cachedStateManager;
     private ContextManager<ProxiedPlayer> contextManager;
@@ -164,7 +162,6 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         groupManager = new GenericGroupManager(this);
         trackManager = new GenericTrackManager();
         importer = new Importer(commandManager);
-        consecutiveExecutor = new ConsecutiveExecutor(commandManager);
         calculatorFactory = new BungeeCalculatorFactory(this);
         cachedStateManager = new CachedStateManager(this);
 
@@ -190,7 +187,6 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
         // register tasks
         getProxy().getScheduler().schedule(this, new ExpireTemporaryTask(this), 3L, 3L, TimeUnit.SECONDS);
-        getProxy().getScheduler().schedule(this, consecutiveExecutor, 1L, 1L, TimeUnit.SECONDS);
 
         getLog().info("Successfully loaded.");
     }

@@ -51,13 +51,10 @@ import java.util.UUID;
 import static me.lucko.luckperms.common.core.model.PermissionHolder.exportToLegacy;
 
 abstract class SQLBacking extends AbstractBacking {
-    private static final QueryPS EMPTY_PS = preparedStatement -> {
-    };
+    private static final QueryPS EMPTY_PS = preparedStatement -> {};
 
-    private static final Type NM_TYPE = new TypeToken<Map<String, Boolean>>() {
-    }.getType();
-    private static final Type T_TYPE = new TypeToken<List<String>>() {
-    }.getType();
+    private static final Type NM_TYPE = new TypeToken<Map<String, Boolean>>() {}.getType();
+    private static final Type T_TYPE = new TypeToken<List<String>>() {}.getType();
 
     private static final String USER_INSERT = "INSERT INTO lp_users VALUES(?, ?, ?, ?)";
     private static final String USER_SELECT = "SELECT * FROM lp_users WHERE uuid=?";

@@ -41,7 +41,6 @@ import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.api.ApiProvider;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
-import me.lucko.luckperms.common.commands.ConsecutiveExecutor;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.LPConfiguration;
 import me.lucko.luckperms.common.constants.Permission;
@@ -104,7 +103,6 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private ApiProvider apiProvider;
     private Logger log;
     private Importer importer;
-    private ConsecutiveExecutor consecutiveExecutor;
     private DefaultsProvider defaultsProvider;
     private ChildPermissionProvider childPermissionProvider;
     private LocaleManager localeManager;
@@ -218,7 +216,6 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         groupManager = new GenericGroupManager(this);
         trackManager = new GenericTrackManager();
         importer = new Importer(commandManager);
-        consecutiveExecutor = new ConsecutiveExecutor(commandManager);
         calculatorFactory = new BukkitCalculatorFactory(this);
         cachedStateManager = new CachedStateManager(this);
 
@@ -255,7 +252,6 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
         // register tasks
         getServer().getScheduler().runTaskTimerAsynchronously(this, new ExpireTemporaryTask(this), 60L, 60L);
-        getServer().getScheduler().runTaskTimerAsynchronously(this, consecutiveExecutor, 20L, 20L);
 
         // register permissions
         registerPermissions(getConfiguration().isCommandsAllowOp() ? PermissionDefault.OP : PermissionDefault.FALSE);
