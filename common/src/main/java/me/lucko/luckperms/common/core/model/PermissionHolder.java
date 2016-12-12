@@ -948,6 +948,36 @@ public abstract class PermissionHolder {
         invalidateCache(true);
     }
 
+    public void clearParents() {
+        synchronized (nodes) {
+            boolean b = nodes.removeIf(Node::isGroupNode);
+            if (!b) {
+                return;
+            }
+        }
+        if (this instanceof User) {
+            plugin.getUserManager().giveDefaultIfNeeded((User) this, false);
+        }
+        invalidateCache(true);
+    }
+
+    public void clearParents(String server) {
+        String finalServer = Optional.ofNullable(server).orElse("global");
+
+        synchronized (nodes) {
+            boolean b = nodes.removeIf(n ->
+                    n.isGroupNode() && n.getServer().orElse("global").equalsIgnoreCase(finalServer)
+            );
+            if (!b) {
+                return;
+            }
+        }
+        if (this instanceof User) {
+            plugin.getUserManager().giveDefaultIfNeeded((User) this, false);
+        }
+        invalidateCache(true);
+    }
+
     public void clearParents(String server, String world) {
         String finalServer = Optional.ofNullable(server).orElse("global");
         String finalWorld = Optional.ofNullable(world).orElse("null");
@@ -961,6 +991,9 @@ public abstract class PermissionHolder {
             if (!b) {
                 return;
             }
+        }
+        if (this instanceof User) {
+            plugin.getUserManager().giveDefaultIfNeeded((User) this, false);
         }
         invalidateCache(true);
     }

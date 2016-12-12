@@ -200,6 +200,8 @@ public enum Message {
 
     CLEAR_SUCCESS("&b{0}&a's permissions were cleared. (&b{1}&a nodes were removed.)", true),
     CLEAR_SUCCESS_SINGULAR("&b{0}&a's permissions were cleared. (&b{1}&a node was removed.)", true),
+    PARENT_CLEAR_SUCCESS("&b{0}&a's parents were cleared. (&b{1}&a nodes were removed.)", true),
+    PARENT_CLEAR_SUCCESS_SINGULAR("&b{0}&a's parents were cleared. (&b{1}&a node was removed.)", true),
     META_CLEAR_SUCCESS("&b{0}&a's meta was cleared. (&b{1}&a nodes were removed.)", true),
     META_CLEAR_SUCCESS_SINGULAR("&b{0}&a's meta was cleared. (&b{1}&a node was removed.)", true),
     ILLEGAL_DATE_ERROR("Could not parse date '{0}'.", true),
