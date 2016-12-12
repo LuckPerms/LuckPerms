@@ -47,10 +47,10 @@ import static me.lucko.luckperms.common.commands.SubCommand.getPermissionTabComp
 public class PermissionSetTemp extends SharedSubCommand {
     public PermissionSetTemp() {
         super("settemp", "Sets a permission for the object temporarily", Permission.USER_PERM_SETTEMP,
-                Permission.GROUP_PERM_SETTEMP, Predicates.notInRange(3, 5),
+                Permission.GROUP_PERM_SETTEMP, Predicates.notInRange(2, 5),
                 Arg.list(
                         Arg.create("node", true, "the permission node to set"),
-                        Arg.create("true|false", true, "the value of the node"),
+                        Arg.create("true|false", false, "the value of the node"),
                         Arg.create("duration", true, "the duration until the permission node expires"),
                         Arg.create("server", false, "the server to add the permission node on"),
                         Arg.create("world", false, "the world to add the permission node on")

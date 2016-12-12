@@ -66,11 +66,15 @@ public class ArgumentUtils {
     }
 
     public static boolean handleBoolean(int index, List<String> args) throws ArgumentException {
-        String bool = args.get(index);
-        if (!bool.equalsIgnoreCase("true") && !bool.equalsIgnoreCase("false")) {
-            throw new DetailedUsageException();
+        if (index < args.size()) {
+            String bool = args.get(index);
+            if (bool.equalsIgnoreCase("true") || bool.equalsIgnoreCase("false")) {
+                return Boolean.parseBoolean(bool);
+            }
         }
-        return Boolean.parseBoolean(bool);
+
+        args.add(index, "true");
+        return true;
     }
 
     public static String handleServer(int index, List<String> args) throws ArgumentException {

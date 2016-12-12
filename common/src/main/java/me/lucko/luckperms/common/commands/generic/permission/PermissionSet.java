@@ -46,10 +46,10 @@ import static me.lucko.luckperms.common.commands.SubCommand.getPermissionTabComp
 public class PermissionSet extends SharedSubCommand {
     public PermissionSet() {
         super("set", "Sets a permission for the object", Permission.USER_PERM_SET, Permission.GROUP_PERM_SET,
-                Predicates.notInRange(2, 4),
+                Predicates.notInRange(1, 4),
                 Arg.list(
                         Arg.create("node", true, "the permission node to set"),
-                        Arg.create("true|false", true, "the value of the node"),
+                        Arg.create("true|false", false, "the value of the node"),
                         Arg.create("server", false, "the server to add the permission node on"),
                         Arg.create("world", false, "the world to add the permission node on")
                 )
