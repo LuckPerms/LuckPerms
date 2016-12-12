@@ -31,8 +31,10 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.model.Group;
+import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 
@@ -42,8 +44,12 @@ import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 import java.util.UUID;
 
 import static me.lucko.luckperms.sponge.migration.MigrationUtils.migrateSubject;
@@ -77,6 +83,8 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
 
         MigrationUtils.migrateSubjectData(pexService.getDefaults().getSubjectData(), lpService.getDefaults().getSubjectData());
 
+        Map<String, TreeMap<Integer, String>> tracks = new HashMap<>();
+
         // Migrate groups
         log.info("PermissionsEx Migration: Starting group migration.");
         int groupCount = 0;
@@ -90,8 +98,40 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             Group group = plugin.getGroupManager().getIfLoaded(pexName);
             migrateSubject(pexGroup, group);
             plugin.getStorage().saveGroup(group);
+
+            // Pull track data
+            Optional<String> track = pexGroup.getOption("rank-ladder");
+            Optional<String> pos = pexGroup.getOption("rank");
+            if (track.isPresent() && pos.isPresent()) {
+                String trackName = track.get().toLowerCase();
+                try {
+                    int rank = Integer.parseInt(pos.get());
+                    if (!tracks.containsKey(trackName)) {
+                        tracks.put(trackName, new TreeMap<>(Comparator.reverseOrder()));
+                    }
+
+                    tracks.get(trackName).put(rank, pexName);
+                } catch (NumberFormatException ignored) {}
+            }
+
         }
         log.info("PermissionsEx Migration: Migrated " + groupCount + " groups");
+
+        // Migrate tracks
+        log.info("PermissionsEx Migration: Starting track migration.");
+        for (Map.Entry<String, TreeMap<Integer, String>> e : tracks.entrySet()) {
+            plugin.getStorage().createAndLoadTrack(e.getKey()).join();
+            Track track = plugin.getTrackManager().getIfLoaded(e.getKey());
+            for (String groupName : e.getValue().values()) {
+                Group group = plugin.getGroupManager().getIfLoaded(groupName);
+                if (group != null) {
+                    try {
+                        track.appendGroup(group);
+                    } catch (ObjectAlreadyHasException ignored) {}
+                }
+            }
+        }
+        log.info("PermissionsEx Migration: Migrated " + tracks.size() + " tracks");
 
         // Migrate users
         log.info("PermissionsEx Migration: Starting user migration.");
