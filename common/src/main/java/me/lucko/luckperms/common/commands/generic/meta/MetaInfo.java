@@ -54,7 +54,7 @@ public class MetaInfo extends SharedSubCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         SortedSet<Map.Entry<Integer, LocalizedNode>> prefixes = new TreeSet<>(Util.META_COMPARATOR.reversed());
         SortedSet<Map.Entry<Integer, LocalizedNode>> suffixes = new TreeSet<>(Util.META_COMPARATOR.reversed());
         Set<LocalizedNode> meta = new HashSet<>();

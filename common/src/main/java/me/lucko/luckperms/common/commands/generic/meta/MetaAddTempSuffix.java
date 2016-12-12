@@ -57,7 +57,7 @@ public class MetaAddTempSuffix extends SharedSubCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         int priority = ArgumentUtils.handlePriority(0, args);
         String suffix = ArgumentUtils.handleNodeWithoutCheck(1, args);
         long duration = ArgumentUtils.handleDuration(2, args);

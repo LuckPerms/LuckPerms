@@ -57,7 +57,7 @@ public class MetaRemoveSuffix extends SharedSubCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         int priority = ArgumentUtils.handlePriority(0, args);
         String suffix = ArgumentUtils.handleNodeWithoutCheck(1, args);
         String server = ArgumentUtils.handleServer(2, args);

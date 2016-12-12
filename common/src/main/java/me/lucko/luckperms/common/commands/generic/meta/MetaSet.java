@@ -55,7 +55,7 @@ public class MetaSet extends SharedSubCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         String key = args.get(0);
         String value = args.get(1);
 

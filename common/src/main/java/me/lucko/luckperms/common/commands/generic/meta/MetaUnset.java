@@ -52,7 +52,7 @@ public class MetaUnset extends SharedSubCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         String key = args.get(0);
         String server = ArgumentUtils.handleServer(1, args);
         String world = ArgumentUtils.handleWorld(2, args);

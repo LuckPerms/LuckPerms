@@ -58,7 +58,7 @@ public class ParentAddTemp extends SharedSubCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         String groupName = ArgumentUtils.handleName(0, args);
         long duration = ArgumentUtils.handleDuration(1, args);
         String server = ArgumentUtils.handleServer(2, args);

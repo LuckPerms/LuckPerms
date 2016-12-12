@@ -50,7 +50,7 @@ public class MetaClear extends SharedSubCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         int before = holder.getNodes().size();
 
         String server = ArgumentUtils.handleServer(0, args);

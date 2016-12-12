@@ -27,10 +27,16 @@ import lombok.experimental.UtilityClass;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.common.commands.misc.ExportCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Patterns;
+import me.lucko.luckperms.common.core.model.PermissionHolder;
+import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.utils.DateUtil;
+
+import io.github.mkremins.fanciful.ChatColor;
+import io.github.mkremins.fanciful.FancyMessage;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -124,8 +130,33 @@ public class Util {
         return sb.toString();
     }
 
+    public static FancyMessage appendNodeContextDescription(Node node, FancyMessage message) {
+        if (node.isServerSpecific()) {
+            message = message.then(" ");
+            message = appendContext("server", node.getServer().get(), message);
+        }
+        if (node.isWorldSpecific()) {
+            message = message.then(" ");
+            message = appendContext("world", node.getWorld().get(), message);
+        }
+        for (Map.Entry<String, String> c : node.getContexts().toSet()) {
+            message = message.then(" ");
+            message = appendContext(c.getKey(), c.getValue(), message);
+        }
+
+        return message;
+    }
+
     public static String contextToString(String key, String value) {
         return "&8(&7" + key + "=&f" + value + "&8)";
+    }
+
+    public static FancyMessage appendContext(String key, String value, FancyMessage message) {
+        return message
+                .then("(").color(ChatColor.getByChar('8'))
+                .then(key + "=").color(ChatColor.getByChar('7'))
+                .then(value).color(ChatColor.getByChar('f'))
+                .then(")").color(ChatColor.getByChar('8'));
     }
 
     public static String permNodesToString(SortedSet<LocalizedNode> nodes) {
@@ -140,6 +171,42 @@ public class Util {
                     .append("\n");
         }
         return sb.length() == 0 ? "&3None" : sb.toString();
+    }
+
+    private static FancyMessage makeFancy(PermissionHolder holder, String label, Node node, FancyMessage message) {
+        message = message.formattedTooltip(
+                new FancyMessage("> ")
+                        .color(ChatColor.getByChar('3'))
+                        .then(node.getPermission())
+                        .color(node.getValue() ? ChatColor.getByChar('a') : ChatColor.getByChar('c')),
+                new FancyMessage(" "),
+                new FancyMessage("Click to remove this node from " + holder.getFriendlyName()).color(ChatColor.getByChar('7'))
+        );
+
+        boolean group = !(holder instanceof User);
+        String command = ExportCommand.nodeToString(node, group ? holder.getObjectName() : holder.getFriendlyName(), group)
+                .replace("/luckperms", "/" + label)
+                .replace("set", "unset")
+                .replace(" true", "")
+                .replace(" false", "");
+
+        message = message.suggest(command);
+        return message;
+    }
+
+    public static FancyMessage permNodesToMessage(SortedSet<LocalizedNode> nodes, PermissionHolder holder, String label) {
+        FancyMessage message = new FancyMessage("");
+
+        boolean found = false;
+        for (Node node : nodes) {
+            if (node.isTemporary()) continue;
+            found = true;
+            message = makeFancy(holder, label, node, message.then("> ").color(ChatColor.getByChar('3')));
+            message = makeFancy(holder, label, node, message.then(Util.color(node.getPermission())).color(node.getValue() ? ChatColor.getByChar('a') : ChatColor.getByChar('c')));
+            message = makeFancy(holder, label, node, appendNodeContextDescription(node, message));
+            message = message.then("\n");
+        }
+        return !found ? new FancyMessage("None").color(ChatColor.getByChar('3')) : message;
     }
 
     public static String tempNodesToString(SortedSet<LocalizedNode> nodes) {

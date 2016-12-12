@@ -160,7 +160,7 @@ public enum Message {
     DELETE_TRACK_ERROR("There was an error whilst deleting the track.", true),
     TRACKS_LIST("&aTracks: {0}", true),
 
-    LISTNODES("&b{0}'s Nodes:" + "\n" + "{1}", true),
+    LISTNODES("&b{0}'s Nodes:", true),
     LISTNODES_TEMP("&b{0}'s Temporary Nodes:" + "\n" + "{1}", true),
     LISTPARENTS("&b{0}'s Parent Groups:" + "\n" + "{1}", true),
     LISTPARENTS_TEMP("&b{0}'s Temporary Parent Groups:" + "\n" + "{1}", true),

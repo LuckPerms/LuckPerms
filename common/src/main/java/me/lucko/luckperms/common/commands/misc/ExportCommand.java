@@ -57,7 +57,7 @@ public class ExportCommand extends SingleCommand {
         }
     }
 
-    private static String nodeToString(Node node, String id, boolean group) {
+    public static String nodeToString(Node node, String id, boolean group) {
         StringBuilder sb = new StringBuilder();
         sb.append("/luckperms ").append(group ? "group " : "user ").append(id).append(" ");
 

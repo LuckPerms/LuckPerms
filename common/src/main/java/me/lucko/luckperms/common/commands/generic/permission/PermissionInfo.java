@@ -41,8 +41,9 @@ public class PermissionInfo extends SharedSubCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) throws CommandException {
-        Message.LISTNODES.send(sender, holder.getFriendlyName(), Util.permNodesToString(holder.getPermissions(false)));
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
+        Message.LISTNODES.send(sender, holder.getFriendlyName());
+        sender.sendMessage(Util.permNodesToMessage(holder.getPermissions(false), holder, label));
         Message.LISTNODES_TEMP.send(sender, holder.getFriendlyName(), Util.tempNodesToString(holder.getPermissions(false)));
         return CommandResult.SUCCESS;
     }

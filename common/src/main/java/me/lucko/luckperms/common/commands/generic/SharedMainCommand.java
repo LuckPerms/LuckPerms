@@ -122,7 +122,7 @@ public class SharedMainCommand<T extends PermissionHolder> extends SubCommand<T>
 
         CommandResult result;
         try {
-            result = sub.execute(plugin, sender, t, strippedArgs);
+            result = sub.execute(plugin, sender, t, strippedArgs, label);
         } catch (CommandException e) {
             result = handleException(e, sender, sub);
         }

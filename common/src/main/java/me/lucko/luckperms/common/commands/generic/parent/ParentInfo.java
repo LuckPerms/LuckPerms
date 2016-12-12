@@ -42,7 +42,7 @@ public class ParentInfo extends SharedSubCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         Message.LISTPARENTS.send(sender, holder.getFriendlyName(), Util.permGroupsToString(holder.getPermissions(false)));
         Message.LISTPARENTS_TEMP.send(sender, holder.getFriendlyName(), Util.tempGroupsToString(holder.getPermissions(false)));
         return CommandResult.SUCCESS;

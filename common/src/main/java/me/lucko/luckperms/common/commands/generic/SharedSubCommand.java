@@ -82,7 +82,7 @@ public abstract class SharedSubCommand {
     private final Predicate<? super Integer> isArgumentInvalid;
     private final ImmutableList<Arg> args;
 
-    public abstract CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args) throws CommandException;
+    public abstract CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException;
 
     public List<String> onTabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         return Collections.emptyList();
