@@ -76,7 +76,8 @@ public class MySQLBacking extends SQLBacking {
         config.addDataSourceProperty("cacheServerConfiguration", true);
         config.addDataSourceProperty("elideSetAutoCommits", true);
         config.addDataSourceProperty("useLocalSessionState", true);
-        config.setLeakDetectionThreshold(5000);
+        config.setConnectionTimeout(10000); // 10 seconds
+        config.setLeakDetectionThreshold(5000); // 5 seconds
 
         hikari = new HikariDataSource(config);
 
