@@ -71,6 +71,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -290,13 +291,17 @@ public abstract class PermissionHolder {
         );
 
         TreeSet<Map.Entry<Integer, Node>> sortedParents = new TreeSet<>(Util.META_COMPARATOR.reversed());
-        Map<String, Integer> weights = plugin.getConfiguration().getGroupWeights();
         for (Node node : parents) {
-            if (weights.containsKey(node.getGroupName().toLowerCase())) {
-                sortedParents.add(Maps.immutableEntry(weights.get(node.getGroupName().toLowerCase()), node));
-            } else {
-                sortedParents.add(Maps.immutableEntry(0, node));
+            Group group = plugin.getGroupManager().getIfLoaded(node.getGroupName());
+            if (group != null) {
+                OptionalInt weight = group.getWeight();
+                if (weight.isPresent()) {
+                    sortedParents.add(Maps.immutableEntry(weight.getAsInt(), node));
+                    continue;
+                }
             }
+
+            sortedParents.add(Maps.immutableEntry(0, node));
         }
 
         for (Map.Entry<Integer, Node> e : sortedParents) {
@@ -513,13 +518,17 @@ public abstract class PermissionHolder {
         );
 
         TreeSet<Map.Entry<Integer, Node>> sortedParents = new TreeSet<>(Util.META_COMPARATOR.reversed());
-        Map<String, Integer> weights = plugin.getConfiguration().getGroupWeights();
         for (Node node : parents) {
-            if (weights.containsKey(node.getGroupName().toLowerCase())) {
-                sortedParents.add(Maps.immutableEntry(weights.get(node.getGroupName().toLowerCase()), node));
-            } else {
-                sortedParents.add(Maps.immutableEntry(0, node));
+            Group group = plugin.getGroupManager().getIfLoaded(node.getGroupName());
+            if (group != null) {
+                OptionalInt weight = group.getWeight();
+                if (weight.isPresent()) {
+                    sortedParents.add(Maps.immutableEntry(weight.getAsInt(), node));
+                    continue;
+                }
             }
+
+            sortedParents.add(Maps.immutableEntry(0, node));
         }
 
         for (Map.Entry<Integer, Node> e : sortedParents) {
@@ -1088,6 +1097,26 @@ public abstract class PermissionHolder {
 
     public Set<Node> getMetaNodes() {
         return getPermissions(false).stream().filter(Node::isMeta).collect(Collectors.toSet());
+    }
+
+    public OptionalInt getWeight() {
+        OptionalInt weight = OptionalInt.empty();
+        try {
+            weight = getNodes().stream()
+                    .filter(n -> n.getPermission().startsWith("group.weight."))
+                    .map(n -> n.getPermission().substring("group.weight.".length()))
+                    .mapToInt(Integer::parseInt)
+                    .max();
+        } catch (Exception ignored) {}
+
+        if (!weight.isPresent()) {
+            Integer w = plugin.getConfiguration().getGroupWeights().get(getObjectName().toLowerCase());
+            if (w != null) {
+                weight = OptionalInt.of(w);
+            }
+        }
+
+        return weight;
     }
 
     /**
