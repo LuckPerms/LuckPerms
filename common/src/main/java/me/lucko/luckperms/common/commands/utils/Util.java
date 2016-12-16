@@ -159,7 +159,7 @@ public class Util {
                 .then(")").color(ChatColor.getByChar('8'));
     }
 
-    public static String permNodesToString(SortedSet<LocalizedNode> nodes) {
+    public static String permNodesToStringConsole(SortedSet<LocalizedNode> nodes) {
         StringBuilder sb = new StringBuilder();
         for (Node node : nodes) {
             if (node.isTemporary()) continue;
@@ -167,6 +167,7 @@ public class Util {
             sb.append("&3> ")
                     .append(node.getValue() ? "&a" : "&c")
                     .append(node.getPermission())
+                    .append(" ").append("&7(").append(node.getValue()).append("&7)")
                     .append(getNodeContextDescription(node))
                     .append("\n");
         }

@@ -28,6 +28,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.generic.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
@@ -43,7 +44,12 @@ public class PermissionInfo extends SharedSubCommand {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         Message.LISTNODES.send(sender, holder.getFriendlyName());
-        sender.sendMessage(Util.permNodesToMessage(holder.getPermissions(false), holder, label));
+        if (sender.getUuid().equals(Constants.getConsoleUUID())) {
+            sender.sendMessage(Util.color(Util.permNodesToStringConsole(holder.getPermissions(false))));
+        } else {
+            sender.sendMessage(Util.permNodesToMessage(holder.getPermissions(false), holder, label));
+        }
+
         Message.LISTNODES_TEMP.send(sender, holder.getFriendlyName(), Util.tempNodesToString(holder.getPermissions(false)));
         return CommandResult.SUCCESS;
     }
