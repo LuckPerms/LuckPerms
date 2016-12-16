@@ -35,14 +35,16 @@ public class AutoOPListener implements ContextListener<Player> {
 
     @Override
     public void onContextChange(Player subject, Map.Entry<String, String> before, Map.Entry<String, String> current) throws Exception {
-        LPPermissible permissible = Injector.getPermissible(subject.getUniqueId());
-        if (permissible == null) {
-            return;
-        }
+        try {
+            LPPermissible permissible = Injector.getPermissible(subject.getUniqueId());
+            if (permissible == null) {
+                return;
+            }
 
-        Map<String, Boolean> backing = permissible.getUser().getUserData().getPermissionData(permissible.calculateContexts()).getImmutableBacking();
-        boolean op = Optional.ofNullable(backing.get("luckperms.autoop")).orElse(false);
-        subject.setOp(op);
+            Map<String, Boolean> backing = permissible.getUser().getUserData().getPermissionData(permissible.calculateContexts()).getImmutableBacking();
+            boolean op = Optional.ofNullable(backing.get("luckperms.autoop")).orElse(false);
+            subject.setOp(op);
+        } catch (Exception ignored) {}
     }
 
 }
