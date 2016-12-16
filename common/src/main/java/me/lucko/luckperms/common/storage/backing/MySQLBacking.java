@@ -32,6 +32,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.concurrent.TimeUnit;
 
 public class MySQLBacking extends SQLBacking {
 
@@ -76,8 +77,10 @@ public class MySQLBacking extends SQLBacking {
         config.addDataSourceProperty("cacheServerConfiguration", true);
         config.addDataSourceProperty("elideSetAutoCommits", true);
         config.addDataSourceProperty("useLocalSessionState", true);
-        config.setConnectionTimeout(10000); // 10 seconds
-        config.setLeakDetectionThreshold(5000); // 5 seconds
+        config.setConnectionTimeout(TimeUnit.SECONDS.toMillis(10)); // 10000
+        config.setLeakDetectionThreshold(TimeUnit.SECONDS.toMillis(5)); // 5000
+        config.setValidationTimeout(TimeUnit.SECONDS.toMillis(3)); // 3000
+        config.setConnectionTestQuery("/* LuckPerms ping */ SELECT 1");
 
         hikari = new HikariDataSource(config);
 
