@@ -207,7 +207,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         PluginCommand main = getServer().getPluginCommand("luckperms");
         main.setExecutor(commandManager);
         main.setTabCompleter(commandManager);
-        main.setAliases(Arrays.asList("perms", "lp", "permissions", "p", "perm"));
+        main.setAliases(Arrays.asList("perms", "lp", "permissions", "perm"));
 
         // load internal managers
         getLog().info("Loading internal permission managers...");
