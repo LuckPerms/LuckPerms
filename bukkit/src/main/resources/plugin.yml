@@ -15,7 +15,7 @@ loadbefore: [Vault]
 commands:
   luckperms:
     description: Manage permissions
-    aliases: [perms, permissions, lp, p, perm]
+    aliases: [perms, permissions, lp, perm]
 
 
 # Permissions are registered programmatically instead of here.
