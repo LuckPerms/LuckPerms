@@ -22,17 +22,22 @@
 
 package me.lucko.luckperms.common.commands.group;
 
+import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.model.Group;
+import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class GroupInfo extends SubCommand<Group> {
     public GroupInfo() {
@@ -41,13 +46,40 @@ public class GroupInfo extends SubCommand<Group> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) throws CommandException {
-        Message.GROUP_INFO.send(sender,
+        Message.GROUP_INFO_GENERAL.send(sender,
+                group.getId(),
                 group.getDisplayName(),
                 group.getPermanentNodes().size(),
                 group.getTemporaryNodes().size(),
-                label,
-                group.getName()
+                group.getPrefixNodes().size(),
+                group.getSuffixNodes().size(),
+                group.getMetaNodes().size()
         );
+
+        Set<Node> parents = group.getPermissions(false).stream()
+                .filter(Node::isGroupNode)
+                .filter(Node::isPermanent)
+                .collect(Collectors.toSet());
+
+        Set<Node> tempParents = group.getPermissions(false).stream()
+                .filter(Node::isGroupNode)
+                .filter(Node::isTemporary)
+                .collect(Collectors.toSet());
+
+        if (!parents.isEmpty()) {
+            Message.INFO_PARENT_HEADER.send(sender);
+            for (Node node : parents) {
+                Message.EMPTY.send(sender, "&f-    &3> &f" + node.getGroupName() + Util.getNodeContextDescription(node));
+            }
+        }
+
+        if (!tempParents.isEmpty()) {
+            Message.INFO_TEMP_PARENT_HEADER.send(sender);
+            for (Node node : tempParents) {
+                Message.EMPTY.send(sender, "&f-    &3> &f" + node.getGroupName() + Util.getNodeContextDescription(node));
+                Message.EMPTY.send(sender, "&f-    &2-    expires in " + DateUtil.formatDateDiff(node.getExpiryUnixTime()));
+            }
+        }
         return CommandResult.SUCCESS;
     }
 }

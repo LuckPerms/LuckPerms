@@ -245,8 +245,8 @@ user-info-data: >
   {PREFIX}&f-    &3Current Contexts: {1}\n
   {PREFIX}&f-    &3Current Prefix: {2}\n
   {PREFIX}&f-    &3Current Suffix: {3}
-user-info-parent-header: "&f- &aParent Groups:"
-user-info-temp-parent-header: "&f- &aTemporary Parent Groups:"
+info-parent-header: "&f- &aParent Groups:"
+info-temp-parent-header: "&f- &aTemporary Parent Groups:"
 user-getuuid: "&bThe UUID of &b{0}&b is &b{1}&b."
 user-removegroup-error-primary: "You cannot remove a user from their primary group."
 user-primarygroup-success: "&b{0}&a's primary group was set to &b{1}&a."
@@ -270,11 +270,15 @@ user-demote-error-malformed: >
 user-demote-error-not-contain-group: "Demotions are done based on primary groups. The users primary group is not on the track specified."
 user-showpos: "&aShowing &b{0}&a's position on track &b{1}&a.{2}"
 
-group-info: >
+user-info-general: >
   {PREFIX}&b&l> &bGroup Info: &f{0}\n
-  {PREFIX}&f- &3Permissions: &6{1}\n
-  {PREFIX}&f- &3Temporary Permissions: &6{2}\n
-  {PREFIX}&f- &3Use &b/{3} group {4} permission info &3to see all permissions.
+  {PREFIX}&f- &3Diaplay Name: &f{1}\n
+  {PREFIX}&f- &aCounts:\n
+  {PREFIX}&f-    &3Permissions: &a{2}\n
+  {PREFIX}&f-    &3Temporary Permissions: &a{3}\n
+  {PREFIX}&f-    &3Prefixes: &a{4}\n
+  {PREFIX}&f-    &3Suffixes: &a{5}\n
+  {PREFIX}&f-    &3Meta: &a{6}
 
 track-info: >
   {PREFIX}&b&l> &bShowing Track: &f{0}\n
