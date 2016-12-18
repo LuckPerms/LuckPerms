@@ -25,9 +25,14 @@ package me.lucko.luckperms.common.core;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 
+import java.text.CollationKey;
 import java.text.Collator;
 import java.util.Comparator;
 import java.util.Locale;
@@ -35,16 +40,21 @@ import java.util.Locale;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PriorityComparator implements Comparator<LocalizedNode> {
     private static final PriorityComparator INSTANCE = new PriorityComparator();
-
     public static Comparator<LocalizedNode> get() {
         return INSTANCE;
     }
-
     public static Comparator<LocalizedNode> reverse() {
         return INSTANCE.reversed();
     }
 
     private final Collator collator = Collator.getInstance(Locale.ENGLISH);
+    private final LoadingCache<String, CollationKey> collationKeyCache = CacheBuilder.newBuilder()
+            .build(new CacheLoader<String, CollationKey>() {
+                @Override
+                public CollationKey load(String s) throws Exception {
+                    return collator.getCollationKey(s);
+                }
+            });
 
     @Override
     public int compare(LocalizedNode one, LocalizedNode two) {
@@ -87,6 +97,14 @@ public class PriorityComparator implements Comparator<LocalizedNode> {
             return o1.getWildcardLevel() > o2.getWildcardLevel() ? 1 : -1;
         }
 
-        return collator.compare(o1.getPermission(), o2.getPermission()) == 1 ? -1 : 1;
+        try {
+            CollationKey o1c = collationKeyCache.get(o1.getPermission());
+            CollationKey o2c = collationKeyCache.get(o2.getPermission());
+            return o1c.compareTo(o2c) == 1 ? -1 : 1;
+        } catch (Exception e) {
+            // ignored
+        }
+
+        return 1;
     }
 }
