@@ -24,6 +24,9 @@ package me.lucko.luckperms.sponge.model;
 
 import lombok.Getter;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.api.LocalizedNode;
@@ -73,11 +76,48 @@ public class SpongeGroup extends Group {
         @Getter
         private final LuckPermsSubjectData transientSubjectData;
 
+        private final LoadingCache<ContextSet, NodeTree> permissionCache = CacheBuilder.newBuilder()
+                .build(new CacheLoader<ContextSet, NodeTree>() {
+                    @Override
+                    public NodeTree load(ContextSet contexts) {
+                        // TODO move this away from NodeTree
+                        Map<String, Boolean> permissions = parent.getAllNodesFiltered(ExtractedContexts.generate(plugin.getService().calculateContexts(contexts))).stream()
+                                .map(LocalizedNode::getNode)
+                                .collect(Collectors.toMap(Node::getPermission, Node::getValue));
+
+                        return NodeTree.of(permissions);
+                    }
+                });
+
+        private final LoadingCache<ContextSet, Set<SubjectReference>> parentCache = CacheBuilder.newBuilder()
+                .build(new CacheLoader<ContextSet, Set<SubjectReference>>() {
+                    @Override
+                    public Set<SubjectReference> load(ContextSet contexts) {
+                        Set<SubjectReference> subjects = parent.getAllNodesFiltered(ExtractedContexts.generate(plugin.getService().calculateContexts(contexts))).stream()
+                                .map(LocalizedNode::getNode)
+                                .filter(Node::isGroupNode)
+                                .map(Node::getGroupName)
+                                .map(s -> plugin.getService().getGroupSubjects().get(s))
+                                .map(LPSubject::toReference)
+                                .collect(Collectors.toSet());
+
+                        subjects.addAll(plugin.getService().getGroupSubjects().getDefaultSubject().resolve(getService()).getParents(contexts));
+                        subjects.addAll(plugin.getService().getDefaults().getParents(contexts));
+
+                        return ImmutableSet.copyOf(subjects);
+                    }
+                });
+
         private GroupSubject(LPSpongePlugin plugin, SpongeGroup parent) {
             this.parent = parent;
             this.plugin = plugin;
             this.subjectData = new LuckPermsSubjectData(true, plugin.getService(), parent, this);
             this.transientSubjectData = new LuckPermsSubjectData(false, plugin.getService(), parent, this);
+
+            parent.getStateListeners().add(() -> {
+                permissionCache.invalidateAll();
+                parentCache.invalidateAll();
+            });
         }
 
         @Override
@@ -108,12 +148,8 @@ public class SpongeGroup extends Group {
         @Override
         public Tristate getPermissionValue(ContextSet contexts, String permission) {
             try (Timing ignored = plugin.getTimings().time(LPTiming.GROUP_GET_PERMISSION_VALUE)) {
-                // TODO move this away from NodeTree
-                Map<String, Boolean> permissions = parent.getAllNodesFiltered(ExtractedContexts.generate(plugin.getService().calculateContexts(contexts))).stream()
-                        .map(LocalizedNode::getNode)
-                        .collect(Collectors.toMap(Node::getPermission, Node::getValue));
-
-                Tristate t = Util.convertTristate(NodeTree.of(permissions).get(permission));
+                NodeTree nt = permissionCache.getUnchecked(contexts);
+                Tristate t = Util.convertTristate(nt.get(permission));
                 if (t != Tristate.UNDEFINED) {
                     return t;
                 }
@@ -138,18 +174,7 @@ public class SpongeGroup extends Group {
         @Override
         public Set<SubjectReference> getParents(ContextSet contexts) {
             try (Timing ignored = plugin.getTimings().time(LPTiming.GROUP_GET_PARENTS)) {
-                Set<SubjectReference> subjects = parent.getAllNodesFiltered(ExtractedContexts.generate(plugin.getService().calculateContexts(contexts))).stream()
-                        .map(LocalizedNode::getNode)
-                        .filter(Node::isGroupNode)
-                        .map(Node::getGroupName)
-                        .map(s -> plugin.getService().getGroupSubjects().get(s))
-                        .map(LPSubject::toReference)
-                        .collect(Collectors.toSet());
-
-                subjects.addAll(plugin.getService().getGroupSubjects().getDefaultSubject().resolve(getService()).getParents(contexts));
-                subjects.addAll(plugin.getService().getDefaults().getParents(contexts));
-
-                return ImmutableSet.copyOf(subjects);
+                return parentCache.getUnchecked(contexts);
             }
         }
 

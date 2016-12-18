@@ -116,6 +116,9 @@ public abstract class PermissionHolder {
     @Getter
     private final Lock ioLock = new ReentrantLock();
 
+    @Getter
+    private final Set<Runnable> stateListeners = ConcurrentHashMap.newKeySet();
+
 
     /*
      * CACHES - cache the result of a number of methods in this class, until they are invalidated.
@@ -177,6 +180,15 @@ public abstract class PermissionHolder {
         getAllNodesCache.invalidateAll();
         getAllNodesFilteredCache.invalidateAll();
         exportNodesCache.invalidateAll();
+
+        // Invalidate listeners
+        for (Runnable r : stateListeners) {
+            try {
+                r.run();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
         // Get previous references
         Set<HolderReference> refs = plugin.getCachedStateManager().getInheritances(toReference());
