@@ -54,17 +54,21 @@ public class MySQLBacking extends SQLBacking {
     public void init() {
         HikariConfig config = new HikariConfig();
 
-        final String address = configuration.getAddress();
-        final String database = configuration.getDatabase();
-        final String username = configuration.getUsername();
-        final String password = configuration.getPassword();
+        String address = configuration.getAddress();
+        String[] addressSplit = address.split(":");
+        address = addressSplit[0];
+        String port = addressSplit.length > 1 ? addressSplit[1] : "3306";
+
+        String database = configuration.getDatabase();
+        String username = configuration.getUsername();
+        String password = configuration.getPassword();
 
         config.setMaximumPoolSize(configuration.getPoolSize());
 
         config.setPoolName("luckperms");
         config.setDataSourceClassName("com.mysql.jdbc.jdbc2.optional.MysqlDataSource");
-        config.addDataSourceProperty("serverName", address.split(":")[0]);
-        config.addDataSourceProperty("port", address.split(":")[1]);
+        config.addDataSourceProperty("serverName", address);
+        config.addDataSourceProperty("port", port);
         config.addDataSourceProperty("databaseName", database);
         config.addDataSourceProperty("user", username);
         config.addDataSourceProperty("password", password);
