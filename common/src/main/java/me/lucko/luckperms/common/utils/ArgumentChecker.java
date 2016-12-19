@@ -40,6 +40,10 @@ public class ArgumentChecker {
         return (s.length() > 36 || Patterns.NON_ALPHA_NUMERIC.matcher(s).find());
     }
 
+    public static boolean checkNameWithSpace(String s) {
+        return (s.length() > 36 || Patterns.NON_ALPHA_NUMERIC_SPACE.matcher(s).find());
+    }
+
     public static boolean checkServer(String s) {
         return s.toLowerCase().startsWith("r=") || (s.startsWith("(") && s.endsWith(")") && s.contains("|")) || Patterns.NON_ALPHA_NUMERIC.matcher(s).find();
     }

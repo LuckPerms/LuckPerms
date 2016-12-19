@@ -57,7 +57,7 @@ public class ParentRemove extends SharedSubCommand {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
-        String groupName = ArgumentUtils.handleName(0, args);
+        String groupName = ArgumentUtils.handleNameWithSpace(0, args);
         String server = ArgumentUtils.handleServer(1, args);
         String world = ArgumentUtils.handleWorld(2, args);
 

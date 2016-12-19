@@ -65,6 +65,14 @@ public class ArgumentUtils {
         return groupName;
     }
 
+    public static String handleNameWithSpace(int index, List<String> args) throws ArgumentException {
+        String groupName = args.get(index).toLowerCase();
+        if (ArgumentChecker.checkNameWithSpace(groupName)) {
+            throw new DetailedUsageException();
+        }
+        return groupName;
+    }
+
     public static boolean handleBoolean(int index, List<String> args) throws ArgumentException {
         if (index < args.size()) {
             String bool = args.get(index);
