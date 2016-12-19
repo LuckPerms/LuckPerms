@@ -1115,8 +1115,8 @@ public abstract class PermissionHolder {
         OptionalInt weight = OptionalInt.empty();
         try {
             weight = getNodes().stream()
-                    .filter(n -> n.getPermission().startsWith("group.weight."))
-                    .map(n -> n.getPermission().substring("group.weight.".length()))
+                    .filter(n -> n.getPermission().startsWith("weight."))
+                    .map(n -> n.getPermission().substring("weight.".length()))
                     .mapToInt(Integer::parseInt)
                     .max();
         } catch (Exception ignored) {}
