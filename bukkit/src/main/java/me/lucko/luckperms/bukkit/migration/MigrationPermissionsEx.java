@@ -253,7 +253,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             }
 
             userCount++;
-            plugin.getStorage().loadUser(u, "null").join();
+            plugin.getStorage().loadUser(u, user.getName()).join();
             User lpUser = plugin.getUserManager().get(u);
 
             try {
