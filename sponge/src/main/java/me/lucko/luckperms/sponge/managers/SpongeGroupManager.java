@@ -133,7 +133,7 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
 
         try (Timing ignored = plugin.getTimings().time(LPTiming.GROUP_COLLECTION_GET)) {
             id = id.toLowerCase();
-            if (ArgumentChecker.checkName(id)) {
+            if (ArgumentChecker.checkNameWithSpace(id)) {
                 plugin.getLog().warn("Couldn't get group subject for id: " + id + " (invalid name)");
                 return plugin.getService().getFallbackGroupSubjects().get(id); // fallback to transient collection
             }
