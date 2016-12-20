@@ -71,18 +71,18 @@ public class DebugHandler {
 
                 try {
                     Thread.sleep(200);
-                } catch (InterruptedException ignored) {
-                }
+                } catch (InterruptedException ignored) {}
             }
         });
     }
 
     private void handleOutput(String checked, String node, Tristate value) {
+        paste:
         if (pasted) {
             for (String filter : pastedFilters) {
                 if (node.toLowerCase().startsWith(filter.toLowerCase())) continue;
                 if (checked.equalsIgnoreCase(filter)) continue;
-                break;
+                break paste;
             }
             
             pastedList.add("`" + checked + "` - " + node + " - **" + value.toString() + "**   ");
