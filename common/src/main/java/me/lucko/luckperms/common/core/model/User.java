@@ -149,4 +149,12 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
         super.clearNodes();
         getPlugin().getUserManager().giveDefaultIfNeeded(this, false);
     }
+
+    public void cleanup() {
+        UserCache cache = userData;
+        if (cache != null) {
+            cache.cleanup();
+        }
+        forceCleanup();
+    }
 }

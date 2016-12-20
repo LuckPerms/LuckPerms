@@ -51,6 +51,7 @@ import me.lucko.luckperms.common.managers.impl.GenericUserManager;
 import me.lucko.luckperms.common.messaging.RedisMessaging;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.StorageFactory;
+import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.tasks.UpdateTask;
 import me.lucko.luckperms.common.utils.BufferedRequest;
@@ -187,6 +188,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
         // register tasks
         getProxy().getScheduler().schedule(this, new ExpireTemporaryTask(this), 3L, 3L, TimeUnit.SECONDS);
+        getProxy().getScheduler().schedule(this, new CacheHousekeepingTask(this), 2L, 2L, TimeUnit.MINUTES);
 
         getLog().info("Successfully loaded.");
     }

@@ -51,6 +51,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A simple persistable Subject implementation
@@ -66,6 +67,7 @@ public class PersistedSubject implements LPSubject {
     private final CalculatedSubjectData transientSubjectData;
 
     private final LoadingCache<PermissionLookup, Tristate> permissionLookupCache = CacheBuilder.newBuilder()
+            .expireAfterAccess(20, TimeUnit.MINUTES)
             .build(new CacheLoader<PermissionLookup, Tristate>() {
                 @Override
                 public Tristate load(PermissionLookup lookup) {
@@ -73,6 +75,7 @@ public class PersistedSubject implements LPSubject {
                 }
             });
     private final LoadingCache<ImmutableContextSet, Set<SubjectReference>> parentLookupCache = CacheBuilder.newBuilder()
+            .expireAfterAccess(20, TimeUnit.MINUTES)
             .build(new CacheLoader<ImmutableContextSet, Set<SubjectReference>>() {
                 @Override
                 public Set<SubjectReference> load(ImmutableContextSet contexts) {
@@ -80,6 +83,7 @@ public class PersistedSubject implements LPSubject {
                 }
             });
     private final LoadingCache<OptionLookup, Optional<String>> optionLookupCache = CacheBuilder.newBuilder()
+            .expireAfterAccess(20, TimeUnit.MINUTES)
             .build(new CacheLoader<OptionLookup, Optional<String>>() {
                 @Override
                 public Optional<String> load(OptionLookup lookup) {
@@ -113,6 +117,15 @@ public class PersistedSubject implements LPSubject {
         service.getLocalPermissionCaches().add(permissionLookupCache);
         service.getLocalParentCaches().add(parentLookupCache);
         service.getLocalOptionCaches().add(optionLookupCache);
+    }
+
+    @Override
+    public void performCleanup() {
+        this.subjectData.cleanup();
+        this.transientSubjectData.cleanup();
+        this.permissionLookupCache.cleanUp();
+        this.parentLookupCache.cleanUp();
+        this.optionLookupCache.cleanUp();
     }
 
     public void loadData(SubjectDataHolder dataHolder) {

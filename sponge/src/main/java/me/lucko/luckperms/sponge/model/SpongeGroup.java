@@ -54,6 +54,7 @@ import co.aikar.timings.Timing;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class SpongeGroup extends Group {
@@ -77,6 +78,7 @@ public class SpongeGroup extends Group {
         private final LuckPermsSubjectData transientSubjectData;
 
         private final LoadingCache<ContextSet, NodeTree> permissionCache = CacheBuilder.newBuilder()
+                .expireAfterAccess(10, TimeUnit.MINUTES)
                 .build(new CacheLoader<ContextSet, NodeTree>() {
                     @Override
                     public NodeTree load(ContextSet contexts) {
@@ -90,6 +92,7 @@ public class SpongeGroup extends Group {
                 });
 
         private final LoadingCache<ContextSet, Set<SubjectReference>> parentCache = CacheBuilder.newBuilder()
+                .expireAfterWrite(10, TimeUnit.MINUTES)
                 .build(new CacheLoader<ContextSet, Set<SubjectReference>>() {
                     @Override
                     public Set<SubjectReference> load(ContextSet contexts) {
@@ -118,6 +121,12 @@ public class SpongeGroup extends Group {
                 permissionCache.invalidateAll();
                 parentCache.invalidateAll();
             });
+        }
+
+        @Override
+        public void performCleanup() {
+            permissionCache.cleanUp();
+            parentCache.cleanUp();
         }
 
         @Override

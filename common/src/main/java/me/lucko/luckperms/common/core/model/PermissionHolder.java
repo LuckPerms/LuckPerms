@@ -76,6 +76,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
@@ -142,6 +143,7 @@ public abstract class PermissionHolder {
     /* External Caches - may depend on the state of other instances. */
 
     private LoadingCache<GetAllNodesHolder, SortedSet<LocalizedNode>> getAllNodesCache = CacheBuilder.newBuilder()
+            .expireAfterAccess(10, TimeUnit.MINUTES)
             .build(new CacheLoader<GetAllNodesHolder, SortedSet<LocalizedNode>>() {
                 @Override
                 public SortedSet<LocalizedNode> load(GetAllNodesHolder getAllNodesHolder) {
@@ -149,6 +151,7 @@ public abstract class PermissionHolder {
                 }
             });
     private LoadingCache<ExtractedContexts, Set<LocalizedNode>> getAllNodesFilteredCache = CacheBuilder.newBuilder()
+            .expireAfterAccess(10, TimeUnit.MINUTES)
             .build(new CacheLoader<ExtractedContexts, Set<LocalizedNode>>() {
                 @Override
                 public Set<LocalizedNode> load(ExtractedContexts extractedContexts) throws Exception {
@@ -156,6 +159,7 @@ public abstract class PermissionHolder {
                 }
             });
     private LoadingCache<ExportNodesHolder, Map<String, Boolean>> exportNodesCache = CacheBuilder.newBuilder()
+            .expireAfterAccess(10, TimeUnit.MINUTES)
             .build(new CacheLoader<ExportNodesHolder, Map<String, Boolean>>() {
                 @Override
                 public Map<String, Boolean> load(ExportNodesHolder exportNodesHolder) throws Exception {
@@ -166,6 +170,12 @@ public abstract class PermissionHolder {
 
 
     /* Caching apply methods. Are just called by the caching instances to gather data about the instance. */
+
+    protected void forceCleanup() {
+        getAllNodesCache.cleanUp();
+        getAllNodesFilteredCache.cleanUp();
+        exportNodesCache.cleanUp();
+    }
 
     private void invalidateCache(boolean enduring) {
         if (enduring) {

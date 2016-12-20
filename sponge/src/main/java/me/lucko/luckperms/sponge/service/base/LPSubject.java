@@ -60,6 +60,10 @@ public interface LPSubject extends Subject {
 
     LuckPermsService getService();
 
+    default void performCleanup() {
+
+    }
+
     default SubjectReference toReference() {
         return SubjectReference.of(getParentCollection().getCollection(), getIdentifier());
     }

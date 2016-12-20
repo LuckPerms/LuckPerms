@@ -41,6 +41,7 @@ import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.utils.ExtractedContexts;
 
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Holds an easily accessible cache of a user's data in a number of contexts
@@ -59,6 +60,7 @@ public class UserCache implements UserData {
     private final CalculatorFactory calculatorFactory;
 
     private final LoadingCache<Contexts, PermissionCache> permission = CacheBuilder.newBuilder()
+            .expireAfterAccess(10, TimeUnit.MINUTES)
             .build(new CacheLoader<Contexts, PermissionCache>() {
                 @Override
                 public PermissionCache load(Contexts contexts) {
@@ -73,6 +75,7 @@ public class UserCache implements UserData {
             });
 
     private final LoadingCache<Contexts, MetaCache> meta = CacheBuilder.newBuilder()
+            .expireAfterAccess(10, TimeUnit.MINUTES)
             .build(new CacheLoader<Contexts, MetaCache>() {
                 @Override
                 public MetaCache load(Contexts contexts) {
@@ -151,6 +154,11 @@ public class UserCache implements UserData {
     @Override
     public void invalidatePermissionCalculators() {
         permission.asMap().values().forEach(PermissionData::invalidateCache);
+    }
+
+    public void cleanup() {
+        permission.cleanUp();
+        meta.cleanUp();
     }
 
 }

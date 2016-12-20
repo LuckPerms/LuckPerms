@@ -48,6 +48,7 @@ import me.lucko.luckperms.common.managers.impl.GenericTrackManager;
 import me.lucko.luckperms.common.messaging.RedisMessaging;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.StorageFactory;
+import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.tasks.UpdateTask;
 import me.lucko.luckperms.common.utils.BufferedRequest;
@@ -60,6 +61,7 @@ import me.lucko.luckperms.sponge.contexts.WorldCalculator;
 import me.lucko.luckperms.sponge.managers.SpongeGroupManager;
 import me.lucko.luckperms.sponge.managers.SpongeUserManager;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
+import me.lucko.luckperms.sponge.service.ServiceCacheHousekeepingTask;
 import me.lucko.luckperms.sponge.timings.LPTimings;
 import me.lucko.luckperms.sponge.utils.VersionData;
 
@@ -250,6 +252,9 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
         // register tasks
         scheduler.createTaskBuilder().async().intervalTicks(60L).execute(new ExpireTemporaryTask(this)).submit(this);
+        scheduler.createTaskBuilder().async().intervalTicks(2400L).execute(new CacheHousekeepingTask(this)).submit(this);
+        scheduler.createTaskBuilder().async().intervalTicks(2400L).execute(new ServiceCacheHousekeepingTask(service)).submit(this);
+        scheduler.createTaskBuilder().async().intervalTicks(2400L).execute(() -> userManager.performCleanup()).submit(this);
 
         getLog().info("Successfully loaded.");
     }

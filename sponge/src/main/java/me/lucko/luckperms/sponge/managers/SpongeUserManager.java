@@ -52,6 +52,7 @@ import org.spongepowered.api.service.permission.PermissionService;
 import co.aikar.timings.Timing;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -83,6 +84,17 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
                 new SpongeUser(id.getUuid(), id.getUsername(), plugin);
     }
 
+    public void performCleanup() {
+        Set<UserIdentifier> set = new HashSet<>();
+        for (Map.Entry<UserIdentifier, SpongeUser> user : objects.asMap().entrySet()) {
+            if (user.getValue().getSpongeData().shouldCleanup()) {
+                set.add(user.getKey());
+            }
+        }
+
+        objects.invalidateAll(set);
+    }
+
     /* ------------------------------------------
      * Manager methods
      * ------------------------------------------ */
@@ -109,7 +121,6 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
 
     @Override
     public void unload(User t) {
-        // TODO override
         if (t != null) {
             objects.invalidate(t.getId());
         }

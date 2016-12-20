@@ -52,6 +52,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 @RequiredArgsConstructor
 public class CalculatedSubjectData implements LPSubjectData {
@@ -102,6 +103,7 @@ public class CalculatedSubjectData implements LPSubjectData {
 
     private final Map<ContextSet, Map<String, Boolean>> permissions = new ConcurrentHashMap<>();
     private final LoadingCache<ContextSet, CalculatorHolder> permissionCache = CacheBuilder.newBuilder()
+            .expireAfterAccess(10, TimeUnit.MINUTES)
             .build(new CacheLoader<ContextSet, CalculatorHolder>() {
                 @Override
                 public CalculatorHolder load(ContextSet contexts) {
@@ -118,6 +120,10 @@ public class CalculatedSubjectData implements LPSubjectData {
 
     private final Map<ContextSet, Set<SubjectReference>> parents = new ConcurrentHashMap<>();
     private final Map<ContextSet, Map<String, String>> options = new ConcurrentHashMap<>();
+
+    public void cleanup() {
+        permissionCache.cleanUp();
+    }
 
     public Tristate getPermissionValue(ContextSet contexts, String permission) {
         return permissionCache.getUnchecked(contexts).getCalculator().getPermissionValue(permission);

@@ -58,6 +58,7 @@ import me.lucko.luckperms.common.managers.impl.GenericUserManager;
 import me.lucko.luckperms.common.messaging.RedisMessaging;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.StorageFactory;
+import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.tasks.UpdateTask;
 import me.lucko.luckperms.common.utils.BufferedRequest;
@@ -252,6 +253,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
         // register tasks
         getServer().getScheduler().runTaskTimerAsynchronously(this, new ExpireTemporaryTask(this), 60L, 60L);
+        getServer().getScheduler().runTaskTimerAsynchronously(this, new CacheHousekeepingTask(this), 2400L, 2400L);
 
         // register permissions
         registerPermissions(getConfiguration().isCommandsAllowOp() ? PermissionDefault.OP : PermissionDefault.FALSE);

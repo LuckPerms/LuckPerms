@@ -74,11 +74,23 @@ public class SpongeUser extends User {
         @Getter
         private final LuckPermsSubjectData transientSubjectData;
 
+        private long lastUse = System.currentTimeMillis();
+
         private UserSubject(LPSpongePlugin plugin, SpongeUser parent) {
             this.parent = parent;
             this.plugin = plugin;
             this.subjectData = new LuckPermsSubjectData(true, plugin.getService(), parent, this);
             this.transientSubjectData = new LuckPermsSubjectData(false, plugin.getService(), parent, this);
+        }
+
+        private void logUsage() {
+            lastUse = System.currentTimeMillis();
+        }
+
+        public boolean shouldCleanup() {
+            long now = System.currentTimeMillis();
+            // Expire after 10 minutes of idle
+            return (now - lastUse) > 600000;
         }
 
         private boolean hasData() {
@@ -114,6 +126,7 @@ public class SpongeUser extends User {
 
         @Override
         public Tristate getPermissionValue(ContextSet contexts, String permission) {
+            logUsage();
             try (Timing ignored = plugin.getTimings().time(LPTiming.USER_GET_PERMISSION_VALUE)) {
                 if (!hasData()) {
                     return Tristate.UNDEFINED;
@@ -125,6 +138,7 @@ public class SpongeUser extends User {
 
         @Override
         public boolean isChildOf(ContextSet contexts, SubjectReference parent) {
+            logUsage();
             try (Timing ignored = plugin.getTimings().time(LPTiming.USER_IS_CHILD_OF)) {
                 return parent.getCollection().equals(PermissionService.SUBJECTS_GROUP) && getPermissionValue(contexts, "group." + parent.getIdentifier()).asBoolean();
             }
@@ -132,6 +146,7 @@ public class SpongeUser extends User {
 
         @Override
         public Set<SubjectReference> getParents(ContextSet contexts) {
+            logUsage();
             try (Timing ignored = plugin.getTimings().time(LPTiming.USER_GET_PARENTS)) {
                 ImmutableSet.Builder<SubjectReference> subjects = ImmutableSet.builder();
 
@@ -157,6 +172,7 @@ public class SpongeUser extends User {
 
         @Override
         public Optional<String> getOption(ContextSet contexts, String s) {
+            logUsage();
             try (Timing ignored = plugin.getTimings().time(LPTiming.USER_GET_OPTION)) {
                 if (hasData()) {
                     MetaData data = parent.getUserData().getMetaData(plugin.getService().calculateContexts(contexts));
@@ -188,6 +204,7 @@ public class SpongeUser extends User {
 
         @Override
         public ContextSet getActiveContextSet() {
+            logUsage();
             try (Timing ignored = plugin.getTimings().time(LPTiming.USER_GET_ACTIVE_CONTEXTS)) {
                 return plugin.getContextManager().getApplicableContext(this);
             }
