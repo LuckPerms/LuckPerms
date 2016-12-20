@@ -24,6 +24,8 @@ package me.lucko.luckperms.common.commands.utils;
 
 import lombok.experimental.UtilityClass;
 
+import com.google.common.collect.Maps;
+
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
@@ -40,6 +42,7 @@ import io.github.mkremins.fanciful.FancyMessage;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -195,19 +198,52 @@ public class Util {
         return message;
     }
 
-    public static FancyMessage permNodesToMessage(SortedSet<LocalizedNode> nodes, PermissionHolder holder, String label) {
-        FancyMessage message = new FancyMessage("");
-
-        boolean found = false;
+    public static Map.Entry<FancyMessage, String> permNodesToMessage(SortedSet<LocalizedNode> nodes, PermissionHolder holder, String label, int pageNumber) {
+        List<Node> l = new ArrayList<>();
         for (Node node : nodes) {
-            if (node.isTemporary()) continue;
-            found = true;
+            if (!node.isTemporary()) {
+                l.add(node);
+            }
+        }
+
+        if (l.isEmpty()) {
+            return Maps.immutableEntry(new FancyMessage("None").color(ChatColor.getByChar('3')), null);
+        }
+
+        int index = pageNumber - 1;
+        List<List<Node>> pages = divideList(l, 20);
+
+        if ((index < 0 || index >= pages.size())) {
+            pageNumber = 1;
+            index = 0;
+        }
+
+        List<Node> page = pages.get(index);
+
+        FancyMessage message = new FancyMessage("");
+        String title = "&7(showing page &f" + pageNumber + "&7 of &f" + pages.size() + "&7 - &f" + nodes.size() + "&7 entries)";
+
+        for (Node node : page) {
             message = makeFancy(holder, label, node, message.then("> ").color(ChatColor.getByChar('3')));
             message = makeFancy(holder, label, node, message.then(Util.color(node.getPermission())).color(node.getValue() ? ChatColor.getByChar('a') : ChatColor.getByChar('c')));
             message = makeFancy(holder, label, node, appendNodeContextDescription(node, message));
             message = message.then("\n");
         }
-        return !found ? new FancyMessage("None").color(ChatColor.getByChar('3')) : message;
+
+        return Maps.immutableEntry(message, title);
+    }
+
+    private static <T> List<List<T>> divideList(List<T> source, int size) {
+        List<List<T>> lists = new ArrayList<>();
+        Iterator<T> it = source.iterator();
+        while (it.hasNext()) {
+            List<T> subList = new ArrayList<>();
+            for (int i = 0; it.hasNext() && i < size; i++) {
+                subList.add(it.next());
+            }
+            lists.add(subList);
+        }
+        return lists;
     }
 
     public static String tempNodesToString(SortedSet<LocalizedNode> nodes) {

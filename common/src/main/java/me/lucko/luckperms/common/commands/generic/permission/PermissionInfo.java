@@ -23,6 +23,7 @@
 package me.lucko.luckperms.common.commands.generic.permission;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.generic.SharedSubCommand;
@@ -34,20 +35,44 @@ import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.utils.Predicates;
 
+import io.github.mkremins.fanciful.FancyMessage;
+
 import java.util.List;
+import java.util.Map;
 
 public class PermissionInfo extends SharedSubCommand {
     public PermissionInfo() {
-        super("info", "Lists the permission nodes the object has", Permission.USER_PERM_INFO, Permission.GROUP_PERM_INFO, Predicates.alwaysFalse(), null);
+        super("info", "Lists the permission nodes the object has", Permission.USER_PERM_INFO,
+                Permission.GROUP_PERM_INFO, Predicates.alwaysFalse(),
+                Arg.list(
+                        Arg.create("page", false, "the page to view")
+                )
+        );
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
-        Message.LISTNODES.send(sender, holder.getFriendlyName());
         if (sender.getUuid().equals(Constants.getConsoleUUID())) {
+            Message.LISTNODES.send(sender, holder.getFriendlyName());
             sender.sendMessage(Util.color(Util.permNodesToStringConsole(holder.getPermissions(false))));
         } else {
-            sender.sendMessage(Util.permNodesToMessage(holder.getPermissions(false), holder, label));
+            int page = 1;
+            if (args.size() > 0) {
+                try {
+                    page = Integer.parseInt(args.get(0));
+                } catch (NumberFormatException e) {
+                    // ignored
+                }
+            }
+
+            Map.Entry<FancyMessage, String> ent = Util.permNodesToMessage(holder.getPermissions(false), holder, label, page);
+            if (ent.getValue() != null) {
+                Message.LISTNODES_WITH_PAGE.send(sender, holder.getFriendlyName(), ent.getValue());
+                sender.sendMessage(ent.getKey());
+            } else {
+                Message.LISTNODES.send(sender, holder.getFriendlyName());
+                sender.sendMessage(ent.getKey());
+            }
         }
 
         Message.LISTNODES_TEMP.send(sender, holder.getFriendlyName(), Util.tempNodesToString(holder.getPermissions(false)));
