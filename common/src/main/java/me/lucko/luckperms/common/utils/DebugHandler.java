@@ -79,20 +79,20 @@ public class DebugHandler {
 
     private void handleOutput(String checked, String node, Tristate value) {
         if (pasted) {
+            for (String filter : pastedFilters) {
+                if (node.toLowerCase().startsWith(filter.toLowerCase())) continue;
+                if (checked.equalsIgnoreCase(filter)) continue;
+                break;
+            }
+            
             pastedList.add("`" + checked + "` - " + node + " - **" + value.toString() + "**   ");
         }
 
         all:
         for (Map.Entry<Receiver, List<String>> e : listeners.entrySet()) {
             for (String filter : e.getValue()) {
-                if (node.toLowerCase().startsWith(filter.toLowerCase())) {
-                    continue;
-                }
-
-                if (checked.equalsIgnoreCase(filter)) {
-                    continue;
-                }
-
+                if (node.toLowerCase().startsWith(filter.toLowerCase())) continue;
+                if (checked.equalsIgnoreCase(filter)) continue;
                 continue all;
             }
 
