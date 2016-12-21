@@ -366,4 +366,11 @@ public interface LuckPermsPlugin {
      */
     BufferedRequest<Void> getUpdateTaskBuffer();
 
+    /**
+     * Called at the end of the sync task.
+     */
+    default void onPostUpdate() {
+
+    }
+
 }

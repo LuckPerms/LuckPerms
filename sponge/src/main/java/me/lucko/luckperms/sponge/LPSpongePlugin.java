@@ -62,6 +62,8 @@ import me.lucko.luckperms.sponge.managers.SpongeGroupManager;
 import me.lucko.luckperms.sponge.managers.SpongeUserManager;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.ServiceCacheHousekeepingTask;
+import me.lucko.luckperms.sponge.service.base.LPSubjectCollection;
+import me.lucko.luckperms.sponge.service.persisted.PersistedCollection;
 import me.lucko.luckperms.sponge.timings.LPTimings;
 import me.lucko.luckperms.sponge.utils.VersionData;
 
@@ -303,6 +305,16 @@ public class LPSpongePlugin implements LuckPermsPlugin {
                 registerPermission(p, node);
             }
         }
+    }
+
+    @Override
+    public void onPostUpdate() {
+        for (LPSubjectCollection collection : service.getCollections().values()) {
+            if (collection instanceof PersistedCollection) {
+                ((PersistedCollection) collection).loadAll();
+            }
+        }
+        service.invalidateParentCaches();
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")

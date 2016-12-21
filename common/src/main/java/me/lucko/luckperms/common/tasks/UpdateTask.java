@@ -54,6 +54,8 @@ public class UpdateTask implements Runnable {
         // Refresh all online users.
         plugin.getUserManager().updateAllUsers();
 
+        plugin.onPostUpdate();
+
         plugin.getApiProvider().fireEvent(new PostSyncEvent());
     }
 }
