@@ -47,17 +47,23 @@ public class SubjectDataHolder {
     public SubjectDataHolder(Map<ImmutableContextSet, Map<String, String>> options, Map<ImmutableContextSet, Map<String, Boolean>> permissions, Map<ImmutableContextSet, Set<SubjectReference>> parents) {
         this.options = new HashMap<>();
         for (Map.Entry<ImmutableContextSet, Map<String, String>> e : options.entrySet()) {
-            this.options.put(e.getKey().toMap(), new HashMap<>(e.getValue()));
+            if (!e.getValue().isEmpty()) {
+                this.options.put(e.getKey().toMap(), new HashMap<>(e.getValue()));
+            }
         }
 
         this.permissions = new HashMap<>();
         for (Map.Entry<ImmutableContextSet, Map<String, Boolean>> e : permissions.entrySet()) {
-            this.permissions.put(e.getKey().toMap(), new HashMap<>(e.getValue()));
+            if (!e.getValue().isEmpty()) {
+                this.permissions.put(e.getKey().toMap(), new HashMap<>(e.getValue()));
+            }
         }
 
         this.parents = new HashMap<>();
         for (Map.Entry<ImmutableContextSet, Set<SubjectReference>> e : parents.entrySet()) {
-            this.parents.put(e.getKey().toMap(), e.getValue().stream().map(SubjectReference::serialize).collect(Collectors.toList()));
+            if (!e.getValue().isEmpty()) {
+                this.parents.put(e.getKey().toMap(), e.getValue().stream().map(SubjectReference::serialize).collect(Collectors.toList()));
+            }
         }
     }
 
