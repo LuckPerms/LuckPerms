@@ -45,6 +45,7 @@ public class GroupMainCommand extends MainCommand<Group> {
                 .add(new CommandPermission<>(false))
                 .add(new CommandParent<>(false))
                 .add(new CommandMeta<>(false))
+                .add(new GroupSetWeight())
                 .add(new HolderShowTracks<>(false))
                 .add(new GroupBulkChange())
                 .add(new GroupClear())

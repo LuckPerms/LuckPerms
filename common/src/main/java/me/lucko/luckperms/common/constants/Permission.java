@@ -115,6 +115,7 @@ public enum Permission {
     GROUP_META_REMOVETEMP_SUFFIX(l("meta.removetempsuffix", "removetempsuffix"), Type.GROUP),
     GROUP_META_CLEAR(l("meta.clear", "clearmeta"), Type.GROUP),
     GROUP_SHOWTRACKS(l("showtracks"), Type.GROUP),
+    GROUP_SETWEIGHT(l("setweight"), Type.GROUP),
     GROUP_BULKCHANGE(l("bulkchange"), Type.GROUP),
     GROUP_CLEAR(l("clear"), Type.GROUP),
     GROUP_RENAME(l("rename"), Type.GROUP),

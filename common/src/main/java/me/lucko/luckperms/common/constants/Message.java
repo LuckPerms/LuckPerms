@@ -334,6 +334,7 @@ public enum Message {
              "{PREFIX}&f-    &3Meta: &a{6}",
             false
     ),
+    GROUP_SET_WEIGHT("&aSet weight to &b{0}&a for group &b{1}&a.", true),
 
     TRACK_INFO(
             "{PREFIX}&b&l> &bShowing Track: &f{0}" + "\n" +
