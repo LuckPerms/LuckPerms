@@ -49,6 +49,7 @@ public class GroupInfo extends SubCommand<Group> {
         Message.GROUP_INFO_GENERAL.send(sender,
                 group.getId(),
                 group.getDisplayName(),
+                group.getWeight().isPresent() ? group.getWeight().getAsInt() : "None",
                 group.getPermanentNodes().size(),
                 group.getTemporaryNodes().size(),
                 group.getPrefixNodes().size(),

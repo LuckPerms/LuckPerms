@@ -325,13 +325,14 @@ public enum Message {
 
     GROUP_INFO_GENERAL(
             "{PREFIX}&b&l> &bGroup Info: &f{0}" + "\n" +
-             "{PREFIX}&f- &3Display Name: &f{1}" + "\n" +
-             "{PREFIX}&f- &aCounts:" + "\n" +
-             "{PREFIX}&f-    &3Permissions: &a{2}" + "\n" +
-             "{PREFIX}&f-    &3Temporary Permissions: &a{3}" + "\n" +
-             "{PREFIX}&f-    &3Prefixes: &a{4}" + "\n" +
-             "{PREFIX}&f-    &3Suffixes: &a{5}" + "\n" +
-             "{PREFIX}&f-    &3Meta: &a{6}",
+            "{PREFIX}&f- &3Display Name: &f{1}" + "\n" +
+            "{PREFIX}&f- &3Weight: &f{2}" + "\n" +
+            "{PREFIX}&f- &aCounts:" + "\n" +
+            "{PREFIX}&f-    &3Permissions: &a{3}" + "\n" +
+            "{PREFIX}&f-    &3Temporary Permissions: &a{4}" + "\n" +
+            "{PREFIX}&f-    &3Prefixes: &a{5}" + "\n" +
+            "{PREFIX}&f-    &3Suffixes: &a{6}" + "\n" +
+            "{PREFIX}&f-    &3Meta: &a{7}",
             false
     ),
     GROUP_SET_WEIGHT("&aSet weight to &b{0}&a for group &b{1}&a.", true),
