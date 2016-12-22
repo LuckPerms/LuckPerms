@@ -35,7 +35,7 @@ import me.lucko.luckperms.common.utils.ExtractedContexts;
 @ToString
 @EqualsAndHashCode
 @AllArgsConstructor(staticName = "of")
-public class GetAllNodesHolder {
+public class GetAllNodesRequest {
 
     private final ImmutableList<String> excludedGroups;
     private final ExtractedContexts contexts;
