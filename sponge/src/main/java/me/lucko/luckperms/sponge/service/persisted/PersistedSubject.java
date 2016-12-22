@@ -114,6 +114,8 @@ public class PersistedSubject implements LPSubject {
         this.subjectData = new PersistedSubjectData(service, "local:" + containingCollection.getIdentifier() + "/" + identifier + "(p)", this);
         this.transientSubjectData = new CalculatedSubjectData(this, service, "local:" + containingCollection.getIdentifier() + "/" + identifier + "(t)");
 
+        service.getLocalDataCaches().add(subjectData);
+        service.getLocalDataCaches().add(transientSubjectData);
         service.getLocalPermissionCaches().add(permissionLookupCache);
         service.getLocalParentCaches().add(parentLookupCache);
         service.getLocalOptionCaches().add(optionLookupCache);

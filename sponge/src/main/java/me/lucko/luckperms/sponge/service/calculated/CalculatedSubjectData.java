@@ -125,6 +125,10 @@ public class CalculatedSubjectData implements LPSubjectData {
         permissionCache.cleanUp();
     }
 
+    public void invalidateLookupCache() {
+        permissionCache.invalidateAll();
+    }
+
     public Tristate getPermissionValue(ContextSet contexts, String permission) {
         return permissionCache.getUnchecked(contexts).getCalculator().getPermissionValue(permission);
     }

@@ -51,6 +51,7 @@ import me.lucko.luckperms.sponge.managers.SpongeUserManager;
 import me.lucko.luckperms.sponge.service.base.LPSubject;
 import me.lucko.luckperms.sponge.service.base.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.base.LPSubjectData;
+import me.lucko.luckperms.sponge.service.calculated.CalculatedSubjectData;
 import me.lucko.luckperms.sponge.service.calculated.OptionLookup;
 import me.lucko.luckperms.sponge.service.calculated.PermissionLookup;
 import me.lucko.luckperms.sponge.service.persisted.PersistedCollection;
@@ -96,6 +97,7 @@ public class LuckPermsService implements PermissionService {
     private final Set<LoadingCache<PermissionLookup, Tristate>> localPermissionCaches;
     private final Set<LoadingCache<ImmutableContextSet, Set<SubjectReference>>> localParentCaches;
     private final Set<LoadingCache<OptionLookup, Optional<String>>> localOptionCaches;
+    private final Set<CalculatedSubjectData> localDataCaches;
 
     @Getter(value = AccessLevel.NONE)
     private final LoadingCache<String, LPSubjectCollection> collections = CacheBuilder.newBuilder()
@@ -117,6 +119,7 @@ public class LuckPermsService implements PermissionService {
         localPermissionCaches = Collections.newSetFromMap(new MapMaker().weakKeys().makeMap());
         localParentCaches = Collections.newSetFromMap(new MapMaker().weakKeys().makeMap());
         localOptionCaches = Collections.newSetFromMap(new MapMaker().weakKeys().makeMap());
+        localDataCaches = Collections.newSetFromMap(new MapMaker().weakKeys().makeMap());
 
         storage = new SubjectStorage(new File(plugin.getDataFolder(), "local"));
 
@@ -218,6 +221,9 @@ public class LuckPermsService implements PermissionService {
     public void invalidatePermissionCaches() {
         for (LoadingCache<PermissionLookup, Tristate> c : localPermissionCaches) {
             c.invalidateAll();
+        }
+        for (CalculatedSubjectData subjectData : localDataCaches) {
+            subjectData.invalidateLookupCache();
         }
     }
 
