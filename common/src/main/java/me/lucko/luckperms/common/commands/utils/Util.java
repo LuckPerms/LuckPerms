@@ -211,7 +211,7 @@ public class Util {
         }
 
         int index = pageNumber - 1;
-        List<List<Node>> pages = divideList(l, 20);
+        List<List<Node>> pages = divideList(l, 15);
 
         if ((index < 0 || index >= pages.size())) {
             pageNumber = 1;
