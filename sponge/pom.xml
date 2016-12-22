@@ -56,34 +56,6 @@
                                     <pattern>io.github.mkremins.fanciful</pattern>
                                     <shadedPattern>me.lucko.luckperms.lib.fanciful</shadedPattern>
                                 </relocation>
-                                <relocation>
-                                    <pattern>com.zaxxer.hikari</pattern>
-                                    <shadedPattern>me.lucko.luckperms.lib.hikari</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>com.mongodb</pattern>
-                                    <shadedPattern>me.lucko.luckperms.lib.mongodb</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>org.bson</pattern>
-                                    <shadedPattern>me.lucko.luckperms.lib.bson</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>com.mysql</pattern>
-                                    <shadedPattern>me.lucko.luckperms.lib.mysql</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>redis.clients.jedis</pattern>
-                                    <shadedPattern>me.lucko.luckperms.lib.jedis.jedis</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>redis.clients.util</pattern>
-                                    <shadedPattern>me.lucko.luckperms.lib.jedis.util</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>org.apache.commons.pool2</pattern>
-                                    <shadedPattern>me.lucko.luckperms.lib.jedis.pool2</shadedPattern>
-                                </relocation>
                             </relocations>
                         </configuration>
                     </execution>
@@ -140,13 +112,6 @@
             <groupId>me.lucko.luckperms</groupId>
             <artifactId>luckperms-api</artifactId>
             <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <!-- MySQL -->
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.40</version>
             <scope>compile</scope>
         </dependency>
         <!-- Lombok -->

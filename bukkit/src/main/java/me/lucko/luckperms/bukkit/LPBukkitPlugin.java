@@ -49,6 +49,7 @@ import me.lucko.luckperms.common.contexts.ServerCalculator;
 import me.lucko.luckperms.common.core.UuidCache;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.Importer;
+import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.managers.UserManager;
@@ -58,6 +59,7 @@ import me.lucko.luckperms.common.managers.impl.GenericUserManager;
 import me.lucko.luckperms.common.messaging.RedisMessaging;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.StorageFactory;
+import me.lucko.luckperms.common.storage.StorageType;
 import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.tasks.UpdateTask;
@@ -132,6 +134,9 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         getLog().info("Loading configuration...");
         configuration = new BukkitConfig(this);
 
+        Set<StorageType> storageTypes = StorageFactory.getRequiredTypes(this, StorageType.H2);
+        DependencyManager.loadDependencies(this, storageTypes);
+
         // setup the Bukkit defaults hook
         defaultsProvider = new DefaultsProvider();
         childPermissionProvider = new ChildPermissionProvider();
@@ -166,7 +171,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         pm.registerEvents(new BukkitListener(this), this);
 
         // initialise datastore
-        storage = StorageFactory.getInstance(this, "h2");
+        storage = StorageFactory.getInstance(this, StorageType.H2);
 
         // initialise redis
         if (getConfiguration().isRedisEnabled()) {

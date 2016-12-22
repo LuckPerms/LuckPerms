@@ -44,47 +44,10 @@
                         </goals>
                         <configuration>
                             <minimizeJar>false</minimizeJar>
-                            <artifactSet>
-                                <excludes>
-                                    <exclude>org.xerial:*</exclude>
-                                </excludes>
-                            </artifactSet>
                             <relocations>
                                 <relocation>
                                     <pattern>io.github.mkremins.fanciful</pattern>
                                     <shadedPattern>me.lucko.luckperms.lib.fanciful</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>org.slf4j</pattern>
-                                    <shadedPattern>me.lucko.luckperms.lib.slf4j</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>com.zaxxer.hikari</pattern>
-                                    <shadedPattern>me.lucko.luckperms.lib.hikari</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>com.mongodb</pattern>
-                                    <shadedPattern>me.lucko.luckperms.lib.mongodb</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>org.bson</pattern>
-                                    <shadedPattern>me.lucko.luckperms.lib.bson</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>org.h2</pattern>
-                                    <shadedPattern>me.lucko.luckperms.lib.h2</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>redis.clients.jedis</pattern>
-                                    <shadedPattern>me.lucko.luckperms.lib.jedis.jedis</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>redis.clients.util</pattern>
-                                    <shadedPattern>me.lucko.luckperms.lib.jedis.util</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>org.apache.commons.pool2</pattern>
-                                    <shadedPattern>me.lucko.luckperms.lib.jedis.pool2</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
@@ -137,6 +100,13 @@
             <artifactId>luckperms-api</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
+        </dependency>
+        <!-- HikariCP - needed as source -->
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>2.5.1</version>
+            <scope>provided</scope>
         </dependency>
         <!-- Lombok -->
         <dependency>

@@ -34,6 +34,7 @@ import me.lucko.luckperms.common.storage.backing.MongoDBBacking;
 import me.lucko.luckperms.common.storage.backing.MySQLBacking;
 import me.lucko.luckperms.common.storage.backing.SQLiteBacking;
 import me.lucko.luckperms.common.storage.backing.YAMLBacking;
+import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
 import java.io.File;
 import java.util.HashMap;
@@ -43,24 +44,47 @@ import java.util.Set;
 
 @UtilityClass
 public class StorageFactory {
-    private static final Set<String> TYPES = ImmutableSet.of("json", "yaml", "flatfile", "mongodb", "mysql", "sqlite", "h2");
 
-    public static Storage getInstance(LuckPermsPlugin plugin, String defaultMethod) {
-        Storage storage;
-
+    public static Set<StorageType> getRequiredTypes(LuckPermsPlugin plugin, StorageType defaultMethod) {
         plugin.getLog().info("Detecting storage method...");
         if (plugin.getConfiguration().isSplitStorage()) {
-            plugin.getLog().info("Using split storage.");
+            plugin.getLog().info("Loading split storage options.");
 
-            Map<String, String> types = plugin.getConfiguration().getSplitStorageOptions();
-
+            Map<String, String> types = new HashMap<>(plugin.getConfiguration().getSplitStorageOptions());
             types.entrySet().stream()
-                    .filter(e -> !TYPES.contains(e.getValue().toLowerCase()))
+                    .filter(e -> StorageType.parse(e.getValue()) == null)
                     .forEach(e -> {
                         plugin.getLog().severe("Storage method for " + e.getKey() + " - " + e.getValue() + " not recognised. " +
                                 "Using the default instead.");
-                        e.setValue(defaultMethod);
+                        e.setValue(defaultMethod.getIdentifiers().get(0));
                     });
+
+            Set<String> neededTypes = new HashSet<>();
+            neededTypes.addAll(types.values());
+
+            return neededTypes.stream().map(StorageType::parse).collect(ImmutableCollectors.toImmutableSet());
+        } else {
+            String method = plugin.getConfiguration().getStorageMethod();
+            StorageType type = StorageType.parse(method);
+            if (type == null) {
+                plugin.getLog().severe("Storage method '" + method + "' not recognised. Using the default instead.");
+                type = defaultMethod;
+            }
+            return ImmutableSet.of(type);
+        }
+    }
+
+    public static Storage getInstance(LuckPermsPlugin plugin, StorageType defaultMethod) {
+        Storage storage;
+
+        plugin.getLog().info("Initializing storage backings...");
+        if (plugin.getConfiguration().isSplitStorage()) {
+            plugin.getLog().info("Using split storage.");
+
+            Map<String, String> types = new HashMap<>(plugin.getConfiguration().getSplitStorageOptions());
+            types.entrySet().stream()
+                    .filter(e -> StorageType.parse(e.getValue()) == null)
+                    .forEach(e -> e.setValue(defaultMethod.getIdentifiers().get(0)));
 
             Set<String> neededTypes = new HashSet<>();
             neededTypes.addAll(types.values());
@@ -68,42 +92,41 @@ public class StorageFactory {
             Map<String, AbstractBacking> backing = new HashMap<>();
 
             for (String type : neededTypes) {
-                backing.put(type, backingFromString(type, plugin));
+                backing.put(type, makeBacking(StorageType.parse(type), plugin));
             }
 
             storage = AbstractStorage.wrap(plugin, new SplitBacking(plugin, backing, types));
 
         } else {
-            String storageMethod = plugin.getConfiguration().getStorageMethod().toLowerCase();
-            if (!TYPES.contains(storageMethod)) {
-                plugin.getLog().severe("Storage method '" + storageMethod + "' not recognised. Using the default instead.");
-                storageMethod = defaultMethod;
+            String method = plugin.getConfiguration().getStorageMethod().toLowerCase();
+            StorageType type = StorageType.parse(method);
+            if (type == null) {
+                type = defaultMethod;
             }
 
-            storage = fromString(storageMethod, plugin);
-            plugin.getLog().info("Using " + storage.getName() + " as storage method.");
+            storage = makeInstance(type, plugin);
         }
 
-        plugin.getLog().info("Initialising datastore...");
+        plugin.getLog().info("Initialising storage provider...");
         storage.init();
         return storage;
     }
 
-    private static Storage fromString(String storageMethod, LuckPermsPlugin plugin) {
-        return AbstractStorage.wrap(plugin, backingFromString(storageMethod, plugin));
+    private static Storage makeInstance(StorageType type, LuckPermsPlugin plugin) {
+        return AbstractStorage.wrap(plugin, makeBacking(type, plugin));
     }
 
-    private static AbstractBacking backingFromString(String method, LuckPermsPlugin plugin) {
+    private static AbstractBacking makeBacking(StorageType method, LuckPermsPlugin plugin) {
         switch (method) {
-            case "mysql":
+            case MYSQL:
                 return new MySQLBacking(plugin, plugin.getConfiguration().getDatabaseValues());
-            case "sqlite":
+            case SQLITE:
                 return new SQLiteBacking(plugin, new File(plugin.getDataFolder(), "luckperms.sqlite"));
-            case "h2":
+            case H2:
                 return new H2Backing(plugin, new File(plugin.getDataFolder(), "luckperms.db"));
-            case "mongodb":
+            case MONGODB:
                 return new MongoDBBacking(plugin, plugin.getConfiguration().getDatabaseValues());
-            case "yaml":
+            case YAML:
                 return new YAMLBacking(plugin, plugin.getDataFolder());
             default:
                 return new JSONBacking(plugin, plugin.getDataFolder());
