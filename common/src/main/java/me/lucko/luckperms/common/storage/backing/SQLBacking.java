@@ -39,6 +39,7 @@ import me.lucko.luckperms.common.managers.impl.GenericUserManager;
 import me.lucko.luckperms.common.storage.backing.sqlprovider.H2Provider;
 import me.lucko.luckperms.common.storage.backing.sqlprovider.MySQLProvider;
 import me.lucko.luckperms.common.storage.backing.sqlprovider.SQLProvider;
+import me.lucko.luckperms.common.storage.backing.sqlprovider.SQLiteProvider;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -77,7 +78,7 @@ public class SQLBacking extends AbstractBacking {
     private static final Map<Class<? extends SQLProvider>, String[]> INIT_QUERIES = ImmutableMap.<Class<? extends SQLProvider>, String[]>builder()
             .put(MySQLProvider.class, new String[]{MYSQL_CREATETABLE_UUID, MYSQL_CREATETABLE_USERS, MYSQL_CREATETABLE_GROUPS, MYSQL_CREATETABLE_TRACKS, MYSQL_CREATETABLE_ACTION})
             .put(H2Provider.class, new String[]{H2_CREATETABLE_UUID, H2_CREATETABLE_USERS, H2_CREATETABLE_GROUPS, H2_CREATETABLE_TRACKS, H2_CREATETABLE_ACTION})
-            .put(SQLProvider.class, new String[]{SQLITE_CREATETABLE_UUID, SQLITE_CREATETABLE_USERS, SQLITE_CREATETABLE_GROUPS, SQLITE_CREATETABLE_TRACKS, SQLITE_CREATETABLE_ACTION})
+            .put(SQLiteProvider.class, new String[]{SQLITE_CREATETABLE_UUID, SQLITE_CREATETABLE_USERS, SQLITE_CREATETABLE_GROUPS, SQLITE_CREATETABLE_TRACKS, SQLITE_CREATETABLE_ACTION})
             .build();
     
     private static final String USER_INSERT = "INSERT INTO lp_users VALUES(?, ?, ?, ?)";
