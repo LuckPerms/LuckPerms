@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.common.storage.backing;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -35,12 +36,11 @@ import me.lucko.luckperms.common.data.Log;
 import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.managers.impl.GenericUserManager;
+import me.lucko.luckperms.common.storage.backing.sqlprovider.H2Provider;
+import me.lucko.luckperms.common.storage.backing.sqlprovider.MySQLProvider;
+import me.lucko.luckperms.common.storage.backing.sqlprovider.SQLProvider;
 
 import java.lang.reflect.Type;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -49,13 +49,37 @@ import java.util.Set;
 import java.util.UUID;
 
 import static me.lucko.luckperms.common.core.model.PermissionHolder.exportToLegacy;
+import static me.lucko.luckperms.common.storage.backing.sqlprovider.SQLProvider.QueryPS;
+import static me.lucko.luckperms.common.storage.backing.sqlprovider.SQLProvider.QueryRS;
 
-abstract class SQLBacking extends AbstractBacking {
-    private static final QueryPS EMPTY_PS = preparedStatement -> {};
-
+public class SQLBacking extends AbstractBacking {
     private static final Type NM_TYPE = new TypeToken<Map<String, Boolean>>() {}.getType();
     private static final Type T_TYPE = new TypeToken<List<String>>() {}.getType();
+    
+    private static final String MYSQL_CREATETABLE_UUID = "CREATE TABLE IF NOT EXISTS `lp_uuid` (`name` VARCHAR(16) NOT NULL, `uuid` VARCHAR(36) NOT NULL, PRIMARY KEY (`name`)) DEFAULT CHARSET=utf8;";
+    private static final String MYSQL_CREATETABLE_USERS = "CREATE TABLE IF NOT EXISTS `lp_users` (`uuid` VARCHAR(36) NOT NULL, `name` VARCHAR(16) NOT NULL, `primary_group` VARCHAR(36) NOT NULL, `perms` TEXT NOT NULL, PRIMARY KEY (`uuid`)) DEFAULT CHARSET=utf8;";
+    private static final String MYSQL_CREATETABLE_GROUPS = "CREATE TABLE IF NOT EXISTS `lp_groups` (`name` VARCHAR(36) NOT NULL, `perms` TEXT NULL, PRIMARY KEY (`name`)) DEFAULT CHARSET=utf8;";
+    private static final String MYSQL_CREATETABLE_TRACKS = "CREATE TABLE IF NOT EXISTS `lp_tracks` (`name` VARCHAR(36) NOT NULL, `groups` TEXT NULL, PRIMARY KEY (`name`)) DEFAULT CHARSET=utf8;";
+    private static final String MYSQL_CREATETABLE_ACTION = "CREATE TABLE IF NOT EXISTS `lp_actions` (`id` INT AUTO_INCREMENT NOT NULL, `time` BIGINT NOT NULL, `actor_uuid` VARCHAR(36) NOT NULL, `actor_name` VARCHAR(16) NOT NULL, `type` CHAR(1) NOT NULL, `acted_uuid` VARCHAR(36) NOT NULL, `acted_name` VARCHAR(36) NOT NULL, `action` VARCHAR(256) NOT NULL, PRIMARY KEY (`id`)) DEFAULT CHARSET=utf8;";
 
+    private static final String H2_CREATETABLE_UUID = "CREATE TABLE IF NOT EXISTS `lp_uuid` (`name` VARCHAR(16) NOT NULL, `uuid` VARCHAR(36) NOT NULL, PRIMARY KEY (`name`)) DEFAULT CHARSET=utf8;";
+    private static final String H2_CREATETABLE_USERS = "CREATE TABLE IF NOT EXISTS `lp_users` (`uuid` VARCHAR(36) NOT NULL, `name` VARCHAR(16) NOT NULL, `primary_group` VARCHAR(36) NOT NULL, `perms` TEXT NOT NULL, PRIMARY KEY (`uuid`)) DEFAULT CHARSET=utf8;";
+    private static final String H2_CREATETABLE_GROUPS = "CREATE TABLE IF NOT EXISTS `lp_groups` (`name` VARCHAR(36) NOT NULL, `perms` TEXT NULL, PRIMARY KEY (`name`)) DEFAULT CHARSET=utf8;";
+    private static final String H2_CREATETABLE_TRACKS = "CREATE TABLE IF NOT EXISTS `lp_tracks` (`name` VARCHAR(36) NOT NULL, `groups` TEXT NULL, PRIMARY KEY (`name`)) DEFAULT CHARSET=utf8;";
+    private static final String H2_CREATETABLE_ACTION = "CREATE TABLE IF NOT EXISTS `lp_actions` (`id` INT AUTO_INCREMENT NOT NULL, `time` BIGINT NOT NULL, `actor_uuid` VARCHAR(36) NOT NULL, `actor_name` VARCHAR(16) NOT NULL, `type` CHAR(1) NOT NULL, `acted_uuid` VARCHAR(36) NOT NULL, `acted_name` VARCHAR(36) NOT NULL, `action` VARCHAR(256) NOT NULL, PRIMARY KEY (`id`)) DEFAULT CHARSET=utf8;";
+
+    private static final String SQLITE_CREATETABLE_UUID = "CREATE TABLE IF NOT EXISTS `lp_uuid` (`name` VARCHAR(16) NOT NULL, `uuid` VARCHAR(36) NOT NULL, PRIMARY KEY (`name`));";
+    private static final String SQLITE_CREATETABLE_USERS = "CREATE TABLE IF NOT EXISTS `lp_users` (`uuid` VARCHAR(36) NOT NULL, `name` VARCHAR(16) NOT NULL, `primary_group` VARCHAR(36) NOT NULL, `perms` TEXT NOT NULL, PRIMARY KEY (`uuid`));";
+    private static final String SQLITE_CREATETABLE_GROUPS = "CREATE TABLE IF NOT EXISTS `lp_groups` (`name` VARCHAR(36) NOT NULL, `perms` TEXT NULL, PRIMARY KEY (`name`));";
+    private static final String SQLITE_CREATETABLE_TRACKS = "CREATE TABLE IF NOT EXISTS `lp_tracks` (`name` VARCHAR(36) NOT NULL, `groups` TEXT NULL, PRIMARY KEY (`name`));";
+    private static final String SQLITE_CREATETABLE_ACTION = "CREATE TABLE IF NOT EXISTS `lp_actions` (`id` INTEGER PRIMARY KEY NOT NULL, `time` BIG INT NOT NULL, `actor_uuid` VARCHAR(36) NOT NULL, `actor_name` VARCHAR(16) NOT NULL, `type` CHAR(1) NOT NULL, `acted_uuid` VARCHAR(36) NOT NULL, `acted_name` VARCHAR(36) NOT NULL, `action` VARCHAR(256) NOT NULL);";
+    
+    private static final Map<Class<? extends SQLProvider>, String[]> INIT_QUERIES = ImmutableMap.<Class<? extends SQLProvider>, String[]>builder()
+            .put(MySQLProvider.class, new String[]{MYSQL_CREATETABLE_UUID, MYSQL_CREATETABLE_USERS, MYSQL_CREATETABLE_GROUPS, MYSQL_CREATETABLE_TRACKS, MYSQL_CREATETABLE_ACTION})
+            .put(H2Provider.class, new String[]{H2_CREATETABLE_UUID, H2_CREATETABLE_USERS, H2_CREATETABLE_GROUPS, H2_CREATETABLE_TRACKS, H2_CREATETABLE_ACTION})
+            .put(SQLProvider.class, new String[]{SQLITE_CREATETABLE_UUID, SQLITE_CREATETABLE_USERS, SQLITE_CREATETABLE_GROUPS, SQLITE_CREATETABLE_TRACKS, SQLITE_CREATETABLE_ACTION})
+            .build();
+    
     private static final String USER_INSERT = "INSERT INTO lp_users VALUES(?, ?, ?, ?)";
     private static final String USER_SELECT = "SELECT * FROM lp_users WHERE uuid=?";
     private static final String USER_SELECT_ALL = "SELECT uuid FROM lp_users";
@@ -83,43 +107,64 @@ abstract class SQLBacking extends AbstractBacking {
     private static final String ACTION_INSERT = "INSERT INTO lp_actions(`time`, `actor_uuid`, `actor_name`, `type`, `acted_uuid`, `acted_name`, `action`) VALUES(?, ?, ?, ?, ?, ?, ?)";
     private static final String ACTION_SELECT_ALL = "SELECT * FROM lp_actions";
 
-    protected static void close(AutoCloseable closeable) {
-        if (closeable != null) {
-            try {
-                closeable.close();
-            } catch (Exception ignored) {
-            }
-        }
-    }
-
     private final Gson gson;
+    private final SQLProvider provider;
 
-    SQLBacking(LuckPermsPlugin plugin, String name) {
-        super(plugin, name);
+    public SQLBacking(LuckPermsPlugin plugin, SQLProvider provider) {
+        super(plugin, provider.getName());
+        this.provider = provider;
         gson = new Gson();
     }
 
-    abstract Connection getConnection() throws SQLException;
-
-    abstract boolean runQuery(String query, QueryPS queryPS);
-
-    abstract boolean runQuery(String query, QueryPS queryPS, QueryRS queryRS);
-
-    boolean runQuery(String query) {
-        return runQuery(query, EMPTY_PS);
+    private boolean runQuery(String query, QueryPS queryPS) {
+        return provider.runQuery(query, queryPS);
     }
 
-    boolean runQuery(String query, QueryRS queryRS) {
-        return runQuery(query, EMPTY_PS, queryRS);
+    private boolean runQuery(String query, QueryPS queryPS, QueryRS queryRS) {
+        return provider.runQuery(query, queryPS, queryRS);
     }
 
-    boolean setupTables(String... tableQueries) {
+    private boolean runQuery(String query) {
+        return provider.runQuery(query);
+    }
+
+    private boolean runQuery(String query, QueryRS queryRS) {
+        return provider.runQuery(query, queryRS);
+    }
+
+    private boolean setupTables(String[] tableQueries) {
         boolean success = true;
         for (String q : tableQueries) {
             if (!runQuery(q)) success = false;
         }
 
         return success && cleanupUsers();
+    }
+
+    @Override
+    public void init() {
+        try {
+            provider.init();
+
+            if (!setupTables(INIT_QUERIES.get(provider.getClass()))) {
+                plugin.getLog().severe("Error occurred whilst initialising the database.");
+                shutdown();
+            } else {
+                setAcceptingLogins(true);
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void shutdown() {
+        try {
+            provider.shutdown();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -634,13 +679,5 @@ abstract class SQLBacking extends AbstractBacking {
         );
 
         return success ? name[0] : null;
-    }
-
-    interface QueryPS {
-        void onRun(PreparedStatement preparedStatement) throws SQLException;
-    }
-
-    interface QueryRS {
-        boolean onResult(ResultSet resultSet) throws SQLException;
     }
 }

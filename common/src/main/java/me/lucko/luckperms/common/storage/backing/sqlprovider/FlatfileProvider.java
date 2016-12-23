@@ -20,9 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.backing;
-
-import me.lucko.luckperms.common.LuckPermsPlugin;
+package me.lucko.luckperms.common.storage.backing.sqlprovider;
 
 import java.io.File;
 import java.sql.Connection;
@@ -30,36 +28,55 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.concurrent.locks.ReentrantLock;
 
-public class H2Backing extends SQLBacking {
-
-    private static final String CREATETABLE_UUID = "CREATE TABLE IF NOT EXISTS `lp_uuid` (`name` VARCHAR(16) NOT NULL, `uuid` VARCHAR(36) NOT NULL, PRIMARY KEY (`name`)) DEFAULT CHARSET=utf8;";
-    private static final String CREATETABLE_USERS = "CREATE TABLE IF NOT EXISTS `lp_users` (`uuid` VARCHAR(36) NOT NULL, `name` VARCHAR(16) NOT NULL, `primary_group` VARCHAR(36) NOT NULL, `perms` TEXT NOT NULL, PRIMARY KEY (`uuid`)) DEFAULT CHARSET=utf8;";
-    private static final String CREATETABLE_GROUPS = "CREATE TABLE IF NOT EXISTS `lp_groups` (`name` VARCHAR(36) NOT NULL, `perms` TEXT NULL, PRIMARY KEY (`name`)) DEFAULT CHARSET=utf8;";
-    private static final String CREATETABLE_TRACKS = "CREATE TABLE IF NOT EXISTS `lp_tracks` (`name` VARCHAR(36) NOT NULL, `groups` TEXT NULL, PRIMARY KEY (`name`)) DEFAULT CHARSET=utf8;";
-    private static final String CREATETABLE_ACTION = "CREATE TABLE IF NOT EXISTS `lp_actions` (`id` INT AUTO_INCREMENT NOT NULL, `time` BIGINT NOT NULL, `actor_uuid` VARCHAR(36) NOT NULL, `actor_name` VARCHAR(16) NOT NULL, `type` CHAR(1) NOT NULL, `acted_uuid` VARCHAR(36) NOT NULL, `acted_name` VARCHAR(36) NOT NULL, `action` VARCHAR(256) NOT NULL, PRIMARY KEY (`id`)) DEFAULT CHARSET=utf8;";
+public abstract class FlatfileProvider extends SQLProvider {
 
     private final File file;
-    private final Object connectionLock = new Object();
-    private Connection connection = null;
+    private final ReentrantLock lock = new ReentrantLock();
+    private Connection connection;
 
-    public H2Backing(LuckPermsPlugin plugin, File file) {
-        super(plugin, "H2");
+    public FlatfileProvider(String name, File file) {
+        super(name);
         this.file = file;
     }
 
+    protected abstract String getDriverClass();
+    protected abstract String getDriverId();
+
     @Override
-    public void init() {
-        if (!setupTables(CREATETABLE_UUID, CREATETABLE_USERS, CREATETABLE_GROUPS, CREATETABLE_TRACKS, CREATETABLE_ACTION)) {
-            plugin.getLog().severe("Error occurred whilst initialising the database.");
-            shutdown();
-        } else {
-            setAcceptingLogins(true);
+    public void init() throws Exception {
+
+    }
+
+    @Override
+    public void shutdown() throws Exception {
+        if (connection != null && !connection.isClosed()) {
+            connection.close();
         }
     }
 
     @Override
-    boolean runQuery(String query, QueryPS queryPS) {
+    public Connection getConnection() throws SQLException {
+        lock.lock();
+        try {
+            if (connection == null || connection.isClosed()) {
+                try {
+                    Class.forName(getDriverClass());
+                } catch (ClassNotFoundException ignored) {}
+
+                connection = DriverManager.getConnection(getDriverId() + ":" + file.getAbsolutePath());
+            }
+
+        } finally {
+            lock.unlock();
+        }
+
+        return connection;
+    }
+
+    @Override
+    public boolean runQuery(String query, QueryPS queryPS) {
         boolean success = false;
 
         PreparedStatement preparedStatement = null;
@@ -84,7 +101,7 @@ public class H2Backing extends SQLBacking {
     }
 
     @Override
-    boolean runQuery(String query, QueryPS queryPS, QueryRS queryRS) {
+    public boolean runQuery(String query, QueryPS queryPS, QueryRS queryRS) {
         boolean success = false;
 
         PreparedStatement preparedStatement = null;
@@ -108,32 +125,5 @@ public class H2Backing extends SQLBacking {
             close(preparedStatement);
         }
         return success;
-    }
-
-    @Override
-    public void shutdown() {
-        try {
-            if (connection != null && !connection.isClosed()) {
-                connection.close();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    Connection getConnection() throws SQLException {
-        synchronized (connectionLock) {
-            if (connection == null || connection.isClosed()) {
-                try {
-                    Class.forName("org.h2.Driver");
-                } catch (ClassNotFoundException ignored) {
-                }
-
-                connection = DriverManager.getConnection("jdbc:h2:" + file.getAbsolutePath());
-            }
-        }
-
-        return connection;
     }
 }

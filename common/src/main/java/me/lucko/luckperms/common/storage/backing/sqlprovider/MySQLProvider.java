@@ -20,12 +20,11 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.backing;
+package me.lucko.luckperms.common.storage.backing.sqlprovider;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.DatastoreConfiguration;
 
 import java.sql.Connection;
@@ -34,24 +33,18 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 
-public class MySQLBacking extends SQLBacking {
-
-    private static final String CREATETABLE_UUID = "CREATE TABLE IF NOT EXISTS `lp_uuid` (`name` VARCHAR(16) NOT NULL, `uuid` VARCHAR(36) NOT NULL, PRIMARY KEY (`name`)) DEFAULT CHARSET=utf8;";
-    private static final String CREATETABLE_USERS = "CREATE TABLE IF NOT EXISTS `lp_users` (`uuid` VARCHAR(36) NOT NULL, `name` VARCHAR(16) NOT NULL, `primary_group` VARCHAR(36) NOT NULL, `perms` TEXT NOT NULL, PRIMARY KEY (`uuid`)) DEFAULT CHARSET=utf8;";
-    private static final String CREATETABLE_GROUPS = "CREATE TABLE IF NOT EXISTS `lp_groups` (`name` VARCHAR(36) NOT NULL, `perms` TEXT NULL, PRIMARY KEY (`name`)) DEFAULT CHARSET=utf8;";
-    private static final String CREATETABLE_TRACKS = "CREATE TABLE IF NOT EXISTS `lp_tracks` (`name` VARCHAR(36) NOT NULL, `groups` TEXT NULL, PRIMARY KEY (`name`)) DEFAULT CHARSET=utf8;";
-    private static final String CREATETABLE_ACTION = "CREATE TABLE IF NOT EXISTS `lp_actions` (`id` INT AUTO_INCREMENT NOT NULL, `time` BIGINT NOT NULL, `actor_uuid` VARCHAR(36) NOT NULL, `actor_name` VARCHAR(16) NOT NULL, `type` CHAR(1) NOT NULL, `acted_uuid` VARCHAR(36) NOT NULL, `acted_name` VARCHAR(36) NOT NULL, `action` VARCHAR(256) NOT NULL, PRIMARY KEY (`id`)) DEFAULT CHARSET=utf8;";
+public class MySQLProvider extends SQLProvider {
 
     private final DatastoreConfiguration configuration;
     private HikariDataSource hikari;
 
-    public MySQLBacking(LuckPermsPlugin plugin, DatastoreConfiguration configuration) {
-        super(plugin, "MySQL");
+    public MySQLProvider(DatastoreConfiguration configuration) {
+        super("MySQL");
         this.configuration = configuration;
     }
 
     @Override
-    public void init() {
+    public void init() throws Exception {
         HikariConfig config = new HikariConfig();
 
         String address = configuration.getAddress();
@@ -87,17 +80,22 @@ public class MySQLBacking extends SQLBacking {
         config.setConnectionTestQuery("/* LuckPerms ping */ SELECT 1");
 
         hikari = new HikariDataSource(config);
+    }
 
-        if (!setupTables(CREATETABLE_UUID, CREATETABLE_USERS, CREATETABLE_GROUPS, CREATETABLE_TRACKS, CREATETABLE_ACTION)) {
-            plugin.getLog().severe("Error occurred whilst initialising the database.");
-            shutdown();
-        } else {
-            setAcceptingLogins(true);
+    @Override
+    public void shutdown() throws Exception {
+        if (hikari != null) {
+            hikari.close();
         }
     }
 
     @Override
-    boolean runQuery(String query, QueryPS queryPS) {
+    public Connection getConnection() throws SQLException {
+        return hikari.getConnection();
+    }
+
+    @Override
+    public boolean runQuery(String query, QueryPS queryPS) {
         boolean success = false;
 
         Connection connection = null;
@@ -124,7 +122,7 @@ public class MySQLBacking extends SQLBacking {
     }
 
     @Override
-    boolean runQuery(String query, QueryPS queryPS, QueryRS queryRS) {
+    public boolean runQuery(String query, QueryPS queryPS, QueryRS queryRS) {
         boolean success = false;
 
         Connection connection = null;
@@ -150,17 +148,5 @@ public class MySQLBacking extends SQLBacking {
             close(connection);
         }
         return success;
-    }
-
-    @Override
-    public void shutdown() {
-        if (hikari != null) {
-            hikari.close();
-        }
-    }
-
-    @Override
-    Connection getConnection() throws SQLException {
-        return hikari.getConnection();
     }
 }

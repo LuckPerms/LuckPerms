@@ -28,12 +28,13 @@ import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.backing.AbstractBacking;
-import me.lucko.luckperms.common.storage.backing.H2Backing;
 import me.lucko.luckperms.common.storage.backing.JSONBacking;
 import me.lucko.luckperms.common.storage.backing.MongoDBBacking;
-import me.lucko.luckperms.common.storage.backing.MySQLBacking;
-import me.lucko.luckperms.common.storage.backing.SQLiteBacking;
+import me.lucko.luckperms.common.storage.backing.SQLBacking;
 import me.lucko.luckperms.common.storage.backing.YAMLBacking;
+import me.lucko.luckperms.common.storage.backing.sqlprovider.H2Provider;
+import me.lucko.luckperms.common.storage.backing.sqlprovider.MySQLProvider;
+import me.lucko.luckperms.common.storage.backing.sqlprovider.SQLiteProvider;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
 import java.io.File;
@@ -119,11 +120,11 @@ public class StorageFactory {
     private static AbstractBacking makeBacking(StorageType method, LuckPermsPlugin plugin) {
         switch (method) {
             case MYSQL:
-                return new MySQLBacking(plugin, plugin.getConfiguration().getDatabaseValues());
+                return new SQLBacking(plugin, new MySQLProvider(plugin.getConfiguration().getDatabaseValues()));
             case SQLITE:
-                return new SQLiteBacking(plugin, new File(plugin.getDataFolder(), "luckperms.sqlite"));
+                return new SQLBacking(plugin, new SQLiteProvider(new File(plugin.getDataFolder(), "luckperms.sqlite")));
             case H2:
-                return new H2Backing(plugin, new File(plugin.getDataFolder(), "luckperms.db"));
+                return new SQLBacking(plugin, new H2Provider(new File(plugin.getDataFolder(), "luckperms.db")));
             case MONGODB:
                 return new MongoDBBacking(plugin, plugin.getConfiguration().getDatabaseValues());
             case YAML:
