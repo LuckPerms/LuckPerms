@@ -122,18 +122,34 @@ public class MongoDBBacking extends AbstractBacking {
 
     @Override
     public void init() {
-        MongoCredential credential = MongoCredential.createCredential(
-                configuration.getUsername(),
-                configuration.getDatabase(),
-                configuration.getPassword().toCharArray()
-        );
+        MongoCredential credential = null;
+
+        if (configuration.getUsername() != null && !configuration.getUsername().equals("") && configuration.getDatabase() != null && !configuration.getDatabase().equals("")) {
+            if (configuration.getPassword() == null || configuration.getPassword().equals("")) {
+                credential = MongoCredential.createCredential(
+                        configuration.getUsername(),
+                        configuration.getDatabase(), null
+                );
+            } else {
+                credential = MongoCredential.createCredential(
+                        configuration.getUsername(),
+                        configuration.getDatabase(),
+                        configuration.getPassword().toCharArray()
+                );
+            }
+        }
 
         ServerAddress address = new ServerAddress(
                 configuration.getAddress().split(":")[0],
                 Integer.parseInt(configuration.getAddress().split(":")[1])
         );
 
-        mongoClient = new MongoClient(address, Collections.singletonList(credential));
+        if (credential == null) {
+            mongoClient = new MongoClient(address, Collections.emptyList());
+        } else {
+            mongoClient = new MongoClient(address, Collections.singletonList(credential));
+        }
+
         database = mongoClient.getDatabase(configuration.getDatabase());
         setAcceptingLogins(true);
     }
