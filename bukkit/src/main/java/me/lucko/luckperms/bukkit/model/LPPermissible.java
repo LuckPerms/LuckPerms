@@ -24,6 +24,7 @@ package me.lucko.luckperms.bukkit.model;
 
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Tristate;
@@ -39,12 +40,13 @@ import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.permissions.PermissionRemovedExecutor;
 import org.bukkit.plugin.Plugin;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -61,10 +63,15 @@ public class LPPermissible extends PermissibleBase {
 
     private final LPBukkitPlugin plugin;
 
+    @Getter
+    @Setter
+    private PermissibleBase oldPermissible = null;
+
     // Attachment stuff.
     @Getter
-    private final Map<String, PermissionAttachmentInfo> attachmentPermissions = new HashMap<>();
-    private final List<PermissionAttachment> attachments = new LinkedList<>();
+    private final Map<String, PermissionAttachmentInfo> attachmentPermissions = new ConcurrentHashMap<>();
+    @Getter
+    private final List<PermissionAttachment> attachments = Collections.synchronizedList(new LinkedList<>());
 
     public LPPermissible(@NonNull Player parent, User user, LPBukkitPlugin plugin) {
         super(parent);
@@ -73,6 +80,12 @@ public class LPPermissible extends PermissibleBase {
         this.plugin = plugin;
 
         recalculatePermissions();
+    }
+
+    public void addAttachments(List<PermissionAttachment> attachments) {
+        for (PermissionAttachment attachment : attachments) {
+            this.attachments.add(attachment);
+        }
     }
 
     public Contexts calculateContexts() {

@@ -117,7 +117,7 @@ class BukkitListener extends AbstractListener implements Listener {
         plugin.getWorldCalculator().getWorldCache().remove(internal);
 
         // Remove the custom permissible
-        Injector.unInject(player);
+        Injector.unInject(player, true);
 
         // Handle auto op
         if (plugin.getConfiguration().isAutoOp()) {

@@ -28,9 +28,11 @@ import me.lucko.luckperms.bukkit.model.LPPermissible;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.permissions.Permissible;
+import org.bukkit.permissions.PermissibleBase;
+import org.bukkit.permissions.PermissionAttachment;
 
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,21 +43,42 @@ import java.util.concurrent.ConcurrentHashMap;
 @UtilityClass
 public class Injector {
     private static final Map<UUID, LPPermissible> INJECTED_PERMISSIBLES = new ConcurrentHashMap<>();
+
     private static Field HUMAN_ENTITY_FIELD;
+    private static Field PERMISSIBLEBASE_ATTACHMENTS;
 
     static {
         try {
             HUMAN_ENTITY_FIELD = Class.forName(getVersionedClassName("entity.CraftHumanEntity")).getDeclaredField("perm");
             HUMAN_ENTITY_FIELD.setAccessible(true);
+
+            PERMISSIBLEBASE_ATTACHMENTS = PermissibleBase.class.getDeclaredField("attachments");
+            PERMISSIBLEBASE_ATTACHMENTS.setAccessible(true);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public static boolean inject(Player player, LPPermissible permissible) {
+    public static boolean inject(Player player, LPPermissible lpPermissible) {
         try {
-            HUMAN_ENTITY_FIELD.set(player, permissible);
-            INJECTED_PERMISSIBLES.put(player.getUniqueId(), permissible);
+            PermissibleBase existing = (PermissibleBase) HUMAN_ENTITY_FIELD.get(player);
+            if (existing instanceof LPPermissible) {
+                // uh oh
+                throw new IllegalStateException();
+            }
+
+            // Move attachments over from the old permissible.
+            List<PermissionAttachment> attachments = (List<PermissionAttachment>) PERMISSIBLEBASE_ATTACHMENTS.get(existing);
+            lpPermissible.addAttachments(attachments);
+            attachments.clear();
+            existing.clearPermissions();
+
+            lpPermissible.recalculatePermissions();
+            lpPermissible.setOldPermissible(existing);
+
+            HUMAN_ENTITY_FIELD.set(player, lpPermissible);
+            INJECTED_PERMISSIBLES.put(player.getUniqueId(), lpPermissible);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -63,14 +86,28 @@ public class Injector {
         }
     }
 
-    public static boolean unInject(Player player) {
+    public static boolean unInject(Player player, boolean dummy) {
         try {
-            Permissible permissible = (Permissible) HUMAN_ENTITY_FIELD.get(player);
+            PermissibleBase permissible = (PermissibleBase) HUMAN_ENTITY_FIELD.get(player);
             if (permissible instanceof LPPermissible) {
-                /* The player is most likely leaving. Bukkit will attempt to call #clearPermissions, so we cannot set to null.
-                   However, there's no need to re-inject a real PermissibleBase, so we just inject a dummy instead.
-                   This saves tick time, pointlessly recalculating defaults when the instance will never be used. */
-                HUMAN_ENTITY_FIELD.set(player, new DummyPermissibleBase());
+                if (dummy) {
+                    HUMAN_ENTITY_FIELD.set(player, new DummyPermissibleBase());
+                } else {
+                    LPPermissible lpp = ((LPPermissible) permissible);
+                    List<PermissionAttachment> attachments = lpp.getAttachments();
+
+                    PermissibleBase newPb = lpp.getOldPermissible();
+                    if (newPb == null) {
+                        newPb = new PermissibleBase(player);
+                    }
+
+                    List<PermissionAttachment> newAttachments = (List<PermissionAttachment>) PERMISSIBLEBASE_ATTACHMENTS.get(newPb);
+                    newAttachments.addAll(attachments);
+                    attachments.clear();
+                    lpp.clearPermissions();
+
+                    HUMAN_ENTITY_FIELD.set(player, newPb);
+                }
             }
             INJECTED_PERMISSIBLES.remove(player.getUniqueId());
             return true;

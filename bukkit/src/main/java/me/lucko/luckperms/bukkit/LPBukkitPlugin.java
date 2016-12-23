@@ -34,8 +34,10 @@ import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.bukkit.calculators.AutoOPListener;
+import me.lucko.luckperms.bukkit.inject.Injector;
 import me.lucko.luckperms.bukkit.model.ChildPermissionProvider;
 import me.lucko.luckperms.bukkit.model.DefaultsProvider;
+import me.lucko.luckperms.bukkit.model.LPPermissible;
 import me.lucko.luckperms.bukkit.vault.VaultHook;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.api.ApiProvider;
@@ -72,6 +74,7 @@ import me.lucko.luckperms.common.utils.PermissionCache;
 import org.bukkit.World;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
@@ -92,7 +95,7 @@ import java.util.stream.Collectors;
 
 @Getter
 public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
-    private final Set<UUID> ignoringLogs = ConcurrentHashMap.newKeySet();
+    private Set<UUID> ignoringLogs;
     private Executor syncExecutor;
     private Executor asyncExecutor;
     private VaultHook vaultHook = null;
@@ -103,6 +106,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private Storage storage;
     private RedisMessaging redisMessaging = null;
     private UuidCache uuidCache;
+    private BukkitListener listener;
     private ApiProvider apiProvider;
     private Logger log;
     private Importer importer;
@@ -127,6 +131,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         Executor bukkitAsyncExecutor = r -> getServer().getScheduler().runTaskAsynchronously(this, r);
 
         log = LogFactory.wrap(getLogger());
+        ignoringLogs = ConcurrentHashMap.newKeySet();
         debugHandler = new DebugHandler(bukkitAsyncExecutor, getVersion());
         senderFactory = new BukkitSenderFactory(this);
         permissionCache = new PermissionCache(bukkitAsyncExecutor);
@@ -168,7 +173,8 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
         // register events
         PluginManager pm = getServer().getPluginManager();
-        pm.registerEvents(new BukkitListener(this), this);
+        listener = new BukkitListener(this);
+        pm.registerEvents(listener, this);
 
         // initialise datastore
         storage = StorageFactory.getInstance(this, StorageType.H2);
@@ -250,7 +256,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         int mins = getConfiguration().getSyncTime();
         if (mins > 0) {
             long ticks = mins * 60 * 20;
-            getServer().getScheduler().runTaskTimerAsynchronously(this, () -> updateTaskBuffer.request(), 20L, ticks);
+            getServer().getScheduler().runTaskTimerAsynchronously(this, () -> updateTaskBuffer.request(), 40L, ticks);
         }
 
         // run an update instantly.
@@ -271,6 +277,24 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
             asyncExecutor = bukkitAsyncExecutor;
         });
 
+        // Load any online users (in the case of a reload)
+        for (Player player : getServer().getOnlinePlayers()) {
+            doAsync(() -> {
+                listener.onAsyncLogin(player.getUniqueId(), player.getName());
+                User user = getUserManager().get(getUuidCache().getUUID(player.getUniqueId()));
+                if (user != null) {
+                    doSync(() -> {
+                        try {
+                            LPPermissible lpPermissible = new LPPermissible(player, user, this);
+                            Injector.inject(player, lpPermissible);
+                        } catch (Throwable t) {
+                            t.printStackTrace();
+                        }
+                    });
+                }
+            });
+        }
+
         started = true;
         getLog().info("Successfully loaded.");
     }
@@ -278,6 +302,24 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     @Override
     public void onDisable() {
         started = false;
+
+        defaultsProvider.close();
+        permissionCache.setShutdown(true);
+        debugHandler.setShutdown(true);
+
+        for (Player player : getServer().getOnlinePlayers()) {
+            Injector.unInject(player, false);
+            if (getConfiguration().isAutoOp()) {
+                player.setOp(false);
+            }
+
+            final User user = getUserManager().get(getUuidCache().getUUID(player.getUniqueId()));
+            if (user != null) {
+                user.unregisterData();
+                getUserManager().unload(user);
+            }
+        }
+
         getLog().info("Closing datastore...");
         storage.shutdown();
 
@@ -293,6 +335,38 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         if (vaultHook != null) {
             vaultHook.unhook(this);
         }
+
+        // Bukkit will do this again when #onDisable completes, but we do it early to prevent NPEs elsewhere.
+        getServer().getScheduler().cancelTasks(this);
+        HandlerList.unregisterAll(this);
+
+        // Null everything
+        ignoringLogs = null;
+        syncExecutor = null;
+        asyncExecutor = null;
+        vaultHook = null;
+        configuration = null;
+        userManager = null;
+        groupManager = null;
+        trackManager = null;
+        storage = null;
+        redisMessaging = null;
+        uuidCache = null;
+        listener = null;
+        apiProvider = null;
+        log = null;
+        importer = null;
+        defaultsProvider = null;
+        childPermissionProvider = null;
+        localeManager = null;
+        cachedStateManager = null;
+        contextManager = null;
+        worldCalculator = null;
+        calculatorFactory = null;
+        updateTaskBuffer = null;
+        debugHandler = null;
+        senderFactory = null;
+        permissionCache = null;
     }
 
     public void tryVaultHook(boolean force) {

@@ -58,6 +58,9 @@ public class DebugHandler {
     private final Map<Receiver, List<String>> listeners;
     private final Queue<Data> queue;
 
+    @Setter
+    private boolean shutdown = false;
+
     public DebugHandler(Executor executor, String pluginVersion) {
         this.pluginVersion = "v" + pluginVersion;
         listeners = new ConcurrentHashMap<>();
@@ -67,6 +70,10 @@ public class DebugHandler {
             while (true) {
                 for (Data e; (e = queue.poll()) != null; ) {
                     handleOutput(e.getChecked(), e.getNode(), e.getValue());
+                }
+
+                if (shutdown) {
+                    return;
                 }
 
                 try {

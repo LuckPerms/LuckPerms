@@ -111,6 +111,11 @@ public class DefaultsProvider {
         nonOpDefaults = ImmutableMap.copyOf(builder);
     }
 
+    public void close() {
+        unregisterDefaults(opDefaults, opDummy);
+        unregisterDefaults(nonOpDefaults, nonOpDummy);
+    }
+
     public Tristate hasDefault(String permission, boolean isOp) {
         Map<String, Boolean> map = isOp ? opDefaults : nonOpDefaults;
 

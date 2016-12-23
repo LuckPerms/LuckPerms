@@ -39,7 +39,7 @@ import java.util.UUID;
 public class AbstractListener {
     private final LuckPermsPlugin plugin;
 
-    protected void onAsyncLogin(UUID u, String username) {
+    public void onAsyncLogin(UUID u, String username) {
         final long startTime = System.currentTimeMillis();
 
         final UuidCache cache = plugin.getUuidCache();

@@ -24,6 +24,7 @@ package me.lucko.luckperms.common.utils;
 
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 
 import com.google.common.base.Splitter;
 
@@ -41,6 +42,9 @@ public class PermissionCache {
     private final Node rootNode;
     private final Queue<String> queue;
 
+    @Setter
+    private boolean shutdown = false;
+
     public PermissionCache(Executor executor) {
         rootNode = new Node();
         queue = new ConcurrentLinkedQueue<>();
@@ -51,10 +55,13 @@ public class PermissionCache {
                     insert(e.toLowerCase());
                 }
 
+                if (shutdown) {
+                    return;
+                }
+
                 try {
                     Thread.sleep(5000);
-                } catch (InterruptedException ignored) {
-                }
+                } catch (InterruptedException ignored) {}
             }
         });
     }
