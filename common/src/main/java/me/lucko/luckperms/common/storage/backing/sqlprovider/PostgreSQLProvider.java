@@ -33,13 +33,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 
-public class MySQLProvider extends SQLProvider {
+public class PostgreSQLProvider extends SQLProvider {
 
     private final DatastoreConfiguration configuration;
     private HikariDataSource hikari;
 
-    public MySQLProvider(DatastoreConfiguration configuration) {
-        super("MySQL");
+    public PostgreSQLProvider(DatastoreConfiguration configuration) {
+        super("PostgreSQL");
         this.configuration = configuration;
     }
 
@@ -59,21 +59,12 @@ public class MySQLProvider extends SQLProvider {
         config.setMaximumPoolSize(configuration.getPoolSize());
 
         config.setPoolName("luckperms");
-        config.setDataSourceClassName("com.mysql.jdbc.jdbc2.optional.MysqlDataSource");
+        config.setDataSourceClassName("org.postgresql.ds.PGSimpleDataSource");
         config.addDataSourceProperty("serverName", address);
-        config.addDataSourceProperty("port", port);
+        config.addDataSourceProperty("portNumber", port);
         config.addDataSourceProperty("databaseName", database);
         config.addDataSourceProperty("user", username);
         config.addDataSourceProperty("password", password);
-        config.addDataSourceProperty("cachePrepStmts", true);
-        config.addDataSourceProperty("prepStmtCacheSize", 250);
-        config.addDataSourceProperty("prepStmtCacheSqlLimit", 2048);
-        config.addDataSourceProperty("useServerPrepStmts", true);
-        config.addDataSourceProperty("cacheCallableStmts", true);
-        config.addDataSourceProperty("alwaysSendSetIsolation", false);
-        config.addDataSourceProperty("cacheServerConfiguration", true);
-        config.addDataSourceProperty("elideSetAutoCommits", true);
-        config.addDataSourceProperty("useLocalSessionState", true);
         config.setConnectionTimeout(TimeUnit.SECONDS.toMillis(10)); // 10000
         config.setLeakDetectionThreshold(TimeUnit.SECONDS.toMillis(5)); // 5000
         config.setValidationTimeout(TimeUnit.SECONDS.toMillis(3)); // 3000

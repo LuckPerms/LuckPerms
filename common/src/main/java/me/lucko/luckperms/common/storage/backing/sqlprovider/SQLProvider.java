@@ -64,7 +64,6 @@ public abstract class SQLProvider {
         return runQuery(query, EMPTY_PS, queryRS);
     }
 
-
     @FunctionalInterface
     public interface QueryPS {
         void onRun(PreparedStatement preparedStatement) throws SQLException;

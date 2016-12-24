@@ -20,39 +20,32 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage;
+package me.lucko.luckperms.common.storage.backing.utils;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.ToString;
 
-import com.google.common.collect.ImmutableList;
+import me.lucko.luckperms.api.Node;
 
-import java.util.List;
-
-public enum StorageType {
-
-    JSON("json", "flatfile"),
-    YAML("yaml", "yml"),
-    MONGODB("mongodb"),
-    MYSQL("mysql"),
-    POSTGRESQL("postgresql"),
-    SQLITE("sqlite"),
-    H2("h2");
-
-    @Getter
-    private final List<String> identifiers;
-
-    StorageType(String... identifiers) {
-        this.identifiers = ImmutableList.copyOf(identifiers);
+@Getter
+@ToString
+@AllArgsConstructor(staticName = "of")
+public class NodeDataHolder {
+    public static NodeDataHolder fromNode(Node node) {
+        // TODO
+        return null;
     }
 
-    public static StorageType parse(String name) {
-        for (StorageType t : values()) {
-            for (String id : t.getIdentifiers()) {
-                if (id.equalsIgnoreCase(name)) {
-                    return t;
-                }
-            }
-        }
+    private final String permission;
+    private final boolean value;
+    private final String server;
+    private final String world;
+    private final long expiry;
+    private final String contexts;
+
+    public Node toNode() {
+        // TODO
         return null;
     }
 
