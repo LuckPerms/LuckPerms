@@ -43,6 +43,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -103,7 +104,7 @@ public class SQLBacking extends AbstractBacking {
         return provider.runQuery(query, queryRS);
     }
 
-    public boolean tableExists(String table) throws SQLException {
+    private boolean tableExists(String table) throws SQLException {
         return provider.getConnection().getMetaData().getTables(null, null, table.toUpperCase(), null).next();
     }
 
@@ -292,18 +293,20 @@ public class SQLBacking extends AbstractBacking {
             }
 
             List<NodeDataHolder> data = user.getNodes().stream().map(NodeDataHolder::fromNode).collect(Collectors.toList());
-            try (PreparedStatement ps = provider.getConnection().prepareStatement(prefix.apply(USER_PERMISSIONS_INSERT))) {
-                for (NodeDataHolder nd : data) {
-                    ps.setString(1, user.getUuid().toString());
-                    ps.setString(2, nd.getPermission());
-                    ps.setBoolean(3, nd.isValue());
-                    ps.setString(4, nd.getServer());
-                    ps.setString(5, nd.getWorld());
-                    ps.setLong(6, nd.getExpiry());
-                    ps.setString(7, nd.getContexts());
-                    ps.addBatch();
+            try (Connection connection = provider.getConnection()) {
+                try (PreparedStatement ps = connection.prepareStatement(prefix.apply(USER_PERMISSIONS_INSERT))) {
+                    for (NodeDataHolder nd : data) {
+                        ps.setString(1, user.getUuid().toString());
+                        ps.setString(2, nd.getPermission());
+                        ps.setBoolean(3, nd.isValue());
+                        ps.setString(4, nd.getServer());
+                        ps.setString(5, nd.getWorld());
+                        ps.setLong(6, nd.getExpiry());
+                        ps.setString(7, nd.getContexts());
+                        ps.addBatch();
+                    }
+                    ps.executeBatch();
                 }
-                ps.executeBatch();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
