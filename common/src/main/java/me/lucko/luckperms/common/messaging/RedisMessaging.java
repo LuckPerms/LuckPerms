@@ -49,8 +49,9 @@ public class RedisMessaging implements MessagingService {
     private LPSub sub;
 
     public void init(String address, String password) {
-        String host = address.substring(0, address.indexOf(':'));
-        int port = Integer.parseInt(address.substring(address.indexOf(":") + 1));
+        String[] addressSplit = address.split(":");
+        String host = addressSplit[0];
+        int port = addressSplit.length > 1 ? Integer.parseInt(addressSplit[1]) : 6379;
 
         if (password.equals("")) {
             jedisPool = new JedisPool(new JedisPoolConfig(), host, port);
@@ -91,7 +92,7 @@ public class RedisMessaging implements MessagingService {
         private final LuckPermsPlugin plugin;
         private final Set<UUID> receivedMsgs = Collections.synchronizedSet(new HashSet<>());
 
-        public UUID generateId() {
+        UUID generateId() {
             UUID uuid = UUID.randomUUID();
             receivedMsgs.add(uuid);
             return uuid;

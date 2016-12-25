@@ -148,8 +148,8 @@ group-name-rewrite:
 # +------------------------------------------------------------------------+ #
 
 # Which storage method the plugin should use.
-# Currently supported: mysql, sqlite, h2, json, yaml, mongodb
-# Fill out connection info below if you're using MySQL or MongoDB
+# Currently supported: mysql, postgresql, sqlite, h2, json, yaml, mongodb
+# Fill out connection info below if you're using MySQL, PostgreSQL or MongoDB
 storage-method: h2
 
 # This block enables support for split datastores.
@@ -163,7 +163,11 @@ split-storage:
     log: h2
 
 data:
-  address: localhost:3306
+  # Uses standard DB engine port by default
+  # MySQL: 3306, PostgreSQL: 5432, MongoDB: 27017
+  # Specify as "host:port" if differs
+  address: localhost
+
   database: minecraft
   username: root
   password: ''
@@ -181,9 +185,11 @@ data:
 #
 # If you decide to enable this feature, you should set "sync-minutes" to -1, as there is no need for LuckPerms
 # to poll the database for changes.
+#
+# Port 6379 is used by default; set address to "host:port" if differs
 redis:
   enabled: false
-  address: localhost:6379
+  address: localhost
   password: ''
 
 
