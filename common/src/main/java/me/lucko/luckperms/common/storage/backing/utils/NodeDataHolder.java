@@ -22,19 +22,29 @@
 
 package me.lucko.luckperms.common.storage.backing.utils;
 
+import com.google.gson.JsonParseException;
+import com.google.gson.reflect.TypeToken;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
+import com.google.gson.Gson;
 
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.common.core.NodeBuilder;
+
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.Map;
 
 @Getter
 @ToString
 @AllArgsConstructor(staticName = "of")
 public class NodeDataHolder {
     public static NodeDataHolder fromNode(Node node) {
-        // TODO
-        return null;
+        long expiry = node.isTemporary() ? node.getExpiryUnixTime() : 0L;
+        return NodeDataHolder.of(node.getPermission(), node.getValue(),
+                node.getServer().orElse(null), node.getWorld().orElse(null),
+                expiry, new Gson().toJson(node.getContexts().toMap()));
     }
 
     private final String permission;
@@ -45,8 +55,19 @@ public class NodeDataHolder {
     private final String contexts;
 
     public Node toNode() {
-        // TODO
-        return null;
+        Type type = new TypeToken<Map<String, String>>(){}.getType();
+        Map<String, String> parsedContexts = new Gson().fromJson(contexts, type);
+        if (parsedContexts == null) {
+            parsedContexts = new HashMap<>();
+        }
+
+        NodeBuilder builder = new NodeBuilder(permission);
+        builder.setValue(value);
+        builder.setServer(server);
+        builder.setWorld(world);
+        builder.setExpiry(expiry);
+        builder.withExtraContext(parsedContexts);
+        return builder.build();
     }
 
 }
