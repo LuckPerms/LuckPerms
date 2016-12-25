@@ -139,10 +139,10 @@ public class MongoDBBacking extends AbstractBacking {
             }
         }
 
-        ServerAddress address = new ServerAddress(
-                configuration.getAddress().split(":")[0],
-                Integer.parseInt(configuration.getAddress().split(":")[1])
-        );
+        String[] addressSplit = configuration.getAddress().split(":");
+        String host = addressSplit[0];
+        int port = addressSplit.length > 1 ? Integer.parseInt(addressSplit[1]) : 27017;
+        ServerAddress address = new ServerAddress(host, port);
 
         if (credential == null) {
             mongoClient = new MongoClient(address, Collections.emptyList());
