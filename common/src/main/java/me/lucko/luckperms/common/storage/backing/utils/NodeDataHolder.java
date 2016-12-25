@@ -41,10 +41,14 @@ import java.util.Map;
 @AllArgsConstructor(staticName = "of")
 public class NodeDataHolder {
     public static NodeDataHolder fromNode(Node node) {
-        long expiry = node.isTemporary() ? node.getExpiryUnixTime() : 0L;
-        return NodeDataHolder.of(node.getPermission(), node.getValue(),
-                node.getServer().orElse(null), node.getWorld().orElse(null),
-                expiry, new Gson().toJson(node.getContexts().toMap()));
+        return NodeDataHolder.of(
+                node.getPermission(),
+                node.getValue(),
+                node.getServer().orElse(null),
+                node.getWorld().orElse(null),
+                node.isTemporary() ? node.getExpiryUnixTime() : 0L,
+                new Gson().toJson(node.getContexts().toMap())
+        );
     }
 
     private final String permission;
