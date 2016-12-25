@@ -50,7 +50,7 @@ public class PostgreSQLProvider extends SQLProvider {
         String address = configuration.getAddress();
         String[] addressSplit = address.split(":");
         address = addressSplit[0];
-        String port = addressSplit.length > 1 ? addressSplit[1] : "3306";
+        String port = addressSplit.length > 1 ? addressSplit[1] : "5432";
 
         String database = configuration.getDatabase();
         String username = configuration.getUsername();
@@ -88,57 +88,40 @@ public class PostgreSQLProvider extends SQLProvider {
 
     @Override
     public boolean runQuery(String query, QueryPS queryPS) {
-        boolean success = false;
-
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-
-        try {
-            connection = getConnection();
+        try (Connection connection = getConnection()) {
             if (connection == null || connection.isClosed()) {
                 throw new IllegalStateException("SQL connection is null");
             }
 
-            preparedStatement = connection.prepareStatement(query);
-            queryPS.onRun(preparedStatement);
+            try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                queryPS.onRun(preparedStatement);
 
-            preparedStatement.execute();
-            success = true;
+                preparedStatement.execute();
+                return true;
+            }
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            close(preparedStatement);
-            close(connection);
         }
-        return success;
+        return false;
     }
 
     @Override
     public boolean runQuery(String query, QueryPS queryPS, QueryRS queryRS) {
-        boolean success = false;
-
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-
-        try {
-            connection = getConnection();
+        try (Connection connection = getConnection()){
             if (connection == null || connection.isClosed()) {
                 throw new IllegalStateException("SQL connection is null");
             }
 
-            preparedStatement = connection.prepareStatement(query);
-            queryPS.onRun(preparedStatement);
+            try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                queryPS.onRun(preparedStatement);
 
-            resultSet = preparedStatement.executeQuery();
-            success = queryRS.onResult(resultSet);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    return queryRS.onResult(resultSet);
+                }
+            }
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            close(resultSet);
-            close(preparedStatement);
-            close(connection);
         }
-        return success;
+        return false;
     }
 }

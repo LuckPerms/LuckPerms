@@ -34,15 +34,6 @@ import java.sql.SQLException;
 public abstract class SQLProvider {
     private static final QueryPS EMPTY_PS = preparedStatement -> {};
 
-    static void close(AutoCloseable closeable) {
-        if (closeable != null) {
-            try {
-                closeable.close();
-            } catch (Exception ignored) {
-            }
-        }
-    }
-
     @Getter
     private final String name;
 

@@ -97,57 +97,44 @@ public class MySQLProvider extends SQLProvider {
 
     @Override
     public boolean runQuery(String query, QueryPS queryPS) {
-        boolean success = false;
-
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-
         try {
-            connection = getConnection();
-            if (connection == null || connection.isClosed()) {
-                throw new IllegalStateException("SQL connection is null");
+            try (Connection connection = getConnection()) {
+                if (connection == null || connection.isClosed()) {
+                    throw new IllegalStateException("SQL connection is null");
+                }
+
+                try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                    queryPS.onRun(preparedStatement);
+
+                    preparedStatement.execute();
+                    return true;
+                }
             }
-
-            preparedStatement = connection.prepareStatement(query);
-            queryPS.onRun(preparedStatement);
-
-            preparedStatement.execute();
-            success = true;
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            close(preparedStatement);
-            close(connection);
         }
-        return success;
+        return false;
     }
 
     @Override
     public boolean runQuery(String query, QueryPS queryPS, QueryRS queryRS) {
-        boolean success = false;
-
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-
         try {
-            connection = getConnection();
-            if (connection == null || connection.isClosed()) {
-                throw new IllegalStateException("SQL connection is null");
+            try (Connection connection = getConnection()) {
+                if (connection == null || connection.isClosed()) {
+                    throw new IllegalStateException("SQL connection is null");
+                }
+
+                try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                    queryPS.onRun(preparedStatement);
+
+                    try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                        return queryRS.onResult(resultSet);
+                    }
+                }
             }
-
-            preparedStatement = connection.prepareStatement(query);
-            queryPS.onRun(preparedStatement);
-
-            resultSet = preparedStatement.executeQuery();
-            success = queryRS.onResult(resultSet);
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            close(resultSet);
-            close(preparedStatement);
-            close(connection);
         }
-        return success;
+        return false;
     }
 }
