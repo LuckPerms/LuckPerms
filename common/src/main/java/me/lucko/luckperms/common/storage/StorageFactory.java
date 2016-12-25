@@ -117,8 +117,6 @@ public class StorageFactory {
         switch (method) {
             case MYSQL:
                 return new SQLLegacyBacking(plugin, new MySQLProvider(plugin.getConfiguration().getDatabaseValues()));
-            case CIRNOCRAFT:
-                return new CirnocraftBacking(plugin, plugin.getConfiguration().getDatabaseValues());
             case SQLITE:
                 return new SQLLegacyBacking(plugin, new SQLiteProvider(new File(plugin.getDataFolder(), "luckperms.sqlite")));
             case H2:
