@@ -63,7 +63,7 @@ public class SQLBacking extends AbstractBacking {
 
     private static final String USER_PERMISSIONS_SELECT = "SELECT permission, value, server, world, expiry, contexts FROM {prefix}user_permissions WHERE uuid=?";
     private static final String USER_PERMISSIONS_DELETE = "DELETE FROM {prefix}user_permissions WHERE uuid=?";
-    private static final String USER_PERMISSIONS_INSERT = "INSERT INTO {prefix}user_permissions VALUES(?, ?, ?, ?, ?, ?, ?)";
+    private static final String USER_PERMISSIONS_INSERT = "INSERT INTO {prefix}user_permissions(uuid, permission, value, server, world, expiry, contexts) VALUES(?, ?, ?, ?, ?, ?, ?)";
     private static final String USER_PERMISSIONS_SELECT_DISTINCT = "SELECT DISTINCT uuid FROM {prefix}user_permissions";
 
     private static final String PLAYER_SELECT = "SELECT username, primary_group FROM {prefix}players WHERE uuid=?";
@@ -75,7 +75,7 @@ public class SQLBacking extends AbstractBacking {
 
     private static final String GROUP_PERMISSIONS_SELECT = "SELECT permission, value, server, world, expiry, contexts FROM {prefix}group_permissions WHERE name=?";
     private static final String GROUP_PERMISSIONS_DELETE = "DELETE FROM {prefix}group_permissions WHERE name=?";
-    private static final String GROUP_PERMISSIONS_INSERT = "INSERT INTO {prefix}group_permissions VALUES(?, ?, ?, ?, ?, ?, ?)";
+    private static final String GROUP_PERMISSIONS_INSERT = "INSERT INTO {prefix}group_permissions(name, permission, value, server, world, expiry, contexts) VALUES(?, ?, ?, ?, ?, ?, ?)";
 
     private static final String GROUP_SELECT = "SELECT name FROM {prefix}groups";
     private static final String GROUP_INSERT = "INSERT INTO {prefix}groups VALUES(?)";
@@ -87,7 +87,7 @@ public class SQLBacking extends AbstractBacking {
     private static final String TRACK_UPDATE = "UPDATE {prefix}tracks SET groups=? WHERE name=?";
     private static final String TRACK_DELETE = "DELETE FROM {prefix}tracks WHERE name=?";
 
-    private static final String ACTION_INSERT = "INSERT INTO {prefix}actions(`time`, `actor_uuid`, `actor_name`, `type`, `acted_uuid`, `acted_name`, `action`) VALUES(?, ?, ?, ?, ?, ?, ?)";
+    private static final String ACTION_INSERT = "INSERT INTO {prefix}actions(time, actor_uuid, actor_name, type, acted_uuid, acted_name, action) VALUES(?, ?, ?, ?, ?, ?, ?)";
     private static final String ACTION_SELECT_ALL = "SELECT * FROM {prefix}actions";
 
 
@@ -130,9 +130,9 @@ public class SQLBacking extends AbstractBacking {
             provider.init();
 
             // Init tables
-            if (!tableExists(prefix + "user_permissions")) {
+            if (!tableExists(prefix.apply("{prefix}user_permissions"))) {
                 String schemaFileName = "lp-schema-" + provider.getName().toLowerCase() + ".sql";
-                try (InputStream is = plugin.getClass().getResourceAsStream("sql/" + schemaFileName)) {
+                try (InputStream is = plugin.getResourceStream(schemaFileName)) {
                     if (is == null) {
                         throw new Exception("Couldn't locate schema file for " + provider.getName());
                     }

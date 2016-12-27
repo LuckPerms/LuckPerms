@@ -67,6 +67,7 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -225,6 +226,11 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     @Override
     public File getMainDir() {
         return getDataFolder();
+    }
+
+    @Override
+    public InputStream getResourceStream(String path) {
+        return getResourceAsStream(path);
     }
 
     @Override

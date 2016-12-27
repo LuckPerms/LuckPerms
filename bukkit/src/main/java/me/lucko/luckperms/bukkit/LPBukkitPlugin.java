@@ -81,6 +81,7 @@ import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -418,6 +419,11 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     @Override
     public File getMainDir() {
         return getDataFolder();
+    }
+
+    @Override
+    public InputStream getResourceStream(String path) {
+        return getResource(path);
     }
 
     @Override

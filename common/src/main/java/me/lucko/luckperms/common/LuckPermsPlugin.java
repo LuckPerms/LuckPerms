@@ -47,6 +47,7 @@ import me.lucko.luckperms.common.utils.LocaleManager;
 import me.lucko.luckperms.common.utils.PermissionCache;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -227,6 +228,14 @@ public interface LuckPermsPlugin {
      * @return the platforms data folder
      */
     File getDataFolder();
+
+    /**
+     * Gets a bundled resource file from the jar
+     *
+     * @param path the path of the file
+     * @return the file as an input stream
+     */
+    InputStream getResourceStream(String path);
 
     /**
      * Returns a colored string indicating the status of a player

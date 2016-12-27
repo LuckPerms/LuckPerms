@@ -93,6 +93,7 @@ import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.text.Text;
 
 import java.io.File;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -334,6 +335,11 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     @Override
     public File getDataFolder() {
         return getMainDir();
+    }
+
+    @Override
+    public InputStream getResourceStream(String path) {
+        return getClass().getClassLoader().getResourceAsStream(path);
     }
 
     @Override

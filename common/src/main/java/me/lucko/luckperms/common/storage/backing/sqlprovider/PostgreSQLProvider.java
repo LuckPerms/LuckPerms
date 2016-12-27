@@ -27,9 +27,6 @@ import com.zaxxer.hikari.HikariDataSource;
 
 import me.lucko.luckperms.common.storage.DatastoreConfiguration;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 
@@ -82,46 +79,7 @@ public class PostgreSQLProvider extends SQLProvider {
     }
 
     @Override
-    public Connection getConnection() throws SQLException {
-        return hikari.getConnection();
-    }
-
-    @Override
-    public boolean runQuery(String query, QueryPS queryPS) {
-        try (Connection connection = getConnection()) {
-            if (connection == null || connection.isClosed()) {
-                throw new IllegalStateException("SQL connection is null");
-            }
-
-            try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-                queryPS.onRun(preparedStatement);
-
-                preparedStatement.execute();
-                return true;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    @Override
-    public boolean runQuery(String query, QueryPS queryPS, QueryRS queryRS) {
-        try (Connection connection = getConnection()){
-            if (connection == null || connection.isClosed()) {
-                throw new IllegalStateException("SQL connection is null");
-            }
-
-            try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-                queryPS.onRun(preparedStatement);
-
-                try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                    return queryRS.onResult(resultSet);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
+    public WrappedConnection getConnection() throws SQLException {
+        return new WrappedConnection(hikari.getConnection(), true);
     }
 }
