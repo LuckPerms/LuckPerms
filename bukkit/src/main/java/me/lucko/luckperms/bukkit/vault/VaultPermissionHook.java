@@ -106,10 +106,9 @@ public class VaultPermissionHook extends Permission {
             } else {
                 holder.setPermission(permission, true, server);
             }
-        } catch (ObjectAlreadyHasException ignored) {
-        }
 
-        save(holder);
+            save(holder);
+        } catch (ObjectAlreadyHasException ignored) {}
     }
 
     /**
@@ -126,10 +125,9 @@ public class VaultPermissionHook extends Permission {
             } else {
                 holder.unsetPermission(permission, server);
             }
-        } catch (ObjectLacksException ignored) {
-        }
 
-        save(holder);
+            save(holder);
+        } catch (ObjectLacksException ignored) {}
     }
 
     /**
@@ -269,9 +267,9 @@ public class VaultPermissionHook extends Permission {
                 } else {
                     user.setInheritGroup(group, server);
                 }
-            } catch (ObjectAlreadyHasException ignored) {
-            }
-            save(user);
+
+                save(user);
+            } catch (ObjectAlreadyHasException ignored) {}
         });
         return true;
     }
@@ -294,9 +292,9 @@ public class VaultPermissionHook extends Permission {
                 } else {
                     user.unsetInheritGroup(group, server);
                 }
-            } catch (ObjectLacksException ignored) {
-            }
-            save(user);
+
+                save(user);
+            } catch (ObjectLacksException ignored) {}
         });
         return true;
     }
