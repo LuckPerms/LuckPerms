@@ -164,7 +164,7 @@ public class ImmutableNode implements Node {
             server = null;
         }
 
-        if (world != null && world.equals("")) {
+        if (world != null && (world.equalsIgnoreCase("global") || world.equals(""))) {
             world = null;
         }
 

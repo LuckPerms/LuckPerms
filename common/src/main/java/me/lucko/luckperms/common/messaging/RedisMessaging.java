@@ -92,7 +92,7 @@ public class RedisMessaging implements MessagingService {
         private final LuckPermsPlugin plugin;
         private final Set<UUID> receivedMsgs = Collections.synchronizedSet(new HashSet<>());
 
-        UUID generateId() {
+        private UUID generateId() {
             UUID uuid = UUID.randomUUID();
             receivedMsgs.add(uuid);
             return uuid;

@@ -77,7 +77,8 @@ abstract class FlatfileProvider extends SQLProvider {
 
     @Override
     public boolean runQuery(String query, QueryPS queryPS) {
-        try (Connection connection = getConnection()) {
+        try {
+            Connection connection = getConnection();
             if (connection == null || connection.isClosed()) {
                 throw new IllegalStateException("SQL connection is null");
             }

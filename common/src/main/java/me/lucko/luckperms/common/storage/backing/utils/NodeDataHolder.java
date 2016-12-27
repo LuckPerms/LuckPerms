@@ -22,32 +22,35 @@
 
 package me.lucko.luckperms.common.storage.backing.utils;
 
-import com.google.gson.JsonParseException;
-import com.google.gson.reflect.TypeToken;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
+
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.core.NodeBuilder;
 
 import java.lang.reflect.Type;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.Map;
 
 @Getter
 @ToString
 @AllArgsConstructor(staticName = "of")
 public class NodeDataHolder {
+    private static final Gson GSON = new Gson();
+    private static final Type CONTEXT_TYPE = new TypeToken<Map<String, Collection<String>>>(){}.getType();
+
     public static NodeDataHolder fromNode(Node node) {
         return NodeDataHolder.of(
                 node.getPermission(),
                 node.getValue(),
-                node.getServer().orElse(null),
-                node.getWorld().orElse(null),
+                node.getServer().orElse("global"),
+                node.getWorld().orElse("global"),
                 node.isTemporary() ? node.getExpiryUnixTime() : 0L,
-                new Gson().toJson(node.getContexts().toMap())
+                GSON.toJson(node.getContexts().toMultimap().asMap())
         );
     }
 
@@ -59,18 +62,25 @@ public class NodeDataHolder {
     private final String contexts;
 
     public Node toNode() {
-        Type type = new TypeToken<Map<String, String>>(){}.getType();
-        Map<String, String> parsedContexts = new Gson().fromJson(contexts, type);
-        if (parsedContexts == null) {
-            parsedContexts = new HashMap<>();
-        }
-
         NodeBuilder builder = new NodeBuilder(permission);
         builder.setValue(value);
         builder.setServer(server);
         builder.setWorld(world);
         builder.setExpiry(expiry);
-        builder.withExtraContext(parsedContexts);
+
+        try {
+            Map<String, Collection<String>> deserializedContexts = GSON.fromJson(contexts, CONTEXT_TYPE);
+            if (deserializedContexts != null && !deserializedContexts.isEmpty()) {
+                for (Map.Entry<String, Collection<String>> c : deserializedContexts.entrySet()) {
+                    for (String val : c.getValue()) {
+                        builder.withExtraContext(c.getKey(), val);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return builder.build();
     }
 
