@@ -56,8 +56,7 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
         user.setPrimaryGroup("default");
         try {
             user.setPermission("group.default", true);
-        } catch (ObjectAlreadyHasException ignored) {
-        }
+        } catch (ObjectAlreadyHasException ignored) {}
 
         if (save) {
             plugin.getStorage().saveUser(user);

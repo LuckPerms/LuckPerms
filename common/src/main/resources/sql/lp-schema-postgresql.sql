@@ -18,10 +18,10 @@ CREATE TABLE "{prefix}group_permissions" (
   "name"       VARCHAR(36)              NOT NULL,
   "permission" VARCHAR(200)             NOT NULL,
   "value"      BOOL                     NOT NULL,
-  "server"     VARCHAR(36)              NULL,
-  "world"      VARCHAR(36)              NULL,
+  "server"     VARCHAR(36)              NOT NULL,
+  "world"      VARCHAR(36)              NOT NULL,
   "expiry"     INT                      NOT NULL,
-  "contexts"   VARCHAR(200)             NULL
+  "contexts"   VARCHAR(200)             NOT NULL
 );
 CREATE INDEX "{prefix}group_permissions_name" ON "{prefix}group_permissions" ("name");
 CREATE INDEX "{prefix}group_permissions_permission" ON "{prefix}group_permissions" ("permission");
@@ -32,6 +32,10 @@ CREATE TABLE "{prefix}players" (
   "primary_group" VARCHAR(36)             NOT NULL
 );
 CREATE INDEX "{prefix}players_username" ON "{prefix}players" ("username");
+
+CREATE TABLE "{prefix}groups" (
+  "name" VARCHAR(36) PRIMARY KEY NOT NULL
+);
 
 CREATE TABLE "{prefix}actions" (
   "id"         SERIAL PRIMARY KEY       NOT NULL,

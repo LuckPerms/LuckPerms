@@ -41,11 +41,48 @@ public abstract class SQLProvider {
 
     public abstract void shutdown() throws Exception;
 
-    public abstract Connection getConnection() throws SQLException;
+    public abstract WrappedConnection getConnection() throws SQLException;
 
-    public abstract boolean runQuery(String query, QueryPS queryPS);
+    public boolean runQuery(String query, QueryPS queryPS) {
+        try {
+            try (Connection connection = getConnection()) {
+                if (connection == null || connection.isClosed()) {
+                    throw new IllegalStateException("SQL connection is null");
+                }
 
-    public abstract boolean runQuery(String query, QueryPS queryPS, QueryRS queryRS);
+                try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                    queryPS.onRun(preparedStatement);
+
+                    preparedStatement.execute();
+                    return true;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean runQuery(String query, QueryPS queryPS, QueryRS queryRS) {
+        try {
+            try (Connection connection = getConnection()) {
+                if (connection == null || connection.isClosed()) {
+                    throw new IllegalStateException("SQL connection is null");
+                }
+
+                try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                    queryPS.onRun(preparedStatement);
+
+                    try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                        return queryRS.onResult(resultSet);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 
     public boolean runQuery(String query) {
         return runQuery(query, EMPTY_PS);

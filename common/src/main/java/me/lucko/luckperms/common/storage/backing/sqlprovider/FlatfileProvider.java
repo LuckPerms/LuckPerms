@@ -23,10 +23,7 @@
 package me.lucko.luckperms.common.storage.backing.sqlprovider;
 
 import java.io.File;
-import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -34,7 +31,7 @@ abstract class FlatfileProvider extends SQLProvider {
 
     private final File file;
     private final ReentrantLock lock = new ReentrantLock();
-    private Connection connection;
+    private WrappedConnection connection;
 
     FlatfileProvider(String name, File file) {
         super(name);
@@ -57,7 +54,7 @@ abstract class FlatfileProvider extends SQLProvider {
     }
 
     @Override
-    public Connection getConnection() throws SQLException {
+    public WrappedConnection getConnection() throws SQLException {
         lock.lock();
         try {
             if (connection == null || connection.isClosed()) {
@@ -65,7 +62,7 @@ abstract class FlatfileProvider extends SQLProvider {
                     Class.forName(getDriverClass());
                 } catch (ClassNotFoundException ignored) {}
 
-                connection = DriverManager.getConnection(getDriverId() + ":" + file.getAbsolutePath());
+                connection = new WrappedConnection(DriverManager.getConnection(getDriverId() + ":" + file.getAbsolutePath()), false);
             }
 
         } finally {
@@ -73,46 +70,5 @@ abstract class FlatfileProvider extends SQLProvider {
         }
 
         return connection;
-    }
-
-    @Override
-    public boolean runQuery(String query, QueryPS queryPS) {
-        try {
-            Connection connection = getConnection();
-            if (connection == null || connection.isClosed()) {
-                throw new IllegalStateException("SQL connection is null");
-            }
-
-            try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-                queryPS.onRun(preparedStatement);
-
-                preparedStatement.execute();
-                return true;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    @Override
-    public boolean runQuery(String query, QueryPS queryPS, QueryRS queryRS) {
-        try {
-            Connection connection = getConnection();
-            if (connection == null || connection.isClosed()) {
-                throw new IllegalStateException("SQL connection is null");
-            }
-
-            try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-                queryPS.onRun(preparedStatement);
-
-                try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                    return queryRS.onResult(resultSet);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
     }
 }
