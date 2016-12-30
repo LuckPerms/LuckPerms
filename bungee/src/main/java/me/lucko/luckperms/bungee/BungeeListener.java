@@ -108,8 +108,8 @@ public class BungeeListener extends AbstractListener implements Listener {
                     plugin.getStorage().force().saveUUIDData(c.getName(), c.getUniqueId()).join();
                 }
             } else {
-                UUID uuid = plugin.getStorage().getUUID(c.getName()).join();
-                if (uuid == null) {
+                String name = plugin.getStorage().getName(c.getUniqueId()).join();
+                if (name == null) {
                     plugin.getApiProvider().fireEventAsync(new UserFirstLoginEvent(c.getUniqueId(), c.getName()));
                 }
 

@@ -54,8 +54,8 @@ public class AbstractListener {
                 plugin.getStorage().force().saveUUIDData(username, u);
             }
         } else {
-            UUID uuid = plugin.getStorage().force().getUUID(username).join();
-            if (uuid == null) {
+            String name = plugin.getStorage().force().getName(u).join();
+            if (name == null) {
                 plugin.getApiProvider().fireEventAsync(new UserFirstLoginEvent(u, username));
             }
 
