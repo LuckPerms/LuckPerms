@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.common.storage.backing;
 
+import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -46,11 +47,13 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -62,6 +65,7 @@ public class SQLBacking extends AbstractBacking {
     private static final Type LIST_STRING_TYPE = new TypeToken<List<String>>(){}.getType();
 
     private static final String USER_PERMISSIONS_SELECT = "SELECT permission, value, server, world, expiry, contexts FROM {prefix}user_permissions WHERE uuid=?";
+    private static final String USER_PERMISSIONS_DELETE_SPECIFIC = "DELETE FROM {prefix}user_permissions WHERE uuid=?, permission=?, value=?, server=?, world=?, expiry=?, contexts=?";
     private static final String USER_PERMISSIONS_DELETE = "DELETE FROM {prefix}user_permissions WHERE uuid=?";
     private static final String USER_PERMISSIONS_INSERT = "INSERT INTO {prefix}user_permissions(uuid, permission, value, server, world, expiry, contexts) VALUES(?, ?, ?, ?, ?, ?, ?)";
     private static final String USER_PERMISSIONS_SELECT_DISTINCT = "SELECT DISTINCT uuid FROM {prefix}user_permissions";
@@ -75,9 +79,10 @@ public class SQLBacking extends AbstractBacking {
 
     private static final String GROUP_PERMISSIONS_SELECT = "SELECT permission, value, server, world, expiry, contexts FROM {prefix}group_permissions WHERE name=?";
     private static final String GROUP_PERMISSIONS_DELETE = "DELETE FROM {prefix}group_permissions WHERE name=?";
+    private static final String GROUP_PERMISSIONS_DELETE_SPECIFIC = "DELETE FROM {prefix}group_permissions WHERE name=?, permission=?, value=?, server=?, world=?, expiry=?, contexts=?";
     private static final String GROUP_PERMISSIONS_INSERT = "INSERT INTO {prefix}group_permissions(name, permission, value, server, world, expiry, contexts) VALUES(?, ?, ?, ?, ?, ?, ?)";
 
-    private static final String GROUP_SELECT = "SELECT name FROM {prefix}groups";
+    private static final String GROUP_SELECT_ALL = "SELECT name FROM {prefix}groups";
     private static final String GROUP_INSERT = "INSERT INTO {prefix}groups VALUES(?)";
     private static final String GROUP_DELETE = "DELETE FROM {prefix}groups WHERE name=?";
 
@@ -100,22 +105,6 @@ public class SQLBacking extends AbstractBacking {
         this.provider = provider;
         this.prefix = s -> s.replace("{prefix}", prefix);
         gson = new Gson();
-    }
-
-    private boolean runQuery(String query, SQLProvider.QueryPS queryPS) {
-        return provider.runQuery(query, queryPS);
-    }
-
-    private boolean runQuery(String query, SQLProvider.QueryPS queryPS, SQLProvider.QueryRS queryRS) {
-        return provider.runQuery(query, queryPS, queryRS);
-    }
-
-    private boolean runQuery(String query) {
-        return provider.runQuery(query);
-    }
-
-    private boolean runQuery(String query, SQLProvider.QueryRS queryRS) {
-        return provider.runQuery(query, queryRS);
     }
 
     private boolean tableExists(String table) throws SQLException {
@@ -184,37 +173,48 @@ public class SQLBacking extends AbstractBacking {
 
     @Override
     public boolean logAction(LogEntry entry) {
-        return runQuery(prefix.apply(ACTION_INSERT), ps -> {
-            ps.setLong(1, entry.getTimestamp());
-            ps.setString(2, entry.getActor().toString());
-            ps.setString(3, entry.getActorName());
-            ps.setString(4, Character.toString(entry.getType()));
-            ps.setString(5, entry.getActed() == null ? "null" : entry.getActed().toString());
-            ps.setString(6, entry.getActedName());
-            ps.setString(7, entry.getAction());
-        });
+        try (Connection c = provider.getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement(prefix.apply(ACTION_INSERT))) {
+                ps.setLong(1, entry.getTimestamp());
+                ps.setString(2, entry.getActor().toString());
+                ps.setString(3, entry.getActorName());
+                ps.setString(4, Character.toString(entry.getType()));
+                ps.setString(5, entry.getActed() == null ? "null" : entry.getActed().toString());
+                ps.setString(6, entry.getActedName());
+                ps.setString(7, entry.getAction());
+                ps.execute();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 
     @Override
     public Log getLog() {
         final Log.Builder log = Log.builder();
-        boolean success = runQuery(prefix.apply(ACTION_SELECT_ALL), rs -> {
-            while (rs.next()) {
-                final String actedUuid = rs.getString("acted_uuid");
-                LogEntry e = new LogEntry(
-                        rs.getLong("time"),
-                        UUID.fromString(rs.getString("actor_uuid")),
-                        rs.getString("actor_name"),
-                        rs.getString("type").toCharArray()[0],
-                        actedUuid.equals("null") ? null : UUID.fromString(actedUuid),
-                        rs.getString("acted_name"),
-                        rs.getString("action")
-                );
-                log.add(e);
+        try (Connection c = provider.getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement(prefix.apply(ACTION_SELECT_ALL))) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    final String actedUuid = rs.getString("acted_uuid");
+                    LogEntry e = new LogEntry(
+                            rs.getLong("time"),
+                            UUID.fromString(rs.getString("actor_uuid")),
+                            rs.getString("actor_name"),
+                            rs.getString("type").toCharArray()[0],
+                            actedUuid.equals("null") ? null : UUID.fromString(actedUuid),
+                            rs.getString("acted_name"),
+                            rs.getString("action")
+                    );
+                    log.add(e);
+                }
             }
-            return true;
-        });
-        return success ? log.build() : null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return log.build();
     }
 
     @Override
@@ -225,10 +225,13 @@ public class SQLBacking extends AbstractBacking {
             List<NodeDataHolder> data = new ArrayList<>();
             AtomicReference<String> primaryGroup = new AtomicReference<>(null);
             AtomicReference<String> userName = new AtomicReference<>();
-            boolean s = runQuery(
-                    prefix.apply(USER_PERMISSIONS_SELECT),
-                    ps -> ps.setString(1, user.getUuid().toString()),
-                    rs -> {
+
+            // Collect user permissions
+            try (Connection c = provider.getConnection()) {
+                try (PreparedStatement ps = c.prepareStatement(prefix.apply(USER_PERMISSIONS_SELECT))) {
+                    ps.setString(1, user.getUuid().toString());
+
+                    try (ResultSet rs = ps.executeQuery()) {
                         while (rs.next()) {
                             String permission = rs.getString("permission");
                             boolean value = rs.getBoolean("value");
@@ -238,26 +241,31 @@ public class SQLBacking extends AbstractBacking {
                             String contexts = rs.getString("contexts");
                             data.add(NodeDataHolder.of(permission, value, server, world, expiry, contexts));
                         }
-                        return true;
                     }
-            );
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return false;
+            }
 
-            boolean s2 = runQuery(
-                    prefix.apply(PLAYER_SELECT),
-                    ps -> ps.setString(1, user.getUuid().toString()),
-                    rs -> {
+            // Collect user meta (username & primary group)
+            try (Connection c = provider.getConnection()) {
+                try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_SELECT))) {
+                    ps.setString(1, user.getUuid().toString());
+
+                    try (ResultSet rs = ps.executeQuery()) {
                         if (rs.next()) {
                             userName.set(rs.getString("username"));
                             primaryGroup.set(rs.getString("primary_group"));
                         }
-                        return true;
                     }
-            );
-
-            if (!s || !s2) {
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
                 return false;
             }
 
+            // If the user has any data in storage
             if (!data.isEmpty()) {
                 Set<Node> nodes = data.stream().map(NodeDataHolder::toNode).collect(Collectors.toSet());
                 user.setNodes(nodes);
@@ -273,11 +281,14 @@ public class SQLBacking extends AbstractBacking {
                     name = "null";
                 }
 
+                // Check the user has *at least* some sort of default group.
                 boolean save = plugin.getUserManager().giveDefaultIfNeeded(user, false);
 
+                // Update their username if it has changed since last login.
                 if (user.getName() == null || user.getName().equalsIgnoreCase("null")) {
                     user.setName(name);
                 } else {
+                    // The name in storage is not the same as their actual name.
                     if (!name.equals(user.getName())) {
                         save = true;
                     }
@@ -285,64 +296,12 @@ public class SQLBacking extends AbstractBacking {
 
                 // Save back to the store if there was a username change
                 if (save) {
-                    boolean s3 = runQuery(prefix.apply(USER_PERMISSIONS_DELETE), ps -> {
-                        ps.setString(1, user.getUuid().toString());
-                    });
-
-                    if (!s3) return false;
-
-                    List<NodeDataHolder> newData = user.getNodes().stream().map(NodeDataHolder::fromNode).collect(Collectors.toList());
-                    if (newData.isEmpty()) return true;
-
-                    try (Connection connection = provider.getConnection()) {
-                        try (PreparedStatement ps = connection.prepareStatement(prefix.apply(USER_PERMISSIONS_INSERT))) {
-                            for (NodeDataHolder nd : newData) {
-                                ps.setString(1, user.getUuid().toString());
-                                ps.setString(2, nd.getPermission());
-                                ps.setBoolean(3, nd.isValue());
-                                ps.setString(4, nd.getServer());
-                                ps.setString(5, nd.getWorld());
-                                ps.setLong(6, nd.getExpiry());
-                                ps.setString(7, nd.getContexts());
-                                ps.addBatch();
-                            }
-                            ps.executeBatch();
-                        }
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-
-                    AtomicBoolean exists = new AtomicBoolean(false);
-                    boolean success = runQuery(
-                            prefix.apply(PLAYER_SELECT_USERNAME),
-                            ps -> ps.setString(1, uuid.toString()),
-                            rs -> {
-                                if (rs.next()) {
-                                    exists.set(true);
-                                }
-                                return true;
-                            }
-                    );
-                    if (!success) {
-                        return false;
-                    }
-
-                    if (exists.get()) {
-                        return runQuery(prefix.apply(PLAYER_UPDATE_FULL), ps -> {
-                            ps.setString(1, user.getName().toLowerCase());
-                            ps.setString(2, user.getPrimaryGroup() == null ? "default" : user.getPrimaryGroup());
-                            ps.setString(3, uuid.toString());
-                        });
-                    } else {
-                        return runQuery(prefix.apply(PLAYER_INSERT), ps -> {
-                            ps.setString(1, uuid.toString());
-                            ps.setString(2, user.getName().toLowerCase());
-                            ps.setString(3, user.getPrimaryGroup() == null ? "default" : user.getPrimaryGroup());
-                        });
-                    }
+                    // This should be fine, as the lock will be acquired by the same thread.
+                    saveUser(user);
                 }
 
             } else {
+                // User has no data in storage.
                 if (GenericUserManager.shouldSave(user)) {
                     user.clearNodes();
                     user.setPrimaryGroup(null);
@@ -359,66 +318,137 @@ public class SQLBacking extends AbstractBacking {
 
     @Override
     public boolean saveUser(User user) {
-        boolean shouldSave = GenericUserManager.shouldSave(user);
-
         user.getIoLock().lock();
         try {
-            boolean s = runQuery(prefix.apply(USER_PERMISSIONS_DELETE), ps -> {
-                ps.setString(1, user.getUuid().toString());
-            });
-
-            if (!s) return false;
-            if (!shouldSave) return true;
-
-            List<NodeDataHolder> data = user.getNodes().stream().map(NodeDataHolder::fromNode).collect(Collectors.toList());
-            if (data.isEmpty()) return true;
-
-            try (Connection connection = provider.getConnection()) {
-                try (PreparedStatement ps = connection.prepareStatement(prefix.apply(USER_PERMISSIONS_INSERT))) {
-                    for (NodeDataHolder nd : data) {
+            // Empty data - just delete from the DB.
+            if (!GenericUserManager.shouldSave(user)) {
+                try (Connection c = provider.getConnection()) {
+                    try (PreparedStatement ps = c.prepareStatement(prefix.apply(USER_PERMISSIONS_DELETE))) {
                         ps.setString(1, user.getUuid().toString());
-                        ps.setString(2, nd.getPermission());
-                        ps.setBoolean(3, nd.isValue());
-                        ps.setString(4, nd.getServer());
-                        ps.setString(5, nd.getWorld());
-                        ps.setLong(6, nd.getExpiry());
-                        ps.setString(7, nd.getContexts());
-                        ps.addBatch();
+                        ps.execute();
                     }
-                    ps.executeBatch();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    return false;
+                }
+                return true;
+            }
+
+            // Get a snapshot of current data.
+            Set<NodeDataHolder> remote = new HashSet<>();
+            try (Connection c = provider.getConnection()) {
+                try (PreparedStatement ps = c.prepareStatement(prefix.apply(USER_PERMISSIONS_SELECT))) {
+                    ps.setString(1, user.getUuid().toString());
+
+                    try (ResultSet rs = ps.executeQuery()) {
+                        while (rs.next()) {
+                            String permission = rs.getString("permission");
+                            boolean value = rs.getBoolean("value");
+                            String server = rs.getString("server");
+                            String world = rs.getString("world");
+                            long expiry = rs.getLong("expiry");
+                            String contexts = rs.getString("contexts");
+                            remote.add(NodeDataHolder.of(permission, value, server, world, expiry, contexts));
+                        }
+                    }
                 }
             } catch (SQLException e) {
-                e.printStackTrace();
+                return false;
+            }
+
+            Set<NodeDataHolder> local = user.getNodes().stream().map(NodeDataHolder::fromNode).collect(Collectors.toSet());
+
+            Map.Entry<Set<NodeDataHolder>, Set<NodeDataHolder>> diff = compareSets(local, remote);
+
+            Set<NodeDataHolder> toAdd = diff.getKey();
+            Set<NodeDataHolder> toRemove = diff.getValue();
+
+            if (!toAdd.isEmpty()) {
+                try (Connection c = provider.getConnection()) {
+                    try (PreparedStatement ps = c.prepareStatement(prefix.apply(USER_PERMISSIONS_INSERT))) {
+                        for (NodeDataHolder nd : toAdd) {
+                            ps.setString(1, user.getUuid().toString());
+                            ps.setString(2, nd.getPermission());
+                            ps.setBoolean(3, nd.isValue());
+                            ps.setString(4, nd.getServer());
+                            ps.setString(5, nd.getWorld());
+                            ps.setLong(6, nd.getExpiry());
+                            ps.setString(7, nd.getContexts());
+                            ps.addBatch();
+                        }
+                        ps.executeBatch();
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    return false;
+                }
+            }
+
+            if (!toRemove.isEmpty()) {
+                try (Connection c = provider.getConnection()) {
+                    try (PreparedStatement ps = c.prepareStatement(prefix.apply(USER_PERMISSIONS_DELETE_SPECIFIC))) {
+                        for (NodeDataHolder nd : toRemove) {
+                            ps.setString(1, user.getUuid().toString());
+                            ps.setString(2, nd.getPermission());
+                            ps.setBoolean(3, nd.isValue());
+                            ps.setString(4, nd.getServer());
+                            ps.setString(5, nd.getWorld());
+                            ps.setLong(6, nd.getExpiry());
+                            ps.setString(7, nd.getContexts());
+                            ps.addBatch();
+                        }
+                        ps.executeBatch();
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    return false;
+                }
             }
 
             AtomicBoolean exists = new AtomicBoolean(false);
-            boolean success = runQuery(
-                    prefix.apply(PLAYER_SELECT_USERNAME),
-                    ps -> ps.setString(1, user.getUuid().toString()),
-                    rs -> {
+            try (Connection c = provider.getConnection()) {
+                try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_SELECT_USERNAME))) {
+                    ps.setString(1, user.getUuid().toString());
+
+                    try (ResultSet rs = ps.executeQuery()) {
                         if (rs.next()) {
                             exists.set(true);
                         }
-                        return true;
                     }
-            );
-            if (!success) {
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
                 return false;
             }
 
             if (exists.get()) {
-                return runQuery(prefix.apply(PLAYER_UPDATE_FULL), ps -> {
-                    ps.setString(1, user.getName().toLowerCase());
-                    ps.setString(2, user.getPrimaryGroup() == null ? "default" : user.getPrimaryGroup());
-                    ps.setString(3, user.getUuid().toString());
-                });
+                try (Connection c = provider.getConnection()) {
+                    try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_UPDATE_FULL))) {
+                        ps.setString(1, user.getName().toLowerCase());
+                        ps.setString(2, user.getPrimaryGroup() == null ? "default" : user.getPrimaryGroup());
+                        ps.setString(3, user.getUuid().toString());
+                        ps.execute();
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    return false;
+                }
+
             } else {
-                return runQuery(prefix.apply(PLAYER_INSERT), ps -> {
-                    ps.setString(1, user.getUuid().toString());
-                    ps.setString(2, user.getName().toLowerCase());
-                    ps.setString(3, user.getPrimaryGroup() == null ? "default" : user.getPrimaryGroup());
-                });
+                try (Connection c = provider.getConnection()) {
+                    try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_INSERT))) {
+                        ps.setString(1, user.getUuid().toString());
+                        ps.setString(2, user.getName().toLowerCase());
+                        ps.setString(3, user.getPrimaryGroup() == null ? "default" : user.getPrimaryGroup());
+                        ps.execute();
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    return false;
+                }
             }
+
+            return true;
         } finally {
             user.getIoLock().unlock();
         }
@@ -432,38 +462,48 @@ public class SQLBacking extends AbstractBacking {
     @Override
     public Set<UUID> getUniqueUsers() {
         Set<UUID> uuids = new HashSet<>();
-
-        boolean success = runQuery(prefix.apply(USER_PERMISSIONS_SELECT_DISTINCT), rs -> {
-            while (rs.next()) {
-                String uuid = rs.getString("uuid");
-                uuids.add(UUID.fromString(uuid));
+        try (Connection c = provider.getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement(prefix.apply(USER_PERMISSIONS_SELECT_DISTINCT))) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        String uuid = rs.getString("uuid");
+                        uuids.add(UUID.fromString(uuid));
+                    }
+                }
             }
-            return true;
-        });
-
-        return success ? uuids : null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return uuids;
     }
 
     @Override
     public boolean createAndLoadGroup(String name) {
         List<String> groups = new ArrayList<>();
-        runQuery(
-                prefix.apply(GROUP_SELECT),
-                rs -> {
+        try (Connection c = provider.getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_SELECT_ALL))) {
+                try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         groups.add(rs.getString("name").toLowerCase());
                     }
-                    return true;
                 }
-        );
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
 
         if (!groups.contains(name)) {
-            runQuery(
-                    prefix.apply(GROUP_INSERT),
-                    ps -> {
-                        ps.setString(1, name);
-                    }
-            );
+            try (Connection c = provider.getConnection()) {
+                try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_INSERT))) {
+                    ps.setString(1, name);
+                    ps.execute();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
 
         return loadGroup(name);
@@ -471,16 +511,21 @@ public class SQLBacking extends AbstractBacking {
 
     @Override
     public boolean loadGroup(String name) {
+        // Check the group actually exists
         List<String> groups = new ArrayList<>();
-        runQuery(
-                prefix.apply(GROUP_SELECT),
-                rs -> {
+        try (Connection c = provider.getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_SELECT_ALL))) {
+                try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         groups.add(rs.getString("name").toLowerCase());
                     }
-                    return true;
                 }
-        );
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
 
         if (!groups.contains(name)) {
             return false;
@@ -490,10 +535,12 @@ public class SQLBacking extends AbstractBacking {
         group.getIoLock().lock();
         try {
             List<NodeDataHolder> data = new ArrayList<>();
-            boolean s = runQuery(
-                    prefix.apply(GROUP_PERMISSIONS_SELECT),
-                    ps -> ps.setString(1, group.getName()),
-                    rs -> {
+
+            try (Connection c = provider.getConnection()) {
+                try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_PERMISSIONS_SELECT))) {
+                    ps.setString(1, group.getName());
+
+                    try (ResultSet rs = ps.executeQuery()) {
                         while (rs.next()) {
                             String permission = rs.getString("permission");
                             boolean value = rs.getBoolean("value");
@@ -503,11 +550,10 @@ public class SQLBacking extends AbstractBacking {
                             String contexts = rs.getString("contexts");
                             data.add(NodeDataHolder.of(permission, value, server, world, expiry, contexts));
                         }
-                        return true;
                     }
-            );
-
-            if (!s) {
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
                 return false;
             }
 
@@ -527,68 +573,124 @@ public class SQLBacking extends AbstractBacking {
     @Override
     public boolean loadAllGroups() {
         List<String> groups = new ArrayList<>();
-        boolean b = runQuery(
-                prefix.apply(GROUP_SELECT),
-                rs -> {
+        try (Connection c = provider.getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_SELECT_ALL))) {
+                try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         groups.add(rs.getString("name").toLowerCase());
                     }
-                    return true;
                 }
-        );
+            }
 
-        if (!b) {
+        } catch (SQLException e) {
+            e.printStackTrace();
             return false;
         }
 
+        boolean success = true;
         for (String g : groups) {
             if (!loadGroup(g)) {
-                b = false;
+                success = false;
             }
         }
 
-        if (b) {
+        if (success) {
             GroupManager gm = plugin.getGroupManager();
             gm.getAll().values().stream()
                     .filter(g -> !groups.contains(g.getName()))
                     .forEach(gm::unload);
         }
-        return b;
+        return success;
     }
 
     @Override
     public boolean saveGroup(Group group) {
         group.getIoLock().lock();
         try {
-            boolean s = runQuery(prefix.apply(GROUP_PERMISSIONS_DELETE), ps -> {
-                ps.setString(1, group.getName());
-            });
-            if (!s) {
-                return false;
-            }
-
-            List<NodeDataHolder> data = group.getNodes().stream().map(NodeDataHolder::fromNode).collect(Collectors.toList());
-
-            if (data.isEmpty()) {
+            // Empty data, just delete.
+            if (group.getNodes().isEmpty()) {
+                try (Connection c = provider.getConnection()) {
+                    try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_PERMISSIONS_DELETE))) {
+                        ps.setString(1, group.getName());
+                        ps.execute();
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    return false;
+                }
                 return true;
             }
 
-            try (Connection connection = provider.getConnection()) {
-                try (PreparedStatement ps = connection.prepareStatement(prefix.apply(GROUP_PERMISSIONS_INSERT))) {
-                    for (NodeDataHolder nd : data) {
-                        ps.setString(1, group.getName());
-                        ps.setString(2, nd.getPermission());
-                        ps.setBoolean(3, nd.isValue());
-                        ps.setString(4, nd.getServer());
-                        ps.setString(5, nd.getWorld());
-                        ps.setLong(6, nd.getExpiry());
-                        ps.setString(7, nd.getContexts());
-                        ps.addBatch();
+            // Get a snapshot of current data
+            Set<NodeDataHolder> remote = new HashSet<>();
+            try (Connection c = provider.getConnection()) {
+                try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_PERMISSIONS_SELECT))) {
+                    ps.setString(1, group.getName());
+
+                    try (ResultSet rs = ps.executeQuery()) {
+                        while (rs.next()) {
+                            String permission = rs.getString("permission");
+                            boolean value = rs.getBoolean("value");
+                            String server = rs.getString("server");
+                            String world = rs.getString("world");
+                            long expiry = rs.getLong("expiry");
+                            String contexts = rs.getString("contexts");
+                            remote.add(NodeDataHolder.of(permission, value, server, world, expiry, contexts));
+                        }
                     }
-                    ps.executeBatch();
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
+                return false;
+            }
+
+            Set<NodeDataHolder> local = group.getNodes().stream().map(NodeDataHolder::fromNode).collect(Collectors.toSet());
+
+            Map.Entry<Set<NodeDataHolder>, Set<NodeDataHolder>> diff = compareSets(local, remote);
+
+            Set<NodeDataHolder> toAdd = diff.getKey();
+            Set<NodeDataHolder> toRemove = diff.getValue();
+
+            if (!toAdd.isEmpty()) {
+                try (Connection c = provider.getConnection()) {
+                    try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_PERMISSIONS_INSERT))) {
+                        for (NodeDataHolder nd : toAdd) {
+                            ps.setString(1, group.getName());
+                            ps.setString(2, nd.getPermission());
+                            ps.setBoolean(3, nd.isValue());
+                            ps.setString(4, nd.getServer());
+                            ps.setString(5, nd.getWorld());
+                            ps.setLong(6, nd.getExpiry());
+                            ps.setString(7, nd.getContexts());
+                            ps.addBatch();
+                        }
+                        ps.executeBatch();
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    return false;
+                }
+            }
+
+            if (!toRemove.isEmpty()) {
+                try (Connection c = provider.getConnection()) {
+                    try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_PERMISSIONS_DELETE_SPECIFIC))) {
+                        for (NodeDataHolder nd : toRemove) {
+                            ps.setString(1, group.getName());
+                            ps.setString(2, nd.getPermission());
+                            ps.setBoolean(3, nd.isValue());
+                            ps.setString(4, nd.getServer());
+                            ps.setString(5, nd.getWorld());
+                            ps.setLong(6, nd.getExpiry());
+                            ps.setString(7, nd.getContexts());
+                            ps.addBatch();
+                        }
+                        ps.executeBatch();
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    return false;
+                }
             }
 
             return true;
@@ -601,16 +703,22 @@ public class SQLBacking extends AbstractBacking {
     public boolean deleteGroup(Group group) {
         group.getIoLock().lock();
         try {
+            try (Connection c = provider.getConnection()) {
+                try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_PERMISSIONS_DELETE))) {
+                    ps.setString(1, group.getName());
+                    ps.execute();
+                }
 
-            boolean s = runQuery(
-                    prefix.apply(GROUP_PERMISSIONS_DELETE),
-                    ps -> {
-                        ps.setString(1, group.getName());
-                    }
-            );
-            return s && runQuery(prefix.apply(GROUP_DELETE), ps -> {
-                ps.setString(1, group.getName());
-            });
+                try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_DELETE))) {
+                    ps.setString(1, group.getName());
+                    ps.execute();
+                }
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return false;
+            }
+            return true;
 
         } finally {
             group.getIoLock().unlock();
@@ -625,19 +733,18 @@ public class SQLBacking extends AbstractBacking {
             AtomicBoolean exists = new AtomicBoolean(false);
             AtomicReference<String> groups = new AtomicReference<>(null);
 
-            boolean s = runQuery(
-                    prefix.apply(TRACK_SELECT),
-                    ps -> ps.setString(1, track.getName()),
-                    rs -> {
+            try (Connection c = provider.getConnection()) {
+                try (PreparedStatement ps = c.prepareStatement(prefix.apply(TRACK_SELECT))) {
+                    ps.setString(1, track.getName());
+                    try (ResultSet rs = ps.executeQuery()) {
                         if (rs.next()) {
                             exists.set(true);
                             groups.set(rs.getString("groups"));
                         }
-                        return true;
                     }
-            );
-
-            if (!s) {
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
                 return false;
             }
 
@@ -647,10 +754,17 @@ public class SQLBacking extends AbstractBacking {
                 return true;
             } else {
                 String json = gson.toJson(track.getGroups());
-                return runQuery(prefix.apply(TRACK_INSERT), ps -> {
-                    ps.setString(1, track.getName());
-                    ps.setString(2, json);
-                });
+                try (Connection c = provider.getConnection()) {
+                    try (PreparedStatement ps = c.prepareStatement(prefix.apply(TRACK_INSERT))) {
+                        ps.setString(1, track.getName());
+                        ps.setString(2, json);
+                        ps.execute();
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    return false;
+                }
+                return true;
             }
 
         } finally {
@@ -664,19 +778,17 @@ public class SQLBacking extends AbstractBacking {
         track.getIoLock().lock();
         try {
             AtomicReference<String> groups = new AtomicReference<>(null);
-            boolean s = runQuery(
-                    prefix.apply(TRACK_SELECT),
-                    ps -> ps.setString(1, name),
-                    rs -> {
+            try (Connection c = provider.getConnection()) {
+                try (PreparedStatement ps = c.prepareStatement(prefix.apply(TRACK_SELECT))) {
+                    ps.setString(1, track.getName());
+                    try (ResultSet rs = ps.executeQuery()) {
                         if (rs.next()) {
                             groups.set(rs.getString("groups"));
-                            return true;
                         }
-                        return false;
                     }
-            );
-
-            if (!s) {
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
                 return false;
             }
 
@@ -691,34 +803,33 @@ public class SQLBacking extends AbstractBacking {
     @Override
     public boolean loadAllTracks() {
         List<String> tracks = new ArrayList<>();
-        boolean b = runQuery(
-                prefix.apply(TRACK_SELECT_ALL),
-                rs -> {
+        try (Connection c = provider.getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement(prefix.apply(TRACK_SELECT_ALL))) {
+                try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
-                        String name = rs.getString("name");
-                        tracks.add(name);
+                        tracks.add(rs.getString("name").toLowerCase());
                     }
-                    return true;
                 }
-        );
-
-        if (!b) {
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
             return false;
         }
 
+        boolean success = true;
         for (String t : tracks) {
             if (!loadTrack(t)) {
-                b = false;
+                success = false;
             }
         }
 
-        if (b) {
+        if (success) {
             TrackManager tm = plugin.getTrackManager();
             tm.getAll().values().stream()
                     .filter(t -> !tracks.contains(t.getName()))
                     .forEach(tm::unload);
         }
-        return b;
+        return success;
     }
 
     @Override
@@ -726,13 +837,17 @@ public class SQLBacking extends AbstractBacking {
         track.getIoLock().lock();
         try {
             String s = gson.toJson(track.getGroups());
-            return runQuery(
-                    prefix.apply(TRACK_UPDATE),
-                    ps -> {
-                        ps.setString(1, s);
-                        ps.setString(2, track.getName());
-                    }
-            );
+            try (Connection c = provider.getConnection()) {
+                try (PreparedStatement ps = c.prepareStatement(prefix.apply(TRACK_UPDATE))) {
+                    ps.setString(1, s);
+                    ps.setString(2, track.getName());
+                    ps.execute();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return false;
+            }
+            return true;
         } finally {
             track.getIoLock().unlock();
         }
@@ -741,20 +856,22 @@ public class SQLBacking extends AbstractBacking {
     @Override
     public boolean deleteTrack(Track track) {
         track.getIoLock().lock();
-        boolean success;
         try {
-            success = runQuery(
-                    prefix.apply(TRACK_DELETE),
-                    ps -> {
-                        ps.setString(1, track.getName());
-                    }
-            );
+            try (Connection c = provider.getConnection()) {
+                try (PreparedStatement ps = c.prepareStatement(prefix.apply(TRACK_DELETE))) {
+                    ps.setString(1, track.getName());
+                    ps.execute();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return false;
+            }
         } finally {
             track.getIoLock().unlock();
         }
 
-        if (success) plugin.getTrackManager().unload(track);
-        return success;
+        plugin.getTrackManager().unload(track);
+        return true;
     }
 
     @Override
@@ -762,32 +879,45 @@ public class SQLBacking extends AbstractBacking {
         final String u = username.toLowerCase();
         AtomicBoolean exists = new AtomicBoolean(false);
 
-        boolean success = runQuery(
-                prefix.apply(PLAYER_SELECT_USERNAME),
-                ps -> ps.setString(1, uuid.toString()),
-                rs -> {
+        try (Connection c = provider.getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_SELECT_USERNAME))) {
+                ps.setString(1, uuid.toString());
+                try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
                         exists.set(true);
                     }
-                    return true;
                 }
-        );
-
-        if (!success) {
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
             return false;
         }
 
         if (exists.get()) {
-            return runQuery(prefix.apply(PLAYER_UPDATE), ps -> {
-                ps.setString(1, u);
-                ps.setString(2, uuid.toString());
-            });
+            try (Connection c = provider.getConnection()) {
+                try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_UPDATE))) {
+                    ps.setString(1, u);
+                    ps.setString(2, uuid.toString());
+                    ps.execute();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return false;
+            }
+            return true;
         } else {
-            return runQuery(prefix.apply(PLAYER_INSERT), ps -> {
-                ps.setString(1, uuid.toString());
-                ps.setString(2, u);
-                ps.setString(3, "default");
-            });
+            try (Connection c = provider.getConnection()) {
+                try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_INSERT))) {
+                    ps.setString(1, uuid.toString());
+                    ps.setString(2, u);
+                    ps.setString(3, "default");
+                    ps.execute();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return false;
+            }
+            return true;
         }
     }
 
@@ -796,37 +926,60 @@ public class SQLBacking extends AbstractBacking {
         final String u = username.toLowerCase();
         final AtomicReference<UUID> uuid = new AtomicReference<>(null);
 
-        boolean success = runQuery(
-                prefix.apply(PLAYER_SELECT_UUID),
-                ps -> ps.setString(1, u),
-                rs -> {
+        try (Connection c = provider.getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_SELECT_UUID))) {
+                ps.setString(1, u);
+                try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
                         uuid.set(UUID.fromString(rs.getString("uuid")));
-                        return true;
                     }
-                    return false;
                 }
-        );
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
 
-        return success ? uuid.get() : null;
+        return uuid.get();
     }
 
     @Override
     public String getName(UUID uuid) {
         final AtomicReference<String> name = new AtomicReference<>(null);
 
-        boolean success = runQuery(
-                prefix.apply(PLAYER_SELECT_USERNAME),
-                ps -> ps.setString(1, uuid.toString()),
-                rs -> {
+        try (Connection c = provider.getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_SELECT_USERNAME))) {
+                ps.setString(1, uuid.toString());
+                try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
                         name.set(rs.getString("username"));
-                        return true;
                     }
-                    return false;
                 }
-        );
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
 
-        return success ? name.get() : null;
+        return name.get();
+    }
+
+    /**
+     * Compares two sets
+     * @param local the local set
+     * @param remote the remote set
+     * @return the entries to add to remote, and the entries to remove from remote
+     */
+    private static Map.Entry<Set<NodeDataHolder>, Set<NodeDataHolder>> compareSets(Set<NodeDataHolder> local, Set<NodeDataHolder> remote) {
+        // entries in local but not remote need to be added
+        // entries in remote but not local need to be removed
+
+        Set<NodeDataHolder> toAdd = new HashSet<>(local);
+        toAdd.removeAll(remote);
+
+        Set<NodeDataHolder> toRemove = new HashSet<>(remote);
+        toRemove.removeAll(local);
+
+        return Maps.immutableEntry(toAdd, toRemove);
     }
 }
