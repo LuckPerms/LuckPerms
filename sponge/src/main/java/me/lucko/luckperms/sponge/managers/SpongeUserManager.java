@@ -52,14 +52,22 @@ import org.spongepowered.api.service.permission.PermissionService;
 import co.aikar.timings.Timing;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class SpongeUserManager implements UserManager, LPSubjectCollection {
     private final LPSpongePlugin plugin;
 
+    private final ReentrantLock loadingLock = new ReentrantLock();
+    private final Map<UUID, CountDownLatch> loadingLatches = Collections.synchronizedMap(new HashMap<>());
+    
     private final LoadingCache<UserIdentifier, SpongeUser> objects = CacheBuilder.newBuilder()
             .build(new CacheLoader<UserIdentifier, SpongeUser>() {
                 @Override
@@ -202,26 +210,68 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
 
             UUID u = plugin.getUuidCache().getUUID(uuid);
 
-            // check if the user is loaded in memory.
-            if (isLoaded(UserIdentifier.of(u, null))) {
-                return get(u).getSpongeData();
-            } else {
+            CountDownLatch latch;
 
-                // User isn't already loaded. hopefully this call is not on the main thread. :(
-                //plugin.getLog().warn("User Subject '" + u + "' was requested, but is not loaded in memory. Loading them from storage now.");
-                long startTime = System.currentTimeMillis();
-                plugin.getStorage().loadUser(u, "null").join();
-                SpongeUser user = get(u);
+            loadingLock.lock();
+            try {
+                boolean loaded = isLoaded(UserIdentifier.of(u, null));
+                boolean locked = loadingLatches.containsKey(u);
 
-                if (user == null) {
-                    plugin.getLog().severe("Error whilst loading user '" + u + "'.");
-                    return plugin.getService().getFallbackUserSubjects().get(u.toString());
+                if (loaded && !locked) {
+                    return get(u).getSpongeData();
                 }
 
-                user.setupData(false);
-                //plugin.getLog().warn("Loading '" + u + "' took " + (System.currentTimeMillis() - startTime) + " ms.");
-                return user.getSpongeData();
+                if (!loaded && !locked) {
+                    latch = new CountDownLatch(1);
+                    loadingLatches.put(u, latch);
+
+                    // Request load.
+                    plugin.doAsync(() -> {
+                        try {
+                            plugin.getStorage().loadUser(u, "null").get();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                        SpongeUser user = get(u);
+                        if (user == null) {
+                            plugin.getLog().severe("Error whilst loading user '" + u + "'.");
+                            latch.countDown();
+                            return;
+                        }
+
+                        user.setupData(false);
+                        latch.countDown();
+                        loadingLatches.remove(u, latch);
+                    });
+
+                } else {
+                    // wait for the lock, then load.
+                    latch = loadingLatches.get(u);
+                }
+
+            } finally {
+                loadingLock.unlock();
             }
+
+            // Wait for the task loading the user.
+            try {
+                latch.await(10, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            SpongeUser user = get(u);
+            if (user == null) {
+                plugin.getLog().warn("Failed to load user subject for id: " + id);
+                return plugin.getService().getFallbackUserSubjects().get(id); // fallback to the transient collection
+            }
+
+            if (user.getUserData() == null) {
+                plugin.getLog().warn("User data not present for requested user id: " + id);
+            }
+
+            return user.getSpongeData();
         }
     }
 
