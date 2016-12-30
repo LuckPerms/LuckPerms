@@ -191,6 +191,7 @@ public class Util {
         String command = ExportCommand.nodeToString(node, group ? holder.getObjectName() : holder.getFriendlyName(), group)
                 .replace("/luckperms", "/" + label)
                 .replace("set", "unset")
+                .replace("add", "remove")
                 .replace(" true", "")
                 .replace(" false", "");
 
