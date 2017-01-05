@@ -70,6 +70,8 @@ public class VaultPermissionHook extends Permission {
         this.plugin = plugin;
         this.scheduler = new VaultScheduler(plugin);
 
+        super.plugin = plugin;
+
         // Config options
         this.server = plugin.getConfiguration().getVaultServer();
         this.includeGlobal = plugin.getConfiguration().isVaultIncludingGlobal();
