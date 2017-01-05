@@ -86,7 +86,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
     @Override
     public Map<ImmutableContextSet, Map<String, Boolean>> getPermissions() {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_GET_PERMISSIONS)) {
-            Map<ContextSet, Map<String, Boolean>> perms = new HashMap<>();
+            Map<ImmutableContextSet, Map<String, Boolean>> perms = new HashMap<>();
 
             for (Node n : enduring ? holder.getNodes() : holder.getTransientNodes()) {
                 MutableContextSet contexts = MutableContextSet.fromSet(n.getContexts());
@@ -99,16 +99,12 @@ public class LuckPermsSubjectData implements LPSubjectData {
                     contexts.add(new Context(Context.WORLD_KEY, n.getWorld().get()));
                 }
 
-                if (!perms.containsKey(contexts)) {
-                    perms.put(contexts.makeImmutable(), new HashMap<>());
-                }
-
-                perms.get(contexts).put(n.getPermission(), n.getValue());
+                perms.computeIfAbsent(contexts.makeImmutable(), cs -> new HashMap<>()).put(n.getPermission(), n.getValue());
             }
 
             ImmutableMap.Builder<ImmutableContextSet, Map<String, Boolean>> map = ImmutableMap.builder();
-            for (Map.Entry<ContextSet, Map<String, Boolean>> e : perms.entrySet()) {
-                map.put(e.getKey().makeImmutable(), ImmutableMap.copyOf(e.getValue()));
+            for (Map.Entry<ImmutableContextSet, Map<String, Boolean>> e : perms.entrySet()) {
+                map.put(e.getKey(), ImmutableMap.copyOf(e.getValue()));
             }
             return map.build();
         }
@@ -233,11 +229,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
                     contexts.add(new Context(Context.WORLD_KEY, n.getWorld().get()));
                 }
 
-                if (!parents.containsKey(contexts)) {
-                    parents.put(contexts.makeImmutable(), new HashSet<>());
-                }
-
-                parents.get(contexts).add(service.getGroupSubjects().get(n.getGroupName()).toReference());
+                parents.computeIfAbsent(contexts.makeImmutable(), cs -> new HashSet<>()).add(service.getGroupSubjects().get(n.getGroupName()).toReference());
             }
 
             ImmutableMap.Builder<ImmutableContextSet, Set<SubjectReference>> map = ImmutableMap.builder();
@@ -374,9 +366,9 @@ public class LuckPermsSubjectData implements LPSubjectData {
     @Override
     public Map<ImmutableContextSet, Map<String, String>> getOptions() {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_GET_OPTIONS)) {
-            Map<ContextSet, Map<String, String>> options = new HashMap<>();
-            Map<ContextSet, Integer> minPrefixPriority = new HashMap<>();
-            Map<ContextSet, Integer> minSuffixPriority = new HashMap<>();
+            Map<ImmutableContextSet, Map<String, String>> options = new HashMap<>();
+            Map<ImmutableContextSet, Integer> minPrefixPriority = new HashMap<>();
+            Map<ImmutableContextSet, Integer> minSuffixPriority = new HashMap<>();
 
             for (Node n : enduring ? holder.getNodes() : holder.getTransientNodes()) {
                 if (!n.getValue()) {
@@ -397,39 +389,41 @@ public class LuckPermsSubjectData implements LPSubjectData {
                     contexts.add(new Context(Context.WORLD_KEY, n.getWorld().get()));
                 }
 
-                if (!options.containsKey(contexts)) {
-                    options.put(contexts, new HashMap<>());
-                    minPrefixPriority.put(contexts, Integer.MIN_VALUE);
-                    minSuffixPriority.put(contexts, Integer.MIN_VALUE);
+                ImmutableContextSet immutableContexts = contexts.makeImmutable();
+
+                if (!options.containsKey(immutableContexts)) {
+                    options.put(immutableContexts, new HashMap<>());
+                    minPrefixPriority.put(immutableContexts, Integer.MIN_VALUE);
+                    minSuffixPriority.put(immutableContexts, Integer.MIN_VALUE);
                 }
 
                 if (n.isPrefix()) {
                     Map.Entry<Integer, String> value = n.getPrefix();
-                    if (value.getKey() > minPrefixPriority.get(contexts)) {
-                        options.get(contexts).put("prefix", value.getValue());
-                        minPrefixPriority.put(contexts, value.getKey());
+                    if (value.getKey() > minPrefixPriority.get(immutableContexts)) {
+                        options.get(immutableContexts).put("prefix", value.getValue());
+                        minPrefixPriority.put(immutableContexts, value.getKey());
                     }
                     continue;
                 }
 
                 if (n.isSuffix()) {
                     Map.Entry<Integer, String> value = n.getSuffix();
-                    if (value.getKey() > minSuffixPriority.get(contexts)) {
-                        options.get(contexts).put("suffix", value.getValue());
-                        minSuffixPriority.put(contexts, value.getKey());
+                    if (value.getKey() > minSuffixPriority.get(immutableContexts)) {
+                        options.get(immutableContexts).put("suffix", value.getValue());
+                        minSuffixPriority.put(immutableContexts, value.getKey());
                     }
                     continue;
                 }
 
                 if (n.isMeta()) {
                     Map.Entry<String, String> meta = n.getMeta();
-                    options.get(contexts).put(meta.getKey(), meta.getValue());
+                    options.get(immutableContexts).put(meta.getKey(), meta.getValue());
                 }
             }
 
             ImmutableMap.Builder<ImmutableContextSet, Map<String, String>> map = ImmutableMap.builder();
-            for (Map.Entry<ContextSet, Map<String, String>> e : options.entrySet()) {
-                map.put(e.getKey().makeImmutable(), ImmutableMap.copyOf(e.getValue()));
+            for (Map.Entry<ImmutableContextSet, Map<String, String>> e : options.entrySet()) {
+                map.put(e.getKey(), ImmutableMap.copyOf(e.getValue()));
             }
             return map.build();
         }
@@ -455,8 +449,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
                 } else {
                     holder.setTransientPermission(NodeFactory.makeMetaNode(key, value).withExtraContext(context).build());
                 }
-            } catch (ObjectAlreadyHasException ignored) {
-            }
+            } catch (ObjectAlreadyHasException ignored) {}
             objectSave(holder);
             return true;
         }
@@ -512,8 +505,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
                     } else {
                         holder.unsetTransientPermission(n);
                     }
-                } catch (ObjectLacksException ignored) {
-                }
+                } catch (ObjectLacksException ignored) {}
             });
 
             objectSave(holder);
