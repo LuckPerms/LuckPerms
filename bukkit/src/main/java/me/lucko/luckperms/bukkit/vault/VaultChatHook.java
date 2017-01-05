@@ -86,7 +86,7 @@ public class VaultChatHook extends Chat {
 
         perms.log("Setting meta: '" + node + "' for " + holder.getObjectName() + " on world " + world + ", server " + perms.getServer());
 
-        perms.getScheduler().scheduleTask(() -> {
+        perms.getScheduler().execute(() -> {
             List<Node> toRemove = holder.getNodes().stream()
                     .filter(n -> n.isMeta() && n.getMeta().getKey().equals(node))
                     .collect(Collectors.toList());
@@ -122,7 +122,7 @@ public class VaultChatHook extends Chat {
 
         perms.log("Setting " + (prefix ? "prefix" : "suffix") + " for " + holder.getObjectName() + " on world " + world + ", server " + perms.getServer());
 
-        perms.getScheduler().scheduleTask(() -> {
+        perms.getScheduler().execute(() -> {
             Node.Builder node = new NodeBuilder((prefix ? "prefix" : "suffix") + ".1000." + escapeCharacters(value));
             node.setValue(true);
             if (!perms.getServer().equalsIgnoreCase("global")) {
@@ -153,7 +153,7 @@ public class VaultChatHook extends Chat {
             return defaultValue;
         }
 
-        return unescapeCharacters(user.getUserData().getMetaData(perms.createContext(perms.getServer(), world)).getMeta().getOrDefault(node, defaultValue));
+        return unescapeCharacters(user.getUserData().getMetaData(perms.createContextForWorld(world)).getMeta().getOrDefault(node, defaultValue));
     }
 
     private String getUserChatMeta(boolean prefix, User user, String world) {
@@ -166,7 +166,7 @@ public class VaultChatHook extends Chat {
             return "";
         }
 
-        MetaData data = user.getUserData().getMetaData(perms.createContext(perms.getServer(), world));
+        MetaData data = user.getUserData().getMetaData(perms.createContextForWorld(world));
         String v = prefix ? data.getPrefix() : data.getSuffix();
         return v == null ? "" : unescapeCharacters(v);
     }
