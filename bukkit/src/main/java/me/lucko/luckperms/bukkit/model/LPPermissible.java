@@ -208,7 +208,7 @@ public class LPPermissible extends PermissibleBase {
         }
 
         PermissionAttachment result = addAttachment(plugin);
-        if (Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin, () -> result.remove(), ticks) == -1) {
+        if (Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin, result::remove, ticks) == -1) {
             Bukkit.getServer().getLogger().log(Level.WARNING, "Could not add PermissionAttachment to " + parent + " for plugin " + plugin.getDescription().getFullName() + ": Scheduler returned -1");
             result.remove();
             return null;

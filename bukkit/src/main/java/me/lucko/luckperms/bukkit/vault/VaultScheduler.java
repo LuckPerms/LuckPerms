@@ -24,17 +24,26 @@ package me.lucko.luckperms.bukkit.vault;
 
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 
+import org.bukkit.scheduler.BukkitTask;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
-public class VaultScheduler implements Runnable {
+/**
+ * Sequential executor for Vault modifications
+ */
+public class VaultScheduler implements Runnable, Executor {
+
+    private BukkitTask task = null;
     private final List<Runnable> tasks = new ArrayList<>();
 
     public VaultScheduler(LPBukkitPlugin plugin) {
-        plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, this, 1L, 1L);
+        task = plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, this, 1L, 1L);
     }
 
-    public void scheduleTask(Runnable r) {
+    @Override
+    public void execute(Runnable r) {
         synchronized (tasks) {
             tasks.add(r);
         }
@@ -42,12 +51,24 @@ public class VaultScheduler implements Runnable {
 
     @Override
     public void run() {
-        List<Runnable> toRun = new ArrayList<>();
+        List<Runnable> toRun;
         synchronized (tasks) {
+            if (tasks.isEmpty()) {
+                return;
+            }
+
+            toRun = new ArrayList<>();
             toRun.addAll(tasks);
             tasks.clear();
         }
 
         toRun.forEach(Runnable::run);
+    }
+
+    public void cancelTask() {
+        if (task != null) {
+            task.cancel();
+            task = null;
+        }
     }
 }

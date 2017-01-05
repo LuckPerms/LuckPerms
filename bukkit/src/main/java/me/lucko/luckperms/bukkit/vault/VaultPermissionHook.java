@@ -22,10 +22,8 @@
 
 package me.lucko.luckperms.bukkit.vault;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.Setter;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LocalizedNode;
@@ -44,31 +42,42 @@ import net.milkbowl.vault.permission.Permission;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 /**
  * The LuckPerms Vault Permission implementation
  * Most lookups are cached.
  */
 @Getter
-@Setter
 public class VaultPermissionHook extends Permission {
     private LPBukkitPlugin plugin;
-
-    @Setter(value = AccessLevel.NONE)
     private VaultScheduler scheduler;
+
+    private final String name = "LuckPerms";
 
     private String server = "global";
     private boolean includeGlobal = true;
     private boolean ignoreWorld = false;
-
-    // Primary Group override settings
     private boolean pgo = false;
     private boolean pgoCheckInherited = false;
     private boolean pgoCheckExists = true;
     private boolean pgoCheckMemberOf = true;
 
-    public void setup() {
-        scheduler = new VaultScheduler(plugin);
+    private Function<String, String> WORLD_CORRECTION_FUNCTION = s -> ignoreWorld ? null : s;
+
+    public VaultPermissionHook(LPBukkitPlugin plugin) {
+        this.plugin = plugin;
+        this.scheduler = new VaultScheduler(plugin);
+
+        // Config options
+        this.server = plugin.getConfiguration().getVaultServer();
+        this.includeGlobal = plugin.getConfiguration().isVaultIncludingGlobal();
+        this.ignoreWorld = plugin.getConfiguration().isVaultIgnoreWorld();
+        this.pgo = plugin.getConfiguration().isVaultPrimaryGroupOverrides();
+        this.pgoCheckInherited = plugin.getConfiguration().isVaultPrimaryGroupOverridesCheckInherited();
+        this.pgoCheckExists = plugin.getConfiguration().isVaultPrimaryGroupOverridesCheckExists();
+        this.pgoCheckMemberOf = plugin.getConfiguration().isVaultPrimaryGroupOverridesCheckMemberOf();
     }
 
     public void log(String s) {
@@ -78,13 +87,8 @@ public class VaultPermissionHook extends Permission {
     }
 
     @Override
-    public String getName() {
-        return "LuckPerms";
-    }
-
-    @Override
     public boolean isEnabled() {
-        return plugin.getStorage().isAcceptingLogins();
+        return plugin.isEnabled();
     }
 
     @Override
@@ -99,16 +103,18 @@ public class VaultPermissionHook extends Permission {
      * @param holder     the holder to add the permission to
      * @param permission the permission to add
      */
-    private void add(String world, PermissionHolder holder, String permission) {
-        try {
-            if (world != null && !world.equals("")) {
-                holder.setPermission(permission, true, server, world);
-            } else {
-                holder.setPermission(permission, true, server);
-            }
+    private CompletableFuture<Void> add(String world, PermissionHolder holder, String permission) {
+        return CompletableFuture.runAsync(() -> {
+            try {
+                if (world != null && !world.equals("") && !world.equalsIgnoreCase("global")) {
+                    holder.setPermission(permission, true, server, world);
+                } else {
+                    holder.setPermission(permission, true, server);
+                }
 
-            save(holder);
-        } catch (ObjectAlreadyHasException ignored) {}
+                save(holder);
+            } catch (ObjectAlreadyHasException ignored) {}
+        }, scheduler);
     }
 
     /**
@@ -118,35 +124,37 @@ public class VaultPermissionHook extends Permission {
      * @param holder     the holder to remove the permission from
      * @param permission the permission to remove
      */
-    private void remove(String world, PermissionHolder holder, String permission) {
-        try {
-            if (world != null && !world.equals("")) {
-                holder.unsetPermission(permission, server, world);
-            } else {
-                holder.unsetPermission(permission, server);
-            }
+    private CompletableFuture<Void> remove(String world, PermissionHolder holder, String permission) {
+        return CompletableFuture.runAsync(() -> {
+            try {
+                if (world != null && !world.equals("") && !world.equalsIgnoreCase("global")) {
+                    holder.unsetPermission(permission, server, world);
+                } else {
+                    holder.unsetPermission(permission, server);
+                }
 
-            save(holder);
-        } catch (ObjectLacksException ignored) {}
+                save(holder);
+            } catch (ObjectLacksException ignored) {}
+        }, scheduler);
     }
 
     /**
-     * Utility method for saving a user or group
+     * Utility method to asynchronously save a user or group
      *
      * @param holder the holder instance
      */
-    void save(PermissionHolder holder) {
+    public void save(PermissionHolder holder) {
         if (holder instanceof User) {
-            plugin.getStorage().saveUser(((User) holder))
-                    .thenRunAsync(() -> ((User) holder).getRefreshBuffer().request(), plugin.getAsyncExecutor());
+            User u = (User) holder;
+            plugin.getStorage().saveUser(u).thenRunAsync(() -> u.getRefreshBuffer().request(), plugin.getAsyncExecutor());
         }
         if (holder instanceof Group) {
-            plugin.getStorage().saveGroup(((Group) holder))
-                    .thenRunAsync(() -> plugin.getUpdateTaskBuffer().request(), plugin.getAsyncExecutor());
+            Group g = (Group) holder;
+            plugin.getStorage().saveGroup(g).thenRunAsync(() -> plugin.getUpdateTaskBuffer().request(), plugin.getAsyncExecutor());
         }
     }
 
-    Contexts createContext(String server, String world) {
+    public Contexts createContextForWorld(String world) {
         Map<String, String> context = new HashMap<>();
         if (world != null && !world.equals("")) {
             context.put("world", world);
@@ -157,7 +165,7 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public boolean playerHas(String world, @NonNull String player, @NonNull String permission) {
-        world = ignoreWorld ? null : world; // Correct world value
+        world = WORLD_CORRECTION_FUNCTION.apply(world);
         log("Checking if player " + player + " has permission: " + permission + " on world " + world + ", server " + server);
 
         User user = plugin.getUserManager().getByUsername(player);
@@ -168,91 +176,91 @@ public class VaultPermissionHook extends Permission {
         }
 
         // Effectively fallback to the standard Bukkit #hasPermission check.
-        return user.getUserData().getPermissionData(createContext(server, world)).getPermissionValue(permission).asBoolean();
+        return user.getUserData().getPermissionData(createContextForWorld(world)).getPermissionValue(permission).asBoolean();
     }
 
     @Override
     public boolean playerAdd(String world, @NonNull String player, @NonNull String permission) {
-        String finalWorld = ignoreWorld ? null : world; // Correct world value
-        log("Adding permission to player " + player + ": '" + permission + "' on world " + finalWorld + ", server " + server);
+        world = WORLD_CORRECTION_FUNCTION.apply(world);
+        log("Adding permission to player " + player + ": '" + permission + "' on world " + world + ", server " + server);
 
         final User user = plugin.getUserManager().getByUsername(player);
         if (user == null) return false;
 
-        scheduler.scheduleTask(() -> add(finalWorld, user, permission));
+        add(world, user, permission);
         return true;
     }
 
     @Override
     public boolean playerRemove(String world, @NonNull String player, @NonNull String permission) {
-        String finalWorld = ignoreWorld ? null : world; // Correct world value
-        log("Removing permission from player " + player + ": '" + permission + "' on world " + finalWorld + ", server " + server);
+        world = WORLD_CORRECTION_FUNCTION.apply(world);
+        log("Removing permission from player " + player + ": '" + permission + "' on world " + world + ", server " + server);
 
         final User user = plugin.getUserManager().getByUsername(player);
         if (user == null) return false;
 
-        scheduler.scheduleTask(() -> remove(finalWorld, user, permission));
+        remove(world, user, permission);
         return true;
     }
 
     @Override
     public boolean groupHas(String world, @NonNull String groupName, @NonNull String permission) {
-        world = ignoreWorld ? null : world; // Correct world value
+        world = WORLD_CORRECTION_FUNCTION.apply(world);
         log("Checking if group " + groupName + " has permission: " + permission + " on world " + world + ", server " + server);
 
         final Group group = plugin.getGroupManager().getIfLoaded(groupName);
         if (group == null) return false;
 
         // This is a nasty call. Groups aren't cached. :(
-        Map<String, Boolean> permissions = group.exportNodes(createContext(server, world), true);
-
-        return permissions.containsKey(permission) && permissions.get(permission);
+        Map<String, Boolean> permissions = group.exportNodes(createContextForWorld(world), true);
+        return permissions.containsKey(permission.toLowerCase()) && permissions.get(permission.toLowerCase());
     }
 
     @Override
     public boolean groupAdd(String world, @NonNull String groupName, @NonNull String permission) {
-        String finalWorld = ignoreWorld ? null : world; // Correct world value
-        log("Adding permission to group " + groupName + ": '" + permission + "' on world " + finalWorld + ", server " + server);
+        world = WORLD_CORRECTION_FUNCTION.apply(world);
+        log("Adding permission to group " + groupName + ": '" + permission + "' on world " + world + ", server " + server);
 
         final Group group = plugin.getGroupManager().getIfLoaded(groupName);
         if (group == null) return false;
 
-        scheduler.scheduleTask(() -> add(finalWorld, group, permission));
+        add(world, group, permission);
         return true;
     }
 
     @Override
     public boolean groupRemove(String world, @NonNull String groupName, @NonNull String permission) {
-        String finalWorld = ignoreWorld ? null : world; // Correct world value
-        log("Removing permission from group " + groupName + ": '" + permission + "' on world " + finalWorld + ", server " + server);
+        world = WORLD_CORRECTION_FUNCTION.apply(world);
+        log("Removing permission from group " + groupName + ": '" + permission + "' on world " + world + ", server " + server);
 
         final Group group = plugin.getGroupManager().getIfLoaded(groupName);
         if (group == null) return false;
 
-        scheduler.scheduleTask(() -> remove(finalWorld, group, permission));
+        remove(world, group, permission);
         return true;
     }
 
     @Override
     public boolean playerInGroup(String world, @NonNull String player, @NonNull String group) {
-        String finalWorld = ignoreWorld ? null : world; // Correct world value
-        log("Checking if player " + player + " is in group: " + group + " on world " + finalWorld + ", server " + server);
+        world = WORLD_CORRECTION_FUNCTION.apply(world);
+        log("Checking if player " + player + " is in group: " + group + " on world " + world + ", server " + server);
 
         final User user = plugin.getUserManager().getByUsername(player);
         if (user == null) return false;
 
+        String w = world; // screw effectively final
         return user.getNodes().stream()
                 .filter(Node::isGroupNode)
                 .filter(n -> n.shouldApplyOnServer(server, isIncludeGlobal(), false))
-                .filter(n -> n.shouldApplyOnWorld(finalWorld, true, false))
+                .filter(n -> n.shouldApplyOnWorld(w, true, false))
                 .map(Node::getGroupName)
                 .anyMatch(s -> s.equalsIgnoreCase(group));
     }
 
     @Override
     public boolean playerAddGroup(String world, @NonNull String player, @NonNull String groupName) {
-        String finalWorld = ignoreWorld ? null : world; // Correct world value
-        log("Adding player " + player + " to group: '" + groupName + "' on world " + finalWorld + ", server " + server);
+        world = WORLD_CORRECTION_FUNCTION.apply(world);
+        log("Adding player " + player + " to group: '" + groupName + "' on world " + world + ", server " + server);
 
         final User user = plugin.getUserManager().getByUsername(player);
         if (user == null) return false;
@@ -260,10 +268,11 @@ public class VaultPermissionHook extends Permission {
         final Group group = plugin.getGroupManager().getIfLoaded(groupName);
         if (group == null) return false;
 
-        scheduler.scheduleTask(() -> {
+        String w = world;
+        scheduler.execute(() -> {
             try {
-                if (finalWorld != null && !finalWorld.equals("")) {
-                    user.setInheritGroup(group, server, finalWorld);
+                if (w != null && !w.equals("") && !w.equalsIgnoreCase("global")) {
+                    user.setInheritGroup(group, server, w);
                 } else {
                     user.setInheritGroup(group, server);
                 }
@@ -276,8 +285,8 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public boolean playerRemoveGroup(String world, @NonNull String player, @NonNull String groupName) {
-        String finalWorld = ignoreWorld ? null : world; // Correct world value
-        log("Removing player " + player + " from group: '" + groupName + "' on world " + finalWorld + ", server " + server);
+        world = WORLD_CORRECTION_FUNCTION.apply(world);
+        log("Removing player " + player + " from group: '" + groupName + "' on world " + world + ", server " + server);
 
         final User user = plugin.getUserManager().getByUsername(player);
         if (user == null) return false;
@@ -285,10 +294,11 @@ public class VaultPermissionHook extends Permission {
         final Group group = plugin.getGroupManager().getIfLoaded(groupName);
         if (group == null) return false;
 
-        scheduler.scheduleTask(() -> {
+        String w = world;
+        scheduler.execute(() -> {
             try {
-                if (finalWorld != null && !finalWorld.equals("")) {
-                    user.unsetInheritGroup(group, server, finalWorld);
+                if (w != null && !w.equals("") && !w.equalsIgnoreCase("global")) {
+                    user.unsetInheritGroup(group, server, w);
                 } else {
                     user.unsetInheritGroup(group, server);
                 }
@@ -301,23 +311,24 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public String[] getPlayerGroups(String world, @NonNull String player) {
-        String finalWorld = ignoreWorld ? null : world; // Correct world value
-        log("Getting groups of player: " + player + ", on world " + finalWorld + ", server " + server);
+        world = WORLD_CORRECTION_FUNCTION.apply(world);
+        log("Getting groups of player: " + player + ", on world " + world + ", server " + server);
 
         User user = plugin.getUserManager().getByUsername(player);
         if (user == null) return new String[0];
 
+        String w = world; // screw effectively final
         return user.getNodes().stream()
                 .filter(Node::isGroupNode)
                 .filter(n -> n.shouldApplyOnServer(server, isIncludeGlobal(), false))
-                .filter(n -> n.shouldApplyOnWorld(finalWorld, true, false))
+                .filter(n -> n.shouldApplyOnWorld(w, true, false))
                 .map(Node::getGroupName)
                 .toArray(String[]::new);
     }
 
     @Override
     public String getPrimaryGroup(String world, @NonNull String player) {
-        world = ignoreWorld ? null : world; // Correct world value
+        world = WORLD_CORRECTION_FUNCTION.apply(world);
         log("Getting primary group of player: " + player);
         final User user = plugin.getUserManager().getByUsername(player);
 
@@ -331,7 +342,7 @@ public class VaultPermissionHook extends Permission {
         }
 
         if (pgoCheckInherited) {
-            PermissionData data = user.getUserData().getPermissionData(createContext(server, world));
+            PermissionData data = user.getUserData().getPermissionData(createContextForWorld(world));
             for (Map.Entry<String, Boolean> e : data.getImmutableBacking().entrySet()) {
                 if (!e.getValue()) {
                     continue;

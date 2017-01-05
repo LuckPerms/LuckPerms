@@ -32,6 +32,9 @@ import net.milkbowl.vault.permission.Permission;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.ServicesManager;
 
+/**
+ * Handles hooking with the Vault API
+ */
 @Getter
 public class VaultHook {
     private VaultChatHook chatHook = null;
@@ -40,17 +43,8 @@ public class VaultHook {
     public void hook(LPBukkitPlugin plugin) {
         try {
             if (permissionHook == null) {
-                permissionHook = new VaultPermissionHook();
+                permissionHook = new VaultPermissionHook(plugin);
             }
-            permissionHook.setPlugin(plugin);
-            permissionHook.setServer(plugin.getConfiguration().getVaultServer());
-            permissionHook.setIncludeGlobal(plugin.getConfiguration().isVaultIncludingGlobal());
-            permissionHook.setIgnoreWorld(plugin.getConfiguration().isVaultIgnoreWorld());
-            permissionHook.setPgo(plugin.getConfiguration().isVaultPrimaryGroupOverrides());
-            permissionHook.setPgoCheckInherited(plugin.getConfiguration().isVaultPrimaryGroupOverridesCheckInherited());
-            permissionHook.setPgoCheckExists(plugin.getConfiguration().isVaultPrimaryGroupOverridesCheckExists());
-            permissionHook.setPgoCheckMemberOf(plugin.getConfiguration().isVaultPrimaryGroupOverridesCheckMemberOf());
-            permissionHook.setup();
 
             if (chatHook == null) {
                 chatHook = new VaultChatHook(permissionHook);
@@ -69,9 +63,12 @@ public class VaultHook {
         final ServicesManager sm = plugin.getServer().getServicesManager();
         if (permissionHook != null) {
             sm.unregister(Permission.class, permissionHook);
+            permissionHook.getScheduler().cancelTask();
+            permissionHook = null;
         }
         if (chatHook != null) {
             sm.unregister(Chat.class, chatHook);
+            chatHook = null;
         }
     }
 
