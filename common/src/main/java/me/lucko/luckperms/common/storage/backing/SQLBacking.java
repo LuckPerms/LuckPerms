@@ -221,17 +221,19 @@ public class SQLBacking extends AbstractBacking {
         try (Connection c = provider.getConnection()) {
             try (PreparedStatement ps = c.prepareStatement(prefix.apply(ACTION_SELECT_ALL))) {
                 try (ResultSet rs = ps.executeQuery()) {
-                    final String actedUuid = rs.getString("acted_uuid");
-                    LogEntry e = new LogEntry(
-                            rs.getLong("time"),
-                            UUID.fromString(rs.getString("actor_uuid")),
-                            rs.getString("actor_name"),
-                            rs.getString("type").toCharArray()[0],
-                            actedUuid.equals("null") ? null : UUID.fromString(actedUuid),
-                            rs.getString("acted_name"),
-                            rs.getString("action")
-                    );
-                    log.add(e);
+                    while (rs.next()) {
+                        final String actedUuid = rs.getString("acted_uuid");
+                        LogEntry e = new LogEntry(
+                                rs.getLong("time"),
+                                UUID.fromString(rs.getString("actor_uuid")),
+                                rs.getString("actor_name"),
+                                rs.getString("type").toCharArray()[0],
+                                actedUuid.equals("null") ? null : UUID.fromString(actedUuid),
+                                rs.getString("acted_name"),
+                                rs.getString("action")
+                        );
+                        log.add(e);
+                    }
                 }
             }
         } catch (SQLException e) {
