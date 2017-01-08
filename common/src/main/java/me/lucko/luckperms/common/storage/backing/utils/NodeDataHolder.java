@@ -23,6 +23,7 @@
 package me.lucko.luckperms.common.storage.backing.utils;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -38,6 +39,7 @@ import java.util.Map;
 
 @Getter
 @ToString
+@EqualsAndHashCode
 @AllArgsConstructor(staticName = "of")
 public class NodeDataHolder {
     private static final Gson GSON = new Gson();

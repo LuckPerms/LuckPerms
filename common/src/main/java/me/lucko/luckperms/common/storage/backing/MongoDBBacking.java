@@ -235,7 +235,7 @@ public class MongoDBBacking extends AbstractBacking {
                         if (user.getName() == null || user.getName().equalsIgnoreCase("null")) {
                             user.setName(d.getString("name"));
                         } else {
-                            if (!d.getString("name").equals(user.getName())) {
+                            if (!d.getString("name").equalsIgnoreCase(user.getName())) {
                                 save = true;
                             }
                         }

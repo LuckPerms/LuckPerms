@@ -98,6 +98,8 @@ public interface LPConfiguration {
 
     DatastoreConfiguration getDatabaseValues();
 
+    String getSqlTablePrefix();
+
     String getStorageMethod();
 
     boolean isSplitStorage();

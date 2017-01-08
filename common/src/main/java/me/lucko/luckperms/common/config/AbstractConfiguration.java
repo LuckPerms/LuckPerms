@@ -79,6 +79,7 @@ public abstract class AbstractConfiguration<T extends LuckPermsPlugin> implement
     private Map<String, String> groupNameRewrites;
     private List<Rule> defaultAssignments;
     private DatastoreConfiguration databaseValues;
+    private String sqlTablePrefix;
     private String storageMethod;
     private boolean splitStorage;
     private Map<String, String> splitStorageOptions;
@@ -163,6 +164,7 @@ public abstract class AbstractConfiguration<T extends LuckPermsPlugin> implement
                 getString("data.password", null),
                 getInt("data.pool-size", 10)
         );
+        sqlTablePrefix = getString("data.table_prefix", "luckperms_");
         storageMethod = getString("storage-method", defaultStorage);
         splitStorage = getBoolean("split-storage.enabled", false);
         splitStorageOptions = ImmutableMap.<String, String>builder()

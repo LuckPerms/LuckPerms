@@ -130,7 +130,7 @@ public class JSONBacking extends FlatfileBacking {
                         if (user.getName() == null || user.getName().equalsIgnoreCase("null")) {
                             user.setName(name1);
                         } else {
-                            if (!name1.equals(user.getName())) {
+                            if (!name1.equalsIgnoreCase(user.getName())) {
                                 save = true;
                             }
                         }

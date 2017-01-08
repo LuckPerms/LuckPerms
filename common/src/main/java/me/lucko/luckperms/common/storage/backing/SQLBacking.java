@@ -22,6 +22,8 @@
 
 package me.lucko.luckperms.common.storage.backing;
 
+import lombok.Getter;
+
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -38,6 +40,7 @@ import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.managers.impl.GenericUserManager;
 import me.lucko.luckperms.common.storage.backing.sqlprovider.SQLProvider;
+import me.lucko.luckperms.common.storage.backing.utils.LegacySchemaMigration;
 import me.lucko.luckperms.common.storage.backing.utils.NodeDataHolder;
 
 import java.io.BufferedReader;
@@ -65,7 +68,7 @@ public class SQLBacking extends AbstractBacking {
     private static final Type LIST_STRING_TYPE = new TypeToken<List<String>>(){}.getType();
 
     private static final String USER_PERMISSIONS_SELECT = "SELECT permission, value, server, world, expiry, contexts FROM {prefix}user_permissions WHERE uuid=?";
-    private static final String USER_PERMISSIONS_DELETE_SPECIFIC = "DELETE FROM {prefix}user_permissions WHERE uuid=?, permission=?, value=?, server=?, world=?, expiry=?, contexts=?";
+    private static final String USER_PERMISSIONS_DELETE_SPECIFIC = "DELETE FROM {prefix}user_permissions WHERE uuid=? AND permission=? AND value=? AND server=? AND world=? AND expiry=? AND contexts=?";
     private static final String USER_PERMISSIONS_DELETE = "DELETE FROM {prefix}user_permissions WHERE uuid=?";
     private static final String USER_PERMISSIONS_INSERT = "INSERT INTO {prefix}user_permissions(uuid, permission, value, server, world, expiry, contexts) VALUES(?, ?, ?, ?, ?, ?, ?)";
     private static final String USER_PERMISSIONS_SELECT_DISTINCT = "SELECT DISTINCT uuid FROM {prefix}user_permissions";
@@ -76,10 +79,11 @@ public class SQLBacking extends AbstractBacking {
     private static final String PLAYER_INSERT = "INSERT INTO {prefix}players VALUES(?, ?, ?)";
     private static final String PLAYER_UPDATE = "UPDATE {prefix}players SET username=? WHERE uuid=?";
     private static final String PLAYER_UPDATE_FULL = "UPDATE {prefix}players SET username=?, primary_group=? WHERE uuid=?";
+    private static final String PLAYER_UPDATE_PRIMARY_GROUP = "UPDATE {prefix}players SET primary_group=? WHERE uuid=?";
 
     private static final String GROUP_PERMISSIONS_SELECT = "SELECT permission, value, server, world, expiry, contexts FROM {prefix}group_permissions WHERE name=?";
     private static final String GROUP_PERMISSIONS_DELETE = "DELETE FROM {prefix}group_permissions WHERE name=?";
-    private static final String GROUP_PERMISSIONS_DELETE_SPECIFIC = "DELETE FROM {prefix}group_permissions WHERE name=?, permission=?, value=?, server=?, world=?, expiry=?, contexts=?";
+    private static final String GROUP_PERMISSIONS_DELETE_SPECIFIC = "DELETE FROM {prefix}group_permissions WHERE name=? AND permission=? AND value=? AND server=? AND world=? AND expiry=? AND contexts=?";
     private static final String GROUP_PERMISSIONS_INSERT = "INSERT INTO {prefix}group_permissions(name, permission, value, server, world, expiry, contexts) VALUES(?, ?, ?, ?, ?, ?, ?)";
 
     private static final String GROUP_SELECT_ALL = "SELECT name FROM {prefix}groups";
@@ -96,8 +100,12 @@ public class SQLBacking extends AbstractBacking {
     private static final String ACTION_SELECT_ALL = "SELECT * FROM {prefix}actions";
 
 
+    @Getter
     private final Gson gson;
+
+    @Getter
     private final SQLProvider provider;
+    @Getter
     private final Function<String, String> prefix;
 
     public SQLBacking(LuckPermsPlugin plugin, SQLProvider provider, String prefix) {
@@ -109,7 +117,14 @@ public class SQLBacking extends AbstractBacking {
 
     private boolean tableExists(String table) throws SQLException {
         try (Connection connection = provider.getConnection()) {
-            return connection.getMetaData().getTables(null, null, table.toUpperCase(), null).next();
+            try (ResultSet rs = connection.getMetaData().getTables(null, null, "%", null)) {
+                while (rs.next()) {
+                    if (rs.getString(3).equalsIgnoreCase(table)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
         }
     }
 
@@ -151,6 +166,15 @@ public class SQLBacking extends AbstractBacking {
                             }
                         }
                     }
+                }
+
+                // Try migration from legacy backing
+                if (tableExists("lp_users")) {
+                    plugin.getLog().severe("===== Legacy Schema Migration =====");
+                    plugin.getLog().severe("Starting migration from legacy schema. This could take a while....");
+                    plugin.getLog().severe("Please do not stop your server while the migration takes place.");
+
+                    new LegacySchemaMigration(this).run();
                 }
             }
 
@@ -289,7 +313,7 @@ public class SQLBacking extends AbstractBacking {
                     user.setName(name);
                 } else {
                     // The name in storage is not the same as their actual name.
-                    if (!name.equals(user.getName())) {
+                    if (!name.equalsIgnoreCase(user.getName())) {
                         save = true;
                     }
                 }
@@ -325,6 +349,11 @@ public class SQLBacking extends AbstractBacking {
                 try (Connection c = provider.getConnection()) {
                     try (PreparedStatement ps = c.prepareStatement(prefix.apply(USER_PERMISSIONS_DELETE))) {
                         ps.setString(1, user.getUuid().toString());
+                        ps.execute();
+                    }
+                    try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_UPDATE_PRIMARY_GROUP))) {
+                        ps.setString(1, "default");
+                        ps.setString(2, user.getUuid().toString());
                         ps.execute();
                     }
                 } catch (SQLException e) {

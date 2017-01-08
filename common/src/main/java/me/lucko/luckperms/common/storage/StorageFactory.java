@@ -30,10 +30,11 @@ import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.backing.AbstractBacking;
 import me.lucko.luckperms.common.storage.backing.JSONBacking;
 import me.lucko.luckperms.common.storage.backing.MongoDBBacking;
-import me.lucko.luckperms.common.storage.backing.SQLLegacyBacking;
+import me.lucko.luckperms.common.storage.backing.SQLBacking;
 import me.lucko.luckperms.common.storage.backing.YAMLBacking;
 import me.lucko.luckperms.common.storage.backing.sqlprovider.H2Provider;
 import me.lucko.luckperms.common.storage.backing.sqlprovider.MySQLProvider;
+import me.lucko.luckperms.common.storage.backing.sqlprovider.PostgreSQLProvider;
 import me.lucko.luckperms.common.storage.backing.sqlprovider.SQLiteProvider;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
@@ -120,11 +121,13 @@ public class StorageFactory {
     private static AbstractBacking makeBacking(StorageType method, LuckPermsPlugin plugin) {
         switch (method) {
             case MYSQL:
-                return new SQLLegacyBacking(plugin, new MySQLProvider(plugin.getConfiguration().getDatabaseValues()));
+                return new SQLBacking(plugin, new MySQLProvider(plugin.getConfiguration().getDatabaseValues()), plugin.getConfiguration().getSqlTablePrefix());
             case SQLITE:
-                return new SQLLegacyBacking(plugin, new SQLiteProvider(new File(plugin.getDataFolder(), "luckperms.sqlite")));
+                return new SQLBacking(plugin, new SQLiteProvider(new File(plugin.getDataFolder(), "luckperms.sqlite")), plugin.getConfiguration().getSqlTablePrefix());
             case H2:
-                return new SQLLegacyBacking(plugin, new H2Provider(new File(plugin.getDataFolder(), "luckperms.db")));
+                return new SQLBacking(plugin, new H2Provider(new File(plugin.getDataFolder(), "luckperms.db")), plugin.getConfiguration().getSqlTablePrefix());
+            case POSTGRESQL:
+                return new SQLBacking(plugin, new PostgreSQLProvider(plugin.getConfiguration().getDatabaseValues()), plugin.getConfiguration().getSqlTablePrefix());
             case MONGODB:
                 return new MongoDBBacking(plugin, plugin.getConfiguration().getDatabaseValues());
             case YAML:

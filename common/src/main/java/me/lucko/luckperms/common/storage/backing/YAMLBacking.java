@@ -119,7 +119,7 @@ public class YAMLBacking extends FlatfileBacking {
                         if (user.getName() == null || user.getName().equalsIgnoreCase("null")) {
                             user.setName(name);
                         } else {
-                            if (!name.equals(user.getName())) {
+                            if (!name.equalsIgnoreCase(user.getName())) {
                                 save = true;
                             }
                         }
