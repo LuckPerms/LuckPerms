@@ -40,7 +40,7 @@ import java.util.Locale;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PriorityComparator implements Comparator<LocalizedNode> {
     private static final PriorityComparator INSTANCE = new PriorityComparator();
-    public static Comparator<LocalizedNode> get() {
+    public static PriorityComparator get() {
         return INSTANCE;
     }
     public static Comparator<LocalizedNode> reverse() {
@@ -97,14 +97,17 @@ public class PriorityComparator implements Comparator<LocalizedNode> {
             return o1.getWildcardLevel() > o2.getWildcardLevel() ? 1 : -1;
         }
 
+        return compareStrings(o1.getPermission(), o2.getPermission()) == 1 ? -1 : 1;
+    }
+
+    public int compareStrings(String o1, String o2) {
         try {
-            CollationKey o1c = collationKeyCache.get(o1.getPermission());
-            CollationKey o2c = collationKeyCache.get(o2.getPermission());
-            return o1c.compareTo(o2c) == 1 ? -1 : 1;
+            CollationKey o1c = collationKeyCache.get(o1);
+            CollationKey o2c = collationKeyCache.get(o2);
+            return o1c.compareTo(o2c) == 1 ? 1 : -1;
         } catch (Exception e) {
             // ignored
         }
-
         return 1;
     }
 }

@@ -75,6 +75,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -1166,7 +1167,7 @@ public abstract class PermissionHolder {
     }
 
     public static Map<String, Boolean> exportToLegacy(Set<Node> nodes) {
-        Map<String, Boolean> m = new HashMap<>();
+        Map<String, Boolean> m = new TreeMap<>((o1, o2) -> PriorityComparator.get().compareStrings(o1, o2));
         for (Node node : nodes) {
             m.put(node.toSerializedNode(), node.getValue());
         }
