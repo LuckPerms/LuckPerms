@@ -30,6 +30,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
@@ -52,21 +53,15 @@ import org.spongepowered.api.service.permission.PermissionService;
 import co.aikar.timings.Timing;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class SpongeUserManager implements UserManager, LPSubjectCollection {
     private final LPSpongePlugin plugin;
-
-    private final ReentrantLock loadingLock = new ReentrantLock();
-    private final Map<UUID, CountDownLatch> loadingLatches = Collections.synchronizedMap(new HashMap<>());
     
     private final LoadingCache<UserIdentifier, SpongeUser> objects = CacheBuilder.newBuilder()
             .build(new CacheLoader<UserIdentifier, SpongeUser>() {
@@ -78,6 +73,40 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
                 @Override
                 public ListenableFuture<SpongeUser> reload(UserIdentifier i, SpongeUser t) {
                     return Futures.immediateFuture(t); // Never needs to be refreshed.
+                }
+            });
+
+    private final LoadingCache<UUID, LPSubject> subjectLoadingCache = CacheBuilder.newBuilder()
+            .expireAfterWrite(1, TimeUnit.MINUTES)
+            .build(new CacheLoader<UUID, LPSubject>() {
+                @Override
+                public LPSubject load(UUID u) throws Exception {
+                    if (isLoaded(UserIdentifier.of(u, null))) {
+
+                        SpongeUser user = get(u);
+                        if (user.getUserData() == null) {
+                            user.setupData(false);
+                        }
+
+                        return get(u).getSpongeData();
+                    }
+
+                    // Request load
+                    plugin.getStorage().loadUser(u, "null").join();
+
+                    SpongeUser user = get(u);
+                    if (user == null) {
+                        plugin.getLog().severe("Error whilst loading user '" + u + "'.");
+                        throw new RuntimeException();
+                    }
+
+                    user.setupData(false);
+
+                    if (user.getUserData() == null) {
+                        plugin.getLog().warn("User data not present for requested user id: " + u);
+                    }
+
+                    return user.getSpongeData();
                 }
             });
 
@@ -209,69 +238,13 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
             }
 
             UUID u = plugin.getUuidCache().getUUID(uuid);
-
-            CountDownLatch latch;
-
-            loadingLock.lock();
             try {
-                boolean loaded = isLoaded(UserIdentifier.of(u, null));
-                boolean locked = loadingLatches.containsKey(u);
-
-                if (loaded && !locked) {
-                    return get(u).getSpongeData();
-                }
-
-                if (!loaded && !locked) {
-                    latch = new CountDownLatch(1);
-                    loadingLatches.put(u, latch);
-
-                    // Request load.
-                    plugin.doAsync(() -> {
-                        try {
-                            plugin.getStorage().loadUser(u, "null").get();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-
-                        SpongeUser user = get(u);
-                        if (user == null) {
-                            plugin.getLog().severe("Error whilst loading user '" + u + "'.");
-                            latch.countDown();
-                            return;
-                        }
-
-                        user.setupData(false);
-                        latch.countDown();
-                        loadingLatches.remove(u, latch);
-                    });
-
-                } else {
-                    // wait for the lock, then load.
-                    latch = loadingLatches.get(u);
-                }
-
-            } finally {
-                loadingLock.unlock();
-            }
-
-            // Wait for the task loading the user.
-            try {
-                latch.await(10, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
+                return subjectLoadingCache.get(u);
+            } catch (UncheckedExecutionException | ExecutionException e) {
                 e.printStackTrace();
-            }
-
-            SpongeUser user = get(u);
-            if (user == null) {
-                plugin.getLog().warn("Failed to load user subject for id: " + id);
+                plugin.getLog().warn("Couldn't get user subject for id: " + id);
                 return plugin.getService().getFallbackUserSubjects().get(id); // fallback to the transient collection
             }
-
-            if (user.getUserData() == null) {
-                plugin.getLog().warn("User data not present for requested user id: " + id);
-            }
-
-            return user.getSpongeData();
         }
     }
 
