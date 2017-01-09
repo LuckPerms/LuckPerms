@@ -417,6 +417,16 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     }
 
     @Override
+    public String getServerName() {
+        return getServer().getName();
+    }
+
+    @Override
+    public String getServerVersion() {
+        return getServer().getVersion();
+    }
+
+    @Override
     public File getMainDir() {
         return getDataFolder();
     }

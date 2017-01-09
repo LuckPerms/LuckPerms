@@ -375,6 +375,16 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     }
 
     @Override
+    public String getServerName() {
+        return getGame().getPlatform().getType().name();
+    }
+
+    @Override
+    public String getServerVersion() {
+        return getGame().getPlatform().getApi().getVersion().orElse("null") + " - " + getGame().getPlatform().getImplementation().getVersion().orElse("null");
+    }
+
+    @Override
     public int getPlayerCount() {
         return game.getServer().getOnlinePlayers().size();
     }

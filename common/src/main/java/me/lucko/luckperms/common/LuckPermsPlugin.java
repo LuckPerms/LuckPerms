@@ -216,6 +216,18 @@ public interface LuckPermsPlugin {
     PlatformType getType();
 
     /**
+     * Gets the name or "brand" of the running platform
+     * @return the server brand
+     */
+    String getServerName();
+
+    /**
+     * Gets the version of the running platform
+     * @return the server version
+     */
+    String getServerVersion();
+
+    /**
      * Gets the plugins main directory
      *
      * @return the main plugin directory

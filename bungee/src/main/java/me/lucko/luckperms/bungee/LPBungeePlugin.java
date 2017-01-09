@@ -224,6 +224,16 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     }
 
     @Override
+    public String getServerName() {
+        return getProxy().getName();
+    }
+
+    @Override
+    public String getServerVersion() {
+        return getProxy().getVersion();
+    }
+
+    @Override
     public File getMainDir() {
         return getDataFolder();
     }

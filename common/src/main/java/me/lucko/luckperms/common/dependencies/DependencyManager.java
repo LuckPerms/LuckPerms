@@ -130,7 +130,7 @@ public class DependencyManager {
     private static void loadJar(LuckPermsPlugin plugin, File file, String baseClass) throws Exception {
         URLClassLoader classLoader = (URLClassLoader) plugin.getClass().getClassLoader();
 
-        if (plugin.getType() != PlatformType.SPONGE) {
+        if (plugin.getType() != PlatformType.SPONGE && !plugin.getServerName().equals("KCauldron")) {
             classLoader = (URLClassLoader) classLoader.getParent();
         }
 
