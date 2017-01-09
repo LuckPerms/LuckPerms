@@ -815,6 +815,8 @@ public class SQLBacking extends AbstractBacking {
                     try (ResultSet rs = ps.executeQuery()) {
                         if (rs.next()) {
                             groups.set(rs.getString("groups"));
+                        } else {
+                            return false;
                         }
                     }
                 }
