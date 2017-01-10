@@ -41,6 +41,15 @@ import java.util.Map;
  */
 public abstract class AbstractManager<I, T extends Identifiable<I>> implements Manager<I, T> {
 
+    @SuppressWarnings("unchecked")
+    private static <I> I lowerCase(I i) {
+        if (i instanceof String) {
+            return (I) ((String) i).toLowerCase();
+        } else {
+            return i;
+        }
+    }
+
     private final LoadingCache<I, T> objects = CacheBuilder.newBuilder()
             .build(new CacheLoader<I, T>() {
                 @Override
@@ -61,36 +70,30 @@ public abstract class AbstractManager<I, T extends Identifiable<I>> implements M
 
     @Override
     public T getOrMake(I id) {
-        if (id instanceof String) {
-            return objects.getUnchecked((I) ((String) id).toLowerCase());
-        } else {
-            return objects.getUnchecked(id);
-        }
-
+        return objects.getUnchecked(lowerCase(id));
     }
 
     @Override
     public T getIfLoaded(I id) {
-        if (id instanceof String) {
-            return objects.getIfPresent(((String) id).toLowerCase());
-        } else {
-            return objects.getIfPresent(id);
-        }
+        return objects.getIfPresent(lowerCase(id));
     }
 
     @Override
     public boolean isLoaded(I id) {
-        if (id instanceof String) {
-            return objects.asMap().containsKey(((String) id).toLowerCase());
-        } else {
-            return objects.asMap().containsKey(id);
+        return objects.asMap().containsKey(lowerCase(id));
+    }
+
+    @Override
+    public void unload(I id) {
+        if (id != null) {
+            objects.invalidate(lowerCase(id));
         }
     }
 
     @Override
     public void unload(T t) {
         if (t != null) {
-            objects.invalidate(t.getId());
+            unload(t.getId());
         }
     }
 

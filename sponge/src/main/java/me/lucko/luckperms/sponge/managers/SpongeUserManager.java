@@ -125,6 +125,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
         Set<UserIdentifier> set = new HashSet<>();
         for (Map.Entry<UserIdentifier, SpongeUser> user : objects.asMap().entrySet()) {
             if (user.getValue().getSpongeData().shouldCleanup()) {
+                user.getValue().unregisterData();
                 set.add(user.getKey());
             }
         }
@@ -157,9 +158,16 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
     }
 
     @Override
+    public void unload(UserIdentifier id) {
+        if (id != null) {
+            objects.invalidate(id);
+        }
+    }
+
+    @Override
     public void unload(User t) {
         if (t != null) {
-            objects.invalidate(t.getId());
+            unload(t.getId());
         }
     }
 
@@ -194,9 +202,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
 
     @Override
     public void cleanup(User user) {
-        if (!plugin.isOnline(plugin.getUuidCache().getExternalUUID(user.getUuid()))) {
-            unload(user);
-        }
+        // Do nothing - this instance uses other means in order to cleanup
     }
 
     @Override

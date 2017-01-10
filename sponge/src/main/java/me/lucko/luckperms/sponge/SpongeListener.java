@@ -25,6 +25,7 @@ package me.lucko.luckperms.sponge;
 import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.constants.Message;
+import me.lucko.luckperms.common.core.UuidCache;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.utils.AbstractListener;
 import me.lucko.luckperms.sponge.timings.LPTiming;
@@ -113,7 +114,15 @@ public class SpongeListener extends AbstractListener {
     @Listener(order = Order.LAST)
     public void onClientLeave(ClientConnectionEvent.Disconnect e) {
         try (Timing ignored = plugin.getTimings().time(LPTiming.ON_CLIENT_LEAVE)) {
-            onLeave(e.getTargetEntity().getUniqueId());
+            final UuidCache cache = plugin.getUuidCache();
+
+            final User user = plugin.getUserManager().get(cache.getUUID(e.getTargetEntity().getUniqueId()));
+            if (user != null) {
+                user.unregisterData();
+            }
+
+            // Unload the user from memory when they disconnect;
+            cache.clearCache(e.getTargetEntity().getUniqueId());
         }
     }
 

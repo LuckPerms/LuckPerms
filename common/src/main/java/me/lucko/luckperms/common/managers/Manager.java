@@ -69,6 +69,13 @@ public interface Manager<I, T extends Identifiable<I>> extends Function<I, T> {
     /**
      * Removes and unloads the object from the manager
      *
+     * @param id The object id to unload
+     */
+    void unload(I id);
+
+    /**
+     * Removes and unloads the object from the manager
+     *
      * @param t The object to unload
      */
     void unload(T t);

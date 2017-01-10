@@ -113,23 +113,30 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
 
     @Override
     public SpongeGroup getOrMake(String id) {
-        return objects.getUnchecked(id);
+        return objects.getUnchecked(id.toLowerCase());
     }
 
     @Override
     public SpongeGroup getIfLoaded(String id) {
-        return objects.getIfPresent(id);
+        return objects.getIfPresent(id.toLowerCase());
     }
 
     @Override
     public boolean isLoaded(String id) {
-        return objects.asMap().containsKey(id);
+        return objects.asMap().containsKey(id.toLowerCase());
+    }
+
+    @Override
+    public void unload(String id) {
+        if (id != null) {
+            objects.invalidate(id.toLowerCase());
+        }
     }
 
     @Override
     public void unload(Group t) {
         if (t != null) {
-            objects.invalidate(t.getId());
+            unload(t.getId());
         }
     }
 

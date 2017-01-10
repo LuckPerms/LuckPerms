@@ -93,12 +93,10 @@ public class SpongeUser extends User {
             return (now - lastUse) > 600000;
         }
 
-        private boolean hasData() {
-            if (parent.getUserData() != null) {
-                return true;
-            } else {
+        private void checkData() {
+            if (parent.getUserData() == null) {
                 plugin.getLog().warn("User " + parent.getName() + " - " + parent.getUuid() + " does not have any data loaded.");
-                return false;
+                parent.setupData(false);
             }
         }
 
@@ -133,10 +131,7 @@ public class SpongeUser extends User {
         public Tristate getPermissionValue(ContextSet contexts, String permission) {
             logUsage();
             try (Timing ignored = plugin.getTimings().time(LPTiming.USER_GET_PERMISSION_VALUE)) {
-                if (!hasData()) {
-                    return Tristate.UNDEFINED;
-                }
-
+                checkData();
                 return parent.getUserData().getPermissionData(plugin.getService().calculateContexts(contexts)).getPermissionValue(permission);
             }
         }
@@ -155,16 +150,15 @@ public class SpongeUser extends User {
             try (Timing ignored = plugin.getTimings().time(LPTiming.USER_GET_PARENTS)) {
                 ImmutableSet.Builder<SubjectReference> subjects = ImmutableSet.builder();
 
-                if (hasData()) {
-                    for (String perm : parent.getUserData().getPermissionData(plugin.getService().calculateContexts(contexts)).getImmutableBacking().keySet()) {
-                        if (!perm.startsWith("group.")) {
-                            continue;
-                        }
+                checkData();
+                for (String perm : parent.getUserData().getPermissionData(plugin.getService().calculateContexts(contexts)).getImmutableBacking().keySet()) {
+                    if (!perm.startsWith("group.")) {
+                        continue;
+                    }
 
-                        String groupName = perm.substring("group.".length());
-                        if (plugin.getGroupManager().isLoaded(groupName)) {
-                            subjects.add(plugin.getService().getGroupSubjects().get(groupName).toReference());
-                        }
+                    String groupName = perm.substring("group.".length());
+                    if (plugin.getGroupManager().isLoaded(groupName)) {
+                        subjects.add(plugin.getService().getGroupSubjects().get(groupName).toReference());
                     }
                 }
 
@@ -179,23 +173,23 @@ public class SpongeUser extends User {
         public Optional<String> getOption(ContextSet contexts, String s) {
             logUsage();
             try (Timing ignored = plugin.getTimings().time(LPTiming.USER_GET_OPTION)) {
-                if (hasData()) {
-                    MetaData data = parent.getUserData().getMetaData(plugin.getService().calculateContexts(contexts));
-                    if (s.equalsIgnoreCase("prefix")) {
-                        if (data.getPrefix() != null) {
-                            return Optional.of(data.getPrefix());
-                        }
-                    }
+                checkData();
 
-                    if (s.equalsIgnoreCase("suffix")) {
-                        if (data.getSuffix() != null) {
-                            return Optional.of(data.getSuffix());
-                        }
+                MetaData data = parent.getUserData().getMetaData(plugin.getService().calculateContexts(contexts));
+                if (s.equalsIgnoreCase("prefix")) {
+                    if (data.getPrefix() != null) {
+                        return Optional.of(data.getPrefix());
                     }
+                }
 
-                    if (data.getMeta().containsKey(s)) {
-                        return Optional.of(data.getMeta().get(s));
+                if (s.equalsIgnoreCase("suffix")) {
+                    if (data.getSuffix() != null) {
+                        return Optional.of(data.getSuffix());
                     }
+                }
+
+                if (data.getMeta().containsKey(s)) {
+                    return Optional.of(data.getMeta().get(s));
                 }
 
                 Optional<String> v = plugin.getService().getUserSubjects().getDefaultSubject().resolve(getService()).getOption(contexts, s);
