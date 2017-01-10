@@ -94,12 +94,7 @@ public class SpongeUser extends User {
         }
 
         private boolean hasData() {
-            if (parent.getUserData() != null) {
-                return true;
-            } else {
-                plugin.getLog().warn("User " + parent.getName() + " - " + parent.getUuid() + " does not have any data loaded.");
-                return false;
-            }
+                return parent.getUserData() != null;
         }
 
         @Override
