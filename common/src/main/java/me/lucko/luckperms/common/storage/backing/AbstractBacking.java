@@ -33,7 +33,9 @@ import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.Log;
+import me.lucko.luckperms.common.storage.holder.HeldPermission;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -66,6 +68,8 @@ public abstract class AbstractBacking {
 
     public abstract Set<UUID> getUniqueUsers();
 
+    public abstract List<HeldPermission<UUID>> getUsersWithPermission(String permission);
+
     public abstract boolean createAndLoadGroup(String name);
 
     public abstract boolean loadGroup(String name);
@@ -75,6 +79,8 @@ public abstract class AbstractBacking {
     public abstract boolean saveGroup(Group group);
 
     public abstract boolean deleteGroup(Group group);
+
+    public abstract List<HeldPermission<String>> getGroupsWithPermission(String permission);
 
     public abstract boolean createAndLoadTrack(String name);
 

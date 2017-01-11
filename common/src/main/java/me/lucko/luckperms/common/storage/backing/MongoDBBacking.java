@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.common.storage.backing;
 
+import com.google.common.collect.ImmutableList;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
@@ -31,7 +32,9 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.InsertOneOptions;
 
 import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.UserIdentifier;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.Track;
@@ -41,6 +44,8 @@ import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.managers.impl.GenericUserManager;
 import me.lucko.luckperms.common.storage.DatastoreConfiguration;
+import me.lucko.luckperms.common.storage.holder.HeldPermission;
+import me.lucko.luckperms.common.storage.holder.NodeHeldPermission;
 
 import org.bson.Document;
 
@@ -52,6 +57,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static me.lucko.luckperms.common.core.model.PermissionHolder.exportToLegacy;
@@ -71,14 +77,18 @@ public class MongoDBBacking extends AbstractBacking {
     /*  MongoDB does not allow '.' or '$' in key names.
         See: https://docs.mongodb.com/manual/reference/limits/#Restrictions-on-Field-Names
         The following two methods convert the node maps so they can be stored. */
+
+    private static final Function<String, String> CONVERT_STRING = s -> s.replace(".", "[**DOT**]").replace("$", "[**DOLLAR**]");
+    private static final Function<String, String> REVERT_STRING = s -> s.replace("[**DOT**]", ".").replace("[**DOLLAR**]", "$");
+
     private static <V> Map<String, V> convert(Map<String, V> map) {
         return map.entrySet().stream()
-                .collect(Collectors.toMap(e -> e.getKey().replace(".", "[**DOT**]").replace("$", "[**DOLLAR**]"), Map.Entry::getValue));
+                .collect(Collectors.toMap(e -> CONVERT_STRING.apply(e.getKey()), Map.Entry::getValue));
     }
 
     private static <V> Map<String, V> revert(Map<String, V> map) {
         return map.entrySet().stream()
-                .collect(Collectors.toMap(e -> e.getKey().replace("[**DOT**]", ".").replace("[**DOLLAR**]", "$"), Map.Entry::getValue));
+                .collect(Collectors.toMap(e -> REVERT_STRING.apply(e.getKey()), Map.Entry::getValue));
     }
 
     private static Document fromUser(User user) {
@@ -316,6 +326,35 @@ public class MongoDBBacking extends AbstractBacking {
     }
 
     @Override
+    public List<HeldPermission<UUID>> getUsersWithPermission(String permission) {
+        ImmutableList.Builder<HeldPermission<UUID>> held = ImmutableList.builder();
+        boolean success = call(() -> {
+            MongoCollection<Document> c = database.getCollection("users");
+
+            try (MongoCursor<Document> cursor = c.find().iterator()) {
+                while (cursor.hasNext()) {
+                    Document d = cursor.next();
+
+                    UUID holder = UUID.fromString(d.getString("_id"));
+                    Map<String, Boolean> perms = revert((Map<String, Boolean>) d.get("perms"));
+
+                    for (Map.Entry<String, Boolean> e : perms.entrySet()) {
+                        Node node = NodeFactory.fromSerialisedNode(e.getKey(), e.getValue());
+                        if (!node.getPermission().equalsIgnoreCase(permission)) {
+                            continue;
+                        }
+
+                        held.add(NodeHeldPermission.of(holder, node));
+                    }
+                }
+            }
+            return true;
+        }, false);
+
+        return success ? held.build() : null;
+    }
+
+    @Override
     public boolean createAndLoadGroup(String name) {
         Group group = plugin.getGroupManager().getOrMake(name);
         group.getIoLock().lock();
@@ -417,6 +456,35 @@ public class MongoDBBacking extends AbstractBacking {
 
         if (success) plugin.getGroupManager().unload(group);
         return success;
+    }
+
+    @Override
+    public List<HeldPermission<String>> getGroupsWithPermission(String permission) {
+        ImmutableList.Builder<HeldPermission<String>> held = ImmutableList.builder();
+        boolean success = call(() -> {
+            MongoCollection<Document> c = database.getCollection("groups");
+
+            try (MongoCursor<Document> cursor = c.find().iterator()) {
+                while (cursor.hasNext()) {
+                    Document d = cursor.next();
+
+                    String holder = d.getString("_id");
+                    Map<String, Boolean> perms = revert((Map<String, Boolean>) d.get("perms"));
+
+                    for (Map.Entry<String, Boolean> e : perms.entrySet()) {
+                        Node node = NodeFactory.fromSerialisedNode(e.getKey(), e.getValue());
+                        if (!node.getPermission().equalsIgnoreCase(permission)) {
+                            continue;
+                        }
+
+                        held.add(NodeHeldPermission.of(holder, node));
+                    }
+                }
+            }
+            return true;
+        }, false);
+
+        return success ? held.build() : null;
     }
 
     @Override

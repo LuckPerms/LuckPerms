@@ -31,7 +31,9 @@ import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.Log;
 import me.lucko.luckperms.common.storage.backing.AbstractBacking;
+import me.lucko.luckperms.common.storage.holder.HeldPermission;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -95,6 +97,11 @@ public class SplitBacking extends AbstractBacking {
     }
 
     @Override
+    public List<HeldPermission<UUID>> getUsersWithPermission(String permission) {
+        return backing.get(types.get("user")).getUsersWithPermission(permission);
+    }
+
+    @Override
     public boolean createAndLoadGroup(String name) {
         return backing.get(types.get("group")).createAndLoadGroup(name);
     }
@@ -117,6 +124,11 @@ public class SplitBacking extends AbstractBacking {
     @Override
     public boolean deleteGroup(Group group) {
         return backing.get(types.get("group")).deleteGroup(group);
+    }
+
+    @Override
+    public List<HeldPermission<String>> getGroupsWithPermission(String permission) {
+        return backing.get(types.get("group")).getGroupsWithPermission(permission);
     }
 
     @Override

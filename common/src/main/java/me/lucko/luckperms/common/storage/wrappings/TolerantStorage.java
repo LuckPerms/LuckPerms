@@ -32,7 +32,9 @@ import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.Log;
 import me.lucko.luckperms.common.storage.Storage;
+import me.lucko.luckperms.common.storage.holder.HeldPermission;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -132,6 +134,16 @@ public class TolerantStorage implements Storage {
     }
 
     @Override
+    public CompletableFuture<List<HeldPermission<UUID>>> getUsersWithPermission(String permission) {
+        phaser.register();
+        try {
+            return backing.getUsersWithPermission(permission);
+        } finally {
+            phaser.arriveAndDeregister();
+        }
+    }
+
+    @Override
     public CompletableFuture<Boolean> createAndLoadGroup(String name) {
         phaser.register();
         try {
@@ -176,6 +188,16 @@ public class TolerantStorage implements Storage {
         phaser.register();
         try {
             return backing.deleteGroup(group);
+        } finally {
+            phaser.arriveAndDeregister();
+        }
+    }
+
+    @Override
+    public CompletableFuture<List<HeldPermission<String>>> getGroupsWithPermission(String permission) {
+        phaser.register();
+        try {
+            return backing.getGroupsWithPermission(permission);
         } finally {
             phaser.arriveAndDeregister();
         }

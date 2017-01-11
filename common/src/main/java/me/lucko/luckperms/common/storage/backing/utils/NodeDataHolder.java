@@ -27,6 +27,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -52,8 +54,18 @@ public class NodeDataHolder {
                 node.getServer().orElse("global"),
                 node.getWorld().orElse("global"),
                 node.isTemporary() ? node.getExpiryUnixTime() : 0L,
-                GSON.toJson(node.getContexts().toMultimap().asMap())
+                node.getContexts().toMultimap()
         );
+    }
+
+    public static NodeDataHolder of(String permission, boolean value, String server, String world, long expiry, String contexts) {
+        Map<String, Collection<String>> deserializedContexts = GSON.fromJson(contexts, CONTEXT_TYPE);
+        Multimap<String, String> map = HashMultimap.create();
+        for (Map.Entry<String, Collection<String>> e : deserializedContexts.entrySet()) {
+            map.putAll(e.getKey(), e.getValue());
+        }
+
+        return new NodeDataHolder(permission, value, server, world, expiry, map);
     }
 
     private final String permission;
@@ -61,7 +73,11 @@ public class NodeDataHolder {
     private final String server;
     private final String world;
     private final long expiry;
-    private final String contexts;
+    private final Multimap<String, String> contexts;
+
+    public String serialiseContext() {
+        return GSON.toJson(getContexts().asMap());
+    }
 
     public Node toNode() {
         NodeBuilder builder = new NodeBuilder(permission);
@@ -70,17 +86,8 @@ public class NodeDataHolder {
         builder.setWorld(world);
         builder.setExpiry(expiry);
 
-        try {
-            Map<String, Collection<String>> deserializedContexts = GSON.fromJson(contexts, CONTEXT_TYPE);
-            if (deserializedContexts != null && !deserializedContexts.isEmpty()) {
-                for (Map.Entry<String, Collection<String>> c : deserializedContexts.entrySet()) {
-                    for (String val : c.getValue()) {
-                        builder.withExtraContext(c.getKey(), val);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        for (Map.Entry<String, String> e : contexts.entries()) {
+            builder.withExtraContext(e);
         }
 
         return builder.build();

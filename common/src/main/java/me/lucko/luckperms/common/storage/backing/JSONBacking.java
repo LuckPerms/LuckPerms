@@ -22,10 +22,13 @@
 
 package me.lucko.luckperms.common.storage.backing;
 
+import com.google.common.collect.ImmutableList;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
+import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.UserIdentifier;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.Track;
@@ -33,6 +36,8 @@ import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.managers.impl.GenericUserManager;
+import me.lucko.luckperms.common.storage.holder.HeldPermission;
+import me.lucko.luckperms.common.storage.holder.NodeHeldPermission;
 import me.lucko.luckperms.common.utils.ThrowingFunction;
 
 import java.io.BufferedReader;
@@ -271,6 +276,51 @@ public class JSONBacking extends FlatfileBacking {
     }
 
     @Override
+    public List<HeldPermission<UUID>> getUsersWithPermission(String permission) {
+        ImmutableList.Builder<HeldPermission<UUID>> held = ImmutableList.builder();
+        boolean success = call(() -> {
+            File[] files = usersDir.listFiles((dir, name1) -> name1.endsWith(".json"));
+            if (files == null) return false;
+
+            for (File file : files) {
+                UUID holder = UUID.fromString(file.getName().substring(0, file.getName().length() - 5));
+                Map<String, Boolean> nodes = new HashMap<>();
+                fileToReader(file, reader -> {
+                    reader.beginObject();
+                    reader.nextName(); // uuid record
+                    reader.nextString(); // uuid
+                    reader.nextName(); // name record
+                    reader.nextString(); // name
+                    reader.nextName(); // primaryGroup record
+                    reader.nextString(); // primaryGroup
+                    reader.nextName(); //perms
+                    reader.beginObject();
+                    while (reader.hasNext()) {
+                        String node = reader.nextName();
+                        boolean b = reader.nextBoolean();
+                        nodes.put(node, b);
+                    }
+
+                    reader.endObject();
+                    reader.endObject();
+                    return true;
+                });
+
+                for (Map.Entry<String, Boolean> e : nodes.entrySet()) {
+                    Node node = NodeFactory.fromSerialisedNode(e.getKey(), e.getValue());
+                    if (!node.getPermission().equalsIgnoreCase(permission)) {
+                        continue;
+                    }
+
+                    held.add(NodeHeldPermission.of(holder, node));
+                }
+            }
+            return true;
+        }, false);
+        return success ? held.build() : null;
+    }
+
+    @Override
     public boolean createAndLoadGroup(String name) {
         Group group = plugin.getGroupManager().getOrMake(name);
         group.getIoLock().lock();
@@ -417,6 +467,47 @@ public class JSONBacking extends FlatfileBacking {
         } finally {
             group.getIoLock().unlock();
         }
+    }
+
+    @Override
+    public List<HeldPermission<String>> getGroupsWithPermission(String permission) {
+        ImmutableList.Builder<HeldPermission<String>> held = ImmutableList.builder();
+        boolean success = call(() -> {
+            File[] files = groupsDir.listFiles((dir, name1) -> name1.endsWith(".json"));
+            if (files == null) return false;
+
+            for (File file : files) {
+                String holder = file.getName().substring(0, file.getName().length() - 5);
+                Map<String, Boolean> nodes = new HashMap<>();
+                fileToReader(file, reader -> {
+                    reader.beginObject();
+                    reader.nextName(); // name record
+                    reader.nextString(); // name
+                    reader.nextName(); // perms
+                    reader.beginObject();
+                    while (reader.hasNext()) {
+                        String node = reader.nextName();
+                        boolean b = reader.nextBoolean();
+                        nodes.put(node, b);
+                    }
+
+                    reader.endObject();
+                    reader.endObject();
+                    return true;
+                });
+
+                for (Map.Entry<String, Boolean> e : nodes.entrySet()) {
+                    Node node = NodeFactory.fromSerialisedNode(e.getKey(), e.getValue());
+                    if (!node.getPermission().equalsIgnoreCase(permission)) {
+                        continue;
+                    }
+
+                    held.add(NodeHeldPermission.of(holder, node));
+                }
+            }
+            return true;
+        }, false);
+        return success ? held.build() : null;
     }
 
     @Override

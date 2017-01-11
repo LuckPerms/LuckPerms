@@ -24,6 +24,7 @@ package me.lucko.luckperms.common.storage.backing;
 
 import lombok.Getter;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -42,6 +43,8 @@ import me.lucko.luckperms.common.managers.impl.GenericUserManager;
 import me.lucko.luckperms.common.storage.backing.sqlprovider.SQLProvider;
 import me.lucko.luckperms.common.storage.backing.utils.LegacySchemaMigration;
 import me.lucko.luckperms.common.storage.backing.utils.NodeDataHolder;
+import me.lucko.luckperms.common.storage.holder.HeldPermission;
+import me.lucko.luckperms.common.storage.holder.NodeHeldPermission;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -72,6 +75,7 @@ public class SQLBacking extends AbstractBacking {
     private static final String USER_PERMISSIONS_DELETE = "DELETE FROM {prefix}user_permissions WHERE uuid=?";
     private static final String USER_PERMISSIONS_INSERT = "INSERT INTO {prefix}user_permissions(uuid, permission, value, server, world, expiry, contexts) VALUES(?, ?, ?, ?, ?, ?, ?)";
     private static final String USER_PERMISSIONS_SELECT_DISTINCT = "SELECT DISTINCT uuid FROM {prefix}user_permissions";
+    private static final String USER_PERMISSIONS_SELECT_PERMISSION = "SELECT uuid, value, server, world, expiry, contexts FROM {prefix}user_permissions WHERE permission=?";
 
     private static final String PLAYER_SELECT = "SELECT username, primary_group FROM {prefix}players WHERE uuid=?";
     private static final String PLAYER_SELECT_UUID = "SELECT uuid FROM {prefix}players WHERE username=? LIMIT 1";
@@ -85,6 +89,7 @@ public class SQLBacking extends AbstractBacking {
     private static final String GROUP_PERMISSIONS_DELETE = "DELETE FROM {prefix}group_permissions WHERE name=?";
     private static final String GROUP_PERMISSIONS_DELETE_SPECIFIC = "DELETE FROM {prefix}group_permissions WHERE name=? AND permission=? AND value=? AND server=? AND world=? AND expiry=? AND contexts=?";
     private static final String GROUP_PERMISSIONS_INSERT = "INSERT INTO {prefix}group_permissions(name, permission, value, server, world, expiry, contexts) VALUES(?, ?, ?, ?, ?, ?, ?)";
+    private static final String GROUP_PERMISSIONS_SELECT_PERMISSION = "SELECT name, value, server, world, expiry, contexts FROM {prefix}group_permissions WHERE permission=?";
 
     private static final String GROUP_SELECT_ALL = "SELECT name FROM {prefix}groups";
     private static final String GROUP_INSERT = "INSERT INTO {prefix}groups VALUES(?)";
@@ -404,7 +409,7 @@ public class SQLBacking extends AbstractBacking {
                             ps.setString(4, nd.getServer());
                             ps.setString(5, nd.getWorld());
                             ps.setLong(6, nd.getExpiry());
-                            ps.setString(7, nd.getContexts());
+                            ps.setString(7, nd.serialiseContext());
                             ps.addBatch();
                         }
                         ps.executeBatch();
@@ -425,7 +430,7 @@ public class SQLBacking extends AbstractBacking {
                             ps.setString(4, nd.getServer());
                             ps.setString(5, nd.getWorld());
                             ps.setLong(6, nd.getExpiry());
-                            ps.setString(7, nd.getContexts());
+                            ps.setString(7, nd.serialiseContext());
                             ps.addBatch();
                         }
                         ps.executeBatch();
@@ -507,6 +512,33 @@ public class SQLBacking extends AbstractBacking {
             return null;
         }
         return uuids;
+    }
+
+    @Override
+    public List<HeldPermission<UUID>> getUsersWithPermission(String permission) {
+        ImmutableList.Builder<HeldPermission<UUID>> held = ImmutableList.builder();
+        try (Connection c = provider.getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement(prefix.apply(USER_PERMISSIONS_SELECT_PERMISSION))) {
+                ps.setString(1, permission);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        UUID holder = UUID.fromString(rs.getString("uuid"));
+                        boolean value = rs.getBoolean("value");
+                        String server = rs.getString("server");
+                        String world = rs.getString("world");
+                        long expiry = rs.getLong("expiry");
+                        String contexts = rs.getString("contexts");
+
+                        NodeDataHolder data = NodeDataHolder.of(permission, value, server, world, expiry, contexts);
+                        held.add(NodeHeldPermission.of(holder, data));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return held.build();
     }
 
     @Override
@@ -692,7 +724,7 @@ public class SQLBacking extends AbstractBacking {
                             ps.setString(4, nd.getServer());
                             ps.setString(5, nd.getWorld());
                             ps.setLong(6, nd.getExpiry());
-                            ps.setString(7, nd.getContexts());
+                            ps.setString(7, nd.serialiseContext());
                             ps.addBatch();
                         }
                         ps.executeBatch();
@@ -713,7 +745,7 @@ public class SQLBacking extends AbstractBacking {
                             ps.setString(4, nd.getServer());
                             ps.setString(5, nd.getWorld());
                             ps.setLong(6, nd.getExpiry());
-                            ps.setString(7, nd.getContexts());
+                            ps.setString(7, nd.serialiseContext());
                             ps.addBatch();
                         }
                         ps.executeBatch();
@@ -754,6 +786,33 @@ public class SQLBacking extends AbstractBacking {
         } finally {
             group.getIoLock().unlock();
         }
+    }
+
+    @Override
+    public List<HeldPermission<String>> getGroupsWithPermission(String permission) {
+        ImmutableList.Builder<HeldPermission<String>> held = ImmutableList.builder();
+        try (Connection c = provider.getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_PERMISSIONS_SELECT_PERMISSION))) {
+                ps.setString(1, permission);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        String holder = rs.getString("name");
+                        boolean value = rs.getBoolean("value");
+                        String server = rs.getString("server");
+                        String world = rs.getString("world");
+                        long expiry = rs.getLong("expiry");
+                        String contexts = rs.getString("contexts");
+
+                        NodeDataHolder data = NodeDataHolder.of(permission, value, server, world, expiry, contexts);
+                        held.add(NodeHeldPermission.of(holder, data));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return held.build();
     }
 
     @Override

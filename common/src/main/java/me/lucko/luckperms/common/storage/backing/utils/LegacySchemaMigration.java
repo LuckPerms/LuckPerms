@@ -161,7 +161,7 @@ public class LegacySchemaMigration implements Runnable {
                         ps.setString(4, nd.getServer());
                         ps.setString(5, nd.getWorld());
                         ps.setLong(6, nd.getExpiry());
-                        ps.setString(7, nd.getContexts());
+                        ps.setString(7, nd.serialiseContext());
                         ps.addBatch();
                     }
                     ps.executeBatch();
@@ -240,7 +240,7 @@ public class LegacySchemaMigration implements Runnable {
                         ps.setString(4, nd.getServer());
                         ps.setString(5, nd.getWorld());
                         ps.setLong(6, nd.getExpiry());
-                        ps.setString(7, nd.getContexts());
+                        ps.setString(7, nd.serialiseContext());
                         ps.addBatch();
                     }
                     ps.executeBatch();

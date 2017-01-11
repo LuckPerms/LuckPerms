@@ -27,7 +27,9 @@ import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.Log;
+import me.lucko.luckperms.common.storage.holder.HeldPermission;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -61,6 +63,8 @@ public interface Storage {
 
     CompletableFuture<Set<UUID>> getUniqueUsers();
 
+    CompletableFuture<List<HeldPermission<UUID>>> getUsersWithPermission(String permission);
+
     CompletableFuture<Boolean> createAndLoadGroup(String name);
 
     CompletableFuture<Boolean> loadGroup(String name);
@@ -70,6 +74,8 @@ public interface Storage {
     CompletableFuture<Boolean> saveGroup(Group group);
 
     CompletableFuture<Boolean> deleteGroup(Group group);
+
+    CompletableFuture<List<HeldPermission<String>>> getGroupsWithPermission(String permission);
 
     CompletableFuture<Boolean> createAndLoadTrack(String name);
 

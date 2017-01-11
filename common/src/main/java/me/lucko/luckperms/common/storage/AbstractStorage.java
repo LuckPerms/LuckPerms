@@ -33,9 +33,11 @@ import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.Log;
 import me.lucko.luckperms.common.storage.backing.AbstractBacking;
+import me.lucko.luckperms.common.storage.holder.HeldPermission;
 import me.lucko.luckperms.common.storage.wrappings.BufferedOutputStorage;
 import me.lucko.luckperms.common.storage.wrappings.TolerantStorage;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -95,6 +97,11 @@ public class AbstractStorage implements Storage {
     }
 
     @Override
+    public CompletableFuture<List<HeldPermission<UUID>>> getUsersWithPermission(String permission) {
+        return makeFuture(() -> backing.getUsersWithPermission(permission));
+    }
+
+    @Override
     public CompletableFuture<Boolean> createAndLoadGroup(String name) {
         return makeFuture(() -> backing.createAndLoadGroup(name));
     }
@@ -117,6 +124,11 @@ public class AbstractStorage implements Storage {
     @Override
     public CompletableFuture<Boolean> deleteGroup(Group group) {
         return makeFuture(() -> backing.deleteGroup(group));
+    }
+
+    @Override
+    public CompletableFuture<List<HeldPermission<String>>> getGroupsWithPermission(String permission) {
+        return makeFuture(() -> backing.getGroupsWithPermission(permission));
     }
 
     @Override
