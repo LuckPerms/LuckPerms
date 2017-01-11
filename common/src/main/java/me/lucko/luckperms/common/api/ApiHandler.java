@@ -20,18 +20,42 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms;
+package me.lucko.luckperms.common.api;
 
+import me.lucko.luckperms.LuckPerms;
 import me.lucko.luckperms.api.LuckPermsApi;
 
+import java.lang.reflect.Method;
+
 public class ApiHandler {
+    private static Method REGISTER;
+    private static Method UNREGISTER;
+    static {
+        try {
+            REGISTER = LuckPerms.class.getDeclaredMethod("registerProvider", LuckPermsApi.class);
+            REGISTER.setAccessible(true);
+
+            UNREGISTER = LuckPerms.class.getDeclaredMethod("unregisterProvider");
+            UNREGISTER.setAccessible(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     public static void registerProvider(LuckPermsApi luckPermsApi) {
-        LuckPerms.registerProvider(luckPermsApi);
+        try {
+            REGISTER.invoke(null, luckPermsApi);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static void unregisterProvider() {
-        LuckPerms.unregisterProvider();
+        try {
+            UNREGISTER.invoke(null);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

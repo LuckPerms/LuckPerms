@@ -22,8 +22,6 @@
 
 package me.lucko.luckperms.common.storage.backing;
 
-import lombok.Cleanup;
-
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.core.UserIdentifier;
 import me.lucko.luckperms.common.core.model.Group;
@@ -49,6 +47,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static me.lucko.luckperms.common.core.model.PermissionHolder.exportToLegacy;
@@ -74,25 +73,29 @@ public class YAMLBacking extends FlatfileBacking {
         super(plugin, "YAML", pluginDir);
     }
 
-    private boolean doRead(File file, ReadOperation readOperation) {
+    private boolean readMapFromFile(File file, Function<Map<String, Object>, Boolean> readOperation) {
         boolean success = false;
         try {
-            @Cleanup FileReader fileReader = new FileReader(file);
-            @Cleanup BufferedReader bufferedReader = new BufferedReader(fileReader);
-            success = readOperation.onRun((Map<String, Object>) getYaml().load(bufferedReader));
+            try (FileReader fileReader = new FileReader(file)) {
+                try (BufferedReader bufferedReader = new BufferedReader(fileReader)) {
+                    success = readOperation.apply((Map<String, Object>) getYaml().load(bufferedReader));
+                }
+            }
         } catch (Throwable t) {
             t.printStackTrace();
         }
         return success;
     }
 
-    private boolean doWrite(File file, Map<String, Object> values) {
+    private boolean writeMapToFile(File file, Map<String, Object> values) {
         try {
-            @Cleanup FileWriter fileWriter = new FileWriter(file);
-            @Cleanup BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-            getYaml().dump(values, bufferedWriter);
-            bufferedWriter.flush();
-            return true;
+            try (FileWriter fileWriter = new FileWriter(file)) {
+                try (BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {
+                    getYaml().dump(values, bufferedWriter);
+                    bufferedWriter.flush();
+                    return true;
+                }
+            }
         } catch (Throwable t) {
             t.printStackTrace();
             return false;
@@ -107,7 +110,7 @@ public class YAMLBacking extends FlatfileBacking {
             return call(() -> {
                 File userFile = new File(usersDir, uuid.toString() + ".yml");
                 if (userFile.exists()) {
-                    return doRead(userFile, values -> {
+                    return readMapFromFile(userFile, values -> {
                         // User exists, let's load.
                         String name = (String) values.get("name");
                         user.setPrimaryGroup((String) values.get("primary-group"));
@@ -130,7 +133,7 @@ public class YAMLBacking extends FlatfileBacking {
                             data.put("name", user.getName());
                             data.put("primary-group", user.getPrimaryGroup());
                             data.put("perms", exportToLegacy(user.getNodes()));
-                            doWrite(userFile, data);
+                            writeMapToFile(userFile, data);
                         }
                         return true;
                     });
@@ -176,7 +179,7 @@ public class YAMLBacking extends FlatfileBacking {
                 values.put("name", user.getName());
                 values.put("primary-group", user.getPrimaryGroup());
                 values.put("perms", exportToLegacy(user.getNodes()));
-                return doWrite(userFile, values);
+                return writeMapToFile(userFile, values);
             }, false);
         } finally {
             user.getIoLock().unlock();
@@ -191,7 +194,7 @@ public class YAMLBacking extends FlatfileBacking {
 
             for (File file : files) {
                 Map<String, Boolean> nodes = new HashMap<>();
-                doRead(file, values -> {
+                readMapFromFile(file, values -> {
                     Map<String, Boolean> perms = (Map<String, Boolean>) values.get("perms");
                     nodes.putAll(perms);
                     return true;
@@ -231,7 +234,7 @@ public class YAMLBacking extends FlatfileBacking {
             return call(() -> {
                 File groupFile = new File(groupsDir, name + ".yml");
                 if (groupFile.exists()) {
-                    return doRead(groupFile, values -> {
+                    return readMapFromFile(groupFile, values -> {
                         Map<String, Boolean> perms = (Map<String, Boolean>) values.get("perms");
                         group.setNodes(perms);
                         return true;
@@ -247,7 +250,7 @@ public class YAMLBacking extends FlatfileBacking {
                     Map<String, Object> values = new HashMap<>();
                     values.put("name", group.getName());
                     values.put("perms", exportToLegacy(group.getNodes()));
-                    return doWrite(groupFile, values);
+                    return writeMapToFile(groupFile, values);
                 }
             }, false);
         } finally {
@@ -262,7 +265,7 @@ public class YAMLBacking extends FlatfileBacking {
         try {
             return call(() -> {
                 File groupFile = new File(groupsDir, name + ".yml");
-                return groupFile.exists() && doRead(groupFile, values -> {
+                return groupFile.exists() && readMapFromFile(groupFile, values -> {
                     Map<String, Boolean> perms = (Map<String, Boolean>) values.get("perms");
                     group.setNodes(perms);
                     return true;
@@ -309,7 +312,7 @@ public class YAMLBacking extends FlatfileBacking {
                 Map<String, Object> values = new HashMap<>();
                 values.put("name", group.getName());
                 values.put("perms", exportToLegacy(group.getNodes()));
-                return doWrite(groupFile, values);
+                return writeMapToFile(groupFile, values);
             }, false);
         } finally {
             group.getIoLock().unlock();
@@ -340,7 +343,7 @@ public class YAMLBacking extends FlatfileBacking {
             return call(() -> {
                 File trackFile = new File(tracksDir, name + ".yml");
                 if (trackFile.exists()) {
-                    return doRead(trackFile, values -> {
+                    return readMapFromFile(trackFile, values -> {
                         track.setGroups((List<String>) values.get("groups"));
                         return true;
                     });
@@ -356,7 +359,7 @@ public class YAMLBacking extends FlatfileBacking {
                     values.put("name", track.getName());
                     values.put("groups", track.getGroups());
 
-                    return doWrite(trackFile, values);
+                    return writeMapToFile(trackFile, values);
                 }
             }, false);
         } finally {
@@ -371,7 +374,7 @@ public class YAMLBacking extends FlatfileBacking {
         try {
             return call(() -> {
                 File trackFile = new File(tracksDir, name + ".yml");
-                return trackFile.exists() && doRead(trackFile, values -> {
+                return trackFile.exists() && readMapFromFile(trackFile, values -> {
                     track.setGroups((List<String>) values.get("groups"));
                     return true;
                 });
@@ -416,7 +419,7 @@ public class YAMLBacking extends FlatfileBacking {
                 Map<String, Object> values = new HashMap<>();
                 values.put("name", track.getName());
                 values.put("groups", track.getGroups());
-                return doWrite(trackFile, values);
+                return writeMapToFile(trackFile, values);
             }, false);
         } finally {
             track.getIoLock().unlock();
@@ -437,9 +440,5 @@ public class YAMLBacking extends FlatfileBacking {
         } finally {
             track.getIoLock().unlock();
         }
-    }
-
-    interface ReadOperation {
-        boolean onRun(Map<String, Object> values);
     }
 }

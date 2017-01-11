@@ -22,8 +22,6 @@
 
 package me.lucko.luckperms.common.storage.backing;
 
-import lombok.Cleanup;
-
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
@@ -35,6 +33,7 @@ import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.managers.impl.GenericUserManager;
+import me.lucko.luckperms.common.utils.ThrowingFunction;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -69,29 +68,35 @@ public class JSONBacking extends FlatfileBacking {
         super(plugin, "JSON", pluginDir);
     }
 
-    private boolean doWrite(File file, WriteOperation writeOperation) {
+    private boolean fileToWriter(File file, ThrowingFunction<JsonWriter, Boolean> writeOperation) {
         boolean success = false;
         try {
-            @Cleanup FileWriter fileWriter = new FileWriter(file);
-            @Cleanup BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-            @Cleanup JsonWriter jsonWriter = new JsonWriter(bufferedWriter);
-            jsonWriter.setIndent("    ");
-            success = writeOperation.onRun(jsonWriter);
-            jsonWriter.flush();
-        } catch (IOException e) {
+            try (FileWriter fileWriter = new FileWriter(file)) {
+                try (BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {
+                    try (JsonWriter jsonWriter = new JsonWriter(bufferedWriter)) {
+                        jsonWriter.setIndent("    ");
+                        success = writeOperation.apply(jsonWriter);
+                        jsonWriter.flush();
+                    }
+                }
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return success;
     }
 
-    private boolean doRead(File file, ReadOperation readOperation) {
+    private boolean fileToReader(File file, ThrowingFunction<JsonReader, Boolean> readOperation) {
         boolean success = false;
         try {
-            @Cleanup FileReader fileReader = new FileReader(file);
-            @Cleanup BufferedReader bufferedReader = new BufferedReader(fileReader);
-            @Cleanup JsonReader jsonReader = new JsonReader(bufferedReader);
-            success = readOperation.onRun(jsonReader);
-        } catch (IOException e) {
+            try (FileReader fileReader = new FileReader(file)) {
+                try (BufferedReader bufferedReader = new BufferedReader(fileReader)) {
+                    try (JsonReader jsonReader = new JsonReader(bufferedReader)) {
+                        success = readOperation.apply(jsonReader);
+                    }
+                }
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return success;
@@ -105,12 +110,12 @@ public class JSONBacking extends FlatfileBacking {
             return call(() -> {
                 File userFile = new File(usersDir, uuid.toString() + ".json");
                 if (userFile.exists()) {
-                    return doRead(userFile, reader -> {
+                    return fileToReader(userFile, reader -> {
                         reader.beginObject();
                         reader.nextName(); // uuid record
                         reader.nextString(); // uuid
                         reader.nextName(); // name record
-                        String name1 = reader.nextString(); // name
+                        String name = reader.nextString(); // name
                         reader.nextName(); // primaryGroup record
                         user.setPrimaryGroup(reader.nextString()); // primaryGroup
                         reader.nextName(); // perms
@@ -128,15 +133,15 @@ public class JSONBacking extends FlatfileBacking {
                         boolean save = plugin.getUserManager().giveDefaultIfNeeded(user, false);
 
                         if (user.getName() == null || user.getName().equalsIgnoreCase("null")) {
-                            user.setName(name1);
+                            user.setName(name);
                         } else {
-                            if (!name1.equalsIgnoreCase(user.getName())) {
+                            if (!name.equalsIgnoreCase(user.getName())) {
                                 save = true;
                             }
                         }
 
                         if (save) {
-                            doWrite(userFile, writer -> {
+                            fileToWriter(userFile, writer -> {
                                 writer.beginObject();
                                 writer.name("uuid").value(user.getUuid().toString());
                                 writer.name("name").value(user.getName());
@@ -190,7 +195,7 @@ public class JSONBacking extends FlatfileBacking {
                     }
                 }
 
-                return doWrite(userFile, writer -> {
+                return fileToWriter(userFile, writer -> {
                     writer.beginObject();
                     writer.name("uuid").value(user.getUuid().toString());
                     writer.name("name").value(user.getName());
@@ -218,7 +223,7 @@ public class JSONBacking extends FlatfileBacking {
 
             for (File file : files) {
                 Map<String, Boolean> nodes = new HashMap<>();
-                doRead(file, reader -> {
+                fileToReader(file, reader -> {
                     reader.beginObject();
                     reader.nextName(); // uuid record
                     reader.nextString(); // uuid
@@ -273,7 +278,7 @@ public class JSONBacking extends FlatfileBacking {
             return call(() -> {
                 File groupFile = new File(groupsDir, name + ".json");
                 if (groupFile.exists()) {
-                    return doRead(groupFile, reader -> {
+                    return fileToReader(groupFile, reader -> {
                         reader.beginObject();
                         reader.nextName(); // name record
                         reader.nextString(); // name
@@ -299,7 +304,7 @@ public class JSONBacking extends FlatfileBacking {
                         return false;
                     }
 
-                    return doWrite(groupFile, writer -> {
+                    return fileToWriter(groupFile, writer -> {
                         writer.beginObject();
                         writer.name("name").value(group.getName());
                         writer.name("perms");
@@ -325,7 +330,7 @@ public class JSONBacking extends FlatfileBacking {
         try {
             return call(() -> {
                 File groupFile = new File(groupsDir, name + ".json");
-                return groupFile.exists() && doRead(groupFile, reader -> {
+                return groupFile.exists() && fileToReader(groupFile, reader -> {
                     reader.beginObject();
                     reader.nextName(); // name record
                     reader.nextString(); // name
@@ -380,7 +385,7 @@ public class JSONBacking extends FlatfileBacking {
                     }
                 }
 
-                return doWrite(groupFile, writer -> {
+                return fileToWriter(groupFile, writer -> {
                     writer.beginObject();
                     writer.name("name").value(group.getName());
                     writer.name("perms");
@@ -422,7 +427,7 @@ public class JSONBacking extends FlatfileBacking {
             return call(() -> {
                 File trackFile = new File(tracksDir, name + ".json");
                 if (trackFile.exists()) {
-                    return doRead(trackFile, reader -> {
+                    return fileToReader(trackFile, reader -> {
                         reader.beginObject();
                         reader.nextName(); // name record
                         reader.nextString(); // name
@@ -445,7 +450,7 @@ public class JSONBacking extends FlatfileBacking {
                         return false;
                     }
 
-                    return doWrite(trackFile, writer -> {
+                    return fileToWriter(trackFile, writer -> {
                         writer.beginObject();
                         writer.name("name").value(track.getName());
                         writer.name("groups");
@@ -471,7 +476,7 @@ public class JSONBacking extends FlatfileBacking {
         try {
             return call(() -> {
                 File trackFile = new File(tracksDir, name + ".json");
-                return trackFile.exists() && doRead(trackFile, reader -> {
+                return trackFile.exists() && fileToReader(trackFile, reader -> {
                     reader.beginObject();
                     reader.nextName(); // name record
                     reader.nextString(); // name
@@ -525,7 +530,7 @@ public class JSONBacking extends FlatfileBacking {
                     }
                 }
 
-                return doWrite(trackFile, writer -> {
+                return fileToWriter(trackFile, writer -> {
                     writer.beginObject();
                     writer.name("name").value(track.getName());
                     writer.name("groups");
@@ -557,13 +562,5 @@ public class JSONBacking extends FlatfileBacking {
         } finally {
             track.getIoLock().unlock();
         }
-    }
-
-    interface WriteOperation {
-        boolean onRun(JsonWriter writer) throws IOException;
-    }
-
-    interface ReadOperation {
-        boolean onRun(JsonReader reader) throws IOException;
     }
 }

@@ -126,15 +126,10 @@ public class BufferedOutputStorage implements Storage, Runnable {
 
     private interface Exclude {
         Storage force();
-
         CompletableFuture<Void> shutdown();
-
         CompletableFuture<Boolean> saveUser(User user);
-
         CompletableFuture<Boolean> saveGroup(Group group);
-
         CompletableFuture<Boolean> saveTrack(Track track);
-
         CompletableFuture<Boolean> saveUUIDData(String username, UUID uuid);
     }
 }

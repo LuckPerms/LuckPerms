@@ -22,8 +22,6 @@
 
 package me.lucko.luckperms.common.storage.backing;
 
-import lombok.Cleanup;
-
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.constants.Constants;
@@ -143,15 +141,15 @@ abstract class FlatfileBacking extends AbstractBacking {
         Map<String, String> cache = new HashMap<>();
 
         try {
-            @Cleanup FileReader fileReader = new FileReader(uuidData);
-            @Cleanup BufferedReader bufferedReader = new BufferedReader(fileReader);
-
-            Properties props = new Properties();
-            props.load(bufferedReader);
-            for (String key : props.stringPropertyNames()) {
-                cache.put(key, props.getProperty(key));
+            try (FileReader fileReader = new FileReader(uuidData)) {
+                try (BufferedReader bufferedReader = new BufferedReader(fileReader)) {
+                    Properties props = new Properties();
+                    props.load(bufferedReader);
+                    for (String key : props.stringPropertyNames()) {
+                        cache.put(key, props.getProperty(key));
+                    }
+                }
             }
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -160,12 +158,13 @@ abstract class FlatfileBacking extends AbstractBacking {
 
     private void saveUUIDCache(Map<String, String> cache) {
         try {
-            @Cleanup FileWriter fileWriter = new FileWriter(uuidData);
-            @Cleanup BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-
-            Properties properties = new Properties();
-            properties.putAll(cache);
-            properties.store(bufferedWriter, null);
+            try (FileWriter fileWriter = new FileWriter(uuidData)) {
+                try (BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {
+                    Properties properties = new Properties();
+                    properties.putAll(cache);
+                    properties.store(bufferedWriter, null);
+                }
+            }
 
         } catch (IOException e) {
             e.printStackTrace();

@@ -263,11 +263,8 @@ public class TolerantStorage implements Storage {
 
     private interface Delegated {
         String getName();
-
         boolean isAcceptingLogins();
-
         void setAcceptingLogins(boolean b);
-
         void init();
     }
 }

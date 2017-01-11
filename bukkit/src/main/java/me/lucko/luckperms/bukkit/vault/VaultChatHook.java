@@ -60,7 +60,7 @@ import static me.lucko.luckperms.api.MetaUtils.unescapeCharacters;
  * Normal inheritance rules DO NOT apply.
  * Permission Nodes = meta.node.value
  *
- * Node that special characters used within LuckPerms are escaped:
+ * Note that special characters used within LuckPerms are escaped:
  * See {@link me.lucko.luckperms.api.MetaUtils#unescapeCharacters(String)}
  */
 public class VaultChatHook extends Chat {
