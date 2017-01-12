@@ -63,7 +63,7 @@
         </repository>
         <repository>
             <id>luck-repo</id>
-            <url>https://repo.lucko.me/</url>
+            <url>http://repo.lucko.me/</url>
         </repository>
         <repository>
             <id>vault-repo</id>
