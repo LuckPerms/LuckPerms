@@ -61,6 +61,7 @@ public class Patterns {
         try {
             return CACHE.get(regex);
         } catch (UncheckedExecutionException | ExecutionException e) {
+            e.printStackTrace();
             return null;
         }
     }

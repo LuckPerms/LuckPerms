@@ -57,7 +57,10 @@ public class RegexProcessor implements PermissionProcessor {
                 continue;
             }
 
-            regexPermissions.put(e.getKey().substring(2), e.getValue());
+            String pattern = e.getKey().substring(2);
+            Patterns.compile(pattern); // Cache the lookup for later.
+
+            regexPermissions.put(pattern, e.getValue());
         }
     }
 }
