@@ -41,7 +41,6 @@ import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
-import me.lucko.luckperms.sponge.model.SpongeGroup;
 import me.lucko.luckperms.sponge.service.base.LPSubject;
 import me.lucko.luckperms.sponge.service.base.LPSubjectData;
 import me.lucko.luckperms.sponge.service.references.SubjectReference;
@@ -244,15 +243,15 @@ public class LuckPermsSubjectData implements LPSubjectData {
     public boolean addParent(@NonNull ContextSet contexts, @NonNull SubjectReference subject) {
         try (Timing i = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_ADD_PARENT)) {
             if (subject.getCollection().equals(PermissionService.SUBJECTS_GROUP)) {
-                SpongeGroup permsSubject = ((SpongeGroup) subject.resolve(service));
+                LPSubject permsSubject = subject.resolve(service);
 
                 try {
                     if (enduring) {
-                        holder.setPermission(new NodeBuilder("group." + permsSubject.getName())
+                        holder.setPermission(new NodeBuilder("group." + permsSubject.getIdentifier())
                                 .withExtraContext(contexts)
                                 .build());
                     } else {
-                        holder.setTransientPermission(new NodeBuilder("group." + permsSubject.getName())
+                        holder.setTransientPermission(new NodeBuilder("group." + permsSubject.getIdentifier())
                                 .withExtraContext(contexts)
                                 .build());
                     }
@@ -270,15 +269,15 @@ public class LuckPermsSubjectData implements LPSubjectData {
     public boolean removeParent(@NonNull ContextSet contexts, @NonNull SubjectReference subject) {
         try (Timing i = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_REMOVE_PARENT)) {
             if (subject.getCollection().equals(PermissionService.SUBJECTS_GROUP)) {
-                SpongeGroup permsSubject = ((SpongeGroup) subject.resolve(service));
+                LPSubject permsSubject = subject.resolve(service);
 
                 try {
                     if (enduring) {
-                        holder.unsetPermission(new NodeBuilder("group." + permsSubject.getName())
+                        holder.unsetPermission(new NodeBuilder("group." + permsSubject.getIdentifier())
                                 .withExtraContext(contexts)
                                 .build());
                     } else {
-                        holder.unsetTransientPermission(new NodeBuilder("group." + permsSubject.getName())
+                        holder.unsetTransientPermission(new NodeBuilder("group." + permsSubject.getIdentifier())
                                 .withExtraContext(contexts)
                                 .build());
                     }
