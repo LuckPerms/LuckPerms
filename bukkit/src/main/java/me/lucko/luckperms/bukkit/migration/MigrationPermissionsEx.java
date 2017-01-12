@@ -105,7 +105,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             Group lpGroup = plugin.getGroupManager().getIfLoaded(name);
             try {
                 LogEntry.build()
-                        .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                        .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                         .acted(lpGroup).action("create")
                         .build().submit(plugin);
             } catch (Exception ex) {
@@ -123,7 +123,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                     try {
                         lpGroup.setPermission(node, value);
                         LogEntry.build()
-                                .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                                 .acted(lpGroup).action("set " + node + " " + value)
                                 .build().submit(plugin);
                     } catch (Exception ex) {
@@ -148,7 +148,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                         try {
                             lpGroup.setPermission(node, value, "global", world);
                             LogEntry.build()
-                                    .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                    .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                                     .acted(lpGroup).action("set " + node + " " + value + " global " + world)
                                     .build().submit(plugin);
                         } catch (Exception ex) {
@@ -164,7 +164,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 try {
                     lpGroup.setPermission("group." + g.getName().toLowerCase(), true);
                     LogEntry.build()
-                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                             .acted(lpGroup).action("setinherit " + g.getName().toLowerCase())
                             .build().submit(plugin);
                 } catch (Exception ex) {
@@ -180,7 +180,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                         try {
                             lpGroup.setPermission("group." + g.getName().toLowerCase(), true, "global", world);
                             LogEntry.build()
-                                    .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                    .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                                     .acted(lpGroup).action("setinherit " + g.getName().toLowerCase() + " global " + world)
                                     .build().submit(plugin);
                         } catch (Exception ex) {
@@ -200,7 +200,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 try {
                     lpGroup.setPermission("prefix." + groupWeight + "." + prefix, true);
                     LogEntry.build()
-                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                             .acted(lpGroup).action("set prefix." + groupWeight + "." + prefix + " true")
                             .build().submit(plugin);
                 } catch (Exception ex) {
@@ -215,7 +215,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 try {
                     lpGroup.setPermission("suffix." + groupWeight + "." + suffix, true);
                     LogEntry.build()
-                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                             .acted(lpGroup).action("set suffix." + groupWeight + "." + suffix + " true")
                             .build().submit(plugin);
                 } catch (Exception ex) {
@@ -267,7 +267,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                     try {
                         lpUser.setPermission(node, value);
                         LogEntry.build()
-                                .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                                 .acted(lpUser).action("set " + node + " " + value)
                                 .build().submit(plugin);
                     } catch (Exception ex) {
@@ -292,7 +292,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                         try {
                             lpUser.setPermission(node, value, "global", world);
                             LogEntry.build()
-                                    .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                    .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                                     .acted(lpUser).action("set " + node + " " + value + " global " + world)
                                     .build().submit(plugin);
                         } catch (Exception ex) {
@@ -308,7 +308,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 try {
                     lpUser.setPermission("group." + s.toLowerCase(), true);
                     LogEntry.build()
-                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                             .acted(lpUser).action("addgroup " + s.toLowerCase())
                             .build().submit(plugin);
                 } catch (Exception ex) {
@@ -324,7 +324,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                         try {
                             lpUser.setPermission("group." + s.toLowerCase(), true, "global", world);
                             LogEntry.build()
-                                    .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                    .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                                     .acted(lpUser).action("addgroup " + s.toLowerCase() + " global " + world)
                                     .build().submit(plugin);
                         } catch (Exception ex) {
@@ -344,7 +344,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 try {
                     lpUser.setPermission("prefix." + maxGroupWeight + "." + prefix, true);
                     LogEntry.build()
-                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                             .acted(lpUser).action("set prefix." + maxGroupWeight + "." + prefix + " true")
                             .build().submit(plugin);
                 } catch (Exception ex) {
@@ -359,7 +359,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 try {
                     lpUser.setPermission("suffix." + maxGroupWeight + "." + suffix, true);
                     LogEntry.build()
-                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                             .acted(lpUser).action("set suffix." + maxGroupWeight + "." + suffix + " true")
                             .build().submit(plugin);
                 } catch (Exception ex) {

@@ -118,12 +118,12 @@ public class MigrationMainCommand extends MainCommand<Object> {
 
     @Override
     public boolean isAuthorized(Sender sender) {
-        return sender.getUuid().equals(Constants.getConsoleUUID());
+        return sender.getUuid().equals(Constants.CONSOLE_UUID);
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Void v, List<String> args, String label) throws CommandException {
-        if (!sender.getUuid().equals(Constants.getConsoleUUID())) {
+        if (!sender.getUuid().equals(Constants.CONSOLE_UUID)) {
             Message.MIGRATION_NOT_CONSOLE.send(sender);
             return CommandResult.NO_PERMISSION;
         }

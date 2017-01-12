@@ -73,7 +73,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
             me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().getIfLoaded(g.getName().toLowerCase());
             try {
                 LogEntry.build()
-                        .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                        .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                         .acted(group).action("create")
                         .build().submit(plugin);
             } catch (Exception ex) {
@@ -86,7 +86,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
                 try {
                     group.setPermission(perm, true);
                     LogEntry.build()
-                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                             .acted(group).action("set " + perm + " true")
                             .build().submit(plugin);
                 } catch (Exception ex) {
@@ -102,7 +102,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
                     try {
                         group.setPermission(perm, true, e.getKey());
                         LogEntry.build()
-                                .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                                 .acted(group).action("set " + perm + " true " + e.getKey())
                                 .build().submit(plugin);
                     } catch (Exception ex) {
@@ -118,7 +118,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
                         try {
                             group.setPermission(perm, true, e.getKey(), we.getKey());
                             LogEntry.build()
-                                    .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                    .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                                     .acted(group).action("set " + perm + " true " + e.getKey() + " " + we.getKey())
                                     .build().submit(plugin);
                         } catch (Exception ex) {
@@ -135,7 +135,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
                 try {
                     group.setPermission("group." + inherit, true);
                     LogEntry.build()
-                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                             .acted(group).action("setinherit " + group)
                             .build().submit(plugin);
                 } catch (Exception ex) {
@@ -154,7 +154,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
                 try {
                     group.setPermission("prefix.50." + prefix, true);
                     LogEntry.build()
-                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                             .acted(group).action("set prefix.50." + prefix + " true")
                             .build().submit(plugin);
                 } catch (Exception ex) {
@@ -169,7 +169,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
                 try {
                     group.setPermission("suffix.50." + suffix, true);
                     LogEntry.build()
-                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                             .acted(group).action("set suffix.50." + suffix + " true")
                             .build().submit(plugin);
                 } catch (Exception ex) {
@@ -201,7 +201,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
                 try {
                     user.setPermission(perm, true);
                     LogEntry.build()
-                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                             .acted(user).action("set " + perm + " true")
                             .build().submit(plugin);
                 } catch (Exception ex) {
@@ -217,7 +217,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
                     try {
                         user.setPermission(perm, true, e.getKey());
                         LogEntry.build()
-                                .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                                 .acted(user).action("set " + perm + " true " + e.getKey())
                                 .build().submit(plugin);
                     } catch (Exception ex) {
@@ -233,7 +233,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
                         try {
                             user.setPermission(perm, true, e.getKey(), we.getKey());
                             LogEntry.build()
-                                    .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                    .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                                     .acted(user).action("set " + perm + " true " + e.getKey() + " " + we.getKey())
                                     .build().submit(plugin);
                         } catch (Exception ex) {
@@ -250,7 +250,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
                 try {
                     user.setPermission("group." + group, true);
                     LogEntry.build()
-                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                             .acted(user).action("addgroup " + group)
                             .build().submit(plugin);
                 } catch (Exception ex) {
@@ -269,7 +269,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
                 try {
                     user.setPermission("prefix.100." + prefix, true);
                     LogEntry.build()
-                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                             .acted(user).action("set prefix.100." + prefix + " true")
                             .build().submit(plugin);
                 } catch (Exception ex) {
@@ -284,7 +284,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
                 try {
                     user.setPermission("suffix.100." + suffix, true);
                     LogEntry.build()
-                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                             .acted(user).action("set suffix.100." + suffix + " true")
                             .build().submit(plugin);
                 } catch (Exception ex) {

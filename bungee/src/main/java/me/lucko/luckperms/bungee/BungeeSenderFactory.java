@@ -45,7 +45,7 @@ public class BungeeSenderFactory extends SenderFactory<CommandSender> {
         if (sender instanceof ProxiedPlayer) {
             return sender.getName();
         }
-        return Constants.getConsoleName();
+        return Constants.CONSOLE_NAME;
     }
 
     @Override
@@ -53,7 +53,7 @@ public class BungeeSenderFactory extends SenderFactory<CommandSender> {
         if (sender instanceof ProxiedPlayer) {
             return ((ProxiedPlayer) sender).getUniqueId();
         }
-        return Constants.getConsoleUUID();
+        return Constants.CONSOLE_UUID;
     }
 
     @Override

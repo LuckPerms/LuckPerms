@@ -52,7 +52,7 @@ public class PermissionInfo extends SharedSubCommand {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
-        if (sender.getUuid().equals(Constants.getConsoleUUID())) {
+        if (sender.getUuid().equals(Constants.CONSOLE_UUID)) {
             Message.LISTNODES.send(sender, holder.getFriendlyName());
             sender.sendMessage(Util.color(Util.permNodesToStringConsole(holder.getPermissions(false))));
         } else {

@@ -113,7 +113,7 @@ public class ExportCommand extends SingleCommand {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         final Logger log = plugin.getLog();
 
-        if (!sender.getUuid().equals(Constants.getConsoleUUID())) {
+        if (!sender.getUuid().equals(Constants.CONSOLE_UUID)) {
             Message.MIGRATION_NOT_CONSOLE.send(sender);
             return CommandResult.NO_PERMISSION;
         }
@@ -224,7 +224,7 @@ public class ExportCommand extends SingleCommand {
 
     @Override
     public boolean isAuthorized(Sender sender) {
-        return sender.getUuid().equals(Constants.getConsoleUUID());
+        return sender.getUuid().equals(Constants.CONSOLE_UUID);
     }
 
 }

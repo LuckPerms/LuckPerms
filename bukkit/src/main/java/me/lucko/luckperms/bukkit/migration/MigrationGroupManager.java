@@ -81,7 +81,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
             me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().getIfLoaded(g.getName().toLowerCase());
             try {
                 LogEntry.build()
-                        .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                        .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                         .acted(group).action("create")
                         .build().submit(plugin);
             } catch (Exception ex) {
@@ -101,7 +101,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
                 try {
                     group.setPermission(node, value);
                     LogEntry.build()
-                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                             .acted(group).action("set " + node + " " + value)
                             .build().submit(plugin);
                 } catch (Exception ex) {
@@ -115,7 +115,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
                 try {
                     group.setPermission("group." + s.toLowerCase(), true);
                     LogEntry.build()
-                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                             .acted(group).action("setinherit " + s.toLowerCase())
                             .build().submit(plugin);
                 } catch (Exception ex) {
@@ -204,7 +204,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
             me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().getIfLoaded(e.getKey());
             try {
                 LogEntry.build()
-                        .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                        .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                         .acted(group).action("create")
                         .build().submit(plugin);
             } catch (Exception ex) {
@@ -222,12 +222,12 @@ public class MigrationGroupManager extends SubCommand<Object> {
                     if (n.getKey().getValue().startsWith("group.")) {
                         String groupName = n.getKey().getValue().substring(6);
                         LogEntry.build()
-                                .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                                 .acted(group).action("setinherit " + groupName + " global " + n.getKey().getKey())
                                 .build().submit(plugin);
                     } else {
                         LogEntry.build()
-                                .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                                 .acted(group).action("set " + n.getKey().getValue() + " " + n.getValue() + " global " + n.getKey().getKey())
                                 .build().submit(plugin);
                     }
@@ -256,12 +256,12 @@ public class MigrationGroupManager extends SubCommand<Object> {
                     if (n.getKey().getValue().startsWith("group.")) {
                         String group = n.getKey().getValue().substring(6);
                         LogEntry.build()
-                                .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                                 .acted(user).action("addgroup " + group + " global " + n.getKey().getKey())
                                 .build().submit(plugin);
                     } else {
                         LogEntry.build()
-                                .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                                 .acted(user).action("set " + n.getKey().getValue() + " " + n.getValue() + " global " + n.getKey().getKey())
                                 .build().submit(plugin);
                     }

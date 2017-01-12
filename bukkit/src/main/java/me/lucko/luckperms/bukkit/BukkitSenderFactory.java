@@ -47,7 +47,7 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
         if (sender instanceof Player) {
             return sender.getName();
         }
-        return Constants.getConsoleName();
+        return Constants.CONSOLE_NAME;
     }
 
     @Override
@@ -55,7 +55,7 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
         if (sender instanceof Player) {
             return ((Player) sender).getUniqueId();
         }
-        return Constants.getConsoleUUID();
+        return Constants.CONSOLE_UUID;
     }
 
     @Override

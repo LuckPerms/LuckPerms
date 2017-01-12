@@ -271,7 +271,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             final me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().getIfLoaded(g.getName().toLowerCase());
             try {
                 LogEntry.build()
-                        .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                        .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                         .acted(group).action("create")
                         .build().submit(plugin);
             } catch (Exception ex) {
@@ -286,7 +286,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                 try {
                     group.setPermission("group." + parent.getName().toLowerCase(), true);
                     LogEntry.build()
-                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                             .acted(group).action("setinherit " + parent.getName().toLowerCase()) // All versions
                             .build().submit(plugin);
                 } catch (Exception ex) {
@@ -353,7 +353,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                                             try {
                                                 user.setPermission("group." + g.getName().toLowerCase(), true);
                                                 LogEntry.build()
-                                                        .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                                        .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                                                         .acted(user).action("addgroup " + g.getName().toLowerCase())
                                                         .build().submit(plugin);
                                             } catch (Exception ex) {
@@ -365,7 +365,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                                             try {
                                                 user.setPermission("group." + g.getName().toLowerCase(), true, server);
                                                 LogEntry.build()
-                                                        .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                                        .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                                                         .acted(user).action("addgroup " + g.getName().toLowerCase() + " " + server)
                                                         .build().submit(plugin);
                                             } catch (Exception ex) {
@@ -386,7 +386,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                                             try {
                                                 user.setPermission("group." + group.getName().toLowerCase(), true, g.getExpirationDate().getTime() / 1000L);
                                                 LogEntry.build()
-                                                        .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                                        .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                                                         .acted(user).action("addtempgroup " + group.getName().toLowerCase() + " " + g.getExpirationDate().getTime() / 1000L)
                                                         .build().submit(plugin);
                                             } catch (Exception ex) {
@@ -398,7 +398,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                                             try {
                                                 user.setPermission("group." + group.getName().toLowerCase(), true, server, g.getExpirationDate().getTime() / 1000L);
                                                 LogEntry.build()
-                                                        .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                                        .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                                                         .acted(user).action("addtempgroup " + group.getName().toLowerCase() + " " + g.getExpirationDate().getTime() / 1000L + " " + server)
                                                         .build().submit(plugin);
                                             } catch (Exception ex) {
@@ -413,7 +413,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                                             try {
                                                 user.setPermission("group." + group.getName().toLowerCase(), true);
                                                 LogEntry.build()
-                                                        .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                                        .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                                                         .acted(user).action("addgroup " + group.getName().toLowerCase())
                                                         .build().submit(plugin);
                                             } catch (Exception ex) {
@@ -425,7 +425,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                                             try {
                                                 user.setPermission("group." + group.getName().toLowerCase(), true, server);
                                                 LogEntry.build()
-                                                        .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                                                        .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                                                         .acted(user).action("addgroup " + group.getName().toLowerCase() + " " + server)
                                                         .build().submit(plugin);
                                             } catch (Exception ex) {
@@ -549,7 +549,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                 try {
                     holder.setPermission(node, value, server, world);
                     LogEntry.build()
-                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                             .acted(holder).action("set " + node + " " + value + " " + server + " " + world)
                             .build().submit(plugin);
                 } catch (Exception ex) {
@@ -561,7 +561,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                 try {
                     holder.setPermission(node, value, server, world, expireAt);
                     LogEntry.build()
-                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                             .acted(holder).action("settemp " + node + " " + value + " " + expireAt + " " + server + " " + world)
                             .build().submit(plugin);
                 } catch (Exception ex) {
@@ -576,7 +576,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                 try {
                     holder.setPermission(node, value, server);
                     LogEntry.build()
-                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                             .acted(holder).action("set " + node + " " + value + " " + server)
                             .build().submit(plugin);
                 } catch (Exception ex) {
@@ -588,7 +588,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                 try {
                     holder.setPermission(node, value, server, expireAt);
                     LogEntry.build()
-                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                             .acted(holder).action("settemp " + node + " " + value + " " + expireAt + " " + server)
                             .build().submit(plugin);
                 } catch (Exception ex) {
@@ -602,7 +602,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                 try {
                     holder.setPermission(node, value);
                     LogEntry.build()
-                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                             .acted(holder).action("set " + node + " " + value)
                             .build().submit(plugin);
                 } catch (Exception ex) {
@@ -614,7 +614,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                 try {
                     holder.setPermission(node, value, expireAt);
                     LogEntry.build()
-                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                             .acted(holder).action("settemp " + node + " " + value + " " + expireAt)
                             .build().submit(plugin);
                 } catch (Exception ex) {

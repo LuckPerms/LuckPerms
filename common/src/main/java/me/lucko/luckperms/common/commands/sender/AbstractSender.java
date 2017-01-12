@@ -87,7 +87,7 @@ public class AbstractSender<T> implements Sender {
     }
 
     private boolean isConsole() {
-        return this.uuid.equals(Constants.getConsoleUUID()) || this.uuid.equals(Constants.getImporterUUID());
+        return this.uuid.equals(Constants.CONSOLE_UUID) || this.uuid.equals(Constants.IMPORT_UUID);
     }
 
 }

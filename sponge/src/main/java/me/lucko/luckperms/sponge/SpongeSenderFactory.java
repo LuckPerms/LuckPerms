@@ -44,7 +44,7 @@ public class SpongeSenderFactory extends SenderFactory<CommandSource> {
         if (source instanceof Player) {
             return source.getName();
         }
-        return Constants.getConsoleName();
+        return Constants.CONSOLE_NAME;
     }
 
     @Override
@@ -52,7 +52,7 @@ public class SpongeSenderFactory extends SenderFactory<CommandSource> {
         if (source instanceof Player) {
             return ((Player) source).getUniqueId();
         }
-        return Constants.getConsoleUUID();
+        return Constants.CONSOLE_UUID;
     }
 
     @SuppressWarnings("deprecation")

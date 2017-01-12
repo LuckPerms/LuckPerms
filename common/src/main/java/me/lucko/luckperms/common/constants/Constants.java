@@ -22,7 +22,6 @@
 
 package me.lucko.luckperms.common.constants;
 
-import lombok.Getter;
 import lombok.experimental.UtilityClass;
 
 import java.util.UUID;
@@ -30,19 +29,10 @@ import java.util.UUID;
 @UtilityClass
 public class Constants {
 
-    @Getter
-    private static final UUID consoleUUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
-
-    @Getter
-    private static final String consoleName = "Console";
-
-    @Getter
-    private static final UUID importerUUID = UUID.fromString("11111111-1111-1111-1111-111111111111");
-
-    @Getter
-    private static final String importerName = "Import";
-
-    @Getter
-    private static final String logFormat = "&8(&e%s&8)  [&a%s&8] (&b%s&8) &7--> &f%s";
+    public static final UUID CONSOLE_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
+    public static final String CONSOLE_NAME = "Console";
+    public static final UUID IMPORT_UUID = UUID.fromString("11111111-1111-1111-1111-111111111111");
+    public static final String IMPORT_NAME = "Import";
+    public static final String LOG_FORMAT = "&8(&e%s&8)  [&a%s&8] (&b%s&8) &7--> &f%s";
 
 }

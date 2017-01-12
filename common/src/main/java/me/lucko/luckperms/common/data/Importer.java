@@ -201,12 +201,12 @@ public class Importer {
 
         @Override
         public String getName() {
-            return Constants.getImporterName();
+            return Constants.IMPORT_NAME;
         }
 
         @Override
         public UUID getUuid() {
-            return Constants.getImporterUUID();
+            return Constants.IMPORT_UUID;
         }
 
         @Override

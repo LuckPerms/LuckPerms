@@ -99,7 +99,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
             try {
                 holder.setPermission(p.name(), p.isTrue(), "global", world.getName());
                 LogEntry.build()
-                        .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                        .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                         .acted(holder).action("set " + p.name() + " " + p.isTrue() + " global " + world.getName())
                         .build().submit(plugin);
             } catch (Exception ex) {
@@ -113,7 +113,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
                 try {
                     holder.setPermission(child.getKey(), child.getValue(), "global", world.getName());
                     LogEntry.build()
-                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                             .acted(holder).action("set " + child.getKey() + " " + child.getValue() + " global " + world.getName())
                             .build().submit(plugin);
                 } catch (Exception ex) {
@@ -129,7 +129,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
             try {
                 holder.setPermission("group." + parent.getName(), true, "global", world.getName());
                 LogEntry.build()
-                        .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                        .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                         .acted(holder).action("setinherit " + parent.getName() + " global " + world.getName())
                         .build().submit(plugin);
             } catch (Exception ex) {
@@ -146,7 +146,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
                 try {
                     holder.setPermission(meta.getKey().toLowerCase() + "." + c.getPriority() + "." + chatMeta, true);
                     LogEntry.build()
-                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                             .acted(holder).action("set " + meta.getKey().toLowerCase() + "." + c.getPriority() + "." + chatMeta + " true")
                             .build().submit(plugin);
                 } catch (Exception ex) {
@@ -160,7 +160,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
             try {
                 holder.setPermission("meta." + meta.getKey() + "." + meta.getValue(), true, "global", world.getName());
                 LogEntry.build()
-                        .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                        .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                         .acted(holder).action("set meta." + meta.getKey() + "." + meta.getValue() + " true global " + world.getName())
                         .build().submit(plugin);
             } catch (Exception ex) {
@@ -215,7 +215,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
                 me.lucko.luckperms.common.core.model.Group lpGroup = plugin.getGroupManager().getIfLoaded(groupName);
                 try {
                     LogEntry.build()
-                            .actor(Constants.getConsoleUUID()).actorName(Constants.getConsoleName())
+                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
                             .acted(lpGroup).action("create")
                             .build().submit(plugin);
                 } catch (Exception ex) {

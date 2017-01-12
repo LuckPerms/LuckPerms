@@ -121,7 +121,7 @@ abstract class FlatfileBacking extends AbstractBacking {
     @Override
     public boolean logAction(LogEntry entry) {
         actionLogger.info(String.format(LOG_FORMAT,
-                (entry.getActor().equals(Constants.getConsoleUUID()) ? "" : entry.getActor() + " "),
+                (entry.getActor().equals(Constants.CONSOLE_UUID) ? "" : entry.getActor() + " "),
                 entry.getActorName(),
                 Character.toString(entry.getType()),
                 (entry.getActed() == null ? "" : entry.getActed().toString() + " "),
