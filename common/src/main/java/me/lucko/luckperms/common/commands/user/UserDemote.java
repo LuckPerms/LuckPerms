@@ -35,6 +35,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
+import me.lucko.luckperms.common.commands.utils.ContextHelper;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
@@ -49,7 +50,6 @@ import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -116,13 +116,7 @@ public class UserDemote extends SubCommand<User> {
             nodes.add(node);
         }
 
-        Iterator<Node> it = nodes.iterator();
-        while (it.hasNext()) {
-            Node g = it.next();
-            if (!track.containsGroup(g.getGroupName())) {
-                it.remove();
-            }
-        }
+        nodes.removeIf(g -> !track.containsGroup(g.getGroupName()));
 
         if (nodes.isEmpty()) {
             Message.USER_TRACK_ERROR_NOT_CONTAIN_GROUP.send(sender);
@@ -134,7 +128,8 @@ public class UserDemote extends SubCommand<User> {
             return CommandResult.FAILURE;
         }
 
-        final String old = nodes.stream().findAny().get().getGroupName();
+        final Node oldNode = nodes.stream().findAny().get();
+        final String old = oldNode.getGroupName();
         final String previous;
         try {
             previous = track.getPrevious(old);
@@ -160,26 +155,26 @@ public class UserDemote extends SubCommand<User> {
         }
 
         try {
-            user.unsetPermission(nodes.stream().findAny().get());
-        } catch (ObjectLacksException ignored) {
-        }
+            user.unsetPermission(old);
+        } catch (ObjectLacksException ignored) {}
         try {
             user.setPermission(NodeFactory.newBuilder("group." + previousGroup.getName()).setServer(server).setWorld(world).build());
-        } catch (ObjectAlreadyHasException ignored) {
-        }
+        } catch (ObjectAlreadyHasException ignored) {}
 
-        if (server == null && world == null) {
+        if (server == null && world == null && user.getPrimaryGroup().equalsIgnoreCase(old)) {
             user.setPrimaryGroup(previousGroup.getName());
         }
 
-        if (server == null) {
-            Message.USER_DEMOTE_SUCCESS.send(sender, track.getName(), old, previousGroup.getDisplayName());
-        } else {
-            if (world == null) {
+        switch (ContextHelper.determine(server, world)) {
+            case NONE:
+                Message.USER_DEMOTE_SUCCESS.send(sender, track.getName(), old, previousGroup.getDisplayName());
+                break;
+            case SERVER:
                 Message.USER_DEMOTE_SUCCESS_SERVER.send(sender, track.getName(), old, previousGroup.getDisplayName(), server);
-            } else {
+                break;
+            case SERVER_AND_WORLD:
                 Message.USER_DEMOTE_SUCCESS_SERVER_WORLD.send(sender, track.getName(), old, previousGroup.getDisplayName(), server, world);
-            }
+                break;
         }
 
         Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), previousGroup.getDisplayName(), old, true));
