@@ -24,6 +24,8 @@ package me.lucko.luckperms.common.storage.holder;
 
 import com.google.common.collect.Multimap;
 
+import me.lucko.luckperms.api.Node;
+
 import java.util.Optional;
 import java.util.OptionalLong;
 
@@ -36,5 +38,6 @@ public interface HeldPermission<T> {
     Optional<String> getWorld();
     OptionalLong getExpiry();
     Multimap<String, String> getContext();
+    Node asNode();
 
 }

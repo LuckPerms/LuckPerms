@@ -74,4 +74,9 @@ public class NodeHeldPermission<T> implements HeldPermission<T> {
     public Multimap<String, String> getContext() {
         return node.getContexts().toMultimap();
     }
+
+    @Override
+    public Node asNode() {
+        return node;
+    }
 }

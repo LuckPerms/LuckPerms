@@ -35,6 +35,7 @@ import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Patterns;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.storage.holder.HeldPermission;
 import me.lucko.luckperms.common.utils.DateUtil;
 
 import io.github.mkremins.fanciful.ChatColor;
@@ -48,6 +49,8 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @UtilityClass
 public class Util {
@@ -150,6 +153,16 @@ public class Util {
         return message;
     }
 
+    public static FancyMessage appendNodeExpiry(Node node, FancyMessage message) {
+        if (node.isTemporary()) {
+            message = message.then(" (").color(ChatColor.getByChar('8'));
+            message = message.then("expires in " + DateUtil.formatDateDiff(node.getExpiryUnixTime())).color(ChatColor.getByChar('7'));
+            message = message.then(")").color(ChatColor.getByChar('8'));
+        }
+
+        return message;
+    }
+
     public static String contextToString(String key, String value) {
         return "&8(&7" + key + "=&f" + value + "&8)";
     }
@@ -199,6 +212,29 @@ public class Util {
         return message;
     }
 
+    private static FancyMessage makeFancy(String holderName, boolean group, String label, HeldPermission<?> perm, FancyMessage message) {
+        Node node = perm.asNode();
+
+        message = message.formattedTooltip(
+                new FancyMessage("> ")
+                        .color(ChatColor.getByChar('3'))
+                        .then(node.getPermission())
+                        .color(node.getValue() ? ChatColor.getByChar('a') : ChatColor.getByChar('c')),
+                new FancyMessage(" "),
+                new FancyMessage("Click to remove this node from " + holderName).color(ChatColor.getByChar('7'))
+        );
+
+        String command = ExportCommand.nodeToString(node, group ? holderName : holderName, group)
+                .replace("/luckperms", "/" + label)
+                .replace("set", "unset")
+                .replace("add", "remove")
+                .replace(" true", "")
+                .replace(" false", "");
+
+        message = message.suggest(command);
+        return message;
+    }
+
     public static Map.Entry<FancyMessage, String> permNodesToMessage(SortedSet<LocalizedNode> nodes, PermissionHolder holder, String label, int pageNumber) {
         List<Node> l = new ArrayList<>();
         for (Node node : nodes) {
@@ -227,14 +263,83 @@ public class Util {
         for (Node node : page) {
             message = makeFancy(holder, label, node, message.then("> ").color(ChatColor.getByChar('3')));
             message = makeFancy(holder, label, node, message.then(Util.color(node.getPermission())).color(node.getValue() ? ChatColor.getByChar('a') : ChatColor.getByChar('c')));
-            message = makeFancy(holder, label, node, appendNodeContextDescription(node, message));
+            message = appendNodeContextDescription(node, message);
             message = message.then("\n");
         }
 
         return Maps.immutableEntry(message, title);
     }
 
-    private static <T> List<List<T>> divideList(List<T> source, int size) {
+    public static Map.Entry<FancyMessage, String> searchUserResultToMessage(List<HeldPermission<UUID>> results, Function<UUID, String> uuidLookup, String label, int pageNumber) {
+        if (results.isEmpty()) {
+            return Maps.immutableEntry(new FancyMessage("None").color(ChatColor.getByChar('3')), null);
+        }
+
+        List<HeldPermission<UUID>> sorted = new ArrayList<>(results);
+        sorted.sort(Comparator.comparing(HeldPermission::getHolder));
+
+        int index = pageNumber - 1;
+        List<List<HeldPermission<UUID>>> pages = divideList(sorted, 15);
+
+        if ((index < 0 || index >= pages.size())) {
+            pageNumber = 1;
+            index = 0;
+        }
+
+        List<HeldPermission<UUID>> page = pages.get(index);
+        List<Map.Entry<String, HeldPermission<UUID>>> uuidMappedPage = page.stream().map(hp -> Maps.immutableEntry(uuidLookup.apply(hp.getHolder()), hp)).collect(Collectors.toList());
+
+        FancyMessage message = new FancyMessage("");
+        String title = "&7(page &f" + pageNumber + "&7 of &f" + pages.size() + "&7 - &f" + sorted.size() + "&7 entries)";
+
+        for (Map.Entry<String, HeldPermission<UUID>> ent : uuidMappedPage) {
+            message = makeFancy(ent.getKey(), false, label, ent.getValue(), message.then("> ").color(ChatColor.getByChar('3')));
+            message = makeFancy(ent.getKey(), false, label, ent.getValue(), message.then(ent.getKey()).color(ChatColor.getByChar('b')));
+            message = makeFancy(ent.getKey(), false, label, ent.getValue(), message.then(" - ").color(ChatColor.getByChar('7')));
+            message = makeFancy(ent.getKey(), false, label, ent.getValue(), message.then("" + ent.getValue().getValue()).color(ent.getValue().getValue() ? ChatColor.getByChar('a') : ChatColor.getByChar('c')));
+            message = appendNodeExpiry(ent.getValue().asNode(), message);
+            message = appendNodeContextDescription(ent.getValue().asNode(), message);
+            message = message.then("\n");
+        }
+
+        return Maps.immutableEntry(message, title);
+    }
+
+    public static Map.Entry<FancyMessage, String> searchGroupResultToMessage(List<HeldPermission<String>> results, String label, int pageNumber) {
+        if (results.isEmpty()) {
+            return Maps.immutableEntry(new FancyMessage("None").color(ChatColor.getByChar('3')), null);
+        }
+
+        List<HeldPermission<String>> sorted = new ArrayList<>(results);
+        sorted.sort(Comparator.comparing(HeldPermission::getHolder));
+
+        int index = pageNumber - 1;
+        List<List<HeldPermission<String>>> pages = divideList(sorted, 15);
+
+        if ((index < 0 || index >= pages.size())) {
+            pageNumber = 1;
+            index = 0;
+        }
+
+        List<HeldPermission<String>> page = pages.get(index);
+
+        FancyMessage message = new FancyMessage("");
+        String title = "&7(page &f" + pageNumber + "&7 of &f" + pages.size() + "&7 - &f" + sorted.size() + "&7 entries)";
+
+        for (HeldPermission<String> ent : page) {
+            message = makeFancy(ent.getHolder(), true, label, ent, message.then("> ").color(ChatColor.getByChar('3')));
+            message = makeFancy(ent.getHolder(), true, label, ent, message.then(ent.getHolder()).color(ChatColor.getByChar('b')));
+            message = makeFancy(ent.getHolder(), true, label, ent, message.then(" - ").color(ChatColor.getByChar('7')));
+            message = makeFancy(ent.getHolder(), true, label, ent, message.then("" + ent.getValue()).color(ent.getValue() ? ChatColor.getByChar('a') : ChatColor.getByChar('c')));
+            message = appendNodeExpiry(ent.asNode(), message);
+            message = appendNodeContextDescription(ent.asNode(), message);
+            message = message.then("\n");
+        }
+
+        return Maps.immutableEntry(message, title);
+    }
+
+    public static <T> List<List<T>> divideList(List<T> source, int size) {
         List<List<T>> lists = new ArrayList<>();
         Iterator<T> it = source.iterator();
         while (it.hasNext()) {

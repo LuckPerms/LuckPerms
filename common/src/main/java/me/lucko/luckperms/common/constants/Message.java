@@ -92,6 +92,13 @@ public enum Message {
     VERBOSE_RECORDING_UPLOAD_START("&bVerbose recording was disabled. Uploading results...", true),
     VERBOSE_RECORDING_URL("&aVerbose results URL: {0}", true),
 
+    SEARCH_SEARCHING("&aSearching for users and groups with &b{0}&a...", true),
+    SEARCH_RESULT("&aFound &b{0}&a entries from &b{1}&a users and &b{2}&a groups.", true),
+    SEARCH_SHOWING_USERS("&bShowing user entries:", true),
+    SEARCH_SHOWING_GROUPS("&bShowing group entries:", true),
+    SEARCH_SHOWING_USERS_WITH_PAGE("&bShowing user entries:  {0}", true),
+    SEARCH_SHOWING_GROUPS_WITH_PAGE("&bShowing group entries:  {0}", true),
+
     CREATE_SUCCESS("&b{0}&a was successfully created.", true),
     DELETE_SUCCESS("&b{0}&a was successfully deleted.", true),
     RENAME_SUCCESS("&b{0}&a was successfully renamed to &b{1}&a.", true),

@@ -54,6 +54,13 @@ verbose-recording-on-query: "&bVerbose recording set to &aTRUE &bfor permissions
 verbose-recording-upload-start: "&bVerbose recording was disabled. Uploading results..."
 verbose-recording-url: "&aVerbose results URL: {0}"
 
+search-searching: "&aSearching for users and groups with &b{0}&a..."
+search-result: "&aFound &b{0}&a entries from &b{1}&a users and &b{2}&a groups."
+search-showing-users: "&bShowing user entries:"
+search-showing-groups: "&bShowing group entries:"
+search-showing-users-with-page: "&bShowing user entries:  {0}"
+search-showing-groups-with-page: "&bShowing group entries:  {0}"
+
 create-success: "&b{0}&a was successfully created."
 delete-success: "&b{0}&a was successfully deleted."
 rename-success: "&b{0}&a was successfully renamed to &b{1}&a."

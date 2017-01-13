@@ -37,6 +37,7 @@ import me.lucko.luckperms.common.commands.misc.ExportCommand;
 import me.lucko.luckperms.common.commands.misc.ImportCommand;
 import me.lucko.luckperms.common.commands.misc.InfoCommand;
 import me.lucko.luckperms.common.commands.misc.NetworkSyncCommand;
+import me.lucko.luckperms.common.commands.misc.SearchCommand;
 import me.lucko.luckperms.common.commands.misc.SyncCommand;
 import me.lucko.luckperms.common.commands.misc.VerboseCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
@@ -84,9 +85,10 @@ public class CommandManager {
                 .addAll(plugin.getExtraCommands())
                 .add(new LogMainCommand())
                 .add(new SyncCommand())
-                .add(new NetworkSyncCommand())
                 .add(new InfoCommand())
                 .add(new VerboseCommand())
+                .add(new SearchCommand())
+                .add(new NetworkSyncCommand())
                 .add(new ImportCommand())
                 .add(new ExportCommand())
                 .add(new MigrationMainCommand())
