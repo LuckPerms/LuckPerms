@@ -77,6 +77,8 @@ public class Injector {
             lpPermissible.recalculatePermissions();
             lpPermissible.setOldPermissible(existing);
 
+            lpPermissible.updateSubscriptionsAsync();
+
             HUMAN_ENTITY_FIELD.set(player, lpPermissible);
             INJECTED_PERMISSIBLES.put(player.getUniqueId(), lpPermissible);
             return true;
@@ -90,6 +92,10 @@ public class Injector {
         try {
             PermissibleBase permissible = (PermissibleBase) HUMAN_ENTITY_FIELD.get(player);
             if (permissible instanceof LPPermissible) {
+
+                permissible.clearPermissions();
+                ((LPPermissible) permissible).unsubscribeFromAllAsync();
+
                 if (dummy) {
                     HUMAN_ENTITY_FIELD.set(player, new DummyPermissibleBase());
                 } else {
@@ -104,7 +110,6 @@ public class Injector {
                     List<PermissionAttachment> newAttachments = (List<PermissionAttachment>) PERMISSIBLEBASE_ATTACHMENTS.get(newPb);
                     newAttachments.addAll(attachments);
                     attachments.clear();
-                    lpp.clearPermissions();
 
                     HUMAN_ENTITY_FIELD.set(player, newPb);
                 }

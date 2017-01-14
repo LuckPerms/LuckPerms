@@ -22,7 +22,6 @@
 
 package me.lucko.luckperms.api.context;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -40,37 +39,9 @@ public interface IContextCalculator<T> {
      * @param subject     the subject to add contexts to
      * @param accumulator a map of contexts to add to
      * @return the map
-     * @deprecated in favour of {@link #giveApplicableContext(Object, MutableContextSet)}. Older implementations of this
-     * interface will still work, as the replacement method is given as a default, and falls back to using this method.
-     */
-    @Deprecated
-    default Map<String, String> giveApplicableContext(T subject, Map<String, String> accumulator) {
-        MutableContextSet acc = new MutableContextSet();
-        giveApplicableContext(subject, acc);
-
-        accumulator.putAll(acc.toMap());
-        return accumulator;
-    }
-
-    /**
-     * Gives the subject all of the applicable contexts they meet
-     *
-     * <p><b>You MUST implement this method. The default is only provided for backwards compatibility with
-     * {@link #giveApplicableContext(Object, Map)}.</b>
-     *
-     * @param subject     the subject to add contexts to
-     * @param accumulator a map of contexts to add to
-     * @return the map
      * @since 2.13
      */
-    @SuppressWarnings("deprecation")
-    default MutableContextSet giveApplicableContext(T subject, MutableContextSet accumulator) {
-        Map<String, String> acc = new HashMap<>();
-        giveApplicableContext(subject, acc);
-
-        accumulator.addAll(acc.entrySet());
-        return accumulator;
-    }
+    MutableContextSet giveApplicableContext(T subject, MutableContextSet accumulator);
 
     /**
      * Checks to see if a context is applicable to a subject

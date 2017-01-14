@@ -394,4 +394,13 @@ public interface LuckPermsPlugin {
 
     }
 
+    /**
+     * Called when a users data is refreshed
+     *
+     * @param user the user
+     */
+    default void onUserRefresh(User user) {
+
+    }
+
 }

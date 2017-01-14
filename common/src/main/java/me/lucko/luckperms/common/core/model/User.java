@@ -117,6 +117,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
 
         userData = new UserCache(this, getPlugin().getCalculatorFactory());
         userData.preCalculate(getPlugin().getPreProcessContexts(op));
+        getPlugin().onUserRefresh(this);
     }
 
     /**
@@ -139,6 +140,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
         ud.recalculatePermissions();
         ud.recalculateMeta();
         getPlugin().getApiProvider().fireEventAsync(new UserPermissionRefreshEvent(new UserLink(this)));
+        getPlugin().onUserRefresh(this);
     }
 
     /**

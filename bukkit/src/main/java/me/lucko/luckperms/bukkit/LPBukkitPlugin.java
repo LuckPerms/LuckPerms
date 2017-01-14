@@ -392,6 +392,14 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     }
 
     @Override
+    public void onUserRefresh(User user) {
+        LPPermissible lpp = Injector.getPermissible(uuidCache.getExternalUUID(user.getUuid()));
+        if (lpp != null) {
+            lpp.updateSubscriptions();
+        }
+    }
+
+    @Override
     public void doAsync(Runnable r) {
         asyncExecutor.execute(r);
     }

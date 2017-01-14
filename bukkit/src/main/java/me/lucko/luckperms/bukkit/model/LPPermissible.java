@@ -61,7 +61,11 @@ public class LPPermissible extends PermissibleBase {
     @Getter
     private final Player parent;
 
+    @Getter
     private final LPBukkitPlugin plugin;
+
+    @Getter
+    private final SubscriptionManager subscriptions;
 
     @Getter
     @Setter
@@ -78,8 +82,26 @@ public class LPPermissible extends PermissibleBase {
         this.user = user;
         this.parent = parent;
         this.plugin = plugin;
+        this.subscriptions = new SubscriptionManager(this);
 
         recalculatePermissions();
+    }
+
+    public void updateSubscriptionsAsync() {
+        plugin.doAsync(this::updateSubscriptions);
+    }
+
+    public void updateSubscriptions() {
+        Set<String> ent = user.getUserData().getPermissionData(calculateContexts()).getImmutableBacking().keySet();
+        subscriptions.subscribe(ent);
+    }
+
+    public void unsubscribeFromAllAsync() {
+        plugin.doAsync(this::unsubscribeFromAll);
+    }
+
+    public void unsubscribeFromAll() {
+        subscriptions.subscribe(Collections.emptySet());
     }
 
     public void addAttachments(List<PermissionAttachment> attachments) {
