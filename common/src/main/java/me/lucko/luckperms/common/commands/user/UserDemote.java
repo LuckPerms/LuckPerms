@@ -155,7 +155,7 @@ public class UserDemote extends SubCommand<User> {
         }
 
         try {
-            user.unsetPermission(old);
+            user.unsetPermission(oldNode);
         } catch (ObjectLacksException ignored) {}
         try {
             user.setPermission(NodeFactory.newBuilder("group." + previousGroup.getName()).setServer(server).setWorld(world).build());
