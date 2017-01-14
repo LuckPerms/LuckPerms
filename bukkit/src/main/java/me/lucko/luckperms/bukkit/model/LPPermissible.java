@@ -92,7 +92,14 @@ public class LPPermissible extends PermissibleBase {
     }
 
     public void updateSubscriptions() {
-        Set<String> ent = user.getUserData().getPermissionData(calculateContexts()).getImmutableBacking().keySet();
+        Set<String> ent = new HashSet<>(user.getUserData().getPermissionData(calculateContexts()).getImmutableBacking().keySet());
+
+        if (parent.isOp()) {
+            ent.addAll(plugin.getDefaultsProvider().getOpDefaults().keySet());
+        } else {
+            ent.addAll(plugin.getDefaultsProvider().getNonOpDefaults().keySet());
+        }
+
         subscriptions.subscribe(ent);
     }
 

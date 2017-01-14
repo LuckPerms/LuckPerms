@@ -84,6 +84,7 @@ public class DefaultsProvider {
     @Getter
     private Map<String, Boolean> opDefaults = ImmutableMap.of();
     private final DummyPermissible opDummy = new DummyPermissible(this::refreshOp);
+    
     @Getter
     private Map<String, Boolean> nonOpDefaults = ImmutableMap.of();
     private final DummyPermissible nonOpDummy = new DummyPermissible(this::refreshNonOp);
