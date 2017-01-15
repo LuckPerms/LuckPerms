@@ -261,6 +261,9 @@ user-primarygroup-success: "&b{0}&a's primary group was set to &b{1}&a."
 user-primarygroup-error-alreadyhas: "The user already has this group set as their primary group."
 user-primarygroup-error-notmember: "&b{0}&a was not already a member of &b{1}&a, adding them now."
 user-track-error-not-contain-group: "The user specified isn't already in any groups on this track."
+user-track-added-to-first: "&b{0}&a isn't in any groups on this track, so they were added to the first group, &b{1}&a."
+user-track-added-to-first-server: "&b{0}&a isn't in any groups on this track, so they were added to the first group, &b{1}&a, on server &b{2}&a."
+user-track-added-to-first-server-world: "&b{0}&a isn't in any groups on this track, so they were added to the first group, &b{1}&a, on server &b{2}&a, world &b{3}&a."
 user-promote-success: "&aPromoting user along track &b{0}&a from &b{1}&a to &b{2}&a."
 user-promote-success-server: "&aPromoting user along track &b{0}&a from &b{1}&a to &b{2}&a on server &b{3}&a."
 user-promote-success-server-world: "&aPromoting user along track &b{0}&a from &b{1}&a to &b{2}&a on server &b{3}&a, world &b{4}&a."
@@ -271,7 +274,7 @@ user-promote-error-malformed: >
 user-demote-success: "&aDemoting user along track &b{0}&a from &b{1}&a to &b{2}&a."
 user-demote-success-server: "&aDemoting user along track &b{0}&a from &b{1}&a to &b{2}&a on server &b{3}&a."
 user-demote-success-server-world: "&aDemoting user along track &b{0}&a from &b{1}&a to &b{2}&a on server &b{3}&a, world &b{4}&a."
-user-demote-error-endoftrack: "The end of track &4{0}&c was reached. Unable to demote user."
+user-demote-endoftrack: "The end of track &4{0}&c was reached, so &4{1}&c was removed from &4{2}&c."
 user-demote-error-malformed: >
   {PREFIX}The previous group on the track, {0}, no longer exists. Unable to demote user.\n
   {PREFIX}Either create the group, or remove it from the track and try again.

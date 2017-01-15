@@ -119,8 +119,37 @@ public class UserPromote extends SubCommand<User> {
         nodes.removeIf(g -> !track.containsGroup(g.getGroupName()));
 
         if (nodes.isEmpty()) {
-            Message.USER_TRACK_ERROR_NOT_CONTAIN_GROUP.send(sender);
-            return CommandResult.FAILURE;
+            String first = track.getGroups().get(0);
+
+            Group nextGroup = plugin.getGroupManager().getIfLoaded(first);
+            if (nextGroup == null) {
+                Message.USER_PROMOTE_ERROR_MALFORMED.send(sender, false);
+                return CommandResult.LOADING_ERROR;
+            }
+
+            try {
+                user.setPermission(NodeFactory.newBuilder("group." + first).setServer(server).setWorld(world).build());
+            } catch (ObjectAlreadyHasException ignored) {}
+
+            switch (ContextHelper.determine(server, world)) {
+                case NONE:
+                    Message.USER_TRACK_ADDED_TO_FIRST.send(sender, user.getName(), first);
+                    break;
+                case SERVER:
+                    Message.USER_TRACK_ADDED_TO_FIRST_SERVER.send(sender, user.getName(), first, server);
+                    break;
+                case SERVER_AND_WORLD:
+                    Message.USER_TRACK_ADDED_TO_FIRST_SERVER_WORLD.send(sender, user.getName(), first, server, world);
+                    break;
+            }
+
+            LogEntry.build().actor(sender).acted(user)
+                    .action("promote " + args.stream().collect(Collectors.joining(" ")))
+                    .build().submit(plugin, sender);
+            save(user, sender, plugin);
+            plugin.getApiProvider().fireEventAsync(new UserPromoteEvent(new TrackLink(track), new UserLink(user), null, first));
+
+            return CommandResult.SUCCESS;
         }
 
         if (nodes.size() != 1) {

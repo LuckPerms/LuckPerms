@@ -139,8 +139,20 @@ public class UserDemote extends SubCommand<User> {
         }
 
         if (previous == null) {
-            Message.USER_DEMOTE_ERROR_ENDOFTRACK.send(sender, track.getName());
-            return CommandResult.STATE_ERROR;
+
+            try {
+                user.unsetPermission(oldNode);
+            } catch (ObjectLacksException ignored) {}
+
+            Message.USER_DEMOTE_ENDOFTRACK.send(sender, track.getName(), user.getName(), old);
+
+            LogEntry.build().actor(sender).acted(user)
+                    .action("demote " + args.stream().collect(Collectors.joining(" ")))
+                    .build().submit(plugin, sender);
+            save(user, sender, plugin);
+            plugin.getApiProvider().fireEventAsync(new UserDemoteEvent(new TrackLink(track), new UserLink(user), old, null));
+
+            return CommandResult.SUCCESS;
         }
 
         if (!plugin.getStorage().loadGroup(previous).join()) {
