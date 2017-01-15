@@ -117,10 +117,12 @@ public class SpongeGroup extends Group {
             this.subjectData = new LuckPermsSubjectData(true, plugin.getService(), parent, this);
             this.transientSubjectData = new LuckPermsSubjectData(false, plugin.getService(), parent, this);
 
-            parent.getStateListeners().add(() -> {
-                permissionCache.invalidateAll();
-                parentCache.invalidateAll();
-            });
+            parent.getStateListeners().add(this::invalidateCaches);
+        }
+
+        public void invalidateCaches() {
+            permissionCache.invalidateAll();
+            parentCache.invalidateAll();
         }
 
         @Override

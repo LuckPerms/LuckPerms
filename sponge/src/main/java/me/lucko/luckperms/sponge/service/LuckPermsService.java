@@ -43,11 +43,14 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.common.caching.UserCache;
+import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.contexts.SpongeCalculatorLink;
 import me.lucko.luckperms.sponge.managers.SpongeGroupManager;
 import me.lucko.luckperms.sponge.managers.SpongeUserManager;
+import me.lucko.luckperms.sponge.model.SpongeGroup;
 import me.lucko.luckperms.sponge.service.base.LPSubject;
 import me.lucko.luckperms.sponge.service.base.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.base.LPSubjectData;
@@ -225,6 +228,19 @@ public class LuckPermsService implements PermissionService {
         for (CalculatedSubjectData subjectData : localDataCaches) {
             subjectData.invalidateLookupCache();
         }
+
+        plugin.getCalculatorFactory().invalidateAll();
+
+        for (User user : plugin.getUserManager().getAll().values()) {
+            UserCache userCache = user.getUserData();
+            if (userCache == null) continue;
+
+            userCache.invalidateCache();
+        }
+
+        for (SpongeGroup group : plugin.getGroupManager().getAll().values()) {
+            group.getSpongeData().invalidateCaches();
+        }
     }
 
     public void invalidateParentCaches() {
@@ -238,6 +254,13 @@ public class LuckPermsService implements PermissionService {
     public void invalidateOptionCaches() {
         for (LoadingCache<OptionLookup, Optional<String>> c : localOptionCaches) {
             c.invalidateAll();
+        }
+
+        for (User user : plugin.getUserManager().getAll().values()) {
+            UserCache userCache = user.getUserData();
+            if (userCache == null) continue;
+
+            userCache.invalidateCache();
         }
     }
 
