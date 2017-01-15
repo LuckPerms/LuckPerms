@@ -43,9 +43,12 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -62,6 +65,7 @@ import static me.lucko.luckperms.common.core.model.PermissionHolder.exportToLega
 public class YAMLBacking extends FlatfileBacking {
     private static Yaml getYaml() {
         DumperOptions options = new DumperOptions();
+        options.setAllowUnicode(true);
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
         return new Yaml(options);
     }
@@ -79,33 +83,37 @@ public class YAMLBacking extends FlatfileBacking {
         super(plugin, "YAML", pluginDir);
     }
 
-    private boolean readMapFromFile(File file, Function<Map<String, Object>, Boolean> readOperation) {
-        boolean success = false;
-        try {
-            try (FileReader fileReader = new FileReader(file)) {
-                try (BufferedReader bufferedReader = new BufferedReader(fileReader)) {
-                    success = readOperation.apply((Map<String, Object>) getYaml().load(bufferedReader));
-                }
-            }
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
-        return success;
-    }
-
     private boolean writeMapToFile(File file, Map<String, Object> values) {
         try {
-            try (FileWriter fileWriter = new FileWriter(file)) {
-                try (BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {
-                    getYaml().dump(values, bufferedWriter);
-                    bufferedWriter.flush();
-                    return true;
+            try (FileOutputStream outputStream = new FileOutputStream(file)) {
+                try (OutputStreamWriter outputWriter = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)) {
+                    try (BufferedWriter bufferedWriter = new BufferedWriter(outputWriter)) {
+                        getYaml().dump(values, bufferedWriter);
+                        bufferedWriter.flush();
+                        return true;
+                    }
                 }
             }
         } catch (Throwable t) {
             t.printStackTrace();
             return false;
         }
+    }
+
+    private boolean readMapFromFile(File file, Function<Map<String, Object>, Boolean> readOperation) {
+        boolean success = false;
+        try {
+            try (FileInputStream fileInput = new FileInputStream(file)) {
+                try (InputStreamReader inputReader = new InputStreamReader(fileInput, StandardCharsets.UTF_8)) {
+                    try (BufferedReader bufferedReader = new BufferedReader(inputReader)) {
+                        success = readOperation.apply((Map<String, Object>) getYaml().load(bufferedReader));
+                    }
+                }
+            }
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+        return success;
     }
 
     @Override

@@ -43,9 +43,12 @@ import me.lucko.luckperms.common.utils.ThrowingFunction;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -76,12 +79,14 @@ public class JSONBacking extends FlatfileBacking {
     private boolean fileToWriter(File file, ThrowingFunction<JsonWriter, Boolean> writeOperation) {
         boolean success = false;
         try {
-            try (FileWriter fileWriter = new FileWriter(file)) {
-                try (BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {
-                    try (JsonWriter jsonWriter = new JsonWriter(bufferedWriter)) {
-                        jsonWriter.setIndent("    ");
-                        success = writeOperation.apply(jsonWriter);
-                        jsonWriter.flush();
+            try (FileOutputStream outputStream = new FileOutputStream(file)) {
+                try (OutputStreamWriter outputWriter = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)) {
+                    try (BufferedWriter bufferedWriter = new BufferedWriter(outputWriter)) {
+                        try (JsonWriter jsonWriter = new JsonWriter(bufferedWriter)) {
+                            jsonWriter.setIndent("    ");
+                            success = writeOperation.apply(jsonWriter);
+                            jsonWriter.flush();
+                        }
                     }
                 }
             }
@@ -94,10 +99,12 @@ public class JSONBacking extends FlatfileBacking {
     private boolean fileToReader(File file, ThrowingFunction<JsonReader, Boolean> readOperation) {
         boolean success = false;
         try {
-            try (FileReader fileReader = new FileReader(file)) {
-                try (BufferedReader bufferedReader = new BufferedReader(fileReader)) {
-                    try (JsonReader jsonReader = new JsonReader(bufferedReader)) {
-                        success = readOperation.apply(jsonReader);
+            try (FileInputStream fileInput = new FileInputStream(file)) {
+                try (InputStreamReader inputReader = new InputStreamReader(fileInput, StandardCharsets.UTF_8)) {
+                    try (BufferedReader bufferedReader = new BufferedReader(inputReader)) {
+                        try (JsonReader jsonReader = new JsonReader(bufferedReader)) {
+                            success = readOperation.apply(jsonReader);
+                        }
                     }
                 }
             }
