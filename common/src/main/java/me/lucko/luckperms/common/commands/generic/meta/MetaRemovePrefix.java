@@ -46,10 +46,10 @@ import java.util.stream.Collectors;
 public class MetaRemovePrefix extends SharedSubCommand {
     public MetaRemovePrefix() {
         super("removeprefix", "Removes a prefix", Permission.USER_META_REMOVEPREFIX, Permission.GROUP_META_REMOVEPREFIX,
-                Predicates.notInRange(2, 4),
+                Predicates.notInRange(1, 4),
                 Arg.list(
                         Arg.create("priority", true, "the priority to add the prefix at"),
-                        Arg.create("prefix", true, "the prefix string"),
+                        Arg.create("prefix", false, "the prefix string"),
                         Arg.create("server", false, "the server to add the prefix on"),
                         Arg.create("world", false, "the world to add the prefix on")
                 )
@@ -59,7 +59,7 @@ public class MetaRemovePrefix extends SharedSubCommand {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         int priority = ArgumentUtils.handlePriority(0, args);
-        String prefix = ArgumentUtils.handleNodeWithoutCheck(1, args);
+        String prefix = ArgumentUtils.handleStringOrElse(1, args, "null");
         String server = ArgumentUtils.handleServer(2, args);
         String world = ArgumentUtils.handleWorld(3, args);
 

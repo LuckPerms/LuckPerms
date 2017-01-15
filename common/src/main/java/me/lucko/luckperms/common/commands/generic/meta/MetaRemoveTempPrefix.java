@@ -45,10 +45,11 @@ import java.util.stream.Collectors;
 
 public class MetaRemoveTempPrefix extends SharedSubCommand {
     public MetaRemoveTempPrefix() {
-        super("removetempprefix", "Removes a temporary prefix", Permission.USER_META_REMOVETEMP_PREFIX, Permission.GROUP_META_REMOVETEMP_PREFIX, Predicates.notInRange(2, 4),
+        super("removetempprefix", "Removes a temporary prefix", Permission.USER_META_REMOVETEMP_PREFIX, Permission.GROUP_META_REMOVETEMP_PREFIX,
+                Predicates.notInRange(1, 4),
                 Arg.list(
                         Arg.create("priority", true, "the priority to add the prefix at"),
-                        Arg.create("prefix", true, "the prefix string"),
+                        Arg.create("prefix", false, "the prefix string"),
                         Arg.create("server", false, "the server to add the prefix on"),
                         Arg.create("world", false, "the world to add the prefix on")
                 )
@@ -58,7 +59,7 @@ public class MetaRemoveTempPrefix extends SharedSubCommand {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         int priority = ArgumentUtils.handlePriority(0, args);
-        String prefix = ArgumentUtils.handleNodeWithoutCheck(1, args);
+        String prefix = ArgumentUtils.handleStringOrElse(1, args, "null");
         String server = ArgumentUtils.handleServer(2, args);
         String world = ArgumentUtils.handleWorld(3, args);
 
@@ -90,8 +91,7 @@ public class MetaRemoveTempPrefix extends SharedSubCommand {
             toRemove.forEach(n -> {
                 try {
                     holder.unsetPermission(n);
-                } catch (ObjectLacksException ignored) {
-                }
+                } catch (ObjectLacksException ignored) {}
             });
 
             Message.BULK_CHANGE_SUCCESS.send(sender, toRemove.size());

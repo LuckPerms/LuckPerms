@@ -45,10 +45,11 @@ import java.util.stream.Collectors;
 
 public class MetaRemoveTempSuffix extends SharedSubCommand {
     public MetaRemoveTempSuffix() {
-        super("removetempsuffix", "Removes a temporary suffix", Permission.USER_META_REMOVETEMP_SUFFIX, Permission.GROUP_META_REMOVETEMP_SUFFIX, Predicates.notInRange(2, 4),
+        super("removetempsuffix", "Removes a temporary suffix", Permission.USER_META_REMOVETEMP_SUFFIX, Permission.GROUP_META_REMOVETEMP_SUFFIX,
+                Predicates.notInRange(1, 4),
                 Arg.list(
                         Arg.create("priority", true, "the priority to add the suffix at"),
-                        Arg.create("suffix", true, "the suffix string"),
+                        Arg.create("suffix", false, "the suffix string"),
                         Arg.create("server", false, "the server to add the suffix on"),
                         Arg.create("world", false, "the world to add the suffix on")
                 )
@@ -58,7 +59,7 @@ public class MetaRemoveTempSuffix extends SharedSubCommand {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         int priority = ArgumentUtils.handlePriority(0, args);
-        String suffix = ArgumentUtils.handleNodeWithoutCheck(1, args);
+        String suffix = ArgumentUtils.handleStringOrElse(1, args, "null");
         String server = ArgumentUtils.handleServer(2, args);
         String world = ArgumentUtils.handleWorld(3, args);
 

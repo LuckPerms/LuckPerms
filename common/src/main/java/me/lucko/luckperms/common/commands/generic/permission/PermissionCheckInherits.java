@@ -55,7 +55,7 @@ public class PermissionCheckInherits extends SharedSubCommand {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
-        String node = ArgumentUtils.handleNodeWithoutCheck(0, args);
+        String node = ArgumentUtils.handleString(0, args);
         String server = ArgumentUtils.handleServer(1, args);
         String world = ArgumentUtils.handleWorld(2, args);
 

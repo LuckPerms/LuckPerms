@@ -40,7 +40,15 @@ import java.util.function.Function;
 public class ArgumentUtils {
     public static final Function<String, String> WRAPPER = s -> s.contains(" ") ? "\"" + s + "\"" : s;
 
-    public static String handleNodeWithoutCheck(int index, List<String> args) {
+    public static String handleString(int index, List<String> args) {
+        return args.get(index).replace("{SPACE}", " ");
+    }
+
+    public static String handleStringOrElse(int index, List<String> args, String other) {
+        if (index < 0 || index >= args.size()) {
+            return other;
+        }
+
         return args.get(index).replace("{SPACE}", " ");
     }
 

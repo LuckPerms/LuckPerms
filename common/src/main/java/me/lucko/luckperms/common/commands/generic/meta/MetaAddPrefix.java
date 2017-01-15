@@ -57,7 +57,7 @@ public class MetaAddPrefix extends SharedSubCommand {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         int priority = ArgumentUtils.handlePriority(0, args);
-        String prefix = ArgumentUtils.handleNodeWithoutCheck(1, args);
+        String prefix = ArgumentUtils.handleString(1, args);
         String server = ArgumentUtils.handleServer(2, args);
         String world = ArgumentUtils.handleWorld(3, args);
 

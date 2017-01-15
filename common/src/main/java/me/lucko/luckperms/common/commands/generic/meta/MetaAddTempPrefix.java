@@ -59,7 +59,7 @@ public class MetaAddTempPrefix extends SharedSubCommand {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         int priority = ArgumentUtils.handlePriority(0, args);
-        String prefix = ArgumentUtils.handleNodeWithoutCheck(1, args);
+        String prefix = ArgumentUtils.handleString(1, args);
         long duration = ArgumentUtils.handleDuration(2, args);
         String server = ArgumentUtils.handleServer(3, args);
         String world = ArgumentUtils.handleWorld(4, args);
