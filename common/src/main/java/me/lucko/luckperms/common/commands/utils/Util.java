@@ -203,8 +203,8 @@ public class Util {
         boolean group = !(holder instanceof User);
         String command = ExportCommand.nodeToString(node, group ? holder.getObjectName() : holder.getFriendlyName(), group)
                 .replace("/luckperms", "/" + label)
-                .replace("set", "unset")
-                .replace("add", "remove")
+                .replace("permission set", "permission unset")
+                .replace("parent add", "parent remove")
                 .replace(" true", "")
                 .replace(" false", "");
 
@@ -226,8 +226,8 @@ public class Util {
 
         String command = ExportCommand.nodeToString(node, group ? holderName : holderName, group)
                 .replace("/luckperms", "/" + label)
-                .replace("set", "unset")
-                .replace("add", "remove")
+                .replace("permission set", "permission unset")
+                .replace("parent add", "parent remove")
                 .replace(" true", "")
                 .replace(" false", "");
 
