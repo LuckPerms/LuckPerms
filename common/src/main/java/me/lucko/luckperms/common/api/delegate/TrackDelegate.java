@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.api.internal;
+package me.lucko.luckperms.common.api.delegate;
 
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -34,14 +34,14 @@ import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.List;
 
-import static me.lucko.luckperms.common.api.internal.Utils.checkGroup;
+import static me.lucko.luckperms.common.api.ApiUtils.checkGroup;
 
 /**
  * Provides a link between {@link Track} and {@link me.lucko.luckperms.common.core.model.Track}
  */
 @EqualsAndHashCode(of = {"name"})
 @SuppressWarnings("unused")
-public class TrackLink implements Track {
+public class TrackDelegate implements Track {
 
     @Getter(AccessLevel.PACKAGE)
     private final me.lucko.luckperms.common.core.model.Track master;
@@ -49,7 +49,7 @@ public class TrackLink implements Track {
     @Getter
     private final String name;
 
-    public TrackLink(@NonNull me.lucko.luckperms.common.core.model.Track master) {
+    public TrackDelegate(@NonNull me.lucko.luckperms.common.core.model.Track master) {
         this.master = master;
         this.name = master.getName();
     }
@@ -67,31 +67,31 @@ public class TrackLink implements Track {
     @Override
     public String getNext(@NonNull Group current) throws ObjectLacksException {
         checkGroup(current);
-        return master.getNext(((GroupLink) current).getMaster());
+        return master.getNext(((GroupDelegate) current).getMaster());
     }
 
     @Override
     public String getPrevious(@NonNull Group current) throws ObjectLacksException {
         checkGroup(current);
-        return master.getPrevious(((GroupLink) current).getMaster());
+        return master.getPrevious(((GroupDelegate) current).getMaster());
     }
 
     @Override
     public void appendGroup(@NonNull Group group) throws ObjectAlreadyHasException {
         checkGroup(group);
-        master.appendGroup(((GroupLink) group).getMaster());
+        master.appendGroup(((GroupDelegate) group).getMaster());
     }
 
     @Override
     public void insertGroup(@NonNull Group group, @NonNull int position) throws ObjectAlreadyHasException, IndexOutOfBoundsException {
         checkGroup(group);
-        master.insertGroup(((GroupLink) group).getMaster(), position);
+        master.insertGroup(((GroupDelegate) group).getMaster(), position);
     }
 
     @Override
     public void removeGroup(@NonNull Group group) throws ObjectLacksException {
         checkGroup(group);
-        master.removeGroup(((GroupLink) group).getMaster());
+        master.removeGroup(((GroupDelegate) group).getMaster());
     }
 
     @Override
@@ -102,7 +102,7 @@ public class TrackLink implements Track {
     @Override
     public boolean containsGroup(@NonNull Group group) {
         checkGroup(group);
-        return master.containsGroup(((GroupLink) group).getMaster());
+        return master.containsGroup(((GroupDelegate) group).getMaster());
     }
 
     @Override

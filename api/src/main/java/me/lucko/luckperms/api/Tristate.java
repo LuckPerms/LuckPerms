@@ -23,14 +23,34 @@
 package me.lucko.luckperms.api;
 
 /**
- * Represents a permission value
+ * Represents a permission setting.
+ *
+ * <p> Consider a value of {@link #FALSE} to be a "negated" setting, and a value of {@link #UNDEFINED} to be a
+ * non-existent value.
  */
 public enum Tristate {
 
+    /**
+     * A value indicating a holder has a permission set.
+     */
     TRUE(true),
+
+    /**
+     * A value indicating a holder has a negated value for a permission.
+     */
     FALSE(false),
+
+    /**
+     * A value indicating a holder doesn't have a value for a permission set.
+     */
     UNDEFINED(false);
 
+    /**
+     * Converts from {@link Boolean} a boolean
+     *
+     * @param b the boolean
+     * @return {@link #TRUE} or {@link #FALSE}, depending on the value of the boolean.
+     */
     public static Tristate fromBoolean(boolean b) {
         return b ? TRUE : FALSE;
     }
@@ -41,6 +61,12 @@ public enum Tristate {
         this.booleanValue = booleanValue;
     }
 
+    /**
+     * Returns the value of the Tristate as a boolean.
+     * <p> A value of {@link #UNDEFINED} converts to false.
+     *
+     * @return a boolean representation of the Tristate.
+     */
     public boolean asBoolean() {
         return booleanValue;
     }

@@ -20,24 +20,75 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.holder;
+package me.lucko.luckperms.api;
 
 import com.google.common.collect.Multimap;
-
-import me.lucko.luckperms.api.Node;
 
 import java.util.Optional;
 import java.util.OptionalLong;
 
+/**
+ * A relationship between a Holder and a permission
+ *
+ * @param <T> the identifier type of the holder
+ * @since 2.17
+ */
 public interface HeldPermission<T> {
 
+    /**
+     * Gets the holder of the permission
+     *
+     * @return the holder
+     */
     T getHolder();
+
+    /**
+     * Gets the permission being held
+     *
+     * @return the permission
+     */
     String getPermission();
+
+    /**
+     * Gets the value of the permission
+     *
+     * @return the value
+     */
     boolean getValue();
+
+    /**
+     * Gets the server where the permission is held
+     *
+     * @return the server
+     */
     Optional<String> getServer();
+
+    /**
+     * Gets the world where the permission is held
+     *
+     * @return the world
+     */
     Optional<String> getWorld();
+
+    /**
+     * Gets the time in unix time when the permission will expire
+     *
+     * @return the expiry time
+     */
     OptionalLong getExpiry();
+
+    /**
+     * Gets the context for the permission.
+     *
+     * @return the context
+     */
     Multimap<String, String> getContext();
+
+    /**
+     * Converts this permission into a Node
+     *
+     * @return a Node copy of this permission
+     */
     Node asNode();
 
 }

@@ -26,14 +26,16 @@ import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.List;
+import java.util.OptionalInt;
 
 /**
- * Interface for internal Group instances
+ * A group which holds permission data.
  */
-@SuppressWarnings("unused")
 public interface Group extends PermissionHolder {
 
     /**
+     * Get the name of the group
+     *
      * @return the name of the group
      */
     String getName();
@@ -221,11 +223,6 @@ public interface Group extends PermissionHolder {
     void unsetInheritGroup(Group group, String server, String world, boolean temporary) throws ObjectLacksException;
 
     /**
-     * Clear all of the groups permission nodes
-     */
-    void clearNodes();
-
-    /**
      * Get a {@link List} of all of the groups the group inherits, on all servers
      *
      * @return a {@link List} of group names
@@ -236,6 +233,17 @@ public interface Group extends PermissionHolder {
      * Get a {@link List} of the groups the group inherits on a specific server
      *
      * @param server the server to check
+     * @return a {@link List} of group names
+     * @throws NullPointerException     if the server is null
+     * @throws IllegalArgumentException if the server is invalid
+     */
+    List<String> getLocalGroups(String server);
+
+
+    /**
+     * Get a {@link List} of the groups the group inherits on a specific server and world
+     *
+     * @param server the server to check
      * @param world  the world to check
      * @return a {@link List} of group names
      * @throws NullPointerException     if the server or world is null
@@ -244,12 +252,11 @@ public interface Group extends PermissionHolder {
     List<String> getLocalGroups(String server, String world);
 
     /**
-     * Get a {@link List} of the groups the group inherits on a specific server
+     * Gets the weight of this group, is present.
      *
-     * @param server the server to check
-     * @return a {@link List} of group names
-     * @throws NullPointerException     if the server is null
-     * @throws IllegalArgumentException if the server is invalid
+     * @return the group weight
+     * @since 2.17
      */
-    List<String> getLocalGroups(String server);
+    OptionalInt getWeight();
+
 }

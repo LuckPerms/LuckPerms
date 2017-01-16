@@ -27,8 +27,9 @@ import me.lucko.luckperms.api.context.ContextSet;
 import java.util.Map;
 
 /**
- * Represents the context and options for a permission lookup.
- * All values are immutable.
+ * Context and options for a permission lookup.
+ *
+ * <p> All values are immutable.
  *
  * @since 2.11
  */
@@ -67,28 +68,34 @@ public class Contexts {
      * The keys for servers and worlds are defined as static values.
      */
     private final ContextSet context;
+
     /**
      * The mode to parse defaults on Bukkit
      *
      * @since 2.12
      */
     private final boolean op;
+
     /**
      * If global or non server specific nodes should be applied
      */
     private final boolean includeGlobal;
+
     /**
      * If global or non world specific nodes should be applied
      */
     private final boolean includeGlobalWorld;
+
     /**
      * If parent groups should be applied
      */
     private final boolean applyGroups;
+
     /**
      * If global or non server specific group memberships should be applied
      */
     private final boolean applyGlobalGroups;
+
     /**
      * If global or non world specific group memberships should be applied
      */

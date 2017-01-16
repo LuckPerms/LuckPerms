@@ -38,7 +38,8 @@ public interface UserData {
 
     /**
      * Gets PermissionData from the cache, given a specified context.
-     * If the data is not cached, it is calculated. Therefore, this call could be costly.
+     *
+     * <p> If the data is not cached, it is calculated. Therefore, this call could be costly.
      *
      * @param contexts the contexts to get the permission data in
      * @return a permission data instance
@@ -48,7 +49,8 @@ public interface UserData {
 
     /**
      * Gets MetaData from the cache, given a specified context.
-     * If the data is not cached, it is calculated. Therefore, this call could be costly.
+     *
+     * <p> If the data is not cached, it is calculated. Therefore, this call could be costly.
      *
      * @param contexts the contexts to get the permission data in
      * @return a meta data instance
@@ -75,8 +77,10 @@ public interface UserData {
     MetaData calculateMeta(Contexts contexts);
 
     /**
-     * Calculates permission data and stores it in the cache. If there is already data cached for the given contexts,
-     * and if the resultant output is different, the cached value is updated.
+     * Calculates permission data and stores it in the cache.
+     *
+     * <p> If there is already data cached for the given contexts, and if the resultant output is different,
+     * the cached value is updated.
      *
      * @param contexts the contexts to recalculate in.
      * @throws NullPointerException if contexts is null
@@ -84,8 +88,10 @@ public interface UserData {
     void recalculatePermissions(Contexts contexts);
 
     /**
-     * Calculates meta data and stores it in the cache. If there is already data cached for the given contexts,
-     * and if the resultant output is different, the cached value is updated.
+     * Calculates meta data and stores it in the cache.
+     *
+     * <p> If there is already data cached for the given contexts, and if the resultant output is different,
+     * the cached value is updated.
      *
      * @param contexts the contexts to recalculate in.
      * @throws NullPointerException if contexts is null
@@ -111,8 +117,9 @@ public interface UserData {
     void preCalculate(Set<Contexts> contexts);
 
     /**
-     * Ensures that PermissionData and MetaData is cached for a context. If the cache does not contain any data for the
-     * context, it will be calculated and saved.
+     * Ensures that PermissionData and MetaData is cached for a context.
+     *
+     * <p> If the cache does not contain any data for the context, it will be calculated and saved.
      *
      * @param contexts the contexts to pre-calculate for
      * @throws NullPointerException if contexts is null

@@ -28,19 +28,20 @@ import me.lucko.luckperms.exceptions.ObjectLacksException;
 import java.util.List;
 
 /**
- * Interface for internal Track instances
+ * An ordered collection of groups for easy promotions and demotions
  */
-@SuppressWarnings("unused")
 public interface Track {
 
     /**
+     * Gets the name of this track
      * @return the name of this track
      */
     String getName();
 
     /**
      * Gets an ordered list of the groups on this track
-     * Index 0 is the first/lowest group in (or start of) the track
+     *
+     * <p> Index 0 is the first/lowest group in (or start of) the track
      *
      * @return an ordered {@link List} of the groups on this track
      */
@@ -136,7 +137,7 @@ public interface Track {
     boolean containsGroup(String group);
 
     /**
-     * Clear all of the groups within this track
+     * Clear all of the groups from this track
      */
     void clearGroups();
 

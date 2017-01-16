@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.api.internal;
+package me.lucko.luckperms.common.api.delegate;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -36,16 +36,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static me.lucko.luckperms.common.api.internal.Utils.checkGroup;
-import static me.lucko.luckperms.common.api.internal.Utils.checkServer;
-import static me.lucko.luckperms.common.api.internal.Utils.checkTime;
+import static me.lucko.luckperms.common.api.ApiUtils.checkGroup;
+import static me.lucko.luckperms.common.api.ApiUtils.checkServer;
+import static me.lucko.luckperms.common.api.ApiUtils.checkTime;
 
 /**
  * Provides a link between {@link User} and {@link me.lucko.luckperms.common.core.model.User}
  */
 @EqualsAndHashCode(of = {"uuid"}, callSuper = false)
 @SuppressWarnings("unused")
-public class UserLink extends PermissionHolderLink implements User {
+public class UserDelegate extends PermissionHolderDelegate implements User {
 
     @Getter
     private final me.lucko.luckperms.common.core.model.User master;
@@ -53,7 +53,7 @@ public class UserLink extends PermissionHolderLink implements User {
     @Getter
     private final UUID uuid;
 
-    public UserLink(@NonNull me.lucko.luckperms.common.core.model.User master) {
+    public UserDelegate(@NonNull me.lucko.luckperms.common.core.model.User master) {
         super(master);
         this.master = master;
         this.uuid = master.getUuid();
@@ -93,93 +93,98 @@ public class UserLink extends PermissionHolderLink implements User {
     }
 
     @Override
+    public void setupDataCache() {
+        master.setupData(false);
+    }
+
+    @Override
     public boolean isInGroup(@NonNull Group group) {
         checkGroup(group);
-        return master.inheritsGroup(((GroupLink) group).getMaster());
+        return master.inheritsGroup(((GroupDelegate) group).getMaster());
     }
 
     @Override
     public boolean isInGroup(@NonNull Group group, @NonNull String server) {
         checkGroup(group);
-        return master.inheritsGroup(((GroupLink) group).getMaster(), server);
+        return master.inheritsGroup(((GroupDelegate) group).getMaster(), server);
     }
 
     @Override
     public boolean isInGroup(@NonNull Group group, @NonNull String server, @NonNull String world) {
         checkGroup(group);
-        return master.inheritsGroup(((GroupLink) group).getMaster(), server, world);
+        return master.inheritsGroup(((GroupDelegate) group).getMaster(), server, world);
     }
 
     @Override
     public void addGroup(@NonNull Group group) throws ObjectAlreadyHasException {
         checkGroup(group);
-        master.setInheritGroup(((GroupLink) group).getMaster());
+        master.setInheritGroup(((GroupDelegate) group).getMaster());
     }
 
     @Override
     public void addGroup(@NonNull Group group, @NonNull String server) throws ObjectAlreadyHasException {
         checkGroup(group);
-        master.setInheritGroup(((GroupLink) group).getMaster(), checkServer(server));
+        master.setInheritGroup(((GroupDelegate) group).getMaster(), checkServer(server));
     }
 
     @Override
     public void addGroup(@NonNull Group group, @NonNull String server, @NonNull String world) throws ObjectAlreadyHasException {
         checkGroup(group);
-        master.setInheritGroup(((GroupLink) group).getMaster(), checkServer(server), world);
+        master.setInheritGroup(((GroupDelegate) group).getMaster(), checkServer(server), world);
     }
 
     @Override
     public void addGroup(@NonNull Group group, @NonNull long expireAt) throws ObjectAlreadyHasException {
         checkGroup(group);
-        master.setInheritGroup(((GroupLink) group).getMaster(), checkTime(expireAt));
+        master.setInheritGroup(((GroupDelegate) group).getMaster(), checkTime(expireAt));
     }
 
     @Override
     public void addGroup(@NonNull Group group, @NonNull String server, @NonNull long expireAt) throws ObjectAlreadyHasException {
         checkGroup(group);
-        master.setInheritGroup(((GroupLink) group).getMaster(), checkServer(server), checkTime(expireAt));
+        master.setInheritGroup(((GroupDelegate) group).getMaster(), checkServer(server), checkTime(expireAt));
     }
 
     @Override
     public void addGroup(@NonNull Group group, @NonNull String server, @NonNull String world, @NonNull long expireAt) throws ObjectAlreadyHasException {
         checkGroup(group);
-        master.setInheritGroup(((GroupLink) group).getMaster(), checkServer(server), world, checkTime(expireAt));
+        master.setInheritGroup(((GroupDelegate) group).getMaster(), checkServer(server), world, checkTime(expireAt));
     }
 
     @Override
     public void removeGroup(@NonNull Group group) throws ObjectLacksException {
         checkGroup(group);
-        master.unsetInheritGroup(((GroupLink) group).getMaster());
+        master.unsetInheritGroup(((GroupDelegate) group).getMaster());
     }
 
     @Override
     public void removeGroup(@NonNull Group group, @NonNull boolean temporary) throws ObjectLacksException {
         checkGroup(group);
-        master.unsetInheritGroup(((GroupLink) group).getMaster(), temporary);
+        master.unsetInheritGroup(((GroupDelegate) group).getMaster(), temporary);
     }
 
     @Override
     public void removeGroup(@NonNull Group group, @NonNull String server) throws ObjectLacksException {
         checkGroup(group);
-        master.unsetInheritGroup(((GroupLink) group).getMaster(), checkServer(server));
+        master.unsetInheritGroup(((GroupDelegate) group).getMaster(), checkServer(server));
     }
 
     @Override
     public void removeGroup(@NonNull Group group, @NonNull String server, @NonNull String world) throws ObjectLacksException {
         checkGroup(group);
-        master.unsetInheritGroup(((GroupLink) group).getMaster(), checkServer(server), world);
+        master.unsetInheritGroup(((GroupDelegate) group).getMaster(), checkServer(server), world);
     }
 
     @Override
     public void removeGroup(@NonNull Group group, @NonNull String server, @NonNull boolean temporary) throws ObjectLacksException {
         checkGroup(group);
-        master.unsetInheritGroup(((GroupLink) group).getMaster(), checkServer(server), temporary);
+        master.unsetInheritGroup(((GroupDelegate) group).getMaster(), checkServer(server), temporary);
     }
 
     @Override
     public void removeGroup(@NonNull Group group, @NonNull String server, @NonNull String world, @NonNull boolean temporary) throws ObjectLacksException {
         checkGroup(group);
-        master.unsetInheritGroup(((GroupLink) group).getMaster(), checkServer(server), world, temporary);
+        master.unsetInheritGroup(((GroupDelegate) group).getMaster(), checkServer(server), world, temporary);
     }
 
     @Override

@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.api.internal;
+package me.lucko.luckperms.common.api.delegate;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
@@ -32,13 +32,13 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.UUID;
 
-import static me.lucko.luckperms.common.api.internal.Utils.checkName;
+import static me.lucko.luckperms.common.api.ApiUtils.checkName;
 
 /**
  * Provides a link between {@link Log} and {@link me.lucko.luckperms.common.data.Log}
  */
 @AllArgsConstructor
-public class LogLink implements Log {
+public class LogDelegate implements Log {
     private final me.lucko.luckperms.common.data.Log master;
 
     @Override

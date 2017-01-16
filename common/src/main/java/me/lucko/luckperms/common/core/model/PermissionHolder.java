@@ -45,8 +45,8 @@ import me.lucko.luckperms.api.event.events.PermissionNodeExpireEvent;
 import me.lucko.luckperms.api.event.events.PermissionNodeSetEvent;
 import me.lucko.luckperms.api.event.events.PermissionNodeUnsetEvent;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.api.internal.GroupLink;
-import me.lucko.luckperms.common.api.internal.PermissionHolderLink;
+import me.lucko.luckperms.common.api.delegate.GroupDelegate;
+import me.lucko.luckperms.common.api.delegate.PermissionHolderDelegate;
 import me.lucko.luckperms.common.caching.MetaHolder;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
 import me.lucko.luckperms.common.caching.handlers.GroupReference;
@@ -581,7 +581,7 @@ public abstract class PermissionHolder {
             return false;
         }
 
-        PermissionHolderLink link = new PermissionHolderLink(this);
+        PermissionHolderDelegate link = new PermissionHolderDelegate(this);
         for (Node r : removed) {
             plugin.getApiProvider().fireEventAsync(new PermissionNodeExpireEvent(link, r));
         }
@@ -700,7 +700,7 @@ public abstract class PermissionHolder {
         }
         invalidateCache(true);
 
-        plugin.getApiProvider().fireEventAsync(new PermissionNodeSetEvent(new PermissionHolderLink(this), node));
+        plugin.getApiProvider().fireEventAsync(new PermissionNodeSetEvent(new PermissionHolderDelegate(this), node));
     }
 
     /**
@@ -719,7 +719,7 @@ public abstract class PermissionHolder {
         }
         invalidateCache(false);
 
-        plugin.getApiProvider().fireEventAsync(new PermissionNodeSetEvent(new PermissionHolderLink(this), node));
+        plugin.getApiProvider().fireEventAsync(new PermissionNodeSetEvent(new PermissionHolderDelegate(this), node));
     }
 
     public void setPermission(String node, boolean value) throws ObjectAlreadyHasException {
@@ -763,10 +763,10 @@ public abstract class PermissionHolder {
         invalidateCache(true);
 
         if (node.isGroupNode()) {
-            plugin.getApiProvider().fireEventAsync(new GroupRemoveEvent(new PermissionHolderLink(this),
+            plugin.getApiProvider().fireEventAsync(new GroupRemoveEvent(new PermissionHolderDelegate(this),
                     node.getGroupName(), node.getServer().orElse(null), node.getWorld().orElse(null), node.isTemporary()));
         } else {
-            plugin.getApiProvider().fireEventAsync(new PermissionNodeUnsetEvent(new PermissionHolderLink(this), node));
+            plugin.getApiProvider().fireEventAsync(new PermissionNodeUnsetEvent(new PermissionHolderDelegate(this), node));
         }
     }
 
@@ -787,10 +787,10 @@ public abstract class PermissionHolder {
         invalidateCache(false);
 
         if (node.isGroupNode()) {
-            plugin.getApiProvider().fireEventAsync(new GroupRemoveEvent(new PermissionHolderLink(this),
+            plugin.getApiProvider().fireEventAsync(new GroupRemoveEvent(new PermissionHolderDelegate(this),
                     node.getGroupName(), node.getServer().orElse(null), node.getWorld().orElse(null), node.isTemporary()));
         } else {
-            plugin.getApiProvider().fireEventAsync(new PermissionNodeUnsetEvent(new PermissionHolderLink(this), node));
+            plugin.getApiProvider().fireEventAsync(new PermissionNodeUnsetEvent(new PermissionHolderDelegate(this), node));
         }
     }
 
@@ -836,7 +836,7 @@ public abstract class PermissionHolder {
         }
 
         setPermission("group." + group.getName(), true);
-        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderLink(this), new GroupLink(group), null, null, 0L));
+        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderDelegate(this), new GroupDelegate(group), null, null, 0L));
     }
 
     public void setInheritGroup(Group group, String server) throws ObjectAlreadyHasException {
@@ -845,7 +845,7 @@ public abstract class PermissionHolder {
         }
 
         setPermission("group." + group.getName(), true, server);
-        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderLink(this), new GroupLink(group), server, null, 0L));
+        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderDelegate(this), new GroupDelegate(group), server, null, 0L));
     }
 
     public void setInheritGroup(Group group, String server, String world) throws ObjectAlreadyHasException {
@@ -854,7 +854,7 @@ public abstract class PermissionHolder {
         }
 
         setPermission("group." + group.getName(), true, server, world);
-        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderLink(this), new GroupLink(group), server, world, 0L));
+        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderDelegate(this), new GroupDelegate(group), server, world, 0L));
     }
 
     public void setInheritGroup(Group group, long expireAt) throws ObjectAlreadyHasException {
@@ -863,7 +863,7 @@ public abstract class PermissionHolder {
         }
 
         setPermission("group." + group.getName(), true, expireAt);
-        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderLink(this), new GroupLink(group), null, null, expireAt));
+        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderDelegate(this), new GroupDelegate(group), null, null, expireAt));
     }
 
     public void setInheritGroup(Group group, String server, long expireAt) throws ObjectAlreadyHasException {
@@ -872,7 +872,7 @@ public abstract class PermissionHolder {
         }
 
         setPermission("group." + group.getName(), true, server, expireAt);
-        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderLink(this), new GroupLink(group), server, null, expireAt));
+        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderDelegate(this), new GroupDelegate(group), server, null, expireAt));
     }
 
     public void setInheritGroup(Group group, String server, String world, long expireAt) throws ObjectAlreadyHasException {
@@ -881,7 +881,7 @@ public abstract class PermissionHolder {
         }
 
         setPermission("group." + group.getName(), true, server, world, expireAt);
-        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderLink(this), new GroupLink(group), server, world, expireAt));
+        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderDelegate(this), new GroupDelegate(group), server, world, expireAt));
     }
 
     public void unsetInheritGroup(Group group) throws ObjectLacksException {
@@ -1087,6 +1087,8 @@ public abstract class PermissionHolder {
     }
 
     public OptionalInt getWeight() {
+        if (this instanceof User) return OptionalInt.empty();
+
         OptionalInt weight = OptionalInt.empty();
         try {
             weight = getNodes().stream()

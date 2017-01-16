@@ -44,7 +44,8 @@ public interface PermissionData {
 
     /**
      * Invalidates the underlying permission calculator cache.
-     * Can be called to allow for an update in defaults.
+     *
+     * <p> Can be called to allow for an update in defaults.
      */
     void invalidateCache();
 

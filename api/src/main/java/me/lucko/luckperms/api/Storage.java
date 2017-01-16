@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.api;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -29,7 +30,7 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
- * Interface for the internal Storage instance
+ * A means of loading and saving data to/from the Storage provider.
  *
  * <p>All methods return {@link CompletableFuture}s, which will be populated with the result once the data has been
  * loaded asynchronously. Care should be taken when using the methods to ensure that the main server thread is not
@@ -125,6 +126,16 @@ public interface Storage {
     CompletableFuture<Set<UUID>> getUniqueUsers();
 
     /**
+     * Searches for a list of users with a given permission.
+     *
+     * @param permission the permission to search for
+     * @return a list of held permissions, or null if the operation failed
+     * @throws NullPointerException if the permission is null
+     * @since 2.17
+     */
+    CompletableFuture<List<HeldPermission<UUID>>> getUsersWithPermission(String permission);
+
+    /**
      * Creates and loads a group into the plugins local storage
      *
      * @param name the name of the group
@@ -170,6 +181,16 @@ public interface Storage {
      * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      */
     CompletableFuture<Boolean> deleteGroup(Group group);
+
+    /**
+     * Searches for a list of groups with a given permission.
+     *
+     * @param permission the permission to search for
+     * @return a list of held permissions, or null if the operation failed
+     * @throws NullPointerException if the permission is null
+     * @since 2.17
+     */
+    CompletableFuture<List<HeldPermission<String>>> getGroupsWithPermission(String permission);
 
     /**
      * Creates and loads a track into the plugins local storage
@@ -238,5 +259,15 @@ public interface Storage {
      * @throws IllegalArgumentException if the username is invalid
      */
     CompletableFuture<UUID> getUUID(String username);
+
+    /**
+     * Gets a username from a UUID
+     *
+     * @param uuid the corresponding uuid
+     * @return a name string, could be null
+     * @throws NullPointerException if either parameters are null
+     * @since 2.17
+     */
+    CompletableFuture<String> getName(UUID uuid);
 
 }

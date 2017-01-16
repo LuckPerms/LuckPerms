@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.api.internal;
+package me.lucko.luckperms.common.api.delegate;
 
 import lombok.AllArgsConstructor;
 
@@ -34,7 +34,7 @@ import java.util.Map;
  * Provides a link between {@link LPConfiguration} and {@link me.lucko.luckperms.common.config.LPConfiguration}
  */
 @AllArgsConstructor
-public class LPConfigurationLink implements LPConfiguration {
+public class LPConfigurationDelegate implements LPConfiguration {
     private final me.lucko.luckperms.common.config.LPConfiguration master;
 
     @Override

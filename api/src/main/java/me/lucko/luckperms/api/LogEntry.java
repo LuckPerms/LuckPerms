@@ -25,9 +25,10 @@ package me.lucko.luckperms.api;
 import java.util.UUID;
 
 /**
- * Represents a single entry in a log
+ * A single entry in the log
+ *
+ * <p> Implements {@link Comparable} ordering based upon the timestamp of the entry.
  */
-@SuppressWarnings({"unused", "WeakerAccess"})
 public class LogEntry implements Comparable<LogEntry> {
     private static final String FORMAT = "&8(&e%s&8) [&a%s&8] (&b%s&8) &7--> &f%s";
 
@@ -154,9 +155,15 @@ public class LogEntry implements Comparable<LogEntry> {
 
     @Override
     public String toString() {
-        return "LogEntry(timestamp=" + this.getTimestamp() + ", actor=" + this.getActor() + ", actorName=" +
-                this.getActorName() + ", type=" + this.getType() + ", acted=" + this.getActed() + ", actedName=" +
-                this.getActedName() + ", action=" + this.getAction() + ")";
+        return "LogEntry(" +
+                "timestamp=" + this.getTimestamp() + ", " +
+                "actor=" + this.getActor() + ", " +
+                "actorName=" + this.getActorName() + ", " +
+                "type=" + this.getType() + ", " +
+                "acted=" + this.getActed() + ", " +
+                "actedName=" + this.getActedName() + ", " +
+                "action=" + this.getAction() +
+                ")";
     }
 
     @Override
@@ -165,41 +172,25 @@ public class LogEntry implements Comparable<LogEntry> {
         if (!(o instanceof LogEntry)) return false;
         final LogEntry other = (LogEntry) o;
         if (this.getTimestamp() != other.getTimestamp()) return false;
-        final Object this$actor = this.getActor();
-        final Object other$actor = other.getActor();
-        if (this$actor == null ? other$actor != null : !this$actor.equals(other$actor)) return false;
-        final Object this$actorName = this.getActorName();
-        final Object other$actorName = other.getActorName();
-        if (this$actorName == null ? other$actorName != null : !this$actorName.equals(other$actorName)) return false;
+        if (this.getActor() == null ? other.getActor() != null : !this.getActor().equals(other.getActor())) return false;
+        if (this.getActorName() == null ? other.getActorName() != null : !this.getActorName().equals(other.getActorName())) return false;
         if (this.getType() != other.getType()) return false;
-        final Object this$acted = this.getActed();
-        final Object other$acted = other.getActed();
-        if (this$acted == null ? other$acted != null : !this$acted.equals(other$acted)) return false;
-        final Object this$actedName = this.getActedName();
-        final Object other$actedName = other.getActedName();
-        if (this$actedName == null ? other$actedName != null : !this$actedName.equals(other$actedName)) return false;
-        final Object this$action = this.getAction();
-        final Object other$action = other.getAction();
-        return this$action == null ? other$action == null : this$action.equals(other$action);
+        if (this.getActed() == null ? other.getActed() != null : !this.getActed().equals(other.getActed())) return false;
+        if (this.getActedName() == null ? other.getActedName() != null : !this.getActedName().equals(other.getActedName())) return false;
+        return this.getAction() == null ? other.getAction() == null : this.getAction().equals(other.getAction());
     }
 
     @Override
     public int hashCode() {
         final int PRIME = 59;
         int result = 1;
-        final long $timestamp = this.getTimestamp();
-        result = result * PRIME + (int) ($timestamp >>> 32 ^ $timestamp);
-        final Object $actor = this.getActor();
-        result = result * PRIME + ($actor == null ? 43 : $actor.hashCode());
-        final Object $actorName = this.getActorName();
-        result = result * PRIME + ($actorName == null ? 43 : $actorName.hashCode());
+        result = result * PRIME + (int) (this.getTimestamp() >>> 32 ^ this.getTimestamp());
+        result = result * PRIME + (this.getActor() == null ? 43 : this.getActor().hashCode());
+        result = result * PRIME + (this.getActorName() == null ? 43 : this.getActorName().hashCode());
         result = result * PRIME + this.getType();
-        final Object $acted = this.getActed();
-        result = result * PRIME + ($acted == null ? 43 : $acted.hashCode());
-        final Object $actedName = this.getActedName();
-        result = result * PRIME + ($actedName == null ? 43 : $actedName.hashCode());
-        final Object $action = this.getAction();
-        result = result * PRIME + ($action == null ? 43 : $action.hashCode());
+        result = result * PRIME + (this.getActed() == null ? 43 : this.getActed().hashCode());
+        result = result * PRIME + (this.getActedName() == null ? 43 : this.getActedName().hashCode());
+        result = result * PRIME + (this.getAction() == null ? 43 : this.getAction().hashCode());
         return result;
     }
 
@@ -214,6 +205,7 @@ public class LogEntry implements Comparable<LogEntry> {
         protected LogEntryBuilder getThis() {
             return this;
         }
+
     }
 
     public static abstract class AbstractLogEntryBuilder<T extends LogEntry, B extends AbstractLogEntryBuilder<T, B>> {
@@ -311,9 +303,15 @@ public class LogEntry implements Comparable<LogEntry> {
 
         @Override
         public String toString() {
-            return "LogEntry.LogEntryBuilder(timestamp=" + getTimestamp() + ", actor=" + getActor() + ", actorName=" +
-                    getActorName() + ", type=" + getType() + ", acted=" + getActed() + ", actedName=" + getActedName() +
-                    ", action=" + getAction() + ")";
+            return "LogEntry.LogEntryBuilder(" +
+                    "timestamp=" + this.getTimestamp() + ", " +
+                    "actor=" + this.getActor() + ", " +
+                    "actorName=" + this.getActorName() + ", " +
+                    "type=" + this.getType() + ", " +
+                    "acted=" + this.getActed() + ", " +
+                    "actedName=" + this.getActedName() + ", " +
+                    "action=" + this.getAction() +
+                    ")";
         }
     }
 

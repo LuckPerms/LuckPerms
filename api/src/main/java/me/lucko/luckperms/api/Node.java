@@ -31,12 +31,12 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Represents an immutable node object
+ * An immutable permission node
+ *
  * <p> Use {@link LuckPermsApi#buildNode(String)} to get an instance.
  *
  * @since 2.6
  */
-@SuppressWarnings("unused")
 public interface Node extends Map.Entry<String, Boolean> {
 
     /**

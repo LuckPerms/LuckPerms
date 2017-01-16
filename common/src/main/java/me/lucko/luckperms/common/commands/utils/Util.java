@@ -26,6 +26,7 @@ import lombok.experimental.UtilityClass;
 
 import com.google.common.collect.Maps;
 
+import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
@@ -35,7 +36,6 @@ import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Patterns;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.User;
-import me.lucko.luckperms.common.storage.holder.HeldPermission;
 import me.lucko.luckperms.common.utils.DateUtil;
 
 import io.github.mkremins.fanciful.ChatColor;

@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.api.internal;
+package me.lucko.luckperms.common.api.delegate;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
@@ -39,19 +39,14 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-import static me.lucko.luckperms.common.api.internal.Utils.checkGroup;
-import static me.lucko.luckperms.common.api.internal.Utils.checkName;
-import static me.lucko.luckperms.common.api.internal.Utils.checkTrack;
-import static me.lucko.luckperms.common.api.internal.Utils.checkUser;
-import static me.lucko.luckperms.common.api.internal.Utils.checkUsername;
+import static me.lucko.luckperms.common.api.ApiUtils.checkGroup;
+import static me.lucko.luckperms.common.api.ApiUtils.checkName;
+import static me.lucko.luckperms.common.api.ApiUtils.checkTrack;
+import static me.lucko.luckperms.common.api.ApiUtils.checkUser;
+import static me.lucko.luckperms.common.api.ApiUtils.checkUsername;
 
-/**
- * Provides a link between {@link Datastore} and {@link Storage}
- *
- * Note that this class only provides for the old deprecated interface, see {@link StorageLink} for the new one.
- */
-@SuppressWarnings({"unused", "WeakerAccess", "deprecation"})
-public class DatastoreLink implements Datastore {
+@SuppressWarnings("deprecation")
+public class DatastoreDelegate implements Datastore {
 
     private final LuckPermsPlugin plugin;
     private final Storage master;
@@ -59,7 +54,7 @@ public class DatastoreLink implements Datastore {
     private final Sync sync;
     private final Future future;
 
-    public DatastoreLink(@NonNull LuckPermsPlugin plugin, @NonNull Storage master) {
+    public DatastoreDelegate(@NonNull LuckPermsPlugin plugin, @NonNull Storage master) {
         this.plugin = plugin;
         this.master = master;
         this.async = new Async(master);
@@ -109,7 +104,7 @@ public class DatastoreLink implements Datastore {
 
         @Override
         public void getLog(@NonNull Callback<Log> callback) {
-            master.force().getLog().thenAcceptAsync(log -> callback.onComplete(new LogLink(log)), plugin.getSyncExecutor());
+            master.force().getLog().thenAcceptAsync(log -> callback.onComplete(new LogDelegate(log)), plugin.getSyncExecutor());
         }
 
         @Override
@@ -130,7 +125,7 @@ public class DatastoreLink implements Datastore {
         @Override
         public void saveUser(@NonNull User user, Callback<Boolean> callback) {
             checkUser(user);
-            registerCallback(master.force().saveUser(((UserLink) user).getMaster()), callback);
+            registerCallback(master.force().saveUser(((UserDelegate) user).getMaster()), callback);
         }
 
         @Override
@@ -161,7 +156,7 @@ public class DatastoreLink implements Datastore {
         @Override
         public void saveGroup(@NonNull Group group, Callback<Boolean> callback) {
             checkGroup(group);
-            registerCallback(master.force().saveGroup(((GroupLink) group).getMaster()), callback);
+            registerCallback(master.force().saveGroup(((GroupDelegate) group).getMaster()), callback);
         }
 
         @Override
@@ -170,7 +165,7 @@ public class DatastoreLink implements Datastore {
             if (group.getName().equalsIgnoreCase(plugin.getConfiguration().getDefaultGroupName())) {
                 throw new IllegalArgumentException("Cannot delete the default group.");
             }
-            registerCallback(master.force().deleteGroup(((GroupLink) group).getMaster()), callback);
+            registerCallback(master.force().deleteGroup(((GroupDelegate) group).getMaster()), callback);
         }
 
         @Override
@@ -191,13 +186,13 @@ public class DatastoreLink implements Datastore {
         @Override
         public void saveTrack(@NonNull Track track, Callback<Boolean> callback) {
             checkTrack(track);
-            registerCallback(master.force().saveTrack(((TrackLink) track).getMaster()), callback);
+            registerCallback(master.force().saveTrack(((TrackDelegate) track).getMaster()), callback);
         }
 
         @Override
         public void deleteTrack(@NonNull Track track, Callback<Boolean> callback) {
             checkTrack(track);
-            registerCallback(master.force().deleteTrack(((TrackLink) track).getMaster()), callback);
+            registerCallback(master.force().deleteTrack(((TrackDelegate) track).getMaster()), callback);
         }
 
         @Override
@@ -226,7 +221,7 @@ public class DatastoreLink implements Datastore {
             if (log == null) {
                 return null;
             }
-            return new LogLink(log);
+            return new LogDelegate(log);
         }
 
         @Override
@@ -247,7 +242,7 @@ public class DatastoreLink implements Datastore {
         @Override
         public boolean saveUser(@NonNull User user) {
             checkUser(user);
-            return master.force().saveUser(((UserLink) user).getMaster()).join();
+            return master.force().saveUser(((UserDelegate) user).getMaster()).join();
         }
 
         @Override
@@ -278,7 +273,7 @@ public class DatastoreLink implements Datastore {
         @Override
         public boolean saveGroup(@NonNull Group group) {
             checkGroup(group);
-            return master.force().saveGroup(((GroupLink) group).getMaster()).join();
+            return master.force().saveGroup(((GroupDelegate) group).getMaster()).join();
         }
 
         @Override
@@ -287,7 +282,7 @@ public class DatastoreLink implements Datastore {
             if (group.getName().equalsIgnoreCase(plugin.getConfiguration().getDefaultGroupName())) {
                 throw new IllegalArgumentException("Cannot delete the default group.");
             }
-            return master.force().deleteGroup(((GroupLink) group).getMaster()).join();
+            return master.force().deleteGroup(((GroupDelegate) group).getMaster()).join();
         }
 
         @Override
@@ -308,13 +303,13 @@ public class DatastoreLink implements Datastore {
         @Override
         public boolean saveTrack(@NonNull Track track) {
             checkTrack(track);
-            return master.force().saveTrack(((TrackLink) track).getMaster()).join();
+            return master.force().saveTrack(((TrackDelegate) track).getMaster()).join();
         }
 
         @Override
         public boolean deleteTrack(@NonNull Track track) {
             checkTrack(track);
-            return master.force().deleteTrack(((TrackLink) track).getMaster()).join();
+            return master.force().deleteTrack(((TrackDelegate) track).getMaster()).join();
         }
 
         @Override
@@ -339,7 +334,7 @@ public class DatastoreLink implements Datastore {
 
         @Override
         public java.util.concurrent.Future<Log> getLog() {
-            return master.force().getLog().thenApply(log -> log == null ? null : new LogLink(log));
+            return master.force().getLog().thenApply(log -> log == null ? null : new LogDelegate(log));
         }
 
         @Override
@@ -360,7 +355,7 @@ public class DatastoreLink implements Datastore {
         @Override
         public java.util.concurrent.Future<Boolean> saveUser(@NonNull User user) {
             checkUser(user);
-            return master.force().saveUser(((UserLink) user).getMaster());
+            return master.force().saveUser(((UserDelegate) user).getMaster());
         }
 
         @Override
@@ -391,7 +386,7 @@ public class DatastoreLink implements Datastore {
         @Override
         public java.util.concurrent.Future<Boolean> saveGroup(@NonNull Group group) {
             checkGroup(group);
-            return master.force().saveGroup(((GroupLink) group).getMaster());
+            return master.force().saveGroup(((GroupDelegate) group).getMaster());
         }
 
         @Override
@@ -400,7 +395,7 @@ public class DatastoreLink implements Datastore {
             if (group.getName().equalsIgnoreCase(plugin.getConfiguration().getDefaultGroupName())) {
                 throw new IllegalArgumentException("Cannot delete the default group.");
             }
-            return master.force().deleteGroup(((GroupLink) group).getMaster());
+            return master.force().deleteGroup(((GroupDelegate) group).getMaster());
         }
 
         @Override
@@ -421,13 +416,13 @@ public class DatastoreLink implements Datastore {
         @Override
         public java.util.concurrent.Future<Boolean> saveTrack(@NonNull Track track) {
             checkTrack(track);
-            return master.force().saveTrack(((TrackLink) track).getMaster());
+            return master.force().saveTrack(((TrackDelegate) track).getMaster());
         }
 
         @Override
         public java.util.concurrent.Future<Boolean> deleteTrack(@NonNull Track track) {
             checkTrack(track);
-            return master.force().deleteTrack(((TrackLink) track).getMaster());
+            return master.force().deleteTrack(((TrackDelegate) track).getMaster());
         }
 
         @Override

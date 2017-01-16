@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.api.internal;
+package me.lucko.luckperms.common.api;
 
 import lombok.experimental.UtilityClass;
 
@@ -29,21 +29,24 @@ import com.google.common.base.Preconditions;
 import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.User;
+import me.lucko.luckperms.common.api.delegate.GroupDelegate;
+import me.lucko.luckperms.common.api.delegate.TrackDelegate;
+import me.lucko.luckperms.common.api.delegate.UserDelegate;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
 
 @UtilityClass
-public class Utils {
+public class ApiUtils {
 
     public static void checkUser(User user) {
-        Preconditions.checkState(user instanceof UserLink, "User instance cannot be handled by this implementation.");
+        Preconditions.checkState(user instanceof UserDelegate, "User instance cannot be handled by this implementation.");
     }
 
     public static void checkGroup(Group group) {
-        Preconditions.checkState(group instanceof GroupLink, "Group instance cannot be handled by this implementation.");
+        Preconditions.checkState(group instanceof GroupDelegate, "Group instance cannot be handled by this implementation.");
     }
 
     public static void checkTrack(Track track) {
-        Preconditions.checkState(track instanceof TrackLink, "Track instance cannot be handled by this implementation.");
+        Preconditions.checkState(track instanceof TrackDelegate, "Track instance cannot be handled by this implementation.");
     }
 
     public static String checkUsername(String s) {

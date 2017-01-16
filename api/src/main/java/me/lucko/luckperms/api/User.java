@@ -31,17 +31,20 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Interface for internal User instances
+ * A player holding permission data
  */
-@SuppressWarnings("unused")
 public interface User extends PermissionHolder {
 
     /**
+     * Gets the users unique ID
+     *
      * @return the users Mojang assigned unique id
      */
     UUID getUuid();
 
     /**
+     * Gets the users username
+     *
      * @return the Users Username
      */
     String getName();
@@ -64,7 +67,10 @@ public interface User extends PermissionHolder {
     void setPrimaryGroup(String group) throws ObjectAlreadyHasException;
 
     /**
-     * Refresh and re-assign the users permissions
+     * Refresh and re-assign the users permissions.
+     *
+     * <p> This request is not buffered, and the refresh call will be ran directly. This should ideally be called on
+     * an asynchronous thread.
      */
     void refreshPermissions();
 
@@ -75,6 +81,13 @@ public interface User extends PermissionHolder {
      * @since 2.13
      */
     Optional<UserData> getUserDataCache();
+
+    /**
+     * Sets up the users data cache, if the don't have one setup already.
+     *
+     * @since 2.17
+     */
+    void setupDataCache();
 
     /**
      * Check to see if the user is a member of a group
@@ -254,11 +267,6 @@ public interface User extends PermissionHolder {
      * @throws IllegalArgumentException if the expiry time is in the past or the server/world is invalid
      */
     void removeGroup(Group group, String server, String world, boolean temporary) throws ObjectLacksException;
-
-    /**
-     * Clear all of the users permission nodes
-     */
-    void clearNodes();
 
     /**
      * Get a {@link List} of all of the groups the user is a member of, on all servers

@@ -20,12 +20,13 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.api.internal;
+package me.lucko.luckperms.common.api.delegate;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 
 import me.lucko.luckperms.api.Group;
+import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.Log;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.Storage;
@@ -33,22 +34,23 @@ import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-import static me.lucko.luckperms.common.api.internal.Utils.checkGroup;
-import static me.lucko.luckperms.common.api.internal.Utils.checkName;
-import static me.lucko.luckperms.common.api.internal.Utils.checkTrack;
-import static me.lucko.luckperms.common.api.internal.Utils.checkUser;
-import static me.lucko.luckperms.common.api.internal.Utils.checkUsername;
+import static me.lucko.luckperms.common.api.ApiUtils.checkGroup;
+import static me.lucko.luckperms.common.api.ApiUtils.checkName;
+import static me.lucko.luckperms.common.api.ApiUtils.checkTrack;
+import static me.lucko.luckperms.common.api.ApiUtils.checkUser;
+import static me.lucko.luckperms.common.api.ApiUtils.checkUsername;
 
 /**
  * Provides a link between {@link Storage} and {@link me.lucko.luckperms.common.storage.Storage}
  */
 @AllArgsConstructor
-public class StorageLink implements Storage {
+public class StorageDelegate implements Storage {
     private final LuckPermsPlugin plugin;
     private final me.lucko.luckperms.common.storage.Storage master;
 
@@ -79,7 +81,7 @@ public class StorageLink implements Storage {
 
     @Override
     public CompletableFuture<Log> getLog() {
-        return master.force().getLog().thenApply(log -> log == null ? null : new LogLink(log));
+        return master.force().getLog().thenApply(log -> log == null ? null : new LogDelegate(log));
     }
 
     @Override
@@ -90,7 +92,7 @@ public class StorageLink implements Storage {
     @Override
     public CompletableFuture<Boolean> saveUser(User user) {
         checkUser(user);
-        return master.force().saveUser(((UserLink) user).getMaster());
+        return master.force().saveUser(((UserDelegate) user).getMaster());
     }
 
     @Override
@@ -101,6 +103,11 @@ public class StorageLink implements Storage {
     @Override
     public CompletableFuture<Set<UUID>> getUniqueUsers() {
         return master.force().getUniqueUsers();
+    }
+
+    @Override
+    public CompletableFuture<List<HeldPermission<UUID>>> getUsersWithPermission(@NonNull String permission) {
+        return master.force().getUsersWithPermission(permission);
     }
 
     @Override
@@ -121,7 +128,7 @@ public class StorageLink implements Storage {
     @Override
     public CompletableFuture<Boolean> saveGroup(Group group) {
         checkGroup(group);
-        return master.force().saveGroup(((GroupLink) group).getMaster());
+        return master.force().saveGroup(((GroupDelegate) group).getMaster());
     }
 
     @Override
@@ -130,7 +137,12 @@ public class StorageLink implements Storage {
         if (group.getName().equalsIgnoreCase(plugin.getConfiguration().getDefaultGroupName())) {
             throw new IllegalArgumentException("Cannot delete the default group.");
         }
-        return master.force().deleteGroup(((GroupLink) group).getMaster());
+        return master.force().deleteGroup(((GroupDelegate) group).getMaster());
+    }
+
+    @Override
+    public CompletableFuture<List<HeldPermission<String>>> getGroupsWithPermission(@NonNull String permission) {
+        return master.force().getGroupsWithPermission(permission);
     }
 
     @Override
@@ -151,13 +163,13 @@ public class StorageLink implements Storage {
     @Override
     public CompletableFuture<Boolean> saveTrack(Track track) {
         checkTrack(track);
-        return master.force().saveTrack(((TrackLink) track).getMaster());
+        return master.force().saveTrack(((TrackDelegate) track).getMaster());
     }
 
     @Override
     public CompletableFuture<Boolean> deleteTrack(Track track) {
         checkTrack(track);
-        return master.force().deleteTrack(((TrackLink) track).getMaster());
+        return master.force().deleteTrack(((TrackDelegate) track).getMaster());
     }
 
     @Override
@@ -168,5 +180,10 @@ public class StorageLink implements Storage {
     @Override
     public CompletableFuture<UUID> getUUID(String username) {
         return master.force().getUUID(checkUsername(username));
+    }
+
+    @Override
+    public CompletableFuture<String> getName(@NonNull UUID uuid) {
+        return master.force().getName(uuid);
     }
 }

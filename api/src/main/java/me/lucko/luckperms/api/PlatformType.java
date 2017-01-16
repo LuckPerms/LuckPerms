@@ -23,7 +23,7 @@
 package me.lucko.luckperms.api;
 
 /**
- * Represents the platform type that LuckPerms is running on
+ * The platforms which LuckPerms can run on
  *
  * @since 2.7
  */

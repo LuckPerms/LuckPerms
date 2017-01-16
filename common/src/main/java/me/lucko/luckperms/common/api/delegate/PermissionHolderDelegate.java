@@ -20,10 +20,14 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.api.internal;
+package me.lucko.luckperms.common.api.delegate;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSortedSet;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LocalizedNode;
@@ -36,16 +40,17 @@ import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.AbstractMap;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
-import static me.lucko.luckperms.common.api.internal.Utils.checkNode;
-import static me.lucko.luckperms.common.api.internal.Utils.checkServer;
-import static me.lucko.luckperms.common.api.internal.Utils.checkTime;
+import static me.lucko.luckperms.common.api.ApiUtils.checkNode;
+import static me.lucko.luckperms.common.api.ApiUtils.checkServer;
+import static me.lucko.luckperms.common.api.ApiUtils.checkTime;
 import static me.lucko.luckperms.common.core.model.PermissionHolder.exportToLegacy;
 
 /**
@@ -53,7 +58,7 @@ import static me.lucko.luckperms.common.core.model.PermissionHolder.exportToLega
  */
 @SuppressWarnings("unused")
 @AllArgsConstructor
-public class PermissionHolderLink implements PermissionHolder {
+public class PermissionHolderDelegate implements PermissionHolder {
     private final me.lucko.luckperms.common.core.model.PermissionHolder master;
 
     @Override
@@ -63,37 +68,42 @@ public class PermissionHolderLink implements PermissionHolder {
 
     @Override
     public SortedSet<? extends Node> getPermissions() {
-        return master.getPermissions(false);
+        return ImmutableSortedSet.copyOf(master.getPermissions(false));
     }
 
     @Override
     public Set<Node> getEnduringPermissions() {
-        return master.getNodes();
+        return ImmutableSet.copyOf(master.getNodes());
     }
 
     @Override
     public Set<Node> getTransientPermissions() {
-        return master.getTransientNodes();
+        return ImmutableSet.copyOf(master.getTransientNodes());
     }
 
     @Override
     public Set<Node> getAllNodes() {
-        return Collections.unmodifiableSet(master.getAllNodes(null, ExtractedContexts.generate(Contexts.allowAll())));
+        return ImmutableSet.copyOf(master.getAllNodes(null, ExtractedContexts.generate(Contexts.allowAll())));
     }
 
     @Override
     public SortedSet<LocalizedNode> getAllNodes(@NonNull Contexts contexts) {
-        return master.getAllNodes(null, ExtractedContexts.generate(contexts));
+        return new TreeSet<>(master.getAllNodes(null, ExtractedContexts.generate(contexts)));
     }
 
     @Override
     public Set<LocalizedNode> getAllNodesFiltered(@NonNull Contexts contexts) {
-        return master.getAllNodesFiltered(ExtractedContexts.generate(contexts));
+        return new HashSet<>(master.getAllNodesFiltered(ExtractedContexts.generate(contexts)));
+    }
+
+    @Override
+    public Map<String, Boolean> exportNodes(Contexts contexts, boolean lowerCase) {
+        return new HashMap<>(master.exportNodes(contexts, lowerCase));
     }
 
     @Override
     public Map<String, Boolean> getNodes() {
-        return exportToLegacy(master.getNodes());
+        return ImmutableMap.copyOf(exportToLegacy(master.getNodes()));
     }
 
     @Override
@@ -249,6 +259,61 @@ public class PermissionHolderLink implements PermissionHolder {
     @Override
     public void unsetPermission(@NonNull String node, @NonNull String server, @NonNull String world, @NonNull boolean temporary) throws ObjectLacksException {
         master.unsetPermission(checkNode(node), checkServer(server), world, temporary);
+    }
+
+    @Override
+    public void clearNodes() {
+        master.clearNodes();
+    }
+
+    @Override
+    public void clearNodes(String server) {
+        master.clearNodes(server);
+    }
+
+    @Override
+    public void clearNodes(String server, String world) {
+        master.clearNodes(server, world);
+    }
+
+    @Override
+    public void clearParents() {
+        master.clearParents();
+    }
+
+    @Override
+    public void clearParents(String server) {
+        master.clearParents(server);
+    }
+
+    @Override
+    public void clearParents(String server, String world) {
+        master.clearParents(server, world);
+    }
+
+    @Override
+    public void clearMeta() {
+        master.clearMeta();
+    }
+
+    @Override
+    public void clearMeta(String server) {
+        master.clearMeta(server);
+    }
+
+    @Override
+    public void clearMeta(String server, String world) {
+        master.clearMeta(server, world);
+    }
+
+    @Override
+    public void clearMetaKeys(String key, String server, String world, boolean temporary) {
+        master.clearMetaKeys(key, server, world, temporary);
+    }
+
+    @Override
+    public void clearTransientNodes() {
+        master.clearTransientNodes();
     }
 
     @Override

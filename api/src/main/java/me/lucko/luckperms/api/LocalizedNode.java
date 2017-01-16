@@ -23,14 +23,14 @@
 package me.lucko.luckperms.api;
 
 /**
- * Represents a Node and where it was inherited from.
+ * A node with a traceable origin
  *
  * @since 2.11
  */
 public interface LocalizedNode extends Node {
 
     /**
-     * Gets the node
+     * Gets the delegate node
      *
      * @return the node this instance is representing
      */

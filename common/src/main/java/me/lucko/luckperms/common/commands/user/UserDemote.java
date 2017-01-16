@@ -27,8 +27,8 @@ import com.google.common.base.Objects;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.event.events.UserDemoteEvent;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.api.internal.TrackLink;
-import me.lucko.luckperms.common.api.internal.UserLink;
+import me.lucko.luckperms.common.api.delegate.TrackDelegate;
+import me.lucko.luckperms.common.api.delegate.UserDelegate;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -150,7 +150,7 @@ public class UserDemote extends SubCommand<User> {
                     .action("demote " + args.stream().collect(Collectors.joining(" ")))
                     .build().submit(plugin, sender);
             save(user, sender, plugin);
-            plugin.getApiProvider().fireEventAsync(new UserDemoteEvent(new TrackLink(track), new UserLink(user), old, null));
+            plugin.getApiProvider().fireEventAsync(new UserDemoteEvent(new TrackDelegate(track), new UserDelegate(user), old, null));
 
             return CommandResult.SUCCESS;
         }
@@ -194,7 +194,7 @@ public class UserDemote extends SubCommand<User> {
                 .action("demote " + args.stream().collect(Collectors.joining(" ")))
                 .build().submit(plugin, sender);
         save(user, sender, plugin);
-        plugin.getApiProvider().fireEventAsync(new UserDemoteEvent(new TrackLink(track), new UserLink(user), old, previousGroup.getName()));
+        plugin.getApiProvider().fireEventAsync(new UserDemoteEvent(new TrackDelegate(track), new UserDelegate(user), old, previousGroup.getName()));
         return CommandResult.SUCCESS;
     }
 

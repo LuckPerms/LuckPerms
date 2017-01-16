@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
+import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.core.NodeFactory;
@@ -36,7 +37,6 @@ import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.managers.impl.GenericUserManager;
-import me.lucko.luckperms.common.storage.holder.HeldPermission;
 import me.lucko.luckperms.common.storage.holder.NodeHeldPermission;
 import me.lucko.luckperms.common.utils.ThrowingFunction;
 

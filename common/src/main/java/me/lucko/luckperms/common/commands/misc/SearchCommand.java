@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.common.commands.misc;
 
+import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
@@ -31,7 +32,6 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.storage.holder.HeldPermission;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import io.github.mkremins.fanciful.FancyMessage;

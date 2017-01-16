@@ -20,64 +20,48 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.holder;
+package me.lucko.luckperms.common.api.delegate;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import lombok.NonNull;
 
-import com.google.common.collect.Multimap;
-
-import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.common.storage.backing.utils.NodeDataHolder;
+import me.lucko.luckperms.common.core.NodeFactory;
 
-import java.util.Optional;
-import java.util.OptionalLong;
-
-@Getter
-@EqualsAndHashCode
-@AllArgsConstructor(staticName = "of")
-public class NodeHeldPermission<T> implements HeldPermission<T> {
-    public static <T> NodeHeldPermission<T> of(T holder, NodeDataHolder nodeDataHolder) {
-        return of(holder, nodeDataHolder.toNode());
-    }
-
-    private final T holder;
-    private final Node node;
+public class NodeFactoryDelegate implements me.lucko.luckperms.api.NodeFactory {
+    public static final NodeFactoryDelegate INSTANCE = new NodeFactoryDelegate();
 
     @Override
-    public String getPermission() {
-        return node.getPermission();
+    public Node fromSerialisedNode(@NonNull String serialisedPermission, boolean value) {
+        return NodeFactory.fromSerialisedNode(serialisedPermission, value);
     }
 
     @Override
-    public boolean getValue() {
-        return node.getValue();
+    public Node.Builder newBuilder(@NonNull String permission) {
+        return NodeFactory.newBuilder(permission);
     }
 
     @Override
-    public Optional<String> getServer() {
-        return node.getServer();
+    public Node.Builder newBuilderFromExisting(@NonNull Node other) {
+        return NodeFactory.builderFromExisting(other);
     }
 
     @Override
-    public Optional<String> getWorld() {
-        return node.getWorld();
+    public Node.Builder newBuilderFromSerialisedNode(@NonNull String serialisedPermission, boolean value) {
+        return NodeFactory.builderFromSerialisedNode(serialisedPermission, value);
     }
 
     @Override
-    public OptionalLong getExpiry() {
-        return node.isTemporary() ? OptionalLong.of(node.getExpiryUnixTime()) : OptionalLong.empty();
+    public Node.Builder makeMetaNode(@NonNull String key, @NonNull String value) {
+        return NodeFactory.makeMetaNode(key, value);
     }
 
     @Override
-    public Multimap<String, String> getContext() {
-        return node.getContexts().toMultimap();
+    public Node.Builder makePrefixNode(int priority, @NonNull String prefix) {
+        return NodeFactory.makePrefixNode(priority, prefix);
     }
 
     @Override
-    public Node asNode() {
-        return node;
+    public Node.Builder makeSuffixNode(int priority, @NonNull String suffix) {
+        return NodeFactory.makeSuffixNode(priority, suffix);
     }
 }

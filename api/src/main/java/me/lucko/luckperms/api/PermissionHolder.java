@@ -31,19 +31,24 @@ import java.util.Set;
 import java.util.SortedSet;
 
 /**
- * Interface for internal PermissionHolder (user/group) instances
+ * An object capable of holding permissions
+ *
+ * <p> Any changes made will be lost unless the instance is saved back to the {@link Storage}.
  */
-@SuppressWarnings("unused")
 public interface PermissionHolder {
 
     /**
-     * @return the identifier for this object. either a uuid string or name However, you should really just use {@link
-     * User#getUuid()}, {@link User#getName()} or {@link Group#getName()}
+     * Gets the objects name
+     *
+     * <p> {@link User#getUuid()}, {@link User#getName()} or {@link Group#getName()} should normally be used instead of
+     * this method.
+     *
+     * @return the identifier for this object. Either a uuid string or name.
      */
     String getObjectName();
 
     /**
-     * Gets an immutable Set of the objects permission nodes
+     * Gets a sorted set of all held permissions.
      *
      * @return an immutable set of permissions in priority order
      * @since 2.6
@@ -51,20 +56,22 @@ public interface PermissionHolder {
     SortedSet<? extends Node> getPermissions();
 
     /**
-     * Similar to {@link #getPermissions()}, except excluding transient permissions
+     * Similar to {@link #getPermissions()}, except without transient permissions
      *
      * @return a set of nodes
      * @since 2.6
      */
-    Set<Node> getEnduringPermissions();
+    Set<? extends Node> getEnduringPermissions();
 
     /**
-     * Similar to {@link #getPermissions()}, except excluding non-transient permissions
+     * Gets an immutable set of all transiently held permissions.
+     *
+     * <p> Transient permissions only exist for the duration of the session.
      *
      * @return a set of nodes
      * @since 2.6
      */
-    Set<Node> getTransientPermissions();
+    Set<? extends Node> getTransientPermissions();
 
 
     /**
@@ -91,7 +98,7 @@ public interface PermissionHolder {
     SortedSet<LocalizedNode> getAllNodes(Contexts contexts);
 
     /**
-     * Gets a mutable set of the nodes that is objects has and inherits, filtered by context.
+     * Gets a mutable set of the nodes that this object has and inherits, filtered by context.
      * Unlike {@link #getAllNodes(Contexts)}, this method WILL filter individual nodes, and only return ones that fully
      * meet the context provided.
      *
@@ -103,6 +110,14 @@ public interface PermissionHolder {
     Set<LocalizedNode> getAllNodesFiltered(Contexts contexts);
 
     /**
+     * Converts the output of {@link #getAllNodesFiltered(Contexts)}, and expands shorthand permissions.
+     * @param contexts the context for the lookup
+     * @param lowerCase if the keys should be made lowercase whilst being exported
+     * @return a mutable map of permissions
+     */
+    Map<String, Boolean> exportNodes(Contexts contexts, boolean lowerCase);
+
+    /**
      * Gets an immutable Map of the objects permission nodes
      *
      * @return an immutable map of permissions
@@ -110,6 +125,11 @@ public interface PermissionHolder {
      */
     @Deprecated
     Map<String, Boolean> getNodes();
+
+    /**
+     * Removes temporary permissions that have expired
+     */
+    void auditTemporaryPermissions();
 
     /**
      * Checks to see if the object has a certain permission
@@ -509,6 +529,109 @@ public interface PermissionHolder {
     void unsetPermission(String node, String server, String world, boolean temporary) throws ObjectLacksException;
 
     /**
+     * Clears all nodes held by the object
+     *
+     * @since 2.17
+     */
+    void clearNodes();
+
+    /**
+     * Clears all nodes held by the object on a specific server
+     *
+     * @param server the server to filter by, can be null
+     * @since 2.17
+     */
+    void clearNodes(String server);
+
+    /**
+     * Clears all nodes held by the object on a specific server and world
+     *
+     * @param server the server to filter by, can be null
+     * @param world the world to filter by, can be null
+     * @since 2.17
+     */
+    void clearNodes(String server, String world);
+
+    /**
+     * Clears all parent groups
+     *
+     * @since 2.17
+     */
+    void clearParents();
+
+    /**
+     * Clears all parents on a specific server
+     *
+     * @param server the server to filter by, can be null
+     * @since 2.17
+     */
+    void clearParents(String server);
+
+    /**
+     * Clears all parents on a specific server and world
+     *
+     * @param server the server to filter by, can be null
+     * @param world the world to filter by, can be null
+     * @since 2.17
+     */
+    void clearParents(String server, String world);
+
+    /**
+     * Clears all meta held by the object
+     *
+     * @since 2.17
+     */
+    void clearMeta();
+
+    /**
+     * Clears all meta held by the object on a specific server
+     *
+     * @param server the server to filter by, can be null
+     * @since 2.17
+     */
+    void clearMeta(String server);
+
+    /**
+     * Clears all meta held by the object on a specific server and world
+     *
+     * @param server the server to filter by, can be null
+     * @param world the world to filter by, can be null
+     * @since 2.17
+     */
+    void clearMeta(String server, String world);
+
+    /**
+     * Clears all meta for a given key.
+     *
+     * @param key the meta key
+     * @param server the server to filter by, can be null
+     * @param world the world to filter by, can be null
+     * @param temporary whether the query is for temporary nodes or not.
+     */
+    void clearMetaKeys(String key, String server, String world, boolean temporary);
+
+    /**
+     * Clears all transient permissions the holder has.
+     */
+    void clearTransientNodes();
+
+    /**
+     * Processes the nodes and returns the non-temporary ones.
+     *
+     * @return a set of permanent nodes
+     * @since 2.6
+     */
+    Set<Node> getPermanentPermissionNodes();
+
+    /**
+     * Processes the nodes and returns the temporary ones.
+     *
+     * @return a set of temporary nodes
+     * @since 2.6
+     */
+    Set<Node> getTemporaryPermissionNodes();
+
+    /**
      * Gets the permissions and inherited permissions that apply to a specific server and world
      *
      * @param server         The server to get nodes for
@@ -582,14 +705,6 @@ public interface PermissionHolder {
     Map<Map.Entry<String, Boolean>, Long> getTemporaryNodes();
 
     /**
-     * Processes the nodes and returns the temporary ones.
-     *
-     * @return a set of temporary nodes
-     * @since 2.6
-     */
-    Set<Node> getTemporaryPermissionNodes();
-
-    /**
      * Processes the nodes and returns the non-temporary ones.
      *
      * @return a map of permanent nodes
@@ -597,18 +712,5 @@ public interface PermissionHolder {
      */
     @Deprecated
     Map<String, Boolean> getPermanentNodes();
-
-    /**
-     * Processes the nodes and returns the non-temporary ones.
-     *
-     * @return a set of permanent nodes
-     * @since 2.6
-     */
-    Set<Node> getPermanentPermissionNodes();
-
-    /**
-     * Removes temporary permissions that have expired
-     */
-    void auditTemporaryPermissions();
 
 }

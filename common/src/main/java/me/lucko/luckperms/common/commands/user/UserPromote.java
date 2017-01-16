@@ -27,8 +27,8 @@ import com.google.common.base.Objects;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.event.events.UserPromoteEvent;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.api.internal.TrackLink;
-import me.lucko.luckperms.common.api.internal.UserLink;
+import me.lucko.luckperms.common.api.delegate.TrackDelegate;
+import me.lucko.luckperms.common.api.delegate.UserDelegate;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -147,7 +147,7 @@ public class UserPromote extends SubCommand<User> {
                     .action("promote " + args.stream().collect(Collectors.joining(" ")))
                     .build().submit(plugin, sender);
             save(user, sender, plugin);
-            plugin.getApiProvider().fireEventAsync(new UserPromoteEvent(new TrackLink(track), new UserLink(user), null, first));
+            plugin.getApiProvider().fireEventAsync(new UserPromoteEvent(new TrackDelegate(track), new UserDelegate(user), null, first));
 
             return CommandResult.SUCCESS;
         }
@@ -211,7 +211,7 @@ public class UserPromote extends SubCommand<User> {
                 .action("promote " + args.stream().collect(Collectors.joining(" ")))
                 .build().submit(plugin, sender);
         save(user, sender, plugin);
-        plugin.getApiProvider().fireEventAsync(new UserPromoteEvent(new TrackLink(track), new UserLink(user), old, nextGroup.getName()));
+        plugin.getApiProvider().fireEventAsync(new UserPromoteEvent(new TrackDelegate(track), new UserDelegate(user), old, nextGroup.getName()));
         return CommandResult.SUCCESS;
     }
 

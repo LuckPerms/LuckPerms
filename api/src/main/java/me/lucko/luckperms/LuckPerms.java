@@ -27,13 +27,16 @@ import me.lucko.luckperms.api.LuckPermsApi;
 import java.util.Optional;
 
 /**
- * Static access to LuckPerms
+ * Singleton for the {@link LuckPermsApi}.
+ *
+ * <p> Ideally, the ServiceManager for the platform should be used to obtain and cache an instance, however, this can be
+ * used if you need static access.
  */
 public final class LuckPerms {
     private static LuckPermsApi api = null;
 
     /**
-     * Gets an instance of {@link LuckPermsApi}
+     * Gets an instance of {@link LuckPermsApi}, throwing {@link IllegalStateException} if the API is not loaded.
      *
      * @return an api instance
      * @throws IllegalStateException if the api is not loaded
@@ -46,8 +49,10 @@ public final class LuckPerms {
     }
 
     /**
-     * Gets an instance of {@link LuckPermsApi} safely. Unlike {@link LuckPerms#getApi}, this method will not throw an
-     * {@link IllegalStateException} if the api is not loaded, rather return an empty {@link Optional}.
+     * Gets an instance of {@link LuckPermsApi} safely.
+     *
+     * <p> Unlike {@link LuckPerms#getApi}, this method will not throw an {@link IllegalStateException} if the API is
+     * not loaded, rather return an empty {@link Optional}.
      *
      * @return an optional api instance
      */

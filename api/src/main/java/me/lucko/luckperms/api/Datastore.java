@@ -28,7 +28,7 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Interface for the internal Datastore instance
+ * Deprecated Storage interface. Use {@link Storage} instead.
  *
  * @deprecated as of version 2.14 in favour of {@link Storage}.
  */

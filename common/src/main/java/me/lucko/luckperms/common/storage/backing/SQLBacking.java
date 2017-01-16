@@ -29,6 +29,7 @@ import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.LuckPermsPlugin;
@@ -43,7 +44,6 @@ import me.lucko.luckperms.common.managers.impl.GenericUserManager;
 import me.lucko.luckperms.common.storage.backing.sqlprovider.SQLProvider;
 import me.lucko.luckperms.common.storage.backing.utils.LegacySchemaMigration;
 import me.lucko.luckperms.common.storage.backing.utils.NodeDataHolder;
-import me.lucko.luckperms.common.storage.holder.HeldPermission;
 import me.lucko.luckperms.common.storage.holder.NodeHeldPermission;
 
 import java.io.BufferedReader;

@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.api.internal;
+package me.lucko.luckperms.common.api.delegate;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
@@ -33,7 +33,7 @@ import java.util.UUID;
  * Provides a link between {@link UuidCache} and {@link me.lucko.luckperms.common.core.UuidCache}
  */
 @AllArgsConstructor
-public class UuidCacheLink implements UuidCache {
+public class UuidCacheDelegate implements UuidCache {
     private final me.lucko.luckperms.common.core.UuidCache master;
 
     @Override

@@ -31,6 +31,7 @@ import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.InsertOneOptions;
 
+import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.LuckPermsPlugin;
@@ -44,7 +45,6 @@ import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.managers.impl.GenericUserManager;
 import me.lucko.luckperms.common.storage.DatastoreConfiguration;
-import me.lucko.luckperms.common.storage.holder.HeldPermission;
 import me.lucko.luckperms.common.storage.holder.NodeHeldPermission;
 
 import org.bson.Document;

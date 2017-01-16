@@ -23,7 +23,7 @@
 package me.lucko.luckperms.api;
 
 /**
- * Exposes any networking provider being used on the platform. e.g. Redis
+ * A means to push changes to other servers using the platforms networking
  *
  * @since 2.14
  */
@@ -31,7 +31,9 @@ public interface MessagingService {
 
     /**
      * Uses the messaging service to inform other servers about changes.
-     * This will push the update asynchronously, and this method will return almost immediately.
+     *
+     * <p> This will push the update asynchronously, and this method will return immediately. Calling this method is
+     * equivalent to running "/lp networksync", except will not sync this server.
      */
     void pushUpdate();
 

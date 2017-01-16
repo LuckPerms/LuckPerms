@@ -35,24 +35,26 @@ import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.MessagingService;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.NodeFactory;
 import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.api.Storage;
 import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.UuidCache;
 import me.lucko.luckperms.api.context.ContextListener;
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.IContextCalculator;
 import me.lucko.luckperms.api.event.LPEvent;
 import me.lucko.luckperms.api.event.LPListener;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.api.internal.DatastoreLink;
-import me.lucko.luckperms.common.api.internal.GroupLink;
-import me.lucko.luckperms.common.api.internal.LPConfigurationLink;
-import me.lucko.luckperms.common.api.internal.StorageLink;
-import me.lucko.luckperms.common.api.internal.TrackLink;
-import me.lucko.luckperms.common.api.internal.UserLink;
-import me.lucko.luckperms.common.api.internal.Utils;
-import me.lucko.luckperms.common.api.internal.UuidCacheLink;
+import me.lucko.luckperms.common.api.delegate.DatastoreDelegate;
+import me.lucko.luckperms.common.api.delegate.GroupDelegate;
+import me.lucko.luckperms.common.api.delegate.LPConfigurationDelegate;
+import me.lucko.luckperms.common.api.delegate.NodeFactoryDelegate;
+import me.lucko.luckperms.common.api.delegate.StorageDelegate;
+import me.lucko.luckperms.common.api.delegate.TrackDelegate;
+import me.lucko.luckperms.common.api.delegate.UserDelegate;
+import me.lucko.luckperms.common.api.delegate.UuidCacheDelegate;
 import me.lucko.luckperms.common.core.NodeBuilder;
 import me.lucko.luckperms.common.core.UserIdentifier;
 
@@ -61,7 +63,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static me.lucko.luckperms.common.api.internal.Utils.checkNode;
+import static me.lucko.luckperms.common.api.ApiUtils.checkNode;
 
 /**
  * Implements the LuckPerms API using the plugin instance
@@ -92,7 +94,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public double getApiVersion() {
-        return 2.16;
+        return 2.17;
     }
 
     @Override
@@ -117,18 +119,18 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public LPConfiguration getConfiguration() {
-        return new LPConfigurationLink(plugin.getConfiguration());
+        return new LPConfigurationDelegate(plugin.getConfiguration());
     }
 
     @Override
     public Storage getStorage() {
-        return new StorageLink(plugin, plugin.getStorage());
+        return new StorageDelegate(plugin, plugin.getStorage());
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public Datastore getDatastore() {
-        return new DatastoreLink(plugin, plugin.getStorage());
+        return new DatastoreDelegate(plugin, plugin.getStorage());
     }
 
     @Override
@@ -138,7 +140,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public UuidCache getUuidCache() {
-        return new UuidCacheLink(plugin.getUuidCache());
+        return new UuidCacheDelegate(plugin.getUuidCache());
     }
 
     @Override
@@ -149,7 +151,7 @@ public class ApiProvider implements LuckPermsApi {
     @Override
     public User getUser(@NonNull UUID uuid) {
         final me.lucko.luckperms.common.core.model.User user = plugin.getUserManager().get(uuid);
-        return user == null ? null : new UserLink(user);
+        return user == null ? null : new UserDelegate(user);
     }
 
     @Override
@@ -160,7 +162,7 @@ public class ApiProvider implements LuckPermsApi {
     @Override
     public User getUser(@NonNull String name) {
         final me.lucko.luckperms.common.core.model.User user = plugin.getUserManager().getByUsername(name);
-        return user == null ? null : new UserLink(user);
+        return user == null ? null : new UserDelegate(user);
     }
 
     @Override
@@ -170,7 +172,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public Set<User> getUsers() {
-        return plugin.getUserManager().getAll().values().stream().map(UserLink::new).collect(Collectors.toSet());
+        return plugin.getUserManager().getAll().values().stream().map(UserDelegate::new).collect(Collectors.toSet());
     }
 
     @Override
@@ -180,14 +182,14 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public void cleanupUser(@NonNull User user) {
-        Utils.checkUser(user);
-        plugin.getUserManager().cleanup(((UserLink) user).getMaster());
+        ApiUtils.checkUser(user);
+        plugin.getUserManager().cleanup(((UserDelegate) user).getMaster());
     }
 
     @Override
     public Group getGroup(@NonNull String name) {
         final me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().getIfLoaded(name);
-        return group == null ? null : new GroupLink(group);
+        return group == null ? null : new GroupDelegate(group);
     }
 
     @Override
@@ -197,7 +199,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public Set<Group> getGroups() {
-        return plugin.getGroupManager().getAll().values().stream().map(GroupLink::new).collect(Collectors.toSet());
+        return plugin.getGroupManager().getAll().values().stream().map(GroupDelegate::new).collect(Collectors.toSet());
     }
 
     @Override
@@ -208,7 +210,7 @@ public class ApiProvider implements LuckPermsApi {
     @Override
     public Track getTrack(@NonNull String name) {
         final me.lucko.luckperms.common.core.model.Track track = plugin.getTrackManager().getIfLoaded(name);
-        return track == null ? null : new TrackLink(track);
+        return track == null ? null : new TrackDelegate(track);
     }
 
     @Override
@@ -218,12 +220,17 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public Set<Track> getTracks() {
-        return plugin.getTrackManager().getAll().values().stream().map(TrackLink::new).collect(Collectors.toSet());
+        return plugin.getTrackManager().getAll().values().stream().map(TrackDelegate::new).collect(Collectors.toSet());
     }
 
     @Override
     public boolean isTrackLoaded(@NonNull String name) {
         return plugin.getTrackManager().isLoaded(name);
+    }
+
+    @Override
+    public NodeFactory getNodeFactory() {
+        return NodeFactoryDelegate.INSTANCE;
     }
 
     @Override
@@ -245,7 +252,13 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public Optional<Contexts> getContextForUser(User user) {
-        Utils.checkUser(user);
-        return Optional.ofNullable(plugin.getContextForUser(((UserLink) user).getMaster()));
+        ApiUtils.checkUser(user);
+        return Optional.ofNullable(plugin.getContextForUser(((UserDelegate) user).getMaster()));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public ContextSet getContextForPlayer(Object player) {
+        return plugin.getContextManager().getApplicableContext(player);
     }
 }

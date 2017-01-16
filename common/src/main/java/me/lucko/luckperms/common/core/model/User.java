@@ -30,7 +30,7 @@ import lombok.ToString;
 import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.api.event.events.UserPermissionRefreshEvent;
 import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.api.internal.UserLink;
+import me.lucko.luckperms.common.api.delegate.UserDelegate;
 import me.lucko.luckperms.common.caching.UserCache;
 import me.lucko.luckperms.common.caching.handlers.HolderReference;
 import me.lucko.luckperms.common.caching.handlers.UserReference;
@@ -139,7 +139,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
 
         ud.recalculatePermissions();
         ud.recalculateMeta();
-        getPlugin().getApiProvider().fireEventAsync(new UserPermissionRefreshEvent(new UserLink(this)));
+        getPlugin().getApiProvider().fireEventAsync(new UserPermissionRefreshEvent(new UserDelegate(this)));
         getPlugin().onUserRefresh(this);
     }
 

@@ -23,6 +23,7 @@
 package me.lucko.luckperms.api;
 
 import me.lucko.luckperms.api.context.ContextListener;
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.IContextCalculator;
 import me.lucko.luckperms.api.event.LPListener;
 
@@ -31,9 +32,8 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * The root API interface in LuckPerms
+ * The root API interface for LuckPerms
  */
-@SuppressWarnings("unused")
 public interface LuckPermsApi {
 
     /**
@@ -251,6 +251,13 @@ public interface LuckPermsApi {
     boolean isTrackLoaded(String name);
 
     /**
+     * Gets the node factory instance for the platform
+     *
+     * @return the node factory
+     */
+    NodeFactory getNodeFactory();
+
+    /**
      * Returns a permission builder instance
      *
      * @param permission the main permission node to build
@@ -279,11 +286,21 @@ public interface LuckPermsApi {
 
     /**
      * Gets a calculated context instance for the user using the rules of the platform.
-     * These values are calculated using the options in the configuration, and the provided calculators.
+     *
+     * <p> These values are calculated using the options in the configuration, and the provided calculators.
      *
      * @param user the user to get contexts for
      * @return an optional containing contexts. Will return empty if the user is not online.
      */
     Optional<Contexts> getContextForUser(User user);
+
+    /**
+     * Gets set of contexts applicable to a player using the platforms {@link IContextCalculator}s.
+     *
+     * @param player the player to calculate for. Must be the player instance for the platform.
+     * @return a set of contexts.
+     * @since 2.17
+     */
+    ContextSet getContextForPlayer(Object player);
 
 }
