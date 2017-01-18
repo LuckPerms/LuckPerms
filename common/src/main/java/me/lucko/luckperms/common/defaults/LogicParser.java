@@ -33,7 +33,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
 public class LogicParser {
-    private static final ScriptEngine SCRIPT_ENGINE = new ScriptEngineManager().getEngineByName("nashorn");
+    private static final ScriptEngine SCRIPT_ENGINE = new ScriptEngineManager(null).getEngineByName("nashorn");
 
     public static boolean parse(String s, PermissionHolder holder, Tristate tristate) throws IllegalArgumentException {
         try {
