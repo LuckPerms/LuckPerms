@@ -22,7 +22,6 @@
 
 package me.lucko.luckperms.bukkit;
 
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import com.google.common.collect.Maps;
@@ -32,24 +31,15 @@ import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerChangedWorldEvent;
-import org.bukkit.event.player.PlayerLoginEvent;
 
 import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 @RequiredArgsConstructor
 public class WorldCalculator extends ContextCalculator<Player> implements Listener {
     private static final String WORLD_KEY = "world";
 
     private final LuckPermsPlugin plugin;
-
-    @Getter
-    private final Map<UUID, String> worldCache = new ConcurrentHashMap<>();
 
     @Override
     public MutableContextSet giveApplicableContext(Player subject, MutableContextSet accumulator) {
@@ -73,34 +63,7 @@ public class WorldCalculator extends ContextCalculator<Player> implements Listen
     }
 
     private String getWorld(Player player) {
-        UUID internal = plugin.getUuidCache().getUUID(player.getUniqueId());
-        String world = worldCache.get(internal);
-        if (world == null) {
-            return null;
-        }
-
+        String world = player.getWorld().getName();
         return plugin.getConfiguration().getWorldRewrites().getOrDefault(world, world);
-    }
-
-    @EventHandler(priority = EventPriority.LOW)
-    public void onPlayerJoin(PlayerLoginEvent e) {
-        UUID internal = plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId());
-        worldCache.put(internal, e.getPlayer().getWorld().getName());
-        pushUpdate(
-                e.getPlayer(),
-                Maps.immutableEntry(WORLD_KEY, null),
-                Maps.immutableEntry(WORLD_KEY, e.getPlayer().getWorld().getName())
-        );
-    }
-
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onPlayerChangedWorld(PlayerChangedWorldEvent e) {
-        UUID internal = plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId());
-        worldCache.put(internal, e.getPlayer().getWorld().getName());
-        pushUpdate(
-                e.getPlayer(),
-                Maps.immutableEntry(WORLD_KEY, e.getFrom().getName()),
-                Maps.immutableEntry(WORLD_KEY, e.getPlayer().getWorld().getName())
-        );
     }
 }

@@ -33,12 +33,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.PluginEnableEvent;
-
-import java.util.UUID;
 
 class BukkitListener extends AbstractListener implements Listener {
     private final LPBukkitPlugin plugin;
@@ -92,6 +91,8 @@ class BukkitListener extends AbstractListener implements Listener {
             t.printStackTrace();
         }
 
+        plugin.refreshAutoOp(player);
+
         if (player.isOp()) {
 
             // We assume all users are not op, but those who are need extra calculation.
@@ -105,16 +106,14 @@ class BukkitListener extends AbstractListener implements Listener {
 
             // The player got denied on sync login.
             onLeave(e.getPlayer().getUniqueId());
+        } else {
+            plugin.refreshAutoOp(e.getPlayer());
         }
     }
 
     @EventHandler(priority = EventPriority.MONITOR) // Allow other plugins to see data when this event gets called.
     public void onPlayerQuit(PlayerQuitEvent e) {
         final Player player = e.getPlayer();
-        final UUID internal = plugin.getUuidCache().getUUID(player.getUniqueId());
-
-        // Remove from World cache
-        plugin.getWorldCalculator().getWorldCache().remove(internal);
 
         // Remove the custom permissible
         Injector.unInject(player, true);
@@ -151,5 +150,10 @@ class BukkitListener extends AbstractListener implements Listener {
         if (e.getPlugin().getName().equalsIgnoreCase("Vault")) {
             plugin.tryVaultHook(true);
         }
+    }
+
+    @EventHandler
+    public void onWorldChange(PlayerChangedWorldEvent e) {
+        plugin.refreshAutoOp(e.getPlayer());
     }
 }

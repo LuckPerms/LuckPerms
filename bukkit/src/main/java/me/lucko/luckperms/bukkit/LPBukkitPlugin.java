@@ -32,7 +32,6 @@ import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.bukkit.calculators.AutoOPListener;
 import me.lucko.luckperms.bukkit.inject.Injector;
 import me.lucko.luckperms.bukkit.model.ChildPermissionProvider;
 import me.lucko.luckperms.bukkit.model.DefaultsProvider;
@@ -87,6 +86,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -237,11 +237,6 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         pm.registerEvents(worldCalculator, this);
         contextManager.registerCalculator(worldCalculator);
         contextManager.registerCalculator(new ServerCalculator<>(getConfiguration().getServer()));
-
-        // handle server operators
-        if (getConfiguration().isAutoOp()) {
-            contextManager.registerListener(new AutoOPListener());
-        }
 
         // Provide vault support
         tryVaultHook(false);
@@ -396,6 +391,21 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         LPPermissible lpp = Injector.getPermissible(uuidCache.getExternalUUID(user.getUuid()));
         if (lpp != null) {
             lpp.updateSubscriptions();
+        }
+    }
+
+    public void refreshAutoOp(Player player) {
+        if (getConfiguration().isAutoOp()) {
+            try {
+                LPPermissible permissible = Injector.getPermissible(player.getUniqueId());
+                if (permissible == null) {
+                    return;
+                }
+
+                Map<String, Boolean> backing = permissible.getUser().getUserData().getPermissionData(permissible.calculateContexts()).getImmutableBacking();
+                boolean op = Optional.ofNullable(backing.get("luckperms.autoop")).orElse(false);
+                player.setOp(op);
+            } catch (Exception ignored) {}
         }
     }
 
@@ -570,7 +580,6 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         map.put("Vault Server", configuration.getVaultServer());
         map.put("Bukkit Defaults count", defaultsProvider.size());
         map.put("Bukkit Child Permissions count", childPermissionProvider.getPermissions().size());
-        map.put("World Cache size", worldCalculator.getWorldCache().size());
         map.put("Vault Including Global", configuration.isVaultIncludingGlobal());
         map.put("Vault Ignoring World", configuration.isVaultIgnoreWorld());
         map.put("Vault Primary Group Overrides", configuration.isVaultPrimaryGroupOverrides());
