@@ -118,7 +118,7 @@ class SpongeConfig extends AbstractConfiguration<LPSpongePlugin> {
             return def;
         }
 
-        return node.getChildrenList().stream().map(n -> (String) n.getKey()).collect(Collectors.toList());
+        return node.getChildrenMap().keySet().stream().map(Object::toString).collect(Collectors.toList());
     }
 
     @SuppressWarnings("unchecked")
