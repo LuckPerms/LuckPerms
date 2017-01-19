@@ -125,13 +125,15 @@ public interface LPSubject extends Subject {
     @Deprecated
     @Override
     default List<Subject> getParents() {
-        return getParents(getActiveContextSet()).stream().map(s -> s.resolve(getService())).collect(ImmutableCollectors.toImmutableList());
+        List<Subject> ret = getParents(getActiveContextSet()).stream().map(s -> s.resolve(getService())).collect(ImmutableCollectors.toImmutableList());
+        return getService().sortSubjects(ret);
     }
 
     @Deprecated
     @Override
     default List<Subject> getParents(@NonNull Set<Context> contexts) {
-        return getParents(convertContexts(contexts)).stream().map(s -> s.resolve(getService())).collect(ImmutableCollectors.toImmutableList());
+        List<Subject> ret = getParents(convertContexts(contexts)).stream().map(s -> s.resolve(getService())).collect(ImmutableCollectors.toImmutableList());
+        return getService().sortSubjects(ret);
     }
 
     @Deprecated

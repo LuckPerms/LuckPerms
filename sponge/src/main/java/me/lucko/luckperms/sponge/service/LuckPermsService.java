@@ -33,6 +33,7 @@ import lombok.ToString;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.MapMaker;
@@ -44,6 +45,7 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.caching.UserCache;
+import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
@@ -73,9 +75,11 @@ import org.spongepowered.api.text.Text;
 import co.aikar.timings.Timing;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -207,6 +211,45 @@ public class LuckPermsService implements PermissionService {
     @Override
     public void registerContextCalculator(@NonNull ContextCalculator<Subject> contextCalculator) {
         plugin.getContextManager().registerCalculator(new SpongeCalculatorLink(contextCalculator));
+    }
+
+    public List<Subject> sortSubjects(List<Subject> s) {
+        List<Subject> ret = new ArrayList<>(s);
+        ret.sort((o1, o2) -> {
+            if (o1.equals(o2)) {
+                return 0;
+            }
+
+            boolean o1isGroup = o1.getContainingCollection().getIdentifier().equals(PermissionService.SUBJECTS_GROUP);
+            boolean o2isGroup = o2.getContainingCollection().getIdentifier().equals(PermissionService.SUBJECTS_GROUP);
+
+            if (o1isGroup != o2isGroup) {
+                return o1isGroup ? 1 : -1;
+            }
+
+            // Neither are groups
+            if (!o1isGroup) {
+                return 1;
+            }
+
+            Group g1 = plugin.getGroupManager().getIfLoaded(o1.getIdentifier());
+            Group g2 = plugin.getGroupManager().getIfLoaded(o2.getIdentifier());
+
+            boolean g1Null = g1 == null;
+            boolean g2Null = g2 == null;
+
+            if (g1Null != g2Null) {
+                return g1Null ? -1 : 1;
+            }
+
+            // Both are null
+            if (g1Null) {
+                return 1;
+            }
+
+            return Integer.compare(g1.getWeight().orElse(0), g2.getWeight().orElse(0)) == 1 ? 1 : -1;
+        });
+        return ImmutableList.copyOf(ret);
     }
 
     public Contexts calculateContexts(ContextSet contextSet) {
