@@ -51,6 +51,9 @@ import me.lucko.luckperms.common.core.UuidCache;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.Importer;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.NoopLocaleManager;
+import me.lucko.luckperms.common.locale.SimpleLocaleManager;
 import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.managers.UserManager;
@@ -66,8 +69,7 @@ import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.tasks.UpdateTask;
 import me.lucko.luckperms.common.utils.BufferedRequest;
 import me.lucko.luckperms.common.utils.DebugHandler;
-import me.lucko.luckperms.common.utils.LocaleManager;
-import me.lucko.luckperms.common.utils.LogFactory;
+import me.lucko.luckperms.common.utils.LoggerImpl;
 import me.lucko.luckperms.common.utils.PermissionCache;
 
 import org.bukkit.World;
@@ -139,11 +141,14 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         asyncExecutor = asyncLpExecutor;
         syncExecutor = r -> getServer().getScheduler().runTask(this, r);
 
-        log = LogFactory.wrap(getLogger());
+        localeManager = new NoopLocaleManager();
+        senderFactory = new BukkitSenderFactory(this);
+        log = new LoggerImpl(getConsoleSender());
+        LuckPermsPlugin.sendStartupBanner(getConsoleSender(), this);
+
         ignoringLogs = ConcurrentHashMap.newKeySet();
         shutdownHooks = Collections.synchronizedSet(new HashSet<>());
         debugHandler = new DebugHandler(asyncBukkitExecutor, getVersion());
-        senderFactory = new BukkitSenderFactory(this);
         permissionCache = new PermissionCache(asyncBukkitExecutor);
 
         getLog().info("Loading configuration...");
@@ -212,7 +217,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         };
 
         // load locale
-        localeManager = new LocaleManager();
+        localeManager = new SimpleLocaleManager();
         File locale = new File(getDataFolder(), "lang.yml");
         if (locale.exists()) {
             getLog().info("Found locale file. Attempting to load from it.");

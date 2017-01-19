@@ -36,6 +36,11 @@ public enum Message {
      * General & Commands
      */
     PREFIX("&7&l[&b&lL&3&lP&7&l] &c", false),
+
+    LOG_INFO("&7&l[&bL&3P&7&l] &3{0}", false),
+    LOG_WARN("&7&l[&bLuck&3Perms&7&l] &c[WARN] {0}", false),
+    LOG_ERROR("&7&l[&bLuck&3Perms&7&l] &4[ERROR] {0}", false),
+
     EMPTY("{0}", true),
     PLAYER_ONLINE("&aOnline", false),
     PLAYER_OFFLINE("&cOffline", false),

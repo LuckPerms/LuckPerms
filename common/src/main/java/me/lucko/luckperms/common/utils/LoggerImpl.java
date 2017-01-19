@@ -22,54 +22,28 @@
 
 package me.lucko.luckperms.common.utils;
 
-import lombok.experimental.UtilityClass;
+import lombok.AllArgsConstructor;
 
 import me.lucko.luckperms.api.Logger;
+import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.constants.Message;
 
-/**
- * Utility to help create wrapped log instances
- */
-@UtilityClass
-public class LogFactory {
-    public static Logger wrap(org.slf4j.Logger l) {
-        return new Logger() {
-            private final org.slf4j.Logger logger = l;
+@AllArgsConstructor
+public class LoggerImpl implements Logger {
+    private final Sender console;
 
-            @Override
-            public void info(String s) {
-                logger.info(s);
-            }
-
-            @Override
-            public void warn(String s) {
-                logger.warn(s);
-            }
-
-            @Override
-            public void severe(String s) {
-                logger.error(s);
-            }
-        };
+    @Override
+    public void info(String s) {
+        Message.LOG_INFO.send(console, s);
     }
 
-    public static Logger wrap(java.util.logging.Logger l) {
-        return new Logger() {
-            private final java.util.logging.Logger logger = l;
+    @Override
+    public void warn(String s) {
+        Message.LOG_WARN.send(console, s);
+    }
 
-            @Override
-            public void info(String s) {
-                logger.info(s);
-            }
-
-            @Override
-            public void warn(String s) {
-                logger.warning(s);
-            }
-
-            @Override
-            public void severe(String s) {
-                logger.severe(s);
-            }
-        };
+    @Override
+    public void severe(String s) {
+        Message.LOG_ERROR.send(console, s);
     }
 }

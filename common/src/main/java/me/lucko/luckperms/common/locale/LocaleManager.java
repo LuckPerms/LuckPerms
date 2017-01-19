@@ -20,44 +20,26 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.utils;
-
-import lombok.Cleanup;
-
-import com.google.common.collect.ImmutableMap;
+package me.lucko.luckperms.common.locale;
 
 import me.lucko.luckperms.common.constants.Message;
 
-import org.yaml.snakeyaml.Yaml;
-
 import java.io.File;
-import java.io.FileReader;
-import java.util.Map;
 
 /**
  * Manages translations
  */
-public class LocaleManager {
+public interface LocaleManager {
 
-    private Map<String, String> translations = null;
+    void loadFromFile(File file) throws Exception;
 
-    @SuppressWarnings("unchecked")
-    public void loadFromFile(File file) throws Exception {
-        @Cleanup FileReader fileReader = new FileReader(file);
-        translations = ImmutableMap.copyOf((Map<String, String>) new Yaml().load(fileReader));
-    }
+    int getSize();
 
-    public int getSize() {
-        return translations == null ? 0 : translations.size();
-    }
-
-    public String getTranslation(Message key) {
-        if (translations == null) {
-            return null;
-        }
-
-        String k = key.name().toLowerCase().replace('_', '-');
-        return translations.get(k);
-    }
+    /**
+     * Gets a translation for a given message key
+     * @param key the key
+     * @return the translation, or null if there isn't a translation available.
+     */
+    String getTranslation(Message key);
 
 }

@@ -30,12 +30,14 @@ import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.commands.BaseCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.config.LPConfiguration;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.core.UuidCache;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.Importer;
+import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.managers.UserManager;
@@ -43,7 +45,6 @@ import me.lucko.luckperms.common.messaging.RedisMessaging;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.utils.BufferedRequest;
 import me.lucko.luckperms.common.utils.DebugHandler;
-import me.lucko.luckperms.common.utils.LocaleManager;
 import me.lucko.luckperms.common.utils.PermissionCache;
 
 import java.io.File;
@@ -407,6 +408,15 @@ public interface LuckPermsPlugin {
      */
     default void onUserRefresh(User user) {
 
+    }
+
+    static void sendStartupBanner(Sender sender, LuckPermsPlugin plugin) {
+        sender.sendMessage(Util.color("&b               __       &3 __   ___  __         __  "));
+        sender.sendMessage(Util.color("&b    |    |  | /  ` |__/ &3|__) |__  |__)  |\\/| /__` "));
+        sender.sendMessage(Util.color("&b    |___ \\__/ \\__, |  \\ &3|    |___ |  \\  |  | .__/ "));
+        sender.sendMessage(Util.color(" "));
+        sender.sendMessage(Util.color("&2  Loading version &bv" + plugin.getVersion() + "&2 on " + plugin.getType().getFriendlyName() + " - " + plugin.getServerName()));
+        sender.sendMessage(Util.color(" "));
     }
 
 }

@@ -44,6 +44,9 @@ import me.lucko.luckperms.common.core.UuidCache;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.Importer;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.NoopLocaleManager;
+import me.lucko.luckperms.common.locale.SimpleLocaleManager;
 import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.managers.impl.GenericTrackManager;
 import me.lucko.luckperms.common.messaging.RedisMessaging;
@@ -55,8 +58,7 @@ import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.tasks.UpdateTask;
 import me.lucko.luckperms.common.utils.BufferedRequest;
 import me.lucko.luckperms.common.utils.DebugHandler;
-import me.lucko.luckperms.common.utils.LocaleManager;
-import me.lucko.luckperms.common.utils.LogFactory;
+import me.lucko.luckperms.common.utils.LoggerImpl;
 import me.lucko.luckperms.common.utils.PermissionCache;
 import me.lucko.luckperms.sponge.commands.SpongeMainCommand;
 import me.lucko.luckperms.sponge.contexts.WorldCalculator;
@@ -160,9 +162,11 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
     @Listener(order = Order.FIRST)
     public void onEnable(GamePreInitializationEvent event) {
-        log = LogFactory.wrap(logger);
-        debugHandler = new DebugHandler(asyncExecutor, getVersion());
+        localeManager = new NoopLocaleManager();
         senderFactory = new SpongeSenderFactory(this);
+        log = new LoggerImpl(getConsoleSender());
+        LuckPermsPlugin.sendStartupBanner(getConsoleSender(), this);
+        debugHandler = new DebugHandler(asyncExecutor, getVersion());
         permissionCache = new PermissionCache(asyncExecutor);
         timings = new LPTimings(this);
 
@@ -202,7 +206,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         };
 
         // load locale
-        localeManager = new LocaleManager();
+        localeManager = new SimpleLocaleManager();
         File locale = new File(getMainDir(), "lang.yml");
         if (locale.exists()) {
             getLog().info("Found locale file. Attempting to load from it.");

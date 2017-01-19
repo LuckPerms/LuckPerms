@@ -3,6 +3,9 @@
 # Author: Luck
 
 prefix: "&7&l[&b&lL&3&lP&7&l] &c"
+log-info: "&7&l[&bL&3P&7&l] &3{0}"
+log-warn: "&7&l[&bLuck&3Perms&7&l] &c[WARN] {0}"
+log-error: "&7&l[&bLuck&3Perms&7&l] &4[ERROR] {0}"
 empty: "{0}"
 player-online: "&aOnline"
 player-offline: "&cOffline"
