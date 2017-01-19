@@ -83,7 +83,7 @@ public class Log {
     private final SortedSet<LogEntry> content;
 
     public Log(SortedSet<LogEntry> content) {
-        this.content = ImmutableSortedSet.copyOf(content);
+        this.content = ImmutableSortedSet.copyOfSorted(content);
     }
 
     public SortedSet<LogEntry> getRecent() {

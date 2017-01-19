@@ -68,7 +68,7 @@ public class PermissionHolderDelegate implements PermissionHolder {
 
     @Override
     public SortedSet<? extends Node> getPermissions() {
-        return ImmutableSortedSet.copyOf(master.getPermissions(false));
+        return ImmutableSortedSet.copyOfSorted(master.getPermissions(false));
     }
 
     @Override
