@@ -40,6 +40,8 @@ public enum Permission {
     SEARCH(list("search"), Type.NONE),
     VERBOSE(list("verbose"), Type.NONE),
     IMPORT(list("import"), Type.NONE),
+    EXPORT(list("export"), Type.NONE),
+    MIGRATION(list("migration"), Type.NONE),
 
     CREATE_GROUP(list("creategroup"), Type.NONE),
     DELETE_GROUP(list("deletegroup"), Type.NONE),
@@ -148,9 +150,7 @@ public enum Permission {
     SPONGE_OPTION_INFO(list("option.info"), Type.SPONGE),
     SPONGE_OPTION_SET(list("option.set"), Type.SPONGE),
     SPONGE_OPTION_UNSET(list("option.unset"), Type.SPONGE),
-    SPONGE_OPTION_CLEAR(list("option.clear"), Type.SPONGE),
-
-    MIGRATION(list("migration"), Type.NONE);
+    SPONGE_OPTION_CLEAR(list("option.clear"), Type.SPONGE);
 
     private static final String IDENTIFIER = "luckperms.";
 

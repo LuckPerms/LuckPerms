@@ -29,7 +29,6 @@ import de.bananaco.bpermissions.api.Permission;
 import de.bananaco.bpermissions.api.World;
 import de.bananaco.bpermissions.api.WorldManager;
 
-import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.CommandException;
@@ -37,6 +36,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Constants;
+import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.LogEntry;
@@ -50,6 +50,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import static me.lucko.luckperms.common.constants.Permission.MIGRATION;
 
@@ -177,31 +178,35 @@ public class MigrationBPermissions extends SubCommand<Object> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) throws CommandException {
-        final Logger log = plugin.getLog();
+        Consumer<String> log = s -> {
+            Message.MIGRATION_LOG.send(sender, s);
+            Message.MIGRATION_LOG.send(plugin.getConsoleSender(), s);
+        };
+        log.accept("Starting bPermissions migration.");
 
         WorldManager worldManager = WorldManager.getInstance();
         if (worldManager == null) {
-            log.severe("bPermissions Migration: Error -> bPermissions is not loaded.");
+            log.accept("Error -> bPermissions is not loaded.");
             return CommandResult.STATE_ERROR;
         }
 
-        log.info("bPermissions Migration: Forcing the plugin to load all data. This could take a while.");
+        log.accept("Forcing the plugin to load all data. This could take a while.");
         for (World world : worldManager.getAllWorlds()) {
             Set<String> users = getUsers(world);
             if (users == null) {
-                log.severe("bPermissions Migration: Couldn't get a list of users.");
+                log.accept("Couldn't get a list of users.");
                 return CommandResult.FAILURE;
             }
             users.forEach(s -> world.loadOne(s, CalculableType.USER));
         }
 
         // Migrate one world at a time.
-        log.info("bPermissions Migration: Starting world migration.");
+        log.accept("Starting world migration.");
         for (World world : worldManager.getAllWorlds()) {
-            log.info("bPermissions Migration: Migrating world: " + world.getName());
+            log.accept("Migrating world: " + world.getName());
 
             // Migrate all groups
-            log.info("bPermissions Migration: Starting group migration in world " + world.getName() + ".");
+            log.accept("Starting group migration in world " + world.getName() + ".");
             int groupCount = 0;
             for (Calculable group : world.getAll(CalculableType.GROUP)) {
                 groupCount++;
@@ -225,10 +230,10 @@ public class MigrationBPermissions extends SubCommand<Object> {
                 migrateHolder(plugin, world, group, lpGroup);
                 plugin.getStorage().saveGroup(lpGroup);
             }
-            log.info("bPermissions Migration: Migrated " + groupCount + " groups in world " + world.getName() + ".");
+            log.accept("Migrated " + groupCount + " groups in world " + world.getName() + ".");
 
             // Migrate all users
-            log.info("bPermissions Migration: Starting user migration in world " + world.getName() + ".");
+            log.accept("Starting user migration in world " + world.getName() + ".");
             int userCount = 0;
             for (Calculable user : world.getAll(CalculableType.USER)) {
                 userCount++;
@@ -242,7 +247,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
                 }
 
                 if (uuid == null) {
-                    log.info("bPermissions Migration: Unable to migrate user " + user.getName() + ". Unable to get UUID.");
+                    log.accept("Unable to migrate user " + user.getName() + ". Unable to get UUID.");
                     continue;
                 }
 
@@ -256,10 +261,10 @@ public class MigrationBPermissions extends SubCommand<Object> {
                 plugin.getUserManager().cleanup(lpUser);
             }
 
-            log.info("bPermissions Migration: Migrated " + userCount + " users in world " + world.getName() + ".");
+            log.accept("Migrated " + userCount + " users in world " + world.getName() + ".");
         }
 
-        log.info("bPermissions Migration: Success! Completed without any errors.");
+        log.accept("Success! Completed without any errors.");
         return CommandResult.SUCCESS;
     }
 }

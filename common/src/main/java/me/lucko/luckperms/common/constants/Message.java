@@ -48,6 +48,8 @@ public enum Message {
     OP_DISABLED("&bThe vanilla OP system is disabled on this server.", false),
     OP_DISABLED_SPONGE("&2Server Operator status has no effect when a permission plugin is installed. Please edit user data directly.", true),
     LOG("&3LOG &3&l> {0}", true),
+    EXPORT_LOG("&3EXPORT &3&l> &f{0}", true),
+    MIGRATION_LOG("&3MIGRATION &3&l> &f{0}", true),
 
     COMMAND_NOT_RECOGNISED("Command not recognised.", true),
     COMMAND_NO_PERMISSION("You do not have permission to use this command!", true),
@@ -413,9 +415,7 @@ public enum Message {
     ),
 
     IMPORT_END_ERROR_CONTENT("&b(Import) &b-> &c{0}", true),
-    IMPORT_END_ERROR_FOOTER("&b(Import) &7<------------------------------------------>", true),
-
-    MIGRATION_NOT_CONSOLE("Migration must be performed from the Console.", true);
+    IMPORT_END_ERROR_FOOTER("&b(Import) &7<------------------------------------------>", true);
 
     private static String format(String s, Object... objects) {
         for (int i = 0, objsLength = objects.length; i < objsLength; i++) {

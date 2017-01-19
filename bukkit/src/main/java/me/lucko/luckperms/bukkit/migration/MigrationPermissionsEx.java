@@ -22,7 +22,6 @@
 
 package me.lucko.luckperms.bukkit.migration;
 
-import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.common.LuckPermsPlugin;
@@ -32,6 +31,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Constants;
+import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.User;
@@ -48,6 +48,7 @@ import ru.tehkode.permissions.bukkit.PermissionsEx;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class MigrationPermissionsEx extends SubCommand<Object> {
@@ -60,15 +61,20 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
     @SuppressWarnings("deprecation")
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) throws CommandException {
-        final Logger log = plugin.getLog();
+        Consumer<String> log = s -> {
+            Message.MIGRATION_LOG.send(sender, s);
+            Message.MIGRATION_LOG.send(plugin.getConsoleSender(), s);
+        };
+        log.accept("Starting PermissionsEx migration.");
+        
         if (!plugin.isPluginLoaded("PermissionsEx")) {
-            log.severe("PermissionsEx Migration: Error -> PermissionsEx is not loaded.");
+            log.accept("Error -> PermissionsEx is not loaded.");
             return CommandResult.STATE_ERROR;
         }
 
         if (plugin.getType() != PlatformType.BUKKIT) {
             // Sponge uses a completely different version of PEX.
-            log.severe("PEX import is not supported on this platform.");
+            log.accept("PEX import is not supported on this platform.");
             return CommandResult.STATE_ERROR;
         }
 
@@ -90,7 +96,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         }
 
         // Migrate all groups.
-        log.info("PermissionsEx Migration: Starting group migration.");
+        log.accept("Starting group migration.");
 
         int maxGroupWeight = 0;
         int groupCount = 0;
@@ -229,10 +235,10 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
 
         }
 
-        log.info("PermissionsEx Migration: Migrated " + groupCount + " groups");
+        log.accept("Migrated " + groupCount + " groups");
 
         // Migrate all users
-        log.info("PermissionsEx Migration: Starting user migration.");
+        log.accept("Starting user migration.");
         int userCount = 0;
         maxGroupWeight++;
         for (PermissionUser user : manager.getUsers()) {
@@ -248,7 +254,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             }
 
             if (u == null) {
-                log.severe("Unable to get a UUID for user identifier: " + user.getIdentifier());
+                log.accept("Unable to get a UUID for user identifier: " + user.getIdentifier());
                 continue;
             }
 
@@ -390,8 +396,8 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             plugin.getStorage().saveUser(lpUser);
         }
 
-        log.info("PermissionsEx Migration: Migrated " + userCount + " users.");
-        log.info("PermissionsEx Migration: Success! Completed without any errors.");
+        log.accept("Migrated " + userCount + " users.");
+        log.accept("Success! Completed without any errors.");
         return CommandResult.SUCCESS;
     }
 }

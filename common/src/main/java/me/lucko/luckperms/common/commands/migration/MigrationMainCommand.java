@@ -29,8 +29,8 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.MainCommand;
 import me.lucko.luckperms.common.commands.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.Constants;
-import me.lucko.luckperms.common.constants.Message;
+import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -95,6 +95,7 @@ public class MigrationMainCommand extends MainCommand<Object> {
     }
 
     private List<Command<Object, ?>> commands = null;
+    private boolean display = true;
 
     public MigrationMainCommand() {
         super("Migration", "Migration commands", "/%s migration", 1, null);
@@ -106,6 +107,17 @@ public class MigrationMainCommand extends MainCommand<Object> {
     public synchronized Optional<List<Command<Object, ?>>> getChildren() {
         if (commands == null) {
             commands = getAvailableCommands();
+
+            // Add dummy command to show in the list.
+            if (commands.isEmpty()) {
+                display = false;
+                commands.add(new SubCommand<Object>("No available plugins to migrate from", "No available plugins to migrate from.", Permission.MIGRATION, Predicates.alwaysFalse(), null) {
+                    @Override
+                    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) throws CommandException {
+                        return CommandResult.SUCCESS;
+                    }
+                });
+            }
         }
 
         return Optional.of(commands);
@@ -118,17 +130,13 @@ public class MigrationMainCommand extends MainCommand<Object> {
 
     @Override
     public boolean isAuthorized(Sender sender) {
-        return sender.getUuid().equals(Constants.CONSOLE_UUID);
+        return sender.hasPermission(Permission.MIGRATION);
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Void v, List<String> args, String label) throws CommandException {
-        if (!sender.getUuid().equals(Constants.CONSOLE_UUID)) {
-            Message.MIGRATION_NOT_CONSOLE.send(sender);
-            return CommandResult.NO_PERMISSION;
-        }
-
-        return super.execute(plugin, sender, v, args, label);
+    public boolean shouldDisplay() {
+        getSubCommands();
+        return display;
     }
 
     @Override

@@ -22,12 +22,12 @@
 
 package me.lucko.luckperms.bukkit.migration;
 
-import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.Group;
@@ -48,24 +48,29 @@ import org.tyrannyofheaven.bukkit.zPermissions.model.PermissionEntity;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public class MigrationZPermissions extends SubCommand<Object> {
-
     public MigrationZPermissions() {
         super("zpermissions", "Migration from zPermissions", Permission.MIGRATION, Predicates.alwaysFalse(), null);
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) throws CommandException {
-        final Logger log = plugin.getLog();
+        Consumer<String> log = s -> {
+            Message.MIGRATION_LOG.send(sender, s);
+            Message.MIGRATION_LOG.send(plugin.getConsoleSender(), s);
+        };
+        log.accept("Starting zPermissions migration.");
+        
         if (!plugin.isPluginLoaded("zPermissions")) {
-            log.severe("zPermissions Migration: Error -> zPermissions is not loaded.");
+            log.accept("Error -> zPermissions is not loaded.");
             return CommandResult.STATE_ERROR;
         }
 
         ZPermissionsService service = (ZPermissionsService) plugin.getService(ZPermissionsService.class);
         if (service == null) {
-            log.severe("zPermissions Migration: Error -> zPermissions is not loaded.");
+            log.accept("Error -> zPermissions is not loaded.");
             return CommandResult.STATE_ERROR;
         }
 
@@ -81,7 +86,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
         }
 
         // Migrate all groups
-        log.info("zPermissions Migration: Starting group migration.");
+        log.accept("Starting group migration.");
         for (String g : service.getAllGroups()) {
             plugin.getStorage().createAndLoadGroup(g.toLowerCase()).join();
             Group group = plugin.getGroupManager().getIfLoaded(g.toLowerCase());
@@ -93,7 +98,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
         }
 
         // Migrate all tracks
-        log.info("zPermissions Migration: Starting track migration.");
+        log.accept("Starting track migration.");
         for (String t : service.getAllTracks()) {
             plugin.getStorage().createAndLoadTrack(t.toLowerCase()).join();
             Track track = plugin.getTrackManager().getIfLoaded(t.toLowerCase());
@@ -102,7 +107,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
         }
 
         // Migrate all users.
-        log.info("zPermissions Migration: Starting user migration.");
+        log.accept("Starting user migration.");
         for (UUID u : service.getAllPlayersUUID()) {
             plugin.getStorage().loadUser(u, "null").join();
             User user = plugin.getUserManager().get(u);
@@ -120,7 +125,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
             plugin.getStorage().saveUser(user);
         }
 
-        log.info("zPermissions Migration: Success! Completed without any errors.");
+        log.accept("Success! Completed without any errors.");
         return CommandResult.SUCCESS;
     }
 

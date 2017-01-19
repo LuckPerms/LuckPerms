@@ -22,7 +22,6 @@
 
 package me.lucko.luckperms.bungee.migration;
 
-import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.CommandException;
@@ -30,6 +29,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Constants;
+import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.utils.Predicates;
@@ -43,6 +43,7 @@ import net.alpenblock.bungeeperms.World;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * BungeePerms is actually pretty nice. huh.
@@ -54,16 +55,20 @@ public class MigrationBungeePerms extends SubCommand<Object> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) throws CommandException {
-        final Logger log = plugin.getLog();
+        Consumer<String> log = s -> {
+            Message.MIGRATION_LOG.send(sender, s);
+            Message.MIGRATION_LOG.send(plugin.getConsoleSender(), s);
+        };
+        log.accept("Starting BungeePerms migration.");
 
         BungeePerms bp = BungeePerms.getInstance();
         if (bp == null) {
-            log.severe("BungeePerms Migration: Error -> BungeePerms is not loaded.");
+            log.accept("Error -> BungeePerms is not loaded.");
             return CommandResult.STATE_ERROR;
         }
 
         // Migrate all groups.
-        log.info("BungeePerms Migration: Starting group migration.");
+        log.accept("Starting group migration.");
         int groupCount = 0;
         for (Group g : bp.getPermissionsManager().getBackEnd().loadGroups()) {
             groupCount++;
@@ -182,10 +187,10 @@ public class MigrationBungeePerms extends SubCommand<Object> {
             plugin.getStorage().saveGroup(group);
         }
 
-        log.info("BungeePerms Migration: Migrated " + groupCount + " groups");
+        log.accept("Migrated " + groupCount + " groups");
 
         // Migrate all users.
-        log.info("BungeePerms Migration: Starting user migration.");
+        log.accept("Starting user migration.");
         int userCount = 0;
         for (User u : bp.getPermissionsManager().getBackEnd().loadUsers()) {
             if (u.getUUID() == null) continue;
@@ -298,8 +303,8 @@ public class MigrationBungeePerms extends SubCommand<Object> {
             plugin.getUserManager().cleanup(user);
         }
 
-        log.info("BungeePerms Migration: Migrated " + userCount + " users.");
-        log.info("BungeePerms Migration: Success! Completed without any errors.");
+        log.accept("Migrated " + userCount + " users.");
+        log.accept("Success! Completed without any errors.");
         return CommandResult.SUCCESS;
     }
 }

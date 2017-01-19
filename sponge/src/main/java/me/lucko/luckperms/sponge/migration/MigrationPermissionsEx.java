@@ -22,13 +22,13 @@
 
 package me.lucko.luckperms.sponge.migration;
 
-import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.Track;
@@ -51,6 +51,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import static me.lucko.luckperms.sponge.migration.MigrationUtils.migrateSubject;
 
@@ -61,12 +62,17 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) throws CommandException {
-        final Logger log = plugin.getLog();
+        Consumer<String> log = s -> {
+            Message.MIGRATION_LOG.send(sender, s);
+            Message.MIGRATION_LOG.send(plugin.getConsoleSender(), s);
+        };
+        log.accept("Starting PermissionsEx migration.");
+        
         final LuckPermsService lpService = ((LPSpongePlugin) plugin).getService();
 
         Optional<PluginContainer> pex = Sponge.getPluginManager().getPlugin("permissionsex");
         if (!pex.isPresent()) {
-            log.severe("PermissionsEx Migration: Error -> PermissionsEx is not loaded.");
+            log.accept("Error -> PermissionsEx is not loaded.");
             return CommandResult.STATE_ERROR;
         }
 
@@ -86,7 +92,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         Map<String, TreeMap<Integer, String>> tracks = new HashMap<>();
 
         // Migrate groups
-        log.info("PermissionsEx Migration: Starting group migration.");
+        log.accept("Starting group migration.");
         int groupCount = 0;
         for (Subject pexGroup : pexService.getGroupSubjects().getAllSubjects()) {
             groupCount++;
@@ -115,10 +121,10 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             }
 
         }
-        log.info("PermissionsEx Migration: Migrated " + groupCount + " groups");
+        log.accept("Migrated " + groupCount + " groups");
 
         // Migrate tracks
-        log.info("PermissionsEx Migration: Starting track migration.");
+        log.accept("Starting track migration.");
         for (Map.Entry<String, TreeMap<Integer, String>> e : tracks.entrySet()) {
             plugin.getStorage().createAndLoadTrack(e.getKey()).join();
             Track track = plugin.getTrackManager().getIfLoaded(e.getKey());
@@ -131,16 +137,16 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 }
             }
         }
-        log.info("PermissionsEx Migration: Migrated " + tracks.size() + " tracks");
+        log.accept("Migrated " + tracks.size() + " tracks");
 
         // Migrate users
-        log.info("PermissionsEx Migration: Starting user migration.");
+        log.accept("Starting user migration.");
         int userCount = 0;
         for (Subject pexUser : pexService.getUserSubjects().getAllSubjects()) {
             userCount++;
             UUID uuid = Util.parseUuid(pexUser.getIdentifier());
             if (uuid == null) {
-                log.severe("PermissionsEx Migration: Error -> Could not parse UUID for user: " + pexUser.getIdentifier());
+                log.accept("Error -> Could not parse UUID for user: " + pexUser.getIdentifier());
                 continue;
             }
 
@@ -152,8 +158,8 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             plugin.getUserManager().cleanup(user);
         }
 
-        log.info("PermissionsEx Migration: Migrated " + userCount + " users.");
-        log.info("PermissionsEx Migration: Success! Completed without any errors.");
+        log.accept("Migrated " + userCount + " users.");
+        log.accept("Success! Completed without any errors.");
         return CommandResult.SUCCESS;
     }
 }

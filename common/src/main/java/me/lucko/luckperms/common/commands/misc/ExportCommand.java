@@ -22,14 +22,12 @@
 
 package me.lucko.luckperms.common.commands.misc;
 
-import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.model.Group;
@@ -46,6 +44,7 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public class ExportCommand extends SingleCommand {
     private static void write(BufferedWriter writer, String s) {
@@ -102,7 +101,7 @@ public class ExportCommand extends SingleCommand {
     }
 
     public ExportCommand() {
-        super("Export", "Export data to a file", "/%s export <file>", Permission.MIGRATION, Predicates.not(1),
+        super("Export", "Export data to a file", "/%s export <file>", Permission.EXPORT, Predicates.not(1),
                 Arg.list(
                         Arg.create("file", true, "the file to export to")
                 )
@@ -111,12 +110,7 @@ public class ExportCommand extends SingleCommand {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
-        final Logger log = plugin.getLog();
-
-        if (!sender.getUuid().equals(Constants.CONSOLE_UUID)) {
-            Message.MIGRATION_NOT_CONSOLE.send(sender);
-            return CommandResult.NO_PERMISSION;
-        }
+        Consumer<String> log = s -> Message.EXPORT_LOG.send(sender, s);
 
         File f = new File(plugin.getMainDir(), args.get(0));
         if (f.exists()) {
@@ -138,10 +132,10 @@ public class ExportCommand extends SingleCommand {
         }
 
         try (FileWriter fWriter = new FileWriter(f, true); BufferedWriter writer = new BufferedWriter(fWriter)) {
-            log.info("Export: Starting export process.");
+            log.accept("Starting export process.");
 
             // Export Groups
-            log.info("Export: Exporting all groups.");
+            log.accept("Exporting all groups.");
 
             // Create the groups first
             for (Group group : plugin.getGroupManager().getAll().values()) {
@@ -155,10 +149,10 @@ public class ExportCommand extends SingleCommand {
                     write(writer, nodeToString(node, group.getName(), true));
                 }
             }
-            log.info("Export: Exported " + groupCount + " groups.");
+            log.accept("Exported " + groupCount + " groups.");
 
             // Export tracks
-            log.info("Export: Exporting all tracks.");
+            log.accept("Exporting all tracks.");
 
             // Create the tracks first
             for (Track track : plugin.getTrackManager().getAll().values()) {
@@ -172,13 +166,13 @@ public class ExportCommand extends SingleCommand {
                     write(writer, "/luckperms track " + track.getName() + " append " + group);
                 }
             }
-            log.info("Export: Exported " + trackCount + " tracks.");
+            log.accept("Exported " + trackCount + " tracks.");
 
             // Export users
-            log.info("Export: Exporting all users. Finding a list of unique users to export.");
+            log.accept("Exporting all users. Finding a list of unique users to export.");
             Storage ds = plugin.getStorage();
             Set<UUID> users = ds.getUniqueUsers().join();
-            log.info("Export: Found " + users.size() + " unique users to export.");
+            log.accept("Found " + users.size() + " unique users to export.");
 
             int userCount = 0;
             for (UUID uuid : users) {
@@ -206,7 +200,7 @@ public class ExportCommand extends SingleCommand {
 
                 plugin.getUserManager().cleanup(user);
             }
-            log.info("Export: Exported " + userCount + " users.");
+            log.accept("Exported " + userCount + " users.");
 
             try {
                 writer.flush();
@@ -220,11 +214,6 @@ public class ExportCommand extends SingleCommand {
             t.printStackTrace();
             return CommandResult.FAILURE;
         }
-    }
-
-    @Override
-    public boolean isAuthorized(Sender sender) {
-        return sender.getUuid().equals(Constants.CONSOLE_UUID);
     }
 
 }

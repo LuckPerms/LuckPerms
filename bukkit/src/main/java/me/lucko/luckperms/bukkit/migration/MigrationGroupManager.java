@@ -22,7 +22,6 @@
 
 package me.lucko.luckperms.bukkit.migration;
 
-import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
@@ -30,6 +29,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Constants;
+import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.data.LogEntry;
@@ -49,6 +49,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class MigrationGroupManager extends SubCommand<Object> {
@@ -60,9 +61,14 @@ public class MigrationGroupManager extends SubCommand<Object> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) throws CommandException {
-        final Logger log = plugin.getLog();
+        Consumer<String> log = s -> {
+            Message.MIGRATION_LOG.send(sender, s);
+            Message.MIGRATION_LOG.send(plugin.getConsoleSender(), s);
+        };
+        log.accept("Starting GroupManager migration.");
+        
         if (!plugin.isPluginLoaded("GroupManager")) {
-            log.severe("GroupManager Migration: Error -> GroupManager is not loaded.");
+            log.accept("Error -> GroupManager is not loaded.");
             return CommandResult.STATE_ERROR;
         }
 
@@ -73,7 +79,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
         GroupManager gm = (GroupManager) plugin.getPlugin("GroupManager");
 
         // Migrate Global Groups
-        log.info("GroupManager Migration: Starting Global Group migration.");
+        log.accept("Starting Global Group migration.");
         GlobalGroups gg = GroupManager.getGlobalGroups();
 
         for (Group g : gg.getGroupList()) {
@@ -135,7 +141,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
         WorldsHolder wh = gm.getWorldsHolder();
 
         // Collect data for all users and groups.
-        log.info("GroupManager Migration: Starting user and group migration.");
+        log.accept("Starting user and group migration.");
         for (String world : worlds) {
             world = world.toLowerCase();
 
@@ -196,8 +202,8 @@ public class MigrationGroupManager extends SubCommand<Object> {
 
         }
 
-        log.info("GroupManager Migration: All existing GroupManager data has been processed. Now beginning the import process.");
-        log.info("GroupManager Migration: Found a total of " + users.size() + " users and " + groups.size() + " groups.");
+        log.accept("All existing GroupManager data has been processed. Now beginning the import process.");
+        log.accept("Found a total of " + users.size() + " users and " + groups.size() + " groups.");
 
         for (Map.Entry<String, Map<Map.Entry<String, String>, Boolean>> e : groups.entrySet()) {
             plugin.getStorage().createAndLoadGroup(e.getKey()).join();
@@ -290,7 +296,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
             plugin.getUserManager().cleanup(user);
         }
 
-        log.info("GroupManager Migration: Success! Completed without any errors.");
+        log.accept("Success! Completed without any errors.");
         return CommandResult.SUCCESS;
     }
 }

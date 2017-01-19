@@ -149,12 +149,6 @@ public abstract class MainCommand<T> extends BaseCommand<Void, T> {
 
     @Override
     public void sendUsage(Sender sender, String label) {
-        /*
-        if (getSubCommands().isEmpty()) {
-            Util.sendPluginMessage(sender, "&3> &a" + String.format(getUsage(), label));
-            return;
-        */
-
         List<Command> subs = getSubCommands().stream()
                 .filter(s -> s.isAuthorized(sender))
                 .collect(Collectors.toList());

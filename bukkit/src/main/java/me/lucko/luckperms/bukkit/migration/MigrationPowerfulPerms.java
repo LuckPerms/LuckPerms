@@ -33,7 +33,6 @@ import com.github.cheesesoftware.PowerfulPermsAPI.ResultRunnable;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.zaxxer.hikari.HikariDataSource;
 
-import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.data.Callback;
 import me.lucko.luckperms.bukkit.migration.utils.LPResultRunnable;
 import me.lucko.luckperms.common.LuckPermsPlugin;
@@ -43,6 +42,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Constants;
+import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.LogEntry;
@@ -64,6 +64,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
 
 import static me.lucko.luckperms.common.constants.Permission.MIGRATION;
 
@@ -187,17 +188,22 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) throws CommandException {
         try {
-            return run(plugin, args);
+            return run(plugin, sender, args);
         } catch (Throwable t) {
             t.printStackTrace();
             return CommandResult.FAILURE;
         }
     }
 
-    private CommandResult run(LuckPermsPlugin plugin, List<String> args) {
-        final Logger log = plugin.getLog();
+    private CommandResult run(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+        Consumer<String> log = s -> {
+            Message.MIGRATION_LOG.send(sender, s);
+            Message.MIGRATION_LOG.send(plugin.getConsoleSender(), s);
+        };
+        log.accept("Starting PowerfulPerms migration.");
+        
         if (!plugin.isPluginLoaded("PowerfulPerms")) {
-            log.severe("PowerfulPerms Migration: Error -> PowerfulPerms is not loaded.");
+            log.accept("Error -> PowerfulPerms is not loaded.");
             return CommandResult.STATE_ERROR;
         }
 
@@ -208,7 +214,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         final String dbTable = args.get(4);
 
         // Find a list of UUIDs
-        log.info("PowerfulPerms Migration: Getting a list of UUIDs to migrate.");
+        log.accept("Getting a list of UUIDs to migrate.");
 
         @Cleanup HikariDataSource hikari = new HikariDataSource();
         hikari.setMaximumPoolSize(2);
@@ -227,7 +233,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
 
             @Cleanup ResultSet tables = meta.getTables(null, null, dbTable, null);
             if (!tables.next()) {
-                log.severe("PowerfulPerms Migration: Error - Couldn't find table.");
+                log.accept("Error - Couldn't find table.");
                 return CommandResult.FAILURE;
 
             } else {
@@ -235,9 +241,9 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                 columnPs.setString(1, dbTable);
                 @Cleanup ResultSet columnRs = columnPs.executeQuery();
 
-                log.info("Found table: " + dbTable);
+                log.accept("Found table: " + dbTable);
                 while (columnRs.next()) {
-                    log.info("" + columnRs.getString("COLUMN_NAME") + " - " + columnRs.getString("COLUMN_TYPE"));
+                    log.accept("" + columnRs.getString("COLUMN_NAME") + " - " + columnRs.getString("COLUMN_TYPE"));
                 }
 
                 @Cleanup PreparedStatement preparedStatement = connection.prepareStatement("SELECT `uuid` FROM " + dbTable);
@@ -254,17 +260,17 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         }
 
         if (uuids.isEmpty()) {
-            log.severe("PowerfulPerms Migration: Error - Unable to find any UUIDs to migrate.");
+            log.accept("Error - Unable to find any UUIDs to migrate.");
             return CommandResult.FAILURE;
         }
 
-        log.info("PowerfulPerms Migration: Found " + uuids.size() + " uuids. Starting migration.");
+        log.accept("Found " + uuids.size() + " uuids. Starting migration.");
 
         PowerfulPermsPlugin ppPlugin = (PowerfulPermsPlugin) plugin.getPlugin("PowerfulPerms");
         PermissionManager pm = ppPlugin.getPermissionManager();
 
         // Groups first.
-        log.info("PowerfulPerms Migration: Starting group migration.");
+        log.accept("Starting group migration.");
         Map<Integer, Group> groups = pm.getGroups(); // All versions
         for (Group g : groups.values()) {
             plugin.getStorage().createAndLoadGroup(g.getName().toLowerCase()).join();
@@ -298,10 +304,10 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
 
             plugin.getStorage().saveGroup(group);
         }
-        log.info("PowerfulPerms Migration: Group migration complete.");
+        log.accept("Group migration complete.");
 
         // Now users.
-        log.info("PowerfulPerms Migration: Starting user migration.");
+        log.accept("Starting user migration.");
         final Map<UUID, CountDownLatch> progress = new HashMap<>();
 
         // Migrate all users and their groups
@@ -468,7 +474,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                         e.printStackTrace();
                     }
                 } catch (IllegalAccessException | InvocationTargetException e) {
-                    log.info("PowerfulPerms Migration: Error");
+                    log.accept("Error");
                     e.printStackTrace();
                 }
             } else {
@@ -480,7 +486,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                         }
                     });
                 } catch (IllegalAccessException | InvocationTargetException e) {
-                    log.info("PowerfulPerms Migration: Error");
+                    log.accept("Error");
                     e.printStackTrace();
                 }
             }
@@ -488,7 +494,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
 
         // All groups are migrated, but there may still be some users being migrated.
         // This block will wait for all users to be completed.
-        log.info("PowerfulPerms Migration: Waiting for user migration to complete. This may take some time");
+        log.accept("Waiting for user migration to complete. This may take some time");
         boolean sleep = true;
         while (sleep) {
             sleep = false;
@@ -511,7 +517,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         }
 
         // We done.
-        log.info("PowerfulPerms Migration: Success! Completed without any errors.");
+        log.accept("Success! Completed without any errors.");
         return CommandResult.SUCCESS;
     }
 

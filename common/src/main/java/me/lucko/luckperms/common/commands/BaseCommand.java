@@ -35,4 +35,8 @@ public abstract class BaseCommand<T, S> extends Command<T, S> {
 
     public abstract String getUsage();
 
+    public boolean shouldDisplay() {
+        return true;
+    }
+
 }

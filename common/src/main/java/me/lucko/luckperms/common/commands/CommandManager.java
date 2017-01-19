@@ -214,6 +214,10 @@ public class CommandManager {
         mainCommands.stream()
                 .filter(c -> c.isAuthorized(sender))
                 .forEach(c -> {
+                    if (!c.shouldDisplay()) {
+                        return;
+                    }
+
                     @SuppressWarnings("unchecked")
                     String permission = (String) c.getPermission().map(p -> ((Permission) p).getExample()).orElse("None");
                     FancyMessage msg = new FancyMessage("> ").color(ChatColor.getByChar('3')).then().text(String.format(c.getUsage(), label)).color(ChatColor.getByChar('a'))
