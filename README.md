@@ -26,7 +26,7 @@ _Features checked on 23rd Aug 2016. If you find any inaccuracies, please do let 
 _Features checked on 8th Oct 2016. If you find any inaccuracies, please do let me know. I tried to be as fair as possible, and copy all major features from the respective plugin pages._
 
 ## License
-LuckPerms is licensed under the permissive MIT license. See LICENSE.md for more info.
+LuckPerms is licensed under the permissive MIT license. See LICENSE.txt for more info.
 
 ## Sponsor
 [![JProfiler](https://www.ej-technologies.com/images/product_banners/jprofiler_large.png)](http://www.ej-technologies.com/products/jprofiler/overview.html)

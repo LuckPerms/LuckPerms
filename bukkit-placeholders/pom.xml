@@ -12,6 +12,15 @@
     <artifactId>luckperms-bukkit-placeholders</artifactId>
     <build>
         <finalName>LuckPermsPlaceholderExpansion</finalName>
+        <resources>
+            <resource>
+                <directory>../</directory>
+                <filtering>false</filtering>
+                <includes>
+                    <include>LICENSE.txt</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
