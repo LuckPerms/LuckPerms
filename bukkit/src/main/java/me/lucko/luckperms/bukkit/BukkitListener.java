@@ -39,8 +39,15 @@ import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
 class BukkitListener extends AbstractListener implements Listener {
     private final LPBukkitPlugin plugin;
+    private final Set<UUID> deniedAsyncLogin = Collections.synchronizedSet(new HashSet<>());
+    private final Set<UUID> deniedLogin = new HashSet<>();
 
     BukkitListener(LPBukkitPlugin plugin) {
         super(plugin);
@@ -49,7 +56,13 @@ class BukkitListener extends AbstractListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOW)
     public void onPlayerPreLogin(AsyncPlayerPreLoginEvent e) {
+        if (e.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
+            deniedAsyncLogin.add(e.getUniqueId());
+            return;
+        }
+
         if (!plugin.isStarted() || !plugin.getStorage().isAcceptingLogins()) {
+            deniedAsyncLogin.add(e.getUniqueId());
 
             // The datastore is disabled, prevent players from joining the server
             e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, Message.LOADING_ERROR.toString());
@@ -62,6 +75,11 @@ class BukkitListener extends AbstractListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerPreLoginMonitor(AsyncPlayerPreLoginEvent e) {
+        // If they were denied before/at LOW, then don't bother handling here.
+        if (deniedAsyncLogin.remove(e.getUniqueId())) {
+            return;
+        }
+
         if (plugin.isStarted() && plugin.getStorage().isAcceptingLogins() && e.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
 
             // Login event was cancelled by another plugin
@@ -69,12 +87,19 @@ class BukkitListener extends AbstractListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.LOW)
     public void onPlayerLogin(PlayerLoginEvent e) {
+        if (e.getResult() != PlayerLoginEvent.Result.ALLOWED) {
+            deniedLogin.add(e.getPlayer().getUniqueId());
+            return;
+        }
+
         final Player player = e.getPlayer();
         final User user = plugin.getUserManager().get(plugin.getUuidCache().getUUID(player.getUniqueId()));
 
         if (user == null) {
+            deniedLogin.add(e.getPlayer().getUniqueId());
+
             // User wasn't loaded for whatever reason.
             e.disallow(PlayerLoginEvent.Result.KICK_OTHER, Message.LOADING_ERROR.toString());
             return;
@@ -103,6 +128,11 @@ class BukkitListener extends AbstractListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerLoginMonitor(PlayerLoginEvent e) {
         if (e.getResult() != PlayerLoginEvent.Result.ALLOWED) {
+
+            // If they were denied before/at LOW, then don't bother handling here.
+            if (deniedLogin.remove(e.getPlayer().getUniqueId())) {
+                return;
+            }
 
             // The player got denied on sync login.
             onLeave(e.getPlayer().getUniqueId());
