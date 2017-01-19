@@ -388,6 +388,12 @@ public interface LuckPermsPlugin {
     BufferedRequest<Void> getUpdateTaskBuffer();
 
     /**
+     * Adds a runnable to be called when the plugin disables
+     * @param r the runnable to run
+     */
+    void addShutdownHook(Runnable r);
+
+    /**
      * Called at the end of the sync task.
      */
     default void onPostUpdate() {

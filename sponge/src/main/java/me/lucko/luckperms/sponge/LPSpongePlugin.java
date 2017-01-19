@@ -86,6 +86,7 @@ import org.spongepowered.api.scheduler.AsynchronousExecutor;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.SpongeExecutorService;
 import org.spongepowered.api.scheduler.SynchronousExecutor;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.permission.PermissionDescription;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
@@ -96,6 +97,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
@@ -111,6 +113,7 @@ import java.util.stream.StreamSupport;
 public class LPSpongePlugin implements LuckPermsPlugin {
 
     private final Set<UUID> ignoringLogs = ConcurrentHashMap.newKeySet();
+    private final Set<Runnable> shutdownHooks = Collections.synchronizedSet(new HashSet<>());
 
     @Inject
     private Logger logger;
@@ -251,18 +254,23 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         // schedule update tasks
         int mins = getConfiguration().getSyncTime();
         if (mins > 0) {
-            scheduler.createTaskBuilder().async().interval(mins, TimeUnit.MINUTES).execute(new UpdateTask(this))
+            Task t = scheduler.createTaskBuilder().async().interval(mins, TimeUnit.MINUTES).execute(new UpdateTask(this))
                     .submit(LPSpongePlugin.this);
+            addShutdownHook(t::cancel);
         }
 
         // run an update instantly.
         updateTaskBuffer.requestDirectly();
 
         // register tasks
-        scheduler.createTaskBuilder().async().intervalTicks(60L).execute(new ExpireTemporaryTask(this)).submit(this);
-        scheduler.createTaskBuilder().async().intervalTicks(2400L).execute(new CacheHousekeepingTask(this)).submit(this);
-        scheduler.createTaskBuilder().async().intervalTicks(2400L).execute(new ServiceCacheHousekeepingTask(service)).submit(this);
-        scheduler.createTaskBuilder().async().intervalTicks(2400L).execute(() -> userManager.performCleanup()).submit(this);
+        Task t2 = scheduler.createTaskBuilder().async().intervalTicks(60L).execute(new ExpireTemporaryTask(this)).submit(this);
+        Task t3 = scheduler.createTaskBuilder().async().intervalTicks(2400L).execute(new CacheHousekeepingTask(this)).submit(this);
+        Task t4 = scheduler.createTaskBuilder().async().intervalTicks(2400L).execute(new ServiceCacheHousekeepingTask(service)).submit(this);
+        Task t5 = scheduler.createTaskBuilder().async().intervalTicks(2400L).execute(() -> userManager.performCleanup()).submit(this);
+        addShutdownHook(t2::cancel);
+        addShutdownHook(t3::cancel);
+        addShutdownHook(t4::cancel);
+        addShutdownHook(t5::cancel);
 
         getLog().info("Successfully loaded.");
     }
@@ -439,6 +447,11 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     @Override
     public boolean isPluginLoaded(String name) {
         return game.getPluginManager().isLoaded(name);
+    }
+
+    @Override
+    public void addShutdownHook(Runnable r) {
+        shutdownHooks.add(r);
     }
 
     @Override

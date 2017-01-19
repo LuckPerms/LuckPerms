@@ -68,6 +68,7 @@ import net.md_5.bungee.api.plugin.Plugin;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -80,6 +81,7 @@ import java.util.stream.Collectors;
 @Getter
 public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     private final Set<UUID> ignoringLogs = ConcurrentHashMap.newKeySet();
+    private final Set<Runnable> shutdownHooks = Collections.synchronizedSet(new HashSet<>());
     private Executor executor;
     private LPConfiguration configuration;
     private UserManager userManager;
@@ -201,6 +203,8 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
     @Override
     public void onDisable() {
+        shutdownHooks.forEach(Runnable::run);
+
         getLog().info("Closing datastore...");
         storage.shutdown();
 
@@ -211,6 +215,9 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
         getLog().info("Unregistering API...");
         ApiHandler.unregisterProvider();
+
+        getProxy().getScheduler().cancel(this);
+        getProxy().getPluginManager().unregisterListeners(this);
     }
 
     @Override
@@ -344,9 +351,12 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     @Override
     public boolean isPluginLoaded(String name) {
         return getProxy().getPluginManager().getPlugins().stream()
-                .filter(p -> p.getDescription().getName().equalsIgnoreCase(name))
-                .findAny()
-                .isPresent();
+                .anyMatch(p -> p.getDescription().getName().equalsIgnoreCase(name));
+    }
+
+    @Override
+    public void addShutdownHook(Runnable r) {
+        shutdownHooks.add(r);
     }
 
     @Override

@@ -82,6 +82,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -91,14 +92,19 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Getter
 public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private Set<UUID> ignoringLogs;
+    private Set<Runnable> shutdownHooks;
     private Executor syncExecutor;
     private Executor asyncExecutor;
+    private Executor asyncBukkitExecutor;
+    private ExecutorService asyncLpExecutor;
     private VaultHook vaultHook = null;
     private LPConfiguration configuration;
     private UserManager userManager;
@@ -126,16 +132,19 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
     @Override
     public void onEnable() {
-        // Used whilst the server is still starting
-        asyncExecutor = Executors.newCachedThreadPool();
+        // Used whilst the plugin is enabling / disabling / disabled
+        asyncLpExecutor = Executors.newCachedThreadPool();
+        asyncBukkitExecutor = r -> getServer().getScheduler().runTaskAsynchronously(this, r);
+
+        asyncExecutor = asyncLpExecutor;
         syncExecutor = r -> getServer().getScheduler().runTask(this, r);
-        Executor bukkitAsyncExecutor = r -> getServer().getScheduler().runTaskAsynchronously(this, r);
 
         log = LogFactory.wrap(getLogger());
         ignoringLogs = ConcurrentHashMap.newKeySet();
-        debugHandler = new DebugHandler(bukkitAsyncExecutor, getVersion());
+        shutdownHooks = Collections.synchronizedSet(new HashSet<>());
+        debugHandler = new DebugHandler(asyncBukkitExecutor, getVersion());
         senderFactory = new BukkitSenderFactory(this);
-        permissionCache = new PermissionCache(bukkitAsyncExecutor);
+        permissionCache = new PermissionCache(asyncBukkitExecutor);
 
         getLog().info("Loading configuration...");
         configuration = new BukkitConfig(this);
@@ -270,7 +279,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
         // replace the temporary executor when the Bukkit one starts
         getServer().getScheduler().runTaskAsynchronously(this, () -> {
-            asyncExecutor = bukkitAsyncExecutor;
+            asyncExecutor = asyncBukkitExecutor;
         });
 
         // Load any online users (in the case of a reload)
@@ -297,14 +306,19 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
     @Override
     public void onDisable() {
+        // Switch back to the LP executor, the bukkit one won't allow new tasks
+        asyncExecutor = asyncLpExecutor;
+
         started = false;
+
+        shutdownHooks.forEach(Runnable::run);
 
         defaultsProvider.close();
         permissionCache.setShutdown(true);
         debugHandler.setShutdown(true);
 
         for (Player player : getServer().getOnlinePlayers()) {
-            Injector.unInject(player, false);
+            Injector.unInject(player, false, false);
             if (getConfiguration().isAutoOp()) {
                 player.setOp(false);
             }
@@ -332,14 +346,20 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
             vaultHook.unhook(this);
         }
 
+        // wait for executor
+        asyncLpExecutor.shutdown();
+        try {
+            asyncLpExecutor.awaitTermination(30, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         // Bukkit will do this again when #onDisable completes, but we do it early to prevent NPEs elsewhere.
         getServer().getScheduler().cancelTasks(this);
         HandlerList.unregisterAll(this);
 
         // Null everything
         ignoringLogs = null;
-        syncExecutor = null;
-        asyncExecutor = null;
         vaultHook = null;
         configuration = null;
         userManager = null;
@@ -613,6 +633,11 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     @Override
     public boolean isPluginLoaded(String name) {
         return getServer().getPluginManager().isPluginEnabled(name);
+    }
+
+    @Override
+    public void addShutdownHook(Runnable r) {
+        shutdownHooks.add(r);
     }
 
     private void registerPermissions(PermissionDefault def) {

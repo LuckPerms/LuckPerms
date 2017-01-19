@@ -116,7 +116,7 @@ class BukkitListener extends AbstractListener implements Listener {
         final Player player = e.getPlayer();
 
         // Remove the custom permissible
-        Injector.unInject(player, true);
+        Injector.unInject(player, true, true);
 
         // Handle auto op
         if (plugin.getConfiguration().isAutoOp()) {

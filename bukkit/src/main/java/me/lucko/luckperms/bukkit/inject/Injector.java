@@ -88,13 +88,16 @@ public class Injector {
         }
     }
 
-    public static boolean unInject(Player player, boolean dummy) {
+    public static boolean unInject(Player player, boolean dummy, boolean unsubscribe) {
         try {
             PermissibleBase permissible = (PermissibleBase) HUMAN_ENTITY_FIELD.get(player);
             if (permissible instanceof LPPermissible) {
 
                 permissible.clearPermissions();
-                ((LPPermissible) permissible).unsubscribeFromAllAsync();
+
+                if (unsubscribe) {
+                    ((LPPermissible) permissible).unsubscribeFromAllAsync();
+                }
 
                 if (dummy) {
                     HUMAN_ENTITY_FIELD.set(player, new DummyPermissibleBase());
