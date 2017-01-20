@@ -116,11 +116,6 @@ public class SpongeListener extends AbstractListener {
         try (Timing ignored = plugin.getTimings().time(LPTiming.ON_CLIENT_LEAVE)) {
             final UuidCache cache = plugin.getUuidCache();
 
-            final User user = plugin.getUserManager().get(cache.getUUID(e.getTargetEntity().getUniqueId()));
-            if (user != null) {
-                user.unregisterData();
-            }
-
             // Unload the user from memory when they disconnect;
             cache.clearCache(e.getTargetEntity().getUniqueId());
         }
