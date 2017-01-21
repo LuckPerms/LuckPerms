@@ -41,6 +41,7 @@ public enum Permission {
     VERBOSE(list("verbose"), Type.NONE),
     IMPORT(list("import"), Type.NONE),
     EXPORT(list("export"), Type.NONE),
+    RELOAD_CONFIG(list("reloadconfig"), Type.NONE),
     MIGRATION(list("migration"), Type.NONE),
 
     CREATE_GROUP(list("creategroup"), Type.NONE),

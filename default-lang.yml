@@ -94,6 +94,7 @@ update-task-complete: "&aUpdate task finished."
 update-task-complete-network: "&aUpdate task finished. Now attempting to push to other servers."
 update-task-push-success: "&aOther servers were notified successfully."
 update-task-push-failure: "&cError whilst pushing changes to other servers. Is Redis enabled?"
+reload-config-success: "&aThe configuration file was reloaded. &7(some options will only apply after the server has restarted.)"
 info: >
   {PREFIX}&2Running &bLuckPerms v{0}&2 by &bLuck&2.\n
   {PREFIX}&f-  &3Platform: &f{1}\n

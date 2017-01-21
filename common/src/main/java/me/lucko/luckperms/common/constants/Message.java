@@ -136,6 +136,7 @@ public enum Message {
     UPDATE_TASK_COMPLETE_NETWORK("&aUpdate task finished. Now attempting to push to other servers.", true),
     UPDATE_TASK_PUSH_SUCCESS("&aOther servers were notified successfully.", true),
     UPDATE_TASK_PUSH_FAILURE("&cError whilst pushing changes to other servers. Is Redis enabled?", true),
+    RELOAD_CONFIG_SUCCESS("&aThe configuration file was reloaded. &7(some options will only apply after the server has restarted.)", true),
     INFO(
             "{PREFIX}&2Running &bLuckPerms v{0}&2 by &bLuck&2." + "\n" +
             "{PREFIX}&f-  &3Platform: &f{1}" + "\n" +
