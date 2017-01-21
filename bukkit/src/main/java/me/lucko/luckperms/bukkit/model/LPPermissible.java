@@ -29,6 +29,7 @@ import lombok.Setter;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.core.model.User;
 
 import org.bukkit.Bukkit;
@@ -120,11 +121,11 @@ public class LPPermissible extends PermissibleBase {
     public Contexts calculateContexts() {
         return new Contexts(
                 plugin.getContextManager().getApplicableContext(parent),
-                plugin.getConfiguration().isIncludingGlobalPerms(),
-                plugin.getConfiguration().isIncludingGlobalWorldPerms(),
+                plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
+                plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
                 true,
-                plugin.getConfiguration().isApplyingGlobalGroups(),
-                plugin.getConfiguration().isApplyingGlobalWorldGroups(),
+                plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
+                plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
                 parent.isOp()
         );
     }

@@ -28,21 +28,23 @@ import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.config.LPConfiguration;
 
 import java.util.Map;
 
 @AllArgsConstructor
 public class ServerCalculator<T> extends ContextCalculator<T> {
-    private final String server;
+    private final LPConfiguration config;
 
     @Override
     public MutableContextSet giveApplicableContext(T subject, MutableContextSet accumulator) {
-        accumulator.add(Maps.immutableEntry("server", server));
+        accumulator.add(Maps.immutableEntry("server", config.get(ConfigKeys.SERVER)));
         return accumulator;
     }
 
     @Override
     public boolean isContextApplicable(T subject, Map.Entry<String, String> context) {
-        return context.getKey().equals("server") && server.equalsIgnoreCase(context.getValue());
+        return context.getKey().equals("server") && config.get(ConfigKeys.SERVER).equalsIgnoreCase(context.getValue());
     }
 }

@@ -27,6 +27,7 @@ import lombok.AllArgsConstructor;
 import me.lucko.luckperms.api.event.events.PostSyncEvent;
 import me.lucko.luckperms.api.event.events.PreSyncEvent;
 import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.config.ConfigKeys;
 
 @AllArgsConstructor
 public class UpdateTask implements Runnable {
@@ -43,7 +44,7 @@ public class UpdateTask implements Runnable {
 
         // Reload all groups
         plugin.getStorage().loadAllGroups().join();
-        String defaultGroup = plugin.getConfiguration().getDefaultGroupName();
+        String defaultGroup = plugin.getConfiguration().get(ConfigKeys.DEFAULT_GROUP_NAME);
         if (!plugin.getGroupManager().isLoaded(defaultGroup)) {
             plugin.getStorage().createAndLoadGroup(defaultGroup).join();
         }

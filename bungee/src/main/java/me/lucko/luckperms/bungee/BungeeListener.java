@@ -24,6 +24,7 @@ package me.lucko.luckperms.bungee;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.event.events.UserFirstLoginEvent;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.core.UuidCache;
 import me.lucko.luckperms.common.core.model.User;
@@ -75,11 +76,11 @@ public class BungeeListener extends AbstractListener implements Listener {
 
         Contexts contexts = new Contexts(
                 plugin.getContextManager().getApplicableContext(player),
-                plugin.getConfiguration().isIncludingGlobalPerms(),
-                plugin.getConfiguration().isIncludingGlobalWorldPerms(),
+                plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
+                plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
                 true,
-                plugin.getConfiguration().isApplyingGlobalGroups(),
-                plugin.getConfiguration().isApplyingGlobalWorldGroups(),
+                plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
+                plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
                 false
         );
 
@@ -97,7 +98,7 @@ public class BungeeListener extends AbstractListener implements Listener {
             final UuidCache cache = plugin.getUuidCache();
             final PendingConnection c = e.getConnection();
 
-            if (!cache.isOnlineMode()) {
+            if (!plugin.getConfiguration().get(ConfigKeys.ONLINE_MODE)) {
                 UUID uuid = plugin.getStorage().getUUID(c.getName()).join();
                 if (uuid != null) {
                     cache.addToCache(c.getUniqueId(), uuid);
@@ -126,7 +127,7 @@ public class BungeeListener extends AbstractListener implements Listener {
             } else {
                 // Setup defaults for the user
                 boolean save = false;
-                for (Rule rule : plugin.getConfiguration().getDefaultAssignments()) {
+                for (Rule rule : plugin.getConfiguration().get(ConfigKeys.DEFAULT_ASSIGNMENTS)) {
                     if (rule.apply(user)) {
                         save = true;
                     }

@@ -22,6 +22,8 @@
 
 package me.lucko.luckperms.sponge;
 
+import lombok.RequiredArgsConstructor;
+
 import com.google.common.base.Splitter;
 
 import me.lucko.luckperms.common.config.AbstractConfiguration;
@@ -41,12 +43,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-class SpongeConfig extends AbstractConfiguration<LPSpongePlugin> {
+@RequiredArgsConstructor
+public class SpongeConfig extends AbstractConfiguration {
+    private final LPSpongePlugin plugin;
     private ConfigurationNode root;
-
-    SpongeConfig(LPSpongePlugin plugin) {
-        super(plugin, "global", true, "sqlite");
-    }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     private Path makeFile(Path file) throws IOException {
@@ -54,7 +54,7 @@ class SpongeConfig extends AbstractConfiguration<LPSpongePlugin> {
         cfg.getParentFile().mkdirs();
 
         if (!cfg.exists()) {
-            try (InputStream is = getPlugin().getClass().getClassLoader().getResourceAsStream("luckperms.conf")) {
+            try (InputStream is = plugin.getClass().getClassLoader().getResourceAsStream("luckperms.conf")) {
                 Files.copy(is, cfg.toPath());
             }
         }
@@ -63,10 +63,10 @@ class SpongeConfig extends AbstractConfiguration<LPSpongePlugin> {
     }
 
     @Override
-    protected void init() {
+    public void init() {
         try {
             ConfigurationLoader<CommentedConfigurationNode> loader = HoconConfigurationLoader.builder()
-                    .setPath(makeFile(getPlugin().getConfigDir().resolve("luckperms.conf")))
+                    .setPath(makeFile(plugin.getConfigDir().resolve("luckperms.conf")))
                     .build();
 
             root = loader.load();
@@ -87,22 +87,22 @@ class SpongeConfig extends AbstractConfiguration<LPSpongePlugin> {
     }
 
     @Override
-    protected String getString(String path, String def) {
+    public String getString(String path, String def) {
         return getNode(path).getString(def);
     }
 
     @Override
-    protected int getInt(String path, int def) {
+    public int getInt(String path, int def) {
         return getNode(path).getInt(def);
     }
 
     @Override
-    protected boolean getBoolean(String path, boolean def) {
+    public boolean getBoolean(String path, boolean def) {
         return getNode(path).getBoolean(def);
     }
 
     @Override
-    protected List<String> getList(String path, List<String> def) {
+    public List<String> getList(String path, List<String> def) {
         ConfigurationNode node = getNode(path);
         if (node.isVirtual()) {
             return def;
@@ -112,7 +112,7 @@ class SpongeConfig extends AbstractConfiguration<LPSpongePlugin> {
     }
 
     @Override
-    protected List<String> getObjectList(String path, List<String> def) {
+    public List<String> getObjectList(String path, List<String> def) {
         ConfigurationNode node = getNode(path);
         if (node.isVirtual()) {
             return def;
@@ -123,7 +123,7 @@ class SpongeConfig extends AbstractConfiguration<LPSpongePlugin> {
 
     @SuppressWarnings("unchecked")
     @Override
-    protected Map<String, String> getMap(String path, Map<String, String> def) {
+    public Map<String, String> getMap(String path, Map<String, String> def) {
         ConfigurationNode node = getNode(path);
         if (node.isVirtual()) {
             return def;

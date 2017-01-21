@@ -36,6 +36,7 @@ import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.commands.BaseCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LPConfiguration;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.contexts.ContextManager;
@@ -172,6 +173,8 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
         getLog().info("Loading configuration...");
         configuration = new SpongeConfig(this);
+        configuration.init();
+        configuration.loadAll();
 
         Set<StorageType> storageTypes = StorageFactory.getRequiredTypes(this, StorageType.H2);
         DependencyManager.loadDependencies(this, storageTypes);
@@ -183,11 +186,11 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         storage = StorageFactory.getInstance(this, StorageType.H2);
 
         // initialise redis
-        if (getConfiguration().isRedisEnabled()) {
+        if (getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
             getLog().info("Loading redis...");
             redisMessaging = new RedisMessaging(this);
             try {
-                redisMessaging.init(getConfiguration().getRedisAddress(), getConfiguration().getRedisPassword());
+                redisMessaging.init(getConfiguration().get(ConfigKeys.REDIS_ADDRESS), getConfiguration().get(ConfigKeys.REDIS_PASSWORD));
                 getLog().info("Loaded redis successfully...");
             } catch (Exception e) {
                 getLog().info("Couldn't load redis...");
@@ -225,7 +228,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
         // load internal managers
         getLog().info("Loading internal permission managers...");
-        uuidCache = new UuidCache(getConfiguration().isOnlineMode());
+        uuidCache = new UuidCache(this);
         userManager = new SpongeUserManager(this);
         groupManager = new SpongeGroupManager(this);
         trackManager = new GenericTrackManager();
@@ -234,7 +237,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         cachedStateManager = new CachedStateManager(this);
 
         contextManager = new ContextManager<>();
-        contextManager.registerCalculator(new ServerCalculator<>(getConfiguration().getServer()));
+        contextManager.registerCalculator(new ServerCalculator<>(configuration));
         contextManager.registerCalculator(new WorldCalculator(this));
 
         // register the PermissionService with Sponge
@@ -256,7 +259,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         game.getServiceManager().setProvider(this, LuckPermsApi.class, apiProvider);
 
         // schedule update tasks
-        int mins = getConfiguration().getSyncTime();
+        int mins = getConfiguration().get(ConfigKeys.SYNC_TIME);
         if (mins > 0) {
             Task t = scheduler.createTaskBuilder().async().interval(mins, TimeUnit.MINUTES).execute(new UpdateTask(this))
                     .submit(LPSpongePlugin.this);
@@ -367,11 +370,11 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         }
         return new Contexts(
                 getContextManager().getApplicableContext(player),
-                getConfiguration().isIncludingGlobalPerms(),
-                getConfiguration().isIncludingGlobalWorldPerms(),
+                getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
+                getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
                 true,
-                getConfiguration().isApplyingGlobalGroups(),
-                getConfiguration().isApplyingGlobalWorldGroups(),
+                getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
+                getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
                 false
         );
     }

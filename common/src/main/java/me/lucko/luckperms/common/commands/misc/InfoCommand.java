@@ -27,6 +27,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LPConfiguration;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
@@ -64,8 +65,8 @@ public class InfoCommand extends SingleCommand {
                 plugin.getVersion(),
                 plugin.getType().getFriendlyName(),
                 plugin.getStorage().getName(),
-                c.getServer(),
-                c.getSyncTime(),
+                c.get(ConfigKeys.SERVER),
+                c.get(ConfigKeys.SYNC_TIME),
                 plugin.getPlayerCount(),
                 plugin.getUserManager().getAll().size(),
                 plugin.getGroupManager().getAll().size(),
@@ -75,15 +76,15 @@ public class InfoCommand extends SingleCommand {
                 plugin.getLocaleManager().getSize(),
                 plugin.getPreProcessContexts(false).size(),
                 plugin.getContextManager().getCalculatorsSize(),
-                formatBoolean(c.isOnlineMode()),
-                formatBoolean(c.isRedisEnabled()),
-                formatBoolean(c.isIncludingGlobalPerms()),
-                formatBoolean(c.isIncludingGlobalWorldPerms()),
-                formatBoolean(c.isApplyingGlobalGroups()),
-                formatBoolean(c.isApplyingGlobalWorldGroups()),
-                formatBoolean(c.isApplyingWildcards()),
-                formatBoolean(c.isApplyingRegex()),
-                formatBoolean(c.isApplyingShorthand())
+                formatBoolean(c.get(ConfigKeys.ONLINE_MODE)),
+                formatBoolean(c.get(ConfigKeys.REDIS_ENABLED)),
+                formatBoolean(c.get(ConfigKeys.INCLUDING_GLOBAL_PERMS)),
+                formatBoolean(c.get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS)),
+                formatBoolean(c.get(ConfigKeys.APPLYING_GLOBAL_GROUPS)),
+                formatBoolean(c.get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS)),
+                formatBoolean(c.get(ConfigKeys.APPLYING_WILDCARDS)),
+                formatBoolean(c.get(ConfigKeys.APPLYING_REGEX)),
+                formatBoolean(c.get(ConfigKeys.APPLYING_SHORTHAND))
         );
 
         LinkedHashMap<String, Object> platformInfo = plugin.getExtraInfo();

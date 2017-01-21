@@ -20,31 +20,23 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.config;
+package me.lucko.luckperms.common.config.keys;
 
-import java.util.List;
+import lombok.AllArgsConstructor;
+
+import com.google.common.collect.ImmutableMap;
+
+import me.lucko.luckperms.common.config.ConfigKey;
+import me.lucko.luckperms.common.config.LPConfiguration;
+
 import java.util.Map;
 
-public interface LPConfiguration {
+@AllArgsConstructor(staticName = "of")
+public class MapKey implements ConfigKey<Map<String, String>> {
+    private final String path;
 
-    void init();
-
-    void reload();
-
-    void loadAll();
-
-    String getString(String path, String def);
-
-    int getInt(String path, int def);
-
-    boolean getBoolean(String path, boolean def);
-
-    List<String> getList(String path, List<String> def);
-
-    List<String> getObjectList(String path, List<String> def);
-
-    Map<String, String> getMap(String path, Map<String, String> def);
-
-    <T> T get(ConfigKey<T> key);
-
+    @Override
+    public Map<String, String> get(LPConfiguration config) {
+        return ImmutableMap.copyOf(config.getMap(path, ImmutableMap.of()));
+    }
 }

@@ -30,6 +30,7 @@ import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.storage.StorageType;
 
 import java.io.File;
@@ -73,7 +74,7 @@ public class DependencyManager {
             dependencies.addAll(STORAGE_DEPENDENCIES.get(storageType));
         }
 
-        if (plugin.getConfiguration().isRedisEnabled()) {
+        if (plugin.getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
             dependencies.add(Dependency.APACHE_COMMONS_POOL);
             dependencies.add(Dependency.JEDIS);
         }

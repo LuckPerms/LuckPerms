@@ -27,6 +27,7 @@ import lombok.AllArgsConstructor;
 import me.lucko.luckperms.api.LPConfiguration;
 import me.lucko.luckperms.api.data.DatastoreConfiguration;
 import me.lucko.luckperms.api.data.MySQLConfiguration;
+import me.lucko.luckperms.common.config.ConfigKeys;
 
 import java.util.Map;
 
@@ -39,67 +40,67 @@ public class LPConfigurationDelegate implements LPConfiguration {
 
     @Override
     public String getServer() {
-        return master.getServer();
+        return master.get(ConfigKeys.SERVER);
     }
 
     @Override
     public int getSyncTime() {
-        return master.getSyncTime();
+        return master.get(ConfigKeys.SYNC_TIME);
     }
 
     @Override
     public String getDefaultGroupNode() {
-        return master.getDefaultGroupNode();
+        return master.get(ConfigKeys.DEFAULT_GROUP_NODE);
     }
 
     @Override
     public String getDefaultGroupName() {
-        return master.getDefaultGroupName();
+        return master.get(ConfigKeys.DEFAULT_GROUP_NAME);
     }
 
     @Override
     public boolean getIncludeGlobalPerms() {
-        return master.isIncludingGlobalPerms();
+        return master.get(ConfigKeys.INCLUDING_GLOBAL_PERMS);
     }
 
     @Override
     public boolean getIncludeGlobalWorldPerms() {
-        return master.isIncludingGlobalWorldPerms();
+        return master.get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS);
     }
 
     @Override
     public boolean getApplyGlobalGroups() {
-        return master.isApplyingGlobalGroups();
+        return master.get(ConfigKeys.APPLYING_GLOBAL_GROUPS);
     }
 
     @Override
     public boolean getApplyGlobalWorldGroups() {
-        return master.isApplyingGlobalWorldGroups();
+        return master.get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS);
     }
 
     @Override
     public boolean getOnlineMode() {
-        return master.isOnlineMode();
+        return master.get(ConfigKeys.ONLINE_MODE);
     }
 
     @Override
     public boolean getApplyWildcards() {
-        return master.isApplyingWildcards();
+        return master.get(ConfigKeys.APPLYING_WILDCARDS);
     }
 
     @Override
     public boolean getApplyRegex() {
-        return master.isApplyingRegex();
+        return master.get(ConfigKeys.APPLYING_REGEX);
     }
 
     @Override
     public boolean getApplyShorthand() {
-        return master.isApplyingShorthand();
+        return master.get(ConfigKeys.APPLYING_SHORTHAND);
     }
 
     @Override
     public boolean getLogNotify() {
-        return master.isLogNotify();
+        return master.get(ConfigKeys.LOG_NOTIFY);
     }
 
     @Override
@@ -109,27 +110,27 @@ public class LPConfigurationDelegate implements LPConfiguration {
 
     @Override
     public boolean getEnableOps() {
-        return master.isOpsEnabled();
+        return master.get(ConfigKeys.OPS_ENABLED);
     }
 
     @Override
     public boolean getCommandsAllowOp() {
-        return master.isCommandsAllowOp();
+        return master.get(ConfigKeys.COMMANDS_ALLOW_OP);
     }
 
     @Override
     public boolean getAutoOp() {
-        return master.isAutoOp();
+        return master.get(ConfigKeys.AUTO_OP);
     }
 
     @Override
     public String getVaultServer() {
-        return master.getVaultServer();
+        return master.get(ConfigKeys.VAULT_SERVER);
     }
 
     @Override
     public boolean getVaultIncludeGlobal() {
-        return master.isVaultIncludingGlobal();
+        return master.get(ConfigKeys.VAULT_INCLUDING_GLOBAL);
     }
 
     @SuppressWarnings("deprecation")
@@ -140,21 +141,21 @@ public class LPConfigurationDelegate implements LPConfiguration {
 
     @Override
     public DatastoreConfiguration getDatastoreConfig() {
-        return master.getDatabaseValues();
+        return master.get(ConfigKeys.DATABASE_VALUES);
     }
 
     @Override
     public String getStorageMethod() {
-        return master.getStorageMethod();
+        return master.get(ConfigKeys.STORAGE_METHOD);
     }
 
     @Override
     public boolean getSplitStorage() {
-        return master.isSplitStorage();
+        return master.get(ConfigKeys.SPLIT_STORAGE);
     }
 
     @Override
     public Map<String, String> getSplitStorageOptions() {
-        return master.getSplitStorageOptions();
+        return master.get(ConfigKeys.SPLIT_STORAGE_OPTIONS);
     }
 }

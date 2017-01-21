@@ -50,7 +50,7 @@ public interface Sender {
     String getName();
 
     /**
-     * Gets the sender's unique id. See {@link Constants#getConsoleUUID()} for the console's UUID representation.
+     * Gets the sender's unique id. See {@link Constants#CONSOLE_UUID} for the console's UUID representation.
      *
      * @return the sender's uuid
      */

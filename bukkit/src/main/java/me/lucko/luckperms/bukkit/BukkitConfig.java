@@ -22,6 +22,8 @@
 
 package me.lucko.luckperms.bukkit;
 
+import lombok.RequiredArgsConstructor;
+
 import me.lucko.luckperms.common.config.AbstractConfiguration;
 
 import org.bukkit.configuration.ConfigurationSection;
@@ -34,48 +36,45 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-class BukkitConfig extends AbstractConfiguration<LPBukkitPlugin> {
+@RequiredArgsConstructor
+public class BukkitConfig extends AbstractConfiguration {
+    private final LPBukkitPlugin plugin;
     private YamlConfiguration configuration;
 
-    BukkitConfig(LPBukkitPlugin plugin) {
-        super(plugin, "global", true, "sqlite");
-    }
-
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     @Override
-    protected void init() {
-        File configFile = new File(getPlugin().getDataFolder(), "config.yml");
+    public void init() {
+        File configFile = new File(plugin.getDataFolder(), "config.yml");
 
         if (!configFile.exists()) {
             configFile.getParentFile().mkdirs();
-            getPlugin().saveResource("config.yml", false);
+            plugin.saveResource("config.yml", false);
         }
 
         configuration = YamlConfiguration.loadConfiguration(configFile);
     }
 
     @Override
-    protected String getString(String path, String def) {
+    public String getString(String path, String def) {
         return configuration.getString(path, def);
     }
 
     @Override
-    protected int getInt(String path, int def) {
+    public int getInt(String path, int def) {
         return configuration.getInt(path, def);
     }
 
     @Override
-    protected boolean getBoolean(String path, boolean def) {
+    public boolean getBoolean(String path, boolean def) {
         return configuration.getBoolean(path, def);
     }
 
     @Override
-    protected List<String> getList(String path, List<String> def) {
+    public List<String> getList(String path, List<String> def) {
         return Optional.ofNullable(configuration.getStringList(path)).orElse(def);
     }
 
     @Override
-    protected List<String> getObjectList(String path, List<String> def) {
+    public List<String> getObjectList(String path, List<String> def) {
         ConfigurationSection section = configuration.getConfigurationSection(path);
         if (section == null) {
             return def;
@@ -84,9 +83,8 @@ class BukkitConfig extends AbstractConfiguration<LPBukkitPlugin> {
         return Optional.ofNullable(section.getKeys(false).stream().collect(Collectors.toList())).orElse(def);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    protected Map<String, String> getMap(String path, Map<String, String> def) {
+    public Map<String, String> getMap(String path, Map<String, String> def) {
         Map<String, String> map = new HashMap<>();
         ConfigurationSection section = configuration.getConfigurationSection(path);
         if (section == null) {

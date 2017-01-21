@@ -40,7 +40,7 @@ class BungeeCommand extends Command implements TabExecutor {
     private final CommandManager manager;
 
     BungeeCommand(LPBungeePlugin plugin, CommandManager manager) {
-        super("luckpermsbungee", null, "bperms", "lpb", "bpermissions", "bp", "bperm");
+        super("luckpermsbungee", null, "bperms", "lpb", "bpermissions", "bperm");
         this.plugin = plugin;
         this.manager = manager;
     }
@@ -49,7 +49,7 @@ class BungeeCommand extends Command implements TabExecutor {
     public void execute(CommandSender sender, String[] args) {
         manager.onCommand(
                 plugin.getSenderFactory().wrap(sender),
-                "bperms",
+                "lpb",
                 Util.stripQuotes(Splitter.on(Patterns.COMMAND_SEPARATOR).omitEmptyStrings().splitToList(Joiner.on(' ').join(args)))
         );
     }

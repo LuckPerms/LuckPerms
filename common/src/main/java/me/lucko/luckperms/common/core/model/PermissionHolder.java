@@ -54,6 +54,7 @@ import me.lucko.luckperms.common.caching.handlers.HolderReference;
 import me.lucko.luckperms.common.caching.holder.ExportNodesHolder;
 import me.lucko.luckperms.common.caching.holder.GetAllNodesRequest;
 import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.core.InheritanceInfo;
 import me.lucko.luckperms.common.core.NodeBuilder;
 import me.lucko.luckperms.common.core.NodeFactory;
@@ -281,8 +282,8 @@ public abstract class PermissionHolder {
                 .map(LocalizedNode::getNode)
                 .filter(Node::getValue)
                 .filter(Node::isGroupNode)
-                .filter(n -> n.shouldApplyOnServer(server, context.isApplyGlobalGroups(), plugin.getConfiguration().isApplyingRegex()))
-                .filter(n -> n.shouldApplyOnWorld(world, context.isApplyGlobalWorldGroups(), plugin.getConfiguration().isApplyingRegex()))
+                .filter(n -> n.shouldApplyOnServer(server, context.isApplyGlobalGroups(), plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)))
+                .filter(n -> n.shouldApplyOnWorld(world, context.isApplyGlobalWorldGroups(), plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)))
                 .filter(n -> n.shouldApplyWithContext(contexts.getContextSet(), false))
                 .collect(Collectors.toSet());
 
@@ -329,8 +330,8 @@ public abstract class PermissionHolder {
 
         allNodes.removeIf(node ->
                 !node.isGroupNode() && (
-                        !node.shouldApplyOnServer(server, context.isIncludeGlobal(), plugin.getConfiguration().isApplyingRegex()) ||
-                        !node.shouldApplyOnWorld(world, context.isIncludeGlobalWorld(), plugin.getConfiguration().isApplyingRegex()) ||
+                        !node.shouldApplyOnServer(server, context.isIncludeGlobal(), plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) ||
+                        !node.shouldApplyOnWorld(world, context.isIncludeGlobalWorld(), plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) ||
                         !node.shouldApplyWithContext(contexts.getContextSet(), false)
                 )
         );
@@ -363,7 +364,7 @@ public abstract class PermissionHolder {
 
             perms.put(lowerCase ? node.getPermission().toLowerCase() : node.getPermission(), node.getValue());
 
-            if (plugin.getConfiguration().isApplyingShorthand()) {
+            if (plugin.getConfiguration().get(ConfigKeys.APPLYING_SHORTHAND)) {
                 List<String> sh = node.resolveShorthand();
                 if (!sh.isEmpty()) {
                     sh.stream().map(s -> lowerCase ? s.toLowerCase() : s)
@@ -499,8 +500,8 @@ public abstract class PermissionHolder {
                 .collect(Collectors.toSet());
 
         parents.removeIf(node ->
-                !node.shouldApplyOnServer(server, context.isApplyGlobalGroups(), plugin.getConfiguration().isApplyingRegex()) ||
-                !node.shouldApplyOnWorld(world, context.isApplyGlobalWorldGroups(), plugin.getConfiguration().isApplyingRegex()) ||
+                !node.shouldApplyOnServer(server, context.isApplyGlobalGroups(), plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) ||
+                !node.shouldApplyOnWorld(world, context.isApplyGlobalWorldGroups(), plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) ||
                 !node.shouldApplyWithContext(contexts.getContextSet(), false)
         );
 
@@ -1099,7 +1100,7 @@ public abstract class PermissionHolder {
         } catch (Exception ignored) {}
 
         if (!weight.isPresent()) {
-            Integer w = plugin.getConfiguration().getGroupWeights().get(getObjectName().toLowerCase());
+            Integer w = plugin.getConfiguration().get(ConfigKeys.GROUP_WEIGHTS).get(getObjectName().toLowerCase());
             if (w != null) {
                 weight = OptionalInt.of(w);
             }

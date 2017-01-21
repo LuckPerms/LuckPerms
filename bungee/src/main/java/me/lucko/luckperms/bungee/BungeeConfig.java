@@ -22,6 +22,8 @@
 
 package me.lucko.luckperms.bungee;
 
+import lombok.RequiredArgsConstructor;
+
 import me.lucko.luckperms.common.config.AbstractConfiguration;
 
 import net.md_5.bungee.config.Configuration;
@@ -38,20 +40,18 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-class BungeeConfig extends AbstractConfiguration<LPBungeePlugin> {
+@RequiredArgsConstructor
+public class BungeeConfig extends AbstractConfiguration {
+    private final LPBungeePlugin plugin;
     private Configuration configuration;
-
-    BungeeConfig(LPBungeePlugin plugin) {
-        super(plugin, "bungee", false, "flatfile");
-    }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     private File makeFile(String file) throws IOException {
-        File cfg = new File(getPlugin().getDataFolder(), file);
+        File cfg = new File(plugin.getDataFolder(), file);
 
         if (!cfg.exists()) {
-            getPlugin().getDataFolder().mkdir();
-            try (InputStream is = getPlugin().getResourceAsStream(file)) {
+            plugin.getDataFolder().mkdir();
+            try (InputStream is = plugin.getResourceAsStream(file)) {
                 Files.copy(is, cfg.toPath());
             }
         }
@@ -60,7 +60,7 @@ class BungeeConfig extends AbstractConfiguration<LPBungeePlugin> {
     }
 
     @Override
-    protected void init() {
+    public void init() {
         try {
             configuration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(makeFile("config.yml"));
         } catch (IOException e) {
@@ -69,27 +69,27 @@ class BungeeConfig extends AbstractConfiguration<LPBungeePlugin> {
     }
 
     @Override
-    protected String getString(String path, String def) {
+    public String getString(String path, String def) {
         return configuration.getString(path, def);
     }
 
     @Override
-    protected int getInt(String path, int def) {
+    public int getInt(String path, int def) {
         return configuration.getInt(path, def);
     }
 
     @Override
-    protected boolean getBoolean(String path, boolean def) {
+    public boolean getBoolean(String path, boolean def) {
         return configuration.getBoolean(path, def);
     }
 
     @Override
-    protected List<String> getList(String path, List<String> def) {
+    public List<String> getList(String path, List<String> def) {
         return Optional.ofNullable(configuration.getStringList(path)).orElse(def);
     }
 
     @Override
-    protected List<String> getObjectList(String path, List<String> def) {
+    public List<String> getObjectList(String path, List<String> def) {
         Configuration section = configuration.getSection(path);
         if (section == null) {
             return def;
@@ -99,7 +99,7 @@ class BungeeConfig extends AbstractConfiguration<LPBungeePlugin> {
     }
 
     @Override
-    protected Map<String, String> getMap(String path, Map<String, String> def) {
+    public Map<String, String> getMap(String path, Map<String, String> def) {
         Map<String, String> map = new HashMap<>();
         Configuration section = configuration.getSection(path);
         if (section == null) {

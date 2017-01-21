@@ -26,6 +26,7 @@ import lombok.AllArgsConstructor;
 
 import me.lucko.luckperms.api.event.events.UserFirstLoginEvent;
 import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.core.UuidCache;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.defaults.Rule;
@@ -43,7 +44,7 @@ public class AbstractListener {
         final long startTime = System.currentTimeMillis();
 
         final UuidCache cache = plugin.getUuidCache();
-        if (!cache.isOnlineMode()) {
+        if (!plugin.getConfiguration().get(ConfigKeys.ONLINE_MODE)) {
             UUID uuid = plugin.getStorage().force().getUUID(username).join();
             if (uuid != null) {
                 cache.addToCache(u, uuid);
@@ -70,7 +71,7 @@ public class AbstractListener {
         } else {
             // Setup defaults for the user
             boolean save = false;
-            for (Rule rule : plugin.getConfiguration().getDefaultAssignments()) {
+            for (Rule rule : plugin.getConfiguration().get(ConfigKeys.DEFAULT_ASSIGNMENTS)) {
                 if (rule.apply(user)) {
                     save = true;
                 }

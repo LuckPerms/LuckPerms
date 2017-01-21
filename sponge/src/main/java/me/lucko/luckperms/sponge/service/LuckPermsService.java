@@ -45,6 +45,7 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.caching.UserCache;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
@@ -255,11 +256,11 @@ public class LuckPermsService implements PermissionService {
     public Contexts calculateContexts(ContextSet contextSet) {
         return new Contexts(
                 contextSet,
-                plugin.getConfiguration().isIncludingGlobalPerms(),
-                plugin.getConfiguration().isIncludingGlobalWorldPerms(),
+                plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
+                plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
                 true,
-                plugin.getConfiguration().isApplyingGlobalGroups(),
-                plugin.getConfiguration().isApplyingGlobalWorldGroups(),
+                plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
+                plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
                 false
         );
     }

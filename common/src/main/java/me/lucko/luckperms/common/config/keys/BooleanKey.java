@@ -20,31 +20,20 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.config;
+package me.lucko.luckperms.common.config.keys;
 
-import java.util.List;
-import java.util.Map;
+import lombok.AllArgsConstructor;
 
-public interface LPConfiguration {
+import me.lucko.luckperms.common.config.ConfigKey;
+import me.lucko.luckperms.common.config.LPConfiguration;
 
-    void init();
+@AllArgsConstructor(staticName = "of")
+public class BooleanKey implements ConfigKey<Boolean> {
+    private final String path;
+    private final boolean def;
 
-    void reload();
-
-    void loadAll();
-
-    String getString(String path, String def);
-
-    int getInt(String path, int def);
-
-    boolean getBoolean(String path, boolean def);
-
-    List<String> getList(String path, List<String> def);
-
-    List<String> getObjectList(String path, List<String> def);
-
-    Map<String, String> getMap(String path, Map<String, String> def);
-
-    <T> T get(ConfigKey<T> key);
-
+    @Override
+    public Boolean get(LPConfiguration config) {
+        return config.getBoolean(path, def);
+    }
 }

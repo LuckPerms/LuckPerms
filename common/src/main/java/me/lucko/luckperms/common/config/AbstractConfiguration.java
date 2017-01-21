@@ -22,168 +22,49 @@
 
 package me.lucko.luckperms.common.config;
 
-import lombok.AccessLevel;
-import lombok.Getter;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
+import me.lucko.luckperms.common.config.keys.EnduringKey;
 
-import me.lucko.luckperms.common.LuckPermsPlugin;
-import me.lucko.luckperms.common.constants.Patterns;
-import me.lucko.luckperms.common.defaults.Rule;
-import me.lucko.luckperms.common.storage.DatastoreConfiguration;
+import java.util.Set;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+@SuppressWarnings("unchecked")
+public abstract class AbstractConfiguration implements LPConfiguration {
+    private final LoadingCache<ConfigKey<?>, Object> cache = CacheBuilder.newBuilder()
+            .build(new CacheLoader<ConfigKey<?>, Object>() {
+                @Override
+                public Object load(ConfigKey<?> key) {
+                    return key.get(AbstractConfiguration.this);
+                }
 
-/**
- * A thread-safe config abstraction
- *
- * @param <T> the plugin type
- */
-@Getter
-public abstract class AbstractConfiguration<T extends LuckPermsPlugin> implements LPConfiguration {
+                @Override
+                public ListenableFuture<Object> reload(ConfigKey<?> key, Object oldValue) {
+                    if (key instanceof EnduringKey) {
+                        return Futures.immediateFuture(key);
+                    } else {
+                        return Futures.immediateFuture(key.get(AbstractConfiguration.this));
+                    }
+                }
+            });
 
-    @Getter(AccessLevel.PROTECTED)
-    private final T plugin;
-
-    // Values
-    private String server;
-    private int syncTime;
-    private String defaultGroupNode;
-    private String defaultGroupName;
-    private boolean includingGlobalPerms;
-    private boolean includingGlobalWorldPerms;
-    private boolean applyingGlobalGroups;
-    private boolean applyingGlobalWorldGroups;
-    private boolean onlineMode;
-    private boolean applyingWildcards;
-    private boolean applyingRegex;
-    private boolean applyingShorthand;
-    private Map<String, Integer> groupWeights;
-    private boolean logNotify;
-    private boolean opsEnabled;
-    private boolean commandsAllowOp;
-    private boolean autoOp;
-    private String vaultServer;
-    private boolean vaultIncludingGlobal;
-    private boolean vaultIgnoreWorld;
-    private boolean vaultPrimaryGroupOverrides;
-    private boolean vaultPrimaryGroupOverridesCheckInherited;
-    private boolean vaultPrimaryGroupOverridesCheckExists;
-    private boolean vaultPrimaryGroupOverridesCheckMemberOf;
-    private boolean vaultDebug;
-    private Map<String, String> worldRewrites;
-    private Map<String, String> groupNameRewrites;
-    private List<Rule> defaultAssignments;
-    private DatastoreConfiguration databaseValues;
-    private String sqlTablePrefix;
-    private String storageMethod;
-    private boolean splitStorage;
-    private Map<String, String> splitStorageOptions;
-    private boolean redisEnabled;
-    private String redisAddress;
-    private String redisPassword;
-
-    public AbstractConfiguration(T plugin, String defaultServerName, boolean defaultIncludeGlobal, String defaultStorage) {
-        this.plugin = plugin;
-        init();
-        load(defaultServerName, defaultIncludeGlobal, defaultStorage);
+    @Override
+    public <T> T get(ConfigKey<T> key) {
+        return (T) cache.getUnchecked(key);
     }
 
-    protected abstract void init();
+    @Override
+    public void loadAll() {
+        ConfigKeys.getAllKeys().forEach(cache::getUnchecked);
+    }
 
-    protected abstract String getString(String path, String def);
-
-    protected abstract int getInt(String path, int def);
-
-    protected abstract boolean getBoolean(String path, boolean def);
-
-    protected abstract List<String> getList(String path, List<String> def);
-
-    protected abstract List<String> getObjectList(String path, List<String> def);
-
-    protected abstract Map<String, String> getMap(String path, Map<String, String> def);
-
-    public void load(String defaultServerName, boolean defaultIncludeGlobal, String defaultStorage) {
-        server = getString("server", defaultServerName);
-        syncTime = getInt("data.sync-minutes", 3);
-        defaultGroupNode = "group.default"; // constant since 2.6
-        defaultGroupName = "default"; // constant since 2.6
-        includingGlobalPerms = getBoolean("include-global", defaultIncludeGlobal);
-        includingGlobalWorldPerms = getBoolean("include-global-world", true);
-        applyingGlobalGroups = getBoolean("apply-global-groups", true);
-        applyingGlobalWorldGroups = getBoolean("apply-global-world-groups", true);
-        onlineMode = getBoolean("online-mode", true);
-        applyingWildcards = getBoolean("apply-wildcards", true);
-        applyingRegex = getBoolean("apply-regex", true);
-        applyingShorthand = getBoolean("apply-shorthand", true);
-        Map<String, String> weights = getMap("group-weight", Collections.emptyMap());
-        ImmutableMap.Builder<String, Integer> mb = ImmutableMap.builder();
-        for (Map.Entry<String, String> e : weights.entrySet()) {
-            try {
-                mb.put(e.getKey().toLowerCase(), Integer.parseInt(e.getValue()));
-            } catch (NumberFormatException ignored) {
-            }
-        }
-        groupWeights = mb.build();
-        logNotify = getBoolean("log-notify", true);
-        autoOp = getBoolean("auto-op", false);
-        opsEnabled = !isAutoOp() && getBoolean("enable-ops", true);
-        commandsAllowOp = getBoolean("commands-allow-op", true);
-        vaultServer = getString("vault-server", "global");
-        vaultIncludingGlobal = getBoolean("vault-include-global", true);
-        vaultIgnoreWorld = getBoolean("vault-ignore-world", false);
-        vaultPrimaryGroupOverrides = getBoolean("vault-primary-groups-overrides.enabled", false);
-        vaultPrimaryGroupOverridesCheckInherited = getBoolean("vault-primary-groups-overrides.check-inherited-permissions", false);
-        vaultPrimaryGroupOverridesCheckExists = getBoolean("vault-primary-groups-overrides.check-group-exists", true);
-        vaultPrimaryGroupOverridesCheckMemberOf = getBoolean("vault-primary-groups-overrides.check-user-member-of", true);
-        vaultDebug = getBoolean("vault-debug", false);
-        worldRewrites = ImmutableMap.copyOf(getMap("world-rewrite", Collections.emptyMap()));
-        groupNameRewrites = ImmutableMap.copyOf(getMap("group-name-rewrite", Collections.emptyMap()));
-
-        ImmutableList.Builder<Rule> defs = ImmutableList.builder();
-        List<String> ruleNames = getObjectList("default-assignments", new ArrayList<>());
-        for (String ruleName : ruleNames) {
-            String hasTrue = getString("default-assignments." + ruleName + ".if.has-true", null);
-            String hasFalse = getString("default-assignments." + ruleName + ".if.has-false", null);
-            String lacks = getString("default-assignments." + ruleName + ".if.lacks", null);
-            List<String> give = getList("default-assignments." + ruleName + ".give", new ArrayList<>());
-            List<String> take = getList("default-assignments." + ruleName + ".take", new ArrayList<>());
-            String pg = getString("default-assignments." + ruleName + ".set-primary-group", null);
-            defs.add(new Rule(hasTrue, hasFalse, lacks, give, take, pg));
-        }
-        defaultAssignments = defs.build();
-
-        databaseValues = new DatastoreConfiguration(
-                getString("data.address", null),
-                getString("data.database", null),
-                getString("data.username", null),
-                getString("data.password", null),
-                getInt("data.pool-size", 10)
-        );
-        sqlTablePrefix = getString("data.table_prefix", "luckperms_");
-        storageMethod = getString("storage-method", defaultStorage);
-        splitStorage = getBoolean("split-storage.enabled", false);
-        splitStorageOptions = ImmutableMap.<String, String>builder()
-                .put("user", getString("split-storage.methods.user", defaultStorage))
-                .put("group", getString("split-storage.methods.group", defaultStorage))
-                .put("track", getString("split-storage.methods.track", defaultStorage))
-                .put("uuid", getString("split-storage.methods.uuid", defaultStorage))
-                .put("log", getString("split-storage.methods.log", defaultStorage))
-                .build();
-
-        redisEnabled = getBoolean("redis.enabled", false);
-        redisAddress = getString("redis.address", null);
-        redisPassword = getString("redis.password", "");
-
-        if (Patterns.NON_ALPHA_NUMERIC.matcher(getServer()).find()) {
-            plugin.getLog().severe("Server name defined in config.yml contains invalid characters. Server names can " +
-                    "only contain alphanumeric characters.\nDefined server name '" + getServer() + "' will be replaced with '" +
-                    defaultServerName + "' (the default)");
-            server = defaultServerName;
-        }
+    @Override
+    public void reload() {
+        init();
+        Set<ConfigKey<?>> keys = cache.asMap().keySet();
+        keys.forEach(cache::refresh);
     }
 }

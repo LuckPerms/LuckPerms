@@ -25,6 +25,7 @@ package me.lucko.luckperms.common.data;
 import me.lucko.luckperms.api.event.events.LogNotifyEvent;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.model.Group;
@@ -51,7 +52,7 @@ public class LogEntry extends me.lucko.luckperms.api.LogEntry {
         plugin.getStorage().logAction(this);
 
         LogNotifyEvent event = new LogNotifyEvent(this);
-        event.setCancelled(!plugin.getConfiguration().isLogNotify());
+        event.setCancelled(!plugin.getConfiguration().get(ConfigKeys.LOG_NOTIFY));
         plugin.getApiProvider().fireEvent(event);
         if (event.isCancelled()) return;
 

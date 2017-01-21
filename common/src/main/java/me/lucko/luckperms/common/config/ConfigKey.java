@@ -22,29 +22,8 @@
 
 package me.lucko.luckperms.common.config;
 
-import java.util.List;
-import java.util.Map;
+public interface ConfigKey<T> {
 
-public interface LPConfiguration {
-
-    void init();
-
-    void reload();
-
-    void loadAll();
-
-    String getString(String path, String def);
-
-    int getInt(String path, int def);
-
-    boolean getBoolean(String path, boolean def);
-
-    List<String> getList(String path, List<String> def);
-
-    List<String> getObjectList(String path, List<String> def);
-
-    Map<String, String> getMap(String path, Map<String, String> def);
-
-    <T> T get(ConfigKey<T> key);
+    T get(LPConfiguration config);
 
 }

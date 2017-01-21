@@ -33,6 +33,7 @@ import me.lucko.luckperms.common.calculators.PermissionProcessor;
 import me.lucko.luckperms.common.calculators.processors.MapProcessor;
 import me.lucko.luckperms.common.calculators.processors.RegexProcessor;
 import me.lucko.luckperms.common.calculators.processors.WildcardProcessor;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.sponge.calculators.DefaultsProcessor;
 import me.lucko.luckperms.sponge.calculators.SpongeWildcardProcessor;
@@ -45,11 +46,11 @@ public class SpongeCalculatorFactory extends AbstractCalculatorFactory {
     public PermissionCalculator build(Contexts contexts, User user) {
         ImmutableList.Builder<PermissionProcessor> processors = ImmutableList.builder();
         processors.add(new MapProcessor());
-        if (plugin.getConfiguration().isApplyingWildcards()) {
-            processors.add(new SpongeWildcardProcessor());
+        processors.add(new SpongeWildcardProcessor());
+        if (plugin.getConfiguration().get(ConfigKeys.APPLYING_WILDCARDS)) {
             processors.add(new WildcardProcessor());
         }
-        if (plugin.getConfiguration().isApplyingRegex()) {
+        if (plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) {
             processors.add(new RegexProcessor());
         }
         processors.add(new DefaultsProcessor(plugin.getService(), contexts.getContexts()));

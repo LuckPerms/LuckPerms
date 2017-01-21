@@ -27,6 +27,7 @@ import lombok.experimental.UtilityClass;
 import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.storage.backing.AbstractBacking;
 import me.lucko.luckperms.common.storage.backing.JSONBacking;
 import me.lucko.luckperms.common.storage.backing.MongoDBBacking;
@@ -49,10 +50,10 @@ public class StorageFactory {
 
     public static Set<StorageType> getRequiredTypes(LuckPermsPlugin plugin, StorageType defaultMethod) {
         plugin.getLog().info("Detecting storage method...");
-        if (plugin.getConfiguration().isSplitStorage()) {
+        if (plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE)) {
             plugin.getLog().info("Loading split storage options.");
 
-            Map<String, String> types = new HashMap<>(plugin.getConfiguration().getSplitStorageOptions());
+            Map<String, String> types = new HashMap<>(plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE_OPTIONS));
             types.entrySet().stream()
                     .filter(e -> StorageType.parse(e.getValue()) == null)
                     .forEach(e -> {
@@ -66,7 +67,7 @@ public class StorageFactory {
 
             return neededTypes.stream().map(StorageType::parse).collect(ImmutableCollectors.toImmutableSet());
         } else {
-            String method = plugin.getConfiguration().getStorageMethod();
+            String method = plugin.getConfiguration().get(ConfigKeys.STORAGE_METHOD);
             StorageType type = StorageType.parse(method);
             if (type == null) {
                 plugin.getLog().severe("Storage method '" + method + "' not recognised. Using the default instead.");
@@ -80,10 +81,10 @@ public class StorageFactory {
         Storage storage;
 
         plugin.getLog().info("Initializing storage backings...");
-        if (plugin.getConfiguration().isSplitStorage()) {
+        if (plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE)) {
             plugin.getLog().info("Using split storage.");
 
-            Map<String, String> types = new HashMap<>(plugin.getConfiguration().getSplitStorageOptions());
+            Map<String, String> types = new HashMap<>(plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE_OPTIONS));
             types.entrySet().stream()
                     .filter(e -> StorageType.parse(e.getValue()) == null)
                     .forEach(e -> e.setValue(defaultMethod.getIdentifiers().get(0)));
@@ -100,7 +101,7 @@ public class StorageFactory {
             storage = AbstractStorage.wrap(plugin, new SplitBacking(plugin, backing, types));
 
         } else {
-            String method = plugin.getConfiguration().getStorageMethod().toLowerCase();
+            String method = plugin.getConfiguration().get(ConfigKeys.STORAGE_METHOD);
             StorageType type = StorageType.parse(method);
             if (type == null) {
                 type = defaultMethod;
@@ -121,15 +122,15 @@ public class StorageFactory {
     private static AbstractBacking makeBacking(StorageType method, LuckPermsPlugin plugin) {
         switch (method) {
             case MYSQL:
-                return new SQLBacking(plugin, new MySQLProvider(plugin.getConfiguration().getDatabaseValues()), plugin.getConfiguration().getSqlTablePrefix());
+                return new SQLBacking(plugin, new MySQLProvider(plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)), plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX));
             case SQLITE:
-                return new SQLBacking(plugin, new SQLiteProvider(new File(plugin.getDataFolder(), "luckperms.sqlite")), plugin.getConfiguration().getSqlTablePrefix());
+                return new SQLBacking(plugin, new SQLiteProvider(new File(plugin.getDataFolder(), "luckperms.sqlite")), plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX));
             case H2:
-                return new SQLBacking(plugin, new H2Provider(new File(plugin.getDataFolder(), "luckperms.db")), plugin.getConfiguration().getSqlTablePrefix());
+                return new SQLBacking(plugin, new H2Provider(new File(plugin.getDataFolder(), "luckperms.db")), plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX));
             case POSTGRESQL:
-                return new SQLBacking(plugin, new PostgreSQLProvider(plugin.getConfiguration().getDatabaseValues()), plugin.getConfiguration().getSqlTablePrefix());
+                return new SQLBacking(plugin, new PostgreSQLProvider(plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)), plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX));
             case MONGODB:
-                return new MongoDBBacking(plugin, plugin.getConfiguration().getDatabaseValues());
+                return new MongoDBBacking(plugin, plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES));
             case YAML:
                 return new YAMLBacking(plugin, plugin.getDataFolder());
             default:

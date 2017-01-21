@@ -33,6 +33,7 @@ import me.lucko.luckperms.common.calculators.PermissionProcessor;
 import me.lucko.luckperms.common.calculators.processors.MapProcessor;
 import me.lucko.luckperms.common.calculators.processors.RegexProcessor;
 import me.lucko.luckperms.common.calculators.processors.WildcardProcessor;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.core.model.User;
 
 @AllArgsConstructor
@@ -43,10 +44,10 @@ public class BungeeCalculatorFactory extends AbstractCalculatorFactory {
     public PermissionCalculator build(Contexts contexts, User user) {
         ImmutableList.Builder<PermissionProcessor> processors = ImmutableList.builder();
         processors.add(new MapProcessor());
-        if (plugin.getConfiguration().isApplyingWildcards()) {
+        if (plugin.getConfiguration().get(ConfigKeys.APPLYING_WILDCARDS)) {
             processors.add(new WildcardProcessor());
         }
-        if (plugin.getConfiguration().isApplyingRegex()) {
+        if (plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) {
             processors.add(new RegexProcessor());
         }
 

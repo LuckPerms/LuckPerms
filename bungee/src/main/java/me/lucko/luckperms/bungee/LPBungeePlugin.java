@@ -36,6 +36,7 @@ import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LPConfiguration;
 import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.contexts.ServerCalculator;
@@ -116,6 +117,8 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
         getLog().info("Loading configuration...");
         configuration = new BungeeConfig(this);
+        configuration.init();
+        configuration.loadAll();
 
         Set<StorageType> storageTypes = StorageFactory.getRequiredTypes(this, StorageType.H2);
         DependencyManager.loadDependencies(this, storageTypes);
@@ -127,11 +130,11 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         storage = StorageFactory.getInstance(this, StorageType.H2);
 
         // initialise redis
-        if (getConfiguration().isRedisEnabled()) {
+        if (getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
             getLog().info("Loading redis...");
             redisMessaging = new RedisMessaging(this);
             try {
-                redisMessaging.init(getConfiguration().getRedisAddress(), getConfiguration().getRedisPassword());
+                redisMessaging.init(getConfiguration().get(ConfigKeys.REDIS_ADDRESS), getConfiguration().get(ConfigKeys.REDIS_PASSWORD));
                 getLog().info("Loaded redis successfully...");
             } catch (Exception e) {
                 getLog().info("Couldn't load redis...");
@@ -170,7 +173,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
         // load internal managers
         getLog().info("Loading internal permission managers...");
-        uuidCache = new UuidCache(getConfiguration().isOnlineMode());
+        uuidCache = new UuidCache(this);
         userManager = new GenericUserManager(this);
         groupManager = new GenericGroupManager(this);
         trackManager = new GenericTrackManager();
@@ -182,7 +185,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         BackendServerCalculator serverCalculator = new BackendServerCalculator();
         getProxy().getPluginManager().registerListener(this, serverCalculator);
         contextManager.registerCalculator(serverCalculator);
-        contextManager.registerCalculator(new ServerCalculator<>(getConfiguration().getServer()));
+        contextManager.registerCalculator(new ServerCalculator<>(configuration));
 
         // register with the LP API
         getLog().info("Registering API...");
@@ -190,7 +193,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         ApiHandler.registerProvider(apiProvider);
 
         // schedule update tasks
-        int mins = getConfiguration().getSyncTime();
+        int mins = getConfiguration().get(ConfigKeys.SYNC_TIME);
         if (mins > 0) {
             getProxy().getScheduler().schedule(this, new UpdateTask(this), mins, mins, TimeUnit.MINUTES);
         }
@@ -267,11 +270,11 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         }
         return new Contexts(
                 getContextManager().getApplicableContext(player),
-                getConfiguration().isIncludingGlobalPerms(),
-                getConfiguration().isIncludingGlobalWorldPerms(),
+                getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
+                getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
                 true,
-                getConfiguration().isApplyingGlobalGroups(),
-                getConfiguration().isApplyingGlobalWorldGroups(),
+                getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
+                getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
                 false
         );
     }
@@ -312,12 +315,12 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     public Set<Contexts> getPreProcessContexts(boolean op) {
         Set<ContextSet> c = new HashSet<>();
         c.add(ContextSet.empty());
-        c.add(ContextSet.singleton("server", getConfiguration().getServer()));
+        c.add(ContextSet.singleton("server", getConfiguration().get(ConfigKeys.SERVER)));
         c.addAll(getProxy().getServers().values().stream()
                 .map(ServerInfo::getName)
                 .map(s -> {
                     MutableContextSet set = MutableContextSet.create();
-                    set.add("server", getConfiguration().getServer());
+                    set.add("server", getConfiguration().get(ConfigKeys.SERVER));
                     set.add("world", s);
                     return set.makeImmutable();
                 })
@@ -327,11 +330,11 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         return c.stream()
                 .map(set -> new Contexts(
                         set,
-                        getConfiguration().isIncludingGlobalPerms(),
-                        getConfiguration().isIncludingGlobalWorldPerms(),
+                        getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
+                        getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
                         true,
-                        getConfiguration().isApplyingGlobalGroups(),
-                        getConfiguration().isApplyingGlobalWorldGroups(),
+                        getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
+                        getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
                         false
                 ))
                 .collect(Collectors.toSet());

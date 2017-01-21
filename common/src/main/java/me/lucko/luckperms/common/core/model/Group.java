@@ -29,6 +29,7 @@ import lombok.ToString;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.caching.handlers.GroupReference;
 import me.lucko.luckperms.common.caching.handlers.HolderReference;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.utils.Identifiable;
 
 @ToString(of = {"name"})
@@ -52,7 +53,7 @@ public class Group extends PermissionHolder implements Identifiable<String> {
     }
 
     public String getRawDisplayName() {
-        return getPlugin().getConfiguration().getGroupNameRewrites().getOrDefault(name, name);
+        return getPlugin().getConfiguration().get(ConfigKeys.GROUP_NAME_REWRITES).getOrDefault(name, name);
     }
 
     public String getDisplayName() {

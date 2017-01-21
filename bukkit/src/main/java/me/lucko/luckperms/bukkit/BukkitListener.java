@@ -24,6 +24,7 @@ package me.lucko.luckperms.bukkit;
 
 import me.lucko.luckperms.bukkit.inject.Injector;
 import me.lucko.luckperms.bukkit.model.LPPermissible;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.utils.AbstractListener;
@@ -149,7 +150,7 @@ class BukkitListener extends AbstractListener implements Listener {
         Injector.unInject(player, true, true);
 
         // Handle auto op
-        if (plugin.getConfiguration().isAutoOp()) {
+        if (plugin.getConfiguration().get(ConfigKeys.AUTO_OP)) {
             player.setOp(false);
         }
 
@@ -159,7 +160,7 @@ class BukkitListener extends AbstractListener implements Listener {
 
     @EventHandler
     public void onPlayerCommand(PlayerCommandPreprocessEvent e) {
-        if (plugin.getConfiguration().isOpsEnabled()) {
+        if (plugin.getConfiguration().get(ConfigKeys.AUTO_OP)) {
             return;
         }
 

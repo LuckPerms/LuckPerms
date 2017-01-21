@@ -43,6 +43,7 @@ import me.lucko.luckperms.common.api.ApiProvider;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LPConfiguration;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.contexts.ContextManager;
@@ -153,6 +154,8 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
         getLog().info("Loading configuration...");
         configuration = new BukkitConfig(this);
+        configuration.init();
+        configuration.loadAll();
 
         Set<StorageType> storageTypes = StorageFactory.getRequiredTypes(this, StorageType.H2);
         DependencyManager.loadDependencies(this, storageTypes);
@@ -195,11 +198,11 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         storage = StorageFactory.getInstance(this, StorageType.H2);
 
         // initialise redis
-        if (getConfiguration().isRedisEnabled()) {
+        if (getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
             getLog().info("Loading redis...");
             redisMessaging = new RedisMessaging(this);
             try {
-                redisMessaging.init(getConfiguration().getRedisAddress(), getConfiguration().getRedisPassword());
+                redisMessaging.init(getConfiguration().get(ConfigKeys.REDIS_ADDRESS), getConfiguration().get(ConfigKeys.REDIS_PASSWORD));
                 getLog().info("Loaded redis successfully...");
             } catch (Exception e) {
                 getLog().info("Couldn't load redis...");
@@ -238,7 +241,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
         // load internal managers
         getLog().info("Loading internal permission managers...");
-        uuidCache = new UuidCache(getConfiguration().isOnlineMode());
+        uuidCache = new UuidCache(this);
         userManager = new GenericUserManager(this);
         groupManager = new GenericGroupManager(this);
         trackManager = new GenericTrackManager();
@@ -250,7 +253,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         worldCalculator = new WorldCalculator(this);
         pm.registerEvents(worldCalculator, this);
         contextManager.registerCalculator(worldCalculator);
-        contextManager.registerCalculator(new ServerCalculator<>(getConfiguration().getServer()));
+        contextManager.registerCalculator(new ServerCalculator<>(getConfiguration()));
 
         // Provide vault support
         tryVaultHook(false);
@@ -263,7 +266,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
 
         // schedule update tasks
-        int mins = getConfiguration().getSyncTime();
+        int mins = getConfiguration().get(ConfigKeys.SYNC_TIME);
         if (mins > 0) {
             long ticks = mins * 60 * 20;
             getServer().getScheduler().runTaskTimerAsynchronously(this, () -> updateTaskBuffer.request(), 40L, ticks);
@@ -277,8 +280,8 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         getServer().getScheduler().runTaskTimerAsynchronously(this, new CacheHousekeepingTask(this), 2400L, 2400L);
 
         // register permissions
-        registerPermissions(getConfiguration().isCommandsAllowOp() ? PermissionDefault.OP : PermissionDefault.FALSE);
-        if (!getConfiguration().isOpsEnabled()) {
+        registerPermissions(getConfiguration().get(ConfigKeys.COMMANDS_ALLOW_OP) ? PermissionDefault.OP : PermissionDefault.FALSE);
+        if (!getConfiguration().get(ConfigKeys.OPS_ENABLED)) {
             getServer().getScheduler().runTask(this, () -> getServer().getOperators().forEach(o -> o.setOp(false)));
         }
 
@@ -324,7 +327,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
         for (Player player : getServer().getOnlinePlayers()) {
             Injector.unInject(player, false, false);
-            if (getConfiguration().isAutoOp()) {
+            if (getConfiguration().get(ConfigKeys.AUTO_OP)) {
                 player.setOp(false);
             }
 
@@ -420,7 +423,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     }
 
     public void refreshAutoOp(Player player) {
-        if (getConfiguration().isAutoOp()) {
+        if (getConfiguration().get(ConfigKeys.AUTO_OP)) {
             try {
                 LPPermissible permissible = Injector.getPermissible(player.getUniqueId());
                 if (permissible == null) {
@@ -492,11 +495,11 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         }
         return new Contexts(
                 getContextManager().getApplicableContext(player),
-                getConfiguration().isIncludingGlobalPerms(),
-                getConfiguration().isIncludingGlobalWorldPerms(),
+                getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
+                getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
                 true,
-                getConfiguration().isApplyingGlobalGroups(),
-                getConfiguration().isApplyingGlobalWorldGroups(),
+                getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
+                getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
                 player.isOp()
         );
     }
@@ -537,14 +540,14 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     public Set<Contexts> getPreProcessContexts(boolean op) {
         Set<ContextSet> c = new HashSet<>();
         c.add(ContextSet.empty());
-        c.add(ContextSet.singleton("server", getConfiguration().getServer()));
+        c.add(ContextSet.singleton("server", getConfiguration().get(ConfigKeys.SERVER)));
 
         // Pre process all worlds
         c.addAll(getServer().getWorlds().stream()
                 .map(World::getName)
                 .map(s -> {
                     MutableContextSet set = MutableContextSet.create();
-                    set.add("server", getConfiguration().getServer());
+                    set.add("server", getConfiguration().get(ConfigKeys.SERVER));
                     set.add("world", s);
                     return set.makeImmutable();
                 })
@@ -552,13 +555,13 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         );
 
         // Pre process the separate Vault server, if any
-        if (!getConfiguration().getServer().equals(getConfiguration().getVaultServer())) {
-            c.add(ContextSet.singleton("server", getConfiguration().getVaultServer()));
+        if (!getConfiguration().get(ConfigKeys.SERVER).equals(getConfiguration().get(ConfigKeys.VAULT_SERVER))) {
+            c.add(ContextSet.singleton("server", getConfiguration().get(ConfigKeys.VAULT_SERVER)));
             c.addAll(getServer().getWorlds().stream()
                     .map(World::getName)
                     .map(s -> {
                         MutableContextSet set = MutableContextSet.create();
-                        set.add("server", getConfiguration().getVaultServer());
+                        set.add("server", getConfiguration().get(ConfigKeys.VAULT_SERVER));
                         set.add("world", s);
                         return set.makeImmutable();
                     })
@@ -572,25 +575,25 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         contexts.addAll(c.stream()
                 .map(set -> new Contexts(
                         set,
-                        getConfiguration().isIncludingGlobalPerms(),
-                        getConfiguration().isIncludingGlobalWorldPerms(),
+                        getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
+                        getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
                         true,
-                        getConfiguration().isApplyingGlobalGroups(),
-                        getConfiguration().isApplyingGlobalWorldGroups(),
+                        getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
+                        getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
                         op
                 ))
                 .collect(Collectors.toSet())
         );
 
         // Check for and include varying Vault config options
-        boolean vaultDiff = getConfiguration().isVaultIncludingGlobal() != getConfiguration().isIncludingGlobalPerms() ||
-                !getConfiguration().isIncludingGlobalWorldPerms() ||
-                !getConfiguration().isApplyingGlobalGroups() ||
-                !getConfiguration().isApplyingGlobalWorldGroups();
+        boolean vaultDiff = getConfiguration().get(ConfigKeys.VAULT_INCLUDING_GLOBAL) != getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS) ||
+                !getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS) ||
+                !getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS) ||
+                !getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS);
 
         if (vaultDiff) {
             contexts.addAll(c.stream()
-                    .map(map -> new Contexts(map, getConfiguration().isVaultIncludingGlobal(), true, true, true, true, op))
+                    .map(map -> new Contexts(map, getConfiguration().get(ConfigKeys.VAULT_INCLUDING_GLOBAL), true, true, true, true, op))
                     .collect(Collectors.toSet())
             );
         }
@@ -602,16 +605,16 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     public LinkedHashMap<String, Object> getExtraInfo() {
         LinkedHashMap<String, Object> map = new LinkedHashMap<>();
         map.put("Vault Enabled", vaultHook != null);
-        map.put("Vault Server", configuration.getVaultServer());
+        map.put("Vault Server", configuration.get(ConfigKeys.VAULT_SERVER));
         map.put("Bukkit Defaults count", defaultsProvider.size());
         map.put("Bukkit Child Permissions count", childPermissionProvider.getPermissions().size());
-        map.put("Vault Including Global", configuration.isVaultIncludingGlobal());
-        map.put("Vault Ignoring World", configuration.isVaultIgnoreWorld());
-        map.put("Vault Primary Group Overrides", configuration.isVaultPrimaryGroupOverrides());
-        map.put("Vault Debug", configuration.isVaultDebug());
-        map.put("OPs Enabled", configuration.isOpsEnabled());
-        map.put("Auto OP", configuration.isAutoOp());
-        map.put("Commands Allow OPs", configuration.isCommandsAllowOp());
+        map.put("Vault Including Global", configuration.get(ConfigKeys.VAULT_INCLUDING_GLOBAL));
+        map.put("Vault Ignoring World", configuration.get(ConfigKeys.VAULT_IGNORE_WORLD));
+        map.put("Vault Primary Group Overrides", configuration.get(ConfigKeys.VAULT_PRIMARY_GROUP_OVERRIDES));
+        map.put("Vault Debug", configuration.get(ConfigKeys.VAULT_DEBUG));
+        map.put("OPs Enabled", configuration.get(ConfigKeys.OPS_ENABLED));
+        map.put("Auto OP", configuration.get(ConfigKeys.AUTO_OP));
+        map.put("Commands Allow OPs", configuration.get(ConfigKeys.COMMANDS_ALLOW_OP));
         return map;
     }
 

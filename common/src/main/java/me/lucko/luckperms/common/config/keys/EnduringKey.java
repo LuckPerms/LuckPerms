@@ -20,31 +20,21 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.config;
+package me.lucko.luckperms.common.config.keys;
 
-import java.util.List;
-import java.util.Map;
+import lombok.AllArgsConstructor;
+import lombok.experimental.Delegate;
 
-public interface LPConfiguration {
+import me.lucko.luckperms.common.config.ConfigKey;
 
-    void init();
+/**
+ * Wrapper class to mark a config key as enduring (doesn't change in the event of a reload)
+ * @param <T>
+ */
+@AllArgsConstructor(staticName = "wrap")
+public class EnduringKey<T> implements ConfigKey<T> {
 
-    void reload();
-
-    void loadAll();
-
-    String getString(String path, String def);
-
-    int getInt(String path, int def);
-
-    boolean getBoolean(String path, boolean def);
-
-    List<String> getList(String path, List<String> def);
-
-    List<String> getObjectList(String path, List<String> def);
-
-    Map<String, String> getMap(String path, Map<String, String> def);
-
-    <T> T get(ConfigKey<T> key);
+    @Delegate
+    private final ConfigKey<T> delegate;
 
 }

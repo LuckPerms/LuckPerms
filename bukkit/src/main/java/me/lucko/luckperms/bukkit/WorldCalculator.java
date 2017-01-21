@@ -29,6 +29,7 @@ import com.google.common.collect.Maps;
 import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.config.ConfigKeys;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
@@ -64,6 +65,6 @@ public class WorldCalculator extends ContextCalculator<Player> implements Listen
 
     private String getWorld(Player player) {
         String world = player.getWorld().getName();
-        return plugin.getConfiguration().getWorldRewrites().getOrDefault(world, world);
+        return plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).getOrDefault(world, world);
     }
 }

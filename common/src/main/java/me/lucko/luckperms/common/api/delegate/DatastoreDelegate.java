@@ -33,6 +33,7 @@ import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.data.Callback;
 import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.storage.Storage;
 
 import java.util.Set;
@@ -162,7 +163,7 @@ public class DatastoreDelegate implements Datastore {
         @Override
         public void deleteGroup(@NonNull Group group, Callback<Boolean> callback) {
             checkGroup(group);
-            if (group.getName().equalsIgnoreCase(plugin.getConfiguration().getDefaultGroupName())) {
+            if (group.getName().equalsIgnoreCase(plugin.getConfiguration().get(ConfigKeys.DEFAULT_GROUP_NAME))) {
                 throw new IllegalArgumentException("Cannot delete the default group.");
             }
             registerCallback(master.force().deleteGroup(((GroupDelegate) group).getMaster()), callback);
@@ -279,7 +280,7 @@ public class DatastoreDelegate implements Datastore {
         @Override
         public boolean deleteGroup(@NonNull Group group) {
             checkGroup(group);
-            if (group.getName().equalsIgnoreCase(plugin.getConfiguration().getDefaultGroupName())) {
+            if (group.getName().equalsIgnoreCase(plugin.getConfiguration().get(ConfigKeys.DEFAULT_GROUP_NAME))) {
                 throw new IllegalArgumentException("Cannot delete the default group.");
             }
             return master.force().deleteGroup(((GroupDelegate) group).getMaster()).join();
@@ -392,7 +393,7 @@ public class DatastoreDelegate implements Datastore {
         @Override
         public java.util.concurrent.Future<Boolean> deleteGroup(@NonNull Group group) {
             checkGroup(group);
-            if (group.getName().equalsIgnoreCase(plugin.getConfiguration().getDefaultGroupName())) {
+            if (group.getName().equalsIgnoreCase(plugin.getConfiguration().get(ConfigKeys.DEFAULT_GROUP_NAME))) {
                 throw new IllegalArgumentException("Cannot delete the default group.");
             }
             return master.force().deleteGroup(((GroupDelegate) group).getMaster());

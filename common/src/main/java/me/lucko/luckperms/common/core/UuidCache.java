@@ -22,52 +22,47 @@
 
 package me.lucko.luckperms.common.core;
 
-import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
+
+import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.config.ConfigKeys;
 
 import java.util.UUID;
 
 /**
  * @see me.lucko.luckperms.api.UuidCache for docs
  */
+@RequiredArgsConstructor
 public class UuidCache {
+    private final LuckPermsPlugin plugin;
 
-    @Getter
-    private final boolean onlineMode;
     // External UUID --> Internal UUID
-    private BiMap<UUID, UUID> cache;
-
-    public UuidCache(boolean onlineMode) {
-        this.onlineMode = onlineMode;
-
-        if (!onlineMode) {
-            cache = Maps.synchronizedBiMap(HashBiMap.create());
-        }
-    }
+    private final BiMap<UUID, UUID> cache = Maps.synchronizedBiMap(HashBiMap.create());
 
     public UUID getUUID(UUID external) {
-        return onlineMode ? external : cache.getOrDefault(external, external);
+        return plugin.getConfiguration().get(ConfigKeys.ONLINE_MODE) ? external : cache.getOrDefault(external, external);
     }
 
     public UUID getExternalUUID(UUID internal) {
-        return onlineMode ? internal : cache.inverse().getOrDefault(internal, internal);
+        return plugin.getConfiguration().get(ConfigKeys.ONLINE_MODE) ? internal : cache.inverse().getOrDefault(internal, internal);
     }
 
     public void addToCache(UUID external, UUID internal) {
-        if (onlineMode) return;
+        if (plugin.getConfiguration().get(ConfigKeys.ONLINE_MODE)) return;
         cache.forcePut(external, internal);
     }
 
     public void clearCache(UUID external) {
-        if (onlineMode) return;
+        if (plugin.getConfiguration().get(ConfigKeys.ONLINE_MODE)) return;
         cache.remove(external);
     }
 
     public int getSize() {
-        return onlineMode ? 0 : cache.size();
+        return plugin.getConfiguration().get(ConfigKeys.ONLINE_MODE) ? 0 : cache.size();
     }
 
 }

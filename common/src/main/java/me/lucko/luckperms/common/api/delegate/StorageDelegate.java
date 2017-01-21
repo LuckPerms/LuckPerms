@@ -33,6 +33,7 @@ import me.lucko.luckperms.api.Storage;
 import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.config.ConfigKeys;
 
 import java.util.List;
 import java.util.Set;
@@ -134,7 +135,7 @@ public class StorageDelegate implements Storage {
     @Override
     public CompletableFuture<Boolean> deleteGroup(Group group) {
         checkGroup(group);
-        if (group.getName().equalsIgnoreCase(plugin.getConfiguration().getDefaultGroupName())) {
+        if (group.getName().equalsIgnoreCase(plugin.getConfiguration().get(ConfigKeys.DEFAULT_GROUP_NAME))) {
             throw new IllegalArgumentException("Cannot delete the default group.");
         }
         return master.force().deleteGroup(((GroupDelegate) group).getMaster());
