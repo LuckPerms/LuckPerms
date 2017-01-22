@@ -40,7 +40,7 @@ import me.lucko.luckperms.common.defaults.Rule;
 import me.lucko.luckperms.common.storage.DatastoreConfiguration;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -72,7 +72,10 @@ public class ConfigKeys {
         );
     });
     public static final ConfigKey<GenericMetaStack> PREFIX_FORMATTING_OPTIONS = AbstractKey.of(l -> {
-        List<String> format = l.getList("meta-formatting.prefix.format", Collections.singletonList("highest"));
+        List<String> format = l.getList("meta-formatting.prefix.format", new ArrayList<>());
+        if (format.isEmpty()) {
+            format.add("highest");
+        }
         String startSpacer = l.getString("meta-formatting.prefix.start-spacer", "");
         String middleSpacer = l.getString("meta-formatting.prefix.middle-spacer", " ");
         String endSpacer = l.getString("meta-formatting.prefix.end-spacer", "");
@@ -80,7 +83,10 @@ public class ConfigKeys {
         return new GenericMetaStack(StackElementFactory.fromList(l.getPlugin(), format, true), startSpacer, middleSpacer, endSpacer);
     });
     public static final ConfigKey<GenericMetaStack> SUFFIX_FORMATTING_OPTIONS = AbstractKey.of(l -> {
-        List<String> format = l.getList("meta-formatting.suffix.format", Collections.singletonList("highest"));
+        List<String> format = l.getList("meta-formatting.suffix.format", new ArrayList<>());
+        if (format.isEmpty()) {
+            format.add("highest");
+        }
         String startSpacer = l.getString("meta-formatting.suffix.start-spacer", "");
         String middleSpacer = l.getString("meta-formatting.suffix.middle-spacer", " ");
         String endSpacer = l.getString("meta-formatting.suffix.end-spacer", "");
