@@ -44,6 +44,10 @@ public class ShorthandParser {
             .build();
 
     public static Set<String> parseShorthand(String s) {
+        return parseShorthand(s, true);
+    }
+
+    public static Set<String> parseShorthand(String s, boolean removeSelf) {
         Set<String> results = new HashSet<>();
         results.add(s);
 
@@ -68,7 +72,10 @@ public class ShorthandParser {
             break;
         }
 
-        results.remove(s);
+        if (removeSelf) {
+            results.remove(s);
+        }
+
         return results;
     }
 

@@ -61,28 +61,53 @@ public class ImmutableNode implements Node {
     private static final Pattern META_PATTERN = Pattern.compile("meta\\..*\\..*");
 
     private static boolean shouldApply(String str, boolean applyRegex, String thisStr) {
+        if (str.equalsIgnoreCase(thisStr)) {
+            return true;
+        }
+
+        Set<String> expandedStr = ShorthandParser.parseShorthand(str, false);
+        Set<String> expandedThisStr = ShorthandParser.parseShorthand(thisStr, false);
+
         if (str.toLowerCase().startsWith("r=") && applyRegex) {
             Pattern p = Patterns.compile(str.substring(2));
             if (p == null) {
                 return false;
             }
-            return p.matcher(thisStr).matches();
-        }
 
-        if (str.startsWith("(") && str.endsWith(")") && str.contains("|")) {
-            final String bits = str.substring(1, str.length() - 1);
-            Iterable<String> parts = Splitter.on('|').split(bits);
-
-            for (String s : parts) {
-                if (s.equalsIgnoreCase(thisStr)) {
+            for (String s : expandedThisStr) {
+                if (p.matcher(s).matches()) {
                     return true;
                 }
             }
-
             return false;
         }
 
-        return thisStr.equalsIgnoreCase(str);
+        if (thisStr.toLowerCase().startsWith("r=") && applyRegex) {
+            Pattern p = Patterns.compile(thisStr.substring(2));
+            if (p == null) {
+                return false;
+            }
+
+            for (String s : expandedStr) {
+                if (p.matcher(s).matches()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        if (expandedStr.size() <= 1 && expandedThisStr.size() <= 1) {
+            return false;
+        }
+
+        for (String t : expandedThisStr) {
+            for (String s : expandedStr) {
+                if (t.equalsIgnoreCase(s)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
