@@ -85,5 +85,9 @@
             <id>placeholderapi</id>
             <url>http://repo.extendedclip.com/content/repositories/placeholderapi/</url>
         </repository>
+        <repository>
+            <id>lilypad-repo</id>
+            <url>http://ci.lilypadmc.org/plugin/repository/everything</url>
+        </repository>
     </repositories>
 </project>

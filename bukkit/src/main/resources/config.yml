@@ -213,15 +213,23 @@ data:
   # e.g. if you're using sqlite or flatfile, this can be set to -1 to save resources.
   sync-minutes: 3
 
-# Settings for Redis.
+# Settings for the messaging service
 #
-# If enabled and configured, LuckPerms will use the Redis PubSub system to inform other
+# If enabled and configured, LuckPerms will use the messaging system to inform other
 # connected servers of changes. Use the command "/luckperms networksync" to push changes.
-# Data is NOT stored on redis. It is only used as a messaging platform.
+# Data is NOT stored using this service. It is only used as a messaging platform.
 #
 # If you decide to enable this feature, you should set "sync-minutes" to -1, as there is no need for LuckPerms
 # to poll the database for changes.
 #
+# Available options:
+# bungee ==> uses the plugin messaging channels. Must be enabled on all connected servers to work.
+# lilypad ==> uses lilypad pub sub to push changes. You need to have the LilyPad-Connect plugin installed.
+# redis ==> uses redis pub sub to push changes. Your redis server must be configured below.
+# none ==> nothing
+messaging-service: none
+
+# Settings for Redis.
 # Port 6379 is used by default; set address to "host:port" if differs
 redis:
   enabled: false

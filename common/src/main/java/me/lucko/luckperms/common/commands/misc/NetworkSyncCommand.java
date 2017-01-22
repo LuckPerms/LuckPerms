@@ -44,8 +44,8 @@ public class NetworkSyncCommand extends SingleCommand {
         plugin.getUpdateTaskBuffer().request().join();
         Message.UPDATE_TASK_COMPLETE_NETWORK.send(sender);
 
-        if (plugin.getRedisMessaging() != null) {
-            plugin.getRedisMessaging().pushUpdate();
+        if (plugin.getMessagingService() != null) {
+            plugin.getMessagingService().pushUpdate();
             Message.UPDATE_TASK_PUSH_SUCCESS.send(sender);
         } else {
             Message.UPDATE_TASK_PUSH_FAILURE.send(sender);

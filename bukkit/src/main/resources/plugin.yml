@@ -11,6 +11,7 @@ load: STARTUP
 # It in turn fixes issues where plugins using Vault cache the provided instance when their plugin enables, or
 # when they check for the presence of a service provider, before LuckPerms has enabled.
 loadbefore: [Vault]
+softdepend: [LilyPad-Connect]
 
 commands:
   luckperms:

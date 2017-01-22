@@ -135,7 +135,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public Optional<MessagingService> getMessagingService() {
-        return Optional.ofNullable(plugin.getRedisMessaging());
+        return Optional.ofNullable(plugin.getMessagingService());
     }
 
     @Override

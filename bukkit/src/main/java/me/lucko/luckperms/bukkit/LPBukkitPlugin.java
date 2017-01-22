@@ -33,6 +33,8 @@ import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.bukkit.inject.Injector;
+import me.lucko.luckperms.bukkit.messaging.BungeeMessagingService;
+import me.lucko.luckperms.bukkit.messaging.LilyPadMessagingService;
 import me.lucko.luckperms.bukkit.model.ChildPermissionProvider;
 import me.lucko.luckperms.bukkit.model.DefaultsProvider;
 import me.lucko.luckperms.bukkit.model.LPPermissible;
@@ -61,6 +63,7 @@ import me.lucko.luckperms.common.managers.UserManager;
 import me.lucko.luckperms.common.managers.impl.GenericGroupManager;
 import me.lucko.luckperms.common.managers.impl.GenericTrackManager;
 import me.lucko.luckperms.common.managers.impl.GenericUserManager;
+import me.lucko.luckperms.common.messaging.AbstractMessagingService;
 import me.lucko.luckperms.common.messaging.RedisMessaging;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.StorageFactory;
@@ -114,7 +117,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private GroupManager groupManager;
     private TrackManager trackManager;
     private Storage storage;
-    private RedisMessaging redisMessaging = null;
+    private AbstractMessagingService messagingService = null;
     private UuidCache uuidCache;
     private BukkitListener listener;
     private ApiProvider apiProvider;
@@ -197,17 +200,40 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         // initialise datastore
         storage = StorageFactory.getInstance(this, StorageType.H2);
 
-        // initialise redis
-        if (getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
+        // initialise messaging
+        String messagingType = getConfiguration().get(ConfigKeys.MESSAGING_SERVICE).toLowerCase();
+        if (messagingType.equals("redis")) {
             getLog().info("Loading redis...");
-            redisMessaging = new RedisMessaging(this);
-            try {
-                redisMessaging.init(getConfiguration().get(ConfigKeys.REDIS_ADDRESS), getConfiguration().get(ConfigKeys.REDIS_PASSWORD));
-                getLog().info("Loaded redis successfully...");
-            } catch (Exception e) {
-                getLog().info("Couldn't load redis...");
-                e.printStackTrace();
+            if (getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
+                RedisMessaging redis = new RedisMessaging(this);
+                try {
+                    redis.init(getConfiguration().get(ConfigKeys.REDIS_ADDRESS), getConfiguration().get(ConfigKeys.REDIS_PASSWORD));
+                    getLog().info("Loaded redis successfully...");
+
+                    messagingService = redis;
+                } catch (Exception e) {
+                    getLog().warn("Couldn't load redis...");
+                    e.printStackTrace();
+                }
+            } else {
+                getLog().warn("Messaging Service was set to redis, but redis is not enabled!");
             }
+        } else if (messagingType.equals("bungee")) {
+            getLog().info("Loading bungee messaging service...");
+            BungeeMessagingService bungeeMessaging = new BungeeMessagingService(this);
+            bungeeMessaging.init();
+            messagingService = bungeeMessaging;
+        } else if (messagingType.equals("lilypad")) {
+            getLog().info("Loading LilyPad messaging service...");
+            if (getServer().getPluginManager().getPlugin("LilyPad-Connect") == null) {
+                getLog().warn("LilyPad-Connect plugin not present.");
+            } else {
+                LilyPadMessagingService lilyPadMessaging = new LilyPadMessagingService(this);
+                lilyPadMessaging.init();
+                messagingService = lilyPadMessaging;
+            }
+        } else if (!messagingType.equals("none")) {
+            getLog().warn("Messaging service '" + messagingType + "' not recognised.");
         }
 
         // setup the update task buffer
@@ -341,9 +367,9 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         getLog().info("Closing datastore...");
         storage.shutdown();
 
-        if (redisMessaging != null) {
-            getLog().info("Closing redis...");
-            redisMessaging.shutdown();
+        if (messagingService != null) {
+            getLog().info("Closing messaging service...");
+            messagingService.close();
         }
 
         getLog().info("Unregistering API...");
@@ -374,7 +400,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         groupManager = null;
         trackManager = null;
         storage = null;
-        redisMessaging = null;
+        messagingService = null;
         uuidCache = null;
         listener = null;
         apiProvider = null;

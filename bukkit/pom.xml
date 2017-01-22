@@ -108,6 +108,13 @@
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
+        <!-- LilyPad - used as a messaging service -->
+        <dependency>
+            <groupId>lilypad.client.connect</groupId>
+            <artifactId>api</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
         <!-- HikariCP - needed as source -->
         <dependency>
             <groupId>com.zaxxer</groupId>

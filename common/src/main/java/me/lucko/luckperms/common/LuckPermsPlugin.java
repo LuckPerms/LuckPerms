@@ -41,7 +41,7 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.managers.UserManager;
-import me.lucko.luckperms.common.messaging.RedisMessaging;
+import me.lucko.luckperms.common.messaging.AbstractMessagingService;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.utils.BufferedRequest;
 import me.lucko.luckperms.common.utils.DebugHandler;
@@ -103,7 +103,7 @@ public interface LuckPermsPlugin {
      *
      * @return the redis messaging service
      */
-    RedisMessaging getRedisMessaging();
+    AbstractMessagingService getMessagingService();
 
     /**
      * Gets a wrapped logger instance for the platform.

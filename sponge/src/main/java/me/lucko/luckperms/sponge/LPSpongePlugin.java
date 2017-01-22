@@ -50,6 +50,7 @@ import me.lucko.luckperms.common.locale.NoopLocaleManager;
 import me.lucko.luckperms.common.locale.SimpleLocaleManager;
 import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.managers.impl.GenericTrackManager;
+import me.lucko.luckperms.common.messaging.AbstractMessagingService;
 import me.lucko.luckperms.common.messaging.RedisMessaging;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.StorageFactory;
@@ -65,6 +66,7 @@ import me.lucko.luckperms.sponge.commands.SpongeMainCommand;
 import me.lucko.luckperms.sponge.contexts.WorldCalculator;
 import me.lucko.luckperms.sponge.managers.SpongeGroupManager;
 import me.lucko.luckperms.sponge.managers.SpongeUserManager;
+import me.lucko.luckperms.sponge.messaging.BungeeMessagingService;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.ServiceCacheHousekeepingTask;
 import me.lucko.luckperms.sponge.service.base.LPSubjectCollection;
@@ -146,7 +148,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     private SpongeGroupManager groupManager;
     private TrackManager trackManager;
     private Storage storage;
-    private RedisMessaging redisMessaging = null;
+    private AbstractMessagingService messagingService = null;
     private UuidCache uuidCache;
     private ApiProvider apiProvider;
     private me.lucko.luckperms.api.Logger log;
@@ -185,18 +187,31 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         // initialise datastore
         storage = StorageFactory.getInstance(this, StorageType.H2);
 
-        // initialise redis
-        if (getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
+        // initialise messaging
+        String messagingType = getConfiguration().get(ConfigKeys.MESSAGING_SERVICE).toLowerCase();
+        if (messagingType.equals("redis")) {
             getLog().info("Loading redis...");
-            redisMessaging = new RedisMessaging(this);
-            try {
-                redisMessaging.init(getConfiguration().get(ConfigKeys.REDIS_ADDRESS), getConfiguration().get(ConfigKeys.REDIS_PASSWORD));
-                getLog().info("Loaded redis successfully...");
-            } catch (Exception e) {
-                getLog().info("Couldn't load redis...");
-                e.printStackTrace();
-                redisMessaging = null;
+            if (getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
+                RedisMessaging redis = new RedisMessaging(this);
+                try {
+                    redis.init(getConfiguration().get(ConfigKeys.REDIS_ADDRESS), getConfiguration().get(ConfigKeys.REDIS_PASSWORD));
+                    getLog().info("Loaded redis successfully...");
+
+                    messagingService = redis;
+                } catch (Exception e) {
+                    getLog().warn("Couldn't load redis...");
+                    e.printStackTrace();
+                }
+            } else {
+                getLog().warn("Messaging Service was set to redis, but redis is not enabled!");
             }
+        } else if (messagingType.equals("bungee")) {
+            getLog().info("Loading bungee messaging service...");
+            BungeeMessagingService bungeeMessaging = new BungeeMessagingService(this);
+            bungeeMessaging.init();
+            messagingService = bungeeMessaging;
+        } else if (!messagingType.equals("none")) {
+            getLog().warn("Messaging service '" + messagingType + "' not recognised.");
         }
 
         // setup the update task buffer
@@ -295,9 +310,9 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         getLog().info("Closing datastore...");
         storage.shutdown();
 
-        if (redisMessaging != null) {
-            getLog().info("Closing redis...");
-            redisMessaging.shutdown();
+        if (messagingService != null) {
+            getLog().info("Closing messaging service...");
+            messagingService.close();
         }
 
         getLog().info("Unregistering API...");

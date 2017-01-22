@@ -24,7 +24,6 @@ package me.lucko.luckperms.common.messaging;
 
 import lombok.RequiredArgsConstructor;
 
-import me.lucko.luckperms.api.MessagingService;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 
 import redis.clients.jedis.Jedis;
@@ -32,21 +31,18 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisPubSub;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-
 /**
- * Uses Redis to push/receive changes to/from other servers
+ * An implementation of {@link me.lucko.luckperms.api.MessagingService} using Redis.
  */
-@RequiredArgsConstructor
-public class RedisMessaging implements MessagingService {
-    private static final String CHANNEL = "luckperms";
-
+public class RedisMessaging extends AbstractMessagingService {
     private final LuckPermsPlugin plugin;
     private JedisPool jedisPool;
     private LPSub sub;
+
+    public RedisMessaging(LuckPermsPlugin plugin) {
+        super(plugin, "Redis");
+        this.plugin = plugin;
+    }
 
     public void init(String address, String password) {
         String[] addressSplit = address.split(":");
@@ -60,7 +56,7 @@ public class RedisMessaging implements MessagingService {
         }
 
         plugin.doAsync(() -> {
-            sub = new LPSub(plugin);
+            sub = new LPSub(this);
             try (Jedis jedis = jedisPool.getResource()) {
                 jedis.subscribe(sub, CHANNEL);
             } catch (Exception e) {
@@ -69,60 +65,28 @@ public class RedisMessaging implements MessagingService {
         });
     }
 
-    public void shutdown() {
+    @Override
+    public void close() {
         sub.unsubscribe();
         jedisPool.destroy();
     }
 
     @Override
-    public void pushUpdate() {
-        plugin.doAsync(() -> {
-            UUID id = sub.generateId();
-            plugin.getLog().info("[Redis Messaging] Sending redis ping with id: " + id.toString());
-            try (Jedis jedis = jedisPool.getResource()) {
-                jedis.publish(CHANNEL, "update:" + id.toString());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+    protected void sendMessage(String channel, String message) {
+        try (Jedis jedis = jedisPool.getResource()) {
+            jedis.publish(CHANNEL, message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @RequiredArgsConstructor
     private static class LPSub extends JedisPubSub {
-        private final LuckPermsPlugin plugin;
-        private final Set<UUID> receivedMsgs = Collections.synchronizedSet(new HashSet<>());
-
-        private UUID generateId() {
-            UUID uuid = UUID.randomUUID();
-            receivedMsgs.add(uuid);
-            return uuid;
-        }
+        private final RedisMessaging parent;
 
         @Override
         public void onMessage(String channel, String msg) {
-            if (!channel.equals(CHANNEL)) {
-                return;
-            }
-
-            if (!msg.startsWith("update:")) {
-                return;
-            }
-
-            String requestId = msg.substring("update:".length());
-            UUID uuid;
-            try {
-                uuid = UUID.fromString(requestId);
-            } catch (IllegalArgumentException e) {
-                e.printStackTrace();
-                return;
-            }
-
-            if (!receivedMsgs.add(uuid)) {
-                return;
-            }
-
-            plugin.getLog().info("[Redis Messaging] Received update ping with id: " + uuid.toString());
-            plugin.getUpdateTaskBuffer().request();
+            parent.onMessage(channel, msg, null);
         }
     }
 

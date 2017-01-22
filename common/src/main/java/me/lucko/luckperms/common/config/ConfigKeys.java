@@ -139,6 +139,7 @@ public class ConfigKeys {
                 .put("log", c.getString("split-storage.methods.log", "h2"))
                 .build();
     }));
+    public static final ConfigKey<String> MESSAGING_SERVICE = EnduringKey.wrap(StringKey.of("messaging-service", "none"));
     public static final ConfigKey<Boolean> REDIS_ENABLED = EnduringKey.wrap(BooleanKey.of("redis.enabled", false));
     public static final ConfigKey<String> REDIS_ADDRESS = EnduringKey.wrap(StringKey.of("redis.address", null));
     public static final ConfigKey<String> REDIS_PASSWORD = EnduringKey.wrap(StringKey.of("redis.password", ""));
