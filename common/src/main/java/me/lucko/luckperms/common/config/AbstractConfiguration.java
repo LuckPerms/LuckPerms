@@ -25,12 +25,11 @@ package me.lucko.luckperms.common.config;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 
 import me.lucko.luckperms.common.config.keys.EnduringKey;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
 public abstract class AbstractConfiguration implements LPConfiguration {
@@ -39,15 +38,6 @@ public abstract class AbstractConfiguration implements LPConfiguration {
                 @Override
                 public Object load(ConfigKey<?> key) {
                     return key.get(AbstractConfiguration.this);
-                }
-
-                @Override
-                public ListenableFuture<Object> reload(ConfigKey<?> key, Object oldValue) {
-                    if (key instanceof EnduringKey) {
-                        return Futures.immediateFuture(key);
-                    } else {
-                        return Futures.immediateFuture(key.get(AbstractConfiguration.this));
-                    }
                 }
             });
 
@@ -64,7 +54,10 @@ public abstract class AbstractConfiguration implements LPConfiguration {
     @Override
     public void reload() {
         init();
-        Set<ConfigKey<?>> keys = cache.asMap().keySet();
-        keys.forEach(cache::refresh);
+
+        Set<ConfigKey<?>> toInvalidate = cache.asMap().keySet().stream().filter(k -> !(k instanceof EnduringKey)).collect(Collectors.toSet());
+        cache.invalidateAll(toInvalidate);
+
+        loadAll();
     }
 }
