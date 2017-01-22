@@ -72,6 +72,7 @@ public class BungeeMessagingService extends AbstractMessagingService implements 
             Player p = Iterables.getFirst(players, null);
             this.channel.sendTo(p, buf -> buf.writeUTF(message));
 
+            task.cancel();
         }).submit(plugin);
     }
 
