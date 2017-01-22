@@ -20,35 +20,46 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.config;
+package me.lucko.luckperms.common.caching.stacking.elements;
 
+import lombok.RequiredArgsConstructor;
+
+import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.caching.stacking.MetaStackElement;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
-public interface LPConfiguration {
+@RequiredArgsConstructor
+public class LowestPriorityTrackElement implements MetaStackElement {
+    private final boolean prefix;
+    private final LuckPermsPlugin plugin;
+    private final String trackName;
 
-    LuckPermsPlugin getPlugin();
+    private Map.Entry<Integer, String> entry = null;
 
-    void init();
+    @Override
+    public Optional<Map.Entry<Integer, String>> getEntry() {
+        return Optional.ofNullable(entry);
+    }
 
-    void reload();
+    @Override
+    public boolean accumulateNode(LocalizedNode node) {
+        if (MetaStackElement.checkMetaType(prefix, node)) {
+            return false;
+        }
 
-    void loadAll();
+        Map.Entry<Integer, String> entry = prefix ? node.getPrefix() : node.getSuffix();
+        if (LowestPriorityElement.compareEntries(this.entry, entry)) {
+            return false;
+        }
 
-    String getString(String path, String def);
+        if (MetaStackElement.checkTrackElement(plugin, node, trackName)) {
+            return false;
+        }
 
-    int getInt(String path, int def);
-
-    boolean getBoolean(String path, boolean def);
-
-    List<String> getList(String path, List<String> def);
-
-    List<String> getObjectList(String path, List<String> def);
-
-    Map<String, String> getMap(String path, Map<String, String> def);
-
-    <T> T get(ConfigKey<T> key);
-
+        this.entry = entry;
+        return true;
+    }
 }

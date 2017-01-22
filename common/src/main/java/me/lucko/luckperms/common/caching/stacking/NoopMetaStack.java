@@ -20,35 +20,21 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.config;
+package me.lucko.luckperms.common.caching.stacking;
 
-import me.lucko.luckperms.common.LuckPermsPlugin;
-
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
-public interface LPConfiguration {
+public class NoopMetaStack implements MetaStack {
+    public static final NoopMetaStack INSTANCE = new NoopMetaStack();
 
-    LuckPermsPlugin getPlugin();
+    @Override
+    public List<MetaStackElement> getElements() {
+        return Collections.emptyList();
+    }
 
-    void init();
-
-    void reload();
-
-    void loadAll();
-
-    String getString(String path, String def);
-
-    int getInt(String path, int def);
-
-    boolean getBoolean(String path, boolean def);
-
-    List<String> getList(String path, List<String> def);
-
-    List<String> getObjectList(String path, List<String> def);
-
-    Map<String, String> getMap(String path, Map<String, String> def);
-
-    <T> T get(ConfigKey<T> key);
-
+    @Override
+    public String toFormattedString() {
+        return null;
+    }
 }

@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.bungee;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.common.config.AbstractConfiguration;
@@ -42,7 +43,10 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class BungeeConfig extends AbstractConfiguration {
+
+    @Getter
     private final LPBungeePlugin plugin;
+
     private Configuration configuration;
 
     @SuppressWarnings("ResultOfMethodCallIgnored")

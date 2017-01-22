@@ -20,35 +20,19 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.config;
+package me.lucko.luckperms.common.caching.stacking;
 
-import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.api.LocalizedNode;
 
 import java.util.List;
-import java.util.Map;
 
-public interface LPConfiguration {
+public interface MetaStack {
 
-    LuckPermsPlugin getPlugin();
+    List<MetaStackElement> getElements();
+    String toFormattedString();
 
-    void init();
-
-    void reload();
-
-    void loadAll();
-
-    String getString(String path, String def);
-
-    int getInt(String path, int def);
-
-    boolean getBoolean(String path, boolean def);
-
-    List<String> getList(String path, List<String> def);
-
-    List<String> getObjectList(String path, List<String> def);
-
-    Map<String, String> getMap(String path, Map<String, String> def);
-
-    <T> T get(ConfigKey<T> key);
+    default void accumulateToAll(LocalizedNode node) {
+        getElements().forEach(m -> m.accumulateNode(node));
+    }
 
 }

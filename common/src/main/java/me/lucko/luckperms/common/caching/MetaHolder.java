@@ -25,7 +25,9 @@ package me.lucko.luckperms.common.caching;
 import lombok.Getter;
 import lombok.ToString;
 
-import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.LocalizedNode;
+import me.lucko.luckperms.common.caching.stacking.MetaStack;
+import me.lucko.luckperms.common.caching.stacking.NoopMetaStack;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -40,11 +42,26 @@ import java.util.TreeMap;
 @ToString
 public class MetaHolder {
 
-    private final Map<String, String> meta = new HashMap<>();
-    private final SortedMap<Integer, String> prefixes = new TreeMap<>(Comparator.reverseOrder());
-    private final SortedMap<Integer, String> suffixes = new TreeMap<>(Comparator.reverseOrder());
+    private final Map<String, String> meta;
+    private final SortedMap<Integer, String> prefixes;
+    private final SortedMap<Integer, String> suffixes;
 
-    public void accumulateNode(Node n) {
+    private final MetaStack prefixStack;
+    private final MetaStack suffixStack;
+
+    public MetaHolder(MetaStack prefixStack, MetaStack suffixStack) {
+        this.meta = new HashMap<>();
+        this.prefixes = new TreeMap<>(Comparator.reverseOrder());
+        this.suffixes = new TreeMap<>(Comparator.reverseOrder());
+        this.prefixStack = prefixStack;
+        this.suffixStack = suffixStack;
+    }
+
+    public MetaHolder() {
+        this(NoopMetaStack.INSTANCE, NoopMetaStack.INSTANCE);
+    }
+
+    public void accumulateNode(LocalizedNode n) {
         if (n.isMeta()) {
             Map.Entry<String, String> entry = n.getMeta();
             if (!meta.containsKey(entry.getKey())) {
@@ -57,6 +74,8 @@ public class MetaHolder {
             if (!prefixes.containsKey(value.getKey())) {
                 prefixes.put(value.getKey(), value.getValue());
             }
+
+            prefixStack.accumulateToAll(n);
         }
 
         if (n.isSuffix()) {
@@ -64,6 +83,8 @@ public class MetaHolder {
             if (!suffixes.containsKey(value.getKey())) {
                 suffixes.put(value.getKey(), value.getValue());
             }
+
+            suffixStack.accumulateToAll(n);
         }
     }
 

@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.bukkit;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.common.config.AbstractConfiguration;
@@ -38,7 +39,10 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class BukkitConfig extends AbstractConfiguration {
+
+    @Getter
     private final LPBukkitPlugin plugin;
+
     private YamlConfiguration configuration;
 
     @Override

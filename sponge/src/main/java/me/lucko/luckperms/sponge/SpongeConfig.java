@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.sponge;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import com.google.common.base.Splitter;
@@ -45,7 +46,10 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class SpongeConfig extends AbstractConfiguration {
+
+    @Getter
     private final LPSpongePlugin plugin;
+
     private ConfigurationNode root;
 
     @SuppressWarnings("ResultOfMethodCallIgnored")

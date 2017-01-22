@@ -467,7 +467,10 @@ public abstract class PermissionHolder {
 
     public MetaHolder accumulateMeta(MetaHolder holder, List<String> excludedGroups, ExtractedContexts contexts) {
         if (holder == null) {
-            holder = new MetaHolder();
+            holder = new MetaHolder(
+                    plugin.getConfiguration().get(ConfigKeys.PREFIX_FORMATTING_OPTIONS),
+                    plugin.getConfiguration().get(ConfigKeys.SUFFIX_FORMATTING_OPTIONS)
+            );
         }
 
         if (excludedGroups == null) {
@@ -490,7 +493,7 @@ public abstract class PermissionHolder {
             if (!n.shouldApplyOnWorld(world, context.isIncludeGlobalWorld(), false)) continue;
             if (!n.shouldApplyWithContext(contexts.getContextSet(), false)) continue;
 
-            holder.accumulateNode(n);
+            holder.accumulateNode(ln);
         }
 
         Set<Node> parents = all.stream()

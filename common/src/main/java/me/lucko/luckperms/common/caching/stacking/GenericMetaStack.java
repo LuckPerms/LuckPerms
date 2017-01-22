@@ -20,35 +20,44 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.config;
+package me.lucko.luckperms.common.caching.stacking;
 
-import me.lucko.luckperms.common.LuckPermsPlugin;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-public interface LPConfiguration {
+@Getter
+@RequiredArgsConstructor
+public class GenericMetaStack implements MetaStack {
 
-    LuckPermsPlugin getPlugin();
+    private final List<MetaStackElement> elements;
+    private final String startSpacer;
+    private final String middleSpacer;
+    private final String endSpacer;
 
-    void init();
+    @Override
+    public String toFormattedString() {
+        List<MetaStackElement> ret = new ArrayList<>(elements);
+        ret.removeIf(m -> !m.getEntry().isPresent());
 
-    void reload();
+        if (ret.isEmpty()) {
+            return null;
+        }
 
-    void loadAll();
+        StringBuilder sb = new StringBuilder();
+        sb.append(startSpacer);
+        for (int i = 0; i < ret.size(); i++) {
+            if (i != 0) {
+                sb.append(middleSpacer);
+            }
 
-    String getString(String path, String def);
+            MetaStackElement e = ret.get(i);
+            sb.append(e.getEntry().get().getValue());
+        }
+        sb.append(endSpacer);
 
-    int getInt(String path, int def);
-
-    boolean getBoolean(String path, boolean def);
-
-    List<String> getList(String path, List<String> def);
-
-    List<String> getObjectList(String path, List<String> def);
-
-    Map<String, String> getMap(String path, Map<String, String> def);
-
-    <T> T get(ConfigKey<T> key);
-
+        return sb.toString();
+    }
 }

@@ -29,6 +29,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedMap;
 
 import me.lucko.luckperms.api.caching.MetaData;
+import me.lucko.luckperms.common.caching.stacking.MetaStack;
+import me.lucko.luckperms.common.caching.stacking.NoopMetaStack;
 
 import java.util.Map;
 import java.util.SortedMap;
@@ -51,12 +53,20 @@ public class MetaCache implements MetaData {
     @Getter
     private SortedMap<Integer, String> suffixes = ImmutableSortedMap.of();
 
+    @Getter
+    private MetaStack prefixStack = NoopMetaStack.INSTANCE;
+
+    @Getter
+    private MetaStack suffixStack = NoopMetaStack.INSTANCE;
+
     public void loadMeta(MetaHolder meta) {
         lock.writeLock().lock();
         try {
             this.meta = ImmutableMap.copyOf(meta.getMeta());
             this.prefixes = ImmutableSortedMap.copyOfSorted(meta.getPrefixes());
             this.suffixes = ImmutableSortedMap.copyOfSorted(meta.getSuffixes());
+            this.prefixStack = meta.getPrefixStack();
+            this.suffixStack = meta.getSuffixStack();
         } finally {
             lock.writeLock().unlock();
         }
@@ -66,11 +76,7 @@ public class MetaCache implements MetaData {
     public String getPrefix() {
         lock.readLock().lock();
         try {
-            if (prefixes.isEmpty()) {
-                return null;
-            }
-
-            return prefixes.get(prefixes.firstKey());
+            return prefixStack.toFormattedString();
         } finally {
             lock.readLock().unlock();
         }
@@ -80,11 +86,7 @@ public class MetaCache implements MetaData {
     public String getSuffix() {
         lock.readLock().lock();
         try {
-            if (suffixes.isEmpty()) {
-                return null;
-            }
-
-            return suffixes.get(suffixes.firstKey());
+            return suffixStack.toFormattedString();
         } finally {
             lock.readLock().unlock();
         }
