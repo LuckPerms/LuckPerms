@@ -37,4 +37,9 @@ public class NoopMetaStack implements MetaStack {
     public String toFormattedString() {
         return null;
     }
+
+    @Override
+    public MetaStack copy() {
+        return this;
+    }
 }

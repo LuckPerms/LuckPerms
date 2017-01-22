@@ -62,4 +62,9 @@ public class HighestPriorityTrackElement implements MetaStackElement {
         this.entry = entry;
         return true;
     }
+
+    @Override
+    public MetaStackElement copy() {
+        return new HighestPriorityTrackElement(prefix, plugin, trackName);
+    }
 }

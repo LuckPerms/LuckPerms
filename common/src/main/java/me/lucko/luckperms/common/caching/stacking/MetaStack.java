@@ -30,6 +30,7 @@ public interface MetaStack {
 
     List<MetaStackElement> getElements();
     String toFormattedString();
+    MetaStack copy();
 
     default void accumulateToAll(LocalizedNode node) {
         getElements().forEach(m -> m.accumulateNode(node));

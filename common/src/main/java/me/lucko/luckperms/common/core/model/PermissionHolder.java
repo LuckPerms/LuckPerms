@@ -468,8 +468,8 @@ public abstract class PermissionHolder {
     public MetaHolder accumulateMeta(MetaHolder holder, List<String> excludedGroups, ExtractedContexts contexts) {
         if (holder == null) {
             holder = new MetaHolder(
-                    plugin.getConfiguration().get(ConfigKeys.PREFIX_FORMATTING_OPTIONS),
-                    plugin.getConfiguration().get(ConfigKeys.SUFFIX_FORMATTING_OPTIONS)
+                    plugin.getConfiguration().get(ConfigKeys.PREFIX_FORMATTING_OPTIONS).copy(),
+                    plugin.getConfiguration().get(ConfigKeys.SUFFIX_FORMATTING_OPTIONS).copy()
             );
         }
 

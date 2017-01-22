@@ -59,4 +59,9 @@ public class HighestPriorityOwnElement implements MetaStackElement {
         return true;
     }
 
+    @Override
+    public MetaStackElement copy() {
+        return new HighestPriorityOwnElement(prefix);
+    }
+
 }

@@ -36,6 +36,8 @@ public interface MetaStackElement {
 
     boolean accumulateNode(LocalizedNode node);
 
+    MetaStackElement copy();
+
     /**
      * Returns true if the types do not match
      * @param expectingPrefix if the method is expecting a prefix

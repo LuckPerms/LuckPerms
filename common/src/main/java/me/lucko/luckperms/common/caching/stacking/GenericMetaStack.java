@@ -25,6 +25,8 @@ package me.lucko.luckperms.common.caching.stacking;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import me.lucko.luckperms.common.utils.ImmutableCollectors;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,5 +61,15 @@ public class GenericMetaStack implements MetaStack {
         sb.append(endSpacer);
 
         return sb.toString();
+    }
+
+    @Override
+    public MetaStack copy() {
+        return new GenericMetaStack(
+                elements.stream().map(MetaStackElement::copy).collect(ImmutableCollectors.toImmutableList()),
+                startSpacer,
+                middleSpacer,
+                endSpacer
+        );
     }
 }

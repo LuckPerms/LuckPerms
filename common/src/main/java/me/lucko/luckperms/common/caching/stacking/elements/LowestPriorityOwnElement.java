@@ -58,4 +58,9 @@ public class LowestPriorityOwnElement implements MetaStackElement {
         this.entry = entry;
         return true;
     }
+
+    @Override
+    public MetaStackElement copy() {
+        return new LowestPriorityOwnElement(prefix);
+    }
 }
