@@ -25,14 +25,10 @@ package me.lucko.luckperms.common.storage.backing.sqlprovider;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 @RequiredArgsConstructor
 public abstract class SQLProvider {
-    private static final QueryPS EMPTY_PS = preparedStatement -> {};
 
     @Getter
     private final String name;
@@ -42,64 +38,5 @@ public abstract class SQLProvider {
     public abstract void shutdown() throws Exception;
 
     public abstract WrappedConnection getConnection() throws SQLException;
-
-    public boolean runQuery(String query, QueryPS queryPS) {
-        try {
-            try (Connection connection = getConnection()) {
-                if (connection == null || connection.isClosed()) {
-                    throw new IllegalStateException("SQL connection is null");
-                }
-
-                try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-                    queryPS.onRun(preparedStatement);
-
-                    preparedStatement.execute();
-                    return true;
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    public boolean runQuery(String query, QueryPS queryPS, QueryRS queryRS) {
-        try {
-            try (Connection connection = getConnection()) {
-                if (connection == null || connection.isClosed()) {
-                    throw new IllegalStateException("SQL connection is null");
-                }
-
-                try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-                    queryPS.onRun(preparedStatement);
-
-                    try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                        return queryRS.onResult(resultSet);
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    public boolean runQuery(String query) {
-        return runQuery(query, EMPTY_PS);
-    }
-
-    public boolean runQuery(String query, QueryRS queryRS) {
-        return runQuery(query, EMPTY_PS, queryRS);
-    }
-
-    @FunctionalInterface
-    public interface QueryPS {
-        void onRun(PreparedStatement preparedStatement) throws SQLException;
-    }
-
-    @FunctionalInterface
-    public interface QueryRS {
-        boolean onResult(ResultSet resultSet) throws SQLException;
-    }
 
 }

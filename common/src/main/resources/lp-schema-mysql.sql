@@ -39,7 +39,7 @@ CREATE INDEX `{prefix}players_username` ON `{prefix}players` (`username`);
 CREATE TABLE `{prefix}groups` (
   `name` VARCHAR(36) NOT NULL,
   PRIMARY KEY (`name`)
-);
+) DEFAULT CHARSET = utf8;
 
 CREATE TABLE `{prefix}actions` (
   `id`         INT AUTO_INCREMENT NOT NULL,

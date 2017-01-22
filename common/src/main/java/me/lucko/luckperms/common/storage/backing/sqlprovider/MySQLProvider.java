@@ -71,6 +71,8 @@ public class MySQLProvider extends SQLProvider {
         config.addDataSourceProperty("cacheServerConfiguration", true);
         config.addDataSourceProperty("elideSetAutoCommits", true);
         config.addDataSourceProperty("useLocalSessionState", true);
+        config.addDataSourceProperty("characterEncoding", "utf8");
+        config.addDataSourceProperty("useUnicode", "true");
         config.setConnectionTimeout(TimeUnit.SECONDS.toMillis(10)); // 10000
         config.setLeakDetectionThreshold(TimeUnit.SECONDS.toMillis(5)); // 5000
         config.setValidationTimeout(TimeUnit.SECONDS.toMillis(3)); // 3000
