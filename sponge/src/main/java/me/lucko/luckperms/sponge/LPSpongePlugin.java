@@ -189,6 +189,9 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
         // initialise messaging
         String messagingType = getConfiguration().get(ConfigKeys.MESSAGING_SERVICE).toLowerCase();
+        if (messagingType.equals("none") && getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
+            messagingType = "redis";
+        }
         if (messagingType.equals("redis")) {
             getLog().info("Loading redis...");
             if (getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
