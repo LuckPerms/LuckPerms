@@ -25,23 +25,23 @@ package me.lucko.luckperms.common.defaults;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
+import me.lucko.luckperms.common.utils.Scripting;
 
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 
 public class LogicParser {
-    private static final ScriptEngine SCRIPT_ENGINE = new ScriptEngineManager(null).getEngineByName("nashorn");
-
     public static boolean parse(String s, PermissionHolder holder, Tristate tristate) throws IllegalArgumentException {
         try {
+            ScriptEngine engine = Scripting.getScriptEngine();
+
             String expression = generateExpression(s, s1 -> holder.hasPermission(NodeFactory.fromSerialisedNode(s1, true)) == tristate);
-            if (SCRIPT_ENGINE == null) {
+            if (engine == null) {
                 throw new NullPointerException("script engine");
             }
-            String result = SCRIPT_ENGINE.eval(expression).toString();
+            String result = engine.eval(expression).toString();
 
             if (!result.equals("true") && !result.equals("false")) {
                 throw new IllegalArgumentException();

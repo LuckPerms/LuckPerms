@@ -53,6 +53,7 @@ import me.lucko.luckperms.common.contexts.ServerCalculator;
 import me.lucko.luckperms.common.core.UuidCache;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.Importer;
+import me.lucko.luckperms.common.debug.DebugHandler;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.NoopLocaleManager;
@@ -72,7 +73,6 @@ import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.tasks.UpdateTask;
 import me.lucko.luckperms.common.utils.BufferedRequest;
-import me.lucko.luckperms.common.utils.DebugHandler;
 import me.lucko.luckperms.common.utils.LoggerImpl;
 import me.lucko.luckperms.common.utils.PermissionCache;
 

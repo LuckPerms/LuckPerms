@@ -37,6 +37,7 @@ import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.core.UuidCache;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.Importer;
+import me.lucko.luckperms.common.debug.DebugHandler;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.managers.TrackManager;
@@ -44,7 +45,6 @@ import me.lucko.luckperms.common.managers.UserManager;
 import me.lucko.luckperms.common.messaging.AbstractMessagingService;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.utils.BufferedRequest;
-import me.lucko.luckperms.common.utils.DebugHandler;
 import me.lucko.luckperms.common.utils.PermissionCache;
 
 import java.io.File;
