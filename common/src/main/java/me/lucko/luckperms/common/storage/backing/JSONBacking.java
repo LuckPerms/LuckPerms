@@ -91,6 +91,7 @@ public class JSONBacking extends FlatfileBacking {
                 }
             }
         } catch (Exception e) {
+            plugin.getLog().warn("Exception whilst writing to file: " + file.getAbsolutePath());
             e.printStackTrace();
         }
         return success;
@@ -109,6 +110,7 @@ public class JSONBacking extends FlatfileBacking {
                 }
             }
         } catch (Exception e) {
+            plugin.getLog().warn("Exception whilst reading from file: " + file.getAbsolutePath());
             e.printStackTrace();
         }
         return success;

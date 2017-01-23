@@ -95,6 +95,7 @@ public class YAMLBacking extends FlatfileBacking {
                 }
             }
         } catch (Throwable t) {
+            plugin.getLog().warn("Exception whilst writing to file: " + file.getAbsolutePath());
             t.printStackTrace();
             return false;
         }
@@ -111,6 +112,7 @@ public class YAMLBacking extends FlatfileBacking {
                 }
             }
         } catch (Throwable t) {
+            plugin.getLog().warn("Exception whilst reading from file: " + file.getAbsolutePath());
             t.printStackTrace();
         }
         return success;
