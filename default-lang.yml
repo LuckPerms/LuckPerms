@@ -25,6 +25,8 @@ does-not-have-temp-permission: "{0} does not have this permission set temporaril
 
 
 user-not-found: "&bUser could not be found."
+user-not-online: "&bUser &a{0}&b is not online."
+user-no-data: "&bUser &a{0}&b does not have any data loaded."
 user-save-success: "&7(User data was saved to storage)"
 user-save-error: "There was an error whilst saving the user."
 user-create-fail: "There was an error whilst creating a new user."
@@ -63,6 +65,8 @@ search-showing-users: "&bShowing user entries:"
 search-showing-groups: "&bShowing group entries:"
 search-showing-users-with-page: "&bShowing user entries:  {0}"
 search-showing-groups-with-page: "&bShowing group entries:  {0}"
+
+check-result: "&aPermission check result for user &b{0}&a for permission &b{1}&a in current contexts: &f{2}"
 
 create-success: "&b{0}&a was successfully created."
 delete-success: "&b{0}&a was successfully deleted."

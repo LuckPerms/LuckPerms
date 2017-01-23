@@ -64,6 +64,8 @@ public enum Message {
      * Loading / Saving
      */
     USER_NOT_FOUND("&bUser could not be found.", true),
+    USER_NOT_ONLINE("&bUser &a{0}&b is not online.", true),
+    USER_NO_DATA("&bUser &a{0}&b does not have any data loaded.", true),
     USER_SAVE_SUCCESS("&7(User data was saved to storage)", true),
     USER_SAVE_ERROR("There was an error whilst saving the user.", true),
     USER_CREATE_FAIL("There was an error whilst creating a new user.", true),
@@ -105,6 +107,8 @@ public enum Message {
     SEARCH_SHOWING_GROUPS("&bShowing group entries:", true),
     SEARCH_SHOWING_USERS_WITH_PAGE("&bShowing user entries:  {0}", true),
     SEARCH_SHOWING_GROUPS_WITH_PAGE("&bShowing group entries:  {0}", true),
+
+    CHECK_RESULT("&aPermission check result for user &b{0}&a for permission &b{1}&a in current contexts: &f{2}", true),
 
     CREATE_SUCCESS("&b{0}&a was successfully created.", true),
     DELETE_SUCCESS("&b{0}&a was successfully deleted.", true),
