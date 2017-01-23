@@ -136,7 +136,7 @@ class BukkitListener extends AbstractListener implements Listener {
             }
 
             // The player got denied on sync login.
-            onLeave(e.getPlayer().getUniqueId());
+            plugin.getServer().getScheduler().runTaskLater(plugin, () -> onLeave(e.getPlayer().getUniqueId()), 20L);
         } else {
             plugin.refreshAutoOp(e.getPlayer());
         }
