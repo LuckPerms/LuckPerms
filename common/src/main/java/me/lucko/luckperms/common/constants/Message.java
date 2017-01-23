@@ -108,7 +108,7 @@ public enum Message {
     SEARCH_SHOWING_USERS_WITH_PAGE("&bShowing user entries:  {0}", true),
     SEARCH_SHOWING_GROUPS_WITH_PAGE("&bShowing group entries:  {0}", true),
 
-    CHECK_RESULT("&aPermission check result for user &b{0}&a for permission &b{1}&a in current contexts: &f{2}", true),
+    CHECK_RESULT("&aPermission check result on user &b{0}&a for permission &b{1}&a: &f{2}", true),
 
     CREATE_SUCCESS("&b{0}&a was successfully created.", true),
     DELETE_SUCCESS("&b{0}&a was successfully deleted.", true),

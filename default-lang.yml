@@ -66,7 +66,7 @@ search-showing-groups: "&bShowing group entries:"
 search-showing-users-with-page: "&bShowing user entries:  {0}"
 search-showing-groups-with-page: "&bShowing group entries:  {0}"
 
-check-result: "&aPermission check result for user &b{0}&a for permission &b{1}&a in current contexts: &f{2}"
+check-result: "&aPermission check result on user &b{0}&a for permission &b{1}&a: &f{2}"
 
 create-success: "&b{0}&a was successfully created."
 delete-success: "&b{0}&a was successfully deleted."
