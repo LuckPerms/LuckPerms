@@ -71,7 +71,7 @@ public class DebugListener {
             return false;
         }
 
-        StringTokenizer tokenizer = new StringTokenizer(filter, " |&()", true);
+        StringTokenizer tokenizer = new StringTokenizer(filter, " |&()!", true);
         StringBuilder expression = new StringBuilder();
 
         while (tokenizer.hasMoreTokens()) {
@@ -104,7 +104,7 @@ public class DebugListener {
     }
 
     private static boolean isDelim(String token) {
-        return token.equals(" ") || token.equals("|") || token.equals("&") || token.equals("(") || token.equals(")");
+        return token.equals(" ") || token.equals("|") || token.equals("&") || token.equals("(") || token.equals(")") || token.equals("!");
     }
 
     public String uploadPastedData() {
