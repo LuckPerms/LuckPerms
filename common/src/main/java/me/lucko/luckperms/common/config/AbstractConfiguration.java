@@ -28,22 +28,23 @@ import com.google.common.cache.LoadingCache;
 
 import me.lucko.luckperms.common.config.keys.EnduringKey;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
 public abstract class AbstractConfiguration implements LPConfiguration {
-    private final LoadingCache<ConfigKey<?>, Object> cache = CacheBuilder.newBuilder()
-            .build(new CacheLoader<ConfigKey<?>, Object>() {
+    private final LoadingCache<ConfigKey<?>, Optional<Object>> cache = CacheBuilder.newBuilder()
+            .build(new CacheLoader<ConfigKey<?>, Optional<Object>>() {
                 @Override
-                public Object load(ConfigKey<?> key) {
-                    return key.get(AbstractConfiguration.this);
+                public Optional<Object> load(ConfigKey<?> key) {
+                    return Optional.ofNullable(key.get(AbstractConfiguration.this));
                 }
             });
 
     @Override
     public <T> T get(ConfigKey<T> key) {
-        return (T) cache.getUnchecked(key);
+        return (T) cache.getUnchecked(key).orElse(null);
     }
 
     @Override
