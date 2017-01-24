@@ -42,7 +42,7 @@ import java.util.UUID;
 public class CheckCommand extends SingleCommand {
     public CheckCommand() {
         super("Check", "Perform a standard permission check on an online player",
-                "/%s search <user> <permission>", Permission.CHECK, Predicates.not(2),
+                "/%s check <user> <permission>", Permission.CHECK, Predicates.not(2),
                 Arg.list(
                         Arg.create("user", true, "the user to check"),
                         Arg.create("permission", true, "the permission to check for")

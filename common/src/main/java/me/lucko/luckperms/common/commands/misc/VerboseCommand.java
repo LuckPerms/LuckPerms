@@ -40,7 +40,7 @@ public class VerboseCommand extends SingleCommand {
     public VerboseCommand() {
         super("Verbose", "Manage verbose permission checking", "/%s verbose <true|false> [filter]", Permission.VERBOSE, Predicates.is(0),
                 Arg.list(
-                        Arg.create("true|false|record|paste", true, "whether to enable/disable logging, or start/stop recording"),
+                        Arg.create("on|record|off|paste", true, "whether to enable/disable logging, or to paste the logged output"),
                         Arg.create("filter", false, "the filter to match entries against")
                 )
         );
