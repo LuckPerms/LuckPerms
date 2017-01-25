@@ -75,7 +75,6 @@ public class DependencyManager {
         }
 
         if (plugin.getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
-            dependencies.add(Dependency.APACHE_COMMONS_POOL);
             dependencies.add(Dependency.JEDIS);
         }
 
@@ -109,11 +108,12 @@ public class DependencyManager {
     private static File downloadDependency(LuckPermsPlugin plugin, File libDir, Dependency dependency) throws Exception {
         String name = dependency.name().toLowerCase() + "-" + dependency.getVersion() + ".jar";
 
-        URL url = new URL(dependency.getUrl());
         File file = new File(libDir, name);
         if (file.exists()) {
             return file;
         }
+
+        URL url = new URL(dependency.getUrl());
 
         plugin.getLog().info("Dependency '" + name + "' could not be found. Attempting to download.");
         try (InputStream in = url.openStream()) {
