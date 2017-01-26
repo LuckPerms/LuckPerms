@@ -35,12 +35,7 @@ import java.net.URL;
 
 public class PasteUtils {
 
-    public static void main(String[] args) {
-        String s = "hey\nlol\nxd";
-        System.out.println(paste(s));
-    }
-
-    public static String paste(String contents) {
+    public static String paste(String name, String desc, String contents) {
         try {
             HttpURLConnection connection = (HttpURLConnection) new URL("https://api.github.com/gists").openConnection();
             connection.setRequestMethod("POST");
@@ -50,10 +45,10 @@ public class PasteUtils {
             try (OutputStream os = connection.getOutputStream()) {
                 StringWriter sw = new StringWriter();
                 new JsonWriter(sw).beginObject()
-                        .name("description").value("LuckPerms Verbose Output")
+                        .name("description").value(desc)
                         .name("public").value(false)
                         .name("files")
-                        .beginObject().name("lp-verbose.md")
+                        .beginObject().name(name)
                         .beginObject().name("content").value(contents)
                         .endObject()
                         .endObject()

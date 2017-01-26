@@ -136,6 +136,14 @@ public class DateUtil {
         return DateUtil.formatDateDiff(now, c);
     }
 
+    public static String formatTime(long seconds) {
+        Calendar c = new GregorianCalendar();
+        c.setTimeInMillis(0L);
+        Calendar c2 = new GregorianCalendar();
+        c2.setTimeInMillis(seconds * 1000L);
+        return DateUtil.formatDateDiff(c, c2);
+    }
+
     private static String formatDateDiff(Calendar fromDate, Calendar toDate) {
         boolean future = false;
         if (toDate.equals(fromDate)) {

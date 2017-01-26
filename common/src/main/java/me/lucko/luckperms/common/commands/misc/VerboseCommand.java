@@ -32,6 +32,9 @@ import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.debug.DebugListener;
 import me.lucko.luckperms.common.utils.Predicates;
 
+import io.github.mkremins.fanciful.ChatColor;
+import io.github.mkremins.fanciful.FancyMessage;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -90,12 +93,15 @@ public class VerboseCommand extends SingleCommand {
                 if (listener == null) {
                     Message.VERBOSE_OFF.send(sender);
                 } else {
+                    Message.VERBOSE_RECORDING_UPLOAD_START.send(sender);
+
                     String url = listener.uploadPastedData();
                     if (url == null) {
                         url = "null";
                     }
 
-                    Message.VERBOSE_RECORDING_URL.send(sender, url);
+                    Message.VERBOSE_RECORDING_URL.send(sender);
+                    sender.sendMessage(new FancyMessage(url).color(ChatColor.getByChar('b')).link(url));
                     return CommandResult.SUCCESS;
                 }
             } else {

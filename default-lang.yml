@@ -57,7 +57,7 @@ verbose-off: "&bVerbose checking output set to &cFALSE&b."
 verbose-recording-on: "&bVerbose recording set to &aTRUE &bfor all permissions."
 verbose-recording-on-query: "&bVerbose recording set to &aTRUE &bfor permissions matching the following filters: &f{0}"
 verbose-recording-upload-start: "&bVerbose recording was disabled. Uploading results..."
-verbose-recording-url: "&aVerbose results URL: {0}"
+verbose-recording-url: "&aVerbose results URL:"
 
 search-searching: "&aSearching for users and groups with &b{0}&a..."
 search-result: "&aFound &b{0}&a entries from &b{1}&a users and &b{2}&a groups."

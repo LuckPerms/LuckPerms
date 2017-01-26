@@ -99,7 +99,7 @@ public enum Message {
     VERBOSE_RECORDING_ON("&bVerbose recording set to &aTRUE &bfor all permissions.", true),
     VERBOSE_RECORDING_ON_QUERY("&bVerbose recording set to &aTRUE &bfor permissions matching the following filters: &f{0}", true),
     VERBOSE_RECORDING_UPLOAD_START("&bVerbose recording was disabled. Uploading results...", true),
-    VERBOSE_RECORDING_URL("&aVerbose results URL: {0}", true),
+    VERBOSE_RECORDING_URL("&aVerbose results URL:", true),
 
     SEARCH_SEARCHING("&aSearching for users and groups with &b{0}&a...", true),
     SEARCH_RESULT("&aFound &b{0}&a entries from &b{1}&a users and &b{2}&a groups.", true),
