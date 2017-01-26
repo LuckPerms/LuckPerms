@@ -29,6 +29,7 @@ import lombok.Setter;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
+import me.lucko.luckperms.common.caching.UserCache;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.core.model.User;
 
@@ -93,7 +94,12 @@ public class LPPermissible extends PermissibleBase {
     }
 
     public void updateSubscriptions() {
-        Set<String> ent = new HashSet<>(user.getUserData().getPermissionData(calculateContexts()).getImmutableBacking().keySet());
+        UserCache cache = user.getUserData();
+        if (cache == null) {
+            return;
+        }
+
+        Set<String> ent = new HashSet<>(cache.getPermissionData(calculateContexts()).getImmutableBacking().keySet());
 
         if (parent.isOp()) {
             ent.addAll(plugin.getDefaultsProvider().getOpDefaults().keySet());
