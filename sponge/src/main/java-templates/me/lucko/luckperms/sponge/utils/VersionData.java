@@ -24,6 +24,6 @@ package me.lucko.luckperms.sponge.utils;
 
 public class VersionData {
 
-    public static final String VERSION = "${release.version}.${git.closest.tag.commit.count}";
+    public static final String VERSION = "${release.version}.${patch.version}";
 
 }

@@ -39,6 +39,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <release.version>2.17</release.version>
+        <patch.version>${git.closest.tag.commit.count}</patch.version>
     </properties>
 
     <distributionManagement>
@@ -51,6 +52,29 @@
             <url>https://nexus.lucko.me/repository/maven-releases/</url>
         </repository>
     </distributionManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+                <version>2.2.1</version>
+                <executions>
+                    <execution>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <skipPoms>false</skipPoms>
+                    <injectAllReactorProjects>true</injectAllReactorProjects>
+                    <runOnlyOnce>true</runOnlyOnce>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
     <repositories>
         <repository>

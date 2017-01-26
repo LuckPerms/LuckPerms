@@ -14,7 +14,7 @@
 
     <build>
         <defaultGoal>clean package</defaultGoal>
-        <finalName>LuckPerms-Sponge-${release.version}.${git.closest.tag.commit.count}</finalName>
+        <finalName>LuckPerms-Sponge-${release.version}.${patch.version}</finalName>
         <sourceDirectory>${basedir}/src/main/java</sourceDirectory>
         <resources>
             <resource>
@@ -51,13 +51,7 @@
                         </goals>
                         <configuration>
                             <minimizeJar>false</minimizeJar>
-                            <artifactSet>
-                                <excludes>
-                                    <exclude>org.slf4j:*</exclude>
-                                    <exclude>org.xerial:*</exclude>
-                                    <exclude>com.h2database:*</exclude>
-                                </excludes>
-                            </artifactSet>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
                             <relocations>
                                 <relocation>
                                     <pattern>io.github.mkremins.fanciful</pattern>
@@ -80,21 +74,6 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>pl.project13.maven</groupId>
-                <artifactId>git-commit-id-plugin</artifactId>
-                <version>2.2.1</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>revision</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <injectAllReactorProjects>true</injectAllReactorProjects>
-                </configuration>
             </plugin>
         </plugins>
     </build>

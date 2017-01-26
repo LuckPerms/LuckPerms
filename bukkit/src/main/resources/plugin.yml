@@ -1,5 +1,5 @@
 name: LuckPerms
-version: ${release.version}.${git.closest.tag.commit.count}
+version: ${release.version}.${patch.version}
 description: A permissions plugin
 author: Luck
 website: https://github.com/lucko/LuckPerms
