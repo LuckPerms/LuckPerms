@@ -28,6 +28,7 @@ import me.lucko.luckperms.common.commands.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
@@ -44,13 +45,21 @@ public class NetworkSyncCommand extends SingleCommand {
         plugin.getUpdateTaskBuffer().request().join();
         Message.UPDATE_TASK_COMPLETE_NETWORK.send(sender);
 
-        if (plugin.getMessagingService() != null) {
-            plugin.getMessagingService().pushUpdate();
-            Message.UPDATE_TASK_PUSH_SUCCESS.send(sender);
-        } else {
-            Message.UPDATE_TASK_PUSH_FAILURE.send(sender);
+        InternalMessagingService messagingService = plugin.getMessagingService();
+
+        if (messagingService == null) {
+            Message.UPDATE_TASK_PUSH_FAILURE_NOT_SETUP.send(sender);
+            return CommandResult.FAILURE;
         }
 
-        return CommandResult.SUCCESS;
+        try {
+            messagingService.pushUpdate();
+            Message.UPDATE_TASK_PUSH_SUCCESS.send(sender, messagingService.getName());
+            return CommandResult.SUCCESS;
+        } catch (Exception e) {
+            e.printStackTrace();
+            Message.UPDATE_TASK_PUSH_FAILURE.send(sender);
+            return CommandResult.FAILURE;
+        }
     }
 }

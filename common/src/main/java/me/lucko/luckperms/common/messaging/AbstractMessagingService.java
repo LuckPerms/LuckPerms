@@ -22,9 +22,9 @@
 
 package me.lucko.luckperms.common.messaging;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import me.lucko.luckperms.api.MessagingService;
 import me.lucko.luckperms.common.LuckPermsPlugin;
 
 import java.util.Collections;
@@ -37,15 +37,15 @@ import java.util.function.Consumer;
  * An abstract implementation of {@link me.lucko.luckperms.api.MessagingService}.
  */
 @RequiredArgsConstructor
-public abstract class AbstractMessagingService implements MessagingService {
+public abstract class AbstractMessagingService implements InternalMessagingService {
     public static final String CHANNEL = "lpuc";
 
     private final LuckPermsPlugin plugin;
+
+    @Getter
     private final String name;
 
     private final Set<UUID> receivedMsgs = Collections.synchronizedSet(new HashSet<>());
-
-    public abstract void close();
 
     protected abstract void sendMessage(String channel, String message);
 

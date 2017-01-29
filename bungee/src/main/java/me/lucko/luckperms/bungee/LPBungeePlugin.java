@@ -55,7 +55,7 @@ import me.lucko.luckperms.common.managers.UserManager;
 import me.lucko.luckperms.common.managers.impl.GenericGroupManager;
 import me.lucko.luckperms.common.managers.impl.GenericTrackManager;
 import me.lucko.luckperms.common.managers.impl.GenericUserManager;
-import me.lucko.luckperms.common.messaging.AbstractMessagingService;
+import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.messaging.RedisMessaging;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.StorageFactory;
@@ -93,7 +93,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     private GroupManager groupManager;
     private TrackManager trackManager;
     private Storage storage;
-    private AbstractMessagingService messagingService = null;
+    private InternalMessagingService messagingService = null;
     private UuidCache uuidCache;
     private ApiProvider apiProvider;
     private Logger log;

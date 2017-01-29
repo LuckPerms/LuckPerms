@@ -51,7 +51,7 @@ import me.lucko.luckperms.common.locale.NoopLocaleManager;
 import me.lucko.luckperms.common.locale.SimpleLocaleManager;
 import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.managers.impl.GenericTrackManager;
-import me.lucko.luckperms.common.messaging.AbstractMessagingService;
+import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.messaging.RedisMessaging;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.StorageFactory;
@@ -148,7 +148,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     private SpongeGroupManager groupManager;
     private TrackManager trackManager;
     private Storage storage;
-    private AbstractMessagingService messagingService = null;
+    private InternalMessagingService messagingService = null;
     private UuidCache uuidCache;
     private ApiProvider apiProvider;
     private me.lucko.luckperms.api.Logger log;

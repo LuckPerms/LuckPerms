@@ -138,8 +138,9 @@ public enum Message {
     UPDATE_TASK_REQUEST("&bUpdate task scheduled.", true),
     UPDATE_TASK_COMPLETE("&aUpdate task finished.", true),
     UPDATE_TASK_COMPLETE_NETWORK("&aUpdate task finished. Now attempting to push to other servers.", true),
-    UPDATE_TASK_PUSH_SUCCESS("&aOther servers were notified successfully.", true),
-    UPDATE_TASK_PUSH_FAILURE("&cError whilst pushing changes to other servers. Is Redis enabled?", true),
+    UPDATE_TASK_PUSH_SUCCESS("&aOther servers were notified via &b{0} Messaging &asuccessfully.", true),
+    UPDATE_TASK_PUSH_FAILURE("&cError whilst pushing changes to other servers.", true),
+    UPDATE_TASK_PUSH_FAILURE_NOT_SETUP("&cError whilst pushing changes to other servers. A messaging service has not been configured.", true),
     RELOAD_CONFIG_SUCCESS("&aThe configuration file was reloaded. &7(some options will only apply after the server has restarted.)", true),
     INFO(
             "{PREFIX}&2Running &bLuckPerms v{0}&2 by &bLuck&2." + "\n" +
@@ -147,19 +148,19 @@ public enum Message {
             "{PREFIX}&f-  &3Storage Method: &f{2}" + "\n" +
             "{PREFIX}&f-  &3Server Name: &f{3}" + "\n" +
             "{PREFIX}&f-  &3Sync Interval: &a{4} &fminutes" + "\n" +
+            "{PREFIX}&f-  &3Messaging Service: &f{5}" + "\n" +
             "{PREFIX}&f-  &bCounts:" + "\n" +
-            "{PREFIX}&f-     &3Online Players: &a{5}" + "\n" +
-            "{PREFIX}&f-     &3Loaded Users: &a{6}" + "\n" +
-            "{PREFIX}&f-     &3Loaded Groups: &a{7}" + "\n" +
-            "{PREFIX}&f-     &3Loaded Tracks: &a{8}" + "\n" +
-            "{PREFIX}&f-     &3Log size: &a{9}" + "\n" +
-            "{PREFIX}&f-     &3UUID Cache size: &a{10}" + "\n" +
-            "{PREFIX}&f-     &3Translations loaded: &a{11}" + "\n" +
-            "{PREFIX}&f-     &3Pre-process contexts: &a{12}" + "\n" +
-            "{PREFIX}&f-     &3Context Calculators: &a{13}" + "\n" +
+            "{PREFIX}&f-     &3Online Players: &a{6}" + "\n" +
+            "{PREFIX}&f-     &3Loaded Users: &a{7}" + "\n" +
+            "{PREFIX}&f-     &3Loaded Groups: &a{8}" + "\n" +
+            "{PREFIX}&f-     &3Loaded Tracks: &a{9}" + "\n" +
+            "{PREFIX}&f-     &3Log size: &a{10}" + "\n" +
+            "{PREFIX}&f-     &3UUID Cache size: &a{11}" + "\n" +
+            "{PREFIX}&f-     &3Translations loaded: &a{12}" + "\n" +
+            "{PREFIX}&f-     &3Pre-process contexts: &a{13}" + "\n" +
+            "{PREFIX}&f-     &3Context Calculators: &a{14}" + "\n" +
             "{PREFIX}&f-  &bConfiguration:" + "\n" +
-            "{PREFIX}&f-     &3Online Mode: {14}" + "\n" +
-            "{PREFIX}&f-     &3Redis Enabled: {15}" + "\n" +
+            "{PREFIX}&f-     &3Online Mode: {15}" + "\n" +
             "{PREFIX}&f-     &bPermission Calculation:" + "\n" +
             "{PREFIX}&f-        &3Including Global: {16}" + "\n" +
             "{PREFIX}&f-        &3Including Global World: {17}" + "\n" +
