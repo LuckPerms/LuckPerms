@@ -40,6 +40,8 @@ import me.lucko.luckperms.common.defaults.Rule;
 import me.lucko.luckperms.common.storage.DatastoreConfiguration;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -145,44 +147,25 @@ public class ConfigKeys {
     public static final ConfigKey<String> REDIS_PASSWORD = EnduringKey.wrap(StringKey.of("redis.password", ""));
 
     public static List<ConfigKey<?>> getAllKeys() {
-        return ImmutableList.<ConfigKey<?>>builder()
-                .add(SERVER)
-                .add(SYNC_TIME)
-                .add(DEFAULT_GROUP_NODE)
-                .add(DEFAULT_GROUP_NAME)
-                .add(INCLUDING_GLOBAL_PERMS)
-                .add(INCLUDING_GLOBAL_WORLD_PERMS)
-                .add(APPLYING_GLOBAL_GROUPS)
-                .add(APPLYING_GLOBAL_WORLD_GROUPS)
-                .add(ONLINE_MODE)
-                .add(APPLYING_WILDCARDS)
-                .add(APPLYING_REGEX)
-                .add(APPLYING_SHORTHAND)
-                .add(GROUP_WEIGHTS)
-                .add(LOG_NOTIFY)
-                .add(AUTO_OP)
-                .add(OPS_ENABLED)
-                .add(COMMANDS_ALLOW_OP)
-                .add(VAULT_SERVER)
-                .add(VAULT_INCLUDING_GLOBAL)
-                .add(VAULT_IGNORE_WORLD)
-                .add(VAULT_PRIMARY_GROUP_OVERRIDES)
-                .add(VAULT_PRIMARY_GROUP_OVERRIDES_CHECK_INHERITED)
-                .add(VAULT_PRIMARY_GROUP_OVERRIDES_CHECK_EXISTS)
-                .add(VAULT_PRIMARY_GROUP_OVERRIDES_CHECK_MEMBER_OF)
-                .add(VAULT_DEBUG)
-                .add(WORLD_REWRITES)
-                .add(GROUP_NAME_REWRITES)
-                .add(DEFAULT_ASSIGNMENTS)
-                .add(DATABASE_VALUES)
-                .add(SQL_TABLE_PREFIX)
-                .add(STORAGE_METHOD)
-                .add(SPLIT_STORAGE)
-                .add(SPLIT_STORAGE_OPTIONS)
-                .add(REDIS_ENABLED)
-                .add(REDIS_ADDRESS)
-                .add(REDIS_PASSWORD)
-                .build();
+        ImmutableList.Builder<ConfigKey<?>> keys = ImmutableList.builder();
+
+        try {
+            Field[] values = ConfigKeys.class.getFields();
+            for (Field f : values) {
+                if (!Modifier.isStatic(f.getModifiers())) {
+                    continue;
+                }
+
+                Object val = f.get(null);
+                if (val instanceof ConfigKey<?>) {
+                    keys.add((ConfigKey<?>) val);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return keys.build();
     }
 
 }
