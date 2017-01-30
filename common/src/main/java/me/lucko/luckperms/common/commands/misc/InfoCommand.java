@@ -48,8 +48,7 @@ public class InfoCommand extends SingleCommand {
         try {
             int i = Integer.parseInt(value);
             return "&a" + i;
-        } catch (NumberFormatException ignored) {
-        }
+        } catch (NumberFormatException ignored) {}
 
         return "&f" + value;
     }

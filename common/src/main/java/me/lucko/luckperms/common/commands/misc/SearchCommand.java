@@ -29,6 +29,7 @@ import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
@@ -56,15 +57,7 @@ public class SearchCommand extends SingleCommand {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) throws CommandException {
         String query = args.get(0);
-
-        int page = 1;
-        if (args.size() > 1) {
-            try {
-                page = Integer.parseInt(args.get(1));
-            } catch (NumberFormatException e) {
-                // ignored
-            }
-        }
+        int page = ArgumentUtils.handleIntOrElse(1, args, 1);
 
         Message.SEARCH_SEARCHING.send(sender, query);
 

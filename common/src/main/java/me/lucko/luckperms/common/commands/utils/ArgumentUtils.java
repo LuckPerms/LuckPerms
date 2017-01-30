@@ -52,6 +52,18 @@ public class ArgumentUtils {
         return args.get(index).replace("{SPACE}", " ");
     }
 
+    public static int handleIntOrElse(int index, List<String> args, int other) {
+        if (index < 0 || index >= args.size()) {
+            return other;
+        }
+
+        try {
+            return Integer.parseInt(args.get(index));
+        } catch (NumberFormatException e) {
+            return other;
+        }
+    }
+
     public static String handleNode(int index, List<String> args) throws ArgumentException {
         String node = args.get(index).replace("{SPACE}", " ");
         if (ArgumentChecker.checkNode(node)) {

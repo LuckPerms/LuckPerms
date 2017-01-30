@@ -28,6 +28,7 @@ import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.generic.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Message;
@@ -56,14 +57,7 @@ public class PermissionInfo extends SharedSubCommand {
             Message.LISTNODES.send(sender, holder.getFriendlyName());
             sender.sendMessage(Util.color(Util.permNodesToStringConsole(holder.getPermissions(false))));
         } else {
-            int page = 1;
-            if (args.size() > 0) {
-                try {
-                    page = Integer.parseInt(args.get(0));
-                } catch (NumberFormatException e) {
-                    // ignored
-                }
-            }
+            int page = ArgumentUtils.handleIntOrElse(0, args, 1);
 
             Map.Entry<FancyMessage, String> ent = Util.permNodesToMessage(holder.getPermissions(false), holder, label, page);
             if (ent.getValue() != null) {
