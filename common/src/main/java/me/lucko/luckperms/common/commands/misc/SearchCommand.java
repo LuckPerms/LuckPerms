@@ -58,9 +58,9 @@ public class SearchCommand extends SingleCommand {
         String query = args.get(0);
 
         int page = 1;
-        if (args.size() > 0) {
+        if (args.size() > 1) {
             try {
-                page = Integer.parseInt(args.get(0));
+                page = Integer.parseInt(args.get(1));
             } catch (NumberFormatException e) {
                 // ignored
             }
