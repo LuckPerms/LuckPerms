@@ -223,6 +223,11 @@ public class Importer {
         public boolean hasPermission(Permission permission) {
             return true;
         }
+
+        @Override
+        public boolean isConsole() {
+            return true;
+        }
     }
 
     private static class Result {
