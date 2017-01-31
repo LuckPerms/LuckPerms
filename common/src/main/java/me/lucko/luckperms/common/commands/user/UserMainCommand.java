@@ -24,7 +24,6 @@ package me.lucko.luckperms.common.commands.user;
 
 import com.google.common.collect.ImmutableList;
 
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.Command;
 import me.lucko.luckperms.common.commands.MainCommand;
 import me.lucko.luckperms.common.commands.generic.meta.CommandMeta;
@@ -36,6 +35,7 @@ import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Patterns;
 import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.List;
 import java.util.UUID;

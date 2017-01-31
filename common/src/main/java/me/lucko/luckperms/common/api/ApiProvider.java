@@ -46,7 +46,6 @@ import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.IContextCalculator;
 import me.lucko.luckperms.api.event.LPEvent;
 import me.lucko.luckperms.api.event.LPListener;
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.api.delegate.DatastoreDelegate;
 import me.lucko.luckperms.common.api.delegate.GroupDelegate;
 import me.lucko.luckperms.common.api.delegate.LPConfigurationDelegate;
@@ -57,6 +56,7 @@ import me.lucko.luckperms.common.api.delegate.UserDelegate;
 import me.lucko.luckperms.common.api.delegate.UuidCacheDelegate;
 import me.lucko.luckperms.common.core.NodeBuilder;
 import me.lucko.luckperms.common.core.UserIdentifier;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.Optional;
 import java.util.Set;
@@ -104,7 +104,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public PlatformType getPlatformType() {
-        return plugin.getType();
+        return plugin.getServerType();
     }
 
     @Override

@@ -26,8 +26,8 @@ import lombok.experimental.UtilityClass;
 
 import com.google.common.collect.ImmutableSet;
 
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.backing.AbstractBacking;
 import me.lucko.luckperms.common.storage.backing.JSONBacking;
 import me.lucko.luckperms.common.storage.backing.MongoDBBacking;
@@ -124,17 +124,17 @@ public class StorageFactory {
             case MYSQL:
                 return new SQLBacking(plugin, new MySQLProvider(plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)), plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX));
             case SQLITE:
-                return new SQLBacking(plugin, new SQLiteProvider(new File(plugin.getDataFolder(), "luckperms.sqlite")), plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX));
+                return new SQLBacking(plugin, new SQLiteProvider(new File(plugin.getDataDirectory(), "luckperms.sqlite")), plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX));
             case H2:
-                return new SQLBacking(plugin, new H2Provider(new File(plugin.getDataFolder(), "luckperms.db")), plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX));
+                return new SQLBacking(plugin, new H2Provider(new File(plugin.getDataDirectory(), "luckperms.db")), plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX));
             case POSTGRESQL:
                 return new SQLBacking(plugin, new PostgreSQLProvider(plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)), plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX));
             case MONGODB:
                 return new MongoDBBacking(plugin, plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES));
             case YAML:
-                return new YAMLBacking(plugin, plugin.getDataFolder());
+                return new YAMLBacking(plugin, plugin.getDataDirectory());
             default:
-                return new JSONBacking(plugin, plugin.getDataFolder());
+                return new JSONBacking(plugin, plugin.getDataDirectory());
         }
     }
 }

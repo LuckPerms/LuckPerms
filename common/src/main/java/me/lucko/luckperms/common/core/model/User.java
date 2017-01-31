@@ -29,12 +29,12 @@ import lombok.ToString;
 
 import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.api.event.events.UserPermissionRefreshEvent;
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.api.delegate.UserDelegate;
 import me.lucko.luckperms.common.caching.UserCache;
 import me.lucko.luckperms.common.caching.handlers.HolderReference;
 import me.lucko.luckperms.common.caching.handlers.UserReference;
 import me.lucko.luckperms.common.core.UserIdentifier;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.BufferedRequest;
 import me.lucko.luckperms.common.utils.Identifiable;
 

@@ -24,7 +24,6 @@ package me.lucko.luckperms.bukkit.migration;
 
 import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.api.PlatformType;
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -36,8 +35,11 @@ import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.LogEntry;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
+
+import org.bukkit.Bukkit;
 
 import ru.tehkode.permissions.NativeInterface;
 import ru.tehkode.permissions.PermissionGroup;
@@ -67,12 +69,12 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         };
         log.accept("Starting PermissionsEx migration.");
         
-        if (!plugin.isPluginLoaded("PermissionsEx")) {
+        if (!Bukkit.getPluginManager().isPluginEnabled("PermissionsEx")) {
             log.accept("Error -> PermissionsEx is not loaded.");
             return CommandResult.STATE_ERROR;
         }
 
-        if (plugin.getType() != PlatformType.BUKKIT) {
+        if (plugin.getServerType() != PlatformType.BUKKIT) {
             // Sponge uses a completely different version of PEX.
             log.accept("PEX import is not supported on this platform.");
             return CommandResult.STATE_ERROR;
@@ -82,7 +84,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 .map(String::toLowerCase)
                 .collect(Collectors.toList());
 
-        PermissionsEx pex = (PermissionsEx) plugin.getPlugin("PermissionsEx");
+        PermissionsEx pex = (PermissionsEx) Bukkit.getPluginManager().getPlugin("PermissionsEx");
         PermissionManager manager = pex.getPermissionsManager();
 
         NativeInterface ni;
@@ -249,7 +251,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             } catch (IllegalArgumentException e) {
                 u = ni.nameToUUID(user.getIdentifier());
                 if (u == null) {
-                    u = plugin.getUUID(user.getIdentifier());
+                    u = plugin.getUuidFromUsername(user.getIdentifier());
                 }
             }
 

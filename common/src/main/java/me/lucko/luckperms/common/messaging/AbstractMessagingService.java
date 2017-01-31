@@ -25,7 +25,7 @@ package me.lucko.luckperms.common.messaging;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.Collections;
 import java.util.HashSet;

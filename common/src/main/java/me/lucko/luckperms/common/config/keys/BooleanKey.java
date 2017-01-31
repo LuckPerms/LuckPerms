@@ -25,7 +25,7 @@ package me.lucko.luckperms.common.config.keys;
 import lombok.AllArgsConstructor;
 
 import me.lucko.luckperms.common.config.ConfigKey;
-import me.lucko.luckperms.common.config.LPConfiguration;
+import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 
 @AllArgsConstructor(staticName = "of")
 public class BooleanKey implements ConfigKey<Boolean> {
@@ -33,7 +33,7 @@ public class BooleanKey implements ConfigKey<Boolean> {
     private final boolean def;
 
     @Override
-    public Boolean get(LPConfiguration config) {
+    public Boolean get(LuckPermsConfiguration config) {
         return config.getBoolean(path, def);
     }
 }

@@ -22,7 +22,6 @@
 
 package me.lucko.luckperms.common.commands.misc;
 
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SingleCommand;
@@ -30,6 +29,7 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.data.Importer;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.io.File;
@@ -56,7 +56,7 @@ public class ImportCommand extends SingleCommand {
 
         Importer importer = plugin.getImporter();
 
-        File f = new File(plugin.getMainDir(), args.get(0));
+        File f = new File(plugin.getDataDirectory(), args.get(0));
         if (!f.exists()) {
             Message.IMPORT_LOG_DOESNT_EXIST.send(sender, f.getAbsolutePath());
             return CommandResult.INVALID_ARGS;

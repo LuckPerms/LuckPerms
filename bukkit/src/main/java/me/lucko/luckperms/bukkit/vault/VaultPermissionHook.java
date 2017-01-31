@@ -57,7 +57,7 @@ public class VaultPermissionHook extends Permission {
 
     private final String name = "LuckPerms";
 
-    private Function<String, String> WORLD_CORRECTION_FUNCTION = s -> isIgnoreWorld() ? null : s;
+    private Function<String, String> worldCorrectionFunction = s -> isIgnoreWorld() ? null : s;
 
     public VaultPermissionHook(LPBukkitPlugin plugin) {
         this.plugin = plugin;
@@ -132,11 +132,11 @@ public class VaultPermissionHook extends Permission {
     public void save(PermissionHolder holder) {
         if (holder instanceof User) {
             User u = (User) holder;
-            plugin.getStorage().saveUser(u).thenRunAsync(() -> u.getRefreshBuffer().request(), plugin.getAsyncExecutor());
+            plugin.getStorage().saveUser(u).thenRunAsync(() -> u.getRefreshBuffer().request(), plugin.getScheduler().getAsyncExecutor());
         }
         if (holder instanceof Group) {
             Group g = (Group) holder;
-            plugin.getStorage().saveGroup(g).thenRunAsync(() -> plugin.getUpdateTaskBuffer().request(), plugin.getAsyncExecutor());
+            plugin.getStorage().saveGroup(g).thenRunAsync(() -> plugin.getUpdateTaskBuffer().request(), plugin.getScheduler().getAsyncExecutor());
         }
     }
 
@@ -151,7 +151,7 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public boolean playerHas(String world, @NonNull String player, @NonNull String permission) {
-        world = WORLD_CORRECTION_FUNCTION.apply(world);
+        world = worldCorrectionFunction.apply(world);
         log("Checking if player " + player + " has permission: " + permission + " on world " + world + ", server " + getServer());
 
         User user = plugin.getUserManager().getByUsername(player);
@@ -167,7 +167,7 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public boolean playerAdd(String world, @NonNull String player, @NonNull String permission) {
-        world = WORLD_CORRECTION_FUNCTION.apply(world);
+        world = worldCorrectionFunction.apply(world);
         log("Adding permission to player " + player + ": '" + permission + "' on world " + world + ", server " + getServer());
 
         final User user = plugin.getUserManager().getByUsername(player);
@@ -179,7 +179,7 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public boolean playerRemove(String world, @NonNull String player, @NonNull String permission) {
-        world = WORLD_CORRECTION_FUNCTION.apply(world);
+        world = worldCorrectionFunction.apply(world);
         log("Removing permission from player " + player + ": '" + permission + "' on world " + world + ", server " + getServer());
 
         final User user = plugin.getUserManager().getByUsername(player);
@@ -191,7 +191,7 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public boolean groupHas(String world, @NonNull String groupName, @NonNull String permission) {
-        world = WORLD_CORRECTION_FUNCTION.apply(world);
+        world = worldCorrectionFunction.apply(world);
         log("Checking if group " + groupName + " has permission: " + permission + " on world " + world + ", server " + getServer());
 
         final Group group = plugin.getGroupManager().getIfLoaded(groupName);
@@ -204,7 +204,7 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public boolean groupAdd(String world, @NonNull String groupName, @NonNull String permission) {
-        world = WORLD_CORRECTION_FUNCTION.apply(world);
+        world = worldCorrectionFunction.apply(world);
         log("Adding permission to group " + groupName + ": '" + permission + "' on world " + world + ", server " + getServer());
 
         final Group group = plugin.getGroupManager().getIfLoaded(groupName);
@@ -216,7 +216,7 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public boolean groupRemove(String world, @NonNull String groupName, @NonNull String permission) {
-        world = WORLD_CORRECTION_FUNCTION.apply(world);
+        world = worldCorrectionFunction.apply(world);
         log("Removing permission from group " + groupName + ": '" + permission + "' on world " + world + ", server " + getServer());
 
         final Group group = plugin.getGroupManager().getIfLoaded(groupName);
@@ -228,7 +228,7 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public boolean playerInGroup(String world, @NonNull String player, @NonNull String group) {
-        world = WORLD_CORRECTION_FUNCTION.apply(world);
+        world = worldCorrectionFunction.apply(world);
         log("Checking if player " + player + " is in group: " + group + " on world " + world + ", server " + getServer());
 
         final User user = plugin.getUserManager().getByUsername(player);
@@ -245,7 +245,7 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public boolean playerAddGroup(String world, @NonNull String player, @NonNull String groupName) {
-        world = WORLD_CORRECTION_FUNCTION.apply(world);
+        world = worldCorrectionFunction.apply(world);
         log("Adding player " + player + " to group: '" + groupName + "' on world " + world + ", server " + getServer());
 
         final User user = plugin.getUserManager().getByUsername(player);
@@ -271,7 +271,7 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public boolean playerRemoveGroup(String world, @NonNull String player, @NonNull String groupName) {
-        world = WORLD_CORRECTION_FUNCTION.apply(world);
+        world = worldCorrectionFunction.apply(world);
         log("Removing player " + player + " from group: '" + groupName + "' on world " + world + ", server " + getServer());
 
         final User user = plugin.getUserManager().getByUsername(player);
@@ -297,7 +297,7 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public String[] getPlayerGroups(String world, @NonNull String player) {
-        world = WORLD_CORRECTION_FUNCTION.apply(world);
+        world = worldCorrectionFunction.apply(world);
         log("Getting groups of player: " + player + ", on world " + world + ", server " + getServer());
 
         User user = plugin.getUserManager().getByUsername(player);
@@ -314,7 +314,7 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public String getPrimaryGroup(String world, @NonNull String player) {
-        world = WORLD_CORRECTION_FUNCTION.apply(world);
+        world = worldCorrectionFunction.apply(world);
         log("Getting primary group of player: " + player);
         final User user = plugin.getUserManager().getByUsername(player);
 

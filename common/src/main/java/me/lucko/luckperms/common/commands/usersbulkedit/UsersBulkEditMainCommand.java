@@ -24,10 +24,10 @@ package me.lucko.luckperms.common.commands.usersbulkedit;
 
 import com.google.common.collect.ImmutableList;
 
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.Command;
 import me.lucko.luckperms.common.commands.MainCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.Storage;
 
 import java.util.Collections;

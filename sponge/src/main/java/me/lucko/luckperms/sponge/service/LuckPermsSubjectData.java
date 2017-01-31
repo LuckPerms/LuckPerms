@@ -74,11 +74,11 @@ public class LuckPermsSubjectData implements LPSubjectData {
     private void objectSave(PermissionHolder t) {
         if (t instanceof User) {
             service.getPlugin().getStorage().saveUser(((User) t))
-                    .thenRunAsync(() -> ((User) t).getRefreshBuffer().request(), service.getPlugin().getAsyncExecutor());
+                    .thenRunAsync(() -> ((User) t).getRefreshBuffer().request(), service.getPlugin().getScheduler().getAsyncExecutor());
         }
         if (t instanceof Group) {
             service.getPlugin().getStorage().saveGroup((Group) t)
-                    .thenRunAsync(() -> service.getPlugin().getUpdateTaskBuffer().request(), service.getPlugin().getAsyncExecutor());
+                    .thenRunAsync(() -> service.getPlugin().getUpdateTaskBuffer().request(), service.getPlugin().getScheduler().getAsyncExecutor());
         }
     }
 

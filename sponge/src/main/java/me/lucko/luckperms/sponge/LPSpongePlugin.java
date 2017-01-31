@@ -29,7 +29,6 @@ import com.google.inject.Inject;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.PlatformType;
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.api.ApiHandler;
 import me.lucko.luckperms.common.api.ApiProvider;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
@@ -37,7 +36,7 @@ import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.commands.BaseCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.config.LPConfiguration;
+import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.contexts.ServerCalculator;
@@ -53,6 +52,8 @@ import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.managers.impl.GenericTrackManager;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.messaging.RedisMessaging;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.plugin.LuckPermsScheduler;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.StorageFactory;
 import me.lucko.luckperms.common.storage.StorageType;
@@ -86,12 +87,10 @@ import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.plugin.Plugin;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.AsynchronousExecutor;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.SpongeExecutorService;
 import org.spongepowered.api.scheduler.SynchronousExecutor;
-import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.permission.PermissionDescription;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
@@ -102,14 +101,12 @@ import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -118,7 +115,6 @@ import java.util.stream.StreamSupport;
 public class LPSpongePlugin implements LuckPermsPlugin {
 
     private final Set<UUID> ignoringLogs = ConcurrentHashMap.newKeySet();
-    private final Set<Runnable> shutdownHooks = Collections.synchronizedSet(new HashSet<>());
 
     @Inject
     private Logger logger;
@@ -130,20 +126,21 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     @ConfigDir(sharedRoot = false)
     private Path configDir;
 
-    private Scheduler scheduler = Sponge.getScheduler();
+    private Scheduler spongeScheduler = Sponge.getScheduler();
 
     @Inject
     @SynchronousExecutor
-    private SpongeExecutorService syncExecutor;
+    private SpongeExecutorService syncExecutorService;
 
     @Inject
     @AsynchronousExecutor
-    private SpongeExecutorService asyncExecutor;
+    private SpongeExecutorService asyncExecutorService;
 
     private LPTimings timings;
     private boolean lateLoad = false;
 
-    private LPConfiguration configuration;
+    private LuckPermsScheduler scheduler;
+    private LuckPermsConfiguration configuration;
     private SpongeUserManager userManager;
     private SpongeGroupManager groupManager;
     private TrackManager trackManager;
@@ -165,12 +162,13 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
     @Listener(order = Order.FIRST)
     public void onEnable(GamePreInitializationEvent event) {
+        scheduler = new LPSpongeScheduler(this);
         localeManager = new NoopLocaleManager();
         senderFactory = new SpongeSenderFactory(this);
         log = new LoggerImpl(getConsoleSender());
         LuckPermsPlugin.sendStartupBanner(getConsoleSender(), this);
-        debugHandler = new DebugHandler(asyncExecutor, getVersion());
-        permissionCache = new PermissionCache(asyncExecutor);
+        debugHandler = new DebugHandler(scheduler.getAsyncExecutor(), getVersion());
+        permissionCache = new PermissionCache(scheduler.getAsyncExecutor());
         timings = new LPTimings(this);
 
         getLog().info("Loading configuration...");
@@ -228,7 +226,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
         // load locale
         localeManager = new SimpleLocaleManager();
-        File locale = new File(getMainDir(), "lang.yml");
+        File locale = new File(getDataDirectory(), "lang.yml");
         if (locale.exists()) {
             getLog().info("Found locale file. Attempting to load from it.");
             try {
@@ -279,23 +277,19 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         // schedule update tasks
         int mins = getConfiguration().get(ConfigKeys.SYNC_TIME);
         if (mins > 0) {
-            Task t = scheduler.createTaskBuilder().async().interval(mins, TimeUnit.MINUTES).execute(new UpdateTask(this))
-                    .submit(LPSpongePlugin.this);
-            addShutdownHook(t::cancel);
+            long ticks = mins * 60 * 20;
+            scheduler.doAsyncRepeating(() -> updateTaskBuffer.request(), ticks);
         }
+        scheduler.doAsyncLater(() -> updateTaskBuffer.request(), 40L);
 
         // run an update instantly.
         updateTaskBuffer.requestDirectly();
 
         // register tasks
-        Task t2 = scheduler.createTaskBuilder().async().intervalTicks(60L).execute(new ExpireTemporaryTask(this)).submit(this);
-        Task t3 = scheduler.createTaskBuilder().async().intervalTicks(2400L).execute(new CacheHousekeepingTask(this)).submit(this);
-        Task t4 = scheduler.createTaskBuilder().async().intervalTicks(2400L).execute(new ServiceCacheHousekeepingTask(service)).submit(this);
-        Task t5 = scheduler.createTaskBuilder().async().intervalTicks(2400L).execute(() -> userManager.performCleanup()).submit(this);
-        addShutdownHook(t2::cancel);
-        addShutdownHook(t3::cancel);
-        addShutdownHook(t4::cancel);
-        addShutdownHook(t5::cancel);
+        scheduler.doAsyncRepeating(new ExpireTemporaryTask(this), 60L);
+        scheduler.doAsyncRepeating(new CacheHousekeepingTask(this), 2400L);
+        scheduler.doAsyncRepeating(new ServiceCacheHousekeepingTask(service), 2400L);
+        scheduler.doAsyncRepeating(() -> userManager.performCleanup(), 2400L);
 
         getLog().info("Successfully loaded.");
     }
@@ -320,6 +314,8 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
         getLog().info("Unregistering API...");
         ApiHandler.unregisterProvider();
+
+        scheduler.shutdown();
     }
 
     @Listener
@@ -356,9 +352,8 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         service.invalidateParentCaches();
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     @Override
-    public File getMainDir() {
+    public File getDataDirectory() {
         File base = configDir.toFile().getParentFile().getParentFile();
         File luckPermsDir = new File(base, "luckperms");
         luckPermsDir.mkdirs();
@@ -366,8 +361,8 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     }
 
     @Override
-    public File getDataFolder() {
-        return getMainDir();
+    public File getConfigDirectory() {
+        return configDir.toFile();
     }
 
     @Override
@@ -403,13 +398,13 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     }
 
     @Override
-    public PlatformType getType() {
+    public PlatformType getServerType() {
         return PlatformType.SPONGE;
     }
 
     @Override
     public String getServerName() {
-        return getGame().getPlatform().getType().name();
+        return getGame().getPlatform().getImplementation().getDescription().orElse("null");
     }
 
     @Override
@@ -433,12 +428,12 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     }
 
     @Override
-    public boolean isOnline(UUID external) {
+    public boolean isPlayerOnline(UUID external) {
         return game.getServer().getPlayer(external).isPresent();
     }
 
     @Override
-    public List<Sender> getSenders() {
+    public List<Sender> getOnlineSenders() {
         return game.getServer().getOnlinePlayers().stream()
                 .map(s -> getSenderFactory().wrap(s))
                 .collect(Collectors.toList());
@@ -455,43 +450,8 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     }
 
     @Override
-    public Object getPlugin(String name) {
-        return game.getPluginManager().getPlugin(name).map(PluginContainer::getInstance).orElse(null);
-    }
-
-    @Override
-    public Object getService(Class clazz) {
-        return game.getServiceManager().provideUnchecked(clazz);
-    }
-
-    @Override
-    public UUID getUUID(String playerName) {
+    public UUID getUuidFromUsername(String playerName) {
         return game.getServer().getPlayer(playerName).map(Player::getUniqueId).orElse(null);
-    }
-
-    @Override
-    public boolean isPluginLoaded(String name) {
-        return game.getPluginManager().isLoaded(name);
-    }
-
-    @Override
-    public void addShutdownHook(Runnable r) {
-        shutdownHooks.add(r);
-    }
-
-    @Override
-    public void doAsync(Runnable r) {
-        scheduler.createTaskBuilder().async().execute(r).submit(this);
-    }
-
-    @Override
-    public void doSync(Runnable r) {
-        scheduler.createTaskBuilder().execute(r).submit(this);
-    }
-
-    @Override
-    public void doAsyncRepeating(Runnable r, long interval) {
-        scheduler.createTaskBuilder().async().intervalTicks(interval).execute(r).submit(this);
     }
 
     @Override

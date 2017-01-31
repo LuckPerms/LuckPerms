@@ -29,13 +29,13 @@ import com.google.common.collect.Maps;
 import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.config.LPConfiguration;
+import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 
 import java.util.Map;
 
 @AllArgsConstructor
 public class ServerCalculator<T> extends ContextCalculator<T> {
-    private final LPConfiguration config;
+    private final LuckPermsConfiguration config;
 
     @Override
     public MutableContextSet giveApplicableContext(T subject, MutableContextSet accumulator) {

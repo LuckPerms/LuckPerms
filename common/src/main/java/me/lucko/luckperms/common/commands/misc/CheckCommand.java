@@ -23,7 +23,6 @@
 package me.lucko.luckperms.common.commands.misc;
 
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.caching.UserCache;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
@@ -34,6 +33,7 @@ import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;

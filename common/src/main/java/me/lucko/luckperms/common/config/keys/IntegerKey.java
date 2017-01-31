@@ -25,7 +25,7 @@ package me.lucko.luckperms.common.config.keys;
 import lombok.AllArgsConstructor;
 
 import me.lucko.luckperms.common.config.ConfigKey;
-import me.lucko.luckperms.common.config.LPConfiguration;
+import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 
 @AllArgsConstructor(staticName = "of")
 public class IntegerKey implements ConfigKey<Integer> {
@@ -33,7 +33,7 @@ public class IntegerKey implements ConfigKey<Integer> {
     private final int def;
 
     @Override
-    public Integer get(LPConfiguration config) {
+    public Integer get(LuckPermsConfiguration config) {
         return config.getInt(path, def);
     }
 }

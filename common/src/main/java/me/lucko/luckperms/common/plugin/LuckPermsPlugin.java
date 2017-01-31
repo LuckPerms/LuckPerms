@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common;
+package me.lucko.luckperms.common.plugin;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Logger;
@@ -31,7 +31,7 @@ import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.commands.BaseCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.config.LPConfiguration;
+import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.core.UuidCache;
@@ -54,7 +54,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Executor;
 
 /**
  * Main internal interface for LuckPerms plugins, providing the base for abstraction throughout the project.
@@ -89,7 +88,7 @@ public interface LuckPermsPlugin {
      *
      * @return the plugin config
      */
-    LPConfiguration getConfiguration();
+    LuckPermsConfiguration getConfiguration();
 
     /**
      * Gets the primary data storage instance. This is likely to be wrapped with extra layers for caching, etc.
@@ -177,30 +176,19 @@ public interface LuckPermsPlugin {
     PermissionCache getPermissionCache();
 
     /**
-     * Execute a runnable asynchronously
+     * Gets the LuckPerms Scheduler instance
      *
-     * @param r the task to run
+     * @return the scheduler
      */
-    void doAsync(Runnable r);
+    LuckPermsScheduler getScheduler();
 
-    /**
-     * Execute a runnable synchronously
-     *
-     * @param r the task to run
-     */
-    void doSync(Runnable r);
+    default void doAsync(Runnable r) {
+        getScheduler().doAsync(r);
+    }
 
-    Executor getSyncExecutor();
-
-    Executor getAsyncExecutor();
-
-    /**
-     * Execute a runnable asynchronously on a loop
-     *
-     * @param r        the task to run
-     * @param interval the time between runs in ticks
-     */
-    void doAsyncRepeating(Runnable r, long interval);
+    default void doSync(Runnable r) {
+        getScheduler().doSync(r);
+    }
 
     /**
      * Gets a string of the plugin's version
@@ -214,7 +202,7 @@ public interface LuckPermsPlugin {
      *
      * @return the platform type
      */
-    PlatformType getType();
+    PlatformType getServerType();
 
     /**
      * Gets the name or "brand" of the running platform
@@ -229,18 +217,26 @@ public interface LuckPermsPlugin {
     String getServerVersion();
 
     /**
-     * Gets the plugins main directory
-     *
-     * @return the main plugin directory
-     */
-    File getMainDir();
-
-    /**
      * Gets the plugins main data storage directory
+     *
+     * <p>Bukkit: /root/plugins/LuckPerms</p>
+     * <p>Bungee: /root/plugins/LuckPerms</p>
+     * <p>Sponge: /root/luckperms/</p>
      *
      * @return the platforms data folder
      */
-    File getDataFolder();
+    File getDataDirectory();
+
+    /**
+     * Gets the plugins config directory.
+     *
+     * <p>This is the same as {@link #getDataDirectory()} on Bukkit/Bungee, but different on Sponge.</p>
+     *
+     * @return the platforms config folder
+     */
+    default File getConfigDirectory() {
+        return getDataDirectory();
+    }
 
     /**
      * Gets a bundled resource file from the jar
@@ -258,7 +254,7 @@ public interface LuckPermsPlugin {
      */
     default Message getPlayerStatus(UUID uuid) {
         UUID external = getUuidCache().getExternalUUID(uuid);
-        return isOnline(external) ? Message.PLAYER_ONLINE : Message.PLAYER_OFFLINE;
+        return isPlayerOnline(external) ? Message.PLAYER_ONLINE : Message.PLAYER_OFFLINE;
     }
 
     /**
@@ -305,14 +301,14 @@ public interface LuckPermsPlugin {
      * @param external the users external uuid
      * @return true if the user is online
      */
-    boolean isOnline(UUID external);
+    boolean isPlayerOnline(UUID external);
 
     /**
      * Gets a list of online Senders on the platform
      *
      * @return a {@link List} of senders online on the platform
      */
-    List<Sender> getSenders();
+    List<Sender> getOnlineSenders();
 
     /**
      * Gets the console.
@@ -350,36 +346,12 @@ public interface LuckPermsPlugin {
     Set<UUID> getIgnoringLogs();
 
     /**
-     * Gets a loaded plugins instance from the platform
-     *
-     * @param name the name of the plugin
-     * @return a plugin instance
-     */
-    Object getPlugin(String name);
-
-    /**
-     * Gets a provided service from the platform.
-     *
-     * @param clazz the class of the service
-     * @return the service instance, if it is provided for
-     */
-    Object getService(Class clazz);
-
-    /**
      * Gets the UUID of a player. Used as a backup for migration
      *
      * @param playerName the players name
      * @return a uuid if found, or null if not
      */
-    UUID getUUID(String playerName);
-
-    /**
-     * Checks if a plugin is loaded on the platform
-     *
-     * @param name the name of the plugin
-     * @return true if the plugin is loaded
-     */
-    boolean isPluginLoaded(String name);
+    UUID getUuidFromUsername(String playerName);
 
     /**
      * Gets the update task buffer of the platform, used for scheduling and running update tasks.
@@ -387,12 +359,6 @@ public interface LuckPermsPlugin {
      * @return the update task buffer instance
      */
     BufferedRequest<Void> getUpdateTaskBuffer();
-
-    /**
-     * Adds a runnable to be called when the plugin disables
-     * @param r the runnable to run
-     */
-    void addShutdownHook(Runnable r);
 
     /**
      * Called at the end of the sync task.
@@ -415,7 +381,7 @@ public interface LuckPermsPlugin {
         sender.sendMessage(Util.color("&b    |    |  | /  ` |__/ &3|__) |__  |__)  |\\/| /__` "));
         sender.sendMessage(Util.color("&b    |___ \\__/ \\__, |  \\ &3|    |___ |  \\  |  | .__/ "));
         sender.sendMessage(Util.color(" "));
-        sender.sendMessage(Util.color("&2  Loading version &bv" + plugin.getVersion() + "&2 on " + plugin.getType().getFriendlyName() + " - " + plugin.getServerName()));
+        sender.sendMessage(Util.color("&2  Loading version &bv" + plugin.getVersion() + "&2 on " + plugin.getServerType().getFriendlyName() + " - " + plugin.getServerName()));
         sender.sendMessage(Util.color(" "));
     }
 

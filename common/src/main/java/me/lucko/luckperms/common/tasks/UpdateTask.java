@@ -26,8 +26,8 @@ import lombok.AllArgsConstructor;
 
 import me.lucko.luckperms.api.event.events.PostSyncEvent;
 import me.lucko.luckperms.api.event.events.PreSyncEvent;
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 @AllArgsConstructor
 public class UpdateTask implements Runnable {

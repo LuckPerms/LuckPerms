@@ -35,7 +35,6 @@ import com.zaxxer.hikari.HikariDataSource;
 
 import me.lucko.luckperms.api.data.Callback;
 import me.lucko.luckperms.bukkit.migration.utils.LPResultRunnable;
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -46,8 +45,11 @@ import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.LogEntry;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
+
+import org.bukkit.Bukkit;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -202,7 +204,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         };
         log.accept("Starting PowerfulPerms migration.");
         
-        if (!plugin.isPluginLoaded("PowerfulPerms")) {
+        if (!Bukkit.getPluginManager().isPluginEnabled("PowerfulPerms")) {
             log.accept("Error -> PowerfulPerms is not loaded.");
             return CommandResult.STATE_ERROR;
         }
@@ -266,7 +268,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
 
         log.accept("Found " + uuids.size() + " uuids. Starting migration.");
 
-        PowerfulPermsPlugin ppPlugin = (PowerfulPermsPlugin) plugin.getPlugin("PowerfulPerms");
+        PowerfulPermsPlugin ppPlugin = (PowerfulPermsPlugin) Bukkit.getPluginManager().getPlugin("PowerfulPerms");
         PermissionManager pm = ppPlugin.getPermissionManager();
 
         // Groups first.

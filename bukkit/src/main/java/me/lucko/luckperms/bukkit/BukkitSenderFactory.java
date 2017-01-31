@@ -23,9 +23,9 @@
 package me.lucko.luckperms.bukkit;
 
 import me.lucko.luckperms.bukkit.compat.MessageHandler;
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.sender.SenderFactory;
 import me.lucko.luckperms.common.constants.Constants;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;

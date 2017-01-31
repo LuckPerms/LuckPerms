@@ -22,7 +22,6 @@
 
 package me.lucko.luckperms.bukkit.migration;
 
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SubCommand;
@@ -34,9 +33,11 @@ import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
+import org.bukkit.Bukkit;
 import org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsService;
 import org.tyrannyofheaven.bukkit.zPermissions.dao.PermissionService;
 import org.tyrannyofheaven.bukkit.zPermissions.model.EntityMetadata;
@@ -63,19 +64,19 @@ public class MigrationZPermissions extends SubCommand<Object> {
         };
         log.accept("Starting zPermissions migration.");
         
-        if (!plugin.isPluginLoaded("zPermissions")) {
+        if (!Bukkit.getPluginManager().isPluginEnabled("zPermissions")) {
             log.accept("Error -> zPermissions is not loaded.");
             return CommandResult.STATE_ERROR;
         }
 
-        ZPermissionsService service = (ZPermissionsService) plugin.getService(ZPermissionsService.class);
-        if (service == null) {
+        if (!Bukkit.getServicesManager().isProvidedFor(ZPermissionsService.class)) {
             log.accept("Error -> zPermissions is not loaded.");
             return CommandResult.STATE_ERROR;
         }
+
+        ZPermissionsService service = Bukkit.getServicesManager().getRegistration(ZPermissionsService.class).getProvider();
 
         PermissionService internalService;
-
         try {
             Field psField = service.getClass().getDeclaredField("permissionService");
             psField.setAccessible(true);

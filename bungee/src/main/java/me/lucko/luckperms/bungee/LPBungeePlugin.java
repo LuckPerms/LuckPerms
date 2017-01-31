@@ -30,7 +30,6 @@ import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.bungee.messaging.BungeeMessagingService;
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.api.ApiHandler;
 import me.lucko.luckperms.common.api.ApiProvider;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
@@ -38,7 +37,7 @@ import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.config.LPConfiguration;
+import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.contexts.ServerCalculator;
 import me.lucko.luckperms.common.core.UuidCache;
@@ -57,6 +56,8 @@ import me.lucko.luckperms.common.managers.impl.GenericTrackManager;
 import me.lucko.luckperms.common.managers.impl.GenericUserManager;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.messaging.RedisMessaging;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.plugin.LuckPermsScheduler;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.StorageFactory;
 import me.lucko.luckperms.common.storage.StorageType;
@@ -73,22 +74,18 @@ import net.md_5.bungee.api.plugin.Plugin;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Getter
 public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     private final Set<UUID> ignoringLogs = ConcurrentHashMap.newKeySet();
-    private final Set<Runnable> shutdownHooks = Collections.synchronizedSet(new HashSet<>());
-    private Executor executor;
-    private LPConfiguration configuration;
+    private LuckPermsScheduler scheduler;
+    private LuckPermsConfiguration configuration;
     private UserManager userManager;
     private GroupManager groupManager;
     private TrackManager trackManager;
@@ -109,13 +106,13 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
     @Override
     public void onEnable() {
-        executor = r -> getProxy().getScheduler().runAsync(this, r);
+        scheduler = new LPBungeeScheduler(this);
         localeManager = new NoopLocaleManager();
         senderFactory = new BungeeSenderFactory(this);
         log = new LoggerImpl(getConsoleSender());
         LuckPermsPlugin.sendStartupBanner(getConsoleSender(), this);
-        debugHandler = new DebugHandler(executor, getVersion());
-        permissionCache = new PermissionCache(executor);
+        debugHandler = new DebugHandler(scheduler.getAsyncExecutor(), getVersion());
+        permissionCache = new PermissionCache(scheduler.getAsyncExecutor());
 
         getLog().info("Loading configuration...");
         configuration = new BungeeConfig(this);
@@ -214,23 +211,23 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         // schedule update tasks
         int mins = getConfiguration().get(ConfigKeys.SYNC_TIME);
         if (mins > 0) {
-            getProxy().getScheduler().schedule(this, new UpdateTask(this), mins, mins, TimeUnit.MINUTES);
+            long ticks = mins * 60 * 20;
+            scheduler.doAsyncRepeating(() -> updateTaskBuffer.request(), ticks);
         }
+        scheduler.doAsyncLater(() -> updateTaskBuffer.request(), 40L);
 
         // run an update instantly.
         updateTaskBuffer.requestDirectly();
 
         // register tasks
-        getProxy().getScheduler().schedule(this, new ExpireTemporaryTask(this), 3L, 3L, TimeUnit.SECONDS);
-        getProxy().getScheduler().schedule(this, new CacheHousekeepingTask(this), 2L, 2L, TimeUnit.MINUTES);
+        scheduler.doAsyncRepeating(new ExpireTemporaryTask(this), 60L);
+        scheduler.doAsyncRepeating(new CacheHousekeepingTask(this), 2400L);
 
         getLog().info("Successfully loaded.");
     }
 
     @Override
     public void onDisable() {
-        shutdownHooks.forEach(Runnable::run);
-
         getLog().info("Closing datastore...");
         storage.shutdown();
 
@@ -252,7 +249,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     }
 
     @Override
-    public PlatformType getType() {
+    public PlatformType getServerType() {
         return PlatformType.BUNGEE;
     }
 
@@ -267,8 +264,8 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     }
 
     @Override
-    public File getMainDir() {
-        return getDataFolder();
+    public File getDataDirectory() {
+        return super.getDataFolder();
     }
 
     @Override
@@ -314,12 +311,12 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     }
 
     @Override
-    public boolean isOnline(UUID external) {
+    public boolean isPlayerOnline(UUID external) {
         return getProxy().getPlayer(external) != null;
     }
 
     @Override
-    public List<Sender> getSenders() {
+    public List<Sender> getOnlineSenders() {
         return getProxy().getPlayers().stream()
                 .map(p -> getSenderFactory().wrap(p))
                 .collect(Collectors.toList());
@@ -360,54 +357,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     }
 
     @Override
-    public Object getPlugin(String name) {
-        return getProxy().getPluginManager().getPlugin(name);
-    }
-
-    @Override
-    public Object getService(Class clazz) {
-        return null;
-    }
-
-    @Override
-    public UUID getUUID(String playerName) {
+    public UUID getUuidFromUsername(String playerName) {
         return null; // Not needed on Bungee
-    }
-
-    @Override
-    public boolean isPluginLoaded(String name) {
-        return getProxy().getPluginManager().getPlugins().stream()
-                .anyMatch(p -> p.getDescription().getName().equalsIgnoreCase(name));
-    }
-
-    @Override
-    public void addShutdownHook(Runnable r) {
-        shutdownHooks.add(r);
-    }
-
-    @Override
-    public void doAsync(Runnable r) {
-        getProxy().getScheduler().runAsync(this, r);
-    }
-
-    @Override
-    public void doSync(Runnable r) {
-        doAsync(r);
-    }
-
-    @Override
-    public Executor getSyncExecutor() {
-        return executor;
-    }
-
-    @Override
-    public Executor getAsyncExecutor() {
-        return executor;
-    }
-
-    @Override
-    public void doAsyncRepeating(Runnable r, long interval) {
-        long millis = interval * 50L; // convert from ticks to milliseconds
-        getProxy().getScheduler().schedule(this, r, millis, millis, TimeUnit.MILLISECONDS);
     }
 }

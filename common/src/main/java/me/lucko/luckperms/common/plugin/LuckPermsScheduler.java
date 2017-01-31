@@ -20,28 +20,24 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.user;
+package me.lucko.luckperms.common.plugin;
 
-import me.lucko.luckperms.common.commands.CommandException;
-import me.lucko.luckperms.common.commands.CommandResult;
-import me.lucko.luckperms.common.commands.SubCommand;
-import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.model.User;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.utils.Predicates;
+import java.util.concurrent.Executor;
 
-import java.util.List;
+public interface LuckPermsScheduler {
 
-public class UserGetUUID extends SubCommand<User> {
-    public UserGetUUID() {
-        super("getuuid", "Displays the user's internal LuckPerms unique id", Permission.USER_GETUUID, Predicates.alwaysFalse(), null);
-    }
+    Executor getAsyncExecutor();
+    Executor getSyncExecutor();
 
-    @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) throws CommandException {
-        Message.USER_GETUUID.send(sender, user.getName(), user.getUuid().toString());
-        return CommandResult.SUCCESS;
-    }
+    void doAsync(Runnable r);
+    void doSync(Runnable r);
+
+    void doAsyncRepeating(Runnable r, long interval);
+    void doSyncRepeating(Runnable r, long interval);
+
+    void doAsyncLater(Runnable r, long delay);
+    void doSyncLater(Runnable r, long delay);
+
+    void shutdown();
+
 }

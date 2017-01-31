@@ -27,7 +27,7 @@ import lombok.AllArgsConstructor;
 import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.common.config.ConfigKey;
-import me.lucko.luckperms.common.config.LPConfiguration;
+import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 
 import java.util.Map;
 
@@ -36,7 +36,7 @@ public class MapKey implements ConfigKey<Map<String, String>> {
     private final String path;
 
     @Override
-    public Map<String, String> get(LPConfiguration config) {
+    public Map<String, String> get(LuckPermsConfiguration config) {
         return ImmutableMap.copyOf(config.getMap(path, ImmutableMap.of()));
     }
 }

@@ -28,8 +28,8 @@ import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;

@@ -24,7 +24,7 @@ package me.lucko.luckperms.common.messaging;
 
 import lombok.RequiredArgsConstructor;
 
-import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;

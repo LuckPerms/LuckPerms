@@ -25,8 +25,8 @@ package me.lucko.luckperms.common.caching.stacking.elements;
 import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.api.LocalizedNode;
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.caching.stacking.MetaStackElement;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.Map;
 import java.util.Optional;

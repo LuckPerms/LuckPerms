@@ -32,8 +32,8 @@ import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.data.Callback;
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.Storage;
 
 import java.util.Set;
@@ -65,7 +65,7 @@ public class DatastoreDelegate implements Datastore {
 
     private <T> void registerCallback(CompletableFuture<T> fut, Callback<T> c) {
         if (c != null) {
-            fut.thenAcceptAsync(Callback.convertToConsumer(c), plugin.getSyncExecutor());
+            fut.thenAcceptAsync(Callback.convertToConsumer(c), plugin.getScheduler().getSyncExecutor());
         }
     }
 
@@ -105,7 +105,7 @@ public class DatastoreDelegate implements Datastore {
 
         @Override
         public void getLog(@NonNull Callback<Log> callback) {
-            master.force().getLog().thenAcceptAsync(log -> callback.onComplete(new LogDelegate(log)), plugin.getSyncExecutor());
+            master.force().getLog().thenAcceptAsync(log -> callback.onComplete(new LogDelegate(log)), plugin.getScheduler().getSyncExecutor());
         }
 
         @Override

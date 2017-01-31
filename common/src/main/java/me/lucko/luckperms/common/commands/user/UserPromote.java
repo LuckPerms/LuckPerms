@@ -26,7 +26,6 @@ import com.google.common.base.Objects;
 
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.event.events.UserPromoteEvent;
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.api.delegate.TrackDelegate;
 import me.lucko.luckperms.common.api.delegate.UserDelegate;
 import me.lucko.luckperms.common.commands.Arg;
@@ -44,6 +43,7 @@ import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.LogEntry;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;

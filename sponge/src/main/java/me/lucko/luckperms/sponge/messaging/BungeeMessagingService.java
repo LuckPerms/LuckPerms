@@ -63,7 +63,7 @@ public class BungeeMessagingService extends AbstractMessagingService implements 
 
     @Override
     protected void sendMessage(String channel, String message) {
-        plugin.getScheduler().createTaskBuilder().interval(10, TimeUnit.SECONDS).execute(task -> {
+        plugin.getSpongeScheduler().createTaskBuilder().interval(10, TimeUnit.SECONDS).execute(task -> {
             Collection<Player> players = plugin.getGame().getServer().getOnlinePlayers();
             if (players.isEmpty()) {
                 return;

@@ -32,8 +32,8 @@ import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.Storage;
 import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.User;
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.List;
 import java.util.Set;
@@ -67,12 +67,12 @@ public class StorageDelegate implements Storage {
 
     @Override
     public Executor getSyncExecutor() {
-        return plugin.getSyncExecutor();
+        return plugin.getScheduler().getSyncExecutor();
     }
 
     @Override
     public Executor getAsyncExecutor() {
-        return plugin.getAsyncExecutor();
+        return plugin.getScheduler().getAsyncExecutor();
     }
 
     @Override

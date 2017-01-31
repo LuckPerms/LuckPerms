@@ -22,7 +22,6 @@
 
 package me.lucko.luckperms.bukkit.migration;
 
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -33,6 +32,7 @@ import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.data.LogEntry;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
@@ -43,6 +43,7 @@ import org.anjocaido.groupmanager.data.Group;
 import org.anjocaido.groupmanager.data.User;
 import org.anjocaido.groupmanager.dataholder.WorldDataHolder;
 import org.anjocaido.groupmanager.dataholder.worlds.WorldsHolder;
+import org.bukkit.Bukkit;
 
 import java.util.AbstractMap;
 import java.util.HashMap;
@@ -67,7 +68,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
         };
         log.accept("Starting GroupManager migration.");
         
-        if (!plugin.isPluginLoaded("GroupManager")) {
+        if (!Bukkit.getPluginManager().isPluginEnabled("GroupManager")) {
             log.accept("Error -> GroupManager is not loaded.");
             return CommandResult.STATE_ERROR;
         }
@@ -76,7 +77,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
                 .map(String::toLowerCase)
                 .collect(Collectors.toList());
 
-        GroupManager gm = (GroupManager) plugin.getPlugin("GroupManager");
+        GroupManager gm = (GroupManager) Bukkit.getPluginManager().getPlugin("GroupManager");
 
         // Migrate Global Groups
         log.accept("Starting Global Group migration.");

@@ -24,8 +24,8 @@ package me.lucko.luckperms.common.tasks;
 
 import lombok.RequiredArgsConstructor;
 
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 @RequiredArgsConstructor
 public class CacheHousekeepingTask implements Runnable {

@@ -24,6 +24,6 @@ package me.lucko.luckperms.common.config;
 
 public interface ConfigKey<T> {
 
-    T get(LPConfiguration config);
+    T get(LuckPermsConfiguration config);
 
 }

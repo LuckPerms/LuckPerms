@@ -25,11 +25,11 @@ package me.lucko.luckperms.common.managers.impl;
 import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.core.UserIdentifier;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.managers.AbstractManager;
 import me.lucko.luckperms.common.managers.UserManager;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.Set;
@@ -130,7 +130,7 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
 
     @Override
     public void cleanup(User user) {
-        if (!plugin.isOnline(plugin.getUuidCache().getExternalUUID(user.getUuid()))) {
+        if (!plugin.isPlayerOnline(plugin.getUuidCache().getExternalUUID(user.getUuid()))) {
             unload(user);
         }
     }

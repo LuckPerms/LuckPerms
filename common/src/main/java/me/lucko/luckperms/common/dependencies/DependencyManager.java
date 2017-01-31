@@ -29,8 +29,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.api.PlatformType;
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.StorageType;
 
 import java.io.File;
@@ -80,7 +80,7 @@ public class DependencyManager {
 
         plugin.getLog().info("Identified the following dependencies: " + dependencies.toString());
 
-        File data = new File(plugin.getDataFolder(), "lib");
+        File data = new File(plugin.getDataDirectory(), "lib");
         data.mkdirs();
 
         // Download files.
@@ -131,7 +131,7 @@ public class DependencyManager {
     private static void loadJar(LuckPermsPlugin plugin, File file, String baseClass) throws Exception {
         URLClassLoader classLoader = (URLClassLoader) plugin.getClass().getClassLoader();
 
-        if (plugin.getType() != PlatformType.SPONGE && !plugin.getServerName().equals("KCauldron")) {
+        if (plugin.getServerType() != PlatformType.SPONGE && !plugin.getServerName().equals("KCauldron")) {
             classLoader = (URLClassLoader) classLoader.getParent();
         }
 

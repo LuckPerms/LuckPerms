@@ -33,7 +33,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
-public abstract class AbstractConfiguration implements LPConfiguration {
+public abstract class AbstractConfiguration implements LuckPermsConfiguration {
     private final LoadingCache<ConfigKey<?>, Optional<Object>> cache = CacheBuilder.newBuilder()
             .build(new CacheLoader<ConfigKey<?>, Optional<Object>>() {
                 @Override

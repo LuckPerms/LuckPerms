@@ -29,7 +29,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.List;
 import java.util.Map;

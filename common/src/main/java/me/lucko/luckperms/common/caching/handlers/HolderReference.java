@@ -22,8 +22,8 @@
 
 package me.lucko.luckperms.common.caching.handlers;
 
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Identifiable;
 
 import java.util.function.Consumer;

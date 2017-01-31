@@ -24,7 +24,7 @@ package me.lucko.luckperms.common.commands.sender;
 
 import lombok.RequiredArgsConstructor;
 
-import me.lucko.luckperms.common.LuckPermsPlugin;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import io.github.mkremins.fanciful.FancyMessage;
 

@@ -23,8 +23,8 @@
 package me.lucko.luckperms.common.caching.stacking;
 
 import me.lucko.luckperms.api.LocalizedNode;
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.core.model.Track;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.Map;
 import java.util.Optional;

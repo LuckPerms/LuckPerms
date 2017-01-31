@@ -28,7 +28,6 @@ import lombok.Setter;
 
 import com.google.common.base.Splitter;
 
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.sender.Sender;
@@ -36,6 +35,7 @@ import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import io.github.mkremins.fanciful.FancyMessage;
 

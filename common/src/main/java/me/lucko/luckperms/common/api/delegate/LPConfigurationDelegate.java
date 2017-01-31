@@ -28,15 +28,16 @@ import me.lucko.luckperms.api.LPConfiguration;
 import me.lucko.luckperms.api.data.DatastoreConfiguration;
 import me.lucko.luckperms.api.data.MySQLConfiguration;
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 
 import java.util.Map;
 
 /**
- * Provides a link between {@link LPConfiguration} and {@link me.lucko.luckperms.common.config.LPConfiguration}
+ * Provides a link between {@link LPConfiguration} and {@link LuckPermsConfiguration}
  */
 @AllArgsConstructor
 public class LPConfigurationDelegate implements LPConfiguration {
-    private final me.lucko.luckperms.common.config.LPConfiguration master;
+    private final LuckPermsConfiguration master;
 
     @Override
     public String getServer() {

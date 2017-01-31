@@ -25,11 +25,11 @@ package me.lucko.luckperms.common.utils;
 import lombok.AllArgsConstructor;
 
 import me.lucko.luckperms.api.event.events.UserFirstLoginEvent;
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.core.UuidCache;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.defaults.Rule;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.UUID;
 

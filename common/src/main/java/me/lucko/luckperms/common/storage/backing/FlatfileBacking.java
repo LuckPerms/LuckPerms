@@ -23,9 +23,9 @@
 package me.lucko.luckperms.common.storage.backing;
 
 import me.lucko.luckperms.api.LogEntry;
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.data.Log;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

@@ -26,7 +26,6 @@ import lombok.Getter;
 
 import com.google.common.collect.ImmutableList;
 
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.group.CreateGroup;
 import me.lucko.luckperms.common.commands.group.DeleteGroup;
 import me.lucko.luckperms.common.commands.group.GroupMainCommand;
@@ -53,6 +52,7 @@ import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import io.github.mkremins.fanciful.ChatColor;
 import io.github.mkremins.fanciful.FancyMessage;

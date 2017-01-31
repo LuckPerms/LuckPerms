@@ -22,9 +22,9 @@
 
 package me.lucko.luckperms.sponge;
 
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.sender.SenderFactory;
 import me.lucko.luckperms.common.constants.Constants;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;

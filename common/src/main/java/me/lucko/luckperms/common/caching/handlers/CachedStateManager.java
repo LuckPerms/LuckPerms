@@ -27,8 +27,8 @@ import lombok.RequiredArgsConstructor;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.HashSet;
 import java.util.Set;

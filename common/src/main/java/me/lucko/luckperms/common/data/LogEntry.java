@@ -23,7 +23,6 @@
 package me.lucko.luckperms.common.data;
 
 import me.lucko.luckperms.api.event.events.LogNotifyEvent;
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.Message;
@@ -32,6 +31,7 @@ import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.List;
 
@@ -58,7 +58,7 @@ public class LogEntry extends me.lucko.luckperms.api.LogEntry {
 
         final String msg = super.getFormatted();
 
-        List<Sender> senders = plugin.getSenders();
+        List<Sender> senders = plugin.getOnlineSenders();
         senders.add(plugin.getConsoleSender());
 
         if (sender == null) {

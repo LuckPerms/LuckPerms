@@ -22,15 +22,15 @@
 
 package me.lucko.luckperms.common.commands.misc;
 
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.config.LPConfiguration;
+import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.LinkedHashMap;
@@ -59,10 +59,10 @@ public class InfoCommand extends SingleCommand {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
-        final LPConfiguration c = plugin.getConfiguration();
+        final LuckPermsConfiguration c = plugin.getConfiguration();
         Message.INFO.send(sender,
                 plugin.getVersion(),
-                plugin.getType().getFriendlyName(),
+                plugin.getServerType().getFriendlyName(),
                 plugin.getStorage().getName(),
                 c.get(ConfigKeys.SERVER),
                 c.get(ConfigKeys.SYNC_TIME),

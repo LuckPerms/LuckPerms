@@ -24,13 +24,13 @@ package me.lucko.luckperms.common.caching.stacking;
 
 import lombok.experimental.UtilityClass;
 
-import me.lucko.luckperms.common.LuckPermsPlugin;
 import me.lucko.luckperms.common.caching.stacking.elements.HighestPriorityElement;
 import me.lucko.luckperms.common.caching.stacking.elements.HighestPriorityOwnElement;
 import me.lucko.luckperms.common.caching.stacking.elements.HighestPriorityTrackElement;
 import me.lucko.luckperms.common.caching.stacking.elements.LowestPriorityElement;
 import me.lucko.luckperms.common.caching.stacking.elements.LowestPriorityOwnElement;
 import me.lucko.luckperms.common.caching.stacking.elements.LowestPriorityTrackElement;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
 import java.util.List;

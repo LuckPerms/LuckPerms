@@ -129,7 +129,7 @@ public class LuckPermsService implements PermissionService {
         localOptionCaches = Collections.newSetFromMap(new MapMaker().weakKeys().makeMap());
         localDataCaches = Collections.newSetFromMap(new MapMaker().weakKeys().makeMap());
 
-        storage = new SubjectStorage(new File(plugin.getDataFolder(), "local"));
+        storage = new SubjectStorage(new File(plugin.getDataDirectory(), "local"));
 
         userSubjects = plugin.getUserManager();
         fallbackUserSubjects = new PersistedCollection(this, "fallback-users", true);
