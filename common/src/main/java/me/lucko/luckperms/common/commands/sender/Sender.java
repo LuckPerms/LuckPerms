@@ -78,4 +78,11 @@ public interface Sender {
      */
     boolean hasPermission(Permission permission);
 
+    /**
+     * Gets whether this sender is the console
+     *
+     * @return if the sender is the console
+     */
+    boolean isConsole();
+
 }

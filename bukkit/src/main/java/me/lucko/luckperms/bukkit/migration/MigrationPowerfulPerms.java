@@ -200,7 +200,9 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
     private CommandResult run(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         Consumer<String> log = s -> {
             Message.MIGRATION_LOG.send(sender, s);
-            Message.MIGRATION_LOG.send(plugin.getConsoleSender(), s);
+            if (!sender.isConsole()) {
+                Message.MIGRATION_LOG.send(plugin.getConsoleSender(), s);
+            }
         };
         log.accept("Starting PowerfulPerms migration.");
         

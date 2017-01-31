@@ -180,7 +180,9 @@ public class MigrationBPermissions extends SubCommand<Object> {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) throws CommandException {
         Consumer<String> log = s -> {
             Message.MIGRATION_LOG.send(sender, s);
-            Message.MIGRATION_LOG.send(plugin.getConsoleSender(), s);
+            if (!sender.isConsole()) {
+                Message.MIGRATION_LOG.send(plugin.getConsoleSender(), s);
+            }
         };
         log.accept("Starting bPermissions migration.");
 

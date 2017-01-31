@@ -110,7 +110,12 @@ public class ExportCommand extends SingleCommand {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
-        Consumer<String> log = s -> Message.EXPORT_LOG.send(sender, s);
+        Consumer<String> log = s -> {
+            Message.EXPORT_LOG.send(sender, s);
+            if (!sender.isConsole()) {
+                Message.EXPORT_LOG.send(plugin.getConsoleSender(), s);
+            }
+        };
 
         File f = new File(plugin.getDataDirectory(), args.get(0));
         if (f.exists()) {
