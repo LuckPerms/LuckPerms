@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.common.commands.sender;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import me.lucko.luckperms.common.constants.Constants;
@@ -39,6 +40,7 @@ import java.util.UUID;
  * @param <T> the command sender type
  */
 @Getter
+@EqualsAndHashCode(of = "uuid")
 public class AbstractSender<T> implements Sender {
     private final LuckPermsPlugin platform;
     private final SenderFactory<T> factory;

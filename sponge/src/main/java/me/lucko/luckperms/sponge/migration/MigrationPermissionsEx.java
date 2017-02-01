@@ -25,9 +25,9 @@ package me.lucko.luckperms.sponge.migration;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SubCommand;
+import me.lucko.luckperms.common.commands.migration.MigrationLogger;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.Track;
@@ -51,7 +51,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.UUID;
-import java.util.function.Consumer;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static me.lucko.luckperms.sponge.migration.MigrationUtils.migrateSubject;
 
@@ -62,19 +62,17 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) throws CommandException {
-        Consumer<String> log = s -> {
-            Message.MIGRATION_LOG.send(sender, s);
-            if (!sender.isConsole()) {
-                Message.MIGRATION_LOG.send(plugin.getConsoleSender(), s);
-            }
-        };
-        log.accept("Starting PermissionsEx migration.");
+        MigrationLogger log = new MigrationLogger("PermissionsEx");
+        log.addListener(plugin.getConsoleSender());
+        log.addListener(sender);
+
+        log.log("Starting.");
         
         final LuckPermsService lpService = ((LPSpongePlugin) plugin).getService();
 
         Optional<PluginContainer> pex = Sponge.getPluginManager().getPlugin("permissionsex");
         if (!pex.isPresent()) {
-            log.accept("Error -> PermissionsEx is not loaded.");
+            log.logErr("Plugin not loaded.");
             return CommandResult.STATE_ERROR;
         }
 
@@ -82,23 +80,21 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         PermissionService pexService = (PermissionService) pex.get().getInstance().get();
 
         // Migrate defaults
+        log.log("Migrating default subjects.");
         for (SubjectCollection collection : pexService.getKnownSubjects().values()) {
             MigrationUtils.migrateSubjectData(
                     collection.getDefaults().getSubjectData(),
                     lpService.getSubjects("defaults").get(collection.getIdentifier()).getSubjectData()
             );
         }
-
         MigrationUtils.migrateSubjectData(pexService.getDefaults().getSubjectData(), lpService.getDefaults().getSubjectData());
 
         Map<String, TreeMap<Integer, String>> tracks = new HashMap<>();
 
         // Migrate groups
-        log.accept("Starting group migration.");
-        int groupCount = 0;
+        log.log("Starting group migration.");
+        AtomicInteger groupCount = new AtomicInteger(0);
         for (Subject pexGroup : pexService.getGroupSubjects().getAllSubjects()) {
-            groupCount++;
-
             String pexName = MigrationUtils.convertGroupName(pexGroup.getIdentifier().toLowerCase());
 
             // Make a LuckPerms group for the one being migrated
@@ -122,11 +118,12 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 } catch (NumberFormatException ignored) {}
             }
 
+            log.logAllProgress("Migrated {} groups so far.", groupCount.incrementAndGet());
         }
-        log.accept("Migrated " + groupCount + " groups");
+        log.log("Migrated " + groupCount.get() + " groups");
 
         // Migrate tracks
-        log.accept("Starting track migration.");
+        log.log("Starting track migration.");
         for (Map.Entry<String, TreeMap<Integer, String>> e : tracks.entrySet()) {
             plugin.getStorage().createAndLoadTrack(e.getKey()).join();
             Track track = plugin.getTrackManager().getIfLoaded(e.getKey());
@@ -139,16 +136,15 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 }
             }
         }
-        log.accept("Migrated " + tracks.size() + " tracks");
+        log.log("Migrated " + tracks.size() + " tracks");
 
         // Migrate users
-        log.accept("Starting user migration.");
-        int userCount = 0;
+        log.log("Starting user migration.");
+        AtomicInteger userCount = new AtomicInteger(0);
         for (Subject pexUser : pexService.getUserSubjects().getAllSubjects()) {
-            userCount++;
             UUID uuid = Util.parseUuid(pexUser.getIdentifier());
             if (uuid == null) {
-                log.accept("Error -> Could not parse UUID for user: " + pexUser.getIdentifier());
+                log.logErr("Could not parse UUID for user: " + pexUser.getIdentifier());
                 continue;
             }
 
@@ -161,10 +157,12 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             migrateSubject(pexUser, user);
             plugin.getStorage().saveUser(user);
             plugin.getUserManager().cleanup(user);
+
+            log.logProgress("Migrated {} users so far.", userCount.incrementAndGet());
         }
 
-        log.accept("Migrated " + userCount + " users.");
-        log.accept("Success! Completed without any errors.");
+        log.log("Migrated " + userCount.get() + " users.");
+        log.log("Success! Migration complete.");
         return CommandResult.SUCCESS;
     }
 }

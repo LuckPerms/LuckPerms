@@ -22,8 +22,6 @@
 
 package me.lucko.luckperms.bukkit.migration;
 
-import lombok.Cleanup;
-
 import com.github.cheesesoftware.PowerfulPermsAPI.CachedGroup;
 import com.github.cheesesoftware.PowerfulPermsAPI.Group;
 import com.github.cheesesoftware.PowerfulPermsAPI.Permission;
@@ -33,21 +31,17 @@ import com.github.cheesesoftware.PowerfulPermsAPI.ResultRunnable;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.zaxxer.hikari.HikariDataSource;
 
-import me.lucko.luckperms.api.data.Callback;
 import me.lucko.luckperms.bukkit.migration.utils.LPResultRunnable;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SubCommand;
+import me.lucko.luckperms.common.commands.migration.MigrationLogger;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.Constants;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.User;
-import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import org.bukkit.Bukkit;
 
@@ -66,26 +60,18 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import static me.lucko.luckperms.common.constants.Permission.MIGRATION;
 
-@SuppressWarnings("unchecked")
+
 public class MigrationPowerfulPerms extends SubCommand<Object> {
-    /* <sadness>
-        The PowerfulPerms API is a complete joke. Seriously, it would probably be easier reflecting into the actual plugin.
-        Methods move about randomly every version...
-
-        What kind of API requires reflection to function with multiple versions...
-        Doesn't that just defeat the whole god damn point of having an API in the first place?
-        Whatever happened to depreciation?
-    </sadness> */
-
     private static Method getPlayerPermissionsMethod = null;
     private static Method getPlayerGroupsMethod = null;
     private static Method getGroupMethod = null;
 
-    // lol
+    // lol, nice "api"
     private static boolean superLegacy = false;
     private static boolean legacy = false;
 
@@ -93,29 +79,25 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         try {
             Class.forName("com.github.cheesesoftware.PowerfulPermsAPI.ResponseRunnable");
             legacy = true;
-        } catch (ClassNotFoundException ignored) {
-        }
+        } catch (ClassNotFoundException ignored) {}
 
         if (legacy) {
             try {
                 getPlayerPermissionsMethod = PermissionManager.class.getMethod("getPlayerOwnPermissions", UUID.class, ResultRunnable.class);
                 getPlayerPermissionsMethod.setAccessible(true);
-            } catch (NoSuchMethodException ignored) {
-            }
+            } catch (NoSuchMethodException ignored) {}
         } else {
             try {
                 getPlayerPermissionsMethod = PermissionManager.class.getMethod("getPlayerOwnPermissions", UUID.class);
                 getPlayerPermissionsMethod.setAccessible(true);
-            } catch (NoSuchMethodException ignored) {
-            }
+            } catch (NoSuchMethodException ignored) {}
         }
 
         try {
             getGroupMethod = CachedGroup.class.getMethod("getGroup");
             getGroupMethod.setAccessible(true);
             superLegacy = true;
-        } catch (NoSuchMethodException ignored) {
-        }
+        } catch (NoSuchMethodException ignored) {}
 
         if (!legacy) {
             try {
@@ -135,42 +117,6 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                 } catch (NoSuchMethodException e1) {
                     e1.printStackTrace();
                 }
-            }
-        }
-    }
-
-    private static void getPlayerPermissions(PermissionManager manager, UUID uuid, Callback<List<Permission>> callback) {
-        if (legacy) {
-            try {
-                getPlayerPermissionsMethod.invoke(manager, uuid, new LPResultRunnable<List<Permission>>() {
-                    @Override
-                    public void run() {
-                        callback.onComplete(getResult());
-                    }
-                });
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                e.printStackTrace();
-            }
-        } else {
-            try {
-                ListenableFuture<List<Permission>> lf = (ListenableFuture<List<Permission>>) getPlayerPermissionsMethod.invoke(manager, uuid);
-                try {
-                    if (lf.isDone()) {
-                        callback.onComplete(lf.get());
-                    } else {
-                        lf.addListener(() -> {
-                            try {
-                                callback.onComplete(lf.get());
-                            } catch (InterruptedException | ExecutionException e) {
-                                e.printStackTrace();
-                            }
-                        }, Runnable::run);
-                    }
-                } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
-                }
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                e.printStackTrace();
             }
         }
     }
@@ -198,16 +144,14 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
     }
 
     private CommandResult run(LuckPermsPlugin plugin, Sender sender, List<String> args) {
-        Consumer<String> log = s -> {
-            Message.MIGRATION_LOG.send(sender, s);
-            if (!sender.isConsole()) {
-                Message.MIGRATION_LOG.send(plugin.getConsoleSender(), s);
-            }
-        };
-        log.accept("Starting PowerfulPerms migration.");
+        MigrationLogger log = new MigrationLogger("PowerfulPerms");
+        log.addListener(plugin.getConsoleSender());
+        log.addListener(sender);
+
+        log.log("Starting.");
         
         if (!Bukkit.getPluginManager().isPluginEnabled("PowerfulPerms")) {
-            log.accept("Error -> PowerfulPerms is not loaded.");
+            log.logErr("PowerfulPerms is not loaded.");
             return CommandResult.STATE_ERROR;
         }
 
@@ -218,100 +162,90 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         final String dbTable = args.get(4);
 
         // Find a list of UUIDs
-        log.accept("Getting a list of UUIDs to migrate.");
-
-        @Cleanup HikariDataSource hikari = new HikariDataSource();
-        hikari.setMaximumPoolSize(2);
-        hikari.setDataSourceClassName("com.mysql.jdbc.jdbc2.optional.MysqlDataSource");
-        hikari.addDataSourceProperty("serverName", address.split(":")[0]);
-        hikari.addDataSourceProperty("port", address.split(":")[1]);
-        hikari.addDataSourceProperty("databaseName", database);
-        hikari.addDataSourceProperty("user", username);
-        hikari.addDataSourceProperty("password", password);
-
+        log.log("Getting a list of UUIDs to migrate.");
         Set<UUID> uuids = new HashSet<>();
 
-        try {
-            @Cleanup Connection connection = hikari.getConnection();
-            DatabaseMetaData meta = connection.getMetaData();
+        try (HikariDataSource hikari = new HikariDataSource()) {
+            hikari.setMaximumPoolSize(2);
+            hikari.setDataSourceClassName("com.mysql.jdbc.jdbc2.optional.MysqlDataSource");
+            hikari.addDataSourceProperty("serverName", address.split(":")[0]);
+            hikari.addDataSourceProperty("port", address.split(":")[1]);
+            hikari.addDataSourceProperty("databaseName", database);
+            hikari.addDataSourceProperty("user", username);
+            hikari.addDataSourceProperty("password", password);
 
-            @Cleanup ResultSet tables = meta.getTables(null, null, dbTable, null);
-            if (!tables.next()) {
-                log.accept("Error - Couldn't find table.");
-                return CommandResult.FAILURE;
+            try (Connection c = hikari.getConnection()) {
+                DatabaseMetaData meta = c.getMetaData();
 
-            } else {
-                @Cleanup PreparedStatement columnPs = connection.prepareStatement("SELECT COLUMN_NAME, COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME=?");
-                columnPs.setString(1, dbTable);
-                @Cleanup ResultSet columnRs = columnPs.executeQuery();
-
-                log.accept("Found table: " + dbTable);
-                while (columnRs.next()) {
-                    log.accept("" + columnRs.getString("COLUMN_NAME") + " - " + columnRs.getString("COLUMN_TYPE"));
-                }
-
-                @Cleanup PreparedStatement preparedStatement = connection.prepareStatement("SELECT `uuid` FROM " + dbTable);
-                @Cleanup ResultSet resultSet = preparedStatement.executeQuery();
-
-                while (resultSet.next()) {
-                    uuids.add(UUID.fromString(resultSet.getString("uuid")));
+                try (ResultSet rs = meta.getTables(null, null, dbTable, null)) {
+                    if (!rs.next()) {
+                        log.log("Error - Couldn't find table.");
+                        return CommandResult.FAILURE;
+                    }
                 }
             }
 
+            try (Connection c = hikari.getConnection()) {
+                try (PreparedStatement ps = c.prepareStatement("SELECT COLUMN_NAME, COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME=?")) {
+                    ps.setString(1, dbTable);
+
+                    try (ResultSet rs = ps.executeQuery()) {
+                        log.log("Found table: " + dbTable);
+                        while (rs.next()) {
+                            log.log("" + rs.getString("COLUMN_NAME") + " - " + rs.getString("COLUMN_TYPE"));
+                        }
+                    }
+                }
+
+                try (PreparedStatement ps = c.prepareStatement("SELECT `uuid` FROM " + dbTable)) {
+                    try (ResultSet rs = ps.executeQuery()) {
+                        while (rs.next()) {
+                            uuids.add(UUID.fromString(rs.getString("uuid")));
+                        }
+                    }
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            return CommandResult.FAILURE;
         }
 
         if (uuids.isEmpty()) {
-            log.accept("Error - Unable to find any UUIDs to migrate.");
+            log.logErr("Unable to find any UUIDs to migrate.");
             return CommandResult.FAILURE;
         }
 
-        log.accept("Found " + uuids.size() + " uuids. Starting migration.");
+        log.log("Found " + uuids.size() + " uuids. Starting migration.");
 
         PowerfulPermsPlugin ppPlugin = (PowerfulPermsPlugin) Bukkit.getPluginManager().getPlugin("PowerfulPerms");
         PermissionManager pm = ppPlugin.getPermissionManager();
 
         // Groups first.
-        log.accept("Starting group migration.");
+        log.log("Starting group migration.");
+        AtomicInteger groupCount = new AtomicInteger(0);
         Map<Integer, Group> groups = pm.getGroups(); // All versions
         for (Group g : groups.values()) {
             plugin.getStorage().createAndLoadGroup(g.getName().toLowerCase()).join();
             final me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().getIfLoaded(g.getName().toLowerCase());
-            try {
-                LogEntry.build()
-                        .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
-                        .acted(group).action("create")
-                        .build().submit(plugin);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
 
             for (Permission p : g.getOwnPermissions()) { // All versions
-                applyPerm(group, p, plugin);
+                applyPerm(group, p, log);
             }
 
             for (Group parent : g.getParents()) { // All versions
                 try {
                     group.setPermission("group." + parent.getName().toLowerCase(), true);
-                    LogEntry.build()
-                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
-                            .acted(group).action("setinherit " + parent.getName().toLowerCase()) // All versions
-                            .build().submit(plugin);
                 } catch (Exception ex) {
-                    if (!(ex instanceof ObjectAlreadyHasException)) {
-                        ex.printStackTrace();
-                    }
+                    log.handleException(ex);
                 }
             }
 
             plugin.getStorage().saveGroup(group);
+            log.logAllProgress("Migrated {} groups so far.", groupCount.incrementAndGet());
         }
-        log.accept("Group migration complete.");
+        log.log("Migrated " + groupCount.get() + " groups");
 
         // Now users.
-        log.accept("Starting user migration.");
+        log.log("Starting user migration.");
         final Map<UUID, CountDownLatch> progress = new HashMap<>();
 
         // Migrate all users and their groups
@@ -324,7 +258,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
 
             // Get a list of Permissions held by the user from the PP API.
             getPlayerPermissions(pm, uuid, perms -> { // Changes each version
-                perms.forEach(p -> applyPerm(user, p, plugin));
+                perms.forEach(p -> applyPerm(user, p, log));
 
                 // Update the progress so the user can be saved and unloaded.
                 synchronized (progress) {
@@ -337,7 +271,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             });
 
             // Migrate the user's groups to LuckPerms from PP.
-            Callback<Map<String, List<CachedGroup>>> callback = groups1 -> {
+            Consumer<Map<String, List<CachedGroup>>> callback = groups1 -> {
                 for (Map.Entry<String, List<CachedGroup>> e : groups1.entrySet()) {
                     final String server;
                     if (e.getKey() != null && (e.getKey().equals("") || e.getKey().equalsIgnoreCase("all"))) {
@@ -362,26 +296,14 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                                         if (server == null) {
                                             try {
                                                 user.setPermission("group." + g.getName().toLowerCase(), true);
-                                                LogEntry.build()
-                                                        .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
-                                                        .acted(user).action("addgroup " + g.getName().toLowerCase())
-                                                        .build().submit(plugin);
                                             } catch (Exception ex) {
-                                                if (!(ex instanceof ObjectAlreadyHasException)) {
-                                                    ex.printStackTrace();
-                                                }
+                                                log.handleException(ex);
                                             }
                                         } else {
                                             try {
                                                 user.setPermission("group." + g.getName().toLowerCase(), true, server);
-                                                LogEntry.build()
-                                                        .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
-                                                        .acted(user).action("addgroup " + g.getName().toLowerCase() + " " + server)
-                                                        .build().submit(plugin);
                                             } catch (Exception ex) {
-                                                if (!(ex instanceof ObjectAlreadyHasException)) {
-                                                    ex.printStackTrace();
-                                                }
+                                                log.handleException(ex);
                                             }
                                         }
                                     }
@@ -395,26 +317,14 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                                         if (server == null) {
                                             try {
                                                 user.setPermission("group." + group.getName().toLowerCase(), true, g.getExpirationDate().getTime() / 1000L);
-                                                LogEntry.build()
-                                                        .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
-                                                        .acted(user).action("addtempgroup " + group.getName().toLowerCase() + " " + g.getExpirationDate().getTime() / 1000L)
-                                                        .build().submit(plugin);
                                             } catch (Exception ex) {
-                                                if (!(ex instanceof ObjectAlreadyHasException)) {
-                                                    ex.printStackTrace();
-                                                }
+                                                log.handleException(ex);
                                             }
                                         } else {
                                             try {
                                                 user.setPermission("group." + group.getName().toLowerCase(), true, server, g.getExpirationDate().getTime() / 1000L);
-                                                LogEntry.build()
-                                                        .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
-                                                        .acted(user).action("addtempgroup " + group.getName().toLowerCase() + " " + g.getExpirationDate().getTime() / 1000L + " " + server)
-                                                        .build().submit(plugin);
                                             } catch (Exception ex) {
-                                                if (!(ex instanceof ObjectAlreadyHasException)) {
-                                                    ex.printStackTrace();
-                                                }
+                                                log.handleException(ex);
                                             }
                                         }
 
@@ -422,26 +332,14 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                                         if (server == null) {
                                             try {
                                                 user.setPermission("group." + group.getName().toLowerCase(), true);
-                                                LogEntry.build()
-                                                        .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
-                                                        .acted(user).action("addgroup " + group.getName().toLowerCase())
-                                                        .build().submit(plugin);
                                             } catch (Exception ex) {
-                                                if (!(ex instanceof ObjectAlreadyHasException)) {
-                                                    ex.printStackTrace();
-                                                }
+                                                log.handleException(ex);
                                             }
                                         } else {
                                             try {
                                                 user.setPermission("group." + group.getName().toLowerCase(), true, server);
-                                                LogEntry.build()
-                                                        .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
-                                                        .acted(user).action("addgroup " + group.getName().toLowerCase() + " " + server)
-                                                        .build().submit(plugin);
                                             } catch (Exception ex) {
-                                                if (!(ex instanceof ObjectAlreadyHasException)) {
-                                                    ex.printStackTrace();
-                                                }
+                                                log.handleException(ex);
                                             }
                                         }
                                     }
@@ -464,11 +362,11 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                     ListenableFuture<LinkedHashMap<String, List<CachedGroup>>> future = (ListenableFuture<LinkedHashMap<String, List<CachedGroup>>>) getPlayerGroupsMethod.invoke(pm, uuid);
                     try {
                         if (future.isDone()) {
-                            callback.onComplete(future.get());
+                            callback.accept(future.get());
                         } else {
                             future.addListener(() -> {
                                 try {
-                                    callback.onComplete(future.get());
+                                    callback.accept(future.get());
                                 } catch (InterruptedException | ExecutionException e) {
                                     e.printStackTrace();
                                 }
@@ -478,7 +376,6 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                         e.printStackTrace();
                     }
                 } catch (IllegalAccessException | InvocationTargetException e) {
-                    log.accept("Error");
                     e.printStackTrace();
                 }
             } else {
@@ -486,11 +383,10 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                     getPlayerGroupsMethod.invoke(pm, uuid, new LPResultRunnable<LinkedHashMap<String, List<CachedGroup>>>() {
                         @Override
                         public void run() {
-                            callback.onComplete(getResult());
+                            callback.accept(getResult());
                         }
                     });
                 } catch (IllegalAccessException | InvocationTargetException e) {
-                    log.accept("Error");
                     e.printStackTrace();
                 }
             }
@@ -498,7 +394,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
 
         // All groups are migrated, but there may still be some users being migrated.
         // This block will wait for all users to be completed.
-        log.accept("Waiting for user migration to complete. This may take some time");
+        log.log("Waiting for user migration to complete. This may take some time");
         boolean sleep = true;
         while (sleep) {
             sleep = false;
@@ -521,11 +417,11 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         }
 
         // We done.
-        log.accept("Success! Completed without any errors.");
+        log.log("Success! Migration complete.");
         return CommandResult.SUCCESS;
     }
 
-    private void applyPerm(PermissionHolder holder, Permission p, LuckPermsPlugin plugin) {
+    private void applyPerm(PermissionHolder holder, Permission p, MigrationLogger log) {
         String node = p.getPermissionString();
         boolean value = true;
         if (node.startsWith("!")) {
@@ -558,26 +454,14 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             if (expireAt == 0L) {
                 try {
                     holder.setPermission(node, value, server, world);
-                    LogEntry.build()
-                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
-                            .acted(holder).action("set " + node + " " + value + " " + server + " " + world)
-                            .build().submit(plugin);
                 } catch (Exception ex) {
-                    if (!(ex instanceof ObjectAlreadyHasException)) {
-                        ex.printStackTrace();
-                    }
+                    log.handleException(ex);
                 }
             } else {
                 try {
                     holder.setPermission(node, value, server, world, expireAt);
-                    LogEntry.build()
-                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
-                            .acted(holder).action("settemp " + node + " " + value + " " + expireAt + " " + server + " " + world)
-                            .build().submit(plugin);
                 } catch (Exception ex) {
-                    if (!(ex instanceof ObjectAlreadyHasException)) {
-                        ex.printStackTrace();
-                    }
+                    log.handleException(ex);
                 }
             }
 
@@ -585,53 +469,65 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             if (expireAt == 0L) {
                 try {
                     holder.setPermission(node, value, server);
-                    LogEntry.build()
-                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
-                            .acted(holder).action("set " + node + " " + value + " " + server)
-                            .build().submit(plugin);
                 } catch (Exception ex) {
-                    if (!(ex instanceof ObjectAlreadyHasException)) {
-                        ex.printStackTrace();
-                    }
+                    log.handleException(ex);
                 }
             } else {
                 try {
                     holder.setPermission(node, value, server, expireAt);
-                    LogEntry.build()
-                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
-                            .acted(holder).action("settemp " + node + " " + value + " " + expireAt + " " + server)
-                            .build().submit(plugin);
                 } catch (Exception ex) {
-                    if (!(ex instanceof ObjectAlreadyHasException)) {
-                        ex.printStackTrace();
-                    }
+                    log.handleException(ex);
                 }
             }
         } else {
             if (expireAt == 0L) {
                 try {
                     holder.setPermission(node, value);
-                    LogEntry.build()
-                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
-                            .acted(holder).action("set " + node + " " + value)
-                            .build().submit(plugin);
                 } catch (Exception ex) {
-                    if (!(ex instanceof ObjectAlreadyHasException)) {
-                        ex.printStackTrace();
-                    }
+                    log.handleException(ex);
                 }
             } else {
                 try {
                     holder.setPermission(node, value, expireAt);
-                    LogEntry.build()
-                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
-                            .acted(holder).action("settemp " + node + " " + value + " " + expireAt)
-                            .build().submit(plugin);
                 } catch (Exception ex) {
-                    if (!(ex instanceof ObjectAlreadyHasException)) {
-                        ex.printStackTrace();
-                    }
+                    log.handleException(ex);
                 }
+            }
+        }
+    }
+
+    private static void getPlayerPermissions(PermissionManager manager, UUID uuid, Consumer<List<Permission>> callback) {
+        if (legacy) {
+            try {
+                getPlayerPermissionsMethod.invoke(manager, uuid, new LPResultRunnable<List<Permission>>() {
+                    @Override
+                    public void run() {
+                        callback.accept(getResult());
+                    }
+                });
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
+        } else {
+            try {
+                ListenableFuture<List<Permission>> lf = (ListenableFuture<List<Permission>>) getPlayerPermissionsMethod.invoke(manager, uuid);
+                try {
+                    if (lf.isDone()) {
+                        callback.accept(lf.get());
+                    } else {
+                        lf.addListener(() -> {
+                            try {
+                                callback.accept(lf.get());
+                            } catch (InterruptedException | ExecutionException e) {
+                                e.printStackTrace();
+                            }
+                        }, Runnable::run);
+                    }
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                }
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
             }
         }
     }

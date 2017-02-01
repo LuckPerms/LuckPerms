@@ -25,8 +25,8 @@ package me.lucko.luckperms.bukkit.migration;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SubCommand;
+import me.lucko.luckperms.common.commands.migration.MigrationLogger;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.Group;
@@ -49,7 +49,7 @@ import org.tyrannyofheaven.bukkit.zPermissions.model.PermissionEntity;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Consumer;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MigrationZPermissions extends SubCommand<Object> {
     public MigrationZPermissions() {
@@ -58,21 +58,19 @@ public class MigrationZPermissions extends SubCommand<Object> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) throws CommandException {
-        Consumer<String> log = s -> {
-            Message.MIGRATION_LOG.send(sender, s);
-            if (!sender.isConsole()) {
-                Message.MIGRATION_LOG.send(plugin.getConsoleSender(), s);
-            }
-        };
-        log.accept("Starting zPermissions migration.");
+        MigrationLogger log = new MigrationLogger("PermissionManager");
+        log.addListener(plugin.getConsoleSender());
+        log.addListener(sender);
+
+        log.log("Starting.");
         
         if (!Bukkit.getPluginManager().isPluginEnabled("zPermissions")) {
-            log.accept("Error -> zPermissions is not loaded.");
+            log.logErr("zPermissions is not loaded.");
             return CommandResult.STATE_ERROR;
         }
 
         if (!Bukkit.getServicesManager().isProvidedFor(ZPermissionsService.class)) {
-            log.accept("Error -> zPermissions is not loaded.");
+            log.logErr("zPermissions is not loaded.");
             return CommandResult.STATE_ERROR;
         }
 
@@ -89,7 +87,8 @@ public class MigrationZPermissions extends SubCommand<Object> {
         }
 
         // Migrate all groups
-        log.accept("Starting group migration.");
+        log.log("Starting group migration.");
+        AtomicInteger groupCount = new AtomicInteger(0);
         for (String g : service.getAllGroups()) {
             plugin.getStorage().createAndLoadGroup(g.toLowerCase()).join();
             Group group = plugin.getGroupManager().getIfLoaded(g.toLowerCase());
@@ -98,19 +97,25 @@ public class MigrationZPermissions extends SubCommand<Object> {
             migrateEntity(group, entity, null);
 
             plugin.getStorage().saveGroup(group);
+            log.logAllProgress("Migrated {} groups so far.", groupCount.incrementAndGet());
         }
+        log.log("Migrated " + groupCount.get() + " groups");
 
         // Migrate all tracks
-        log.accept("Starting track migration.");
+        log.log("Starting track migration.");
+        AtomicInteger trackCount = new AtomicInteger(0);
         for (String t : service.getAllTracks()) {
             plugin.getStorage().createAndLoadTrack(t.toLowerCase()).join();
             Track track = plugin.getTrackManager().getIfLoaded(t.toLowerCase());
             track.setGroups(service.getTrackGroups(t));
             plugin.getStorage().saveTrack(track);
+            log.logAllProgress("Migrated {} tracks so far.", trackCount.incrementAndGet());
         }
+        log.log("Migrated " + trackCount.get() + " tracks");
 
         // Migrate all users.
-        log.accept("Starting user migration.");
+        log.log("Starting user migration.");
+        AtomicInteger userCount = new AtomicInteger(0);
         for (UUID u : service.getAllPlayersUUID()) {
             plugin.getStorage().loadUser(u, "null").join();
             User user = plugin.getUserManager().get(u);
@@ -126,9 +131,11 @@ public class MigrationZPermissions extends SubCommand<Object> {
 
             plugin.getUserManager().cleanup(user);
             plugin.getStorage().saveUser(user);
+            log.logProgress("Migrated {} users so far.", userCount.incrementAndGet());
         }
 
-        log.accept("Success! Completed without any errors.");
+        log.log("Migrated " + userCount.get() + " users.");
+        log.log("Success! Migration complete.");
         return CommandResult.SUCCESS;
     }
 
@@ -137,13 +144,11 @@ public class MigrationZPermissions extends SubCommand<Object> {
             if (e.getWorld() != null) {
                 try {
                     group.setPermission(e.getPermission(), true, "global", e.getWorld().getName());
-                } catch (ObjectAlreadyHasException ignored) {
-                }
+                } catch (ObjectAlreadyHasException ignored) {}
             } else {
                 try {
                     group.setPermission(e.getPermission(), true); // TODO handle negated.
-                } catch (ObjectAlreadyHasException ignored) {
-                }
+                } catch (ObjectAlreadyHasException ignored) {}
             }
         }
 
@@ -153,16 +158,14 @@ public class MigrationZPermissions extends SubCommand<Object> {
                     if (!inheritance.getParent().getName().equals(group.getObjectName())) {
                         group.setPermission("group." + inheritance.getParent().getName(), true);
                     }
-                } catch (ObjectAlreadyHasException ignored) {
-                }
+                } catch (ObjectAlreadyHasException ignored) {}
             }
         } else {
             // entity.getMemberships() doesn't work (always returns 0 records)
             for (Membership membership : memberships) {
                 try {
                     group.setPermission("group." + membership.getGroup().getDisplayName(), true);
-                } catch (ObjectAlreadyHasException ignored) {
-                }
+                } catch (ObjectAlreadyHasException ignored) {}
             }
         }
 

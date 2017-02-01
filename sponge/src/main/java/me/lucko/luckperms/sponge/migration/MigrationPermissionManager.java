@@ -25,26 +25,29 @@ package me.lucko.luckperms.sponge.migration;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SubCommand;
+import me.lucko.luckperms.common.commands.migration.MigrationLogger;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.sponge.LPSpongePlugin;
+import me.lucko.luckperms.sponge.service.LuckPermsService;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
+import org.spongepowered.api.service.permission.SubjectCollection;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Consumer;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static me.lucko.luckperms.sponge.migration.MigrationUtils.migrateSubject;
 
@@ -55,17 +58,17 @@ public class MigrationPermissionManager extends SubCommand<Object> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) throws CommandException {
-        Consumer<String> log = s -> {
-            Message.MIGRATION_LOG.send(sender, s);
-            if (!sender.isConsole()) {
-                Message.MIGRATION_LOG.send(plugin.getConsoleSender(), s);
-            }
-        };
-        log.accept("Starting PermissionManager migration.");
+        MigrationLogger log = new MigrationLogger("PermissionManager");
+        log.addListener(plugin.getConsoleSender());
+        log.addListener(sender);
+
+        log.log("Starting.");
+
+        final LuckPermsService lpService = ((LPSpongePlugin) plugin).getService();
 
         Optional<PluginContainer> pm = Sponge.getPluginManager().getPlugin("permissionmanager");
         if (!pm.isPresent()) {
-            log.accept("Error -> PermissionManager is not loaded.");
+            log.logErr("Plugin not loaded.");
             return CommandResult.STATE_ERROR;
         }
 
@@ -81,8 +84,18 @@ public class MigrationPermissionManager extends SubCommand<Object> {
             return CommandResult.FAILURE;
         }
 
+        // Migrate defaults
+        log.log("Migrating default subjects.");
+        for (SubjectCollection collection : pmService.getKnownSubjects().values()) {
+            MigrationUtils.migrateSubjectData(
+                    collection.getDefaults().getSubjectData(),
+                    lpService.getSubjects("defaults").get(collection.getIdentifier()).getSubjectData()
+            );
+        }
+        MigrationUtils.migrateSubjectData(pmService.getDefaults().getSubjectData(), lpService.getDefaults().getSubjectData());
+
         // Migrate groups
-        log.accept("Starting group migration.");
+        log.log("Starting group migration.");
 
         // Forcefully load all groups.
         try {
@@ -92,10 +105,8 @@ public class MigrationPermissionManager extends SubCommand<Object> {
             t.printStackTrace();
         }
 
-        int groupCount = 0;
+        AtomicInteger groupCount = new AtomicInteger(0);
         for (Subject pmGroup : pmService.getGroupSubjects().getAllSubjects()) {
-            groupCount++;
-
             String pmName = MigrationUtils.convertGroupName(pmGroup.getIdentifier().toLowerCase());
 
             // Make a LuckPerms group for the one being migrated
@@ -103,11 +114,13 @@ public class MigrationPermissionManager extends SubCommand<Object> {
             Group group = plugin.getGroupManager().getIfLoaded(pmName);
             migrateSubject(pmGroup, group);
             plugin.getStorage().saveGroup(group);
+
+            log.logAllProgress("Migrated {} groups so far.", groupCount.incrementAndGet());
         }
-        log.accept("Migrated " + groupCount + " groups");
+        log.log("Migrated " + groupCount.get() + " groups");
 
         // Migrate users
-        log.accept("Starting user migration.");
+        log.log("Starting user migration.");
 
         // Forcefully load all users.
         try {
@@ -117,12 +130,11 @@ public class MigrationPermissionManager extends SubCommand<Object> {
             t.printStackTrace();
         }
 
-        int userCount = 0;
+        AtomicInteger userCount = new AtomicInteger(0);
         for (Subject pmUser : pmService.getUserSubjects().getAllSubjects()) {
-            userCount++;
             UUID uuid = Util.parseUuid(pmUser.getIdentifier());
             if (uuid == null) {
-                log.accept("Error -> Could not parse UUID for user: " + pmUser.getIdentifier());
+                log.logErr("Could not parse UUID for user: " + pmUser.getIdentifier());
                 continue;
             }
 
@@ -135,10 +147,12 @@ public class MigrationPermissionManager extends SubCommand<Object> {
             migrateSubject(pmUser, user);
             plugin.getStorage().saveUser(user);
             plugin.getUserManager().cleanup(user);
+
+            log.logProgress("Migrated {} users so far.", userCount.incrementAndGet());
         }
 
-        log.accept("Migrated " + userCount + " users.");
-        log.accept("Success! Completed without any errors.");
+        log.log("Migrated " + userCount.get() + " users.");
+        log.log("Success! Migration complete.");
         return CommandResult.SUCCESS;
     }
 }

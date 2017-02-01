@@ -26,14 +26,11 @@ import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SubCommand;
+import me.lucko.luckperms.common.commands.migration.MigrationLogger;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.Constants;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import net.alpenblock.bungeeperms.BungeePerms;
 import net.alpenblock.bungeeperms.Group;
@@ -43,11 +40,8 @@ import net.alpenblock.bungeeperms.World;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * BungeePerms is actually pretty nice. huh.
- */
 public class MigrationBungeePerms extends SubCommand<Object> {
     public MigrationBungeePerms() {
         super("bungeeperms", "Migration from BungeePerms", Permission.MIGRATION, Predicates.alwaysFalse(), null);
@@ -55,51 +49,34 @@ public class MigrationBungeePerms extends SubCommand<Object> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) throws CommandException {
-        Consumer<String> log = s -> {
-            Message.MIGRATION_LOG.send(sender, s);
-            if (!sender.isConsole()) {
-                Message.MIGRATION_LOG.send(plugin.getConsoleSender(), s);
-            }
-        };
-        log.accept("Starting BungeePerms migration.");
+        MigrationLogger log = new MigrationLogger("BungeePerms");
+        log.addListener(plugin.getConsoleSender());
+        log.addListener(sender);
 
+        log.log("Starting.");
+
+        // Get BungeePerms instance
         BungeePerms bp = BungeePerms.getInstance();
         if (bp == null) {
-            log.accept("Error -> BungeePerms is not loaded.");
+            log.logErr("Plugin not loaded.");
             return CommandResult.STATE_ERROR;
         }
 
         // Migrate all groups.
-        log.accept("Starting group migration.");
-        int groupCount = 0;
+        log.log("Starting group migration.");
+        AtomicInteger groupCount = new AtomicInteger(0);
         for (Group g : bp.getPermissionsManager().getBackEnd().loadGroups()) {
-            groupCount++;
 
             // Make a LuckPerms group for the one being migrated
             plugin.getStorage().createAndLoadGroup(g.getName().toLowerCase()).join();
             me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().getIfLoaded(g.getName().toLowerCase());
-            try {
-                LogEntry.build()
-                        .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
-                        .acted(group).action("create")
-                        .build().submit(plugin);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-
 
             // Migrate global perms
             for (String perm : g.getPerms()) {
                 try {
                     group.setPermission(perm, true);
-                    LogEntry.build()
-                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
-                            .acted(group).action("set " + perm + " true")
-                            .build().submit(plugin);
                 } catch (Exception ex) {
-                    if (!(ex instanceof ObjectAlreadyHasException)) {
-                        ex.printStackTrace();
-                    }
+                    log.handleException(ex);
                 }
             }
 
@@ -108,14 +85,8 @@ public class MigrationBungeePerms extends SubCommand<Object> {
                 for (String perm : e.getValue().getPerms()) {
                     try {
                         group.setPermission(perm, true, e.getKey());
-                        LogEntry.build()
-                                .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
-                                .acted(group).action("set " + perm + " true " + e.getKey())
-                                .build().submit(plugin);
                     } catch (Exception ex) {
-                        if (!(ex instanceof ObjectAlreadyHasException)) {
-                            ex.printStackTrace();
-                        }
+                        log.handleException(ex);
                     }
                 }
 
@@ -124,14 +95,8 @@ public class MigrationBungeePerms extends SubCommand<Object> {
                     for (String perm : we.getValue().getPerms()) {
                         try {
                             group.setPermission(perm, true, e.getKey(), we.getKey());
-                            LogEntry.build()
-                                    .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
-                                    .acted(group).action("set " + perm + " true " + e.getKey() + " " + we.getKey())
-                                    .build().submit(plugin);
                         } catch (Exception ex) {
-                            if (!(ex instanceof ObjectAlreadyHasException)) {
-                                ex.printStackTrace();
-                            }
+                            log.handleException(ex);
                         }
                     }
                 }
@@ -141,14 +106,8 @@ public class MigrationBungeePerms extends SubCommand<Object> {
             for (String inherit : g.getInheritances()) {
                 try {
                     group.setPermission("group." + inherit, true);
-                    LogEntry.build()
-                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
-                            .acted(group).action("setinherit " + group)
-                            .build().submit(plugin);
                 } catch (Exception ex) {
-                    if (!(ex instanceof ObjectAlreadyHasException)) {
-                        ex.printStackTrace();
-                    }
+                    log.handleException(ex);
                 }
             }
 
@@ -160,14 +119,8 @@ public class MigrationBungeePerms extends SubCommand<Object> {
                 prefix = MetaUtils.escapeCharacters(prefix);
                 try {
                     group.setPermission("prefix.50." + prefix, true);
-                    LogEntry.build()
-                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
-                            .acted(group).action("set prefix.50." + prefix + " true")
-                            .build().submit(plugin);
                 } catch (Exception ex) {
-                    if (!(ex instanceof ObjectAlreadyHasException)) {
-                        ex.printStackTrace();
-                    }
+                    log.handleException(ex);
                 }
             }
 
@@ -175,29 +128,25 @@ public class MigrationBungeePerms extends SubCommand<Object> {
                 suffix = MetaUtils.escapeCharacters(suffix);
                 try {
                     group.setPermission("suffix.50." + suffix, true);
-                    LogEntry.build()
-                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
-                            .acted(group).action("set suffix.50." + suffix + " true")
-                            .build().submit(plugin);
                 } catch (Exception ex) {
-                    if (!(ex instanceof ObjectAlreadyHasException)) {
-                        ex.printStackTrace();
-                    }
+                    log.handleException(ex);
                 }
             }
 
             plugin.getStorage().saveGroup(group);
-        }
 
-        log.accept("Migrated " + groupCount + " groups");
+            log.logAllProgress("Migrated {} groups so far.", groupCount.incrementAndGet());
+        }
+        log.log("Migrated " + groupCount.get() + " groups");
 
         // Migrate all users.
-        log.accept("Starting user migration.");
-        int userCount = 0;
+        log.log("Starting user migration.");
+        AtomicInteger userCount = new AtomicInteger(0);
         for (User u : bp.getPermissionsManager().getBackEnd().loadUsers()) {
-            if (u.getUUID() == null) continue;
-
-            userCount++;
+            if (u.getUUID() == null) {
+                log.logErr("Could not parse UUID for user: " + u.getName());
+                continue;
+            }
 
             // Make a LuckPerms user for the one being migrated.
             plugin.getStorage().loadUser(u.getUUID(), "null").join();
@@ -207,14 +156,8 @@ public class MigrationBungeePerms extends SubCommand<Object> {
             for (String perm : u.getPerms()) {
                 try {
                     user.setPermission(perm, true);
-                    LogEntry.build()
-                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
-                            .acted(user).action("set " + perm + " true")
-                            .build().submit(plugin);
                 } catch (Exception ex) {
-                    if (!(ex instanceof ObjectAlreadyHasException)) {
-                        ex.printStackTrace();
-                    }
+                    log.handleException(ex);
                 }
             }
 
@@ -223,14 +166,8 @@ public class MigrationBungeePerms extends SubCommand<Object> {
                 for (String perm : e.getValue().getPerms()) {
                     try {
                         user.setPermission(perm, true, e.getKey());
-                        LogEntry.build()
-                                .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
-                                .acted(user).action("set " + perm + " true " + e.getKey())
-                                .build().submit(plugin);
                     } catch (Exception ex) {
-                        if (!(ex instanceof ObjectAlreadyHasException)) {
-                            ex.printStackTrace();
-                        }
+                        log.handleException(ex);
                     }
                 }
 
@@ -239,14 +176,8 @@ public class MigrationBungeePerms extends SubCommand<Object> {
                     for (String perm : we.getValue().getPerms()) {
                         try {
                             user.setPermission(perm, true, e.getKey(), we.getKey());
-                            LogEntry.build()
-                                    .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
-                                    .acted(user).action("set " + perm + " true " + e.getKey() + " " + we.getKey())
-                                    .build().submit(plugin);
                         } catch (Exception ex) {
-                            if (!(ex instanceof ObjectAlreadyHasException)) {
-                                ex.printStackTrace();
-                            }
+                            log.handleException(ex);
                         }
                     }
                 }
@@ -256,14 +187,8 @@ public class MigrationBungeePerms extends SubCommand<Object> {
             for (String group : u.getGroupsString()) {
                 try {
                     user.setPermission("group." + group, true);
-                    LogEntry.build()
-                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
-                            .acted(user).action("addgroup " + group)
-                            .build().submit(plugin);
                 } catch (Exception ex) {
-                    if (!(ex instanceof ObjectAlreadyHasException)) {
-                        ex.printStackTrace();
-                    }
+                    log.handleException(ex);
                 }
             }
 
@@ -275,14 +200,8 @@ public class MigrationBungeePerms extends SubCommand<Object> {
                 prefix = MetaUtils.escapeCharacters(prefix);
                 try {
                     user.setPermission("prefix.100." + prefix, true);
-                    LogEntry.build()
-                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
-                            .acted(user).action("set prefix.100." + prefix + " true")
-                            .build().submit(plugin);
                 } catch (Exception ex) {
-                    if (!(ex instanceof ObjectAlreadyHasException)) {
-                        ex.printStackTrace();
-                    }
+                    log.handleException(ex);
                 }
             }
 
@@ -290,23 +209,19 @@ public class MigrationBungeePerms extends SubCommand<Object> {
                 suffix = MetaUtils.escapeCharacters(suffix);
                 try {
                     user.setPermission("suffix.100." + suffix, true);
-                    LogEntry.build()
-                            .actor(Constants.CONSOLE_UUID).actorName(Constants.CONSOLE_NAME)
-                            .acted(user).action("set suffix.100." + suffix + " true")
-                            .build().submit(plugin);
                 } catch (Exception ex) {
-                    if (!(ex instanceof ObjectAlreadyHasException)) {
-                        ex.printStackTrace();
-                    }
+                    log.handleException(ex);
                 }
             }
 
             plugin.getStorage().saveUser(user);
             plugin.getUserManager().cleanup(user);
+
+            log.logProgress("Migrated {} users so far.", userCount.incrementAndGet());
         }
 
-        log.accept("Migrated " + userCount + " users.");
-        log.accept("Success! Completed without any errors.");
+        log.log("Migrated " + userCount.get() + " users.");
+        log.log("Success! Migration complete.");
         return CommandResult.SUCCESS;
     }
 }

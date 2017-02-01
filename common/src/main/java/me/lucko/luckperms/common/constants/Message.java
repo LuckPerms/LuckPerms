@@ -49,7 +49,8 @@ public enum Message {
     OP_DISABLED_SPONGE("&2Server Operator status has no effect when a permission plugin is installed. Please edit user data directly.", true),
     LOG("&3LOG &3&l> {0}", true),
     EXPORT_LOG("&3EXPORT &3&l> &f{0}", true),
-    MIGRATION_LOG("&3MIGRATION &3&l> &f{0}", true),
+    MIGRATION_LOG("&3MIGRATION &7[&3{0}&7] &3&l> &f{1}", true),
+    MIGRATION_LOG_PROGRESS("&3MIGRATION &7[&3{0}&7] &3&l> &7{1}", true),
 
     COMMAND_NOT_RECOGNISED("Command not recognised.", true),
     COMMAND_NO_PERMISSION("You do not have permission to use this command!", true),
