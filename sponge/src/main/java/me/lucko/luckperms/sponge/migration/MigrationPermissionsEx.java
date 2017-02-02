@@ -49,6 +49,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -89,33 +90,55 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         }
         MigrationUtils.migrateSubjectData(pexService.getDefaults().getSubjectData(), lpService.getDefaults().getSubjectData());
 
+        log.log("Calculating group weightings.");
+        int maxWeight = 0;
+        for (Subject pexGroup : pexService.getGroupSubjects().getAllSubjects()) {
+            Optional<String> pos = pexGroup.getOption("rank");
+            if (pos.isPresent()) {
+                try {
+                    int i = Integer.parseInt(pos.get());
+                    maxWeight = Math.max(maxWeight, i);
+                } catch (NumberFormatException ignored) {}
+            }
+        }
+        maxWeight += 5;
+
         Map<String, TreeMap<Integer, String>> tracks = new HashMap<>();
 
         // Migrate groups
         log.log("Starting group migration.");
         AtomicInteger groupCount = new AtomicInteger(0);
         for (Subject pexGroup : pexService.getGroupSubjects().getAllSubjects()) {
-            String pexName = MigrationUtils.convertGroupName(pexGroup.getIdentifier().toLowerCase());
+            String pexName = MigrationUtils.convertName(pexGroup.getIdentifier());
+
+            Optional<String> rankString = pexGroup.getOption("rank");
+            OptionalInt rank = OptionalInt.empty();
+            if (rankString.isPresent()) {
+                try {
+                    int r = Integer.parseInt(rankString.get());
+                    rank = OptionalInt.of(r);
+                } catch (NumberFormatException ignored) {}
+            }
+
+            int weight = 100;
+            if (rank.isPresent()) {
+                weight = maxWeight - rank.getAsInt();
+            }
 
             // Make a LuckPerms group for the one being migrated
             plugin.getStorage().createAndLoadGroup(pexName).join();
             Group group = plugin.getGroupManager().getIfLoaded(pexName);
-            migrateSubject(pexGroup, group);
+            migrateSubject(pexGroup, group, weight);
             plugin.getStorage().saveGroup(group);
 
             // Pull track data
             Optional<String> track = pexGroup.getOption("rank-ladder");
-            Optional<String> pos = pexGroup.getOption("rank");
-            if (track.isPresent() && pos.isPresent()) {
-                String trackName = track.get().toLowerCase();
-                try {
-                    int rank = Integer.parseInt(pos.get());
-                    if (!tracks.containsKey(trackName)) {
-                        tracks.put(trackName, new TreeMap<>(Comparator.reverseOrder()));
-                    }
-
-                    tracks.get(trackName).put(rank, pexName);
-                } catch (NumberFormatException ignored) {}
+            if (track.isPresent() && rank.isPresent()) {
+                String trackName = MigrationUtils.convertName(track.get());
+                if (!tracks.containsKey(trackName)) {
+                    tracks.put(trackName, new TreeMap<>(Comparator.reverseOrder()));
+                }
+                tracks.get(trackName).put(rank.getAsInt(), pexName);
             }
 
             log.logAllProgress("Migrated {} groups so far.", groupCount.incrementAndGet());
@@ -141,6 +164,10 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         // Migrate users
         log.log("Starting user migration.");
         AtomicInteger userCount = new AtomicInteger(0);
+
+        // Increment the max weight from the group migrations. All user meta should override.
+        maxWeight += 5;
+
         for (Subject pexUser : pexService.getUserSubjects().getAllSubjects()) {
             UUID uuid = Util.parseUuid(pexUser.getIdentifier());
             if (uuid == null) {
@@ -154,7 +181,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             if (user.getNodes().size() <= 1) {
                 user.clearNodes(false);
             }
-            migrateSubject(pexUser, user);
+            migrateSubject(pexUser, user, maxWeight);
             plugin.getStorage().saveUser(user);
             plugin.getUserManager().cleanup(user);
 

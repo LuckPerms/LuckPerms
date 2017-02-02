@@ -45,7 +45,7 @@ import java.util.Set;
 @UtilityClass
 public class MigrationUtils {
 
-    public static void migrateSubject(Subject subject, PermissionHolder holder) {
+    public static void migrateSubject(Subject subject, PermissionHolder holder, int priority) {
         // Migrate permissions
         Map<Set<Context>, Map<String, Boolean>> perms = subject.getSubjectData().getAllPermissions();
         for (Map.Entry<Set<Context>, Map<String, Boolean>> e : perms.entrySet()) {
@@ -77,11 +77,11 @@ public class MigrationUtils {
                 for (Map.Entry<String, String> opt : e.getValue().entrySet()) {
                     if (opt.getKey().equalsIgnoreCase("prefix")) {
                         try {
-                            holder.setPermission(NodeFactory.makePrefixNode(100, opt.getValue()).setServerRaw(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
+                            holder.setPermission(NodeFactory.makePrefixNode(priority, opt.getValue()).setServerRaw(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
                         } catch (ObjectAlreadyHasException ignored) {}
                     } else if (opt.getKey().equalsIgnoreCase("suffix")) {
                         try {
-                            holder.setPermission(NodeFactory.makeSuffixNode(100, opt.getValue()).setServerRaw(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
+                            holder.setPermission(NodeFactory.makeSuffixNode(priority, opt.getValue()).setServerRaw(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
                         } catch (ObjectAlreadyHasException ignored) {}
                     } else {
                         try {
@@ -111,7 +111,7 @@ public class MigrationUtils {
                 }
 
                 try {
-                    holder.setPermission(new NodeBuilder("group." + convertGroupName(s.getIdentifier().toLowerCase())).setServerRaw(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
+                    holder.setPermission(new NodeBuilder("group." + convertName(s.getIdentifier())).setServerRaw(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
                 } catch (ObjectAlreadyHasException ignored) {}
             }
         }
@@ -137,8 +137,8 @@ public class MigrationUtils {
         }
     }
 
-    public static String convertGroupName(String s) {
-        return s.replace(' ', '_');
+    public static String convertName(String s) {
+        return s.replace(' ', '_').toLowerCase();
     }
 
 }

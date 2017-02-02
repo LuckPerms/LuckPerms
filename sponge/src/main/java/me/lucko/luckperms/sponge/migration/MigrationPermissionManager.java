@@ -107,12 +107,12 @@ public class MigrationPermissionManager extends SubCommand<Object> {
 
         AtomicInteger groupCount = new AtomicInteger(0);
         for (Subject pmGroup : pmService.getGroupSubjects().getAllSubjects()) {
-            String pmName = MigrationUtils.convertGroupName(pmGroup.getIdentifier().toLowerCase());
+            String pmName = MigrationUtils.convertName(pmGroup.getIdentifier());
 
             // Make a LuckPerms group for the one being migrated
             plugin.getStorage().createAndLoadGroup(pmName).join();
             Group group = plugin.getGroupManager().getIfLoaded(pmName);
-            migrateSubject(pmGroup, group);
+            migrateSubject(pmGroup, group, 100);
             plugin.getStorage().saveGroup(group);
 
             log.logAllProgress("Migrated {} groups so far.", groupCount.incrementAndGet());
@@ -144,7 +144,7 @@ public class MigrationPermissionManager extends SubCommand<Object> {
             if (user.getNodes().size() <= 1) {
                 user.clearNodes(false);
             }
-            migrateSubject(pmUser, user);
+            migrateSubject(pmUser, user, 100);
             plugin.getStorage().saveUser(user);
             plugin.getUserManager().cleanup(user);
 
