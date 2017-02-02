@@ -29,12 +29,14 @@ import me.lucko.luckperms.common.commands.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.common.utils.ProgressLogger;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -44,7 +46,7 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Consumer;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ExportCommand extends SingleCommand {
     private static void write(BufferedWriter writer, String s) {
@@ -54,50 +56,6 @@ public class ExportCommand extends SingleCommand {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public static String nodeToString(Node node, String id, boolean group) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("/luckperms ").append(group ? "group " : "user ").append(id).append(" ");
-
-        if (node.isGroupNode()) {
-            if (node.isTemporary()) {
-                sb.append("parent addtemp ");
-                sb.append(node.getGroupName());
-                sb.append(" ").append(node.getExpiryUnixTime());
-            } else {
-                sb.append("parent add ");
-                sb.append(node.getGroupName());
-            }
-
-            if (node.isWorldSpecific()) {
-                sb.append(" ").append(node.getServer().get()).append(" ").append(node.getWorld().get());
-            } else if (node.isServerSpecific()) {
-                sb.append(" ").append(node.getServer().get());
-            }
-
-            return sb.toString();
-        }
-
-        sb.append(node.isTemporary() ? "permission settemp " : "permission set ");
-        if (node.getPermission().contains(" ")) {
-            sb.append("\"").append(node.getPermission()).append("\"");
-        } else {
-            sb.append(node.getPermission());
-        }
-        sb.append(" ").append(node.getValue());
-
-        if (node.isTemporary()) {
-            sb.append(" ").append(node.getExpiryUnixTime());
-        }
-
-        if (node.isWorldSpecific()) {
-            sb.append(" ").append(node.getServer().get()).append(" ").append(node.getWorld().get());
-        } else if (node.isServerSpecific()) {
-            sb.append(" ").append(node.getServer().get());
-        }
-
-        return sb.toString();
     }
 
     public ExportCommand() {
@@ -110,12 +68,9 @@ public class ExportCommand extends SingleCommand {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
-        Consumer<String> log = s -> {
-            Message.EXPORT_LOG.send(sender, s);
-            if (!sender.isConsole()) {
-                Message.EXPORT_LOG.send(plugin.getConsoleSender(), s);
-            }
-        };
+        ProgressLogger log = new ProgressLogger(null, Message.EXPORT_LOG, Message.EXPORT_LOG_PROGRESS);
+        log.addListener(plugin.getConsoleSender());
+        log.addListener(sender);
 
         File f = new File(plugin.getDataDirectory(), args.get(0));
         if (f.exists()) {
@@ -137,51 +92,50 @@ public class ExportCommand extends SingleCommand {
         }
 
         try (FileWriter fWriter = new FileWriter(f, true); BufferedWriter writer = new BufferedWriter(fWriter)) {
-            log.accept("Starting export process.");
+            log.log("Starting.");
 
             // Export Groups
-            log.accept("Exporting all groups.");
+            log.log("Starting group export.");
 
-            // Create the groups first
+            // Create the actual groups first
             for (Group group : plugin.getGroupManager().getAll().values()) {
                 write(writer, "/luckperms creategroup " + group.getName());
             }
 
-            int groupCount = 0;
+            AtomicInteger groupCount = new AtomicInteger(0);
             for (Group group : plugin.getGroupManager().getAll().values()) {
-                groupCount++;
                 for (Node node : group.getNodes()) {
-                    write(writer, nodeToString(node, group.getName(), true));
+                    write(writer, NodeFactory.nodeAsCommand(node, group.getName(), true));
                 }
+                log.logAllProgress("Exported {} groups so far.", groupCount.incrementAndGet());
             }
-            log.accept("Exported " + groupCount + " groups.");
+            log.log("Exported " + groupCount.get() + " groups.");
 
             // Export tracks
-            log.accept("Exporting all tracks.");
+            log.log("Starting track export.");
 
-            // Create the tracks first
+            // Create the actual tracks first
             for (Track track : plugin.getTrackManager().getAll().values()) {
                 write(writer, "/luckperms createtrack " + track.getName());
             }
 
-            int trackCount = 0;
+            AtomicInteger trackCount = new AtomicInteger(0);
             for (Track track : plugin.getTrackManager().getAll().values()) {
-                trackCount++;
                 for (String group : track.getGroups()) {
                     write(writer, "/luckperms track " + track.getName() + " append " + group);
                 }
+                log.logAllProgress("Exported {} tracks so far.", trackCount.incrementAndGet());
             }
-            log.accept("Exported " + trackCount + " tracks.");
+            log.log("Exported " + trackCount.get() + " tracks.");
 
             // Export users
-            log.accept("Exporting all users. Finding a list of unique users to export.");
+            log.log("Starting user export. Finding a list of unique users to export.");
             Storage ds = plugin.getStorage();
             Set<UUID> users = ds.getUniqueUsers().join();
-            log.accept("Found " + users.size() + " unique users to export.");
+            log.log("Found " + users.size() + " unique users to export.");
 
-            int userCount = 0;
+            AtomicInteger userCount = new AtomicInteger(0);
             for (UUID uuid : users) {
-                userCount++;
                 plugin.getStorage().loadUser(uuid, "null").join();
                 User user = plugin.getUserManager().get(uuid);
 
@@ -192,11 +146,11 @@ public class ExportCommand extends SingleCommand {
                         continue;
                     }
 
-                    write(writer, nodeToString(node, user.getUuid().toString(), false));
+                    write(writer, NodeFactory.nodeAsCommand(node, user.getUuid().toString(), false));
                 }
 
                 if (!user.getPrimaryGroup().equalsIgnoreCase("default")) {
-                    write(writer, "/luckperms user " + user.getUuid().toString() + " setprimarygroup " + user.getPrimaryGroup());
+                    write(writer, "/luckperms user " + user.getUuid().toString() + " switchprimarygroup " + user.getPrimaryGroup());
                 }
 
                 if (!inDefault) {
@@ -204,8 +158,9 @@ public class ExportCommand extends SingleCommand {
                 }
 
                 plugin.getUserManager().cleanup(user);
+                log.logProgress("Exported {} users so far.", userCount.incrementAndGet());
             }
-            log.accept("Exported " + userCount + " users.");
+            log.log("Exported " + userCount.get() + " users.");
 
             try {
                 writer.flush();
@@ -213,7 +168,7 @@ public class ExportCommand extends SingleCommand {
                 e.printStackTrace();
             }
 
-            Message.LOG_EXPORT_SUCCESS.send(sender, f.getAbsolutePath());
+            log.getListeners().forEach(l -> Message.LOG_EXPORT_SUCCESS.send(l, f.getAbsolutePath()));
             return CommandResult.SUCCESS;
         } catch (Throwable t) {
             t.printStackTrace();

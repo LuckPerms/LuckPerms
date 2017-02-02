@@ -36,12 +36,12 @@ import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SubCommand;
-import me.lucko.luckperms.common.commands.migration.MigrationLogger;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.common.utils.ProgressLogger;
 
 import org.bukkit.Bukkit;
 
@@ -144,7 +144,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
     }
 
     private CommandResult run(LuckPermsPlugin plugin, Sender sender, List<String> args) {
-        MigrationLogger log = new MigrationLogger("PowerfulPerms");
+        ProgressLogger log = new ProgressLogger("PowerfulPerms");
         log.addListener(plugin.getConsoleSender());
         log.addListener(sender);
 
@@ -421,7 +421,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         return CommandResult.SUCCESS;
     }
 
-    private void applyPerm(PermissionHolder holder, Permission p, MigrationLogger log) {
+    private void applyPerm(PermissionHolder holder, Permission p, ProgressLogger log) {
         String node = p.getPermissionString();
         boolean value = true;
         if (node.startsWith("!")) {

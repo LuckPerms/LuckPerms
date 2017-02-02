@@ -20,8 +20,9 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.migration;
+package me.lucko.luckperms.common.utils;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.common.commands.sender.Sender;
@@ -33,26 +34,46 @@ import java.util.HashSet;
 import java.util.Set;
 
 @RequiredArgsConstructor
-public class MigrationLogger {
+public class ProgressLogger {
     private static final int NOTIFY_FREQUENCY = 100;
 
     private final String pluginName;
+    private final Message logMessage;
+    private final Message logProgressMessage;
+
+    @Getter
     private final Set<Sender> listeners = new HashSet<>();
+
+    public ProgressLogger(String pluginName) {
+        this(pluginName, Message.MIGRATION_LOG, Message.MIGRATION_LOG_PROGRESS);
+    }
 
     public void addListener(Sender sender) {
         listeners.add(sender);
     }
 
     public void log(String msg) {
-        listeners.forEach(s -> Message.MIGRATION_LOG.send(s, pluginName, msg));
+        if (pluginName == null) {
+            listeners.forEach(s -> logMessage.send(s, msg));
+        } else {
+            listeners.forEach(s -> logMessage.send(s, pluginName, msg));
+        }
     }
 
     public void logErr(String msg) {
-        listeners.forEach(s -> Message.MIGRATION_LOG.send(s, pluginName, "Error -> " + msg));
+        if (pluginName == null) {
+            listeners.forEach(s -> logMessage.send(s, "Error -> " + msg));
+        } else {
+            listeners.forEach(s -> logMessage.send(s, pluginName, "Error -> " + msg));
+        }
     }
 
     public void logAllProgress(String msg, int amount) {
-        listeners.forEach(s -> Message.MIGRATION_LOG_PROGRESS.send(s, pluginName, msg.replace("{}", "" + amount)));
+        if (pluginName == null) {
+            listeners.forEach(s -> logProgressMessage.send(s, msg.replace("{}", "" + amount)));
+        } else {
+            listeners.forEach(s -> logProgressMessage.send(s, pluginName, msg.replace("{}", "" + amount)));
+        }
     }
 
     public void logProgress(String msg, int amount) {

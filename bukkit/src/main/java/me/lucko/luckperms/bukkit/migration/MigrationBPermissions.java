@@ -33,12 +33,12 @@ import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SubCommand;
-import me.lucko.luckperms.common.commands.migration.MigrationLogger;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.common.utils.ProgressLogger;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -71,7 +71,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) throws CommandException {
-        MigrationLogger log = new MigrationLogger("bPermissions");
+        ProgressLogger log = new ProgressLogger("bPermissions");
         log.addListener(plugin.getConsoleSender());
         log.addListener(sender);
 
@@ -186,7 +186,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
         }
     }
 
-    private static void migrateHolder(MigrationLogger log, World world, Calculable c, PermissionHolder holder) {
+    private static void migrateHolder(ProgressLogger log, World world, Calculable c, PermissionHolder holder) {
         // Migrate the groups permissions in this world
         for (Permission p : c.getPermissions()) {
             try {

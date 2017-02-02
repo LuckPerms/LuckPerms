@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.common.data;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -34,6 +35,7 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Message;
+import me.lucko.luckperms.common.constants.Patterns;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
@@ -107,7 +109,11 @@ public class Importer {
 
             executing = index;
             try {
-                CommandResult result = commandManager.onCommand(fake, "perms", Splitter.on(' ').splitToList(command)).get();
+                CommandResult result = commandManager.onCommand(
+                        fake,
+                        "lp",
+                        Util.stripQuotes(Splitter.on(Patterns.COMMAND_SEPARATOR).omitEmptyStrings().splitToList(command))
+                ).get();
                 getResult(index, command).setResult(result);
 
             } catch (Exception e) {
@@ -230,14 +236,14 @@ public class Importer {
         }
     }
 
+    @Getter
+    @Setter
     private static class Result {
-        @Getter
+
+        @Setter(AccessLevel.NONE)
         private final List<String> output = new ArrayList<>();
-        @Getter
-        @Setter
+
         private String command;
-        @Getter
-        @Setter
         private CommandResult result = CommandResult.FAILURE;
 
         private Result(String command) {

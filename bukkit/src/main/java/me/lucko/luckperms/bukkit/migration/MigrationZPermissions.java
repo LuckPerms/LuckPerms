@@ -25,7 +25,6 @@ package me.lucko.luckperms.bukkit.migration;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SubCommand;
-import me.lucko.luckperms.common.commands.migration.MigrationLogger;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeFactory;
@@ -35,6 +34,7 @@ import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.common.utils.ProgressLogger;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import org.bukkit.Bukkit;
@@ -58,7 +58,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) throws CommandException {
-        MigrationLogger log = new MigrationLogger("PermissionManager");
+        ProgressLogger log = new ProgressLogger("PermissionManager");
         log.addListener(plugin.getConsoleSender());
         log.addListener(sender);
 

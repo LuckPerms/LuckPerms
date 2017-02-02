@@ -129,4 +129,48 @@ public class NodeFactory {
     public static NodeBuilder makeSuffixNode(int priority, String suffix) {
         return new NodeBuilder("suffix." + priority + "." + MetaUtils.escapeCharacters(suffix));
     }
+
+    public static String nodeAsCommand(Node node, String id, boolean group) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("/luckperms ").append(group ? "group " : "user ").append(id).append(" ");
+
+        if (node.isGroupNode()) {
+            if (node.isTemporary()) {
+                sb.append("parent addtemp ");
+                sb.append(node.getGroupName());
+                sb.append(" ").append(node.getExpiryUnixTime());
+            } else {
+                sb.append("parent add ");
+                sb.append(node.getGroupName());
+            }
+
+            if (node.isWorldSpecific()) {
+                sb.append(" ").append(node.getServer().get()).append(" ").append(node.getWorld().get());
+            } else if (node.isServerSpecific()) {
+                sb.append(" ").append(node.getServer().get());
+            }
+
+            return sb.toString();
+        }
+
+        sb.append(node.isTemporary() ? "permission settemp " : "permission set ");
+        if (node.getPermission().contains(" ")) {
+            sb.append("\"").append(node.getPermission()).append("\"");
+        } else {
+            sb.append(node.getPermission());
+        }
+        sb.append(" ").append(node.getValue());
+
+        if (node.isTemporary()) {
+            sb.append(" ").append(node.getExpiryUnixTime());
+        }
+
+        if (node.isWorldSpecific()) {
+            sb.append(" ").append(node.getServer().get()).append(" ").append(node.getWorld().get());
+        } else if (node.isServerSpecific()) {
+            sb.append(" ").append(node.getServer().get());
+        }
+
+        return sb.toString();
+    }
 }

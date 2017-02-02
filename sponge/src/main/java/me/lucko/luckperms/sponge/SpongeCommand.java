@@ -58,7 +58,7 @@ class SpongeCommand extends CommandManager implements CommandCallable {
         try (Timing ignored = plugin.getTimings().time(LPTiming.ON_COMMAND)) {
             onCommand(
                     plugin.getSenderFactory().wrap(source),
-                    "perms",
+                    "lp",
                     Util.stripQuotes(Splitter.on(Patterns.COMMAND_SEPARATOR).omitEmptyStrings().splitToList(s))
             );
             return CommandResult.success();
