@@ -37,7 +37,7 @@ public enum Dependency {
     SLF4J_SIMPLE("https://repo1.maven.org/maven2/org/slf4j/slf4j-simple/1.7.9/slf4j-simple-1.7.9.jar", "1.7.9", "org.slf4j.impl.SimpleLoggerFactory"),
     SLF4J_API("https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.9/slf4j-api-1.7.9.jar", "1.7.9", "org.slf4j.helpers.BasicMarkerFactory"),
     MONGODB_DRIVER("https://repo1.maven.org/maven2/org/mongodb/mongo-java-driver/3.4.1/mongo-java-driver-3.4.1.jar", "3.4.1", "com.mongodb.Mongo"),
-    JEDIS("https://github.com/lucko/jedis/releases/download/jedis-2.9.0-shaded/jedis-2.9.0-shaded.jar", "2.9.0-shaded", "redis.clients.jedis.Jedis");
+    JEDIS("https://github.com/lucko/jedis/releases/download/jedis-2.9.1-shaded/jedis-2.9.1-shaded.jar", "2.9.1-shaded", "redis.clients.jedis.shaded.Jedis");
 
     private final String url;
     private final String version;
