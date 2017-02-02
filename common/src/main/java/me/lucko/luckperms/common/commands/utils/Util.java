@@ -30,10 +30,10 @@ import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.common.commands.misc.ExportCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Patterns;
+import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.utils.DateUtil;
@@ -201,7 +201,7 @@ public class Util {
         );
 
         boolean group = !(holder instanceof User);
-        String command = ExportCommand.nodeToString(node, group ? holder.getObjectName() : holder.getFriendlyName(), group)
+        String command = NodeFactory.nodeAsCommand(node, group ? holder.getObjectName() : holder.getFriendlyName(), group)
                 .replace("/luckperms", "/" + label)
                 .replace("permission set", "permission unset")
                 .replace("parent add", "parent remove")
@@ -224,7 +224,7 @@ public class Util {
                 new FancyMessage("Click to remove this node from " + holderName).color(ChatColor.getByChar('7'))
         );
 
-        String command = ExportCommand.nodeToString(node, group ? holderName : holderName, group)
+        String command = NodeFactory.nodeAsCommand(node, group ? holderName : holderName, group)
                 .replace("/luckperms", "/" + label)
                 .replace("permission set", "permission unset")
                 .replace("parent add", "parent remove")
