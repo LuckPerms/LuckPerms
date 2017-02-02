@@ -160,7 +160,7 @@ class BukkitListener extends AbstractListener implements Listener {
 
     @EventHandler
     public void onPlayerCommand(PlayerCommandPreprocessEvent e) {
-        if (plugin.getConfiguration().get(ConfigKeys.AUTO_OP)) {
+        if (plugin.getConfiguration().get(ConfigKeys.OPS_ENABLED)) {
             return;
         }
 
