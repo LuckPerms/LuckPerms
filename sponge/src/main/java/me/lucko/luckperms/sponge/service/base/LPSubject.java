@@ -145,7 +145,7 @@ public interface LPSubject extends Subject {
     @Deprecated
     @Override
     default Optional<String> getOption(@NonNull Set<Context> contexts, @NonNull String key) {
-        return getOption(getActiveContextSet(), key);
+        return getOption(convertContexts(contexts), key);
     }
 
     @Deprecated
