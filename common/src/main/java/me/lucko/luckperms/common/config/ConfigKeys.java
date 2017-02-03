@@ -36,6 +36,7 @@ import me.lucko.luckperms.common.config.keys.IntegerKey;
 import me.lucko.luckperms.common.config.keys.MapKey;
 import me.lucko.luckperms.common.config.keys.StaticKey;
 import me.lucko.luckperms.common.config.keys.StringKey;
+import me.lucko.luckperms.common.core.TemporaryModifier;
 import me.lucko.luckperms.common.defaults.Rule;
 import me.lucko.luckperms.common.storage.DatastoreConfiguration;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
@@ -58,6 +59,14 @@ public class ConfigKeys {
     public static final ConfigKey<Boolean> APPLYING_GLOBAL_GROUPS = BooleanKey.of("apply-global-groups", true);
     public static final ConfigKey<Boolean> APPLYING_GLOBAL_WORLD_GROUPS = BooleanKey.of("apply-global-world-groups", true);
     public static final ConfigKey<Boolean> ONLINE_MODE = BooleanKey.of("online-mode", true);
+    public static final ConfigKey<TemporaryModifier> TEMPORARY_ADD_BEHAVIOUR = AbstractKey.of(c -> {
+        String option = c.getString("temporary-add-behaviour", "deny").toLowerCase();
+        if (!option.equals("deny") && !option.equals("replace") && !option.equals("accumulate")) {
+            option = "deny";
+        }
+
+        return TemporaryModifier.valueOf(option.toUpperCase());
+    });
     public static final ConfigKey<Boolean> APPLYING_WILDCARDS = EnduringKey.wrap(BooleanKey.of("apply-wildcards", true));
     public static final ConfigKey<Boolean> APPLYING_REGEX = EnduringKey.wrap(BooleanKey.of("apply-regex", true));
     public static final ConfigKey<Boolean> APPLYING_SHORTHAND = EnduringKey.wrap(BooleanKey.of("apply-shorthand", true));

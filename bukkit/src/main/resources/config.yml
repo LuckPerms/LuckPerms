@@ -46,6 +46,14 @@ online-mode: true
 # If the plugin should send log notifications to users whenever permissions are modified.
 log-notify: true
 
+# Controls how temporary permissions/parents/meta should be accumulated
+#
+# The default behaviour is "deny"
+# If "accumulate": durations will be added to the existing expiry time
+# If "replace": durations will be replaced if the new duration is later than the current expiration
+# If "deny": the command will just fail if you try to add another node with the same expiry
+temporary-add-behaviour: deny
+
 
 
 

@@ -58,6 +58,7 @@ import me.lucko.luckperms.common.core.InheritanceInfo;
 import me.lucko.luckperms.common.core.NodeBuilder;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.PriorityComparator;
+import me.lucko.luckperms.common.core.TemporaryModifier;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Cache;
 import me.lucko.luckperms.common.utils.ExtractedContexts;
@@ -593,6 +594,16 @@ public abstract class PermissionHolder {
         return true;
     }
 
+    public Optional<Node> getAlmostEquals(Node node, boolean t) {
+        for (Node n : t ? getTransientNodes() : getNodes()) {
+            if (n.almostEquals(node)) {
+                return Optional.of(n);
+            }
+        }
+
+        return Optional.empty();
+    }
+
     /**
      * Check if the holder has a permission node
      *
@@ -601,13 +612,7 @@ public abstract class PermissionHolder {
      * @return a tristate
      */
     public Tristate hasPermission(Node node, boolean t) {
-        for (Node n : t ? getTransientNodes() : getNodes()) {
-            if (n.almostEquals(node)) {
-                return n.getTristate();
-            }
-        }
-
-        return Tristate.UNDEFINED;
+        return getAlmostEquals(node, t).map(Node::getTristate).orElse(Tristate.UNDEFINED);
     }
 
     public Tristate hasPermission(Node node) {
@@ -705,6 +710,71 @@ public abstract class PermissionHolder {
         invalidateCache(true);
 
         plugin.getApiProvider().fireEventAsync(new PermissionNodeSetEvent(new PermissionHolderDelegate(this), node));
+    }
+
+    /**
+     * Sets a permission node, applying a temporary modifier if the node is temporary.
+     * @param node the node to set
+     * @param modifier the modifier to use for the operation
+     * @return the node that was actually set, respective of the modifier
+     * @throws ObjectAlreadyHasException if the holder has this permission set already, respective of the modifier
+     */
+    public Node setPermission(Node node, TemporaryModifier modifier) throws ObjectAlreadyHasException {
+        // If the node is temporary, we should take note of the modifier
+        if (node.isTemporary()) {
+            if (modifier == TemporaryModifier.ACCUMULATE) {
+                // Try to accumulate with an existing node
+                Optional<Node> existing = getAlmostEquals(node, false);
+
+                // An existing node was found
+                if (existing.isPresent()) {
+                    Node previous = existing.get();
+
+                    // Create a new node with the same properties, but add the expiry dates together
+                    Node newNode = NodeFactory.builderFromExisting(node).setExpiry(previous.getExpiryUnixTime() + node.getSecondsTilExpiry()).build();
+
+                    // Remove the old node & add the new one.
+                    synchronized (nodes) {
+                        nodes.remove(previous);
+                        nodes.add(newNode);
+                    }
+
+                    invalidateCache(true);
+                    plugin.getApiProvider().fireEventAsync(new PermissionNodeUnsetEvent(new PermissionHolderDelegate(this), previous));
+                    plugin.getApiProvider().fireEventAsync(new PermissionNodeSetEvent(new PermissionHolderDelegate(this), newNode));
+                    return newNode;
+                }
+
+            } else if (modifier == TemporaryModifier.REPLACE) {
+                // Try to replace an existing node
+                Optional<Node> existing = getAlmostEquals(node, false);
+
+                // An existing node was found
+                if (existing.isPresent()) {
+                    Node previous = existing.get();
+
+                    // Only replace if the new expiry time is greater than the old one.
+                    if (node.getExpiryUnixTime() > previous.getExpiryUnixTime()) {
+
+                        synchronized (nodes) {
+                            nodes.remove(previous);
+                            nodes.add(node);
+                        }
+
+                        invalidateCache(true);
+                        plugin.getApiProvider().fireEventAsync(new PermissionNodeUnsetEvent(new PermissionHolderDelegate(this), previous));
+                        plugin.getApiProvider().fireEventAsync(new PermissionNodeSetEvent(new PermissionHolderDelegate(this), node));
+                        return node;
+                    }
+                }
+            }
+
+            // DENY behaviour is the default anyways.
+        }
+
+        // Fallback to the normal handling.
+        setPermission(node);
+        return node;
     }
 
     /**

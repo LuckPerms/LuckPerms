@@ -22,6 +22,9 @@
 
 package me.lucko.luckperms.common.commands.generic.parent;
 
+import me.lucko.luckperms.api.event.events.GroupAddEvent;
+import me.lucko.luckperms.common.api.delegate.GroupDelegate;
+import me.lucko.luckperms.common.api.delegate.PermissionHolderDelegate;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -29,8 +32,11 @@ import me.lucko.luckperms.common.commands.generic.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.ContextHelper;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.core.NodeBuilder;
+import me.lucko.luckperms.common.core.TemporaryModifier;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
@@ -63,6 +69,7 @@ public class ParentAddTemp extends SharedSubCommand {
         long duration = ArgumentUtils.handleDuration(1, args);
         String server = ArgumentUtils.handleServer(2, args);
         String world = ArgumentUtils.handleWorld(3, args);
+        TemporaryModifier modifier = plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR);
 
         if (!plugin.getStorage().loadGroup(groupName).join()) {
             Message.GROUP_DOES_NOT_EXIST.send(sender);
@@ -76,24 +83,31 @@ public class ParentAddTemp extends SharedSubCommand {
         }
 
         try {
+            if (group.getName().equalsIgnoreCase(holder.getObjectName())) {
+                throw new ObjectAlreadyHasException();
+            }
+
             switch (ContextHelper.determine(server, world)) {
                 case NONE:
-                    holder.setInheritGroup(group, duration);
+                    duration = holder.setPermission(new NodeBuilder("group." + group.getName()).setValue(true).setExpiry(duration).build(), modifier).getExpiryUnixTime();
                     Message.SET_TEMP_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(),
                             DateUtil.formatDateDiff(duration)
                     );
+                    plugin.getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderDelegate(holder), new GroupDelegate(group), null, null, duration));
                     break;
                 case SERVER:
-                    holder.setInheritGroup(group, server, duration);
+                    duration = holder.setPermission(new NodeBuilder("group." + group.getName()).setValue(true).setServer(server).setExpiry(duration).build(), modifier).getExpiryUnixTime();
                     Message.SET_TEMP_INHERIT_SERVER_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(),
                             server, DateUtil.formatDateDiff(duration)
                     );
+                    plugin.getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderDelegate(holder), new GroupDelegate(group), server, null, duration));
                     break;
                 case SERVER_AND_WORLD:
-                    holder.setInheritGroup(group, server, world, duration);
+                    duration = holder.setPermission(new NodeBuilder("group." + group.getName()).setValue(true).setServer(server).setWorld(world).setExpiry(duration).build(), modifier).getExpiryUnixTime();
                     Message.SET_TEMP_INHERIT_SERVER_WORLD_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(),
                             server, world, DateUtil.formatDateDiff(duration)
                     );
+                    plugin.getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderDelegate(holder), new GroupDelegate(group), server, world, duration));
                     break;
             }
 

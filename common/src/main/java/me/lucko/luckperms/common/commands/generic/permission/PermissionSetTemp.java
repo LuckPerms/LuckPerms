@@ -29,8 +29,11 @@ import me.lucko.luckperms.common.commands.generic.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.ContextHelper;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.core.NodeBuilder;
+import me.lucko.luckperms.common.core.TemporaryModifier;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -68,22 +71,24 @@ public class PermissionSetTemp extends SharedSubCommand {
         String server = ArgumentUtils.handleServer(3, args);
         String world = ArgumentUtils.handleWorld(4, args);
 
+        TemporaryModifier modifier = plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR);
+
         try {
             switch (ContextHelper.determine(server, world)) {
                 case NONE:
-                    holder.setPermission(node, b, duration);
+                    duration = holder.setPermission(new NodeBuilder(node).setValue(b).setExpiry(duration).build(), modifier).getExpiryUnixTime();
                     Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, b, holder.getFriendlyName(),
                             DateUtil.formatDateDiff(duration)
                     );
                     break;
                 case SERVER:
-                    holder.setPermission(node, b, server, duration);
+                    duration = holder.setPermission(new NodeBuilder(node).setValue(b).setServer(server).setExpiry(duration).build(), modifier).getExpiryUnixTime();
                     Message.SETPERMISSION_TEMP_SERVER_SUCCESS.send(sender, node, b, holder.getFriendlyName(), server,
                             DateUtil.formatDateDiff(duration)
                     );
                     break;
                 case SERVER_AND_WORLD:
-                    holder.setPermission(node, b, server, world, duration);
+                    duration = holder.setPermission(new NodeBuilder(node).setValue(b).setServer(server).setWorld(world).setExpiry(duration).build(), modifier).getExpiryUnixTime();
                     Message.SETPERMISSION_TEMP_SERVER_WORLD_SUCCESS.send(sender, node, b, holder.getFriendlyName(),
                             server, world, DateUtil.formatDateDiff(duration)
                     );

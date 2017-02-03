@@ -30,8 +30,11 @@ import me.lucko.luckperms.common.commands.generic.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.ContextHelper;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.core.NodeBuilder;
+import me.lucko.luckperms.common.core.TemporaryModifier;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -63,25 +66,26 @@ public class MetaAddTempPrefix extends SharedSubCommand {
         long duration = ArgumentUtils.handleDuration(2, args);
         String server = ArgumentUtils.handleServer(3, args);
         String world = ArgumentUtils.handleWorld(4, args);
+        TemporaryModifier modifier = plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR);
 
         final String node = "prefix." + priority + "." + MetaUtils.escapeCharacters(prefix);
 
         try {
             switch (ContextHelper.determine(server, world)) {
                 case NONE:
-                    holder.setPermission(node, true, duration);
+                    duration = holder.setPermission(new NodeBuilder(node).setValue(true).setExpiry(duration).build(), modifier).getExpiryUnixTime();
                     Message.ADD_TEMP_PREFIX_SUCCESS.send(sender, holder.getFriendlyName(), prefix, priority,
                             DateUtil.formatDateDiff(duration)
                     );
                     break;
                 case SERVER:
-                    holder.setPermission(node, true, server, duration);
+                    duration = holder.setPermission(new NodeBuilder(node).setValue(true).setServer(server).setExpiry(duration).build(), modifier).getExpiryUnixTime();
                     Message.ADD_TEMP_PREFIX_SERVER_SUCCESS.send(sender, holder.getFriendlyName(), prefix, priority,
                             server, DateUtil.formatDateDiff(duration)
                     );
                     break;
                 case SERVER_AND_WORLD:
-                    holder.setPermission(node, true, server, world, duration);
+                    duration = holder.setPermission(new NodeBuilder(node).setValue(true).setServer(server).setWorld(world).setExpiry(duration).build(), modifier).getExpiryUnixTime();
                     Message.ADD_TEMP_PREFIX_SERVER_WORLD_SUCCESS.send(sender, holder.getFriendlyName(), prefix, priority,
                             server, world, DateUtil.formatDateDiff(duration)
                     );
