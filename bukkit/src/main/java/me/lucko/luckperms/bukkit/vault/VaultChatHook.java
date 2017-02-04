@@ -153,7 +153,12 @@ public class VaultChatHook extends Chat {
             return defaultValue;
         }
 
-        return unescapeCharacters(user.getUserData().getMetaData(perms.createContextForWorld(world)).getMeta().getOrDefault(node, defaultValue));
+        String ret = user.getUserData().getMetaData(perms.createContextForWorld(world)).getMeta().get(node);
+        if (ret == null) {
+            return defaultValue;
+        } else {
+            return unescapeCharacters(ret);
+        }
     }
 
     private String getUserChatMeta(boolean prefix, User user, String world) {
