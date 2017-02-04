@@ -58,7 +58,7 @@ public class MigrationUtils {
 
             for (Map.Entry<String, Boolean> perm : e.getValue().entrySet()) {
                 try {
-                    holder.setPermission(new NodeBuilder(perm.getKey()).setServerRaw(server).setWorld(world).withExtraContext(contexts).setValue(perm.getValue()).build());
+                    holder.setPermission(new NodeBuilder(perm.getKey()).setServer(server).setWorld(world).withExtraContext(contexts).setValue(perm.getValue()).build());
                 } catch (ObjectAlreadyHasException ignored) {}
             }
         }
@@ -77,15 +77,15 @@ public class MigrationUtils {
                 for (Map.Entry<String, String> opt : e.getValue().entrySet()) {
                     if (opt.getKey().equalsIgnoreCase("prefix")) {
                         try {
-                            holder.setPermission(NodeFactory.makePrefixNode(priority, opt.getValue()).setServerRaw(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
+                            holder.setPermission(NodeFactory.makePrefixNode(priority, opt.getValue()).setServer(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
                         } catch (ObjectAlreadyHasException ignored) {}
                     } else if (opt.getKey().equalsIgnoreCase("suffix")) {
                         try {
-                            holder.setPermission(NodeFactory.makeSuffixNode(priority, opt.getValue()).setServerRaw(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
+                            holder.setPermission(NodeFactory.makeSuffixNode(priority, opt.getValue()).setServer(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
                         } catch (ObjectAlreadyHasException ignored) {}
                     } else {
                         try {
-                            holder.setPermission(NodeFactory.makeMetaNode(opt.getKey(), opt.getValue()).setServerRaw(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
+                            holder.setPermission(NodeFactory.makeMetaNode(opt.getKey(), opt.getValue()).setServer(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
                         } catch (ObjectAlreadyHasException ignored) {}
                     }
                 }
@@ -111,7 +111,7 @@ public class MigrationUtils {
                 }
 
                 try {
-                    holder.setPermission(new NodeBuilder("group." + convertName(s.getIdentifier())).setServerRaw(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
+                    holder.setPermission(new NodeBuilder("group." + convertName(s.getIdentifier())).setServer(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
                 } catch (ObjectAlreadyHasException ignored) {}
             }
         }

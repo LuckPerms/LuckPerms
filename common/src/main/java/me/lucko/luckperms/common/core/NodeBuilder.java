@@ -32,7 +32,6 @@ import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.constants.Patterns;
 import me.lucko.luckperms.common.core.model.ImmutableNode;
-import me.lucko.luckperms.common.utils.ArgumentChecker;
 
 import java.util.List;
 import java.util.Map;
@@ -58,12 +57,16 @@ public class NodeBuilder implements Node.Builder {
             if (!Patterns.NODE_CONTEXTS.matcher(permission).matches()) {
                 this.permission = permission;
             } else {
-                List<String> contextParts = Splitter.on(')').limit(2).splitToList(permission.substring(1));
+                List<String> contextParts = Splitter.on(Patterns.compileDelimitedMatcher(")", "\\")).limit(2).splitToList(permission.substring(1));
                 // 0 = context, 1 = node
 
                 this.permission = contextParts.get(1);
                 try {
-                    extraContexts.addAll(Splitter.on(',').withKeyValueSeparator('=').split(contextParts.get(0)));
+                    Map<String, String> map = Splitter.on(Patterns.compileDelimitedMatcher(",", "\\")).withKeyValueSeparator(Splitter.on(Patterns.compileDelimitedMatcher("=", "\\"))).split(contextParts.get(0));
+                    for (Map.Entry<String, String> e : map.entrySet()) {
+                        this.withExtraContext(NodeFactory.unescapeDelimiters(e.getKey(), "=", "(", ")", ","), NodeFactory.unescapeDelimiters(e.getValue(), "=", "(", ")", ","));
+                    }
+
                 } catch (IllegalArgumentException e) {
                     e.printStackTrace();
                 }
@@ -113,15 +116,6 @@ public class NodeBuilder implements Node.Builder {
 
     @Override
     public Node.Builder setServer(String server) {
-        if (server != null && ArgumentChecker.checkServer(server)) {
-            throw new IllegalArgumentException("Server name invalid.");
-        }
-
-        this.server = server;
-        return this;
-    }
-
-    public Node.Builder setServerRaw(String server) {
         this.server = server;
         return this;
     }

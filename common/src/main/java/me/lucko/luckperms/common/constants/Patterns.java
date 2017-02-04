@@ -66,4 +66,12 @@ public class Patterns {
         }
     }
 
+    public static String buildDelimitedMatcher(String delim, String esc) {
+        return "(?<!" + Pattern.quote(esc) + ")" + Pattern.quote(delim);
+    }
+
+    public static Pattern compileDelimitedMatcher(String delim, String esc) {
+        return compile(buildDelimitedMatcher(delim, esc));
+    }
+
 }

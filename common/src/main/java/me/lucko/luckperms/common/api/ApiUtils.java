@@ -65,22 +65,6 @@ public class ApiUtils {
         return s.toLowerCase();
     }
 
-    public static String checkServer(String s) {
-        Preconditions.checkArgument(
-                !ArgumentChecker.checkServer(s),
-                "Invalid server entry '" + s + "'. Server names can only contain alphanumeric characters."
-        );
-        return s;
-    }
-
-    public static String checkNode(String s) {
-        Preconditions.checkArgument(
-                !ArgumentChecker.checkNode(s),
-                "Invalid node entry '" + s + "'. Nodes cannot contain '/' or '$' characters."
-        );
-        return s;
-    }
-
     public static long checkTime(long l) {
         Preconditions.checkArgument(!ArgumentChecker.checkTime(l), "Unix time '" + l + "' is invalid, as it has already passed.");
         return l;

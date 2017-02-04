@@ -66,13 +66,10 @@ public class ArgumentUtils {
 
     public static String handleNode(int index, List<String> args) throws ArgumentException {
         String node = args.get(index).replace("{SPACE}", " ");
-        if (ArgumentChecker.checkNode(node)) {
-            throw new DetailedUsageException();
-        }
-
         if (node.toLowerCase().startsWith("group.")) {
             throw new UseInheritException();
         }
+
 
         return node;
     }
@@ -107,11 +104,7 @@ public class ArgumentUtils {
 
     public static String handleServer(int index, List<String> args) throws ArgumentException {
         if (args.size() > index) {
-            final String server = args.get(index).toLowerCase();
-            if (ArgumentChecker.checkServer(server)) {
-                throw new InvalidServerException();
-            }
-            return server;
+            return args.get(index).toLowerCase();
         }
         return null;
     }

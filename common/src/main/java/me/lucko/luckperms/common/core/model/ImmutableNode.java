@@ -37,6 +37,7 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.constants.Patterns;
+import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.utils.ShorthandParser;
 
 import java.util.Collections;
@@ -56,9 +57,6 @@ import java.util.stream.Collectors;
 @ToString(of = {"permission", "value", "override", "server", "world", "expireAt", "contexts"})
 @EqualsAndHashCode(of = {"permission", "value", "override", "server", "world", "expireAt", "contexts"})
 public class ImmutableNode implements Node {
-    private static final Pattern PREFIX_PATTERN = Pattern.compile("(?i)prefix\\.-?\\d+\\..*");
-    private static final Pattern SUFFIX_PATTERN = Pattern.compile("(?i)suffix\\.-?\\d+\\..*");
-    private static final Pattern META_PATTERN = Pattern.compile("meta\\..*\\..*");
 
     private static boolean shouldApply(String str, boolean applyRegex, String thisStr) {
         if (str.equalsIgnoreCase(thisStr)) {
@@ -197,39 +195,39 @@ public class ImmutableNode implements Node {
             server = "global";
         }
 
-        this.permission = permission;
+        this.permission = NodeFactory.unescapeDelimiters(permission, "/", "-", "$", "(", ")", "=", ",");
         this.value = value;
         this.override = override;
         this.expireAt = expireAt;
-        this.server = server;
-        this.world = world;
+        this.server = NodeFactory.unescapeDelimiters(server, "/", "-");
+        this.world = NodeFactory.unescapeDelimiters(world, "/", "-");
         this.contexts = contexts == null ? ContextSet.empty() : contexts.makeImmutable();
 
         // Setup state
-        isGroup = permission.toLowerCase().startsWith("group.");
+        isGroup = this.permission.toLowerCase().startsWith("group.");
         if (isGroup) {
-            groupName = permission.substring("group.".length());
+            groupName = this.permission.substring("group.".length());
         }
 
-        isWildcard = permission.endsWith(".*");
-        wildcardLevel = (int) permission.chars().filter(num -> num == Character.getNumericValue('.')).count();
+        isWildcard = this.permission.endsWith(".*");
+        wildcardLevel = (int) this.permission.chars().filter(num -> num == Character.getNumericValue('.')).count();
 
-        isMeta = META_PATTERN.matcher(permission).matches();
+        isMeta = NodeFactory.isMetaNode(this.permission);
         if (isMeta) {
-            List<String> metaPart = Splitter.on('.').limit(2).splitToList(getPermission().substring("meta.".length()));
+            List<String> metaPart = Splitter.on(Patterns.compileDelimitedMatcher(".", "\\")).limit(2).splitToList(getPermission().substring("meta.".length()));
             meta = Maps.immutableEntry(MetaUtils.unescapeCharacters(metaPart.get(0)), MetaUtils.unescapeCharacters(metaPart.get(1)));
         }
 
-        isPrefix = PREFIX_PATTERN.matcher(permission).matches();
+        isPrefix = NodeFactory.isPrefixNode(this.permission);
         if (isPrefix) {
-            List<String> prefixPart = Splitter.on('.').limit(2).splitToList(getPermission().substring("prefix.".length()));
+            List<String> prefixPart = Splitter.on(Patterns.compileDelimitedMatcher(".", "\\")).limit(2).splitToList(getPermission().substring("prefix.".length()));
             Integer i = Integer.parseInt(prefixPart.get(0));
             prefix = Maps.immutableEntry(i, MetaUtils.unescapeCharacters(prefixPart.get(1)));
         }
 
-        isSuffix = SUFFIX_PATTERN.matcher(permission).matches();
+        isSuffix = NodeFactory.isSuffixNode(this.permission);
         if (isSuffix) {
-            List<String> suffixPart = Splitter.on('.').limit(2).splitToList(getPermission().substring("suffix.".length()));
+            List<String> suffixPart = Splitter.on(Patterns.compileDelimitedMatcher(".", "\\")).limit(2).splitToList(getPermission().substring("suffix.".length()));
             Integer i = Integer.parseInt(suffixPart.get(0));
             suffix = Maps.immutableEntry(i, MetaUtils.unescapeCharacters(suffixPart.get(1)));
         }
@@ -453,29 +451,29 @@ public class ImmutableNode implements Node {
         StringBuilder builder = new StringBuilder();
 
         if (server != null) {
-            builder.append(server);
+            builder.append(NodeFactory.escapeDelimiters(server, "/", "-"));
 
             if (world != null) {
-                builder.append("-").append(world);
+                builder.append("-").append(NodeFactory.escapeDelimiters(world, "/", "-"));
             }
             builder.append("/");
         } else {
             if (world != null) {
-                builder.append("global-").append(world).append("/");
+                builder.append("global-").append(NodeFactory.escapeDelimiters(world, "/", "-")).append("/");
             }
         }
 
         if (!contexts.isEmpty()) {
             builder.append("(");
             for (Map.Entry<String, String> entry : contexts.toSet()) {
-                builder.append(entry.getKey()).append("=").append(entry.getValue()).append(",");
+                builder.append(NodeFactory.escapeDelimiters(entry.getKey(), "=", "(", ")", ",")).append("=").append(NodeFactory.escapeDelimiters(entry.getValue(), "=", "(", ")", ",")).append(",");
             }
 
             builder.deleteCharAt(builder.length() - 1);
             builder.append(")");
         }
 
-        builder.append(permission);
+        builder.append(NodeFactory.escapeDelimiters(permission, "/", "-", "$", "(", ")", "=", ","));
 
         if (expireAt != 0L) {
             builder.append("$").append(expireAt);

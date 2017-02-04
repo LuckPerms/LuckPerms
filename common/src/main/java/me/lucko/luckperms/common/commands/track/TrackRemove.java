@@ -50,7 +50,7 @@ public class TrackRemove extends SubCommand<Track> {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args, String label) throws CommandException {
         String groupName = args.get(0).toLowerCase();
 
-        if (ArgumentChecker.checkNode(groupName)) {
+        if (ArgumentChecker.checkName(groupName)) {
             sendDetailedUsage(sender, label);
             return CommandResult.INVALID_ARGS;
         }

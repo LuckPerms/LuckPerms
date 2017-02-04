@@ -32,6 +32,7 @@ import com.google.common.util.concurrent.UncheckedExecutionException;
 
 import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.common.constants.Patterns;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -70,36 +71,42 @@ public class NodeFactory {
     }
 
     public static Node.Builder builderFromSerialisedNode(String s, Boolean b) {
-        if (s.contains("/")) {
-            List<String> parts = Splitter.on('/').limit(2).splitToList(s);
+        // if contains /
+        if (Patterns.compileDelimitedMatcher("/", "\\").matcher(s).find()) {
+            List<String> parts = Splitter.on(Patterns.compileDelimitedMatcher("/", "\\")).limit(2).splitToList(s);
             // 0=server(+world)   1=node
 
             // WORLD SPECIFIC
-            if (parts.get(0).contains("-")) {
-                List<String> serverParts = Splitter.on('-').limit(2).splitToList(parts.get(0));
+            // if parts[0] contains -
+            if (Patterns.compileDelimitedMatcher("-", "\\").matcher(parts.get(0)).find()) {
+                List<String> serverParts = Splitter.on(Patterns.compileDelimitedMatcher("-", "\\")).limit(2).splitToList(parts.get(0));
                 // 0=server   1=world
 
-                if (parts.get(1).contains("$")) {
+                // if parts[1] contains $
+                if (Patterns.compileDelimitedMatcher("$", "\\").matcher(parts.get(1)).find()) {
                     List<String> tempParts = Splitter.on('$').limit(2).splitToList(parts.get(1));
-                    return new NodeBuilder(tempParts.get(0), true).setServerRaw(serverParts.get(0)).setWorld(serverParts.get(1))
+                    return new NodeBuilder(tempParts.get(0), true).setServer(serverParts.get(0)).setWorld(serverParts.get(1))
                             .setExpiry(Long.parseLong(tempParts.get(1))).setValue(b);
                 } else {
-                    return new NodeBuilder(parts.get(1), true).setServerRaw(serverParts.get(0)).setWorld(serverParts.get(1)).setValue(b);
+                    return new NodeBuilder(parts.get(1), true).setServer(serverParts.get(0)).setWorld(serverParts.get(1)).setValue(b);
                 }
-
             } else {
                 // SERVER BUT NOT WORLD SPECIFIC
-                if (parts.get(1).contains("$")) {
-                    List<String> tempParts = Splitter.on('$').limit(2).splitToList(parts.get(1));
-                    return new NodeBuilder(tempParts.get(0), true).setServerRaw(parts.get(0)).setExpiry(Long.parseLong(tempParts.get(1))).setValue(b);
+
+                // if parts[1] contains $
+                if (Patterns.compileDelimitedMatcher("$", "\\").matcher(parts.get(1)).find()) {
+                    List<String> tempParts = Splitter.on(Patterns.compileDelimitedMatcher("$", "\\")).limit(2).splitToList(parts.get(1));
+                    return new NodeBuilder(tempParts.get(0), true).setServer(parts.get(0)).setExpiry(Long.parseLong(tempParts.get(1))).setValue(b);
                 } else {
-                    return new NodeBuilder(parts.get(1), true).setServerRaw(parts.get(0)).setValue(b);
+                    return new NodeBuilder(parts.get(1), true).setServer(parts.get(0)).setValue(b);
                 }
             }
         } else {
             // NOT SERVER SPECIFIC
-            if (s.contains("$")) {
-                List<String> tempParts = Splitter.on('$').limit(2).splitToList(s);
+
+            // if s contains $
+            if (Patterns.compileDelimitedMatcher("$", "\\").matcher(s).find()) {
+                List<String> tempParts = Splitter.on(Patterns.compileDelimitedMatcher("$", "\\")).limit(2).splitToList(s);
                 return new NodeBuilder(tempParts.get(0), true).setExpiry(Long.parseLong(tempParts.get(1))).setValue(b);
             } else {
                 return new NodeBuilder(s, true).setValue(b);
@@ -172,5 +179,63 @@ public class NodeFactory {
         }
 
         return sb.toString();
+    }
+
+    public static String escapeDelimiters(String s, String... delims) {
+        if (s == null) {
+            return null;
+        }
+
+        for (String delim : delims) {
+            s = s.replace(delim, "\\" + delim);
+        }
+        return s;
+    }
+
+    public static String unescapeDelimiters(String s, String... delims) {
+        if (s == null) {
+            return null;
+        }
+
+        for (String delim : delims) {
+            s = s.replace("\\" + delim, delim);
+        }
+        return s;
+    }
+
+    public static boolean isMetaNode(String s) {
+        if (!s.startsWith("meta.")) {
+            return false;
+        }
+        String parts = s.substring("meta.".length());
+        return Patterns.compileDelimitedMatcher(".", "\\").matcher(parts).find();
+    }
+
+    private static boolean isChatMetaNode(String type, String s) {
+        if (!s.startsWith(type + ".")) {
+            return false;
+        }
+        String parts = s.substring((type + ".").length());
+
+        if (!Patterns.compileDelimitedMatcher(".", "\\").matcher(parts).find()) {
+            return false;
+        }
+
+        List<String> metaParts = Splitter.on(Patterns.compileDelimitedMatcher(".", "\\")).limit(2).splitToList(parts);
+        String priority = metaParts.get(0);
+        try {
+            Integer.parseInt(priority);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    public static boolean isPrefixNode(String s) {
+        return isChatMetaNode("prefix", s);
+    }
+
+    public static boolean isSuffixNode(String s) {
+        return isChatMetaNode("suffix", s);
     }
 }

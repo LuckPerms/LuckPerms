@@ -44,14 +44,6 @@ public class ArgumentChecker {
         return (s.length() > 36 || Patterns.NON_ALPHA_NUMERIC_SPACE.matcher(s).find());
     }
 
-    public static boolean checkServer(String s) {
-        return !s.toLowerCase().startsWith("r=") && Patterns.NON_ALPHA_NUMERIC_SPACE.matcher(s).find();
-    }
-
-    public static boolean checkNode(String s) {
-        return (s.contains("/") || s.contains("$"));
-    }
-
     public static boolean checkTime(long l) {
         return DateUtil.shouldExpire(l);
     }

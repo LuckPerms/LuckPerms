@@ -37,6 +37,20 @@ import java.util.Set;
  */
 public class MetaUtils {
 
+    private static String escapeDelimiters(String s, String... delims) {
+        for (String delim : delims) {
+            s = s.replace(delim, "\\" + delim);
+        }
+        return s;
+    }
+
+    private static String unescapeDelimiters(String s, String... delims) {
+        for (String delim : delims) {
+            s = s.replace("\\" + delim, delim);
+        }
+        return s;
+    }
+
     /**
      * Escapes special characters used within LuckPerms, so the string can be saved without issues
      *
@@ -49,11 +63,7 @@ public class MetaUtils {
             throw new NullPointerException();
         }
 
-        s = s.replace(".", "{SEP}");
-        s = s.replace("/", "{FSEP}");
-        s = s.replace("$", "{DSEP}");
-
-        return s;
+        return escapeDelimiters(s, ".", "/", "-", "$");
     }
 
     /**
@@ -71,6 +81,7 @@ public class MetaUtils {
         s = s.replace("{SEP}", ".");
         s = s.replace("{FSEP}", "/");
         s = s.replace("{DSEP}", "$");
+        s = unescapeDelimiters(s, ".", "/", "-", "$");
 
         return s;
     }

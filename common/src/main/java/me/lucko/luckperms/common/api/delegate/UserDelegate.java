@@ -37,7 +37,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static me.lucko.luckperms.common.api.ApiUtils.checkGroup;
-import static me.lucko.luckperms.common.api.ApiUtils.checkServer;
 import static me.lucko.luckperms.common.api.ApiUtils.checkTime;
 
 /**
@@ -124,13 +123,13 @@ public class UserDelegate extends PermissionHolderDelegate implements User {
     @Override
     public void addGroup(@NonNull Group group, @NonNull String server) throws ObjectAlreadyHasException {
         checkGroup(group);
-        master.setInheritGroup(((GroupDelegate) group).getMaster(), checkServer(server));
+        master.setInheritGroup(((GroupDelegate) group).getMaster(), server);
     }
 
     @Override
     public void addGroup(@NonNull Group group, @NonNull String server, @NonNull String world) throws ObjectAlreadyHasException {
         checkGroup(group);
-        master.setInheritGroup(((GroupDelegate) group).getMaster(), checkServer(server), world);
+        master.setInheritGroup(((GroupDelegate) group).getMaster(), server, world);
     }
 
     @Override
@@ -142,13 +141,13 @@ public class UserDelegate extends PermissionHolderDelegate implements User {
     @Override
     public void addGroup(@NonNull Group group, @NonNull String server, @NonNull long expireAt) throws ObjectAlreadyHasException {
         checkGroup(group);
-        master.setInheritGroup(((GroupDelegate) group).getMaster(), checkServer(server), checkTime(expireAt));
+        master.setInheritGroup(((GroupDelegate) group).getMaster(), server, checkTime(expireAt));
     }
 
     @Override
     public void addGroup(@NonNull Group group, @NonNull String server, @NonNull String world, @NonNull long expireAt) throws ObjectAlreadyHasException {
         checkGroup(group);
-        master.setInheritGroup(((GroupDelegate) group).getMaster(), checkServer(server), world, checkTime(expireAt));
+        master.setInheritGroup(((GroupDelegate) group).getMaster(), server, world, checkTime(expireAt));
     }
 
     @Override
@@ -166,25 +165,25 @@ public class UserDelegate extends PermissionHolderDelegate implements User {
     @Override
     public void removeGroup(@NonNull Group group, @NonNull String server) throws ObjectLacksException {
         checkGroup(group);
-        master.unsetInheritGroup(((GroupDelegate) group).getMaster(), checkServer(server));
+        master.unsetInheritGroup(((GroupDelegate) group).getMaster(), server);
     }
 
     @Override
     public void removeGroup(@NonNull Group group, @NonNull String server, @NonNull String world) throws ObjectLacksException {
         checkGroup(group);
-        master.unsetInheritGroup(((GroupDelegate) group).getMaster(), checkServer(server), world);
+        master.unsetInheritGroup(((GroupDelegate) group).getMaster(), server, world);
     }
 
     @Override
     public void removeGroup(@NonNull Group group, @NonNull String server, @NonNull boolean temporary) throws ObjectLacksException {
         checkGroup(group);
-        master.unsetInheritGroup(((GroupDelegate) group).getMaster(), checkServer(server), temporary);
+        master.unsetInheritGroup(((GroupDelegate) group).getMaster(), server, temporary);
     }
 
     @Override
     public void removeGroup(@NonNull Group group, @NonNull String server, @NonNull String world, @NonNull boolean temporary) throws ObjectLacksException {
         checkGroup(group);
-        master.unsetInheritGroup(((GroupDelegate) group).getMaster(), checkServer(server), world, temporary);
+        master.unsetInheritGroup(((GroupDelegate) group).getMaster(), server, world, temporary);
     }
 
     @Override
@@ -199,12 +198,12 @@ public class UserDelegate extends PermissionHolderDelegate implements User {
 
     @Override
     public List<String> getLocalGroups(@NonNull String server, @NonNull String world) {
-        return master.getLocalGroups(checkServer(server), world);
+        return master.getLocalGroups(server, world);
     }
 
     @Override
     public List<String> getLocalGroups(@NonNull String server) {
-        return master.getLocalGroups(checkServer(server));
+        return master.getLocalGroups(server);
     }
 
 }

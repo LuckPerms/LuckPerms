@@ -63,8 +63,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static me.lucko.luckperms.common.api.ApiUtils.checkNode;
-
 /**
  * Implements the LuckPerms API using the plugin instance
  */
@@ -235,7 +233,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public Node.Builder buildNode(@NonNull String permission) throws IllegalArgumentException {
-        return new NodeBuilder(checkNode(permission));
+        return new NodeBuilder(permission);
     }
 
     @SuppressWarnings("unchecked")

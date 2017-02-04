@@ -48,8 +48,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import static me.lucko.luckperms.common.api.ApiUtils.checkNode;
-import static me.lucko.luckperms.common.api.ApiUtils.checkServer;
 import static me.lucko.luckperms.common.api.ApiUtils.checkTime;
 import static me.lucko.luckperms.common.core.model.PermissionHolder.exportToLegacy;
 
@@ -123,12 +121,12 @@ public class PermissionHolderDelegate implements PermissionHolder {
 
     @Override
     public boolean hasPermission(@NonNull String node, @NonNull boolean b, @NonNull String server) {
-        return master.hasPermission(node, b, checkServer(server));
+        return master.hasPermission(node, b, server);
     }
 
     @Override
     public boolean hasPermission(@NonNull String node, @NonNull boolean b, @NonNull String server, @NonNull String world) {
-        return master.hasPermission(node, b, checkServer(server), world);
+        return master.hasPermission(node, b, server, world);
     }
 
     @Override
@@ -138,12 +136,12 @@ public class PermissionHolderDelegate implements PermissionHolder {
 
     @Override
     public boolean hasPermission(@NonNull String node, @NonNull boolean b, @NonNull String server, @NonNull boolean temporary) {
-        return master.hasPermission(node, b, checkServer(server), temporary);
+        return master.hasPermission(node, b, server, temporary);
     }
 
     @Override
     public boolean hasPermission(@NonNull String node, @NonNull boolean b, @NonNull String server, @NonNull String world, @NonNull boolean temporary) {
-        return master.hasPermission(node, b, checkServer(server), world, temporary);
+        return master.hasPermission(node, b, server, world, temporary);
     }
 
     @Override
@@ -158,12 +156,12 @@ public class PermissionHolderDelegate implements PermissionHolder {
 
     @Override
     public boolean inheritsPermission(@NonNull String node, @NonNull boolean b, @NonNull String server) {
-        return master.inheritsPermission(node, b, checkServer(server));
+        return master.inheritsPermission(node, b, server);
     }
 
     @Override
     public boolean inheritsPermission(@NonNull String node, @NonNull boolean b, @NonNull String server, @NonNull String world) {
-        return master.inheritsPermission(node, b, checkServer(server), world);
+        return master.inheritsPermission(node, b, server, world);
     }
 
     @Override
@@ -173,12 +171,12 @@ public class PermissionHolderDelegate implements PermissionHolder {
 
     @Override
     public boolean inheritsPermission(@NonNull String node, @NonNull boolean b, @NonNull String server, @NonNull boolean temporary) {
-        return master.inheritsPermission(node, b, checkServer(server), temporary);
+        return master.inheritsPermission(node, b, server, temporary);
     }
 
     @Override
     public boolean inheritsPermission(@NonNull String node, @NonNull boolean b, @NonNull String server, @NonNull String world, @NonNull boolean temporary) {
-        return master.inheritsPermission(node, b, checkServer(server), world, temporary);
+        return master.inheritsPermission(node, b, server, world, temporary);
     }
 
     @Override
@@ -193,32 +191,32 @@ public class PermissionHolderDelegate implements PermissionHolder {
 
     @Override
     public void setPermission(@NonNull String node, @NonNull boolean value) throws ObjectAlreadyHasException {
-        master.setPermission(checkNode(node), value);
+        master.setPermission(node, value);
     }
 
     @Override
     public void setPermission(@NonNull String node, @NonNull boolean value, @NonNull String server) throws ObjectAlreadyHasException {
-        master.setPermission(checkNode(node), value, checkServer(server));
+        master.setPermission(node, value, server);
     }
 
     @Override
     public void setPermission(@NonNull String node, @NonNull boolean value, @NonNull String server, @NonNull String world) throws ObjectAlreadyHasException {
-        master.setPermission(checkNode(node), value, checkServer(server), world);
+        master.setPermission(node, value, server, world);
     }
 
     @Override
     public void setPermission(@NonNull String node, @NonNull boolean value, @NonNull long expireAt) throws ObjectAlreadyHasException {
-        master.setPermission(checkNode(node), value, checkTime(expireAt));
+        master.setPermission(node, value, checkTime(expireAt));
     }
 
     @Override
     public void setPermission(@NonNull String node, @NonNull boolean value, @NonNull String server, @NonNull long expireAt) throws ObjectAlreadyHasException {
-        master.setPermission(checkNode(node), value, checkServer(server), checkTime(expireAt));
+        master.setPermission(node, value, server, checkTime(expireAt));
     }
 
     @Override
     public void setPermission(@NonNull String node, @NonNull boolean value, @NonNull String server, @NonNull String world, @NonNull long expireAt) throws ObjectAlreadyHasException {
-        master.setPermission(checkNode(node), value, checkServer(server), world, checkTime(expireAt));
+        master.setPermission(node, value, server, world, checkTime(expireAt));
     }
 
     @Override
@@ -233,32 +231,32 @@ public class PermissionHolderDelegate implements PermissionHolder {
 
     @Override
     public void unsetPermission(@NonNull String node, @NonNull boolean temporary) throws ObjectLacksException {
-        master.unsetPermission(checkNode(node), temporary);
+        master.unsetPermission(node, temporary);
     }
 
     @Override
     public void unsetPermission(@NonNull String node) throws ObjectLacksException {
-        master.unsetPermission(checkNode(node));
+        master.unsetPermission(node);
     }
 
     @Override
     public void unsetPermission(@NonNull String node, @NonNull String server) throws ObjectLacksException {
-        master.unsetPermission(checkNode(node), checkServer(server));
+        master.unsetPermission(node, server);
     }
 
     @Override
     public void unsetPermission(@NonNull String node, @NonNull String server, @NonNull String world) throws ObjectLacksException {
-        master.unsetPermission(checkNode(node), checkServer(server), world);
+        master.unsetPermission(node, server, world);
     }
 
     @Override
     public void unsetPermission(@NonNull String node, @NonNull String server, @NonNull boolean temporary) throws ObjectLacksException {
-        master.unsetPermission(checkNode(node), checkServer(server), temporary);
+        master.unsetPermission(node, server, temporary);
     }
 
     @Override
     public void unsetPermission(@NonNull String node, @NonNull String server, @NonNull String world, @NonNull boolean temporary) throws ObjectLacksException {
-        master.unsetPermission(checkNode(node), checkServer(server), world, temporary);
+        master.unsetPermission(node, server, world, temporary);
     }
 
     @Override
