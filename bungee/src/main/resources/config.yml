@@ -218,7 +218,7 @@ redis:
 #
 # Within conditions, permission nodes MUST be escaped using "<" and ">". See the example below.
 #
-# Explaination of the examples below: (they're just to demonstrate the features & use cases)
+# Explanation of the examples below: (they're just to demonstrate the features & use cases)
 #
 # rule1:
 # If a user is either in the vip or vip+ group, and they have the "titles.titlecollector" permission set to true, and the
