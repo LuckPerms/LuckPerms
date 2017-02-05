@@ -75,9 +75,12 @@ public class Importer {
     public void start(Sender executor, List<String> commands) {
         this.executor = executor;
         this.commands = commands.stream()
-                .map(s -> s.startsWith("/") ? s.substring(1) : s)
-                .map(s -> s.startsWith("perms ") ? s.substring(6) : s)
-                .map(s -> s.startsWith("luckperms ") ? s.substring(10) : s)
+                .filter(s -> !s.isEmpty())
+                .filter(s -> !s.startsWith("#"))
+                .filter(s -> !s.startsWith("//"))
+                .map(s -> s.startsWith("/") ? s.substring("/".length()) : s)
+                .map(s -> s.startsWith("perms ") ? s.substring("perms ".length()) : s)
+                .map(s -> s.startsWith("luckperms ") ? s.substring("luckperms ".length()) : s)
                 .collect(Collectors.toList());
 
         cmdResult = new HashMap<>();
