@@ -30,10 +30,10 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.api.LocalizedNode;
-import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.common.caching.MetaHolder;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.utils.ExtractedContexts;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
@@ -224,47 +224,18 @@ public class SpongeGroup extends Group {
         }
 
         private Optional<String> getChatMeta(ContextSet contexts, boolean prefix) {
-            int priority = Integer.MIN_VALUE;
-            String meta = null;
-
-            for (Node n : parent.getAllNodesFiltered(ExtractedContexts.generate(plugin.getService().calculateContexts(contexts)))) {
-                if (!n.getValue()) {
-                    continue;
-                }
-
-                if (prefix ? !n.isPrefix() : !n.isSuffix()) {
-                    continue;
-                }
-
-                Map.Entry<Integer, String> value = prefix ? n.getPrefix() : n.getSuffix();
-                if (value.getKey() > priority) {
-                    meta = value.getValue();
-                    priority = value.getKey();
-                }
+            MetaHolder metaHolder = parent.accumulateMeta(null, null, ExtractedContexts.generate(plugin.getService().calculateContexts(contexts)));
+            if (prefix) {
+                return Optional.ofNullable(metaHolder.getPrefixStack().toFormattedString());
+            } else {
+                return Optional.ofNullable(metaHolder.getSuffixStack().toFormattedString());
             }
-
-            return meta == null ? Optional.empty() : Optional.of(MetaUtils.unescapeCharacters(meta));
         }
 
         private Optional<String> getMeta(ContextSet contexts, String key) {
-            for (Node n : parent.getAllNodesFiltered(ExtractedContexts.generate(plugin.getService().calculateContexts(contexts)))) {
-                if (!n.getValue()) {
-                    continue;
-                }
-
-                if (!n.isMeta()) {
-                    continue;
-                }
-
-                Map.Entry<String, String> m = n.getMeta();
-                if (!m.getKey().equalsIgnoreCase(key)) {
-                    continue;
-                }
-
-                return Optional.of(MetaUtils.unescapeCharacters(m.getValue()));
-            }
-
-            return Optional.empty();
+            MetaHolder metaHolder = parent.accumulateMeta(null, null, ExtractedContexts.generate(plugin.getService().calculateContexts(contexts)));
+            Map<String, String> meta = metaHolder.getMeta();
+            return Optional.ofNullable(meta.get(key));
         }
     }
 }
