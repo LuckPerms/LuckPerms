@@ -58,8 +58,8 @@ public class PermissionSet extends SharedSubCommand {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
-        String node = ArgumentUtils.handleNode(0, args);
         boolean b = ArgumentUtils.handleBoolean(1, args);
+        String node = b ? ArgumentUtils.handleNode(0, args) : ArgumentUtils.handleString(0, args);
 
         String server = ArgumentUtils.handleServer(2, args);
         String world = ArgumentUtils.handleWorld(3, args);
