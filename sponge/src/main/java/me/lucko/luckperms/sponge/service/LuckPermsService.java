@@ -248,7 +248,7 @@ public class LuckPermsService implements PermissionService {
                 return 1;
             }
 
-            return Integer.compare(g1.getWeight().orElse(0), g2.getWeight().orElse(0)) == 1 ? 1 : -1;
+            return Integer.compare(g1.getWeight().orElse(0), g2.getWeight().orElse(0)) == -1 ? 1 : -1;
         });
         return ImmutableList.copyOf(ret);
     }
