@@ -47,11 +47,11 @@ public class SpongeCalculatorFactory extends AbstractCalculatorFactory {
         ImmutableList.Builder<PermissionProcessor> processors = ImmutableList.builder();
         processors.add(new MapProcessor());
         processors.add(new SpongeWildcardProcessor());
-        if (plugin.getConfiguration().get(ConfigKeys.APPLYING_WILDCARDS)) {
-            processors.add(new WildcardProcessor());
-        }
         if (plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) {
             processors.add(new RegexProcessor());
+        }
+        if (plugin.getConfiguration().get(ConfigKeys.APPLYING_WILDCARDS)) {
+            processors.add(new WildcardProcessor());
         }
         processors.add(new DefaultsProcessor(plugin.getService(), contexts.getContexts()));
 

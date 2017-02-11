@@ -58,11 +58,11 @@ public class BukkitCalculatorFactory extends AbstractCalculatorFactory {
             LPPermissible permissible = Injector.getPermissible(uuid);
             return permissible == null ? null : permissible.getAttachmentPermissions();
         }));
-        if (plugin.getConfiguration().get(ConfigKeys.APPLYING_WILDCARDS)) {
-            processors.add(new WildcardProcessor());
-        }
         if (plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) {
             processors.add(new RegexProcessor());
+        }
+        if (plugin.getConfiguration().get(ConfigKeys.APPLYING_WILDCARDS)) {
+            processors.add(new WildcardProcessor());
         }
         processors.add(new DefaultsProcessor(contexts.isOp(), plugin.getDefaultsProvider()));
 
