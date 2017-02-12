@@ -50,6 +50,7 @@ use-inherit-command: "Use the 'parent add' command instead of specifying the nod
 
 
 
+verbose-invalid-filter: "&cInvalid verbose filter: &f{0}"
 verbose-on: "&bVerbose checking output set to &aTRUE &bfor all permissions."
 verbose-on_query: "&bVerbose checking output set to &aTRUE &bfor permissions matching the following filters: &f{0}"
 verbose-off: "&bVerbose checking output set to &cFALSE&b."

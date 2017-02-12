@@ -96,6 +96,7 @@ public enum Message {
     /*
      * Commands
      */
+    VERBOSE_INVALID_FILTER("&cInvalid verbose filter: &f{0}", true),
     VERBOSE_ON("&bVerbose checking output set to &aTRUE &bfor all permissions.", true),
     VERBOSE_ON_QUERY("&bVerbose checking output set to &aTRUE &bfor permissions matching the following filters: &f{0}", true),
     VERBOSE_OFF("&bVerbose checking output set to &cFALSE&b.", true),

@@ -65,6 +65,12 @@ public class VerboseCommand extends SingleCommand {
             }
 
             String filter = filters.isEmpty() ? "" : filters.stream().collect(Collectors.joining(" "));
+
+            if (!DebugListener.isValidFilter(filter)) {
+                Message.VERBOSE_INVALID_FILTER.send(sender, filter);
+                return CommandResult.FAILURE;
+            }
+
             boolean notify = !mode.equals("record");
 
             plugin.getDebugHandler().register(sender, filter, notify);

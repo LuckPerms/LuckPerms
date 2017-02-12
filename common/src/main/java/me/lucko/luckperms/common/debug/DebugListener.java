@@ -116,6 +116,42 @@ public class DebugListener {
         return false;
     }
 
+    public static boolean isValidFilter(String filter) {
+        if (filter.equals("")) {
+            return true;
+        }
+
+        ScriptEngine engine = Scripting.getScriptEngine();
+        if (engine == null) {
+            return false;
+        }
+
+        StringTokenizer tokenizer = new StringTokenizer(filter, " |&()!", true);
+        StringBuilder expression = new StringBuilder();
+
+        while (tokenizer.hasMoreTokens()) {
+            String token = tokenizer.nextToken();
+            if (!isDelim(token)) {
+                token = "true"; // dummy result
+            }
+
+            expression.append(token);
+        }
+
+        try {
+            String exp = expression.toString().replace("&", "&&").replace("|", "||");
+            String result = engine.eval(exp).toString();
+            if (!result.equals("true") && !result.equals("false")) {
+                throw new IllegalArgumentException(exp + " - " + result);
+            }
+
+            return true;
+
+        } catch (Throwable t) {
+            return false;
+        }
+    }
+
     private static boolean isDelim(String token) {
         return token.equals(" ") || token.equals("|") || token.equals("&") || token.equals("(") || token.equals(")") || token.equals("!");
     }
