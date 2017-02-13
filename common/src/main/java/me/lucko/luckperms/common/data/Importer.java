@@ -28,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -45,6 +46,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -56,7 +58,7 @@ public class Importer {
     private final CommandManager commandManager;
 
     private boolean running = false;
-    private Sender executor = null;
+    private Set<Sender> notify = ImmutableSet.of();
     private List<String> commands = null;
     private Map<Integer, Result> cmdResult = null;
 
@@ -73,7 +75,11 @@ public class Importer {
     }
 
     public void start(Sender executor, List<String> commands) {
-        this.executor = executor;
+        if (executor.isConsole()) {
+            this.notify = ImmutableSet.of(executor);
+        } else {
+            this.notify = ImmutableSet.of(executor, commandManager.getPlugin().getConsoleSender());
+        }
         this.commands = commands.stream()
                 .filter(s -> !s.isEmpty())
                 .filter(s -> !s.startsWith("#"))
@@ -89,7 +95,7 @@ public class Importer {
     }
 
     private void cleanup() {
-        executor = null;
+        notify = ImmutableSet.of();
         commands = null;
         cmdResult = null;
         lastMsg = 0;
@@ -99,7 +105,7 @@ public class Importer {
 
     public void run() {
         long startTime = System.currentTimeMillis();
-        Message.IMPORT_START.send(executor);
+        notify.forEach(s -> Message.IMPORT_START.send(s));
         final Sender fake = new FakeSender(this);
 
         int index = 1;
@@ -137,21 +143,30 @@ public class Importer {
         }
 
         if (errors == 0) {
-            Message.IMPORT_END_COMPLETE.send(executor, seconds);
+            for (Sender s : notify) {
+                Message.IMPORT_END_COMPLETE.send(s, seconds);
+            }
         } else if (errors == 1) {
-            Message.IMPORT_END_COMPLETE_ERR_SIN.send(executor, seconds, errors);
+            for (Sender s : notify) {
+                Message.IMPORT_END_COMPLETE_ERR_SIN.send(s, seconds, errors);
+            }
         } else {
-            Message.IMPORT_END_COMPLETE_ERR.send(executor, seconds, errors);
+            for (Sender s : notify) {
+                Message.IMPORT_END_COMPLETE_ERR.send(s, seconds, errors);
+            }
         }
 
         int errIndex = 1;
         for (Map.Entry<Integer, Result> e : cmdResult.entrySet()) {
             if (e.getValue().getResult() != null && !e.getValue().getResult().asBoolean()) {
-                Message.IMPORT_END_ERROR_HEADER.send(executor, errIndex, e.getKey(), e.getValue().getCommand(), e.getValue().getResult().toString());
-                for (String s : e.getValue().getOutput()) {
-                    Message.IMPORT_END_ERROR_CONTENT.send(executor, s);
+                for (Sender s : notify) {
+                    Message.IMPORT_END_ERROR_HEADER.send(s, errIndex, e.getKey(), e.getValue().getCommand(), e.getValue().getResult().toString());
+                    for (String out : e.getValue().getOutput()) {
+                        Message.IMPORT_END_ERROR_CONTENT.send(s, out);
+                    }
+                    Message.IMPORT_END_ERROR_FOOTER.send(s);
                 }
-                Message.IMPORT_END_ERROR_FOOTER.send(executor);
+
                 errIndex++;
             }
         }
@@ -170,9 +185,13 @@ public class Importer {
         }
 
         if (errors == 1) {
-            Message.IMPORT_PROGRESS_SIN.send(executor, percent, executing, commands.size(), errors);
+            for (Sender s : notify) {
+                Message.IMPORT_PROGRESS_SIN.send(s, percent, executing, commands.size(), errors);
+            }
         } else {
-            Message.IMPORT_PROGRESS.send(executor, percent, executing, commands.size(), errors);
+            for (Sender s : notify) {
+                Message.IMPORT_PROGRESS.send(s, percent, executing, commands.size(), errors);
+            }
         }
     }
 
