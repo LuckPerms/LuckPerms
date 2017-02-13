@@ -102,6 +102,7 @@ import java.util.stream.Collectors;
 public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private Set<UUID> ignoringLogs;
     private LPBukkitScheduler scheduler;
+    private BukkitCommand commandManager;
     private VaultHook vaultHook = null;
     private LuckPermsConfiguration configuration;
     private UserManager userManager;
@@ -247,7 +248,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
         // register commands
         getLog().info("Registering commands...");
-        BukkitCommand commandManager = new BukkitCommand(this);
+        commandManager = new BukkitCommand(this);
         PluginCommand main = getServer().getPluginCommand("luckperms");
         main.setExecutor(commandManager);
         main.setTabCompleter(commandManager);

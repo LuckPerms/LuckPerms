@@ -37,7 +37,7 @@ import org.bukkit.command.TabExecutor;
 import java.util.Arrays;
 import java.util.List;
 
-class BukkitCommand extends CommandManager implements CommandExecutor, TabExecutor {
+public class BukkitCommand extends CommandManager implements CommandExecutor, TabExecutor {
     private final LPBukkitPlugin plugin;
 
     BukkitCommand(LPBukkitPlugin plugin) {
