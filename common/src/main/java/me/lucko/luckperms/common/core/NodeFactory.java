@@ -129,6 +129,10 @@ public class NodeFactory {
         return new NodeBuilder("meta." + MetaUtils.escapeCharacters(key) + "." + MetaUtils.escapeCharacters(value));
     }
 
+    public static NodeBuilder makeChatMetaNode(boolean prefix, int priority, String s) {
+        return prefix ? makePrefixNode(priority, s) : makeSuffixNode(priority, s);
+    }
+
     public static NodeBuilder makePrefixNode(int priority, String prefix) {
         return new NodeBuilder("prefix." + priority + "." + MetaUtils.escapeCharacters(prefix));
     }

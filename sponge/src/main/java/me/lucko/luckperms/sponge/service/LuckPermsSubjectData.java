@@ -34,11 +34,13 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.common.caching.MetaHolder;
 import me.lucko.luckperms.common.core.NodeBuilder;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.utils.ExtractedContexts;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 import me.lucko.luckperms.sponge.service.base.LPSubject;
@@ -431,24 +433,59 @@ public class LuckPermsSubjectData implements LPSubjectData {
     @Override
     public boolean setOption(@NonNull ContextSet context, @NonNull String key, @NonNull String value) {
         try (Timing i = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_SET_OPTION)) {
-            List<Node> toRemove = holder.getNodes().stream()
-                    .filter(n -> n.isMeta() && n.getMeta().getKey().equals(key))
-                    .collect(Collectors.toList());
+            if (key.equalsIgnoreCase("prefix") || key.equalsIgnoreCase("suffix")) {
+                // special handling.
+                String type = key.toLowerCase();
 
-            toRemove.forEach(n -> {
+                // remove all prefixes/suffixes from the user
+                List<Node> toRemove = holder.getNodes().stream()
+                        .filter(n -> type.equals("prefix") ? n.isPrefix() : n.isSuffix())
+                        .collect(Collectors.toList());
+
+                toRemove.forEach(n -> {
+                    try {
+                        if (enduring) {
+                            holder.unsetPermission(n);
+                        } else {
+                            holder.unsetTransientPermission(n);
+                        }
+                    } catch (ObjectLacksException ignored) {}
+                });
+
+                MetaHolder metaHolder = holder.accumulateMeta(null, null, ExtractedContexts.generate(context));
+                int priority = (type.equals("prefix") ? metaHolder.getPrefixes() : metaHolder.getSuffixes()).keySet().stream()
+                        .mapToInt(e -> e).max().orElse(0);
+                priority += 10;
+
                 try {
-                    holder.unsetPermission(n);
-                } catch (ObjectLacksException ignored) {
-                }
-            });
+                    if (enduring) {
+                        holder.setPermission(NodeFactory.makeChatMetaNode(type.equals("prefix"), priority, value).withExtraContext(context).build());
+                    } else {
+                        holder.setTransientPermission(NodeFactory.makeChatMetaNode(type.equals("prefix"), priority, value).withExtraContext(context).build());
+                    }
+                } catch (ObjectAlreadyHasException ignored) {}
 
-            try {
-                if (enduring) {
-                    holder.setPermission(NodeFactory.makeMetaNode(key, value).withExtraContext(context).build());
-                } else {
-                    holder.setTransientPermission(NodeFactory.makeMetaNode(key, value).withExtraContext(context).build());
-                }
-            } catch (ObjectAlreadyHasException ignored) {}
+            } else {
+                // standard remove
+                List<Node> toRemove = holder.getNodes().stream()
+                        .filter(n -> n.isMeta() && n.getMeta().getKey().equals(key))
+                        .collect(Collectors.toList());
+
+                toRemove.forEach(n -> {
+                    try {
+                        holder.unsetPermission(n);
+                    } catch (ObjectLacksException ignored) {}
+                });
+
+                try {
+                    if (enduring) {
+                        holder.setPermission(NodeFactory.makeMetaNode(key, value).withExtraContext(context).build());
+                    } else {
+                        holder.setTransientPermission(NodeFactory.makeMetaNode(key, value).withExtraContext(context).build());
+                    }
+                } catch (ObjectAlreadyHasException ignored) {}
+            }
+
             objectSave(holder);
             return true;
         }
@@ -457,15 +494,18 @@ public class LuckPermsSubjectData implements LPSubjectData {
     @Override
     public boolean unsetOption(ContextSet contexts, String key) {
         try (Timing i = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_SET_OPTION)) {
-            List<Node> toRemove = holder.getNodes().stream()
+            List<Node> toRemove = (enduring ? holder.getNodes() : holder.getTransientNodes()).stream()
                     .filter(n -> n.isMeta() && n.getMeta().getKey().equals(key))
                     .collect(Collectors.toList());
 
             toRemove.forEach(n -> {
                 try {
-                    holder.unsetPermission(n);
-                } catch (ObjectLacksException ignored) {
-                }
+                    if (enduring) {
+                        holder.unsetPermission(n);
+                    } else {
+                        holder.unsetTransientPermission(n);
+                    }
+                } catch (ObjectLacksException ignored) {}
             });
 
             objectSave(holder);
@@ -526,8 +566,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
                     } else {
                         holder.unsetTransientPermission(n);
                     }
-                } catch (ObjectLacksException ignored) {
-                }
+                } catch (ObjectLacksException ignored) {}
             });
 
             objectSave(holder);
