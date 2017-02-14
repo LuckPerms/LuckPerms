@@ -82,7 +82,7 @@ public class SQLBacking extends AbstractBacking {
     private static final String PLAYER_SELECT_USERNAME = "SELECT username FROM {prefix}players WHERE uuid=? LIMIT 1";
     private static final String PLAYER_INSERT = "INSERT INTO {prefix}players VALUES(?, ?, ?)";
     private static final String PLAYER_UPDATE = "UPDATE {prefix}players SET username=? WHERE uuid=?";
-    private static final String PLAYER_UPDATE_FULL = "UPDATE {prefix}players SET username=?, primary_group=? WHERE uuid=?";
+    private static final String PLAYER_DELETE = "DELETE FROM {prefix}players WHERE username=? AND NOT uuid=?";
     private static final String PLAYER_UPDATE_PRIMARY_GROUP = "UPDATE {prefix}players SET primary_group=? WHERE uuid=?";
 
     private static final String GROUP_PERMISSIONS_SELECT = "SELECT permission, value, server, world, expiry, contexts FROM {prefix}group_permissions WHERE name=?";
@@ -255,7 +255,7 @@ public class SQLBacking extends AbstractBacking {
         try {
             List<NodeDataHolder> data = new ArrayList<>();
             AtomicReference<String> primaryGroup = new AtomicReference<>(null);
-            AtomicReference<String> userName = new AtomicReference<>();
+            AtomicReference<String> userName = new AtomicReference<>(null);
 
             // Collect user permissions
             try (Connection c = provider.getConnection()) {
@@ -296,37 +296,30 @@ public class SQLBacking extends AbstractBacking {
                 return false;
             }
 
+            // update username & primary group
+            String pg = primaryGroup.get();
+            if (pg == null) {
+                pg = "default";
+            }
+            user.setPrimaryGroup(pg);
+
+            String name = userName.get();
+            if (name == null) {
+                name = "null";
+            }
+
+            // Update their username to what was in the storage if the one in the local instance is null
+            if (user.getName() == null || user.getName().equalsIgnoreCase("null")) {
+                user.setName(name);
+            }
+
             // If the user has any data in storage
             if (!data.isEmpty()) {
                 Set<Node> nodes = data.stream().map(NodeDataHolder::toNode).collect(Collectors.toSet());
                 user.setNodes(nodes);
 
-                String pg = primaryGroup.get();
-                if (pg == null) {
-                    pg = "default";
-                }
-                user.setPrimaryGroup(pg);
-
-                String name = userName.get();
-                if (name == null) {
-                    name = "null";
-                }
-
-                // Check the user has *at least* some sort of default group.
-                boolean save = plugin.getUserManager().giveDefaultIfNeeded(user, false);
-
-                // Update their username if it has changed since last login.
-                if (user.getName() == null || user.getName().equalsIgnoreCase("null")) {
-                    user.setName(name);
-                } else {
-                    // The name in storage is not the same as their actual name.
-                    if (!name.equalsIgnoreCase(user.getName())) {
-                        save = true;
-                    }
-                }
-
-                // Save back to the store if there was a username change
-                if (save) {
+                // Save back to the store if data was changed
+                if (plugin.getUserManager().giveDefaultIfNeeded(user, false)) {
                     // This should be fine, as the lock will be acquired by the same thread.
                     saveUser(user);
                 }
@@ -441,47 +434,15 @@ public class SQLBacking extends AbstractBacking {
                 }
             }
 
-            AtomicBoolean exists = new AtomicBoolean(false);
             try (Connection c = provider.getConnection()) {
-                try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_SELECT_USERNAME))) {
-                    ps.setString(1, user.getUuid().toString());
-
-                    try (ResultSet rs = ps.executeQuery()) {
-                        if (rs.next()) {
-                            exists.set(true);
-                        }
-                    }
+                try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_UPDATE_PRIMARY_GROUP))) {
+                    ps.setString(1, user.getPrimaryGroup() == null ? "default" : user.getPrimaryGroup());
+                    ps.setString(2, user.getUuid().toString());
+                    ps.execute();
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
                 return false;
-            }
-
-            if (exists.get()) {
-                try (Connection c = provider.getConnection()) {
-                    try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_UPDATE_FULL))) {
-                        ps.setString(1, user.getName().toLowerCase());
-                        ps.setString(2, user.getPrimaryGroup() == null ? "default" : user.getPrimaryGroup());
-                        ps.setString(3, user.getUuid().toString());
-                        ps.execute();
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    return false;
-                }
-
-            } else {
-                try (Connection c = provider.getConnection()) {
-                    try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_INSERT))) {
-                        ps.setString(1, user.getUuid().toString());
-                        ps.setString(2, user.getName().toLowerCase());
-                        ps.setString(3, user.getPrimaryGroup() == null ? "default" : user.getPrimaryGroup());
-                        ps.execute();
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    return false;
-                }
             }
 
             return true;
@@ -969,14 +930,25 @@ public class SQLBacking extends AbstractBacking {
     @Override
     public boolean saveUUIDData(String username, UUID uuid) {
         final String u = username.toLowerCase();
-        AtomicBoolean exists = new AtomicBoolean(false);
+        AtomicReference<String> remoteUserName = new AtomicReference<>(null);
+
+        // cleanup any old values
+        try (Connection c = provider.getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_DELETE))) {
+                ps.setString(1, u);
+                ps.setString(2, uuid.toString());
+                ps.execute();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
         try (Connection c = provider.getConnection()) {
             try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_SELECT_USERNAME))) {
                 ps.setString(1, uuid.toString());
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
-                        exists.set(true);
+                        remoteUserName.set(rs.getString("username"));
                     }
                 }
             }
@@ -985,7 +957,12 @@ public class SQLBacking extends AbstractBacking {
             return false;
         }
 
-        if (exists.get()) {
+        if (remoteUserName.get() != null) {
+            // the value is already correct
+            if (remoteUserName.get().equals(u)) {
+                return true;
+            }
+
             try (Connection c = provider.getConnection()) {
                 try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_UPDATE))) {
                     ps.setString(1, u);
@@ -998,6 +975,7 @@ public class SQLBacking extends AbstractBacking {
             }
             return true;
         } else {
+            // first time we've seen this uuid
             try (Connection c = provider.getConnection()) {
                 try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_INSERT))) {
                     ps.setString(1, uuid.toString());
