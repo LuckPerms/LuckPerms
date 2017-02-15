@@ -39,6 +39,7 @@ public class DebugHandler implements Runnable {
 
     private final Map<UUID, DebugListener> listeners;
     private final Queue<CheckData> queue;
+    private boolean listening = false;
 
     @Setter
     private boolean shutdown = false;
@@ -52,16 +53,25 @@ public class DebugHandler implements Runnable {
     }
 
     public void offer(String checked, String node, Tristate value) {
+        if (!listening) {
+            return;
+        }
+
         queue.offer(new CheckData(checked, node, value));
     }
 
     public void register(Sender sender, String filter, boolean notify) {
+        listening = true;
         listeners.put(sender.getUuid(), new DebugListener(pluginVersion, sender, filter, notify));
     }
 
     public DebugListener unregister(UUID uuid) {
         flush();
-        return listeners.remove(uuid);
+        DebugListener ret = listeners.remove(uuid);
+        if (listeners.isEmpty()) {
+            listening = false;
+        }
+        return ret;
     }
 
     @Override
