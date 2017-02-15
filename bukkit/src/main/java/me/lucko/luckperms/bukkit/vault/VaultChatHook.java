@@ -28,7 +28,7 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.caching.MetaData;
 import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.common.core.NodeBuilder;
+import me.lucko.luckperms.common.caching.MetaHolder;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
@@ -48,20 +48,8 @@ import static me.lucko.luckperms.api.MetaUtils.escapeCharacters;
 import static me.lucko.luckperms.api.MetaUtils.unescapeCharacters;
 
 /**
- * Provides the Vault Chat service through the use of normal permission nodes.
- *
- * Prefixes / Suffixes:
- * Normal inheritance rules apply.
- * Permission Nodes = prefix.priority.value OR suffix.priority.value
- * If a user/group has / inherits multiple prefixes and suffixes, the one with the highest priority is the one that
- * will apply.
- *
- * Meta:
- * Normal inheritance rules DO NOT apply.
- * Permission Nodes = meta.node.value
- *
- * Note that special characters used within LuckPerms are escaped:
- * See {@link me.lucko.luckperms.api.MetaUtils#unescapeCharacters(String)}
+ * LuckPerms Vault Chat implementation
+ * All user lookups are cached.
  */
 public class VaultChatHook extends Chat {
     private final VaultPermissionHook perms;
@@ -94,22 +82,20 @@ public class VaultChatHook extends Chat {
             toRemove.forEach(n -> {
                 try {
                     holder.unsetPermission(n);
-                } catch (ObjectLacksException ignored) {
-                }
+                } catch (ObjectLacksException ignored) {}
             });
 
             Node.Builder metaNode = NodeFactory.makeMetaNode(node, value).setValue(true);
             if (!perms.getServer().equalsIgnoreCase("global")) {
                 metaNode.setServer(perms.getServer());
             }
-            if (finalWorld != null && !finalWorld.equals("")) {
-                metaNode.setServer(perms.getServer()).setWorld(finalWorld);
+            if (finalWorld != null && !finalWorld.equals("") && !finalWorld.equals("global")) {
+                metaNode.setWorld(finalWorld);
             }
 
             try {
                 holder.setPermission(metaNode.build());
-            } catch (ObjectAlreadyHasException ignored) {
-            }
+            } catch (ObjectAlreadyHasException ignored) {}
 
             perms.save(holder);
         });
@@ -123,20 +109,34 @@ public class VaultChatHook extends Chat {
         perms.log("Setting " + (prefix ? "prefix" : "suffix") + " for " + holder.getObjectName() + " on world " + world + ", server " + perms.getServer());
 
         perms.getScheduler().execute(() -> {
-            Node.Builder node = new NodeBuilder((prefix ? "prefix" : "suffix") + ".1000." + escapeCharacters(value));
-            node.setValue(true);
-            if (!perms.getServer().equalsIgnoreCase("global")) {
-                node.setServer(perms.getServer());
-            }
 
-            if (finalWorld != null && !finalWorld.equals("")) {
-                node.setServer(perms.getServer()).setWorld(finalWorld);
+            // remove all prefixes/suffixes directly set on the user/group
+            List<Node> toRemove = holder.getNodes().stream()
+                    .filter(n -> prefix ? n.isPrefix() : n.isSuffix())
+                    .collect(Collectors.toList());
+
+            toRemove.forEach(n -> {
+                try {
+                    holder.unsetPermission(n);
+                } catch (ObjectLacksException ignored) {}
+            });
+
+            // find the max inherited priority & add 10
+            MetaHolder metaHolder = holder.accumulateMeta(null, null, ExtractedContexts.generate(perms.createContextForWorld(finalWorld)));
+            int priority = (prefix ? metaHolder.getPrefixes() : metaHolder.getSuffixes()).keySet().stream()
+                    .mapToInt(e -> e).max().orElse(0) + 10;
+
+            Node.Builder chatMetaNode = NodeFactory.makeChatMetaNode(prefix, priority, value);
+            if (!perms.getServer().equalsIgnoreCase("global")) {
+                chatMetaNode.setServer(perms.getServer());
+            }
+            if (finalWorld != null && !finalWorld.equals("") && !finalWorld.equals("global")) {
+                chatMetaNode.setWorld(finalWorld);
             }
 
             try {
-                holder.setPermission(node.build());
-            } catch (ObjectAlreadyHasException ignored) {
-            }
+                holder.setPermission(chatMetaNode.build());
+            } catch (ObjectAlreadyHasException ignored) {}
 
             perms.save(holder);
         });
@@ -185,21 +185,10 @@ public class VaultChatHook extends Chat {
         perms.log("Getting meta: '" + node + "' for group " + group.getName() + " on world " + world + ", server " + perms.getServer());
 
         for (Node n : group.getPermissions(true)) {
-            if (!n.getValue()) {
-                continue;
-            }
-
-            if (!n.isMeta()) {
-                continue;
-            }
-
-            if (!n.shouldApplyOnServer(perms.getServer(), perms.isIncludeGlobal(), false)) {
-                continue;
-            }
-
-            if (!n.shouldApplyOnWorld(world, perms.isIncludeGlobal(), false)) {
-                continue;
-            }
+            if (!n.getValue()) continue;
+            if (!n.isMeta()) continue;
+            if (!n.shouldApplyOnServer(perms.getServer(), perms.isIncludeGlobal(), false)) continue;
+            if (!n.shouldApplyOnWorld(world, perms.isIncludeGlobal(), false)) continue;
 
             Map.Entry<String, String> meta = n.getMeta();
             if (meta.getKey().equalsIgnoreCase(node)) {
@@ -227,21 +216,10 @@ public class VaultChatHook extends Chat {
 
         ExtractedContexts ec = ExtractedContexts.generate(new Contexts(ContextSet.fromMap(context), perms.isIncludeGlobal(), true, true, true, true, false));
         for (Node n : group.getAllNodes(null, ec)) {
-            if (!n.getValue()) {
-                continue;
-            }
-
-            if (prefix ? !n.isPrefix() : !n.isSuffix()) {
-                continue;
-            }
-
-            if (!n.shouldApplyOnServer(perms.getServer(), perms.isIncludeGlobal(), false)) {
-                continue;
-            }
-
-            if (!n.shouldApplyOnWorld(world, perms.isIncludeGlobal(), false)) {
-                continue;
-            }
+            if (!n.getValue()) continue;
+            if (prefix ? !n.isPrefix() : !n.isSuffix()) continue;
+            if (!n.shouldApplyOnServer(perms.getServer(), perms.isIncludeGlobal(), false)) continue;
+            if (!n.shouldApplyOnWorld(world, perms.isIncludeGlobal(), false)) continue;
 
             Map.Entry<Integer, String> value = prefix ? n.getPrefix() : n.getSuffix();
             if (value.getKey() > priority) {
@@ -253,46 +231,55 @@ public class VaultChatHook extends Chat {
         return meta == null ? "" : unescapeCharacters(meta);
     }
 
+    @Override
     public String getPlayerPrefix(String world, @NonNull String player) {
         final User user = perms.getPlugin().getUserManager().getByUsername(player);
         return getUserChatMeta(true, user, world);
     }
 
+    @Override
     public void setPlayerPrefix(String world, @NonNull String player, @NonNull String prefix) {
         final User user = perms.getPlugin().getUserManager().getByUsername(player);
         setChatMeta(true, user, prefix, world);
     }
 
+    @Override
     public String getPlayerSuffix(String world, @NonNull String player) {
         final User user = perms.getPlugin().getUserManager().getByUsername(player);
         return getUserChatMeta(false, user, world);
     }
 
+    @Override
     public void setPlayerSuffix(String world, @NonNull String player, @NonNull String suffix) {
         final User user = perms.getPlugin().getUserManager().getByUsername(player);
         setChatMeta(false, user, suffix, world);
     }
 
+    @Override
     public String getGroupPrefix(String world, @NonNull String group) {
         final Group g = perms.getPlugin().getGroupManager().getIfLoaded(group);
         return getGroupChatMeta(true, g, world);
     }
 
+    @Override
     public void setGroupPrefix(String world, @NonNull String group, @NonNull String prefix) {
         final Group g = perms.getPlugin().getGroupManager().getIfLoaded(group);
         setChatMeta(true, g, prefix, world);
     }
 
+    @Override
     public String getGroupSuffix(String world, @NonNull String group) {
         final Group g = perms.getPlugin().getGroupManager().getIfLoaded(group);
         return getGroupChatMeta(false, g, world);
     }
 
+    @Override
     public void setGroupSuffix(String world, @NonNull String group, @NonNull String suffix) {
         final Group g = perms.getPlugin().getGroupManager().getIfLoaded(group);
         setChatMeta(false, g, suffix, world);
     }
 
+    @Override
     public int getPlayerInfoInteger(String world, @NonNull String player, @NonNull String node, int defaultValue) {
         final User user = perms.getPlugin().getUserManager().getByUsername(player);
         try {
@@ -302,11 +289,13 @@ public class VaultChatHook extends Chat {
         }
     }
 
+    @Override
     public void setPlayerInfoInteger(String world, @NonNull String player, @NonNull String node, int value) {
         final User user = perms.getPlugin().getUserManager().getByUsername(player);
         setMeta(user, world, node, String.valueOf(value));
     }
 
+    @Override
     public int getGroupInfoInteger(String world, @NonNull String group, @NonNull String node, int defaultValue) {
         final Group g = perms.getPlugin().getGroupManager().getIfLoaded(group);
         try {
@@ -316,11 +305,13 @@ public class VaultChatHook extends Chat {
         }
     }
 
+    @Override
     public void setGroupInfoInteger(String world, @NonNull String group, @NonNull String node, int value) {
         final Group g = perms.getPlugin().getGroupManager().getIfLoaded(group);
         setMeta(g, world, node, String.valueOf(value));
     }
 
+    @Override
     public double getPlayerInfoDouble(String world, @NonNull String player, @NonNull String node, double defaultValue) {
         final User user = perms.getPlugin().getUserManager().getByUsername(player);
         try {
@@ -330,11 +321,13 @@ public class VaultChatHook extends Chat {
         }
     }
 
+    @Override
     public void setPlayerInfoDouble(String world, @NonNull String player, @NonNull String node, double value) {
         final User user = perms.getPlugin().getUserManager().getByUsername(player);
         setMeta(user, world, node, String.valueOf(value));
     }
 
+    @Override
     public double getGroupInfoDouble(String world, @NonNull String group, @NonNull String node, double defaultValue) {
         final Group g = perms.getPlugin().getGroupManager().getIfLoaded(group);
         try {
@@ -344,11 +337,13 @@ public class VaultChatHook extends Chat {
         }
     }
 
+    @Override
     public void setGroupInfoDouble(String world, @NonNull String group, @NonNull String node, double value) {
         final Group g = perms.getPlugin().getGroupManager().getIfLoaded(group);
         setMeta(g, world, node, String.valueOf(value));
     }
 
+    @Override
     public boolean getPlayerInfoBoolean(String world, @NonNull String player, @NonNull String node, boolean defaultValue) {
         final User user = perms.getPlugin().getUserManager().getByUsername(player);
         String s = getUserMeta(user, world, node, String.valueOf(defaultValue));
@@ -358,11 +353,13 @@ public class VaultChatHook extends Chat {
         return Boolean.parseBoolean(s);
     }
 
+    @Override
     public void setPlayerInfoBoolean(String world, @NonNull String player, @NonNull String node, boolean value) {
         final User user = perms.getPlugin().getUserManager().getByUsername(player);
         setMeta(user, world, node, String.valueOf(value));
     }
 
+    @Override
     public boolean getGroupInfoBoolean(String world, @NonNull String group, @NonNull String node, boolean defaultValue) {
         final Group g = perms.getPlugin().getGroupManager().getIfLoaded(group);
         String s = getGroupMeta(g, world, node, String.valueOf(defaultValue));
@@ -372,26 +369,31 @@ public class VaultChatHook extends Chat {
         return Boolean.parseBoolean(s);
     }
 
+    @Override
     public void setGroupInfoBoolean(String world, @NonNull String group, @NonNull String node, boolean value) {
         final Group g = perms.getPlugin().getGroupManager().getIfLoaded(group);
         setMeta(g, world, node, String.valueOf(value));
     }
 
+    @Override
     public String getPlayerInfoString(String world, @NonNull String player, @NonNull String node, String defaultValue) {
         final User user = perms.getPlugin().getUserManager().getByUsername(player);
         return getUserMeta(user, world, node, defaultValue);
     }
 
+    @Override
     public void setPlayerInfoString(String world, @NonNull String player, @NonNull String node, String value) {
         final User user = perms.getPlugin().getUserManager().getByUsername(player);
         setMeta(user, world, node, value);
     }
 
+    @Override
     public String getGroupInfoString(String world, @NonNull String group, @NonNull String node, String defaultValue) {
         final Group g = perms.getPlugin().getGroupManager().getIfLoaded(group);
         return getGroupMeta(g, world, node, defaultValue);
     }
 
+    @Override
     public void setGroupInfoString(String world, @NonNull String group, @NonNull String node, String value) {
         final Group g = perms.getPlugin().getGroupManager().getIfLoaded(group);
         setMeta(g, world, node, value);

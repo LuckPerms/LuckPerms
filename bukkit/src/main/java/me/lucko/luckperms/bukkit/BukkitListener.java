@@ -22,7 +22,7 @@
 
 package me.lucko.luckperms.bukkit;
 
-import me.lucko.luckperms.bukkit.inject.Injector;
+import me.lucko.luckperms.bukkit.model.Injector;
 import me.lucko.luckperms.bukkit.model.LPPermissible;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.Message;

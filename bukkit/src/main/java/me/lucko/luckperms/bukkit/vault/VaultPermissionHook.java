@@ -47,7 +47,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 /**
- * The LuckPerms Vault Permission implementation
+ * LuckPerms Vault Permission implementation
  * Most lookups are cached.
  */
 @Getter
@@ -62,7 +62,6 @@ public class VaultPermissionHook extends Permission {
     public VaultPermissionHook(LPBukkitPlugin plugin) {
         this.plugin = plugin;
         this.scheduler = new VaultScheduler(plugin);
-
         super.plugin = plugin;
     }
 
@@ -142,7 +141,7 @@ public class VaultPermissionHook extends Permission {
 
     public Contexts createContextForWorld(String world) {
         Map<String, String> context = new HashMap<>();
-        if (world != null && !world.equals("")) {
+        if (world != null && !world.equals("") && !world.equalsIgnoreCase("global")) {
             context.put("world", world);
         }
         context.put("server", getServer());
@@ -322,21 +321,19 @@ public class VaultPermissionHook extends Permission {
             return null;
         }
 
+        // nothing special, just return the value.
         if (!isPgo()) {
             String g = user.getPrimaryGroup();
             return plugin.getConfiguration().get(ConfigKeys.GROUP_NAME_REWRITES).getOrDefault(g, g);
         }
 
+        // we need to do the complex PGO checking. (it's been enabled in the config.)
         if (isPgoCheckInherited()) {
+            // we can just check the cached data
             PermissionData data = user.getUserData().getPermissionData(createContextForWorld(world));
             for (Map.Entry<String, Boolean> e : data.getImmutableBacking().entrySet()) {
-                if (!e.getValue()) {
-                    continue;
-                }
-
-                if (!e.getKey().toLowerCase().startsWith("vault.primarygroup.")) {
-                    continue;
-                }
+                if (!e.getValue()) continue;
+                if (!e.getKey().toLowerCase().startsWith("vault.primarygroup.")) continue;
 
                 String group = e.getKey().substring("vault.primarygroup.".length());
                 if (isPgoCheckExists()) {
@@ -354,22 +351,12 @@ public class VaultPermissionHook extends Permission {
                 return group;
             }
         } else {
+            // we need to check the users permissions only
             for (LocalizedNode node : user.getPermissions(true)) {
-                if (!node.getValue()) {
-                    continue;
-                }
-
-                if (!node.getPermission().toLowerCase().startsWith("vault.primarygroup.")) {
-                    continue;
-                }
-
-                if (!node.shouldApplyOnServer(getServer(), isIncludeGlobal(), false)) {
-                    continue;
-                }
-
-                if (!node.shouldApplyOnWorld(world, true, false)) {
-                    continue;
-                }
+                if (!node.getValue()) continue;
+                if (!node.getPermission().toLowerCase().startsWith("vault.primarygroup.")) continue;
+                if (!node.shouldApplyOnServer(getServer(), isIncludeGlobal(), false)) continue;
+                if (!node.shouldApplyOnWorld(world, true, false)) continue;
 
                 String group = node.getPermission().substring("vault.primarygroup.".length());
                 if (isPgoCheckExists()) {
@@ -403,31 +390,31 @@ public class VaultPermissionHook extends Permission {
         return true;
     }
 
-    public String getServer() {
+    String getServer() {
         return plugin.getConfiguration().get(ConfigKeys.VAULT_SERVER);
     }
 
-    public boolean isIncludeGlobal() {
+    boolean isIncludeGlobal() {
         return plugin.getConfiguration().get(ConfigKeys.VAULT_INCLUDING_GLOBAL);
     }
 
-    public boolean isIgnoreWorld() {
+    boolean isIgnoreWorld() {
         return plugin.getConfiguration().get(ConfigKeys.VAULT_IGNORE_WORLD);
     }
 
-    public boolean isPgo() {
+    private boolean isPgo() {
         return plugin.getConfiguration().get(ConfigKeys.VAULT_PRIMARY_GROUP_OVERRIDES);
     }
 
-    public boolean isPgoCheckInherited() {
+    private boolean isPgoCheckInherited() {
         return plugin.getConfiguration().get(ConfigKeys.VAULT_PRIMARY_GROUP_OVERRIDES_CHECK_INHERITED);
     }
 
-    public boolean isPgoCheckExists() {
+    private boolean isPgoCheckExists() {
         return plugin.getConfiguration().get(ConfigKeys.VAULT_PRIMARY_GROUP_OVERRIDES_CHECK_EXISTS);
     }
 
-    public boolean isPgoCheckMemberOf() {
+    private boolean isPgoCheckMemberOf() {
         return plugin.getConfiguration().get(ConfigKeys.VAULT_PRIMARY_GROUP_OVERRIDES_CHECK_MEMBER_OF);
     }
 }

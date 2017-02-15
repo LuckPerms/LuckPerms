@@ -27,10 +27,20 @@ import lombok.RequiredArgsConstructor;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
+import org.bukkit.permissions.Permission;
+
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Handles permission subscriptions with Bukkits plugin manager, for a given LPPermissible.
+ *
+ * Bukkit for some reason sometimes uses subscription status to determine whether a permissible has a given node, instead
+ * of checking directly with {@link org.bukkit.permissions.Permissible#hasPermission(Permission)}.
+ *
+ * {@link org.bukkit.Bukkit#broadcast(String, String)} is a good example of this.
+ */
 @RequiredArgsConstructor
 public class SubscriptionManager {
 
@@ -40,6 +50,8 @@ public class SubscriptionManager {
     public synchronized void subscribe(Set<String> perms) {
         Set<String> newPerms = ImmutableSet.copyOf(perms);
 
+        // we compare changes to avoid unnecessary time wasted on the main thread mutating this data.
+        // the changes can be calculated here async, and then only the needed changes can be applied.
         Map.Entry<Set<String>, Set<String>> changes = compareSets(newPerms, currentSubscriptions);
 
         Set<String> toAdd = changes.getKey();

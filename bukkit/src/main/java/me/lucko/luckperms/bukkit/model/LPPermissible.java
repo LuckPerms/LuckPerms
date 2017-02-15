@@ -55,28 +55,19 @@ import java.util.stream.Collectors;
 /**
  * Modified PermissibleBase for LuckPerms
  */
+@Getter
 public class LPPermissible extends PermissibleBase {
 
-    @Getter
     private final User user;
-
-    @Getter
     private final Player parent;
-
-    @Getter
     private final LPBukkitPlugin plugin;
-
-    @Getter
     private final SubscriptionManager subscriptions;
 
-    @Getter
     @Setter
     private PermissibleBase oldPermissible = null;
 
     // Attachment stuff.
-    @Getter
     private final Map<String, PermissionAttachmentInfo> attachmentPermissions = new ConcurrentHashMap<>();
-    @Getter
     private final List<PermissionAttachment> attachments = Collections.synchronizedList(new LinkedList<>());
 
     public LPPermissible(@NonNull Player parent, User user, LPBukkitPlugin plugin) {
@@ -86,7 +77,7 @@ public class LPPermissible extends PermissibleBase {
         this.plugin = plugin;
         this.subscriptions = new SubscriptionManager(this);
 
-        recalculatePermissions();
+        // recalculatePermissions();
     }
 
     public void updateSubscriptionsAsync() {
@@ -294,8 +285,8 @@ public class LPPermissible extends PermissibleBase {
             Bukkit.getServer().getPluginManager().unsubscribeFromPermission(name, parent);
         }
 
-        Bukkit.getServer().getPluginManager().unsubscribeFromDefaultPerms(false, parent);
-        Bukkit.getServer().getPluginManager().unsubscribeFromDefaultPerms(true, parent);
+        // Bukkit.getServer().getPluginManager().unsubscribeFromDefaultPerms(false, parent);
+        // Bukkit.getServer().getPluginManager().unsubscribeFromDefaultPerms(true, parent);
 
         attachmentPermissions.clear();
     }

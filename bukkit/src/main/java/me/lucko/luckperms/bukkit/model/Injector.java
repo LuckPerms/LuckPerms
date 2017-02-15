@@ -20,11 +20,9 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit.inject;
+package me.lucko.luckperms.bukkit.model;
 
 import lombok.experimental.UtilityClass;
-
-import me.lucko.luckperms.bukkit.model.LPPermissible;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

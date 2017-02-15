@@ -30,7 +30,7 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.bukkit.calculators.AttachmentProcessor;
 import me.lucko.luckperms.bukkit.calculators.ChildProcessor;
 import me.lucko.luckperms.bukkit.calculators.DefaultsProcessor;
-import me.lucko.luckperms.bukkit.inject.Injector;
+import me.lucko.luckperms.bukkit.model.Injector;
 import me.lucko.luckperms.bukkit.model.LPPermissible;
 import me.lucko.luckperms.common.calculators.AbstractCalculatorFactory;
 import me.lucko.luckperms.common.calculators.PermissionCalculator;

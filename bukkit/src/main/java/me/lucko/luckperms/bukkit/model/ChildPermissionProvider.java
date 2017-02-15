@@ -36,6 +36,27 @@ import java.util.Map;
 
 public class ChildPermissionProvider {
 
+    @Getter
+    private ImmutableMap<Map.Entry<String, Boolean>, ImmutableMap<String, Boolean>> permissions = ImmutableMap.of();
+
+    public void setup() {
+        Map<Map.Entry<String, Boolean>, ImmutableMap<String, Boolean>> permissions = new HashMap<>();
+
+        for (Permission permission : Bukkit.getServer().getPluginManager().getPermissions()) {
+            // handle true
+            Map<String, Boolean> trueChildren = new HashMap<>();
+            resolveChildren(trueChildren, Collections.singletonMap(permission.getName(), true), false);
+            permissions.put(Maps.immutableEntry(permission.getName().toLowerCase(), true), ImmutableMap.copyOf(trueChildren));
+
+            // handle false
+            Map<String, Boolean> falseChildren = new HashMap<>();
+            resolveChildren(falseChildren, Collections.singletonMap(permission.getName(), false), false);
+            permissions.put(Maps.immutableEntry(permission.getName().toLowerCase(), false), ImmutableMap.copyOf(falseChildren));
+        }
+
+        this.permissions = ImmutableMap.copyOf(permissions);
+    }
+
     private static void resolveChildren(Map<String, Boolean> accumulator, Map<String, Boolean> children, boolean invert) {
         for (Map.Entry<String, Boolean> e : children.entrySet()) {
             if (accumulator.containsKey(e.getKey())) {
@@ -52,26 +73,5 @@ public class ChildPermissionProvider {
                 resolveChildren(accumulator, perm.getChildren(), !value);
             }
         }
-    }
-
-    @Getter
-    private ImmutableMap<Map.Entry<String, Boolean>, ImmutableMap<String, Boolean>> permissions = ImmutableMap.of();
-
-    public void setup() {
-        Map<Map.Entry<String, Boolean>, ImmutableMap<String, Boolean>> permissions = new HashMap<>();
-
-        for (Permission permission : Bukkit.getServer().getPluginManager().getPermissions()) {
-            // handle true
-            Map<String, Boolean> children = new HashMap<>();
-            resolveChildren(children, Collections.singletonMap(permission.getName(), true), false);
-            permissions.put(Maps.immutableEntry(permission.getName().toLowerCase(), true), ImmutableMap.copyOf(children));
-
-            // handle false
-            Map<String, Boolean> nChildren = new HashMap<>();
-            resolveChildren(nChildren, Collections.singletonMap(permission.getName(), false), false);
-            permissions.put(Maps.immutableEntry(permission.getName().toLowerCase(), false), ImmutableMap.copyOf(nChildren));
-        }
-
-        this.permissions = ImmutableMap.copyOf(permissions);
     }
 }

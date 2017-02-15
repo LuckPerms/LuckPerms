@@ -20,9 +20,11 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit.inject;
+package me.lucko.luckperms.bukkit.model;
 
-import org.bukkit.permissions.PermissibleBase;
+import lombok.AllArgsConstructor;
+
+import org.bukkit.permissions.Permissible;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionAttachmentInfo;
@@ -31,19 +33,18 @@ import org.bukkit.plugin.Plugin;
 import java.util.Collections;
 import java.util.Set;
 
-public class DummyPermissibleBase extends PermissibleBase {
-    public DummyPermissibleBase() {
-        super(null);
+@AllArgsConstructor
+public class DummyPermissible implements Permissible {
+    private final Runnable onRefresh;
+
+    @Override
+    public void recalculatePermissions() {
+        onRefresh.run();
     }
 
     @Override
-    public boolean isOp() {
-        return false;
-    }
-
-    @Override
-    public void setOp(boolean value) {
-
+    public Set<PermissionAttachmentInfo> getEffectivePermissions() {
+        return Collections.emptySet();
     }
 
     @Override
@@ -57,7 +58,7 @@ public class DummyPermissibleBase extends PermissibleBase {
     }
 
     @Override
-    public boolean hasPermission(String inName) {
+    public boolean hasPermission(String name) {
         return false;
     }
 
@@ -77,21 +78,6 @@ public class DummyPermissibleBase extends PermissibleBase {
     }
 
     @Override
-    public void removeAttachment(PermissionAttachment attachment) {
-
-    }
-
-    @Override
-    public void recalculatePermissions() {
-
-    }
-
-    @Override
-    public synchronized void clearPermissions() {
-
-    }
-
-    @Override
     public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value, int ticks) {
         return null;
     }
@@ -102,7 +88,17 @@ public class DummyPermissibleBase extends PermissibleBase {
     }
 
     @Override
-    public Set<PermissionAttachmentInfo> getEffectivePermissions() {
-        return Collections.emptySet();
+    public void removeAttachment(PermissionAttachment attachment) {
+
+    }
+
+    @Override
+    public boolean isOp() {
+        return false;
+    }
+
+    @Override
+    public void setOp(boolean value) {
+
     }
 }
