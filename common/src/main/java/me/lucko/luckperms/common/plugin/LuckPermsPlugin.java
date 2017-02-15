@@ -44,8 +44,8 @@ import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.managers.UserManager;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.storage.Storage;
+import me.lucko.luckperms.common.treeview.PermissionVault;
 import me.lucko.luckperms.common.utils.BufferedRequest;
-import me.lucko.luckperms.common.utils.PermissionCache;
 
 import java.io.File;
 import java.io.InputStream;
@@ -173,7 +173,7 @@ public interface LuckPermsPlugin {
      *
      * @return the permission cache instance
      */
-    PermissionCache getPermissionCache();
+    PermissionVault getPermissionVault();
 
     /**
      * Gets the LuckPerms Scheduler instance

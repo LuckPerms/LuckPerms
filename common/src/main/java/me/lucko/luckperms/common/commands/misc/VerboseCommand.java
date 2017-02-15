@@ -101,7 +101,7 @@ public class VerboseCommand extends SingleCommand {
                 } else {
                     Message.VERBOSE_RECORDING_UPLOAD_START.send(sender);
 
-                    String url = listener.uploadPastedData();
+                    String url = listener.uploadPasteData();
                     if (url == null) {
                         url = "null";
                     }

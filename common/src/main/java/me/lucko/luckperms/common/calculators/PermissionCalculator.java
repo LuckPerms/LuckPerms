@@ -59,7 +59,7 @@ public class PermissionCalculator {
         permission = permission.toLowerCase();
         Tristate t = cache.getUnchecked(permission);
         plugin.getDebugHandler().offer(objectName, permission, t);
-        plugin.getPermissionCache().offer(permission);
+        plugin.getPermissionVault().offer(permission);
         return t;
     }
 

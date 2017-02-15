@@ -60,9 +60,9 @@ import me.lucko.luckperms.common.storage.StorageType;
 import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.tasks.UpdateTask;
+import me.lucko.luckperms.common.treeview.PermissionVault;
 import me.lucko.luckperms.common.utils.BufferedRequest;
 import me.lucko.luckperms.common.utils.LoggerImpl;
-import me.lucko.luckperms.common.utils.PermissionCache;
 import me.lucko.luckperms.sponge.commands.SpongeMainCommand;
 import me.lucko.luckperms.sponge.contexts.WorldCalculator;
 import me.lucko.luckperms.sponge.managers.SpongeGroupManager;
@@ -158,7 +158,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     private BufferedRequest<Void> updateTaskBuffer;
     private DebugHandler debugHandler;
     private SpongeSenderFactory senderFactory;
-    private PermissionCache permissionCache;
+    private PermissionVault permissionVault;
 
     @Listener(order = Order.FIRST)
     public void onEnable(GamePreInitializationEvent event) {
@@ -168,7 +168,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         log = new LoggerImpl(getConsoleSender());
         LuckPermsPlugin.sendStartupBanner(getConsoleSender(), this);
         debugHandler = new DebugHandler(scheduler.getAsyncExecutor(), getVersion());
-        permissionCache = new PermissionCache(scheduler.getAsyncExecutor());
+        permissionVault = new PermissionVault(scheduler.getAsyncExecutor());
         timings = new LPTimings(this);
 
         getLog().info("Loading configuration...");

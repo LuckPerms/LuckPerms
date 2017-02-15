@@ -156,7 +156,7 @@ public class DebugListener {
         return token.equals(" ") || token.equals("|") || token.equals("&") || token.equals("(") || token.equals(")") || token.equals("!");
     }
 
-    public String uploadPastedData() {
+    public String uploadPasteData() {
         long now = System.currentTimeMillis();
         String startDate = DATE_FORMAT.format(new Date(startTime));
         String endDate = DATE_FORMAT.format(new Date(now));

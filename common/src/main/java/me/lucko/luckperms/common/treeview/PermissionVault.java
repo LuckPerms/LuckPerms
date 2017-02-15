@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.utils;
+package me.lucko.luckperms.common.treeview;
 
 import lombok.Getter;
 import lombok.NonNull;
@@ -29,69 +29,65 @@ import lombok.Setter;
 import com.google.common.base.Splitter;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
 
-public class PermissionCache {
+/**
+ * Stores a collection of all permissions known to the platform.
+ */
+public class PermissionVault implements Runnable {
+    private static final Splitter DOT_SPLIT = Splitter.on('.').omitEmptyStrings();
 
     @Getter
-    private final Node rootNode;
+    private final TreeNode rootNode;
     private final Queue<String> queue;
 
     @Setter
     private boolean shutdown = false;
 
-    public PermissionCache(Executor executor) {
-        rootNode = new Node();
+    public PermissionVault(Executor executor) {
+        rootNode = new TreeNode();
         queue = new ConcurrentLinkedQueue<>();
 
-        executor.execute(() -> {
-            while (true) {
-                for (String e; (e = queue.poll()) != null; ) {
-                    insert(e.toLowerCase());
-                }
+        executor.execute(this);
+    }
 
-                if (shutdown) {
-                    return;
-                }
-
+    @Override
+    public void run() {
+        while (true) {
+            for (String e; (e = queue.poll()) != null; ) {
                 try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException ignored) {}
+                    insert(e.toLowerCase());
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
             }
-        });
+
+            if (shutdown) {
+                return;
+            }
+
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException ignored) {}
+        }
     }
 
     public void offer(@NonNull String permission) {
         queue.offer(permission);
     }
 
-    private void insert(String permission) {
-        List<String> parts = Splitter.on('.').splitToList(permission);
-
-        Node current = rootNode;
-        for (String part : parts) {
-            current = current.getChildMap().computeIfAbsent(part, s -> new Node());
-        }
+    public int getSize() {
+        return rootNode.getDeepSize();
     }
 
-    public static class Node {
-        private Map<String, Node> children = null;
+    private void insert(String permission) {
+        List<String> parts = DOT_SPLIT.splitToList(permission);
 
-        // lazy init
-        private synchronized Map<String, Node> getChildMap() {
-            if (children == null) {
-                children = new ConcurrentHashMap<>();
-            }
-            return children;
-        }
-
-        public Optional<Map<String, Node>> getChildren() {
-            return Optional.ofNullable(children);
+        TreeNode current = rootNode;
+        for (String part : parts) {
+            current = current.getChildMap().computeIfAbsent(part, s -> new TreeNode());
         }
     }
 

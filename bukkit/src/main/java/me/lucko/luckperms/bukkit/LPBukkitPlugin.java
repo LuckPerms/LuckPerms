@@ -72,9 +72,9 @@ import me.lucko.luckperms.common.storage.StorageType;
 import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.tasks.UpdateTask;
+import me.lucko.luckperms.common.treeview.PermissionVault;
 import me.lucko.luckperms.common.utils.BufferedRequest;
 import me.lucko.luckperms.common.utils.LoggerImpl;
-import me.lucko.luckperms.common.utils.PermissionCache;
 
 import org.bukkit.World;
 import org.bukkit.command.PluginCommand;
@@ -126,7 +126,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private boolean started = false;
     private DebugHandler debugHandler;
     private BukkitSenderFactory senderFactory;
-    private PermissionCache permissionCache;
+    private PermissionVault permissionVault;
 
     @Override
     public void onEnable() {
@@ -139,7 +139,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
         ignoringLogs = ConcurrentHashMap.newKeySet();
         debugHandler = new DebugHandler(scheduler.getAsyncBukkitExecutor(), getVersion());
-        permissionCache = new PermissionCache(scheduler.getAsyncBukkitExecutor());
+        permissionVault = new PermissionVault(scheduler.getAsyncBukkitExecutor());
 
         getLog().info("Loading configuration...");
         configuration = new BukkitConfig(this);
@@ -160,18 +160,18 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
             getServer().getScheduler().runTaskAsynchronously(this, () -> {
                 for (Map.Entry<String, Boolean> e : defaultsProvider.getOpDefaults().entrySet()) {
-                    permissionCache.offer(e.getKey());
+                    permissionVault.offer(e.getKey());
                 }
 
                 for (Map.Entry<String, Boolean> e : defaultsProvider.getNonOpDefaults().entrySet()) {
-                    permissionCache.offer(e.getKey());
+                    permissionVault.offer(e.getKey());
                 }
 
                 ImmutableMap<Map.Entry<String, Boolean>, ImmutableMap<String, Boolean>> permissions = childPermissionProvider.getPermissions();
                 for (Map.Entry<Map.Entry<String, Boolean>, ImmutableMap<String, Boolean>> e : permissions.entrySet()) {
-                    permissionCache.offer(e.getKey().getKey());
+                    permissionVault.offer(e.getKey().getKey());
                     for (Map.Entry<String, Boolean> e1 : e.getValue().entrySet()) {
-                        permissionCache.offer(e1.getKey());
+                        permissionVault.offer(e1.getKey());
                     }
                 }
             });
@@ -336,7 +336,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         started = false;
 
         defaultsProvider.close();
-        permissionCache.setShutdown(true);
+        permissionVault.setShutdown(true);
         debugHandler.setShutdown(true);
 
         for (Player player : getServer().getOnlinePlayers()) {
@@ -398,7 +398,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         updateTaskBuffer = null;
         debugHandler = null;
         senderFactory = null;
-        permissionCache = null;
+        permissionVault = null;
     }
 
     public void tryVaultHook(boolean force) {

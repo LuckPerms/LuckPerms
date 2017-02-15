@@ -27,6 +27,7 @@ import lombok.ToString;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 
 @Getter
@@ -41,7 +42,7 @@ public class ExtractedContexts {
     }
 
     private Contexts contexts;
-    private ContextSet contextSet;
+    private ImmutableContextSet contextSet;
     private String server;
     private String world;
 

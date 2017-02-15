@@ -32,6 +32,7 @@ import java.io.OutputStream;
 import java.io.StringWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 public class PasteUtils {
 
@@ -54,7 +55,7 @@ public class PasteUtils {
                         .endObject()
                         .endObject();
 
-                os.write(sw.toString().getBytes());
+                os.write(sw.toString().getBytes(StandardCharsets.UTF_8));
             }
 
             if (connection.getResponseCode() >= 400) {

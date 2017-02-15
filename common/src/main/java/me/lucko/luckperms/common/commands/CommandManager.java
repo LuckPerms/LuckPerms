@@ -40,6 +40,7 @@ import me.lucko.luckperms.common.commands.misc.NetworkSyncCommand;
 import me.lucko.luckperms.common.commands.misc.ReloadConfigCommand;
 import me.lucko.luckperms.common.commands.misc.SearchCommand;
 import me.lucko.luckperms.common.commands.misc.SyncCommand;
+import me.lucko.luckperms.common.commands.misc.TreeCommand;
 import me.lucko.luckperms.common.commands.misc.VerboseCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.track.CreateTrack;
@@ -89,6 +90,7 @@ public class CommandManager {
                 .add(new SyncCommand())
                 .add(new InfoCommand())
                 .add(new VerboseCommand())
+                .add(new TreeCommand())
                 .add(new SearchCommand())
                 .add(new CheckCommand())
                 .add(new NetworkSyncCommand())

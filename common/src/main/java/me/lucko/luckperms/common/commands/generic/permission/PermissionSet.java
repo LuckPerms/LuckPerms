@@ -99,6 +99,6 @@ public class PermissionSet extends SharedSubCommand {
         if (!ret.isEmpty()) {
             return ret;
         }
-        return getPermissionTabComplete(args, plugin.getPermissionCache());
+        return getPermissionTabComplete(args, plugin.getPermissionVault());
     }
 }

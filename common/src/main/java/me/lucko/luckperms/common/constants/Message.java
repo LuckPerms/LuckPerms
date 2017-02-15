@@ -106,6 +106,10 @@ public enum Message {
     VERBOSE_RECORDING_UPLOAD_START("&bVerbose recording was disabled. Uploading results...", true),
     VERBOSE_RECORDING_URL("&aVerbose results URL:", true),
 
+    TREE_UPLOAD_START("&bGenerating permission tree...", true),
+    TREE_EMPTY("&aUnable to generate tree. No results were found.", true),
+    TREE_URL("&aPermission Tree URL:", true),
+
     SEARCH_SEARCHING("&aSearching for users and groups with &b{0}&a...", true),
     SEARCH_RESULT("&aFound &b{0}&a entries from &b{1}&a users and &b{2}&a groups.", true),
     SEARCH_SHOWING_USERS("&bShowing user entries:", true),
@@ -164,16 +168,17 @@ public enum Message {
             "{PREFIX}&f-     &3Translations loaded: &a{12}" + "\n" +
             "{PREFIX}&f-     &3Pre-process contexts: &a{13}" + "\n" +
             "{PREFIX}&f-     &3Context Calculators: &a{14}" + "\n" +
+            "{PREFIX}&f-     &3Unique permissions: &a{15}" + "\n" +
             "{PREFIX}&f-  &bConfiguration:" + "\n" +
-            "{PREFIX}&f-     &3Online Mode: {15}" + "\n" +
+            "{PREFIX}&f-     &3Online Mode: {16}" + "\n" +
             "{PREFIX}&f-     &bPermission Calculation:" + "\n" +
-            "{PREFIX}&f-        &3Including Global: {16}" + "\n" +
-            "{PREFIX}&f-        &3Including Global World: {17}" + "\n" +
-            "{PREFIX}&f-        &3Applying Global Groups: {18}" + "\n" +
-            "{PREFIX}&f-        &3Applying Global World Groups: {19}" + "\n" +
-            "{PREFIX}&f-        &3Applying Wildcards: {20}" + "\n" +
-            "{PREFIX}&f-        &3Applying Regex: {21}" + "\n" +
-            "{PREFIX}&f-        &3Applying Shorthand: {22}",
+            "{PREFIX}&f-        &3Including Global: {17}" + "\n" +
+            "{PREFIX}&f-        &3Including Global World: {18}" + "\n" +
+            "{PREFIX}&f-        &3Applying Global Groups: {19}" + "\n" +
+            "{PREFIX}&f-        &3Applying Global World Groups: {20}" + "\n" +
+            "{PREFIX}&f-        &3Applying Wildcards: {21}" + "\n" +
+            "{PREFIX}&f-        &3Applying Regex: {22}" + "\n" +
+            "{PREFIX}&f-        &3Applying Shorthand: {23}",
             false
     ),
     CREATE_GROUP_ERROR("There was an error whilst creating the group.", true),

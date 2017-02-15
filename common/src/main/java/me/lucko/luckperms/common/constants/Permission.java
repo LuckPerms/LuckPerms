@@ -38,6 +38,7 @@ public enum Permission {
     SYNC(list("sync"), Type.NONE),
     INFO(list("info"), Type.NONE),
     VERBOSE(list("verbose"), Type.NONE),
+    TREE(list("tree"), Type.NONE),
     SEARCH(list("search"), Type.NONE),
     CHECK(list("check"), Type.NONE),
     IMPORT(list("import"), Type.NONE),

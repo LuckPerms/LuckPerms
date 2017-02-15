@@ -34,7 +34,8 @@ import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.utils.PermissionCache;
+import me.lucko.luckperms.common.treeview.PermissionVault;
+import me.lucko.luckperms.common.treeview.TreeNode;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,7 +74,7 @@ public abstract class SubCommand<T> extends Command<T, Void> {
      * ----------------------------------------------------------------------------------
      */
 
-    public static List<String> getPermissionTabComplete(List<String> args, PermissionCache cache) {
+    public static List<String> getPermissionTabComplete(List<String> args, PermissionVault cache) {
         if (args.size() <= 1) {
             if (args.isEmpty() || args.get(0).equals("")) {
                 return cache.getRootNode().getChildren()
@@ -84,7 +85,7 @@ public abstract class SubCommand<T> extends Command<T, Void> {
 
             String start = args.get(0).toLowerCase();
             List<String> parts = new ArrayList<>(Splitter.on('.').splitToList(start));
-            PermissionCache.Node root = cache.getRootNode();
+            TreeNode root = cache.getRootNode();
 
             if (parts.size() <= 1) {
                 if (!root.getChildren().isPresent()) {
@@ -101,7 +102,7 @@ public abstract class SubCommand<T> extends Command<T, Void> {
                     return Collections.emptyList();
                 }
 
-                PermissionCache.Node n = root.getChildren().get().get(s);
+                TreeNode n = root.getChildren().get().get(s);
                 if (n == null) {
                     return Collections.emptyList();
                 }

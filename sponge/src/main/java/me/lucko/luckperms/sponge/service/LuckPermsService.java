@@ -355,7 +355,7 @@ public class LuckPermsService implements PermissionService {
                 subject.getTransientSubjectData().setPermission(ContextSet.empty(), id, assignment.getValue());
             }
 
-            service.getPlugin().getPermissionCache().offer(id);
+            service.getPlugin().getPermissionVault().offer(id);
 
             return d;
         }
