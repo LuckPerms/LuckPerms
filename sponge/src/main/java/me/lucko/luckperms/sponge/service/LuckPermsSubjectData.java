@@ -452,7 +452,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
                     } catch (ObjectLacksException ignored) {}
                 });
 
-                MetaHolder metaHolder = holder.accumulateMeta(null, null, ExtractedContexts.generate(context));
+                MetaHolder metaHolder = holder.accumulateMeta(null, null, ExtractedContexts.generate(service.calculateContexts(context)));
                 int priority = (type.equals("prefix") ? metaHolder.getPrefixes() : metaHolder.getSuffixes()).keySet().stream()
                         .mapToInt(e -> e).max().orElse(0);
                 priority += 10;
