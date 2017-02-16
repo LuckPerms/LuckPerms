@@ -52,6 +52,7 @@ public class ExtractedContexts {
     }
 
     private ExtractedContexts(ContextSet contexts) {
+        this.contexts = null;
         setup(contexts);
     }
 
@@ -63,5 +64,12 @@ public class ExtractedContexts {
         contextSet.removeAll("world");
 
         this.contextSet = contextSet.makeImmutable();
+    }
+
+    public Contexts getContexts() {
+        if (contexts == null) {
+            throw new NullPointerException("contexts");
+        }
+        return contexts;
     }
 }
