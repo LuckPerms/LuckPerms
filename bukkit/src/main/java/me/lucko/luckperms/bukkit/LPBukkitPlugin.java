@@ -158,14 +158,17 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
             defaultsProvider.refresh();
             childPermissionProvider.setup();
 
-            getServer().getScheduler().runTaskAsynchronously(this, () -> {
-                for (Map.Entry<String, Boolean> e : defaultsProvider.getOpDefaults().entrySet()) {
-                    permissionVault.offer(e.getKey());
-                }
+            Set<String> perms = new HashSet<>();
+            getServer().getPluginManager().getPermissions().forEach(p -> {
+                perms.add(p.getName());
+                perms.addAll(p.getChildren().keySet());
+            });
 
-                for (Map.Entry<String, Boolean> e : defaultsProvider.getNonOpDefaults().entrySet()) {
-                    permissionVault.offer(e.getKey());
-                }
+            getServer().getScheduler().runTaskAsynchronously(this, () -> {
+                defaultsProvider.getOpDefaults().entrySet().stream().map(Map.Entry::getKey).forEach(e -> permissionVault.offer(e));
+                defaultsProvider.getNonOpDefaults().entrySet().stream().map(Map.Entry::getKey).forEach(e -> permissionVault.offer(e));
+
+                perms.forEach(p -> permissionVault.offer(p));
 
                 ImmutableMap<Map.Entry<String, Boolean>, ImmutableMap<String, Boolean>> permissions = childPermissionProvider.getPermissions();
                 for (Map.Entry<Map.Entry<String, Boolean>, ImmutableMap<String, Boolean>> e : permissions.entrySet()) {
