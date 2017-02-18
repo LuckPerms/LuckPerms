@@ -40,21 +40,27 @@ public class ChildPermissionProvider {
     private ImmutableMap<Map.Entry<String, Boolean>, ImmutableMap<String, Boolean>> permissions = ImmutableMap.of();
 
     public void setup() {
-        Map<Map.Entry<String, Boolean>, ImmutableMap<String, Boolean>> permissions = new HashMap<>();
+        ImmutableMap.Builder<Map.Entry<String, Boolean>, ImmutableMap<String, Boolean>> permissions = ImmutableMap.builder();
 
         for (Permission permission : Bukkit.getServer().getPluginManager().getPermissions()) {
             // handle true
             Map<String, Boolean> trueChildren = new HashMap<>();
             resolveChildren(trueChildren, Collections.singletonMap(permission.getName(), true), false);
-            permissions.put(Maps.immutableEntry(permission.getName().toLowerCase(), true), ImmutableMap.copyOf(trueChildren));
+            trueChildren.remove(permission.getName(), true);
+            if (!trueChildren.isEmpty()) {
+                permissions.put(Maps.immutableEntry(permission.getName().toLowerCase(), true), ImmutableMap.copyOf(trueChildren));
+            }
 
             // handle false
             Map<String, Boolean> falseChildren = new HashMap<>();
             resolveChildren(falseChildren, Collections.singletonMap(permission.getName(), false), false);
-            permissions.put(Maps.immutableEntry(permission.getName().toLowerCase(), false), ImmutableMap.copyOf(falseChildren));
+            falseChildren.remove(permission.getName(), false);
+            if (!falseChildren.isEmpty()) {
+                permissions.put(Maps.immutableEntry(permission.getName().toLowerCase(), false), ImmutableMap.copyOf(falseChildren));
+            }
         }
 
-        this.permissions = ImmutableMap.copyOf(permissions);
+        this.permissions = permissions.build();
     }
 
     private static void resolveChildren(Map<String, Boolean> accumulator, Map<String, Boolean> children, boolean invert) {

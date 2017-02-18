@@ -24,8 +24,6 @@ package me.lucko.luckperms.bukkit;
 
 import lombok.Getter;
 
-import com.google.common.collect.ImmutableMap;
-
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.LuckPermsApi;
@@ -153,7 +151,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         defaultsProvider = new DefaultsProvider();
         childPermissionProvider = new ChildPermissionProvider();
 
-        // give all plugins a chance to load their defaults, then refresh.
+        // give all plugins a chance to load their permissions, then refresh.
         scheduler.doSyncLater(() -> {
             defaultsProvider.refresh();
             childPermissionProvider.setup();
@@ -164,21 +162,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
                 perms.addAll(p.getChildren().keySet());
             });
 
-            getServer().getScheduler().runTaskAsynchronously(this, () -> {
-                defaultsProvider.getOpDefaults().entrySet().stream().map(Map.Entry::getKey).forEach(e -> permissionVault.offer(e));
-                defaultsProvider.getNonOpDefaults().entrySet().stream().map(Map.Entry::getKey).forEach(e -> permissionVault.offer(e));
-
-                perms.forEach(p -> permissionVault.offer(p));
-
-                ImmutableMap<Map.Entry<String, Boolean>, ImmutableMap<String, Boolean>> permissions = childPermissionProvider.getPermissions();
-                for (Map.Entry<Map.Entry<String, Boolean>, ImmutableMap<String, Boolean>> e : permissions.entrySet()) {
-                    permissionVault.offer(e.getKey().getKey());
-                    for (Map.Entry<String, Boolean> e1 : e.getValue().entrySet()) {
-                        permissionVault.offer(e1.getKey());
-                    }
-                }
-            });
-
+            perms.forEach(p -> permissionVault.offer(p));
         }, 1L);
 
         // register events
