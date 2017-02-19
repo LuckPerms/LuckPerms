@@ -25,7 +25,6 @@ package me.lucko.luckperms.api;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
@@ -73,17 +72,6 @@ public interface PermissionHolder {
      */
     Set<? extends Node> getTransientPermissions();
 
-
-    /**
-     * Gets an immutable set of the nodes that this object has and inherits
-     *
-     * @return an immutable set of permissions
-     * @since 2.6
-     * @deprecated in favour of {@link #getAllNodes(Contexts)}
-     */
-    @Deprecated
-    Set<Node> getAllNodes();
-
     /**
      * Gets a mutable sorted set of the nodes that this object has and inherits, filtered by context
      * Unlike {@link #getAllNodesFiltered(Contexts)}, this method will not filter individual nodes. The context is only
@@ -116,15 +104,6 @@ public interface PermissionHolder {
      * @return a mutable map of permissions
      */
     Map<String, Boolean> exportNodes(Contexts contexts, boolean lowerCase);
-
-    /**
-     * Gets an immutable Map of the objects permission nodes
-     *
-     * @return an immutable map of permissions
-     * @deprecated in favour of {@link #getPermissions()}
-     */
-    @Deprecated
-    Map<String, Boolean> getNodes();
 
     /**
      * Removes temporary permissions that have expired
@@ -630,87 +609,5 @@ public interface PermissionHolder {
      * @since 2.6
      */
     Set<Node> getTemporaryPermissionNodes();
-
-    /**
-     * Gets the permissions and inherited permissions that apply to a specific server and world
-     *
-     * @param server         The server to get nodes for
-     * @param world          The world to get nodes for
-     * @param excludedGroups Groups that shouldn't be inherited (to prevent circular inheritance issues)
-     * @param possibleNodes  A list of possible permission nodes for wildcard permission handling
-     * @return a {@link Map} of the permissions
-     * @deprecated in favour of {@link #getPermissions(String, String, Map, boolean, List, boolean)}
-     */
-    @Deprecated
-    Map<String, Boolean> getLocalPermissions(String server, String world, List<String> excludedGroups, List<String> possibleNodes);
-
-    /**
-     * Gets the permissions and inherited permissions that apply to a specific server and world
-     *
-     * @param server         The server to get nodes for
-     * @param world          The world to get nodes for
-     * @param excludedGroups Groups that shouldn't be inherited (to prevent circular inheritance issues)
-     * @return a {@link Map} of the permissions
-     * @deprecated in favour of {@link #getPermissions(String, String, Map, boolean, List, boolean)}
-     */
-    @Deprecated
-    Map<String, Boolean> getLocalPermissions(String server, String world, List<String> excludedGroups);
-
-    /**
-     * Gets the permissions and inherited permissions that apply to a specific server
-     *
-     * @param server         The server to get nodes for
-     * @param excludedGroups Groups that shouldn't be inherited (to prevent circular inheritance issues)
-     * @param possibleNodes  A list of possible permission nodes for wildcard permission handling
-     * @return a {@link Map} of the permissions
-     * @deprecated in favour of {@link #getPermissions(String, String, Map, boolean, List, boolean)}
-     */
-    @Deprecated
-    Map<String, Boolean> getLocalPermissions(String server, List<String> excludedGroups, List<String> possibleNodes);
-
-    /**
-     * Gets the permissions and inherited permissions that apply to a specific server
-     *
-     * @param server         The server to get nodes for
-     * @param excludedGroups Groups that shouldn't be inherited (to prevent circular inheritance issues)
-     * @return a {@link Map} of the permissions
-     * @deprecated in favour of {@link #getPermissions(String, String, Map, boolean, List, boolean)}
-     */
-    @Deprecated
-    Map<String, Boolean> getLocalPermissions(String server, List<String> excludedGroups);
-
-    /**
-     * Convert the holders nodes into a Map of permissions to be applied on the platform
-     *
-     * @param server        the server
-     * @param world         the world
-     * @param extraContext  any extra context to filter by
-     * @param includeGlobal whether to include global nodes
-     * @param possibleNodes a list of possible permissions for resolving wildcards
-     * @param applyGroups   if inherited group permissions should be included
-     * @return a map of permissions
-     * @since 2.6
-     * @deprecated in favour of {@link #getAllNodesFiltered(Contexts)}
-     */
-    @Deprecated
-    Map<String, Boolean> getPermissions(String server, String world, Map<String, String> extraContext, boolean includeGlobal, List<String> possibleNodes, boolean applyGroups);
-
-    /**
-     * Processes the nodes and returns the temporary ones.
-     *
-     * @return a map of temporary nodes
-     * @deprecated in favour of {@link #getTemporaryPermissionNodes()}
-     */
-    @Deprecated
-    Map<Map.Entry<String, Boolean>, Long> getTemporaryNodes();
-
-    /**
-     * Processes the nodes and returns the non-temporary ones.
-     *
-     * @return a map of permanent nodes
-     * @deprecated in favour of {@link #getPermanentPermissionNodes()}
-     */
-    @Deprecated
-    Map<String, Boolean> getPermanentNodes();
 
 }

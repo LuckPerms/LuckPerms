@@ -23,6 +23,7 @@
 package me.lucko.luckperms.bukkit.migration;
 
 import me.lucko.luckperms.api.MetaUtils;
+import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SubCommand;
@@ -99,7 +100,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             int groupWeight = maxWeight - group.getRank();
 
             final String name = group.getName().toLowerCase();
-            plugin.getStorage().createAndLoadGroup(name).join();
+            plugin.getStorage().createAndLoadGroup(name, CreationCause.INTERNAL).join();
             Group lpGroup = plugin.getGroupManager().getIfLoaded(name);
 
             try {

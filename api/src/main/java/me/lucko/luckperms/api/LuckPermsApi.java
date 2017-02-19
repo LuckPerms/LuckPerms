@@ -22,10 +22,9 @@
 
 package me.lucko.luckperms.api;
 
-import me.lucko.luckperms.api.context.ContextListener;
+import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.api.context.IContextCalculator;
-import me.lucko.luckperms.api.event.LPListener;
+import me.lucko.luckperms.api.event.EventBus;
 
 import java.util.Optional;
 import java.util.Set;
@@ -42,37 +41,31 @@ public interface LuckPermsApi {
     void runUpdateTask();
 
     /**
+     * Gets the API version
      * @return the version of the API running on the platform
      * @since 2.6
      */
     double getApiVersion();
 
     /**
+     * Gets the plugin version
      * @return the version of the plugin running on the platform
      */
     String getVersion();
 
     /**
+     * Gets the platform LuckPerms is running on
      * @return the platform LuckPerms is running on
      * @since 2.7
      */
     PlatformType getPlatformType();
 
     /**
-     * Registers a listener to be sent LuckPerms events
-     *
-     * @param listener the listener instance
-     * @throws NullPointerException if the listener is null
+     * Gets the event bus, used for subscribing to events
+     * @return the event bus
+     * @since 3.0
      */
-    void registerListener(LPListener listener);
-
-    /**
-     * Unregisters a previously registered listener from the EventBus
-     *
-     * @param listener the listener instance to unregister
-     * @throws NullPointerException if the listener is null
-     */
-    void unregisterListener(LPListener listener);
+    EventBus getEventBus();
 
     /**
      * Gets a wrapped {@link LPConfiguration} instance, with read only access
@@ -88,16 +81,6 @@ public interface LuckPermsApi {
      * @since 2.14
      */
     Storage getStorage();
-
-    /**
-     * Gets a wrapped Datastore instance.
-     *
-     * @return a datastore instance
-     * @deprecated in favour of {@link #getStorage()}
-     */
-    @SuppressWarnings("deprecation")
-    @Deprecated
-    Datastore getDatastore();
 
     /**
      * Gets the messaging service in use on the platform, if present.
@@ -274,15 +257,7 @@ public interface LuckPermsApi {
      * @param contextCalculator the context calculator to register. The type MUST be the player class of the platform.
      * @throws ClassCastException if the type is not the player class of the platform.
      */
-    void registerContextCalculator(IContextCalculator<?> contextCalculator);
-
-    /**
-     * Registers a custom context listener to the server,
-     *
-     * @param contextListener the context listener to register. The type MUST be the player class of the platform.
-     * @throws ClassCastException if the type is not the player class of the platform.
-     */
-    void registerContextListener(ContextListener<?> contextListener);
+    void registerContextCalculator(ContextCalculator<?> contextCalculator);
 
     /**
      * Gets a calculated context instance for the user using the rules of the platform.
@@ -295,7 +270,7 @@ public interface LuckPermsApi {
     Optional<Contexts> getContextForUser(User user);
 
     /**
-     * Gets set of contexts applicable to a player using the platforms {@link IContextCalculator}s.
+     * Gets set of contexts applicable to a player using the platforms {@link ContextCalculator}s.
      *
      * @param player the player to calculate for. Must be the player instance for the platform.
      * @return a set of contexts.

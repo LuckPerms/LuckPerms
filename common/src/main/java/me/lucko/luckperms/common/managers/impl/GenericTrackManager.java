@@ -22,15 +22,20 @@
 
 package me.lucko.luckperms.common.managers.impl;
 
+import lombok.AllArgsConstructor;
+
 import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.managers.AbstractManager;
 import me.lucko.luckperms.common.managers.TrackManager;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
+@AllArgsConstructor
 public class GenericTrackManager extends AbstractManager<String, Track> implements TrackManager {
+    private final LuckPermsPlugin plugin;
 
     @Override
     public Track apply(String name) {
-        return new Track(name);
+        return new Track(name, plugin);
     }
 
 }

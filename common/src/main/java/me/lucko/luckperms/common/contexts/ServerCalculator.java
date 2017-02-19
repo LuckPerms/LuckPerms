@@ -34,7 +34,7 @@ import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import java.util.Map;
 
 @AllArgsConstructor
-public class ServerCalculator<T> extends ContextCalculator<T> {
+public class ServerCalculator<T> implements ContextCalculator<T> {
     private final LuckPermsConfiguration config;
 
     @Override

@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.bukkit.migration;
 
+import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SubCommand;
@@ -90,7 +91,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
         log.log("Starting group migration.");
         AtomicInteger groupCount = new AtomicInteger(0);
         for (String g : service.getAllGroups()) {
-            plugin.getStorage().createAndLoadGroup(g.toLowerCase()).join();
+            plugin.getStorage().createAndLoadGroup(g.toLowerCase(), CreationCause.INTERNAL).join();
             Group group = plugin.getGroupManager().getIfLoaded(g.toLowerCase());
 
             PermissionEntity entity = internalService.getEntity(g, null, true);
@@ -105,7 +106,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
         log.log("Starting track migration.");
         AtomicInteger trackCount = new AtomicInteger(0);
         for (String t : service.getAllTracks()) {
-            plugin.getStorage().createAndLoadTrack(t.toLowerCase()).join();
+            plugin.getStorage().createAndLoadTrack(t.toLowerCase(), CreationCause.INTERNAL).join();
             Track track = plugin.getTrackManager().getIfLoaded(t.toLowerCase());
             track.setGroups(service.getTrackGroups(t));
             plugin.getStorage().saveTrack(track);

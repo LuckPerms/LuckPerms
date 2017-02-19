@@ -29,6 +29,8 @@ import lombok.ToString;
 
 import com.google.common.collect.ImmutableList;
 
+import me.lucko.luckperms.common.api.delegates.TrackDelegate;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Identifiable;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
@@ -49,12 +51,19 @@ public class Track implements Identifiable<String> {
      */
     @Getter
     private final String name;
+
+    private final LuckPermsPlugin plugin;
+
     @Getter
     private final Lock ioLock = new ReentrantLock();
+
     /**
      * The groups within this track
      */
     private List<String> groups = Collections.synchronizedList(new ArrayList<>());
+
+    @Getter
+    private final TrackDelegate delegate = new TrackDelegate(this);
 
     @Override
     public String getId() {
@@ -147,8 +156,13 @@ public class Track implements Identifiable<String> {
      * @throws ObjectAlreadyHasException if the group is already on this track somewhere
      */
     public void appendGroup(Group group) throws ObjectAlreadyHasException {
+        List<String> before = ImmutableList.copyOf(groups);
+
         assertNotContains(group);
         groups.add(group.getName());
+
+        List<String> after = ImmutableList.copyOf(groups);
+        plugin.getApiProvider().getEventFactory().handleTrackAddGroup(this, group.getName(), before, after);
     }
 
     /**
@@ -160,8 +174,13 @@ public class Track implements Identifiable<String> {
      * @throws IndexOutOfBoundsException if the position is less than 0 or greater than the size of the track
      */
     public void insertGroup(Group group, int position) throws ObjectAlreadyHasException, IndexOutOfBoundsException {
+        List<String> before = ImmutableList.copyOf(groups);
+
         assertNotContains(group);
         groups.add(position, group.getName());
+
+        List<String> after = ImmutableList.copyOf(groups);
+        plugin.getApiProvider().getEventFactory().handleTrackAddGroup(this, group.getName(), before, after);
     }
 
     /**
@@ -181,8 +200,12 @@ public class Track implements Identifiable<String> {
      * @throws ObjectLacksException if the group is not on this track
      */
     public void removeGroup(String group) throws ObjectLacksException {
+        List<String> before = ImmutableList.copyOf(groups);
         assertContains(group);
         groups.remove(group);
+
+        List<String> after = ImmutableList.copyOf(groups);
+        plugin.getApiProvider().getEventFactory().handleTrackRemoveGroup(this, group, before, after);
     }
 
     /**
@@ -209,7 +232,9 @@ public class Track implements Identifiable<String> {
      * Clear all of the groups within this track
      */
     public void clearGroups() {
+        List<String> before = ImmutableList.copyOf(groups);
         groups.clear();
+        plugin.getApiProvider().getEventFactory().handleTrackClear(this, before);
     }
 
     private void assertNotContains(Group g) throws ObjectAlreadyHasException {

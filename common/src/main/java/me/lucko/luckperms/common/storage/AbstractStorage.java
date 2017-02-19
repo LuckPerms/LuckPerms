@@ -23,11 +23,15 @@
 package me.lucko.luckperms.common.storage;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Delegate;
 
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.api.event.cause.CreationCause;
+import me.lucko.luckperms.api.event.cause.DeletionCause;
+import me.lucko.luckperms.common.api.delegates.StorageDelegate;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.core.model.User;
@@ -49,13 +53,24 @@ import java.util.function.Supplier;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class AbstractStorage implements Storage {
     public static Storage wrap(LuckPermsPlugin plugin, AbstractBacking backing) {
-        BufferedOutputStorage bufferedDs = BufferedOutputStorage.wrap(TolerantStorage.wrap(new AbstractStorage(backing)), 1000L);
+        BufferedOutputStorage bufferedDs = BufferedOutputStorage.wrap(TolerantStorage.wrap(new AbstractStorage(plugin, backing)), 1000L);
         plugin.getScheduler().doAsyncRepeating(bufferedDs, 10L);
         return bufferedDs;
     }
 
+    private final LuckPermsPlugin plugin;
+
     @Delegate(types = Delegated.class)
     private final AbstractBacking backing;
+
+    @Getter
+    private final StorageDelegate delegate;
+
+    private AbstractStorage(LuckPermsPlugin plugin, AbstractBacking backing) {
+        this.plugin = plugin;
+        this.backing = backing;
+        this.delegate = new StorageDelegate(plugin, this);
+    }
 
     private <T> CompletableFuture<T> makeFuture(Supplier<T> supplier) {
         return CompletableFuture.supplyAsync(supplier, backing.getPlugin().getScheduler().getAsyncExecutor());
@@ -78,7 +93,13 @@ public class AbstractStorage implements Storage {
 
     @Override
     public CompletableFuture<Boolean> loadUser(UUID uuid, String username) {
-        return makeFuture(() -> backing.loadUser(uuid, username));
+        return makeFuture(() -> {
+            if (backing.loadUser(uuid, username)) {
+                plugin.getApiProvider().getEventFactory().handleUserLoad(plugin.getUserManager().get(uuid));
+                return true;
+            }
+            return false;
+        });
     }
 
     @Override
@@ -102,18 +123,36 @@ public class AbstractStorage implements Storage {
     }
 
     @Override
-    public CompletableFuture<Boolean> createAndLoadGroup(String name) {
-        return makeFuture(() -> backing.createAndLoadGroup(name));
+    public CompletableFuture<Boolean> createAndLoadGroup(String name, CreationCause cause) {
+        return makeFuture(() -> {
+            if (backing.createAndLoadGroup(name)) {
+                plugin.getApiProvider().getEventFactory().handleGroupCreate(plugin.getGroupManager().getIfLoaded(name), cause);
+                return true;
+            }
+            return false;
+        });
     }
 
     @Override
     public CompletableFuture<Boolean> loadGroup(String name) {
-        return makeFuture(() -> backing.loadGroup(name));
+        return makeFuture(() -> {
+            if (backing.loadGroup(name)) {
+                plugin.getApiProvider().getEventFactory().handleGroupLoad(plugin.getGroupManager().getIfLoaded(name));
+                return true;
+            }
+            return false;
+        });
     }
 
     @Override
     public CompletableFuture<Boolean> loadAllGroups() {
-        return makeFuture(backing::loadAllGroups);
+        return makeFuture(() -> {
+            if (backing.loadAllGroups()) {
+                plugin.getApiProvider().getEventFactory().handleGroupLoadAll();
+                return true;
+            }
+            return false;
+        });
     }
 
     @Override
@@ -122,8 +161,14 @@ public class AbstractStorage implements Storage {
     }
 
     @Override
-    public CompletableFuture<Boolean> deleteGroup(Group group) {
-        return makeFuture(() -> backing.deleteGroup(group));
+    public CompletableFuture<Boolean> deleteGroup(Group group, DeletionCause cause) {
+        return makeFuture(() -> {
+            if (backing.deleteGroup(group)) {
+                plugin.getApiProvider().getEventFactory().handleGroupDelete(group, cause);
+                return true;
+            }
+            return false;
+        });
     }
 
     @Override
@@ -132,18 +177,36 @@ public class AbstractStorage implements Storage {
     }
 
     @Override
-    public CompletableFuture<Boolean> createAndLoadTrack(String name) {
-        return makeFuture(() -> backing.createAndLoadTrack(name));
+    public CompletableFuture<Boolean> createAndLoadTrack(String name, CreationCause cause) {
+        return makeFuture(() -> {
+            if (backing.createAndLoadTrack(name)) {
+                plugin.getApiProvider().getEventFactory().handleTrackCreate(plugin.getTrackManager().getIfLoaded(name), cause);
+                return true;
+            }
+            return false;
+        });
     }
 
     @Override
     public CompletableFuture<Boolean> loadTrack(String name) {
-        return makeFuture(() -> backing.loadTrack(name));
+        return makeFuture(() -> {
+            if (backing.loadTrack(name)) {
+                plugin.getApiProvider().getEventFactory().handleTrackLoad(plugin.getTrackManager().getIfLoaded(name));
+                return true;
+            }
+            return false;
+        });
     }
 
     @Override
     public CompletableFuture<Boolean> loadAllTracks() {
-        return makeFuture(backing::loadAllTracks);
+        return makeFuture(() -> {
+            if (backing.loadAllTracks()) {
+                plugin.getApiProvider().getEventFactory().handleTrackLoadAll();
+                return true;
+            }
+            return false;
+        });
     }
 
     @Override
@@ -152,8 +215,14 @@ public class AbstractStorage implements Storage {
     }
 
     @Override
-    public CompletableFuture<Boolean> deleteTrack(Track track) {
-        return makeFuture(() -> backing.deleteTrack(track));
+    public CompletableFuture<Boolean> deleteTrack(Track track, DeletionCause cause) {
+        return makeFuture(() -> {
+            if (backing.deleteTrack(track)) {
+                plugin.getApiProvider().getEventFactory().handleTrackDelete(track, cause);
+                return true;
+            }
+            return false;
+         });
     }
 
     @Override

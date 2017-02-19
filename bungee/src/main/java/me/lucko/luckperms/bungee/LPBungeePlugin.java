@@ -192,14 +192,13 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         uuidCache = new UuidCache(this);
         userManager = new GenericUserManager(this);
         groupManager = new GenericGroupManager(this);
-        trackManager = new GenericTrackManager();
+        trackManager = new GenericTrackManager(this);
         importer = new Importer(commandManager);
         calculatorFactory = new BungeeCalculatorFactory(this);
         cachedStateManager = new CachedStateManager(this);
 
         contextManager = new ContextManager<>();
         BackendServerCalculator serverCalculator = new BackendServerCalculator();
-        getProxy().getPluginManager().registerListener(this, serverCalculator);
         contextManager.registerCalculator(serverCalculator);
         contextManager.registerCalculator(new ServerCalculator<>(configuration));
 

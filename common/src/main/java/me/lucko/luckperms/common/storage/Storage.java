@@ -24,6 +24,9 @@ package me.lucko.luckperms.common.storage;
 
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.api.event.cause.CreationCause;
+import me.lucko.luckperms.api.event.cause.DeletionCause;
+import me.lucko.luckperms.common.api.delegates.StorageDelegate;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.core.model.User;
@@ -38,6 +41,8 @@ import java.util.concurrent.CompletableFuture;
  * Main interface for all Storage providers.
  */
 public interface Storage {
+
+    StorageDelegate getDelegate();
 
     String getName();
 
@@ -65,7 +70,7 @@ public interface Storage {
 
     CompletableFuture<List<HeldPermission<UUID>>> getUsersWithPermission(String permission);
 
-    CompletableFuture<Boolean> createAndLoadGroup(String name);
+    CompletableFuture<Boolean> createAndLoadGroup(String name, CreationCause cause);
 
     CompletableFuture<Boolean> loadGroup(String name);
 
@@ -73,11 +78,11 @@ public interface Storage {
 
     CompletableFuture<Boolean> saveGroup(Group group);
 
-    CompletableFuture<Boolean> deleteGroup(Group group);
+    CompletableFuture<Boolean> deleteGroup(Group group, DeletionCause cause);
 
     CompletableFuture<List<HeldPermission<String>>> getGroupsWithPermission(String permission);
 
-    CompletableFuture<Boolean> createAndLoadTrack(String name);
+    CompletableFuture<Boolean> createAndLoadTrack(String name, CreationCause cause);
 
     CompletableFuture<Boolean> loadTrack(String name);
 
@@ -85,7 +90,7 @@ public interface Storage {
 
     CompletableFuture<Boolean> saveTrack(Track track);
 
-    CompletableFuture<Boolean> deleteTrack(Track track);
+    CompletableFuture<Boolean> deleteTrack(Track track, DeletionCause cause);
 
     CompletableFuture<Boolean> saveUUIDData(String username, UUID uuid);
 

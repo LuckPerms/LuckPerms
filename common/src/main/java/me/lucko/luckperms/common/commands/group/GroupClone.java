@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.common.commands.group;
 
+import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -57,7 +58,7 @@ public class GroupClone extends SubCommand<Group> {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!plugin.getStorage().createAndLoadGroup(newGroupName).join()) {
+        if (!plugin.getStorage().createAndLoadGroup(newGroupName, CreationCause.COMMAND).join()) {
             Message.CREATE_GROUP_ERROR.send(sender);
             return CommandResult.FAILURE;
         }

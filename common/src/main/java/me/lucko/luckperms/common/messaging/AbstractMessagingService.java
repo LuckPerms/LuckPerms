@@ -64,6 +64,11 @@ public abstract class AbstractMessagingService implements InternalMessagingServi
         }
 
         plugin.getLog().info("[" + name + " Messaging] Received update ping with id: " + uuid.toString());
+
+        if (plugin.getApiProvider().getEventFactory().handleNetworkPreSync(false, uuid)) {
+            return;
+        }
+
         plugin.getUpdateTaskBuffer().request();
 
         if (callback != null) {

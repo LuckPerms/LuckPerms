@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.common.commands.group;
 
+import me.lucko.luckperms.api.event.cause.DeletionCause;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SingleCommand;
@@ -73,7 +74,7 @@ public class DeleteGroup extends SingleCommand {
             return CommandResult.LOADING_ERROR;
         }
 
-        if (!plugin.getStorage().deleteGroup(group).join()) {
+        if (!plugin.getStorage().deleteGroup(group, DeletionCause.COMMAND).join()) {
             Message.DELETE_GROUP_ERROR.send(sender);
             return CommandResult.FAILURE;
         }

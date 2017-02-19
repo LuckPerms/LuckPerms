@@ -23,7 +23,6 @@
 package me.lucko.luckperms.api;
 
 import me.lucko.luckperms.api.data.DatastoreConfiguration;
-import me.lucko.luckperms.api.data.MySQLConfiguration;
 
 import java.util.Map;
 
@@ -43,22 +42,6 @@ public interface LPConfiguration {
      * @return how often a sync task will run in minutes
      */
     int getSyncTime();
-
-    /**
-     * Returns the default group, in a node representation
-     * @return the default group, in a node representation
-     * @deprecated as of 2.6, the default group is always "default"
-     */
-    @Deprecated
-    String getDefaultGroupNode();
-
-    /**
-     * Returns the name of the default group
-     * @return the name of the default group
-     * @deprecated as of 2.6, the default group is always "default"
-     */
-    @Deprecated
-    String getDefaultGroupName();
 
     /**
      * Returns if the users on this server will have their global permissions applied
@@ -119,15 +102,6 @@ public interface LPConfiguration {
     boolean getLogNotify();
 
     /**
-     * Returns true if permission checks are being recorded / debugged
-     * @return true if permission checks are being recorded / debugged
-     * @since 2.9
-     * @deprecated as this value is now always false. Functionality was replaced by the verbose command.
-     */
-    @Deprecated
-    boolean getDebugPermissionChecks();
-
-    /**
      * Returns true if the vanilla op system is enabled
      * @return true if the vanilla op system is enabled
      * @since 2.8
@@ -161,15 +135,6 @@ public interface LPConfiguration {
      * @since 2.7
      */
     boolean getVaultIncludeGlobal();
-
-    /**
-     * Returns the database values set in the configuration
-     * @return the database values set in the configuration
-     * @deprecated use {@link #getDatastoreConfig()}
-     */
-    @SuppressWarnings("deprecation")
-    @Deprecated
-    MySQLConfiguration getDatabaseValues();
 
     /**
      * Returns the values set for data storage in the configuration

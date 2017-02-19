@@ -134,31 +134,6 @@ public interface Node extends Map.Entry<String, Boolean> {
     boolean shouldApplyWithContext(ContextSet context);
 
     /**
-     * If this node should apply in the given context
-     *
-     * @param context        the context key value pairs
-     * @param worldAndServer if world and server contexts should be checked
-     * @return true if the node should apply
-     * @deprecated in favour of {@link #shouldApplyWithContext(ContextSet, boolean)}
-     */
-    @Deprecated
-    default boolean shouldApplyWithContext(Map<String, String> context, boolean worldAndServer) {
-        return shouldApplyWithContext(ContextSet.fromMap(context), worldAndServer);
-    }
-
-    /**
-     * If this node should apply in the given context
-     *
-     * @param context the context key value pairs
-     * @return true if the node should apply
-     * @deprecated in favour of {@link #shouldApplyWithContext(ContextSet)}
-     */
-    @Deprecated
-    default boolean shouldApplyWithContext(Map<String, String> context) {
-        return shouldApplyWithContext(ContextSet.fromMap(context));
-    }
-
-    /**
      * Similar to {@link #shouldApplyOnServer(String, boolean, boolean)}, except this method accepts a List
      *
      * @param servers       the list of servers
@@ -226,15 +201,6 @@ public interface Node extends Map.Entry<String, Boolean> {
      * @return true if this node has expired
      */
     boolean hasExpired();
-
-    /**
-     * @return the extra contexts required for this node to apply
-     * @deprecated in favour of {@link #getContexts()}
-     */
-    @Deprecated
-    default Map<String, String> getExtraContexts() {
-        return getContexts().toMap();
-    }
 
     /**
      * @return the extra contexts required for this node to apply

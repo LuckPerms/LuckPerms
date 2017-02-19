@@ -24,8 +24,7 @@ package me.lucko.luckperms.common.tasks;
 
 import lombok.AllArgsConstructor;
 
-import me.lucko.luckperms.api.event.events.PostSyncEvent;
-import me.lucko.luckperms.api.event.events.PreSyncEvent;
+import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
@@ -38,15 +37,15 @@ public class UpdateTask implements Runnable {
      */
     @Override
     public void run() {
-        PreSyncEvent event = new PreSyncEvent();
-        plugin.getApiProvider().fireEvent(event);
-        if (event.isCancelled()) return;
+        if (plugin.getApiProvider().getEventFactory().handlePreSync(false)) {
+            return;
+        }
 
         // Reload all groups
         plugin.getStorage().loadAllGroups().join();
         String defaultGroup = plugin.getConfiguration().get(ConfigKeys.DEFAULT_GROUP_NAME);
         if (!plugin.getGroupManager().isLoaded(defaultGroup)) {
-            plugin.getStorage().createAndLoadGroup(defaultGroup).join();
+            plugin.getStorage().createAndLoadGroup(defaultGroup, CreationCause.INTERNAL).join();
         }
 
         // Reload all tracks
@@ -57,6 +56,6 @@ public class UpdateTask implements Runnable {
 
         plugin.onPostUpdate();
 
-        plugin.getApiProvider().fireEvent(new PostSyncEvent());
+        plugin.getApiProvider().getEventFactory().handlePostSync();
     }
 }

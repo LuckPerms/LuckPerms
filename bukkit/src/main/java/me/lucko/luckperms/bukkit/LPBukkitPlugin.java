@@ -246,14 +246,13 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         uuidCache = new UuidCache(this);
         userManager = new GenericUserManager(this);
         groupManager = new GenericGroupManager(this);
-        trackManager = new GenericTrackManager();
+        trackManager = new GenericTrackManager(this);
         importer = new Importer(commandManager);
         calculatorFactory = new BukkitCalculatorFactory(this);
         cachedStateManager = new CachedStateManager(this);
 
         contextManager = new ContextManager<>();
         worldCalculator = new WorldCalculator(this);
-        pm.registerEvents(worldCalculator, this);
         contextManager.registerCalculator(worldCalculator);
         contextManager.registerCalculator(new ServerCalculator<>(getConfiguration()));
 

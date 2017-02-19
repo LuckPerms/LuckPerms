@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.common.commands.track;
 
+import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SingleCommand;
@@ -62,7 +63,7 @@ public class CreateTrack extends SingleCommand {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!plugin.getStorage().createAndLoadTrack(trackName).join()) {
+        if (!plugin.getStorage().createAndLoadTrack(trackName, CreationCause.COMMAND).join()) {
             Message.CREATE_TRACK_ERROR.send(sender);
             return CommandResult.FAILURE;
         }

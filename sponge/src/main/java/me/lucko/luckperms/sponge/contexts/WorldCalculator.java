@@ -38,7 +38,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RequiredArgsConstructor
-public class WorldCalculator extends ContextCalculator<Subject> {
+public class WorldCalculator implements ContextCalculator<Subject> {
     private final LPSpongePlugin plugin;
 
     @Override
@@ -65,11 +65,7 @@ public class WorldCalculator extends ContextCalculator<Subject> {
         }
 
         Optional<Player> p = plugin.getGame().getServer().getPlayer(plugin.getUuidCache().getExternalUUID(uuid));
-        if (!p.isPresent()) {
-            return false;
-        }
-
-        return context.getKey().equals(Context.WORLD_KEY) && p.get().getWorld().getName().equals(context.getValue());
+        return p.map(player -> context.getKey().equals(Context.WORLD_KEY) && player.getWorld().getName().equals(context.getValue())).orElse(false);
     }
 
 }

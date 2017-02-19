@@ -22,6 +22,8 @@
 
 package me.lucko.luckperms.common.commands.group;
 
+import me.lucko.luckperms.api.event.cause.CreationCause;
+import me.lucko.luckperms.api.event.cause.DeletionCause;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -57,7 +59,7 @@ public class GroupRename extends SubCommand<Group> {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!plugin.getStorage().createAndLoadGroup(newGroupName).join()) {
+        if (!plugin.getStorage().createAndLoadGroup(newGroupName, CreationCause.COMMAND).join()) {
             Message.CREATE_GROUP_ERROR.send(sender);
             return CommandResult.FAILURE;
         }
@@ -68,7 +70,7 @@ public class GroupRename extends SubCommand<Group> {
             return CommandResult.LOADING_ERROR;
         }
 
-        if (!plugin.getStorage().deleteGroup(group).join()) {
+        if (!plugin.getStorage().deleteGroup(group, DeletionCause.COMMAND).join()) {
             Message.DELETE_GROUP_ERROR.send(sender);
             return CommandResult.FAILURE;
         }

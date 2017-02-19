@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.sponge.migration;
 
+import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SubCommand;
@@ -126,7 +127,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             }
 
             // Make a LuckPerms group for the one being migrated
-            plugin.getStorage().createAndLoadGroup(pexName).join();
+            plugin.getStorage().createAndLoadGroup(pexName, CreationCause.INTERNAL).join();
             Group group = plugin.getGroupManager().getIfLoaded(pexName);
             migrateSubject(pexGroup, group, weight);
             plugin.getStorage().saveGroup(group);
@@ -148,7 +149,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         // Migrate tracks
         log.log("Starting track migration.");
         for (Map.Entry<String, TreeMap<Integer, String>> e : tracks.entrySet()) {
-            plugin.getStorage().createAndLoadTrack(e.getKey()).join();
+            plugin.getStorage().createAndLoadTrack(e.getKey(), CreationCause.INTERNAL).join();
             Track track = plugin.getTrackManager().getIfLoaded(e.getKey());
             for (String groupName : e.getValue().values()) {
                 Group group = plugin.getGroupManager().getIfLoaded(groupName);

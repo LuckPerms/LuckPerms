@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.sponge.migration;
 
+import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SubCommand;
@@ -110,7 +111,7 @@ public class MigrationPermissionManager extends SubCommand<Object> {
             String pmName = MigrationUtils.convertName(pmGroup.getIdentifier());
 
             // Make a LuckPerms group for the one being migrated
-            plugin.getStorage().createAndLoadGroup(pmName).join();
+            plugin.getStorage().createAndLoadGroup(pmName, CreationCause.INTERNAL).join();
             Group group = plugin.getGroupManager().getIfLoaded(pmName);
             migrateSubject(pmGroup, group, 100);
             plugin.getStorage().saveGroup(group);

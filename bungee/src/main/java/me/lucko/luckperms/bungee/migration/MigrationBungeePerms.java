@@ -23,6 +23,7 @@
 package me.lucko.luckperms.bungee.migration;
 
 import me.lucko.luckperms.api.MetaUtils;
+import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SubCommand;
@@ -68,7 +69,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
         for (Group g : bp.getPermissionsManager().getBackEnd().loadGroups()) {
 
             // Make a LuckPerms group for the one being migrated
-            plugin.getStorage().createAndLoadGroup(g.getName().toLowerCase()).join();
+            plugin.getStorage().createAndLoadGroup(g.getName().toLowerCase(), CreationCause.INTERNAL).join();
             me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().getIfLoaded(g.getName().toLowerCase());
 
             // Migrate global perms

@@ -247,7 +247,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         uuidCache = new UuidCache(this);
         userManager = new SpongeUserManager(this);
         groupManager = new SpongeGroupManager(this);
-        trackManager = new GenericTrackManager();
+        trackManager = new GenericTrackManager(this);
         importer = new Importer(commandManager);
         calculatorFactory = new SpongeCalculatorFactory(this);
         cachedStateManager = new CachedStateManager(this);

@@ -26,9 +26,8 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
-import me.lucko.luckperms.api.context.ContextListener;
+import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.api.context.IContextCalculator;
 import me.lucko.luckperms.api.context.MutableContextSet;
 
 import java.util.List;
@@ -37,8 +36,7 @@ import java.util.concurrent.TimeUnit;
 
 public class ContextManager<T> {
 
-    private final List<IContextCalculator<T>> calculators = new CopyOnWriteArrayList<>();
-    private final List<ContextListener<T>> listeners = new CopyOnWriteArrayList<>();
+    private final List<ContextCalculator<T>> calculators = new CopyOnWriteArrayList<>();
 
     private final LoadingCache<T, ContextSet> cache = CacheBuilder.newBuilder()
             .weakKeys()
@@ -51,7 +49,7 @@ public class ContextManager<T> {
             });
 
     private MutableContextSet calculateApplicableContext(T subject, MutableContextSet accumulator) {
-        for (IContextCalculator<T> calculator : calculators) {
+        for (ContextCalculator<T> calculator : calculators) {
             calculator.giveApplicableContext(subject, accumulator);
         }
         return accumulator;
@@ -61,17 +59,8 @@ public class ContextManager<T> {
         return cache.getUnchecked(subject);
     }
 
-    public void registerCalculator(IContextCalculator<T> calculator) {
-        listeners.forEach(calculator::addListener);
+    public void registerCalculator(ContextCalculator<T> calculator) {
         calculators.add(calculator);
-    }
-
-    public void registerListener(ContextListener<T> listener) {
-        for (IContextCalculator<T> calculator : calculators) {
-            calculator.addListener(listener);
-        }
-
-        listeners.add(listener);
     }
 
     public int getCalculatorsSize() {

@@ -30,6 +30,7 @@ import de.bananaco.bpermissions.api.World;
 import de.bananaco.bpermissions.api.WorldManager;
 
 import me.lucko.luckperms.api.MetaUtils;
+import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SubCommand;
@@ -114,7 +115,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
                 }
 
                 // Make a LuckPerms group for the one being migrated.
-                plugin.getStorage().createAndLoadGroup(groupName).join();
+                plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
                 me.lucko.luckperms.common.core.model.Group lpGroup = plugin.getGroupManager().getIfLoaded(groupName);
 
                 migrateHolder(log, world, group, lpGroup);

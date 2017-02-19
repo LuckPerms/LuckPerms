@@ -22,10 +22,13 @@
 
 package me.lucko.luckperms.common.config;
 
+import lombok.Getter;
+
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
+import me.lucko.luckperms.common.api.delegates.LPConfigurationDelegate;
 import me.lucko.luckperms.common.config.keys.EnduringKey;
 
 import java.util.Optional;
@@ -41,6 +44,9 @@ public abstract class AbstractConfiguration implements LuckPermsConfiguration {
                     return Optional.ofNullable(key.get(AbstractConfiguration.this));
                 }
             });
+
+    @Getter
+    private final LPConfigurationDelegate delegate = new LPConfigurationDelegate(this);
 
     @Override
     public <T> T get(ConfigKey<T> key) {
@@ -60,5 +66,7 @@ public abstract class AbstractConfiguration implements LuckPermsConfiguration {
         cache.invalidateAll(toInvalidate);
 
         loadAll();
+
+        getPlugin().getApiProvider().getEventFactory().handleConfigReload();
     }
 }

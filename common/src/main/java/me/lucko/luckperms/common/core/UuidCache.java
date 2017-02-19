@@ -22,12 +22,14 @@
 
 package me.lucko.luckperms.common.core;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
 
+import me.lucko.luckperms.common.api.delegates.UuidCacheDelegate;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
@@ -42,6 +44,9 @@ public class UuidCache {
 
     // External UUID --> Internal UUID
     private final BiMap<UUID, UUID> cache = Maps.synchronizedBiMap(HashBiMap.create());
+
+    @Getter
+    private final UuidCacheDelegate delegate = new UuidCacheDelegate(this);
 
     public UUID getUUID(UUID external) {
         return plugin.getConfiguration().get(ConfigKeys.ONLINE_MODE) ? external : cache.getOrDefault(external, external);

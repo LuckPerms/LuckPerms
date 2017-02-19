@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.common.commands.track;
 
+import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -57,7 +58,7 @@ public class TrackClone extends SubCommand<Track> {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!plugin.getStorage().createAndLoadTrack(newTrackName).join()) {
+        if (!plugin.getStorage().createAndLoadTrack(newTrackName, CreationCause.INTERNAL).join()) {
             Message.CREATE_TRACK_ERROR.send(sender);
             return CommandResult.FAILURE;
         }

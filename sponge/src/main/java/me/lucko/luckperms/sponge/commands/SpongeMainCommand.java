@@ -100,7 +100,7 @@ public class SpongeMainCommand extends BaseCommand<Void, SubjectData> {
 
         if (args.size() < 1) {
             Util.sendPluginMessage(sender, "&aCurrent Subject Collections:\n" +
-                    Util.listToCommaSep(service.getKnownSubjects().keySet().stream()
+                    Util.listToCommaSep(service.getCollections().keySet().stream()
                             .filter(s -> !s.equalsIgnoreCase("user") && !s.equalsIgnoreCase("group"))
                             .collect(Collectors.toList())
                     )
@@ -115,7 +115,7 @@ public class SpongeMainCommand extends BaseCommand<Void, SubjectData> {
             return CommandResult.STATE_ERROR;
         }
 
-        if (service.getKnownSubjects().keySet().stream().map(String::toLowerCase).noneMatch(s -> s.equalsIgnoreCase(subjectCollection))) {
+        if (service.getCollections().keySet().stream().map(String::toLowerCase).noneMatch(s -> s.equalsIgnoreCase(subjectCollection))) {
             Util.sendPluginMessage(sender, "Warning: SubjectCollection '&4" + subjectCollection + "&c' doesn't already exist. Creating it now.");
         }
 

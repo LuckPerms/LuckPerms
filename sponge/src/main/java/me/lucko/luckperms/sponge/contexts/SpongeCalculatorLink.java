@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.Set;
 
 @AllArgsConstructor
-public class SpongeCalculatorLink extends ContextCalculator<Subject> {
+public class SpongeCalculatorLink implements ContextCalculator<Subject> {
     private final org.spongepowered.api.service.context.ContextCalculator<Subject> calculator;
 
     @Override

@@ -26,6 +26,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
+import me.lucko.luckperms.common.api.delegates.GroupDelegate;
 import me.lucko.luckperms.common.caching.handlers.GroupReference;
 import me.lucko.luckperms.common.caching.handlers.HolderReference;
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -41,6 +42,9 @@ public class Group extends PermissionHolder implements Identifiable<String> {
      */
     @Getter
     private final String name;
+
+    @Getter
+    private final GroupDelegate delegate = new GroupDelegate(this);
 
     public Group(String name, LuckPermsPlugin plugin) {
         super(name, plugin);

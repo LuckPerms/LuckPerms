@@ -39,13 +39,7 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.api.event.events.GroupAddEvent;
-import me.lucko.luckperms.api.event.events.GroupRemoveEvent;
-import me.lucko.luckperms.api.event.events.PermissionNodeExpireEvent;
-import me.lucko.luckperms.api.event.events.PermissionNodeSetEvent;
-import me.lucko.luckperms.api.event.events.PermissionNodeUnsetEvent;
-import me.lucko.luckperms.common.api.delegate.GroupDelegate;
-import me.lucko.luckperms.common.api.delegate.PermissionHolderDelegate;
+import me.lucko.luckperms.common.api.delegates.PermissionHolderDelegate;
 import me.lucko.luckperms.common.caching.MetaHolder;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
 import me.lucko.luckperms.common.caching.handlers.GroupReference;
@@ -384,6 +378,7 @@ public abstract class PermissionHolder {
 
     public abstract String getFriendlyName();
     public abstract HolderReference<?> toReference();
+    public abstract PermissionHolderDelegate getDelegate();
 
     public Set<Node> getNodes() {
         return enduringCache.get();
@@ -549,6 +544,8 @@ public abstract class PermissionHolder {
         boolean work = false;
         Set<Node> removed = new HashSet<>();
 
+        ImmutableSet<Node> before = ImmutableSet.copyOf(getPermissions(true));
+
         synchronized (nodes) {
             Iterator<Node> it = nodes.iterator();
             while (it.hasNext()) {
@@ -586,9 +583,10 @@ public abstract class PermissionHolder {
             return false;
         }
 
-        PermissionHolderDelegate link = new PermissionHolderDelegate(this);
+        ImmutableSet<Node> after = ImmutableSet.copyOf(getPermissions(true));
+
         for (Node r : removed) {
-            plugin.getApiProvider().fireEventAsync(new PermissionNodeExpireEvent(link, r));
+            plugin.getApiProvider().getEventFactory().handleNodeRemove(r, this, before, after);
         }
 
         return true;
@@ -704,12 +702,16 @@ public abstract class PermissionHolder {
             throw new ObjectAlreadyHasException();
         }
 
+        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes());
+
         synchronized (nodes) {
             nodes.add(node);
         }
         invalidateCache(true);
 
-        plugin.getApiProvider().fireEventAsync(new PermissionNodeSetEvent(new PermissionHolderDelegate(this), node));
+        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes());
+
+        plugin.getApiProvider().getEventFactory().handleNodeAdd(node, this, before, after);
     }
 
     /**
@@ -733,6 +735,8 @@ public abstract class PermissionHolder {
                     // Create a new node with the same properties, but add the expiry dates together
                     Node newNode = NodeFactory.builderFromExisting(node).setExpiry(previous.getExpiryUnixTime() + node.getSecondsTilExpiry()).build();
 
+                    ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes());
+
                     // Remove the old node & add the new one.
                     synchronized (nodes) {
                         nodes.remove(previous);
@@ -740,8 +744,8 @@ public abstract class PermissionHolder {
                     }
 
                     invalidateCache(true);
-                    plugin.getApiProvider().fireEventAsync(new PermissionNodeUnsetEvent(new PermissionHolderDelegate(this), previous));
-                    plugin.getApiProvider().fireEventAsync(new PermissionNodeSetEvent(new PermissionHolderDelegate(this), newNode));
+                    ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes());
+                    plugin.getApiProvider().getEventFactory().handleNodeAdd(newNode, this, before, after);
                     return newNode;
                 }
 
@@ -756,14 +760,16 @@ public abstract class PermissionHolder {
                     // Only replace if the new expiry time is greater than the old one.
                     if (node.getExpiryUnixTime() > previous.getExpiryUnixTime()) {
 
+                        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes());
+
                         synchronized (nodes) {
                             nodes.remove(previous);
                             nodes.add(node);
                         }
 
                         invalidateCache(true);
-                        plugin.getApiProvider().fireEventAsync(new PermissionNodeUnsetEvent(new PermissionHolderDelegate(this), previous));
-                        plugin.getApiProvider().fireEventAsync(new PermissionNodeSetEvent(new PermissionHolderDelegate(this), node));
+                        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes());
+                        plugin.getApiProvider().getEventFactory().handleNodeAdd(node, this, before, after);
                         return node;
                     }
                 }
@@ -788,12 +794,16 @@ public abstract class PermissionHolder {
             throw new ObjectAlreadyHasException();
         }
 
+        ImmutableSet<Node> before = ImmutableSet.copyOf(getTransientNodes());
+
         synchronized (transientNodes) {
             transientNodes.add(node);
         }
         invalidateCache(false);
 
-        plugin.getApiProvider().fireEventAsync(new PermissionNodeSetEvent(new PermissionHolderDelegate(this), node));
+        ImmutableSet<Node> after = ImmutableSet.copyOf(getTransientNodes());
+
+        plugin.getApiProvider().getEventFactory().handleNodeAdd(node, this, before, after);
     }
 
     public void setPermission(String node, boolean value) throws ObjectAlreadyHasException {
@@ -831,17 +841,15 @@ public abstract class PermissionHolder {
             throw new ObjectLacksException();
         }
 
+        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes());
+
         synchronized (nodes) {
             nodes.removeIf(e -> e.almostEquals(node));
         }
         invalidateCache(true);
 
-        if (node.isGroupNode()) {
-            plugin.getApiProvider().fireEventAsync(new GroupRemoveEvent(new PermissionHolderDelegate(this),
-                    node.getGroupName(), node.getServer().orElse(null), node.getWorld().orElse(null), node.isTemporary()));
-        } else {
-            plugin.getApiProvider().fireEventAsync(new PermissionNodeUnsetEvent(new PermissionHolderDelegate(this), node));
-        }
+        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes());
+        plugin.getApiProvider().getEventFactory().handleNodeRemove(node, this, before, after);
     }
 
     /**
@@ -855,17 +863,15 @@ public abstract class PermissionHolder {
             throw new ObjectLacksException();
         }
 
+        ImmutableSet<Node> before = ImmutableSet.copyOf(getTransientNodes());
+
         synchronized (transientNodes) {
             transientNodes.removeIf(e -> e.almostEquals(node));
         }
         invalidateCache(false);
 
-        if (node.isGroupNode()) {
-            plugin.getApiProvider().fireEventAsync(new GroupRemoveEvent(new PermissionHolderDelegate(this),
-                    node.getGroupName(), node.getServer().orElse(null), node.getWorld().orElse(null), node.isTemporary()));
-        } else {
-            plugin.getApiProvider().fireEventAsync(new PermissionNodeUnsetEvent(new PermissionHolderDelegate(this), node));
-        }
+        ImmutableSet<Node> after = ImmutableSet.copyOf(getTransientNodes());
+        plugin.getApiProvider().getEventFactory().handleNodeRemove(node, this, before, after);
     }
 
     public void unsetPermission(String node, boolean temporary) throws ObjectLacksException {
@@ -910,7 +916,6 @@ public abstract class PermissionHolder {
         }
 
         setPermission("group." + group.getName(), true);
-        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderDelegate(this), new GroupDelegate(group), null, null, 0L));
     }
 
     public void setInheritGroup(Group group, String server) throws ObjectAlreadyHasException {
@@ -919,7 +924,6 @@ public abstract class PermissionHolder {
         }
 
         setPermission("group." + group.getName(), true, server);
-        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderDelegate(this), new GroupDelegate(group), server, null, 0L));
     }
 
     public void setInheritGroup(Group group, String server, String world) throws ObjectAlreadyHasException {
@@ -928,7 +932,6 @@ public abstract class PermissionHolder {
         }
 
         setPermission("group." + group.getName(), true, server, world);
-        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderDelegate(this), new GroupDelegate(group), server, world, 0L));
     }
 
     public void setInheritGroup(Group group, long expireAt) throws ObjectAlreadyHasException {
@@ -937,7 +940,6 @@ public abstract class PermissionHolder {
         }
 
         setPermission("group." + group.getName(), true, expireAt);
-        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderDelegate(this), new GroupDelegate(group), null, null, expireAt));
     }
 
     public void setInheritGroup(Group group, String server, long expireAt) throws ObjectAlreadyHasException {
@@ -946,7 +948,6 @@ public abstract class PermissionHolder {
         }
 
         setPermission("group." + group.getName(), true, server, expireAt);
-        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderDelegate(this), new GroupDelegate(group), server, null, expireAt));
     }
 
     public void setInheritGroup(Group group, String server, String world, long expireAt) throws ObjectAlreadyHasException {
@@ -955,7 +956,6 @@ public abstract class PermissionHolder {
         }
 
         setPermission("group." + group.getName(), true, server, world, expireAt);
-        getPlugin().getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderDelegate(this), new GroupDelegate(group), server, world, expireAt));
     }
 
     public void unsetInheritGroup(Group group) throws ObjectLacksException {
@@ -986,27 +986,34 @@ public abstract class PermissionHolder {
      * Clear all of the holders permission nodes
      */
     public void clearNodes() {
+        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes());
         synchronized (nodes) {
             nodes.clear();
         }
         invalidateCache(true);
+        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes());
+        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
     }
 
     public void clearNodes(String server) {
         String finalServer = Optional.ofNullable(server).orElse("global");
 
+        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes());
         synchronized (nodes) {
             if (!nodes.removeIf(n -> n.getServer().orElse("global").equalsIgnoreCase(finalServer))) {
                 return;
             }
         }
         invalidateCache(true);
+        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes());
+        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
     }
 
     public void clearNodes(String server, String world) {
         String finalServer = Optional.ofNullable(server).orElse("global");
         String finalWorld = Optional.ofNullable(world).orElse("null");
 
+        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes());
         synchronized (nodes) {
             boolean b = nodes.removeIf(n ->
                     n.getServer().orElse("global").equalsIgnoreCase(finalServer) &&
@@ -1016,9 +1023,13 @@ public abstract class PermissionHolder {
             }
         }
         invalidateCache(true);
+        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes());
+        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
     }
 
     public void clearParents() {
+        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes());
+
         synchronized (nodes) {
             boolean b = nodes.removeIf(Node::isGroupNode);
             if (!b) {
@@ -1029,11 +1040,14 @@ public abstract class PermissionHolder {
             plugin.getUserManager().giveDefaultIfNeeded((User) this, false);
         }
         invalidateCache(true);
+        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes());
+        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
     }
 
     public void clearParents(String server) {
         String finalServer = Optional.ofNullable(server).orElse("global");
 
+        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes());
         synchronized (nodes) {
             boolean b = nodes.removeIf(n ->
                     n.isGroupNode() && n.getServer().orElse("global").equalsIgnoreCase(finalServer)
@@ -1046,12 +1060,15 @@ public abstract class PermissionHolder {
             plugin.getUserManager().giveDefaultIfNeeded((User) this, false);
         }
         invalidateCache(true);
+        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes());
+        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
     }
 
     public void clearParents(String server, String world) {
         String finalServer = Optional.ofNullable(server).orElse("global");
         String finalWorld = Optional.ofNullable(world).orElse("null");
 
+        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes());
         synchronized (nodes) {
             boolean b = nodes.removeIf(n ->
                     n.isGroupNode() &&
@@ -1066,20 +1083,27 @@ public abstract class PermissionHolder {
             plugin.getUserManager().giveDefaultIfNeeded((User) this, false);
         }
         invalidateCache(true);
+        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes());
+        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
     }
 
     public void clearMeta() {
+        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes());
+
         synchronized (nodes) {
             if (!nodes.removeIf(n -> n.isMeta() || n.isPrefix() || n.isSuffix())) {
                 return;
             }
         }
         invalidateCache(true);
+        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes());
+        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
     }
 
     public void clearMeta(String server) {
         String finalServer = Optional.ofNullable(server).orElse("global");
 
+        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes());
         synchronized (nodes) {
             boolean b = nodes.removeIf(n ->
                     (n.isMeta() || n.isPrefix() || n.isSuffix()) &&
@@ -1090,12 +1114,15 @@ public abstract class PermissionHolder {
             }
         }
         invalidateCache(true);
+        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes());
+        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
     }
 
     public void clearMeta(String server, String world) {
         String finalServer = Optional.ofNullable(server).orElse("global");
         String finalWorld = Optional.ofNullable(world).orElse("null");
 
+        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes());
         synchronized (nodes) {
             boolean b = nodes.removeIf(n ->
                     (n.isMeta() || n.isPrefix() || n.isSuffix()) && (
@@ -1108,12 +1135,15 @@ public abstract class PermissionHolder {
             }
         }
         invalidateCache(true);
+        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes());
+        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
     }
 
     public void clearMetaKeys(String key, String server, String world, boolean temp) {
         String finalServer = Optional.ofNullable(server).orElse("global");
         String finalWorld = Optional.ofNullable(world).orElse("null");
 
+        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes());
         synchronized (nodes) {
             boolean b = nodes.removeIf(n ->
                     n.isMeta() && (n.isTemporary() == temp) && n.getMeta().getKey().equalsIgnoreCase(key) &&
@@ -1125,13 +1155,19 @@ public abstract class PermissionHolder {
             }
         }
         invalidateCache(true);
+        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes());
+        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
     }
 
     public void clearTransientNodes() {
+        ImmutableSet<Node> before = ImmutableSet.copyOf(getTransientNodes());
+
         synchronized (transientNodes) {
             transientNodes.clear();
         }
         invalidateCache(false);
+        ImmutableSet<Node> after = ImmutableSet.copyOf(getTransientNodes());
+        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
     }
 
     /**

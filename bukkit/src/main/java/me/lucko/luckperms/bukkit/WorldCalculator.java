@@ -32,12 +32,11 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import org.bukkit.entity.Player;
-import org.bukkit.event.Listener;
 
 import java.util.Map;
 
 @RequiredArgsConstructor
-public class WorldCalculator extends ContextCalculator<Player> implements Listener {
+public class WorldCalculator implements ContextCalculator<Player> {
     private static final String WORLD_KEY = "world";
 
     private final LuckPermsPlugin plugin;

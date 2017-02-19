@@ -31,6 +31,7 @@ import com.github.cheesesoftware.PowerfulPermsAPI.ResultRunnable;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.zaxxer.hikari.HikariDataSource;
 
+import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.bukkit.migration.utils.LPResultRunnable;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
@@ -224,7 +225,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         AtomicInteger groupCount = new AtomicInteger(0);
         Map<Integer, Group> groups = pm.getGroups(); // All versions
         for (Group g : groups.values()) {
-            plugin.getStorage().createAndLoadGroup(g.getName().toLowerCase()).join();
+            plugin.getStorage().createAndLoadGroup(g.getName().toLowerCase(), CreationCause.INTERNAL).join();
             final me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().getIfLoaded(g.getName().toLowerCase());
 
             for (Permission p : g.getOwnPermissions()) { // All versions

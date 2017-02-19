@@ -24,8 +24,6 @@ package me.lucko.luckperms.api;
 
 import me.lucko.luckperms.api.context.ContextSet;
 
-import java.util.Map;
-
 /**
  * Context and options for a permission lookup.
  *
@@ -48,18 +46,6 @@ public class Contexts {
     }
 
     public static Contexts of(ContextSet context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups, boolean op) {
-        return new Contexts(context, includeGlobal, includeGlobalWorld, applyGroups, applyGlobalGroups, applyGlobalWorldGroups, op);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Deprecated
-    public static Contexts of(Map<String, String> context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups) {
-        return new Contexts(context, includeGlobal, includeGlobalWorld, applyGroups, applyGlobalGroups, applyGlobalWorldGroups);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Deprecated
-    public static Contexts of(Map<String, String> context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups, boolean op) {
         return new Contexts(context, includeGlobal, includeGlobalWorld, applyGroups, applyGlobalGroups, applyGlobalWorldGroups, op);
     }
 
@@ -115,17 +101,6 @@ public class Contexts {
         this.op = op;
     }
 
-    @Deprecated
-    public Contexts(Map<String, String> context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups, boolean op) {
-        this(context == null ? null : ContextSet.fromMap(context), includeGlobal, includeGlobalWorld, applyGroups, applyGlobalGroups, applyGlobalWorldGroups, op);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Deprecated
-    public Contexts(Map<String, String> context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups) {
-        this(context, includeGlobal, includeGlobalWorld, applyGroups, applyGlobalGroups, applyGlobalWorldGroups, false);
-    }
-
     /**
      * Gets the contexts that apply for this lookup
      *
@@ -134,17 +109,6 @@ public class Contexts {
      */
     public ContextSet getContexts() {
         return this.context;
-    }
-
-    /**
-     * Gets the contexts that apply for this lookup
-     *
-     * @return an immutable map of context key value pairs
-     * @deprecated in favour of {@link #getContexts()}
-     */
-    @Deprecated
-    public Map<String, String> getContext() {
-        return this.context.toMap();
     }
 
     /**

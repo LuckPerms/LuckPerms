@@ -34,6 +34,7 @@ import com.google.common.util.concurrent.UncheckedExecutionException;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
@@ -81,7 +82,7 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
                     }
 
                     // Request load
-                    plugin.getStorage().createAndLoadGroup(s).join();
+                    plugin.getStorage().createAndLoadGroup(s, CreationCause.INTERNAL).join();
 
                     SpongeGroup group = getIfLoaded(s);
                     if (group == null) {

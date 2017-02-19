@@ -29,9 +29,9 @@ import com.google.common.base.Preconditions;
 import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.User;
-import me.lucko.luckperms.common.api.delegate.GroupDelegate;
-import me.lucko.luckperms.common.api.delegate.TrackDelegate;
-import me.lucko.luckperms.common.api.delegate.UserDelegate;
+import me.lucko.luckperms.common.api.delegates.GroupDelegate;
+import me.lucko.luckperms.common.api.delegates.TrackDelegate;
+import me.lucko.luckperms.common.api.delegates.UserDelegate;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
 
 @UtilityClass

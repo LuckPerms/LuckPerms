@@ -22,55 +22,34 @@
 
 package me.lucko.luckperms.api.context;
 
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * A simple implementation of the listener aspects of {@link IContextCalculator}
+ * Calculates whether contexts are applicable to {@link T}
  *
- * @param <T> the subject type
+ * <p>Somewhat inspired by the system used on Sponge.
+ *
+ * @param <T> the subject type. Is ALWAYS the player class of the platform.
  */
-public abstract class ContextCalculator<T> implements IContextCalculator<T> {
-    private final List<ContextListener<T>> listeners = new CopyOnWriteArrayList<>();
+public interface ContextCalculator<T> {
 
     /**
-     * Pushes an update to all registered {@link ContextListener}s.
-     * Make sure any changes are applied internally before this method is called.
+     * Gives the subject all of the applicable contexts they meet
      *
-     * @param subject the subject that changed
-     * @param before  the context state before the change
-     * @param current the context state after the change (now)
-     * @throws NullPointerException if any parameters are null
+     * @param subject     the subject to add contexts to
+     * @param accumulator a map of contexts to add to
+     * @return the map
+     * @since 2.13
      */
-    protected void pushUpdate(T subject, Map.Entry<String, String> before, Map.Entry<String, String> current) {
-        if (subject == null) {
-            throw new NullPointerException("subject");
-        }
-        if (before == null) {
-            throw new NullPointerException("before");
-        }
-        if (current == null) {
-            throw new NullPointerException("current");
-        }
+    MutableContextSet giveApplicableContext(T subject, MutableContextSet accumulator);
 
-        for (ContextListener<T> listener : listeners) {
-            try {
-                listener.onContextChange(subject, before, current);
-            } catch (Exception e) {
-                System.out.println("Exception whilst passing context change to listener: " + listener);
-                e.printStackTrace();
-            }
-        }
-    }
-
-    @Override
-    public void addListener(ContextListener<T> listener) {
-        if (listener == null) {
-            throw new NullPointerException("listener");
-        }
-
-        listeners.add(listener);
-    }
+    /**
+     * Checks to see if a context is applicable to a subject
+     *
+     * @param subject the subject to check against
+     * @param context the context to check for
+     * @return true if met, or false if not. If this calculator does not calculate the given context, return false.
+     */
+    boolean isContextApplicable(T subject, Map.Entry<String, String> context);
 
 }

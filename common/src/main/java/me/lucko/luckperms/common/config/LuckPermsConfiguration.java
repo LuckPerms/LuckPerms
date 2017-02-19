@@ -22,12 +22,15 @@
 
 package me.lucko.luckperms.common.config;
 
+import me.lucko.luckperms.common.api.delegates.LPConfigurationDelegate;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.List;
 import java.util.Map;
 
 public interface LuckPermsConfiguration {
+
+    LPConfigurationDelegate getDelegate();
 
     LuckPermsPlugin getPlugin();
 

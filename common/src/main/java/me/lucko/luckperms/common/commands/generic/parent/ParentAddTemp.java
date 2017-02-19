@@ -22,9 +22,6 @@
 
 package me.lucko.luckperms.common.commands.generic.parent;
 
-import me.lucko.luckperms.api.event.events.GroupAddEvent;
-import me.lucko.luckperms.common.api.delegate.GroupDelegate;
-import me.lucko.luckperms.common.api.delegate.PermissionHolderDelegate;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -93,21 +90,18 @@ public class ParentAddTemp extends SharedSubCommand {
                     Message.SET_TEMP_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(),
                             DateUtil.formatDateDiff(duration)
                     );
-                    plugin.getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderDelegate(holder), new GroupDelegate(group), null, null, duration));
                     break;
                 case SERVER:
                     duration = holder.setPermission(new NodeBuilder("group." + group.getName()).setValue(true).setServer(server).setExpiry(duration).build(), modifier).getExpiryUnixTime();
                     Message.SET_TEMP_INHERIT_SERVER_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(),
                             server, DateUtil.formatDateDiff(duration)
                     );
-                    plugin.getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderDelegate(holder), new GroupDelegate(group), server, null, duration));
                     break;
                 case SERVER_AND_WORLD:
                     duration = holder.setPermission(new NodeBuilder("group." + group.getName()).setValue(true).setServer(server).setWorld(world).setExpiry(duration).build(), modifier).getExpiryUnixTime();
                     Message.SET_TEMP_INHERIT_SERVER_WORLD_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(),
                             server, world, DateUtil.formatDateDiff(duration)
                     );
-                    plugin.getApiProvider().fireEventAsync(new GroupAddEvent(new PermissionHolderDelegate(holder), new GroupDelegate(group), server, world, duration));
                     break;
             }
 

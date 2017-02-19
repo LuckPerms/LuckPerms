@@ -23,7 +23,6 @@
 package me.lucko.luckperms.bungee;
 
 import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.event.events.UserFirstLoginEvent;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.core.UuidCache;
@@ -104,14 +103,14 @@ public class BungeeListener extends AbstractListener implements Listener {
                     cache.addToCache(c.getUniqueId(), uuid);
                 } else {
                     // No previous data for this player
-                    plugin.getApiProvider().fireEventAsync(new UserFirstLoginEvent(c.getUniqueId(), c.getName()));
+                    plugin.getApiProvider().getEventFactory().handleUserFirstLogin(c.getUniqueId(), c.getName());
                     cache.addToCache(c.getUniqueId(), c.getUniqueId());
                     plugin.getStorage().force().saveUUIDData(c.getName(), c.getUniqueId()).join();
                 }
             } else {
                 String name = plugin.getStorage().getName(c.getUniqueId()).join();
                 if (name == null) {
-                    plugin.getApiProvider().fireEventAsync(new UserFirstLoginEvent(c.getUniqueId(), c.getName()));
+                    plugin.getApiProvider().getEventFactory().handleUserFirstLogin(c.getUniqueId(), c.getName());
                 }
 
                 // Online mode, no cache needed. This is just for name -> uuid lookup.

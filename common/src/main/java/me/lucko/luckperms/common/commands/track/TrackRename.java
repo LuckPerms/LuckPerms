@@ -22,6 +22,8 @@
 
 package me.lucko.luckperms.common.commands.track;
 
+import me.lucko.luckperms.api.event.cause.CreationCause;
+import me.lucko.luckperms.api.event.cause.DeletionCause;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -57,7 +59,7 @@ public class TrackRename extends SubCommand<Track> {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!plugin.getStorage().createAndLoadTrack(newTrackName).join()) {
+        if (!plugin.getStorage().createAndLoadTrack(newTrackName, CreationCause.COMMAND).join()) {
             Message.CREATE_TRACK_ERROR.send(sender);
             return CommandResult.FAILURE;
         }
@@ -68,7 +70,7 @@ public class TrackRename extends SubCommand<Track> {
             return CommandResult.LOADING_ERROR;
         }
 
-        if (!plugin.getStorage().deleteTrack(track).join()) {
+        if (!plugin.getStorage().deleteTrack(track, DeletionCause.COMMAND).join()) {
             Message.DELETE_TRACK_ERROR.send(sender);
             return CommandResult.FAILURE;
         }

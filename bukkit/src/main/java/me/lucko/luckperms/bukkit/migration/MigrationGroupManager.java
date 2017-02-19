@@ -24,6 +24,7 @@ package me.lucko.luckperms.bukkit.migration;
 
 import com.google.common.collect.Maps;
 
+import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -90,7 +91,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
 
         AtomicInteger globalGroupCount = new AtomicInteger(0);
         for (Group g : gg.getGroupList()) {
-            plugin.getStorage().createAndLoadGroup(g.getName().toLowerCase()).join();
+            plugin.getStorage().createAndLoadGroup(g.getName().toLowerCase(), CreationCause.INTERNAL).join();
             me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().getIfLoaded(g.getName().toLowerCase());
 
             for (String node : g.getPermissionList()) {
@@ -214,7 +215,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
         log.log("Starting group migration.");
         AtomicInteger groupCount = new AtomicInteger(0);
         for (Map.Entry<String, Map<Map.Entry<String, String>, Boolean>> e : groups.entrySet()) {
-            plugin.getStorage().createAndLoadGroup(e.getKey()).join();
+            plugin.getStorage().createAndLoadGroup(e.getKey(), CreationCause.INTERNAL).join();
             me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().getIfLoaded(e.getKey());
 
             for (Map.Entry<Map.Entry<String, String>, Boolean> n : e.getValue().entrySet()) {

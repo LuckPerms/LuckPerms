@@ -28,8 +28,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import me.lucko.luckperms.api.caching.UserData;
-import me.lucko.luckperms.api.event.events.UserPermissionRefreshEvent;
-import me.lucko.luckperms.common.api.delegate.UserDelegate;
+import me.lucko.luckperms.common.api.delegates.UserDelegate;
 import me.lucko.luckperms.common.caching.UserCache;
 import me.lucko.luckperms.common.caching.handlers.HolderReference;
 import me.lucko.luckperms.common.caching.handlers.UserReference;
@@ -79,6 +78,9 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
         }
     };
 
+    @Getter
+    private final UserDelegate delegate = new UserDelegate(this);
+
     public User(UUID uuid, LuckPermsPlugin plugin) {
         super(uuid.toString(), plugin);
         this.uuid = uuid;
@@ -117,6 +119,8 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
 
         userData = new UserCache(this, getPlugin().getCalculatorFactory());
         userData.preCalculate(getPlugin().getPreProcessContexts(op));
+
+        getPlugin().getApiProvider().getEventFactory().handleUserCacheLoad(this, userData);
         getPlugin().onUserRefresh(this);
     }
 
@@ -139,7 +143,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
 
         ud.recalculatePermissions();
         ud.recalculateMeta();
-        getPlugin().getApiProvider().fireEventAsync(new UserPermissionRefreshEvent(new UserDelegate(this)));
+        getPlugin().getApiProvider().getEventFactory().handleUserDataRecalculate(this, userData);
         getPlugin().onUserRefresh(this);
     }
 

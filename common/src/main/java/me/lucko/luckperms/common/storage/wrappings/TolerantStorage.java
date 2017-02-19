@@ -28,6 +28,9 @@ import lombok.experimental.Delegate;
 
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.api.event.cause.CreationCause;
+import me.lucko.luckperms.api.event.cause.DeletionCause;
+import me.lucko.luckperms.common.api.delegates.StorageDelegate;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.core.model.User;
@@ -144,10 +147,10 @@ public class TolerantStorage implements Storage {
     }
 
     @Override
-    public CompletableFuture<Boolean> createAndLoadGroup(String name) {
+    public CompletableFuture<Boolean> createAndLoadGroup(String name, CreationCause cause) {
         phaser.register();
         try {
-            return backing.createAndLoadGroup(name);
+            return backing.createAndLoadGroup(name, cause);
         } finally {
             phaser.arriveAndDeregister();
         }
@@ -184,10 +187,10 @@ public class TolerantStorage implements Storage {
     }
 
     @Override
-    public CompletableFuture<Boolean> deleteGroup(Group group) {
+    public CompletableFuture<Boolean> deleteGroup(Group group, DeletionCause cause) {
         phaser.register();
         try {
-            return backing.deleteGroup(group);
+            return backing.deleteGroup(group, cause);
         } finally {
             phaser.arriveAndDeregister();
         }
@@ -204,10 +207,10 @@ public class TolerantStorage implements Storage {
     }
 
     @Override
-    public CompletableFuture<Boolean> createAndLoadTrack(String name) {
+    public CompletableFuture<Boolean> createAndLoadTrack(String name, CreationCause cause) {
         phaser.register();
         try {
-            return backing.createAndLoadTrack(name);
+            return backing.createAndLoadTrack(name, cause);
         } finally {
             phaser.arriveAndDeregister();
         }
@@ -244,10 +247,10 @@ public class TolerantStorage implements Storage {
     }
 
     @Override
-    public CompletableFuture<Boolean> deleteTrack(Track track) {
+    public CompletableFuture<Boolean> deleteTrack(Track track, DeletionCause cause) {
         phaser.register();
         try {
-            return backing.deleteTrack(track);
+            return backing.deleteTrack(track, cause);
         } finally {
             phaser.arriveAndDeregister();
         }
@@ -284,6 +287,7 @@ public class TolerantStorage implements Storage {
     }
 
     private interface Delegated {
+        StorageDelegate getDelegate();
         String getName();
         boolean isAcceptingLogins();
         void setAcceptingLogins(boolean b);
