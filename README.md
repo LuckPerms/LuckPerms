@@ -11,7 +11,7 @@ LuckPerms also includes an extensive API for developers, and support for a varie
 
 ## Useful Links
 * **Development Builds** - <https://ci.lucko.me/job/LuckPerms>
-* **Javadocs** - <https://jd.lucko.me/LuckPerms>
+* **Javadocs** - <https://luckperms.lucko.me/javadocs/>
 * **Wiki** - <https://github.com/lucko/LuckPerms/wiki>
 
 ## Building
