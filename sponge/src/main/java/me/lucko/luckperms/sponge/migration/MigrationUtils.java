@@ -46,6 +46,7 @@ import java.util.Set;
 public class MigrationUtils {
 
     public static void migrateSubject(Subject subject, PermissionHolder holder, int priority) {
+
         // Migrate permissions
         Map<Set<Context>, Map<String, Boolean>> perms = subject.getSubjectData().getAllPermissions();
         for (Map.Entry<Set<Context>, Map<String, Boolean>> e : perms.entrySet()) {
@@ -93,7 +94,6 @@ public class MigrationUtils {
         } catch (Throwable ignored) {
             // Ignore. This is just so older versions of Sponge API can be used.
         }
-
 
         // Migrate parents
         Map<Set<Context>, List<Subject>> parents = subject.getSubjectData().getAllParents();

@@ -44,6 +44,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -129,25 +130,32 @@ public class ExportCommand extends SingleCommand {
             // Export tracks
             log.log("Starting track export.");
 
-            // Create the actual tracks first
-            write(writer, "# Create tracks");
-            for (Track track : plugin.getTrackManager().getAll().values()) {
-                write(writer, "/luckperms createtrack " + track.getName());
-            }
+            Collection<? extends Track> tracks = plugin.getTrackManager().getAll().values();
+            if (!tracks.isEmpty()) {
 
-            AtomicInteger trackCount = new AtomicInteger(0);
-            for (Track track : plugin.getTrackManager().getAll().values()) {
-                write(writer, "# Export track: " + track.getName());
-                for (String group : track.getGroups()) {
-                    write(writer, "/luckperms track " + track.getName() + " append " + group);
+                // Create the actual tracks first
+                write(writer, "# Create tracks");
+                for (Track track : tracks) {
+                    write(writer, "/luckperms createtrack " + track.getName());
                 }
-                write(writer, "");
-                log.logAllProgress("Exported {} tracks so far.", trackCount.incrementAndGet());
-            }
-            log.log("Exported " + trackCount.get() + " tracks.");
 
-            write(writer, "");
-            write(writer, "");
+                write(writer, "");
+
+                AtomicInteger trackCount = new AtomicInteger(0);
+                for (Track track : plugin.getTrackManager().getAll().values()) {
+                    write(writer, "# Export track: " + track.getName());
+                    for (String group : track.getGroups()) {
+                        write(writer, "/luckperms track " + track.getName() + " append " + group);
+                    }
+                    write(writer, "");
+                    log.logAllProgress("Exported {} tracks so far.", trackCount.incrementAndGet());
+                }
+
+                write(writer, "");
+                write(writer, "");
+            }
+
+            log.log("Exported " + tracks.size() + " tracks.");
 
             // Export users
             log.log("Starting user export. Finding a list of unique users to export.");

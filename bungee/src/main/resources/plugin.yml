@@ -3,4 +3,3 @@ version: ${release.version}.${patch.version}
 description: A permissions plugin
 author: Luck
 main: me.lucko.luckperms.bungee.LPBungeePlugin
-softdepends: [PowerfulPerms] # For migration

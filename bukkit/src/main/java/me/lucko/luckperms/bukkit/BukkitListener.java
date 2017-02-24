@@ -66,6 +66,7 @@ class BukkitListener extends AbstractListener implements Listener {
             deniedAsyncLogin.add(e.getUniqueId());
 
             // The datastore is disabled, prevent players from joining the server
+            plugin.getLog().warn("The plugin storage is not loaded. Denying connection from: " + e.getUniqueId() + " - " + e.getName());
             e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, Message.LOADING_ERROR.toString());
             return;
         }
@@ -81,9 +82,8 @@ class BukkitListener extends AbstractListener implements Listener {
             return;
         }
 
+        // Login event was cancelled by another plugin
         if (plugin.isStarted() && plugin.getStorage().isAcceptingLogins() && e.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
-
-            // Login event was cancelled by another plugin
             onLeave(e.getUniqueId());
         }
     }
@@ -102,6 +102,7 @@ class BukkitListener extends AbstractListener implements Listener {
             deniedLogin.add(e.getPlayer().getUniqueId());
 
             // User wasn't loaded for whatever reason.
+            plugin.getLog().warn("User " + player.getUniqueId() + " - " + player.getName() + " could not be loaded. - denying login.");
             e.disallow(PlayerLoginEvent.Result.KICK_OTHER, Message.LOADING_ERROR.toString());
             return;
         }

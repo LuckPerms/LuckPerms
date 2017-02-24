@@ -240,7 +240,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         getLog().info("Registering commands...");
         CommandManager cmdService = game.getCommandManager();
         SpongeCommand commandManager = new SpongeCommand(this);
-        cmdService.register(this, commandManager, "luckperms", "perms", "lp", "permissions", "p", "perm");
+        cmdService.register(this, commandManager, "luckperms", "perms", "lp", "permissions", "perm");
 
         // load internal managers
         getLog().info("Loading internal permission managers...");

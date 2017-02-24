@@ -81,6 +81,7 @@ public class Importer {
             this.notify = ImmutableSet.of(executor, commandManager.getPlugin().getConsoleSender());
         }
         this.commands = commands.stream()
+                .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .filter(s -> !s.startsWith("#"))
                 .filter(s -> !s.startsWith("//"))
