@@ -49,7 +49,6 @@ import static me.lucko.luckperms.common.api.ApiUtils.checkTime;
 /**
  * Provides a link between {@link PermissionHolder} and {@link me.lucko.luckperms.common.core.model.PermissionHolder}
  */
-@SuppressWarnings("unused")
 @AllArgsConstructor
 public class PermissionHolderDelegate implements PermissionHolder {
     private final me.lucko.luckperms.common.core.model.PermissionHolder master;

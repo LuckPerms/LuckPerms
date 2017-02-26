@@ -23,7 +23,6 @@
 package me.lucko.luckperms.common.api.delegates;
 
 import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 
@@ -40,19 +39,19 @@ import static me.lucko.luckperms.common.api.ApiUtils.checkTime;
 /**
  * Provides a link between {@link Group} and {@link me.lucko.luckperms.common.core.model.Group}
  */
-@EqualsAndHashCode(of = {"name"}, callSuper = false)
-public class GroupDelegate extends PermissionHolderDelegate implements Group {
+public final class GroupDelegate extends PermissionHolderDelegate implements Group {
 
     @Getter(AccessLevel.PACKAGE)
     private final me.lucko.luckperms.common.core.model.Group master;
 
-    @Getter
-    private final String name;
-
     public GroupDelegate(@NonNull me.lucko.luckperms.common.core.model.Group master) {
         super(master);
         this.master = master;
-        this.name = master.getName();
+    }
+
+    @Override
+    public String getName() {
+        return master.getName();
     }
 
     @Override
@@ -168,5 +167,17 @@ public class GroupDelegate extends PermissionHolderDelegate implements Group {
     @Override
     public List<String> getLocalGroups(@NonNull String server) {
         return master.getLocalGroups(server);
+    }
+
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof GroupDelegate)) return false;
+
+        GroupDelegate other = (GroupDelegate) o;
+        return this.getName() == null ? other.getName() == null : this.getName().equals(other.getName());
+    }
+
+    public int hashCode() {
+        return this.getName().hashCode();
     }
 }

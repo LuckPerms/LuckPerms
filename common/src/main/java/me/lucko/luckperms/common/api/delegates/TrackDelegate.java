@@ -23,7 +23,7 @@
 package me.lucko.luckperms.common.api.delegates;
 
 import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
 
@@ -39,18 +39,15 @@ import static me.lucko.luckperms.common.api.ApiUtils.checkGroup;
 /**
  * Provides a link between {@link Track} and {@link me.lucko.luckperms.common.core.model.Track}
  */
-@EqualsAndHashCode(of = {"name"})
-public class TrackDelegate implements Track {
+@AllArgsConstructor
+public final class TrackDelegate implements Track {
 
     @Getter(AccessLevel.PACKAGE)
     private final me.lucko.luckperms.common.core.model.Track master;
 
-    @Getter
-    private final String name;
-
-    public TrackDelegate(@NonNull me.lucko.luckperms.common.core.model.Track master) {
-        this.master = master;
-        this.name = master.getName();
+    @Override
+    public String getName() {
+        return master.getName();
     }
 
     @Override
@@ -112,5 +109,17 @@ public class TrackDelegate implements Track {
     @Override
     public void clearGroups() {
         master.clearGroups();
+    }
+
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof TrackDelegate)) return false;
+
+        TrackDelegate other = (TrackDelegate) o;
+        return this.getName() == null ? other.getName() == null : this.getName().equals(other.getName());
+    }
+
+    public int hashCode() {
+        return this.getName().hashCode();
     }
 }

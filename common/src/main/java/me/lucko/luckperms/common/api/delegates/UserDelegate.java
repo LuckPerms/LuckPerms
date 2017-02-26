@@ -22,7 +22,6 @@
 
 package me.lucko.luckperms.common.api.delegates;
 
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 
@@ -42,19 +41,19 @@ import static me.lucko.luckperms.common.api.ApiUtils.checkTime;
 /**
  * Provides a link between {@link User} and {@link me.lucko.luckperms.common.core.model.User}
  */
-@EqualsAndHashCode(of = {"uuid"}, callSuper = false)
-public class UserDelegate extends PermissionHolderDelegate implements User {
+public final class UserDelegate extends PermissionHolderDelegate implements User {
 
     @Getter
     private final me.lucko.luckperms.common.core.model.User master;
 
-    @Getter
-    private final UUID uuid;
-
     public UserDelegate(@NonNull me.lucko.luckperms.common.core.model.User master) {
         super(master);
         this.master = master;
-        this.uuid = master.getUuid();
+    }
+
+    @Override
+    public UUID getUuid() {
+        return master.getUuid();
     }
 
     @Override
@@ -205,4 +204,15 @@ public class UserDelegate extends PermissionHolderDelegate implements User {
         return master.getLocalGroups(server);
     }
 
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof UserDelegate)) return false;
+
+        UserDelegate other = (UserDelegate) o;
+        return this.getUuid() == null ? other.getUuid() == null : this.getUuid().equals(other.getUuid());
+    }
+
+    public int hashCode() {
+        return this.getUuid().hashCode();
+    }
 }
