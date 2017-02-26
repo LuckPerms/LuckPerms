@@ -54,7 +54,7 @@ public class BungeeListener extends AbstractListener implements Listener {
         this.plugin = plugin;
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerPermissionCheck(PermissionCheckEvent e) {
         if (!(e.getSender() instanceof ProxiedPlayer)) {
             e.setHasPermission(true);
@@ -158,7 +158,8 @@ public class BungeeListener extends AbstractListener implements Listener {
         }
     }
 
-    @EventHandler
+    // Wait until the last priority to unload, so plugins can still perform permission checks on this event
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerQuit(PlayerDisconnectEvent e) {
         onLeave(e.getPlayer().getUniqueId());
     }

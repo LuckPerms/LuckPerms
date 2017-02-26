@@ -143,7 +143,8 @@ class BukkitListener extends AbstractListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR) // Allow other plugins to see data when this event gets called.
+    // Wait until the last priority to unload, so plugins can still perform permission checks on this event
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerQuit(PlayerQuitEvent e) {
         final Player player = e.getPlayer();
 

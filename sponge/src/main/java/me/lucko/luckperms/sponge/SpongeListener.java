@@ -113,10 +113,13 @@ public class SpongeListener extends AbstractListener {
 
     @Listener(order = Order.LAST)
     public void onClientLeave(ClientConnectionEvent.Disconnect e) {
+        /* We don't actually remove the user instance here, as Sponge likes to keep performing checks
+           on players when they disconnect. The instance gets cleared up on a housekeeping task
+           after a period of inactivity. */
         try (Timing ignored = plugin.getTimings().time(LPTiming.ON_CLIENT_LEAVE)) {
             final UuidCache cache = plugin.getUuidCache();
 
-            // Unload the user from memory when they disconnect;
+            // Unload the user from memory when they disconnect
             cache.clearCache(e.getTargetEntity().getUniqueId());
         }
     }
