@@ -24,19 +24,14 @@ package me.lucko.luckperms.sponge.commands;
 
 import lombok.experimental.UtilityClass;
 
-import com.google.common.collect.Maps;
-
+import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-
-import org.spongepowered.api.service.context.Context;
-import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.util.Tristate;
+import me.lucko.luckperms.sponge.service.references.SubjectReference;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @UtilityClass
 public class SpongeUtils {
@@ -78,13 +73,13 @@ public class SpongeUtils {
         return sb.toString();
     }
 
-    public static String parentsToString(List<Subject> parents) {
+    public static String parentsToString(Set<SubjectReference> parents) {
         StringBuilder sb = new StringBuilder();
-        for (Subject s : parents) {
+        for (SubjectReference s : parents) {
             sb.append("&3> &a")
                     .append(s.getIdentifier())
                     .append(" &bfrom collection &a")
-                    .append(s.getContainingCollection().getIdentifier())
+                    .append(s.getCollection())
                     .append("&b.\n");
         }
         return sb.toString();
@@ -100,14 +95,6 @@ public class SpongeUtils {
             sb.append("&f").append(e.getKey()).append("&7=&f").append(e.getValue()).append("&7, ");
         }
         return sb.delete(sb.length() - 2, sb.length()).toString();
-    }
-
-    public static ContextSet convertContexts(Set<Context> contexts) {
-        return ContextSet.fromEntries(contexts.stream().map(c -> Maps.immutableEntry(c.getKey(), c.getValue())).collect(Collectors.toSet()));
-    }
-
-    public static Set<Context> convertContexts(ContextSet contexts) {
-        return contexts.toSet().stream().map(e -> new Context(e.getKey(), e.getValue())).collect(Collectors.toSet());
     }
 
 }

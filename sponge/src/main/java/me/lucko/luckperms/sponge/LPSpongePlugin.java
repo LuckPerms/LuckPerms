@@ -266,6 +266,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
             lateLoad = true;
         } else {
             game.getServiceManager().setProvider(this, PermissionService.class, service);
+            game.getServiceManager().setProvider(this, LuckPermsService.class, service);
         }
 
         // register with the LP API
@@ -299,6 +300,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         if (lateLoad) {
             getLog().info("Providing late registration of PermissionService...");
             game.getServiceManager().setProvider(this, PermissionService.class, service);
+            game.getServiceManager().setProvider(this, LuckPermsService.class, service);
         }
     }
 
@@ -321,23 +323,14 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     @Listener
     public void onPostInit(GamePostInitializationEvent event) {
         // register permissions
-        Optional<PermissionService> ps = game.getServiceManager().provide(PermissionService.class);
-        if (!ps.isPresent()) {
-            getLog().warn("Unable to register all LuckPerms permissions. PermissionService not available.");
-            return;
-        }
-
-        final PermissionService p = ps.get();
-
-        Optional<PermissionDescription.Builder> builder = p.newDescriptionBuilder(this);
-        if (!builder.isPresent()) {
-            getLog().warn("Unable to register all LuckPerms permissions. Description Builder not available.");
+        LuckPermsService service = this.service;
+        if (service == null) {
             return;
         }
 
         for (Permission perm : Permission.values()) {
             for (String node : perm.getNodes()) {
-                registerPermission(p, node);
+                registerPermission(service, node);
             }
         }
     }
@@ -473,7 +466,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         return map;
     }
 
-    private void registerPermission(PermissionService p, String node) {
+    private void registerPermission(LuckPermsService p, String node) {
         Optional<PermissionDescription.Builder> builder = p.newDescriptionBuilder(this);
         if (!builder.isPresent()) return;
 

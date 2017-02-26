@@ -39,10 +39,9 @@ import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
-
-import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.service.permission.SubjectCollection;
-import org.spongepowered.api.service.permission.SubjectData;
+import me.lucko.luckperms.sponge.service.proxy.LPSubject;
+import me.lucko.luckperms.sponge.service.proxy.LPSubjectCollection;
+import me.lucko.luckperms.sponge.service.proxy.LPSubjectData;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,26 +49,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
-public class SpongeMainCommand extends BaseCommand<Void, SubjectData> {
+public class SpongeMainCommand extends BaseCommand<Void, LPSubjectData> {
     private final LPSpongePlugin plugin;
 
-    private final Map<String, List<Command<SubjectData, ?>>> subCommands = ImmutableMap.<String, List<Command<SubjectData, ?>>>builder()
-            .put("permission", ImmutableList.<Command<SubjectData, ?>>builder()
+    private final Map<String, List<Command<LPSubjectData, ?>>> subCommands = ImmutableMap.<String, List<Command<LPSubjectData, ?>>>builder()
+            .put("permission", ImmutableList.<Command<LPSubjectData, ?>>builder()
                     .add(new PermissionInfo())
                     .add(new PermissionSet())
                     .add(new PermissionClear())
                     .build()
             )
-            .put("parent", ImmutableList.<Command<SubjectData, ?>>builder()
+            .put("parent", ImmutableList.<Command<LPSubjectData, ?>>builder()
                     .add(new ParentInfo())
                     .add(new ParentAdd())
                     .add(new ParentRemove())
                     .add(new ParentClear())
                     .build()
             )
-            .put("option", ImmutableList.<Command<SubjectData, ?>>builder()
+            .put("option", ImmutableList.<Command<LPSubjectData, ?>>builder()
                     .add(new OptionInfo())
                     .add(new OptionSet())
                     .add(new OptionUnset())
@@ -119,11 +117,11 @@ public class SpongeMainCommand extends BaseCommand<Void, SubjectData> {
             Util.sendPluginMessage(sender, "Warning: SubjectCollection '&4" + subjectCollection + "&c' doesn't already exist. Creating it now.");
         }
 
-        SubjectCollection collection = service.getSubjects(subjectCollection);
+        LPSubjectCollection collection = service.getSubjects(subjectCollection);
 
         if (args.size() < 2) {
-            List<String> subjects = StreamSupport.stream(collection.getAllSubjects().spliterator(), false)
-                    .map(Subject::getIdentifier)
+            List<String> subjects = collection.getSubjects().stream()
+                    .map(LPSubject::getIdentifier)
                     .collect(Collectors.toList());
 
             if (subjects.size() > 50) {
@@ -156,7 +154,7 @@ public class SpongeMainCommand extends BaseCommand<Void, SubjectData> {
         }
 
         String cmd = args.get(3);
-        Optional<Command<SubjectData, ?>> o = subCommands.get(type).stream()
+        Optional<Command<LPSubjectData, ?>> o = subCommands.get(type).stream()
                 .filter(s -> s.getName().equalsIgnoreCase(cmd))
                 .findAny();
 
@@ -165,7 +163,7 @@ public class SpongeMainCommand extends BaseCommand<Void, SubjectData> {
             return CommandResult.INVALID_ARGS;
         }
 
-        final Command<SubjectData, ?> sub = o.get();
+        final Command<LPSubjectData, ?> sub = o.get();
         if (!sub.isAuthorized(sender)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;
@@ -186,8 +184,8 @@ public class SpongeMainCommand extends BaseCommand<Void, SubjectData> {
             Util.sendPluginMessage(sender, "Warning: Subject '&4" + subjectId + "&c' doesn't already exist. Creating it now.");
         }
 
-        Subject subject = collection.get(subjectId);
-        SubjectData subjectData = persistent ? subject.getSubjectData() : subject.getTransientSubjectData();
+        LPSubject subject = collection.get(subjectId);
+        LPSubjectData subjectData = persistent ? subject.getSubjectData() : subject.getTransientSubjectData();
 
         CommandResult result;
         try {
@@ -232,12 +230,12 @@ public class SpongeMainCommand extends BaseCommand<Void, SubjectData> {
         return "/%s sponge <collection> <subject>";
     }
 
-    public List<Command<SubjectData, ?>> getSubCommands() {
+    public List<Command<LPSubjectData, ?>> getSubCommands() {
         return subCommands.values().stream().flatMap(List::stream).collect(ImmutableCollectors.toImmutableList());
     }
 
     @Override
-    public Optional<List<Command<SubjectData, ?>>> getChildren() {
+    public Optional<List<Command<LPSubjectData, ?>>> getChildren() {
         return Optional.of(getSubCommands());
     }
 }

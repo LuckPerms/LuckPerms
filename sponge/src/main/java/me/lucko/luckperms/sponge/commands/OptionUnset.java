@@ -33,12 +33,11 @@ import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-
-import org.spongepowered.api.service.permission.SubjectData;
+import me.lucko.luckperms.sponge.service.proxy.LPSubjectData;
 
 import java.util.List;
 
-public class OptionUnset extends SubCommand<SubjectData> {
+public class OptionUnset extends SubCommand<LPSubjectData> {
     public OptionUnset() {
         super("unset", "Unsets an option for the Subject", Permission.SPONGE_OPTION_UNSET, Predicates.is(0),
                 Arg.list(
@@ -49,11 +48,11 @@ public class OptionUnset extends SubCommand<SubjectData> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, SubjectData subjectData, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, List<String> args, String label) throws CommandException {
         String key = args.get(0);
         ContextSet contextSet = ArgumentUtils.handleContexts(1, args);
 
-        if (subjectData.setOption(SpongeUtils.convertContexts(contextSet), key, null)) {
+        if (subjectData.setOption(contextSet, key, null)) {
             Util.sendPluginMessage(sender, "&aUnset &f\"" + key + "&f\"&a in context " + SpongeUtils.contextToString(contextSet));
         } else {
             Util.sendPluginMessage(sender, "Unable to unset option. Are you sure the Subject has it set?");

@@ -33,12 +33,11 @@ import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-
-import org.spongepowered.api.service.permission.SubjectData;
+import me.lucko.luckperms.sponge.service.proxy.LPSubjectData;
 
 import java.util.List;
 
-public class PermissionClear extends SubCommand<SubjectData> {
+public class PermissionClear extends SubCommand<LPSubjectData> {
     public PermissionClear() {
         super("clear", "Clears the Subjects permissions", Permission.SPONGE_PERMISSION_CLEAR, Predicates.alwaysFalse(),
                 Arg.list(
@@ -48,13 +47,13 @@ public class PermissionClear extends SubCommand<SubjectData> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, SubjectData subjectData, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, List<String> args, String label) throws CommandException {
         ContextSet contextSet = ArgumentUtils.handleContexts(0, args);
         if (contextSet.isEmpty()) {
             subjectData.clearPermissions();
             Util.sendPluginMessage(sender, "&aCleared permissions matching contexts &bANY&a.");
         } else {
-            subjectData.clearPermissions(SpongeUtils.convertContexts(contextSet));
+            subjectData.clearPermissions(contextSet);
             Util.sendPluginMessage(sender, "&aCleared permissions matching contexts &b" + SpongeUtils.contextToString(contextSet));
         }
         return CommandResult.SUCCESS;

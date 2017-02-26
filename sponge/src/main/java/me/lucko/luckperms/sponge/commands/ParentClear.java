@@ -33,12 +33,11 @@ import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-
-import org.spongepowered.api.service.permission.SubjectData;
+import me.lucko.luckperms.sponge.service.proxy.LPSubjectData;
 
 import java.util.List;
 
-public class ParentClear extends SubCommand<SubjectData> {
+public class ParentClear extends SubCommand<LPSubjectData> {
     public ParentClear() {
         super("clear", "Clears the Subjects parents", Permission.SPONGE_PARENT_CLEAR, Predicates.alwaysFalse(),
                 Arg.list(
@@ -48,13 +47,13 @@ public class ParentClear extends SubCommand<SubjectData> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, SubjectData subjectData, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, List<String> args, String label) throws CommandException {
         ContextSet contextSet = ArgumentUtils.handleContexts(0, args);
         if (contextSet.isEmpty()) {
             subjectData.clearParents();
             Util.sendPluginMessage(sender, "&aCleared parents matching contexts &bANY&a.");
         } else {
-            subjectData.clearParents(SpongeUtils.convertContexts(contextSet));
+            subjectData.clearParents(contextSet);
             Util.sendPluginMessage(sender, "&aCleared parents matching contexts &b" + SpongeUtils.contextToString(contextSet));
         }
         return CommandResult.SUCCESS;

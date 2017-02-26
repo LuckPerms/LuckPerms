@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.sponge.commands;
 
+import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
@@ -33,13 +34,11 @@ import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-
-import org.spongepowered.api.service.permission.SubjectData;
-import org.spongepowered.api.util.Tristate;
+import me.lucko.luckperms.sponge.service.proxy.LPSubjectData;
 
 import java.util.List;
 
-public class PermissionSet extends SubCommand<SubjectData> {
+public class PermissionSet extends SubCommand<LPSubjectData> {
     public PermissionSet() {
         super("set", "Sets a permission for the Subject", Permission.SPONGE_PERMISSION_SET, Predicates.inRange(0, 1),
                 Arg.list(
@@ -51,12 +50,12 @@ public class PermissionSet extends SubCommand<SubjectData> {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, SubjectData subjectData, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, List<String> args, String label) throws CommandException {
         String node = args.get(0);
         Tristate tristate = SpongeUtils.parseTristate(1, args);
         ContextSet contextSet = ArgumentUtils.handleContexts(2, args);
 
-        if (subjectData.setPermission(SpongeUtils.convertContexts(contextSet), node, tristate)) {
+        if (subjectData.setPermission(contextSet, node, tristate)) {
             Util.sendPluginMessage(sender, "&aSet &b" + node + "&a to &b" + tristate.toString().toLowerCase() + "&a in context " + SpongeUtils.contextToString(contextSet));
         } else {
             Util.sendPluginMessage(sender, "Unable to set permission. Does the Subject already have it set?");
