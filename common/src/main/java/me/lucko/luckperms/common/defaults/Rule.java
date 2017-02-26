@@ -29,8 +29,6 @@ import lombok.ToString;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.User;
-import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
-import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.List;
 
@@ -91,17 +89,11 @@ public class Rule {
 
         // The holder meets all of the requirements of this rule.
         for (String s : toTake) {
-            try {
-                user.unsetPermission(NodeFactory.fromSerialisedNode(s, true));
-            } catch (ObjectLacksException ignored) {
-            }
+            user.unsetPermissionUnchecked(NodeFactory.fromSerialisedNode(s, true));
         }
 
         for (String s : toGive) {
-            try {
-                user.setPermission(NodeFactory.fromSerialisedNode(s, true));
-            } catch (ObjectAlreadyHasException ignored) {
-            }
+            user.setPermissionUnchecked(NodeFactory.fromSerialisedNode(s, true));
         }
 
         if (setPrimaryGroup != null) {

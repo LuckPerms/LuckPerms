@@ -38,10 +38,12 @@ public class Predicates {
     private static final Predicate FALSE = o -> false;
     private static final Predicate TRUE = o -> true;
 
+    @SuppressWarnings("unchecked")
     public static <T> Predicate<T> alwaysFalse() {
         return FALSE;
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> Predicate<T> alwaysTrue() {
         return TRUE;
     }

@@ -64,11 +64,10 @@ public class BungeeMessagingService extends AbstractMessagingService implements 
             @Override
             public void run() {
                 Collection<? extends Player> players = plugin.getServer().getOnlinePlayers();
-                if (players.isEmpty()) {
+                Player p = Iterables.getFirst(players, null);
+                if (p == null) {
                     return;
                 }
-
-                Player p = Iterables.getFirst(players, null);
 
                 ByteArrayDataOutput out = ByteStreams.newDataOutput();
                 out.writeUTF(message);

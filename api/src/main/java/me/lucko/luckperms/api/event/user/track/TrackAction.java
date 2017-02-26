@@ -35,6 +35,6 @@ public enum TrackAction {
     /**
      * The user was demoted down a track
      */
-    DEMOTION;
+    DEMOTION
 
 }

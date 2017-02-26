@@ -175,6 +175,7 @@ public abstract class MainCommand<T> extends BaseCommand<Void, T> {
         return getSubCommands().stream().filter(sc -> sc.isAuthorized(sender)).count() != 0;
     }
 
+    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     @Override
     public Optional<List<Command<T, ?>>> getChildren() {

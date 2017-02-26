@@ -111,8 +111,8 @@ public class CommandManager {
 
     /**
      * Generic on command method to be called from the command executor object of the platform
-     * Unlike {@link #onCommand(Sender, String, List)}, this method is called in a new thread
-     *  @param sender who sent the command
+     * Unlike {@link #execute(Sender, String, List)}, this method is called in a new thread
+     * @param sender who sent the command
      * @param label  the command label used
      * @param args   the arguments provided
      */

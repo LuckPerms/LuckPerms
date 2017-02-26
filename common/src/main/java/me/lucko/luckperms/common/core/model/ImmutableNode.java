@@ -136,15 +136,18 @@ public class ImmutableNode implements Node {
     private final String permission;
 
     @Getter
-    private Boolean value;
+    private final Boolean value;
 
     @Getter
     private boolean override;
 
-    private String server = null;
-    private String world = null;
+    // nullable
+    private final String server;
+    // nullable
+    private final String world;
 
-    private long expireAt = 0L;
+    // 0L for no expiry
+    private final long expireAt;
 
     @Getter
     private final ImmutableContextSet contexts;
@@ -153,6 +156,11 @@ public class ImmutableNode implements Node {
     private final ImmutableContextSet fullContexts;
 
     // Cached state
+
+    // these save on lots of instance creation when comparing nodes
+    private final Optional<String> optServer;
+    private final Optional<String> optWorld;
+
     private final boolean isGroup;
     private String groupName;
 
@@ -248,6 +256,8 @@ public class ImmutableNode implements Node {
         }
 
         this.fullContexts = fullContexts.makeImmutable();
+        this.optServer = Optional.ofNullable(this.server);
+        this.optWorld = Optional.ofNullable(this.world);
     }
 
     @Override
@@ -262,12 +272,12 @@ public class ImmutableNode implements Node {
 
     @Override
     public Optional<String> getServer() {
-        return Optional.ofNullable(server);
+        return optServer;
     }
 
     @Override
     public Optional<String> getWorld() {
-        return Optional.ofNullable(world);
+        return optWorld;
     }
 
     @Override
@@ -532,11 +542,7 @@ public class ImmutableNode implements Node {
             return false;
         }
 
-        if (!other.getContexts().equals(this.getContexts())) {
-            return false;
-        }
-
-        return true;
+        return other.getContexts().equals(this.getContexts());
     }
 
     @Override
@@ -569,11 +575,7 @@ public class ImmutableNode implements Node {
             return false;
         }
 
-        if (!other.getContexts().equals(this.getContexts())) {
-            return false;
-        }
-
-        return true;
+        return other.getContexts().equals(this.getContexts());
     }
 
     @Override
@@ -602,11 +604,7 @@ public class ImmutableNode implements Node {
             return false;
         }
 
-        if (!other.getContexts().equals(this.getContexts())) {
-            return false;
-        }
-
-        return true;
+        return other.getContexts().equals(this.getContexts());
     }
 
     @Override

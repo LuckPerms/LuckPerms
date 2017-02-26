@@ -101,7 +101,7 @@ public class MigrationMainCommand extends MainCommand<Object> {
         super("Migration", "Migration commands", "/%s migration", 1, null);
     }
 
-    @SuppressWarnings("deprecation")
+    @SuppressWarnings({"deprecation", "DeprecatedIsStillUsed"})
     @Deprecated
     @Override
     public synchronized Optional<List<Command<Object, ?>>> getChildren() {

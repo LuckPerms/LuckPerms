@@ -65,11 +65,11 @@ public class BungeeMessagingService extends AbstractMessagingService implements 
     protected void sendMessage(String channel, String message) {
         plugin.getSpongeScheduler().createTaskBuilder().interval(10, TimeUnit.SECONDS).execute(task -> {
             Collection<Player> players = plugin.getGame().getServer().getOnlinePlayers();
-            if (players.isEmpty()) {
+            Player p = Iterables.getFirst(players, null);
+            if (p == null) {
                 return;
             }
 
-            Player p = Iterables.getFirst(players, null);
             this.channel.sendTo(p, buf -> buf.writeUTF(message));
 
             task.cancel();

@@ -40,6 +40,6 @@ public enum CreationCause {
     /**
      * The creation was caused by a LuckPerms internal
      */
-    INTERNAL;
+    INTERNAL
 
 }

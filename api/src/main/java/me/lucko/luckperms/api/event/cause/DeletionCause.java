@@ -40,6 +40,6 @@ public enum DeletionCause {
     /**
      * The deletion was caused by a LuckPerms internal
      */
-    INTERNAL;
+    INTERNAL
 
 }

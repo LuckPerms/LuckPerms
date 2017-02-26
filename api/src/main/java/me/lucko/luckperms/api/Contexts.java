@@ -194,14 +194,13 @@ public class Contexts {
         final Contexts other = (Contexts) o;
         final Object this$context = this.getContexts();
         final Object other$context = other.getContexts();
-        if (this$context == null ? other$context != null : !this$context.equals(other$context)) return false;
-        if (this.isOp() != other.isOp()) return false;
-        if (this.isIncludeGlobal() != other.isIncludeGlobal()) return false;
-        if (this.isIncludeGlobalWorld() != other.isIncludeGlobalWorld()) return false;
-        if (this.isApplyGroups() != other.isApplyGroups()) return false;
-        if (this.isApplyGlobalGroups() != other.isApplyGlobalGroups()) return false;
-        if (this.isApplyGlobalWorldGroups() != other.isApplyGlobalWorldGroups()) return false;
-        return true;
+        return (this$context == null ? other$context == null : this$context.equals(other$context)) &&
+                this.isOp() == other.isOp() &&
+                this.isIncludeGlobal() == other.isIncludeGlobal() &&
+                this.isIncludeGlobalWorld() == other.isIncludeGlobalWorld() &&
+                this.isApplyGroups() == other.isApplyGroups() &&
+                this.isApplyGlobalGroups() == other.isApplyGlobalGroups() &&
+                this.isApplyGlobalWorldGroups() == other.isApplyGlobalWorldGroups();
     }
 
     /**

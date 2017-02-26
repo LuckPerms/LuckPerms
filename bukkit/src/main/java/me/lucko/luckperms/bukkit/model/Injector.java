@@ -38,6 +38,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Injects a {@link LPPermissible} into a {@link Player}
  */
+@SuppressWarnings("unchecked")
 @UtilityClass
 public class Injector {
     private static final Map<UUID, LPPermissible> INJECTED_PERMISSIBLES = new ConcurrentHashMap<>();

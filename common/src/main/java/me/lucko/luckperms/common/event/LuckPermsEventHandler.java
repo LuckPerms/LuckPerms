@@ -66,6 +66,7 @@ public class LuckPermsEventHandler<T extends LuckPermsEvent> implements EventHan
         return callCount.get();
     }
 
+    @SuppressWarnings("unchecked") // we know that this method will never be called if the class doesn't match eventClass
     void handle(LuckPermsEvent event) {
         try {
             T t = (T) event;

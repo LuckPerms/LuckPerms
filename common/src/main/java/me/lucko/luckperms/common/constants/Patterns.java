@@ -27,10 +27,12 @@ import lombok.experimental.UtilityClass;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
@@ -49,11 +51,18 @@ public class Patterns {
                 }
             });
 
+    private static final LoadingCache<Map.Entry<String, String>, String> DELIMITER_CACHE = CacheBuilder.newBuilder()
+            .build(new CacheLoader<Map.Entry<String, String>, String>() {
+                @Override
+                public String load(Map.Entry<String, String> e) {
+                    return "(?<!" + Pattern.quote(e.getKey()) + ")" + Pattern.quote(e.getValue());
+                }
+            });
+
     public static final Pattern COMMAND_SEPARATOR = Pattern.compile(" (?=([^\\\"]*\\\"[^\\\"]*\\\")*[^\\\"]*$)");
     public static final Pattern NON_ALPHA_NUMERIC = Pattern.compile("[\\/\\$\\.\\- ]");
     public static final Pattern NON_ALPHA_NUMERIC_SPACE = Pattern.compile("[\\/\\$\\.\\-]");
     public static final Pattern NON_USERNAME = Pattern.compile("[^A-Za-z0-9_ ]");
-    public static final Pattern SHORTHAND_NODE = Pattern.compile("\\.\\([^.]+\\)");
     public static final Pattern STRIP_COLOR_PATTERN = Pattern.compile("(?i)" + String.valueOf('§') + "[0-9A-FK-OR]");
     public static final Pattern NODE_CONTEXTS = Pattern.compile("\\(.+\\).*");
 
@@ -67,7 +76,7 @@ public class Patterns {
     }
 
     public static String buildDelimitedMatcher(String delim, String esc) {
-        return "(?<!" + Pattern.quote(esc) + ")" + Pattern.quote(delim);
+        return DELIMITER_CACHE.getUnchecked(Maps.immutableEntry(delim, esc));
     }
 
     public static Pattern compileDelimitedMatcher(String delim, String esc) {

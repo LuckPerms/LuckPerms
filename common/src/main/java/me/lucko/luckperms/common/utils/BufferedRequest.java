@@ -78,7 +78,7 @@ public abstract class BufferedRequest<T> {
         private final long delayMillis;
         private final Supplier<R> supplier;
         private final ReentrantLock lock = new ReentrantLock();
-        private final CompletableFuture<R> future = new CompletableFuture<R>();
+        private final CompletableFuture<R> future = new CompletableFuture<>();
         @Getter
         private boolean usable = true;
         private long executionTime;

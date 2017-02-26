@@ -242,4 +242,60 @@ public class NodeFactory {
     public static boolean isSuffixNode(String s) {
         return isChatMetaNode("suffix", s);
     }
+
+    public static Node make(String node) {
+        return newBuilder(node).build();
+    }
+
+    public static Node make(String node, boolean value) {
+        return newBuilder(node).setValue(value).build();
+    }
+
+    public static Node make(String node, boolean value, String server) {
+        return newBuilder(node).setValue(value).setServer(server).build();
+    }
+
+    public static Node make(String node, boolean value, String server, String world) {
+        return newBuilder(node).setValue(value).setServer(server).setWorld(world).build();
+    }
+
+    public static Node make(String node, String server) {
+        return newBuilder(node).setServer(server).build();
+    }
+
+    public static Node make(String node, String server, String world) {
+        return newBuilder(node).setServer(server).setWorld(world).build();
+    }
+
+    public static Node make(String node, boolean value, boolean temporary) {
+        return newBuilder(node).setValue(value).setExpiry(temporary ? 10L : 0L).build();
+    }
+
+    public static Node make(String node, boolean value, String server, boolean temporary) {
+        return newBuilder(node).setValue(value).setServer(server).setExpiry(temporary ? 10L : 0L).build();
+    }
+
+    public static Node make(String node, boolean value, String server, String world, boolean temporary) {
+        return newBuilder(node).setValue(value).setServer(server).setWorld(world).setExpiry(temporary ? 10L : 0L).build();
+    }
+
+    public static Node make(String node, String server, boolean temporary) {
+        return newBuilder(node).setServer(server).setExpiry(temporary ? 10L : 0L).build();
+    }
+
+    public static Node make(String node, String server, String world, boolean temporary) {
+        return newBuilder(node).setServer(server).setWorld(world).setExpiry(temporary ? 10L : 0L).build();
+    }
+
+    public static Node make(String node, boolean value, long expireAt) {
+        return newBuilder(node).setValue(value).setExpiry(expireAt).build();
+    }
+
+    public static Node make(String node, boolean value, String server, long expireAt) {
+        return newBuilder(node).setValue(value).setServer(server).setExpiry(expireAt).build();
+    }
+
+    public static Node make(String node, boolean value, String server, String world, long expireAt) {
+        return newBuilder(node).setValue(value).setServer(server).setWorld(world).setExpiry(expireAt).build();
+    }
 }

@@ -171,13 +171,13 @@ public class LogEntry implements Comparable<LogEntry> {
         if (o == this) return true;
         if (!(o instanceof LogEntry)) return false;
         final LogEntry other = (LogEntry) o;
-        if (this.getTimestamp() != other.getTimestamp()) return false;
-        if (this.getActor() == null ? other.getActor() != null : !this.getActor().equals(other.getActor())) return false;
-        if (this.getActorName() == null ? other.getActorName() != null : !this.getActorName().equals(other.getActorName())) return false;
-        if (this.getType() != other.getType()) return false;
-        if (this.getActed() == null ? other.getActed() != null : !this.getActed().equals(other.getActed())) return false;
-        if (this.getActedName() == null ? other.getActedName() != null : !this.getActedName().equals(other.getActedName())) return false;
-        return this.getAction() == null ? other.getAction() == null : this.getAction().equals(other.getAction());
+        return this.getTimestamp() == other.getTimestamp() &&
+                (this.getActor() == null ? other.getActor() == null : this.getActor().equals(other.getActor())) &&
+                (this.getActorName() == null ? other.getActorName() == null : this.getActorName().equals(other.getActorName())) &&
+                this.getType() == other.getType() &&
+                (this.getActed() == null ? other.getActed() == null : this.getActed().equals(other.getActed())) &&
+                (this.getActedName() == null ? other.getActedName() == null : this.getActedName().equals(other.getActedName())) &&
+                (this.getAction() == null ? other.getAction() == null : this.getAction().equals(other.getAction()));
     }
 
     @Override

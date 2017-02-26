@@ -146,9 +146,7 @@ public class LuckPermsPlaceholderExpansion extends PlaceholderExpansion {
             String trackName = identifier.substring("on_track_".length());
 
             Optional<Track> track = api.getTrackSafe(trackName);
-            if (!track.isPresent()) return "";
-
-            return formatBoolean(track.get().containsGroup(user.getPrimaryGroup()));
+            return track.map(t -> formatBoolean(t.containsGroup(user.getPrimaryGroup()))).orElse("");
         }
 
         if (identifier.startsWith("expiry_time_") && identifier.length() > "expiry_time_".length()) {

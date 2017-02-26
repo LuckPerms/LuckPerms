@@ -49,7 +49,6 @@ import me.lucko.luckperms.common.caching.holder.GetAllNodesRequest;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.core.InheritanceInfo;
-import me.lucko.luckperms.common.core.NodeBuilder;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.PriorityComparator;
 import me.lucko.luckperms.common.core.TemporaryModifier;
@@ -227,14 +226,14 @@ public abstract class PermissionHolder {
         Set<Node> enduring = getNodes();
         if (!enduring.isEmpty()) {
             combined.addAll(enduring.stream()
-                    .map(n -> makeLocal(n, getObjectName()))
+                    .map(n -> ImmutableLocalizedNode.of(n, getObjectName()))
                     .collect(Collectors.toList())
             );
         }
         Set<Node> tran = getTransientNodes();
         if (!tran.isEmpty()) {
             combined.addAll(tran.stream()
-                    .map(n -> makeLocal(n, getObjectName()))
+                    .map(n -> ImmutableLocalizedNode.of(n, getObjectName()))
                     .collect(Collectors.toList())
             );
         }
@@ -386,7 +385,7 @@ public abstract class PermissionHolder {
 
     public void setNodes(Map<String, Boolean> nodes) {
         Set<Node> set = nodes.entrySet().stream()
-                .map(e -> makeNode(e.getKey(), e.getValue()))
+                .map(e -> NodeFactory.fromSerialisedNode(e.getKey(), e.getValue()))
                 .collect(Collectors.toSet());
 
         setNodes(set);
@@ -606,39 +605,39 @@ public abstract class PermissionHolder {
      * Check if the holder has a permission node
      *
      * @param node the node to check
-     * @param t    whether to check transient nodes
+     * @param checkTransient    whether to check transient nodes
      * @return a tristate
      */
-    public Tristate hasPermission(Node node, boolean t) {
-        return getAlmostEquals(node, t).map(Node::getTristate).orElse(Tristate.UNDEFINED);
+    public Tristate hasPermission(Node node, boolean checkTransient) {
+        return getAlmostEquals(node, checkTransient).map(Node::getTristate).orElse(Tristate.UNDEFINED);
     }
 
     public Tristate hasPermission(Node node) {
         return hasPermission(node, false);
     }
 
-    public boolean hasPermission(String node, boolean b) {
-        return hasPermission(buildNode(node).setValue(b).build()).asBoolean() == b;
+    public boolean hasPermission(String node, boolean value) {
+        return hasPermission(NodeFactory.make(node, value)).asBoolean() == value;
     }
 
-    public boolean hasPermission(String node, boolean b, String server) {
-        return hasPermission(buildNode(node).setValue(b).setServer(server).build()).asBoolean() == b;
+    public boolean hasPermission(String node, boolean value, String server) {
+        return hasPermission(NodeFactory.make(node, value, server)).asBoolean() == value;
     }
 
-    public boolean hasPermission(String node, boolean b, String server, String world) {
-        return hasPermission(buildNode(node).setValue(b).setServer(server).setWorld(world).build()).asBoolean() == b;
+    public boolean hasPermission(String node, boolean value, String server, String world) {
+        return hasPermission(NodeFactory.make(node, value, server, world)).asBoolean() == value;
     }
 
-    public boolean hasPermission(String node, boolean b, boolean temporary) {
-        return hasPermission(buildNode(node).setValue(b).setExpiry(temporary ? 10L : 0L).build()).asBoolean() == b;
+    public boolean hasPermission(String node, boolean value, boolean temporary) {
+        return hasPermission(NodeFactory.make(node, value, temporary)).asBoolean() == value;
     }
 
-    public boolean hasPermission(String node, boolean b, String server, boolean temporary) {
-        return hasPermission(buildNode(node).setValue(b).setServer(server).setExpiry(temporary ? 10L : 0L).build()).asBoolean() == b;
+    public boolean hasPermission(String node, boolean value, String server, boolean temporary) {
+        return hasPermission(NodeFactory.make(node, value, server, temporary)).asBoolean() == value;
     }
 
-    public boolean hasPermission(String node, boolean b, String server, String world, boolean temporary) {
-        return hasPermission(buildNode(node).setValue(b).setServer(server).setWorld(world).setExpiry(temporary ? 10L : 0L).build()).asBoolean() == b;
+    public boolean hasPermission(String node, boolean value, String server, String world, boolean temporary) {
+        return hasPermission(NodeFactory.make(node, value, server, world, temporary)).asBoolean() == value;
     }
 
     /**
@@ -667,28 +666,28 @@ public abstract class PermissionHolder {
         return inheritsPermissionInfo(node).getResult();
     }
 
-    public boolean inheritsPermission(String node, boolean b) {
-        return inheritsPermission(buildNode(node).setValue(b).build()).asBoolean() == b;
+    public boolean inheritsPermission(String node, boolean value) {
+        return inheritsPermission(NodeFactory.make(node, value)).asBoolean() == value;
     }
 
-    public boolean inheritsPermission(String node, boolean b, String server) {
-        return inheritsPermission(buildNode(node).setValue(b).setServer(server).build()).asBoolean() == b;
+    public boolean inheritsPermission(String node, boolean value, String server) {
+        return inheritsPermission(NodeFactory.make(node, value, server)).asBoolean() == value;
     }
 
-    public boolean inheritsPermission(String node, boolean b, String server, String world) {
-        return inheritsPermission(buildNode(node).setValue(b).setServer(server).setWorld(world).build()).asBoolean() == b;
+    public boolean inheritsPermission(String node, boolean value, String server, String world) {
+        return inheritsPermission(NodeFactory.make(node, value, server, world)).asBoolean() == value;
     }
 
-    public boolean inheritsPermission(String node, boolean b, boolean temporary) {
-        return inheritsPermission(buildNode(node).setValue(b).setExpiry(temporary ? 10L : 0L).build()).asBoolean() == b;
+    public boolean inheritsPermission(String node, boolean value, boolean temporary) {
+        return inheritsPermission(NodeFactory.make(node, value, temporary)).asBoolean() == value;
     }
 
-    public boolean inheritsPermission(String node, boolean b, String server, boolean temporary) {
-        return inheritsPermission(buildNode(node).setValue(b).setServer(server).setExpiry(temporary ? 10L : 0L).build()).asBoolean() == b;
+    public boolean inheritsPermission(String node, boolean value, String server, boolean temporary) {
+        return inheritsPermission(NodeFactory.make(node, value, server, temporary)).asBoolean() == value;
     }
 
-    public boolean inheritsPermission(String node, boolean b, String server, String world, boolean temporary) {
-        return inheritsPermission(buildNode(node).setValue(b).setServer(server).setWorld(world).setExpiry(temporary ? 10L : 0L).build()).asBoolean() == b;
+    public boolean inheritsPermission(String node, boolean value, String server, String world, boolean temporary) {
+        return inheritsPermission(NodeFactory.make(node, value, server, world, temporary)).asBoolean() == value;
     }
 
     /**
@@ -825,27 +824,27 @@ public abstract class PermissionHolder {
     }
 
     public void setPermission(String node, boolean value) throws ObjectAlreadyHasException {
-        setPermission(buildNode(node).setValue(value).build());
+        setPermission(NodeFactory.make(node, value));
     }
 
     public void setPermission(String node, boolean value, String server) throws ObjectAlreadyHasException {
-        setPermission(buildNode(node).setValue(value).setServer(server).build());
+        setPermission(NodeFactory.make(node, value, server));
     }
 
     public void setPermission(String node, boolean value, String server, String world) throws ObjectAlreadyHasException {
-        setPermission(buildNode(node).setValue(value).setServer(server).setWorld(world).build());
+        setPermission(NodeFactory.make(node, value, server, world));
     }
 
     public void setPermission(String node, boolean value, long expireAt) throws ObjectAlreadyHasException {
-        setPermission(buildNode(node).setValue(value).setExpiry(expireAt).build());
+        setPermission(NodeFactory.make(node, value, expireAt));
     }
 
     public void setPermission(String node, boolean value, String server, long expireAt) throws ObjectAlreadyHasException {
-        setPermission(buildNode(node).setValue(value).setServer(server).setExpiry(expireAt).build());
+        setPermission(NodeFactory.make(node, value, server, expireAt));
     }
 
     public void setPermission(String node, boolean value, String server, String world, long expireAt) throws ObjectAlreadyHasException {
-        setPermission(buildNode(node).setValue(value).setServer(server).setWorld(world).setExpiry(expireAt).build());
+        setPermission(NodeFactory.make(node, value, server, world, expireAt));
     }
 
     /**
@@ -905,27 +904,27 @@ public abstract class PermissionHolder {
     }
 
     public void unsetPermission(String node, boolean temporary) throws ObjectLacksException {
-        unsetPermission(buildNode(node).setExpiry(temporary ? 10L : 0L).build());
+        unsetPermission(NodeFactory.make(node, temporary));
     }
 
     public void unsetPermission(String node) throws ObjectLacksException {
-        unsetPermission(buildNode(node).build());
+        unsetPermission(NodeFactory.make(node));
     }
 
     public void unsetPermission(String node, String server) throws ObjectLacksException {
-        unsetPermission(buildNode(node).setServer(server).build());
+        unsetPermission(NodeFactory.make(node, server));
     }
 
     public void unsetPermission(String node, String server, String world) throws ObjectLacksException {
-        unsetPermission(buildNode(node).setServer(server).setWorld(world).build());
+        unsetPermission(NodeFactory.make(node, server, world));
     }
 
     public void unsetPermission(String node, String server, boolean temporary) throws ObjectLacksException {
-        unsetPermission(buildNode(node).setServer(server).setExpiry(temporary ? 10L : 0L).build());
+        unsetPermission(NodeFactory.make(node, server, temporary));
     }
 
     public void unsetPermission(String node, String server, String world, boolean temporary) throws ObjectLacksException {
-        unsetPermission(buildNode(node).setServer(server).setWorld(world).setExpiry(temporary ? 10L : 0L).build());
+        unsetPermission(NodeFactory.make(node, server, world, temporary));
     }
 
     public boolean inheritsGroup(Group group) {
@@ -1314,17 +1313,5 @@ public abstract class PermissionHolder {
             m.put(node.toSerializedNode(), node.getValue());
         }
         return m;
-    }
-
-    private static Node.Builder buildNode(String permission) {
-        return new NodeBuilder(permission);
-    }
-
-    private static ImmutableLocalizedNode makeLocal(Node node, String location) {
-        return ImmutableLocalizedNode.of(node, location);
-    }
-
-    private static Node makeNode(String s, Boolean b) {
-        return NodeFactory.fromSerialisedNode(s, b);
     }
 }

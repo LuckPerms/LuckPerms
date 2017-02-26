@@ -288,9 +288,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         }
 
         // replace the temporary executor when the Bukkit one starts
-        getServer().getScheduler().runTaskAsynchronously(this, () -> {
-            scheduler.setUseBukkitAsync(true);
-        });
+        getServer().getScheduler().runTaskAsynchronously(this, () -> scheduler.setUseBukkitAsync(true));
 
         // Load any online users (in the case of a reload)
         for (Player player : getServer().getOnlinePlayers()) {

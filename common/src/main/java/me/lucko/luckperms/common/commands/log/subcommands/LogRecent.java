@@ -97,7 +97,7 @@ public class LogRecent extends SubCommand<Log> {
 
         // User and possibly page
         final String s = args.get(0);
-        UUID u = null;
+        UUID u;
 
         u = Util.parseUuid(s);
         if (u == null) {

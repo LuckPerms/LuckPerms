@@ -66,6 +66,7 @@ import java.util.function.Consumer;
 
 import static me.lucko.luckperms.common.constants.Permission.MIGRATION;
 
+@SuppressWarnings("unchecked")
 public class MigrationPowerfulPerms extends SubCommand<Object> {
     private static Method getPlayerPermissionsMethod = null;
     private static Method getPlayerGroupsMethod = null;

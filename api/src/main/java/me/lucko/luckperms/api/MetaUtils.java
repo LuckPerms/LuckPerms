@@ -149,8 +149,7 @@ public class MetaUtils {
 
         try {
             holder.setPermission(metaNode.build());
-        } catch (ObjectAlreadyHasException ignored) {
-        }
+        } catch (ObjectAlreadyHasException ignored) {}
     }
 
     /**
@@ -233,8 +232,7 @@ public class MetaUtils {
 
         try {
             holder.setPermission(node.build());
-        } catch (ObjectAlreadyHasException ignored) {
-        }
+        } catch (ObjectAlreadyHasException ignored) {}
     }
 
     /**

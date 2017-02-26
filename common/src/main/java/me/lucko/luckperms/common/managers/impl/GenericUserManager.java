@@ -92,11 +92,8 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
             }
         }
 
-        if (!user.getPrimaryGroup().equalsIgnoreCase("default")) {
-            return true; // Not in the default primary group
-        }
-
-        return false;
+        // Not in the default primary group
+        return !user.getPrimaryGroup().equalsIgnoreCase("default");
     }
 
     private final LuckPermsPlugin plugin;
