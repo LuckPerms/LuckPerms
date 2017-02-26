@@ -216,7 +216,7 @@ public class LuckPermsService implements PermissionService {
 
     public List<Subject> sortSubjects(List<Subject> s) {
         List<Subject> ret = new ArrayList<>(s);
-        ret.sort((o1, o2) -> {
+        ret.sort(Collections.reverseOrder((o1, o2) -> {
             if (o1.equals(o2)) {
                 return 0;
             }
@@ -248,8 +248,8 @@ public class LuckPermsService implements PermissionService {
                 return 1;
             }
 
-            return Integer.compare(g1.getWeight().orElse(0), g2.getWeight().orElse(0)) == -1 ? 1 : -1;
-        });
+            return Integer.compare(g1.getWeight().orElse(0), g2.getWeight().orElse(0)) == 1 ? 1 : -1;
+        }));
         return ImmutableList.copyOf(ret);
     }
 
