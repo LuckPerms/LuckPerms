@@ -28,7 +28,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import me.lucko.luckperms.sponge.service.LuckPermsService;
-import me.lucko.luckperms.sponge.service.base.LPSubjectCollection;
+import me.lucko.luckperms.sponge.service.proxy.LPSubjectCollection;
 
 import java.lang.ref.WeakReference;
 

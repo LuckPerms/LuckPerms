@@ -42,8 +42,8 @@ import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.model.SpongeGroup;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
-import me.lucko.luckperms.sponge.service.base.LPSubject;
-import me.lucko.luckperms.sponge.service.base.LPSubjectCollection;
+import me.lucko.luckperms.sponge.service.proxy.LPSubject;
+import me.lucko.luckperms.sponge.service.proxy.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.references.SubjectReference;
 import me.lucko.luckperms.sponge.timings.LPTiming;
 

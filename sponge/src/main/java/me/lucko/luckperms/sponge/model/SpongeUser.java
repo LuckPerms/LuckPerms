@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.LuckPermsSubjectData;
-import me.lucko.luckperms.sponge.service.base.LPSubject;
+import me.lucko.luckperms.sponge.service.proxy.LPSubject;
 import me.lucko.luckperms.sponge.service.references.SubjectCollectionReference;
 import me.lucko.luckperms.sponge.service.references.SubjectReference;
 import me.lucko.luckperms.sponge.timings.LPTiming;

@@ -24,8 +24,8 @@ package me.lucko.luckperms.sponge.service;
 
 import lombok.RequiredArgsConstructor;
 
-import me.lucko.luckperms.sponge.service.base.LPSubject;
-import me.lucko.luckperms.sponge.service.base.LPSubjectCollection;
+import me.lucko.luckperms.sponge.service.proxy.LPSubject;
+import me.lucko.luckperms.sponge.service.proxy.LPSubjectCollection;
 
 @RequiredArgsConstructor
 public class ServiceCacheHousekeepingTask implements Runnable {

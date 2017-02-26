@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.base;
+package me.lucko.luckperms.sponge.service.proxy;
 
 import lombok.NonNull;
 
@@ -38,7 +38,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-import static me.lucko.luckperms.sponge.service.base.Util.convertContexts;
+import static me.lucko.luckperms.sponge.service.proxy.Util.convertContexts;
 
 public interface LPSubjectCollection extends SubjectCollection {
 

@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.base;
+package me.lucko.luckperms.sponge.service.proxy;
 
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;

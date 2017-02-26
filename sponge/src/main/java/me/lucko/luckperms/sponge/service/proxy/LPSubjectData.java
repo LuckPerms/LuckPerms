@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.base;
+package me.lucko.luckperms.sponge.service.proxy;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -41,8 +41,8 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-import static me.lucko.luckperms.sponge.service.base.Util.convertContexts;
-import static me.lucko.luckperms.sponge.service.base.Util.convertTristate;
+import static me.lucko.luckperms.sponge.service.proxy.Util.convertContexts;
+import static me.lucko.luckperms.sponge.service.proxy.Util.convertTristate;
 
 public interface LPSubjectData extends SubjectData {
 

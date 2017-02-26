@@ -30,7 +30,7 @@ import lombok.ToString;
 import com.google.common.base.Splitter;
 
 import me.lucko.luckperms.sponge.service.LuckPermsService;
-import me.lucko.luckperms.sponge.service.base.LPSubject;
+import me.lucko.luckperms.sponge.service.proxy.LPSubject;
 
 import org.spongepowered.api.service.permission.Subject;
 

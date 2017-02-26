@@ -26,7 +26,7 @@ import lombok.AllArgsConstructor;
 
 import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.sponge.service.base.Util;
+import me.lucko.luckperms.sponge.service.proxy.Util;
 
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;

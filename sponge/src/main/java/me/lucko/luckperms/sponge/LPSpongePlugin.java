@@ -70,8 +70,8 @@ import me.lucko.luckperms.sponge.managers.SpongeUserManager;
 import me.lucko.luckperms.sponge.messaging.BungeeMessagingService;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.ServiceCacheHousekeepingTask;
-import me.lucko.luckperms.sponge.service.base.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.persisted.PersistedCollection;
+import me.lucko.luckperms.sponge.service.proxy.LPSubjectCollection;
 import me.lucko.luckperms.sponge.timings.LPTimings;
 import me.lucko.luckperms.sponge.utils.VersionData;
 

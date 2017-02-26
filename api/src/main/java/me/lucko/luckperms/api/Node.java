@@ -203,10 +203,20 @@ public interface Node extends Map.Entry<String, Boolean> {
     boolean hasExpired();
 
     /**
+     * Gets the extra contexts required for this node to apply
+     *
      * @return the extra contexts required for this node to apply
      * @since 2.13
      */
     ContextSet getContexts();
+
+    /**
+     * The same as {@link #getContexts()}, but also includes values for "server" and "world" keys if present.
+     *
+     * @return the full contexts required for this node to apply
+     * @since 3.1
+     */
+    ContextSet getFullContexts();
 
     /**
      * Converts this node into a serialized form

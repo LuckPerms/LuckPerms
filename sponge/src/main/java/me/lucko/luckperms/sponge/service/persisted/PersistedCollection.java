@@ -36,8 +36,8 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
-import me.lucko.luckperms.sponge.service.base.LPSubject;
-import me.lucko.luckperms.sponge.service.base.LPSubjectCollection;
+import me.lucko.luckperms.sponge.service.proxy.LPSubject;
+import me.lucko.luckperms.sponge.service.proxy.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.references.SubjectReference;
 
 import java.util.Collection;

@@ -36,6 +36,7 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.constants.Patterns;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.utils.ShorthandParser;
@@ -148,6 +149,9 @@ public class ImmutableNode implements Node {
     @Getter
     private final ImmutableContextSet contexts;
 
+    @Getter
+    private final ImmutableContextSet fullContexts;
+
     // Cached state
     private final boolean isGroup;
     private String groupName;
@@ -234,6 +238,16 @@ public class ImmutableNode implements Node {
 
         resolvedShorthand = ImmutableList.copyOf(ShorthandParser.parseShorthand(getPermission()));
         serializedNode = calculateSerializedNode();
+
+        MutableContextSet fullContexts = this.contexts.mutableCopy();
+        if (isServerSpecific()) {
+            fullContexts.add("server", this.server);
+        }
+        if (isWorldSpecific()) {
+            fullContexts.add("world", this.world);
+        }
+
+        this.fullContexts = fullContexts.makeImmutable();
     }
 
     @Override

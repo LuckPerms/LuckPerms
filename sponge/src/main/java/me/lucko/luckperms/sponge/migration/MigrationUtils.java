@@ -30,7 +30,7 @@ import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.utils.ExtractedContexts;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
-import me.lucko.luckperms.sponge.service.base.Util;
+import me.lucko.luckperms.sponge.service.proxy.Util;
 
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.PermissionService;

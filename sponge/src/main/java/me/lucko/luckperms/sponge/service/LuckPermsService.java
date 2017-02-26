@@ -54,14 +54,14 @@ import me.lucko.luckperms.sponge.contexts.SpongeCalculatorLink;
 import me.lucko.luckperms.sponge.managers.SpongeGroupManager;
 import me.lucko.luckperms.sponge.managers.SpongeUserManager;
 import me.lucko.luckperms.sponge.model.SpongeGroup;
-import me.lucko.luckperms.sponge.service.base.LPSubject;
-import me.lucko.luckperms.sponge.service.base.LPSubjectCollection;
-import me.lucko.luckperms.sponge.service.base.LPSubjectData;
 import me.lucko.luckperms.sponge.service.calculated.CalculatedSubjectData;
 import me.lucko.luckperms.sponge.service.calculated.OptionLookup;
 import me.lucko.luckperms.sponge.service.calculated.PermissionLookup;
 import me.lucko.luckperms.sponge.service.persisted.PersistedCollection;
 import me.lucko.luckperms.sponge.service.persisted.SubjectStorage;
+import me.lucko.luckperms.sponge.service.proxy.LPSubject;
+import me.lucko.luckperms.sponge.service.proxy.LPSubjectCollection;
+import me.lucko.luckperms.sponge.service.proxy.LPSubjectData;
 import me.lucko.luckperms.sponge.service.references.SubjectReference;
 import me.lucko.luckperms.sponge.timings.LPTiming;
 

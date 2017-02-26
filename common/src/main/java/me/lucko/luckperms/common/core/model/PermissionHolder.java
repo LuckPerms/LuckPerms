@@ -714,6 +714,12 @@ public abstract class PermissionHolder {
         plugin.getApiProvider().getEventFactory().handleNodeAdd(node, this, before, after);
     }
 
+    public void setPermissionUnchecked(Node node) {
+        try {
+            setPermission(node);
+        } catch (ObjectAlreadyHasException ignored) {}
+    }
+
     /**
      * Sets a permission node, applying a temporary modifier if the node is temporary.
      * @param node the node to set
@@ -783,6 +789,12 @@ public abstract class PermissionHolder {
         return node;
     }
 
+    public void setPermissionUnchecked(Node node, TemporaryModifier modifier) {
+        try {
+            setPermission(node, modifier);
+        } catch (ObjectAlreadyHasException ignored) {}
+    }
+
     /**
      * Sets a transient permission node
      *
@@ -804,6 +816,12 @@ public abstract class PermissionHolder {
         ImmutableSet<Node> after = ImmutableSet.copyOf(getTransientNodes());
 
         plugin.getApiProvider().getEventFactory().handleNodeAdd(node, this, before, after);
+    }
+
+    public void setTransientPermissionUnchecked(Node node) {
+        try {
+            setTransientPermission(node);
+        } catch (ObjectAlreadyHasException ignored) {}
     }
 
     public void setPermission(String node, boolean value) throws ObjectAlreadyHasException {
@@ -852,6 +870,12 @@ public abstract class PermissionHolder {
         plugin.getApiProvider().getEventFactory().handleNodeRemove(node, this, before, after);
     }
 
+    public void unsetPermissionUnchecked(Node node) {
+        try {
+            unsetPermission(node);
+        } catch (ObjectLacksException ignored) {}
+    }
+
     /**
      * Unsets a transient permission node
      *
@@ -872,6 +896,12 @@ public abstract class PermissionHolder {
 
         ImmutableSet<Node> after = ImmutableSet.copyOf(getTransientNodes());
         plugin.getApiProvider().getEventFactory().handleNodeRemove(node, this, before, after);
+    }
+
+    public void unsetTransientPermissionUnchecked(Node node) {
+        try {
+            unsetTransientPermission(node);
+        } catch (ObjectLacksException ignored) {}
     }
 
     public void unsetPermission(String node, boolean temporary) throws ObjectLacksException {
