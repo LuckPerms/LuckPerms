@@ -55,7 +55,8 @@ public class Patterns {
             .build(new CacheLoader<Map.Entry<String, String>, String>() {
                 @Override
                 public String load(Map.Entry<String, String> e) {
-                    return "(?<!" + Pattern.quote(e.getKey()) + ")" + Pattern.quote(e.getValue());
+                    // note the reversed order
+                    return "(?<!" + Pattern.quote(e.getValue()) + ")" + Pattern.quote(e.getKey());
                 }
             });
 
