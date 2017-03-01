@@ -55,6 +55,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class MigrationGroupManager extends SubCommand<Object> {
+    // group manager global groups contain the ":" character, which is not allowed in windows file names
+    private static final Function<String, String> GROUP_RENAME_FUNCTION = s -> s.replace(':', '-').toLowerCase();
+
     public MigrationGroupManager() {
         super("groupmanager", "Migration from GroupManager", Permission.MIGRATION, Predicates.is(0),
                 Arg.list(Arg.create("migrate as global", true, "if world permissions should be ignored, and just migrated as global"))
@@ -91,8 +94,10 @@ public class MigrationGroupManager extends SubCommand<Object> {
 
         AtomicInteger globalGroupCount = new AtomicInteger(0);
         for (Group g : gg.getGroupList()) {
-            plugin.getStorage().createAndLoadGroup(g.getName().toLowerCase(), CreationCause.INTERNAL).join();
-            me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().getIfLoaded(g.getName().toLowerCase());
+            String name = GROUP_RENAME_FUNCTION.apply(g.getName());
+
+            plugin.getStorage().createAndLoadGroup(name, CreationCause.INTERNAL).join();
+            me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().getIfLoaded(name);
 
             for (String node : g.getPermissionList()) {
                 boolean value = true;
@@ -113,7 +118,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
 
             for (String s : g.getInherits()) {
                 try {
-                    group.setPermission("group." + s.toLowerCase(), true);
+                    group.setPermission("group." + GROUP_RENAME_FUNCTION.apply(s), true);
                 } catch (Exception ex) {
                     log.handleException(ex);
                 }
@@ -146,7 +151,9 @@ public class MigrationGroupManager extends SubCommand<Object> {
 
             AtomicInteger groupWorldCount = new AtomicInteger(0);
             for (Group g : wdh.getGroupList()) {
-                groups.putIfAbsent(g.getName().toLowerCase(), new HashMap<>());
+                String name = GROUP_RENAME_FUNCTION.apply(g.getName());
+
+                groups.putIfAbsent(name, new HashMap<>());
 
                 for (String node : g.getPermissionList()) {
                     boolean value = true;
@@ -158,11 +165,11 @@ public class MigrationGroupManager extends SubCommand<Object> {
                         value = true;
                     }
 
-                    groups.get(g.getName().toLowerCase()).put(Maps.immutableEntry(worldMappingFunc.apply(world), node), value);
+                    groups.get(name).put(Maps.immutableEntry(worldMappingFunc.apply(world), node), value);
                 }
 
                 for (String s : g.getInherits()) {
-                    groups.get(g.getName().toLowerCase()).put(Maps.immutableEntry(worldMappingFunc.apply(world), "group." + s.toLowerCase()), true);
+                    groups.get(name).put(Maps.immutableEntry(worldMappingFunc.apply(world), "group." + GROUP_RENAME_FUNCTION.apply(s)), true);
                 }
                 log.logAllProgress("Migrated {} groups so far in world " + world, groupWorldCount.incrementAndGet());
             }
@@ -197,11 +204,11 @@ public class MigrationGroupManager extends SubCommand<Object> {
 
                 // Collect sub groups
                 users.get(uuid).putAll(user.subGroupListStringCopy().stream()
-                        .map(n -> "group." + n)
+                        .map(n -> "group." + GROUP_RENAME_FUNCTION.apply(n))
                         .map(n -> Maps.immutableEntry(finalWorld, n))
                         .collect(Collectors.toMap(n -> n, n -> true))
                 );
-                primaryGroups.put(uuid, user.getGroupName());
+                primaryGroups.put(uuid, GROUP_RENAME_FUNCTION.apply(user.getGroupName()));
 
                 log.logProgress("Migrated {} users so far in world " + world, userWorldCount.incrementAndGet());
             }
