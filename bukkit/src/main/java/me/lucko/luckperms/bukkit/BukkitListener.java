@@ -39,16 +39,22 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.PluginEnableEvent;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
 class BukkitListener extends AbstractListener implements Listener {
     private final LPBukkitPlugin plugin;
+
     private final Set<UUID> deniedAsyncLogin = Collections.synchronizedSet(new HashSet<>());
     private final Set<UUID> deniedLogin = new HashSet<>();
+
+    private final Map<UUID, BukkitTask> cleanupTasks = Collections.synchronizedMap(new HashMap<>());
 
     BukkitListener(LPBukkitPlugin plugin) {
         super(plugin);
@@ -71,20 +77,33 @@ class BukkitListener extends AbstractListener implements Listener {
             return;
         }
 
+        // remove any pending cleanup tasks
+        BukkitTask task = cleanupTasks.remove(e.getUniqueId());
+        if (task != null) {
+            task.cancel();
+        }
+
         // Process login
         onAsyncLogin(e.getUniqueId(), e.getName());
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerPreLoginMonitor(AsyncPlayerPreLoginEvent e) {
         // If they were denied before/at LOW, then don't bother handling here.
         if (deniedAsyncLogin.remove(e.getUniqueId())) {
+
+            // this is a problem, as they were denied at low priority, but are now being allowed.
+            if (e.getLoginResult() == AsyncPlayerPreLoginEvent.Result.ALLOWED) {
+                new IllegalStateException("Player connection was re-allowed for " + e.getUniqueId()).printStackTrace();
+                e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, "");
+            }
+
             return;
         }
 
         // Login event was cancelled by another plugin
         if (plugin.isStarted() && plugin.getStorage().isAcceptingLogins() && e.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
-            onLeave(e.getUniqueId());
+            cleanupUser(e.getUniqueId());
         }
     }
 
@@ -107,6 +126,12 @@ class BukkitListener extends AbstractListener implements Listener {
             return;
         }
 
+        // remove any pending cleanup tasks
+        BukkitTask task = cleanupTasks.remove(e.getPlayer().getUniqueId());
+        if (task != null) {
+            task.cancel();
+        }
+
         try {
             // Make a new permissible for the user
             LPPermissible lpPermissible = new LPPermissible(player, user, plugin);
@@ -120,24 +145,29 @@ class BukkitListener extends AbstractListener implements Listener {
 
         plugin.refreshAutoOp(player);
 
+        // We assume all users are not op, but those who are need extra calculation.
         if (player.isOp()) {
-
-            // We assume all users are not op, but those who are need extra calculation.
             plugin.doAsync(() -> user.getUserData().preCalculate(plugin.getPreProcessContexts(true)));
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerLoginMonitor(PlayerLoginEvent e) {
-        if (e.getResult() != PlayerLoginEvent.Result.ALLOWED) {
+        // If they were denied before/at LOW, then don't bother handling here.
+        if (deniedLogin.remove(e.getPlayer().getUniqueId())) {
 
-            // If they were denied before/at LOW, then don't bother handling here.
-            if (deniedLogin.remove(e.getPlayer().getUniqueId())) {
-                return;
+            // this is a problem, as they were denied at low priority, but are now being allowed.
+            if (e.getResult() == PlayerLoginEvent.Result.ALLOWED) {
+                new IllegalStateException("Player connection was re-allowed for " + e.getPlayer().getUniqueId()).printStackTrace();
+                e.disallow(PlayerLoginEvent.Result.KICK_OTHER, "");
             }
 
+            return;
+        }
+
+        if (e.getResult() != PlayerLoginEvent.Result.ALLOWED) {
             // The player got denied on sync login.
-            plugin.getServer().getScheduler().runTaskLater(plugin, () -> onLeave(e.getPlayer().getUniqueId()), 20L);
+            cleanupUser(e.getPlayer().getUniqueId());
         } else {
             plugin.refreshAutoOp(e.getPlayer());
         }
@@ -158,6 +188,19 @@ class BukkitListener extends AbstractListener implements Listener {
 
         // Call internal leave handling
         onLeave(player.getUniqueId());
+    }
+
+    private void cleanupUser(UUID uuid) {
+        if (cleanupTasks.containsKey(uuid)) {
+            return;
+        }
+
+        BukkitTask task = plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            onLeave(uuid);
+            cleanupTasks.remove(uuid);
+        }, 60L);
+
+        cleanupTasks.put(uuid, task);
     }
 
     @EventHandler
