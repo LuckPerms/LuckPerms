@@ -31,6 +31,7 @@ import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.ContextHelper;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -59,19 +60,37 @@ public class PermissionUnsetTemp extends SharedSubCommand {
         String world = ArgumentUtils.handleWorld(2, args);
 
         try {
-            switch (ContextHelper.determine(server, world)) {
-                case NONE:
-                    holder.unsetPermission(node, true);
-                    Message.UNSET_TEMP_PERMISSION_SUCCESS.send(sender, node, holder.getFriendlyName());
-                    break;
-                case SERVER:
-                    holder.unsetPermission(node, server, true);
-                    Message.UNSET_TEMP_PERMISSION_SERVER_SUCCESS.send(sender, node, holder.getFriendlyName(), server);
-                    break;
-                case SERVER_AND_WORLD:
-                    holder.unsetPermission(node, server, world, true);
-                    Message.UNSET_TEMP_PERMISSION_SERVER_WORLD_SUCCESS.send(sender, node, holder.getFriendlyName(), server, world);
-                    break;
+            // unset exact - with false value only
+            if (node.startsWith("group.")) {
+                switch (ContextHelper.determine(server, world)) {
+                    case NONE:
+                        holder.unsetPermissionExact(NodeFactory.make(node, false, true));
+                        Message.UNSET_TEMP_PERMISSION_SUCCESS.send(sender, node, holder.getFriendlyName());
+                        break;
+                    case SERVER:
+                        holder.unsetPermissionExact(NodeFactory.make(node, false, server, true));
+                        Message.UNSET_TEMP_PERMISSION_SERVER_SUCCESS.send(sender, node, holder.getFriendlyName(), server);
+                        break;
+                    case SERVER_AND_WORLD:
+                        holder.unsetPermissionExact(NodeFactory.make(node, false, server, world, true));
+                        Message.UNSET_TEMP_PERMISSION_SERVER_WORLD_SUCCESS.send(sender, node, holder.getFriendlyName(), server, world);
+                        break;
+                }
+            } else {
+                switch (ContextHelper.determine(server, world)) {
+                    case NONE:
+                        holder.unsetPermission(node, true);
+                        Message.UNSET_TEMP_PERMISSION_SUCCESS.send(sender, node, holder.getFriendlyName());
+                        break;
+                    case SERVER:
+                        holder.unsetPermission(node, server, true);
+                        Message.UNSET_TEMP_PERMISSION_SERVER_SUCCESS.send(sender, node, holder.getFriendlyName(), server);
+                        break;
+                    case SERVER_AND_WORLD:
+                        holder.unsetPermission(node, server, world, true);
+                        Message.UNSET_TEMP_PERMISSION_SERVER_WORLD_SUCCESS.send(sender, node, holder.getFriendlyName(), server, world);
+                        break;
+                }
             }
 
             LogEntry.build().actor(sender).acted(holder)

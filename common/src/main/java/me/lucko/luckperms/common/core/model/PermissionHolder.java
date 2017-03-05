@@ -876,6 +876,29 @@ public abstract class PermissionHolder {
     }
 
     /**
+     * Unsets a permission node
+     *
+     * @param node the node to unset
+     * @throws ObjectLacksException if the holder doesn't have this node already
+     */
+    public void unsetPermissionExact(Node node) throws ObjectLacksException {
+        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes());
+
+        synchronized (nodes) {
+            nodes.removeIf(e -> e.equals(node));
+        }
+        invalidateCache(true);
+
+        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes());
+
+        if (before.size() == after.size()) {
+            throw new ObjectLacksException();
+        }
+
+        plugin.getApiProvider().getEventFactory().handleNodeRemove(node, this, before, after);
+    }
+
+    /**
      * Unsets a transient permission node
      *
      * @param node the node to unset

@@ -42,6 +42,10 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
 
         if (user.getPrimaryGroup() != null && !user.getPrimaryGroup().isEmpty()) {
             for (Node node : user.getPermissions(false)) {
+                if (node.isServerSpecific() || node.isWorldSpecific()) {
+                    continue;
+                }
+
                 if (node.isGroupNode()) {
                     hasGroup = true;
                     break;
