@@ -28,6 +28,7 @@ import lombok.experimental.UtilityClass;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
@@ -44,7 +45,7 @@ public class Util {
             .build(new CacheLoader<Set<Context>, ImmutableContextSet>() {
                 @Override
                 public ImmutableContextSet load(Set<Context> contexts) {
-                    return ContextSet.fromEntries(contexts);
+                    return ImmutableContextSet.fromEntries(contexts);
                 }
             });
 
@@ -57,7 +58,7 @@ public class Util {
             });
 
     public static ContextSet convertContexts(@NonNull Set<Context> contexts) {
-        return SPONGE_TO_LP_CACHE.getUnchecked(contexts);
+        return SPONGE_TO_LP_CACHE.getUnchecked(ImmutableSet.copyOf(contexts));
     }
 
     public static Set<Context> convertContexts(@NonNull ContextSet contexts) {
