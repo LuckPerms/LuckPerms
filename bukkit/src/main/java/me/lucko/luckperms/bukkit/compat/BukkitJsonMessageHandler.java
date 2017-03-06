@@ -22,7 +22,6 @@
 
 package me.lucko.luckperms.bukkit.compat;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.Constructor;
@@ -58,7 +57,7 @@ public class BukkitJsonMessageHandler {
             }
         }
 
-        Class<?> packetChatClass = Class.forName(getVersionedClassName("PacketPlayOutChat"));
+        Class<?> packetChatClass = ReflectionUtil.nmsClass("PacketPlayOutChat");
         Constructor[] packetConstructors = packetChatClass.getDeclaredConstructors();
         for (Constructor c : packetConstructors) {
             Class<?>[] parameters = c.getParameterTypes();
@@ -68,28 +67,17 @@ public class BukkitJsonMessageHandler {
             }
         }
 
-        Class<?> baseComponentClass = Class.forName(getVersionedClassName("IChatBaseComponent"));
-        Class<?> chatSerializerClass = baseComponentClass.getClasses()[0];
+        Class<?> baseComponentClass = ReflectionUtil.nmsClass("IChatBaseComponent");
+        Class<?> chatSerializerClass;
+
+        if (baseComponentClass.getClasses().length > 0) {
+            chatSerializerClass = baseComponentClass.getClasses()[0];
+        } else {
+            // 1.7 class is here instead.
+            chatSerializerClass = ReflectionUtil.nmsClass("ChatSerializer");
+        }
 
         SERIALIZE_METHOD = chatSerializerClass.getDeclaredMethod("a", String.class);
-    }
-
-    private static String getVersionedClassName(String className) {
-        Class server = Bukkit.getServer().getClass();
-        if (!server.getSimpleName().equals("CraftServer")) {
-            throw new RuntimeException("Couldn't reflect into server " + server);
-        }
-
-        String version;
-        if (server.getName().equals("org.bukkit.craftbukkit.CraftServer")) {
-            // Non versioned class
-            version = ".";
-        } else {
-            version = server.getName().substring("org.bukkit.craftbukkit".length());
-            version = version.substring(0, version.length() - "CraftServer".length());
-        }
-
-        return "net.minecraft.server" + version + className;
     }
 
     private static synchronized boolean trySetup(Object player) {

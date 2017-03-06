@@ -37,7 +37,7 @@ public class MessageHandler {
     }
 
     public void sendJsonMessage(CommandSender sender, FancyMessage message) {
-        if (sender instanceof Player) {
+        if (ReflectionUtil.isChatCompatible() && sender instanceof Player) {
             Player player = (Player) sender;
             String json = message.toJSONString();
 
