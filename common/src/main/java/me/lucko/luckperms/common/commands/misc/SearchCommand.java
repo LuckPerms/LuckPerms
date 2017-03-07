@@ -72,8 +72,8 @@ public class SearchCommand extends SingleCommand {
         Map<UUID, String> uuidLookups = new HashMap<>();
         Function<UUID, String> lookupFunc = uuid -> uuidLookups.computeIfAbsent(uuid, u -> {
             String s = plugin.getStorage().getName(u).join();
-            if (s == null) {
-                s = "null";
+            if (s == null || s.isEmpty() || s.equals("null")) {
+                s = u.toString();
             }
             return s;
         });

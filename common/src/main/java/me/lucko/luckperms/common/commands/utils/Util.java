@@ -281,13 +281,15 @@ public class Util {
         int index = pageNumber - 1;
         List<List<HeldPermission<UUID>>> pages = divideList(sorted, 15);
 
-        if ((index < 0 || index >= pages.size())) {
+        if (index < 0 || index >= pages.size()) {
             pageNumber = 1;
             index = 0;
         }
 
         List<HeldPermission<UUID>> page = pages.get(index);
-        List<Map.Entry<String, HeldPermission<UUID>>> uuidMappedPage = page.stream().map(hp -> Maps.immutableEntry(uuidLookup.apply(hp.getHolder()), hp)).collect(Collectors.toList());
+        List<Map.Entry<String, HeldPermission<UUID>>> uuidMappedPage = page.stream()
+                .map(hp -> Maps.immutableEntry(uuidLookup.apply(hp.getHolder()), hp))
+                .collect(Collectors.toList());
 
         FancyMessage message = new FancyMessage("");
         String title = "&7(page &f" + pageNumber + "&7 of &f" + pages.size() + "&7 - &f" + sorted.size() + "&7 entries)";
@@ -316,7 +318,7 @@ public class Util {
         int index = pageNumber - 1;
         List<List<HeldPermission<String>>> pages = divideList(sorted, 15);
 
-        if ((index < 0 || index >= pages.size())) {
+        if (index < 0 || index >= pages.size()) {
             pageNumber = 1;
             index = 0;
         }
