@@ -84,6 +84,10 @@ public class ProgressLogger {
     }
 
     public void handleException(Exception ex) {
+        handleAndPrintException(ex);
+    }
+
+    public static void handleAndPrintException(Exception ex) {
         if (ex instanceof ObjectAlreadyHasException || ex instanceof ObjectLacksException) {
             return;
         }

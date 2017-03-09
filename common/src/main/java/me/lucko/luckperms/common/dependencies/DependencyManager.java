@@ -56,7 +56,7 @@ public class DependencyManager {
         }
     }
 
-    private static final Map<StorageType, List<Dependency>> STORAGE_DEPENDENCIES = ImmutableMap.<StorageType, List<Dependency>>builder()
+    public static final Map<StorageType, List<Dependency>> STORAGE_DEPENDENCIES = ImmutableMap.<StorageType, List<Dependency>>builder()
             .put(StorageType.JSON, ImmutableList.of())
             .put(StorageType.YAML, ImmutableList.of())
             .put(StorageType.MONGODB, ImmutableList.of(Dependency.MONGODB_DRIVER))
@@ -78,6 +78,10 @@ public class DependencyManager {
             dependencies.add(Dependency.JEDIS);
         }
 
+        loadDependencies(plugin, dependencies);
+    }
+
+    public static void loadDependencies(LuckPermsPlugin plugin, List<Dependency> dependencies) {
         plugin.getLog().info("Identified the following dependencies: " + dependencies.toString());
 
         File data = new File(plugin.getDataDirectory(), "lib");

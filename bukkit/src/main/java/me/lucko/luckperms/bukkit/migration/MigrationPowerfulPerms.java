@@ -22,106 +22,51 @@
 
 package me.lucko.luckperms.bukkit.migration;
 
+import lombok.SneakyThrows;
+
 import com.github.cheesesoftware.PowerfulPermsAPI.CachedGroup;
 import com.github.cheesesoftware.PowerfulPermsAPI.Group;
 import com.github.cheesesoftware.PowerfulPermsAPI.Permission;
 import com.github.cheesesoftware.PowerfulPermsAPI.PermissionManager;
 import com.github.cheesesoftware.PowerfulPermsAPI.PowerfulPermsPlugin;
-import com.github.cheesesoftware.PowerfulPermsAPI.ResultRunnable;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.zaxxer.hikari.HikariDataSource;
 
+import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.event.cause.CreationCause;
-import me.lucko.luckperms.bukkit.migration.utils.LPResultRunnable;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.storage.StorageType;
+import me.lucko.luckperms.common.utils.HikariSupplier;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.common.utils.ProgressLogger;
 
 import org.bukkit.Bukkit;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 
 import static me.lucko.luckperms.common.constants.Permission.MIGRATION;
 
-@SuppressWarnings("unchecked")
+// Only supports the latest versions of the PP API. (it seems to change randomly almost every release)
 public class MigrationPowerfulPerms extends SubCommand<Object> {
-    private static Method getPlayerPermissionsMethod = null;
-    private static Method getPlayerGroupsMethod = null;
-    private static Method getGroupMethod = null;
-
-    // lol, nice "api"
-    private static boolean superLegacy = false;
-    private static boolean legacy = false;
-
-    static {
-        try {
-            Class.forName("com.github.cheesesoftware.PowerfulPermsAPI.ResponseRunnable");
-            legacy = true;
-        } catch (ClassNotFoundException ignored) {}
-
-        if (legacy) {
-            try {
-                getPlayerPermissionsMethod = PermissionManager.class.getMethod("getPlayerOwnPermissions", UUID.class, ResultRunnable.class);
-                getPlayerPermissionsMethod.setAccessible(true);
-            } catch (NoSuchMethodException ignored) {}
-        } else {
-            try {
-                getPlayerPermissionsMethod = PermissionManager.class.getMethod("getPlayerOwnPermissions", UUID.class);
-                getPlayerPermissionsMethod.setAccessible(true);
-            } catch (NoSuchMethodException ignored) {}
-        }
-
-        try {
-            getGroupMethod = CachedGroup.class.getMethod("getGroup");
-            getGroupMethod.setAccessible(true);
-            superLegacy = true;
-        } catch (NoSuchMethodException ignored) {}
-
-        if (!legacy) {
-            try {
-                getPlayerGroupsMethod = PermissionManager.class.getMethod("getPlayerOwnGroups", UUID.class);
-                getPlayerGroupsMethod.setAccessible(true);
-            } catch (NoSuchMethodException e) {
-                e.printStackTrace();
-            }
-        } else {
-            try {
-                getPlayerGroupsMethod = PermissionManager.class.getMethod("getPlayerOwnGroups", UUID.class, ResultRunnable.class);
-                getPlayerGroupsMethod.setAccessible(true);
-            } catch (NoSuchMethodException e) {
-                try {
-                    getPlayerGroupsMethod = PermissionManager.class.getMethod("getPlayerGroups", UUID.class, ResultRunnable.class);
-                    getPlayerGroupsMethod.setAccessible(true);
-                } catch (NoSuchMethodException e1) {
-                    e1.printStackTrace();
-                }
-            }
-        }
-    }
-
     public MigrationPowerfulPerms() {
         super("powerfulperms", "Migration from PowerfulPerms", MIGRATION, Predicates.not(5),
                 Arg.list(
@@ -136,44 +81,37 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) throws CommandException {
-        try {
-            return run(plugin, sender, args);
-        } catch (Throwable t) {
-            t.printStackTrace();
-            return CommandResult.FAILURE;
-        }
-    }
-
-    private CommandResult run(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         ProgressLogger log = new ProgressLogger("PowerfulPerms");
         log.addListener(plugin.getConsoleSender());
         log.addListener(sender);
 
         log.log("Starting.");
-        
+
         if (!Bukkit.getPluginManager().isPluginEnabled("PowerfulPerms")) {
             log.logErr("PowerfulPerms is not loaded.");
             return CommandResult.STATE_ERROR;
         }
 
-        final String address = args.get(0);
-        final String database = args.get(1);
-        final String username = args.get(2);
-        final String password = args.get(3);
-        final String dbTable = args.get(4);
+        String method = plugin.getConfiguration().get(ConfigKeys.STORAGE_METHOD);
+        StorageType type = StorageType.parse(method);
+
+        if (type == null || type != StorageType.MYSQL) {
+            // We need to load the Hikari/MySQL stuff.
+            DependencyManager.loadDependencies(plugin, DependencyManager.STORAGE_DEPENDENCIES.get(StorageType.MYSQL));
+        }
+
+        String address = args.get(0);
+        String database = args.get(1);
+        String username = args.get(2);
+        String password = args.get(3);
+        String dbTable = args.get(4);
 
         // Find a list of UUIDs
         log.log("Getting a list of UUIDs to migrate.");
         Set<UUID> uuids = new HashSet<>();
 
-        try (HikariDataSource hikari = new HikariDataSource()) {
-            hikari.setMaximumPoolSize(2);
-            hikari.setDataSourceClassName("com.mysql.jdbc.jdbc2.optional.MysqlDataSource");
-            hikari.addDataSourceProperty("serverName", address.split(":")[0]);
-            hikari.addDataSourceProperty("port", address.split(":")[1]);
-            hikari.addDataSourceProperty("databaseName", database);
-            hikari.addDataSourceProperty("user", username);
-            hikari.addDataSourceProperty("password", password);
+        try (HikariSupplier hikari = new HikariSupplier(address, database, username, password)) {
+            hikari.setup();
 
             try (Connection c = hikari.getConnection()) {
                 DatabaseMetaData meta = c.getMetaData();
@@ -220,23 +158,52 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         PowerfulPermsPlugin ppPlugin = (PowerfulPermsPlugin) Bukkit.getPluginManager().getPlugin("PowerfulPerms");
         PermissionManager pm = ppPlugin.getPermissionManager();
 
+        Collection<Group> groups = pm.getGroups().values();
+
+        int maxWeight = 0;
+
         // Groups first.
         log.log("Starting group migration.");
         AtomicInteger groupCount = new AtomicInteger(0);
-        Map<Integer, Group> groups = pm.getGroups(); // All versions
-        for (Group g : groups.values()) {
-            plugin.getStorage().createAndLoadGroup(g.getName().toLowerCase(), CreationCause.INTERNAL).join();
-            final me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().getIfLoaded(g.getName().toLowerCase());
+        for (Group g : groups) {
+            maxWeight = Math.max(maxWeight, g.getRank());
 
-            for (Permission p : g.getOwnPermissions()) { // All versions
-                applyPerm(group, p, log);
+            final String name = g.getName().toLowerCase();
+            plugin.getStorage().createAndLoadGroup(name, CreationCause.INTERNAL).join();
+            final me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().getIfLoaded(name);
+
+            for (Permission p : g.getOwnPermissions()) {
+                applyPerm(group, p);
             }
 
-            for (Group parent : g.getParents()) { // All versions
-                try {
-                    group.setPermission("group." + parent.getName().toLowerCase(), true);
-                } catch (Exception ex) {
-                    log.handleException(ex);
+            for (Group parent : g.getParents()) {
+                group.setPermissionUnchecked(NodeFactory.make("group." + parent.getName().toLowerCase(), true));
+            }
+
+            // server --> prefix afaik
+            for (Map.Entry<String, String> prefix : g.getPrefixes().entrySet()) {
+                String server = prefix.getKey().toLowerCase();
+                if (prefix.getKey().equals("*") || prefix.getKey().equals("all")) {
+                    server = null;
+                }
+
+                if (server != null) {
+                    group.setPermissionUnchecked(NodeFactory.makePrefixNode(g.getRank(), prefix.getValue()).setServer(server).build());
+                } else {
+                    group.setPermissionUnchecked(NodeFactory.makePrefixNode(g.getRank(), prefix.getValue()).build());
+                }
+            }
+
+            for (Map.Entry<String, String> suffix : g.getSuffixes().entrySet()) {
+                String server = suffix.getKey().toLowerCase();
+                if (suffix.getKey().equals("*") || suffix.getKey().equals("all")) {
+                    server = null;
+                }
+
+                if (server != null) {
+                    group.setPermissionUnchecked(NodeFactory.makeSuffixNode(g.getRank(), suffix.getValue()).setServer(server).build());
+                } else {
+                    group.setPermissionUnchecked(NodeFactory.makeSuffixNode(g.getRank(), suffix.getValue()).build());
                 }
             }
 
@@ -245,291 +212,134 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         }
         log.log("Migrated " + groupCount.get() + " groups");
 
-        // Now users.
+        // Migrate all users
         log.log("Starting user migration.");
-        final Map<UUID, CountDownLatch> progress = new HashMap<>();
+        AtomicInteger userCount = new AtomicInteger(0);
+
+        // Increment the max weight from the group migrations. All user meta should override.
+        maxWeight += 5;
 
         // Migrate all users and their groups
         for (UUID uuid : uuids) {
-            progress.put(uuid, new CountDownLatch(2));
 
             // Create a LuckPerms user for the UUID
             plugin.getStorage().loadUser(uuid, "null").join();
             User user = plugin.getUserManager().get(uuid);
 
-            // Get a list of Permissions held by the user from the PP API.
-            getPlayerPermissions(pm, uuid, perms -> { // Changes each version
-                perms.forEach(p -> applyPerm(user, p, log));
+            List<Permission> permissions = joinFuture(pm.getPlayerOwnPermissions(uuid));
 
-                // Update the progress so the user can be saved and unloaded.
-                synchronized (progress) {
-                    progress.get(uuid).countDown();
-                    if (progress.get(uuid).getCount() == 0) {
-                        plugin.getStorage().saveUser(user);
-                        plugin.getUserManager().cleanup(user);
-                    }
-                }
-            });
+            for (Permission p : permissions) {
+                applyPerm(user, p);
+            }
 
-            // Migrate the user's groups to LuckPerms from PP.
-            Consumer<Map<String, List<CachedGroup>>> callback = groups1 -> {
-                for (Map.Entry<String, List<CachedGroup>> e : groups1.entrySet()) {
-                    final String server;
-                    if (e.getKey() != null && (e.getKey().equals("") || e.getKey().equalsIgnoreCase("all"))) {
-                        server = null;
-                    } else {
-                        server = e.getKey();
-                    }
-
-                    if (superLegacy) {
-                        e.getValue().stream()
-                                .filter(cg -> !cg.isNegated())
-                                .map(cg -> {
-                                    try {
-                                        return (Group) getGroupMethod.invoke(cg);
-                                    } catch (IllegalAccessException | InvocationTargetException e1) {
-                                        e1.printStackTrace();
-                                        return null;
-                                    }
-                                })
-                                .forEach(g -> {
-                                    if (g != null) {
-                                        if (server == null) {
-                                            try {
-                                                user.setPermission("group." + g.getName().toLowerCase(), true);
-                                            } catch (Exception ex) {
-                                                log.handleException(ex);
-                                            }
-                                        } else {
-                                            try {
-                                                user.setPermission("group." + g.getName().toLowerCase(), true, server);
-                                            } catch (Exception ex) {
-                                                log.handleException(ex);
-                                            }
-                                        }
-                                    }
-                                });
-                    } else {
-                        e.getValue().stream()
-                                .filter(g -> !g.hasExpired() && !g.isNegated())
-                                .forEach(g -> {
-                                    final Group group = pm.getGroup(g.getGroupId());
-                                    if (g.willExpire()) {
-                                        if (server == null) {
-                                            try {
-                                                user.setPermission("group." + group.getName().toLowerCase(), true, g.getExpirationDate().getTime() / 1000L);
-                                            } catch (Exception ex) {
-                                                log.handleException(ex);
-                                            }
-                                        } else {
-                                            try {
-                                                user.setPermission("group." + group.getName().toLowerCase(), true, server, g.getExpirationDate().getTime() / 1000L);
-                                            } catch (Exception ex) {
-                                                log.handleException(ex);
-                                            }
-                                        }
-
-                                    } else {
-                                        if (server == null) {
-                                            try {
-                                                user.setPermission("group." + group.getName().toLowerCase(), true);
-                                            } catch (Exception ex) {
-                                                log.handleException(ex);
-                                            }
-                                        } else {
-                                            try {
-                                                user.setPermission("group." + group.getName().toLowerCase(), true, server);
-                                            } catch (Exception ex) {
-                                                log.handleException(ex);
-                                            }
-                                        }
-                                    }
-                                });
-                    }
+            // server --> list of groups
+            Map<String, List<CachedGroup>> parents = joinFuture(pm.getPlayerOwnGroups(uuid));
+            for (Map.Entry<String, List<CachedGroup>> parent : parents.entrySet()) {
+                String server = parent.getKey().toLowerCase();
+                if (parent.getKey().equals("*") || parent.getKey().equals("all")) {
+                    server = null;
                 }
 
-                // Update the progress so the user can be saved and unloaded.
-                synchronized (progress) {
-                    progress.get(uuid).countDown();
-                    if (progress.get(uuid).getCount() == 0) {
-                        plugin.getStorage().saveUser(user);
-                        plugin.getUserManager().cleanup(user);
-                    }
-                }
-            };
-
-            if (!legacy) {
-                try {
-                    ListenableFuture<LinkedHashMap<String, List<CachedGroup>>> future = (ListenableFuture<LinkedHashMap<String, List<CachedGroup>>>) getPlayerGroupsMethod.invoke(pm, uuid);
-                    try {
-                        if (future.isDone()) {
-                            callback.accept(future.get());
-                        } else {
-                            future.addListener(() -> {
-                                try {
-                                    callback.accept(future.get());
-                                } catch (InterruptedException | ExecutionException e) {
-                                    e.printStackTrace();
-                                }
-                            }, Runnable::run);
-                        }
-                    } catch (InterruptedException | ExecutionException e) {
-                        e.printStackTrace();
-                    }
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                try {
-                    getPlayerGroupsMethod.invoke(pm, uuid, new LPResultRunnable<LinkedHashMap<String, List<CachedGroup>>>() {
-                        @Override
-                        public void run() {
-                            callback.accept(getResult());
-                        }
-                    });
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    e.printStackTrace();
+                for (CachedGroup group : parent.getValue()) {
+                    applyGroup(pm, user, group, server);
                 }
             }
+
+            String prefix = joinFuture(pm.getPlayerOwnPrefix(uuid));
+            String suffix = joinFuture(pm.getPlayerOwnSuffix(uuid));
+
+            if (prefix != null && !prefix.equals("")) {
+                user.setPermissionUnchecked(NodeFactory.makePrefixNode(maxWeight, prefix).build());
+            }
+
+            if (suffix != null && !suffix.equals("")) {
+                user.setPermissionUnchecked(NodeFactory.makeSuffixNode(maxWeight, suffix).build());
+            }
+
+            String primary = joinFuture(pm.getPlayerPrimaryGroup(uuid)).getName().toLowerCase();
+            if (!primary.equals("default")) {
+                user.setPermissionUnchecked(NodeFactory.make("group." + primary));
+                user.setPrimaryGroup(primary);
+            }
+
+            plugin.getUserManager().cleanup(user);
+            plugin.getStorage().saveUser(user);
+            log.logProgress("Migrated {} users so far.", userCount.incrementAndGet());
         }
 
-        // All groups are migrated, but there may still be some users being migrated.
-        // This block will wait for all users to be completed.
-        log.log("Waiting for user migration to complete. This may take some time");
-        boolean sleep = true;
-        while (sleep) {
-            sleep = false;
-
-            for (Map.Entry<UUID, CountDownLatch> e : progress.entrySet()) {
-                if (e.getValue().getCount() != 0) {
-                    sleep = true;
-                    break;
-                }
-            }
-
-            if (sleep) {
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-
-        }
-
-        // We done.
+        log.log("Migrated " + userCount.get() + " users.");
         log.log("Success! Migration complete.");
         return CommandResult.SUCCESS;
     }
 
-    private void applyPerm(PermissionHolder holder, Permission p, ProgressLogger log) {
+    private void applyPerm(PermissionHolder holder, Permission p) {
         String node = p.getPermissionString();
         boolean value = true;
-        if (node.startsWith("!")) {
+        if (node.startsWith("!") || node.startsWith("-")) {
             node = node.substring(1);
             value = false;
         }
 
         String server = p.getServer();
-        if (server != null && server.equalsIgnoreCase("all")) {
+        if (server != null && (server.equalsIgnoreCase("all") || server.equalsIgnoreCase("*"))) {
             server = null;
         }
 
         String world = p.getWorld();
-        if (world != null && world.equalsIgnoreCase("all")) {
+        if (world != null && (world.equalsIgnoreCase("all") || world.equalsIgnoreCase("*"))) {
             world = null;
         }
 
         long expireAt = 0L;
-        if (!superLegacy) {
-            if (p.willExpire()) {
-                expireAt = p.getExpirationDate().getTime() / 1000L;
-            }
+        if (p.willExpire()) {
+            expireAt = p.getExpirationDate().getTime() / 1000L;
         }
 
         if (world != null && server == null) {
             server = "global";
         }
 
-        if (world != null) {
-            if (expireAt == 0L) {
-                try {
-                    holder.setPermission(node, value, server, world);
-                } catch (Exception ex) {
-                    log.handleException(ex);
-                }
-            } else {
-                try {
-                    holder.setPermission(node, value, server, world, expireAt);
-                } catch (Exception ex) {
-                    log.handleException(ex);
-                }
-            }
+        Node.Builder nb = NodeFactory.newBuilder(node).setValue(value);
 
-        } else if (server != null) {
-            if (expireAt == 0L) {
-                try {
-                    holder.setPermission(node, value, server);
-                } catch (Exception ex) {
-                    log.handleException(ex);
-                }
-            } else {
-                try {
-                    holder.setPermission(node, value, server, expireAt);
-                } catch (Exception ex) {
-                    log.handleException(ex);
-                }
-            }
-        } else {
-            if (expireAt == 0L) {
-                try {
-                    holder.setPermission(node, value);
-                } catch (Exception ex) {
-                    log.handleException(ex);
-                }
-            } else {
-                try {
-                    holder.setPermission(node, value, expireAt);
-                } catch (Exception ex) {
-                    log.handleException(ex);
-                }
-            }
+        if (expireAt != 0) {
+            nb.setExpiry(expireAt);
         }
+
+        if (server != null) {
+            nb.setServer(server);
+        }
+
+        if (world != null) {
+            nb.setWorld(world);
+        }
+
+        holder.setPermissionUnchecked(nb.build());
     }
 
-    private static void getPlayerPermissions(PermissionManager manager, UUID uuid, Consumer<List<Permission>> callback) {
-        if (legacy) {
-            try {
-                getPlayerPermissionsMethod.invoke(manager, uuid, new LPResultRunnable<List<Permission>>() {
-                    @Override
-                    public void run() {
-                        callback.accept(getResult());
-                    }
-                });
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                e.printStackTrace();
-            }
-        } else {
-            try {
-                ListenableFuture<List<Permission>> lf = (ListenableFuture<List<Permission>>) getPlayerPermissionsMethod.invoke(manager, uuid);
-                try {
-                    if (lf.isDone()) {
-                        callback.accept(lf.get());
-                    } else {
-                        lf.addListener(() -> {
-                            try {
-                                callback.accept(lf.get());
-                            } catch (InterruptedException | ExecutionException e) {
-                                e.printStackTrace();
-                            }
-                        }, Runnable::run);
-                    }
-                } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
-                }
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                e.printStackTrace();
-            }
+    private void applyGroup(PermissionManager pm, PermissionHolder holder, CachedGroup g, String server) {
+        Group group = pm.getGroup(g.getGroupId());
+        String node = "group." + group.getName();
+
+        long expireAt = 0L;
+        if (g.willExpire()) {
+            expireAt = g.getExpirationDate().getTime() / 1000L;
         }
+
+        Node.Builder nb = NodeFactory.newBuilder(node);
+
+        if (expireAt != 0) {
+            nb.setExpiry(expireAt);
+        }
+
+        if (server != null) {
+            nb.setServer(server);
+        }
+
+        holder.setPermissionUnchecked(nb.build());
+    }
+
+    @SneakyThrows
+    private static <T> T joinFuture(Future<T> future) {
+        return future.get();
     }
 }
