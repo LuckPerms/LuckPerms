@@ -70,7 +70,7 @@ public class Util {
         ListIterator<String> iterator = input.listIterator();
         while (iterator.hasNext()) {
             String value = iterator.next();
-            if (!(value.length() >= 3)) {
+            if (value.length() < 3) {
                 continue;
             }
 
@@ -224,7 +224,7 @@ public class Util {
                 new FancyMessage("Click to remove this node from " + holderName).color(ChatColor.getByChar('7'))
         );
 
-        String command = NodeFactory.nodeAsCommand(node, group ? holderName : holderName, group)
+        String command = NodeFactory.nodeAsCommand(node, holderName, group)
                 .replace("/luckperms", "/" + label)
                 .replace("permission set", "permission unset")
                 .replace("parent add", "parent remove")
@@ -250,7 +250,7 @@ public class Util {
         int index = pageNumber - 1;
         List<List<Node>> pages = divideList(l, 15);
 
-        if ((index < 0 || index >= pages.size())) {
+        if (index < 0 || index >= pages.size()) {
             pageNumber = 1;
             index = 0;
         }
@@ -460,7 +460,7 @@ public class Util {
         return sb.delete(sb.length() - 6, sb.length()).toString();
     }
 
-    public class MetaComparator implements Comparator<Map.Entry<Integer, ? extends Node>> {
+    public static class MetaComparator implements Comparator<Map.Entry<Integer, ? extends Node>> {
 
         @Override
         public int compare(Map.Entry<Integer, ? extends Node> o1, Map.Entry<Integer, ? extends Node> o2) {

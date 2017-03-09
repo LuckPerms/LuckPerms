@@ -40,9 +40,10 @@ import me.lucko.luckperms.common.utils.ProgressLogger;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
@@ -83,6 +84,8 @@ public class ExportCommand extends SingleCommand {
             return CommandResult.INVALID_ARGS;
         }
 
+        Path path = f.toPath();
+
         try {
             f.createNewFile();
         } catch (IOException e) {
@@ -91,12 +94,12 @@ public class ExportCommand extends SingleCommand {
             return CommandResult.FAILURE;
         }
 
-        if (!Files.isWritable(f.toPath())) {
+        if (!Files.isWritable(path)) {
             Message.LOG_EXPORT_NOT_WRITABLE.send(sender, f.getAbsolutePath());
             return CommandResult.FAILURE;
         }
 
-        try (FileWriter fWriter = new FileWriter(f, true); BufferedWriter writer = new BufferedWriter(fWriter)) {
+        try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
             log.log("Starting.");
 
             write(writer, "# LuckPerms Export File");
@@ -194,11 +197,7 @@ public class ExportCommand extends SingleCommand {
             }
             log.log("Exported " + userCount.get() + " users.");
 
-            try {
-                writer.flush();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            writer.flush();
 
             log.getListeners().forEach(l -> Message.LOG_EXPORT_SUCCESS.send(l, f.getAbsolutePath()));
             return CommandResult.SUCCESS;

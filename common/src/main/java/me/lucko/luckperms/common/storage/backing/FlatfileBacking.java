@@ -30,9 +30,9 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -140,15 +140,11 @@ abstract class FlatfileBacking extends AbstractBacking {
     private Map<String, String> getUUIDCache() {
         Map<String, String> cache = new HashMap<>();
 
-        try {
-            try (FileReader fileReader = new FileReader(uuidData)) {
-                try (BufferedReader bufferedReader = new BufferedReader(fileReader)) {
-                    Properties props = new Properties();
-                    props.load(bufferedReader);
-                    for (String key : props.stringPropertyNames()) {
-                        cache.put(key, props.getProperty(key));
-                    }
-                }
+        try (BufferedReader reader = Files.newBufferedReader(uuidData.toPath(), StandardCharsets.UTF_8)) {
+            Properties props = new Properties();
+            props.load(reader);
+            for (String key : props.stringPropertyNames()) {
+                cache.put(key, props.getProperty(key));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -157,15 +153,11 @@ abstract class FlatfileBacking extends AbstractBacking {
     }
 
     private void saveUUIDCache(Map<String, String> cache) {
-        try {
-            try (FileWriter fileWriter = new FileWriter(uuidData)) {
-                try (BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {
-                    Properties properties = new Properties();
-                    properties.putAll(cache);
-                    properties.store(bufferedWriter, null);
-                }
-            }
-
+        try (BufferedWriter writer = Files.newBufferedWriter(uuidData.toPath(), StandardCharsets.UTF_8)) {
+            Properties properties = new Properties();
+            properties.putAll(cache);
+            properties.store(writer, null);
+            writer.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }

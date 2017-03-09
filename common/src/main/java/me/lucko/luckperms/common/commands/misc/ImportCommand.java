@@ -34,8 +34,9 @@ import me.lucko.luckperms.common.utils.Predicates;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 public class ImportCommand extends SingleCommand {
@@ -62,7 +63,9 @@ public class ImportCommand extends SingleCommand {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (!Files.isReadable(f.toPath())) {
+        Path path = f.toPath();
+
+        if (!Files.isReadable(path)) {
             Message.IMPORT_LOG_NOT_READABLE.send(sender, f.getAbsolutePath());
             return CommandResult.FAILURE;
         }
@@ -70,7 +73,7 @@ public class ImportCommand extends SingleCommand {
         List<String> commands;
 
         try {
-            commands = Files.readAllLines(f.toPath(), Charset.defaultCharset());
+            commands = Files.readAllLines(path, StandardCharsets.UTF_8);
         } catch (IOException e) {
             e.printStackTrace();
             Message.IMPORT_LOG_FAILURE.send(sender);

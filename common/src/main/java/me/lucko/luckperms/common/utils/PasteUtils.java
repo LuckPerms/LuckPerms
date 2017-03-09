@@ -22,7 +22,6 @@
 
 package me.lucko.luckperms.common.utils;
 
-import com.google.common.base.Charsets;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonWriter;
@@ -62,7 +61,7 @@ public class PasteUtils {
                 return null;
             }
 
-            JsonObject response = new Gson().fromJson(new InputStreamReader(connection.getInputStream(), Charsets.UTF_8), JsonObject.class);
+            JsonObject response = new Gson().fromJson(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8), JsonObject.class);
             String pasteUrl = response.get("html_url").getAsString();
             connection.disconnect();
 

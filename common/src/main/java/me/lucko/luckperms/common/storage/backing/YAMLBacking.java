@@ -43,12 +43,9 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -84,16 +81,10 @@ public class YAMLBacking extends FlatfileBacking {
     }
 
     private boolean writeMapToFile(File file, Map<String, Object> values) {
-        try {
-            try (FileOutputStream outputStream = new FileOutputStream(file)) {
-                try (OutputStreamWriter outputWriter = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)) {
-                    try (BufferedWriter bufferedWriter = new BufferedWriter(outputWriter)) {
-                        getYaml().dump(values, bufferedWriter);
-                        bufferedWriter.flush();
-                        return true;
-                    }
-                }
-            }
+        try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
+            getYaml().dump(values, writer);
+            writer.flush();
+            return true;
         } catch (Throwable t) {
             plugin.getLog().warn("Exception whilst writing to file: " + file.getAbsolutePath());
             t.printStackTrace();
@@ -103,14 +94,8 @@ public class YAMLBacking extends FlatfileBacking {
 
     private boolean readMapFromFile(File file, Function<Map<String, Object>, Boolean> readOperation) {
         boolean success = false;
-        try {
-            try (FileInputStream fileInput = new FileInputStream(file)) {
-                try (InputStreamReader inputReader = new InputStreamReader(fileInput, StandardCharsets.UTF_8)) {
-                    try (BufferedReader bufferedReader = new BufferedReader(inputReader)) {
-                        success = readOperation.apply((Map<String, Object>) getYaml().load(bufferedReader));
-                    }
-                }
-            }
+        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
+            success = readOperation.apply((Map<String, Object>) getYaml().load(reader));
         } catch (Throwable t) {
             plugin.getLog().warn("Exception whilst reading from file: " + file.getAbsolutePath());
             t.printStackTrace();
