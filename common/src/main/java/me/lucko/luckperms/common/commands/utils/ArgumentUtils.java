@@ -25,6 +25,8 @@ package me.lucko.luckperms.common.commands.utils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import com.google.common.base.Splitter;
+
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.commands.CommandException;
@@ -38,7 +40,9 @@ import java.util.function.Function;
  * Utility class to help process arguments, and throw checked exceptions if the arguments are invalid.
  */
 public class ArgumentUtils {
+    private static final Splitter CONTEXT_SPLITTER = Splitter.on('=').limit(2).omitEmptyStrings();
     public static final Function<String, String> WRAPPER = s -> s.contains(" ") ? "\"" + s + "\"" : s;
+
 
     public static String handleString(int index, List<String> args) {
         return args.get(index).replace("{SPACE}", " ");
@@ -130,6 +134,37 @@ public class ArgumentUtils {
 
     public static String handleWorld(int index, List<String> args) {
         return args.size() > index ? args.get(index).toLowerCase() : null;
+    }
+
+    public static MutableContextSet handleContext(int fromIndex, List<String> args) {
+        if (args.size() > fromIndex) {
+
+            MutableContextSet set = MutableContextSet.create();
+
+            List<String> contexts = args.subList(fromIndex, args.size() - 1);
+
+            for (int i = 0; i < contexts.size(); i++) {
+                String pair = contexts.get(i);
+
+                // one of the first two values, and doesn't have a key
+                if (i <= 1 && !pair.contains("=")) {
+                    String key = i == 0 ? "server" : "world";
+                    set.add(key, pair);
+                    continue;
+                }
+
+                List<String> keyValue = CONTEXT_SPLITTER.splitToList(pair);
+                if (keyValue.size() != 2) {
+                    continue;
+                }
+
+                set.add(keyValue.get(0), keyValue.get(1));
+            }
+
+            return set;
+        } else {
+            return MutableContextSet.create();
+        }
     }
 
     public static int handlePriority(int index, List<String> args) throws ArgumentException {
