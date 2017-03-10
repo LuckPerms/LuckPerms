@@ -410,6 +410,7 @@ public enum Message {
     LOG_EXPORT_SUCCESS("&aSuccessfully exported the log to &b{0}&a.", true),
 
     IMPORT_ALREADY_RUNNING("Another import process is already running. Please wait for it to finish and try again.", true),
+    EXPORT_ALREADY_RUNNING("Another export process is already running. Please wait for it to finish and try again.", true),
     IMPORT_LOG_DOESNT_EXIST("Error: File {0} does not exist.", true),
     IMPORT_LOG_NOT_READABLE("Error: File {0} is not readable.", true),
     IMPORT_LOG_FAILURE("An unexpected error occured whilst reading from the log file.", true),

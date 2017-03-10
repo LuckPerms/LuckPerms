@@ -24,7 +24,6 @@ package me.lucko.luckperms.common.data;
 
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import com.google.common.base.Splitter;
@@ -48,33 +47,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
- * Class to handle import operations
+ * Handles import operations
  */
-@RequiredArgsConstructor
-public class Importer {
-    private final CommandManager commandManager;
+public class Importer implements Runnable {
+    private static final int PROGRESS_REPORT_SECONDS = 10;
 
-    private boolean running = false;
-    private Set<Sender> notify = ImmutableSet.of();
-    private List<String> commands = null;
-    private Map<Integer, Result> cmdResult = null;
+    private final CommandManager commandManager;
+    private final Set<Sender> notify;
+    private final List<String> commands;
+    private final Map<Integer, Result> cmdResult;
+    private final FakeSender fake;
 
     private long lastMsg = 0;
     private int executing = -1;
 
-    public synchronized boolean startRun() {
-        if (running) {
-            return false;
-        }
+    public Importer(CommandManager commandManager, Sender executor, List<String> commands) {
+        this.commandManager = commandManager;
 
-        running = true;
-        return true;
-    }
-
-    public void start(Sender executor, List<String> commands) {
         if (executor.isConsole()) {
             this.notify = ImmutableSet.of(executor);
         } else {
@@ -90,29 +83,20 @@ public class Importer {
                 .map(s -> s.startsWith("luckperms ") ? s.substring("luckperms ".length()) : s)
                 .collect(Collectors.toList());
 
-        cmdResult = new HashMap<>();
-
-        run();
+        this.cmdResult = new HashMap<>();
+        this.fake = new FakeSender();
     }
 
-    private void cleanup() {
-        notify = ImmutableSet.of();
-        commands = null;
-        cmdResult = null;
-        lastMsg = 0;
-        executing = -1;
-        running = false;
-    }
-
+    @Override
     public void run() {
         long startTime = System.currentTimeMillis();
         notify.forEach(s -> Message.IMPORT_START.send(s));
-        final Sender fake = new FakeSender(this);
 
         int index = 1;
         for (String command : commands) {
-            if (lastMsg < (System.currentTimeMillis() / 1000) - 5) {
-                lastMsg = System.currentTimeMillis() / 1000;
+            long time = System.currentTimeMillis() / 1000;
+            if (lastMsg < (time - PROGRESS_REPORT_SECONDS)) {
+                lastMsg = time;
 
                 sendProgress(index);
             }
@@ -134,80 +118,57 @@ public class Importer {
         }
 
         long endTime = System.currentTimeMillis();
-        double seconds = (endTime - startTime) / 1000.0;
+        double seconds = (endTime - startTime) / 1000;
 
-        int errors = 0;
-        for (Map.Entry<Integer, Result> e : cmdResult.entrySet()) {
-            if (e.getValue().getResult() != null && !e.getValue().getResult().asBoolean()) {
-                errors++;
-            }
-        }
+        int errors = (int) cmdResult.values().stream().filter(v -> v.getResult() != null && !v.getResult().asBoolean()).count();
 
         if (errors == 0) {
-            for (Sender s : notify) {
-                Message.IMPORT_END_COMPLETE.send(s, seconds);
-            }
+            notify.forEach(s -> Message.IMPORT_END_COMPLETE.send(s, seconds));
         } else if (errors == 1) {
-            for (Sender s : notify) {
-                Message.IMPORT_END_COMPLETE_ERR_SIN.send(s, seconds, errors);
-            }
+            notify.forEach(s -> Message.IMPORT_END_COMPLETE_ERR_SIN.send(s, seconds, errors));
         } else {
-            for (Sender s : notify) {
-                Message.IMPORT_END_COMPLETE_ERR.send(s, seconds, errors);
-            }
+            notify.forEach(s -> Message.IMPORT_END_COMPLETE_ERR.send(s, seconds, errors));
         }
 
-        int errIndex = 1;
+        AtomicInteger errIndex = new AtomicInteger(1);
         for (Map.Entry<Integer, Result> e : cmdResult.entrySet()) {
             if (e.getValue().getResult() != null && !e.getValue().getResult().asBoolean()) {
-                for (Sender s : notify) {
-                    Message.IMPORT_END_ERROR_HEADER.send(s, errIndex, e.getKey(), e.getValue().getCommand(), e.getValue().getResult().toString());
+                notify.forEach(s -> {
+                    Message.IMPORT_END_ERROR_HEADER.send(s, errIndex.get(), e.getKey(), e.getValue().getCommand(), e.getValue().getResult().toString());
                     for (String out : e.getValue().getOutput()) {
                         Message.IMPORT_END_ERROR_CONTENT.send(s, out);
                     }
                     Message.IMPORT_END_ERROR_FOOTER.send(s);
-                }
+                });
 
-                errIndex++;
+                errIndex.incrementAndGet();
             }
         }
-
-        cleanup();
     }
 
     private void sendProgress(int executing) {
         int percent = (executing * 100) / commands.size();
-        int errors = 0;
-
-        for (Map.Entry<Integer, Result> e : cmdResult.entrySet()) {
-            if (e.getValue().getResult() != null && !e.getValue().getResult().asBoolean()) {
-                errors++;
-            }
-        }
+        int errors = (int) cmdResult.values().stream().filter(v -> v.getResult() != null && !v.getResult().asBoolean()).count();
 
         if (errors == 1) {
-            for (Sender s : notify) {
-                Message.IMPORT_PROGRESS_SIN.send(s, percent, executing, commands.size(), errors);
-            }
+            notify.forEach(s -> Message.IMPORT_PROGRESS_SIN.send(s, percent, executing, commands.size(), errors));
         } else {
-            for (Sender s : notify) {
-                Message.IMPORT_PROGRESS.send(s, percent, executing, commands.size(), errors);
-            }
+            notify.forEach(s -> Message.IMPORT_PROGRESS.send(s, percent, executing, commands.size(), errors));
         }
     }
 
     private Result getResult(int executing, String command) {
-        if (!cmdResult.containsKey(executing)) {
-            cmdResult.put(executing, new Result(command));
-        }
+        return cmdResult.compute(executing, (i, r) -> {
+            if (r == null) {
+                r = new Result(command);
+            } else {
+                if (!command.equals("") && r.getCommand().equals("")) {
+                    r.setCommand(command);
+                }
+            }
 
-        Result existing = cmdResult.get(executing);
-
-        if (!command.equals("") && existing.getCommand().equals("")) {
-            existing.setCommand(command);
-        }
-
-        return existing;
+            return r;
+        });
     }
 
     private void logMessage(String msg) {
@@ -216,16 +177,11 @@ public class Importer {
         }
     }
 
-    private static class FakeSender implements Sender {
-        private final Importer instance;
-
-        private FakeSender(Importer instance) {
-            this.instance = instance;
-        }
+    private class FakeSender implements Sender {
 
         @Override
         public LuckPermsPlugin getPlatform() {
-            return instance.commandManager.getPlugin();
+            return commandManager.getPlugin();
         }
 
         @Override
@@ -240,12 +196,12 @@ public class Importer {
 
         @Override
         public void sendMessage(String s) {
-            instance.logMessage(s);
+            logMessage(s);
         }
 
         @Override
         public void sendMessage(FancyMessage message) {
-            instance.logMessage(message.toOldMessageFormat());
+            logMessage(message.toOldMessageFormat());
         }
 
         @Override

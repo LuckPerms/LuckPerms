@@ -39,9 +39,9 @@ public class HikariSupplier implements AutoCloseable {
 
     private HikariDataSource hikari;
 
-    public void setup() {
+    public void setup(String poolName) {
         hikari = new HikariDataSource();
-        hikari.setPoolName("powerfulperms-migrator-pool");
+        hikari.setPoolName(poolName);
         hikari.setMaximumPoolSize(2);
         hikari.setDataSourceClassName("com.mysql.jdbc.jdbc2.optional.MysqlDataSource");
         hikari.addDataSourceProperty("serverName", address.split(":")[0]);

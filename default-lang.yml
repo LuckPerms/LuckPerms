@@ -346,6 +346,7 @@ log-export-failure: "An unexpected error occured whilst writing to the file."
 log-export-success: "&aSuccessfully exported the log to &b{0}&a."
 
 import-already-running: "Another import process is already running. Please wait for it to finish and try again."
+export-already-running: "Another export process is already running. Please wait for it to finish and try again."
 import-log-doesnt-exist: "Error: File {0} does not exist."
 import-log-not-readable: "Error: File {0} is not readable."
 import-log-failure: "An unexpected error occured whilst reading from the log file."

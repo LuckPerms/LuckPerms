@@ -49,7 +49,6 @@ import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.contexts.ServerCalculator;
 import me.lucko.luckperms.common.core.UuidCache;
 import me.lucko.luckperms.common.core.model.User;
-import me.lucko.luckperms.common.data.Importer;
 import me.lucko.luckperms.common.debug.DebugHandler;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -112,7 +111,6 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private BukkitListener listener;
     private ApiProvider apiProvider;
     private Logger log;
-    private Importer importer;
     private DefaultsProvider defaultsProvider;
     private ChildPermissionProvider childPermissionProvider;
     private LocaleManager localeManager;
@@ -247,7 +245,6 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         userManager = new GenericUserManager(this);
         groupManager = new GenericGroupManager(this);
         trackManager = new GenericTrackManager(this);
-        importer = new Importer(commandManager);
         calculatorFactory = new BukkitCalculatorFactory(this);
         cachedStateManager = new CachedStateManager(this);
 
@@ -371,7 +368,6 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         listener = null;
         apiProvider = null;
         log = null;
-        importer = null;
         defaultsProvider = null;
         childPermissionProvider = null;
         localeManager = null;

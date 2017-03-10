@@ -42,7 +42,6 @@ import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.contexts.ServerCalculator;
 import me.lucko.luckperms.common.core.UuidCache;
 import me.lucko.luckperms.common.core.model.User;
-import me.lucko.luckperms.common.data.Importer;
 import me.lucko.luckperms.common.debug.DebugHandler;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -85,6 +84,7 @@ import java.util.stream.Collectors;
 public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     private final Set<UUID> ignoringLogs = ConcurrentHashMap.newKeySet();
     private LuckPermsScheduler scheduler;
+    private CommandManager commandManager;
     private LuckPermsConfiguration configuration;
     private UserManager userManager;
     private GroupManager groupManager;
@@ -94,7 +94,6 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     private UuidCache uuidCache;
     private ApiProvider apiProvider;
     private Logger log;
-    private Importer importer;
     private LocaleManager localeManager;
     private CachedStateManager cachedStateManager;
     private ContextManager<ProxiedPlayer> contextManager;
@@ -181,7 +180,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
         // register commands
         getLog().info("Registering commands...");
-        CommandManager commandManager = new CommandManager(this);
+        commandManager = new CommandManager(this);
         getProxy().getPluginManager().registerCommand(this, new BungeeCommand(this, commandManager));
 
         // disable the default Bungee /perms command so it gets handled by the Bukkit plugin
@@ -193,7 +192,6 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         userManager = new GenericUserManager(this);
         groupManager = new GenericGroupManager(this);
         trackManager = new GenericTrackManager(this);
-        importer = new Importer(commandManager);
         calculatorFactory = new BungeeCalculatorFactory(this);
         cachedStateManager = new CachedStateManager(this);
 

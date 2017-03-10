@@ -341,7 +341,7 @@ public class Util {
         return Maps.immutableEntry(message, title);
     }
 
-    public static <T> List<List<T>> divideList(List<T> source, int size) {
+    public static <T> List<List<T>> divideList(Iterable<T> source, int size) {
         List<List<T>> lists = new ArrayList<>();
         Iterator<T> it = source.iterator();
         while (it.hasNext()) {

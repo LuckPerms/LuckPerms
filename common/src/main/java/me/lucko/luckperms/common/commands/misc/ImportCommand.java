@@ -38,8 +38,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ImportCommand extends SingleCommand {
+    private AtomicBoolean running = new AtomicBoolean(false);
+
     public ImportCommand() {
         super("Import", "Import data from a file", "/%s import <file>", Permission.IMPORT, Predicates.not(1),
                 Arg.list(
@@ -50,12 +53,10 @@ public class ImportCommand extends SingleCommand {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
-        if (args.size() == 0) {
-            sendUsage(sender, label);
-            return CommandResult.INVALID_ARGS;
+        if (running.get()) {
+            Message.IMPORT_ALREADY_RUNNING.send(sender);
+            return CommandResult.STATE_ERROR;
         }
-
-        Importer importer = plugin.getImporter();
 
         File f = new File(plugin.getDataDirectory(), args.get(0));
         if (!f.exists()) {
@@ -80,13 +81,22 @@ public class ImportCommand extends SingleCommand {
             return CommandResult.FAILURE;
         }
 
-        if (!importer.startRun()) {
+        if (!running.compareAndSet(false, true)) {
             Message.IMPORT_ALREADY_RUNNING.send(sender);
             return CommandResult.STATE_ERROR;
         }
 
+        Importer importer = new Importer(plugin.getCommandManager(), sender, commands);
+
         // Run the importer in its own thread.
-        plugin.doAsync(() -> importer.start(sender, commands));
+        plugin.doAsync(() -> {
+            try {
+                importer.run();
+            } finally {
+                running.set(false);
+            }
+        });
+
         return CommandResult.SUCCESS;
     }
 }

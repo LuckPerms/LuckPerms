@@ -111,7 +111,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         Set<UUID> uuids = new HashSet<>();
 
         try (HikariSupplier hikari = new HikariSupplier(address, database, username, password)) {
-            hikari.setup();
+            hikari.setup("powerfulperms-migrator-pool");
 
             try (Connection c = hikari.getConnection()) {
                 DatabaseMetaData meta = c.getMetaData();

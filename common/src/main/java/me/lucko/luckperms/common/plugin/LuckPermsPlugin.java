@@ -29,6 +29,7 @@ import me.lucko.luckperms.common.api.ApiProvider;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.commands.BaseCommand;
+import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
@@ -36,7 +37,6 @@ import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.core.UuidCache;
 import me.lucko.luckperms.common.core.model.User;
-import me.lucko.luckperms.common.data.Importer;
 import me.lucko.luckperms.common.debug.DebugHandler;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.managers.GroupManager;
@@ -126,11 +126,11 @@ public interface LuckPermsPlugin {
     ApiProvider getApiProvider();
 
     /**
-     * Gets the importer instance
+     * Gets the command manager
      *
-     * @return the importer
+     * @return the command manager
      */
-    Importer getImporter();
+    CommandManager getCommandManager();
 
     /**
      * Gets the instance providing locale translations for the plugin

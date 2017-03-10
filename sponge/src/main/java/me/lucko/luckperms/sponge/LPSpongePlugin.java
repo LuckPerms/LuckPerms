@@ -140,6 +140,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     private boolean lateLoad = false;
 
     private LuckPermsScheduler scheduler;
+    private SpongeCommand commandManager;
     private LuckPermsConfiguration configuration;
     private SpongeUserManager userManager;
     private SpongeGroupManager groupManager;
@@ -239,7 +240,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         // register commands
         getLog().info("Registering commands...");
         CommandManager cmdService = game.getCommandManager();
-        SpongeCommand commandManager = new SpongeCommand(this);
+        commandManager = new SpongeCommand(this);
         cmdService.register(this, commandManager, "luckperms", "perms", "lp", "permissions", "perm");
 
         // load internal managers
@@ -248,7 +249,6 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         userManager = new SpongeUserManager(this);
         groupManager = new SpongeGroupManager(this);
         trackManager = new GenericTrackManager(this);
-        importer = new Importer(commandManager);
         calculatorFactory = new SpongeCalculatorFactory(this);
         cachedStateManager = new CachedStateManager(this);
 
