@@ -32,11 +32,11 @@ LuckPerms is licensed under the permissive MIT license. Please see [`LICENSE.txt
 
 ## LuckPerms vs Other Plugins
 ### Bukkit
-![alt text](https://static.lucko.me/luckperms-compare-copy.png "Feature comparison")
-###### _Features checked on 23rd Aug 2016. If you find any inaccuracies, please let me know._
+![alt text](https://luckperms.lucko.me/assets/bukkit-compare.png "Feature comparison")
+
 ### Sponge
-![alt text](https://static.lucko.me/luckperms-compare-sponge.png "Feature comparison")
-###### _Features checked on 8th Oct 2016. If you find any inaccuracies, please let me know._
+![alt text](https://luckperms.lucko.me/assets/sponge-compare.png "Feature comparison")
+
 
 ## Thanks
 [![JProfiler](https://www.ej-technologies.com/images/product_banners/jprofiler_large.png)](http://www.ej-technologies.com/products/jprofiler/overview.html)
