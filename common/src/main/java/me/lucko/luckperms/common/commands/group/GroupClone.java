@@ -41,7 +41,7 @@ import java.util.List;
 public class GroupClone extends SubCommand<Group> {
     public GroupClone() {
         super("clone", "Clone the group", Permission.GROUP_CLONE, Predicates.not(1),
-                Arg.list(Arg.create("name", true, "the name of the clone"))
+                Arg.list(Arg.create("name", true, "the name of the group to clone onto"))
         );
     }
 
@@ -53,15 +53,7 @@ public class GroupClone extends SubCommand<Group> {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (plugin.getStorage().loadGroup(newGroupName).join()) {
-            Message.GROUP_ALREADY_EXISTS.send(sender);
-            return CommandResult.INVALID_ARGS;
-        }
-
-        if (!plugin.getStorage().createAndLoadGroup(newGroupName, CreationCause.COMMAND).join()) {
-            Message.CREATE_GROUP_ERROR.send(sender);
-            return CommandResult.FAILURE;
-        }
+        plugin.getStorage().createAndLoadGroup(newGroupName, CreationCause.COMMAND).join();
 
         Group newGroup = plugin.getGroupManager().getIfLoaded(newGroupName);
         if (newGroup == null) {

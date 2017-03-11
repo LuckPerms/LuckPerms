@@ -76,7 +76,7 @@ check-result: "&aPermission check result on user &b{0}&a for permission &b{1}&a:
 create-success: "&b{0}&a was successfully created."
 delete-success: "&b{0}&a was successfully deleted."
 rename-success: "&b{0}&a was successfully renamed to &b{1}&a."
-clone-success: "&b{0}&a was successfully cloned to &b{1}&a."
+clone-success: "&b{0}&a was successfully cloned onto &b{1}&a."
 
 already-inherits: "{0} already inherits '{1}'."
 does-not-inherit: "{0} does not inherit '{1}'."

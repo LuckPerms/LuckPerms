@@ -122,7 +122,7 @@ public enum Message {
     CREATE_SUCCESS("&b{0}&a was successfully created.", true),
     DELETE_SUCCESS("&b{0}&a was successfully deleted.", true),
     RENAME_SUCCESS("&b{0}&a was successfully renamed to &b{1}&a.", true),
-    CLONE_SUCCESS("&b{0}&a was successfully cloned to &b{1}&a.", true),
+    CLONE_SUCCESS("&b{0}&a was successfully cloned onto &b{1}&a.", true),
 
     ALREADY_INHERITS("{0} already inherits '{1}'.", true),
     DOES_NOT_INHERIT("{0} does not inherit '{1}'.", true),

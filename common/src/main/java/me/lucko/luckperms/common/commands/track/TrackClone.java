@@ -41,7 +41,7 @@ import java.util.List;
 public class TrackClone extends SubCommand<Track> {
     public TrackClone() {
         super("clone", "Clone the track", Permission.TRACK_CLONE, Predicates.not(1),
-                Arg.list(Arg.create("name", true, "the name of the clone"))
+                Arg.list(Arg.create("name", true, "the name of the track to clone onto"))
         );
     }
 
@@ -53,15 +53,7 @@ public class TrackClone extends SubCommand<Track> {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (plugin.getStorage().loadTrack(newTrackName).join()) {
-            Message.TRACK_ALREADY_EXISTS.send(sender);
-            return CommandResult.INVALID_ARGS;
-        }
-
-        if (!plugin.getStorage().createAndLoadTrack(newTrackName, CreationCause.INTERNAL).join()) {
-            Message.CREATE_TRACK_ERROR.send(sender);
-            return CommandResult.FAILURE;
-        }
+        plugin.getStorage().createAndLoadTrack(newTrackName, CreationCause.INTERNAL).join();
 
         Track newTrack = plugin.getTrackManager().getIfLoaded(newTrackName);
         if (newTrack == null) {
