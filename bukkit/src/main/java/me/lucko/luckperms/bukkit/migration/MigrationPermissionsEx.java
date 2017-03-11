@@ -195,7 +195,11 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             } catch (IllegalArgumentException e) {
                 u = ni.nameToUUID(user.getIdentifier());
                 if (u == null) {
-                    u = plugin.getUuidFromUsername(user.getIdentifier());
+                    try {
+                        u = Bukkit.getOfflinePlayer(user.getIdentifier()).getUniqueId();
+                    } catch (Exception ex) {
+                        e.printStackTrace();
+                    }
                 }
             }
 

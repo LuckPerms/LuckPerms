@@ -346,14 +346,6 @@ public interface LuckPermsPlugin {
     Set<UUID> getIgnoringLogs();
 
     /**
-     * Gets the UUID of a player. Used as a backup for migration
-     *
-     * @param playerName the players name
-     * @return a uuid if found, or null if not
-     */
-    UUID getUuidFromUsername(String playerName);
-
-    /**
      * Gets the update task buffer of the platform, used for scheduling and running update tasks.
      *
      * @return the update task buffer instance

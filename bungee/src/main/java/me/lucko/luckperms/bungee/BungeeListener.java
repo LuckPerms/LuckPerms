@@ -23,6 +23,8 @@
 package me.lucko.luckperms.bungee;
 
 import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.caching.UserData;
+import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.core.UuidCache;
@@ -37,6 +39,7 @@ import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.event.PermissionCheckEvent;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
+import net.md_5.bungee.api.event.ServerConnectEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
@@ -68,7 +71,8 @@ public class BungeeListener extends AbstractListener implements Listener {
             return;
         }
 
-        if (user.getUserData() == null) {
+        UserData userData = user.getUserData();
+        if (userData == null) {
             plugin.getLog().warn("Player " + player.getName() + " does not have any user data setup.");
             return;
         }
@@ -83,7 +87,7 @@ public class BungeeListener extends AbstractListener implements Listener {
                 false
         );
 
-        e.setHasPermission(user.getUserData().getPermissionData(contexts).getPermissionValue(e.getPermission()).asBoolean());
+        e.setHasPermission(userData.getPermissionData(contexts).getPermissionValue(e.getPermission()).asBoolean());
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -162,5 +166,39 @@ public class BungeeListener extends AbstractListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerQuit(PlayerDisconnectEvent e) {
         onLeave(e.getPlayer().getUniqueId());
+    }
+
+    // We don't preprocess all servers, so we may have to do it here.
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onServerSwitch(ServerConnectEvent e) {
+        String serverName = e.getTarget().getName();
+        UUID uuid = e.getPlayer().getUniqueId();
+
+        plugin.doAsync(() -> {
+            MutableContextSet set = MutableContextSet.create();
+            set.add("server", plugin.getConfiguration().get(ConfigKeys.SERVER));
+            set.add("world", serverName);
+
+            User user = plugin.getUserManager().get(plugin.getUuidCache().getUUID(uuid));
+            if (user == null) {
+                return;
+            }
+            UserData userData = user.getUserData();
+            if (userData == null) {
+                return;
+            }
+
+            Contexts contexts = new Contexts(
+                    set.makeImmutable(),
+                    plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
+                    plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
+                    true,
+                    plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
+                    plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
+                    false
+            );
+
+            userData.preCalculate(contexts);
+        });
     }
 }

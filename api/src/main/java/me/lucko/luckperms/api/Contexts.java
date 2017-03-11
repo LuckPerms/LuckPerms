@@ -192,9 +192,7 @@ public class Contexts {
         if (o == this) return true;
         if (!(o instanceof Contexts)) return false;
         final Contexts other = (Contexts) o;
-        final Object this$context = this.getContexts();
-        final Object other$context = other.getContexts();
-        return (this$context == null ? other$context == null : this$context.equals(other$context)) &&
+        return (this.getContexts() == null ? other.getContexts() == null : this.getContexts().equals(other.getContexts())) &&
                 this.isOp() == other.isOp() &&
                 this.isIncludeGlobal() == other.isIncludeGlobal() &&
                 this.isIncludeGlobalWorld() == other.isIncludeGlobalWorld() &&
@@ -212,8 +210,8 @@ public class Contexts {
     public int hashCode() {
         final int PRIME = 59;
         int result = 1;
-        final Object $context = this.getContexts();
-        result = result * PRIME + ($context == null ? 43 : $context.hashCode());
+        final Object contexts = this.getContexts();
+        result = result * PRIME + (contexts == null ? 43 : contexts.hashCode());
         result = result * PRIME + (this.isOp() ? 79 : 97);
         result = result * PRIME + (this.isIncludeGlobal() ? 79 : 97);
         result = result * PRIME + (this.isIncludeGlobalWorld() ? 79 : 97);

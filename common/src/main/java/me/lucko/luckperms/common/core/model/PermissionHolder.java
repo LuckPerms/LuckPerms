@@ -29,7 +29,6 @@ import lombok.RequiredArgsConstructor;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
@@ -61,6 +60,7 @@ import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -257,7 +257,7 @@ public abstract class PermissionHolder {
 
     private SortedSet<LocalizedNode> getAllNodesCacheApply(GetAllNodesRequest getAllNodesHolder) {
         // Expand the holder.
-        List<String> excludedGroups = new ArrayList<>(getAllNodesHolder.getExcludedGroups());
+        Set<String> excludedGroups = new HashSet<>(getAllNodesHolder.getExcludedGroups());
         ExtractedContexts contexts = getAllNodesHolder.getContexts();
 
         // Don't register users, as they cannot be inherited.
@@ -436,8 +436,8 @@ public abstract class PermissionHolder {
      * @param contexts       context to decide if groups should be applied
      * @return a set of nodes
      */
-    public SortedSet<LocalizedNode> getAllNodes(List<String> excludedGroups, ExtractedContexts contexts) {
-        return getAllNodesCache.getUnchecked(GetAllNodesRequest.of(excludedGroups == null ? ImmutableList.of() : ImmutableList.copyOf(excludedGroups), contexts));
+    public SortedSet<LocalizedNode> getAllNodes(Collection<String> excludedGroups, ExtractedContexts contexts) {
+        return getAllNodesCache.getUnchecked(GetAllNodesRequest.of(excludedGroups == null ? ImmutableSet.of() : ImmutableSet.copyOf(excludedGroups), contexts));
     }
 
     /**

@@ -591,16 +591,6 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         return map;
     }
 
-    @SuppressWarnings("deprecation")
-    @Override
-    public UUID getUuidFromUsername(String playerName) {
-        try {
-            return getServer().getOfflinePlayer(playerName).getUniqueId();
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
     private void registerPermissions(PermissionDefault def) {
         PluginManager pm = getServer().getPluginManager();
 

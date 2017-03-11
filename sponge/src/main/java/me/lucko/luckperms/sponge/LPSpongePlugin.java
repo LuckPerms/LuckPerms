@@ -443,11 +443,6 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     }
 
     @Override
-    public UUID getUuidFromUsername(String playerName) {
-        return game.getServer().getPlayer(playerName).map(Player::getUniqueId).orElse(null);
-    }
-
-    @Override
     public List<BaseCommand> getExtraCommands() {
         return Collections.singletonList(new SpongeMainCommand(this));
     }

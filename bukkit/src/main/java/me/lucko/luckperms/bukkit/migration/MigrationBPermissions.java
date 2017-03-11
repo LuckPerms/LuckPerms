@@ -41,6 +41,8 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.common.utils.ProgressLogger;
 
+import org.bukkit.Bukkit;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -130,11 +132,16 @@ public class MigrationBPermissions extends SubCommand<Object> {
             AtomicInteger userCount = new AtomicInteger(0);
             for (Calculable user : world.getAll(CalculableType.USER)) {
                 // There is no mention of UUIDs in the API. I assume that name = uuid. idk?
-                UUID uuid;
+                UUID uuid = null;
                 try {
                     uuid = UUID.fromString(user.getName());
                 } catch (IllegalArgumentException e) {
-                    uuid = plugin.getUuidFromUsername(user.getName());
+                    try {
+                        //noinspection deprecation
+                        uuid = Bukkit.getOfflinePlayer(user.getName()).getUniqueId();
+                    } catch (Exception ex) {
+                        e.printStackTrace();
+                    }
                 }
 
                 if (uuid == null) {

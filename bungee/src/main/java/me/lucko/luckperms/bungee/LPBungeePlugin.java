@@ -28,7 +28,6 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.bungee.messaging.BungeeMessagingService;
 import me.lucko.luckperms.common.api.ApiHandler;
 import me.lucko.luckperms.common.api.ApiProvider;
@@ -67,7 +66,6 @@ import me.lucko.luckperms.common.treeview.PermissionVault;
 import me.lucko.luckperms.common.utils.BufferedRequest;
 import me.lucko.luckperms.common.utils.LoggerImpl;
 
-import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 
@@ -329,17 +327,6 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         Set<ContextSet> c = new HashSet<>();
         c.add(ContextSet.empty());
         c.add(ContextSet.singleton("server", getConfiguration().get(ConfigKeys.SERVER)));
-        c.addAll(getProxy().getServers().values().stream()
-                .map(ServerInfo::getName)
-                .map(s -> {
-                    MutableContextSet set = MutableContextSet.create();
-                    set.add("server", getConfiguration().get(ConfigKeys.SERVER));
-                    set.add("world", s);
-                    return set.makeImmutable();
-                })
-                .collect(Collectors.toList())
-        );
-
         return c.stream()
                 .map(set -> new Contexts(
                         set,
@@ -351,10 +338,5 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
                         false
                 ))
                 .collect(Collectors.toSet());
-    }
-
-    @Override
-    public UUID getUuidFromUsername(String playerName) {
-        return null; // Not needed on Bungee
     }
 }

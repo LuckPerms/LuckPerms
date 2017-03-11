@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.common.utils;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -31,6 +32,7 @@ import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 
 @Getter
+@EqualsAndHashCode
 @ToString
 public class ExtractedContexts {
     public static ExtractedContexts generate(Contexts contexts) {

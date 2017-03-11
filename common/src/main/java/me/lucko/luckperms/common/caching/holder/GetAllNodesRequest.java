@@ -27,7 +27,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.common.utils.ExtractedContexts;
 
@@ -37,7 +37,7 @@ import me.lucko.luckperms.common.utils.ExtractedContexts;
 @AllArgsConstructor(staticName = "of")
 public class GetAllNodesRequest {
 
-    private final ImmutableList<String> excludedGroups;
+    private final ImmutableSet<String> excludedGroups;
     private final ExtractedContexts contexts;
 
 }
