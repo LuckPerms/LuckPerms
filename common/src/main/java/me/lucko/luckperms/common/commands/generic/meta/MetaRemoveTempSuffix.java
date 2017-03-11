@@ -48,10 +48,10 @@ public class MetaRemoveTempSuffix extends SharedSubCommand {
         super("removetempsuffix", "Removes a temporary suffix", Permission.USER_META_REMOVETEMP_SUFFIX, Permission.GROUP_META_REMOVETEMP_SUFFIX,
                 Predicates.notInRange(1, 4),
                 Arg.list(
-                        Arg.create("priority", true, "the priority to add the suffix at"),
+                        Arg.create("priority", true, "the priority to remove the suffix at"),
                         Arg.create("suffix", false, "the suffix string"),
-                        Arg.create("server", false, "the server to add the suffix on"),
-                        Arg.create("world", false, "the world to add the suffix on")
+                        Arg.create("server", false, "the server to remove the suffix on"),
+                        Arg.create("world", false, "the world to remove the suffix on")
                 )
         );
     }

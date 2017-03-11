@@ -48,10 +48,10 @@ public class MetaRemoveTempPrefix extends SharedSubCommand {
         super("removetempprefix", "Removes a temporary prefix", Permission.USER_META_REMOVETEMP_PREFIX, Permission.GROUP_META_REMOVETEMP_PREFIX,
                 Predicates.notInRange(1, 4),
                 Arg.list(
-                        Arg.create("priority", true, "the priority to add the prefix at"),
+                        Arg.create("priority", true, "the priority to remove the prefix at"),
                         Arg.create("prefix", false, "the prefix string"),
-                        Arg.create("server", false, "the server to add the prefix on"),
-                        Arg.create("world", false, "the world to add the prefix on")
+                        Arg.create("server", false, "the server to remove the prefix on"),
+                        Arg.create("world", false, "the world to remove the prefix on")
                 )
         );
     }
