@@ -34,15 +34,11 @@ import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.utils.ExtractedContexts;
-import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
-import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import net.milkbowl.vault.chat.Chat;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static me.lucko.luckperms.api.MetaUtils.escapeCharacters;
 import static me.lucko.luckperms.api.MetaUtils.unescapeCharacters;
@@ -75,15 +71,7 @@ public class VaultChatHook extends Chat {
         perms.log("Setting meta: '" + node + "' for " + holder.getObjectName() + " on world " + world + ", server " + perms.getServer());
 
         perms.getScheduler().execute(() -> {
-            List<Node> toRemove = holder.getNodes().stream()
-                    .filter(n -> n.isMeta() && n.getMeta().getKey().equals(node))
-                    .collect(Collectors.toList());
-
-            toRemove.forEach(n -> {
-                try {
-                    holder.unsetPermission(n);
-                } catch (ObjectLacksException ignored) {}
-            });
+            holder.removeIf(n -> n.isMeta() && n.getMeta().getKey().equals(node));
 
             Node.Builder metaNode = NodeFactory.makeMetaNode(node, value).setValue(true);
             if (!perms.getServer().equalsIgnoreCase("global")) {
@@ -93,10 +81,7 @@ public class VaultChatHook extends Chat {
                 metaNode.setWorld(finalWorld);
             }
 
-            try {
-                holder.setPermission(metaNode.build());
-            } catch (ObjectAlreadyHasException ignored) {}
-
+            holder.setPermissionUnchecked(metaNode.build());
             perms.save(holder);
         });
     }
@@ -111,15 +96,7 @@ public class VaultChatHook extends Chat {
         perms.getScheduler().execute(() -> {
 
             // remove all prefixes/suffixes directly set on the user/group
-            List<Node> toRemove = holder.getNodes().stream()
-                    .filter(n -> prefix ? n.isPrefix() : n.isSuffix())
-                    .collect(Collectors.toList());
-
-            toRemove.forEach(n -> {
-                try {
-                    holder.unsetPermission(n);
-                } catch (ObjectLacksException ignored) {}
-            });
+            holder.removeIf(n -> prefix ? n.isPrefix() : n.isSuffix());
 
             // find the max inherited priority & add 10
             MetaHolder metaHolder = holder.accumulateMeta(null, null, ExtractedContexts.generate(perms.createContextForWorld(finalWorld)));
@@ -134,10 +111,7 @@ public class VaultChatHook extends Chat {
                 chatMetaNode.setWorld(finalWorld);
             }
 
-            try {
-                holder.setPermission(chatMetaNode.build());
-            } catch (ObjectAlreadyHasException ignored) {}
-
+            holder.setPermissionUnchecked(chatMetaNode.build());
             perms.save(holder);
         });
     }

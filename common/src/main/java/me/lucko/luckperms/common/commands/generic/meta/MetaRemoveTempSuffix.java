@@ -88,12 +88,7 @@ public class MetaRemoveTempSuffix extends SharedSubCommand {
                 toRemove.add(node);
             }
 
-            toRemove.forEach(n -> {
-                try {
-                    holder.unsetPermission(n);
-                } catch (ObjectLacksException ignored) {
-                }
-            });
+            toRemove.forEach(holder::unsetPermissionUnchecked);
 
             Message.BULK_CHANGE_SUCCESS.send(sender, toRemove.size());
             save(holder, sender, plugin);

@@ -135,8 +135,7 @@ public class MetaUtils {
         for (Node n : toRemove) {
             try {
                 holder.unsetPermission(n);
-            } catch (ObjectLacksException ignored) {
-            }
+            } catch (ObjectLacksException ignored) {}
         }
 
         Node.Builder metaNode = LuckPerms.getApi().buildNode("meta." + node + "." + value).setValue(true);

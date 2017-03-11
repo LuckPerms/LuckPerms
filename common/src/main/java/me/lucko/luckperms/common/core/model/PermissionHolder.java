@@ -438,6 +438,20 @@ public abstract class PermissionHolder {
         invalidateCache(false);
     }
 
+    public boolean removeIfTransient(Predicate<Node> predicate) {
+        boolean result;
+
+        synchronized (nodes) {
+            result = transientNodes.removeIf(predicate);
+        }
+
+        if (result) {
+            invalidateCache(false);
+        }
+
+        return result;
+    }
+
     /**
      * Combines and returns this holders nodes in a priority order.
      *
