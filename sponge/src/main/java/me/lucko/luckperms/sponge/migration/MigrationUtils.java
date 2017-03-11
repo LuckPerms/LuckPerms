@@ -47,6 +47,9 @@ public class MigrationUtils {
 
     public static void migrateSubject(Subject subject, PermissionHolder holder, int priority) {
 
+        holder.removeIf(n -> n.getPermission().startsWith("weight."));
+        holder.setPermissionUnchecked(NodeFactory.make("weight." + priority, true));
+
         // Migrate permissions
         Map<Set<Context>, Map<String, Boolean>> perms = subject.getSubjectData().getAllPermissions();
         for (Map.Entry<Set<Context>, Map<String, Boolean>> e : perms.entrySet()) {
@@ -77,17 +80,11 @@ public class MigrationUtils {
 
                 for (Map.Entry<String, String> opt : e.getValue().entrySet()) {
                     if (opt.getKey().equalsIgnoreCase("prefix")) {
-                        try {
-                            holder.setPermission(NodeFactory.makePrefixNode(priority, opt.getValue()).setServer(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
-                        } catch (ObjectAlreadyHasException ignored) {}
+                        holder.setPermissionUnchecked(NodeFactory.makePrefixNode(priority, opt.getValue()).setServer(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
                     } else if (opt.getKey().equalsIgnoreCase("suffix")) {
-                        try {
-                            holder.setPermission(NodeFactory.makeSuffixNode(priority, opt.getValue()).setServer(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
-                        } catch (ObjectAlreadyHasException ignored) {}
+                        holder.setPermissionUnchecked(NodeFactory.makeSuffixNode(priority, opt.getValue()).setServer(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
                     } else {
-                        try {
-                            holder.setPermission(NodeFactory.makeMetaNode(opt.getKey(), opt.getValue()).setServer(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
-                        } catch (ObjectAlreadyHasException ignored) {}
+                        holder.setPermissionUnchecked(NodeFactory.makeMetaNode(opt.getKey(), opt.getValue()).setServer(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
                     }
                 }
             }
@@ -110,9 +107,7 @@ public class MigrationUtils {
                     continue; // LuckPerms does not support persisting other subject types.
                 }
 
-                try {
-                    holder.setPermission(new NodeBuilder("group." + convertName(s.getIdentifier())).setServer(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
-                } catch (ObjectAlreadyHasException ignored) {}
+                holder.setPermissionUnchecked(new NodeBuilder("group." + convertName(s.getIdentifier())).setServer(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
             }
         }
     }

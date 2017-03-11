@@ -29,6 +29,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -102,6 +103,9 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             final String name = group.getName().toLowerCase();
             plugin.getStorage().createAndLoadGroup(name, CreationCause.INTERNAL).join();
             Group lpGroup = plugin.getGroupManager().getIfLoaded(name);
+
+            lpGroup.removeIf(n -> n.getPermission().startsWith("weight."));
+            lpGroup.setPermissionUnchecked(NodeFactory.make("weight." + groupWeight, true));
 
             try {
                 for (String node : group.getOwnPermissions(null)) {

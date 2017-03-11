@@ -76,6 +76,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -401,6 +402,24 @@ public abstract class PermissionHolder {
             nodes.addAll(set);
         }
         invalidateCache(true);
+    }
+
+    public boolean removeIf(Predicate<Node> predicate) {
+        boolean result;
+        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes());
+
+        synchronized (nodes) {
+            result = nodes.removeIf(predicate);
+        }
+
+        if (!result) {
+            return false;
+        }
+
+        invalidateCache(true);
+        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes());
+        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
+        return true;
     }
 
     public Set<Node> getTransientNodes() {

@@ -172,6 +172,9 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             plugin.getStorage().createAndLoadGroup(name, CreationCause.INTERNAL).join();
             final me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().getIfLoaded(name);
 
+            group.removeIf(n -> n.getPermission().startsWith("weight."));
+            group.setPermissionUnchecked(NodeFactory.make("weight." + g.getRank(), true));
+
             for (Permission p : g.getOwnPermissions()) {
                 applyPerm(group, p);
             }
