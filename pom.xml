@@ -12,7 +12,6 @@
         <module>common</module>
         <module>bukkit</module>
         <module>bukkit-legacy</module>
-        <module>bukkit-placeholders</module>
         <module>bungee</module>
         <module>sponge</module>
     </modules>
@@ -104,10 +103,6 @@
         <repository>
             <id>bungeeperms-repo</id>
             <url>http://repo.wea-ondara.net/repository/public/</url>
-        </repository>
-        <repository>
-            <id>placeholderapi-repo</id>
-            <url>http://repo.extendedclip.com/content/repositories/placeholderapi/</url>
         </repository>
         <repository>
             <id>lilypad-repo</id>
