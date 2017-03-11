@@ -62,6 +62,7 @@ import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.tasks.UpdateTask;
 import me.lucko.luckperms.common.treeview.PermissionVault;
 import me.lucko.luckperms.common.utils.BufferedRequest;
+import me.lucko.luckperms.common.utils.FileWatcher;
 import me.lucko.luckperms.common.utils.LoggerImpl;
 import me.lucko.luckperms.sponge.commands.SpongeMainCommand;
 import me.lucko.luckperms.sponge.contexts.WorldCalculator;
@@ -146,6 +147,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     private SpongeGroupManager groupManager;
     private TrackManager trackManager;
     private Storage storage;
+    private FileWatcher fileWatcher = null;
     private InternalMessagingService messagingService = null;
     private UuidCache uuidCache;
     private ApiProvider apiProvider;
@@ -182,6 +184,11 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
         // register events
         game.getEventManager().registerListeners(this, new SpongeListener(this));
+
+        if (getConfiguration().get(ConfigKeys.WATCH_FILES)) {
+            fileWatcher = new FileWatcher(this);
+            getScheduler().doAsyncRepeating(fileWatcher, 30L);
+        }
 
         // initialise datastore
         storage = StorageFactory.getInstance(this, StorageType.H2);
@@ -308,6 +315,10 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     public void onDisable(GameStoppingServerEvent event) {
         getLog().info("Closing datastore...");
         storage.shutdown();
+
+        if (fileWatcher != null) {
+            fileWatcher.close();
+        }
 
         if (messagingService != null) {
             getLog().info("Closing messaging service...");

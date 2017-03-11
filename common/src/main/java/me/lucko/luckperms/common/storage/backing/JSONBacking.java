@@ -70,7 +70,7 @@ public class JSONBacking extends FlatfileBacking {
     }
 
     public JSONBacking(LuckPermsPlugin plugin, File pluginDir) {
-        super(plugin, "JSON", pluginDir);
+        super(plugin, "JSON", pluginDir, ".json");
     }
 
     private boolean fileToWriter(File file, ThrowingFunction<JsonWriter, Boolean> writeOperation) {
@@ -108,6 +108,8 @@ public class JSONBacking extends FlatfileBacking {
         try {
             return call(() -> {
                 File userFile = new File(usersDir, uuid.toString() + ".json");
+                registerFileAction("users", userFile);
+
                 if (userFile.exists()) {
                     return fileToReader(userFile, reader -> {
                         reader.beginObject();
@@ -178,6 +180,8 @@ public class JSONBacking extends FlatfileBacking {
         try {
             return call(() -> {
                 File userFile = new File(usersDir, user.getUuid().toString() + ".json");
+                registerFileAction("users", userFile);
+
                 if (!GenericUserManager.shouldSave(user)) {
                     if (userFile.exists()) {
                         userFile.delete();
@@ -221,6 +225,8 @@ public class JSONBacking extends FlatfileBacking {
             if (files == null) return false;
 
             for (File file : files) {
+                registerFileAction("users", file);
+
                 Map<String, Boolean> nodes = new HashMap<>();
                 fileToReader(file, reader -> {
                     reader.beginObject();
@@ -277,6 +283,8 @@ public class JSONBacking extends FlatfileBacking {
             if (files == null) return false;
 
             for (File file : files) {
+                registerFileAction("users", file);
+
                 UUID holder = UUID.fromString(file.getName().substring(0, file.getName().length() - 5));
                 Map<String, Boolean> nodes = new HashMap<>();
                 fileToReader(file, reader -> {
@@ -321,6 +329,8 @@ public class JSONBacking extends FlatfileBacking {
         try {
             return call(() -> {
                 File groupFile = new File(groupsDir, name + ".json");
+                registerFileAction("groups", groupFile);
+
                 if (groupFile.exists()) {
                     return fileToReader(groupFile, reader -> {
                         reader.beginObject();
@@ -374,6 +384,8 @@ public class JSONBacking extends FlatfileBacking {
         try {
             return call(() -> {
                 File groupFile = new File(groupsDir, name + ".json");
+                registerFileAction("groups", groupFile);
+
                 return groupFile.exists() && fileToReader(groupFile, reader -> {
                     reader.beginObject();
                     reader.nextName(); // name record
@@ -420,6 +432,8 @@ public class JSONBacking extends FlatfileBacking {
         try {
             return call(() -> {
                 File groupFile = new File(groupsDir, group.getName() + ".json");
+                registerFileAction("groups", groupFile);
+
                 if (!groupFile.exists()) {
                     try {
                         groupFile.createNewFile();
@@ -453,6 +467,8 @@ public class JSONBacking extends FlatfileBacking {
         try {
             return call(() -> {
                 File groupFile = new File(groupsDir, group.getName() + ".json");
+                registerFileAction("groups", groupFile);
+
                 if (groupFile.exists()) {
                     groupFile.delete();
                 }
@@ -471,6 +487,8 @@ public class JSONBacking extends FlatfileBacking {
             if (files == null) return false;
 
             for (File file : files) {
+                registerFileAction("groups", file);
+
                 String holder = file.getName().substring(0, file.getName().length() - 5);
                 Map<String, Boolean> nodes = new HashMap<>();
                 fileToReader(file, reader -> {
@@ -511,6 +529,8 @@ public class JSONBacking extends FlatfileBacking {
         try {
             return call(() -> {
                 File trackFile = new File(tracksDir, name + ".json");
+                registerFileAction("tracks", trackFile);
+
                 if (trackFile.exists()) {
                     return fileToReader(trackFile, reader -> {
                         reader.beginObject();
@@ -561,6 +581,8 @@ public class JSONBacking extends FlatfileBacking {
         try {
             return call(() -> {
                 File trackFile = new File(tracksDir, name + ".json");
+                registerFileAction("tracks", trackFile);
+
                 return trackFile.exists() && fileToReader(trackFile, reader -> {
                     reader.beginObject();
                     reader.nextName(); // name record
@@ -606,6 +628,8 @@ public class JSONBacking extends FlatfileBacking {
         try {
             return call(() -> {
                 File trackFile = new File(tracksDir, track.getName() + ".json");
+                registerFileAction("tracks", trackFile);
+
                 if (!trackFile.exists()) {
                     try {
                         trackFile.createNewFile();
@@ -639,6 +663,8 @@ public class JSONBacking extends FlatfileBacking {
         try {
             return call(() -> {
                 File trackFile = new File(tracksDir, track.getName() + ".json");
+                registerFileAction("tracks", trackFile);
+
                 if (trackFile.exists()) {
                     trackFile.delete();
                 }

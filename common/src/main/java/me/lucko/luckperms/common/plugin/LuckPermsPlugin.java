@@ -46,6 +46,7 @@ import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.treeview.PermissionVault;
 import me.lucko.luckperms.common.utils.BufferedRequest;
+import me.lucko.luckperms.common.utils.FileWatcher;
 
 import java.io.File;
 import java.io.InputStream;
@@ -54,6 +55,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 /**
  * Main internal interface for LuckPerms plugins, providing the base for abstraction throughout the project.
@@ -215,6 +217,20 @@ public interface LuckPermsPlugin {
      * @return the server version
      */
     String getServerVersion();
+
+    /**
+     * Gets the file watcher running on the platform, or null if it's not enabled.
+     *
+     * @return the file watcher, or null
+     */
+    FileWatcher getFileWatcher();
+
+    default void applyToFileWatcher(Consumer<FileWatcher> consumer) {
+        FileWatcher fw = getFileWatcher();
+        if (fw != null) {
+            consumer.accept(fw);
+        }
+    }
 
     /**
      * Gets the plugins main data storage directory

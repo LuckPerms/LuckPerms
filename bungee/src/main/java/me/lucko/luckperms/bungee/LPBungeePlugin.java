@@ -64,6 +64,7 @@ import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.tasks.UpdateTask;
 import me.lucko.luckperms.common.treeview.PermissionVault;
 import me.lucko.luckperms.common.utils.BufferedRequest;
+import me.lucko.luckperms.common.utils.FileWatcher;
 import me.lucko.luckperms.common.utils.LoggerImpl;
 
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -88,6 +89,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     private GroupManager groupManager;
     private TrackManager trackManager;
     private Storage storage;
+    private FileWatcher fileWatcher = null;
     private InternalMessagingService messagingService = null;
     private UuidCache uuidCache;
     private ApiProvider apiProvider;
@@ -121,6 +123,11 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
         // register events
         getProxy().getPluginManager().registerListener(this, new BungeeListener(this));
+
+        if (getConfiguration().get(ConfigKeys.WATCH_FILES)) {
+            fileWatcher = new FileWatcher(this);
+            getScheduler().doAsyncRepeating(fileWatcher, 30L);
+        }
 
         // initialise datastore
         storage = StorageFactory.getInstance(this, StorageType.H2);
@@ -225,6 +232,10 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     public void onDisable() {
         getLog().info("Closing datastore...");
         storage.shutdown();
+
+        if (fileWatcher != null) {
+            fileWatcher.close();
+        }
 
         if (messagingService != null) {
             getLog().info("Closing messaging service...");

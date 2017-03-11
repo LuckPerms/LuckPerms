@@ -23,7 +23,9 @@
 package me.lucko.luckperms.common.storage.backing;
 
 import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Constants;
+import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.Log;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
@@ -49,23 +51,27 @@ abstract class FlatfileBacking extends AbstractBacking {
     private static final String LOG_FORMAT = "%s(%s): [%s] %s(%s) --> %s";
 
     private final Logger actionLogger = Logger.getLogger("lp_actions");
+    private Map<String, String> uuidCache = new ConcurrentHashMap<>();
+
     private final File pluginDir;
+    private final String fileExtension;
+
+    private File uuidData;
+    private File actionLog;
     File usersDir;
     File groupsDir;
     File tracksDir;
-    private Map<String, String> uuidCache = new ConcurrentHashMap<>();
-    private File uuidData;
-    private File actionLog;
 
-    FlatfileBacking(LuckPermsPlugin plugin, String name, File pluginDir) {
+    FlatfileBacking(LuckPermsPlugin plugin, String name, File pluginDir, String fileExtension) {
         super(plugin, name);
         this.pluginDir = pluginDir;
+        this.fileExtension = fileExtension;
     }
 
     @Override
     public void init() {
         try {
-            makeFiles();
+            setupFiles();
         } catch (IOException e) {
             e.printStackTrace();
             return;
@@ -93,7 +99,7 @@ abstract class FlatfileBacking extends AbstractBacking {
         setAcceptingLogins(true);
     }
 
-    private void makeFiles() throws IOException {
+    private void setupFiles() throws IOException {
         File data = new File(pluginDir, "data");
         data.mkdirs();
 
@@ -111,11 +117,54 @@ abstract class FlatfileBacking extends AbstractBacking {
 
         actionLog = new File(data, "actions.log");
         actionLog.createNewFile();
+
+        // Listen for file changes.
+        plugin.applyToFileWatcher(watcher -> {
+            watcher.subscribe("users", usersDir.toPath(), s -> {
+                if (!s.endsWith(fileExtension)) {
+                    return;
+                }
+
+                String user = s.substring(0, s.length() - fileExtension.length());
+                UUID uuid = Util.parseUuid(user);
+                if (uuid == null) {
+                    return;
+                }
+
+                User u = plugin.getUserManager().get(uuid);
+                if (u != null) {
+                    plugin.getLog().info("[FileWatcher] Refreshing user " + u.getName());
+                    plugin.getStorage().loadUser(uuid, "null");
+                }
+            });
+            watcher.subscribe("groups", groupsDir.toPath(), s -> {
+                if (!s.endsWith(fileExtension)) {
+                    return;
+                }
+
+                String groupName = s.substring(0, s.length() - fileExtension.length());
+                plugin.getLog().info("[FileWatcher] Refreshing group " + groupName);
+                plugin.getUpdateTaskBuffer().request();
+            });
+            watcher.subscribe("tracks", tracksDir.toPath(), s -> {
+                if (!s.endsWith(fileExtension)) {
+                    return;
+                }
+
+                String trackName = s.substring(0, s.length() - fileExtension.length());
+                plugin.getLog().info("[FileWatcher] Refreshing track " + trackName);
+                plugin.getStorage().loadAllTracks();
+            });
+        });
     }
 
     @Override
     public void shutdown() {
         saveUUIDCache(uuidCache);
+    }
+
+    protected void registerFileAction(String type, File file) {
+        plugin.applyToFileWatcher(fileWatcher -> fileWatcher.registerChange(type, file.getName()));
     }
 
     @Override

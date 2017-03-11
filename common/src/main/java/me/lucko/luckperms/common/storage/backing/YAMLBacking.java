@@ -77,7 +77,7 @@ public class YAMLBacking extends FlatfileBacking {
     }
 
     public YAMLBacking(LuckPermsPlugin plugin, File pluginDir) {
-        super(plugin, "YAML", pluginDir);
+        super(plugin, "YAML", pluginDir, ".yml");
     }
 
     private boolean writeMapToFile(File file, Map<String, Object> values) {
@@ -110,6 +110,7 @@ public class YAMLBacking extends FlatfileBacking {
         try {
             return call(() -> {
                 File userFile = new File(usersDir, uuid.toString() + ".yml");
+                registerFileAction("users", userFile);
                 if (userFile.exists()) {
                     return readMapFromFile(userFile, values -> {
                         // User exists, let's load.
@@ -159,6 +160,7 @@ public class YAMLBacking extends FlatfileBacking {
         try {
             return call(() -> {
                 File userFile = new File(usersDir, user.getUuid().toString() + ".yml");
+                registerFileAction("users", userFile);
                 if (!GenericUserManager.shouldSave(user)) {
                     if (userFile.exists()) {
                         userFile.delete();
@@ -194,6 +196,7 @@ public class YAMLBacking extends FlatfileBacking {
             if (files == null) return false;
 
             for (File file : files) {
+                registerFileAction("users", file);
                 Map<String, Boolean> nodes = new HashMap<>();
                 readMapFromFile(file, values -> {
                     Map<String, Boolean> perms = (Map<String, Boolean>) values.get("perms");
@@ -235,6 +238,8 @@ public class YAMLBacking extends FlatfileBacking {
             if (files == null) return false;
 
             for (File file : files) {
+                registerFileAction("users", file);
+
                 UUID holder = UUID.fromString(file.getName().substring(0, file.getName().length() - 4));
                 Map<String, Boolean> nodes = new HashMap<>();
                 readMapFromFile(file, values -> {
@@ -264,6 +269,7 @@ public class YAMLBacking extends FlatfileBacking {
         try {
             return call(() -> {
                 File groupFile = new File(groupsDir, name + ".yml");
+                registerFileAction("groups", groupFile);
                 if (groupFile.exists()) {
                     return readMapFromFile(groupFile, values -> {
                         Map<String, Boolean> perms = (Map<String, Boolean>) values.get("perms");
@@ -296,6 +302,7 @@ public class YAMLBacking extends FlatfileBacking {
         try {
             return call(() -> {
                 File groupFile = new File(groupsDir, name + ".yml");
+                registerFileAction("groups", groupFile);
                 return groupFile.exists() && readMapFromFile(groupFile, values -> {
                     Map<String, Boolean> perms = (Map<String, Boolean>) values.get("perms");
                     group.setNodes(perms);
@@ -331,6 +338,7 @@ public class YAMLBacking extends FlatfileBacking {
         try {
             return call(() -> {
                 File groupFile = new File(groupsDir, group.getName() + ".yml");
+                registerFileAction("groups", groupFile);
                 if (!groupFile.exists()) {
                     try {
                         groupFile.createNewFile();
@@ -356,6 +364,7 @@ public class YAMLBacking extends FlatfileBacking {
         try {
             return call(() -> {
                 File groupFile = new File(groupsDir, group.getName() + ".yml");
+                registerFileAction("groups", groupFile);
                 if (groupFile.exists()) {
                     groupFile.delete();
                 }
@@ -374,6 +383,8 @@ public class YAMLBacking extends FlatfileBacking {
             if (files == null) return false;
 
             for (File file : files) {
+                registerFileAction("groups", file);
+
                 String holder = file.getName().substring(0, file.getName().length() - 4);
                 Map<String, Boolean> nodes = new HashMap<>();
                 readMapFromFile(file, values -> {
@@ -403,6 +414,8 @@ public class YAMLBacking extends FlatfileBacking {
         try {
             return call(() -> {
                 File trackFile = new File(tracksDir, name + ".yml");
+                registerFileAction("tracks", trackFile);
+
                 if (trackFile.exists()) {
                     return readMapFromFile(trackFile, values -> {
                         track.setGroups((List<String>) values.get("groups"));
@@ -435,6 +448,8 @@ public class YAMLBacking extends FlatfileBacking {
         try {
             return call(() -> {
                 File trackFile = new File(tracksDir, name + ".yml");
+                registerFileAction("tracks", trackFile);
+
                 return trackFile.exists() && readMapFromFile(trackFile, values -> {
                     track.setGroups((List<String>) values.get("groups"));
                     return true;
@@ -468,6 +483,8 @@ public class YAMLBacking extends FlatfileBacking {
         try {
             return call(() -> {
                 File trackFile = new File(tracksDir, track.getName() + ".yml");
+                registerFileAction("tracks", trackFile);
+
                 if (!trackFile.exists()) {
                     try {
                         trackFile.createNewFile();
@@ -493,6 +510,8 @@ public class YAMLBacking extends FlatfileBacking {
         try {
             return call(() -> {
                 File trackFile = new File(tracksDir, track.getName() + ".yml");
+                registerFileAction("tracks", trackFile);
+
                 if (trackFile.exists()) {
                     trackFile.delete();
                 }

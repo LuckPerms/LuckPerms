@@ -51,7 +51,7 @@ import java.util.Map;
 public class ConfigKeys {
 
     public static final ConfigKey<String> SERVER = StringKey.of("server", "global");
-    public static final ConfigKey<Integer> SYNC_TIME = EnduringKey.wrap(IntegerKey.of("data.sync-minutes", 3));
+    public static final ConfigKey<Integer> SYNC_TIME = EnduringKey.wrap(IntegerKey.of("data.sync-minutes", -1));
     public static final ConfigKey<String> DEFAULT_GROUP_NODE = StaticKey.of("group.default"); // constant since 2.6
     public static final ConfigKey<String> DEFAULT_GROUP_NAME = StaticKey.of("default"); // constant since 2.6
     public static final ConfigKey<Boolean> INCLUDING_GLOBAL_PERMS = BooleanKey.of("include-global", true);
@@ -140,6 +140,7 @@ public class ConfigKeys {
     }));
     public static final ConfigKey<String> SQL_TABLE_PREFIX = EnduringKey.wrap(StringKey.of("data.table_prefix", "luckperms_"));
     public static final ConfigKey<String> STORAGE_METHOD = EnduringKey.wrap(StringKey.of("storage-method", "h2"));
+    public static final ConfigKey<Boolean> WATCH_FILES = BooleanKey.of("watch-files", true);
     public static final ConfigKey<Boolean> SPLIT_STORAGE = EnduringKey.wrap(BooleanKey.of("split-storage.enabled", false));
     public static final ConfigKey<Map<String, String>> SPLIT_STORAGE_OPTIONS = EnduringKey.wrap(AbstractKey.of(c -> {
         return ImmutableMap.<String, String>builder()

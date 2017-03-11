@@ -71,6 +71,7 @@ import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.tasks.UpdateTask;
 import me.lucko.luckperms.common.treeview.PermissionVault;
 import me.lucko.luckperms.common.utils.BufferedRequest;
+import me.lucko.luckperms.common.utils.FileWatcher;
 import me.lucko.luckperms.common.utils.LoggerImpl;
 
 import org.bukkit.World;
@@ -106,6 +107,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private GroupManager groupManager;
     private TrackManager trackManager;
     private Storage storage;
+    private FileWatcher fileWatcher = null;
     private InternalMessagingService messagingService = null;
     private UuidCache uuidCache;
     private BukkitListener listener;
@@ -167,6 +169,11 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         PluginManager pm = getServer().getPluginManager();
         listener = new BukkitListener(this);
         pm.registerEvents(listener, this);
+
+        if (getConfiguration().get(ConfigKeys.WATCH_FILES)) {
+            fileWatcher = new FileWatcher(this);
+            getScheduler().doAsyncRepeating(fileWatcher, 30L);
+        }
 
         // initialise datastore
         storage = StorageFactory.getInstance(this, StorageType.H2);
@@ -336,6 +343,10 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         getLog().info("Closing datastore...");
         storage.shutdown();
 
+        if (fileWatcher != null) {
+            fileWatcher.close();
+        }
+
         if (messagingService != null) {
             getLog().info("Closing messaging service...");
             messagingService.close();
@@ -363,6 +374,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         groupManager = null;
         trackManager = null;
         storage = null;
+        fileWatcher = null;
         messagingService = null;
         uuidCache = null;
         listener = null;
