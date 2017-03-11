@@ -22,48 +22,38 @@
 
 package me.lucko.luckperms.api.placeholders;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+
 import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.clip.placeholderapi.util.TimeUtil;
 import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.User;
+import me.lucko.luckperms.api.caching.PermissionData;
 import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.api.context.MutableContextSet;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 /*
  * PlaceholderAPI Expansion for LuckPerms, implemented using the LuckPerms API.
- *
- * Placeholders:
- * - group_name
- * - groups
- * - has_permission_<node>
- * - inherits_permission_<node>
- * - in_group_<name>
- * - inherits_group_<name>
- * - on_track_<track>
- * - expiry_time_<node>
- * - group_expiry_time_<group>
- * - prefix
- * - suffix
- * - meta_<node>
  */
 public class LuckPermsPlaceholderExpansion extends PlaceholderExpansion {
     private static final String IDENTIFIER = "luckperms";
     private static final String PLUGIN_NAME = "LuckPerms";
     private static final String AUTHOR = "Luck";
-
-    private static String formatBoolean(boolean b) {
-        return b ? PlaceholderAPIPlugin.booleanTrue() : PlaceholderAPIPlugin.booleanFalse();
-    }
+    private static final String VERSION = "3.0";
 
     private LuckPermsApi api = null;
 
@@ -82,11 +72,6 @@ public class LuckPermsPlaceholderExpansion extends PlaceholderExpansion {
         return super.register();
     }
 
-    @Override
-    public String getVersion() {
-        return "2.13";
-    }
-
     private Contexts makeContexts(Player player) {
         MutableContextSet contextSet = new MutableContextSet();
         contextSet.add("server", api.getConfiguration().getVaultServer());
@@ -100,25 +85,32 @@ public class LuckPermsPlaceholderExpansion extends PlaceholderExpansion {
             return "";
         }
 
-        Optional<User> u = api.getUserSafe(api.getUuidCache().getUUID(player.getUniqueId()));
-        if (!u.isPresent()) {
+        User user = api.getUserSafe(api.getUuidCache().getUUID(player.getUniqueId())).orElse(null);
+        if (user == null) {
             return "";
         }
-        final User user = u.get();
 
-        Optional<UserData> d = user.getUserDataCache();
-        if (!d.isPresent()) {
+        UserData data = user.getUserDataCache().orElse(null);
+        if (data == null) {
             return "";
         }
-        final UserData data = d.get();
 
         identifier = identifier.toLowerCase();
 
-        if (identifier.equalsIgnoreCase("group_name")) {
+        if (identifier.equals("group_name")) {
             return user.getPrimaryGroup();
         }
 
-        if (identifier.equalsIgnoreCase("groups")) {
+        if (identifier.startsWith("context_") && identifier.length() > "context_".length()) {
+            String key = identifier.substring("context_".length());
+            return api.getContextForUser(user)
+                    .map(Contexts::getContexts)
+                    .map(c -> c.getValues(key))
+                    .map(s -> Iterables.getFirst(s, ""))
+                    .orElse("");
+        }
+
+        if (identifier.equals("groups")) {
             return user.getGroupNames().stream().collect(Collectors.joining(", "));
         }
 
@@ -129,6 +121,11 @@ public class LuckPermsPlaceholderExpansion extends PlaceholderExpansion {
 
         if (identifier.startsWith("inherits_permission_") && identifier.length() > "inherits_permission_".length()) {
             String node = identifier.substring("inherits_permission_".length());
+            return formatBoolean(data.getPermissionData(makeContexts(player)).getPermissionValue(node).asBoolean());
+        }
+
+        if (identifier.startsWith("check_permission_") && identifier.length() > "check_permission_".length()) {
+            String node = identifier.substring("check_permission_".length());
             return formatBoolean(data.getPermissionData(makeContexts(player)).getPermissionValue(node).asBoolean());
         }
 
@@ -144,58 +141,128 @@ public class LuckPermsPlaceholderExpansion extends PlaceholderExpansion {
 
         if (identifier.startsWith("on_track_") && identifier.length() > "on_track_".length()) {
             String trackName = identifier.substring("on_track_".length());
+            return api.getTrackSafe(trackName)
+                    .map(t -> formatBoolean(t.containsGroup(user.getPrimaryGroup())))
+                    .orElse("");
+        }
 
-            Optional<Track> track = api.getTrackSafe(trackName);
-            return track.map(t -> formatBoolean(t.containsGroup(user.getPrimaryGroup()))).orElse("");
+        if (identifier.startsWith("has_groups_on_track_") && identifier.length() > "has_groups_on_track_".length()) {
+            String trackName = identifier.substring("has_groups_on_track_".length());
+            return api.getTrackSafe(trackName).map(t -> {
+                for (String group : user.getGroupNames()) {
+                    if (t.containsGroup(group)) {
+                        return formatBoolean(true);
+                    }
+                }
+                return formatBoolean(false);
+            }).orElse("");
+        }
+
+        if (identifier.equals("highest_group_by_weight")) {
+            return user.getPermissions().stream()
+                    .filter(Node::isGroupNode)
+                    .map(Node::getGroupName)
+                    .map(s -> api.getGroupSafe(s))
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .sorted((o1, o2) -> {
+                        int ret = Integer.compare(o1.getWeight().orElse(0), o2.getWeight().orElse(0));
+                        return ret == 1 ? 1 : -1;
+                    })
+                    .findFirst()
+                    .map(Group::getName)
+                    .orElse("");
+        }
+
+        if (identifier.equals("lowest_group_by_weight")) {
+            return user.getPermissions().stream()
+                    .filter(Node::isGroupNode)
+                    .map(Node::getGroupName)
+                    .map(s -> api.getGroupSafe(s))
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .sorted((o1, o2) -> {
+                        int ret = Integer.compare(o1.getWeight().orElse(0), o2.getWeight().orElse(0));
+                        return ret == 1 ? -1 : 1;
+                    })
+                    .findFirst()
+                    .map(Group::getName)
+                    .orElse("");
+        }
+
+        if (identifier.startsWith("first_group_on_tracks_") && identifier.length() > "first_group_on_tracks_".length()) {
+            List<String> tracks = Splitter.on(',').trimResults().splitToList(identifier.substring("first_group_on_tracks_".length()));
+            PermissionData permData = data.getPermissionData(makeContexts(player));
+            return tracks.stream()
+                    .map(t -> api.getTrackSafe(t))
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .map(Track::getGroups)
+                    .map(groups -> groups.stream()
+                            .filter(s -> permData.getPermissionValue("group." + s).asBoolean())
+                            .findFirst()
+                    )
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .findFirst()
+                    .orElse("");
+        }
+
+        if (identifier.startsWith("last_group_on_tracks_") && identifier.length() > "last_group_on_tracks_".length()) {
+            List<String> tracks = Splitter.on(',').trimResults().splitToList(identifier.substring("last_group_on_tracks_".length()));
+            PermissionData permData = data.getPermissionData(makeContexts(player));
+            return tracks.stream()
+                    .map(t -> api.getTrackSafe(t))
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .map(Track::getGroups)
+                    .map(Lists::reverse)
+                    .map(groups -> groups.stream()
+                            .filter(s -> permData.getPermissionValue("group." + s).asBoolean())
+                            .findFirst()
+                    )
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .findFirst()
+                    .orElse("");
         }
 
         if (identifier.startsWith("expiry_time_") && identifier.length() > "expiry_time_".length()) {
             String node = identifier.substring("expiry_time_".length());
             long currentTime = System.currentTimeMillis() / 1000L;
-            for (Node n : user.getTemporaryPermissionNodes()) {
-                if (n.toSerializedNode().equalsIgnoreCase(node)) {
-                    return TimeUtil.getTime((int) (n.getExpiryUnixTime() - currentTime));
-                }
-            }
-
-            return "";
+            return user.getPermissions().stream()
+                    .filter(Node::isTemporary)
+                    .filter(n -> n.toSerializedNode().equals(node))
+                    .map(Node::getExpiryUnixTime)
+                    .findAny()
+                    .map(e -> TimeUtil.getTime((int) (e - currentTime)))
+                    .orElse("");
         }
 
         if (identifier.startsWith("group_expiry_time_") && identifier.length() > "group_expiry_time_".length()) {
-            String node = "group." + identifier.substring("group_expiry_time_".length());
+            String group = identifier.substring("group_expiry_time_".length());
             long currentTime = System.currentTimeMillis() / 1000L;
-            for (Node n : user.getTemporaryPermissionNodes()) {
-                if (n.getPermission().equalsIgnoreCase(node)) {
-                    return TimeUtil.getTime((int) (n.getExpiryUnixTime() - currentTime));
-                }
-            }
-
-            return "";
+            return user.getPermissions().stream()
+                    .filter(Node::isTemporary)
+                    .filter(Node::isGroupNode)
+                    .filter(n -> n.getGroupName().equals(group))
+                    .map(Node::getExpiryUnixTime)
+                    .findAny()
+                    .map(e -> TimeUtil.getTime((int) (e - currentTime)))
+                    .orElse("");
         }
 
         if (identifier.equalsIgnoreCase("prefix")) {
-            String prefix = data.calculateMeta(makeContexts(player)).getPrefix();
-            if (prefix == null) {
-                prefix = "";
-            }
-            return prefix;
+            return Optional.ofNullable(data.calculateMeta(makeContexts(player)).getPrefix()).orElse("");
         }
 
         if (identifier.equalsIgnoreCase("suffix")) {
-            String suffix = data.calculateMeta(makeContexts(player)).getSuffix();
-            if (suffix == null) {
-                suffix = "";
-            }
-            return suffix;
+            return Optional.ofNullable(data.calculateMeta(makeContexts(player)).getSuffix()).orElse("");
         }
 
         if (identifier.startsWith("meta_") && identifier.length() > "meta_".length()) {
             String node = identifier.substring("meta_".length());
-            String meta = data.getMetaData(makeContexts(player)).getMeta().get(node);
-            if (meta == null) {
-                meta = "";
-            }
-            return meta;
+            return data.getMetaData(makeContexts(player)).getMeta().getOrDefault(node, "");
         }
 
         return null;
@@ -214,5 +281,14 @@ public class LuckPermsPlaceholderExpansion extends PlaceholderExpansion {
     @Override
     public String getAuthor() {
         return AUTHOR;
+    }
+
+    @Override
+    public String getVersion() {
+        return VERSION;
+    }
+
+    private static String formatBoolean(boolean b) {
+        return b ? PlaceholderAPIPlugin.booleanTrue() : PlaceholderAPIPlugin.booleanFalse();
     }
 }
