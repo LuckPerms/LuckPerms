@@ -27,6 +27,7 @@ import com.zaxxer.hikari.HikariDataSource;
 
 import me.lucko.luckperms.common.storage.DatastoreConfiguration;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 
@@ -62,21 +63,26 @@ public class MySQLProvider extends SQLProvider {
         config.addDataSourceProperty("databaseName", database);
         config.addDataSourceProperty("user", username);
         config.addDataSourceProperty("password", password);
-        config.addDataSourceProperty("cachePrepStmts", true);
-        config.addDataSourceProperty("prepStmtCacheSize", 250);
-        config.addDataSourceProperty("prepStmtCacheSqlLimit", 2048);
-        config.addDataSourceProperty("useServerPrepStmts", true);
-        config.addDataSourceProperty("cacheCallableStmts", true);
-        config.addDataSourceProperty("alwaysSendSetIsolation", false);
-        config.addDataSourceProperty("cacheServerConfiguration", true);
-        config.addDataSourceProperty("elideSetAutoCommits", true);
-        config.addDataSourceProperty("useLocalSessionState", true);
+        config.addDataSourceProperty("cachePrepStmts", "true");
+        config.addDataSourceProperty("prepStmtCacheSize", "250");
+        config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+        config.addDataSourceProperty("useServerPrepStmts", "true");
+        config.addDataSourceProperty("cacheCallableStmts", "true");
+        config.addDataSourceProperty("alwaysSendSetIsolation", "false");
+        config.addDataSourceProperty("cacheServerConfiguration", "true");
+        config.addDataSourceProperty("elideSetAutoCommits", "true");
+        config.addDataSourceProperty("useLocalSessionState", "true");
         config.addDataSourceProperty("characterEncoding", "utf8");
         config.addDataSourceProperty("useUnicode", "true");
-        config.setConnectionTimeout(TimeUnit.SECONDS.toMillis(10)); // 10000
-        config.setLeakDetectionThreshold(TimeUnit.SECONDS.toMillis(5)); // 5000
-        config.setValidationTimeout(TimeUnit.SECONDS.toMillis(3)); // 3000
-        config.setInitializationFailFast(true);
+
+        // We will wait for 15 seconds to get a connection from the pool.
+        // Default is 30, but it shouldn't be taking that long.
+        config.setConnectionTimeout(TimeUnit.SECONDS.toMillis(15)); // 15000
+
+        // If a connection is not returned within 10 seconds, it's probably safe to assume it's been leaked.
+        config.setLeakDetectionThreshold(TimeUnit.SECONDS.toMillis(10)); // 10000
+
+        // The drivers are really old in some of the older Spigot binaries, so Connection#isValid doesn't work.
         config.setConnectionTestQuery("/* LuckPerms ping */ SELECT 1");
 
         hikari = new HikariDataSource(config);
@@ -91,6 +97,10 @@ public class MySQLProvider extends SQLProvider {
 
     @Override
     public WrappedConnection getConnection() throws SQLException {
-        return new WrappedConnection(hikari.getConnection(), true);
+        Connection connection = hikari.getConnection();
+        if (connection == null) {
+            throw new SQLException("Connection is null");
+        }
+        return new WrappedConnection(connection, true);
     }
 }

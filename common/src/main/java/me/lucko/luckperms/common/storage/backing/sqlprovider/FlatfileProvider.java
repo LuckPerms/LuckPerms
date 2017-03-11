@@ -23,6 +23,7 @@
 package me.lucko.luckperms.common.storage.backing.sqlprovider;
 
 import java.io.File;
+import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.concurrent.locks.ReentrantLock;
@@ -57,18 +58,25 @@ abstract class FlatfileProvider extends SQLProvider {
     public WrappedConnection getConnection() throws SQLException {
         lock.lock();
         try {
-            if (connection == null || connection.isClosed()) {
+            if (this.connection == null || this.connection.isClosed()) {
                 try {
                     Class.forName(getDriverClass());
                 } catch (ClassNotFoundException ignored) {}
 
-                connection = new WrappedConnection(DriverManager.getConnection(getDriverId() + ":" + file.getAbsolutePath()), false);
+                Connection connection = DriverManager.getConnection(getDriverId() + ":" + file.getAbsolutePath());
+                if (connection != null) {
+                    this.connection = new WrappedConnection(connection, false);
+                }
             }
 
         } finally {
             lock.unlock();
         }
 
-        return connection;
+        if (this.connection == null) {
+            throw new SQLException("Connection is null");
+        }
+
+        return this.connection;
     }
 }
