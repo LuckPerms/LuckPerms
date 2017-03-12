@@ -10,12 +10,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>luckperms-common</artifactId>
+    <packaging>jar</packaging>
+
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.5.1</version>
+                <version>${compiler.version}</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
@@ -120,7 +122,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.16.10</version>
+            <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

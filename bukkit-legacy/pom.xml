@@ -15,10 +15,6 @@
         <finalName>LuckPerms-Bukkit-Legacy-${release.version}.${patch.version}</finalName>
         <resources>
             <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-            </resource>
-            <resource>
                 <directory>../</directory>
                 <filtering>false</filtering>
                 <includes>
@@ -30,7 +26,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.5.1</version>
+                <version>${compiler.version}</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
@@ -39,7 +35,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>2.4.3</version>
+                <version>${shade.version}</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -77,6 +73,16 @@
             <artifactId>luckperms-bukkit</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>me.lucko.luckperms</groupId>
+                    <artifactId>luckperms-common</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>me.lucko.luckperms</groupId>
+                    <artifactId>luckperms-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Shade gson and guava, as they are not included in earlier Bukkit releases -->

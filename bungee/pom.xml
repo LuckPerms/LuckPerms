@@ -33,7 +33,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.5.1</version>
+                <version>${compiler.version}</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
@@ -42,7 +42,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>2.4.3</version>
+                <version>${shade.version}</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -70,7 +70,7 @@
         <dependency>
             <groupId>net.md-5</groupId>
             <artifactId>bungeecord-api</artifactId>
-            <version>1.9-SNAPSHOT</version>
+            <version>1.11-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <!-- LuckPerms Common -->
@@ -87,18 +87,11 @@
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
-        <!-- slf4j library -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>1.7.9</version>
-            <scope>provided</scope>
-        </dependency>
         <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.16.10</version>
+            <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
         <!-- **************Migration Plugins************** -->

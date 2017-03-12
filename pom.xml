@@ -37,8 +37,15 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <skipTests>true</skipTests>
+        <maven.test.skip>true</maven.test.skip>
+
         <release.version>3.0</release.version>
         <patch.version>${git.closest.tag.commit.count}</patch.version>
+
+        <compiler.version>3.6.1</compiler.version>
+        <shade.version>3.0.0</shade.version>
+        <lombok.version>1.16.14</lombok.version>
     </properties>
 
     <distributionManagement>
@@ -51,6 +58,11 @@
             <url>https://nexus.lucko.me/repository/maven-releases/</url>
         </repository>
     </distributionManagement>
+
+    <ciManagement>
+        <system>jenkins</system>
+        <url>https://ci.lucko.me/job/LuckPerms</url>
+    </ciManagement>
 
     <build>
         <plugins>
@@ -77,24 +89,28 @@
 
     <repositories>
         <repository>
-            <id>spigot-repo</id>
-            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+            <id>luck-repo</id>
+            <url>https://repo.lucko.me/</url>
         </repository>
         <repository>
             <id>oss-sonatype-snapshots</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
         </repository>
         <repository>
-            <id>luck-repo</id>
-            <url>https://repo.lucko.me/</url>
+            <id>spigot-repo</id>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+        </repository>
+        <repository>
+            <id>sponge-repo</id>
+            <url>https://repo.spongepowered.org/maven</url>
         </repository>
         <repository>
             <id>vault-repo</id>
             <url>http://nexus.hc.to/content/repositories/pub_releases</url>
         </repository>
         <repository>
-            <id>sponge-repo</id>
-            <url>https://repo.spongepowered.org/maven</url>
+            <id>lilypad-repo</id>
+            <url>http://ci.lilypadmc.org/plugin/repository/everything</url>
         </repository>
         <repository>
             <id>pex-repo</id>
@@ -103,10 +119,6 @@
         <repository>
             <id>bungeeperms-repo</id>
             <url>http://repo.wea-ondara.net/repository/public/</url>
-        </repository>
-        <repository>
-            <id>lilypad-repo</id>
-            <url>http://ci.lilypadmc.org/plugin/repository/everything</url>
         </repository>
     </repositories>
 </project>
