@@ -77,6 +77,7 @@ import me.lucko.luckperms.sponge.utils.VersionData;
 
 import org.slf4j.Logger;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandManager;
 import org.spongepowered.api.config.ConfigDir;
@@ -406,12 +407,15 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
     @Override
     public String getServerName() {
-        return getGame().getPlatform().getImplementation().getDescription().orElse("null");
+        return getGame().getPlatform().getContainer(Platform.Component.IMPLEMENTATION).getName();
     }
 
     @Override
     public String getServerVersion() {
-        return getGame().getPlatform().getApi().getVersion().orElse("null") + " - " + getGame().getPlatform().getImplementation().getVersion().orElse("null");
+        return getGame().getPlatform().getContainer(Platform.Component.API).getName() + ": " +
+                getGame().getPlatform().getContainer(Platform.Component.API).getVersion().orElse("null") + " - " +
+                getGame().getPlatform().getContainer(Platform.Component.IMPLEMENTATION).getName() + ": " +
+                getGame().getPlatform().getContainer(Platform.Component.IMPLEMENTATION).getVersion().orElse("null");
     }
 
     @Override

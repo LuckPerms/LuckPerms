@@ -454,7 +454,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
     @Override
     public String getServerVersion() {
-        return getServer().getVersion();
+        return getServer().getVersion() + " - " + getServer().getBukkitVersion();
     }
 
     @Override

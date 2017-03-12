@@ -390,6 +390,7 @@ public interface LuckPermsPlugin {
         sender.sendMessage(Util.color("&b    |___ \\__/ \\__, |  \\ &3|    |___ |  \\  |  | .__/ "));
         sender.sendMessage(Util.color(" "));
         sender.sendMessage(Util.color("&2  Loading version &bv" + plugin.getVersion() + "&2 on " + plugin.getServerType().getFriendlyName() + " - " + plugin.getServerName()));
+        sender.sendMessage(Util.color("&8  Running on server version " + plugin.getServerVersion()));
         sender.sendMessage(Util.color(" "));
     }
 
