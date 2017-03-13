@@ -195,11 +195,18 @@ public class ImmutableNode implements Node {
             throw new IllegalArgumentException("Empty permission");
         }
 
-        if (server != null && (server.equalsIgnoreCase("global") || server.equals(""))) {
+        if (server != null) {
+            server = server.toLowerCase();
+        }
+        if (world != null) {
+            world = world.toLowerCase();
+        }
+
+        if (server != null && (server.equals("global") || server.equals(""))) {
             server = null;
         }
 
-        if (world != null && (world.equalsIgnoreCase("global") || world.equals(""))) {
+        if (world != null && (world.equals("global") || world.equals(""))) {
             world = null;
         }
 

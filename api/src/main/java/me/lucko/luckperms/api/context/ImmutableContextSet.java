@@ -72,7 +72,7 @@ public final class ImmutableContextSet implements ContextSet {
 
         ImmutableMultimap.Builder<String, String> b = ImmutableMultimap.builder();
         for (Map.Entry<String, String> e : map.entrySet()) {
-            b.put(e.getKey(), e.getValue());
+            b.put(e.getKey().toLowerCase(), e.getValue());
         }
 
         return new ImmutableContextSet(b.build());

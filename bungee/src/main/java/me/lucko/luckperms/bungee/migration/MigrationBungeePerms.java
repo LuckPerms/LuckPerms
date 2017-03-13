@@ -26,6 +26,7 @@ import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SubCommand;
+import me.lucko.luckperms.common.commands.migration.MigrationUtils;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeFactory;
@@ -79,52 +80,34 @@ public class MigrationBungeePerms extends SubCommand<Object> {
             int groupWeight = maxWeight - g.getRank();
 
             // Make a LuckPerms group for the one being migrated
-            plugin.getStorage().createAndLoadGroup(g.getName().toLowerCase(), CreationCause.INTERNAL).join();
-            me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().getIfLoaded(g.getName().toLowerCase());
+            String groupName = MigrationUtils.standardizeName(g.getName());
+            plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
+            me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().getIfLoaded(groupName);
 
-            group.removeIf(n -> n.getPermission().startsWith("weight."));
-            group.setPermissionUnchecked(NodeFactory.make("weight." + groupWeight, true));
+            MigrationUtils.setGroupWeight(group, groupWeight);
 
             // Migrate global perms
             for (String perm : g.getPerms()) {
-                boolean value = true;
-                if (perm.startsWith("-") || perm.startsWith("!")) {
-                    perm = perm.substring(1);
-                    value = false;
-                }
-
-                group.setPermissionUnchecked(NodeFactory.make(perm, value));
+                group.setPermissionUnchecked(MigrationUtils.parseNode(perm, true).build());
             }
 
             // Migrate per-server perms
             for (Map.Entry<String, Server> e : g.getServers().entrySet()) {
                 for (String perm : e.getValue().getPerms()) {
-                    boolean value = true;
-                    if (perm.startsWith("-") || perm.startsWith("!")) {
-                        perm = perm.substring(1);
-                        value = false;
-                    }
-
-                    group.setPermissionUnchecked(NodeFactory.make(perm, value, e.getKey()));
+                    group.setPermissionUnchecked(MigrationUtils.parseNode(perm, true).setWorld(e.getKey()).build());
                 }
 
                 // Migrate per-world perms
                 for (Map.Entry<String, World> we : e.getValue().getWorlds().entrySet()) {
                     for (String perm : we.getValue().getPerms()) {
-                        boolean value = true;
-                        if (perm.startsWith("-") || perm.startsWith("!")) {
-                            perm = perm.substring(1);
-                            value = false;
-                        }
-
-                        group.setPermissionUnchecked(NodeFactory.make(perm, value, e.getKey(), we.getKey()));
+                        group.setPermissionUnchecked(MigrationUtils.parseNode(perm, true).setServer(e.getKey()).setWorld(we.getKey()).build());
                     }
                 }
             }
 
             // Migrate any parent groups
             for (String inherit : g.getInheritances()) {
-                group.setPermissionUnchecked(NodeFactory.make("group." + inherit));
+                group.setPermissionUnchecked(NodeFactory.make("group." + MigrationUtils.standardizeName(inherit)));
             }
 
             // Migrate prefix and suffix
@@ -134,7 +117,6 @@ public class MigrationBungeePerms extends SubCommand<Object> {
             if (prefix != null && !prefix.equals("")) {
                 group.setPermissionUnchecked(NodeFactory.makePrefixNode(groupWeight, prefix).build());
             }
-
             if (suffix != null && !suffix.equals("")) {
                 group.setPermissionUnchecked(NodeFactory.makeSuffixNode(groupWeight, suffix).build());
             }
@@ -158,49 +140,31 @@ public class MigrationBungeePerms extends SubCommand<Object> {
             }
 
             // Make a LuckPerms user for the one being migrated.
-            plugin.getStorage().loadUser(u.getUUID(), "null").join();
+            plugin.getStorage().loadUser(u.getUUID(), u.getName()).join();
             me.lucko.luckperms.common.core.model.User user = plugin.getUserManager().get(u.getUUID());
 
             // Migrate global perms
             for (String perm : u.getPerms()) {
-                boolean value = true;
-                if (perm.startsWith("-") || perm.startsWith("!")) {
-                    perm = perm.substring(1);
-                    value = false;
-                }
-
-                user.setPermissionUnchecked(NodeFactory.make(perm, value));
+                user.setPermissionUnchecked(MigrationUtils.parseNode(perm, true).build());
             }
 
             // Migrate per-server perms
             for (Map.Entry<String, Server> e : u.getServers().entrySet()) {
                 for (String perm : e.getValue().getPerms()) {
-                    boolean value = true;
-                    if (perm.startsWith("-") || perm.startsWith("!")) {
-                        perm = perm.substring(1);
-                        value = false;
-                    }
-
-                    user.setPermissionUnchecked(NodeFactory.make(perm, value, e.getKey()));
+                    user.setPermissionUnchecked(MigrationUtils.parseNode(perm, true).setWorld(e.getKey()).build());
                 }
 
                 // Migrate per-world perms
                 for (Map.Entry<String, World> we : e.getValue().getWorlds().entrySet()) {
                     for (String perm : we.getValue().getPerms()) {
-                        boolean value = true;
-                        if (perm.startsWith("-") || perm.startsWith("!")) {
-                            perm = perm.substring(1);
-                            value = false;
-                        }
-
-                        user.setPermissionUnchecked(NodeFactory.make(perm, value, e.getKey(), we.getKey()));
+                        user.setPermissionUnchecked(MigrationUtils.parseNode(perm, true).setServer(e.getKey()).setWorld(we.getKey()).build());
                     }
                 }
             }
 
             // Migrate groups
             for (String group : u.getGroupsString()) {
-                user.setPermissionUnchecked(NodeFactory.make("group." + group));
+                user.setPermissionUnchecked(NodeFactory.make("group." + MigrationUtils.standardizeName(group)));
             }
 
             // Migrate prefix & suffix
@@ -210,7 +174,6 @@ public class MigrationBungeePerms extends SubCommand<Object> {
             if (prefix != null && !prefix.equals("")) {
                 user.setPermissionUnchecked(NodeFactory.makePrefixNode(maxWeight, prefix).build());
             }
-
             if (suffix != null && !suffix.equals("")) {
                 user.setPermissionUnchecked(NodeFactory.makeSuffixNode(maxWeight, suffix).build());
             }

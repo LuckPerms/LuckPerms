@@ -22,6 +22,8 @@
 
 package me.lucko.luckperms.common.commands.migration;
 
+import com.google.common.collect.ImmutableMap;
+
 import me.lucko.luckperms.common.commands.Command;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -35,60 +37,31 @@ import me.lucko.luckperms.common.utils.Predicates;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class MigrationMainCommand extends MainCommand<Object> {
+    private static final Map<String, String> PLUGINS = ImmutableMap.<String, String>builder()
+            .put("org.anjocaido.groupmanager.GroupManager", "me.lucko.luckperms.bukkit.migration.MigrationGroupManager")
+            .put("ru.tehkode.permissions.bukkit.PermissionsEx", "me.lucko.luckperms.bukkit.migration.MigrationPermissionsEx")
+            .put("com.github.cheesesoftware.PowerfulPermsAPI.PowerfulPermsPlugin", "me.lucko.luckperms.bukkit.migration.MigrationPowerfulPerms")
+            .put("org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsService", "me.lucko.luckperms.bukkit.migration.MigrationZPermissions")
+            .put("net.alpenblock.bungeeperms.BungeePerms", "me.lucko.luckperms.bungee.migration.MigrationBungeePerms")
+            .put("de.bananaco.bpermissions.api.WorldManager", "me.lucko.luckperms.bukkit.migration.MigrationBPermissions")
+            .put("ninja.leaping.permissionsex.sponge.PermissionsExPlugin", "me.lucko.luckperms.sponge.migration.MigrationPermissionsEx")
+            .put("io.github.djxy.permissionmanager.PermissionManager", "me.lucko.luckperms.sponge.migration.MigrationPermissionManager")
+            .build();
+
     @SuppressWarnings("unchecked")
     private static List<Command<Object, ?>> getAvailableCommands() {
         List<SubCommand<Object>> l = new ArrayList<>();
 
-        try {
-            Class.forName("org.anjocaido.groupmanager.GroupManager");
-            l.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.bukkit.migration.MigrationGroupManager").newInstance());
-        } catch (Throwable ignored) {
-        }
-
-        try {
-            Class.forName("ru.tehkode.permissions.bukkit.PermissionsEx");
-            l.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.bukkit.migration.MigrationPermissionsEx").newInstance());
-        } catch (Throwable ignored) {
-        }
-
-        try {
-            Class.forName("com.github.cheesesoftware.PowerfulPermsAPI.PowerfulPermsPlugin");
-            l.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.bukkit.migration.MigrationPowerfulPerms").newInstance());
-        } catch (Throwable ignored) {
-        }
-
-        try {
-            Class.forName("org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsService");
-            l.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.bukkit.migration.MigrationZPermissions").newInstance());
-        } catch (Throwable ignored) {
-        }
-
-        try {
-            Class.forName("net.alpenblock.bungeeperms.BungeePerms");
-            l.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.bungee.migration.MigrationBungeePerms").newInstance());
-        } catch (Throwable ignored) {
-        }
-
-        try {
-            Class.forName("de.bananaco.bpermissions.api.WorldManager");
-            l.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.bukkit.migration.MigrationBPermissions").newInstance());
-        } catch (Throwable ignored) {
-        }
-
-        try {
-            Class.forName("ninja.leaping.permissionsex.sponge.PermissionsExPlugin");
-            l.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.sponge.migration.MigrationPermissionsEx").newInstance());
-        } catch (Throwable ignored) {
-        }
-
-        try {
-            Class.forName("io.github.djxy.permissionmanager.PermissionManager");
-            l.add((SubCommand<Object>) Class.forName("me.lucko.luckperms.sponge.migration.MigrationPermissionManager").newInstance());
-        } catch (Throwable ignored) {
+        for (Map.Entry<String, String> plugin : PLUGINS.entrySet()) {
+            try {
+                Class.forName(plugin.getKey());
+                l.add((SubCommand<Object>) Class.forName(plugin.getValue()).newInstance());
+            } catch (Throwable ignored) {}
         }
 
         return l.stream().collect(Collectors.toList());

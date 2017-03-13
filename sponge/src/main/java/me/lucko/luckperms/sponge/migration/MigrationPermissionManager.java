@@ -26,6 +26,7 @@ import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SubCommand;
+import me.lucko.luckperms.common.commands.migration.MigrationUtils;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Permission;
@@ -50,7 +51,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static me.lucko.luckperms.sponge.migration.MigrationUtils.migrateSubject;
+import static me.lucko.luckperms.sponge.migration.SpongeMigrationUtils.migrateSubject;
 
 public class MigrationPermissionManager extends SubCommand<Object> {
     public MigrationPermissionManager() {
@@ -88,12 +89,12 @@ public class MigrationPermissionManager extends SubCommand<Object> {
         // Migrate defaults
         log.log("Migrating default subjects.");
         for (SubjectCollection collection : pmService.getKnownSubjects().values()) {
-            MigrationUtils.migrateSubjectData(
+            SpongeMigrationUtils.migrateSubjectData(
                     collection.getDefaults().getSubjectData(),
                     lpService.getSubjects("defaults").get(collection.getIdentifier()).getSubjectData()
             );
         }
-        MigrationUtils.migrateSubjectData(pmService.getDefaults().getSubjectData(), lpService.getDefaults().getSubjectData());
+        SpongeMigrationUtils.migrateSubjectData(pmService.getDefaults().getSubjectData(), lpService.getDefaults().getSubjectData());
 
         // Migrate groups
         log.log("Starting group migration.");
@@ -108,7 +109,7 @@ public class MigrationPermissionManager extends SubCommand<Object> {
 
         AtomicInteger groupCount = new AtomicInteger(0);
         for (Subject pmGroup : pmService.getGroupSubjects().getAllSubjects()) {
-            String pmName = MigrationUtils.convertName(pmGroup.getIdentifier());
+            String pmName = MigrationUtils.standardizeName(pmGroup.getIdentifier());
 
             // Make a LuckPerms group for the one being migrated
             plugin.getStorage().createAndLoadGroup(pmName, CreationCause.INTERNAL).join();

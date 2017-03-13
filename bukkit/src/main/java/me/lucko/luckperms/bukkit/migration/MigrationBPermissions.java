@@ -29,12 +29,13 @@ import de.bananaco.bpermissions.api.Permission;
 import de.bananaco.bpermissions.api.World;
 import de.bananaco.bpermissions.api.WorldManager;
 
-import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SubCommand;
+import me.lucko.luckperms.common.commands.migration.MigrationUtils;
 import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -42,10 +43,10 @@ import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.common.utils.ProgressLogger;
 
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -56,9 +57,6 @@ import static me.lucko.luckperms.common.constants.Permission.MIGRATION;
 
 public class MigrationBPermissions extends SubCommand<Object> {
     private static Field uConfigField;
-    private static Method getConfigurationSectionMethod = null;
-    private static Method getKeysMethod = null;
-
     static {
         try {
             uConfigField = Class.forName("de.bananaco.bpermissions.imp.YamlWorld").getDeclaredField("uconfig");
@@ -89,7 +87,24 @@ public class MigrationBPermissions extends SubCommand<Object> {
         log.log("Forcing the plugin to load all data. This could take a while.");
         for (World world : worldManager.getAllWorlds()) {
             log.log("Loading users in world " + world.getName());
-            Set<String> users = getUsers(world);
+
+            YamlConfiguration yamlWorldUsers = null;
+            try {
+                yamlWorldUsers = (YamlConfiguration) uConfigField.get(world);
+            } catch (Throwable t) {
+                t.printStackTrace();
+            }
+
+            if (yamlWorldUsers == null) {
+                continue;
+            }
+
+            ConfigurationSection configSection = yamlWorldUsers.getConfigurationSection("users");
+            if (configSection == null) {
+                continue;
+            }
+
+            Set<String> users = configSection.getKeys(false);
             if (users == null) {
                 log.logErr("Couldn't get a list of users.");
                 return CommandResult.FAILURE;
@@ -111,7 +126,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
             log.log("Starting group migration in world " + world.getName() + ".");
             AtomicInteger groupCount = new AtomicInteger(0);
             for (Calculable group : world.getAll(CalculableType.GROUP)) {
-                String groupName = group.getName().toLowerCase();
+                String groupName = MigrationUtils.standardizeName(group.getName());
                 if (group.getName().equalsIgnoreCase(world.getDefaultGroup())) {
                     groupName = "default";
                 }
@@ -120,12 +135,15 @@ public class MigrationBPermissions extends SubCommand<Object> {
                 plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
                 me.lucko.luckperms.common.core.model.Group lpGroup = plugin.getGroupManager().getIfLoaded(groupName);
 
-                migrateHolder(log, world, group, lpGroup);
+                MigrationUtils.setGroupWeight(lpGroup, group.getPriority());
+                migrateHolder(world, group, lpGroup);
+
                 plugin.getStorage().saveGroup(lpGroup);
 
                 log.logAllProgress("Migrated {} groups so far.", groupCount.incrementAndGet());
             }
             log.log("Migrated " + groupCount.get() + " groups in world " + world.getName() + ".");
+
 
             // Migrate all users
             log.log("Starting user migration in world " + world.getName() + ".");
@@ -153,7 +171,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
                 plugin.getStorage().loadUser(uuid, "null").join();
                 User lpUser = plugin.getUserManager().get(uuid);
 
-                migrateHolder(log, world, user, lpUser);
+                migrateHolder(world, user, lpUser);
 
                 plugin.getStorage().saveUser(lpUser);
                 plugin.getUserManager().cleanup(lpUser);
@@ -168,78 +186,35 @@ public class MigrationBPermissions extends SubCommand<Object> {
         return CommandResult.SUCCESS;
     }
 
-    @SuppressWarnings("unchecked")
-    private static Set<String> getUsers(World world) {
-        try {
-            Object yamlWorldUsers = uConfigField.get(world);
-            if (getConfigurationSectionMethod == null) {
-                getConfigurationSectionMethod = yamlWorldUsers.getClass().getMethod("getConfigurationSection", String.class);
-                getConfigurationSectionMethod.setAccessible(true);
-            }
-
-            Object configSection = getConfigurationSectionMethod.invoke(yamlWorldUsers, "users");
-            if (configSection == null) {
-                return Collections.emptySet();
-            }
-
-            if (getKeysMethod == null) {
-                getKeysMethod = configSection.getClass().getMethod("getKeys", boolean.class);
-                getKeysMethod.setAccessible(true);
-            }
-
-            return (Set<String>) getKeysMethod.invoke(configSection, false);
-        } catch (Throwable t) {
-            t.printStackTrace();
-            return null;
-        }
-    }
-
-    private static void migrateHolder(ProgressLogger log, World world, Calculable c, PermissionHolder holder) {
+    private static void migrateHolder(World world, Calculable c, PermissionHolder holder) {
         // Migrate the groups permissions in this world
         for (Permission p : c.getPermissions()) {
-            try {
-                holder.setPermission(p.name(), p.isTrue(), "global", world.getName());
-            } catch (Exception ex) {
-                log.handleException(ex);
-            }
+            holder.setPermissionUnchecked(NodeFactory.make(p.name(), p.isTrue(), "global", world.getName()));
 
             // Include any child permissions
             for (Map.Entry<String, Boolean> child : p.getChildren().entrySet()) {
-                try {
-                    holder.setPermission(child.getKey(), child.getValue(), "global", world.getName());
-                } catch (Exception ex) {
-                    log.handleException(ex);
-                }
+                holder.setPermissionUnchecked(NodeFactory.make(child.getKey(), child.getValue(), "global", world.getName()));
             }
         }
 
         // Migrate any inherited groups
         for (Group parent : c.getGroups()) {
-            try {
-                holder.setPermission("group." + parent.getName(), true, "global", world.getName());
-            } catch (Exception ex) {
-                log.handleException(ex);
+            String parentName = MigrationUtils.standardizeName(parent.getName());
+            if (parent.getName().equalsIgnoreCase(world.getDefaultGroup())) {
+                parentName = "default";
             }
+
+            holder.setPermissionUnchecked(NodeFactory.make("group." + parentName, true, "global", world.getName()));
         }
 
         // Migrate existing meta
         for (Map.Entry<String, String> meta : c.getMeta().entrySet()) {
             if (meta.getKey().equalsIgnoreCase("prefix") || meta.getKey().equalsIgnoreCase("suffix")) {
-                String chatMeta = MetaUtils.escapeCharacters(meta.getValue());
-                try {
-                    holder.setPermission(meta.getKey().toLowerCase() + "." + c.getPriority() + "." + chatMeta, true);
-                } catch (Exception ex) {
-                    log.handleException(ex);
-                }
+                holder.setPermissionUnchecked(NodeFactory.makeChatMetaNode(meta.getKey().equalsIgnoreCase("prefix"), c.getPriority(), meta.getValue()).setWorld(world.getName()).build());
                 continue;
             }
 
-            try {
-                holder.setPermission("meta." + meta.getKey() + "." + meta.getValue(), true, "global", world.getName());
-            } catch (Exception ex) {
-                log.handleException(ex);
-            }
+            holder.setPermissionUnchecked(NodeFactory.makeMetaNode(meta.getKey(), meta.getValue()).setWorld(world.getName()).build());
         }
     }
-
 }

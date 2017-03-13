@@ -36,6 +36,7 @@ import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SubCommand;
+import me.lucko.luckperms.common.commands.migration.MigrationUtils;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.core.NodeFactory;
@@ -88,7 +89,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         log.log("Starting.");
 
         if (!Bukkit.getPluginManager().isPluginEnabled("PowerfulPerms")) {
-            log.logErr("PowerfulPerms is not loaded.");
+            log.logErr("Plugin not loaded.");
             return CommandResult.STATE_ERROR;
         }
 
@@ -168,12 +169,11 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         for (Group g : groups) {
             maxWeight = Math.max(maxWeight, g.getRank());
 
-            final String name = g.getName().toLowerCase();
-            plugin.getStorage().createAndLoadGroup(name, CreationCause.INTERNAL).join();
-            final me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().getIfLoaded(name);
+            final String groupName = MigrationUtils.standardizeName(g.getName());
+            plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
+            final me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().getIfLoaded(groupName);
 
-            group.removeIf(n -> n.getPermission().startsWith("weight."));
-            group.setPermissionUnchecked(NodeFactory.make("weight." + g.getRank(), true));
+            MigrationUtils.setGroupWeight(group, g.getRank());
 
             for (Permission p : g.getOwnPermissions()) {
                 applyPerm(group, p);
@@ -321,7 +321,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
 
     private void applyGroup(PermissionManager pm, PermissionHolder holder, CachedGroup g, String server) {
         Group group = pm.getGroup(g.getGroupId());
-        String node = "group." + group.getName();
+        String node = "group." + MigrationUtils.standardizeName(group.getName());
 
         long expireAt = 0L;
         if (g.willExpire()) {

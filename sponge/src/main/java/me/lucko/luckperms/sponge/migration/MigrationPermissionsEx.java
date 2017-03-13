@@ -26,6 +26,7 @@ import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.SubCommand;
+import me.lucko.luckperms.common.commands.migration.MigrationUtils;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Permission;
@@ -55,7 +56,7 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static me.lucko.luckperms.sponge.migration.MigrationUtils.migrateSubject;
+import static me.lucko.luckperms.sponge.migration.SpongeMigrationUtils.migrateSubject;
 
 public class MigrationPermissionsEx extends SubCommand<Object> {
     public MigrationPermissionsEx() {
@@ -84,12 +85,12 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         // Migrate defaults
         log.log("Migrating default subjects.");
         for (SubjectCollection collection : pexService.getKnownSubjects().values()) {
-            MigrationUtils.migrateSubjectData(
+            SpongeMigrationUtils.migrateSubjectData(
                     collection.getDefaults().getSubjectData(),
                     lpService.getSubjects("defaults").get(collection.getIdentifier()).getSubjectData()
             );
         }
-        MigrationUtils.migrateSubjectData(pexService.getDefaults().getSubjectData(), lpService.getDefaults().getSubjectData());
+        SpongeMigrationUtils.migrateSubjectData(pexService.getDefaults().getSubjectData(), lpService.getDefaults().getSubjectData());
 
         log.log("Calculating group weightings.");
         int maxWeight = 0;
@@ -110,7 +111,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         log.log("Starting group migration.");
         AtomicInteger groupCount = new AtomicInteger(0);
         for (Subject pexGroup : pexService.getGroupSubjects().getAllSubjects()) {
-            String pexName = MigrationUtils.convertName(pexGroup.getIdentifier());
+            String pexName = MigrationUtils.standardizeName(pexGroup.getIdentifier());
 
             Optional<String> rankString = pexGroup.getOption("rank");
             OptionalInt rank = OptionalInt.empty();
@@ -135,7 +136,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             // Pull track data
             Optional<String> track = pexGroup.getOption("rank-ladder");
             if (track.isPresent() && rank.isPresent()) {
-                String trackName = MigrationUtils.convertName(track.get());
+                String trackName = MigrationUtils.standardizeName(track.get());
                 if (!tracks.containsKey(trackName)) {
                     tracks.put(trackName, new TreeMap<>(Comparator.reverseOrder()));
                 }

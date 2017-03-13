@@ -25,11 +25,12 @@ package me.lucko.luckperms.sponge.migration;
 import lombok.experimental.UtilityClass;
 
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.common.commands.migration.MigrationUtils;
 import me.lucko.luckperms.common.core.NodeBuilder;
 import me.lucko.luckperms.common.core.NodeFactory;
+import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.utils.ExtractedContexts;
-import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.sponge.service.proxy.Util;
 
 import org.spongepowered.api.service.context.Context;
@@ -43,12 +44,13 @@ import java.util.Map;
 import java.util.Set;
 
 @UtilityClass
-public class MigrationUtils {
+public class SpongeMigrationUtils {
 
     public static void migrateSubject(Subject subject, PermissionHolder holder, int priority) {
 
-        holder.removeIf(n -> n.getPermission().startsWith("weight."));
-        holder.setPermissionUnchecked(NodeFactory.make("weight." + priority, true));
+        if (holder instanceof Group) {
+            MigrationUtils.setGroupWeight((Group) holder, priority);
+        }
 
         // Migrate permissions
         Map<Set<Context>, Map<String, Boolean>> perms = subject.getSubjectData().getAllPermissions();
@@ -61,9 +63,7 @@ public class MigrationUtils {
             String world = extractedContexts.getWorld();
 
             for (Map.Entry<String, Boolean> perm : e.getValue().entrySet()) {
-                try {
-                    holder.setPermission(new NodeBuilder(perm.getKey()).setServer(server).setWorld(world).withExtraContext(contexts).setValue(perm.getValue()).build());
-                } catch (ObjectAlreadyHasException ignored) {}
+                holder.setPermissionUnchecked(new NodeBuilder(perm.getKey()).setServer(server).setWorld(world).withExtraContext(contexts).setValue(perm.getValue()).build());
             }
         }
 
@@ -107,7 +107,7 @@ public class MigrationUtils {
                     continue; // LuckPerms does not support persisting other subject types.
                 }
 
-                holder.setPermissionUnchecked(new NodeBuilder("group." + convertName(s.getIdentifier())).setServer(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
+                holder.setPermissionUnchecked(new NodeBuilder("group." + MigrationUtils.standardizeName(s.getIdentifier())).setServer(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
             }
         }
     }
@@ -130,10 +130,6 @@ public class MigrationUtils {
                 to.addParent(e.getKey(), s);
             }
         }
-    }
-
-    public static String convertName(String s) {
-        return s.replace(' ', '_').toLowerCase();
     }
 
 }

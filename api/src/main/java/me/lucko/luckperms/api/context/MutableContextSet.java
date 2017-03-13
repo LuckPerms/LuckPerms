@@ -284,7 +284,7 @@ public final class MutableContextSet implements ContextSet {
      */
     public void addAll(Iterable<? extends Map.Entry<String, String>> iterable) {
         if (iterable == null) {
-            throw new NullPointerException("contexts");
+            throw new NullPointerException("iterable");
         }
 
         for (Map.Entry<String, String> e : iterable) {
@@ -300,7 +300,7 @@ public final class MutableContextSet implements ContextSet {
      */
     public void addAll(Map<String, String> map) {
         if (map == null) {
-            throw new NullPointerException("contexts");
+            throw new NullPointerException("map");
         }
         addAll(map.entrySet());
     }
@@ -334,7 +334,7 @@ public final class MutableContextSet implements ContextSet {
             throw new NullPointerException("value");
         }
 
-        map.entries().removeIf(entry -> entry.getKey().equalsIgnoreCase(key) && entry.getValue().equals(value));
+        map.entries().removeIf(entry -> entry.getKey().equals(key) && entry.getValue().equals(value));
     }
 
     /**

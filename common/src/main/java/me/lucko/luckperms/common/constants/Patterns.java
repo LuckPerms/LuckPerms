@@ -61,8 +61,8 @@ public class Patterns {
             });
 
     public static final Pattern COMMAND_SEPARATOR = Pattern.compile(" (?=([^\\\"]*\\\"[^\\\"]*\\\")*[^\\\"]*$)");
-    public static final Pattern NON_ALPHA_NUMERIC = Pattern.compile("[\\/\\$\\.\\- ]");
-    public static final Pattern NON_ALPHA_NUMERIC_SPACE = Pattern.compile("[\\/\\$\\.\\-]");
+    public static final Pattern NON_ALPHA_NUMERIC = Pattern.compile("[\\/\\$\\. ]");
+    public static final Pattern NON_ALPHA_NUMERIC_SPACE = Pattern.compile("[\\/\\$\\.]");
     public static final Pattern NON_USERNAME = Pattern.compile("[^A-Za-z0-9_ ]");
     public static final Pattern STRIP_COLOR_PATTERN = Pattern.compile("(?i)" + String.valueOf('§') + "[0-9A-FK-OR]");
     public static final Pattern NODE_CONTEXTS = Pattern.compile("\\(.+\\).*");
