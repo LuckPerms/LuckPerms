@@ -26,11 +26,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.common.commands.Arg;
-import me.lucko.luckperms.common.commands.BaseCommand;
-import me.lucko.luckperms.common.commands.Command;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.CommandResult;
+import me.lucko.luckperms.common.commands.abstraction.Command;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Message;
@@ -50,7 +49,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class SpongeMainCommand extends BaseCommand<Void, LPSubjectData> {
+public class SpongeMainCommand extends Command<Void, LPSubjectData> {
     private final LPSpongePlugin plugin;
 
     private final Map<String, List<Command<LPSubjectData, ?>>> subCommands = ImmutableMap.<String, List<Command<LPSubjectData, ?>>>builder()

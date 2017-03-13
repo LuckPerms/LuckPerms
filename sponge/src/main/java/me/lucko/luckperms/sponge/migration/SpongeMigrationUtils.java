@@ -25,7 +25,7 @@ package me.lucko.luckperms.sponge.migration;
 import lombok.experimental.UtilityClass;
 
 import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.common.commands.migration.MigrationUtils;
+import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
 import me.lucko.luckperms.common.core.NodeBuilder;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.Group;

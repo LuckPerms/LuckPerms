@@ -26,29 +26,30 @@ import lombok.Getter;
 
 import com.google.common.collect.ImmutableList;
 
-import me.lucko.luckperms.common.commands.group.CreateGroup;
-import me.lucko.luckperms.common.commands.group.DeleteGroup;
-import me.lucko.luckperms.common.commands.group.GroupMainCommand;
-import me.lucko.luckperms.common.commands.group.ListGroups;
-import me.lucko.luckperms.common.commands.log.LogMainCommand;
-import me.lucko.luckperms.common.commands.migration.MigrationMainCommand;
-import me.lucko.luckperms.common.commands.misc.CheckCommand;
-import me.lucko.luckperms.common.commands.misc.ExportCommand;
-import me.lucko.luckperms.common.commands.misc.ImportCommand;
-import me.lucko.luckperms.common.commands.misc.InfoCommand;
-import me.lucko.luckperms.common.commands.misc.NetworkSyncCommand;
-import me.lucko.luckperms.common.commands.misc.ReloadConfigCommand;
-import me.lucko.luckperms.common.commands.misc.SearchCommand;
-import me.lucko.luckperms.common.commands.misc.SyncCommand;
-import me.lucko.luckperms.common.commands.misc.TreeCommand;
-import me.lucko.luckperms.common.commands.misc.VerboseCommand;
+import me.lucko.luckperms.common.commands.abstraction.Command;
+import me.lucko.luckperms.common.commands.impl.group.CreateGroup;
+import me.lucko.luckperms.common.commands.impl.group.DeleteGroup;
+import me.lucko.luckperms.common.commands.impl.group.GroupMainCommand;
+import me.lucko.luckperms.common.commands.impl.group.ListGroups;
+import me.lucko.luckperms.common.commands.impl.log.LogMainCommand;
+import me.lucko.luckperms.common.commands.impl.migration.MigrationMainCommand;
+import me.lucko.luckperms.common.commands.impl.misc.CheckCommand;
+import me.lucko.luckperms.common.commands.impl.misc.ExportCommand;
+import me.lucko.luckperms.common.commands.impl.misc.ImportCommand;
+import me.lucko.luckperms.common.commands.impl.misc.InfoCommand;
+import me.lucko.luckperms.common.commands.impl.misc.NetworkSyncCommand;
+import me.lucko.luckperms.common.commands.impl.misc.ReloadConfigCommand;
+import me.lucko.luckperms.common.commands.impl.misc.SearchCommand;
+import me.lucko.luckperms.common.commands.impl.misc.SyncCommand;
+import me.lucko.luckperms.common.commands.impl.misc.TreeCommand;
+import me.lucko.luckperms.common.commands.impl.misc.VerboseCommand;
+import me.lucko.luckperms.common.commands.impl.track.CreateTrack;
+import me.lucko.luckperms.common.commands.impl.track.DeleteTrack;
+import me.lucko.luckperms.common.commands.impl.track.ListTracks;
+import me.lucko.luckperms.common.commands.impl.track.TrackMainCommand;
+import me.lucko.luckperms.common.commands.impl.user.UserMainCommand;
+import me.lucko.luckperms.common.commands.impl.usersbulkedit.UsersBulkEditMainCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.track.CreateTrack;
-import me.lucko.luckperms.common.commands.track.DeleteTrack;
-import me.lucko.luckperms.common.commands.track.ListTracks;
-import me.lucko.luckperms.common.commands.track.TrackMainCommand;
-import me.lucko.luckperms.common.commands.user.UserMainCommand;
-import me.lucko.luckperms.common.commands.usersbulkedit.UsersBulkEditMainCommand;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Message;
@@ -75,14 +76,14 @@ public class CommandManager {
     private final ExecutorService executor;
 
     @Getter
-    private final List<BaseCommand> mainCommands;
+    private final List<Command> mainCommands;
 
     public CommandManager(LuckPermsPlugin plugin) {
         this.plugin = plugin;
         this.executor = Executors.newSingleThreadExecutor();
 
-        ImmutableList.Builder<BaseCommand> l = ImmutableList.builder();
-        l.add(new UserMainCommand())
+        mainCommands = ImmutableList.<Command>builder()
+                .add(new UserMainCommand())
                 .add(new GroupMainCommand())
                 .add(new TrackMainCommand())
                 .addAll(plugin.getExtraCommands())
@@ -104,9 +105,8 @@ public class CommandManager {
                 .add(new ListGroups())
                 .add(new CreateTrack())
                 .add(new DeleteTrack())
-                .add(new ListTracks());
-
-        mainCommands = l.build();
+                .add(new ListTracks())
+                .build();
     }
 
     /**
@@ -129,7 +129,7 @@ public class CommandManager {
         }
 
         // Look for the main command.
-        Optional<BaseCommand> o = mainCommands.stream()
+        Optional<Command> o = mainCommands.stream()
                 .filter(m -> m.getName().equalsIgnoreCase(args.get(0)))
                 .limit(1)
                 .findAny();
@@ -226,18 +226,22 @@ public class CommandManager {
 
                     @SuppressWarnings("unchecked")
                     String permission = (String) c.getPermission().map(p -> ((Permission) p).getExample()).orElse("None");
-                    FancyMessage msg = new FancyMessage("> ").color(ChatColor.getByChar('3')).then().text(String.format(c.getUsage(), label)).color(ChatColor.getByChar('a'))
+                    FancyMessage msg = new FancyMessage("> ").color(c('3')).then().text(String.format(c.getUsage(), label)).color(c('a'))
                             .formattedTooltip(
-                                    new FancyMessage("Command: ").color(ChatColor.getByChar('b')).then().text(c.getName()).color(ChatColor.getByChar('2')),
-                                    new FancyMessage("Description: ").color(ChatColor.getByChar('b')).then().text(c.getDescription()).color(ChatColor.getByChar('2')),
-                                    new FancyMessage("Usage: ").color(ChatColor.getByChar('b')).then().text(String.format(c.getUsage(), label)).color(ChatColor.getByChar('2')),
-                                    new FancyMessage("Permission: ").color(ChatColor.getByChar('b')).then().text(permission).color(ChatColor.getByChar('2')),
+                                    new FancyMessage("Command: ").color(c('b')).then().text(c.getName()).color(c('2')),
+                                    new FancyMessage("Description: ").color(c('b')).then().text(c.getDescription()).color(c('2')),
+                                    new FancyMessage("Usage: ").color(c('b')).then().text(String.format(c.getUsage(), label)).color(c('2')),
+                                    new FancyMessage("Permission: ").color(c('b')).then().text(permission).color(c('2')),
                                     new FancyMessage(" "),
-                                    new FancyMessage("Click to auto-complete.").color(ChatColor.getByChar('7'))
+                                    new FancyMessage("Click to auto-complete.").color(c('7'))
                             )
                             .suggest(String.format(c.getUsage(), label));
                     sender.sendMessage(msg);
                 });
+    }
+    
+    private static ChatColor c(char c) {
+        return ChatColor.getByChar(c);
     }
 
     public static CommandResult handleException(CommandException e, Sender sender, String label, Command command) {
@@ -392,9 +396,9 @@ public class CommandManager {
             // Provide lazy set rewrite
             boolean lazySet = (
                     args.size() >= 6 &&
-                            args.get(2).equalsIgnoreCase("permission") &&
-                            args.get(3).toLowerCase().startsWith("set") &&
-                            (args.get(5).equalsIgnoreCase("none") || args.get(5).equalsIgnoreCase("0"))
+                    args.get(2).equalsIgnoreCase("permission") &&
+                    args.get(3).toLowerCase().startsWith("set") &&
+                    (args.get(5).equalsIgnoreCase("none") || args.get(5).equalsIgnoreCase("0"))
             );
 
             if (lazySet) {

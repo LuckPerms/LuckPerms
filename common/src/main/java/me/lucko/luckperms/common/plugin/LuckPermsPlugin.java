@@ -28,8 +28,8 @@ import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.common.api.ApiProvider;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
-import me.lucko.luckperms.common.commands.BaseCommand;
 import me.lucko.luckperms.common.commands.CommandManager;
+import me.lucko.luckperms.common.commands.abstraction.Command;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
@@ -341,7 +341,7 @@ public interface LuckPermsPlugin {
      */
     Set<Contexts> getPreProcessContexts(boolean op);
 
-    default List<BaseCommand> getExtraCommands() {
+    default List<Command> getExtraCommands() {
         return Collections.emptyList();
     }
 
