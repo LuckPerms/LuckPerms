@@ -59,7 +59,6 @@ import me.lucko.luckperms.common.utils.WeightComparator;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -493,7 +492,7 @@ public abstract class PermissionHolder {
         return exportNodesCache.getUnchecked(ExportNodesHolder.of(context, lowerCase));
     }
 
-    public MetaHolder accumulateMeta(MetaHolder holder, List<String> excludedGroups, ExtractedContexts contexts) {
+    public MetaHolder accumulateMeta(MetaHolder holder, Set<String> excludedGroups, ExtractedContexts contexts) {
         if (holder == null) {
             holder = new MetaHolder(
                     plugin.getConfiguration().get(ConfigKeys.PREFIX_FORMATTING_OPTIONS).copy(),
@@ -502,7 +501,7 @@ public abstract class PermissionHolder {
         }
 
         if (excludedGroups == null) {
-            excludedGroups = new ArrayList<>();
+            excludedGroups = new HashSet<>();
         }
 
         excludedGroups.add(getObjectName().toLowerCase());
@@ -524,6 +523,11 @@ public abstract class PermissionHolder {
             holder.accumulateNode(ln);
         }
 
+        OptionalInt w = getWeight();
+        if (w.isPresent()) {
+            holder.accumulateWeight(w.getAsInt());
+        }
+
         Set<Node> parents = all.stream()
                 .map(LocalizedNode::getNode)
                 .filter(Node::getValue)
@@ -536,23 +540,10 @@ public abstract class PermissionHolder {
                 !node.shouldApplyWithContext(contexts.getContextSet(), false)
         );
 
-        TreeSet<Map.Entry<Integer, Node>> sortedParents = new TreeSet<>(Util.META_COMPARATOR.reversed());
+        TreeSet<Map.Entry<Integer, Group>> sortedParents = new TreeSet<>(Util.META_COMPARATOR.reversed());
         for (Node node : parents) {
             Group group = plugin.getGroupManager().getIfLoaded(node.getGroupName());
-            if (group != null) {
-                OptionalInt weight = group.getWeight();
-                if (weight.isPresent()) {
-                    sortedParents.add(Maps.immutableEntry(weight.getAsInt(), node));
-                    continue;
-                }
-            }
 
-            sortedParents.add(Maps.immutableEntry(0, node));
-        }
-
-        for (Map.Entry<Integer, Node> e : sortedParents) {
-            Node parent = e.getValue();
-            Group group = plugin.getGroupManager().getIfLoaded(parent.getGroupName());
             if (group == null) {
                 continue;
             }
@@ -561,7 +552,11 @@ public abstract class PermissionHolder {
                 continue;
             }
 
-            group.accumulateMeta(holder, excludedGroups, contexts);
+            sortedParents.add(Maps.immutableEntry(group.getWeight().orElse(0), group));
+        }
+
+        for (Map.Entry<Integer, Group> e : sortedParents) {
+            e.getValue().accumulateMeta(holder, excludedGroups, contexts);
         }
 
         return holder;

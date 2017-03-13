@@ -460,10 +460,10 @@ public class Util {
         return sb.delete(sb.length() - 6, sb.length()).toString();
     }
 
-    public static class MetaComparator implements Comparator<Map.Entry<Integer, ? extends Node>> {
+    public static class MetaComparator implements Comparator<Map.Entry<Integer, ?>> {
 
         @Override
-        public int compare(Map.Entry<Integer, ? extends Node> o1, Map.Entry<Integer, ? extends Node> o2) {
+        public int compare(Map.Entry<Integer, ?> o1, Map.Entry<Integer, ?> o2) {
             int result = Integer.compare(o1.getKey(), o2.getKey());
             return result != 0 ? result : 1;
         }

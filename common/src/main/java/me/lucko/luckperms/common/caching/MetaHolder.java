@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.common.caching;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -42,9 +43,11 @@ import java.util.TreeMap;
 @ToString
 public class MetaHolder {
 
+    @Getter(AccessLevel.NONE)
     private final Map<String, String> meta;
     private final SortedMap<Integer, String> prefixes;
     private final SortedMap<Integer, String> suffixes;
+    private int weight = 0;
 
     private final MetaStack prefixStack;
     private final MetaStack suffixStack;
@@ -86,6 +89,20 @@ public class MetaHolder {
 
             suffixStack.accumulateToAll(n);
         }
+    }
+
+    public void accumulateWeight(int weight) {
+        this.weight = Math.max(this.weight, weight);
+    }
+
+    // We can assume that if this method is being called, this holder is effectively finalized. (it's not going to accumulate more nodes)
+    // Therefore, it should be ok to set the weight meta key, if not already present.
+    public Map<String, String> getMeta() {
+        if (!this.meta.containsKey("weight") && this.weight != 0) {
+            this.meta.put("weight", String.valueOf(this.weight));
+        }
+
+        return this.meta;
     }
 
 }
