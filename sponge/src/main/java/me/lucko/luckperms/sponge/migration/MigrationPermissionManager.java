@@ -44,7 +44,6 @@ import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
@@ -78,9 +77,9 @@ public class MigrationPermissionManager extends SubCommand<Object> {
         PermissionService pmService;
 
         try {
-            Class clazz = Class.forName("io.github.djxy.permissionmanager.PermissionService");
-            Field instance = clazz.getDeclaredField("instance");
-            pmService = (PermissionService) instance.get(null);
+            Object pmPlugin = pm.get().getInstance().get();
+            Method method = pmPlugin.getClass().getDeclaredMethod("getPermissionService");
+            pmService = (PermissionService) method.invoke(pmPlugin);
         } catch (Throwable t) {
             t.printStackTrace();
             return CommandResult.FAILURE;
@@ -98,15 +97,6 @@ public class MigrationPermissionManager extends SubCommand<Object> {
 
         // Migrate groups
         log.log("Starting group migration.");
-
-        // Forcefully load all groups.
-        try {
-            Method method = pmService.getGroupSubjects().getClass().getMethod("load");
-            method.invoke(pmService.getGroupSubjects());
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
-
         AtomicInteger groupCount = new AtomicInteger(0);
         for (Subject pmGroup : pmService.getGroupSubjects().getAllSubjects()) {
             String pmName = MigrationUtils.standardizeName(pmGroup.getIdentifier());
@@ -123,15 +113,6 @@ public class MigrationPermissionManager extends SubCommand<Object> {
 
         // Migrate users
         log.log("Starting user migration.");
-
-        // Forcefully load all users.
-        try {
-            Method method = pmService.getUserSubjects().getClass().getMethod("load");
-            method.invoke(pmService.getUserSubjects());
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
-
         AtomicInteger userCount = new AtomicInteger(0);
         for (Subject pmUser : pmService.getUserSubjects().getAllSubjects()) {
             UUID uuid = Util.parseUuid(pmUser.getIdentifier());
