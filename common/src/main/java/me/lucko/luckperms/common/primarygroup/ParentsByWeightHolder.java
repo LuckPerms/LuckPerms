@@ -26,6 +26,7 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.User;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Optional;
 
@@ -51,7 +52,7 @@ public class ParentsByWeightHolder extends StoredHolder {
                 .map(n -> Optional.ofNullable(user.getPlugin().getGroupManager().getIfLoaded(n.getGroupName())))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .sorted(Comparator.comparingInt(o -> o.getWeight().orElse(0)))
+                .sorted(Collections.reverseOrder(Comparator.comparingInt(o -> o.getWeight().orElse(0))))
                 .findFirst()
                 .map(Group::getName)
                 .orElse(null);
