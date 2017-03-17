@@ -335,7 +335,7 @@ public class MongoDBBacking extends AbstractBacking {
                 while (cursor.hasNext()) {
                     Document d = cursor.next();
 
-                    UUID holder = UUID.fromString(d.getString("_id"));
+                    UUID holder = d.get("_id", UUID.class);
                     Map<String, Boolean> perms = revert((Map<String, Boolean>) d.get("perms"));
 
                     for (Map.Entry<String, Boolean> e : perms.entrySet()) {
