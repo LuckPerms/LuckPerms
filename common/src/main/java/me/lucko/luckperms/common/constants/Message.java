@@ -435,7 +435,7 @@ public enum Message {
     IMPORT_END_ERROR_FOOTER("&b(Import) &7<------------------------------------------>", true);
 
     private static String format(String s, Object... objects) {
-        for (int i = 0, objsLength = objects.length; i < objsLength; i++) {
+        for (int i = 0; i < objects.length; i++) {
             Object o = objects[i];
             s = s.replace("{" + i + "}", o.toString());
         }
@@ -470,4 +470,28 @@ public enum Message {
             sender.sendMessage(Util.color(format(s, objects)));
         }
     }
+
+    /**
+     * Prints this Message enum in a yml format, for reading by the {@link me.lucko.luckperms.common.locale.LocaleManager}
+     * @param args not needed
+     */
+    public static void main(String[] args) {
+        for (Message message : values()) {
+            String key = message.name().replace('_', '-').toLowerCase();
+            String value = message.message;
+
+            if (!value.contains("\n")) {
+                System.out.println(key + ": \"" + value.replace("\"", "\\\"") + "\"");
+            } else {
+                System.out.println(key + ": >");
+                String[] parts = value.split("\n");
+
+                for (int i = 0; i < parts.length; i++) {
+                    String s = parts[i].replace("\"", "\\\"");
+                    System.out.println("  " + s + (i == (parts.length - 1) ? "" : "\\n"));
+                }
+            }
+        }
+    }
+
 }

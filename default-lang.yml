@@ -13,80 +13,62 @@ loading-error: "Permissions data could not be loaded. Please contact an administ
 op-disabled: "&bThe vanilla OP system is disabled on this server."
 op-disabled-sponge: "&2Server Operator status has no effect when a permission plugin is installed. Please edit user data directly."
 log: "&3LOG &3&l> {0}"
-
+export-log: "&3EXPORT &3&l> &f{0}"
+export-log-progress: "&3EXPORT &3&l> &7{0}"
+migration-log: "&3MIGRATION &7[&3{0}&7] &3&l> &f{1}"
+migration-log-progress: "&3MIGRATION &7[&3{0}&7] &3&l> &7{1}"
 command-not-recognised: "Command not recognised."
 command-no-permission: "You do not have permission to use this command!"
-
 already-haspermission: "{0} already has this permission!"
 does-not-havepermission: "{0} does not have this permission set."
 already-has-temp-permission: "{0} already has this permission set temporarily!"
 does-not-have-temp-permission: "{0} does not have this permission set temporarily."
-
-
-
 user-not-found: "&bUser could not be found."
 user-not-online: "&bUser &a{0}&b is not online."
 user-no-data: "&bUser &a{0}&b does not have any data loaded."
 user-save-success: "&7(User data was saved to storage)"
 user-save-error: "There was an error whilst saving the user."
 user-create-fail: "There was an error whilst creating a new user."
-
 group-not-found: "&bGroup could not be found."
 group-save-success: "&7(Group data was saved to storage)"
 group-save-error: "There was an error whilst saving the group."
-
 track-not-found: "&bTrack could not be found."
 track-save-success: "&7(Track data was saved to storage)"
 track-save-error: "There was an error whilst saving the track."
-
-
-
 user-invalid-entry: "&d{0}&c is not a valid username/uuid."
 group-invalid-entry: "Group names can only contain alphanumeric characters."
 track-invalid-entry: "Track names can only contain alphanumeric characters."
 server-invalid-entry: "Server names can only contain alphanumeric characters."
-
-use-inherit-command: "Use the 'parent add' command instead of specifying the node."
-
-
-
+use-inherit-command: "Use the 'parent add' and 'parent remove' commands instead of specifying the node."
 verbose-invalid-filter: "&cInvalid verbose filter: &f{0}"
 verbose-on: "&bVerbose checking output set to &aTRUE &bfor all permissions."
-verbose-on_query: "&bVerbose checking output set to &aTRUE &bfor permissions matching the following filters: &f{0}"
+verbose-on-query: "&bVerbose checking output set to &aTRUE &bfor permissions matching the following filters: &f{0}"
 verbose-off: "&bVerbose checking output set to &cFALSE&b."
-
 verbose-recording-on: "&bVerbose recording set to &aTRUE &bfor all permissions."
 verbose-recording-on-query: "&bVerbose recording set to &aTRUE &bfor permissions matching the following filters: &f{0}"
 verbose-recording-upload-start: "&bVerbose recording was disabled. Uploading results..."
 verbose-recording-url: "&aVerbose results URL:"
-
 tree-upload-start: "&bGenerating permission tree..."
 tree-empty: "&aUnable to generate tree. No results were found."
 tree-url: "&aPermission Tree URL:"
-
 search-searching: "&aSearching for users and groups with &b{0}&a..."
 search-result: "&aFound &b{0}&a entries from &b{1}&a users and &b{2}&a groups."
 search-showing-users: "&bShowing user entries:"
 search-showing-groups: "&bShowing group entries:"
 search-showing-users-with-page: "&bShowing user entries:  {0}"
 search-showing-groups-with-page: "&bShowing group entries:  {0}"
-
 check-result: "&aPermission check result on user &b{0}&a for permission &b{1}&a: &f{2}"
-
 create-success: "&b{0}&a was successfully created."
 delete-success: "&b{0}&a was successfully deleted."
 rename-success: "&b{0}&a was successfully renamed to &b{1}&a."
 clone-success: "&b{0}&a was successfully cloned onto &b{1}&a."
-
 already-inherits: "{0} already inherits '{1}'."
 does-not-inherit: "{0} does not inherit '{1}'."
 already-temp-inherits: "{0} already temporarily inherits '{1}'."
 does-not-temp-inherit: "{0} does not temporarily inherit '{1}'."
-
 track-already-contains: "Track {0} already contains the group '{1}'."
 track-does-not-contain: "Track {0} does not contain the group '{1}'."
 track-ambiguous-call: "The user specified is a member of multiple groups on this track. Unable to determine their location."
-
 group-already-exists: "That group already exists!"
 group-does-not-exist: "That group does not exist!"
 group-load-error: "An unexpected error occurred. Group not loaded."
@@ -95,9 +77,7 @@ track-already-exists: "That track already exists!"
 track-does-not-exist: "That track does not exist!"
 track-load-error: "An unexpected error occurred. Track not loaded."
 tracks-load-error: "An unexpected error occurred. Unable to load all tracks."
-
 track-empty: "The track cannot be used as it is empty or contains only one group."
-
 update-task-request: "&bUpdate task scheduled."
 update-task-complete: "&aUpdate task finished."
 update-task-complete-network: "&aUpdate task finished. Now attempting to push to other servers."
@@ -137,21 +117,30 @@ create-group-error: "There was an error whilst creating the group."
 delete-group-error: "There was an error whilst deleting the group."
 delete-group-error-default: "You cannot delete the default group."
 groups-list: "&aGroups: {0}"
-
 create-track-error: "There was an error whilst creating the track."
 delete-track-error: "There was an error whilst deleting the track."
 tracks-list: "&aTracks: {0}"
-
 listnodes: "&b{0}'s Nodes:"
 listnodes-with-page: "&b{0}'s Nodes:  {1}"
-listnodes-temp: "&b{0}'s Temporary Nodes:\n{1}"
-listparents: "&b{0}'s Parent Groups:\n{1}"
-listparents-temp: "&b{0}'s Temporary Parent Groups:\n{1}"
-listgroups: "&b{0}'s Groups:\n{1}"
-listgroups-temp: "&b{0}'s Temporary Groups:\n{1}"
-list-tracks: "&b{0}'s Tracks:\n{1}"
+listnodes-temp: >
+  &b{0}'s Temporary Nodes:\n
+  {1}
+listparents: >
+  &b{0}'s Parent Groups:\n
+  {1}
+listparents-temp: >
+  &b{0}'s Temporary Parent Groups:\n
+  {1}
+listgroups: >
+  &b{0}'s Groups:\n
+  {1}
+listgroups-temp: >
+  &b{0}'s Temporary Groups:\n
+  {1}
+list-tracks: >
+  &b{0}'s Tracks:\n
+  {1}
 list-tracks-empty: "{0} is not on any tracks."
-
 setpermission-success: "&aSet &b{0}&a to &b{1}&a for &b{2}&a."
 setpermission-server-success: "&aSet &b{0}&a to &b{1}&a for &b{2}&a on server &b{3}&a."
 setpermission-server-world-success: "&aSet &b{0}&a to &b{1}&a for &b{2}&a on server &b{3}&a, world &b{4}&a."
@@ -165,7 +154,7 @@ unset-temp-permission-success: "&aUnset temporary permission &b{0}&a for &b{1}&a
 unset-temp-permission-server-success: "&aUnset temporary permission &b{0}&a for &b{1}&a on server &b{2}&a."
 unset-temp-permission-server-world-success: "&aUnset temporary permission &b{0}&a for &b{1}&a on server &b{2}&a, world &b{3}&a."
 set-inherit-success: "&b{0}&a now inherits permissions from &b{1}&a."
-set-inherit-server-success: "&b{0}&a now inherits permissions from &b{2}&a on server &b{3}&a."
+set-inherit-server-success: "&b{0}&a now inherits permissions from &b{1}&a on server &b{2}&a."
 set-inherit-server-world-success: "&b{0}&a now inherits permissions from &b{1}&a on server &b{2}&a, world &b{3}&a."
 set-parent-success: "&b{0}&a had their existing parent groups cleared, and now only inherits &b{1}&a."
 set-parent-server-success: "&b{0}&a had their existing parent groups cleared, and now only inherits &b{1}&a on server &b{2}&a."
@@ -187,7 +176,6 @@ meta-clear-success: "&b{0}&a's meta was cleared. (&b{1}&a nodes were removed.)"
 meta-clear-success-singular: "&b{0}&a's meta was cleared. (&b{1}&a node was removed.)"
 illegal-date-error: "Could not parse date '{0}'."
 past-date-error: "You cannot set a date in the past!"
-
 chat-meta-prefix-header: "&b{0}'s Prefixes"
 chat-meta-suffix-header: "&b{0}'s Suffixes"
 meta-header: "&b{0}'s Meta"
@@ -198,41 +186,35 @@ meta-entry-with-context: "&b-> &a{0} &f= &f\"{1}&f\" &8(&7inherited from &a{2}&8
 chat-meta-prefix-none: "&b{0} has no prefixes."
 chat-meta-suffix-none: "&b{0} has no suffixes."
 meta-none: "&b{0} has no meta."
-
 meta-invalid-priority: "Invalid priority '{0}'. Expected a number."
 already-has-prefix: "{0} already has that prefix set."
 already-has-suffix: "{0} already has that suffix set."
 does-not-have-prefix: "{0} doesn't have that prefix set."
 does-not-have-suffix: "{0} doesn't have that suffix set."
-
 addprefix-success: "&b{0}&a had prefix &f\"{1}&f\"&a set at a priority of &b{2}&a."
 addprefix-server-success: "&b{0}&a had prefix &f\"{1}&f\"&a set at a priority of &b{2}&a on server &b{3}&a."
 addprefix-server-world-success: "&b{0}&a had prefix &f\"{1}&f\"&a set at a priority of &b{2}&a on server &b{3}&a, world &b{4}&a."
 removeprefix-success: "&b{0}&a had prefix &f\"{1}&f\"&a at priority &b{2}&a removed."
 removeprefix-server-success: "&b{0}&a had prefix &f\"{1}&f\"&a at priority &b{2}&a removed on server &b{3}&a."
 removeprefix-server-world-success: "&b{0}&a had prefix &f\"{1}&f\"&a at priority &b{2}&a removed on server &b{3}&a, world &b{4}&a."
-
 addsuffix-success: "&b{0}&a had suffix &f\"{1}&f\"&a set at a priority of &b{2}&a."
 addsuffix-server-success: "&b{0}&a had suffix &f\"{1}&f\"&a set at a priority of &b{2}&a on server &b{3}&a."
 addsuffix-server-world-success: "&b{0}&a had suffix &f\"{1}&f\"&a set at a priority of &b{2}&a on server &b{3}&a, world &b{4}&a."
 removesuffix-success: "&b{0}&a had suffix &f\"{1}&f\"&a at priority &b{2}&a removed."
 removesuffix-server-success: "&b{0}&a had suffix &f\"{1}&f\"&a at priority &b{2}&a removed on server &b{3}&a."
 removesuffix-server-world-success: "&b{0}&a had suffix &f\"{1}&f\"&a at priority &b{2}&a removed on server &b{3}&a, world &b{4}&a."
-
 add-temp-prefix-success: "&b{0}&a had prefix &f\"{1}&f\"&a set at a priority of &b{2}&a for a duration of &b{3}&a."
 add-temp-prefix-server-success: "&b{0}&a had prefix &f\"{1}&f\"&a set at a priority of &b{2}&a on server &b{3}&a, for a duration of &b{4}&a."
 add-temp-prefix-server-world-success: "&b{0}&a had prefix &f\"{1}&f\"&a set at a priority of &b{2}&a on server &b{3}&a, world &b{4}&a, for a duration of &b{5}&a."
 remove-temp-prefix-success: "&b{0}&a had temporary prefix &f\"{1}&f\"&a at priority &b{2}&a removed."
 remove-temp-prefix-server-success: "&b{0}&a had temporary prefix &f\"{1}&f\"&a at priority &b{2}&a removed on server &b{3}&a."
 remove-temp-prefix-server-world-success: "&b{0}&a had temporary prefix &f\"{1}&f\"&a at priority &b{2}&a removed on server &b{3}&a, world &b{4}&a."
-
 add-temp-suffix-success: "&b{0}&a had suffix &f\"{1}&f\"&a set at a priority of &b{2}&a for a duration of &b{3}&a."
 add-temp-suffix-server-success: "&b{0}&a had suffix &f\"{1}&f\"&a set at a priority of &b{2}&a on server &b{3}&a, for a duration of &b{4}&a."
 add-temp-suffix-server-world-success: "&b{0}&a had suffix &f\"{1}&f\"&a set at a priority of &b{2}&a on server &b{3}&a, world &b{4}&a, for a duration of &b{5}&a."
 remove-temp-suffix-success: "&b{0}&a had temporary suffix &f\"{1}&f\"&a at priority &b{1}&a removed."
 remove-temp-suffix-server-success: "&b{0}&a had temporary suffix &f\"{1}&f\"&a at priority &b{2}&a removed on server &b{3}&a."
 remove-temp-suffix-server-world-success: "&b{0}&a had temporary suffix &f\"{1}&f\"&a at priority &b{2}&a removed on server &b{3}&a, world &b{4}&a."
-
 already-has-meta: "{0} already has that meta key value pair set."
 set-meta-success: "&aSet meta value for key &f\"{0}&f\"&a to &f\"{1}&f\"&a for &b{2}&a."
 set-meta-server-success: "&aSet meta value for key &f\"{0}&f\"&a to &f\"{1}&f\"&a for &b{2}&a on server &b{3}&a."
@@ -240,17 +222,14 @@ set-meta-server-world-success: "&aSet meta value for key &f\"{0}&f\"&a to &f\"{1
 set-meta-temp-success: "&aSet meta value for key &f\"{0}&f\"&a to &f\"{1}&f\"&a for &b{2}&a for a duration of &b{3}&a."
 set-meta-temp-server-success: "&aSet meta value for key &f\"{0}&f\"&a to &f\"{1}&f\"&a for &b{2}&a on server &b{3}&a for a duration of &b{4}&a."
 set-meta-temp-server-world-success: "&aSet meta value for key &f\"{0}&f\"&a to &f\"{1}&f\"&a for &b{2}&a on server &b{3}&a, world &b{4}&a, for a duration of &b{5}&a."
-
 unset-meta-success: "&aUnset meta value with key &f\"{0}&f\"&a for &b{1}&a."
 unset-meta-server-success: "&aUnset meta value with key &f\"{0}&f\"&a for &b{1}&a on server &b{2}&a."
 unset-meta-server-world-success: "&aUnset meta value with key &f\"{0}&f\"&a for &b{1}&a on server &b{2}&a, world &b{3}&a."
 unset-meta-temp-success: "&aUnset temporary meta value with key &f\"{0}&f\"&a for &b{1}&a."
 unset-meta-temp-server-success: "&aUnset temporary meta value with key &f\"{0}&f\"&a for &b{1}&a on server &b{2}&a."
 unset-meta-temp-server-world-success: "&aUnset temporary meta value with key &f\"{0}&f\"&a for &b{1}&a on server &b{2}&a, world &b{3}&a."
-
 bulk-change-type-error: "Invalid type. Was expecting 'server' or 'world'."
 bulk-change-success: "&aApplied bulk change successfully. {0} records were changed."
-
 user-info-general: >
   {PREFIX}&b&l> &bUser Info: &f{0}\n
   {PREFIX}&f- &3UUID: &f{1}\n
@@ -284,7 +263,7 @@ user-promote-success-server: "&aPromoting user along track &b{0}&a from &b{1}&a 
 user-promote-success-server-world: "&aPromoting user along track &b{0}&a from &b{1}&a to &b{2}&a on server &b{3}&a, world &b{4}&a."
 user-promote-error-endoftrack: "The end of track &4{0}&c was reached. Unable to promote user."
 user-promote-error-malformed: >
-  {PREFIX}The next group on the track, {0}, no longer exists. Unable to promote user.
+  {PREFIX}The next group on the track, {0}, no longer exists. Unable to promote user.\n
   {PREFIX}Either create the group, or remove it from the track and try again.
 user-demote-success: "&aDemoting user along track &b{0}&a from &b{1}&a to &b{2}&a."
 user-demote-success-server: "&aDemoting user along track &b{0}&a from &b{1}&a to &b{2}&a on server &b{3}&a."
@@ -293,9 +272,9 @@ user-demote-endoftrack: "The end of track &4{0}&c was reached, so &4{1}&c was re
 user-demote-error-malformed: >
   {PREFIX}The previous group on the track, {0}, no longer exists. Unable to demote user.\n
   {PREFIX}Either create the group, or remove it from the track and try again.
-user-demote-error-not-contain-group: "Demotions are done based on primary groups. The users primary group is not on the track specified."
-user-showpos: "&aShowing &b{0}&a's position on track &b{1}&a.{2}"
-
+user-showpos: >
+  &aShowing &b{0}&a's position on track &b{1}&a.\n
+  {2}
 group-info-general: >
   {PREFIX}&b&l> &bGroup Info: &f{0}\n
   {PREFIX}&f- &3Display Name: &f{1}\n
@@ -307,7 +286,6 @@ group-info-general: >
   {PREFIX}&f-    &3Suffixes: &a{6}\n
   {PREFIX}&f-    &3Meta: &a{7}
 group-set-weight: "&aSet weight to &b{0}&a for group &b{1}&a."
-
 track-info: >
   {PREFIX}&b&l> &bShowing Track: &f{0}\n
   {PREFIX}&f- &7Path: &f{1}
@@ -317,56 +295,43 @@ track-insert-success: "&aGroup &b{0}&a was successfully inserted into track &b{1
 track-insert-error-number: "Expected number but instead received: {0}"
 track-insert-error-invalid-pos: "Unable to insert at position {0}. Index out of bounds."
 track-remove-success: "&aGroup &b{0}&a was successfully removed from track &b{1}&a."
-
 log-load-error: "The log could not be loaded."
 log-invalid-page: "Invalid page number."
 log-invalid-page-range: "Invalid page number. Please enter a value between 1 and {0}."
 log-no-entries: "&bNo log entries to show."
 log-entry: "&b#{0} -> &8(&7{1} ago&8) {2}"
-
 log-notify-toggle-on: "&aEnabled&b logging output."
 log-notify-toggle-off: "&cDisabled&b logging output."
 log-notify-already-on: "You are already receiving notifications."
 log-notify-already-off: "You aren't currently receiving notifications."
 log-notify-unknown: "State unknown. Expecting \"on\" or \"off\"."
-
 log-search-header: "&aShowing recent actions for query &b{0} &a(page &f{1}&a of &f{2}&a)"
-
 log-recent-header: "&aShowing recent actions (page &f{0}&a of &f{1}&a)"
 log-recent-by-header: "&aShowing recent actions by &b{0} &a(page &f{1}&a of &f{2}&a)"
-
 log-history-user-header: "&aShowing history for user &b{0} &a(page &f{1}&a of &f{2}&a)"
 log-history-group-header: "&aShowing history for group &b{0} &a(page &f{1}&a of &f{2}&a)"
 log-history-track-header: "&aShowing history for track &b{0} &a(page &f{1}&a of &f{2}&a)"
-
 log-export-already-exists: "Error: File {0} already exists."
 log-export-not-writable: "Error: File {0} is not writable."
 log-export-empty: "The log is empty and therefore cannot be exported."
 log-export-failure: "An unexpected error occured whilst writing to the file."
 log-export-success: "&aSuccessfully exported the log to &b{0}&a."
-
 import-already-running: "Another import process is already running. Please wait for it to finish and try again."
 export-already-running: "Another export process is already running. Please wait for it to finish and try again."
 import-log-doesnt-exist: "Error: File {0} does not exist."
 import-log-not-readable: "Error: File {0} is not readable."
 import-log-failure: "An unexpected error occured whilst reading from the log file."
-
 import-progress: "&b(Import) &b-> &f{0} &fpercent complete &7- &b{1}&f/&b{2} &foperations complete with &c{3} &ferrors."
 import-progress-sin: "&b(Import) &b-> &f{0} &fpercent complete &7- &b{1}&f/&b{2} &foperations complete with &c{3} &ferror."
 import-start: "&b(Import) &b-> &fStarting import process."
-
 import-end-complete: "&b(Import) &a&lCOMPLETED &7- took &b{0} &7seconds - &7No errors."
 import-end-complete-err: "&b(Import) &a&lCOMPLETED &7- took &b{0} &7seconds - &c{1} errors."
 import-end-complete-err-sin: "&b(Import) &a&lCOMPLETED &7- took &b{0} &7seconds - &c{1} error."
-
 import-end-error-header: >
   {PREFIX}&b(Import) &7------------> &fShowing Error #&b{0} &7<------------\n
   {PREFIX}&b(Import) &fWhilst executing: &3Command #{1}\n
   {PREFIX}&b(Import) &fCommand: &7{2}\n
   {PREFIX}&b(Import) &fType: &3{3}\n
   {PREFIX}&b(Import) &fOutput:
-
 import-end-error-content: "&b(Import) &b-> &c{0}"
 import-end-error-footer: "&b(Import) &7<------------------------------------------>"
-
-migration-not-console: "Migration must be performed from the Console."
