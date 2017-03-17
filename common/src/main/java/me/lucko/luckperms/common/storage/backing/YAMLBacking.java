@@ -115,7 +115,7 @@ public class YAMLBacking extends FlatfileBacking {
                     return readMapFromFile(userFile, values -> {
                         // User exists, let's load.
                         String name = (String) values.get("name");
-                        user.setPrimaryGroup((String) values.get("primary-group"));
+                        user.getPrimaryGroup().setStoredValue((String) values.get("primary-group"));
                         Map<String, Boolean> perms = (Map<String, Boolean>) values.get("perms");
                         user.setNodes(perms);
 
@@ -133,7 +133,7 @@ public class YAMLBacking extends FlatfileBacking {
                             Map<String, Object> data = new HashMap<>();
                             data.put("uuid", user.getUuid().toString());
                             data.put("name", user.getName());
-                            data.put("primary-group", user.getPrimaryGroup());
+                            data.put("primary-group", user.getPrimaryGroup().getStoredValue());
                             data.put("perms", exportToLegacy(user.getNodes()));
                             writeMapToFile(userFile, data);
                         }
@@ -142,7 +142,7 @@ public class YAMLBacking extends FlatfileBacking {
                 } else {
                     if (GenericUserManager.shouldSave(user)) {
                         user.clearNodes();
-                        user.setPrimaryGroup(null);
+                        user.getPrimaryGroup().setStoredValue(null);
                         plugin.getUserManager().giveDefaultIfNeeded(user, false);
                     }
                     return true;
@@ -180,7 +180,7 @@ public class YAMLBacking extends FlatfileBacking {
                 Map<String, Object> values = new HashMap<>();
                 values.put("uuid", user.getUuid().toString());
                 values.put("name", user.getName());
-                values.put("primary-group", user.getPrimaryGroup());
+                values.put("primary-group", user.getPrimaryGroup().getStoredValue());
                 values.put("perms", exportToLegacy(user.getNodes()));
                 return writeMapToFile(userFile, values);
             }, false);

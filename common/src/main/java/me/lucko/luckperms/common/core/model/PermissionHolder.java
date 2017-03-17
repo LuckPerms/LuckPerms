@@ -95,7 +95,7 @@ public abstract class PermissionHolder {
     /**
      * Reference to the main plugin instance
      */
-    @Getter(AccessLevel.PROTECTED)
+    @Getter
     private final LuckPermsPlugin plugin;
 
     /**
@@ -168,10 +168,6 @@ public abstract class PermissionHolder {
                 }
             });
 
-
-
-    /* Caching apply methods. Are just called by the caching instances to gather data about the instance. */
-
     protected void forceCleanup() {
         getAllNodesCache.cleanUp();
         getAllNodesFilteredCache.cleanUp();
@@ -220,6 +216,8 @@ public abstract class PermissionHolder {
         exportNodesCache.invalidateAll();
         declareState();
     }
+
+    /* Caching apply methods. Are just called by the caching instances to gather data about the instance. */
 
     private ImmutableSortedSet<LocalizedNode> cacheApply(boolean mergeTemp) {
         TreeSet<LocalizedNode> combined = new TreeSet<>(PriorityComparator.reverse());

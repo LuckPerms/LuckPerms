@@ -238,7 +238,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
             String primaryGroup = primaryGroups.get(e.getKey());
             if (primaryGroup != null) {
                 user.setPermissionUnchecked(NodeFactory.make("group." + primaryGroup));
-                user.setPrimaryGroup(primaryGroup);
+                user.getPrimaryGroup().setStoredValue(primaryGroup);
                 user.unsetPermissionUnchecked(NodeFactory.make("group.default"));
             }
 

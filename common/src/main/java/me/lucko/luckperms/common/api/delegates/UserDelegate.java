@@ -63,7 +63,7 @@ public final class UserDelegate extends PermissionHolderDelegate implements User
 
     @Override
     public String getPrimaryGroup() {
-        return master.getPrimaryGroup();
+        return master.getPrimaryGroup().getValue();
     }
 
     @Override
@@ -76,7 +76,7 @@ public final class UserDelegate extends PermissionHolderDelegate implements User
             throw new IllegalStateException("User is not a member of that group.");
         }
 
-        master.setPrimaryGroup(s.toLowerCase());
+        master.getPrimaryGroup().setStoredValue(s.toLowerCase());
     }
 
     @Override

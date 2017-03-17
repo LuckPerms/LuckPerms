@@ -323,7 +323,7 @@ public class VaultPermissionHook extends Permission {
 
         // nothing special, just return the value.
         if (!isPgo()) {
-            String g = user.getPrimaryGroup();
+            String g = user.getPrimaryGroup().getValue();
             return plugin.getConfiguration().get(ConfigKeys.GROUP_NAME_REWRITES).getOrDefault(g, g);
         }
 
@@ -376,7 +376,7 @@ public class VaultPermissionHook extends Permission {
         }
 
         // Fallback
-        String g = user.getPrimaryGroup();
+        String g = user.getPrimaryGroup().getValue();
         return plugin.getConfiguration().get(ConfigKeys.GROUP_NAME_REWRITES).getOrDefault(g, g);
     }
 

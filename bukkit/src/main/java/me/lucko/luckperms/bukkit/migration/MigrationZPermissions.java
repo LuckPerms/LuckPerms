@@ -132,7 +132,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
             plugin.getStorage().loadUser(u, username).join();
             User user = plugin.getUserManager().get(u);
             migrateEntity(user, entity, internalService.getGroups(u));
-            user.setPrimaryGroup(MigrationUtils.standardizeName(service.getPlayerPrimaryGroup(u)));
+            user.getPrimaryGroup().setStoredValue(MigrationUtils.standardizeName(service.getPlayerPrimaryGroup(u)));
 
             plugin.getUserManager().cleanup(user);
             plugin.getStorage().saveUser(user);

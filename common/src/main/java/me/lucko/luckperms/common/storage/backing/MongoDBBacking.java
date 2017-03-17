@@ -94,7 +94,7 @@ public class MongoDBBacking extends AbstractBacking {
     private static Document fromUser(User user) {
         Document main = new Document("_id", user.getUuid())
                 .append("name", user.getName())
-                .append("primaryGroup", user.getPrimaryGroup());
+                .append("primaryGroup", user.getPrimaryGroup().getStoredValue());
 
         Document perms = new Document();
         for (Map.Entry<String, Boolean> e : convert(exportToLegacy(user.getNodes())).entrySet()) {
@@ -238,7 +238,7 @@ public class MongoDBBacking extends AbstractBacking {
                         // User exists, let's load.
                         Document d = cursor.next();
                         user.setNodes(revert((Map<String, Boolean>) d.get("perms")));
-                        user.setPrimaryGroup(d.getString("primaryGroup"));
+                        user.getPrimaryGroup().setStoredValue(d.getString("primaryGroup"));
 
                         boolean save = plugin.getUserManager().giveDefaultIfNeeded(user, false);
 
@@ -256,7 +256,7 @@ public class MongoDBBacking extends AbstractBacking {
                     } else {
                         if (GenericUserManager.shouldSave(user)) {
                             user.clearNodes();
-                            user.setPrimaryGroup(null);
+                            user.getPrimaryGroup().setStoredValue(null);
                             plugin.getUserManager().giveDefaultIfNeeded(user, false);
                         }
                     }

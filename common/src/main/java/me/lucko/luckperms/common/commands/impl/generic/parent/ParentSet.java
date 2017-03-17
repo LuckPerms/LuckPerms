@@ -82,7 +82,7 @@ public class ParentSet extends SharedSubCommand {
                 } catch (ObjectAlreadyHasException ignored) {}
 
                 if (holder instanceof User) {
-                    ((User) holder).setPrimaryGroup(group.getName());
+                    ((User) holder).getPrimaryGroup().setStoredValue(group.getName());
                 }
 
                 Message.SET_PARENT_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName());
@@ -96,7 +96,7 @@ public class ParentSet extends SharedSubCommand {
                 }
 
                 if (server.equalsIgnoreCase("global") && holder instanceof User) {
-                    ((User) holder).setPrimaryGroup(group.getName());
+                    ((User) holder).getPrimaryGroup().setStoredValue(group.getName());
                 }
 
                 Message.SET_PARENT_SERVER_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(), server);

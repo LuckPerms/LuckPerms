@@ -221,7 +221,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
 
             if (primary != null && !primary.equalsIgnoreCase("default")) {
                 lpUser.setPermissionUnchecked(NodeFactory.make("group." + primary.toLowerCase()));
-                lpUser.setPrimaryGroup(primary);
+                lpUser.getPrimaryGroup().setStoredValue(primary);
                 lpUser.unsetPermissionUnchecked(NodeFactory.make("group.default"));
             }
 

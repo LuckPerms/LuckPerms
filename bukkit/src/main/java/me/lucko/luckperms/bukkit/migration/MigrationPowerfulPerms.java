@@ -262,7 +262,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             String primary = joinFuture(pm.getPlayerPrimaryGroup(uuid)).getName().toLowerCase();
             if (!primary.equals("default")) {
                 user.setPermissionUnchecked(NodeFactory.make("group." + primary));
-                user.setPrimaryGroup(primary);
+                user.getPrimaryGroup().setStoredValue(primary);
             }
 
             plugin.getUserManager().cleanup(user);

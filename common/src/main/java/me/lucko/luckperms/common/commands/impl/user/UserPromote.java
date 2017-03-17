@@ -187,8 +187,8 @@ public class UserPromote extends SubCommand<User> {
             user.setPermission(NodeFactory.newBuilder("group." + nextGroup.getName()).setServer(server).setWorld(world).build());
         } catch (ObjectAlreadyHasException ignored) {}
 
-        if (server == null && world == null && user.getPrimaryGroup().equalsIgnoreCase(old)) {
-            user.setPrimaryGroup(nextGroup.getName());
+        if (server == null && world == null && user.getPrimaryGroup().getStoredValue().equalsIgnoreCase(old)) {
+            user.getPrimaryGroup().setStoredValue(nextGroup.getName());
         }
 
         switch (ContextHelper.determine(server, world)) {

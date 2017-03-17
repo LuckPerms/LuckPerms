@@ -97,7 +97,7 @@ public class Rule {
         }
 
         if (setPrimaryGroup != null) {
-            user.setPrimaryGroup(setPrimaryGroup);
+            user.getPrimaryGroup().setStoredValue(setPrimaryGroup);
         }
 
         return true;

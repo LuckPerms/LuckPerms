@@ -330,6 +330,7 @@ public enum Message {
     USER_GETUUID("&bThe UUID of &b{0}&b is &b{1}&b.", true),
     USER_REMOVEGROUP_ERROR_PRIMARY("You cannot remove a user from their primary group.", true),
     USER_PRIMARYGROUP_SUCCESS("&b{0}&a's primary group was set to &b{1}&a.", true),
+    USER_PRIMARYGROUP_WARN_OPTION("&cWarning: The primary group calculation method being used by this server &7({0}) &cmay not reflect this change.", true),
     USER_PRIMARYGROUP_ERROR_ALREADYHAS("The user already has this group set as their primary group.", true),
     USER_PRIMARYGROUP_ERROR_NOTMEMBER("&b{0}&a was not already a member of &b{1}&a, adding them now.", true),
     USER_TRACK_ERROR_NOT_CONTAIN_GROUP("The user specified isn't already in any groups on this track.", true),

@@ -29,6 +29,7 @@ import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.ContextHelper;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
@@ -68,7 +69,8 @@ public class ParentRemove extends SharedSubCommand {
 
             boolean shouldPrevent = (context == ContextHelper.CommandContext.NONE ||
                     (context == ContextHelper.CommandContext.SERVER && server.equalsIgnoreCase("global"))) &&
-                    user.getPrimaryGroup().equalsIgnoreCase(groupName);
+                    plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION_METHOD).equals("stored") &&
+                    user.getPrimaryGroup().getStoredValue().equalsIgnoreCase(groupName);
 
             if (shouldPrevent) {
                 Message.USER_REMOVEGROUP_ERROR_PRIMARY.send(sender);

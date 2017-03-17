@@ -226,7 +226,7 @@ public class Exporter implements Runnable {
                                 output.add(NodeFactory.nodeAsCommand(node, user.getUuid().toString(), false));
                             }
 
-                            if (!user.getPrimaryGroup().equalsIgnoreCase("default")) {
+                            if (!user.getPrimaryGroup().getStoredValue().equalsIgnoreCase("default")) {
                                 output.add("/luckperms user " + user.getUuid().toString() + " switchprimarygroup " + user.getPrimaryGroup());
                             }
 

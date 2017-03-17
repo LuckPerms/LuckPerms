@@ -301,7 +301,7 @@ public class SQLBacking extends AbstractBacking {
             if (pg == null) {
                 pg = "default";
             }
-            user.setPrimaryGroup(pg);
+            user.getPrimaryGroup().setStoredValue(pg);
 
             String name = userName.get();
             if (name == null) {
@@ -328,7 +328,7 @@ public class SQLBacking extends AbstractBacking {
                 // User has no data in storage.
                 if (GenericUserManager.shouldSave(user)) {
                     user.clearNodes();
-                    user.setPrimaryGroup(null);
+                    user.getPrimaryGroup().setStoredValue(null);
                     plugin.getUserManager().giveDefaultIfNeeded(user, false);
                 }
             }
@@ -436,7 +436,7 @@ public class SQLBacking extends AbstractBacking {
 
             try (Connection c = provider.getConnection()) {
                 try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_UPDATE_PRIMARY_GROUP))) {
-                    ps.setString(1, user.getPrimaryGroup() == null ? "default" : user.getPrimaryGroup());
+                    ps.setString(1, user.getPrimaryGroup().getStoredValue() == null ? "default" : user.getPrimaryGroup().getStoredValue());
                     ps.setString(2, user.getUuid().toString());
                     ps.execute();
                 }

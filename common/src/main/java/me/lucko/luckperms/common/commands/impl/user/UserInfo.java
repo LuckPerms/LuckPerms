@@ -54,7 +54,7 @@ public class UserInfo extends SubCommand<User> {
                 user.getName(),
                 user.getUuid(),
                 plugin.getPlayerStatus(user.getUuid()),
-                user.getPrimaryGroup(),
+                user.getPrimaryGroup().getValue(),
                 user.getPermanentNodes().size(),
                 user.getTemporaryNodes().size(),
                 user.getPrefixNodes().size(),

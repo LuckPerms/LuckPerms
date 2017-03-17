@@ -91,7 +91,7 @@ public class BulkEditGroup extends SubCommand<Storage> {
                         continue;
                     }
 
-                    if (element.getGroupName().equals(user.getPrimaryGroup())) {
+                    if (element.getGroupName().equals(user.getPrimaryGroup().getStoredValue())) {
                         if (!element.isServerSpecific() && !element.isWorldSpecific() && !element.isTemporary()) {
                             continue;
                         }
@@ -117,7 +117,7 @@ public class BulkEditGroup extends SubCommand<Storage> {
                         continue;
                     }
 
-                    if (element.getGroupName().equals(user.getPrimaryGroup())) {
+                    if (element.getGroupName().equals(user.getPrimaryGroup().getStoredValue())) {
                         continue;
                     }
 

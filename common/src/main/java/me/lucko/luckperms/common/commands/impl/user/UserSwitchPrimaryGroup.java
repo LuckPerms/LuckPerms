@@ -27,6 +27,7 @@ import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.model.Group;
@@ -47,13 +48,18 @@ public class UserSwitchPrimaryGroup extends SubCommand<User> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) throws CommandException {
+        String opt = plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION_METHOD);
+        if (!opt.equals("stored")) {
+            Message.USER_PRIMARYGROUP_WARN_OPTION.send(sender, opt);
+        }
+
         Group group = plugin.getGroupManager().getIfLoaded(args.get(0).toLowerCase());
         if (group == null) {
             Message.GROUP_DOES_NOT_EXIST.send(sender);
             return CommandResult.INVALID_ARGS;
         }
 
-        if (user.getPrimaryGroup().equalsIgnoreCase(group.getName())) {
+        if (user.getPrimaryGroup().getStoredValue().equalsIgnoreCase(group.getName())) {
             Message.USER_PRIMARYGROUP_ERROR_ALREADYHAS.send(sender);
             return CommandResult.STATE_ERROR;
         }
@@ -66,7 +72,7 @@ public class UserSwitchPrimaryGroup extends SubCommand<User> {
             }
         }
 
-        user.setPrimaryGroup(group.getName());
+        user.getPrimaryGroup().setStoredValue(group.getName());
         Message.USER_PRIMARYGROUP_SUCCESS.send(sender, user.getName(), group.getDisplayName());
         LogEntry.build().actor(sender).acted(user)
                 .action("setprimarygroup " + group.getName())

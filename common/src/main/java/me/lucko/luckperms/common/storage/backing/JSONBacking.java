@@ -118,7 +118,7 @@ public class JSONBacking extends FlatfileBacking {
                         reader.nextName(); // name record
                         String name = reader.nextString(); // name
                         reader.nextName(); // primaryGroup record
-                        user.setPrimaryGroup(reader.nextString()); // primaryGroup
+                        user.getPrimaryGroup().setStoredValue(reader.nextString()); // primaryGroup
                         reader.nextName(); // perms
                         reader.beginObject();
                         Map<String, Boolean> map = new HashMap<>();
@@ -146,7 +146,7 @@ public class JSONBacking extends FlatfileBacking {
                                 writer.beginObject();
                                 writer.name("uuid").value(user.getUuid().toString());
                                 writer.name("name").value(user.getName());
-                                writer.name("primaryGroup").value(user.getPrimaryGroup());
+                                writer.name("primaryGroup").value(user.getPrimaryGroup().getStoredValue());
                                 writer.name("perms");
                                 writer.beginObject();
                                 for (Map.Entry<String, Boolean> e : exportToLegacy(user.getNodes()).entrySet()) {
@@ -162,7 +162,7 @@ public class JSONBacking extends FlatfileBacking {
                 } else {
                     if (GenericUserManager.shouldSave(user)) {
                         user.clearNodes();
-                        user.setPrimaryGroup(null);
+                        user.getPrimaryGroup().setStoredValue(null);
                         plugin.getUserManager().giveDefaultIfNeeded(user, false);
                     }
                     return true;
@@ -202,7 +202,7 @@ public class JSONBacking extends FlatfileBacking {
                     writer.beginObject();
                     writer.name("uuid").value(user.getUuid().toString());
                     writer.name("name").value(user.getName());
-                    writer.name("primaryGroup").value(user.getPrimaryGroup());
+                    writer.name("primaryGroup").value(user.getPrimaryGroup().getStoredValue());
                     writer.name("perms");
                     writer.beginObject();
                     for (Map.Entry<String, Boolean> e : exportToLegacy(user.getNodes()).entrySet()) {

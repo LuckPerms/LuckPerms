@@ -37,7 +37,12 @@ import me.lucko.luckperms.common.config.keys.MapKey;
 import me.lucko.luckperms.common.config.keys.StaticKey;
 import me.lucko.luckperms.common.config.keys.StringKey;
 import me.lucko.luckperms.common.core.TemporaryModifier;
+import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.defaults.Rule;
+import me.lucko.luckperms.common.primarygroup.AllParentsByWeightHolder;
+import me.lucko.luckperms.common.primarygroup.ParentsByWeightHolder;
+import me.lucko.luckperms.common.primarygroup.PrimaryGroupHolder;
+import me.lucko.luckperms.common.primarygroup.StoredHolder;
 import me.lucko.luckperms.common.storage.DatastoreConfiguration;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
@@ -46,6 +51,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 @UtilityClass
 public class ConfigKeys {
@@ -70,6 +76,25 @@ public class ConfigKeys {
 
         return TemporaryModifier.valueOf(option.toUpperCase());
     });
+    public static final ConfigKey<String> PRIMARY_GROUP_CALCULATION_METHOD = EnduringKey.wrap(AbstractKey.of(c -> {
+        String option = c.getString("primary-group-calculation", "stored").toLowerCase();
+        if (!option.equals("stored") && !option.equals("parents-by-weight") && !option.equals("all-parents-by-weight")) {
+            option = "stored";
+        }
+
+        return option;
+    }));
+    public static final ConfigKey<Function<User, PrimaryGroupHolder>> PRIMARY_GROUP_CALCULATION = EnduringKey.wrap(AbstractKey.of(c -> {
+        String option = PRIMARY_GROUP_CALCULATION_METHOD.get(c);
+        switch (option) {
+            case "stored":
+                return (Function<User, PrimaryGroupHolder>) StoredHolder::new;
+            case "parents-by-weight":
+                return (Function<User, PrimaryGroupHolder>) ParentsByWeightHolder::new;
+            default:
+                return (Function<User, PrimaryGroupHolder>) AllParentsByWeightHolder::new;
+        }
+    }));
     public static final ConfigKey<Boolean> APPLYING_WILDCARDS = EnduringKey.wrap(BooleanKey.of("apply-wildcards", true));
     public static final ConfigKey<Boolean> APPLYING_REGEX = EnduringKey.wrap(BooleanKey.of("apply-regex", true));
     public static final ConfigKey<Boolean> APPLYING_SHORTHAND = EnduringKey.wrap(BooleanKey.of("apply-shorthand", true));

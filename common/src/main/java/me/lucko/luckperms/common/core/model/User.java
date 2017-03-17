@@ -32,8 +32,10 @@ import me.lucko.luckperms.common.api.delegates.UserDelegate;
 import me.lucko.luckperms.common.caching.UserCache;
 import me.lucko.luckperms.common.caching.handlers.HolderReference;
 import me.lucko.luckperms.common.caching.handlers.UserReference;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.core.UserIdentifier;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.primarygroup.PrimaryGroupHolder;
 import me.lucko.luckperms.common.utils.BufferedRequest;
 import me.lucko.luckperms.common.utils.Identifiable;
 
@@ -60,8 +62,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
      * The users primary group
      */
     @Getter
-    @Setter
-    private String primaryGroup = null;
+    private final PrimaryGroupHolder primaryGroup;
 
     /**
      * The users data cache instance, if present.
@@ -85,12 +86,14 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
         super(uuid.toString(), plugin);
         this.uuid = uuid;
         this.name = null;
+        this.primaryGroup = plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION).apply(this);
     }
 
     public User(UUID uuid, String name, LuckPermsPlugin plugin) {
         super(uuid.toString(), plugin);
         this.uuid = uuid;
         this.name = name;
+        this.primaryGroup = plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION).apply(this);
     }
 
     @Override

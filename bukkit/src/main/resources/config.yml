@@ -56,6 +56,14 @@ log-notify: true
 # If "deny": the command will just fail if you try to add another node with the same expiry
 temporary-add-behaviour: deny
 
+# How should LuckPerms determine a users "primary" group.
+#
+# Available Options:
+# -> stored                 use the value stored against the users record in the file/database
+# -> parents-by-weight      just use the users most highly weighted parent
+# -> all-parents-by-weight  same as above, but calculates based upon all parents inherits from both directly and indirectly
+primary-group-calculation: stored
+
 
 
 

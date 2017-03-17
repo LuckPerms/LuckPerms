@@ -170,8 +170,8 @@ public class UserDemote extends SubCommand<User> {
             user.setPermission(NodeFactory.newBuilder("group." + previousGroup.getName()).setServer(server).setWorld(world).build());
         } catch (ObjectAlreadyHasException ignored) {}
 
-        if (server == null && world == null && user.getPrimaryGroup().equalsIgnoreCase(old)) {
-            user.setPrimaryGroup(previousGroup.getName());
+        if (server == null && world == null && user.getPrimaryGroup().getStoredValue().equalsIgnoreCase(old)) {
+            user.getPrimaryGroup().setStoredValue(previousGroup.getName());
         }
 
         switch (ContextHelper.determine(server, world)) {

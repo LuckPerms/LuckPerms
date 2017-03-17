@@ -25,12 +25,12 @@ package me.lucko.luckperms.common.managers.impl;
 import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.UserIdentifier;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.managers.AbstractManager;
 import me.lucko.luckperms.common.managers.UserManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.Set;
 import java.util.UUID;
@@ -40,7 +40,7 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
     public static boolean giveDefaultIfNeeded(User user, boolean save, LuckPermsPlugin plugin) {
         boolean hasGroup = false;
 
-        if (user.getPrimaryGroup() != null && !user.getPrimaryGroup().isEmpty()) {
+        if (user.getPrimaryGroup().getStoredValue() != null && !user.getPrimaryGroup().getStoredValue().isEmpty()) {
             for (Node node : user.getPermissions(false)) {
                 if (node.isServerSpecific() || node.isWorldSpecific()) {
                     continue;
@@ -57,10 +57,8 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
             return false;
         }
 
-        user.setPrimaryGroup("default");
-        try {
-            user.setPermission("group.default", true);
-        } catch (ObjectAlreadyHasException ignored) {}
+        user.getPrimaryGroup().setStoredValue("default");
+        user.setPermissionUnchecked(NodeFactory.make("group.default"));
 
         if (save) {
             plugin.getStorage().saveUser(user);
@@ -97,7 +95,7 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
         }
 
         // Not in the default primary group
-        return !user.getPrimaryGroup().equalsIgnoreCase("default");
+        return !user.getPrimaryGroup().getStoredValue().equalsIgnoreCase("default");
     }
 
     private final LuckPermsPlugin plugin;
