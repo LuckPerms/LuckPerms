@@ -70,7 +70,7 @@ public class LPConfigurationDelegate implements LPConfiguration {
 
     @Override
     public boolean getOnlineMode() {
-        return master.get(ConfigKeys.ONLINE_MODE);
+        return master.get(ConfigKeys.USE_SERVER_UUIDS);
     }
 
     @Override

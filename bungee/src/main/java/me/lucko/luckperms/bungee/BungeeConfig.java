@@ -73,6 +73,11 @@ public class BungeeConfig extends AbstractConfiguration {
     }
 
     @Override
+    public boolean contains(String path) {
+        return configuration.contains(path);
+    }
+
+    @Override
     public String getString(String path, String def) {
         return configuration.getString(path, def);
     }

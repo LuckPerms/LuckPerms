@@ -40,6 +40,8 @@ public interface LuckPermsConfiguration {
 
     void loadAll();
 
+    boolean contains(String path);
+
     String getString(String path, String def);
 
     int getInt(String path, int def);

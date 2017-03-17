@@ -79,7 +79,7 @@ public class SpongeConfig extends AbstractConfiguration {
         }
     }
 
-    private ConfigurationNode getNode(String path) {
+    private ConfigurationNode resolvePath(String path) {
         Iterable<String> paths = Splitter.on('.').split(path);
         ConfigurationNode node = root;
 
@@ -91,23 +91,28 @@ public class SpongeConfig extends AbstractConfiguration {
     }
 
     @Override
+    public boolean contains(String path) {
+        return !resolvePath(path).isVirtual();
+    }
+
+    @Override
     public String getString(String path, String def) {
-        return getNode(path).getString(def);
+        return resolvePath(path).getString(def);
     }
 
     @Override
     public int getInt(String path, int def) {
-        return getNode(path).getInt(def);
+        return resolvePath(path).getInt(def);
     }
 
     @Override
     public boolean getBoolean(String path, boolean def) {
-        return getNode(path).getBoolean(def);
+        return resolvePath(path).getBoolean(def);
     }
 
     @Override
     public List<String> getList(String path, List<String> def) {
-        ConfigurationNode node = getNode(path);
+        ConfigurationNode node = resolvePath(path);
         if (node.isVirtual()) {
             return def;
         }
@@ -117,7 +122,7 @@ public class SpongeConfig extends AbstractConfiguration {
 
     @Override
     public List<String> getObjectList(String path, List<String> def) {
-        ConfigurationNode node = getNode(path);
+        ConfigurationNode node = resolvePath(path);
         if (node.isVirtual()) {
             return def;
         }
@@ -128,7 +133,7 @@ public class SpongeConfig extends AbstractConfiguration {
     @SuppressWarnings("unchecked")
     @Override
     public Map<String, String> getMap(String path, Map<String, String> def) {
-        ConfigurationNode node = getNode(path);
+        ConfigurationNode node = resolvePath(path);
         if (node.isVirtual()) {
             return def;
         }

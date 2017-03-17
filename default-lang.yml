@@ -124,7 +124,7 @@ info: >
   {PREFIX}&f-     &3Context Calculators: &a{14}\n
   {PREFIX}&f-     &3Unique permissions: &a{15}\n
   {PREFIX}&f-  &bConfiguration:\n
-  {PREFIX}&f-     &3Online Mode: {16}\n
+  {PREFIX}&f-     &3Use Server UUIDs: {16}\n
   {PREFIX}&f-     &bPermission Calculation:\n
   {PREFIX}&f-        &3Including Global: {17}\n
   {PREFIX}&f-        &3Including Global World: {18}\n

@@ -49,25 +49,25 @@ public class UuidCache {
     private final UuidCacheDelegate delegate = new UuidCacheDelegate(this);
 
     public UUID getUUID(UUID external) {
-        return plugin.getConfiguration().get(ConfigKeys.ONLINE_MODE) ? external : cache.getOrDefault(external, external);
+        return plugin.getConfiguration().get(ConfigKeys.USE_SERVER_UUIDS) ? external : cache.getOrDefault(external, external);
     }
 
     public UUID getExternalUUID(UUID internal) {
-        return plugin.getConfiguration().get(ConfigKeys.ONLINE_MODE) ? internal : cache.inverse().getOrDefault(internal, internal);
+        return plugin.getConfiguration().get(ConfigKeys.USE_SERVER_UUIDS) ? internal : cache.inverse().getOrDefault(internal, internal);
     }
 
     public void addToCache(UUID external, UUID internal) {
-        if (plugin.getConfiguration().get(ConfigKeys.ONLINE_MODE)) return;
+        if (plugin.getConfiguration().get(ConfigKeys.USE_SERVER_UUIDS)) return;
         cache.forcePut(external, internal);
     }
 
     public void clearCache(UUID external) {
-        if (plugin.getConfiguration().get(ConfigKeys.ONLINE_MODE)) return;
+        if (plugin.getConfiguration().get(ConfigKeys.USE_SERVER_UUIDS)) return;
         cache.remove(external);
     }
 
     public int getSize() {
-        return plugin.getConfiguration().get(ConfigKeys.ONLINE_MODE) ? 0 : cache.size();
+        return plugin.getConfiguration().get(ConfigKeys.USE_SERVER_UUIDS) ? 0 : cache.size();
     }
 
 }

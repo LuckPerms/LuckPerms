@@ -43,7 +43,7 @@ public class AbstractListener {
         final long startTime = System.currentTimeMillis();
 
         final UuidCache cache = plugin.getUuidCache();
-        if (!plugin.getConfiguration().get(ConfigKeys.ONLINE_MODE)) {
+        if (!plugin.getConfiguration().get(ConfigKeys.USE_SERVER_UUIDS)) {
             UUID uuid = plugin.getStorage().force().getUUID(username).join();
             if (uuid != null) {
                 cache.addToCache(u, uuid);

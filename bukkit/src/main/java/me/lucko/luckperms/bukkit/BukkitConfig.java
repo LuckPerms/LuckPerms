@@ -58,6 +58,11 @@ public class BukkitConfig extends AbstractConfiguration {
     }
 
     @Override
+    public boolean contains(String path) {
+        return configuration.contains(path, true);
+    }
+
+    @Override
     public String getString(String path, String def) {
         return configuration.getString(path, def);
     }

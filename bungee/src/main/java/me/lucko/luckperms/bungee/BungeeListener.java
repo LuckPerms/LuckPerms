@@ -101,7 +101,7 @@ public class BungeeListener extends AbstractListener implements Listener {
             final UuidCache cache = plugin.getUuidCache();
             final PendingConnection c = e.getConnection();
 
-            if (!plugin.getConfiguration().get(ConfigKeys.ONLINE_MODE)) {
+            if (!plugin.getConfiguration().get(ConfigKeys.USE_SERVER_UUIDS)) {
                 UUID uuid = plugin.getStorage().getUUID(c.getName()).join();
                 if (uuid != null) {
                     cache.addToCache(c.getUniqueId(), uuid);

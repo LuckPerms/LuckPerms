@@ -77,7 +77,7 @@ public class InfoCommand extends SingleCommand {
                 plugin.getPreProcessContexts(false).size(),
                 plugin.getContextManager().getCalculatorsSize(),
                 plugin.getPermissionVault().getSize(),
-                formatBoolean(c.get(ConfigKeys.ONLINE_MODE)),
+                formatBoolean(c.get(ConfigKeys.USE_SERVER_UUIDS)),
                 formatBoolean(c.get(ConfigKeys.INCLUDING_GLOBAL_PERMS)),
                 formatBoolean(c.get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS)),
                 formatBoolean(c.get(ConfigKeys.APPLYING_GLOBAL_GROUPS)),

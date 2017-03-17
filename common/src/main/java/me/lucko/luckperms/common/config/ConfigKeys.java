@@ -58,7 +58,10 @@ public class ConfigKeys {
     public static final ConfigKey<Boolean> INCLUDING_GLOBAL_WORLD_PERMS = BooleanKey.of("include-global-world", true);
     public static final ConfigKey<Boolean> APPLYING_GLOBAL_GROUPS = BooleanKey.of("apply-global-groups", true);
     public static final ConfigKey<Boolean> APPLYING_GLOBAL_WORLD_GROUPS = BooleanKey.of("apply-global-world-groups", true);
-    public static final ConfigKey<Boolean> ONLINE_MODE = BooleanKey.of("online-mode", true);
+    public static final ConfigKey<Boolean> USE_SERVER_UUIDS = AbstractKey.of(c -> {
+        // backwards compatible with the old online-mode option
+        return c.contains("use-server-uuids") ? c.getBoolean("use-server-uuids", true) : c.getBoolean("online-mode", true);
+    });
     public static final ConfigKey<TemporaryModifier> TEMPORARY_ADD_BEHAVIOUR = AbstractKey.of(c -> {
         String option = c.getString("temporary-add-behaviour", "deny").toLowerCase();
         if (!option.equals("deny") && !option.equals("replace") && !option.equals("accumulate")) {
