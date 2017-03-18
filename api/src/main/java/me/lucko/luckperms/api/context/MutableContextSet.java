@@ -27,6 +27,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
+import com.google.common.collect.SetMultimap;
 
 import java.util.Collection;
 import java.util.Map;
@@ -136,14 +137,14 @@ public final class MutableContextSet implements ContextSet {
         return new MutableContextSet();
     }
 
-    private final Multimap<String, String> map;
+    private final SetMultimap<String, String> map;
 
     public MutableContextSet() {
-        this.map = Multimaps.synchronizedMultimap(HashMultimap.create());
+        this.map = Multimaps.synchronizedSetMultimap(HashMultimap.create());
     }
 
     private MutableContextSet(Multimap<String, String> contexts) {
-        this.map = Multimaps.synchronizedMultimap(HashMultimap.create(contexts));
+        this.map = Multimaps.synchronizedSetMultimap(HashMultimap.create(contexts));
     }
 
     @Override

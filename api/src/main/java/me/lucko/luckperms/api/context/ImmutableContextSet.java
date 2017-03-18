@@ -23,9 +23,10 @@
 package me.lucko.luckperms.api.context;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.SetMultimap;
 
 import java.util.Collection;
 import java.util.Map;
@@ -37,7 +38,7 @@ import java.util.Set;
  * @since 2.16
  */
 public final class ImmutableContextSet implements ContextSet {
-    private static final ImmutableContextSet EMPTY = new ImmutableContextSet(ImmutableMultimap.of());
+    private static final ImmutableContextSet EMPTY = new ImmutableContextSet(ImmutableSetMultimap.of());
 
     /**
      * Make a singleton ImmutableContextSet from a context pair
@@ -55,7 +56,7 @@ public final class ImmutableContextSet implements ContextSet {
             throw new NullPointerException("value");
         }
 
-        return new ImmutableContextSet(ImmutableMultimap.of(key.toLowerCase(), value));
+        return new ImmutableContextSet(ImmutableSetMultimap.of(key.toLowerCase(), value));
     }
 
     /**
@@ -70,7 +71,7 @@ public final class ImmutableContextSet implements ContextSet {
             throw new NullPointerException("map");
         }
 
-        ImmutableMultimap.Builder<String, String> b = ImmutableMultimap.builder();
+        ImmutableSetMultimap.Builder<String, String> b = ImmutableSetMultimap.builder();
         for (Map.Entry<String, String> e : map.entrySet()) {
             b.put(e.getKey().toLowerCase(), e.getValue());
         }
@@ -129,10 +130,10 @@ public final class ImmutableContextSet implements ContextSet {
         return EMPTY;
     }
 
-    private final Multimap<String, String> map;
+    private final SetMultimap<String, String> map;
 
     ImmutableContextSet(Multimap<String, String> contexts) {
-        this.map = ImmutableMultimap.copyOf(contexts);
+        this.map = ImmutableSetMultimap.copyOf(contexts);
     }
 
     @Override

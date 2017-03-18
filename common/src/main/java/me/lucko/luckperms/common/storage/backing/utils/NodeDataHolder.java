@@ -27,8 +27,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.ImmutableSetMultimap;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -54,18 +53,18 @@ public class NodeDataHolder {
                 node.getServer().orElse("global"),
                 node.getWorld().orElse("global"),
                 node.isTemporary() ? node.getExpiryUnixTime() : 0L,
-                node.getContexts().toMultimap()
+                ImmutableSetMultimap.copyOf(node.getContexts().toMultimap())
         );
     }
 
     public static NodeDataHolder of(String permission, boolean value, String server, String world, long expiry, String contexts) {
         Map<String, Collection<String>> deserializedContexts = GSON.fromJson(contexts, CONTEXT_TYPE);
-        Multimap<String, String> map = HashMultimap.create();
+        ImmutableSetMultimap.Builder<String, String> map = ImmutableSetMultimap.builder();
         for (Map.Entry<String, Collection<String>> e : deserializedContexts.entrySet()) {
             map.putAll(e.getKey(), e.getValue());
         }
 
-        return new NodeDataHolder(permission, value, server, world, expiry, map);
+        return new NodeDataHolder(permission, value, server, world, expiry, map.build());
     }
 
     private final String permission;
@@ -73,7 +72,7 @@ public class NodeDataHolder {
     private final String server;
     private final String world;
     private final long expiry;
-    private final Multimap<String, String> contexts;
+    private final ImmutableSetMultimap<String, String> contexts;
 
     public String serialiseContext() {
         return GSON.toJson(getContexts().asMap());
