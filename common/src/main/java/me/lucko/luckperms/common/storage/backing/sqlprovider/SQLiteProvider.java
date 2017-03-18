@@ -27,6 +27,12 @@ import java.io.File;
 public class SQLiteProvider extends FlatfileProvider {
     public SQLiteProvider(File file) {
         super("SQLite", file);
+
+        // backwards compat
+        File data = new File(file.getParent(), "luckperms.sqlite");
+        if (data.exists()) {
+            data.renameTo(new File(file.getParent(), "luckperms-sqlite.db"));
+        }
     }
 
     @Override

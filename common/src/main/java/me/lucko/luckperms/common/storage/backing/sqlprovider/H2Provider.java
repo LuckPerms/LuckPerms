@@ -27,6 +27,12 @@ import java.io.File;
 public class H2Provider extends FlatfileProvider {
     public H2Provider(File file) {
         super("H2", file);
+
+        // backwards compat
+        File data = new File(file.getParent(), "luckperms.db.mv.db");
+        if (data.exists()) {
+            data.renameTo(new File(file.getParent(), "luckperms-h2.mv.db"));
+        }
     }
 
     @Override

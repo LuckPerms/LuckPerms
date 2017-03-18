@@ -124,9 +124,9 @@ public class StorageFactory {
             case MYSQL:
                 return new SQLBacking(plugin, new MySQLProvider(plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)), plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX));
             case SQLITE:
-                return new SQLBacking(plugin, new SQLiteProvider(new File(plugin.getDataDirectory(), "luckperms.sqlite")), plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX));
+                return new SQLBacking(plugin, new SQLiteProvider(new File(plugin.getDataDirectory(), "luckperms-sqlite.db")), plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX));
             case H2:
-                return new SQLBacking(plugin, new H2Provider(new File(plugin.getDataDirectory(), "luckperms.db")), plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX));
+                return new SQLBacking(plugin, new H2Provider(new File(plugin.getDataDirectory(), "luckperms-h2")), plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX));
             case POSTGRESQL:
                 return new SQLBacking(plugin, new PostgreSQLProvider(plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)), plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX));
             case MONGODB:
