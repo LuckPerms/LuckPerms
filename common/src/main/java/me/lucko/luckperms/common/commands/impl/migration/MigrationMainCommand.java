@@ -50,7 +50,7 @@ public class MigrationMainCommand extends MainCommand<Object> {
             .put("net.alpenblock.bungeeperms.BungeePerms", "me.lucko.luckperms.bungee.migration.MigrationBungeePerms")
             .put("de.bananaco.bpermissions.api.WorldManager", "me.lucko.luckperms.bukkit.migration.MigrationBPermissions")
             .put("ninja.leaping.permissionsex.sponge.PermissionsExPlugin", "me.lucko.luckperms.sponge.migration.MigrationPermissionsEx")
-            .put("io.github.djxy.permissionmanager.PermissionManager", "me.lucko.luckperms.sponge.migration.MigrationPermissionManager")
+            .put("io.github.djxy.permissionmanager.sponge.SpongePlugin", "me.lucko.luckperms.sponge.migration.MigrationPermissionManager")
             .build();
 
     private List<Command<Object, ?>> commands = null;
