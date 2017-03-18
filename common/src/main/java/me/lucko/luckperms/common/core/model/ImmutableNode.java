@@ -225,7 +225,7 @@ public class ImmutableNode implements Node {
         // Setup state
         isGroup = this.permission.toLowerCase().startsWith("group.");
         if (isGroup) {
-            groupName = this.permission.substring("group.".length());
+            groupName = this.permission.substring("group.".length()).toLowerCase();
         }
 
         isWildcard = this.permission.endsWith(".*");
