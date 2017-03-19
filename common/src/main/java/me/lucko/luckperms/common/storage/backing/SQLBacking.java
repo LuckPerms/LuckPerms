@@ -42,7 +42,7 @@ import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.managers.impl.GenericUserManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.backing.sqlprovider.SQLProvider;
-import me.lucko.luckperms.common.storage.backing.utils.LegacySchemaMigration;
+import me.lucko.luckperms.common.storage.backing.utils.LegacySQLSchemaMigration;
 import me.lucko.luckperms.common.storage.backing.utils.NodeDataHolder;
 import me.lucko.luckperms.common.storage.holder.NodeHeldPermission;
 
@@ -179,7 +179,7 @@ public class SQLBacking extends AbstractBacking {
                     plugin.getLog().severe("Starting migration from legacy schema. This could take a while....");
                     plugin.getLog().severe("Please do not stop your server while the migration takes place.");
 
-                    new LegacySchemaMigration(this).run();
+                    new LegacySQLSchemaMigration(this).run();
                 }
             }
 

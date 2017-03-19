@@ -45,13 +45,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-public class LegacySchemaMigration implements Runnable {
+public class LegacySQLSchemaMigration implements Runnable {
     private static final Type NODE_MAP_TYPE = new TypeToken<Map<String, Boolean>>() {}.getType();
     private final SQLBacking backing;
 
     @Override
     public void run() {
-        backing.getPlugin().getLog().info("Collecting UUID data from the old tables.");
+        backing.getPlugin().getLog().warn("Collecting UUID data from the old tables.");
 
         Map<UUID, String> uuidData = new HashMap<>();
         try (Connection c = backing.getProvider().getConnection()) {
@@ -70,7 +70,7 @@ public class LegacySchemaMigration implements Runnable {
             e.printStackTrace();
         }
 
-        backing.getPlugin().getLog().info("Found " + uuidData.size() + " uuid data entries. Copying to new tables...");
+        backing.getPlugin().getLog().warn("Found " + uuidData.size() + " uuid data entries. Copying to new tables...");
 
         List<Map.Entry<UUID, String>> uuidEntries = uuidData.entrySet().stream().collect(Collectors.toList());
         List<List<Map.Entry<UUID, String>>> partitionedUuidEntries = Lists.partition(uuidEntries, 100);
@@ -95,8 +95,8 @@ public class LegacySchemaMigration implements Runnable {
         uuidEntries.clear();
         partitionedUuidEntries.clear();
 
-        backing.getPlugin().getLog().info("Migrated all uuid data.");
-        backing.getPlugin().getLog().info("Starting user data migration.");
+        backing.getPlugin().getLog().warn("Migrated all uuid data.");
+        backing.getPlugin().getLog().warn("Starting user data migration.");
 
         Set<UUID> users = new HashSet<>();
         try (Connection c = backing.getProvider().getConnection()) {
@@ -115,7 +115,7 @@ public class LegacySchemaMigration implements Runnable {
             e.printStackTrace();
         }
 
-        backing.getPlugin().getLog().info("Found " + users.size() + " user data entries. Copying to new tables...");
+        backing.getPlugin().getLog().warn("Found " + users.size() + " user data entries. Copying to new tables...");
 
         AtomicInteger userCounter = new AtomicInteger(0);
         for (UUID uuid : users) {
@@ -184,14 +184,14 @@ public class LegacySchemaMigration implements Runnable {
 
             int i = userCounter.incrementAndGet();
             if (i % 100 == 0) {
-                backing.getPlugin().getLog().info("Migrated " + i + " users so far...");
+                backing.getPlugin().getLog().warn("Migrated " + i + " users so far...");
             }
         }
 
         users.clear();
 
-        backing.getPlugin().getLog().info("Migrated all user data.");
-        backing.getPlugin().getLog().info("Starting group data migration.");
+        backing.getPlugin().getLog().warn("Migrated all user data.");
+        backing.getPlugin().getLog().warn("Starting group data migration.");
 
         Map<String, String> groupData = new HashMap<>();
         try (Connection c = backing.getProvider().getConnection()) {
@@ -206,7 +206,7 @@ public class LegacySchemaMigration implements Runnable {
             e.printStackTrace();
         }
 
-        backing.getPlugin().getLog().info("Found " + groupData.size() + " group data entries. Copying to new tables...");
+        backing.getPlugin().getLog().warn("Found " + groupData.size() + " group data entries. Copying to new tables...");
         for (Map.Entry<String, String> e : groupData.entrySet()) {
             String name = e.getKey();
             String permsJson = e.getValue();
@@ -251,9 +251,9 @@ public class LegacySchemaMigration implements Runnable {
         }
 
         groupData.clear();
-        backing.getPlugin().getLog().info("Migrated all group data.");
+        backing.getPlugin().getLog().warn("Migrated all group data.");
 
-        backing.getPlugin().getLog().info("Renaming action and track tables.");
+        backing.getPlugin().getLog().warn("Renaming action and track tables.");
         try (Connection c = backing.getProvider().getConnection()) {
             try (PreparedStatement ps = c.prepareStatement(backing.getPrefix().apply("DROP TABLE {prefix}actions"))) {
                 ps.execute();
@@ -272,6 +272,6 @@ public class LegacySchemaMigration implements Runnable {
             ex.printStackTrace();
         }
 
-        backing.getPlugin().getLog().info("Legacy schema migration complete.");
+        backing.getPlugin().getLog().warn("Legacy schema migration complete.");
     }
 }

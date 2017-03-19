@@ -22,12 +22,20 @@
 
 package me.lucko.luckperms.common.storage.backing;
 
+import lombok.Getter;
+
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Constants;
+import me.lucko.luckperms.common.core.model.Group;
+import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.Log;
+import me.lucko.luckperms.common.managers.GroupManager;
+import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.storage.backing.utils.LegacyJSONSchemaMigration;
+import me.lucko.luckperms.common.storage.backing.utils.LegacyYAMLSchemaMigration;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -35,37 +43,56 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
-abstract class FlatfileBacking extends AbstractBacking {
+public abstract class FlatfileBacking extends AbstractBacking {
     private static final String LOG_FORMAT = "%s(%s): [%s] %s(%s) --> %s";
+
+    protected static <T> T call(Callable<T> c, T def) {
+        try {
+            return c.call();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return def;
+        }
+    }
 
     private final Logger actionLogger = Logger.getLogger("lp_actions");
     private Map<String, String> uuidCache = new ConcurrentHashMap<>();
 
     private final File pluginDir;
+
+    @Getter
     private final String fileExtension;
+
+    private final String dataFolderName;
 
     private File uuidData;
     private File actionLog;
-    File usersDir;
-    File groupsDir;
-    File tracksDir;
+    protected File usersDir;
+    protected File groupsDir;
+    protected File tracksDir;
 
-    FlatfileBacking(LuckPermsPlugin plugin, String name, File pluginDir, String fileExtension) {
+    FlatfileBacking(LuckPermsPlugin plugin, String name, File pluginDir, String fileExtension, String dataFolderName) {
         super(plugin, name);
         this.pluginDir = pluginDir;
         this.fileExtension = fileExtension;
+        this.dataFolderName = dataFolderName;
     }
 
     @Override
@@ -100,8 +127,30 @@ abstract class FlatfileBacking extends AbstractBacking {
     }
 
     private void setupFiles() throws IOException {
-        File data = new File(pluginDir, "data");
+        File data = new File(pluginDir, dataFolderName);
         data.mkdirs();
+
+        // Perform schema migration
+        File oldData = new File(pluginDir, "data");
+        if (oldData.exists()) {
+            plugin.getLog().severe("===== Legacy Schema Migration =====");
+            plugin.getLog().severe("Starting migration from legacy schema. This could take a while....");
+            plugin.getLog().severe("Please do not stop your server while the migration takes place.");
+
+            if (this instanceof YAMLBacking) {
+                try {
+                    new LegacyYAMLSchemaMigration(plugin, (YAMLBacking) this, oldData, data).run();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else if (this instanceof JSONBacking) {
+                try {
+                    new LegacyJSONSchemaMigration(plugin, (JSONBacking) this, oldData, data).run();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
 
         usersDir = new File(data, "users");
         usersDir.mkdir();
@@ -186,29 +235,83 @@ abstract class FlatfileBacking extends AbstractBacking {
         return Log.builder().build();
     }
 
-    private Map<String, String> getUUIDCache() {
-        Map<String, String> cache = new HashMap<>();
-
-        try (BufferedReader reader = Files.newBufferedReader(uuidData.toPath(), StandardCharsets.UTF_8)) {
-            Properties props = new Properties();
-            props.load(reader);
-            for (String key : props.stringPropertyNames()) {
-                cache.put(key, props.getProperty(key));
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return cache;
+    @Override
+    public Set<UUID> getUniqueUsers() {
+        String[] fileNames = usersDir.list((dir, name) -> name.endsWith(fileExtension));
+        if (fileNames == null) return null;
+        return Arrays.stream(fileNames)
+                .map(s -> s.substring(0, s.length() - fileExtension.length()))
+                .map(UUID::fromString)
+                .collect(Collectors.toSet());
     }
 
-    private void saveUUIDCache(Map<String, String> cache) {
-        try (BufferedWriter writer = Files.newBufferedWriter(uuidData.toPath(), StandardCharsets.UTF_8)) {
-            Properties properties = new Properties();
-            properties.putAll(cache);
-            properties.store(writer, null);
-            writer.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
+    @Override
+    public boolean loadAllGroups() {
+        String[] fileNames = groupsDir.list((dir, name) -> name.endsWith(fileExtension));
+        if (fileNames == null) return false;
+        List<String> groups = Arrays.stream(fileNames)
+                .map(s -> s.substring(0, s.length() - fileExtension.length()))
+                .collect(Collectors.toList());
+
+        groups.forEach(this::loadGroup);
+
+        GroupManager gm = plugin.getGroupManager();
+        gm.getAll().values().stream()
+                .filter(g -> !groups.contains(g.getName()))
+                .forEach(gm::unload);
+        return true;
+    }
+
+    @Override
+    public boolean deleteGroup(Group group) {
+        group.getIoLock().lock();
+        try {
+            return call(() -> {
+                File groupFile = new File(groupsDir, group.getName() + fileExtension);
+                registerFileAction("groups", groupFile);
+
+                if (groupFile.exists()) {
+                    groupFile.delete();
+                }
+                return true;
+            }, false);
+        } finally {
+            group.getIoLock().unlock();
+        }
+    }
+
+    @Override
+    public boolean loadAllTracks() {
+        String[] fileNames = tracksDir.list((dir, name) -> name.endsWith(fileExtension));
+        if (fileNames == null) return false;
+        List<String> tracks = Arrays.stream(fileNames)
+                .map(s -> s.substring(0, s.length() - fileExtension.length()))
+                .collect(Collectors.toList());
+
+        tracks.forEach(this::loadTrack);
+
+        TrackManager tm = plugin.getTrackManager();
+        tm.getAll().values().stream()
+                .filter(t -> !tracks.contains(t.getName()))
+                .forEach(tm::unload);
+        return true;
+    }
+
+    @Override
+    public boolean deleteTrack(Track track) {
+        track.getIoLock().lock();
+        try {
+            return call(() -> {
+                File trackFile = new File(tracksDir, track.getName() + fileExtension);
+                registerFileAction("tracks", trackFile);
+
+                if (trackFile.exists()) {
+                    trackFile.delete();
+                }
+                return true;
+            }, false);
+        } finally {
+            track.getIoLock().unlock();
         }
     }
 
@@ -234,5 +337,31 @@ abstract class FlatfileBacking extends AbstractBacking {
             }
         }
         return null;
+    }
+
+    private Map<String, String> getUUIDCache() {
+        Map<String, String> cache = new HashMap<>();
+
+        try (BufferedReader reader = Files.newBufferedReader(uuidData.toPath(), StandardCharsets.UTF_8)) {
+            Properties props = new Properties();
+            props.load(reader);
+            for (String key : props.stringPropertyNames()) {
+                cache.put(key, props.getProperty(key));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return cache;
+    }
+
+    private void saveUUIDCache(Map<String, String> cache) {
+        try (BufferedWriter writer = Files.newBufferedWriter(uuidData.toPath(), StandardCharsets.UTF_8)) {
+            Properties properties = new Properties();
+            properties.putAll(cache);
+            properties.store(writer, null);
+            writer.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -23,18 +23,19 @@
 package me.lucko.luckperms.common.storage.backing;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSetMultimap;
+import com.google.common.collect.Iterables;
 
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.common.core.NodeFactory;
+import me.lucko.luckperms.common.core.PriorityComparator;
 import me.lucko.luckperms.common.core.UserIdentifier;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.core.model.User;
-import me.lucko.luckperms.common.managers.GroupManager;
-import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.managers.impl.GenericUserManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.storage.backing.utils.NodeDataHolder;
 import me.lucko.luckperms.common.storage.holder.NodeHeldPermission;
 
 import org.yaml.snakeyaml.DumperOptions;
@@ -46,17 +47,17 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static me.lucko.luckperms.common.core.model.PermissionHolder.exportToLegacy;
 
 @SuppressWarnings({"unchecked", "ResultOfMethodCallIgnored"})
 public class YAMLBacking extends FlatfileBacking {
@@ -67,20 +68,11 @@ public class YAMLBacking extends FlatfileBacking {
         return new Yaml(options);
     }
 
-    private static <T> T call(Callable<T> c, T def) {
-        try {
-            return c.call();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return def;
-        }
+    public YAMLBacking(LuckPermsPlugin plugin, File pluginDir, String dataFolderName) {
+        super(plugin, "YAML", pluginDir, ".yml", dataFolderName);
     }
 
-    public YAMLBacking(LuckPermsPlugin plugin, File pluginDir) {
-        super(plugin, "YAML", pluginDir, ".yml");
-    }
-
-    private boolean writeMapToFile(File file, Map<String, Object> values) {
+    public boolean writeMapToFile(File file, Map<String, Object> values) {
         try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
             getYaml().dump(values, writer);
             writer.flush();
@@ -92,7 +84,7 @@ public class YAMLBacking extends FlatfileBacking {
         }
     }
 
-    private boolean readMapFromFile(File file, Function<Map<String, Object>, Boolean> readOperation) {
+    public boolean readMapFromFile(File file, Function<Map<String, Object>, Boolean> readOperation) {
         boolean success = false;
         try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
             success = readOperation.apply((Map<String, Object>) getYaml().load(reader));
@@ -116,8 +108,10 @@ public class YAMLBacking extends FlatfileBacking {
                         // User exists, let's load.
                         String name = (String) values.get("name");
                         user.getPrimaryGroup().setStoredValue((String) values.get("primary-group"));
-                        Map<String, Boolean> perms = (Map<String, Boolean>) values.get("perms");
-                        user.setNodes(perms);
+
+                        Set<NodeDataHolder> data = deserializePermissions((List<Object>) values.get("permissions"));
+                        Set<Node> nodes = data.stream().map(NodeDataHolder::toNode).collect(Collectors.toSet());
+                        user.setNodes(nodes);
 
                         boolean save = plugin.getUserManager().giveDefaultIfNeeded(user, false);
 
@@ -130,12 +124,7 @@ public class YAMLBacking extends FlatfileBacking {
                         }
 
                         if (save) {
-                            Map<String, Object> data = new HashMap<>();
-                            data.put("uuid", user.getUuid().toString());
-                            data.put("name", user.getName());
-                            data.put("primary-group", user.getPrimaryGroup().getStoredValue());
-                            data.put("perms", exportToLegacy(user.getNodes()));
-                            writeMapToFile(userFile, data);
+                            saveUser(user);
                         }
                         return true;
                     });
@@ -177,11 +166,14 @@ public class YAMLBacking extends FlatfileBacking {
                     }
                 }
 
-                Map<String, Object> values = new HashMap<>();
+                Map<String, Object> values = new LinkedHashMap<>();
                 values.put("uuid", user.getUuid().toString());
                 values.put("name", user.getName());
                 values.put("primary-group", user.getPrimaryGroup().getStoredValue());
-                values.put("perms", exportToLegacy(user.getNodes()));
+
+                Set<NodeDataHolder> data = user.getNodes().stream().map(NodeDataHolder::fromNode).collect(Collectors.toSet());
+                values.put("permissions", serializePermissions(data));
+
                 return writeMapToFile(userFile, values);
             }, false);
         } finally {
@@ -197,18 +189,18 @@ public class YAMLBacking extends FlatfileBacking {
 
             for (File file : files) {
                 registerFileAction("users", file);
-                Map<String, Boolean> nodes = new HashMap<>();
+
+                Set<NodeDataHolder> nodes = new HashSet<>();
                 readMapFromFile(file, values -> {
-                    Map<String, Boolean> perms = (Map<String, Boolean>) values.get("perms");
-                    nodes.putAll(perms);
+                    nodes.addAll(deserializePermissions((List<Object>) values.get("permissions")));
                     return true;
                 });
 
                 boolean shouldDelete = false;
                 if (nodes.size() == 1) {
-                    for (Map.Entry<String, Boolean> e : nodes.entrySet()) {
+                    for (NodeDataHolder e : nodes) {
                         // There's only one
-                        shouldDelete = e.getKey().equalsIgnoreCase("group.default") && e.getValue();
+                        shouldDelete = e.getPermission().equalsIgnoreCase("group.default") && e.isValue();
                     }
                 }
 
@@ -218,16 +210,6 @@ public class YAMLBacking extends FlatfileBacking {
             }
             return true;
         }, false);
-    }
-
-    @Override
-    public Set<UUID> getUniqueUsers() {
-        String[] fileNames = usersDir.list((dir, name) -> name.endsWith(".yml"));
-        if (fileNames == null) return null;
-        return Arrays.stream(fileNames)
-                .map(s -> s.substring(0, s.length() - 4))
-                .map(UUID::fromString)
-                .collect(Collectors.toSet());
     }
 
     @Override
@@ -241,20 +223,18 @@ public class YAMLBacking extends FlatfileBacking {
                 registerFileAction("users", file);
 
                 UUID holder = UUID.fromString(file.getName().substring(0, file.getName().length() - 4));
-                Map<String, Boolean> nodes = new HashMap<>();
+                Set<NodeDataHolder> nodes = new HashSet<>();
                 readMapFromFile(file, values -> {
-                    Map<String, Boolean> perms = (Map<String, Boolean>) values.get("perms");
-                    nodes.putAll(perms);
+                    nodes.addAll(deserializePermissions((List<Object>) values.get("permissions")));
                     return true;
                 });
 
-                for (Map.Entry<String, Boolean> e : nodes.entrySet()) {
-                    Node node = NodeFactory.fromSerialisedNode(e.getKey(), e.getValue());
-                    if (!node.getPermission().equalsIgnoreCase(permission)) {
+                for (NodeDataHolder e : nodes) {
+                    if (!e.getPermission().equalsIgnoreCase(permission)) {
                         continue;
                     }
 
-                    held.add(NodeHeldPermission.of(holder, node));
+                    held.add(NodeHeldPermission.of(holder, e));
                 }
             }
             return true;
@@ -270,10 +250,12 @@ public class YAMLBacking extends FlatfileBacking {
             return call(() -> {
                 File groupFile = new File(groupsDir, name + ".yml");
                 registerFileAction("groups", groupFile);
+
                 if (groupFile.exists()) {
                     return readMapFromFile(groupFile, values -> {
-                        Map<String, Boolean> perms = (Map<String, Boolean>) values.get("perms");
-                        group.setNodes(perms);
+                        Set<NodeDataHolder> data = deserializePermissions((List<Object>) values.get("permissions"));
+                        Set<Node> nodes = data.stream().map(NodeDataHolder::toNode).collect(Collectors.toSet());
+                        group.setNodes(nodes);
                         return true;
                     });
                 } else {
@@ -284,9 +266,10 @@ public class YAMLBacking extends FlatfileBacking {
                         return false;
                     }
 
-                    Map<String, Object> values = new HashMap<>();
+                    Map<String, Object> values = new LinkedHashMap<>();
                     values.put("name", group.getName());
-                    values.put("perms", exportToLegacy(group.getNodes()));
+                    Set<NodeDataHolder> data = group.getNodes().stream().map(NodeDataHolder::fromNode).collect(Collectors.toSet());
+                    values.put("permissions", serializePermissions(data));
                     return writeMapToFile(groupFile, values);
                 }
             }, false);
@@ -303,33 +286,17 @@ public class YAMLBacking extends FlatfileBacking {
             return call(() -> {
                 File groupFile = new File(groupsDir, name + ".yml");
                 registerFileAction("groups", groupFile);
+
                 return groupFile.exists() && readMapFromFile(groupFile, values -> {
-                    Map<String, Boolean> perms = (Map<String, Boolean>) values.get("perms");
-                    group.setNodes(perms);
+                    Set<NodeDataHolder> data = deserializePermissions((List<Object>) values.get("permissions"));
+                    Set<Node> nodes = data.stream().map(NodeDataHolder::toNode).collect(Collectors.toSet());
+                    group.setNodes(nodes);
                     return true;
                 });
-
             }, false);
         } finally {
             group.getIoLock().unlock();
         }
-    }
-
-    @Override
-    public boolean loadAllGroups() {
-        String[] fileNames = groupsDir.list((dir, name) -> name.endsWith(".yml"));
-        if (fileNames == null) return false;
-        List<String> groups = Arrays.stream(fileNames)
-                .map(s -> s.substring(0, s.length() - 4))
-                .collect(Collectors.toList());
-
-        groups.forEach(this::loadGroup);
-
-        GroupManager gm = plugin.getGroupManager();
-        gm.getAll().values().stream()
-                .filter(g -> !groups.contains(g.getName()))
-                .forEach(gm::unload);
-        return true;
     }
 
     @Override
@@ -339,6 +306,7 @@ public class YAMLBacking extends FlatfileBacking {
             return call(() -> {
                 File groupFile = new File(groupsDir, group.getName() + ".yml");
                 registerFileAction("groups", groupFile);
+
                 if (!groupFile.exists()) {
                     try {
                         groupFile.createNewFile();
@@ -348,27 +316,11 @@ public class YAMLBacking extends FlatfileBacking {
                     }
                 }
 
-                Map<String, Object> values = new HashMap<>();
+                Map<String, Object> values = new LinkedHashMap<>();
                 values.put("name", group.getName());
-                values.put("perms", exportToLegacy(group.getNodes()));
+                Set<NodeDataHolder> data = group.getNodes().stream().map(NodeDataHolder::fromNode).collect(Collectors.toSet());
+                values.put("permissions", serializePermissions(data));
                 return writeMapToFile(groupFile, values);
-            }, false);
-        } finally {
-            group.getIoLock().unlock();
-        }
-    }
-
-    @Override
-    public boolean deleteGroup(Group group) {
-        group.getIoLock().lock();
-        try {
-            return call(() -> {
-                File groupFile = new File(groupsDir, group.getName() + ".yml");
-                registerFileAction("groups", groupFile);
-                if (groupFile.exists()) {
-                    groupFile.delete();
-                }
-                return true;
             }, false);
         } finally {
             group.getIoLock().unlock();
@@ -386,20 +338,18 @@ public class YAMLBacking extends FlatfileBacking {
                 registerFileAction("groups", file);
 
                 String holder = file.getName().substring(0, file.getName().length() - 4);
-                Map<String, Boolean> nodes = new HashMap<>();
+                Set<NodeDataHolder> nodes = new HashSet<>();
                 readMapFromFile(file, values -> {
-                    Map<String, Boolean> perms = (Map<String, Boolean>) values.get("perms");
-                    nodes.putAll(perms);
+                    nodes.addAll(deserializePermissions((List<Object>) values.get("permissions")));
                     return true;
                 });
 
-                for (Map.Entry<String, Boolean> e : nodes.entrySet()) {
-                    Node node = NodeFactory.fromSerialisedNode(e.getKey(), e.getValue());
-                    if (!node.getPermission().equalsIgnoreCase(permission)) {
+                for (NodeDataHolder e : nodes) {
+                    if (!e.getPermission().equalsIgnoreCase(permission)) {
                         continue;
                     }
 
-                    held.add(NodeHeldPermission.of(holder, node));
+                    held.add(NodeHeldPermission.of(holder, e));
                 }
             }
             return true;
@@ -429,7 +379,7 @@ public class YAMLBacking extends FlatfileBacking {
                         return false;
                     }
 
-                    Map<String, Object> values = new HashMap<>();
+                    Map<String, Object> values = new LinkedHashMap<>();
                     values.put("name", track.getName());
                     values.put("groups", track.getGroups());
 
@@ -461,23 +411,6 @@ public class YAMLBacking extends FlatfileBacking {
     }
 
     @Override
-    public boolean loadAllTracks() {
-        String[] fileNames = tracksDir.list((dir, name) -> name.endsWith(".yml"));
-        if (fileNames == null) return false;
-        List<String> tracks = Arrays.stream(fileNames)
-                .map(s -> s.substring(0, s.length() - 4))
-                .collect(Collectors.toList());
-
-        tracks.forEach(this::loadTrack);
-
-        TrackManager tm = plugin.getTrackManager();
-        tm.getAll().values().stream()
-                .filter(t -> !tracks.contains(t.getName()))
-                .forEach(tm::unload);
-        return true;
-    }
-
-    @Override
     public boolean saveTrack(Track track) {
         track.getIoLock().lock();
         try {
@@ -494,7 +427,7 @@ public class YAMLBacking extends FlatfileBacking {
                     }
                 }
 
-                Map<String, Object> values = new HashMap<>();
+                Map<String, Object> values = new LinkedHashMap<>();
                 values.put("name", track.getName());
                 values.put("groups", track.getGroups());
                 return writeMapToFile(trackFile, values);
@@ -504,21 +437,121 @@ public class YAMLBacking extends FlatfileBacking {
         }
     }
 
-    @Override
-    public boolean deleteTrack(Track track) {
-        track.getIoLock().lock();
-        try {
-            return call(() -> {
-                File trackFile = new File(tracksDir, track.getName() + ".yml");
-                registerFileAction("tracks", trackFile);
+    public static Set<NodeDataHolder> deserializePermissions(List<Object> permissionsSection) {
+        Set<NodeDataHolder> nodes = new HashSet<>();
 
-                if (trackFile.exists()) {
-                    trackFile.delete();
+        for (Object perm : permissionsSection) {
+
+            if (!(perm instanceof Map)) {
+                continue;
+            }
+
+            Map<String, Object> data = (Map<String, Object>) perm;
+            Map.Entry<String, Object> entry = Iterables.getFirst(data.entrySet(), null);
+
+            if (entry == null) {
+                continue;
+            }
+
+            String permission = entry.getKey();
+
+            if (entry.getValue() != null && entry.getValue() instanceof Map) {
+                Map<String, Object> attributes = (Map<String, Object>) entry.getValue();
+
+                boolean value = true;
+                String server = "global";
+                String world = "global";
+                long expiry = 0L;
+                ImmutableSetMultimap context = ImmutableSetMultimap.of();
+
+                if (attributes.containsKey("value")) {
+                    value = (boolean) attributes.get("value");
                 }
-                return true;
-            }, false);
-        } finally {
-            track.getIoLock().unlock();
+                if (attributes.containsKey("server")) {
+                    server = attributes.get("server").toString();
+                }
+                if (attributes.containsKey("world")) {
+                    world = attributes.get("world").toString();
+                }
+                if (attributes.containsKey("expiry")) {
+                    Object exp = attributes.get("expiry");
+                    if (exp instanceof Long || exp.getClass().isPrimitive()) {
+                        expiry = (long) exp;
+                    } else {
+                        expiry = (int) exp;
+                    }
+                }
+
+                if (attributes.get("context") != null && attributes.get("context") instanceof Map) {
+                    Map<String, Object> contexts = (Map<String, Object>) attributes.get("context");
+                    ImmutableSetMultimap.Builder<String, String> map = ImmutableSetMultimap.builder();
+
+                    for (Map.Entry<String, Object> e : contexts.entrySet()) {
+                        Object val = e.getValue();
+                        if (val instanceof List) {
+                            map.putAll(e.getKey(), ((List<String>) val));
+                        } else {
+                            map.put(e.getKey(), val.toString());
+                        }
+                    }
+
+                    context = map.build();
+                }
+
+                nodes.add(NodeDataHolder.of(permission, value, server, world, expiry, context));
+            }
         }
+
+        return nodes;
+    }
+
+    public static List<Map<String, Object>> serializePermissions(Set<NodeDataHolder> nodes) {
+        List<Map<String, Object>> data = new ArrayList<>();
+
+        for (NodeDataHolder node : nodes) {
+            Map<String, Object> attributes = new LinkedHashMap<>();
+            attributes.put("value", node.isValue());
+
+            if (!node.getServer().equals("global")) {
+                attributes.put("server", node.getServer());
+            }
+
+            if (!node.getWorld().equals("global")) {
+                attributes.put("world", node.getWorld());
+            }
+
+            if (node.getExpiry() != 0L) {
+                attributes.put("expiry", node.getExpiry());
+            }
+
+            if (!node.getContexts().isEmpty()) {
+                Map<String, Object> context = new HashMap<>();
+                Map<String, Collection<String>> map = node.getContexts().asMap();
+
+                for (Map.Entry<String, Collection<String>> e : map.entrySet()) {
+                    List<String> vals = new ArrayList<>(e.getValue());
+                    int size = vals.size();
+
+                    if (size == 1) {
+                        context.put(e.getKey(), vals.get(0));;
+                    } else if (size > 1) {
+                        context.put(e.getKey(), vals);
+                    }
+                }
+
+                attributes.put("context", context);
+            }
+
+            Map<String, Object> perm = new HashMap<>();
+            perm.put(node.getPermission(), attributes);
+            data.add(perm);
+        }
+
+        data.sort((o1, o2) -> PriorityComparator.get().compareStrings(
+                Iterables.getFirst(o1.keySet(), ""),
+                Iterables.getFirst(o2.keySet(), ""))
+        );
+
+        return data;
     }
 }

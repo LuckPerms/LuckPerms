@@ -23,22 +23,25 @@
 package me.lucko.luckperms.common.storage.backing;
 
 import com.google.common.collect.ImmutableList;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
+import com.google.common.collect.ImmutableSetMultimap;
+import com.google.common.collect.Iterables;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.common.core.NodeFactory;
+import me.lucko.luckperms.common.core.PriorityComparator;
 import me.lucko.luckperms.common.core.UserIdentifier;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.core.model.User;
-import me.lucko.luckperms.common.managers.GroupManager;
-import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.managers.impl.GenericUserManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.storage.backing.utils.NodeDataHolder;
 import me.lucko.luckperms.common.storage.holder.NodeHeldPermission;
-import me.lucko.luckperms.common.utils.ThrowingFunction;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -47,56 +50,44 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Callable;
+import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static me.lucko.luckperms.common.core.model.PermissionHolder.exportToLegacy;
 
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class JSONBacking extends FlatfileBacking {
-    private static <T> T call(Callable<T> c, T def) {
-        try {
-            return c.call();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return def;
-        }
+    private final Gson gson;
+
+    public JSONBacking(LuckPermsPlugin plugin, File pluginDir, String dataFolderName) {
+        super(plugin, "JSON", pluginDir, ".json", dataFolderName);
+        gson = new GsonBuilder().setPrettyPrinting().create();
     }
 
-    public JSONBacking(LuckPermsPlugin plugin, File pluginDir) {
-        super(plugin, "JSON", pluginDir, ".json");
-    }
-
-    private boolean fileToWriter(File file, ThrowingFunction<JsonWriter, Boolean> writeOperation) {
-        boolean success = false;
+    public boolean writeElementToFile(File file, JsonElement element) {
         try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
-            try (JsonWriter jsonWriter = new JsonWriter(writer)) {
-                jsonWriter.setIndent("    "); // 4 spaces
-                success = writeOperation.apply(jsonWriter);
-                jsonWriter.flush();
-            }
-        } catch (Exception e) {
+            gson.toJson(element, writer);
+            writer.flush();
+            return true;
+        } catch (Throwable t) {
             plugin.getLog().warn("Exception whilst writing to file: " + file.getAbsolutePath());
-            e.printStackTrace();
+            t.printStackTrace();
+            return false;
         }
-        return success;
     }
 
-    private boolean fileToReader(File file, ThrowingFunction<JsonReader, Boolean> readOperation) {
+    public boolean readObjectFromFile(File file, Function<JsonObject, Boolean> readOperation) {
         boolean success = false;
         try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
-            try (JsonReader jsonReader = new JsonReader(reader)) {
-                success = readOperation.apply(jsonReader);
-            }
-        } catch (Exception e) {
+            JsonObject object = gson.fromJson(reader, JsonObject.class);
+            success = readOperation.apply(object);
+        } catch (Throwable t) {
             plugin.getLog().warn("Exception whilst reading from file: " + file.getAbsolutePath());
-            e.printStackTrace();
+            t.printStackTrace();
         }
         return success;
     }
@@ -111,25 +102,13 @@ public class JSONBacking extends FlatfileBacking {
                 registerFileAction("users", userFile);
 
                 if (userFile.exists()) {
-                    return fileToReader(userFile, reader -> {
-                        reader.beginObject();
-                        reader.nextName(); // uuid record
-                        reader.nextString(); // uuid
-                        reader.nextName(); // name record
-                        String name = reader.nextString(); // name
-                        reader.nextName(); // primaryGroup record
-                        user.getPrimaryGroup().setStoredValue(reader.nextString()); // primaryGroup
-                        reader.nextName(); // perms
-                        reader.beginObject();
-                        Map<String, Boolean> map = new HashMap<>();
-                        while (reader.hasNext()) {
-                            String node = reader.nextName();
-                            boolean b = reader.nextBoolean();
-                            map.put(node, b);
-                        }
-                        user.setNodes(map);
-                        reader.endObject();
-                        reader.endObject();
+                    return readObjectFromFile(userFile, object -> {
+                        String name = object.get("name").getAsString();
+                        user.getPrimaryGroup().setStoredValue(object.get("primaryGroup").getAsString());
+
+                        Set<NodeDataHolder> data = deserializePermissions(object.get("permissions").getAsJsonArray());
+                        Set<Node> nodes = data.stream().map(NodeDataHolder::toNode).collect(Collectors.toSet());
+                        user.setNodes(nodes);
 
                         boolean save = plugin.getUserManager().giveDefaultIfNeeded(user, false);
 
@@ -142,21 +121,9 @@ public class JSONBacking extends FlatfileBacking {
                         }
 
                         if (save) {
-                            fileToWriter(userFile, writer -> {
-                                writer.beginObject();
-                                writer.name("uuid").value(user.getUuid().toString());
-                                writer.name("name").value(user.getName());
-                                writer.name("primaryGroup").value(user.getPrimaryGroup().getStoredValue());
-                                writer.name("perms");
-                                writer.beginObject();
-                                for (Map.Entry<String, Boolean> e : exportToLegacy(user.getNodes()).entrySet()) {
-                                    writer.name(e.getKey()).value(e.getValue().booleanValue());
-                                }
-                                writer.endObject();
-                                writer.endObject();
-                                return true;
-                            });
+                            saveUser(user);
                         }
+
                         return true;
                     });
                 } else {
@@ -198,20 +165,15 @@ public class JSONBacking extends FlatfileBacking {
                     }
                 }
 
-                return fileToWriter(userFile, writer -> {
-                    writer.beginObject();
-                    writer.name("uuid").value(user.getUuid().toString());
-                    writer.name("name").value(user.getName());
-                    writer.name("primaryGroup").value(user.getPrimaryGroup().getStoredValue());
-                    writer.name("perms");
-                    writer.beginObject();
-                    for (Map.Entry<String, Boolean> e : exportToLegacy(user.getNodes()).entrySet()) {
-                        writer.name(e.getKey()).value(e.getValue().booleanValue());
-                    }
-                    writer.endObject();
-                    writer.endObject();
-                    return true;
-                });
+                JsonObject data = new JsonObject();
+                data.addProperty("uuid", user.getUuid().toString());
+                data.addProperty("name", user.getName());
+                data.addProperty("primaryGroup", user.getPrimaryGroup().getStoredValue());
+
+                Set<NodeDataHolder> nodes = user.getNodes().stream().map(NodeDataHolder::fromNode).collect(Collectors.toSet());
+                data.add("permissions", serializePermissions(nodes));
+
+                return writeElementToFile(userFile, data);
             }, false);
         } finally {
             user.getIoLock().unlock();
@@ -227,33 +189,17 @@ public class JSONBacking extends FlatfileBacking {
             for (File file : files) {
                 registerFileAction("users", file);
 
-                Map<String, Boolean> nodes = new HashMap<>();
-                fileToReader(file, reader -> {
-                    reader.beginObject();
-                    reader.nextName(); // uuid record
-                    reader.nextString(); // uuid
-                    reader.nextName(); // name record
-                    reader.nextString(); // name
-                    reader.nextName(); // primaryGroup record
-                    reader.nextString(); // primaryGroup
-                    reader.nextName(); //perms
-                    reader.beginObject();
-                    while (reader.hasNext()) {
-                        String node = reader.nextName();
-                        boolean b = reader.nextBoolean();
-                        nodes.put(node, b);
-                    }
-
-                    reader.endObject();
-                    reader.endObject();
-                    return true;
+                Set<NodeDataHolder> nodes = new HashSet<>();
+                readObjectFromFile(file, object -> {
+                   nodes.addAll(deserializePermissions(object.get("permissions").getAsJsonArray()));
+                   return true;
                 });
 
                 boolean shouldDelete = false;
                 if (nodes.size() == 1) {
-                    for (Map.Entry<String, Boolean> e : nodes.entrySet()) {
+                    for (NodeDataHolder e : nodes) {
                         // There's only one
-                        shouldDelete = e.getKey().equalsIgnoreCase("group.default") && e.getValue();
+                        shouldDelete = e.getPermission().equalsIgnoreCase("group.default") && e.isValue();
                     }
                 }
 
@@ -263,16 +209,6 @@ public class JSONBacking extends FlatfileBacking {
             }
             return true;
         }, false);
-    }
-
-    @Override
-    public Set<UUID> getUniqueUsers() {
-        String[] fileNames = usersDir.list((dir, name) -> name.endsWith(".json"));
-        if (fileNames == null) return null;
-        return Arrays.stream(fileNames)
-                .map(s -> s.substring(0, s.length() - 5))
-                .map(UUID::fromString)
-                .collect(Collectors.toSet());
     }
 
     @Override
@@ -286,35 +222,19 @@ public class JSONBacking extends FlatfileBacking {
                 registerFileAction("users", file);
 
                 UUID holder = UUID.fromString(file.getName().substring(0, file.getName().length() - 5));
-                Map<String, Boolean> nodes = new HashMap<>();
-                fileToReader(file, reader -> {
-                    reader.beginObject();
-                    reader.nextName(); // uuid record
-                    reader.nextString(); // uuid
-                    reader.nextName(); // name record
-                    reader.nextString(); // name
-                    reader.nextName(); // primaryGroup record
-                    reader.nextString(); // primaryGroup
-                    reader.nextName(); //perms
-                    reader.beginObject();
-                    while (reader.hasNext()) {
-                        String node = reader.nextName();
-                        boolean b = reader.nextBoolean();
-                        nodes.put(node, b);
-                    }
+                Set<NodeDataHolder> nodes = new HashSet<>();
 
-                    reader.endObject();
-                    reader.endObject();
+                readObjectFromFile(file, object -> {
+                    nodes.addAll(deserializePermissions(object.get("permissions").getAsJsonArray()));
                     return true;
                 });
 
-                for (Map.Entry<String, Boolean> e : nodes.entrySet()) {
-                    Node node = NodeFactory.fromSerialisedNode(e.getKey(), e.getValue());
-                    if (!node.getPermission().equalsIgnoreCase(permission)) {
+                for (NodeDataHolder e : nodes) {
+                    if (!e.getPermission().equalsIgnoreCase(permission)) {
                         continue;
                     }
 
-                    held.add(NodeHeldPermission.of(holder, node));
+                    held.add(NodeHeldPermission.of(holder, e));
                 }
             }
             return true;
@@ -332,22 +252,10 @@ public class JSONBacking extends FlatfileBacking {
                 registerFileAction("groups", groupFile);
 
                 if (groupFile.exists()) {
-                    return fileToReader(groupFile, reader -> {
-                        reader.beginObject();
-                        reader.nextName(); // name record
-                        reader.nextString(); // name
-                        reader.nextName(); //perms
-                        reader.beginObject();
-                        Map<String, Boolean> map = new HashMap<>();
-                        while (reader.hasNext()) {
-                            String node = reader.nextName();
-                            boolean b = reader.nextBoolean();
-                            map.put(node, b);
-                        }
-                        group.setNodes(map);
-
-                        reader.endObject();
-                        reader.endObject();
+                    return readObjectFromFile(groupFile, object -> {
+                        Set<NodeDataHolder> data = deserializePermissions(object.get("permissions").getAsJsonArray());
+                        Set<Node> nodes = data.stream().map(NodeDataHolder::toNode).collect(Collectors.toSet());
+                        group.setNodes(nodes);
                         return true;
                     });
                 } else {
@@ -358,18 +266,13 @@ public class JSONBacking extends FlatfileBacking {
                         return false;
                     }
 
-                    return fileToWriter(groupFile, writer -> {
-                        writer.beginObject();
-                        writer.name("name").value(group.getName());
-                        writer.name("perms");
-                        writer.beginObject();
-                        for (Map.Entry<String, Boolean> e : exportToLegacy(group.getNodes()).entrySet()) {
-                            writer.name(e.getKey()).value(e.getValue().booleanValue());
-                        }
-                        writer.endObject();
-                        writer.endObject();
-                        return true;
-                    });
+                    JsonObject data = new JsonObject();
+                    data.addProperty("name", group.getName());
+
+                    Set<NodeDataHolder> nodes = group.getNodes().stream().map(NodeDataHolder::fromNode).collect(Collectors.toSet());
+                    data.add("permissions", serializePermissions(nodes));
+
+                    return writeElementToFile(groupFile, data);
                 }
             }, false);
         } finally {
@@ -386,44 +289,16 @@ public class JSONBacking extends FlatfileBacking {
                 File groupFile = new File(groupsDir, name + ".json");
                 registerFileAction("groups", groupFile);
 
-                return groupFile.exists() && fileToReader(groupFile, reader -> {
-                    reader.beginObject();
-                    reader.nextName(); // name record
-                    reader.nextString(); // name
-                    reader.nextName(); // perms
-                    reader.beginObject();
-                    Map<String, Boolean> map = new HashMap<>();
-                    while (reader.hasNext()) {
-                        String node = reader.nextName();
-                        boolean b = reader.nextBoolean();
-                        map.put(node, b);
-                    }
-                    group.setNodes(map);
-                    reader.endObject();
-                    reader.endObject();
+                return groupFile.exists() && readObjectFromFile(groupFile, object -> {
+                    Set<NodeDataHolder> data = deserializePermissions(object.get("permissions").getAsJsonArray());
+                    Set<Node> nodes = data.stream().map(NodeDataHolder::toNode).collect(Collectors.toSet());
+                    group.setNodes(nodes);
                     return true;
                 });
             }, false);
         } finally {
             group.getIoLock().unlock();
         }
-    }
-
-    @Override
-    public boolean loadAllGroups() {
-        String[] fileNames = groupsDir.list((dir, name) -> name.endsWith(".json"));
-        if (fileNames == null) return false;
-        List<String> groups = Arrays.stream(fileNames)
-                .map(s -> s.substring(0, s.length() - 5))
-                .collect(Collectors.toList());
-
-        groups.forEach(this::loadGroup);
-
-        GroupManager gm = plugin.getGroupManager();
-        gm.getAll().values().stream()
-                .filter(g -> !groups.contains(g.getName()))
-                .forEach(gm::unload);
-        return true;
     }
 
     @Override
@@ -443,36 +318,11 @@ public class JSONBacking extends FlatfileBacking {
                     }
                 }
 
-                return fileToWriter(groupFile, writer -> {
-                    writer.beginObject();
-                    writer.name("name").value(group.getName());
-                    writer.name("perms");
-                    writer.beginObject();
-                    for (Map.Entry<String, Boolean> e : exportToLegacy(group.getNodes()).entrySet()) {
-                        writer.name(e.getKey()).value(e.getValue().booleanValue());
-                    }
-                    writer.endObject();
-                    writer.endObject();
-                    return true;
-                });
-            }, false);
-        } finally {
-            group.getIoLock().unlock();
-        }
-    }
-
-    @Override
-    public boolean deleteGroup(Group group) {
-        group.getIoLock().lock();
-        try {
-            return call(() -> {
-                File groupFile = new File(groupsDir, group.getName() + ".json");
-                registerFileAction("groups", groupFile);
-
-                if (groupFile.exists()) {
-                    groupFile.delete();
-                }
-                return true;
+                JsonObject data = new JsonObject();
+                data.addProperty("name", group.getName());
+                Set<NodeDataHolder> nodes = group.getNodes().stream().map(NodeDataHolder::fromNode).collect(Collectors.toSet());
+                data.add("permissions", serializePermissions(nodes));
+                return writeElementToFile(groupFile, data);
             }, false);
         } finally {
             group.getIoLock().unlock();
@@ -490,31 +340,18 @@ public class JSONBacking extends FlatfileBacking {
                 registerFileAction("groups", file);
 
                 String holder = file.getName().substring(0, file.getName().length() - 5);
-                Map<String, Boolean> nodes = new HashMap<>();
-                fileToReader(file, reader -> {
-                    reader.beginObject();
-                    reader.nextName(); // name record
-                    reader.nextString(); // name
-                    reader.nextName(); // perms
-                    reader.beginObject();
-                    while (reader.hasNext()) {
-                        String node = reader.nextName();
-                        boolean b = reader.nextBoolean();
-                        nodes.put(node, b);
-                    }
-
-                    reader.endObject();
-                    reader.endObject();
+                Set<NodeDataHolder> nodes = new HashSet<>();
+                readObjectFromFile(file, element -> {
+                    nodes.addAll(deserializePermissions(element.get("permissions").getAsJsonArray()));
                     return true;
                 });
 
-                for (Map.Entry<String, Boolean> e : nodes.entrySet()) {
-                    Node node = NodeFactory.fromSerialisedNode(e.getKey(), e.getValue());
-                    if (!node.getPermission().equalsIgnoreCase(permission)) {
+                for (NodeDataHolder e : nodes) {
+                    if (!e.getPermission().equalsIgnoreCase(permission)) {
                         continue;
                     }
 
-                    held.add(NodeHeldPermission.of(holder, node));
+                    held.add(NodeHeldPermission.of(holder, e));
                 }
             }
             return true;
@@ -532,19 +369,12 @@ public class JSONBacking extends FlatfileBacking {
                 registerFileAction("tracks", trackFile);
 
                 if (trackFile.exists()) {
-                    return fileToReader(trackFile, reader -> {
-                        reader.beginObject();
-                        reader.nextName(); // name record
-                        reader.nextString(); // name
-                        reader.nextName(); // groups record
-                        reader.beginArray();
+                    return readObjectFromFile(trackFile, element -> {
                         List<String> groups = new ArrayList<>();
-                        while (reader.hasNext()) {
-                            groups.add(reader.nextString());
+                        for (JsonElement g : element.get("groups").getAsJsonArray()) {
+                            groups.add(g.getAsString());
                         }
                         track.setGroups(groups);
-                        reader.endArray();
-                        reader.endObject();
                         return true;
                     });
                 } else {
@@ -555,18 +385,15 @@ public class JSONBacking extends FlatfileBacking {
                         return false;
                     }
 
-                    return fileToWriter(trackFile, writer -> {
-                        writer.beginObject();
-                        writer.name("name").value(track.getName());
-                        writer.name("groups");
-                        writer.beginArray();
-                        for (String s : track.getGroups()) {
-                            writer.value(s);
-                        }
-                        writer.endArray();
-                        writer.endObject();
-                        return true;
-                    });
+                    JsonObject data = new JsonObject();
+                    data.addProperty("name", track.getName());
+                    JsonArray groups = new JsonArray();
+                    for (String s : track.getGroups()) {
+                        groups.add(s);
+                    }
+                    data.add("groups", groups);
+
+                    return writeElementToFile(trackFile, data);
                 }
             }, false);
         } finally {
@@ -583,19 +410,12 @@ public class JSONBacking extends FlatfileBacking {
                 File trackFile = new File(tracksDir, name + ".json");
                 registerFileAction("tracks", trackFile);
 
-                return trackFile.exists() && fileToReader(trackFile, reader -> {
-                    reader.beginObject();
-                    reader.nextName(); // name record
-                    reader.nextString(); // name
-                    reader.nextName(); // groups
-                    reader.beginArray();
+                return trackFile.exists() && readObjectFromFile(trackFile, element -> {
                     List<String> groups = new ArrayList<>();
-                    while (reader.hasNext()) {
-                        groups.add(reader.nextString());
+                    for (JsonElement g : element.get("groups").getAsJsonArray()) {
+                        groups.add(g.getAsString());
                     }
                     track.setGroups(groups);
-                    reader.endArray();
-                    reader.endObject();
                     return true;
                 });
 
@@ -603,23 +423,6 @@ public class JSONBacking extends FlatfileBacking {
         } finally {
             track.getIoLock().unlock();
         }
-    }
-
-    @Override
-    public boolean loadAllTracks() {
-        String[] fileNames = tracksDir.list((dir, name) -> name.endsWith(".json"));
-        if (fileNames == null) return false;
-        List<String> tracks = Arrays.stream(fileNames)
-                .map(s -> s.substring(0, s.length() - 5))
-                .collect(Collectors.toList());
-
-        tracks.forEach(this::loadTrack);
-
-        TrackManager tm = plugin.getTrackManager();
-        tm.getAll().values().stream()
-                .filter(t -> !tracks.contains(t.getName()))
-                .forEach(tm::unload);
-        return true;
     }
 
     @Override
@@ -639,39 +442,139 @@ public class JSONBacking extends FlatfileBacking {
                     }
                 }
 
-                return fileToWriter(trackFile, writer -> {
-                    writer.beginObject();
-                    writer.name("name").value(track.getName());
-                    writer.name("groups");
-                    writer.beginArray();
-                    for (String s : track.getGroups()) {
-                        writer.value(s);
-                    }
-                    writer.endArray();
-                    writer.endObject();
-                    return true;
-                });
+                JsonObject data = new JsonObject();
+                data.addProperty("name", track.getName());
+                JsonArray groups = new JsonArray();
+                for (String s : track.getGroups()) {
+                    groups.add(s);
+                }
+                data.add("groups", groups);
+
+                return writeElementToFile(trackFile, data);
             }, false);
         } finally {
             track.getIoLock().unlock();
         }
     }
 
-    @Override
-    public boolean deleteTrack(Track track) {
-        track.getIoLock().lock();
-        try {
-            return call(() -> {
-                File trackFile = new File(tracksDir, track.getName() + ".json");
-                registerFileAction("tracks", trackFile);
+    public static Set<NodeDataHolder> deserializePermissions(JsonArray permissionsSection) {
+        Set<NodeDataHolder> nodes = new HashSet<>();
 
-                if (trackFile.exists()) {
-                    trackFile.delete();
+        for (JsonElement ent : permissionsSection) {
+            if (!ent.isJsonObject()) {
+                continue;
+            }
+
+            JsonObject data = ent.getAsJsonObject();
+            Map.Entry<String, JsonElement> entry = Iterables.getFirst(data.entrySet(), null);
+
+            if (entry == null || !entry.getValue().isJsonObject()) {
+                continue;
+            }
+
+            String permission = entry.getKey();
+            JsonObject attributes = entry.getValue().getAsJsonObject();
+
+            boolean value = true;
+            String server = "global";
+            String world = "global";
+            long expiry = 0L;
+            ImmutableSetMultimap context = ImmutableSetMultimap.of();
+
+            if (attributes.has("value")) {
+                value = attributes.get("value").getAsBoolean();
+            }
+            if (attributes.has("server")) {
+                server = attributes.get("server").getAsString();
+            }
+            if (attributes.has("world")) {
+                world = attributes.get("world").getAsString();
+            }
+            if (attributes.has("expiry")) {
+                expiry = attributes.get("expiry").getAsLong();
+            }
+
+            if (attributes.has("context") && attributes.get("context").isJsonObject()) {
+                JsonObject contexts = attributes.get("context").getAsJsonObject();
+                ImmutableSetMultimap.Builder<String, String> map = ImmutableSetMultimap.builder();
+
+                for (Map.Entry<String, JsonElement> e : contexts.entrySet()) {
+                    JsonElement val = e.getValue();
+                    if (val.isJsonArray()) {
+                        JsonArray vals = val.getAsJsonArray();
+                        for (JsonElement element : vals) {
+                            map.put(e.getKey(), element.getAsString());
+                        }
+                    } else {
+                        map.put(e.getKey(), val.getAsString());
+                    }
                 }
-                return true;
-            }, false);
-        } finally {
-            track.getIoLock().unlock();
+
+                context = map.build();
+            }
+
+            nodes.add(NodeDataHolder.of(permission, value, server, world, expiry, context));
         }
+
+        return nodes;
+    }
+
+    public static JsonArray serializePermissions(Set<NodeDataHolder> nodes) {
+        List<JsonObject> data = new ArrayList<>();
+
+        for (NodeDataHolder node : nodes) {
+            JsonObject attributes = new JsonObject();
+            attributes.addProperty("value", node.isValue());
+
+            if (!node.getServer().equals("global")) {
+                attributes.addProperty("server", node.getServer());
+            }
+
+            if (!node.getWorld().equals("global")) {
+                attributes.addProperty("world", node.getWorld());
+            }
+
+            if (node.getExpiry() != 0L) {
+                attributes.addProperty("expiry", node.getExpiry());
+            }
+
+            if (!node.getContexts().isEmpty()) {
+                JsonObject context = new JsonObject();
+                Map<String, Collection<String>> map = node.getContexts().asMap();
+
+                for (Map.Entry<String, Collection<String>> e : map.entrySet()) {
+                    List<String> vals = new ArrayList<>(e.getValue());
+                    int size = vals.size();
+
+                    if (size == 1) {
+                        context.addProperty(e.getKey(), vals.get(0));;
+                    } else if (size > 1) {
+                        JsonArray arr = new JsonArray();
+                        for (String s : vals) {
+                            arr.add(s);
+                        }
+                        context.add(e.getKey(), arr);
+                    }
+                }
+
+                attributes.add("context", context);
+            }
+
+            JsonObject perm = new JsonObject();
+            perm.add(node.getPermission(), attributes);
+            data.add(perm);
+        }
+
+        data.sort((o1, o2) -> PriorityComparator.get().compareStrings(
+                Iterables.getFirst(o1.entrySet(), null).getKey(),
+                Iterables.getFirst(o2.entrySet(), null).getKey()
+        ));
+
+        JsonArray arr = new JsonArray();
+        for (JsonObject o : data) {
+            arr.add(o);
+        }
+
+        return arr;
     }
 }

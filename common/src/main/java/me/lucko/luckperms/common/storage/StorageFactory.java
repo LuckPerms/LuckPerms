@@ -132,9 +132,9 @@ public class StorageFactory {
             case MONGODB:
                 return new MongoDBBacking(plugin, plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES));
             case YAML:
-                return new YAMLBacking(plugin, plugin.getDataDirectory());
+                return new YAMLBacking(plugin, plugin.getDataDirectory(), "yaml-storage");
             default:
-                return new JSONBacking(plugin, plugin.getDataDirectory());
+                return new JSONBacking(plugin, plugin.getDataDirectory(), "json-storage");
         }
     }
 }
