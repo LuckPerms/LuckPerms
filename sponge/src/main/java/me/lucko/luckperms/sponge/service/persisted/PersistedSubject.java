@@ -41,6 +41,7 @@ import me.lucko.luckperms.sponge.service.calculated.PermissionLookup;
 import me.lucko.luckperms.sponge.service.proxy.LPSubject;
 import me.lucko.luckperms.sponge.service.references.SubjectCollectionReference;
 import me.lucko.luckperms.sponge.service.references.SubjectReference;
+import me.lucko.luckperms.sponge.service.storage.SubjectStorageModel;
 import me.lucko.luckperms.sponge.timings.LPTiming;
 
 import org.spongepowered.api.command.CommandSource;
@@ -130,9 +131,9 @@ public class PersistedSubject implements LPSubject {
         this.optionLookupCache.cleanUp();
     }
 
-    public void loadData(SubjectDataHolder dataHolder) {
+    public void loadData(SubjectStorageModel dataHolder) {
         subjectData.setSave(false);
-        dataHolder.copyTo(subjectData);
+        dataHolder.applyToData(subjectData);
         subjectData.setSave(true);
     }
 

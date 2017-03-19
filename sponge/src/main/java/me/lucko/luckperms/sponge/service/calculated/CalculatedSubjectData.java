@@ -47,6 +47,7 @@ import me.lucko.luckperms.sponge.service.references.SubjectReference;
 
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -133,29 +134,29 @@ public class CalculatedSubjectData implements LPSubjectData {
         return permissionCache.getUnchecked(contexts).getCalculator().getPermissionValue(permission);
     }
 
-    public void replacePermissions(Map<ContextSet, Map<String, Boolean>> map) {
+    public void replacePermissions(Map<ImmutableContextSet, Map<String, Boolean>> map) {
         permissions.clear();
-        for (Map.Entry<ContextSet, Map<String, Boolean>> e : map.entrySet()) {
-            permissions.put(e.getKey().makeImmutable(), new ConcurrentHashMap<>(e.getValue()));
+        for (Map.Entry<ImmutableContextSet, Map<String, Boolean>> e : map.entrySet()) {
+            permissions.put(e.getKey(), new ConcurrentHashMap<>(e.getValue()));
         }
         permissionCache.invalidateAll();
         service.invalidatePermissionCaches();
     }
 
-    public void replaceParents(Map<ContextSet, Set<SubjectReference>> map) {
+    public void replaceParents(Map<ImmutableContextSet, List<SubjectReference>> map) {
         parents.clear();
-        for (Map.Entry<ContextSet, Set<SubjectReference>> e : map.entrySet()) {
+        for (Map.Entry<ImmutableContextSet, List<SubjectReference>> e : map.entrySet()) {
             Set<SubjectReference> set = ConcurrentHashMap.newKeySet();
             set.addAll(e.getValue());
-            parents.put(e.getKey().makeImmutable(), set);
+            parents.put(e.getKey(), set);
         }
         service.invalidateParentCaches();
     }
 
-    public void replaceOptions(Map<ContextSet, Map<String, String>> map) {
+    public void replaceOptions(Map<ImmutableContextSet, Map<String, String>> map) {
         options.clear();
-        for (Map.Entry<ContextSet, Map<String, String>> e : map.entrySet()) {
-            options.put(e.getKey().makeImmutable(), new ConcurrentHashMap<>(e.getValue()));
+        for (Map.Entry<ImmutableContextSet, Map<String, String>> e : map.entrySet()) {
+            options.put(e.getKey(), new ConcurrentHashMap<>(e.getValue()));
         }
         service.invalidateOptionCaches();
     }
@@ -224,6 +225,14 @@ public class CalculatedSubjectData implements LPSubjectData {
         ImmutableMap.Builder<ImmutableContextSet, Set<SubjectReference>> map = ImmutableMap.builder();
         for (Map.Entry<ContextSet, Set<SubjectReference>> e : parents.entrySet()) {
             map.put(e.getKey().makeImmutable(), ImmutableSet.copyOf(e.getValue()));
+        }
+        return map.build();
+    }
+
+    public Map<ImmutableContextSet, List<SubjectReference>> getParentsAsList() {
+        ImmutableMap.Builder<ImmutableContextSet, List<SubjectReference>> map = ImmutableMap.builder();
+        for (Map.Entry<ContextSet, Set<SubjectReference>> e : parents.entrySet()) {
+            map.put(e.getKey().makeImmutable(), ImmutableList.copyOf(e.getValue()));
         }
         return map.build();
     }

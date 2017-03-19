@@ -20,17 +20,24 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.persisted;
+package me.lucko.luckperms.sponge.service.storage;
+
+import lombok.Getter;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.io.Files;
+import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 
+import me.lucko.luckperms.sponge.service.persisted.PersistedSubject;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.AbstractMap;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,11 +48,14 @@ import java.util.stream.Collectors;
  * Handles persisted Subject I/O and (de)serialization
  */
 public class SubjectStorage {
+
+    @Getter
     private final Gson gson;
+
     private final File container;
 
     public SubjectStorage(File container) {
-        this.gson = new GsonBuilder().setPrettyPrinting().enableComplexMapKeySerialization().create();
+        this.gson = new GsonBuilder().setPrettyPrinting().create();
         this.container = container;
         checkContainer();
     }
@@ -65,32 +75,35 @@ public class SubjectStorage {
         return ImmutableSet.copyOf(dirs).stream().map(File::getName).collect(Collectors.toSet());
     }
 
-    public void saveToFile(PersistedSubject subject) throws IOException {
+    public File resolveFile(String collectionName, String subjectName) {
         checkContainer();
-        File collection = new File(container, subject.getContainingCollection().getIdentifier());
+        File collection = new File(container, collectionName);
         if (!collection.exists()) {
             collection.mkdirs();
         }
 
-        File subjectFile = new File(collection, subject.getIdentifier() + ".json");
-        saveToFile(subject, subjectFile);
+        return new File(collection, subjectName + ".json");
     }
 
-    public void saveToFile(PersistedSubject subject, File file) throws IOException {
+    public void saveToFile(PersistedSubject subject) throws IOException {
+        File subjectFile = resolveFile(subject.getContainingCollection().getIdentifier(), subject.getIdentifier());
+        saveToFile(new SubjectStorageModel(subject.getSubjectData()), subjectFile);
+    }
+
+    public void saveToFile(SubjectStorageModel model, File file) throws IOException {
         file.getParentFile().mkdirs();
         if (file.exists()) {
             file.delete();
         }
         file.createNewFile();
 
-        Files.write(saveToString(new SubjectDataHolder(subject.getSubjectData())), file, Charset.defaultCharset());
+        try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
+            gson.toJson(model.toJson(), writer);
+            writer.flush();
+        }
     }
 
-    public String saveToString(SubjectDataHolder subject) {
-        return gson.toJson(subject);
-    }
-
-    public Map<String, SubjectDataHolder> loadAllFromFile(String collectionName) {
+    public Map<String, SubjectStorageModel> loadAllFromFile(String collectionName) {
         checkContainer();
         File collection = new File(container, collectionName);
         if (!collection.exists()) {
@@ -100,12 +113,12 @@ public class SubjectStorage {
         String[] fileNames = collection.list((dir, name) -> name.endsWith(".json"));
         if (fileNames == null) return Collections.emptyMap();
 
-        Map<String, SubjectDataHolder> holders = new HashMap<>();
+        Map<String, SubjectStorageModel> holders = new HashMap<>();
         for (String name : fileNames) {
             File subject = new File(collection, name);
 
             try {
-                Map.Entry<String, SubjectDataHolder> s = loadFromFile(subject);
+                Map.Entry<String, SubjectStorageModel> s = loadFromFile(subject);
                 if (s != null) {
                     holders.put(s.getKey(), s.getValue());
                 }
@@ -117,7 +130,7 @@ public class SubjectStorage {
         return holders;
     }
 
-    public Map.Entry<String, SubjectDataHolder> loadFromFile(String collectionName, String subjectName) throws IOException {
+    public Map.Entry<String, SubjectStorageModel> loadFromFile(String collectionName, String subjectName) throws IOException {
         checkContainer();
         File collection = new File(container, collectionName);
         if (!collection.exists()) {
@@ -125,20 +138,21 @@ public class SubjectStorage {
         }
 
         File subject = new File(collection, subjectName + ".json");
-        return new AbstractMap.SimpleEntry<>(subjectName, loadFromFile(subject).getValue());
+        return Maps.immutableEntry(subjectName, loadFromFile(subject).getValue());
     }
 
-    public Map.Entry<String, SubjectDataHolder> loadFromFile(File file) throws IOException {
+    public Map.Entry<String, SubjectStorageModel> loadFromFile(File file) throws IOException {
         if (!file.exists()) {
             return null;
         }
 
-        String s = Files.toString(file, Charset.defaultCharset());
-        return new AbstractMap.SimpleEntry<>(file.getName().substring(0, file.getName().length() - 5), loadFromString(s));
-    }
+        String subjectName = file.getName().substring(0, file.getName().length() - ".json".length());
 
-    public SubjectDataHolder loadFromString(String s) {
-        return gson.fromJson(s, SubjectDataHolder.class);
+        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
+            JsonObject data = gson.fromJson(reader, JsonObject.class);
+            SubjectStorageModel model = new SubjectStorageModel(data);
+            return Maps.immutableEntry(subjectName, model);
+        }
     }
 
 }

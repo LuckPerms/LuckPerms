@@ -30,6 +30,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.Node;
@@ -547,11 +548,11 @@ public class JSONBacking extends FlatfileBacking {
                     int size = vals.size();
 
                     if (size == 1) {
-                        context.addProperty(e.getKey(), vals.get(0));;
+                        context.addProperty(e.getKey(), vals.get(0));
                     } else if (size > 1) {
                         JsonArray arr = new JsonArray();
                         for (String s : vals) {
-                            arr.add(s);
+                            arr.add(new JsonPrimitive(s));
                         }
                         context.add(e.getKey(), arr);
                     }

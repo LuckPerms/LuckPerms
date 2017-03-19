@@ -39,6 +39,7 @@ import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.proxy.LPSubject;
 import me.lucko.luckperms.sponge.service.proxy.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.references.SubjectReference;
+import me.lucko.luckperms.sponge.service.storage.SubjectStorageModel;
 
 import java.util.Collection;
 import java.util.Map;
@@ -63,8 +64,8 @@ public class PersistedCollection implements LPSubjectCollection {
             });
 
     public void loadAll() {
-        Map<String, SubjectDataHolder> holders = service.getStorage().loadAllFromFile(identifier);
-        for (Map.Entry<String, SubjectDataHolder> e : holders.entrySet()) {
+        Map<String, SubjectStorageModel> holders = service.getStorage().loadAllFromFile(identifier);
+        for (Map.Entry<String, SubjectStorageModel> e : holders.entrySet()) {
             PersistedSubject subject = get(e.getKey());
             subject.loadData(e.getValue());
         }

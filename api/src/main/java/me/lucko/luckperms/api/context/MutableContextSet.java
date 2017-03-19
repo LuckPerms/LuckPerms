@@ -25,6 +25,7 @@ package me.lucko.luckperms.api.context;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
@@ -179,7 +180,7 @@ public final class MutableContextSet implements ContextSet {
 
     @Override
     public Multimap<String, String> toMultimap() {
-        return map;
+        return ImmutableSetMultimap.copyOf(map);
     }
 
     @Override

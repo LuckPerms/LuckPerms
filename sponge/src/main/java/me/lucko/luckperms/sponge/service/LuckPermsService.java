@@ -57,12 +57,13 @@ import me.lucko.luckperms.sponge.model.SpongeGroup;
 import me.lucko.luckperms.sponge.service.calculated.CalculatedSubjectData;
 import me.lucko.luckperms.sponge.service.calculated.OptionLookup;
 import me.lucko.luckperms.sponge.service.calculated.PermissionLookup;
+import me.lucko.luckperms.sponge.service.legacystorage.LegacyDataMigrator;
 import me.lucko.luckperms.sponge.service.persisted.PersistedCollection;
-import me.lucko.luckperms.sponge.service.persisted.SubjectStorage;
 import me.lucko.luckperms.sponge.service.proxy.LPSubject;
 import me.lucko.luckperms.sponge.service.proxy.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.proxy.LPSubjectData;
 import me.lucko.luckperms.sponge.service.references.SubjectReference;
+import me.lucko.luckperms.sponge.service.storage.SubjectStorage;
 import me.lucko.luckperms.sponge.timings.LPTiming;
 
 import org.spongepowered.api.plugin.PluginContainer;
@@ -129,7 +130,8 @@ public class LuckPermsService implements PermissionService {
         localOptionCaches = Collections.newSetFromMap(new MapMaker().weakKeys().makeMap());
         localDataCaches = Collections.newSetFromMap(new MapMaker().weakKeys().makeMap());
 
-        storage = new SubjectStorage(new File(plugin.getDataDirectory(), "local"));
+        storage = new SubjectStorage(new File(plugin.getDataDirectory(), "sponge-data"));
+        new LegacyDataMigrator(plugin, new File(plugin.getDataDirectory(), "local"), storage).run();
 
         userSubjects = plugin.getUserManager();
         fallbackUserSubjects = new PersistedCollection(this, "fallback-users", true);
