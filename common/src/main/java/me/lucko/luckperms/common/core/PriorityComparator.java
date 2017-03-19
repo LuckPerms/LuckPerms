@@ -101,6 +101,10 @@ public class PriorityComparator implements Comparator<LocalizedNode> {
     }
 
     public int compareStrings(String o1, String o2) {
+        if (o1.equals(o2)) {
+            return 1;
+        }
+
         try {
             CollationKey o1c = collationKeyCache.get(o1);
             CollationKey o2c = collationKeyCache.get(o2);

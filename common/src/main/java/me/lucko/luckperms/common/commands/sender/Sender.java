@@ -85,4 +85,11 @@ public interface Sender {
      */
     boolean isConsole();
 
+    /**
+     * Gets whether this sender is an import process
+     *
+     * @return if the sender is an import process
+     */
+    boolean isImport();
+
 }

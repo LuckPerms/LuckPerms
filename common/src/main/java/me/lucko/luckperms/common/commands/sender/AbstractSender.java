@@ -93,4 +93,9 @@ public class AbstractSender<T> implements Sender {
         return this.uuid.equals(Constants.CONSOLE_UUID) || this.uuid.equals(Constants.IMPORT_UUID);
     }
 
+    @Override
+    public boolean isImport() {
+        return this.uuid.equals(Constants.IMPORT_UUID);
+    }
+
 }

@@ -213,6 +213,11 @@ public class Importer implements Runnable {
         public boolean isConsole() {
             return true;
         }
+
+        @Override
+        public boolean isImport() {
+            return true;
+        }
     }
 
     @Getter

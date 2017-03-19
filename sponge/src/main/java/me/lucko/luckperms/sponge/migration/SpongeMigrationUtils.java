@@ -68,28 +68,24 @@ public class SpongeMigrationUtils {
         }
 
         // Migrate options
-        try {
-            Map<Set<Context>, Map<String, String>> opts = subject.getSubjectData().getAllOptions();
-            for (Map.Entry<Set<Context>, Map<String, String>> e : opts.entrySet()) {
-                ContextSet context = Util.convertContexts(e.getKey());
+        Map<Set<Context>, Map<String, String>> opts = subject.getSubjectData().getAllOptions();
+        for (Map.Entry<Set<Context>, Map<String, String>> e : opts.entrySet()) {
+            ContextSet context = Util.convertContexts(e.getKey());
 
-                ExtractedContexts extractedContexts = ExtractedContexts.generate(context);
-                ContextSet contexts = extractedContexts.getContextSet();
-                String server = extractedContexts.getServer();
-                String world = extractedContexts.getWorld();
+            ExtractedContexts extractedContexts = ExtractedContexts.generate(context);
+            ContextSet contexts = extractedContexts.getContextSet();
+            String server = extractedContexts.getServer();
+            String world = extractedContexts.getWorld();
 
-                for (Map.Entry<String, String> opt : e.getValue().entrySet()) {
-                    if (opt.getKey().equalsIgnoreCase("prefix")) {
-                        holder.setPermissionUnchecked(NodeFactory.makePrefixNode(priority, opt.getValue()).setServer(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
-                    } else if (opt.getKey().equalsIgnoreCase("suffix")) {
-                        holder.setPermissionUnchecked(NodeFactory.makeSuffixNode(priority, opt.getValue()).setServer(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
-                    } else {
-                        holder.setPermissionUnchecked(NodeFactory.makeMetaNode(opt.getKey(), opt.getValue()).setServer(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
-                    }
+            for (Map.Entry<String, String> opt : e.getValue().entrySet()) {
+                if (opt.getKey().equalsIgnoreCase("prefix")) {
+                    holder.setPermissionUnchecked(NodeFactory.makePrefixNode(priority, opt.getValue()).setServer(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
+                } else if (opt.getKey().equalsIgnoreCase("suffix")) {
+                    holder.setPermissionUnchecked(NodeFactory.makeSuffixNode(priority, opt.getValue()).setServer(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
+                } else {
+                    holder.setPermissionUnchecked(NodeFactory.makeMetaNode(opt.getKey(), opt.getValue()).setServer(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
                 }
             }
-        } catch (Throwable ignored) {
-            // Ignore. This is just so older versions of Sponge API can be used.
         }
 
         // Migrate parents
