@@ -28,9 +28,9 @@ import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.debug.DebugListener;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.common.verbose.VerboseListener;
 
 import io.github.mkremins.fanciful.ChatColor;
 import io.github.mkremins.fanciful.FancyMessage;
@@ -66,14 +66,14 @@ public class VerboseCommand extends SingleCommand {
 
             String filter = filters.isEmpty() ? "" : filters.stream().collect(Collectors.joining(" "));
 
-            if (!DebugListener.isValidFilter(filter)) {
+            if (!VerboseListener.isValidFilter(filter)) {
                 Message.VERBOSE_INVALID_FILTER.send(sender, filter);
                 return CommandResult.FAILURE;
             }
 
             boolean notify = !mode.equals("record");
 
-            plugin.getDebugHandler().register(sender, filter, notify);
+            plugin.getVerboseHandler().register(sender, filter, notify);
 
             if (notify) {
                 if (!filter.equals("")) {
@@ -93,7 +93,7 @@ public class VerboseCommand extends SingleCommand {
         }
 
         if (mode.equals("off") || mode.equals("false") || mode.equals("paste")) {
-            DebugListener listener = plugin.getDebugHandler().unregister(sender.getUuid());
+            VerboseListener listener = plugin.getVerboseHandler().unregister(sender.getUuid());
 
             if (mode.equals("paste")) {
                 if (listener == null) {

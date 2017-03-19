@@ -49,7 +49,6 @@ import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.contexts.ServerCalculator;
 import me.lucko.luckperms.common.core.UuidCache;
 import me.lucko.luckperms.common.core.model.User;
-import me.lucko.luckperms.common.debug.DebugHandler;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.NoopLocaleManager;
@@ -73,6 +72,7 @@ import me.lucko.luckperms.common.treeview.PermissionVault;
 import me.lucko.luckperms.common.utils.BufferedRequest;
 import me.lucko.luckperms.common.utils.FileWatcher;
 import me.lucko.luckperms.common.utils.LoggerImpl;
+import me.lucko.luckperms.common.verbose.VerboseHandler;
 
 import org.bukkit.World;
 import org.bukkit.command.PluginCommand;
@@ -122,7 +122,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private CalculatorFactory calculatorFactory;
     private BufferedRequest<Void> updateTaskBuffer;
     private boolean started = false;
-    private DebugHandler debugHandler;
+    private VerboseHandler verboseHandler;
     private BukkitSenderFactory senderFactory;
     private PermissionVault permissionVault;
 
@@ -136,7 +136,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         LuckPermsPlugin.sendStartupBanner(getConsoleSender(), this);
 
         ignoringLogs = ConcurrentHashMap.newKeySet();
-        debugHandler = new DebugHandler(scheduler.getAsyncBukkitExecutor(), getVersion());
+        verboseHandler = new VerboseHandler(scheduler.getAsyncBukkitExecutor(), getVersion());
         permissionVault = new PermissionVault(scheduler.getAsyncBukkitExecutor());
 
         getLog().info("Loading configuration...");
@@ -325,7 +325,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
         defaultsProvider.close();
         permissionVault.setShutdown(true);
-        debugHandler.setShutdown(true);
+        verboseHandler.setShutdown(true);
 
         for (Player player : getServer().getOnlinePlayers()) {
             Injector.unInject(player, false, false);
@@ -388,7 +388,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         worldCalculator = null;
         calculatorFactory = null;
         updateTaskBuffer = null;
-        debugHandler = null;
+        verboseHandler = null;
         senderFactory = null;
         permissionVault = null;
     }

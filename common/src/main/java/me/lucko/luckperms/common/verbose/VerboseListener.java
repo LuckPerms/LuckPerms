@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.debug;
+package me.lucko.luckperms.common.verbose;
 
 import lombok.RequiredArgsConstructor;
 
@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 import javax.script.ScriptEngine;
 
 @RequiredArgsConstructor
-public class DebugListener {
+public class VerboseListener {
     private static final int DATA_TRUNCATION = 700;
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
 

@@ -42,7 +42,6 @@ import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.contexts.ServerCalculator;
 import me.lucko.luckperms.common.core.UuidCache;
 import me.lucko.luckperms.common.core.model.User;
-import me.lucko.luckperms.common.debug.DebugHandler;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.NoopLocaleManager;
@@ -63,6 +62,7 @@ import me.lucko.luckperms.common.treeview.PermissionVault;
 import me.lucko.luckperms.common.utils.BufferedRequest;
 import me.lucko.luckperms.common.utils.FileWatcher;
 import me.lucko.luckperms.common.utils.LoggerImpl;
+import me.lucko.luckperms.common.verbose.VerboseHandler;
 import me.lucko.luckperms.sponge.commands.SpongeMainCommand;
 import me.lucko.luckperms.sponge.contexts.WorldCalculator;
 import me.lucko.luckperms.sponge.managers.SpongeGroupManager;
@@ -158,7 +158,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     private ContextManager<Subject> contextManager;
     private CalculatorFactory calculatorFactory;
     private BufferedRequest<Void> updateTaskBuffer;
-    private DebugHandler debugHandler;
+    private VerboseHandler verboseHandler;
     private SpongeSenderFactory senderFactory;
     private PermissionVault permissionVault;
 
@@ -169,7 +169,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         senderFactory = new SpongeSenderFactory(this);
         log = new LoggerImpl(getConsoleSender());
         LuckPermsPlugin.sendStartupBanner(getConsoleSender(), this);
-        debugHandler = new DebugHandler(scheduler.getAsyncExecutor(), getVersion());
+        verboseHandler = new VerboseHandler(scheduler.getAsyncExecutor(), getVersion());
         permissionVault = new PermissionVault(scheduler.getAsyncExecutor());
         timings = new LPTimings(this);
 

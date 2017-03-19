@@ -41,7 +41,6 @@ import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.contexts.ServerCalculator;
 import me.lucko.luckperms.common.core.UuidCache;
 import me.lucko.luckperms.common.core.model.User;
-import me.lucko.luckperms.common.debug.DebugHandler;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.NoopLocaleManager;
@@ -66,6 +65,7 @@ import me.lucko.luckperms.common.treeview.PermissionVault;
 import me.lucko.luckperms.common.utils.BufferedRequest;
 import me.lucko.luckperms.common.utils.FileWatcher;
 import me.lucko.luckperms.common.utils.LoggerImpl;
+import me.lucko.luckperms.common.verbose.VerboseHandler;
 
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -99,7 +99,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     private ContextManager<ProxiedPlayer> contextManager;
     private CalculatorFactory calculatorFactory;
     private BufferedRequest<Void> updateTaskBuffer;
-    private DebugHandler debugHandler;
+    private VerboseHandler verboseHandler;
     private BungeeSenderFactory senderFactory;
     private PermissionVault permissionVault;
 
@@ -110,7 +110,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         senderFactory = new BungeeSenderFactory(this);
         log = new LoggerImpl(getConsoleSender());
         LuckPermsPlugin.sendStartupBanner(getConsoleSender(), this);
-        debugHandler = new DebugHandler(scheduler.getAsyncExecutor(), getVersion());
+        verboseHandler = new VerboseHandler(scheduler.getAsyncExecutor(), getVersion());
         permissionVault = new PermissionVault(scheduler.getAsyncExecutor());
 
         getLog().info("Loading configuration...");

@@ -37,7 +37,6 @@ import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.core.UuidCache;
 import me.lucko.luckperms.common.core.model.User;
-import me.lucko.luckperms.common.debug.DebugHandler;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.managers.TrackManager;
@@ -47,6 +46,7 @@ import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.treeview.PermissionVault;
 import me.lucko.luckperms.common.utils.BufferedRequest;
 import me.lucko.luckperms.common.utils.FileWatcher;
+import me.lucko.luckperms.common.verbose.VerboseHandler;
 
 import java.io.File;
 import java.io.InputStream;
@@ -168,7 +168,7 @@ public interface LuckPermsPlugin {
      *
      * @return the debug handler instance
      */
-    DebugHandler getDebugHandler();
+    VerboseHandler getVerboseHandler();
 
     /**
      * Gets the permission caching instance for the platform.

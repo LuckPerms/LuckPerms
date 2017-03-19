@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.debug;
+package me.lucko.luckperms.common.verbose;
 
 import lombok.Setter;
 
@@ -34,17 +34,17 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
 
-public class DebugHandler implements Runnable {
+public class VerboseHandler implements Runnable {
     private final String pluginVersion;
 
-    private final Map<UUID, DebugListener> listeners;
+    private final Map<UUID, VerboseListener> listeners;
     private final Queue<CheckData> queue;
     private boolean listening = false;
 
     @Setter
     private boolean shutdown = false;
 
-    public DebugHandler(Executor executor, String pluginVersion) {
+    public VerboseHandler(Executor executor, String pluginVersion) {
         this.pluginVersion = "v" + pluginVersion;
         listeners = new ConcurrentHashMap<>();
         queue = new ConcurrentLinkedQueue<>();
@@ -62,12 +62,12 @@ public class DebugHandler implements Runnable {
 
     public void register(Sender sender, String filter, boolean notify) {
         listening = true;
-        listeners.put(sender.getUuid(), new DebugListener(pluginVersion, sender, filter, notify));
+        listeners.put(sender.getUuid(), new VerboseListener(pluginVersion, sender, filter, notify));
     }
 
-    public DebugListener unregister(UUID uuid) {
+    public VerboseListener unregister(UUID uuid) {
         flush();
-        DebugListener ret = listeners.remove(uuid);
+        VerboseListener ret = listeners.remove(uuid);
         if (listeners.isEmpty()) {
             listening = false;
         }
@@ -91,7 +91,7 @@ public class DebugHandler implements Runnable {
 
     public synchronized void flush() {
         for (CheckData e; (e = queue.poll()) != null; ) {
-            for (DebugListener listener : listeners.values()) {
+            for (VerboseListener listener : listeners.values()) {
                 listener.acceptData(e);
             }
         }
