@@ -30,6 +30,7 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.messaging.NoopMessagingService;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -66,7 +67,7 @@ public class InfoCommand extends SingleCommand {
                 plugin.getStorage().getName(),
                 c.get(ConfigKeys.SERVER),
                 c.get(ConfigKeys.SYNC_TIME),
-                plugin.getMessagingService() == null ? "None" : plugin.getMessagingService().getName(),
+                plugin.getMessagingService() instanceof NoopMessagingService ? "None" : plugin.getMessagingService().getName(),
                 plugin.getPlayerCount(),
                 plugin.getUserManager().getAll().size(),
                 plugin.getGroupManager().getAll().size(),

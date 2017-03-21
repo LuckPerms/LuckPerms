@@ -22,28 +22,27 @@
 
 package me.lucko.luckperms.common.messaging;
 
-import me.lucko.luckperms.api.MessagingService;
 import me.lucko.luckperms.common.utils.BufferedRequest;
 
-public interface InternalMessagingService extends MessagingService {
+public class NoopMessagingService implements InternalMessagingService {
 
-    /**
-     * Gets the name of this messaging service
-     *
-     * @return the name of this messaging service
-     */
-    String getName();
+    @Override
+    public String getName() {
+        return "No op";
+    }
 
-    /**
-     * Closes the messaging service
-     */
-    void close();
+    @Override
+    public void close() {
 
-    /**
-     * Gets the buffer for sending updates to other servers
-     *
-     * @return the update buffer
-     */
-    BufferedRequest<Void> getUpdateBuffer();
+    }
 
+    @Override
+    public BufferedRequest<Void> getUpdateBuffer() {
+        return null;
+    }
+
+    @Override
+    public void pushUpdate() {
+
+    }
 }

@@ -180,6 +180,7 @@ public class ConfigKeys {
                 .build();
     }));
     public static final ConfigKey<String> MESSAGING_SERVICE = EnduringKey.wrap(StringKey.of("messaging-service", "none"));
+    public static final ConfigKey<Boolean> AUTO_PUSH_UPDATES = EnduringKey.wrap(BooleanKey.of("auto-push-updates", true));
     public static final ConfigKey<Boolean> REDIS_ENABLED = EnduringKey.wrap(BooleanKey.of("redis.enabled", false));
     public static final ConfigKey<String> REDIS_ADDRESS = EnduringKey.wrap(StringKey.of("redis.address", null));
     public static final ConfigKey<String> REDIS_PASSWORD = EnduringKey.wrap(StringKey.of("redis.password", ""));

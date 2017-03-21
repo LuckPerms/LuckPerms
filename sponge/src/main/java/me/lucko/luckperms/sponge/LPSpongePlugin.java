@@ -49,6 +49,7 @@ import me.lucko.luckperms.common.locale.SimpleLocaleManager;
 import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.managers.impl.GenericTrackManager;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
+import me.lucko.luckperms.common.messaging.NoopMessagingService;
 import me.lucko.luckperms.common.messaging.RedisMessaging;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.LuckPermsScheduler;
@@ -220,6 +221,10 @@ public class LPSpongePlugin implements LuckPermsPlugin {
             messagingService = bungeeMessaging;
         } else if (!messagingType.equals("none")) {
             getLog().warn("Messaging service '" + messagingType + "' not recognised.");
+        }
+
+        if (messagingService == null) {
+            messagingService = new NoopMessagingService();
         }
 
         // setup the update task buffer

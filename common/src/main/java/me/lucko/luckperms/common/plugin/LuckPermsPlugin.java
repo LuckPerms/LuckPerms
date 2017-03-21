@@ -100,7 +100,7 @@ public interface LuckPermsPlugin {
     Storage getStorage();
 
     /**
-     * Gets the redis messaging instance if present. Could return null if redis is not enabled.
+     * Gets the redis messaging instance.
      *
      * @return the redis messaging service
      */

@@ -28,6 +28,7 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
+import me.lucko.luckperms.common.messaging.NoopMessagingService;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -47,7 +48,7 @@ public class NetworkSyncCommand extends SingleCommand {
 
         InternalMessagingService messagingService = plugin.getMessagingService();
 
-        if (messagingService == null) {
+        if (messagingService instanceof NoopMessagingService) {
             Message.UPDATE_TASK_PUSH_FAILURE_NOT_SETUP.send(sender);
             return CommandResult.FAILURE;
         }

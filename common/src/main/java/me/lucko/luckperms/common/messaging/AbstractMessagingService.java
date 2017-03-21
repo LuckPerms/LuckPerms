@@ -26,6 +26,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.utils.BufferedRequest;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -40,12 +41,22 @@ import java.util.function.Consumer;
 public abstract class AbstractMessagingService implements InternalMessagingService {
     public static final String CHANNEL = "lpuc";
 
+    @Getter
     private final LuckPermsPlugin plugin;
 
     @Getter
     private final String name;
 
     private final Set<UUID> receivedMsgs = Collections.synchronizedSet(new HashSet<>());
+
+    @Getter
+    private final BufferedRequest<Void> updateBuffer = new BufferedRequest<Void>(10000L, r -> getPlugin().doAsync(r)) {
+        @Override
+        protected Void perform() {
+            pushUpdate();
+            return null;
+        }
+    };
 
     protected abstract void sendMessage(String channel, String message);
 

@@ -29,11 +29,14 @@ import com.google.common.base.Splitter;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.messaging.InternalMessagingService;
+import me.lucko.luckperms.common.messaging.NoopMessagingService;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.treeview.PermissionVault;
 import me.lucko.luckperms.common.treeview.TreeNode;
@@ -174,6 +177,11 @@ public abstract class SubCommand<T> extends Command<T, Void> {
             user.getRefreshBuffer().requestDirectly();
         }
 
+        InternalMessagingService messagingService = plugin.getMessagingService();
+        if (!sender.isImport() && !(messagingService instanceof NoopMessagingService) && plugin.getConfiguration().get(ConfigKeys.AUTO_PUSH_UPDATES)) {
+            messagingService.getUpdateBuffer().request();
+        }
+
         if (success) {
             Message.USER_SAVE_SUCCESS.send(sender);
         } else {
@@ -190,6 +198,11 @@ public abstract class SubCommand<T> extends Command<T, Void> {
             plugin.getUpdateTaskBuffer().requestDirectly();
         }
 
+        InternalMessagingService messagingService = plugin.getMessagingService();
+        if (!sender.isImport() && !(messagingService instanceof NoopMessagingService) && plugin.getConfiguration().get(ConfigKeys.AUTO_PUSH_UPDATES)) {
+            messagingService.getUpdateBuffer().request();
+        }
+
         if (success) {
             Message.GROUP_SAVE_SUCCESS.send(sender);
         } else {
@@ -204,6 +217,11 @@ public abstract class SubCommand<T> extends Command<T, Void> {
             plugin.getUpdateTaskBuffer().request();
         } else {
             plugin.getUpdateTaskBuffer().requestDirectly();
+        }
+
+        InternalMessagingService messagingService = plugin.getMessagingService();
+        if (!sender.isImport() && !(messagingService instanceof NoopMessagingService) && plugin.getConfiguration().get(ConfigKeys.AUTO_PUSH_UPDATES)) {
+            messagingService.getUpdateBuffer().request();
         }
 
         if (success) {

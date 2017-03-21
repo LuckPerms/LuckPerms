@@ -60,6 +60,7 @@ import me.lucko.luckperms.common.managers.impl.GenericGroupManager;
 import me.lucko.luckperms.common.managers.impl.GenericTrackManager;
 import me.lucko.luckperms.common.managers.impl.GenericUserManager;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
+import me.lucko.luckperms.common.messaging.NoopMessagingService;
 import me.lucko.luckperms.common.messaging.RedisMessaging;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.Storage;
@@ -215,6 +216,10 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
             }
         } else if (!messagingType.equals("none")) {
             getLog().warn("Messaging service '" + messagingType + "' not recognised.");
+        }
+
+        if (messagingService == null) {
+            messagingService = new NoopMessagingService();
         }
 
         // setup the update task buffer
