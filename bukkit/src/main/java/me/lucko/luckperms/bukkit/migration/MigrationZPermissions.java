@@ -59,7 +59,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) throws CommandException {
-        ProgressLogger log = new ProgressLogger("PermissionManager");
+        ProgressLogger log = new ProgressLogger("zPermissions");
         log.addListener(plugin.getConsoleSender());
         log.addListener(sender);
 
