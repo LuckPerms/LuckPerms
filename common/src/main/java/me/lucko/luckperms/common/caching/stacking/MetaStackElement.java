@@ -23,6 +23,7 @@
 package me.lucko.luckperms.common.caching.stacking;
 
 import me.lucko.luckperms.api.LocalizedNode;
+import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
@@ -44,7 +45,7 @@ public interface MetaStackElement {
      * @param node the node to check
      * @return true if the accumulation should return
      */
-    static boolean checkMetaType(boolean expectingPrefix, LocalizedNode node) {
+    static boolean checkMetaType(boolean expectingPrefix, Node node) {
         if (expectingPrefix) {
             if (!node.isPrefix()) {
                 return true;

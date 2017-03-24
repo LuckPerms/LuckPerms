@@ -83,7 +83,7 @@ public final class EventFactory {
     }
 
     public void handleGroupDelete(Group group, DeletionCause cause) {
-        EventGroupDelete event = new EventGroupDelete(group.getName(), ImmutableSet.copyOf(group.getNodes()), cause);
+        EventGroupDelete event = new EventGroupDelete(group.getName(), ImmutableSet.copyOf(group.getNodes().values()), cause);
         fireEvent(event);
     }
 

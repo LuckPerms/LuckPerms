@@ -26,43 +26,44 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSortedSet;
-import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableSetMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
+import com.google.common.collect.SortedSetMultimap;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.api.delegates.PermissionHolderDelegate;
-import me.lucko.luckperms.common.caching.MetaHolder;
-import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
+import me.lucko.luckperms.common.caching.MetaAccumulator;
 import me.lucko.luckperms.common.caching.handlers.GroupReference;
 import me.lucko.luckperms.common.caching.handlers.HolderReference;
-import me.lucko.luckperms.common.caching.holder.ExportNodesHolder;
-import me.lucko.luckperms.common.caching.holder.GetAllNodesRequest;
-import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.core.ContextSetComparator;
 import me.lucko.luckperms.common.core.InheritanceInfo;
+import me.lucko.luckperms.common.core.NodeComparator;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.PriorityComparator;
 import me.lucko.luckperms.common.core.TemporaryModifier;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.utils.Cache;
 import me.lucko.luckperms.common.utils.ExtractedContexts;
 import me.lucko.luckperms.common.utils.ImmutableLocalizedNode;
-import me.lucko.luckperms.common.utils.WeightComparator;
+import me.lucko.luckperms.common.utils.NodeTools;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -71,22 +72,38 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
- * Represents an object that can hold permissions
- * For example a User or a Group
+ * Represents an object that can hold permissions, (a user or group)
+ *
+ * <p>Permissions are stored in Multimaps, with the context of the node being the key, and the actual Node object being
+ * the value. The keys (context sets) are ordered according to their weight {@link ContextSetComparator}, and the values
+ * are ordered according to the priority of the node, according to {@link NodeComparator}.</p>
+ *
+ * <p>This class also provides a number of methods to perform inheritance lookups. These lookup methods initially use
+ * Lists of nodes populated with the inheritance tree. Nodes at the start of this list have priority over nodes at the
+ * end. Nodes higher up the tree appear at the end of these lists. In order to remove duplicate elements, the lists are
+ * flattened using the methods in {@link NodeTools}. This is significantly faster than trying to prevent duplicates
+ * throughout the process of accumulation, and reduces the need for too much caching.</p>
+ *
+ * <p>Cached state is avoided in these instances to cut down on memory footprint. The nodes are stored indexed to the
+ * contexts they apply in, so doing context specific querying should be fast. Caching would be ineffective here, due to
+ * the potentially vast amount of contexts being used by nodes, and the potential for very large inheritance trees.</p>
  */
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class PermissionHolder {
 
     /**
-     * The UUID of the user / name of the group.
-     * Used to prevent circular inheritance issues
+     * The name of this PermissionHolder object.
+     *
+     * <p>Used to prevent circular inheritance issues.</p>
+     *
+     * <p>For users, this value is a String representation of their {@link User#getUuid()}. For groups, it's just the
+     * {@link Group#getName()}.</p>
      */
     @Getter
     private final String objectName;
@@ -98,14 +115,38 @@ public abstract class PermissionHolder {
     private final LuckPermsPlugin plugin;
 
     /**
-     * The holders persistent nodes
+     * The holders persistent nodes.
+     *
+     * <p>These are nodes which are never stored or persisted to a file, and only
+     * last until the end of the objects lifetime. (for a group, that's when the server stops, and for a user, it's when
+     * they log out, or get unloaded.)</p>
+     *
+     * <p>Nodes are mapped by the result of {@link Node#getFullContexts()}, and keys are sorted by the weight of the
+     * ContextSet. ContextSets are ordered first by the presence of a server key, then by the presence of a world
+     * key, and finally by the overall size of the set. Nodes are ordered according to the priority rules
+     * defined in {@link NodeComparator}.</p>
      */
-    private final Set<Node> nodes = new HashSet<>();
+    private final SortedSetMultimap<ImmutableContextSet, Node> nodes = MultimapBuilder
+            .treeKeys(ContextSetComparator.reverse())
+            .treeSetValues(NodeComparator.reverse())
+            .build();
 
     /**
-     * The holders transient nodes
+     * The holders transient nodes.
+     *
+     * <p>These are nodes which are never stored or persisted to a file, and only
+     * last until the end of the objects lifetime. (for a group, that's when the server stops, and for a user, it's when
+     * they log out, or get unloaded.)</p>
+     *
+     * <p>Nodes are mapped by the result of {@link Node#getFullContexts()}, and keys are sorted by the weight of the
+     * ContextSet. ContextSets are ordered first by the presence of a server key, then by the presence of a world
+     * key, and finally by the overall size of the set. Nodes are ordered according to the priority rules
+     * defined in {@link NodeComparator}.</p>
      */
-    private final Set<Node> transientNodes = new HashSet<>();
+    private final SortedSetMultimap<ImmutableContextSet, Node> transientNodes = MultimapBuilder
+            .treeKeys(ContextSetComparator.reverse())
+            .treeSetValues(NodeComparator.reverse())
+            .build();
 
     /**
      * Lock used by Storage implementations to prevent concurrent read/writes
@@ -113,80 +154,13 @@ public abstract class PermissionHolder {
     @Getter
     private final Lock ioLock = new ReentrantLock();
 
+    /**
+     * A set of runnables which are called when this objects state changes.
+     */
     @Getter
     private final Set<Runnable> stateListeners = ConcurrentHashMap.newKeySet();
 
-
-    /*
-     * CACHES - cache the result of a number of methods in this class, until they are invalidated.
-     */
-
-    /* Internal Caches - only depend on the state of this instance. */
-
-    // Just holds immutable copies of the node sets.
-    private Cache<ImmutableSet<Node>> enduringCache = new Cache<>(() -> {
-        synchronized (nodes) {
-            return ImmutableSet.copyOf(nodes);
-        }
-    });
-    private Cache<ImmutableSet<Node>> transientCache = new Cache<>(() -> {
-        synchronized (transientNodes) {
-            return ImmutableSet.copyOf(transientNodes);
-        }
-    });
-
-    // Merges transient and persistent nodes together, and converts Node instances to a localized form.
-    private Cache<ImmutableSortedSet<LocalizedNode>> cache = new Cache<>(() -> cacheApply(false));
-    // Same as the cache above, except this merges temporary values with any permanent values if any are matching.
-    private Cache<ImmutableSortedSet<LocalizedNode>> mergedCache = new Cache<>(() -> cacheApply(true));
-
-    /* External Caches - may depend on the state of other instances. */
-
-    private LoadingCache<GetAllNodesRequest, SortedSet<LocalizedNode>> getAllNodesCache = CacheBuilder.newBuilder()
-            .expireAfterAccess(10, TimeUnit.MINUTES)
-            .build(new CacheLoader<GetAllNodesRequest, SortedSet<LocalizedNode>>() {
-                @Override
-                public SortedSet<LocalizedNode> load(GetAllNodesRequest getAllNodesHolder) {
-                    return getAllNodesCacheApply(getAllNodesHolder);
-                }
-            });
-    private LoadingCache<ExtractedContexts, Set<LocalizedNode>> getAllNodesFilteredCache = CacheBuilder.newBuilder()
-            .expireAfterAccess(10, TimeUnit.MINUTES)
-            .build(new CacheLoader<ExtractedContexts, Set<LocalizedNode>>() {
-                @Override
-                public Set<LocalizedNode> load(ExtractedContexts extractedContexts) throws Exception {
-                    return getAllNodesFilteredApply(extractedContexts);
-                }
-            });
-    private LoadingCache<ExportNodesHolder, Map<String, Boolean>> exportNodesCache = CacheBuilder.newBuilder()
-            .expireAfterAccess(10, TimeUnit.MINUTES)
-            .build(new CacheLoader<ExportNodesHolder, Map<String, Boolean>>() {
-                @Override
-                public Map<String, Boolean> load(ExportNodesHolder exportNodesHolder) throws Exception {
-                    return exportNodesApply(exportNodesHolder);
-                }
-            });
-
-    protected void forceCleanup() {
-        getAllNodesCache.cleanUp();
-        getAllNodesFilteredCache.cleanUp();
-        exportNodesCache.cleanUp();
-    }
-
-    private void invalidateCache(boolean enduring) {
-        if (enduring) {
-            enduringCache.invalidate();
-        } else {
-            transientCache.invalidate();
-        }
-        cache.invalidate();
-        mergedCache.invalidate();
-
-        // Invalidate inheritance caches
-        getAllNodesCache.invalidateAll();
-        getAllNodesFilteredCache.invalidateAll();
-        exportNodesCache.invalidateAll();
-
+    private void invalidateCache() {
         // Invalidate listeners
         for (Runnable r : stateListeners) {
             try {
@@ -196,171 +170,392 @@ public abstract class PermissionHolder {
             }
         }
 
-        // Get previous references
-        Set<HolderReference> refs = plugin.getCachedStateManager().getInheritances(toReference());
-
         // Declare new state to the state manager
         declareState();
-
-        // Add all new references affected by the state change.
-        refs.addAll(plugin.getCachedStateManager().getInheritances(toReference()));
-
-        // Invalidate all affected children.
-        CachedStateManager.invalidateInheritances(plugin, refs);
     }
 
-    public void invalidateInheritanceCaches() {
-        getAllNodesCache.invalidateAll();
-        getAllNodesFilteredCache.invalidateAll();
-        exportNodesCache.invalidateAll();
-        declareState();
+    protected void declareState() {
+        /* only declare state of groups. the state manager isn't really being used now the caches in this class
+           are gone, but it's useful for command output. */
+        if (this instanceof Group) {
+            plugin.getCachedStateManager().putAll(toReference(), getGroupReferences());
+        }
     }
 
-    /* Caching apply methods. Are just called by the caching instances to gather data about the instance. */
+    /**
+     * Gets the friendly name of this permission holder (for use in commands, etc)
+     *
+     * @return the holders "friendly" name
+     */
+    public abstract String getFriendlyName();
 
-    private ImmutableSortedSet<LocalizedNode> cacheApply(boolean mergeTemp) {
-        TreeSet<LocalizedNode> combined = new TreeSet<>(PriorityComparator.reverse());
-        Set<Node> enduring = getNodes();
-        if (!enduring.isEmpty()) {
-            combined.addAll(enduring.stream()
-                    .map(n -> ImmutableLocalizedNode.of(n, getObjectName()))
-                    .collect(Collectors.toList())
-            );
+    /**
+     * Forms a HolderReference for this PermissionHolder.
+     *
+     * @return this holders reference
+     */
+    public abstract HolderReference<?> toReference();
+
+    /**
+     * Gets the API delegate for this instance
+     *
+     * @return the api delegate
+     */
+    public abstract PermissionHolderDelegate getDelegate();
+
+    /**
+     * Returns an immutable copy of this objects nodes
+     *
+     * @return an immutable copy of the multimap storing this objects nodes
+     */
+    public ImmutableSetMultimap<ImmutableContextSet, Node> getNodes() {
+        synchronized (nodes) {
+            return ImmutableSetMultimap.copyOf(nodes);
         }
-        Set<Node> tran = getTransientNodes();
-        if (!tran.isEmpty()) {
-            combined.addAll(tran.stream()
-                    .map(n -> ImmutableLocalizedNode.of(n, getObjectName()))
-                    .collect(Collectors.toList())
-            );
+    }
+
+    /**
+     * Returns an immutable copy of this objects transient nodes
+     *
+     * @return an immutable copy of the multimap storing this objects transient nodes
+     */
+    public ImmutableSetMultimap<ImmutableContextSet, Node> getTransientNodes() {
+        synchronized (transientNodes) {
+            return ImmutableSetMultimap.copyOf(transientNodes);
+        }
+    }
+
+    /**
+     * Sets this objects nodes to the values in the set
+     *
+     * @param set the set of nodes to apply to the object
+     */
+    public void setNodes(Set<Node> set) {
+        synchronized (nodes) {
+            nodes.clear();
+            for (Node n : set) {
+                nodes.put(n.getFullContexts().makeImmutable(), n);
+            }
+        }
+        invalidateCache();
+    }
+
+    /**
+     * Replaces the multimap backing this object with another
+     *
+     * @param multimap the replacement multimap
+     */
+    public void replaceNodes(Multimap<ImmutableContextSet, Node> multimap) {
+        synchronized (nodes) {
+            nodes.clear();
+            nodes.putAll(multimap);
+        }
+        invalidateCache();
+    }
+
+    public void setTransientNodes(Set<Node> set) {
+        synchronized (transientNodes) {
+            transientNodes.clear();
+            for (Node n : set) {
+                transientNodes.put(n.getFullContexts().makeImmutable(), n);
+            }
+        }
+        invalidateCache();
+    }
+
+    public void replaceTransientNodes(Multimap<ImmutableContextSet, Node> multimap) {
+        synchronized (transientNodes) {
+            transientNodes.clear();
+            transientNodes.putAll(multimap);
+        }
+        invalidateCache();
+    }
+
+    /**
+     * Merges enduring and transient permissions into one set
+     *
+     * @return a set containing the holders enduring and transient permissions
+     */
+    public LinkedHashSet<Node> mergePermissions() {
+        LinkedHashSet<Node> ret = new LinkedHashSet<>();
+        synchronized (transientNodes) {
+            ret.addAll(transientNodes.values());
         }
 
-        Iterator<LocalizedNode> it = combined.iterator();
-        Set<LocalizedNode> higherPriority = new HashSet<>();
+        synchronized (nodes) {
+            ret.addAll(nodes.values());
+        }
 
-        iterate:
-        while (it.hasNext()) {
-            LocalizedNode entry = it.next();
-            for (LocalizedNode h : higherPriority) {
-                if (mergeTemp ? entry.getNode().equalsIgnoringValueOrTemp(h.getNode()) : entry.getNode().almostEquals(h.getNode())) {
-                    it.remove();
-                    continue iterate;
+        return ret;
+    }
+
+    public List<Node> mergePermissionsToList() {
+        List<Node> ret = new ArrayList<>();
+        synchronized (transientNodes) {
+            ret.addAll(transientNodes.values());
+        }
+        synchronized (nodes) {
+            ret.addAll(nodes.values());
+        }
+
+        return ret;
+    }
+
+    public SortedSet<LocalizedNode> mergePermissionsToSortedSet() {
+        SortedSet<LocalizedNode> ret = new TreeSet<>(PriorityComparator.reverse());
+        ret.addAll(mergePermissions().stream().map(n -> ImmutableLocalizedNode.of(n, getObjectName())).collect(Collectors.toSet()));
+        return ret;
+    }
+
+    public LinkedHashSet<Node> flattenNodes() {
+        synchronized (nodes) {
+            return new LinkedHashSet<>(nodes.values());
+        }
+    }
+
+    public LinkedHashSet<Node> flattenNodes(ContextSet filter) {
+        synchronized (nodes) {
+            LinkedHashSet<Node> set = new LinkedHashSet<>();
+            for (Map.Entry<ImmutableContextSet, Collection<Node>> e : nodes.asMap().entrySet()) {
+                if (e.getKey().isSatisfiedBy(filter)) {
+                    set.addAll(e.getValue());
                 }
             }
-            higherPriority.add(entry);
+
+            return set;
         }
-        return ImmutableSortedSet.copyOfSorted(combined);
     }
 
-    private SortedSet<LocalizedNode> getAllNodesCacheApply(GetAllNodesRequest getAllNodesHolder) {
-        // Expand the holder.
-        Set<String> excludedGroups = new HashSet<>(getAllNodesHolder.getExcludedGroups());
-        ExtractedContexts contexts = getAllNodesHolder.getContexts();
+    public LinkedHashSet<Node> flattenTransientNodes() {
+        synchronized (transientNodes) {
+            return new LinkedHashSet<>(transientNodes.values());
+        }
+    }
 
-        // Don't register users, as they cannot be inherited.
-        if (!(this instanceof User)) {
+    public LinkedHashSet<Node> flattenTransientNodes(ContextSet filter) {
+        synchronized (transientNodes) {
+            LinkedHashSet<Node> set = new LinkedHashSet<>();
+            for (Map.Entry<ImmutableContextSet, Collection<Node>> e : transientNodes.asMap().entrySet()) {
+                if (e.getKey().isSatisfiedBy(filter)) {
+                    set.addAll(e.getValue());
+                }
+            }
+
+            return set;
+        }
+    }
+
+    public List<Node> flattenNodesToList() {
+        synchronized (nodes) {
+             return new ArrayList<>(nodes.values());
+        }
+    }
+
+    public List<Node> flattenNodesToList(ContextSet filter) {
+        synchronized (nodes) {
+            List<Node> set = new ArrayList<>();
+            for (Map.Entry<ImmutableContextSet, Collection<Node>> e : nodes.asMap().entrySet()) {
+                if (e.getKey().isSatisfiedBy(filter)) {
+                    set.addAll(e.getValue());
+                }
+            }
+
+            return set;
+        }
+    }
+
+    public List<Node> flattenTransientNodesToList() {
+        synchronized (transientNodes) {
+            return new ArrayList<>(transientNodes.values());
+        }
+    }
+
+    public List<Node> flattenTransientNodesToList(ContextSet filter) {
+        synchronized (transientNodes) {
+            if (transientNodes.isEmpty()) {
+                return Collections.emptyList();
+            }
+
+            List<Node> set = new ArrayList<>();
+            for (Map.Entry<ImmutableContextSet, Collection<Node>> e : transientNodes.asMap().entrySet()) {
+                if (e.getKey().isSatisfiedBy(filter)) {
+                    set.addAll(e.getValue());
+                }
+            }
+
+            return set;
+        }
+    }
+
+    public boolean removeIf(Predicate<Node> predicate) {
+        boolean result;
+        ImmutableSet<Node> before = ImmutableSet.copyOf(flattenNodes());
+
+        synchronized (nodes) {
+            result = nodes.values().removeIf(predicate);
+        }
+
+        if (!result) {
+            return false;
+        }
+
+        invalidateCache();
+        ImmutableSet<Node> after = ImmutableSet.copyOf(flattenNodes());
+        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
+        return true;
+    }
+
+    public boolean removeIfTransient(Predicate<Node> predicate) {
+        boolean result;
+
+        synchronized (nodes) {
+            result = transientNodes.values().removeIf(predicate);
+        }
+
+        if (result) {
+            invalidateCache();
+        }
+
+        return result;
+    }
+
+    /**
+     * Resolves inherited nodes and returns them
+     *
+     * @param excludedGroups a list of groups to exclude
+     * @param context       context to decide if groups should be applied
+     * @return a set of nodes
+     */
+    protected List<LocalizedNode> resolveInheritances(List<LocalizedNode> accumulator, Set<String> excludedGroups, ExtractedContexts context) {
+        if (accumulator == null) {
+            accumulator = new ArrayList<>();
+        }
+
+        if (excludedGroups == null) {
+            excludedGroups = new HashSet<>();
+        }
+
+        if (this instanceof Group) {
             excludedGroups.add(getObjectName().toLowerCase());
         }
 
-        // Get the objects base permissions.
-        SortedSet<LocalizedNode> all = new TreeSet<>((SortedSet<LocalizedNode>) getPermissions(true));
+        // get the objects own nodes
+        flattenTransientNodesToList(context.getContextSet()).stream()
+                .map(n -> ImmutableLocalizedNode.of(n, getObjectName()))
+                .forEach(accumulator::add);
 
-        Contexts context = contexts.getContexts();
-        String server = contexts.getServer();
-        String world = contexts.getWorld();
+        flattenNodesToList(context.getContextSet()).stream()
+                .map(n -> ImmutableLocalizedNode.of(n, getObjectName()))
+                .forEach(accumulator::add);
 
-        Set<Node> parents = all.stream()
-                .map(LocalizedNode::getNode)
+        Contexts contexts = context.getContexts();
+        String server = context.getServer();
+        String world = context.getWorld();
+
+        // screw effectively final
+        Set<String> finalExcludedGroups = excludedGroups;
+        List<LocalizedNode> finalAccumulator = accumulator;
+        mergePermissions().stream()
                 .filter(Node::getValue)
                 .filter(Node::isGroupNode)
-                .filter(n -> n.shouldApplyOnServer(server, context.isApplyGlobalGroups(), plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)))
-                .filter(n -> n.shouldApplyOnWorld(world, context.isApplyGlobalWorldGroups(), plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)))
-                .filter(n -> n.shouldApplyWithContext(contexts.getContextSet(), false))
-                .collect(Collectors.toSet());
+                .filter(n -> n.shouldApplyOnServer(server, contexts.isApplyGlobalGroups(), plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)))
+                .filter(n -> n.shouldApplyOnWorld(world, contexts.isApplyGlobalWorldGroups(), plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)))
+                .filter(n -> n.shouldApplyWithContext(contexts.getContexts(), false))
+                .map(Node::getGroupName)
+                .distinct()
+                .map(n -> Optional.ofNullable(plugin.getGroupManager().getIfLoaded(n)))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .filter(g -> !finalExcludedGroups.contains(g.getObjectName().toLowerCase()))
+                .sorted((o1, o2) -> {
+                    int result = Integer.compare(o1.getWeight().orElse(0), o2.getWeight().orElse(0));
+                    return result == 1 ? -1 : 1;
+                })
+                .forEach(group -> group.resolveInheritances(finalAccumulator, finalExcludedGroups, context));
 
-        // Resolve & sort parents into order before we apply.
-        TreeSet<Map.Entry<Integer, Group>> sortedParents = new TreeSet<>(WeightComparator.INSTANCE.reversed());
-        for (Node node : parents) {
-            Group group = plugin.getGroupManager().getIfLoaded(node.getGroupName());
-            if (group != null) {
-                sortedParents.add(Maps.immutableEntry(group.getWeight().orElse(0), group));
-            }
-        }
-
-        for (Map.Entry<Integer, Group> e : sortedParents) {
-            if (excludedGroups.contains(e.getValue().getObjectName().toLowerCase())) {
-                continue;
-            }
-
-            inherited:
-            for (LocalizedNode inherited : e.getValue().getAllNodes(excludedGroups, contexts)) {
-                for (LocalizedNode existing : all) {
-                    if (existing.getNode().almostEquals(inherited.getNode())) {
-                        continue inherited;
-                    }
-                }
-
-                all.add(inherited);
-            }
-        }
-
-        return all;
+        return accumulator;
     }
 
-    private Set<LocalizedNode> getAllNodesFilteredApply(ExtractedContexts contexts) {
-        Contexts context = contexts.getContexts();
-        String server = contexts.getServer();
-        String world = contexts.getWorld();
+    public List<LocalizedNode> resolveInheritances(ExtractedContexts context) {
+        return resolveInheritances(null, null, context);
+    }
 
-        SortedSet<LocalizedNode> allNodes;
-        if (context.isApplyGroups()) {
-            allNodes = getAllNodes(null, contexts);
+    public SortedSet<LocalizedNode> resolveInheritancesAlmostEqual(ExtractedContexts contexts) {
+        List<LocalizedNode> nodes = resolveInheritances(null, null, contexts);
+        NodeTools.removeAlmostEqual(nodes.iterator());
+        SortedSet<LocalizedNode> ret = new TreeSet<>(PriorityComparator.reverse());
+        ret.addAll(nodes);
+        return ret;
+    }
+
+    public SortedSet<LocalizedNode> resolveInheritancesMergeTemp(ExtractedContexts contexts) {
+        List<LocalizedNode> nodes = resolveInheritances(null, null, contexts);
+        NodeTools.removeIgnoreValueOrTemp(nodes.iterator());
+        SortedSet<LocalizedNode> ret = new TreeSet<>(PriorityComparator.reverse());
+        ret.addAll(nodes);
+        return ret;
+    }
+
+    public SortedSet<LocalizedNode> getAllNodes(ExtractedContexts context) {
+        Contexts contexts = context.getContexts();
+        String server = context.getServer();
+        String world = context.getWorld();
+
+        List<LocalizedNode> entries;
+        if (contexts.isApplyGroups()) {
+            entries = resolveInheritances(null, null, context);
         } else {
-            allNodes = new TreeSet<>((SortedSet<LocalizedNode>) getPermissions(true));
+            entries = flattenNodesToList(context.getContextSet()).stream().map(n -> ImmutableLocalizedNode.of(n, getObjectName())).collect(Collectors.toList());
         }
 
-        allNodes.removeIf(node ->
+        entries.removeIf(node ->
                 !node.isGroupNode() && (
-                        !node.shouldApplyOnServer(server, context.isIncludeGlobal(), plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) ||
-                        !node.shouldApplyOnWorld(world, context.isIncludeGlobalWorld(), plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) ||
-                        !node.shouldApplyWithContext(contexts.getContextSet(), false)
+                        !node.shouldApplyOnServer(server, contexts.isIncludeGlobal(), plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) ||
+                        !node.shouldApplyOnWorld(world, contexts.isIncludeGlobalWorld(), plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) ||
+                        !node.shouldApplyWithContext(context.getContextSet(), false)
                 )
         );
 
-        Set<LocalizedNode> perms = ConcurrentHashMap.newKeySet();
-
-        all:
-        for (LocalizedNode ln : allNodes) {
-            // Force higher priority nodes to override
-            for (LocalizedNode alreadyIn : perms) {
-                if (ln.getNode().getPermission().equals(alreadyIn.getNode().getPermission())) {
-                    continue all;
-                }
-            }
-
-            perms.add(ln);
-        }
-
-        return perms;
+        NodeTools.removeSamePermission(entries.iterator());
+        SortedSet<LocalizedNode> ret = new TreeSet<>(PriorityComparator.reverse());
+        ret.addAll(entries);
+        return ret;
     }
 
-    private Map<String, Boolean> exportNodesApply(ExportNodesHolder exportNodesHolder) {
-        Contexts context = exportNodesHolder.getContexts();
-        Boolean lowerCase = exportNodesHolder.getLowerCase();
+    public Map<String, Boolean> exportNodes(ExtractedContexts context, boolean lowerCase) {
+        Contexts contexts = context.getContexts();
+        String server = context.getServer();
+        String world = context.getWorld();
+
+        List<? extends Node> entries;
+        if (contexts.isApplyGroups()) {
+            entries = resolveInheritances(null, null, context);
+        } else {
+            entries = flattenNodesToList(context.getContextSet());
+        }
+
+        entries.removeIf(node ->
+                !node.isGroupNode() && (
+                        !node.shouldApplyOnServer(server, contexts.isIncludeGlobal(), plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) ||
+                        !node.shouldApplyOnWorld(world, contexts.isIncludeGlobalWorld(), plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) ||
+                        !node.shouldApplyWithContext(context.getContextSet(), false)
+                )
+        );
 
         Map<String, Boolean> perms = new HashMap<>();
 
-        for (LocalizedNode ln : getAllNodesFiltered(ExtractedContexts.generate(context))) {
-            Node node = ln.getNode();
+        for (Node node : entries) {
+            String perm = lowerCase ? node.getPermission().toLowerCase() : node.getPermission();
+            if (!perms.containsKey(perm)) {
+                perms.put(perm, node.getValue());
 
-            perms.put(lowerCase ? node.getPermission().toLowerCase() : node.getPermission(), node.getValue());
-
-            if (plugin.getConfiguration().get(ConfigKeys.APPLYING_SHORTHAND)) {
-                List<String> sh = node.resolveShorthand();
-                if (!sh.isEmpty()) {
-                    sh.stream().map(s -> lowerCase ? s.toLowerCase() : s)
-                            .filter(s -> !perms.containsKey(s))
-                            .forEach(s -> perms.put(s, node.getValue()));
+                if (plugin.getConfiguration().get(ConfigKeys.APPLYING_SHORTHAND)) {
+                    List<String> sh = node.resolveShorthand();
+                    if (!sh.isEmpty()) {
+                        sh.stream().map(s -> lowerCase ? s.toLowerCase() : s)
+                                .filter(s -> !perms.containsKey(s))
+                                .forEach(s -> perms.put(s, node.getValue()));
+                    }
                 }
             }
         }
@@ -368,130 +563,9 @@ public abstract class PermissionHolder {
         return ImmutableMap.copyOf(perms);
     }
 
-    protected void declareState() {
-        plugin.getCachedStateManager().putAll(toReference(), getGroupReferences());
-    }
-
-    public abstract String getFriendlyName();
-    public abstract HolderReference<?> toReference();
-    public abstract PermissionHolderDelegate getDelegate();
-
-    public Set<Node> getNodes() {
-        return enduringCache.get();
-    }
-
-    public void setNodes(Map<String, Boolean> nodes) {
-        Set<Node> set = nodes.entrySet().stream()
-                .map(e -> NodeFactory.fromSerialisedNode(e.getKey(), e.getValue()))
-                .collect(Collectors.toSet());
-
-        setNodes(set);
-    }
-
-    public void setNodes(Set<Node> set) {
-        synchronized (nodes) {
-            if (nodes.equals(set)) {
-                return;
-            }
-
-            nodes.clear();
-            nodes.addAll(set);
-        }
-        invalidateCache(true);
-    }
-
-    public boolean removeIf(Predicate<Node> predicate) {
-        boolean result;
-        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes());
-
-        synchronized (nodes) {
-            result = nodes.removeIf(predicate);
-        }
-
-        if (!result) {
-            return false;
-        }
-
-        invalidateCache(true);
-        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes());
-        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
-        return true;
-    }
-
-    public Set<Node> getTransientNodes() {
-        return transientCache.get();
-    }
-
-    public void setTransientNodes(Set<Node> set) {
-        synchronized (transientNodes) {
-            if (transientNodes.equals(set)) {
-                return;
-            }
-
-            transientNodes.clear();
-            transientNodes.addAll(set);
-        }
-        invalidateCache(false);
-    }
-
-    public boolean removeIfTransient(Predicate<Node> predicate) {
-        boolean result;
-
-        synchronized (nodes) {
-            result = transientNodes.removeIf(predicate);
-        }
-
-        if (result) {
-            invalidateCache(false);
-        }
-
-        return result;
-    }
-
-    /**
-     * Combines and returns this holders nodes in a priority order.
-     *
-     * @param mergeTemp if the temporary nodes should be merged together with permanent nodes
-     * @return the holders transient and permanent nodes
-     */
-    public SortedSet<LocalizedNode> getPermissions(boolean mergeTemp) {
-        return mergeTemp ? mergedCache.get() : cache.get();
-    }
-
-    /**
-     * Resolves inherited nodes and returns them
-     *
-     * @param excludedGroups a list of groups to exclude
-     * @param contexts       context to decide if groups should be applied
-     * @return a set of nodes
-     */
-    public SortedSet<LocalizedNode> getAllNodes(Collection<String> excludedGroups, ExtractedContexts contexts) {
-        return getAllNodesCache.getUnchecked(GetAllNodesRequest.of(excludedGroups == null ? ImmutableSet.of() : ImmutableSet.copyOf(excludedGroups), contexts));
-    }
-
-    /**
-     * Gets all of the nodes that this holder has (and inherits), given the context
-     *
-     * @param contexts the context for this request
-     * @return a map of permissions
-     */
-    public Set<LocalizedNode> getAllNodesFiltered(ExtractedContexts contexts) {
-        return getAllNodesFilteredCache.getUnchecked(contexts);
-    }
-
-    /**
-     * Converts the output of {@link #getAllNodesFiltered(ExtractedContexts)}, and expands shorthand perms
-     *
-     * @param context the context for this request
-     * @return a map of permissions
-     */
-    public Map<String, Boolean> exportNodes(Contexts context, boolean lowerCase) {
-        return exportNodesCache.getUnchecked(ExportNodesHolder.of(context, lowerCase));
-    }
-
-    public MetaHolder accumulateMeta(MetaHolder holder, Set<String> excludedGroups, ExtractedContexts contexts) {
-        if (holder == null) {
-            holder = new MetaHolder(
+    public MetaAccumulator accumulateMeta(MetaAccumulator accumulator, Set<String> excludedGroups, ExtractedContexts context) {
+        if (accumulator == null) {
+            accumulator = new MetaAccumulator(
                     plugin.getConfiguration().get(ConfigKeys.PREFIX_FORMATTING_OPTIONS).copy(),
                     plugin.getConfiguration().get(ConfigKeys.SUFFIX_FORMATTING_OPTIONS).copy()
             );
@@ -501,62 +575,58 @@ public abstract class PermissionHolder {
             excludedGroups = new HashSet<>();
         }
 
-        excludedGroups.add(getObjectName().toLowerCase());
-
-        Contexts context = contexts.getContexts();
-        String server = contexts.getServer();
-        String world = contexts.getWorld();
-
-        SortedSet<LocalizedNode> all = new TreeSet<>((SortedSet<LocalizedNode>) getPermissions(true));
-        for (LocalizedNode ln : all) {
-            Node n = ln.getNode();
-
-            if (!n.getValue()) continue;
-            if (!n.isMeta() && !n.isPrefix() && !n.isSuffix()) continue;
-            if (!n.shouldApplyOnServer(server, context.isIncludeGlobal(), false)) continue;
-            if (!n.shouldApplyOnWorld(world, context.isIncludeGlobalWorld(), false)) continue;
-            if (!n.shouldApplyWithContext(contexts.getContextSet(), false)) continue;
-
-            holder.accumulateNode(ln);
+        if (this instanceof Group) {
+            excludedGroups.add(getObjectName().toLowerCase());
         }
+
+        Contexts contexts = context.getContexts();
+        String server = context.getServer();
+        String world = context.getWorld();
+
+        // screw effectively final
+        Set<String> finalExcludedGroups = excludedGroups;
+        MetaAccumulator finalAccumulator = accumulator;
+
+        flattenTransientNodesToList(context.getContextSet()).stream()
+                .filter(Node::getValue)
+                .filter(n -> n.isMeta() || n.isPrefix() || n.isSuffix())
+                .filter(n -> n.shouldApplyOnServer(server, contexts.isIncludeGlobal(), false))
+                .filter(n -> n.shouldApplyOnWorld(world, contexts.isIncludeGlobalWorld(), false))
+                .filter(n -> n.shouldApplyWithContext(context.getContextSet(), false))
+                .forEach(n -> finalAccumulator.accumulateNode(ImmutableLocalizedNode.of(n, getObjectName())));
+
+        flattenNodesToList(context.getContextSet()).stream()
+                .filter(Node::getValue)
+                .filter(n -> n.isMeta() || n.isPrefix() || n.isSuffix())
+                .filter(n -> n.shouldApplyOnServer(server, contexts.isIncludeGlobal(), false))
+                .filter(n -> n.shouldApplyOnWorld(world, contexts.isIncludeGlobalWorld(), false))
+                .filter(n -> n.shouldApplyWithContext(context.getContextSet(), false))
+                .forEach(n -> finalAccumulator.accumulateNode(ImmutableLocalizedNode.of(n, getObjectName())));
 
         OptionalInt w = getWeight();
         if (w.isPresent()) {
-            holder.accumulateWeight(w.getAsInt());
+            accumulator.accumulateWeight(w.getAsInt());
         }
 
-        Set<Node> parents = all.stream()
-                .map(LocalizedNode::getNode)
+        mergePermissions().stream()
                 .filter(Node::getValue)
                 .filter(Node::isGroupNode)
-                .collect(Collectors.toSet());
+                .filter(n -> n.shouldApplyOnServer(server, contexts.isApplyGlobalGroups(), plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)))
+                .filter(n -> n.shouldApplyOnWorld(world, contexts.isApplyGlobalWorldGroups(), plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)))
+                .filter(n -> n.shouldApplyWithContext(contexts.getContexts(), false))
+                .map(Node::getGroupName)
+                .distinct()
+                .map(n -> Optional.ofNullable(plugin.getGroupManager().getIfLoaded(n)))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .filter(g -> !finalExcludedGroups.contains(g.getObjectName().toLowerCase()))
+                .sorted((o1, o2) -> {
+                    int result = Integer.compare(o1.getWeight().orElse(0), o2.getWeight().orElse(0));
+                    return result == 1 ? -1 : 1;
+                })
+                .forEach(group -> group.accumulateMeta(finalAccumulator, finalExcludedGroups, context));
 
-        parents.removeIf(node ->
-                !node.shouldApplyOnServer(server, context.isApplyGlobalGroups(), plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) ||
-                !node.shouldApplyOnWorld(world, context.isApplyGlobalWorldGroups(), plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) ||
-                !node.shouldApplyWithContext(contexts.getContextSet(), false)
-        );
-
-        TreeSet<Map.Entry<Integer, Group>> sortedParents = new TreeSet<>(Util.META_COMPARATOR.reversed());
-        for (Node node : parents) {
-            Group group = plugin.getGroupManager().getIfLoaded(node.getGroupName());
-
-            if (group == null) {
-                continue;
-            }
-
-            if (excludedGroups.contains(group.getObjectName().toLowerCase())) {
-                continue;
-            }
-
-            sortedParents.add(Maps.immutableEntry(group.getWeight().orElse(0), group));
-        }
-
-        for (Map.Entry<Integer, Group> e : sortedParents) {
-            e.getValue().accumulateMeta(holder, excludedGroups, contexts);
-        }
-
-        return holder;
+        return accumulator;
     }
 
     /**
@@ -568,10 +638,10 @@ public abstract class PermissionHolder {
         boolean work = false;
         Set<Node> removed = new HashSet<>();
 
-        ImmutableSet<Node> before = ImmutableSet.copyOf(getPermissions(true));
+        ImmutableSet<Node> before = ImmutableSet.copyOf(mergePermissions());
 
         synchronized (nodes) {
-            Iterator<Node> it = nodes.iterator();
+            Iterator<Node> it = nodes.values().iterator();
             while (it.hasNext()) {
                 Node entry = it.next();
                 if (entry.hasExpired()) {
@@ -583,12 +653,12 @@ public abstract class PermissionHolder {
         }
 
         if (work) {
-            invalidateCache(true);
+            invalidateCache();
             work = false;
         }
 
         synchronized (transientNodes) {
-            Iterator<Node> it = transientNodes.iterator();
+            Iterator<Node> it = transientNodes.values().iterator();
             while (it.hasNext()) {
                 Node entry = it.next();
                 if (entry.hasExpired()) {
@@ -600,14 +670,14 @@ public abstract class PermissionHolder {
         }
 
         if (work) {
-            invalidateCache(false);
+            invalidateCache();
         }
 
         if (removed.isEmpty()) {
             return false;
         }
 
-        ImmutableSet<Node> after = ImmutableSet.copyOf(getPermissions(true));
+        ImmutableSet<Node> after = ImmutableSet.copyOf(mergePermissions());
 
         for (Node r : removed) {
             plugin.getApiProvider().getEventFactory().handleNodeRemove(r, this, before, after);
@@ -617,7 +687,7 @@ public abstract class PermissionHolder {
     }
 
     public Optional<Node> getAlmostEquals(Node node, boolean t) {
-        for (Node n : t ? getTransientNodes() : getNodes()) {
+        for (Node n : t ? getTransientNodes().values() : getNodes().values()) {
             if (n.almostEquals(node)) {
                 return Optional.of(n);
             }
@@ -672,7 +742,7 @@ public abstract class PermissionHolder {
      * @return the result of the lookup
      */
     public InheritanceInfo inheritsPermissionInfo(Node node) {
-        for (LocalizedNode n : getAllNodes(null, ExtractedContexts.generate(Contexts.allowAll()))) {
+        for (LocalizedNode n : resolveInheritances(ExtractedContexts.generate(Contexts.allowAll()))) {
             if (n.getNode().almostEquals(node)) {
                 return InheritanceInfo.of(n);
             }
@@ -726,14 +796,14 @@ public abstract class PermissionHolder {
             throw new ObjectAlreadyHasException();
         }
 
-        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes());
+        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes().values());
 
         synchronized (nodes) {
-            nodes.add(node);
+            nodes.put(node.getFullContexts().makeImmutable(), node);
         }
-        invalidateCache(true);
+        invalidateCache();
 
-        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes());
+        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes().values());
 
         plugin.getApiProvider().getEventFactory().handleNodeAdd(node, this, before, after);
     }
@@ -765,16 +835,16 @@ public abstract class PermissionHolder {
                     // Create a new node with the same properties, but add the expiry dates together
                     Node newNode = NodeFactory.builderFromExisting(node).setExpiry(previous.getExpiryUnixTime() + node.getSecondsTilExpiry()).build();
 
-                    ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes());
+                    ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes().values());
 
                     // Remove the old node & add the new one.
                     synchronized (nodes) {
-                        nodes.remove(previous);
-                        nodes.add(newNode);
+                        nodes.remove(previous.getContexts().makeImmutable(), previous);
+                        nodes.put(newNode.getFullContexts().makeImmutable(), newNode);
                     }
 
-                    invalidateCache(true);
-                    ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes());
+                    invalidateCache();
+                    ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes().values());
                     plugin.getApiProvider().getEventFactory().handleNodeAdd(newNode, this, before, after);
                     return newNode;
                 }
@@ -790,15 +860,15 @@ public abstract class PermissionHolder {
                     // Only replace if the new expiry time is greater than the old one.
                     if (node.getExpiryUnixTime() > previous.getExpiryUnixTime()) {
 
-                        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes());
+                        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes().values());
 
                         synchronized (nodes) {
-                            nodes.remove(previous);
-                            nodes.add(node);
+                            nodes.remove(previous.getFullContexts().makeImmutable(), previous);
+                            nodes.put(node.getFullContexts().makeImmutable(), node);
                         }
 
-                        invalidateCache(true);
-                        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes());
+                        invalidateCache();
+                        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes().values());
                         plugin.getApiProvider().getEventFactory().handleNodeAdd(node, this, before, after);
                         return node;
                     }
@@ -830,14 +900,14 @@ public abstract class PermissionHolder {
             throw new ObjectAlreadyHasException();
         }
 
-        ImmutableSet<Node> before = ImmutableSet.copyOf(getTransientNodes());
+        ImmutableSet<Node> before = ImmutableSet.copyOf(getTransientNodes().values());
 
         synchronized (transientNodes) {
-            transientNodes.add(node);
+            transientNodes.put(node.getFullContexts().makeImmutable(), node);
         }
-        invalidateCache(false);
+        invalidateCache();
 
-        ImmutableSet<Node> after = ImmutableSet.copyOf(getTransientNodes());
+        ImmutableSet<Node> after = ImmutableSet.copyOf(getTransientNodes().values());
 
         plugin.getApiProvider().getEventFactory().handleNodeAdd(node, this, before, after);
     }
@@ -883,14 +953,14 @@ public abstract class PermissionHolder {
             throw new ObjectLacksException();
         }
 
-        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes());
+        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes().values());
 
         synchronized (nodes) {
-            nodes.removeIf(e -> e.almostEquals(node));
+            this.nodes.get(node.getFullContexts().makeImmutable()).removeIf(e -> e.almostEquals(node));
         }
-        invalidateCache(true);
+        invalidateCache();
 
-        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes());
+        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes().values());
         plugin.getApiProvider().getEventFactory().handleNodeRemove(node, this, before, after);
     }
 
@@ -907,14 +977,14 @@ public abstract class PermissionHolder {
      * @throws ObjectLacksException if the holder doesn't have this node already
      */
     public void unsetPermissionExact(Node node) throws ObjectLacksException {
-        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes());
+        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes().values());
 
         synchronized (nodes) {
-            nodes.removeIf(e -> e.equals(node));
+            nodes.get(node.getFullContexts().makeImmutable()).removeIf(e -> e.equals(node));
         }
-        invalidateCache(true);
+        invalidateCache();
 
-        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes());
+        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes().values());
 
         if (before.size() == after.size()) {
             throw new ObjectLacksException();
@@ -934,14 +1004,14 @@ public abstract class PermissionHolder {
             throw new ObjectLacksException();
         }
 
-        ImmutableSet<Node> before = ImmutableSet.copyOf(getTransientNodes());
+        ImmutableSet<Node> before = ImmutableSet.copyOf(getTransientNodes().values());
 
         synchronized (transientNodes) {
-            transientNodes.removeIf(e -> e.almostEquals(node));
+            transientNodes.get(node.getFullContexts().makeImmutable()).removeIf(e -> e.almostEquals(node));
         }
-        invalidateCache(false);
+        invalidateCache();
 
-        ImmutableSet<Node> after = ImmutableSet.copyOf(getTransientNodes());
+        ImmutableSet<Node> after = ImmutableSet.copyOf(getTransientNodes().values());
         plugin.getApiProvider().getEventFactory().handleNodeRemove(node, this, before, after);
     }
 
@@ -1063,26 +1133,26 @@ public abstract class PermissionHolder {
      * Clear all of the holders permission nodes
      */
     public void clearNodes() {
-        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes());
+        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes().values());
         synchronized (nodes) {
             nodes.clear();
         }
-        invalidateCache(true);
-        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes());
+        invalidateCache();
+        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes().values());
         plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
     }
 
     public void clearNodes(String server) {
         String finalServer = Optional.ofNullable(server).orElse("global");
 
-        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes());
+        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes().values());
         synchronized (nodes) {
-            if (!nodes.removeIf(n -> n.getServer().orElse("global").equalsIgnoreCase(finalServer))) {
+            if (!nodes.values().removeIf(n -> n.getServer().orElse("global").equalsIgnoreCase(finalServer))) {
                 return;
             }
         }
-        invalidateCache(true);
-        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes());
+        invalidateCache();
+        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes().values());
         plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
     }
 
@@ -1090,25 +1160,25 @@ public abstract class PermissionHolder {
         String finalServer = Optional.ofNullable(server).orElse("global");
         String finalWorld = Optional.ofNullable(world).orElse("null");
 
-        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes());
+        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes().values());
         synchronized (nodes) {
-            boolean b = nodes.removeIf(n ->
+            boolean b = nodes.values().removeIf(n ->
                     n.getServer().orElse("global").equalsIgnoreCase(finalServer) &&
                             n.getWorld().orElse("null").equalsIgnoreCase(finalWorld));
             if (!b) {
                 return;
             }
         }
-        invalidateCache(true);
-        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes());
+        invalidateCache();
+        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes().values());
         plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
     }
 
     public void clearParents() {
-        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes());
+        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes().values());
 
         synchronized (nodes) {
-            boolean b = nodes.removeIf(Node::isGroupNode);
+            boolean b = nodes.values().removeIf(Node::isGroupNode);
             if (!b) {
                 return;
             }
@@ -1116,17 +1186,17 @@ public abstract class PermissionHolder {
         if (this instanceof User) {
             plugin.getUserManager().giveDefaultIfNeeded((User) this, false);
         }
-        invalidateCache(true);
-        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes());
+        invalidateCache();
+        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes().values());
         plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
     }
 
     public void clearParents(String server) {
         String finalServer = Optional.ofNullable(server).orElse("global");
 
-        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes());
+        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes().values());
         synchronized (nodes) {
-            boolean b = nodes.removeIf(n ->
+            boolean b = nodes.values().removeIf(n ->
                     n.isGroupNode() && n.getServer().orElse("global").equalsIgnoreCase(finalServer)
             );
             if (!b) {
@@ -1136,8 +1206,8 @@ public abstract class PermissionHolder {
         if (this instanceof User) {
             plugin.getUserManager().giveDefaultIfNeeded((User) this, false);
         }
-        invalidateCache(true);
-        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes());
+        invalidateCache();
+        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes().values());
         plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
     }
 
@@ -1145,9 +1215,9 @@ public abstract class PermissionHolder {
         String finalServer = Optional.ofNullable(server).orElse("global");
         String finalWorld = Optional.ofNullable(world).orElse("null");
 
-        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes());
+        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes().values());
         synchronized (nodes) {
-            boolean b = nodes.removeIf(n ->
+            boolean b = nodes.values().removeIf(n ->
                     n.isGroupNode() &&
                             n.getServer().orElse("global").equalsIgnoreCase(finalServer) &&
                             n.getWorld().orElse("null").equalsIgnoreCase(finalWorld)
@@ -1159,30 +1229,30 @@ public abstract class PermissionHolder {
         if (this instanceof User) {
             plugin.getUserManager().giveDefaultIfNeeded((User) this, false);
         }
-        invalidateCache(true);
-        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes());
+        invalidateCache();
+        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes().values());
         plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
     }
 
     public void clearMeta() {
-        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes());
+        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes().values());
 
         synchronized (nodes) {
-            if (!nodes.removeIf(n -> n.isMeta() || n.isPrefix() || n.isSuffix())) {
+            if (!nodes.values().removeIf(n -> n.isMeta() || n.isPrefix() || n.isSuffix())) {
                 return;
             }
         }
-        invalidateCache(true);
-        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes());
+        invalidateCache();
+        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes().values());
         plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
     }
 
     public void clearMeta(String server) {
         String finalServer = Optional.ofNullable(server).orElse("global");
 
-        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes());
+        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes().values());
         synchronized (nodes) {
-            boolean b = nodes.removeIf(n ->
+            boolean b = nodes.values().removeIf(n ->
                     (n.isMeta() || n.isPrefix() || n.isSuffix()) &&
                             n.getServer().orElse("global").equalsIgnoreCase(finalServer)
             );
@@ -1190,8 +1260,8 @@ public abstract class PermissionHolder {
                 return;
             }
         }
-        invalidateCache(true);
-        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes());
+        invalidateCache();
+        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes().values());
         plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
     }
 
@@ -1199,9 +1269,9 @@ public abstract class PermissionHolder {
         String finalServer = Optional.ofNullable(server).orElse("global");
         String finalWorld = Optional.ofNullable(world).orElse("null");
 
-        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes());
+        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes().values());
         synchronized (nodes) {
-            boolean b = nodes.removeIf(n ->
+            boolean b = nodes.values().removeIf(n ->
                     (n.isMeta() || n.isPrefix() || n.isSuffix()) && (
                             n.getServer().orElse("global").equalsIgnoreCase(finalServer) &&
                                     n.getWorld().orElse("null").equalsIgnoreCase(finalWorld)
@@ -1211,8 +1281,8 @@ public abstract class PermissionHolder {
                 return;
             }
         }
-        invalidateCache(true);
-        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes());
+        invalidateCache();
+        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes().values());
         plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
     }
 
@@ -1220,9 +1290,9 @@ public abstract class PermissionHolder {
         String finalServer = Optional.ofNullable(server).orElse("global");
         String finalWorld = Optional.ofNullable(world).orElse("null");
 
-        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes());
+        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes().values());
         synchronized (nodes) {
-            boolean b = nodes.removeIf(n ->
+            boolean b = nodes.values().removeIf(n ->
                     n.isMeta() && (n.isTemporary() == temp) && n.getMeta().getKey().equalsIgnoreCase(key) &&
                             n.getServer().orElse("global").equalsIgnoreCase(finalServer) &&
                             n.getWorld().orElse("null").equalsIgnoreCase(finalWorld)
@@ -1231,19 +1301,19 @@ public abstract class PermissionHolder {
                 return;
             }
         }
-        invalidateCache(true);
-        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes());
+        invalidateCache();
+        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes().values());
         plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
     }
 
     public void clearTransientNodes() {
-        ImmutableSet<Node> before = ImmutableSet.copyOf(getTransientNodes());
+        ImmutableSet<Node> before = ImmutableSet.copyOf(getTransientNodes().values());
 
         synchronized (transientNodes) {
             transientNodes.clear();
         }
-        invalidateCache(false);
-        ImmutableSet<Node> after = ImmutableSet.copyOf(getTransientNodes());
+        invalidateCache();
+        ImmutableSet<Node> after = ImmutableSet.copyOf(getTransientNodes().values());
         plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
     }
 
@@ -1251,26 +1321,26 @@ public abstract class PermissionHolder {
      * @return The temporary nodes held by the holder
      */
     public Set<Node> getTemporaryNodes() {
-        return getPermissions(false).stream().filter(Node::isTemporary).collect(Collectors.toSet());
+        return mergePermissionsToList().stream().filter(Node::isTemporary).collect(Collectors.toSet());
     }
 
     /**
      * @return The permanent nodes held by the holder
      */
     public Set<Node> getPermanentNodes() {
-        return getPermissions(false).stream().filter(Node::isPermanent).collect(Collectors.toSet());
+        return mergePermissionsToList().stream().filter(Node::isPermanent).collect(Collectors.toSet());
     }
 
     public Set<Node> getPrefixNodes() {
-        return getPermissions(false).stream().filter(Node::isPrefix).collect(Collectors.toSet());
+        return mergePermissionsToList().stream().filter(Node::isPrefix).collect(Collectors.toSet());
     }
 
     public Set<Node> getSuffixNodes() {
-        return getPermissions(false).stream().filter(Node::isSuffix).collect(Collectors.toSet());
+        return mergePermissionsToList().stream().filter(Node::isSuffix).collect(Collectors.toSet());
     }
 
     public Set<Node> getMetaNodes() {
-        return getPermissions(false).stream().filter(Node::isMeta).collect(Collectors.toSet());
+        return mergePermissionsToList().stream().filter(Node::isMeta).collect(Collectors.toSet());
     }
 
     public OptionalInt getWeight() {
@@ -1278,7 +1348,7 @@ public abstract class PermissionHolder {
 
         OptionalInt weight = OptionalInt.empty();
         try {
-            weight = getNodes().stream()
+            weight = mergePermissionsToList().stream()
                     .filter(n -> n.getPermission().startsWith("weight."))
                     .map(n -> n.getPermission().substring("weight.".length()))
                     .mapToInt(Integer::parseInt)
@@ -1301,14 +1371,14 @@ public abstract class PermissionHolder {
      * @return a {@link List} of group names
      */
     public List<String> getGroupNames() {
-        return getNodes().stream()
+        return mergePermissionsToList().stream()
                 .filter(Node::isGroupNode)
                 .map(Node::getGroupName)
                 .collect(Collectors.toList());
     }
 
     public Set<HolderReference> getGroupReferences() {
-        return getNodes().stream()
+        return mergePermissionsToList().stream()
                 .filter(Node::isGroupNode)
                 .map(Node::getGroupName)
                 .map(String::toLowerCase)
@@ -1324,7 +1394,7 @@ public abstract class PermissionHolder {
      * @return a {@link List} of group names
      */
     public List<String> getLocalGroups(String server, String world) {
-        return getNodes().stream()
+        return mergePermissionsToList().stream()
                 .filter(Node::isGroupNode)
                 .filter(n -> n.shouldApplyOnWorld(world, false, true))
                 .filter(n -> n.shouldApplyOnServer(server, false, true))
@@ -1333,7 +1403,7 @@ public abstract class PermissionHolder {
     }
 
     public List<String> getLocalGroups(String server, String world, boolean includeGlobal) {
-        return getNodes().stream()
+        return mergePermissionsToList().stream()
                 .filter(Node::isGroupNode)
                 .filter(n -> n.shouldApplyOnWorld(world, includeGlobal, true))
                 .filter(n -> n.shouldApplyOnServer(server, includeGlobal, true))
@@ -1348,14 +1418,14 @@ public abstract class PermissionHolder {
      * @return a {@link List} of group names
      */
     public List<String> getLocalGroups(String server) {
-        return getNodes().stream()
+        return mergePermissionsToList().stream()
                 .filter(Node::isGroupNode)
                 .filter(n -> n.shouldApplyOnServer(server, false, true))
                 .map(Node::getGroupName)
                 .collect(Collectors.toList());
     }
 
-    public static Map<String, Boolean> exportToLegacy(Set<Node> nodes) {
+    public static Map<String, Boolean> exportToLegacy(Iterable<Node> nodes) {
         Map<String, Boolean> m = new HashMap<>();
         for (Node node : nodes) {
             m.put(node.toSerializedNode(), node.getValue());

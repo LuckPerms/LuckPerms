@@ -70,7 +70,7 @@ public class GroupBulkChange extends SubCommand<Group> {
             return CommandResult.FAILURE;
         }
 
-        Iterator<Node> iterator = group.getNodes().iterator();
+        Iterator<Node> iterator = group.getNodes().values().iterator();
         if (type.equals("world")) {
             while (iterator.hasNext()) {
                 Node element = iterator.next();

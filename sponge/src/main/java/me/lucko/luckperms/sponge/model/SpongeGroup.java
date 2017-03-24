@@ -33,7 +33,7 @@ import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.common.caching.MetaHolder;
+import me.lucko.luckperms.common.caching.MetaAccumulator;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.utils.ExtractedContexts;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
@@ -83,7 +83,7 @@ public class SpongeGroup extends Group {
                     @Override
                     public NodeTree load(ContextSet contexts) {
                         // TODO move this away from NodeTree
-                        Map<String, Boolean> permissions = parent.getAllNodesFiltered(ExtractedContexts.generate(plugin.getService().calculateContexts(contexts))).stream()
+                        Map<String, Boolean> permissions = parent.getAllNodes(ExtractedContexts.generate(plugin.getService().calculateContexts(contexts))).stream()
                                 .map(LocalizedNode::getNode)
                                 .collect(Collectors.toMap(Node::getPermission, Node::getValue));
 
@@ -96,7 +96,7 @@ public class SpongeGroup extends Group {
                 .build(new CacheLoader<ContextSet, Set<SubjectReference>>() {
                     @Override
                     public Set<SubjectReference> load(ContextSet contexts) {
-                        Set<SubjectReference> subjects = parent.getAllNodesFiltered(ExtractedContexts.generate(plugin.getService().calculateContexts(contexts))).stream()
+                        Set<SubjectReference> subjects = parent.getAllNodes(ExtractedContexts.generate(plugin.getService().calculateContexts(contexts))).stream()
                                 .map(LocalizedNode::getNode)
                                 .filter(Node::isGroupNode)
                                 .map(Node::getGroupName)
@@ -224,17 +224,17 @@ public class SpongeGroup extends Group {
         }
 
         private Optional<String> getChatMeta(ContextSet contexts, boolean prefix) {
-            MetaHolder metaHolder = parent.accumulateMeta(null, null, ExtractedContexts.generate(plugin.getService().calculateContexts(contexts)));
+            MetaAccumulator metaAccumulator = parent.accumulateMeta(null, null, ExtractedContexts.generate(plugin.getService().calculateContexts(contexts)));
             if (prefix) {
-                return Optional.ofNullable(metaHolder.getPrefixStack().toFormattedString());
+                return Optional.ofNullable(metaAccumulator.getPrefixStack().toFormattedString());
             } else {
-                return Optional.ofNullable(metaHolder.getSuffixStack().toFormattedString());
+                return Optional.ofNullable(metaAccumulator.getSuffixStack().toFormattedString());
             }
         }
 
         private Optional<String> getMeta(ContextSet contexts, String key) {
-            MetaHolder metaHolder = parent.accumulateMeta(null, null, ExtractedContexts.generate(plugin.getService().calculateContexts(contexts)));
-            Map<String, String> meta = metaHolder.getMeta();
+            MetaAccumulator metaAccumulator = parent.accumulateMeta(null, null, ExtractedContexts.generate(plugin.getService().calculateContexts(contexts)));
+            Map<String, String> meta = metaAccumulator.getMeta();
             return Optional.ofNullable(meta.get(key));
         }
     }

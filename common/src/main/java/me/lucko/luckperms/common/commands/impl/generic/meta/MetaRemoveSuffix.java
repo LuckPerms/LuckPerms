@@ -66,7 +66,7 @@ public class MetaRemoveSuffix extends SharedSubCommand {
         // Handle bulk removal
         if (suffix.equalsIgnoreCase("null")) {
             List<Node> toRemove = new ArrayList<>();
-            for (Node node : holder.getNodes()) {
+            for (Node node : holder.getNodes().values()) {
                 if (!node.isSuffix()) continue;
                 if (node.getSuffix().getKey() != priority) continue;
                 if (node.isTemporary()) continue;

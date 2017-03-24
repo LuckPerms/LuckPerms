@@ -41,7 +41,7 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
         boolean hasGroup = false;
 
         if (user.getPrimaryGroup().getStoredValue() != null && !user.getPrimaryGroup().getStoredValue().isEmpty()) {
-            for (Node node : user.getPermissions(false)) {
+            for (Node node : user.getNodes().values()) {
                 if (node.isServerSpecific() || node.isWorldSpecific()) {
                     continue;
                 }
@@ -78,7 +78,7 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
             return true;
         }
 
-        for (Node node : user.getNodes()) {
+        for (Node node : user.getNodes().values()) {
             // There's only one.
             if (!node.isGroupNode()) {
                 return true;

@@ -171,6 +171,5 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
         if (cache != null) {
             cache.cleanup();
         }
-        forceCleanup();
     }
 }

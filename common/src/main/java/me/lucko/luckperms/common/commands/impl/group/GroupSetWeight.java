@@ -22,7 +22,6 @@
 
 package me.lucko.luckperms.common.commands.impl.group;
 
-import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -35,12 +34,8 @@ import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
-import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class GroupSetWeight extends SubCommand<Group> {
     public GroupSetWeight() {
@@ -53,19 +48,8 @@ public class GroupSetWeight extends SubCommand<Group> {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) throws CommandException {
         int weight = ArgumentUtils.handlePriority(0, args);
 
-        Set<Node> existingWeightNodes = group.getNodes().stream()
-                .filter(n -> n.getPermission().startsWith("weight."))
-                .collect(Collectors.toSet());
-
-        existingWeightNodes.forEach(n -> {
-            try {
-                group.unsetPermission(n);
-            } catch (ObjectLacksException ignored) {}
-        });
-
-        try {
-            group.setPermission(NodeFactory.newBuilder("weight." + weight).build());
-        } catch (ObjectAlreadyHasException ignored) {}
+        group.removeIf(n -> n.getPermission().startsWith("weight."));
+        group.setPermissionUnchecked(NodeFactory.newBuilder("weight." + weight).build());
 
         save(group, sender, plugin);
         Message.GROUP_SET_WEIGHT.send(sender, weight, group.getDisplayName());

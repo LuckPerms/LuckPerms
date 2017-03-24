@@ -82,7 +82,7 @@ public class BulkEditGroup extends SubCommand<Storage> {
 
             Set<Node> toAdd = new HashSet<>();
             Set<Node> toRemove = new HashSet<>();
-            Iterator<Node> iterator = user.getNodes().iterator();
+            Iterator<Node> iterator = user.getNodes().values().iterator();
             if (type.equals("world")) {
                 while (iterator.hasNext()) {
                     Node element = iterator.next();

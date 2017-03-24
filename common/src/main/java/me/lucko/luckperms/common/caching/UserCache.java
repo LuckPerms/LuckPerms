@@ -69,7 +69,7 @@ public class UserCache implements UserData {
 
                 @Override
                 public ListenableFuture<PermissionCache> reload(Contexts contexts, PermissionCache oldData) {
-                    oldData.comparePermissions(user.exportNodes(contexts, true));
+                    oldData.comparePermissions(user.exportNodes(ExtractedContexts.generate(contexts), true));
                     return Futures.immediateFuture(oldData);
                 }
             });
@@ -102,7 +102,7 @@ public class UserCache implements UserData {
     @Override
     public PermissionCache calculatePermissions(@NonNull Contexts contexts) {
         PermissionCache data = new PermissionCache(contexts, user, calculatorFactory);
-        data.setPermissions(user.exportNodes(contexts, true));
+        data.setPermissions(user.exportNodes(ExtractedContexts.generate(contexts), true));
         return data;
     }
 

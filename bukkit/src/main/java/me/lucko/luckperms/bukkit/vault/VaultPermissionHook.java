@@ -26,7 +26,6 @@ import lombok.Getter;
 import lombok.NonNull;
 
 import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.caching.PermissionData;
@@ -36,6 +35,7 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.utils.ExtractedContexts;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
@@ -197,7 +197,7 @@ public class VaultPermissionHook extends Permission {
         if (group == null) return false;
 
         // This is a nasty call. Groups aren't cached. :(
-        Map<String, Boolean> permissions = group.exportNodes(createContextForWorld(world), true);
+        Map<String, Boolean> permissions = group.exportNodes(ExtractedContexts.generate(createContextForWorld(world)), true);
         return permissions.containsKey(permission.toLowerCase()) && permissions.get(permission.toLowerCase());
     }
 
@@ -234,7 +234,7 @@ public class VaultPermissionHook extends Permission {
         if (user == null) return false;
 
         String w = world; // screw effectively final
-        return user.getNodes().stream()
+        return user.getNodes().values().stream()
                 .filter(Node::isGroupNode)
                 .filter(n -> n.shouldApplyOnServer(getServer(), isIncludeGlobal(), false))
                 .filter(n -> n.shouldApplyOnWorld(w, true, false))
@@ -303,7 +303,7 @@ public class VaultPermissionHook extends Permission {
         if (user == null) return new String[0];
 
         String w = world; // screw effectively final
-        return user.getNodes().stream()
+        return user.getNodes().values().stream()
                 .filter(Node::isGroupNode)
                 .filter(n -> n.shouldApplyOnServer(getServer(), isIncludeGlobal(), false))
                 .filter(n -> n.shouldApplyOnWorld(w, true, false))
@@ -352,7 +352,7 @@ public class VaultPermissionHook extends Permission {
             }
         } else {
             // we need to check the users permissions only
-            for (LocalizedNode node : user.getPermissions(true)) {
+            for (Node node : user.mergePermissionsToList()) {
                 if (!node.getValue()) continue;
                 if (!node.getPermission().toLowerCase().startsWith("vault.primarygroup.")) continue;
                 if (!node.shouldApplyOnServer(getServer(), isIncludeGlobal(), false)) continue;

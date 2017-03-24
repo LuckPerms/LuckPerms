@@ -41,7 +41,7 @@ import java.util.TreeMap;
  */
 @Getter
 @ToString
-public class MetaHolder {
+public class MetaAccumulator {
 
     @Getter(AccessLevel.NONE)
     private final Map<String, String> meta;
@@ -52,7 +52,7 @@ public class MetaHolder {
     private final MetaStack prefixStack;
     private final MetaStack suffixStack;
 
-    public MetaHolder(MetaStack prefixStack, MetaStack suffixStack) {
+    public MetaAccumulator(MetaStack prefixStack, MetaStack suffixStack) {
         this.meta = new HashMap<>();
         this.prefixes = new TreeMap<>(Comparator.reverseOrder());
         this.suffixes = new TreeMap<>(Comparator.reverseOrder());
@@ -60,7 +60,7 @@ public class MetaHolder {
         this.suffixStack = suffixStack;
     }
 
-    public MetaHolder() {
+    public MetaAccumulator() {
         this(NoopMetaStack.INSTANCE, NoopMetaStack.INSTANCE);
     }
 

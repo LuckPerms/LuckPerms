@@ -171,7 +171,7 @@ public class JSONBacking extends FlatfileBacking {
                 data.addProperty("name", user.getName());
                 data.addProperty("primaryGroup", user.getPrimaryGroup().getStoredValue());
 
-                Set<NodeDataHolder> nodes = user.getNodes().stream().map(NodeDataHolder::fromNode).collect(Collectors.toSet());
+                Set<NodeDataHolder> nodes = user.getNodes().values().stream().map(NodeDataHolder::fromNode).collect(Collectors.toSet());
                 data.add("permissions", serializePermissions(nodes));
 
                 return writeElementToFile(userFile, data);
@@ -270,7 +270,7 @@ public class JSONBacking extends FlatfileBacking {
                     JsonObject data = new JsonObject();
                     data.addProperty("name", group.getName());
 
-                    Set<NodeDataHolder> nodes = group.getNodes().stream().map(NodeDataHolder::fromNode).collect(Collectors.toSet());
+                    Set<NodeDataHolder> nodes = group.getNodes().values().stream().map(NodeDataHolder::fromNode).collect(Collectors.toSet());
                     data.add("permissions", serializePermissions(nodes));
 
                     return writeElementToFile(groupFile, data);
@@ -321,7 +321,7 @@ public class JSONBacking extends FlatfileBacking {
 
                 JsonObject data = new JsonObject();
                 data.addProperty("name", group.getName());
-                Set<NodeDataHolder> nodes = group.getNodes().stream().map(NodeDataHolder::fromNode).collect(Collectors.toSet());
+                Set<NodeDataHolder> nodes = group.getNodes().values().stream().map(NodeDataHolder::fromNode).collect(Collectors.toSet());
                 data.add("permissions", serializePermissions(nodes));
                 return writeElementToFile(groupFile, data);
             }, false);

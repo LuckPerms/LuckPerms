@@ -48,7 +48,7 @@ public class AllParentsByWeightHolder extends StoredHolder {
             return cachedValue;
         }
 
-        cachedValue = user.getAllNodes(null, ExtractedContexts.generate(Contexts.allowAll())).stream()
+        cachedValue = user.resolveInheritancesAlmostEqual(ExtractedContexts.generate(Contexts.allowAll())).stream()
                 .filter(Node::isGroupNode)
                 .filter(Node::getValue)
                 .map(n -> Optional.ofNullable(user.getPlugin().getGroupManager().getIfLoaded(n.getGroupName())))

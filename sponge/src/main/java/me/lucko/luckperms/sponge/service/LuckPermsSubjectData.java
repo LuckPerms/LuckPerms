@@ -33,7 +33,7 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.caching.MetaHolder;
+import me.lucko.luckperms.common.caching.MetaAccumulator;
 import me.lucko.luckperms.common.core.NodeBuilder;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.Group;
@@ -75,7 +75,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_GET_PERMISSIONS)) {
             Map<ImmutableContextSet, Map<String, Boolean>> perms = new HashMap<>();
 
-            for (Node n : enduring ? holder.getNodes() : holder.getTransientNodes()) {
+            for (Node n : enduring ? holder.getNodes().values() : holder.getTransientNodes().values()) {
                 ContextSet contexts = n.getFullContexts();
                 perms.computeIfAbsent(contexts.makeImmutable(), cs -> new HashMap<>()).put(n.getPermission(), n.getValue());
             }
@@ -166,7 +166,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_GET_PARENTS)) {
             Map<ImmutableContextSet, Set<SubjectReference>> parents = new HashMap<>();
 
-            for (Node n : enduring ? holder.getNodes() : holder.getTransientNodes()) {
+            for (Node n : enduring ? holder.getNodes().values() : holder.getTransientNodes().values()) {
                 if (!n.isGroupNode()) continue;
 
                 ContextSet contexts = n.getFullContexts();
@@ -271,7 +271,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
             Map<ImmutableContextSet, Integer> minPrefixPriority = new HashMap<>();
             Map<ImmutableContextSet, Integer> minSuffixPriority = new HashMap<>();
 
-            for (Node n : enduring ? holder.getNodes() : holder.getTransientNodes()) {
+            for (Node n : enduring ? holder.getNodes().values() : holder.getTransientNodes().values()) {
                 if (!n.getValue()) continue;
                 if (!n.isMeta() && !n.isPrefix() && !n.isSuffix()) continue;
 
@@ -331,8 +331,8 @@ public class LuckPermsSubjectData implements LPSubjectData {
 
                 toRemove.forEach(makeUnsetConsumer(enduring));
 
-                MetaHolder metaHolder = holder.accumulateMeta(null, null, ExtractedContexts.generate(service.calculateContexts(context)));
-                int priority = (type.equals("prefix") ? metaHolder.getPrefixes() : metaHolder.getSuffixes()).keySet().stream()
+                MetaAccumulator metaAccumulator = holder.accumulateMeta(null, null, ExtractedContexts.generate(service.calculateContexts(context)));
+                int priority = (type.equals("prefix") ? metaAccumulator.getPrefixes() : metaAccumulator.getSuffixes()).keySet().stream()
                         .mapToInt(e -> e).max().orElse(0);
                 priority += 10;
 
@@ -416,7 +416,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
     }
 
     private Stream<Node> streamNodes(boolean enduring) {
-        return (enduring ? holder.getNodes() : holder.getTransientNodes()).stream();
+        return (enduring ? holder.getNodes() : holder.getTransientNodes()).values().stream();
     }
 
     private Consumer<Node> makeUnsetConsumer(boolean enduring) {

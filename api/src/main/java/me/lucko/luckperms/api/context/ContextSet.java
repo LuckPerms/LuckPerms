@@ -25,6 +25,7 @@ package me.lucko.luckperms.api.context;
 import com.google.common.collect.Multimap;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -168,6 +169,16 @@ public interface ContextSet {
     Set<String> getValues(String key);
 
     /**
+     * Returns any value from this set matching the key, if present.
+     *
+     * @param key the key to find values for
+     * @return an optional containing any match
+     */
+    default Optional<String> getAnyValue(String key) {
+        return getValues(key).stream().findAny();
+    }
+
+    /**
      * Check if thr set contains a given key mapped to a given value
      *
      * @param key   the key to look for
@@ -186,6 +197,34 @@ public interface ContextSet {
      * @throws NullPointerException if the key or value is null
      */
     boolean hasIgnoreCase(String key, String value);
+
+    /**
+     * Checks to see if all entries in this context set are also included in another set.
+     *
+     * @param other the other set to check
+     * @return true if all entries in this set are also in the other set
+     */
+    default boolean isSatisfiedBy(ContextSet other) {
+        if (this.isEmpty()) {
+            // this is empty, so is therefore always satisfied.
+            return true;
+        } else if (other.isEmpty()) {
+            // this set isn't empty, but the other one is
+            return false;
+        } else if (this.size() > other.size()) {
+            // this set has more unique entries than the other set, so there's no way this can be satisfied.
+            return false;
+        } else {
+            // neither are empty, we need to compare the individual entries
+            for (Map.Entry<String, String> pair : toSet()) {
+                if (!other.has(pair.getKey(), pair.getValue())) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    }
 
     /**
      * Check if the set is empty

@@ -60,7 +60,7 @@ public class MetaInfo extends SharedSubCommand {
         Set<LocalizedNode> meta = new HashSet<>();
 
         // Collect data
-        for (LocalizedNode node : holder.getAllNodes(null, ExtractedContexts.generate(Contexts.allowAll()))) {
+        for (LocalizedNode node : holder.resolveInheritancesAlmostEqual(ExtractedContexts.generate(Contexts.allowAll()))) {
             if (!node.isSuffix() && !node.isPrefix() && !node.isMeta()) {
                 continue;
             }

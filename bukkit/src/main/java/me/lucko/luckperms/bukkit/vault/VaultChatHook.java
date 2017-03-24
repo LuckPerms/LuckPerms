@@ -28,7 +28,7 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.caching.MetaData;
 import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.common.caching.MetaHolder;
+import me.lucko.luckperms.common.caching.MetaAccumulator;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
@@ -99,8 +99,8 @@ public class VaultChatHook extends Chat {
             holder.removeIf(n -> prefix ? n.isPrefix() : n.isSuffix());
 
             // find the max inherited priority & add 10
-            MetaHolder metaHolder = holder.accumulateMeta(null, null, ExtractedContexts.generate(perms.createContextForWorld(finalWorld)));
-            int priority = (prefix ? metaHolder.getPrefixes() : metaHolder.getSuffixes()).keySet().stream()
+            MetaAccumulator metaAccumulator = holder.accumulateMeta(null, null, ExtractedContexts.generate(perms.createContextForWorld(finalWorld)));
+            int priority = (prefix ? metaAccumulator.getPrefixes() : metaAccumulator.getSuffixes()).keySet().stream()
                     .mapToInt(e -> e).max().orElse(0) + 10;
 
             Node.Builder chatMetaNode = NodeFactory.makeChatMetaNode(prefix, priority, value);
@@ -158,7 +158,7 @@ public class VaultChatHook extends Chat {
 
         perms.log("Getting meta: '" + node + "' for group " + group.getName() + " on world " + world + ", server " + perms.getServer());
 
-        for (Node n : group.getPermissions(true)) {
+        for (Node n : group.mergePermissionsToList()) {
             if (!n.getValue()) continue;
             if (!n.isMeta()) continue;
             if (!n.shouldApplyOnServer(perms.getServer(), perms.isIncludeGlobal(), false)) continue;
@@ -189,7 +189,7 @@ public class VaultChatHook extends Chat {
         }
 
         ExtractedContexts ec = ExtractedContexts.generate(new Contexts(ContextSet.fromMap(context), perms.isIncludeGlobal(), true, true, true, true, false));
-        for (Node n : group.getAllNodes(null, ec)) {
+        for (Node n : group.getAllNodes(ec)) {
             if (!n.getValue()) continue;
             if (prefix ? !n.isPrefix() : !n.isSuffix()) continue;
             if (!n.shouldApplyOnServer(perms.getServer(), perms.isIncludeGlobal(), false)) continue;

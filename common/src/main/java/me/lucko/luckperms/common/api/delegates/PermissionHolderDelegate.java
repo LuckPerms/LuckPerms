@@ -60,32 +60,32 @@ public class PermissionHolderDelegate implements PermissionHolder {
 
     @Override
     public SortedSet<? extends Node> getPermissions() {
-        return ImmutableSortedSet.copyOfSorted(master.getPermissions(false));
+        return ImmutableSortedSet.copyOfSorted(master.mergePermissionsToSortedSet());
     }
 
     @Override
     public Set<Node> getEnduringPermissions() {
-        return ImmutableSet.copyOf(master.getNodes());
+        return ImmutableSet.copyOf(master.getNodes().values());
     }
 
     @Override
     public Set<Node> getTransientPermissions() {
-        return ImmutableSet.copyOf(master.getTransientNodes());
+        return ImmutableSet.copyOf(master.getTransientNodes().values());
     }
 
     @Override
     public SortedSet<LocalizedNode> getAllNodes(@NonNull Contexts contexts) {
-        return new TreeSet<>(master.getAllNodes(null, ExtractedContexts.generate(contexts)));
+        return new TreeSet<>(master.resolveInheritancesAlmostEqual(ExtractedContexts.generate(contexts)));
     }
 
     @Override
     public Set<LocalizedNode> getAllNodesFiltered(@NonNull Contexts contexts) {
-        return new HashSet<>(master.getAllNodesFiltered(ExtractedContexts.generate(contexts)));
+        return new HashSet<>(master.getAllNodes(ExtractedContexts.generate(contexts)));
     }
 
     @Override
     public Map<String, Boolean> exportNodes(Contexts contexts, boolean lowerCase) {
-        return new HashMap<>(master.exportNodes(contexts, lowerCase));
+        return new HashMap<>(master.exportNodes(ExtractedContexts.generate(contexts), lowerCase));
     }
 
     @Override

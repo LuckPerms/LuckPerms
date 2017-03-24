@@ -29,7 +29,6 @@ import lombok.ToString;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.context.MutableContextSet;
 
 @Getter
 @EqualsAndHashCode
@@ -43,29 +42,26 @@ public class ExtractedContexts {
         return new ExtractedContexts(contexts);
     }
 
-    private Contexts contexts;
-    private ImmutableContextSet contextSet;
+    private final Contexts contexts;
+    private final ImmutableContextSet contextSet;
     private String server;
     private String world;
 
     private ExtractedContexts(Contexts context) {
         this.contexts = context;
+        this.contextSet = context.getContexts().makeImmutable();
         setup(context.getContexts());
     }
 
     private ExtractedContexts(ContextSet contexts) {
         this.contexts = null;
+        this.contextSet = contexts.makeImmutable();
         setup(contexts);
     }
 
     private void setup(ContextSet contexts) {
-        MutableContextSet contextSet = MutableContextSet.fromSet(contexts);
-        server = contextSet.getValues("server").stream().findAny().orElse(null);
-        world = contextSet.getValues("world").stream().findAny().orElse(null);
-        contextSet.removeAll("server");
-        contextSet.removeAll("world");
-
-        this.contextSet = contextSet.makeImmutable();
+        server = contexts.getAnyValue("server").orElse(null);
+        world = contexts.getAnyValue("world").orElse(null);
     }
 
     public Contexts getContexts() {

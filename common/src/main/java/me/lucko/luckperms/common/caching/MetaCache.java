@@ -59,7 +59,7 @@ public class MetaCache implements MetaData {
     @Getter
     private MetaStack suffixStack = NoopMetaStack.INSTANCE;
 
-    public void loadMeta(MetaHolder meta) {
+    public void loadMeta(MetaAccumulator meta) {
         lock.writeLock().lock();
         try {
             this.meta = ImmutableMap.copyOf(meta.getMeta());

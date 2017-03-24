@@ -91,7 +91,7 @@ public class UserDemote extends SubCommand<User> {
 
         // Load applicable groups
         Set<Node> nodes = new HashSet<>();
-        for (Node node : user.getNodes()) {
+        for (Node node : user.getNodes().values()) {
             if (!node.isGroupNode()) {
                 continue;
             }

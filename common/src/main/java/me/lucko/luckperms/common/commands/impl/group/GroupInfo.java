@@ -57,12 +57,12 @@ public class GroupInfo extends SubCommand<Group> {
                 group.getMetaNodes().size()
         );
 
-        Set<Node> parents = group.getPermissions(false).stream()
+        Set<Node> parents = group.mergePermissions().stream()
                 .filter(Node::isGroupNode)
                 .filter(Node::isPermanent)
                 .collect(Collectors.toSet());
 
-        Set<Node> tempParents = group.getPermissions(false).stream()
+        Set<Node> tempParents = group.mergePermissions().stream()
                 .filter(Node::isGroupNode)
                 .filter(Node::isTemporary)
                 .collect(Collectors.toSet());

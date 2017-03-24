@@ -93,7 +93,7 @@ public class SpongeUser extends User {
             return (now - lastUse) > 600000;
         }
 
-        private void checkData() {
+        private synchronized void checkData() {
             if (parent.getUserData() == null) {
                 plugin.getLog().warn("User " + parent.getName() + " - " + parent.getUuid() + " does not have any data loaded.");
                 parent.setupData(false);

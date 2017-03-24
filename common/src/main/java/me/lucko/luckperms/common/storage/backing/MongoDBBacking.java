@@ -97,7 +97,7 @@ public class MongoDBBacking extends AbstractBacking {
                 .append("primaryGroup", user.getPrimaryGroup().getStoredValue());
 
         Document perms = new Document();
-        for (Map.Entry<String, Boolean> e : convert(exportToLegacy(user.getNodes())).entrySet()) {
+        for (Map.Entry<String, Boolean> e : convert(exportToLegacy(user.getNodes().values())).entrySet()) {
             perms.append(e.getKey(), e.getValue());
         }
 
@@ -109,7 +109,7 @@ public class MongoDBBacking extends AbstractBacking {
         Document main = new Document("_id", group.getName());
 
         Document perms = new Document();
-        for (Map.Entry<String, Boolean> e : convert(exportToLegacy(group.getNodes())).entrySet()) {
+        for (Map.Entry<String, Boolean> e : convert(exportToLegacy(group.getNodes().values())).entrySet()) {
             perms.append(e.getKey(), e.getValue());
         }
 
@@ -237,7 +237,10 @@ public class MongoDBBacking extends AbstractBacking {
                     if (cursor.hasNext()) {
                         // User exists, let's load.
                         Document d = cursor.next();
-                        user.setNodes(revert((Map<String, Boolean>) d.get("perms")));
+                        user.setNodes(revert((Map<String, Boolean>) d.get("perms")).entrySet().stream()
+                                .map(e -> NodeFactory.fromSerialisedNode(e.getKey(), e.getValue()))
+                                .collect(Collectors.toSet())
+                        );
                         user.getPrimaryGroup().setStoredValue(d.getString("primaryGroup"));
 
                         boolean save = plugin.getUserManager().giveDefaultIfNeeded(user, false);
@@ -366,7 +369,10 @@ public class MongoDBBacking extends AbstractBacking {
                     if (cursor.hasNext()) {
                         // Group exists, let's load.
                         Document d = cursor.next();
-                        group.setNodes(revert((Map<String, Boolean>) d.get("perms")));
+                        group.setNodes(revert((Map<String, Boolean>) d.get("perms")).entrySet().stream()
+                                .map(e -> NodeFactory.fromSerialisedNode(e.getKey(), e.getValue()))
+                                .collect(Collectors.toSet())
+                        );
                     } else {
                         c.insertOne(fromGroup(group));
                     }
@@ -389,7 +395,11 @@ public class MongoDBBacking extends AbstractBacking {
                 try (MongoCursor<Document> cursor = c.find(new Document("_id", group.getName())).iterator()) {
                     if (cursor.hasNext()) {
                         Document d = cursor.next();
-                        group.setNodes(revert((Map<String, Boolean>) d.get("perms")));
+
+                        group.setNodes(revert((Map<String, Boolean>) d.get("perms")).entrySet().stream()
+                                .map(e -> NodeFactory.fromSerialisedNode(e.getKey(), e.getValue()))
+                                .collect(Collectors.toSet())
+                        );
                         return true;
                     }
                     return false;

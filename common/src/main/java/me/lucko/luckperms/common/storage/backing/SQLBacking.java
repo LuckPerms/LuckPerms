@@ -385,7 +385,7 @@ public class SQLBacking extends AbstractBacking {
                 return false;
             }
 
-            Set<NodeDataHolder> local = user.getNodes().stream().map(NodeDataHolder::fromNode).collect(Collectors.toSet());
+            Set<NodeDataHolder> local = user.getNodes().values().stream().map(NodeDataHolder::fromNode).collect(Collectors.toSet());
 
             Map.Entry<Set<NodeDataHolder>, Set<NodeDataHolder>> diff = compareSets(local, remote);
 
@@ -668,7 +668,7 @@ public class SQLBacking extends AbstractBacking {
                 return false;
             }
 
-            Set<NodeDataHolder> local = group.getNodes().stream().map(NodeDataHolder::fromNode).collect(Collectors.toSet());
+            Set<NodeDataHolder> local = group.getNodes().values().stream().map(NodeDataHolder::fromNode).collect(Collectors.toSet());
 
             Map.Entry<Set<NodeDataHolder>, Set<NodeDataHolder>> diff = compareSets(local, remote);
 

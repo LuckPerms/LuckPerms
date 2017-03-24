@@ -61,7 +61,7 @@ public class GroupClone extends SubCommand<Group> {
             return CommandResult.LOADING_ERROR;
         }
 
-        newGroup.setNodes(group.getNodes());
+        newGroup.replaceNodes(group.getNodes());
 
         Message.CLONE_SUCCESS.send(sender, group.getName(), newGroup.getName());
         LogEntry.build().actor(sender).acted(group).action("clone " + newGroup.getName()).build().submit(plugin, sender);

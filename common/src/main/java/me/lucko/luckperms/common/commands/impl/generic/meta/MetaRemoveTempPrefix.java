@@ -66,7 +66,7 @@ public class MetaRemoveTempPrefix extends SharedSubCommand {
         // Handle bulk removal
         if (prefix.equalsIgnoreCase("null")) {
             List<Node> toRemove = new ArrayList<>();
-            for (Node node : holder.getNodes()) {
+            for (Node node : holder.getNodes().values()) {
                 if (!node.isPrefix()) continue;
                 if (node.getPrefix().getKey() != priority) continue;
                 if (node.isPermanent()) continue;

@@ -55,11 +55,11 @@ public class PermissionInfo extends SharedSubCommand {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         if (sender.getUuid().equals(Constants.CONSOLE_UUID)) {
             Message.LISTNODES.send(sender, holder.getFriendlyName());
-            sender.sendMessage(Util.color(Util.permNodesToStringConsole(holder.getPermissions(false))));
+            sender.sendMessage(Util.color(Util.permNodesToStringConsole(holder.mergePermissionsToSortedSet())));
         } else {
             int page = ArgumentUtils.handleIntOrElse(0, args, 1);
 
-            Map.Entry<FancyMessage, String> ent = Util.permNodesToMessage(holder.getPermissions(false), holder, label, page);
+            Map.Entry<FancyMessage, String> ent = Util.permNodesToMessage(holder.mergePermissionsToSortedSet(), holder, label, page);
             if (ent.getValue() != null) {
                 Message.LISTNODES_WITH_PAGE.send(sender, holder.getFriendlyName(), ent.getValue());
                 sender.sendMessage(ent.getKey());
@@ -69,7 +69,7 @@ public class PermissionInfo extends SharedSubCommand {
             }
         }
 
-        Message.LISTNODES_TEMP.send(sender, holder.getFriendlyName(), Util.tempNodesToString(holder.getPermissions(false)));
+        Message.LISTNODES_TEMP.send(sender, holder.getFriendlyName(), Util.tempNodesToString(holder.mergePermissionsToSortedSet()));
         return CommandResult.SUCCESS;
     }
 }

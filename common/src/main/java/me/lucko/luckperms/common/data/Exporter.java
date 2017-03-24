@@ -115,7 +115,7 @@ public class Exporter implements Runnable {
             AtomicInteger groupCount = new AtomicInteger(0);
             for (Group group : plugin.getGroupManager().getAll().values()) {
                 write(writer, "# Export group: " + group.getName());
-                for (Node node : group.getNodes()) {
+                for (Node node : group.getNodes().values()) {
                     write(writer, NodeFactory.nodeAsCommand(node, group.getName(), true));
                 }
                 write(writer, "");
@@ -217,7 +217,7 @@ public class Exporter implements Runnable {
                             output.add("# Export user: " + user.getUuid().toString() + " - " + user.getName());
 
                             boolean inDefault = false;
-                            for (Node node : user.getNodes()) {
+                            for (Node node : user.getNodes().values()) {
                                 if (node.isGroupNode() && node.getGroupName().equalsIgnoreCase("default")) {
                                     inDefault = true;
                                     continue;

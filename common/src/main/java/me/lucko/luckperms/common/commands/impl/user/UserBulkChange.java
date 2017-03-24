@@ -70,7 +70,7 @@ public class UserBulkChange extends SubCommand<User> {
             return CommandResult.FAILURE;
         }
 
-        Iterator<Node> iterator = user.getNodes().iterator();
+        Iterator<Node> iterator = user.getNodes().values().iterator();
         if (type.equals("world")) {
             while (iterator.hasNext()) {
                 Node element = iterator.next();

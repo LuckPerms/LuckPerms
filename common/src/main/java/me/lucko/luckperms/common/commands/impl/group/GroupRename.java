@@ -75,7 +75,7 @@ public class GroupRename extends SubCommand<Group> {
             return CommandResult.FAILURE;
         }
 
-        newGroup.setNodes(group.getNodes());
+        newGroup.replaceNodes(group.getNodes());
 
         Message.RENAME_SUCCESS.send(sender, group.getName(), newGroup.getName());
         LogEntry.build().actor(sender).acted(group).action("rename " + newGroup.getName()).build().submit(plugin, sender);

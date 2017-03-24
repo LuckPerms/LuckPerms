@@ -20,44 +20,45 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.primarygroup;
+package me.lucko.luckperms.common.core;
 
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.common.core.model.Group;
-import me.lucko.luckperms.common.core.model.User;
 
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.Optional;
 
-public class ParentsByWeightHolder extends StoredHolder {
+public class NodeComparator implements Comparator<Node> {
+    private static final NodeComparator INSTANCE = new NodeComparator();
+    public static Comparator<Node> get() {
+        return INSTANCE;
+    }
 
-    private String cachedValue = null;
-    private boolean useCached = false;
-
-    public ParentsByWeightHolder(User user) {
-        super(user);
-        user.getStateListeners().add(() -> useCached = false);
+    public static Comparator<Node> reverse() {
+        return INSTANCE.reversed();
     }
 
     @Override
-    public String getValue() {
-        if (useCached) {
-            return cachedValue;
+    public int compare(Node o1, Node o2) {
+        if (o1.equals(o2)) {
+            return 0;
         }
 
-        cachedValue = user.mergePermissionsToList().stream()
-                .filter(Node::isGroupNode)
-                .filter(Node::getValue)
-                .map(n -> Optional.ofNullable(user.getPlugin().getGroupManager().getIfLoaded(n.getGroupName())))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .sorted(Collections.reverseOrder(Comparator.comparingInt(o -> o.getWeight().orElse(0))))
-                .findFirst()
-                .map(Group::getName)
-                .orElse(null);
+        if (o1.isTemporary() != o2.isTemporary()) {
+            return o1.isTemporary() ? 1 : -1;
+        }
 
-        useCached = true;
-        return cachedValue;
+        if (o1.isWildcard() != o2.isWildcard()) {
+            return o1.isWildcard() ? 1 : -1;
+        }
+
+        if (o1.isTemporary()) {
+            return o1.getSecondsTilExpiry() < o2.getSecondsTilExpiry() ? 1 : -1;
+        }
+
+        if (o1.isWildcard()) {
+            return o1.getWildcardLevel() > o2.getWildcardLevel() ? 1 : -1;
+        }
+
+        return PriorityComparator.get().compareStrings(o1.getPermission(), o2.getPermission()) == 1 ? -1 : 1;
     }
+
 }

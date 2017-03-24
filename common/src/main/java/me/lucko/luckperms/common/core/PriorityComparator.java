@@ -102,13 +102,19 @@ public class PriorityComparator implements Comparator<LocalizedNode> {
 
     public int compareStrings(String o1, String o2) {
         if (o1.equals(o2)) {
-            return 1;
+            return 0;
         }
 
         try {
             CollationKey o1c = collationKeyCache.get(o1);
             CollationKey o2c = collationKeyCache.get(o2);
-            return o1c.compareTo(o2c) == 1 ? 1 : -1;
+            int i = o1c.compareTo(o2c);
+            if (i != 0) {
+                return i;
+            }
+
+            // fallback to standard string comparison
+            return o1.compareTo(o2);
         } catch (Exception e) {
             // ignored
         }
