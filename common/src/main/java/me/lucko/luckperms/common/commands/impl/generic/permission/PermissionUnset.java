@@ -80,15 +80,15 @@ public class PermissionUnset extends SharedSubCommand {
                 // standard unset
                 switch (ContextHelper.determine(server, world)) {
                     case NONE:
-                        holder.unsetPermission(node);
+                        holder.unsetPermission(NodeFactory.make(node));
                         Message.UNSETPERMISSION_SUCCESS.send(sender, node, holder.getFriendlyName());
                         break;
                     case SERVER:
-                        holder.unsetPermission(node, server);
+                        holder.unsetPermission(NodeFactory.make(node, server));
                         Message.UNSETPERMISSION_SERVER_SUCCESS.send(sender, node, holder.getFriendlyName(), server);
                         break;
                     case SERVER_AND_WORLD:
-                        holder.unsetPermission(node, server, world);
+                        holder.unsetPermission(NodeFactory.make(node, server, world));
                         Message.UNSETPERMISSION_SERVER_WORLD_SUCCESS.send(sender, node, holder.getFriendlyName(), server, world);
                         break;
                 }

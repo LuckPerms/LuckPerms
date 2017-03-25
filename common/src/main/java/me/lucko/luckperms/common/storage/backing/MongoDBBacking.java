@@ -51,6 +51,7 @@ import org.bson.Document;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -59,8 +60,6 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static me.lucko.luckperms.common.core.model.PermissionHolder.exportToLegacy;
 
 @SuppressWarnings("unchecked")
 public class MongoDBBacking extends AbstractBacking {
@@ -643,5 +642,13 @@ public class MongoDBBacking extends AbstractBacking {
             }
             return null;
         }, null);
+    }
+
+    public static Map<String, Boolean> exportToLegacy(Iterable<Node> nodes) {
+        Map<String, Boolean> m = new HashMap<>();
+        for (Node node : nodes) {
+            m.put(node.toSerializedNode(), node.getValue());
+        }
+        return m;
     }
 }

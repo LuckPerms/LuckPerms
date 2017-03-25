@@ -31,6 +31,7 @@ import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.ContextHelper;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -63,15 +64,15 @@ public class ParentRemoveTemp extends SharedSubCommand {
         try {
             switch (ContextHelper.determine(server, world)) {
                 case NONE:
-                    holder.unsetPermission("group." + groupName, true);
+                    holder.unsetPermission(NodeFactory.make("group." + groupName, true));
                     Message.UNSET_TEMP_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), groupName);
                     break;
                 case SERVER:
-                    holder.unsetPermission("group." + groupName, server, true);
+                    holder.unsetPermission(NodeFactory.make("group." + groupName, server, true));
                     Message.UNSET_TEMP_INHERIT_SERVER_SUCCESS.send(sender, holder.getFriendlyName(), groupName, server);
                     break;
                 case SERVER_AND_WORLD:
-                    holder.unsetPermission("group." + groupName, server, world, true);
+                    holder.unsetPermission(NodeFactory.make("group." + groupName, server, world, true));
                     Message.UNSET_TEMP_INHERIT_SERVER_WORLD_SUCCESS.send(sender, holder.getFriendlyName(), groupName, server, world);
                     break;
             }

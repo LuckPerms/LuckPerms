@@ -33,6 +33,7 @@ import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.ContextHelper;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -100,15 +101,15 @@ public class MetaRemoveTempPrefix extends SharedSubCommand {
         try {
             switch (ContextHelper.determine(server, world)) {
                 case NONE:
-                    holder.unsetPermission(node, true);
+                    holder.unsetPermission(NodeFactory.make(node, true));
                     Message.REMOVE_TEMP_PREFIX_SUCCESS.send(sender, holder.getFriendlyName(), prefix, priority);
                     break;
                 case SERVER:
-                    holder.unsetPermission(node, server, true);
+                    holder.unsetPermission(NodeFactory.make(node, server, true));
                     Message.REMOVE_TEMP_PREFIX_SERVER_SUCCESS.send(sender, holder.getFriendlyName(), prefix, priority, server);
                     break;
                 case SERVER_AND_WORLD:
-                    holder.unsetPermission(node, server, world, true);
+                    holder.unsetPermission(NodeFactory.make(node, server, world, true));
                     Message.REMOVE_TEMP_PREFIX_SERVER_WORLD_SUCCESS.send(sender, holder.getFriendlyName(), prefix, priority, server, world);
                     break;
             }

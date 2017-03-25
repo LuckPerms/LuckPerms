@@ -32,6 +32,7 @@ import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.ContextHelper;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -66,15 +67,15 @@ public class MetaAddSuffix extends SharedSubCommand {
         try {
             switch (ContextHelper.determine(server, world)) {
                 case NONE:
-                    holder.setPermission(node, true);
+                    holder.setPermission(NodeFactory.make(node, true));
                     Message.ADDSUFFIX_SUCCESS.send(sender, holder.getFriendlyName(), suffix, priority);
                     break;
                 case SERVER:
-                    holder.setPermission(node, true, server);
+                    holder.setPermission(NodeFactory.make(node, true, server));
                     Message.ADDSUFFIX_SERVER_SUCCESS.send(sender, holder.getFriendlyName(), suffix, priority, server);
                     break;
                 case SERVER_AND_WORLD:
-                    holder.setPermission(node, true, server, world);
+                    holder.setPermission(NodeFactory.make(node, true, server, world));
                     Message.ADDSUFFIX_SERVER_WORLD_SUCCESS.send(sender, holder.getFriendlyName(), suffix, priority, server, world);
                     break;
             }

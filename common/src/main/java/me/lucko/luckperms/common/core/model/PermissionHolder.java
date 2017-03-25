@@ -704,6 +704,10 @@ public abstract class PermissionHolder {
      * @return a tristate
      */
     public Tristate hasPermission(Node node, boolean checkTransient) {
+        if (node.isGroupNode() && node.getGroupName().equalsIgnoreCase(getObjectName())) {
+            return Tristate.TRUE;
+        }
+
         return getAlmostEquals(node, checkTransient).map(Node::getTristate).orElse(Tristate.UNDEFINED);
     }
 
@@ -918,30 +922,6 @@ public abstract class PermissionHolder {
         } catch (ObjectAlreadyHasException ignored) {}
     }
 
-    public void setPermission(String node, boolean value) throws ObjectAlreadyHasException {
-        setPermission(NodeFactory.make(node, value));
-    }
-
-    public void setPermission(String node, boolean value, String server) throws ObjectAlreadyHasException {
-        setPermission(NodeFactory.make(node, value, server));
-    }
-
-    public void setPermission(String node, boolean value, String server, String world) throws ObjectAlreadyHasException {
-        setPermission(NodeFactory.make(node, value, server, world));
-    }
-
-    public void setPermission(String node, boolean value, long expireAt) throws ObjectAlreadyHasException {
-        setPermission(NodeFactory.make(node, value, expireAt));
-    }
-
-    public void setPermission(String node, boolean value, String server, long expireAt) throws ObjectAlreadyHasException {
-        setPermission(NodeFactory.make(node, value, server, expireAt));
-    }
-
-    public void setPermission(String node, boolean value, String server, String world, long expireAt) throws ObjectAlreadyHasException {
-        setPermission(NodeFactory.make(node, value, server, world, expireAt));
-    }
-
     /**
      * Unsets a permission node
      *
@@ -1021,30 +1001,6 @@ public abstract class PermissionHolder {
         } catch (ObjectLacksException ignored) {}
     }
 
-    public void unsetPermission(String node, boolean temporary) throws ObjectLacksException {
-        unsetPermission(NodeFactory.make(node, temporary));
-    }
-
-    public void unsetPermission(String node) throws ObjectLacksException {
-        unsetPermission(NodeFactory.make(node));
-    }
-
-    public void unsetPermission(String node, String server) throws ObjectLacksException {
-        unsetPermission(NodeFactory.make(node, server));
-    }
-
-    public void unsetPermission(String node, String server, String world) throws ObjectLacksException {
-        unsetPermission(NodeFactory.make(node, server, world));
-    }
-
-    public void unsetPermission(String node, String server, boolean temporary) throws ObjectLacksException {
-        unsetPermission(NodeFactory.make(node, server, temporary));
-    }
-
-    public void unsetPermission(String node, String server, String world, boolean temporary) throws ObjectLacksException {
-        unsetPermission(NodeFactory.make(node, server, world, temporary));
-    }
-
     public boolean inheritsGroup(Group group) {
         return group.getName().equalsIgnoreCase(this.getObjectName()) || hasPermission("group." + group.getName(), true);
     }
@@ -1062,7 +1018,7 @@ public abstract class PermissionHolder {
             throw new ObjectAlreadyHasException();
         }
 
-        setPermission("group." + group.getName(), true);
+        setPermission(NodeFactory.make("group." + group.getName(), true));
     }
 
     public void setInheritGroup(Group group, String server) throws ObjectAlreadyHasException {
@@ -1070,7 +1026,7 @@ public abstract class PermissionHolder {
             throw new ObjectAlreadyHasException();
         }
 
-        setPermission("group." + group.getName(), true, server);
+        setPermission(NodeFactory.make("group." + group.getName(), true, server));
     }
 
     public void setInheritGroup(Group group, String server, String world) throws ObjectAlreadyHasException {
@@ -1078,7 +1034,7 @@ public abstract class PermissionHolder {
             throw new ObjectAlreadyHasException();
         }
 
-        setPermission("group." + group.getName(), true, server, world);
+        setPermission(NodeFactory.make("group." + group.getName(), true, server, world));
     }
 
     public void setInheritGroup(Group group, long expireAt) throws ObjectAlreadyHasException {
@@ -1086,7 +1042,7 @@ public abstract class PermissionHolder {
             throw new ObjectAlreadyHasException();
         }
 
-        setPermission("group." + group.getName(), true, expireAt);
+        setPermission(NodeFactory.make("group." + group.getName(), true, expireAt));
     }
 
     public void setInheritGroup(Group group, String server, long expireAt) throws ObjectAlreadyHasException {
@@ -1094,7 +1050,7 @@ public abstract class PermissionHolder {
             throw new ObjectAlreadyHasException();
         }
 
-        setPermission("group." + group.getName(), true, server, expireAt);
+        setPermission(NodeFactory.make("group." + group.getName(), true, server, expireAt));
     }
 
     public void setInheritGroup(Group group, String server, String world, long expireAt) throws ObjectAlreadyHasException {
@@ -1102,31 +1058,31 @@ public abstract class PermissionHolder {
             throw new ObjectAlreadyHasException();
         }
 
-        setPermission("group." + group.getName(), true, server, world, expireAt);
+        setPermission(NodeFactory.make("group." + group.getName(), true, server, world, expireAt));
     }
 
     public void unsetInheritGroup(Group group) throws ObjectLacksException {
-        unsetPermission("group." + group.getName());
+        unsetPermission(NodeFactory.make("group." + group.getName()));
     }
 
     public void unsetInheritGroup(Group group, boolean temporary) throws ObjectLacksException {
-        unsetPermission("group." + group.getName(), temporary);
+        unsetPermission(NodeFactory.make("group." + group.getName(), temporary));
     }
 
     public void unsetInheritGroup(Group group, String server) throws ObjectLacksException {
-        unsetPermission("group." + group.getName(), server);
+        unsetPermission(NodeFactory.make("group." + group.getName(), server));
     }
 
     public void unsetInheritGroup(Group group, String server, String world) throws ObjectLacksException {
-        unsetPermission("group." + group.getName(), server, world);
+        unsetPermission(NodeFactory.make("group." + group.getName(), server, world));
     }
 
     public void unsetInheritGroup(Group group, String server, boolean temporary) throws ObjectLacksException {
-        unsetPermission("group." + group.getName(), server, temporary);
+        unsetPermission(NodeFactory.make("group." + group.getName(), server, temporary));
     }
 
     public void unsetInheritGroup(Group group, String server, String world, boolean temporary) throws ObjectLacksException {
-        unsetPermission("group." + group.getName(), server, world, temporary);
+        unsetPermission(NodeFactory.make("group." + group.getName(), server, world, temporary));
     }
 
     /**
@@ -1423,13 +1379,5 @@ public abstract class PermissionHolder {
                 .filter(n -> n.shouldApplyOnServer(server, false, true))
                 .map(Node::getGroupName)
                 .collect(Collectors.toList());
-    }
-
-    public static Map<String, Boolean> exportToLegacy(Iterable<Node> nodes) {
-        Map<String, Boolean> m = new HashMap<>();
-        for (Node node : nodes) {
-            m.put(node.toSerializedNode(), node.getValue());
-        }
-        return m;
     }
 }

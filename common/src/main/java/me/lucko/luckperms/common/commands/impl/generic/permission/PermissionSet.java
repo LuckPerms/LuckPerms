@@ -31,6 +31,7 @@ import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.ContextHelper;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -67,15 +68,15 @@ public class PermissionSet extends SharedSubCommand {
         try {
             switch (ContextHelper.determine(server, world)) {
                 case NONE:
-                    holder.setPermission(node, b);
+                    holder.setPermission(NodeFactory.make(node, b));
                     Message.SETPERMISSION_SUCCESS.send(sender, node, b, holder.getFriendlyName());
                     break;
                 case SERVER:
-                    holder.setPermission(node, b, server);
+                    holder.setPermission(NodeFactory.make(node, b, server));
                     Message.SETPERMISSION_SERVER_SUCCESS.send(sender, node, b, holder.getFriendlyName(), server);
                     break;
                 case SERVER_AND_WORLD:
-                    holder.setPermission(node, b, server, world);
+                    holder.setPermission(NodeFactory.make(node, b, server, world));
                     Message.SETPERMISSION_SERVER_WORLD_SUCCESS.send(sender, node, b, holder.getFriendlyName(), server, world);
                     break;
             }

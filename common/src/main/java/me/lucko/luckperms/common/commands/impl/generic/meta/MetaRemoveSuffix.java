@@ -33,6 +33,7 @@ import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.ContextHelper;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -100,15 +101,15 @@ public class MetaRemoveSuffix extends SharedSubCommand {
         try {
             switch (ContextHelper.determine(server, world)) {
                 case NONE:
-                    holder.unsetPermission(node);
+                    holder.unsetPermission(NodeFactory.make(node));
                     Message.REMOVESUFFIX_SUCCESS.send(sender, holder.getFriendlyName(), suffix, priority);
                     break;
                 case SERVER:
-                    holder.unsetPermission(node, server);
+                    holder.unsetPermission(NodeFactory.make(node, server));
                     Message.REMOVESUFFIX_SERVER_SUCCESS.send(sender, holder.getFriendlyName(), suffix, priority, server);
                     break;
                 case SERVER_AND_WORLD:
-                    holder.unsetPermission(node, server, world);
+                    holder.unsetPermission(NodeFactory.make(node, server, world));
                     Message.REMOVESUFFIX_SERVER_WORLD_SUCCESS.send(sender, holder.getFriendlyName(), suffix, priority, server, world);
                     break;
             }

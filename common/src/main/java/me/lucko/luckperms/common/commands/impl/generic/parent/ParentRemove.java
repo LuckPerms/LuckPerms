@@ -32,6 +32,7 @@ import me.lucko.luckperms.common.commands.utils.ContextHelper;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.LogEntry;
@@ -81,15 +82,15 @@ public class ParentRemove extends SharedSubCommand {
         try {
             switch (context) {
                 case NONE:
-                    holder.unsetPermission("group." + groupName);
+                    holder.unsetPermission(NodeFactory.make("group." + groupName));
                     Message.UNSET_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), groupName);
                     break;
                 case SERVER:
-                    holder.unsetPermission("group." + groupName, server);
+                    holder.unsetPermission(NodeFactory.make("group." + groupName, server));
                     Message.UNSET_INHERIT_SERVER_SUCCESS.send(sender, holder.getFriendlyName(), groupName, server);
                     break;
                 case SERVER_AND_WORLD:
-                    holder.unsetPermission("group." + groupName, server, world);
+                    holder.unsetPermission(NodeFactory.make("group." + groupName, server, world));
                     Message.UNSET_INHERIT_SERVER_WORLD_SUCCESS.send(sender, holder.getFriendlyName(), groupName, server, world);
                     break;
             }

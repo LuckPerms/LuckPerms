@@ -32,6 +32,7 @@ import me.lucko.luckperms.api.caching.PermissionData;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.User;
@@ -92,9 +93,9 @@ public class VaultPermissionHook extends Permission {
         return CompletableFuture.runAsync(() -> {
             try {
                 if (world != null && !world.equals("") && !world.equalsIgnoreCase("global")) {
-                    holder.setPermission(permission, true, getServer(), world);
+                    holder.setPermission(NodeFactory.make(permission, true, getServer(), world));
                 } else {
-                    holder.setPermission(permission, true, getServer());
+                    holder.setPermission(NodeFactory.make(permission, true, getServer()));
                 }
 
                 save(holder);
@@ -113,9 +114,9 @@ public class VaultPermissionHook extends Permission {
         return CompletableFuture.runAsync(() -> {
             try {
                 if (world != null && !world.equals("") && !world.equalsIgnoreCase("global")) {
-                    holder.unsetPermission(permission, getServer(), world);
+                    holder.unsetPermission(NodeFactory.make(permission, getServer(), world));
                 } else {
-                    holder.unsetPermission(permission, getServer());
+                    holder.unsetPermission(NodeFactory.make(permission, getServer()));
                 }
 
                 save(holder);

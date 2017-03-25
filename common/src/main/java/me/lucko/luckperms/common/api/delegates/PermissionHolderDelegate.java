@@ -33,6 +33,7 @@ import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.PermissionHolder;
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.utils.ExtractedContexts;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
@@ -175,32 +176,32 @@ public class PermissionHolderDelegate implements PermissionHolder {
 
     @Override
     public void setPermission(@NonNull String node, @NonNull boolean value) throws ObjectAlreadyHasException {
-        master.setPermission(node, value);
+        master.setPermission(NodeFactory.make(node, value));
     }
 
     @Override
     public void setPermission(@NonNull String node, @NonNull boolean value, @NonNull String server) throws ObjectAlreadyHasException {
-        master.setPermission(node, value, server);
+        master.setPermission(NodeFactory.make(node, value, server));
     }
 
     @Override
     public void setPermission(@NonNull String node, @NonNull boolean value, @NonNull String server, @NonNull String world) throws ObjectAlreadyHasException {
-        master.setPermission(node, value, server, world);
+        master.setPermission(NodeFactory.make(node, value, server, world));
     }
 
     @Override
     public void setPermission(@NonNull String node, @NonNull boolean value, @NonNull long expireAt) throws ObjectAlreadyHasException {
-        master.setPermission(node, value, checkTime(expireAt));
+        master.setPermission(NodeFactory.make(node, value, checkTime(expireAt)));
     }
 
     @Override
     public void setPermission(@NonNull String node, @NonNull boolean value, @NonNull String server, @NonNull long expireAt) throws ObjectAlreadyHasException {
-        master.setPermission(node, value, server, checkTime(expireAt));
+        master.setPermission(NodeFactory.make(node, value, server, checkTime(expireAt)));
     }
 
     @Override
     public void setPermission(@NonNull String node, @NonNull boolean value, @NonNull String server, @NonNull String world, @NonNull long expireAt) throws ObjectAlreadyHasException {
-        master.setPermission(node, value, server, world, checkTime(expireAt));
+        master.setPermission(NodeFactory.make(node, value, server, world, checkTime(expireAt)));
     }
 
     @Override
@@ -215,32 +216,32 @@ public class PermissionHolderDelegate implements PermissionHolder {
 
     @Override
     public void unsetPermission(@NonNull String node, @NonNull boolean temporary) throws ObjectLacksException {
-        master.unsetPermission(node, temporary);
+        master.unsetPermission(NodeFactory.make(node, temporary));
     }
 
     @Override
     public void unsetPermission(@NonNull String node) throws ObjectLacksException {
-        master.unsetPermission(node);
+        master.unsetPermission(NodeFactory.make(node));
     }
 
     @Override
     public void unsetPermission(@NonNull String node, @NonNull String server) throws ObjectLacksException {
-        master.unsetPermission(node, server);
+        master.unsetPermission(NodeFactory.make(node, server));
     }
 
     @Override
     public void unsetPermission(@NonNull String node, @NonNull String server, @NonNull String world) throws ObjectLacksException {
-        master.unsetPermission(node, server, world);
+        master.unsetPermission(NodeFactory.make(node, server, world));
     }
 
     @Override
     public void unsetPermission(@NonNull String node, @NonNull String server, @NonNull boolean temporary) throws ObjectLacksException {
-        master.unsetPermission(node, server, temporary);
+        master.unsetPermission(NodeFactory.make(node, server, temporary));
     }
 
     @Override
     public void unsetPermission(@NonNull String node, @NonNull String server, @NonNull String world, @NonNull boolean temporary) throws ObjectLacksException {
-        master.unsetPermission(node, server, world, temporary);
+        master.unsetPermission(NodeFactory.make(node, server, world, temporary));
     }
 
     @Override
