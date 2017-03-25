@@ -122,15 +122,18 @@ public class CommandManager {
 
     @SuppressWarnings("unchecked")
     private CommandResult execute(Sender sender, String label, List<String> args) {
+        List<String> arguments = new ArrayList<>(args);
+        handleRewrites(arguments);
+
         // Handle no arguments
-        if (args.size() == 0) {
+        if (arguments.size() == 0) {
             sendCommandUsage(sender, label);
             return CommandResult.INVALID_ARGS;
         }
 
         // Look for the main command.
         Optional<Command> o = mainCommands.stream()
-                .filter(m -> m.getName().equalsIgnoreCase(args.get(0)))
+                .filter(m -> m.getName().equalsIgnoreCase(arguments.get(0)))
                 .limit(1)
                 .findAny();
 
@@ -147,8 +150,6 @@ public class CommandManager {
             return CommandResult.NO_PERMISSION;
         }
 
-        List<String> arguments = new ArrayList<>(args);
-        handleRewrites(arguments);
         arguments.remove(0); // remove the main command arg.
 
         // Check the correct number of args were given for the main command
@@ -180,15 +181,18 @@ public class CommandManager {
      */
     @SuppressWarnings("unchecked")
     public List<String> onTabComplete(Sender sender, List<String> args) {
+        List<String> arguments = new ArrayList<>(args);
+        handleRewrites(arguments);
+
         final List<Command> mains = mainCommands.stream()
                 .filter(m -> m.isAuthorized(sender))
                 .collect(Collectors.toList());
 
         // Not yet past the point of entering a main command
-        if (args.size() <= 1) {
+        if (arguments.size() <= 1) {
 
             // Nothing yet entered
-            if (args.isEmpty() || args.get(0).equalsIgnoreCase("")) {
+            if (arguments.isEmpty() || arguments.get(0).equalsIgnoreCase("")) {
                 return mains.stream()
                         .map(m -> m.getName().toLowerCase())
                         .collect(Collectors.toList());
@@ -197,22 +201,24 @@ public class CommandManager {
             // Started typing a main command
             return mains.stream()
                     .map(m -> m.getName().toLowerCase())
-                    .filter(s -> s.startsWith(args.get(0).toLowerCase()))
+                    .filter(s -> s.startsWith(arguments.get(0).toLowerCase()))
                     .collect(Collectors.toList());
         }
 
         // Find a main command matching the first arg
         Optional<Command> o = mains.stream()
-                .filter(m -> m.getName().equalsIgnoreCase(args.get(0)))
+                .filter(m -> m.getName().equalsIgnoreCase(arguments.get(0)))
                 .limit(1)
                 .findAny();
+
+        arguments.remove(0); // remove the main command arg.
 
         if (!o.isPresent()) {
             return Collections.emptyList();
         }
 
         // Pass the processing onto the main command
-        return o.get().tabComplete(plugin, sender, args.subList(1, args.size()));
+        return o.get().tabComplete(plugin, sender, arguments);
     }
 
     private void sendCommandUsage(Sender sender, String label) {
@@ -283,6 +289,17 @@ public class CommandManager {
     }
 
     private static void handleRewrites(List<String> args) {
+        if (args.size() >= 1) {
+            if (args.get(0).equalsIgnoreCase("u")) {
+                args.remove(0);
+                args.add(0, "user");
+            }
+            if (args.get(0).equalsIgnoreCase("g")) {
+                args.remove(0);
+                args.add(0, "group");
+            }
+        }
+
         if (args.size() >= 3) {
             if (!args.get(0).equalsIgnoreCase("user") && !args.get(0).equalsIgnoreCase("group")) {
                 return;
@@ -303,6 +320,11 @@ public class CommandManager {
                     args.add(2, "meta");
                     break;
                 case "i":
+                case "about":
+                case "list":
+                    args.remove(2);
+                    args.add(2, "info");
+                    break;
                 case "inherit":
                 case "inheritances":
                 case "group":
@@ -391,6 +413,18 @@ public class CommandManager {
                     break;
                 default:
                     break;
+            }
+
+            // provide lazy info
+            boolean lazyInfo = (
+                    args.size() >= 4 &&
+                    (args.get(2).equalsIgnoreCase("permission") || args.get(2).equalsIgnoreCase("parent") || args.get(2).equalsIgnoreCase("meta")) &&
+                    (args.get(3).equalsIgnoreCase("i") || args.get(3).equalsIgnoreCase("about") || args.get(3).equalsIgnoreCase("list"))
+            );
+
+            if (lazyInfo) {
+                args.remove(3);
+                args.add(3, "info");
             }
 
             // Provide lazy set rewrite
