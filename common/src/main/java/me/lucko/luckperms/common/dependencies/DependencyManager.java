@@ -101,7 +101,7 @@ public class DependencyManager {
         // Load classes.
         for (Map.Entry<Dependency, File> e : toLoad) {
             try {
-                loadJar(plugin, e.getValue(), e.getKey().getTestClass());
+                loadJar(plugin, e.getValue());
             } catch (Throwable e1) {
                 plugin.getLog().severe("Failed to load jar for dependency " + e.getKey().name());
                 e1.printStackTrace();
@@ -132,7 +132,7 @@ public class DependencyManager {
         }
     }
 
-    private static void loadJar(LuckPermsPlugin plugin, File file, String baseClass) throws Exception {
+    private static void loadJar(LuckPermsPlugin plugin, File file) throws Exception {
         URLClassLoader classLoader = (URLClassLoader) plugin.getClass().getClassLoader();
 
         if (plugin.getServerType() != PlatformType.SPONGE && !plugin.getServerName().equals("KCauldron")) {
@@ -140,7 +140,6 @@ public class DependencyManager {
         }
 
         ADD_URL_METHOD.invoke(classLoader, file.toURI().toURL());
-        classLoader.loadClass(baseClass).newInstance(); // Load a test class
     }
 
 }
