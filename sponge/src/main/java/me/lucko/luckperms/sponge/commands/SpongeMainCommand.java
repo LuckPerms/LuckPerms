@@ -97,8 +97,9 @@ public class SpongeMainCommand extends Command<Void, LPSubjectData> {
 
         if (args.size() < 1) {
             Util.sendPluginMessage(sender, "&aCurrent Subject Collections:\n" +
-                    Util.listToCommaSep(service.getCollections().keySet().stream()
+                    Util.toCommaSep(service.getCollections().keySet().stream()
                             .filter(s -> !s.equalsIgnoreCase("user") && !s.equalsIgnoreCase("group"))
+                            .sorted()
                             .collect(Collectors.toList())
                     )
             );
@@ -127,9 +128,9 @@ public class SpongeMainCommand extends Command<Void, LPSubjectData> {
                 List<String> extra = subjects.subList(50, subjects.size());
                 int overflow = extra.size();
                 extra.clear();
-                Util.sendPluginMessage(sender, "&aCurrent Subjects:\n" + Util.listToCommaSep(subjects) + "&b ... and &a" + overflow + " &bmore.");
+                Util.sendPluginMessage(sender, "&aCurrent Subjects:\n" + Util.toCommaSep(subjects) + "&b ... and &a" + overflow + " &bmore.");
             } else {
-                Util.sendPluginMessage(sender, "&aCurrent Subjects:\n" + Util.listToCommaSep(subjects));
+                Util.sendPluginMessage(sender, "&aCurrent Subjects:\n" + Util.toCommaSep(subjects));
             }
 
             return CommandResult.SUCCESS;

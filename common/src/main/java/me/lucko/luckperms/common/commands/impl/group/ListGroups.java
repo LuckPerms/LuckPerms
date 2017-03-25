@@ -32,7 +32,6 @@ import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -50,9 +49,10 @@ public class ListGroups extends SingleCommand {
 
         Message.GROUPS_LIST.send(
                 sender,
-                Util.listToCommaSep(new ArrayList<>(plugin.getGroupManager().getAll().values().stream()
+                Util.toCommaSep(plugin.getGroupManager().getAll().values().stream()
                         .map(Group::getDisplayName)
-                        .collect(Collectors.toList()))
+                        .sorted()
+                        .collect(Collectors.toList())
                 )
         );
         return CommandResult.SUCCESS;

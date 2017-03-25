@@ -31,8 +31,8 @@ import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ListTracks extends SingleCommand {
     public ListTracks() {
@@ -46,7 +46,7 @@ public class ListTracks extends SingleCommand {
             return CommandResult.LOADING_ERROR;
         }
 
-        Message.TRACKS_LIST.send(sender, Util.listToCommaSep(new ArrayList<>(plugin.getTrackManager().getAll().keySet())));
+        Message.TRACKS_LIST.send(sender, Util.toCommaSep(plugin.getTrackManager().getAll().keySet().stream().sorted().collect(Collectors.toList())));
         return CommandResult.SUCCESS;
     }
 }
