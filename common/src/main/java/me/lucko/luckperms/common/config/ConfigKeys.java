@@ -33,6 +33,7 @@ import me.lucko.luckperms.common.config.keys.AbstractKey;
 import me.lucko.luckperms.common.config.keys.BooleanKey;
 import me.lucko.luckperms.common.config.keys.EnduringKey;
 import me.lucko.luckperms.common.config.keys.IntegerKey;
+import me.lucko.luckperms.common.config.keys.LowercaseStringKey;
 import me.lucko.luckperms.common.config.keys.MapKey;
 import me.lucko.luckperms.common.config.keys.StaticKey;
 import me.lucko.luckperms.common.config.keys.StringKey;
@@ -56,7 +57,7 @@ import java.util.function.Function;
 @UtilityClass
 public class ConfigKeys {
 
-    public static final ConfigKey<String> SERVER = StringKey.of("server", "global");
+    public static final ConfigKey<String> SERVER = LowercaseStringKey.of("server", "global");
     public static final ConfigKey<Integer> SYNC_TIME = EnduringKey.wrap(IntegerKey.of("data.sync-minutes", -1));
     public static final ConfigKey<String> DEFAULT_GROUP_NODE = StaticKey.of("group.default"); // constant since 2.6
     public static final ConfigKey<String> DEFAULT_GROUP_NAME = StaticKey.of("default"); // constant since 2.6
@@ -136,7 +137,7 @@ public class ConfigKeys {
     public static final ConfigKey<Boolean> AUTO_OP = EnduringKey.wrap(BooleanKey.of("auto-op", false));
     public static final ConfigKey<Boolean> OPS_ENABLED = EnduringKey.wrap(AbstractKey.of(c -> !AUTO_OP.get(c) && c.getBoolean("enable-ops", true)));
     public static final ConfigKey<Boolean> COMMANDS_ALLOW_OP = EnduringKey.wrap(BooleanKey.of("commands-allow-op", true));
-    public static final ConfigKey<String> VAULT_SERVER = StringKey.of("vault-server", "global");
+    public static final ConfigKey<String> VAULT_SERVER = LowercaseStringKey.of("vault-server", "global");
     public static final ConfigKey<Boolean> VAULT_INCLUDING_GLOBAL = BooleanKey.of("vault-include-global", true);
     public static final ConfigKey<Boolean> VAULT_IGNORE_WORLD = BooleanKey.of("vault-ignore-world", false);
     public static final ConfigKey<Boolean> VAULT_PRIMARY_GROUP_OVERRIDES = BooleanKey.of("vault-primary-groups-overrides.enabled", false);
@@ -167,19 +168,19 @@ public class ConfigKeys {
         );
     }));
     public static final ConfigKey<String> SQL_TABLE_PREFIX = EnduringKey.wrap(StringKey.of("data.table_prefix", "luckperms_"));
-    public static final ConfigKey<String> STORAGE_METHOD = EnduringKey.wrap(StringKey.of("storage-method", "h2"));
+    public static final ConfigKey<String> STORAGE_METHOD = EnduringKey.wrap(LowercaseStringKey.of("storage-method", "h2"));
     public static final ConfigKey<Boolean> WATCH_FILES = BooleanKey.of("watch-files", true);
     public static final ConfigKey<Boolean> SPLIT_STORAGE = EnduringKey.wrap(BooleanKey.of("split-storage.enabled", false));
     public static final ConfigKey<Map<String, String>> SPLIT_STORAGE_OPTIONS = EnduringKey.wrap(AbstractKey.of(c -> {
         return ImmutableMap.<String, String>builder()
-                .put("user", c.getString("split-storage.methods.user", "h2"))
-                .put("group", c.getString("split-storage.methods.group", "h2"))
-                .put("track", c.getString("split-storage.methods.track", "h2"))
-                .put("uuid", c.getString("split-storage.methods.uuid", "h2"))
-                .put("log", c.getString("split-storage.methods.log", "h2"))
+                .put("user", c.getString("split-storage.methods.user", "h2").toLowerCase())
+                .put("group", c.getString("split-storage.methods.group", "h2").toLowerCase())
+                .put("track", c.getString("split-storage.methods.track", "h2").toLowerCase())
+                .put("uuid", c.getString("split-storage.methods.uuid", "h2").toLowerCase())
+                .put("log", c.getString("split-storage.methods.log", "h2").toLowerCase())
                 .build();
     }));
-    public static final ConfigKey<String> MESSAGING_SERVICE = EnduringKey.wrap(StringKey.of("messaging-service", "none"));
+    public static final ConfigKey<String> MESSAGING_SERVICE = EnduringKey.wrap(LowercaseStringKey.of("messaging-service", "none"));
     public static final ConfigKey<Boolean> AUTO_PUSH_UPDATES = EnduringKey.wrap(BooleanKey.of("auto-push-updates", true));
     public static final ConfigKey<Boolean> REDIS_ENABLED = EnduringKey.wrap(BooleanKey.of("redis.enabled", false));
     public static final ConfigKey<String> REDIS_ADDRESS = EnduringKey.wrap(StringKey.of("redis.address", null));
