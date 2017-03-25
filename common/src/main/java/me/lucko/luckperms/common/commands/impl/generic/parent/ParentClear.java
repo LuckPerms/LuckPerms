@@ -58,13 +58,13 @@ public class ParentClear extends SharedSubCommand {
 
         switch (ContextHelper.determine(server, world)) {
             case NONE:
-                holder.clearParents();
+                holder.clearParents(true);
                 break;
             case SERVER:
-                holder.clearParents(server);
+                holder.clearParents(server, true);
                 break;
             case SERVER_AND_WORLD:
-                holder.clearParents(server, world);
+                holder.clearParents(server, world, true);
                 break;
         }
 

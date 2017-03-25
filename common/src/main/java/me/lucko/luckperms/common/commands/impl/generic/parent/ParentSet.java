@@ -75,7 +75,7 @@ public class ParentSet extends SharedSubCommand {
 
         switch (ContextHelper.determine(server, world)) {
             case NONE:
-                holder.clearParents(null, null);
+                holder.clearParents(null, null, false);
 
                 try {
                     holder.setInheritGroup(group);
@@ -88,12 +88,11 @@ public class ParentSet extends SharedSubCommand {
                 Message.SET_PARENT_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName());
                 break;
             case SERVER:
-                holder.clearParents(server, null);
+                holder.clearParents(server, null, false);
 
                 try {
                     holder.setInheritGroup(group, server);
-                } catch (ObjectAlreadyHasException ignored) {
-                }
+                } catch (ObjectAlreadyHasException ignored) {}
 
                 if (server.equalsIgnoreCase("global") && holder instanceof User) {
                     ((User) holder).getPrimaryGroup().setStoredValue(group.getName());
@@ -102,7 +101,7 @@ public class ParentSet extends SharedSubCommand {
                 Message.SET_PARENT_SERVER_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(), server);
                 break;
             case SERVER_AND_WORLD:
-                holder.clearParents(server, world);
+                holder.clearParents(server, world, false);
 
                 try {
                     holder.setInheritGroup(group, server, world);

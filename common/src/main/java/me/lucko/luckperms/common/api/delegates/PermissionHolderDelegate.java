@@ -261,17 +261,17 @@ public class PermissionHolderDelegate implements PermissionHolder {
 
     @Override
     public void clearParents() {
-        master.clearParents();
+        master.clearParents(true);
     }
 
     @Override
     public void clearParents(String server) {
-        master.clearParents(server);
+        master.clearParents(server, true);
     }
 
     @Override
     public void clearParents(String server, String world) {
-        master.clearParents(server, world);
+        master.clearParents(server, world, true);
     }
 
     @Override

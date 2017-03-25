@@ -1130,7 +1130,7 @@ public abstract class PermissionHolder {
         plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
     }
 
-    public void clearParents() {
+    public void clearParents(boolean giveDefault) {
         ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes().values());
 
         synchronized (nodes) {
@@ -1139,7 +1139,7 @@ public abstract class PermissionHolder {
                 return;
             }
         }
-        if (this instanceof User) {
+        if (this instanceof User && giveDefault) {
             plugin.getUserManager().giveDefaultIfNeeded((User) this, false);
         }
         invalidateCache();
@@ -1147,7 +1147,7 @@ public abstract class PermissionHolder {
         plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
     }
 
-    public void clearParents(String server) {
+    public void clearParents(String server, boolean giveDefault) {
         String finalServer = Optional.ofNullable(server).orElse("global");
 
         ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes().values());
@@ -1159,7 +1159,7 @@ public abstract class PermissionHolder {
                 return;
             }
         }
-        if (this instanceof User) {
+        if (this instanceof User && giveDefault) {
             plugin.getUserManager().giveDefaultIfNeeded((User) this, false);
         }
         invalidateCache();
@@ -1167,7 +1167,7 @@ public abstract class PermissionHolder {
         plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
     }
 
-    public void clearParents(String server, String world) {
+    public void clearParents(String server, String world, boolean giveDefault) {
         String finalServer = Optional.ofNullable(server).orElse("global");
         String finalWorld = Optional.ofNullable(world).orElse("null");
 
@@ -1182,7 +1182,7 @@ public abstract class PermissionHolder {
                 return;
             }
         }
-        if (this instanceof User) {
+        if (this instanceof User && giveDefault) {
             plugin.getUserManager().giveDefaultIfNeeded((User) this, false);
         }
         invalidateCache();
