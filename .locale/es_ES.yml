@@ -1,0 +1,338 @@
+# LuckPerms Language File
+# Locale: es_ES (Spanish)
+# Author: Jose Chavez (Twitter: @JoCHav3z)
+
+prefix: "&7&l[&b&lL&3&lP&7&l] &c"
+log-info: "&7&l[&bL&3P&7&l] &3{0}"
+log-warn: "&7&l[&bLuck&3Perms&7&l] &c[ADVERTENCIA] {0}"
+log-error: "&7&l[&bLuck&3Perms&7&l] &4[ERROR] {0}"
+empty: "{0}"
+player-online: "&aConectado"
+player-offline: "&cDesconectado"
+loading-error: "La Informacion de los permisos no pudo ser cargada. Por favor contacte al administrador."
+op-disabled: "&bEl sistema OP de Vanilla esta deshabilitado en este servidor."
+op-disabled-sponge: "&2El estado de operador del servidor no tiene efecto cuando un plugin de permisos esta instalado. Por favor edite la informacion de usuario directamente."
+log: "&3LOG &3&l> {0}"
+export-log: "&3EXPORTAR &3&l> &f{0}"
+export-log-progress: "&3EXPORTADO &3&l> &7{0}"
+migration-log: "&3MIGRACION &7[&3{0}&7] &3&l> &f{1}"
+migration-log-progress: "&3MIGRADO &7[&3{0}&7] &3&l> &7{1}"
+command-not-recognised: "Comando no reconocido."
+command-no-permission: "¡No tienes permiso de usar este comando!"
+already-haspermission: "{0} ¡Ya tienes este permiso!"
+does-not-havepermission: "{0} No tienes este permiso establecido."
+already-has-temp-permission: "{0} ¡Ya tienes este permiso establecido temporalmente!"
+does-not-have-temp-permission: "{0} No tienes este permiso establecido temporalmente."
+user-not-found: "&bNo se pudo encontrar al usuario."
+user-not-online: "&bUsuario &a{0}&b no esta conectado."
+user-no-data: "&bUsuario &a{0}&b no tiene ningún dato cargado."
+user-save-success: "&7(Los datos del usuario se guardaron en el almacenamiento)"
+user-save-error: "Se ha producido un error al guardar el usuario."
+user-create-fail: "Se produjo un error al crear un nuevo usuario."
+group-not-found: "&bEl Grupo no se pudo encontrar."
+group-save-success: "&7(Los datos del grupo se guardaron en el almacenamiento)"
+group-save-error: "Se ha producido un error al guardar el grupo."
+track-not-found: "&bNo se pudo encontrar la pista."
+track-save-success: "&7(Los datos de la pista se guardaron en el almacenamiento)"
+track-save-error: "Se ha producido un error al guardar la pista."
+user-invalid-entry: "&d{0}&c El username/uuid no es valido."
+group-invalid-entry: "Los nombres de grupo sólo pueden contener caracteres alfanuméricos."
+track-invalid-entry: "Los nombres de pista sólo pueden contener caracteres alfanuméricos."
+server-invalid-entry: "Los nombres de servidor sólo pueden contener caracteres alfanuméricos."
+use-inherit-command: "Usa el comando 'parent add' y 'parent remove' en vez de especificar el nodo."
+verbose-invalid-filter: "&cFiltro Verbose invalido: &f{0}"
+verbose-on: "&bEl chequeo Verbose de salida se ha establecido en &aTRUE &bpara todos los permisos."
+verbose-on-query: "&bEl chequeo Verbose de salida que se establecio en &aTRUE &bpara los permisos se ha pareado con los siguientes filtros: &f{0}"
+verbose-off: "&bEl chequeo Verbose de salida que se establecio en &cFALSE&b."
+verbose-recording-on: "&bGrabacion de Verbose establecida en &aTRUE &bpara todos los permisos."
+verbose-recording-on-query: "&bGrabacion de Verbose establecida en &aTRUE &bpara los permisos se ha pareado con los siguientes filtros: &f{0}"
+verbose-recording-upload-start: "&bGrabacion de Verbose se ha deshabilitado. Cargando resultados..."
+verbose-recording-url: "&aURL de resultados de Verbose:"
+tree-upload-start: "&bGenerando arbol de permisos..."
+tree-empty: "&aNo se puede generar el árbol. No se encontraron resultados."
+tree-url: "&aURL de arbol de permisos:"
+search-searching: "&aBúsqueda de usuarios y grupos con &b{0}&a..."
+search-result: "&aEncontradas &b{0}&a entradas por parte de &b{1}&a usuarios y &b{2}&a grupos."
+search-showing-users: "&bMostrando entradas del usuario:"
+search-showing-groups: "&bMostrando entradas del grupo:"
+search-showing-users-with-page: "&bMostrando entradas del usuario:  {0}"
+search-showing-groups-with-page: "&bMostrando entradas del grupo:  {0}"
+check-result: "&aResultado de la comprobación del permiso en el usuario &b{0}&a para permiso &b{1}&a: &f{2}"
+create-success: "&b{0}&a se creó correctamente."
+delete-success: "&b{0}&a fue eliminado correctamente."
+rename-success: "&b{0}&a fue exitosamente renombrado a &b{1}&a."
+clone-success: "&b{0}&a fue clonado con éxito en &b{1}&a."
+already-inherits: "{0} ya hereda '{1}'."
+does-not-inherit: "{0} no hereda '{1}'."
+already-temp-inherits: "{0} ya lo heredo temporalmente a '{1}'."
+does-not-temp-inherit: "{0} no lo heredo temporalmente a '{1}'."
+track-already-contains: "La pista {0} ya contiene el grupo '{1}'."
+track-does-not-contain: "La pista {0} no contiene el grupo '{1}'."
+track-ambiguous-call: "El usuario especificado es miembro de varios grupos en esta pista. No se puede determinar su ubicación."
+group-already-exists: "¡Ese grupo ya existe!"
+group-does-not-exist: "¡Ese grupo no existe!"
+group-load-error: "Ocurrió un error inesperado. No se pudo cargar el grupo."
+groups-load-error: "Ocurrió un error inesperado. No se pueden cargar todos los grupos."
+track-already-exists: "¡La pista ya existe!"
+track-does-not-exist: "¡La pista no existe!"
+track-load-error: "Ocurrió un error inesperado. No se pudo cargar la pista."
+tracks-load-error: "Ocurrió un error inesperado. No se pueden cargar todas las pistas."
+track-empty: "La pista no se puede utilizar porque está vacía o contiene sólo un grupo."
+update-task-request: "&bActualizar tarea programada."
+update-task-complete: "&aLa actualizacion de la tarea a finalizado."
+update-task-complete-network: "&aLa actualizacion de la tarea a finalizado. Ahora intentando enviar a otros servidores."
+update-task-push-success: "&aOtros servidores fueron notificados vía &b{0} Mensajería &aexitoxamente."
+update-task-push-failure: "&cError al empujar cambios a otros servidores."
+update-task-push-failure-not-setup: "&cError al presionar los cambios a otros servidores. No se ha configurado un servicio de mensajería."
+reload-config-success: "&aSe ha vuelto a cargar el archivo de configuración. &7(Algunas opciones sólo se aplicarán después de que el servidor se haya reiniciado.)"
+info: >
+  {PREFIX}&2Running &bLuckPerms v{0}&2 by &bLuck&2.\n
+  {PREFIX}&f-  &3Platform: &f{1}\n
+  {PREFIX}&f-  &3Storage Method: &f{2}\n
+  {PREFIX}&f-  &3Server Name: &f{3}\n
+  {PREFIX}&f-  &3Sync Interval: &a{4} &fminutes\n
+  {PREFIX}&f-  &3Messaging Service: &f{5}\n
+  {PREFIX}&f-  &bCounts:\n
+  {PREFIX}&f-     &3Online Players: &a{6}\n
+  {PREFIX}&f-     &3Loaded Users: &a{7}\n
+  {PREFIX}&f-     &3Loaded Groups: &a{8}\n
+  {PREFIX}&f-     &3Loaded Tracks: &a{9}\n
+  {PREFIX}&f-     &3Log size: &a{10}\n
+  {PREFIX}&f-     &3UUID Cache size: &a{11}\n
+  {PREFIX}&f-     &3Translations loaded: &a{12}\n
+  {PREFIX}&f-     &3Pre-process contexts: &a{13}\n
+  {PREFIX}&f-     &3Context Calculators: &a{14}\n
+  {PREFIX}&f-     &3Unique permissions: &a{15}\n
+  {PREFIX}&f-  &bConfiguration:\n
+  {PREFIX}&f-     &3Use Server UUIDs: {16}\n
+  {PREFIX}&f-     &bPermission Calculation:\n
+  {PREFIX}&f-        &3Including Global: {17}\n
+  {PREFIX}&f-        &3Including Global World: {18}\n
+  {PREFIX}&f-        &3Applying Global Groups: {19}\n
+  {PREFIX}&f-        &3Applying Global World Groups: {20}\n
+  {PREFIX}&f-        &3Applying Wildcards: {21}\n
+  {PREFIX}&f-        &3Applying Regex: {22}\n
+  {PREFIX}&f-        &3Applying Shorthand: {23}
+create-group-error: "Se produjo un error al crear el grupo."
+delete-group-error: "Se produjo un error al eliminar el grupo."
+delete-group-error-default: "No puede eliminar el grupo predeterminado."
+groups-list: "&aGrupos: {0}"
+create-track-error: "Se produjo un error al crear la pista."
+delete-track-error: "Se produjo un error al eliminar la pista."
+tracks-list: "&aPistas: {0}"
+listnodes: "&b{0}'s Nodos:"
+listnodes-with-page: "&b{0}'s Nodos:  {1}"
+listnodes-temp: >
+  &b{0}'s Temporary Nodes:\n
+  {1}
+listparents: >
+  &b{0}'s Parent Groups:\n
+  {1}
+listparents-temp: >
+  &b{0}'s Temporary Parent Groups:\n
+  {1}
+listgroups: >
+  &b{0}'s Groups:\n
+  {1}
+listgroups-temp: >
+  &b{0}'s Temporary Groups:\n
+  {1}
+list-tracks: >
+  &b{0}'s Tracks:\n
+  {1}
+list-tracks-empty: "{0} no está en ninguna pista."
+setpermission-success: "&aEstablecer &b{0}&a a &b{1}&a para &b{2}&a."
+setpermission-server-success: "&aEstablecer &b{0}&a a &b{1}&a para &b{2}&a en el servidor &b{3}&a."
+setpermission-server-world-success: "&aEstablecer &b{0}&a a &b{1}&a para &b{2}&a en el servidor &b{3}&a, mundo &b{4}&a."
+setpermission-temp-success: "&aEstablecer &b{0}&a a &b{1}&a para &b{2}&a por una duracion de &b{3}&a."
+setpermission-temp-server-success: "&aEstablecer &b{0}&a a &b{1}&a para &b{2}&a en el servidor &b{3}&a por una duracion de &b{4}&a."
+setpermission-temp-server-world-success: "&aEstablecer &b{0}&a a &b{1}&a para &b{2}&a en el servidor &b{3}&a, mundo &b{4}&a, por una duracion de &b{5}&a."
+unsetpermission-success: "&aDesestablecer &b{0}&a para &b{1}&a."
+unsetpermission-server-success: "&aDesestablecer &b{0}&a para &b{1}&a en el servidor &b{2}&a."
+unsetpermission-server-world-success: "&aDesestablecer &b{0}&a para &b{1}&a en el servidor &b{2}&a, mundo &b{3}&a."
+unset-temp-permission-success: "&aDesestablecer temporalmente el permiso &b{0}&a para &b{1}&a."
+unset-temp-permission-server-success: "&aDesestablecer temporalmente el permiso &b{0}&a para &b{1}&a en el servidor &b{2}&a."
+unset-temp-permission-server-world-success: "&aDesestablecer temporalmente el permiso &b{0}&a para &b{1}&a en el servidor &b{2}&a, mundo &b{3}&a."
+set-inherit-success: "&b{0}&a ahora hereda los permisos de &b{1}&a."
+set-inherit-server-success: "&b{0}&a ahora hereda los permisos de &b{1}&a en el servidor &b{2}&a."
+set-inherit-server-world-success: "&b{0}&a ahora hereda los permisos de &b{1}&a en el servidor &b{2}&a, mundo &b{3}&a."
+set-parent-success: "&b{0}&a sus grupos parentales existentes han sido borrados, y ahora solo heredan &b{1}&a."
+set-parent-server-success: "&b{0}&a sus grupos parentales existentes han sido borrados, y ahora solo heredan &b{1}&a en el servidor &b{2}&a."
+set-parent-server-world-success: "&b{0}&a sus grupos parentales existentes han sido borrados, y ahora solo heredan &b{1}&a en el servidor &b{2}&a, mundo &b{3}&a."
+set-temp-inherit-success: "&b{0}&a ahora heredan permisos de &b{1}&a por una duracion de &b{2}&a."
+set-temp-inherit-server-success: "&b{0}&a ahora heredan permisos de &b{1}&a en el servidor &b{2}&a por una duracion de &b{3}&a."
+set-temp-inherit-server-world-success: "&b{0}&a ahora heredan permisos de &b{1}&a en el servidor &b{2}&a, mundo &b{3}&a, por una duracion de &b{4}&a."
+unset-inherit-success: "&b{0}&a ya no hereda los permisos de &b{1}&a."
+unset-inherit-server-success: "&b{0}&a ya no hereda los permisos de &b{1}&a en el servidor &b{2}&a."
+unset-inherit-server-world-success: "&b{0}&a ya no hereda los permisos de &b{1}&a en el servidor &b{2}&a, mundo &b{3}&a."
+unset-temp-inherit-success: "&b{0}&a ya no hereda temporalmente los permisos de &b{1}&a."
+unset-temp-inherit-server-success: "&b{0}&a ya no hereda temporalmente los permisos &b{1}&a en el servidor &b{2}&a."
+unset-temp-inherit-server-world-success: "&b{0}&a ya no hereda temporalmente los permisos &b{1}&a en el servidor &b{2}&a, mundo &b{3}&a."
+clear-success: "&b{0}&a's permisos fueron borrados. (&b{1}&a nodos fueron removidos.)"
+clear-success-singular: "&b{0}&a's permisos fueron borrados. (&b{1}&a nodo fue removido.)"
+parent-clear-success: "&b{0}&a's los padres fueron eliminados. (&b{1}&a nodos fueron removidos.)"
+parent-clear-success-singular: "&b{0}&a's los padres fueron eliminados. (&b{1}&a nodo fue removido.)"
+meta-clear-success: "&b{0}&a's meta fue eliminada. (&b{1}&a nodos fueron removidos.)"
+meta-clear-success-singular: "&b{0}&a's meta fue eliminada. (&b{1}&a nodo fue removido.)"
+illegal-date-error: "No se pudo analizar la fecha '{0}'."
+past-date-error: "¡No puedes fijar una fecha en el pasado!"
+chat-meta-prefix-header: "&b{0}'s Prefijos"
+chat-meta-suffix-header: "&b{0}'s Sufijos"
+meta-header: "&b{0}'s Meta"
+chat-meta-entry: "&b-> {0} &f- &f\"{1}&f\" &8(&7heredado de &a{2}&8)"
+chat-meta-entry-with-context: "&b-> {0} &f- &f\"{1}&f\" &8(&7heredado de &a{2}&8){3}"
+meta-entry: "&b-> &a{0} &f= &f\"{1}&f\" &8(&7heredado de &a{2}&8)"
+meta-entry-with-context: "&b-> &a{0} &f= &f\"{1}&f\" &8(&7heredado de &a{2}&8){3}"
+chat-meta-prefix-none: "&b{0} no tiene prefijos."
+chat-meta-suffix-none: "&b{0} no tiene sufijos."
+meta-none: "&b{0} no tiene meta."
+meta-invalid-priority: "Prioridad no válida '{0}'. Se esperaba un número."
+already-has-prefix: "{0} ya tiene ese prefijo establecido."
+already-has-suffix: "{0} ya tiene ese sufijo establecido."
+does-not-have-prefix: "{0} no tiene ese prefijo establecido."
+does-not-have-suffix: "{0} no tiene ese sufijo establecido."
+addprefix-success: "&b{0}&a tiene el prefijo &f\"{1}&f\"&a establecido como prioridad de &b{2}&a."
+addprefix-server-success: "&b{0}&a tiene el prefijo &f\"{1}&f\"&a establecido como prioridad de &b{2}&a en el servidor &b{3}&a."
+addprefix-server-world-success: "&b{0}&a tiene el prefijo &f\"{1}&f\"&a establecido como prioridad de &b{2}&a en el servidor &b{3}&a, mundo &b{4}&a."
+removeprefix-success: "&b{0}&a tiene el prefijo &f\"{1}&f\"&a en prioridad de &b{2}&a removido."
+removeprefix-server-success: "&b{0}&a tiene el prefijo &f\"{1}&f\"&a en prioridad de &b{2}&a removido en el servidor &b{3}&a."
+removeprefix-server-world-success: "&b{0}&a tiene el prefijo &f\"{1}&f\"&a en prioridad de &b{2}&a removido en el servidor &b{3}&a, mundo &b{4}&a."
+addsuffix-success: "&b{0}&a tiene el sufijo &f\"{1}&f\"&a establecido en prioridad de &b{2}&a."
+addsuffix-server-success: "&b{0}&a tiene el sufijo &f\"{1}&f\"&a establecido en prioridad de &b{2}&a en el servidor &b{3}&a."
+addsuffix-server-world-success: "&b{0}&a tiene el sufijo &f\"{1}&f\"&a establecido en prioridad de &b{2}&a en el servidor &b{3}&a, mundo &b{4}&a."
+removesuffix-success: "&b{0}&a tiene el sufijo &f\"{1}&f\"&a en prioridad de &b{2}&a removido."
+removesuffix-server-success: "&b{0}&a tiene el sufijo &f\"{1}&f\"&a en prioridad de &b{2}&a removido en el servidor &b{3}&a."
+removesuffix-server-world-success: "&b{0}&a tiene el sufijo &f\"{1}&f\"&a en prioridad de &b{2}&a removido en el servidor &b{3}&a, mundo &b{4}&a."
+add-temp-prefix-success: "&b{0}&a tiene el prefijo &f\"{1}&f\"&a en prioridad de &b{2}&a por una duracion de &b{3}&a."
+add-temp-prefix-server-success: "&b{0}&a tiene el prefijo &f\"{1}&f\"&a establecido en prioridad de &b{2}&a en el servidor &b{3}&a, por una duracion de &b{4}&a."
+add-temp-prefix-server-world-success: "&b{0}&a tiene el prefijo &f\"{1}&f\"&a establecido en prioridad de &b{2}&a en el servidor &b{3}&a, mundo &b{4}&a, por una duracion de &b{5}&a."
+remove-temp-prefix-success: "&b{0}&a tiene temporalmente el prefijo &f\"{1}&f\"&a en prioridad de &b{2}&a removido."
+remove-temp-prefix-server-success: "&b{0}&a tiene temporalmente el prefijo &f\"{1}&f\"&a en prioridad de &b{2}&a removido en el servidor &b{3}&a."
+remove-temp-prefix-server-world-success: "&b{0}&a tiene temporalmente el prefijo &f\"{1}&f\"&a en prioridad de &b{2}&a removido en el servidor &b{3}&a, mundo &b{4}&a."
+add-temp-suffix-success: "&b{0}&a tiene el sufijo &f\"{1}&f\"&a establecido en prioridad de &b{2}&a por una duracion de &b{3}&a."
+add-temp-suffix-server-success: "&b{0}&a tiene el sufijo &f\"{1}&f\"&a establecido en prioridad de &b{2}&a en el servidor &b{3}&a, por una duracion de &b{4}&a."
+add-temp-suffix-server-world-success: "&b{0}&a tiene el sufijo &f\"{1}&f\"&a establecido en prioridad de &b{2}&a en el servidor &b{3}&a, mundo &b{4}&a, por una duracion de &b{5}&a."
+remove-temp-suffix-success: "&b{0}&a tiene temporalmente el sufijo &f\"{1}&f\"&a en prioridad de &b{1}&a removido."
+remove-temp-suffix-server-success: "&b{0}&a tiene temporalmente el sufijo &f\"{1}&f\"&a en prioridad de &b{2}&a removido en el servidor &b{3}&a."
+remove-temp-suffix-server-world-success: "&b{0}&a tiene temporalmente el sufijo &f\"{1}&f\"&a en prioridad de &b{2}&a removido en el servidor &b{3}&a, mundo &b{4}&a."
+already-has-meta: "{0} ya tiene ese par de valores de llave meta establecido."
+set-meta-success: "&aEstablecer el valor meta para la llave &f\"{0}&f\"&a a &f\"{1}&f\"&a para &b{2}&a."
+set-meta-server-success: "&aEstablecer el valor meta para la llave &f\"{0}&f\"&a a &f\"{1}&f\"&a para &b{2}&a en el servidor &b{3}&a."
+set-meta-server-world-success: "&aEstablecer el valor meta para la llave &f\"{0}&f\"&a a &f\"{1}&f\"&a para &b{2}&a en el servidor &b{3}&a, mundo &b{4}&a."
+set-meta-temp-success: "&aEstablecer el valor meta para la llave &f\"{0}&f\"&a a &f\"{1}&f\"&a para &b{2}&a por una duracion de &b{3}&a."
+set-meta-temp-server-success: "&aEstablecer el valor meta para la llave &f\"{0}&f\"&a a &f\"{1}&f\"&a para &b{2}&a en el servidor &b{3}&a por una duracion de &b{4}&a."
+set-meta-temp-server-world-success: "&aEstablecer el valor meta para la llave &f\"{0}&f\"&a a &f\"{1}&f\"&a para &b{2}&a en el servidor &b{3}&a, mundo &b{4}&a, por una duracion de &b{5}&a."
+unset-meta-success: "&aDesestablecer el valor meta con la llave &f\"{0}&f\"&a para &b{1}&a."
+unset-meta-server-success: "&aDesestablecer el valor meta con la llave &f\"{0}&f\"&a para &b{1}&a en el servidor &b{2}&a."
+unset-meta-server-world-success: "&aDesestablecer el valor meta con la llave &f\"{0}&f\"&a for &b{1}&a en el servidor &b{2}&a, mundo &b{3}&a."
+unset-meta-temp-success: "&aDesestablecer temporalmente el valor meta con la llave &f\"{0}&f\"&a para &b{1}&a."
+unset-meta-temp-server-success: "&aDesestablecer temporalmente el valor meta con la llave &f\"{0}&f\"&a para &b{1}&a en el servidor &b{2}&a."
+unset-meta-temp-server-world-success: "&aDesestablecer temporalmente el valor meta con la llave &f\"{0}&f\"&a para &b{1}&a en el servidor &b{2}&a, mundo &b{3}&a."
+bulk-change-type-error: "Tipo no válido. Se estaba esperando 'server' o 'world'."
+bulk-change-success: "&aEl cambio masivo fue aplicado correctamente. {0} los registros fueron cambiados."
+user-info-general: >
+  {PREFIX}&b&l> &bUser Info: &f{0}\n
+  {PREFIX}&f- &3UUID: &f{1}\n
+  {PREFIX}&f- &3Status: {2}\n
+  {PREFIX}&f- &3Primary Group: &f{3}\n
+  {PREFIX}&f- &aCounts:\n
+  {PREFIX}&f-    &3Permissions: &a{4}\n
+  {PREFIX}&f-    &3Temporary Permissions: &a{5}\n
+  {PREFIX}&f-    &3Prefixes: &a{6}\n
+  {PREFIX}&f-    &3Suffixes: &a{7}\n
+  {PREFIX}&f-    &3Meta: &a{8}
+user-info-data: >
+  {PREFIX}&f- &aCached Data:\n
+  {PREFIX}&f-    &3Is Loaded: {0}\n
+  {PREFIX}&f-    &3Current Contexts: {1}\n
+  {PREFIX}&f-    &3Current Prefix: {2}\n
+  {PREFIX}&f-    &3Current Suffix: {3}
+info-parent-header: "&f- &aGrupos Parentales:"
+info-temp-parent-header: "&f- &aGrupos Temporalmente Parentales:"
+user-getuuid: "&bEl UUID de &b{0}&b es &b{1}&b."
+user-removegroup-error-primary: "No puede eliminar un usuario de su grupo principal."
+user-primarygroup-success: "&b{0}&a's grupo primario se estableció &b{1}&a."
+user-primarygroup-warn-option: "&cAdvertencia: El método de cálculo de grupo primario utilizado por este servidor &7({0}) &cpuede no reflejar este cambio."
+user-primarygroup-error-alreadyhas: "El usuario ya tiene este grupo configurado como su grupo principal."
+user-primarygroup-error-notmember: "&b{0}&a ya no era miembro de &b{1}&a, agregándolos ahora."
+user-track-error-not-contain-group: "El usuario especificado ya no está en ningún grupo de esta pista."
+user-track-added-to-first: "&b{0}&a no está en ningún grupo en esta pista, por lo que se agregaron al primer grupo, &b{1}&a."
+user-track-added-to-first-server: "&b{0}&a no está en ningún grupo en esta pista, por lo que se agregaron al primer grupo, &b{1}&a, en el servidor &b{2}&a."
+user-track-added-to-first-server-world: "&b{0}&a no está en ningún grupo en esta pista, por lo que se agregaron al primer grupo, &b{1}&a, en el servidor &b{2}&a, mundo &b{3}&a."
+user-promote-success: "&aPromover al usuario a lo largo de la pista &b{0}&a desde &b{1}&a a &b{2}&a."
+user-promote-success-server: "&aPromover al usuario a lo largo de la pista &b{0}&a desde &b{1}&a a &b{2}&a en el servidor &b{3}&a."
+user-promote-success-server-world: "&aPromover al usuario a lo largo de la pista &b{0}&a desde &b{1}&a a &b{2}&a en el servidor &b{3}&a, mundo &b{4}&a."
+user-promote-error-endoftrack: "El final de la pista &4{0}&c fue alcanzado. No se puede promover al usuario."
+user-promote-error-malformed: >
+  {PREFIX}The next group on the track, {0}, no longer exists. Unable to promote user.\n
+  {PREFIX}Either create the group, or remove it from the track and try again.
+user-demote-success: "&aDegradando al usuario a lo largo de la pista &b{0}&a desde &b{1}&a a &b{2}&a."
+user-demote-success-server: "&aDegradando al usuario a lo largo de la pista &b{0}&a desde &b{1}&a a &b{2}&a en el servidor &b{3}&a."
+user-demote-success-server-world: "&aDegradando al usuario a lo largo de la pista &b{0}&a desde &b{1}&a a &b{2}&a en el servidor &b{3}&a, mundo &b{4}&a."
+user-demote-endoftrack: "El final de la pista &4{0}&c fue alcanzado, asi que &4{1}&c fue removido de &4{2}&c."
+user-demote-error-malformed: >
+  {PREFIX}The previous group on the track, {0}, no longer exists. Unable to demote user.\n
+  {PREFIX}Either create the group, or remove it from the track and try again.
+user-showpos: >
+  &aShowing &b{0}&a's position on track &b{1}&a.\n
+  {2}
+group-info-general: >
+  {PREFIX}&b&l> &bGroup Info: &f{0}\n
+  {PREFIX}&f- &3Display Name: &f{1}\n
+  {PREFIX}&f- &3Weight: &f{2}\n
+  {PREFIX}&f- &aCounts:\n
+  {PREFIX}&f-    &3Permissions: &a{3}\n
+  {PREFIX}&f-    &3Temporary Permissions: &a{4}\n
+  {PREFIX}&f-    &3Prefixes: &a{5}\n
+  {PREFIX}&f-    &3Suffixes: &a{6}\n
+  {PREFIX}&f-    &3Meta: &a{7}
+group-set-weight: "&aEstablesca el peso a &b{0}&a para el grupo &b{1}&a."
+track-info: >
+  {PREFIX}&b&l> &bShowing Track: &f{0}\n
+  {PREFIX}&f- &7Path: &f{1}
+track-clear: "&b{0}&a's pista de grupos fue borrada."
+track-append-success: "&aGrupo &b{0}&a fue añadido con éxito a la pista &b{1}&a."
+track-insert-success: "&aGrupo &b{0}&a fue insertado con éxito en la pista &b{1}&a en la posicion &b{2}&a."
+track-insert-error-number: "Numero esperado en lugar de recibido: {0}"
+track-insert-error-invalid-pos: "No se puede insertar en la posición {0}. Indice fuera de los limites."
+track-remove-success: "&aGrupo &b{0}&a se eliminó correctamente de la pista &b{1}&a."
+log-load-error: "No se pudo cargar el registro."
+log-invalid-page: "Número de página no válido."
+log-invalid-page-range: "Número de página no válido. Por favor introduzca un valor entre 1 y {0}."
+log-no-entries: "&bNo hay entradas de registro que mostrar."
+log-entry: "&b#{0} -> &8(&7{1} hace&8) {2}"
+log-notify-toggle-on: "&aHabilitada&b salida de registro."
+log-notify-toggle-off: "&cDeshabilitada&b salida de registro."
+log-notify-already-on: "Ya está recibiendo notificaciones."
+log-notify-already-off: "Actualmente no estás recibiendo notificaciones."
+log-notify-unknown: "Estado desconocido. Esperando \"on\" o \"off\"."
+log-search-header: "&aMostrar acciones recientes para la consulta &b{0} &a(pagina &f{1}&a de &f{2}&a)"
+log-recent-header: "&aMostrando acciones recientes (pagina &f{0}&a de &f{1}&a)"
+log-recent-by-header: "&aMostrando las acciones recientes por &b{0} &a(pagina &f{1}&a de &f{2}&a)"
+log-history-user-header: "&aMostrando el historial del usuario &b{0} &a(pagina &f{1}&a de &f{2}&a)"
+log-history-group-header: "&aMostrando la historia del grupo &b{0} &a(pagina &f{1}&a de &f{2}&a)"
+log-history-track-header: "&aMostrando la historia de la pista &b{0} &a(pagina &f{1}&a de &f{2}&a)"
+log-export-already-exists: "Error: Archivo {0} ya existe."
+log-export-not-writable: "Error: Archivo {0} no se puede escribir."
+log-export-empty: "El registro está vacío y por lo tanto no puede ser exportado."
+log-export-failure: "Se ha producido un error inesperado al escribir en el archivo."
+log-export-success: "&aExitosamente exportó el registro a &b{0}&a."
+import-already-running: "Ya se está ejecutando otro proceso de importación. Por favor espere a que finalice e inténtelo de nuevo."
+export-already-running: "Ya se está ejecutando otro proceso de exportación. Por favor espere a que finalice e inténtelo de nuevo."
+import-log-doesnt-exist: "Error: Archivo {0} no existe."
+import-log-not-readable: "Error: Archivo {0} no es legible."
+import-log-failure: "Se ha producido un error inesperado al leer del archivo de registro."
+import-progress: "&b(Import) &b-> &f{0} &fporcentaje completado &7- &b{1}&f/&b{2} &fOperaciones completas con &c{3} &ferrores."
+import-progress-sin: "&b(Import) &b-> &f{0} &fporcentaje completado &7- &b{1}&f/&b{2} &fOperaciones completas con &c{3} &ferrores."
+import-start: "&b(Import) &b-> &fInicio del proceso de importación."
+import-end-complete: "&b(Import) &a&lCOMPLETADO &7- tomo &b{0} &7segundos - &7No errores."
+import-end-complete-err: "&b(Import) &a&lCOMPLETADO &7- tomo &b{0} &7segundos - &c{1} errores."
+import-end-complete-err-sin: "&b(Import) &a&lCOMPLETADO &7- tomo &b{0} &7segundos - &c{1} errores."
+import-end-error-header: >
+  {PREFIX}&b(Import) &7------------> &fShowing Error #&b{0} &7<------------\n
+  {PREFIX}&b(Import) &fWhilst executing: &3Command #{1}\n
+  {PREFIX}&b(Import) &fCommand: &7{2}\n
+  {PREFIX}&b(Import) &fType: &3{3}\n
+  {PREFIX}&b(Import) &fOutput:
+import-end-error-content: "&b(Import) &b-> &c{0}"
+import-end-error-footer: "&b(Import) &7<------------------------------------------>"
