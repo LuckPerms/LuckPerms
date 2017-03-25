@@ -79,7 +79,7 @@ public class PermissionUnsetTemp extends SharedSubCommand {
             } else {
                 switch (ContextHelper.determine(server, world)) {
                     case NONE:
-                        holder.unsetPermission(NodeFactory.make(node, true));
+                        holder.unsetPermission(NodeFactory.make(node, true, true));
                         Message.UNSET_TEMP_PERMISSION_SUCCESS.send(sender, node, holder.getFriendlyName());
                         break;
                     case SERVER:

@@ -101,7 +101,7 @@ public class MetaRemoveTempPrefix extends SharedSubCommand {
         try {
             switch (ContextHelper.determine(server, world)) {
                 case NONE:
-                    holder.unsetPermission(NodeFactory.make(node, true));
+                    holder.unsetPermission(NodeFactory.make(node, true, true));
                     Message.REMOVE_TEMP_PREFIX_SUCCESS.send(sender, holder.getFriendlyName(), prefix, priority);
                     break;
                 case SERVER:

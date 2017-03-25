@@ -64,7 +64,7 @@ public class ParentRemoveTemp extends SharedSubCommand {
         try {
             switch (ContextHelper.determine(server, world)) {
                 case NONE:
-                    holder.unsetPermission(NodeFactory.make("group." + groupName, true));
+                    holder.unsetPermission(NodeFactory.make("group." + groupName, true, true));
                     Message.UNSET_TEMP_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), groupName);
                     break;
                 case SERVER:

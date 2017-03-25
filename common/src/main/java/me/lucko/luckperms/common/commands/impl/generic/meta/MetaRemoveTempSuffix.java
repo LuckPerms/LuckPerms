@@ -101,7 +101,7 @@ public class MetaRemoveTempSuffix extends SharedSubCommand {
         try {
             switch (ContextHelper.determine(server, world)) {
                 case NONE:
-                    holder.unsetPermission(NodeFactory.make(node, true));
+                    holder.unsetPermission(NodeFactory.make(node, true, true));
                     Message.REMOVE_TEMP_SUFFIX_SUCCESS.send(sender, holder.getFriendlyName(), suffix, priority);
                     break;
                 case SERVER:
