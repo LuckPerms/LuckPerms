@@ -70,7 +70,7 @@ public class PasteUtils {
                 connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                 connection.setDoOutput(true);
                 try (OutputStream os = connection.getOutputStream()) {
-                    os.write(("url=" + pasteUrl).getBytes());
+                    os.write(("url=" + pasteUrl).getBytes(StandardCharsets.UTF_8));
                 }
                 pasteUrl = connection.getHeaderField("Location");
                 connection.disconnect();

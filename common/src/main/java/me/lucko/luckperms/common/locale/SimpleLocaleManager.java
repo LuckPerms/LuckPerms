@@ -22,16 +22,16 @@
 
 package me.lucko.luckperms.common.locale;
 
-import lombok.Cleanup;
-
 import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.common.constants.Message;
 
 import org.yaml.snakeyaml.Yaml;
 
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Map;
 
 public class SimpleLocaleManager implements LocaleManager {
@@ -40,8 +40,9 @@ public class SimpleLocaleManager implements LocaleManager {
 
     @SuppressWarnings("unchecked")
     public void loadFromFile(File file) throws Exception {
-        @Cleanup FileReader fileReader = new FileReader(file);
-        translations = ImmutableMap.copyOf((Map<String, String>) new Yaml().load(fileReader));
+        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
+            translations = ImmutableMap.copyOf((Map<String, String>) new Yaml().load(reader));
+        }
     }
 
     @Override

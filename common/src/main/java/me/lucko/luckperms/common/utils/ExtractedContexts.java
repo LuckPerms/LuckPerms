@@ -33,7 +33,7 @@ import me.lucko.luckperms.api.context.ImmutableContextSet;
 @Getter
 @EqualsAndHashCode
 @ToString
-public class ExtractedContexts {
+public final class ExtractedContexts {
     public static ExtractedContexts generate(Contexts contexts) {
         return new ExtractedContexts(contexts);
     }
