@@ -135,6 +135,18 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
     }
 
     @Override
+    public void scheduleUnload(UUID uuid) {
+        plugin.getScheduler().doAsyncLater(() -> {
+            User user = get(plugin.getUuidCache().getUUID(uuid));
+            if (user != null && !plugin.isPlayerOnline(uuid)) {
+                user.unregisterData();
+                unload(user);
+            }
+            plugin.getUuidCache().clearCache(uuid);
+        }, 40L);
+    }
+
+    @Override
     public void updateAllUsers() {
         plugin.doSync(() -> {
             Set<UUID> players = plugin.getOnlinePlayers();

@@ -39,6 +39,7 @@ import me.lucko.luckperms.bukkit.model.LPPermissible;
 import me.lucko.luckperms.bukkit.vault.VaultHook;
 import me.lucko.luckperms.common.api.ApiHandler;
 import me.lucko.luckperms.common.api.ApiProvider;
+import me.lucko.luckperms.common.caching.UserCache;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.commands.sender.Sender;
@@ -73,6 +74,7 @@ import me.lucko.luckperms.common.treeview.PermissionVault;
 import me.lucko.luckperms.common.utils.BufferedRequest;
 import me.lucko.luckperms.common.utils.FileWatcher;
 import me.lucko.luckperms.common.utils.LoggerImpl;
+import me.lucko.luckperms.common.utils.LoginHelper;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 
 import org.bukkit.World;
@@ -302,7 +304,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         // Load any online users (in the case of a reload)
         for (Player player : getServer().getOnlinePlayers()) {
             scheduler.doAsync(() -> {
-                listener.onAsyncLogin(player.getUniqueId(), player.getName());
+                LoginHelper.loadUser(this, player.getUniqueId(), player.getName());
                 User user = getUserManager().get(getUuidCache().getUUID(player.getUniqueId()));
                 if (user != null) {
                     scheduler.doSync(() -> {
@@ -431,11 +433,21 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         if (getConfiguration().get(ConfigKeys.AUTO_OP)) {
             try {
                 LPPermissible permissible = Injector.getPermissible(player.getUniqueId());
-                if (permissible == null) {
+                if (permissible == null || !permissible.getActive().get()) {
                     return;
                 }
 
-                Map<String, Boolean> backing = permissible.getUser().getUserData().getPermissionData(permissible.calculateContexts()).getImmutableBacking();
+                User user = permissible.getUser();
+                if (user == null) {
+                    return;
+                }
+
+                UserCache userData = user.getUserData();
+                if (userData == null) {
+                    return;
+                }
+
+                Map<String, Boolean> backing = userData.getPermissionData(permissible.calculateContexts()).getImmutableBacking();
                 boolean op = Optional.ofNullable(backing.get("luckperms.autoop")).orElse(false);
                 player.setOp(op);
             } catch (Exception ignored) {}
@@ -511,7 +523,8 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
     @Override
     public boolean isPlayerOnline(UUID external) {
-        return getServer().getPlayer(external) != null;
+        Player player = getServer().getPlayer(external);
+        return player != null && player.isOnline();
     }
 
     @Override

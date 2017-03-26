@@ -22,7 +22,7 @@
 
 package me.lucko.luckperms.common.utils;
 
-import lombok.AllArgsConstructor;
+import lombok.experimental.UtilityClass;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.core.UuidCache;
@@ -33,13 +33,12 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import java.util.UUID;
 
 /**
- * An abstract listener shared by Bukkit & Sponge.
+ * Utilities for use in platform listeners
  */
-@AllArgsConstructor
-public class AbstractListener {
-    private final LuckPermsPlugin plugin;
+@UtilityClass
+public class LoginHelper {
 
-    public void onAsyncLogin(UUID u, String username) {
+    public static void loadUser(LuckPermsPlugin plugin, UUID u, String username) {
         final long startTime = System.currentTimeMillis();
 
         final UuidCache cache = plugin.getUuidCache();
@@ -67,6 +66,7 @@ public class AbstractListener {
         User user = plugin.getUserManager().get(cache.getUUID(u));
         if (user == null) {
             plugin.getLog().warn("Failed to load user: " + username);
+            throw new RuntimeException("Failed to load user");
         } else {
             // Setup defaults for the user
             boolean save = false;
@@ -90,20 +90,7 @@ public class AbstractListener {
         }
     }
 
-    protected void onLeave(UUID uuid) {
-        final UuidCache cache = plugin.getUuidCache();
-
-        final User user = plugin.getUserManager().get(cache.getUUID(uuid));
-        if (user != null) {
-            user.unregisterData();
-            plugin.getUserManager().unload(user);
-        }
-
-        // Unload the user from memory when they disconnect;
-        cache.clearCache(uuid);
-    }
-
-    protected void refreshPlayer(UUID uuid) {
+    public static void refreshPlayer(LuckPermsPlugin plugin, UUID uuid) {
         final User user = plugin.getUserManager().get(plugin.getUuidCache().getUUID(uuid));
         if (user != null) {
             user.getRefreshBuffer().requestDirectly();

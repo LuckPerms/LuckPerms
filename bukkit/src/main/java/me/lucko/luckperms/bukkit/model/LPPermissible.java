@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -66,6 +67,8 @@ public class LPPermissible extends PermissibleBase {
     @Setter
     private PermissibleBase oldPermissible = null;
 
+    private final AtomicBoolean active = new AtomicBoolean(false);
+
     // Attachment stuff.
     private final Map<String, PermissionAttachmentInfo> attachmentPermissions = new ConcurrentHashMap<>();
     private final List<PermissionAttachment> attachments = Collections.synchronizedList(new LinkedList<>());
@@ -81,10 +84,18 @@ public class LPPermissible extends PermissibleBase {
     }
 
     public void updateSubscriptionsAsync() {
+        if (!active.get()) {
+            return;
+        }
+
         plugin.doAsync(this::updateSubscriptions);
     }
 
     public void updateSubscriptions() {
+        if (!active.get()) {
+            return;
+        }
+
         UserCache cache = user.getUserData();
         if (cache == null) {
             return;
@@ -110,9 +121,7 @@ public class LPPermissible extends PermissibleBase {
     }
 
     public void addAttachments(List<PermissionAttachment> attachments) {
-        for (PermissionAttachment attachment : attachments) {
-            this.attachments.add(attachment);
-        }
+        this.attachments.addAll(attachments);
     }
 
     public Contexts calculateContexts() {
@@ -128,7 +137,7 @@ public class LPPermissible extends PermissibleBase {
     }
 
     private boolean hasData() {
-        return user.getUserData() != null;
+        return user != null && user.getUserData() != null;
     }
 
     @Override

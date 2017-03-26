@@ -64,7 +64,7 @@ public class Injector {
             PermissibleBase existing = (PermissibleBase) HUMAN_ENTITY_FIELD.get(player);
             if (existing instanceof LPPermissible) {
                 // uh oh
-                throw new IllegalStateException();
+                throw new IllegalStateException("LPPermissible already injected into player " + player.toString());
             }
 
             // Move attachments over from the old permissible.
@@ -73,6 +73,7 @@ public class Injector {
             attachments.clear();
             existing.clearPermissions();
 
+            lpPermissible.getActive().set(true);
             lpPermissible.recalculatePermissions();
             lpPermissible.setOldPermissible(existing);
 
@@ -97,6 +98,8 @@ public class Injector {
                 if (unsubscribe) {
                     ((LPPermissible) permissible).unsubscribeFromAllAsync();
                 }
+
+                ((LPPermissible) permissible).getActive().set(false);
 
                 if (dummy) {
                     HUMAN_ENTITY_FIELD.set(player, new DummyPermissibleBase());

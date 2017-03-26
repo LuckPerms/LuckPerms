@@ -27,6 +27,7 @@ import lombok.Getter;
 
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.locale.LocaleManager;
 
 @SuppressWarnings("SpellCheckingInspection")
 @AllArgsConstructor
@@ -44,7 +45,7 @@ public enum Message {
     EMPTY("{0}", true),
     PLAYER_ONLINE("&aOnline", false),
     PLAYER_OFFLINE("&cOffline", false),
-    LOADING_ERROR("Permissions data could not be loaded. Please contact an administrator.", true),
+    LOADING_ERROR("Permissions data could not be loaded. Please try again later.", true),
     OP_DISABLED("&bThe vanilla OP system is disabled on this server.", false),
     OP_DISABLED_SPONGE("&2Server Operator status has no effect when a permission plugin is installed. Please edit user data directly.", true),
     LOG("&3LOG &3&l> {0}", true),
@@ -450,6 +451,21 @@ public enum Message {
     @Override
     public String toString() {
         return Util.color(showPrefix ? PREFIX + message : message);
+    }
+
+    public String asString(LocaleManager localeManager) {
+        String prefix = localeManager.getTranslation(PREFIX);
+        if (prefix == null) {
+            prefix = PREFIX.getMessage();
+        }
+
+        String s = localeManager.getTranslation(this);
+        if (s == null) {
+            s = message;
+        }
+
+        s = s.replace("{PREFIX}", prefix).replace("\\n", "\n");
+        return Util.color(showPrefix ? (prefix + s) : (s));
     }
 
     public void send(Sender sender, Object... objects) {

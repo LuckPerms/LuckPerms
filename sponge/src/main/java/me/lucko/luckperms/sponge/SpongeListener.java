@@ -22,12 +22,14 @@
 
 package me.lucko.luckperms.sponge;
 
+import lombok.RequiredArgsConstructor;
+
 import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.core.UuidCache;
 import me.lucko.luckperms.common.core.model.User;
-import me.lucko.luckperms.common.utils.AbstractListener;
+import me.lucko.luckperms.common.utils.LoginHelper;
 import me.lucko.luckperms.sponge.timings.LPTiming;
 
 import org.spongepowered.api.command.CommandSource;
@@ -35,49 +37,131 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.command.SendCommandEvent;
+import org.spongepowered.api.event.filter.IsCancelled;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.serializer.TextSerializers;
+import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.World;
 
 import co.aikar.timings.Timing;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("WeakerAccess")
-public class SpongeListener extends AbstractListener {
+@RequiredArgsConstructor
+public class SpongeListener {
     private final LPSpongePlugin plugin;
 
-    SpongeListener(LPSpongePlugin plugin) {
-        super(plugin);
-        this.plugin = plugin;
-    }
+    private final Set<UUID> deniedAsyncLogin = Collections.synchronizedSet(new HashSet<>());
+    private final Set<UUID> deniedLogin = Collections.synchronizedSet(new HashSet<>());
 
-    @Listener(order = Order.EARLY)
+    @Listener(order = Order.AFTER_PRE)
+    @IsCancelled(Tristate.UNDEFINED)
     public void onClientAuth(ClientConnectionEvent.Auth e) {
-        if (!plugin.getStorage().isAcceptingLogins()) {
-            /* Datastore is disabled, prevent players from joining the server
-               Just don't load their data, they will be kicked at login */
+        /* Called when the player first attempts a connection with the server.
+           Listening on AFTER_PRE priority to allow plugins to modify username / UUID data here. (auth plugins) */
+
+        final GameProfile p = e.getProfile();
+
+        /* the player was denied entry to the server before this priority.
+           log this, so we can handle appropriately later. */
+        if (e.isCancelled()) {
+            plugin.getLog().warn("Connection from " + p.getUniqueId() + " was already denied. No permissions data will be loaded.");
+            deniedAsyncLogin.add(p.getUniqueId());
             return;
         }
 
-        final GameProfile p = e.getProfile();
-        onAsyncLogin(p.getUniqueId(), p.getName().get()); // Load the user into LuckPerms
+        /* either the plugin hasn't finished starting yet, or there was an issue connecting to the DB, performing file i/o, etc.
+           we don't let players join in this case, because it means they can connect to the server without their permissions data.
+           some server admins rely on negating perms to stop users from causing damage etc, so it's really important that
+           this data is loaded. */
+        if (!plugin.getStorage().isAcceptingLogins()) {
+
+            // log that the user tried to login, but was denied at this stage.
+            deniedAsyncLogin.add(p.getUniqueId());
+
+            // actually deny the connection.
+            plugin.getLog().warn("Permissions storage is not loaded yet. Denying connection from: " + p.getUniqueId() + " - " + p.getName());
+            e.setCancelled(true);
+            e.setMessageCancelled(true);
+            //noinspection deprecation
+            e.setMessage(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(Message.LOADING_ERROR.asString(plugin.getLocaleManager())));
+            return;
+        }
+
+        /* Actually process the login for the connection.
+           We do this here to delay the login until the data is ready.
+           If the login gets cancelled later on, then this will be cleaned up.
+
+           This includes:
+           - loading uuid data
+           - loading permissions
+           - creating a user instance in the UserManager for this connection.
+           - setting up cached data. */
+        try {
+            LoginHelper.loadUser(plugin, p.getUniqueId(), p.getName().orElseThrow(() -> new RuntimeException("No username present for user " + p.getUniqueId())));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+
+            e.setCancelled(true);
+            e.setMessageCancelled(true);
+            //noinspection deprecation
+            e.setMessage(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(Message.LOADING_ERROR.asString(plugin.getLocaleManager())));
+        }
     }
 
-    @SuppressWarnings("deprecation")
-    @Listener(order = Order.EARLY)
+    @Listener(order = Order.BEFORE_POST)
+    @IsCancelled(Tristate.UNDEFINED)
+    public void onClientAuthMonitor(ClientConnectionEvent.Auth e) {
+        /* Listen to see if the event was cancelled after we initially handled the connection
+           If the connection was cancelled here, we need to do something to clean up the data that was loaded. */
+
+        // Check to see if this connection was denied at LOW.
+        if (deniedAsyncLogin.remove(e.getProfile().getUniqueId())) {
+
+            // This is a problem, as they were denied at low priority, but are now being allowed.
+            if (e.isCancelled()) {
+                plugin.getLog().severe("Player connection was re-allowed for " + e.getProfile().getUniqueId());
+                e.setCancelled(true);
+            }
+        }
+    }
+
+    @Listener(order = Order.AFTER_PRE)
+    @IsCancelled(Tristate.UNDEFINED)
     public void onClientLogin(ClientConnectionEvent.Login e) {
         try (Timing ignored = plugin.getTimings().time(LPTiming.ON_CLIENT_LOGIN)) {
+            /* Called when the player starts logging into the server.
+               At this point, the users data should be present and loaded.
+               Listening on LOW priority to allow plugins to further modify data here. (auth plugins, etc.) */
+
             final GameProfile player = e.getProfile();
+
+            /* the player was denied entry to the server before this priority.
+               log this, so we can handle appropriately later. */
+            if (e.isCancelled()) {
+                plugin.getLog().warn("Login from " + player.getUniqueId() + " was denied before an attachment could be injected.");
+                deniedLogin.add(player.getUniqueId());
+                return;
+            }
+
             final User user = plugin.getUserManager().get(plugin.getUuidCache().getUUID(player.getUniqueId()));
 
-            // Check if the user was loaded successfully.
+            /* User instance is null for whatever reason. Could be that it was unloaded between asyncpre and now. */
             if (user == null) {
+                deniedLogin.add(player.getUniqueId());
+
+                plugin.getLog().warn("User " + player.getUniqueId() + " - " + player.getName() + " doesn't have data pre-loaded. - denying login.");
                 e.setCancelled(true);
-                e.setMessage(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(Message.LOADING_ERROR.toString()));
+                e.setMessageCancelled(true);
+                //noinspection deprecation
+                e.setMessage(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(Message.LOADING_ERROR.asString(plugin.getLocaleManager())));
                 return;
             }
 
@@ -108,7 +192,7 @@ public class SpongeListener extends AbstractListener {
     @Listener(order = Order.EARLY)
     public void onClientJoin(ClientConnectionEvent.Join e) {
         // Refresh permissions again
-        plugin.doAsync(() -> refreshPlayer(e.getTargetEntity().getUniqueId()));
+        plugin.doAsync(() -> LoginHelper.refreshPlayer(plugin, e.getTargetEntity().getUniqueId()));
     }
 
     @Listener(order = Order.LAST)

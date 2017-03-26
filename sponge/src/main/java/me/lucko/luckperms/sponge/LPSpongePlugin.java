@@ -440,7 +440,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
     @Override
     public boolean isPlayerOnline(UUID external) {
-        return game.getServer().getPlayer(external).isPresent();
+        return game.getServer().getPlayer(external).map(Player::isOnline).orElse(false);
     }
 
     @Override

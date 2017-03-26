@@ -61,6 +61,13 @@ public interface UserManager extends Manager<UserIdentifier, User> {
     void cleanup(User user);
 
     /**
+     * Schedules a task to cleanup a user after a certain period of time, if they're not on the server anymore.
+     *
+     * @param uuid external uuid of the player
+     */
+    void scheduleUnload(UUID uuid);
+
+    /**
      * Reloads the data of all online users
      */
     void updateAllUsers();

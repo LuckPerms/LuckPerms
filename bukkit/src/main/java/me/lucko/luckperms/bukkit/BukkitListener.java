@@ -22,12 +22,15 @@
 
 package me.lucko.luckperms.bukkit;
 
+import lombok.RequiredArgsConstructor;
+
 import me.lucko.luckperms.bukkit.model.Injector;
 import me.lucko.luckperms.bukkit.model.LPPermissible;
+import me.lucko.luckperms.common.caching.UserCache;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.core.model.User;
-import me.lucko.luckperms.common.utils.AbstractListener;
+import me.lucko.luckperms.common.utils.LoginHelper;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -39,62 +42,78 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.PluginEnableEvent;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-class BukkitListener extends AbstractListener implements Listener {
+@RequiredArgsConstructor
+public class BukkitListener implements Listener {
     private final LPBukkitPlugin plugin;
 
     private final Set<UUID> deniedAsyncLogin = Collections.synchronizedSet(new HashSet<>());
-    private final Set<UUID> deniedLogin = new HashSet<>();
-
-    private final Map<UUID, BukkitTask> cleanupTasks = Collections.synchronizedMap(new HashMap<>());
-
-    BukkitListener(LPBukkitPlugin plugin) {
-        super(plugin);
-        this.plugin = plugin;
-    }
+    private final Set<UUID> deniedLogin = Collections.synchronizedSet(new HashSet<>());
 
     @EventHandler(priority = EventPriority.LOW)
     public void onPlayerPreLogin(AsyncPlayerPreLoginEvent e) {
+        /* Called when the player first attempts a connection with the server.
+           Listening on LOW priority to allow plugins to modify username / UUID data here. (auth plugins) */
+
+        /* the player was denied entry to the server before this priority.
+           log this, so we can handle appropriately later. */
         if (e.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
+            plugin.getLog().warn("Connection from " + e.getUniqueId() + " was already denied. No permissions data will be loaded.");
             deniedAsyncLogin.add(e.getUniqueId());
             return;
         }
 
+        /* either the plugin hasn't finished starting yet, or there was an issue connecting to the DB, performing file i/o, etc.
+           we don't let players join in this case, because it means they can connect to the server without their permissions data.
+           some server admins rely on negating perms to stop users from causing damage etc, so it's really important that
+           this data is loaded. */
         if (!plugin.isStarted() || !plugin.getStorage().isAcceptingLogins()) {
+
+            // log that the user tried to login, but was denied at this stage.
             deniedAsyncLogin.add(e.getUniqueId());
 
-            // The datastore is disabled, prevent players from joining the server
-            plugin.getLog().warn("The plugin storage is not loaded. Denying connection from: " + e.getUniqueId() + " - " + e.getName());
-            e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, Message.LOADING_ERROR.toString());
+            // actually deny the connection.
+            plugin.getLog().warn("Permissions storage is not loaded yet. Denying connection from: " + e.getUniqueId() + " - " + e.getName());
+            e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, Message.LOADING_ERROR.asString(plugin.getLocaleManager()));
             return;
         }
 
-        // remove any pending cleanup tasks
-        BukkitTask task = cleanupTasks.remove(e.getUniqueId());
-        if (task != null) {
-            task.cancel();
-        }
+        /* Actually process the login for the connection.
+           We do this here to delay the login until the data is ready.
+           If the login gets cancelled later on, then this will be cleaned up.
 
-        // Process login
-        onAsyncLogin(e.getUniqueId(), e.getName());
+           This includes:
+           - loading uuid data
+           - loading permissions
+           - creating a user instance in the UserManager for this connection.
+           - setting up cached data. */
+        try {
+            LoginHelper.loadUser(plugin, e.getUniqueId(), e.getName());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+
+            // there was some error loading data. deny the connection
+            deniedAsyncLogin.add(e.getUniqueId());
+            e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, Message.LOADING_ERROR.asString(plugin.getLocaleManager()));
+        }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerPreLoginMonitor(AsyncPlayerPreLoginEvent e) {
-        // If they were denied before/at LOW, then don't bother handling here.
+        /* Listen to see if the event was cancelled after we initially handled the connection
+           If the connection was cancelled here, we need to do something to clean up the data that was loaded. */
+
+        // Check to see if this connection was denied at LOW.
         if (deniedAsyncLogin.remove(e.getUniqueId())) {
 
-            // this is a problem, as they were denied at low priority, but are now being allowed.
+            // This is a problem, as they were denied at low priority, but are now being allowed.
             if (e.getLoginResult() == AsyncPlayerPreLoginEvent.Result.ALLOWED) {
-                new IllegalStateException("Player connection was re-allowed for " + e.getUniqueId()).printStackTrace();
+                plugin.getLog().severe("Player connection was re-allowed for " + e.getUniqueId());
                 e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, "");
             }
 
@@ -102,14 +121,22 @@ class BukkitListener extends AbstractListener implements Listener {
         }
 
         // Login event was cancelled by another plugin
-        if (plugin.isStarted() && plugin.getStorage().isAcceptingLogins() && e.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
-            cleanupUser(e.getUniqueId());
+        if (e.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
+            // Schedule cleanup of this user.
+            plugin.getUserManager().scheduleUnload(e.getUniqueId());
         }
     }
 
     @EventHandler(priority = EventPriority.LOW)
     public void onPlayerLogin(PlayerLoginEvent e) {
+        /* Called when the player starts logging into the server.
+           At this point, the users data should be present and loaded.
+           Listening on LOW priority to allow plugins to further modify data here. (auth plugins, etc.) */
+
+        /* the player was denied entry to the server before this priority.
+           log this, so we can handle appropriately later. */
         if (e.getResult() != PlayerLoginEvent.Result.ALLOWED) {
+            plugin.getLog().warn("Login from " + e.getPlayer().getUniqueId() + " was denied before an attachment could be injected.");
             deniedLogin.add(e.getPlayer().getUniqueId());
             return;
         }
@@ -117,21 +144,17 @@ class BukkitListener extends AbstractListener implements Listener {
         final Player player = e.getPlayer();
         final User user = plugin.getUserManager().get(plugin.getUuidCache().getUUID(player.getUniqueId()));
 
+        /* User instance is null for whatever reason. Could be that it was unloaded between asyncpre and now. */
         if (user == null) {
             deniedLogin.add(e.getPlayer().getUniqueId());
 
-            // User wasn't loaded for whatever reason.
-            plugin.getLog().warn("User " + player.getUniqueId() + " - " + player.getName() + " could not be loaded. - denying login.");
-            e.disallow(PlayerLoginEvent.Result.KICK_OTHER, Message.LOADING_ERROR.toString());
+            plugin.getLog().warn("User " + player.getUniqueId() + " - " + player.getName() + " doesn't have data pre-loaded. - denying login.");
+            e.disallow(PlayerLoginEvent.Result.KICK_OTHER, Message.LOADING_ERROR.asString(plugin.getLocaleManager()));
             return;
         }
 
-        // remove any pending cleanup tasks
-        BukkitTask task = cleanupTasks.remove(e.getPlayer().getUniqueId());
-        if (task != null) {
-            task.cancel();
-        }
-
+        // User instance is there, now we can inject our custom Permissible into the player.
+        // Care should be taken at this stage to ensure that async tasks which manipulate bukkit data check that the player is still online.
         try {
             // Make a new permissible for the user
             LPPermissible lpPermissible = new LPPermissible(player, user, plugin);
@@ -147,30 +170,43 @@ class BukkitListener extends AbstractListener implements Listener {
 
         // We assume all users are not op, but those who are need extra calculation.
         if (player.isOp()) {
-            plugin.doAsync(() -> user.getUserData().preCalculate(plugin.getPreProcessContexts(true)));
+            plugin.doAsync(() -> {
+                UserCache userData = user.getUserData();
+                if (userData == null) {
+                    return;
+                }
+
+                userData.preCalculate(plugin.getPreProcessContexts(true));
+            });
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerLoginMonitor(PlayerLoginEvent e) {
-        // If they were denied before/at LOW, then don't bother handling here.
+        /* Listen to see if the event was cancelled after we initially handled the login
+           If the connection was cancelled here, we need to do something to clean up the data that was loaded. */
+
+        // Check to see if this connection was denied at LOW.
         if (deniedLogin.remove(e.getPlayer().getUniqueId())) {
 
-            // this is a problem, as they were denied at low priority, but are now being allowed.
+            // This is a problem, as they were denied at low priority, but are now being allowed.
             if (e.getResult() == PlayerLoginEvent.Result.ALLOWED) {
-                new IllegalStateException("Player connection was re-allowed for " + e.getPlayer().getUniqueId()).printStackTrace();
+                plugin.getLog().severe("Player connection was re-allowed for " + e.getPlayer().getUniqueId());
                 e.disallow(PlayerLoginEvent.Result.KICK_OTHER, "");
             }
 
             return;
         }
 
+        // Login event was cancelled by another plugin
         if (e.getResult() != PlayerLoginEvent.Result.ALLOWED) {
-            // The player got denied on sync login.
-            cleanupUser(e.getPlayer().getUniqueId());
-        } else {
-            plugin.refreshAutoOp(e.getPlayer());
+            // Schedule cleanup of this user.
+            plugin.getUserManager().scheduleUnload(e.getPlayer().getUniqueId());
+            return;
         }
+
+        // everything is going well. login was processed ok, this is just to refresh auto-op status.
+        plugin.refreshAutoOp(e.getPlayer());
     }
 
     // Wait until the last priority to unload, so plugins can still perform permission checks on this event
@@ -186,21 +222,8 @@ class BukkitListener extends AbstractListener implements Listener {
             player.setOp(false);
         }
 
-        // Call internal leave handling
-        onLeave(player.getUniqueId());
-    }
-
-    private void cleanupUser(UUID uuid) {
-        if (cleanupTasks.containsKey(uuid)) {
-            return;
-        }
-
-        BukkitTask task = plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-            onLeave(uuid);
-            cleanupTasks.remove(uuid);
-        }, 60L);
-
-        cleanupTasks.put(uuid, task);
+        // Request that the users data is unloaded.
+        plugin.getUserManager().scheduleUnload(player.getUniqueId());
     }
 
     @EventHandler
@@ -209,7 +232,7 @@ class BukkitListener extends AbstractListener implements Listener {
             return;
         }
 
-        String s = e.getMessage()
+        String s = e.getMessage().toLowerCase()
                 .replace("/", "")
                 .replace("bukkit:", "")
                 .replace("spigot:", "")
@@ -217,7 +240,7 @@ class BukkitListener extends AbstractListener implements Listener {
 
         if (s.equals("op") || s.startsWith("op ") || s.equals("deop") || s.startsWith("deop ")) {
             e.setCancelled(true);
-            e.getPlayer().sendMessage(Message.OP_DISABLED.toString());
+            e.getPlayer().sendMessage(Message.OP_DISABLED.asString(plugin.getLocaleManager()));
         }
     }
 

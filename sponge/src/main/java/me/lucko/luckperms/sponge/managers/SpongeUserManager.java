@@ -206,6 +206,11 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
     }
 
     @Override
+    public void scheduleUnload(UUID uuid) {
+        // Do nothing - this instance uses other means in order to cleanup
+    }
+
+    @Override
     public void updateAllUsers() {
         plugin.doSync(() -> {
             Set<UUID> players = plugin.getOnlinePlayers();

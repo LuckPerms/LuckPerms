@@ -323,7 +323,8 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
     @Override
     public boolean isPlayerOnline(UUID external) {
-        return getProxy().getPlayer(external) != null;
+        ProxiedPlayer player = getProxy().getPlayer(external);
+        return player != null && player.isConnected();
     }
 
     @Override
