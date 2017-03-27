@@ -392,10 +392,10 @@ public class SQLBacking extends AbstractBacking {
             Set<NodeDataHolder> toAdd = diff.getKey();
             Set<NodeDataHolder> toRemove = diff.getValue();
 
-            if (!toAdd.isEmpty()) {
+            if (!toRemove.isEmpty()) {
                 try (Connection c = provider.getConnection()) {
-                    try (PreparedStatement ps = c.prepareStatement(prefix.apply(USER_PERMISSIONS_INSERT))) {
-                        for (NodeDataHolder nd : toAdd) {
+                    try (PreparedStatement ps = c.prepareStatement(prefix.apply(USER_PERMISSIONS_DELETE_SPECIFIC))) {
+                        for (NodeDataHolder nd : toRemove) {
                             ps.setString(1, user.getUuid().toString());
                             ps.setString(2, nd.getPermission());
                             ps.setBoolean(3, nd.isValue());
@@ -413,10 +413,10 @@ public class SQLBacking extends AbstractBacking {
                 }
             }
 
-            if (!toRemove.isEmpty()) {
+            if (!toAdd.isEmpty()) {
                 try (Connection c = provider.getConnection()) {
-                    try (PreparedStatement ps = c.prepareStatement(prefix.apply(USER_PERMISSIONS_DELETE_SPECIFIC))) {
-                        for (NodeDataHolder nd : toRemove) {
+                    try (PreparedStatement ps = c.prepareStatement(prefix.apply(USER_PERMISSIONS_INSERT))) {
+                        for (NodeDataHolder nd : toAdd) {
                             ps.setString(1, user.getUuid().toString());
                             ps.setString(2, nd.getPermission());
                             ps.setBoolean(3, nd.isValue());
@@ -675,10 +675,10 @@ public class SQLBacking extends AbstractBacking {
             Set<NodeDataHolder> toAdd = diff.getKey();
             Set<NodeDataHolder> toRemove = diff.getValue();
 
-            if (!toAdd.isEmpty()) {
+            if (!toRemove.isEmpty()) {
                 try (Connection c = provider.getConnection()) {
-                    try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_PERMISSIONS_INSERT))) {
-                        for (NodeDataHolder nd : toAdd) {
+                    try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_PERMISSIONS_DELETE_SPECIFIC))) {
+                        for (NodeDataHolder nd : toRemove) {
                             ps.setString(1, group.getName());
                             ps.setString(2, nd.getPermission());
                             ps.setBoolean(3, nd.isValue());
@@ -696,10 +696,10 @@ public class SQLBacking extends AbstractBacking {
                 }
             }
 
-            if (!toRemove.isEmpty()) {
+            if (!toAdd.isEmpty()) {
                 try (Connection c = provider.getConnection()) {
-                    try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_PERMISSIONS_DELETE_SPECIFIC))) {
-                        for (NodeDataHolder nd : toRemove) {
+                    try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_PERMISSIONS_INSERT))) {
+                        for (NodeDataHolder nd : toAdd) {
                             ps.setString(1, group.getName());
                             ps.setString(2, nd.getPermission());
                             ps.setBoolean(3, nd.isValue());
