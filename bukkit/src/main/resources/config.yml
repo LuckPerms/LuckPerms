@@ -48,6 +48,16 @@ use-server-uuids: true
 # If the plugin should send log notifications to users whenever permissions are modified.
 log-notify: true
 
+# Mirrors world names. Whenever LuckPerms checks what world a user is in, if the world name is in this list, the value assigned
+# will be sent forward for permission calculation instead.
+world-rewrite:
+#  world_nether: world
+#  world_the_end: world
+
+# Rewrites group names. The underlying name of the group does not change, just the output in commands / placeholders / Vault.
+group-name-rewrite:
+#  default: Member
+
 # Controls how temporary permissions/parents/meta should be accumulated
 #
 # The default behaviour is "deny"
@@ -154,8 +164,14 @@ commands-allow-op: true
 # |                                Vault                                   | #
 # +------------------------------------------------------------------------+ #
 
+# If the vault-server option below should be used.
+# When this option is set to false, the server value defined above under "server" is used.
+use-vault-server: false
+
 # The name of the server used within Vault operations. If you don't want Vault operations to be server specific, set this
 # to "global".
+#
+# Will only take effect if use-vault-server is set to true above.
 vault-server: global
 
 # If global permissions should be considered when retrieving meta or player groups
@@ -164,31 +180,8 @@ vault-include-global: true
 # If Vault operations should ignore any world arguments if supplied.
 vault-ignore-world: false
 
-# This block controls the Primary Group override feature
-# See the wiki for more information.
-vault-primary-groups-overrides:
-  # If the feature is enabled
-  enabled: false
-  # If the check should query the user's inherited permissions.
-  # (a value of false only checks the permissions they explicitly have)
-  check-inherited-permissions: false
-  # If LuckPerms should check if the group exists
-  check-group-exists: true
-  # If LuckPerms should check if the user is actually a member of the group
-  check-user-member-of: true
-
 # If LuckPerms should print debugging info to console when a plugin uses a Vault function
 vault-debug: false
-
-# Mirrors world names. Whenever LuckPerms checks what world a user is in, if the world name is in this list, the value assigned
-# will be sent forward for permission calculation instead.
-world-rewrite:
-#  world_nether: world
-#  world_the_end: world
-
-# Rewrites group names. The underlying name of the group does not change, just the output in commands / placeholders / Vault.
-group-name-rewrite:
-#  default: Member
 
 
 

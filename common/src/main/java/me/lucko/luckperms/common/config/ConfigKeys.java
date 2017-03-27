@@ -137,7 +137,14 @@ public class ConfigKeys {
     public static final ConfigKey<Boolean> AUTO_OP = EnduringKey.wrap(BooleanKey.of("auto-op", false));
     public static final ConfigKey<Boolean> OPS_ENABLED = EnduringKey.wrap(AbstractKey.of(c -> !AUTO_OP.get(c) && c.getBoolean("enable-ops", true)));
     public static final ConfigKey<Boolean> COMMANDS_ALLOW_OP = EnduringKey.wrap(BooleanKey.of("commands-allow-op", true));
-    public static final ConfigKey<String> VAULT_SERVER = LowercaseStringKey.of("vault-server", "global");
+    public static final ConfigKey<String> VAULT_SERVER = AbstractKey.of(c -> {
+        // default to true for backwards compatibility
+        if (c.getBoolean("use-vault-server", true)) {
+            return c.getString("vault-server", "global").toLowerCase();
+        } else {
+            return SERVER.get(c);
+        }
+    });
     public static final ConfigKey<Boolean> VAULT_INCLUDING_GLOBAL = BooleanKey.of("vault-include-global", true);
     public static final ConfigKey<Boolean> VAULT_IGNORE_WORLD = BooleanKey.of("vault-ignore-world", false);
     public static final ConfigKey<Boolean> VAULT_PRIMARY_GROUP_OVERRIDES = BooleanKey.of("vault-primary-groups-overrides.enabled", false);
