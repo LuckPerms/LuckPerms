@@ -265,7 +265,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
         contextManager = new ContextManager<>();
         contextManager.registerCalculator(new ServerCalculator<>(configuration));
-        contextManager.registerCalculator(new WorldCalculator(this));
+        contextManager.registerCalculator(new WorldCalculator());
 
         // register the PermissionService with Sponge
         getLog().info("Registering PermissionService...");

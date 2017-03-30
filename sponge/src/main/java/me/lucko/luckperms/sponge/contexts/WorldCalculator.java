@@ -26,46 +26,38 @@ import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.sponge.LPSpongePlugin;
 
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
 
 import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 
 @RequiredArgsConstructor
 public class WorldCalculator implements ContextCalculator<Subject> {
-    private final LPSpongePlugin plugin;
 
     @Override
     public MutableContextSet giveApplicableContext(Subject subject, MutableContextSet accumulator) {
-        UUID uuid = Util.parseUuid(subject.getIdentifier());
-        if (uuid == null) {
+        CommandSource source = subject.getCommandSource().orElse(null);
+        if (source == null || !(source instanceof Player)) {
             return accumulator;
         }
 
-        Optional<Player> p = plugin.getGame().getServer().getPlayer(plugin.getUuidCache().getExternalUUID(uuid));
-        if (!p.isPresent()) {
-            return accumulator;
-        }
-
-        accumulator.add(Context.WORLD_KEY, p.get().getWorld().getName());
+        Player p = ((Player) source);
+        accumulator.add(Context.WORLD_KEY, p.getWorld().getName());
         return accumulator;
     }
 
     @Override
     public boolean isContextApplicable(Subject subject, Map.Entry<String, String> context) {
-        UUID uuid = Util.parseUuid(subject.getIdentifier());
-        if (uuid == null) {
+        CommandSource source = subject.getCommandSource().orElse(null);
+        if (source == null || !(source instanceof Player)) {
             return false;
         }
 
-        Optional<Player> p = plugin.getGame().getServer().getPlayer(plugin.getUuidCache().getExternalUUID(uuid));
-        return p.map(player -> context.getKey().equals(Context.WORLD_KEY) && player.getWorld().getName().equals(context.getValue())).orElse(false);
+        Player p = ((Player) source);
+        return context.getKey().equals(Context.WORLD_KEY) && p.getWorld().getName().equals(context.getValue());
     }
 
 }
