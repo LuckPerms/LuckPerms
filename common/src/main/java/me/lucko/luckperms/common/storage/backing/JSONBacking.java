@@ -390,7 +390,7 @@ public class JSONBacking extends FlatfileBacking {
                     data.addProperty("name", track.getName());
                     JsonArray groups = new JsonArray();
                     for (String s : track.getGroups()) {
-                        groups.add(s);
+                        groups.add(new JsonPrimitive(s));
                     }
                     data.add("groups", groups);
 
@@ -447,7 +447,7 @@ public class JSONBacking extends FlatfileBacking {
                 data.addProperty("name", track.getName());
                 JsonArray groups = new JsonArray();
                 for (String s : track.getGroups()) {
-                    groups.add(s);
+                    groups.add(new JsonPrimitive(s));
                 }
                 data.add("groups", groups);
 
