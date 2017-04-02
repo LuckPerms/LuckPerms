@@ -32,9 +32,12 @@ import com.google.common.util.concurrent.UncheckedExecutionException;
 
 import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.constants.Patterns;
+import me.lucko.luckperms.common.core.model.Group;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -118,7 +121,7 @@ public class NodeFactory {
         return new NodeBuilder(other);
     }
 
-    public static NodeBuilder makeMetaNode(String key, String value) {
+    public static Node.Builder makeMetaNode(String key, String value) {
         if (key.equalsIgnoreCase("prefix")) {
             return makePrefixNode(100, value);
         }
@@ -129,15 +132,15 @@ public class NodeFactory {
         return new NodeBuilder("meta." + MetaUtils.escapeCharacters(key) + "." + MetaUtils.escapeCharacters(value));
     }
 
-    public static NodeBuilder makeChatMetaNode(boolean prefix, int priority, String s) {
+    public static Node.Builder makeChatMetaNode(boolean prefix, int priority, String s) {
         return prefix ? makePrefixNode(priority, s) : makeSuffixNode(priority, s);
     }
 
-    public static NodeBuilder makePrefixNode(int priority, String prefix) {
+    public static Node.Builder makePrefixNode(int priority, String prefix) {
         return new NodeBuilder("prefix." + priority + "." + MetaUtils.escapeCharacters(prefix));
     }
 
-    public static NodeBuilder makeSuffixNode(int priority, String suffix) {
+    public static Node.Builder makeSuffixNode(int priority, String suffix) {
         return new NodeBuilder("suffix." + priority + "." + MetaUtils.escapeCharacters(suffix));
     }
 
@@ -155,13 +158,7 @@ public class NodeFactory {
                 sb.append(node.getGroupName());
             }
 
-            if (node.isWorldSpecific()) {
-                sb.append(" ").append(node.getServer().get()).append(" ").append(node.getWorld().get());
-            } else if (node.isServerSpecific()) {
-                sb.append(" ").append(node.getServer().get());
-            }
-
-            return sb.toString();
+            return appendContextToCommand(sb, node).toString();
         }
 
         sb.append(node.isTemporary() ? "permission settemp " : "permission set ");
@@ -176,13 +173,28 @@ public class NodeFactory {
             sb.append(" ").append(node.getExpiryUnixTime());
         }
 
-        if (node.isWorldSpecific()) {
-            sb.append(" ").append(node.getServer().get()).append(" ").append(node.getWorld().get());
-        } else if (node.isServerSpecific()) {
+        return appendContextToCommand(sb, node).toString();
+    }
+
+    private static StringBuilder appendContextToCommand(StringBuilder sb, Node node) {
+        if (node.isServerSpecific()) {
             sb.append(" ").append(node.getServer().get());
+
+            if (node.isWorldSpecific()) {
+                sb.append(" ").append(node.getWorld().get());
+            }
+        } else {
+            if (node.isWorldSpecific()) {
+                sb.append(" world=").append(node.getWorld().get());
+            }
         }
 
-        return sb.toString();
+        ContextSet contexts = node.getContexts();
+        for (Map.Entry<String, String> context : contexts.toSet()) {
+            sb.append(" ").append(context.getKey()).append("=").append(context.getValue());
+        }
+
+        return sb;
     }
 
     public static String escapeDelimiters(String s, String... delims) {
@@ -298,4 +310,41 @@ public class NodeFactory {
     public static Node make(String node, boolean value, String server, String world, long expireAt) {
         return newBuilder(node).setValue(value).setServer(server).setWorld(world).setExpiry(expireAt).build();
     }
+
+    public static Node make(Group group, long expireAt) {
+        return NodeFactory.make("group." + group.getName(), true, expireAt);
+    }
+
+    public static Node make(Group group, String server, long expireAt) {
+        return NodeFactory.make("group." + group.getName(), true, server, expireAt);
+    }
+
+    public static Node make(Group group, String server, String world, long expireAt) {
+        return NodeFactory.make("group." + group.getName(), true, server, world, expireAt);
+    }
+
+    public static Node make(Group group) {
+        return make("group." + group.getName());
+    }
+
+    public static Node make(Group group, boolean temporary) {
+        return make("group." + group.getName(), temporary);
+    }
+
+    public static Node make(Group group, String server) {
+        return make("group." + group.getName(), server);
+    }
+
+    public static Node make(Group group, String server, String world) {
+        return make("group." + group.getName(), server, world);
+    }
+
+    public static Node make(Group group, String server, boolean temporary) {
+        return make("group." + group.getName(), server, temporary);
+    }
+
+    public static Node make(Group group, String server, String world, boolean temporary) {
+        return make("group." + group.getName(), server, world, temporary);
+    }
+
 }

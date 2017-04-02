@@ -180,7 +180,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             }
 
             for (Group parent : g.getParents()) {
-                group.setPermissionUnchecked(NodeFactory.make("group." + parent.getName().toLowerCase(), true));
+                group.setPermission(NodeFactory.make("group." + parent.getName().toLowerCase(), true));
             }
 
             // server --> prefix afaik
@@ -191,9 +191,9 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                 }
 
                 if (server != null) {
-                    group.setPermissionUnchecked(NodeFactory.makePrefixNode(g.getRank(), prefix.getValue()).setServer(server).build());
+                    group.setPermission(NodeFactory.makePrefixNode(g.getRank(), prefix.getValue()).setServer(server).build());
                 } else {
-                    group.setPermissionUnchecked(NodeFactory.makePrefixNode(g.getRank(), prefix.getValue()).build());
+                    group.setPermission(NodeFactory.makePrefixNode(g.getRank(), prefix.getValue()).build());
                 }
             }
 
@@ -204,9 +204,9 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
                 }
 
                 if (server != null) {
-                    group.setPermissionUnchecked(NodeFactory.makeSuffixNode(g.getRank(), suffix.getValue()).setServer(server).build());
+                    group.setPermission(NodeFactory.makeSuffixNode(g.getRank(), suffix.getValue()).setServer(server).build());
                 } else {
-                    group.setPermissionUnchecked(NodeFactory.makeSuffixNode(g.getRank(), suffix.getValue()).build());
+                    group.setPermission(NodeFactory.makeSuffixNode(g.getRank(), suffix.getValue()).build());
                 }
             }
 
@@ -252,16 +252,16 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             String suffix = joinFuture(pm.getPlayerOwnSuffix(uuid));
 
             if (prefix != null && !prefix.equals("")) {
-                user.setPermissionUnchecked(NodeFactory.makePrefixNode(maxWeight, prefix).build());
+                user.setPermission(NodeFactory.makePrefixNode(maxWeight, prefix).build());
             }
 
             if (suffix != null && !suffix.equals("")) {
-                user.setPermissionUnchecked(NodeFactory.makeSuffixNode(maxWeight, suffix).build());
+                user.setPermission(NodeFactory.makeSuffixNode(maxWeight, suffix).build());
             }
 
             String primary = joinFuture(pm.getPlayerPrimaryGroup(uuid)).getName().toLowerCase();
             if (!primary.equals("default")) {
-                user.setPermissionUnchecked(NodeFactory.make("group." + primary));
+                user.setPermission(NodeFactory.make("group." + primary));
                 user.getPrimaryGroup().setStoredValue(primary);
             }
 
@@ -316,7 +316,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             nb.setWorld(world);
         }
 
-        holder.setPermissionUnchecked(nb.build());
+        holder.setPermission(nb.build());
     }
 
     private void applyGroup(PermissionManager pm, PermissionHolder holder, CachedGroup g, String server) {
@@ -338,7 +338,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             nb.setServer(server);
         }
 
-        holder.setPermissionUnchecked(nb.build());
+        holder.setPermission(nb.build());
     }
 
     @SneakyThrows

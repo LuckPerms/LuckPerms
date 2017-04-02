@@ -22,16 +22,18 @@
 
 package me.lucko.luckperms.common.commands.impl.generic.permission;
 
+import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.ContextHelper;
 import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.NodeBuilder;
+import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
@@ -43,11 +45,10 @@ import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getPermi
 public class PermissionCheck extends SharedSubCommand {
     public PermissionCheck() {
         super("check", "Checks to see if the object has a certain permission node", Permission.USER_PERM_CHECK,
-                Permission.GROUP_PERM_CHECK, Predicates.notInRange(1, 3),
+                Permission.GROUP_PERM_CHECK, Predicates.is(0),
                 Arg.list(
                         Arg.create("node", true, "the permission node to check for"),
-                        Arg.create("server", false, "the server to check on"),
-                        Arg.create("world", false, "the world to check on")
+                        Arg.create("context...", false, "the contexts to check in")
                 )
         );
     }
@@ -55,21 +56,12 @@ public class PermissionCheck extends SharedSubCommand {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         String node = ArgumentUtils.handleString(0, args);
-        String server = ArgumentUtils.handleServer(1, args);
-        String world = ArgumentUtils.handleWorld(2, args);
+        MutableContextSet context = ArgumentUtils.handleContext(1, args);
 
-        switch (ContextHelper.determine(server, world)) {
-            case NONE:
-                Util.sendTristate(sender, node, holder.hasPermission(new NodeBuilder(node).build()));
-                break;
-            case SERVER:
-                Util.sendTristate(sender, node, holder.hasPermission(new NodeBuilder(node).setServer(server).build()));
-                break;
-            case SERVER_AND_WORLD:
-                Util.sendTristate(sender, node, holder.hasPermission(new NodeBuilder(node).setServer(server).setWorld(world).build()));
-                break;
-        }
+        Tristate result = holder.hasPermission(NodeFactory.newBuilder(node).withExtraContext(context).build());
+        String s = Util.formatTristate(result);
 
+        Message.CHECK_PERMISSION.send(sender, holder.getFriendlyName(), node, s, Util.contextSetToString(context));
         return CommandResult.SUCCESS;
     }
 

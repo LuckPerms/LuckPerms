@@ -43,10 +43,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-import static me.lucko.luckperms.common.api.ApiUtils.checkGroup;
 import static me.lucko.luckperms.common.api.ApiUtils.checkName;
-import static me.lucko.luckperms.common.api.ApiUtils.checkTrack;
-import static me.lucko.luckperms.common.api.ApiUtils.checkUser;
 import static me.lucko.luckperms.common.api.ApiUtils.checkUsername;
 
 /**
@@ -94,8 +91,7 @@ public class StorageDelegate implements Storage {
 
     @Override
     public CompletableFuture<Boolean> saveUser(User user) {
-        checkUser(user);
-        return master.force().saveUser(((UserDelegate) user).getMaster());
+        return master.force().saveUser(UserDelegate.cast(user));
     }
 
     @Override
@@ -130,17 +126,15 @@ public class StorageDelegate implements Storage {
 
     @Override
     public CompletableFuture<Boolean> saveGroup(Group group) {
-        checkGroup(group);
-        return master.force().saveGroup(((GroupDelegate) group).getMaster());
+        return master.force().saveGroup(GroupDelegate.cast(group));
     }
 
     @Override
     public CompletableFuture<Boolean> deleteGroup(Group group) {
-        checkGroup(group);
         if (group.getName().equalsIgnoreCase(plugin.getConfiguration().get(ConfigKeys.DEFAULT_GROUP_NAME))) {
             throw new IllegalArgumentException("Cannot delete the default group.");
         }
-        return master.force().deleteGroup(((GroupDelegate) group).getMaster(), DeletionCause.API);
+        return master.force().deleteGroup(GroupDelegate.cast(group), DeletionCause.API);
     }
 
     @Override
@@ -165,14 +159,12 @@ public class StorageDelegate implements Storage {
 
     @Override
     public CompletableFuture<Boolean> saveTrack(Track track) {
-        checkTrack(track);
-        return master.force().saveTrack(((TrackDelegate) track).getMaster());
+        return master.force().saveTrack(TrackDelegate.cast(track));
     }
 
     @Override
     public CompletableFuture<Boolean> deleteTrack(Track track) {
-        checkTrack(track);
-        return master.force().deleteTrack(((TrackDelegate) track).getMaster(), DeletionCause.API);
+        return master.force().deleteTrack(TrackDelegate.cast(track), DeletionCause.API);
     }
 
     @Override

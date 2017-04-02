@@ -88,26 +88,26 @@ public class MigrationBungeePerms extends SubCommand<Object> {
 
             // Migrate global perms
             for (String perm : g.getPerms()) {
-                group.setPermissionUnchecked(MigrationUtils.parseNode(perm, true).build());
+                group.setPermission(MigrationUtils.parseNode(perm, true).build());
             }
 
             // Migrate per-server perms
             for (Map.Entry<String, Server> e : g.getServers().entrySet()) {
                 for (String perm : e.getValue().getPerms()) {
-                    group.setPermissionUnchecked(MigrationUtils.parseNode(perm, true).setWorld(e.getKey()).build());
+                    group.setPermission(MigrationUtils.parseNode(perm, true).setWorld(e.getKey()).build());
                 }
 
                 // Migrate per-world perms
                 for (Map.Entry<String, World> we : e.getValue().getWorlds().entrySet()) {
                     for (String perm : we.getValue().getPerms()) {
-                        group.setPermissionUnchecked(MigrationUtils.parseNode(perm, true).setServer(e.getKey()).setWorld(we.getKey()).build());
+                        group.setPermission(MigrationUtils.parseNode(perm, true).setServer(e.getKey()).setWorld(we.getKey()).build());
                     }
                 }
             }
 
             // Migrate any parent groups
             for (String inherit : g.getInheritances()) {
-                group.setPermissionUnchecked(NodeFactory.make("group." + MigrationUtils.standardizeName(inherit)));
+                group.setPermission(NodeFactory.make("group." + MigrationUtils.standardizeName(inherit)));
             }
 
             // Migrate prefix and suffix
@@ -115,10 +115,10 @@ public class MigrationBungeePerms extends SubCommand<Object> {
             String suffix = g.getSuffix();
 
             if (prefix != null && !prefix.equals("")) {
-                group.setPermissionUnchecked(NodeFactory.makePrefixNode(groupWeight, prefix).build());
+                group.setPermission(NodeFactory.makePrefixNode(groupWeight, prefix).build());
             }
             if (suffix != null && !suffix.equals("")) {
-                group.setPermissionUnchecked(NodeFactory.makeSuffixNode(groupWeight, suffix).build());
+                group.setPermission(NodeFactory.makeSuffixNode(groupWeight, suffix).build());
             }
 
             plugin.getStorage().saveGroup(group);
@@ -145,26 +145,26 @@ public class MigrationBungeePerms extends SubCommand<Object> {
 
             // Migrate global perms
             for (String perm : u.getPerms()) {
-                user.setPermissionUnchecked(MigrationUtils.parseNode(perm, true).build());
+                user.setPermission(MigrationUtils.parseNode(perm, true).build());
             }
 
             // Migrate per-server perms
             for (Map.Entry<String, Server> e : u.getServers().entrySet()) {
                 for (String perm : e.getValue().getPerms()) {
-                    user.setPermissionUnchecked(MigrationUtils.parseNode(perm, true).setWorld(e.getKey()).build());
+                    user.setPermission(MigrationUtils.parseNode(perm, true).setWorld(e.getKey()).build());
                 }
 
                 // Migrate per-world perms
                 for (Map.Entry<String, World> we : e.getValue().getWorlds().entrySet()) {
                     for (String perm : we.getValue().getPerms()) {
-                        user.setPermissionUnchecked(MigrationUtils.parseNode(perm, true).setServer(e.getKey()).setWorld(we.getKey()).build());
+                        user.setPermission(MigrationUtils.parseNode(perm, true).setServer(e.getKey()).setWorld(we.getKey()).build());
                     }
                 }
             }
 
             // Migrate groups
             for (String group : u.getGroupsString()) {
-                user.setPermissionUnchecked(NodeFactory.make("group." + MigrationUtils.standardizeName(group)));
+                user.setPermission(NodeFactory.make("group." + MigrationUtils.standardizeName(group)));
             }
 
             // Migrate prefix & suffix
@@ -172,10 +172,10 @@ public class MigrationBungeePerms extends SubCommand<Object> {
             String suffix = u.getSuffix();
 
             if (prefix != null && !prefix.equals("")) {
-                user.setPermissionUnchecked(NodeFactory.makePrefixNode(maxWeight, prefix).build());
+                user.setPermission(NodeFactory.makePrefixNode(maxWeight, prefix).build());
             }
             if (suffix != null && !suffix.equals("")) {
-                user.setPermissionUnchecked(NodeFactory.makeSuffixNode(maxWeight, suffix).build());
+                user.setPermission(NodeFactory.makeSuffixNode(maxWeight, suffix).build());
             }
 
             plugin.getStorage().saveUser(user);

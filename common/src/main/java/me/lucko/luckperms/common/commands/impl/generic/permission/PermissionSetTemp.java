@@ -22,26 +22,29 @@
 
 package me.lucko.luckperms.common.commands.impl.generic.permission;
 
+import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.ContextHelper;
+import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.NodeBuilder;
+import me.lucko.luckperms.common.core.DataMutateResult;
+import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.TemporaryModifier;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getBoolTabComplete;
@@ -50,13 +53,12 @@ import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getPermi
 public class PermissionSetTemp extends SharedSubCommand {
     public PermissionSetTemp() {
         super("settemp", "Sets a permission for the object temporarily", Permission.USER_PERM_SETTEMP,
-                Permission.GROUP_PERM_SETTEMP, Predicates.notInRange(2, 5),
+                Permission.GROUP_PERM_SETTEMP, Predicates.inRange(0, 1),
                 Arg.list(
                         Arg.create("node", true, "the permission node to set"),
                         Arg.create("true|false", false, "the value of the node"),
                         Arg.create("duration", true, "the duration until the permission node expires"),
-                        Arg.create("server", false, "the server to add the permission node on"),
-                        Arg.create("world", false, "the world to add the permission node on")
+                        Arg.create("context...", false, "the contexts to add the permission in")
                 )
         );
     }
@@ -65,35 +67,15 @@ public class PermissionSetTemp extends SharedSubCommand {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         boolean b = ArgumentUtils.handleBoolean(1, args);
         String node = b ? ArgumentUtils.handleNode(0, args) : ArgumentUtils.handleString(0, args);
-
         long duration = ArgumentUtils.handleDuration(2, args);
-
-        String server = ArgumentUtils.handleServer(3, args);
-        String world = ArgumentUtils.handleWorld(4, args);
+        MutableContextSet context = ArgumentUtils.handleContext(3, args);
 
         TemporaryModifier modifier = plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR);
+        Map.Entry<DataMutateResult, Node> result = holder.setPermission(NodeFactory.newBuilder(node).setValue(b).withExtraContext(context).setExpiry(duration).build(), modifier);
 
-        try {
-            switch (ContextHelper.determine(server, world)) {
-                case NONE:
-                    duration = holder.setPermission(new NodeBuilder(node).setValue(b).setExpiry(duration).build(), modifier).getExpiryUnixTime();
-                    Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, b, holder.getFriendlyName(),
-                            DateUtil.formatDateDiff(duration)
-                    );
-                    break;
-                case SERVER:
-                    duration = holder.setPermission(new NodeBuilder(node).setValue(b).setServer(server).setExpiry(duration).build(), modifier).getExpiryUnixTime();
-                    Message.SETPERMISSION_TEMP_SERVER_SUCCESS.send(sender, node, b, holder.getFriendlyName(), server,
-                            DateUtil.formatDateDiff(duration)
-                    );
-                    break;
-                case SERVER_AND_WORLD:
-                    duration = holder.setPermission(new NodeBuilder(node).setValue(b).setServer(server).setWorld(world).setExpiry(duration).build(), modifier).getExpiryUnixTime();
-                    Message.SETPERMISSION_TEMP_SERVER_WORLD_SUCCESS.send(sender, node, b, holder.getFriendlyName(),
-                            server, world, DateUtil.formatDateDiff(duration)
-                    );
-                    break;
-            }
+        if (result.getKey().asBoolean()) {
+            duration = result.getValue().getExpiryUnixTime();
+            Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, b, holder.getFriendlyName(), DateUtil.formatDateDiff(duration), Util.contextSetToString(context));
 
             LogEntry.build().actor(sender).acted(holder)
                     .action("permission settemp " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
@@ -101,8 +83,7 @@ public class PermissionSetTemp extends SharedSubCommand {
 
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
-
-        } catch (ObjectAlreadyHasException e) {
+        } else {
             Message.ALREADY_HAS_TEMP_PERMISSION.send(sender, holder.getFriendlyName());
             return CommandResult.STATE_ERROR;
         }

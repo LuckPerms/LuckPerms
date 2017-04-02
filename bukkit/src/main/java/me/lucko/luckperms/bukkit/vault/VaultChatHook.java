@@ -81,7 +81,7 @@ public class VaultChatHook extends Chat {
                 metaNode.setWorld(finalWorld);
             }
 
-            holder.setPermissionUnchecked(metaNode.build());
+            holder.setPermission(metaNode.build());
             perms.save(holder);
         });
     }
@@ -111,7 +111,7 @@ public class VaultChatHook extends Chat {
                 chatMetaNode.setWorld(finalWorld);
             }
 
-            holder.setPermissionUnchecked(chatMetaNode.build());
+            holder.setPermission(chatMetaNode.build());
             perms.save(holder);
         });
     }

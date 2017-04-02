@@ -85,14 +85,34 @@ public interface Node extends Map.Entry<String, Boolean> {
     Optional<String> getWorld();
 
     /**
+     * Returns if this node is server specific
+     *
      * @return true if this node is server specific
      */
     boolean isServerSpecific();
 
     /**
+     * Returns if this node is server specific
+     *
      * @return true if this node is server specific
      */
     boolean isWorldSpecific();
+
+    /**
+     * Returns if this node applies globally, and has no specific context
+     *
+     * @return true if this node applies globally, and has no specific context
+     * @since 3.1
+     */
+    boolean appliesGlobally();
+
+    /**
+     * Returns if this node has any specific context in order to apply.
+     *
+     * @return true if this node has specific context
+     * @since 3.1
+     */
+    boolean hasSpecificContext();
 
     /**
      * If this node should apply on a specific server
@@ -222,22 +242,30 @@ public interface Node extends Map.Entry<String, Boolean> {
      * Converts this node into a serialized form
      *
      * @return a serialized node string
+     * @deprecated because this serialized form is no longer used by the implementation.
      */
+    @Deprecated
     String toSerializedNode();
 
     /**
+     * Returns if this is a group node
+     *
      * @return true if this is a group node
      */
     boolean isGroupNode();
 
     /**
+     * Returns the name of the group
+     *
      * @return the name of the group
      * @throws IllegalStateException if this is not a group node. See {@link #isGroupNode()}
      */
     String getGroupName();
 
     /**
-     * @return true is this node is a wildcard node
+     * Returns if this node is a wildcard node
+     *
+     * @return true if this node is a wildcard node
      */
     boolean isWildcard();
 
@@ -250,6 +278,8 @@ public interface Node extends Map.Entry<String, Boolean> {
     int getWildcardLevel();
 
     /**
+     * Returns if this node is a meta node
+     *
      * @return true if this node is a meta node
      */
     boolean isMeta();

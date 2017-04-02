@@ -33,6 +33,7 @@ import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.PermissionHolder;
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.utils.ExtractedContexts;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
@@ -166,82 +167,82 @@ public class PermissionHolderDelegate implements PermissionHolder {
 
     @Override
     public void setPermission(@NonNull Node node) throws ObjectAlreadyHasException {
-        master.setPermission(node);
+        master.setPermission(node).throwException();
     }
 
     @Override
     public void setTransientPermission(@NonNull Node node) throws ObjectAlreadyHasException {
-        master.setTransientPermission(node);
+        master.setTransientPermission(node).throwException();
     }
 
     @Override
     public void setPermission(@NonNull String node, @NonNull boolean value) throws ObjectAlreadyHasException {
-        master.setPermission(NodeFactory.make(node, value));
+        master.setPermission(NodeFactory.make(node, value)).throwException();
     }
 
     @Override
     public void setPermission(@NonNull String node, @NonNull boolean value, @NonNull String server) throws ObjectAlreadyHasException {
-        master.setPermission(NodeFactory.make(node, value, server));
+        master.setPermission(NodeFactory.make(node, value, server)).throwException();
     }
 
     @Override
     public void setPermission(@NonNull String node, @NonNull boolean value, @NonNull String server, @NonNull String world) throws ObjectAlreadyHasException {
-        master.setPermission(NodeFactory.make(node, value, server, world));
+        master.setPermission(NodeFactory.make(node, value, server, world)).throwException();
     }
 
     @Override
     public void setPermission(@NonNull String node, @NonNull boolean value, @NonNull long expireAt) throws ObjectAlreadyHasException {
-        master.setPermission(NodeFactory.make(node, value, checkTime(expireAt)));
+        master.setPermission(NodeFactory.make(node, value, checkTime(expireAt))).throwException();
     }
 
     @Override
     public void setPermission(@NonNull String node, @NonNull boolean value, @NonNull String server, @NonNull long expireAt) throws ObjectAlreadyHasException {
-        master.setPermission(NodeFactory.make(node, value, server, checkTime(expireAt)));
+        master.setPermission(NodeFactory.make(node, value, server, checkTime(expireAt))).throwException();
     }
 
     @Override
     public void setPermission(@NonNull String node, @NonNull boolean value, @NonNull String server, @NonNull String world, @NonNull long expireAt) throws ObjectAlreadyHasException {
-        master.setPermission(NodeFactory.make(node, value, server, world, checkTime(expireAt)));
+        master.setPermission(NodeFactory.make(node, value, server, world, checkTime(expireAt))).throwException();
     }
 
     @Override
     public void unsetPermission(@NonNull Node node) throws ObjectLacksException {
-        master.unsetPermission(node);
+        master.unsetPermission(node).throwException();
     }
 
     @Override
     public void unsetTransientPermission(@NonNull Node node) throws ObjectLacksException {
-        master.unsetTransientPermission(node);
+        master.unsetTransientPermission(node).throwException();
     }
 
     @Override
     public void unsetPermission(@NonNull String node, @NonNull boolean temporary) throws ObjectLacksException {
-        master.unsetPermission(NodeFactory.make(node, temporary));
+        master.unsetPermission(NodeFactory.make(node, temporary)).throwException();
     }
 
     @Override
     public void unsetPermission(@NonNull String node) throws ObjectLacksException {
-        master.unsetPermission(NodeFactory.make(node));
+        master.unsetPermission(NodeFactory.make(node)).throwException();
     }
 
     @Override
     public void unsetPermission(@NonNull String node, @NonNull String server) throws ObjectLacksException {
-        master.unsetPermission(NodeFactory.make(node, server));
+        master.unsetPermission(NodeFactory.make(node, server)).throwException();
     }
 
     @Override
     public void unsetPermission(@NonNull String node, @NonNull String server, @NonNull String world) throws ObjectLacksException {
-        master.unsetPermission(NodeFactory.make(node, server, world));
+        master.unsetPermission(NodeFactory.make(node, server, world)).throwException();
     }
 
     @Override
     public void unsetPermission(@NonNull String node, @NonNull String server, @NonNull boolean temporary) throws ObjectLacksException {
-        master.unsetPermission(NodeFactory.make(node, server, temporary));
+        master.unsetPermission(NodeFactory.make(node, server, temporary)).throwException();
     }
 
     @Override
     public void unsetPermission(@NonNull String node, @NonNull String server, @NonNull String world, @NonNull boolean temporary) throws ObjectLacksException {
-        master.unsetPermission(NodeFactory.make(node, server, world, temporary));
+        master.unsetPermission(NodeFactory.make(node, server, world, temporary)).throwException();
     }
 
     @Override
@@ -251,12 +252,25 @@ public class PermissionHolderDelegate implements PermissionHolder {
 
     @Override
     public void clearNodes(String server) {
-        master.clearNodes(server);
+        MutableContextSet set = new MutableContextSet();
+        if (server != null) {
+            set.add("server", server);
+        }
+
+        master.clearNodes(set);
     }
 
     @Override
     public void clearNodes(String server, String world) {
-        master.clearNodes(server, world);
+        MutableContextSet set = new MutableContextSet();
+        if (server != null) {
+            set.add("server", server);
+        }
+        if (world != null) {
+            set.add("world", world);
+        }
+
+        master.clearNodes(set);
     }
 
     @Override
@@ -266,12 +280,25 @@ public class PermissionHolderDelegate implements PermissionHolder {
 
     @Override
     public void clearParents(String server) {
-        master.clearParents(server, true);
+        MutableContextSet set = new MutableContextSet();
+        if (server != null) {
+            set.add("server", server);
+        }
+
+        master.clearParents(set, true);
     }
 
     @Override
     public void clearParents(String server, String world) {
-        master.clearParents(server, world, true);
+        MutableContextSet set = new MutableContextSet();
+        if (server != null) {
+            set.add("server", server);
+        }
+        if (world != null) {
+            set.add("world", world);
+        }
+
+        master.clearParents(set, true);
     }
 
     @Override
@@ -281,17 +308,38 @@ public class PermissionHolderDelegate implements PermissionHolder {
 
     @Override
     public void clearMeta(String server) {
-        master.clearMeta(server);
+        MutableContextSet set = new MutableContextSet();
+        if (server != null) {
+            set.add("server", server);
+        }
+
+        master.clearMeta(set);
     }
 
     @Override
     public void clearMeta(String server, String world) {
-        master.clearMeta(server, world);
+        MutableContextSet set = new MutableContextSet();
+        if (server != null) {
+            set.add("server", server);
+        }
+        if (world != null) {
+            set.add("world", world);
+        }
+
+        master.clearMeta(set);
     }
 
     @Override
     public void clearMetaKeys(String key, String server, String world, boolean temporary) {
-        master.clearMetaKeys(key, server, world, temporary);
+        MutableContextSet set = new MutableContextSet();
+        if (server != null) {
+            set.add("server", server);
+        }
+        if (world != null) {
+            set.add("world", world);
+        }
+
+        master.clearMetaKeys(key, set, temporary);
     }
 
     @Override

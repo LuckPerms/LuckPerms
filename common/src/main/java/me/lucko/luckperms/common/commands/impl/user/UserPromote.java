@@ -43,7 +43,6 @@ import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.HashSet;
@@ -124,9 +123,7 @@ public class UserPromote extends SubCommand<User> {
                 return CommandResult.LOADING_ERROR;
             }
 
-            try {
-                user.setPermission(NodeFactory.newBuilder("group." + first).setServer(server).setWorld(world).build());
-            } catch (ObjectAlreadyHasException ignored) {}
+            user.setPermission(NodeFactory.newBuilder("group." + first).setServer(server).setWorld(world).build());
 
             switch (ContextHelper.determine(server, world)) {
                 case NONE:
@@ -180,12 +177,8 @@ public class UserPromote extends SubCommand<User> {
             return CommandResult.LOADING_ERROR;
         }
 
-        try {
-            user.unsetPermission(oldNode);
-        } catch (ObjectLacksException ignored) {}
-        try {
-            user.setPermission(NodeFactory.newBuilder("group." + nextGroup.getName()).setServer(server).setWorld(world).build());
-        } catch (ObjectAlreadyHasException ignored) {}
+        user.unsetPermission(oldNode);
+        user.setPermission(NodeFactory.newBuilder("group." + nextGroup.getName()).setServer(server).setWorld(world).build());
 
         if (server == null && world == null && user.getPrimaryGroup().getStoredValue().equalsIgnoreCase(old)) {
             user.getPrimaryGroup().setStoredValue(nextGroup.getName());
@@ -207,6 +200,7 @@ public class UserPromote extends SubCommand<User> {
         LogEntry.build().actor(sender).acted(user)
                 .action("promote " + args.stream().collect(Collectors.joining(" ")))
                 .build().submit(plugin, sender);
+
         save(user, sender, plugin);
         plugin.getApiProvider().getEventFactory().handleUserPromote(user, track, old, nextGroup.getName());
         return CommandResult.SUCCESS;

@@ -26,7 +26,6 @@ import lombok.experimental.UtilityClass;
 
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
-import me.lucko.luckperms.common.core.NodeBuilder;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
@@ -63,7 +62,7 @@ public class SpongeMigrationUtils {
             String world = extractedContexts.getWorld();
 
             for (Map.Entry<String, Boolean> perm : e.getValue().entrySet()) {
-                holder.setPermissionUnchecked(new NodeBuilder(perm.getKey()).setServer(server).setWorld(world).withExtraContext(contexts).setValue(perm.getValue()).build());
+                holder.setPermission(NodeFactory.newBuilder(perm.getKey()).setServer(server).setWorld(world).withExtraContext(contexts).setValue(perm.getValue()).build());
             }
         }
 
@@ -79,11 +78,11 @@ public class SpongeMigrationUtils {
 
             for (Map.Entry<String, String> opt : e.getValue().entrySet()) {
                 if (opt.getKey().equalsIgnoreCase("prefix")) {
-                    holder.setPermissionUnchecked(NodeFactory.makePrefixNode(priority, opt.getValue()).setServer(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
+                    holder.setPermission(NodeFactory.makePrefixNode(priority, opt.getValue()).setServer(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
                 } else if (opt.getKey().equalsIgnoreCase("suffix")) {
-                    holder.setPermissionUnchecked(NodeFactory.makeSuffixNode(priority, opt.getValue()).setServer(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
+                    holder.setPermission(NodeFactory.makeSuffixNode(priority, opt.getValue()).setServer(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
                 } else {
-                    holder.setPermissionUnchecked(NodeFactory.makeMetaNode(opt.getKey(), opt.getValue()).setServer(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
+                    holder.setPermission(NodeFactory.makeMetaNode(opt.getKey(), opt.getValue()).setServer(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
                 }
             }
         }
@@ -103,7 +102,7 @@ public class SpongeMigrationUtils {
                     continue; // LuckPerms does not support persisting other subject types.
                 }
 
-                holder.setPermissionUnchecked(new NodeBuilder("group." + MigrationUtils.standardizeName(s.getIdentifier())).setServer(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
+                holder.setPermission(NodeFactory.newBuilder("group." + MigrationUtils.standardizeName(s.getIdentifier())).setServer(server).setWorld(world).withExtraContext(contexts).setValue(true).build());
             }
         }
     }

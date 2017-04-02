@@ -24,8 +24,6 @@ package me.lucko.luckperms.common.contexts;
 
 import lombok.AllArgsConstructor;
 
-import com.google.common.collect.Maps;
-
 import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -39,7 +37,10 @@ public class ServerCalculator<T> implements ContextCalculator<T> {
 
     @Override
     public MutableContextSet giveApplicableContext(T subject, MutableContextSet accumulator) {
-        accumulator.add(Maps.immutableEntry("server", config.get(ConfigKeys.SERVER)));
+        String server = config.get(ConfigKeys.SERVER);
+        if (!server.equals("global")) {
+            accumulator.add("server", server);
+        }
         return accumulator;
     }
 

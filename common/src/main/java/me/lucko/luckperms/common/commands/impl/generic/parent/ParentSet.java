@@ -22,13 +22,14 @@
 
 package me.lucko.luckperms.common.commands.impl.generic.parent;
 
+import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.ContextHelper;
+import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.model.Group;
@@ -37,7 +38,6 @@ import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,11 +47,10 @@ import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getGroup
 public class ParentSet extends SharedSubCommand {
     public ParentSet() {
         super("set", "Removes all other groups the object inherits already and adds them to the one given",
-                Permission.USER_PARENT_SET, Permission.GROUP_PARENT_SET, Predicates.notInRange(1, 3),
+                Permission.USER_PARENT_SET, Permission.GROUP_PARENT_SET, Predicates.is(0),
                 Arg.list(
                         Arg.create("group", true, "the group to set to"),
-                        Arg.create("server", false, "the server to set the group on"),
-                        Arg.create("world", false, "the world to set the group on")
+                        Arg.create("context...", false, "the contexts to set the group in")
                 )
         );
     }
@@ -59,8 +58,7 @@ public class ParentSet extends SharedSubCommand {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         String groupName = ArgumentUtils.handleName(0, args);
-        String server = ArgumentUtils.handleServer(1, args);
-        String world = ArgumentUtils.handleWorld(2, args);
+        MutableContextSet context = ArgumentUtils.handleContext(1, args);
 
         if (!plugin.getStorage().loadGroup(groupName).join()) {
             Message.GROUP_DOES_NOT_EXIST.send(sender);
@@ -73,43 +71,13 @@ public class ParentSet extends SharedSubCommand {
             return CommandResult.LOADING_ERROR;
         }
 
-        switch (ContextHelper.determine(server, world)) {
-            case NONE:
-                holder.clearParents(null, null, false);
-
-                try {
-                    holder.setInheritGroup(group);
-                } catch (ObjectAlreadyHasException ignored) {}
-
-                if (holder instanceof User) {
-                    ((User) holder).getPrimaryGroup().setStoredValue(group.getName());
-                }
-
-                Message.SET_PARENT_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName());
-                break;
-            case SERVER:
-                holder.clearParents(server, null, false);
-
-                try {
-                    holder.setInheritGroup(group, server);
-                } catch (ObjectAlreadyHasException ignored) {}
-
-                if (server.equalsIgnoreCase("global") && holder instanceof User) {
-                    ((User) holder).getPrimaryGroup().setStoredValue(group.getName());
-                }
-
-                Message.SET_PARENT_SERVER_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(), server);
-                break;
-            case SERVER_AND_WORLD:
-                holder.clearParents(server, world, false);
-
-                try {
-                    holder.setInheritGroup(group, server, world);
-                } catch (ObjectAlreadyHasException ignored) {}
-
-                Message.SET_PARENT_SERVER_WORLD_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(), server, world);
-                break;
+        holder.clearParents(context, false);
+        holder.setInheritGroup(group, context);
+        if (holder instanceof User) {
+            ((User) holder).getPrimaryGroup().setStoredValue(group.getName());
         }
+
+        Message.SET_PARENT_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(), Util.contextSetToString(context));
 
         LogEntry.build().actor(sender).acted(holder)
                 .action("parent set " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))

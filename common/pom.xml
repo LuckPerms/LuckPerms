@@ -38,7 +38,7 @@
         <dependency>
             <groupId>io.github.mkremins</groupId>
             <artifactId>fanciful</artifactId>
-            <version>1.2.0</version>
+            <version>1.2.5</version>
             <scope>compile</scope>
         </dependency>
         <!-- MySQL -->

@@ -201,34 +201,24 @@ public enum Message {
     LIST_TRACKS("&b{0}'s Tracks:" + "\n" + "{1}", true),
     LIST_TRACKS_EMPTY("{0} is not on any tracks.", true),
 
-    SETPERMISSION_SUCCESS("&aSet &b{0}&a to &b{1}&a for &b{2}&a.", true),
-    SETPERMISSION_SERVER_SUCCESS("&aSet &b{0}&a to &b{1}&a for &b{2}&a on server &b{3}&a.", true),
-    SETPERMISSION_SERVER_WORLD_SUCCESS("&aSet &b{0}&a to &b{1}&a for &b{2}&a on server &b{3}&a, world &b{4}&a.", true),
-    SETPERMISSION_TEMP_SUCCESS("&aSet &b{0}&a to &b{1}&a for &b{2}&a for a duration of &b{3}&a.", true),
-    SETPERMISSION_TEMP_SERVER_SUCCESS("&aSet &b{0}&a to &b{1}&a for &b{2}&a on server &b{3}&a for a duration of &b{4}&a.", true),
-    SETPERMISSION_TEMP_SERVER_WORLD_SUCCESS("&aSet &b{0}&a to &b{1}&a for &b{2}&a on server &b{3}&a, world &b{4}&a, for a duration of &b{5}&a.", true),
-    UNSETPERMISSION_SUCCESS("&aUnset &b{0}&a for &b{1}&a.", true),
-    UNSETPERMISSION_SERVER_SUCCESS("&aUnset &b{0}&a for &b{1}&a on server &b{2}&a.", true),
-    UNSETPERMISSION_SERVER_WORLD_SUCCESS("&aUnset &b{0}&a for &b{1}&a on server &b{2}&a, world &b{3}&a.", true),
-    UNSET_TEMP_PERMISSION_SUCCESS("&aUnset temporary permission &b{0}&a for &b{1}&a.", true),
-    UNSET_TEMP_PERMISSION_SERVER_SUCCESS("&aUnset temporary permission &b{0}&a for &b{1}&a on server &b{2}&a.", true),
-    UNSET_TEMP_PERMISSION_SERVER_WORLD_SUCCESS("&aUnset temporary permission &b{0}&a for &b{1}&a on server &b{2}&a, world &b{3}&a.", true),
+    CONTEXT_PAIR_INLINE("&3{0}=&b{1}", false),
+    CONTEXT_PAIR__GLOBAL_INLINE("&eglobal", false),
+    CONTEXT_PAIR_END("&a.", false),
+    CONTEXT_PAIR_SEP("&a, ", false),
 
-    SET_INHERIT_SUCCESS("&b{0}&a now inherits permissions from &b{1}&a.", true),
-    SET_INHERIT_SERVER_SUCCESS("&b{0}&a now inherits permissions from &b{1}&a on server &b{2}&a.", true),
-    SET_INHERIT_SERVER_WORLD_SUCCESS("&b{0}&a now inherits permissions from &b{1}&a on server &b{2}&a, world &b{3}&a.", true),
-    SET_PARENT_SUCCESS("&b{0}&a had their existing parent groups cleared, and now only inherits &b{1}&a.", true),
-    SET_PARENT_SERVER_SUCCESS("&b{0}&a had their existing parent groups cleared, and now only inherits &b{1}&a on server &b{2}&a.", true),
-    SET_PARENT_SERVER_WORLD_SUCCESS("&b{0}&a had their existing parent groups cleared, and now only inherits &b{1}&a on server &b{2}&a, world &b{3}&a.", true),
-    SET_TEMP_INHERIT_SUCCESS("&b{0}&a now inherits permissions from &b{1}&a for a duration of &b{2}&a.", true),
-    SET_TEMP_INHERIT_SERVER_SUCCESS("&b{0}&a now inherits permissions from &b{1}&a on server &b{2}&a for a duration of &b{3}&a.", true),
-    SET_TEMP_INHERIT_SERVER_WORLD_SUCCESS("&b{0}&a now inherits permissions from &b{1}&a on server &b{2}&a, world &b{3}&a, for a duration of &b{4}&a.", true),
-    UNSET_INHERIT_SUCCESS("&b{0}&a no longer inherits permissions from &b{1}&a.", true),
-    UNSET_INHERIT_SERVER_SUCCESS("&b{0}&a no longer inherits permissions from &b{1}&a on server &b{2}&a.", true),
-    UNSET_INHERIT_SERVER_WORLD_SUCCESS("&b{0}&a no longer inherits permissions from &b{1}&a on server &b{2}&a, world &b{3}&a.", true),
-    UNSET_TEMP_INHERIT_SUCCESS("&b{0}&a no longer temporarily inherits permissions from &b{1}&a.", true),
-    UNSET_TEMP_INHERIT_SERVER_SUCCESS("&b{0}&a no longer temporarily inherits permissions from &b{1}&a on server &b{2}&a.", true),
-    UNSET_TEMP_INHERIT_SERVER_WORLD_SUCCESS("&b{0}&a no longer temporarily inherits permissions from &b{1}&a on server &b{2}&a, world &b{3}&a.", true),
+    CONTEXT_PAIR("&8(&7{0}=&f{1}&8)", false),
+
+    CHECK_PERMISSION("&b{0}&a has permission &b{1}&a set to {2}&a in context {3}&a.", true),
+    CHECK_PERMISSION_INHERITED("&b{0}&a has permission &b{1}&a set to {2}&a in context {3}&a, inherited from &b{4}&a.", true),
+    SETPERMISSION_SUCCESS("&aSet &b{0}&a to &b{1}&a for &b{2}&a in context {3}&a.", true),
+    SETPERMISSION_TEMP_SUCCESS("&aSet &b{0}&a to &b{1}&a for &b{2}&a for a duration of &b{3}&a in context {4}&a.", true),
+    UNSETPERMISSION_SUCCESS("&aUnset &b{0}&a for &b{1}&a in context {2}&a.", true),
+    UNSET_TEMP_PERMISSION_SUCCESS("&aUnset temporary permission &b{0}&a for &b{1}&a in context {2}&a.", true),
+    SET_INHERIT_SUCCESS("&b{0}&a now inherits permissions from &b{1}&a in context {2}&a.", true),
+    SET_TEMP_INHERIT_SUCCESS("&b{0}&a now inherits permissions from &b{1}&a for a duration of &b{2}&a in context {3}&a.", true),
+    SET_PARENT_SUCCESS("&b{0}&a had their existing parent groups cleared, and now only inherits &b{1}&a in context {2}&a.", true),
+    UNSET_INHERIT_SUCCESS("&b{0}&a no longer inherits permissions from &b{1}&a in context {2}&a.", true),
+    UNSET_TEMP_INHERIT_SUCCESS("&b{0}&a no longer temporarily inherits permissions from &b{1}&a in context {2}&a.", true),
 
     CLEAR_SUCCESS("&b{0}&a's permissions were cleared. (&b{1}&a nodes were removed.)", true),
     CLEAR_SUCCESS_SINGULAR("&b{0}&a's permissions were cleared. (&b{1}&a node was removed.)", true),
@@ -236,6 +226,7 @@ public enum Message {
     PARENT_CLEAR_SUCCESS_SINGULAR("&b{0}&a's parents were cleared. (&b{1}&a node was removed.)", true),
     META_CLEAR_SUCCESS("&b{0}&a's meta was cleared. (&b{1}&a nodes were removed.)", true),
     META_CLEAR_SUCCESS_SINGULAR("&b{0}&a's meta was cleared. (&b{1}&a node was removed.)", true),
+
     ILLEGAL_DATE_ERROR("Could not parse date '{0}'.", true),
     PAST_DATE_ERROR("You cannot set a date in the past!", true),
 
@@ -251,54 +242,23 @@ public enum Message {
     META_NONE("&b{0} has no meta.", true),
 
     META_INVALID_PRIORITY("Invalid priority '{0}'. Expected a number.", true),
-    ALREADY_HAS_PREFIX("{0} already has that prefix set.", true),
-    ALREADY_HAS_SUFFIX("{0} already has that suffix set.", true),
-    DOES_NOT_HAVE_PREFIX("{0} doesn't have that prefix set.", true),
-    DOES_NOT_HAVE_SUFFIX("{0} doesn't have that suffix set.", true),
 
-    ADDPREFIX_SUCCESS("&b{0}&a had prefix &f\"{1}&f\"&a set at a priority of &b{2}&a.", true),
-    ADDPREFIX_SERVER_SUCCESS("&b{0}&a had prefix &f\"{1}&f\"&a set at a priority of &b{2}&a on server &b{3}&a.", true),
-    ADDPREFIX_SERVER_WORLD_SUCCESS("&b{0}&a had prefix &f\"{1}&f\"&a set at a priority of &b{2}&a on server &b{3}&a, world &b{4}&a.", true),
-    REMOVEPREFIX_SUCCESS("&b{0}&a had prefix &f\"{1}&f\"&a at priority &b{2}&a removed.", true),
-    REMOVEPREFIX_SERVER_SUCCESS("&b{0}&a had prefix &f\"{1}&f\"&a at priority &b{2}&a removed on server &b{3}&a.", true),
-    REMOVEPREFIX_SERVER_WORLD_SUCCESS("&b{0}&a had prefix &f\"{1}&f\"&a at priority &b{2}&a removed on server &b{3}&a, world &b{4}&a.", true),
+    ALREADY_HAS_CHAT_META("{0} already has that {1} set.", true),
+    DOES_NOT_HAVE_CHAT_META("{0} doesn't have that {1} set.", true),
 
-    ADDSUFFIX_SUCCESS("&b{0}&a had suffix &f\"{1}&f\"&a set at a priority of &b{2}&a.", true),
-    ADDSUFFIX_SERVER_SUCCESS("&b{0}&a had suffix &f\"{1}&f\"&a set at a priority of &b{2}&a on server &b{3}&a.", true),
-    ADDSUFFIX_SERVER_WORLD_SUCCESS("&b{0}&a had suffix &f\"{1}&f\"&a set at a priority of &b{2}&a on server &b{3}&a, world &b{4}&a.", true),
-    REMOVESUFFIX_SUCCESS("&b{0}&a had suffix &f\"{1}&f\"&a at priority &b{2}&a removed.", true),
-    REMOVESUFFIX_SERVER_SUCCESS("&b{0}&a had suffix &f\"{1}&f\"&a at priority &b{2}&a removed on server &b{3}&a.", true),
-    REMOVESUFFIX_SERVER_WORLD_SUCCESS("&b{0}&a had suffix &f\"{1}&f\"&a at priority &b{2}&a removed on server &b{3}&a, world &b{4}&a.", true),
-
-    ADD_TEMP_PREFIX_SUCCESS("&b{0}&a had prefix &f\"{1}&f\"&a set at a priority of &b{2}&a for a duration of &b{3}&a.", true),
-    ADD_TEMP_PREFIX_SERVER_SUCCESS("&b{0}&a had prefix &f\"{1}&f\"&a set at a priority of &b{2}&a on server &b{3}&a, for a duration of &b{4}&a.", true),
-    ADD_TEMP_PREFIX_SERVER_WORLD_SUCCESS("&b{0}&a had prefix &f\"{1}&f\"&a set at a priority of &b{2}&a on server &b{3}&a, world &b{4}&a, for a duration of &b{5}&a.", true),
-    REMOVE_TEMP_PREFIX_SUCCESS("&b{0}&a had temporary prefix &f\"{1}&f\"&a at priority &b{2}&a removed.", true),
-    REMOVE_TEMP_PREFIX_SERVER_SUCCESS("&b{0}&a had temporary prefix &f\"{1}&f\"&a at priority &b{2}&a removed on server &b{3}&a.", true),
-    REMOVE_TEMP_PREFIX_SERVER_WORLD_SUCCESS("&b{0}&a had temporary prefix &f\"{1}&f\"&a at priority &b{2}&a removed on server &b{3}&a, world &b{4}&a.", true),
-
-    ADD_TEMP_SUFFIX_SUCCESS("&b{0}&a had suffix &f\"{1}&f\"&a set at a priority of &b{2}&a for a duration of &b{3}&a.", true),
-    ADD_TEMP_SUFFIX_SERVER_SUCCESS("&b{0}&a had suffix &f\"{1}&f\"&a set at a priority of &b{2}&a on server &b{3}&a, for a duration of &b{4}&a.", true),
-    ADD_TEMP_SUFFIX_SERVER_WORLD_SUCCESS("&b{0}&a had suffix &f\"{1}&f\"&a set at a priority of &b{2}&a on server &b{3}&a, world &b{4}&a, for a duration of &b{5}&a.", true),
-    REMOVE_TEMP_SUFFIX_SUCCESS("&b{0}&a had temporary suffix &f\"{1}&f\"&a at priority &b{1}&a removed.", true),
-    REMOVE_TEMP_SUFFIX_SERVER_SUCCESS("&b{0}&a had temporary suffix &f\"{1}&f\"&a at priority &b{2}&a removed on server &b{3}&a.", true),
-    REMOVE_TEMP_SUFFIX_SERVER_WORLD_SUCCESS("&b{0}&a had temporary suffix &f\"{1}&f\"&a at priority &b{2}&a removed on server &b{3}&a, world &b{4}&a.", true),
+    ADD_CHATMETA_SUCCESS("&b{0}&a had {1} &f\"{2}&f\"&a set at a priority of &b{3}&a in context {4}&a.", true),
+    ADD_TEMP_CHATMETA_SUCCESS("&b{0}&a had {1} &f\"{2}&f\"&a set at a priority of &b{3}&a for a duration of &b{4}&a in context {5}&a.", true),
+    REMOVE_CHATMETA_SUCCESS("&b{0}&a had {1} &f\"{2}&f\"&a at priority &b{3}&a removed in context {4}&a.", true),
+    BULK_REMOVE_CHATMETA_SUCCESS("&b{0}&a had all {1}es at priority &b{3}&a removed in context {4}&a.", true),
+    REMOVE_TEMP_CHATMETA_SUCCESS("&b{0}&a had temporary {1} &f\"{2}&f\"&a at priority &b{3}&a removed in context {4}&a.", true),
+    BULK_REMOVE_TEMP_CHATMETA_SUCCESS("&b{0}&a had all temporary {1}es at priority &b{3}&a removed in context {4}&a.", true),
 
     ALREADY_HAS_META("{0} already has that meta key value pair set.", true),
 
-    SET_META_SUCCESS("&aSet meta value for key &f\"{0}&f\"&a to &f\"{1}&f\"&a for &b{2}&a.", true),
-    SET_META_SERVER_SUCCESS("&aSet meta value for key &f\"{0}&f\"&a to &f\"{1}&f\"&a for &b{2}&a on server &b{3}&a.", true),
-    SET_META_SERVER_WORLD_SUCCESS("&aSet meta value for key &f\"{0}&f\"&a to &f\"{1}&f\"&a for &b{2}&a on server &b{3}&a, world &b{4}&a.", true),
-    SET_META_TEMP_SUCCESS("&aSet meta value for key &f\"{0}&f\"&a to &f\"{1}&f\"&a for &b{2}&a for a duration of &b{3}&a.", true),
-    SET_META_TEMP_SERVER_SUCCESS("&aSet meta value for key &f\"{0}&f\"&a to &f\"{1}&f\"&a for &b{2}&a on server &b{3}&a for a duration of &b{4}&a.", true),
-    SET_META_TEMP_SERVER_WORLD_SUCCESS("&aSet meta value for key &f\"{0}&f\"&a to &f\"{1}&f\"&a for &b{2}&a on server &b{3}&a, world &b{4}&a, for a duration of &b{5}&a.", true),
-
-    UNSET_META_SUCCESS("&aUnset meta value with key &f\"{0}&f\"&a for &b{1}&a.", true),
-    UNSET_META_SERVER_SUCCESS("&aUnset meta value with key &f\"{0}&f\"&a for &b{1}&a on server &b{2}&a.", true),
-    UNSET_META_SERVER_WORLD_SUCCESS("&aUnset meta value with key &f\"{0}&f\"&a for &b{1}&a on server &b{2}&a, world &b{3}&a.", true),
-    UNSET_META_TEMP_SUCCESS("&aUnset temporary meta value with key &f\"{0}&f\"&a for &b{1}&a.", true),
-    UNSET_META_TEMP_SERVER_SUCCESS("&aUnset temporary meta value with key &f\"{0}&f\"&a for &b{1}&a on server &b{2}&a.", true),
-    UNSET_META_TEMP_SERVER_WORLD_SUCCESS("&aUnset temporary meta value with key &f\"{0}&f\"&a for &b{1}&a on server &b{2}&a, world &b{3}&a.", true),
+    SET_META_SUCCESS("&aSet meta value for key &f\"{0}&f\"&a to &f\"{1}&f\"&a for &b{2}&a in context {3}&a.", true),
+    SET_META_TEMP_SUCCESS("&aSet meta value for key &f\"{0}&f\"&a to &f\"{1}&f\"&a for &b{2}&a for a duration of &b{3}&a in context {4}&a.", true),
+    UNSET_META_SUCCESS("&aUnset meta value with key &f\"{0}&f\"&a for &b{1}&a in context {2}&a.", true),
+    UNSET_META_TEMP_SUCCESS("&aUnset temporary meta value with key &f\"{0}&f\"&a for &b{1}&a in context {2}&a.", true),
 
     BULK_CHANGE_TYPE_ERROR("Invalid type. Was expecting 'server' or 'world'.", true),
     BULK_CHANGE_SUCCESS("&aApplied bulk change successfully. {0} records were changed.", true),
@@ -450,42 +410,32 @@ public enum Message {
 
     @Override
     public String toString() {
-        return Util.color(showPrefix ? PREFIX + message : message);
+        return asString(null);
     }
 
-    public String asString(LocaleManager localeManager) {
-        String prefix = localeManager.getTranslation(PREFIX);
+    public String asString(LocaleManager localeManager, Object... objects) {
+        String prefix = null;
+        if (localeManager != null) {
+            prefix = localeManager.getTranslation(PREFIX);
+        }
         if (prefix == null) {
             prefix = PREFIX.getMessage();
         }
 
-        String s = localeManager.getTranslation(this);
+        String s = null;
+        if (localeManager != null) {
+            s = localeManager.getTranslation(this);
+        }
         if (s == null) {
             s = message;
         }
 
-        s = s.replace("{PREFIX}", prefix).replace("\\n", "\n");
-        return Util.color(showPrefix ? (prefix + s) : (s));
+        s = format(s.replace("{PREFIX}", prefix).replace("\\n", "\n"), objects);
+        return Util.color(showPrefix ? prefix + s : s);
     }
 
     public void send(Sender sender, Object... objects) {
-        String prefix = sender.getPlatform().getLocaleManager().getTranslation(PREFIX);
-        if (prefix == null) {
-            prefix = PREFIX.getMessage();
-        }
-
-        String s = sender.getPlatform().getLocaleManager().getTranslation(this);
-        if (s == null) {
-            s = message;
-        }
-
-        s = s.replace("{PREFIX}", prefix).replace("\\n", "\n");
-
-        if (showPrefix) {
-            sender.sendMessage(Util.color(prefix + format(s, objects)));
-        } else {
-            sender.sendMessage(Util.color(format(s, objects)));
-        }
+        sender.sendMessage(asString(sender.getPlatform().getLocaleManager(), objects));
     }
 
     /**

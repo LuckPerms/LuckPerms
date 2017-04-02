@@ -64,7 +64,7 @@ public class SpongeSenderFactory extends SenderFactory<CommandSource> {
     @Override
     protected void sendMessage(CommandSource source, FancyMessage message) {
         try {
-            source.sendMessage(TextSerializers.JSON.deserialize(message.toJSONString()));
+            source.sendMessage(TextSerializers.JSON.deserialize(message.exportToJson()));
         } catch (Exception e) {
             sendMessage(source, message.toOldMessageFormat());
         }

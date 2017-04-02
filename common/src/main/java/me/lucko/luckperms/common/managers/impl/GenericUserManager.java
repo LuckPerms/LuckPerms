@@ -42,7 +42,7 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
 
         if (user.getPrimaryGroup().getStoredValue() != null && !user.getPrimaryGroup().getStoredValue().isEmpty()) {
             for (Node node : user.getNodes().values()) {
-                if (node.isServerSpecific() || node.isWorldSpecific()) {
+                if (node.hasSpecificContext()) {
                     continue;
                 }
 
@@ -58,7 +58,7 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
         }
 
         user.getPrimaryGroup().setStoredValue("default");
-        user.setPermissionUnchecked(NodeFactory.make("group.default"));
+        user.setPermission(NodeFactory.make("group.default"));
 
         if (save) {
             plugin.getStorage().saveUser(user);

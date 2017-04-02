@@ -22,21 +22,22 @@
 
 package me.lucko.luckperms.common.commands.impl.generic.parent;
 
+import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.ContextHelper;
+import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.core.DataMutateResult;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,11 +47,10 @@ import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getGroup
 public class ParentRemoveTemp extends SharedSubCommand {
     public ParentRemoveTemp() {
         super("removetemp", "Removes a previously set temporary inheritance rule",
-                Permission.USER_PARENT_REMOVETEMP, Permission.GROUP_PARENT_REMOVETEMP, Predicates.notInRange(1, 3),
+                Permission.USER_PARENT_REMOVETEMP, Permission.GROUP_PARENT_REMOVETEMP, Predicates.is(0),
                 Arg.list(
                         Arg.create("group", true, "the group to remove"),
-                        Arg.create("server", false, "the server to remove the group on"),
-                        Arg.create("world", false, "the world to remove the group on")
+                        Arg.create("context...", false, "the contexts to remove the group in")
                 )
         );
     }
@@ -58,24 +58,12 @@ public class ParentRemoveTemp extends SharedSubCommand {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         String groupName = ArgumentUtils.handleNameWithSpace(0, args);
-        String server = ArgumentUtils.handleServer(1, args);
-        String world = ArgumentUtils.handleWorld(2, args);
+        MutableContextSet context = ArgumentUtils.handleContext(1, args);
 
-        try {
-            switch (ContextHelper.determine(server, world)) {
-                case NONE:
-                    holder.unsetPermission(NodeFactory.make("group." + groupName, true, true));
-                    Message.UNSET_TEMP_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), groupName);
-                    break;
-                case SERVER:
-                    holder.unsetPermission(NodeFactory.make("group." + groupName, server, true));
-                    Message.UNSET_TEMP_INHERIT_SERVER_SUCCESS.send(sender, holder.getFriendlyName(), groupName, server);
-                    break;
-                case SERVER_AND_WORLD:
-                    holder.unsetPermission(NodeFactory.make("group." + groupName, server, world, true));
-                    Message.UNSET_TEMP_INHERIT_SERVER_WORLD_SUCCESS.send(sender, holder.getFriendlyName(), groupName, server, world);
-                    break;
-            }
+        DataMutateResult result = holder.unsetPermission(NodeFactory.newBuilder("group." + groupName).setExpiry(10L).withExtraContext(context).build());
+
+        if (result.asBoolean()) {
+            Message.UNSET_TEMP_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), groupName, Util.contextSetToString(context));
 
             LogEntry.build().actor(sender).acted(holder)
                     .action("parent removetemp " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
@@ -83,8 +71,7 @@ public class ParentRemoveTemp extends SharedSubCommand {
 
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
-
-        } catch (ObjectLacksException e) {
+        } else {
             Message.DOES_NOT_TEMP_INHERIT.send(sender, holder.getFriendlyName(), groupName);
             return CommandResult.STATE_ERROR;
         }

@@ -26,38 +26,32 @@ import lombok.experimental.UtilityClass;
 
 import com.google.common.collect.Maps;
 
-import me.lucko.luckperms.api.HeldPermission;
-import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Patterns;
-import me.lucko.luckperms.common.core.NodeFactory;
-import me.lucko.luckperms.common.core.model.PermissionHolder;
-import me.lucko.luckperms.common.core.model.User;
-import me.lucko.luckperms.common.utils.DateUtil;
 
-import io.github.mkremins.fanciful.ChatColor;
 import io.github.mkremins.fanciful.FancyMessage;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.SortedSet;
 import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @UtilityClass
 public class Util {
 
-    public static final MetaComparator META_COMPARATOR = new MetaComparator();
-
+    /**
+     * Sends a message to the sender, formatted with the plugin prefix and color scheme
+     *
+     * @param sender the sender to send the message to
+     * @param message the message content
+     */
     public static void sendPluginMessage(Sender sender, String message) {
         String prefix = sender.getPlatform().getLocaleManager().getTranslation(Message.PREFIX);
         if (prefix == null) {
@@ -66,6 +60,12 @@ public class Util {
         sender.sendMessage(color(prefix + message));
     }
 
+    /**
+     * Strips outer quote marks from a list of parsed arguments.
+     *
+     * @param input the list of arguments to strip quotes from
+     * @return an ArrayList containing the contents of input without quotes
+     */
     public static List<String> stripQuotes(List<String> input) {
         input = new ArrayList<>(input);
         ListIterator<String> iterator = input.listIterator();
@@ -82,15 +82,17 @@ public class Util {
         return input;
     }
 
+    /**
+     * Colorizes a message.
+     *
+     * @param s the message to colorize
+     * @return a colored message
+     */
     public static String color(String s) {
-        return translateAlternateColorCodes('&', s);
-    }
-
-    public static String translateAlternateColorCodes(char altColorChar, String textToTranslate) {
-        char[] b = textToTranslate.toCharArray();
+        char[] b = s.toCharArray();
 
         for (int i = 0; i < b.length - 1; ++i) {
-            if (b[i] == altColorChar && "0123456789AaBbCcDdEeFfKkLlMmNnOoRr".indexOf(b[i + 1]) > -1) {
+            if (b[i] == '&' && "0123456789AaBbCcDdEeFfKkLlMmNnOoRr".indexOf(b[i + 1]) > -1) {
                 b[i] = 167;
                 b[i + 1] = Character.toLowerCase(b[i + 1]);
             }
@@ -99,247 +101,14 @@ public class Util {
         return new String(b);
     }
 
+    /**
+     * Strips all color from a message
+     *
+     * @param s the message to strip color from
+     * @return the message without color
+     */
     public static String stripColor(String s) {
         return s == null ? null : Patterns.STRIP_COLOR_PATTERN.matcher(s).replaceAll("");
-    }
-
-    public static String formatBoolean(boolean b) {
-        return b ? "&atrue" : "&cfalse";
-    }
-
-    public static String formatTristate(Tristate t) {
-        switch (t) {
-            case TRUE:
-                return "&atrue";
-            case FALSE:
-                return "&cfalse";
-            default:
-                return "&cundefined";
-        }
-    }
-
-    public static void sendTristate(Sender sender, String node, Tristate t) {
-        sender.sendMessage(Util.color("&b" + node + ": " + formatTristate(t)));
-    }
-
-    public static String getNodeContextDescription(Node node) {
-        StringBuilder sb = new StringBuilder();
-        if (node.isServerSpecific()) {
-            sb.append(" ").append(contextToString("server", node.getServer().get()));
-        }
-        if (node.isWorldSpecific()) {
-            sb.append(" ").append(contextToString("world", node.getWorld().get()));
-        }
-        for (Map.Entry<String, String> c : node.getContexts().toSet()) {
-            sb.append(" ").append(contextToString(c.getKey(), c.getValue()));
-        }
-
-        return sb.toString();
-    }
-
-    public static FancyMessage appendNodeContextDescription(Node node, FancyMessage message) {
-        if (node.isServerSpecific()) {
-            message = message.then(" ");
-            message = appendContext("server", node.getServer().get(), message);
-        }
-        if (node.isWorldSpecific()) {
-            message = message.then(" ");
-            message = appendContext("world", node.getWorld().get(), message);
-        }
-        for (Map.Entry<String, String> c : node.getContexts().toSet()) {
-            message = message.then(" ");
-            message = appendContext(c.getKey(), c.getValue(), message);
-        }
-
-        return message;
-    }
-
-    public static FancyMessage appendNodeExpiry(Node node, FancyMessage message) {
-        if (node.isTemporary()) {
-            message = message.then(" (").color(ChatColor.getByChar('8'));
-            message = message.then("expires in " + DateUtil.formatDateDiff(node.getExpiryUnixTime())).color(ChatColor.getByChar('7'));
-            message = message.then(")").color(ChatColor.getByChar('8'));
-        }
-
-        return message;
-    }
-
-    public static String contextToString(String key, String value) {
-        return "&8(&7" + key + "=&f" + value + "&8)";
-    }
-
-    public static FancyMessage appendContext(String key, String value, FancyMessage message) {
-        return message
-                .then("(").color(ChatColor.getByChar('8'))
-                .then(key + "=").color(ChatColor.getByChar('7'))
-                .then(value).color(ChatColor.getByChar('f'))
-                .then(")").color(ChatColor.getByChar('8'));
-    }
-
-    public static String permNodesToStringConsole(SortedSet<LocalizedNode> nodes) {
-        StringBuilder sb = new StringBuilder();
-        for (Node node : nodes) {
-            if (node.isTemporary()) continue;
-
-            sb.append("&3> ")
-                    .append(node.getValue() ? "&a" : "&c")
-                    .append(node.getPermission())
-                    .append(" ").append("&7(").append(node.getValue()).append("&7)")
-                    .append(getNodeContextDescription(node))
-                    .append("\n");
-        }
-        return sb.length() == 0 ? "&3None" : sb.toString();
-    }
-
-    private static FancyMessage makeFancy(PermissionHolder holder, String label, Node node, FancyMessage message) {
-        message = message.formattedTooltip(
-                new FancyMessage("> ")
-                        .color(ChatColor.getByChar('3'))
-                        .then(node.getPermission())
-                        .color(node.getValue() ? ChatColor.getByChar('a') : ChatColor.getByChar('c')),
-                new FancyMessage(" "),
-                new FancyMessage("Click to remove this node from " + holder.getFriendlyName()).color(ChatColor.getByChar('7'))
-        );
-
-        boolean group = !(holder instanceof User);
-        String command = NodeFactory.nodeAsCommand(node, group ? holder.getObjectName() : holder.getFriendlyName(), group)
-                .replace("/luckperms", "/" + label)
-                .replace("permission set", "permission unset")
-                .replace("parent add", "parent remove")
-                .replace(" true", "")
-                .replace(" false", "");
-
-        message = message.suggest(command);
-        return message;
-    }
-
-    private static FancyMessage makeFancy(String holderName, boolean group, String label, HeldPermission<?> perm, FancyMessage message) {
-        Node node = perm.asNode();
-
-        message = message.formattedTooltip(
-                new FancyMessage("> ")
-                        .color(ChatColor.getByChar('3'))
-                        .then(node.getPermission())
-                        .color(node.getValue() ? ChatColor.getByChar('a') : ChatColor.getByChar('c')),
-                new FancyMessage(" "),
-                new FancyMessage("Click to remove this node from " + holderName).color(ChatColor.getByChar('7'))
-        );
-
-        String command = NodeFactory.nodeAsCommand(node, holderName, group)
-                .replace("/luckperms", "/" + label)
-                .replace("permission set", "permission unset")
-                .replace("parent add", "parent remove")
-                .replace(" true", "")
-                .replace(" false", "");
-
-        message = message.suggest(command);
-        return message;
-    }
-
-    public static Map.Entry<FancyMessage, String> permNodesToMessage(SortedSet<LocalizedNode> nodes, PermissionHolder holder, String label, int pageNumber) {
-        List<Node> l = new ArrayList<>();
-        for (Node node : nodes) {
-            if (!node.isTemporary()) {
-                l.add(node);
-            }
-        }
-
-        if (l.isEmpty()) {
-            return Maps.immutableEntry(new FancyMessage("None").color(ChatColor.getByChar('3')), null);
-        }
-
-        int index = pageNumber - 1;
-        List<List<Node>> pages = divideList(l, 15);
-
-        if (index < 0 || index >= pages.size()) {
-            pageNumber = 1;
-            index = 0;
-        }
-
-        List<Node> page = pages.get(index);
-
-        FancyMessage message = new FancyMessage("");
-        String title = "&7(showing page &f" + pageNumber + "&7 of &f" + pages.size() + "&7 - &f" + nodes.size() + "&7 entries)";
-
-        for (Node node : page) {
-            message = makeFancy(holder, label, node, message.then("> ").color(ChatColor.getByChar('3')));
-            message = makeFancy(holder, label, node, message.then(Util.color(node.getPermission())).color(node.getValue() ? ChatColor.getByChar('a') : ChatColor.getByChar('c')));
-            message = appendNodeContextDescription(node, message);
-            message = message.then("\n");
-        }
-
-        return Maps.immutableEntry(message, title);
-    }
-
-    public static Map.Entry<FancyMessage, String> searchUserResultToMessage(List<HeldPermission<UUID>> results, Function<UUID, String> uuidLookup, String label, int pageNumber) {
-        if (results.isEmpty()) {
-            return Maps.immutableEntry(new FancyMessage("None").color(ChatColor.getByChar('3')), null);
-        }
-
-        List<HeldPermission<UUID>> sorted = new ArrayList<>(results);
-        sorted.sort(Comparator.comparing(HeldPermission::getHolder));
-
-        int index = pageNumber - 1;
-        List<List<HeldPermission<UUID>>> pages = divideList(sorted, 15);
-
-        if (index < 0 || index >= pages.size()) {
-            pageNumber = 1;
-            index = 0;
-        }
-
-        List<HeldPermission<UUID>> page = pages.get(index);
-        List<Map.Entry<String, HeldPermission<UUID>>> uuidMappedPage = page.stream()
-                .map(hp -> Maps.immutableEntry(uuidLookup.apply(hp.getHolder()), hp))
-                .collect(Collectors.toList());
-
-        FancyMessage message = new FancyMessage("");
-        String title = "&7(page &f" + pageNumber + "&7 of &f" + pages.size() + "&7 - &f" + sorted.size() + "&7 entries)";
-
-        for (Map.Entry<String, HeldPermission<UUID>> ent : uuidMappedPage) {
-            message = makeFancy(ent.getKey(), false, label, ent.getValue(), message.then("> ").color(ChatColor.getByChar('3')));
-            message = makeFancy(ent.getKey(), false, label, ent.getValue(), message.then(ent.getKey()).color(ChatColor.getByChar('b')));
-            message = makeFancy(ent.getKey(), false, label, ent.getValue(), message.then(" - ").color(ChatColor.getByChar('7')));
-            message = makeFancy(ent.getKey(), false, label, ent.getValue(), message.then("" + ent.getValue().getValue()).color(ent.getValue().getValue() ? ChatColor.getByChar('a') : ChatColor.getByChar('c')));
-            message = appendNodeExpiry(ent.getValue().asNode(), message);
-            message = appendNodeContextDescription(ent.getValue().asNode(), message);
-            message = message.then("\n");
-        }
-
-        return Maps.immutableEntry(message, title);
-    }
-
-    public static Map.Entry<FancyMessage, String> searchGroupResultToMessage(List<HeldPermission<String>> results, String label, int pageNumber) {
-        if (results.isEmpty()) {
-            return Maps.immutableEntry(new FancyMessage("None").color(ChatColor.getByChar('3')), null);
-        }
-
-        List<HeldPermission<String>> sorted = new ArrayList<>(results);
-        sorted.sort(Comparator.comparing(HeldPermission::getHolder));
-
-        int index = pageNumber - 1;
-        List<List<HeldPermission<String>>> pages = divideList(sorted, 15);
-
-        if (index < 0 || index >= pages.size()) {
-            pageNumber = 1;
-            index = 0;
-        }
-
-        List<HeldPermission<String>> page = pages.get(index);
-
-        FancyMessage message = new FancyMessage("");
-        String title = "&7(page &f" + pageNumber + "&7 of &f" + pages.size() + "&7 - &f" + sorted.size() + "&7 entries)";
-
-        for (HeldPermission<String> ent : page) {
-            message = makeFancy(ent.getHolder(), true, label, ent, message.then("> ").color(ChatColor.getByChar('3')));
-            message = makeFancy(ent.getHolder(), true, label, ent, message.then(ent.getHolder()).color(ChatColor.getByChar('b')));
-            message = makeFancy(ent.getHolder(), true, label, ent, message.then(" - ").color(ChatColor.getByChar('7')));
-            message = makeFancy(ent.getHolder(), true, label, ent, message.then("" + ent.getValue()).color(ent.getValue() ? ChatColor.getByChar('a') : ChatColor.getByChar('c')));
-            message = appendNodeExpiry(ent.asNode(), message);
-            message = appendNodeContextDescription(ent.asNode(), message);
-            message = message.then("\n");
-        }
-
-        return Maps.immutableEntry(message, title);
     }
 
     public static <T> List<List<T>> divideList(Iterable<T> source, int size) {
@@ -355,60 +124,12 @@ public class Util {
         return lists;
     }
 
-    public static String tempNodesToString(SortedSet<LocalizedNode> nodes) {
-        StringBuilder sb = new StringBuilder();
-        for (Node node : nodes) {
-            if (!node.isTemporary()) continue;
-
-            sb.append("&3> ")
-                    .append(node.getValue() ? "&a" : "&c")
-                    .append(node.getPermission())
-                    .append(getNodeContextDescription(node))
-                    .append("\n&2-    expires in ")
-                    .append(DateUtil.formatDateDiff(node.getExpiryUnixTime()))
-                    .append("\n");
-        }
-        return sb.length() == 0 ? "&3None" : sb.toString();
-    }
-
-    public static String permGroupsToString(SortedSet<LocalizedNode> nodes) {
-        StringBuilder sb = new StringBuilder();
-        for (Node node : nodes) {
-            if (!node.isGroupNode()) continue;
-            if (node.isTemporary()) continue;
-
-            sb.append("&3> &f")
-                    .append(node.getGroupName())
-                    .append(getNodeContextDescription(node))
-                    .append("\n");
-        }
-        return sb.length() == 0 ? "&3None" : sb.toString();
-    }
-
-    public static String tempGroupsToString(SortedSet<LocalizedNode> nodes) {
-        StringBuilder sb = new StringBuilder();
-        for (Node node : nodes) {
-            if (!node.isGroupNode()) continue;
-            if (!node.isTemporary()) continue;
-
-            sb.append("&3> &f")
-                    .append(node.getGroupName())
-                    .append(getNodeContextDescription(node))
-                    .append("\n&2-    expires in ")
-                    .append(DateUtil.formatDateDiff(node.getExpiryUnixTime()))
-                    .append("\n");
-        }
-        return sb.length() == 0 ? "&3None" : sb.toString();
-    }
-
     public static UUID parseUuid(String s) {
         try {
             return UUID.fromString(s);
         } catch (IllegalArgumentException e) {
             try {
-                return UUID.fromString(s.replaceAll(
-                        "(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})",
-                        "$1-$2-$3-$4-$5"));
+                return UUID.fromString(s.replaceAll("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})", "$1-$2-$3-$4-$5"));
             } catch (IllegalArgumentException e1) {
                 return null;
             }
@@ -416,57 +137,142 @@ public class Util {
     }
 
     public static String toCommaSep(Collection<String> strings) {
-        if (strings.isEmpty()) return "&bNone";
+        if (strings.isEmpty()) {
+            return "&bNone";
+        }
 
         StringBuilder sb = new StringBuilder();
         strings.forEach(s -> sb.append("&3").append(s).append("&7, "));
         return sb.delete(sb.length() - 2, sb.length()).toString();
     }
 
-    public static String listToArrowSep(List<String> strings, String highlight) {
-        if (strings.isEmpty()) return "&bNone";
+    public static String listToArrowSep(Collection<String> strings, String highlight) {
+        if (strings.isEmpty()) {
+            return "&bNone";
+        }
 
         StringBuilder sb = new StringBuilder();
-        for (String s : strings) {
-            if (s.equalsIgnoreCase(highlight)) {
-                sb.append("&b").append(s).append("&7 ---> ");
-            } else {
-                sb.append("&3").append(s).append("&7 ---> ");
-            }
-        }
+        strings.forEach(s -> sb.append(s.equalsIgnoreCase(highlight) ? "&b" : "&3").append(s).append("&7 ---> "));
         return sb.delete(sb.length() - 6, sb.length()).toString();
     }
 
-    public static String listToArrowSep(List<String> strings, String highlightFirst, String highlightSecond, boolean reversed) {
-        if (strings.isEmpty()) return "&6None";
+    public static String listToArrowSep(Collection<String> strings, String highlightFirst, String highlightSecond, boolean reversed) {
+        if (strings.isEmpty()) {
+            return "&6None";
+        }
 
         StringBuilder sb = new StringBuilder();
         for (String s : strings) {
             if (s.equalsIgnoreCase(highlightFirst)) {
-                sb.append("&b").append(s).append("&4").append(reversed ? " <--- " : " ---> ");
+                sb.append("&b").append(s).append("&4");
             } else if (s.equalsIgnoreCase(highlightSecond)) {
-                sb.append("&b").append(s).append("&7").append(reversed ? " <--- " : " ---> ");
+                sb.append("&b").append(s).append("&7");
             } else {
-                sb.append("&3").append(s).append("&7").append(reversed ? " <--- " : " ---> ");
+                sb.append("&3").append(s).append("&7");
             }
+
+            sb.append(reversed ? " <--- " : " ---> ");
         }
         return sb.delete(sb.length() - 6, sb.length()).toString();
     }
 
     public static String listToArrowSep(List<String> strings) {
-        if (strings.isEmpty()) return "&6None";
+        if (strings.isEmpty()) {
+            return "&6None";
+        }
 
         StringBuilder sb = new StringBuilder();
         strings.forEach(s -> sb.append("&3").append(s).append("&b ---> "));
         return sb.delete(sb.length() - 6, sb.length()).toString();
     }
 
-    public static class MetaComparator implements Comparator<Map.Entry<Integer, ?>> {
+    /**
+     * Formats a boolean to a colored string
+     *
+     * @param b the boolean value
+     * @return a formatted boolean string
+     */
+    public static String formatBoolean(boolean b) {
+        return b ? "&atrue" : "&cfalse";
+    }
 
-        @Override
-        public int compare(Map.Entry<Integer, ?> o1, Map.Entry<Integer, ?> o2) {
-            int result = Integer.compare(o1.getKey(), o2.getKey());
-            return result != 0 ? result : 1;
+    /**
+     * Formats a tristate to a colored string
+     *
+     * @param t the tristate value
+     * @return a formatted tristate string
+     */
+    public static String formatTristate(Tristate t) {
+        switch (t) {
+            case TRUE:
+                return "&atrue";
+            case FALSE:
+                return "&cfalse";
+            default:
+                return "&cundefined";
         }
+    }
+
+    /**
+     * Produces a string representing a Nodes context, suitable for appending onto another message line.
+     *
+     * @param node the node to query context from
+     * @return a string representing the nodes context, or an empty string if the node applies globally.
+     */
+    public static String getAppendableNodeContextString(Node node) {
+        StringBuilder sb = new StringBuilder();
+        if (node.isServerSpecific()) {
+            sb.append(" ").append(contextToString("server", node.getServer().get()));
+        }
+        if (node.isWorldSpecific()) {
+            sb.append(" ").append(contextToString("world", node.getWorld().get()));
+        }
+        for (Map.Entry<String, String> c : node.getContexts().toSet()) {
+            sb.append(" ").append(contextToString(c.getKey(), c.getValue()));
+        }
+
+        return sb.toString();
+    }
+
+    public static void appendNodeContextDescription(FancyMessage message, Node node) {
+        if (node.isServerSpecific()) {
+            message.then(" ").apply(Maps.immutableEntry("server", node.getServer().get()), Util::appendContext);
+        }
+        if (node.isWorldSpecific()) {
+            message.then(" ").apply(Maps.immutableEntry("world", node.getWorld().get()), Util::appendContext);
+        }
+        for (Map.Entry<String, String> c : node.getContexts().toSet()) {
+            message.then(" ").apply(c, Util::appendContext);
+        }
+    }
+
+    /**
+     * Converts a context pair to a formatted string, surrounded by (  ) brackets.
+     *
+     * @param key the context key
+     * @param value the context value
+     * @return a formatted string
+     */
+    public static String contextToString(String key, String value) {
+        return Message.CONTEXT_PAIR.asString(null, key, value);
+    }
+
+    public static void appendContext(FancyMessage message, Map.Entry<String, String> ent) {
+        message.addAll(FancyMessage.fromLegacyText(contextToString(ent.getKey(), ent.getValue())));
+    }
+
+    public static String contextSetToString(ContextSet set) {
+        if (set.isEmpty()) {
+            return Message.CONTEXT_PAIR__GLOBAL_INLINE.asString(null);
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        for (Map.Entry<String, String> e : set.toSet()) {
+            sb.append(Message.CONTEXT_PAIR_INLINE.asString(null, e.getKey(), e.getValue()));
+            sb.append(Message.CONTEXT_PAIR_SEP.asString(null));
+        }
+
+        return sb.delete(sb.length() - Message.CONTEXT_PAIR_SEP.asString(null).length(), sb.length()).toString();
     }
 }

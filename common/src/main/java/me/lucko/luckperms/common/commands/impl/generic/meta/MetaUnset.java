@@ -22,13 +22,14 @@
 
 package me.lucko.luckperms.common.commands.impl.generic.meta;
 
+import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.ContextHelper;
+import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
@@ -42,11 +43,10 @@ import java.util.stream.Collectors;
 public class MetaUnset extends SharedSubCommand {
     public MetaUnset() {
         super("unset", "Unsets a meta value", Permission.USER_META_UNSET, Permission.GROUP_META_UNSET,
-                Predicates.notInRange(1, 3),
+                Predicates.is(0),
                 Arg.list(
                         Arg.create("key", true, "the key to unset"),
-                        Arg.create("server", false, "the server to remove the meta pair on"),
-                        Arg.create("world", false, "the world to remove the meta pair on")
+                        Arg.create("context...", false, "the contexts to remove the meta pair in")
                 )
         );
     }
@@ -54,22 +54,10 @@ public class MetaUnset extends SharedSubCommand {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         String key = args.get(0);
-        String server = ArgumentUtils.handleServer(1, args);
-        String world = ArgumentUtils.handleWorld(2, args);
+        MutableContextSet context = ArgumentUtils.handleContext(1, args);
 
-        holder.clearMetaKeys(key, server, world, false);
-
-        switch (ContextHelper.determine(server, world)) {
-            case NONE:
-                Message.UNSET_META_SUCCESS.send(sender, key, holder.getFriendlyName());
-                break;
-            case SERVER:
-                Message.UNSET_META_SERVER_SUCCESS.send(sender, key, holder.getFriendlyName(), server);
-                break;
-            case SERVER_AND_WORLD:
-                Message.UNSET_META_SERVER_WORLD_SUCCESS.send(sender, key, holder.getFriendlyName(), server, world);
-                break;
-        }
+        holder.clearMetaKeys(key, context, false);
+        Message.UNSET_META_SUCCESS.send(sender, key, holder.getFriendlyName(), Util.contextSetToString(context));
 
         LogEntry.build().actor(sender).acted(holder)
                 .action("meta unset " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))

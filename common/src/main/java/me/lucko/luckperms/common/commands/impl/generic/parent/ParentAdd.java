@@ -22,21 +22,22 @@
 
 package me.lucko.luckperms.common.commands.impl.generic.parent;
 
+import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.ContextHelper;
+import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.core.DataMutateResult;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,11 +47,10 @@ import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getGroup
 public class ParentAdd extends SharedSubCommand {
     public ParentAdd() {
         super("add", "Sets another group for the object to inherit permissions from", Permission.USER_PARENT_ADD,
-                Permission.GROUP_PARENT_ADD, Predicates.notInRange(1, 3),
+                Permission.GROUP_PARENT_ADD, Predicates.is(0),
                 Arg.list(
                         Arg.create("group", true, "the group to inherit from"),
-                        Arg.create("server", false, "the server to inherit the group on"),
-                        Arg.create("world", false, "the world to inherit the group on")
+                        Arg.create("context...", false, "the contexts to inherit the group in")
                 )
         );
     }
@@ -58,8 +58,7 @@ public class ParentAdd extends SharedSubCommand {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         String groupName = ArgumentUtils.handleName(0, args);
-        String server = ArgumentUtils.handleServer(1, args);
-        String world = ArgumentUtils.handleWorld(2, args);
+        MutableContextSet context = ArgumentUtils.handleContext(1, args);
 
         if (!plugin.getStorage().loadGroup(groupName).join()) {
             Message.GROUP_DOES_NOT_EXIST.send(sender);
@@ -72,21 +71,10 @@ public class ParentAdd extends SharedSubCommand {
             return CommandResult.LOADING_ERROR;
         }
 
-        try {
-            switch (ContextHelper.determine(server, world)) {
-                case NONE:
-                    holder.setInheritGroup(group);
-                    Message.SET_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName());
-                    break;
-                case SERVER:
-                    holder.setInheritGroup(group, server);
-                    Message.SET_INHERIT_SERVER_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(), server);
-                    break;
-                case SERVER_AND_WORLD:
-                    holder.setInheritGroup(group, server, world);
-                    Message.SET_INHERIT_SERVER_WORLD_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(), server, world);
-                    break;
-            }
+        DataMutateResult result = holder.setInheritGroup(group, context);
+
+        if (result.asBoolean()) {
+            Message.SET_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(), Util.contextSetToString(context));
 
             LogEntry.build().actor(sender).acted(holder)
                     .action("parent add " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
@@ -94,8 +82,7 @@ public class ParentAdd extends SharedSubCommand {
 
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
-
-        } catch (ObjectAlreadyHasException e) {
+        } else {
             Message.ALREADY_INHERITS.send(sender, holder.getFriendlyName(), group.getDisplayName());
             return CommandResult.STATE_ERROR;
         }

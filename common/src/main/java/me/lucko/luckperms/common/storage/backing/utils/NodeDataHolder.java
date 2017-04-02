@@ -27,15 +27,20 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.common.core.NodeBuilder;
+import me.lucko.luckperms.common.core.NodeFactory;
 
-import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 @Getter
@@ -44,7 +49,6 @@ import java.util.Map;
 @AllArgsConstructor(staticName = "of")
 public class NodeDataHolder {
     private static final Gson GSON = new Gson();
-    private static final Type CONTEXT_TYPE = new TypeToken<Map<String, Collection<String>>>(){}.getType();
 
     public static NodeDataHolder fromNode(Node node) {
         return NodeDataHolder.of(
@@ -58,12 +62,19 @@ public class NodeDataHolder {
     }
 
     public static NodeDataHolder of(String permission, boolean value, String server, String world, long expiry, String contexts) {
-        Map<String, Collection<String>> deserializedContexts = GSON.fromJson(contexts, CONTEXT_TYPE);
+        JsonObject context = GSON.fromJson(contexts, JsonObject.class);
         ImmutableSetMultimap.Builder<String, String> map = ImmutableSetMultimap.builder();
-        for (Map.Entry<String, Collection<String>> e : deserializedContexts.entrySet()) {
-            map.putAll(e.getKey(), e.getValue());
+        for (Map.Entry<String, JsonElement> e : context.entrySet()) {
+            JsonElement val = e.getValue();
+            if (val.isJsonArray()) {
+                JsonArray vals = val.getAsJsonArray();
+                for (JsonElement element : vals) {
+                    map.put(e.getKey(), element.getAsString());
+                }
+            } else {
+                map.put(e.getKey(), val.getAsString());
+            }
         }
-
         return new NodeDataHolder(permission, value, server, world, expiry, map.build());
     }
 
@@ -75,11 +86,29 @@ public class NodeDataHolder {
     private final ImmutableSetMultimap<String, String> contexts;
 
     public String serialiseContext() {
-        return GSON.toJson(getContexts().asMap());
+        JsonObject context = new JsonObject();
+        ImmutableMap<String, Collection<String>> map = getContexts().asMap();
+
+        map.forEach((key, value) -> {
+            List<String> vals = new ArrayList<>(value);
+            int size = vals.size();
+
+            if (size == 1) {
+                context.addProperty(key, vals.get(0));
+            } else if (size > 1) {
+                JsonArray arr = new JsonArray();
+                for (String s : vals) {
+                    arr.add(new JsonPrimitive(s));
+                }
+                context.add(key, arr);
+            }
+        });
+
+        return GSON.toJson(context);
     }
 
     public Node toNode() {
-        NodeBuilder builder = new NodeBuilder(permission);
+        Node.Builder builder = NodeFactory.newBuilder(permission);
         builder.setValue(value);
         builder.setServer(server);
         builder.setWorld(world);

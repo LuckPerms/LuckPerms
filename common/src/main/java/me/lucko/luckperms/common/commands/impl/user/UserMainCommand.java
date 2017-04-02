@@ -27,6 +27,7 @@ import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.common.commands.abstraction.Command;
 import me.lucko.luckperms.common.commands.abstraction.MainCommand;
 import me.lucko.luckperms.common.commands.impl.generic.meta.CommandMeta;
+import me.lucko.luckperms.common.commands.impl.generic.other.HolderClear;
 import me.lucko.luckperms.common.commands.impl.generic.other.HolderShowTracks;
 import me.lucko.luckperms.common.commands.impl.generic.parent.CommandParent;
 import me.lucko.luckperms.common.commands.impl.generic.permission.CommandPermission;
@@ -53,7 +54,7 @@ public class UserMainCommand extends MainCommand<User> {
                 .add(new UserDemote())
                 .add(new HolderShowTracks<>(true))
                 .add(new UserBulkChange())
-                .add(new UserClear())
+                .add(new HolderClear<>(true))
                 .build()
         );
     }

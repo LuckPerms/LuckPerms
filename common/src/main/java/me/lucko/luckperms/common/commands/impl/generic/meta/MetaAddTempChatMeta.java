@@ -20,8 +20,9 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.impl.generic.permission;
+package me.lucko.luckperms.common.commands.impl.generic.meta;
 
+import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
@@ -30,62 +31,67 @@ import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.DataMutateResult;
 import me.lucko.luckperms.common.core.NodeFactory;
+import me.lucko.luckperms.common.core.TemporaryModifier;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getBoolTabComplete;
-import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getPermissionTabComplete;
+public class MetaAddTempChatMeta extends SharedSubCommand {
+    private static final Function<Boolean, String> DESCRIPTOR = b -> b ? "prefix" : "suffix";
+    private final boolean isPrefix;
 
-public class PermissionSet extends SharedSubCommand {
-    public PermissionSet() {
-        super("set", "Sets a permission for the object", Permission.USER_PERM_SET, Permission.GROUP_PERM_SET,
-                Predicates.is(0),
+    public MetaAddTempChatMeta(boolean isPrefix) {
+        super("addtemp" + DESCRIPTOR.apply(isPrefix),
+                "Adds a " + DESCRIPTOR.apply(isPrefix) + " temporarily",
+                isPrefix ? Permission.USER_META_ADDTEMP_PREFIX : Permission.USER_META_ADDTEMP_SUFFIX,
+                isPrefix ? Permission.GROUP_META_ADDTEMP_PREFIX : Permission.GROUP_META_ADDTEMP_SUFFIX,
+                Predicates.inRange(0, 2),
                 Arg.list(
-                        Arg.create("node", true, "the permission node to set"),
-                        Arg.create("true|false", false, "the value of the node"),
-                        Arg.create("context...", false, "the contexts to add the permission in")
+                        Arg.create("priority", true, "the priority to add the " + DESCRIPTOR.apply(isPrefix) + " at"),
+                        Arg.create(DESCRIPTOR.apply(isPrefix), true, "the " + DESCRIPTOR.apply(isPrefix) + " string"),
+                        Arg.create("duration", true, "the duration until the " + DESCRIPTOR.apply(isPrefix) + " expires"),
+                        Arg.create("context...", false, "the contexts to add the " + DESCRIPTOR.apply(isPrefix) + " in")
                 )
         );
+        this.isPrefix = isPrefix;
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
-        boolean b = ArgumentUtils.handleBoolean(1, args);
-        String node = b ? ArgumentUtils.handleNode(0, args) : ArgumentUtils.handleString(0, args);
-        MutableContextSet context = ArgumentUtils.handleContext(2, args);
+        int priority = ArgumentUtils.handlePriority(0, args);
+        String meta = ArgumentUtils.handleString(1, args);
+        long duration = ArgumentUtils.handleDuration(2, args);
+        MutableContextSet context = ArgumentUtils.handleContext(3, args);
+        TemporaryModifier modifier = plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR);
 
-        DataMutateResult result = holder.setPermission(NodeFactory.newBuilder(node).setValue(b).withExtraContext(context).build());
+        Map.Entry<DataMutateResult, Node> ret = holder.setPermission(NodeFactory.makeChatMetaNode(isPrefix, priority, meta).setExpiry(duration).withExtraContext(context).build(), modifier);
 
-        if (result.asBoolean()) {
-            Message.SETPERMISSION_SUCCESS.send(sender, node, b, holder.getFriendlyName(), Util.contextSetToString(context));
+        if (ret.getKey().asBoolean()) {
+            duration = ret.getValue().getExpiryUnixTime();
+
+            Message.ADD_TEMP_CHATMETA_SUCCESS.send(sender, holder.getFriendlyName(), DESCRIPTOR.apply(isPrefix), meta, meta, DateUtil.formatDateDiff(duration), Util.contextSetToString(context));
 
             LogEntry.build().actor(sender).acted(holder)
-                    .action("permission set " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                    .action("meta addtemp" + DESCRIPTOR.apply(isPrefix) + " " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
                     .build().submit(plugin, sender);
 
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_HASPERMISSION.send(sender, holder.getFriendlyName());
+            Message.ALREADY_HAS_CHAT_META.send(sender, holder.getFriendlyName(), DESCRIPTOR.apply(isPrefix));
             return CommandResult.STATE_ERROR;
         }
-    }
-
-    @Override
-    public List<String> onTabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
-        List<String> ret = getBoolTabComplete(args);
-        if (!ret.isEmpty()) {
-            return ret;
-        }
-        return getPermissionTabComplete(args, plugin.getPermissionVault());
     }
 }

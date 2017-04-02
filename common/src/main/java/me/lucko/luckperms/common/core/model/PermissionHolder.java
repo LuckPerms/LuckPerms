@@ -29,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.SortedSetMultimap;
@@ -45,6 +46,7 @@ import me.lucko.luckperms.common.caching.handlers.GroupReference;
 import me.lucko.luckperms.common.caching.handlers.HolderReference;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.core.ContextSetComparator;
+import me.lucko.luckperms.common.core.DataMutateResult;
 import me.lucko.luckperms.common.core.InheritanceInfo;
 import me.lucko.luckperms.common.core.NodeComparator;
 import me.lucko.luckperms.common.core.NodeFactory;
@@ -54,8 +56,6 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.ExtractedContexts;
 import me.lucko.luckperms.common.utils.ImmutableLocalizedNode;
 import me.lucko.luckperms.common.utils.NodeTools;
-import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
-import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -704,7 +704,7 @@ public abstract class PermissionHolder {
      * @return a tristate
      */
     public Tristate hasPermission(Node node, boolean checkTransient) {
-        if (node.isGroupNode() && node.getGroupName().equalsIgnoreCase(getObjectName())) {
+        if (this instanceof Group && node.isGroupNode() && node.getGroupName().equalsIgnoreCase(getObjectName())) {
             return Tristate.TRUE;
         }
 
@@ -793,11 +793,10 @@ public abstract class PermissionHolder {
      * Sets a permission node
      *
      * @param node the node to set
-     * @throws ObjectAlreadyHasException if the holder has this permission already
      */
-    public void setPermission(Node node) throws ObjectAlreadyHasException {
+    public DataMutateResult setPermission(Node node) {
         if (hasPermission(node, false) != Tristate.UNDEFINED) {
-            throw new ObjectAlreadyHasException();
+            return DataMutateResult.ALREADY_HAS;
         }
 
         ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes().values());
@@ -810,12 +809,7 @@ public abstract class PermissionHolder {
         ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes().values());
 
         plugin.getApiProvider().getEventFactory().handleNodeAdd(node, this, before, after);
-    }
-
-    public void setPermissionUnchecked(Node node) {
-        try {
-            setPermission(node);
-        } catch (ObjectAlreadyHasException ignored) {}
+        return DataMutateResult.SUCCESS;
     }
 
     /**
@@ -823,9 +817,8 @@ public abstract class PermissionHolder {
      * @param node the node to set
      * @param modifier the modifier to use for the operation
      * @return the node that was actually set, respective of the modifier
-     * @throws ObjectAlreadyHasException if the holder has this permission set already, respective of the modifier
      */
-    public Node setPermission(Node node, TemporaryModifier modifier) throws ObjectAlreadyHasException {
+    public Map.Entry<DataMutateResult, Node> setPermission(Node node, TemporaryModifier modifier) {
         // If the node is temporary, we should take note of the modifier
         if (node.isTemporary()) {
             if (modifier == TemporaryModifier.ACCUMULATE) {
@@ -850,7 +843,7 @@ public abstract class PermissionHolder {
                     invalidateCache();
                     ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes().values());
                     plugin.getApiProvider().getEventFactory().handleNodeAdd(newNode, this, before, after);
-                    return newNode;
+                    return Maps.immutableEntry(DataMutateResult.SUCCESS, newNode);
                 }
 
             } else if (modifier == TemporaryModifier.REPLACE) {
@@ -874,7 +867,7 @@ public abstract class PermissionHolder {
                         invalidateCache();
                         ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes().values());
                         plugin.getApiProvider().getEventFactory().handleNodeAdd(node, this, before, after);
-                        return node;
+                        return Maps.immutableEntry(DataMutateResult.SUCCESS, node);
                     }
                 }
             }
@@ -883,25 +876,17 @@ public abstract class PermissionHolder {
         }
 
         // Fallback to the normal handling.
-        setPermission(node);
-        return node;
-    }
-
-    public void setPermissionUnchecked(Node node, TemporaryModifier modifier) {
-        try {
-            setPermission(node, modifier);
-        } catch (ObjectAlreadyHasException ignored) {}
+        return Maps.immutableEntry(setPermission(node), node);
     }
 
     /**
      * Sets a transient permission node
      *
      * @param node the node to set
-     * @throws ObjectAlreadyHasException if the holder has this permission already
      */
-    public void setTransientPermission(Node node) throws ObjectAlreadyHasException {
+    public DataMutateResult setTransientPermission(Node node) {
         if (hasPermission(node, true) != Tristate.UNDEFINED) {
-            throw new ObjectAlreadyHasException();
+            return DataMutateResult.ALREADY_HAS;
         }
 
         ImmutableSet<Node> before = ImmutableSet.copyOf(getTransientNodes().values());
@@ -914,23 +899,17 @@ public abstract class PermissionHolder {
         ImmutableSet<Node> after = ImmutableSet.copyOf(getTransientNodes().values());
 
         plugin.getApiProvider().getEventFactory().handleNodeAdd(node, this, before, after);
-    }
-
-    public void setTransientPermissionUnchecked(Node node) {
-        try {
-            setTransientPermission(node);
-        } catch (ObjectAlreadyHasException ignored) {}
+        return DataMutateResult.SUCCESS;
     }
 
     /**
      * Unsets a permission node
      *
      * @param node the node to unset
-     * @throws ObjectLacksException if the holder doesn't have this node already
      */
-    public void unsetPermission(Node node) throws ObjectLacksException {
+    public DataMutateResult unsetPermission(Node node) {
         if (hasPermission(node, false) == Tristate.UNDEFINED) {
-            throw new ObjectLacksException();
+            return DataMutateResult.LACKS;
         }
 
         ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes().values());
@@ -942,21 +921,15 @@ public abstract class PermissionHolder {
 
         ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes().values());
         plugin.getApiProvider().getEventFactory().handleNodeRemove(node, this, before, after);
-    }
-
-    public void unsetPermissionUnchecked(Node node) {
-        try {
-            unsetPermission(node);
-        } catch (ObjectLacksException ignored) {}
+        return DataMutateResult.SUCCESS;
     }
 
     /**
      * Unsets a permission node
      *
      * @param node the node to unset
-     * @throws ObjectLacksException if the holder doesn't have this node already
      */
-    public void unsetPermissionExact(Node node) throws ObjectLacksException {
+    public DataMutateResult unsetPermissionExact(Node node) {
         ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes().values());
 
         synchronized (nodes) {
@@ -967,21 +940,21 @@ public abstract class PermissionHolder {
         ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes().values());
 
         if (before.size() == after.size()) {
-            throw new ObjectLacksException();
+            return DataMutateResult.LACKS;
         }
 
         plugin.getApiProvider().getEventFactory().handleNodeRemove(node, this, before, after);
+        return DataMutateResult.SUCCESS;
     }
 
     /**
      * Unsets a transient permission node
      *
      * @param node the node to unset
-     * @throws ObjectLacksException if the holder doesn't have this node already
      */
-    public void unsetTransientPermission(Node node) throws ObjectLacksException {
+    public DataMutateResult unsetTransientPermission(Node node) {
         if (hasPermission(node, true) == Tristate.UNDEFINED) {
-            throw new ObjectLacksException();
+            return DataMutateResult.LACKS;
         }
 
         ImmutableSet<Node> before = ImmutableSet.copyOf(getTransientNodes().values());
@@ -993,12 +966,7 @@ public abstract class PermissionHolder {
 
         ImmutableSet<Node> after = ImmutableSet.copyOf(getTransientNodes().values());
         plugin.getApiProvider().getEventFactory().handleNodeRemove(node, this, before, after);
-    }
-
-    public void unsetTransientPermissionUnchecked(Node node) {
-        try {
-            unsetTransientPermission(node);
-        } catch (ObjectLacksException ignored) {}
+        return DataMutateResult.SUCCESS;
     }
 
     public boolean inheritsGroup(Group group) {
@@ -1013,76 +981,12 @@ public abstract class PermissionHolder {
         return group.getName().equalsIgnoreCase(this.getObjectName()) || hasPermission("group." + group.getName(), true, server, world);
     }
 
-    public void setInheritGroup(Group group) throws ObjectAlreadyHasException {
-        if (group.getName().equalsIgnoreCase(this.getObjectName())) {
-            throw new ObjectAlreadyHasException();
-        }
-
-        setPermission(NodeFactory.make("group." + group.getName(), true));
+    public DataMutateResult setInheritGroup(Group group, ContextSet contexts) {
+        return setPermission(NodeFactory.newBuilder("group." + group.getName()).withExtraContext(contexts).build());
     }
 
-    public void setInheritGroup(Group group, String server) throws ObjectAlreadyHasException {
-        if (group.getName().equalsIgnoreCase(this.getObjectName())) {
-            throw new ObjectAlreadyHasException();
-        }
-
-        setPermission(NodeFactory.make("group." + group.getName(), true, server));
-    }
-
-    public void setInheritGroup(Group group, String server, String world) throws ObjectAlreadyHasException {
-        if (group.getName().equalsIgnoreCase(this.getObjectName())) {
-            throw new ObjectAlreadyHasException();
-        }
-
-        setPermission(NodeFactory.make("group." + group.getName(), true, server, world));
-    }
-
-    public void setInheritGroup(Group group, long expireAt) throws ObjectAlreadyHasException {
-        if (group.getName().equalsIgnoreCase(this.getObjectName())) {
-            throw new ObjectAlreadyHasException();
-        }
-
-        setPermission(NodeFactory.make("group." + group.getName(), true, expireAt));
-    }
-
-    public void setInheritGroup(Group group, String server, long expireAt) throws ObjectAlreadyHasException {
-        if (group.getName().equalsIgnoreCase(this.getObjectName())) {
-            throw new ObjectAlreadyHasException();
-        }
-
-        setPermission(NodeFactory.make("group." + group.getName(), true, server, expireAt));
-    }
-
-    public void setInheritGroup(Group group, String server, String world, long expireAt) throws ObjectAlreadyHasException {
-        if (group.getName().equalsIgnoreCase(this.getObjectName())) {
-            throw new ObjectAlreadyHasException();
-        }
-
-        setPermission(NodeFactory.make("group." + group.getName(), true, server, world, expireAt));
-    }
-
-    public void unsetInheritGroup(Group group) throws ObjectLacksException {
-        unsetPermission(NodeFactory.make("group." + group.getName()));
-    }
-
-    public void unsetInheritGroup(Group group, boolean temporary) throws ObjectLacksException {
-        unsetPermission(NodeFactory.make("group." + group.getName(), temporary));
-    }
-
-    public void unsetInheritGroup(Group group, String server) throws ObjectLacksException {
-        unsetPermission(NodeFactory.make("group." + group.getName(), server));
-    }
-
-    public void unsetInheritGroup(Group group, String server, String world) throws ObjectLacksException {
-        unsetPermission(NodeFactory.make("group." + group.getName(), server, world));
-    }
-
-    public void unsetInheritGroup(Group group, String server, boolean temporary) throws ObjectLacksException {
-        unsetPermission(NodeFactory.make("group." + group.getName(), server, temporary));
-    }
-
-    public void unsetInheritGroup(Group group, String server, String world, boolean temporary) throws ObjectLacksException {
-        unsetPermission(NodeFactory.make("group." + group.getName(), server, world, temporary));
+    public DataMutateResult unsetInheritGroup(Group group, ContextSet contexts) {
+        return unsetPermission(NodeFactory.newBuilder("group." + group.getName()).withExtraContext(contexts).build());
     }
 
     /**
@@ -1098,32 +1002,10 @@ public abstract class PermissionHolder {
         plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
     }
 
-    public void clearNodes(String server) {
-        String finalServer = Optional.ofNullable(server).orElse("global");
-
+    public void clearNodes(ContextSet contextSet) {
         ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes().values());
         synchronized (nodes) {
-            if (!nodes.values().removeIf(n -> n.getServer().orElse("global").equalsIgnoreCase(finalServer))) {
-                return;
-            }
-        }
-        invalidateCache();
-        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes().values());
-        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
-    }
-
-    public void clearNodes(String server, String world) {
-        String finalServer = Optional.ofNullable(server).orElse("global");
-        String finalWorld = Optional.ofNullable(world).orElse("null");
-
-        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes().values());
-        synchronized (nodes) {
-            boolean b = nodes.values().removeIf(n ->
-                    n.getServer().orElse("global").equalsIgnoreCase(finalServer) &&
-                            n.getWorld().orElse("null").equalsIgnoreCase(finalWorld));
-            if (!b) {
-                return;
-            }
+            nodes.removeAll(contextSet.makeImmutable());
         }
         invalidateCache();
         ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes().values());
@@ -1147,37 +1029,15 @@ public abstract class PermissionHolder {
         plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
     }
 
-    public void clearParents(String server, boolean giveDefault) {
-        String finalServer = Optional.ofNullable(server).orElse("global");
-
+    public void clearParents(ContextSet contextSet, boolean giveDefault) {
         ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes().values());
         synchronized (nodes) {
-            boolean b = nodes.values().removeIf(n ->
-                    n.isGroupNode() && n.getServer().orElse("global").equalsIgnoreCase(finalServer)
-            );
-            if (!b) {
+            SortedSet<Node> nodes = this.nodes.get(contextSet.makeImmutable());
+            if (nodes == null) {
                 return;
             }
-        }
-        if (this instanceof User && giveDefault) {
-            plugin.getUserManager().giveDefaultIfNeeded((User) this, false);
-        }
-        invalidateCache();
-        ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes().values());
-        plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
-    }
 
-    public void clearParents(String server, String world, boolean giveDefault) {
-        String finalServer = Optional.ofNullable(server).orElse("global");
-        String finalWorld = Optional.ofNullable(world).orElse("null");
-
-        ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes().values());
-        synchronized (nodes) {
-            boolean b = nodes.values().removeIf(n ->
-                    n.isGroupNode() &&
-                            n.getServer().orElse("global").equalsIgnoreCase(finalServer) &&
-                            n.getWorld().orElse("null").equalsIgnoreCase(finalWorld)
-            );
+            boolean b = nodes.removeIf(Node::isGroupNode);
             if (!b) {
                 return;
             }
@@ -1203,15 +1063,15 @@ public abstract class PermissionHolder {
         plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
     }
 
-    public void clearMeta(String server) {
-        String finalServer = Optional.ofNullable(server).orElse("global");
-
+    public void clearMeta(ContextSet contextSet) {
         ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes().values());
         synchronized (nodes) {
-            boolean b = nodes.values().removeIf(n ->
-                    (n.isMeta() || n.isPrefix() || n.isSuffix()) &&
-                            n.getServer().orElse("global").equalsIgnoreCase(finalServer)
-            );
+            SortedSet<Node> nodes = this.nodes.get(contextSet.makeImmutable());
+            if (nodes == null) {
+                return;
+            }
+
+            boolean b = nodes.removeIf(n -> n.isMeta() || n.isPrefix() || n.isSuffix());
             if (!b) {
                 return;
             }
@@ -1221,18 +1081,10 @@ public abstract class PermissionHolder {
         plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
     }
 
-    public void clearMeta(String server, String world) {
-        String finalServer = Optional.ofNullable(server).orElse("global");
-        String finalWorld = Optional.ofNullable(world).orElse("null");
-
+    public void clearMetaKeys(String key, boolean temp) {
         ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes().values());
         synchronized (nodes) {
-            boolean b = nodes.values().removeIf(n ->
-                    (n.isMeta() || n.isPrefix() || n.isSuffix()) && (
-                            n.getServer().orElse("global").equalsIgnoreCase(finalServer) &&
-                                    n.getWorld().orElse("null").equalsIgnoreCase(finalWorld)
-                    )
-            );
+            boolean b = this.nodes.values().removeIf(n -> n.isMeta() && (n.isTemporary() == temp) && n.getMeta().getKey().equalsIgnoreCase(key));
             if (!b) {
                 return;
             }
@@ -1242,17 +1094,16 @@ public abstract class PermissionHolder {
         plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
     }
 
-    public void clearMetaKeys(String key, String server, String world, boolean temp) {
-        String finalServer = Optional.ofNullable(server).orElse("global");
-        String finalWorld = Optional.ofNullable(world).orElse("null");
-
+    public void clearMetaKeys(String key, ContextSet contextSet, boolean temp) {
         ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes().values());
         synchronized (nodes) {
-            boolean b = nodes.values().removeIf(n ->
-                    n.isMeta() && (n.isTemporary() == temp) && n.getMeta().getKey().equalsIgnoreCase(key) &&
-                            n.getServer().orElse("global").equalsIgnoreCase(finalServer) &&
-                            n.getWorld().orElse("null").equalsIgnoreCase(finalWorld)
-            );
+
+            SortedSet<Node> nodes = this.nodes.get(contextSet.makeImmutable());
+            if (nodes == null) {
+                return;
+            }
+
+            boolean b = nodes.removeIf(n -> n.isMeta() && (n.isTemporary() == temp) && n.getMeta().getKey().equalsIgnoreCase(key));
             if (!b) {
                 return;
             }
@@ -1321,18 +1172,6 @@ public abstract class PermissionHolder {
         return weight;
     }
 
-    /**
-     * Get a {@link List} of all of the groups the holder inherits, on all servers
-     *
-     * @return a {@link List} of group names
-     */
-    public List<String> getGroupNames() {
-        return mergePermissionsToList().stream()
-                .filter(Node::isGroupNode)
-                .map(Node::getGroupName)
-                .collect(Collectors.toList());
-    }
-
     public Set<HolderReference> getGroupReferences() {
         return mergePermissionsToList().stream()
                 .filter(Node::isGroupNode)
@@ -1340,44 +1179,5 @@ public abstract class PermissionHolder {
                 .map(String::toLowerCase)
                 .map(GroupReference::of)
                 .collect(Collectors.toSet());
-    }
-
-    /**
-     * Get a {@link List} of the groups the holder inherits on a specific server and world
-     *
-     * @param server the server to check
-     * @param world  the world to check
-     * @return a {@link List} of group names
-     */
-    public List<String> getLocalGroups(String server, String world) {
-        return mergePermissionsToList().stream()
-                .filter(Node::isGroupNode)
-                .filter(n -> n.shouldApplyOnWorld(world, false, true))
-                .filter(n -> n.shouldApplyOnServer(server, false, true))
-                .map(Node::getGroupName)
-                .collect(Collectors.toList());
-    }
-
-    public List<String> getLocalGroups(String server, String world, boolean includeGlobal) {
-        return mergePermissionsToList().stream()
-                .filter(Node::isGroupNode)
-                .filter(n -> n.shouldApplyOnWorld(world, includeGlobal, true))
-                .filter(n -> n.shouldApplyOnServer(server, includeGlobal, true))
-                .map(Node::getGroupName)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Get a {@link List} of the groups the holder inherits on a specific server
-     *
-     * @param server the server to check
-     * @return a {@link List} of group names
-     */
-    public List<String> getLocalGroups(String server) {
-        return mergePermissionsToList().stream()
-                .filter(Node::isGroupNode)
-                .filter(n -> n.shouldApplyOnServer(server, false, true))
-                .map(Node::getGroupName)
-                .collect(Collectors.toList());
     }
 }

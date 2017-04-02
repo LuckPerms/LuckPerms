@@ -20,36 +20,44 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.impl.migration;
+package me.lucko.luckperms.common.core;
 
-import lombok.experimental.UtilityClass;
+import lombok.AllArgsConstructor;
 
-import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.common.core.NodeFactory;
-import me.lucko.luckperms.common.core.model.Group;
+import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
+import me.lucko.luckperms.exceptions.ObjectLacksException;
 
-@UtilityClass
-public class MigrationUtils {
+import java.util.function.Supplier;
 
-    public static Node.Builder parseNode(String permission, boolean value) {
-        if (permission.startsWith("-") || permission.startsWith("!")) {
-            permission = permission.substring(1);
-            value = false;
-        } else if (permission.startsWith("+")) {
-            permission = permission.substring(1);
-            value = true;
+@AllArgsConstructor
+public enum DataMutateResult {
+
+    SUCCESS(true, null),
+    ALREADY_HAS(false, ObjectAlreadyHasException::new),
+    LACKS(false, ObjectLacksException::new),
+    FAIL(false, RuntimeException::new);
+
+    private boolean bool;
+    private final Supplier<? extends Exception> exceptionSupplier;
+
+    public void throwException() {
+        if (exceptionSupplier != null) {
+            sneakyThrow(exceptionSupplier.get());
         }
-
-        return NodeFactory.newBuilder(permission).setValue(value);
     }
 
-    public static void setGroupWeight(Group group, int weight) {
-        group.removeIf(n -> n.getPermission().startsWith("weight."));
-        group.setPermission(NodeFactory.make("weight." + weight));
+    public boolean asBoolean() {
+        return bool;
     }
 
-    public static String standardizeName(String string) {
-        return string.trim().replace(':', '-').replace(' ', '-').replace('.', '-').toLowerCase();
+    // allows us to throw checked exceptions without declaring it, as #throwException throws a number of
+    // exception types.
+    private static void sneakyThrow(Throwable t) {
+        sneakyThrow0(t);
+    }
+
+    private static <T extends Throwable> void sneakyThrow0(Throwable t) throws T {
+        throw (T) t;
     }
 
 }

@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.common.commands.impl.user;
 
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -35,7 +36,6 @@ import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.List;
 
@@ -66,10 +66,7 @@ public class UserSwitchPrimaryGroup extends SubCommand<User> {
 
         if (!user.inheritsGroup(group)) {
             Message.USER_PRIMARYGROUP_ERROR_NOTMEMBER.send(sender, user.getName(), group.getName());
-            try {
-                user.setInheritGroup(group);
-            } catch (ObjectAlreadyHasException ignored) {
-            }
+            user.setInheritGroup(group, ContextSet.empty());
         }
 
         user.getPrimaryGroup().setStoredValue(group.getName());

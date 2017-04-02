@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.common.core;
 
+import lombok.AccessLevel;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
@@ -40,8 +41,8 @@ import java.util.Set;
 /**
  * Builds Nodes
  */
-@RequiredArgsConstructor
-public class NodeBuilder implements Node.Builder {
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
+class NodeBuilder implements Node.Builder {
     private final String permission;
     private final MutableContextSet extraContexts = MutableContextSet.create();
     private Boolean value = true;

@@ -22,23 +22,24 @@
 
 package me.lucko.luckperms.common.commands.impl.generic.parent;
 
+import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.ContextHelper;
+import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.core.DataMutateResult;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -48,11 +49,10 @@ import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getGroup
 public class ParentRemove extends SharedSubCommand {
     public ParentRemove() {
         super("remove", "Removes a previously set inheritance rule", Permission.USER_PARENT_REMOVE,
-                Permission.GROUP_PARENT_REMOVE, Predicates.notInRange(1, 3),
+                Permission.GROUP_PARENT_REMOVE, Predicates.is(0),
                 Arg.list(
                         Arg.create("group", true, "the group to remove"),
-                        Arg.create("server", false, "the server to remove the group on"),
-                        Arg.create("world", false, "the world to remove the group on")
+                        Arg.create("context...", false, "the contexts to remove the group in")
                 )
         );
     }
@@ -60,16 +60,12 @@ public class ParentRemove extends SharedSubCommand {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         String groupName = ArgumentUtils.handleNameWithSpace(0, args);
-        String server = ArgumentUtils.handleServer(1, args);
-        String world = ArgumentUtils.handleWorld(2, args);
-
-        ContextHelper.CommandContext context = ContextHelper.determine(server, world);
+        MutableContextSet context = ArgumentUtils.handleContext(1, args);
 
         if (holder instanceof User) {
             User user = (User) holder;
 
-            boolean shouldPrevent = (context == ContextHelper.CommandContext.NONE ||
-                    (context == ContextHelper.CommandContext.SERVER && server.equalsIgnoreCase("global"))) &&
+            boolean shouldPrevent = (context.isEmpty() || context.has("server", "global")) &&
                     plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION_METHOD).equals("stored") &&
                     user.getPrimaryGroup().getStoredValue().equalsIgnoreCase(groupName);
 
@@ -79,21 +75,9 @@ public class ParentRemove extends SharedSubCommand {
             }
         }
 
-        try {
-            switch (context) {
-                case NONE:
-                    holder.unsetPermission(NodeFactory.make("group." + groupName));
-                    Message.UNSET_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), groupName);
-                    break;
-                case SERVER:
-                    holder.unsetPermission(NodeFactory.make("group." + groupName, server));
-                    Message.UNSET_INHERIT_SERVER_SUCCESS.send(sender, holder.getFriendlyName(), groupName, server);
-                    break;
-                case SERVER_AND_WORLD:
-                    holder.unsetPermission(NodeFactory.make("group." + groupName, server, world));
-                    Message.UNSET_INHERIT_SERVER_WORLD_SUCCESS.send(sender, holder.getFriendlyName(), groupName, server, world);
-                    break;
-            }
+        DataMutateResult result = holder.unsetPermission(NodeFactory.newBuilder("group." + groupName).withExtraContext(context).build());
+        if (result.asBoolean()) {
+            Message.UNSET_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), groupName, Util.contextSetToString(context));
 
             LogEntry.build().actor(sender).acted(holder)
                     .action("parent remove " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
@@ -101,8 +85,7 @@ public class ParentRemove extends SharedSubCommand {
 
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
-
-        } catch (ObjectLacksException e) {
+        } else {
             Message.DOES_NOT_INHERIT.send(sender, holder.getFriendlyName(), groupName);
             return CommandResult.STATE_ERROR;
         }

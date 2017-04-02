@@ -195,23 +195,18 @@ public class ImmutableNode implements Node {
             throw new IllegalArgumentException("Empty permission");
         }
 
+        // standardize server/world values.
         if (server != null) {
             server = server.toLowerCase();
         }
         if (world != null) {
             world = world.toLowerCase();
         }
-
         if (server != null && (server.equals("global") || server.equals(""))) {
             server = null;
         }
-
         if (world != null && (world.equals("global") || world.equals(""))) {
             world = null;
-        }
-
-        if (world != null && server == null) {
-            server = "global";
         }
 
         this.permission = NodeFactory.unescapeDelimiters(permission, "/", "-", "$", "(", ")", "=", ",");
@@ -289,12 +284,22 @@ public class ImmutableNode implements Node {
 
     @Override
     public boolean isServerSpecific() {
-        return server != null && !server.equalsIgnoreCase("global");
+        return server != null;
     }
 
     @Override
     public boolean isWorldSpecific() {
         return world != null;
+    }
+
+    @Override
+    public boolean appliesGlobally() {
+        return server == null && world == null && contexts.isEmpty();
+    }
+
+    @Override
+    public boolean hasSpecificContext() {
+        return server != null && world != null && !contexts.isEmpty();
     }
 
     @Override

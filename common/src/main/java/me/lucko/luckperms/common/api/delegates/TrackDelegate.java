@@ -27,6 +27,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
 
+import com.google.common.base.Preconditions;
+
 import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
@@ -34,81 +36,77 @@ import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.List;
 
-import static me.lucko.luckperms.common.api.ApiUtils.checkGroup;
-
 /**
  * Provides a link between {@link Track} and {@link me.lucko.luckperms.common.core.model.Track}
  */
 @AllArgsConstructor
 public final class TrackDelegate implements Track {
+    public static me.lucko.luckperms.common.core.model.Track cast(Track g) {
+        Preconditions.checkState(g instanceof TrackDelegate, "Illegal instance " + g.getClass() + " cannot be handled by this implementation.");
+        return ((TrackDelegate) g).getHandle();
+    }
 
     @Getter(AccessLevel.PACKAGE)
-    private final me.lucko.luckperms.common.core.model.Track master;
+    private final me.lucko.luckperms.common.core.model.Track handle;
 
     @Override
     public String getName() {
-        return master.getName();
+        return handle.getName();
     }
 
     @Override
     public List<String> getGroups() {
-        return master.getGroups();
+        return handle.getGroups();
     }
 
     @Override
     public int getSize() {
-        return master.getSize();
+        return handle.getSize();
     }
 
     @Override
     public String getNext(@NonNull Group current) throws ObjectLacksException {
-        checkGroup(current);
-        return master.getNext(((GroupDelegate) current).getMaster());
+        return handle.getNext(GroupDelegate.cast(current));
     }
 
     @Override
     public String getPrevious(@NonNull Group current) throws ObjectLacksException {
-        checkGroup(current);
-        return master.getPrevious(((GroupDelegate) current).getMaster());
+        return handle.getPrevious(GroupDelegate.cast(current));
     }
 
     @Override
     public void appendGroup(@NonNull Group group) throws ObjectAlreadyHasException {
-        checkGroup(group);
-        master.appendGroup(((GroupDelegate) group).getMaster());
+        handle.appendGroup(GroupDelegate.cast(group));
     }
 
     @Override
     public void insertGroup(@NonNull Group group, @NonNull int position) throws ObjectAlreadyHasException, IndexOutOfBoundsException {
-        checkGroup(group);
-        master.insertGroup(((GroupDelegate) group).getMaster(), position);
+        handle.insertGroup(GroupDelegate.cast(group), position);
     }
 
     @Override
     public void removeGroup(@NonNull Group group) throws ObjectLacksException {
-        checkGroup(group);
-        master.removeGroup(((GroupDelegate) group).getMaster());
+        handle.removeGroup(GroupDelegate.cast(group));
     }
 
     @Override
     public void removeGroup(@NonNull String group) throws ObjectLacksException {
-        master.removeGroup(group);
+        handle.removeGroup(group);
     }
 
     @Override
     public boolean containsGroup(@NonNull Group group) {
-        checkGroup(group);
-        return master.containsGroup(((GroupDelegate) group).getMaster());
+        return handle.containsGroup(GroupDelegate.cast(group));
     }
 
     @Override
     public boolean containsGroup(@NonNull String group) {
-        return master.containsGroup(group);
+        return handle.containsGroup(group);
     }
 
     @Override
     public void clearGroups() {
-        master.clearGroups();
+        handle.clearGroups();
     }
 
     public boolean equals(Object o) {

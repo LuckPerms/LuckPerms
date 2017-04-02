@@ -34,7 +34,6 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.caching.MetaAccumulator;
-import me.lucko.luckperms.common.core.NodeBuilder;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
@@ -93,31 +92,31 @@ public class LuckPermsSubjectData implements LPSubjectData {
         try (Timing i = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_SET_PERMISSION)) {
             if (tristate == Tristate.UNDEFINED) {
                 // Unset
-                Node node = new NodeBuilder(permission).withExtraContext(contexts).build();
+                Node node = NodeFactory.newBuilder(permission).withExtraContext(contexts).build();
 
                 if (enduring) {
-                    holder.unsetPermissionUnchecked(node);
+                    holder.unsetPermission(node);
                 } else {
-                    holder.unsetTransientPermissionUnchecked(node);
+                    holder.unsetTransientPermission(node);
                 }
 
                 objectSave(holder);
                 return true;
             }
 
-            Node node = new NodeBuilder(permission).setValue(tristate.asBoolean()).withExtraContext(contexts).build();
+            Node node = NodeFactory.newBuilder(permission).setValue(tristate.asBoolean()).withExtraContext(contexts).build();
 
             // Workaround: unset the inverse, to allow false -> true, true -> false overrides.
             if (enduring) {
-                holder.unsetPermissionUnchecked(node);
+                holder.unsetPermission(node);
             } else {
-                holder.unsetTransientPermissionUnchecked(node);
+                holder.unsetTransientPermission(node);
             }
 
             if (enduring) {
-                holder.setPermissionUnchecked(node);
+                holder.setPermission(node);
             } else {
-                holder.setTransientPermissionUnchecked(node);
+                holder.setTransientPermission(node);
             }
 
             objectSave(holder);
@@ -188,11 +187,11 @@ public class LuckPermsSubjectData implements LPSubjectData {
                 LPSubject permsSubject = subject.resolve(service);
 
                 if (enduring) {
-                    holder.setPermissionUnchecked(new NodeBuilder("group." + permsSubject.getIdentifier())
+                    holder.setPermission(NodeFactory.newBuilder("group." + permsSubject.getIdentifier())
                             .withExtraContext(contexts)
                             .build());
                 } else {
-                    holder.setTransientPermissionUnchecked(new NodeBuilder("group." + permsSubject.getIdentifier())
+                    holder.setTransientPermission(NodeFactory.newBuilder("group." + permsSubject.getIdentifier())
                             .withExtraContext(contexts)
                             .build());
                 }
@@ -211,11 +210,11 @@ public class LuckPermsSubjectData implements LPSubjectData {
                 LPSubject permsSubject = subject.resolve(service);
 
                 if (enduring) {
-                    holder.unsetPermissionUnchecked(new NodeBuilder("group." + permsSubject.getIdentifier())
+                    holder.unsetPermission(NodeFactory.newBuilder("group." + permsSubject.getIdentifier())
                             .withExtraContext(contexts)
                             .build());
                 } else {
-                    holder.unsetTransientPermissionUnchecked(new NodeBuilder("group." + permsSubject.getIdentifier())
+                    holder.unsetTransientPermission(NodeFactory.newBuilder("group." + permsSubject.getIdentifier())
                             .withExtraContext(contexts)
                             .build());
                 }
@@ -337,9 +336,9 @@ public class LuckPermsSubjectData implements LPSubjectData {
                 priority += 10;
 
                 if (enduring) {
-                    holder.setPermissionUnchecked(NodeFactory.makeChatMetaNode(type.equals("prefix"), priority, value).withExtraContext(context).build());
+                    holder.setPermission(NodeFactory.makeChatMetaNode(type.equals("prefix"), priority, value).withExtraContext(context).build());
                 } else {
-                    holder.setTransientPermissionUnchecked(NodeFactory.makeChatMetaNode(type.equals("prefix"), priority, value).withExtraContext(context).build());
+                    holder.setTransientPermission(NodeFactory.makeChatMetaNode(type.equals("prefix"), priority, value).withExtraContext(context).build());
                 }
 
             } else {
@@ -352,9 +351,9 @@ public class LuckPermsSubjectData implements LPSubjectData {
                 toRemove.forEach(makeUnsetConsumer(enduring));
 
                 if (enduring) {
-                    holder.setPermissionUnchecked(NodeFactory.makeMetaNode(key, value).withExtraContext(context).build());
+                    holder.setPermission(NodeFactory.makeMetaNode(key, value).withExtraContext(context).build());
                 } else {
-                    holder.setTransientPermissionUnchecked(NodeFactory.makeMetaNode(key, value).withExtraContext(context).build());
+                    holder.setTransientPermission(NodeFactory.makeMetaNode(key, value).withExtraContext(context).build());
                 }
             }
 
@@ -422,9 +421,9 @@ public class LuckPermsSubjectData implements LPSubjectData {
     private Consumer<Node> makeUnsetConsumer(boolean enduring) {
         return n -> {
             if (enduring) {
-                holder.unsetPermissionUnchecked(n);
+                holder.unsetPermission(n);
             } else {
-                holder.unsetTransientPermissionUnchecked(n);
+                holder.unsetTransientPermission(n);
             }
         };
     }

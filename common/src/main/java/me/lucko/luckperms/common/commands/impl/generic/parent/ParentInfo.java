@@ -22,6 +22,8 @@
 
 package me.lucko.luckperms.common.commands.impl.generic.parent;
 
+import me.lucko.luckperms.api.LocalizedNode;
+import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
@@ -31,9 +33,11 @@ import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
+import java.util.SortedSet;
 
 public class ParentInfo extends SharedSubCommand {
     public ParentInfo() {
@@ -43,8 +47,38 @@ public class ParentInfo extends SharedSubCommand {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
-        Message.LISTPARENTS.send(sender, holder.getFriendlyName(), Util.permGroupsToString(holder.mergePermissionsToSortedSet()));
-        Message.LISTPARENTS_TEMP.send(sender, holder.getFriendlyName(), Util.tempGroupsToString(holder.mergePermissionsToSortedSet()));
+        Message.LISTPARENTS.send(sender, holder.getFriendlyName(), permGroupsToString(holder.mergePermissionsToSortedSet()));
+        Message.LISTPARENTS_TEMP.send(sender, holder.getFriendlyName(), tempGroupsToString(holder.mergePermissionsToSortedSet()));
         return CommandResult.SUCCESS;
+    }
+
+    private static String permGroupsToString(SortedSet<LocalizedNode> nodes) {
+        StringBuilder sb = new StringBuilder();
+        for (Node node : nodes) {
+            if (!node.isGroupNode()) continue;
+            if (node.isTemporary()) continue;
+
+            sb.append("&3> &f")
+                    .append(node.getGroupName())
+                    .append(Util.getAppendableNodeContextString(node))
+                    .append("\n");
+        }
+        return sb.length() == 0 ? "&3None" : sb.toString();
+    }
+
+    private static String tempGroupsToString(SortedSet<LocalizedNode> nodes) {
+        StringBuilder sb = new StringBuilder();
+        for (Node node : nodes) {
+            if (!node.isGroupNode()) continue;
+            if (!node.isTemporary()) continue;
+
+            sb.append("&3> &f")
+                    .append(node.getGroupName())
+                    .append(Util.getAppendableNodeContextString(node))
+                    .append("\n&2-    expires in ")
+                    .append(DateUtil.formatDateDiff(node.getExpiryUnixTime()))
+                    .append("\n");
+        }
+        return sb.length() == 0 ? "&3None" : sb.toString();
     }
 }

@@ -28,6 +28,7 @@ import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.commands.utils.MetaComparator;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
@@ -55,8 +56,8 @@ public class MetaInfo extends SharedSubCommand {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
-        SortedSet<Map.Entry<Integer, LocalizedNode>> prefixes = new TreeSet<>(Util.META_COMPARATOR.reversed());
-        SortedSet<Map.Entry<Integer, LocalizedNode>> suffixes = new TreeSet<>(Util.META_COMPARATOR.reversed());
+        SortedSet<Map.Entry<Integer, LocalizedNode>> prefixes = new TreeSet<>(MetaComparator.INSTANCE.reversed());
+        SortedSet<Map.Entry<Integer, LocalizedNode>> suffixes = new TreeSet<>(MetaComparator.INSTANCE.reversed());
         Set<LocalizedNode> meta = new HashSet<>();
 
         // Collect data
@@ -81,7 +82,7 @@ public class MetaInfo extends SharedSubCommand {
             for (Map.Entry<Integer, LocalizedNode> e : prefixes) {
                 String location = processLocation(e.getValue(), holder);
                 if (e.getValue().isServerSpecific() || e.getValue().isWorldSpecific() || !e.getValue().getContexts().isEmpty()) {
-                    String context = Util.getNodeContextDescription(e.getValue());
+                    String context = Util.getAppendableNodeContextString(e.getValue());
                     Message.CHAT_META_ENTRY_WITH_CONTEXT.send(sender, e.getKey(), e.getValue().getPrefix().getValue(), location, context);
                 } else {
                     Message.CHAT_META_ENTRY.send(sender, e.getKey(), e.getValue().getPrefix().getValue(), location);
@@ -96,7 +97,7 @@ public class MetaInfo extends SharedSubCommand {
             for (Map.Entry<Integer, LocalizedNode> e : suffixes) {
                 String location = processLocation(e.getValue(), holder);
                 if (e.getValue().isServerSpecific() || e.getValue().isWorldSpecific() || !e.getValue().getContexts().isEmpty()) {
-                    String context = Util.getNodeContextDescription(e.getValue());
+                    String context = Util.getAppendableNodeContextString(e.getValue());
                     Message.CHAT_META_ENTRY_WITH_CONTEXT.send(sender, e.getKey(), e.getValue().getSuffix().getValue(), location, context);
                 } else {
                     Message.CHAT_META_ENTRY.send(sender, e.getKey(), e.getValue().getSuffix().getValue(), location);
@@ -111,7 +112,7 @@ public class MetaInfo extends SharedSubCommand {
             for (LocalizedNode m : meta) {
                 String location = processLocation(m, holder);
                 if (m.isServerSpecific() || m.isWorldSpecific() || !m.getContexts().isEmpty()) {
-                    String context = Util.getNodeContextDescription(m);
+                    String context = Util.getAppendableNodeContextString(m);
                     Message.META_ENTRY_WITH_CONTEXT.send(sender, m.getMeta().getKey(), m.getMeta().getValue(), location, context);
                 } else {
                     Message.META_ENTRY.send(sender, m.getMeta().getKey(), m.getMeta().getValue(), location);

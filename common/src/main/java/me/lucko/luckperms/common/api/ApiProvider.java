@@ -42,7 +42,6 @@ import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.api.delegates.NodeFactoryDelegate;
 import me.lucko.luckperms.common.api.delegates.UserDelegate;
-import me.lucko.luckperms.common.core.NodeBuilder;
 import me.lucko.luckperms.common.core.UserIdentifier;
 import me.lucko.luckperms.common.event.EventFactory;
 import me.lucko.luckperms.common.event.LuckPermsEventBus;
@@ -153,8 +152,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public void cleanupUser(@NonNull User user) {
-        ApiUtils.checkUser(user);
-        plugin.getUserManager().cleanup(((UserDelegate) user).getMaster());
+        plugin.getUserManager().cleanup(UserDelegate.cast(user));
     }
 
     @Override
@@ -206,7 +204,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public Node.Builder buildNode(@NonNull String permission) throws IllegalArgumentException {
-        return new NodeBuilder(permission);
+        return me.lucko.luckperms.common.core.NodeFactory.newBuilder(permission);
     }
 
     @SuppressWarnings("unchecked")
@@ -217,8 +215,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public Optional<Contexts> getContextForUser(User user) {
-        ApiUtils.checkUser(user);
-        return Optional.ofNullable(plugin.getContextForUser(((UserDelegate) user).getMaster()));
+        return Optional.ofNullable(plugin.getContextForUser(UserDelegate.cast(user)));
     }
 
     @SuppressWarnings("unchecked")

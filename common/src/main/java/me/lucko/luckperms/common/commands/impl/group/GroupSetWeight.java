@@ -49,7 +49,7 @@ public class GroupSetWeight extends SubCommand<Group> {
         int weight = ArgumentUtils.handlePriority(0, args);
 
         group.removeIf(n -> n.getPermission().startsWith("weight."));
-        group.setPermissionUnchecked(NodeFactory.newBuilder("weight." + weight).build());
+        group.setPermission(NodeFactory.newBuilder("weight." + weight).build());
 
         save(group, sender, plugin);
         Message.GROUP_SET_WEIGHT.send(sender, weight, group.getDisplayName());

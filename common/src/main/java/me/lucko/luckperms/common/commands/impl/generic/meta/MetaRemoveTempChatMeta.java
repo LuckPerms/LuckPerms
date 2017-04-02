@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.impl.generic.permission;
+package me.lucko.luckperms.common.commands.impl.generic.meta;
 
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.commands.Arg;
@@ -40,52 +40,62 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getBoolTabComplete;
-import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getPermissionTabComplete;
+public class MetaRemoveTempChatMeta extends SharedSubCommand {
+    private static final Function<Boolean, String> DESCRIPTOR = b -> b ? "prefix" : "suffix";
+    private final boolean isPrefix;
 
-public class PermissionSet extends SharedSubCommand {
-    public PermissionSet() {
-        super("set", "Sets a permission for the object", Permission.USER_PERM_SET, Permission.GROUP_PERM_SET,
+    public MetaRemoveTempChatMeta(boolean isPrefix) {
+        super("removetemp" + DESCRIPTOR.apply(isPrefix),
+                "Removes a temporary " + DESCRIPTOR.apply(isPrefix),
+                isPrefix ? Permission.USER_META_REMOVETEMP_PREFIX : Permission.USER_META_REMOVETEMP_SUFFIX,
+                isPrefix ? Permission.GROUP_META_REMOVETEMP_PREFIX : Permission.GROUP_META_REMOVETEMP_SUFFIX,
                 Predicates.is(0),
                 Arg.list(
-                        Arg.create("node", true, "the permission node to set"),
-                        Arg.create("true|false", false, "the value of the node"),
-                        Arg.create("context...", false, "the contexts to add the permission in")
+                        Arg.create("priority", true, "the priority to remove the " + DESCRIPTOR.apply(isPrefix) + " at"),
+                        Arg.create(DESCRIPTOR.apply(isPrefix), false, "the " + DESCRIPTOR.apply(isPrefix) + " string"),
+                        Arg.create("server", false, "the server to remove the " + DESCRIPTOR.apply(isPrefix) + " on"),
+                        Arg.create("world", false, "the world to remove the " + DESCRIPTOR.apply(isPrefix) + " on")
                 )
         );
+        this.isPrefix = isPrefix;
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
-        boolean b = ArgumentUtils.handleBoolean(1, args);
-        String node = b ? ArgumentUtils.handleNode(0, args) : ArgumentUtils.handleString(0, args);
+        int priority = ArgumentUtils.handlePriority(0, args);
+        String prefix = ArgumentUtils.handleStringOrElse(1, args, "null");
         MutableContextSet context = ArgumentUtils.handleContext(2, args);
 
-        DataMutateResult result = holder.setPermission(NodeFactory.newBuilder(node).setValue(b).withExtraContext(context).build());
+        // Handle bulk removal
+        if (prefix.equalsIgnoreCase("null")) {
+            holder.removeIf(n ->
+                    n.isPrefix() &&
+                    n.getPrefix().getKey() == priority &&
+                    !n.isPermanent() &&
+                    n.getFullContexts().makeImmutable().equals(context.makeImmutable())
+            );
+            Message.BULK_REMOVE_TEMP_CHATMETA_SUCCESS.send(sender, holder.getFriendlyName(), DESCRIPTOR.apply(isPrefix), priority, Util.contextSetToString(context));
+            save(holder, sender, plugin);
+            return CommandResult.SUCCESS;
+        }
+
+        DataMutateResult result = holder.unsetPermission(NodeFactory.makeChatMetaNode(isPrefix, priority, prefix).setExpiry(10L).withExtraContext(context).build());
 
         if (result.asBoolean()) {
-            Message.SETPERMISSION_SUCCESS.send(sender, node, b, holder.getFriendlyName(), Util.contextSetToString(context));
+            Message.REMOVE_TEMP_CHATMETA_SUCCESS.send(sender, holder.getFriendlyName(), DESCRIPTOR.apply(isPrefix), prefix, priority, Util.contextSetToString(context));
 
             LogEntry.build().actor(sender).acted(holder)
-                    .action("permission set " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                    .action("meta removetemp" + DESCRIPTOR.apply(isPrefix) + " " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
                     .build().submit(plugin, sender);
 
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_HASPERMISSION.send(sender, holder.getFriendlyName());
+            Message.DOES_NOT_HAVE_CHAT_META.send(sender, holder.getFriendlyName(), DESCRIPTOR.apply(isPrefix));
             return CommandResult.STATE_ERROR;
         }
-    }
-
-    @Override
-    public List<String> onTabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
-        List<String> ret = getBoolTabComplete(args);
-        if (!ret.isEmpty()) {
-            return ret;
-        }
-        return getPermissionTabComplete(args, plugin.getPermissionVault());
     }
 }

@@ -63,6 +63,36 @@ public final class MutableContextSet implements ContextSet {
     }
 
     /**
+     * Makes a MutableContextSet from two context pairs
+     *
+     * @param key1 the first key
+     * @param value1 the first value
+     * @param key2 the second key
+     * @param value2 the second value
+     * @return a new MutableContextSet containing the two pairs
+     * @throws NullPointerException if any of the keys or values are null
+     * @since 3.1
+     */
+    public static MutableContextSet of(String key1, String value1, String key2, String value2) {
+        if (key1 == null) {
+            throw new NullPointerException("key1");
+        }
+        if (value1 == null) {
+            throw new NullPointerException("value1");
+        }
+        if (key2 == null) {
+            throw new NullPointerException("key2");
+        }
+        if (value2 == null) {
+            throw new NullPointerException("value2");
+        }
+
+        MutableContextSet ret = singleton(key1, value1);
+        ret.add(key2, value2);
+        return ret;
+    }
+
+    /**
      * Creates a MutableContextSet from an existing map
      *
      * @param map the map to copy from

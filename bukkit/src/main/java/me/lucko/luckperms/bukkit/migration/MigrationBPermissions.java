@@ -189,11 +189,11 @@ public class MigrationBPermissions extends SubCommand<Object> {
     private static void migrateHolder(World world, Calculable c, PermissionHolder holder) {
         // Migrate the groups permissions in this world
         for (Permission p : c.getPermissions()) {
-            holder.setPermissionUnchecked(NodeFactory.make(p.name(), p.isTrue(), "global", world.getName()));
+            holder.setPermission(NodeFactory.make(p.name(), p.isTrue(), "global", world.getName()));
 
             // Include any child permissions
             for (Map.Entry<String, Boolean> child : p.getChildren().entrySet()) {
-                holder.setPermissionUnchecked(NodeFactory.make(child.getKey(), child.getValue(), "global", world.getName()));
+                holder.setPermission(NodeFactory.make(child.getKey(), child.getValue(), "global", world.getName()));
             }
         }
 
@@ -204,17 +204,17 @@ public class MigrationBPermissions extends SubCommand<Object> {
                 parentName = "default";
             }
 
-            holder.setPermissionUnchecked(NodeFactory.make("group." + parentName, true, "global", world.getName()));
+            holder.setPermission(NodeFactory.make("group." + parentName, true, "global", world.getName()));
         }
 
         // Migrate existing meta
         for (Map.Entry<String, String> meta : c.getMeta().entrySet()) {
             if (meta.getKey().equalsIgnoreCase("prefix") || meta.getKey().equalsIgnoreCase("suffix")) {
-                holder.setPermissionUnchecked(NodeFactory.makeChatMetaNode(meta.getKey().equalsIgnoreCase("prefix"), c.getPriority(), meta.getValue()).setWorld(world.getName()).build());
+                holder.setPermission(NodeFactory.makeChatMetaNode(meta.getKey().equalsIgnoreCase("prefix"), c.getPriority(), meta.getValue()).setWorld(world.getName()).build());
                 continue;
             }
 
-            holder.setPermissionUnchecked(NodeFactory.makeMetaNode(meta.getKey(), meta.getValue()).setWorld(world.getName()).build());
+            holder.setPermission(NodeFactory.makeMetaNode(meta.getKey(), meta.getValue()).setWorld(world.getName()).build());
         }
     }
 }

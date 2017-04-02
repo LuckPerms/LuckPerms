@@ -117,7 +117,15 @@ public class CommandManager {
      * @param args   the arguments provided
      */
     public Future<CommandResult> onCommand(Sender sender, String label, List<String> args) {
-        return executor.submit(() -> execute(sender, label, args));
+        return executor.submit(() -> {
+            try {
+                return execute(sender, label, args);
+            } catch (Exception e) {
+                plugin.getLog().severe("Exception whilst executing command: " + args.toString());
+                e.printStackTrace();
+                return null;
+            }
+        });
     }
 
     @SuppressWarnings("unchecked")

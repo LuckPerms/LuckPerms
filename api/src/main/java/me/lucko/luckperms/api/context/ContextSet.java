@@ -37,7 +37,7 @@ import java.util.Set;
 public interface ContextSet {
 
     /**
-     * Make a singleton ImmutableContextSet from a context pair
+     * Creates an ImmutableContextSet from a context pair
      *
      * @param key   the key
      * @param value the value
@@ -49,7 +49,22 @@ public interface ContextSet {
     }
 
     /**
-     * Creates a ImmutableContextSet from an existing map
+     * Creates an ImmutableContextSet from two context pairs
+     *
+     * @param key1 the first key
+     * @param value1 the first value
+     * @param key2 the second key
+     * @param value2 the second value
+     * @return a new ImmutableContextSet containing the two pairs
+     * @throws NullPointerException if any of the keys or values are null
+     * @since 3.1
+     */
+    static ImmutableContextSet of(String key1, String value1, String key2, String value2) {
+        return ImmutableContextSet.of(key1, value1, key2, value2);
+    }
+
+    /**
+     * Creates an ImmutableContextSet from an existing map
      *
      * @param map the map to copy from
      * @return a new ImmutableContextSet representing the pairs from the map
@@ -60,7 +75,7 @@ public interface ContextSet {
     }
 
     /**
-     * Creates a ImmutableContextSet from an existing iterable of Map Entries
+     * Creates an ImmutableContextSet from an existing iterable of Map Entries
      *
      * @param iterable the iterable to copy from
      * @return a new ImmutableContextSet representing the pairs in the iterable
@@ -71,7 +86,7 @@ public interface ContextSet {
     }
 
     /**
-     * Creates a ImmutableContextSet from an existing multimap
+     * Creates an ImmutableContextSet from an existing multimap
      *
      * @param multimap the multimap to copy from
      * @return a new ImmutableContextSet representing the pairs in the multimap
@@ -83,7 +98,7 @@ public interface ContextSet {
     }
 
     /**
-     * Creates a new ImmutableContextSet from an existing set.
+     * Creates an new ImmutableContextSet from an existing set.
      * Only really useful for converting between mutable and immutable types.
      *
      * @param contextSet the context set to copy from
@@ -173,6 +188,7 @@ public interface ContextSet {
      *
      * @param key the key to find values for
      * @return an optional containing any match
+     * @since 3.1
      */
     default Optional<String> getAnyValue(String key) {
         return getValues(key).stream().findAny();
@@ -203,6 +219,7 @@ public interface ContextSet {
      *
      * @param other the other set to check
      * @return true if all entries in this set are also in the other set
+     * @since 3.1
      */
     default boolean isSatisfiedBy(ContextSet other) {
         if (this.isEmpty()) {

@@ -30,22 +30,24 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.caching.PermissionData;
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.core.DataMutateResult;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.utils.ExtractedContexts;
-import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
-import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import net.milkbowl.vault.permission.Permission;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * LuckPerms Vault Permission implementation
@@ -91,15 +93,16 @@ public class VaultPermissionHook extends Permission {
      */
     private CompletableFuture<Void> add(String world, PermissionHolder holder, String permission) {
         return CompletableFuture.runAsync(() -> {
-            try {
-                if (world != null && !world.equals("") && !world.equalsIgnoreCase("global")) {
-                    holder.setPermission(NodeFactory.make(permission, true, getServer(), world));
-                } else {
-                    holder.setPermission(NodeFactory.make(permission, true, getServer()));
-                }
+            DataMutateResult result;
+            if (world != null && !world.equals("") && !world.equalsIgnoreCase("global")) {
+                result = holder.setPermission(NodeFactory.make(permission, true, getServer(), world));
+            } else {
+                result = holder.setPermission(NodeFactory.make(permission, true, getServer()));
+            }
 
+            if (result.asBoolean()) {
                 save(holder);
-            } catch (ObjectAlreadyHasException ignored) {}
+            }
         }, scheduler);
     }
 
@@ -112,15 +115,16 @@ public class VaultPermissionHook extends Permission {
      */
     private CompletableFuture<Void> remove(String world, PermissionHolder holder, String permission) {
         return CompletableFuture.runAsync(() -> {
-            try {
-                if (world != null && !world.equals("") && !world.equalsIgnoreCase("global")) {
-                    holder.unsetPermission(NodeFactory.make(permission, getServer(), world));
-                } else {
-                    holder.unsetPermission(NodeFactory.make(permission, getServer()));
-                }
+            DataMutateResult result;
+            if (world != null && !world.equals("") && !world.equalsIgnoreCase("global")) {
+                result = holder.unsetPermission(NodeFactory.make(permission, getServer(), world));
+            } else {
+                result = holder.unsetPermission(NodeFactory.make(permission, getServer()));
+            }
 
+            if (result.asBoolean()) {
                 save(holder);
-            } catch (ObjectLacksException ignored) {}
+            }
         }, scheduler);
     }
 
@@ -256,15 +260,16 @@ public class VaultPermissionHook extends Permission {
 
         String w = world;
         scheduler.execute(() -> {
-            try {
-                if (w != null && !w.equals("") && !w.equalsIgnoreCase("global")) {
-                    user.setInheritGroup(group, getServer(), w);
-                } else {
-                    user.setInheritGroup(group, getServer());
-                }
+            DataMutateResult result;
+            if (w != null && !w.equals("") && !w.equalsIgnoreCase("global")) {
+                result = user.setInheritGroup(group, ImmutableContextSet.of("server", getServer(), "world", w));
+            } else {
+                result = user.setInheritGroup(group, ImmutableContextSet.singleton("server", getServer()));
+            }
 
+            if (result.asBoolean()) {
                 save(user);
-            } catch (ObjectAlreadyHasException ignored) {}
+            }
         });
         return true;
     }
@@ -282,15 +287,16 @@ public class VaultPermissionHook extends Permission {
 
         String w = world;
         scheduler.execute(() -> {
-            try {
-                if (w != null && !w.equals("") && !w.equalsIgnoreCase("global")) {
-                    user.unsetInheritGroup(group, getServer(), w);
-                } else {
-                    user.unsetInheritGroup(group, getServer());
-                }
+            DataMutateResult result;
+            if (w != null && !w.equals("") && !w.equalsIgnoreCase("global")) {
+                result = user.unsetInheritGroup(group, ImmutableContextSet.of("server", getServer(), "world", w));
+            } else {
+                result = user.unsetInheritGroup(group, ImmutableContextSet.singleton("server", getServer()));
+            }
 
+            if (result.asBoolean()) {
                 save(user);
-            } catch (ObjectLacksException ignored) {}
+            }
         });
         return true;
     }
@@ -367,7 +373,15 @@ public class VaultPermissionHook extends Permission {
                 }
 
                 if (isPgoCheckMemberOf()) {
-                    if (!user.getLocalGroups(getServer(), world, isIncludeGlobal()).contains(group.toLowerCase())) {
+                    String finalWorld = world;
+                    List<String> localGroups = user.mergePermissionsToList().stream()
+                            .filter(Node::isGroupNode)
+                            .filter(n -> n.shouldApplyOnWorld(finalWorld, isIncludeGlobal(), true))
+                            .filter(n -> n.shouldApplyOnServer(getServer(), isIncludeGlobal(), true))
+                            .map(Node::getGroupName)
+                            .collect(Collectors.toList());
+
+                    if (!localGroups.contains(group.toLowerCase())) {
                         continue;
                     }
                 }

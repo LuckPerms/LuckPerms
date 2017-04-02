@@ -20,36 +20,18 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.impl.migration;
+package me.lucko.luckperms.common.commands.utils;
 
-import lombok.experimental.UtilityClass;
+import java.util.Comparator;
+import java.util.Map;
 
-import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.common.core.NodeFactory;
-import me.lucko.luckperms.common.core.model.Group;
+public class MetaComparator implements Comparator<Map.Entry<Integer, ?>> {
+    public static final MetaComparator INSTANCE = new MetaComparator();
 
-@UtilityClass
-public class MigrationUtils {
-
-    public static Node.Builder parseNode(String permission, boolean value) {
-        if (permission.startsWith("-") || permission.startsWith("!")) {
-            permission = permission.substring(1);
-            value = false;
-        } else if (permission.startsWith("+")) {
-            permission = permission.substring(1);
-            value = true;
-        }
-
-        return NodeFactory.newBuilder(permission).setValue(value);
-    }
-
-    public static void setGroupWeight(Group group, int weight) {
-        group.removeIf(n -> n.getPermission().startsWith("weight."));
-        group.setPermission(NodeFactory.make("weight." + weight));
-    }
-
-    public static String standardizeName(String string) {
-        return string.trim().replace(':', '-').replace(' ', '-').replace('.', '-').toLowerCase();
+    @Override
+    public int compare(Map.Entry<Integer, ?> o1, Map.Entry<Integer, ?> o2) {
+        int result = Integer.compare(o1.getKey(), o2.getKey());
+        return result != 0 ? result : 1;
     }
 
 }

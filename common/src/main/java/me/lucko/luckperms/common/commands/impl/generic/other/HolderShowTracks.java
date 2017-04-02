@@ -67,7 +67,7 @@ public class HolderShowTracks<T extends PermissionHolder> extends SubCommand<T> 
                             .append(t.getName())
                             .append(": ")
                             .append(Util.listToArrowSep(t.getGroups(), name))
-                            .append(Util.getNodeContextDescription(node))
+                            .append(Util.getAppendableNodeContextString(node))
                             .append("\n")
                     );
         }

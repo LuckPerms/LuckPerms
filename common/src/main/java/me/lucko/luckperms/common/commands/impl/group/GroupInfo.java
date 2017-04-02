@@ -70,14 +70,14 @@ public class GroupInfo extends SubCommand<Group> {
         if (!parents.isEmpty()) {
             Message.INFO_PARENT_HEADER.send(sender);
             for (Node node : parents) {
-                Message.EMPTY.send(sender, "&f-    &3> &f" + node.getGroupName() + Util.getNodeContextDescription(node));
+                Message.EMPTY.send(sender, "&f-    &3> &f" + node.getGroupName() + Util.getAppendableNodeContextString(node));
             }
         }
 
         if (!tempParents.isEmpty()) {
             Message.INFO_TEMP_PARENT_HEADER.send(sender);
             for (Node node : tempParents) {
-                Message.EMPTY.send(sender, "&f-    &3> &f" + node.getGroupName() + Util.getNodeContextDescription(node));
+                Message.EMPTY.send(sender, "&f-    &3> &f" + node.getGroupName() + Util.getAppendableNodeContextString(node));
                 Message.EMPTY.send(sender, "&f-    &2-    expires in " + DateUtil.formatDateDiff(node.getExpiryUnixTime()));
             }
         }

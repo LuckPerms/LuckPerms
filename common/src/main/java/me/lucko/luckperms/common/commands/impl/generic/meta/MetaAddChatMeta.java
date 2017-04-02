@@ -22,73 +22,64 @@
 
 package me.lucko.luckperms.common.commands.impl.generic.meta;
 
-import me.lucko.luckperms.api.MetaUtils;
+import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.ContextHelper;
+import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.core.DataMutateResult;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class MetaAddSuffix extends SharedSubCommand {
-    public MetaAddSuffix() {
-        super("addsuffix", "Adds a suffix", Permission.USER_META_ADDSUFFIX, Permission.GROUP_META_ADDSUFFIX,
-                Predicates.notInRange(2, 4),
+public class MetaAddChatMeta extends SharedSubCommand {
+    private static final Function<Boolean, String> DESCRIPTOR = b -> b ? "prefix" : "suffix";
+    private final boolean isPrefix;
+
+    public MetaAddChatMeta(boolean isPrefix) {
+        super("add" + DESCRIPTOR.apply(isPrefix),
+                "Adds a " + DESCRIPTOR.apply(isPrefix),
+                isPrefix ? Permission.USER_META_ADDPREFIX : Permission.USER_META_ADDSUFFIX,
+                isPrefix ? Permission.GROUP_META_ADDPREFIX : Permission.GROUP_META_ADDSUFFIX,
+                Predicates.inRange(0, 1),
                 Arg.list(
-                        Arg.create("priority", true, "the priority to add the suffix at"),
-                        Arg.create("suffix", true, "the suffix string"),
-                        Arg.create("server", false, "the server to add the suffix on"),
-                        Arg.create("world", false, "the world to add the suffix on")
+                        Arg.create("priority", true, "the priority to add the " + DESCRIPTOR.apply(isPrefix) + " at"),
+                        Arg.create(DESCRIPTOR.apply(isPrefix), true, "the " + DESCRIPTOR.apply(isPrefix) + " string"),
+                        Arg.create("context...", false, "the contexts to add the " + DESCRIPTOR.apply(isPrefix) + " in")
                 )
         );
+        this.isPrefix = isPrefix;
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         int priority = ArgumentUtils.handlePriority(0, args);
-        String suffix = ArgumentUtils.handleString(1, args);
-        String server = ArgumentUtils.handleServer(2, args);
-        String world = ArgumentUtils.handleWorld(3, args);
+        String meta = ArgumentUtils.handleString(1, args);
+        MutableContextSet context = ArgumentUtils.handleContext(2, args);
 
-        final String node = "suffix." + priority + "." + MetaUtils.escapeCharacters(suffix);
-
-        try {
-            switch (ContextHelper.determine(server, world)) {
-                case NONE:
-                    holder.setPermission(NodeFactory.make(node, true));
-                    Message.ADDSUFFIX_SUCCESS.send(sender, holder.getFriendlyName(), suffix, priority);
-                    break;
-                case SERVER:
-                    holder.setPermission(NodeFactory.make(node, true, server));
-                    Message.ADDSUFFIX_SERVER_SUCCESS.send(sender, holder.getFriendlyName(), suffix, priority, server);
-                    break;
-                case SERVER_AND_WORLD:
-                    holder.setPermission(NodeFactory.make(node, true, server, world));
-                    Message.ADDSUFFIX_SERVER_WORLD_SUCCESS.send(sender, holder.getFriendlyName(), suffix, priority, server, world);
-                    break;
-            }
+        DataMutateResult result = holder.setPermission(NodeFactory.makeChatMetaNode(isPrefix, priority, meta).withExtraContext(context).build());
+        if (result.asBoolean()) {
+            Message.ADD_CHATMETA_SUCCESS.send(sender, holder.getFriendlyName(), DESCRIPTOR.apply(isPrefix), meta, priority, Util.contextSetToString(context));
 
             LogEntry.build().actor(sender).acted(holder)
-                    .action("meta addsuffix " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                    .action("meta add" + DESCRIPTOR.apply(isPrefix) + " " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
                     .build().submit(plugin, sender);
 
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
-
-        } catch (ObjectAlreadyHasException e) {
-            Message.ALREADY_HAS_SUFFIX.send(sender, holder.getFriendlyName());
+        } else {
+            Message.ALREADY_HAS_CHAT_META.send(sender, holder.getFriendlyName(), DESCRIPTOR.apply(isPrefix));
             return CommandResult.STATE_ERROR;
         }
     }

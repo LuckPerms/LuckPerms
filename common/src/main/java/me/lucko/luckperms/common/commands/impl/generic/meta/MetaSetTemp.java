@@ -23,13 +23,14 @@
 package me.lucko.luckperms.common.commands.impl.generic.meta;
 
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.ContextHelper;
+import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
@@ -40,20 +41,18 @@ import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class MetaSetTemp extends SharedSubCommand {
     public MetaSetTemp() {
-        super("settemp", "Sets a meta value temporarily", Permission.USER_META_SETTEMP, Permission.GROUP_META_SETTEMP, Predicates.notInRange(3, 5),
+        super("settemp", "Sets a meta value temporarily", Permission.USER_META_SETTEMP, Permission.GROUP_META_SETTEMP, Predicates.inRange(0, 2),
                 Arg.list(
                         Arg.create("key", true, "the key to set"),
                         Arg.create("value", true, "the value to set"),
                         Arg.create("duration", true, "the duration until the meta value expires"),
-                        Arg.create("server", false, "the server to add the meta pair on"),
-                        Arg.create("world", false, "the world to add the meta pair on")
+                        Arg.create("context...", false, "the contexts to add the meta pair in")
                 )
         );
     }
@@ -63,34 +62,20 @@ public class MetaSetTemp extends SharedSubCommand {
         String key = args.get(0);
         String value = args.get(1);
         long duration = ArgumentUtils.handleDuration(2, args);
-        String server = ArgumentUtils.handleServer(3, args);
-        String world = ArgumentUtils.handleWorld(4, args);
+        MutableContextSet context = ArgumentUtils.handleContext(2, args);
         TemporaryModifier modifier = plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR);
 
-        Node n = NodeFactory.makeMetaNode(key, value).setServer(server).setWorld(world).setExpiry(duration).build();
+        Node n = NodeFactory.makeMetaNode(key, value).withExtraContext(context).setExpiry(duration).build();
 
         if (holder.hasPermission(n).asBoolean()) {
             Message.ALREADY_HAS_META.send(sender, holder.getFriendlyName());
             return CommandResult.STATE_ERROR;
         }
 
-        holder.clearMetaKeys(key, server, world, true);
+        holder.clearMetaKeys(key, context, true);
+        duration = holder.setPermission(n, modifier).getValue().getExpiryUnixTime();
 
-        try {
-            duration = holder.setPermission(n, modifier).getExpiryUnixTime();
-        } catch (ObjectAlreadyHasException ignored) {}
-
-        switch (ContextHelper.determine(server, world)) {
-            case NONE:
-                Message.SET_META_TEMP_SUCCESS.send(sender, key, value, holder.getFriendlyName(), DateUtil.formatDateDiff(duration));
-                break;
-            case SERVER:
-                Message.SET_META_TEMP_SERVER_SUCCESS.send(sender, key, value, holder.getFriendlyName(), server, DateUtil.formatDateDiff(duration));
-                break;
-            case SERVER_AND_WORLD:
-                Message.SET_META_TEMP_SERVER_WORLD_SUCCESS.send(sender, key, value, holder.getFriendlyName(), server, world, DateUtil.formatDateDiff(duration));
-                break;
-        }
+        Message.SET_META_TEMP_SUCCESS.send(sender, key, value, holder.getFriendlyName(), DateUtil.formatDateDiff(duration), Util.contextSetToString(context));
 
         LogEntry.build().actor(sender).acted(holder)
                 .action("meta settemp " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))

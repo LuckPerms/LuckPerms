@@ -97,11 +97,11 @@ public class MigrationGroupManager extends SubCommand<Object> {
             me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().getIfLoaded(groupName);
 
             for (String node : g.getPermissionList()) {
-                group.setPermissionUnchecked(MigrationUtils.parseNode(node, true).build());
+                group.setPermission(MigrationUtils.parseNode(node, true).build());
             }
 
             for (String s : g.getInherits()) {
-                group.setPermissionUnchecked(NodeFactory.make("group." + MigrationUtils.standardizeName(s)));
+                group.setPermission(NodeFactory.make("group." + MigrationUtils.standardizeName(s)));
             }
 
             plugin.getStorage().saveGroup(group);
@@ -217,7 +217,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
             me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().getIfLoaded(e.getKey());
 
             for (Node node : e.getValue()) {
-                group.setPermissionUnchecked(node);
+                group.setPermission(node);
             }
 
             plugin.getStorage().saveGroup(group);
@@ -232,14 +232,14 @@ public class MigrationGroupManager extends SubCommand<Object> {
             me.lucko.luckperms.common.core.model.User user = plugin.getUserManager().get(e.getKey());
 
             for (Node node : e.getValue()) {
-                user.setPermissionUnchecked(node);
+                user.setPermission(node);
             }
 
             String primaryGroup = primaryGroups.get(e.getKey());
             if (primaryGroup != null) {
-                user.setPermissionUnchecked(NodeFactory.make("group." + primaryGroup));
+                user.setPermission(NodeFactory.make("group." + primaryGroup));
                 user.getPrimaryGroup().setStoredValue(primaryGroup);
-                user.unsetPermissionUnchecked(NodeFactory.make("group.default"));
+                user.unsetPermission(NodeFactory.make("group.default"));
             }
 
             plugin.getStorage().saveUser(user);

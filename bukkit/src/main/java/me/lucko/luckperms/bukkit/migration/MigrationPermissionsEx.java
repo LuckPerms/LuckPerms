@@ -106,7 +106,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
 
             try {
                 for (String node : group.getOwnPermissions(null)) {
-                    lpGroup.setPermissionUnchecked(MigrationUtils.parseNode(node, true).build());
+                    lpGroup.setPermission(MigrationUtils.parseNode(node, true).build());
                 }
             } catch (NullPointerException ignored) {
                 // No docs on if #getOwnPermissions(null) is ok. Should be fine though.
@@ -114,17 +114,17 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
 
             for (String world : worlds) {
                 for (String node : group.getOwnPermissions(world)) {
-                    lpGroup.setPermissionUnchecked(MigrationUtils.parseNode(node, true).setWorld(world.toLowerCase()).build());
+                    lpGroup.setPermission(MigrationUtils.parseNode(node, true).setWorld(world.toLowerCase()).build());
                 }
             }
 
             for (PermissionGroup g : group.getParents()) {
-                lpGroup.setPermissionUnchecked(NodeFactory.make("group." + MigrationUtils.standardizeName(g.getName())));
+                lpGroup.setPermission(NodeFactory.make("group." + MigrationUtils.standardizeName(g.getName())));
             }
 
             for (String world : worlds) {
                 for (PermissionGroup g : group.getParents(world)) {
-                    lpGroup.setPermissionUnchecked(NodeFactory.make("group." + MigrationUtils.standardizeName(g.getName()), true, "global", world.toLowerCase()));
+                    lpGroup.setPermission(NodeFactory.make("group." + MigrationUtils.standardizeName(g.getName()), true, "global", world.toLowerCase()));
                 }
             }
 
@@ -132,11 +132,11 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             String suffix = group.getOwnSuffix();
 
             if (prefix != null && !prefix.equals("")) {
-                lpGroup.setPermissionUnchecked(NodeFactory.makePrefixNode(groupWeight, prefix).build());
+                lpGroup.setPermission(NodeFactory.makePrefixNode(groupWeight, prefix).build());
             }
 
             if (suffix != null && !suffix.equals("")) {
-                lpGroup.setPermissionUnchecked(NodeFactory.makeSuffixNode(groupWeight, suffix).build());
+                lpGroup.setPermission(NodeFactory.makeSuffixNode(groupWeight, suffix).build());
             }
 
             plugin.getStorage().saveGroup(lpGroup);
@@ -176,7 +176,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
 
             try {
                 for (String node : user.getOwnPermissions(null)) {
-                    lpUser.setPermissionUnchecked(MigrationUtils.parseNode(node, true).build());
+                    lpUser.setPermission(MigrationUtils.parseNode(node, true).build());
                 }
             } catch (NullPointerException ignored) {
                 // No docs on if #getOwnPermissions(null) is ok. Should be fine though.
@@ -184,17 +184,17 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
 
             for (String world : worlds) {
                 for (String node : user.getOwnPermissions(world)) {
-                    lpUser.setPermissionUnchecked(MigrationUtils.parseNode(node, true).setWorld(world.toLowerCase()).build());
+                    lpUser.setPermission(MigrationUtils.parseNode(node, true).setWorld(world.toLowerCase()).build());
                 }
             }
 
             for (String g : user.getGroupNames()) {
-                lpUser.setPermissionUnchecked(NodeFactory.make("group." + MigrationUtils.standardizeName(g)));
+                lpUser.setPermission(NodeFactory.make("group." + MigrationUtils.standardizeName(g)));
             }
 
             for (String world : worlds) {
                 for (String g : user.getGroupNames(world)) {
-                    lpUser.setPermissionUnchecked(NodeFactory.make("group." + MigrationUtils.standardizeName(g), true, "global", world.toLowerCase()));
+                    lpUser.setPermission(NodeFactory.make("group." + MigrationUtils.standardizeName(g), true, "global", world.toLowerCase()));
                 }
             }
 
@@ -202,11 +202,11 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             String suffix = user.getOwnSuffix();
 
             if (prefix != null && !prefix.equals("")) {
-                lpUser.setPermissionUnchecked(NodeFactory.makePrefixNode(maxWeight, prefix).build());
+                lpUser.setPermission(NodeFactory.makePrefixNode(maxWeight, prefix).build());
             }
 
             if (suffix != null && !suffix.equals("")) {
-                lpUser.setPermissionUnchecked(NodeFactory.makeSuffixNode(maxWeight, suffix).build());
+                lpUser.setPermission(NodeFactory.makeSuffixNode(maxWeight, suffix).build());
             }
 
             // Lowest rank is the highest group #logic
@@ -220,9 +220,9 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             }
 
             if (primary != null && !primary.equalsIgnoreCase("default")) {
-                lpUser.setPermissionUnchecked(NodeFactory.make("group." + primary.toLowerCase()));
+                lpUser.setPermission(NodeFactory.make("group." + primary.toLowerCase()));
                 lpUser.getPrimaryGroup().setStoredValue(primary);
-                lpUser.unsetPermissionUnchecked(NodeFactory.make("group.default"));
+                lpUser.unsetPermission(NodeFactory.make("group.default"));
             }
 
             plugin.getUserManager().cleanup(lpUser);

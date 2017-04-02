@@ -147,9 +147,9 @@ public class MigrationZPermissions extends SubCommand<Object> {
     private void migrateEntity(PermissionHolder holder, PermissionEntity entity, List<Membership> memberships) {
         for (Entry e : entity.getPermissions()) {
             if (e.getWorld() != null && !e.getWorld().getName().equals("")) {
-                holder.setPermissionUnchecked(MigrationUtils.parseNode(e.getPermission(), true).setWorld(e.getWorld().getName()).build());
+                holder.setPermission(MigrationUtils.parseNode(e.getPermission(), true).setWorld(e.getWorld().getName()).build());
             } else {
-                holder.setPermissionUnchecked(MigrationUtils.parseNode(e.getPermission(), true).build());
+                holder.setPermission(MigrationUtils.parseNode(e.getPermission(), true).build());
             }
         }
 
@@ -157,12 +157,12 @@ public class MigrationZPermissions extends SubCommand<Object> {
             // entity.getMemberships() doesn't work for groups (always returns 0 records)
             for (Inheritance inheritance : entity.getInheritancesAsChild()) {
                 if (!inheritance.getParent().getName().equals(holder.getObjectName())) {
-                    holder.setPermissionUnchecked(NodeFactory.make("group." + MigrationUtils.standardizeName(inheritance.getParent().getName())));
+                    holder.setPermission(NodeFactory.make("group." + MigrationUtils.standardizeName(inheritance.getParent().getName())));
                 }
             }
         } else {
             for (Membership membership : memberships) {
-                holder.setPermissionUnchecked(NodeFactory.make("group." + MigrationUtils.standardizeName(membership.getGroup().getDisplayName())));
+                holder.setPermission(NodeFactory.make("group." + MigrationUtils.standardizeName(membership.getGroup().getDisplayName())));
             }
         }
 
@@ -171,9 +171,9 @@ public class MigrationZPermissions extends SubCommand<Object> {
             String key = metadata.getName().toLowerCase();
 
             if (key.equals("prefix") || key.equals("suffix")) {
-                holder.setPermissionUnchecked(NodeFactory.makeChatMetaNode(key.equals("prefix"), weight, metadata.getStringValue()).build());
+                holder.setPermission(NodeFactory.makeChatMetaNode(key.equals("prefix"), weight, metadata.getStringValue()).build());
             } else {
-                holder.setPermissionUnchecked(NodeFactory.makeMetaNode(key, metadata.getStringValue()).build());
+                holder.setPermission(NodeFactory.makeMetaNode(key, metadata.getStringValue()).build());
             }
         }
     }

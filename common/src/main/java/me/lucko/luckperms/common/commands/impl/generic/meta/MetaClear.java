@@ -22,13 +22,13 @@
 
 package me.lucko.luckperms.common.commands.impl.generic.meta;
 
+import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.ContextHelper;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
@@ -41,10 +41,9 @@ import java.util.stream.Collectors;
 
 public class MetaClear extends SharedSubCommand {
     public MetaClear() {
-        super("clear", "Clears all chat meta", Permission.USER_META_CLEAR, Permission.GROUP_META_CLEAR, Predicates.notInRange(0, 2),
+        super("clear", "Clears all chat meta", Permission.USER_META_CLEAR, Permission.GROUP_META_CLEAR, Predicates.alwaysFalse(),
                 Arg.list(
-                        Arg.create("server", false, "the server name to filter by"),
-                        Arg.create("world", false, "the world name to filter by")
+                        Arg.create("context...", false, "the contexts to filter by")
                 )
         );
     }
@@ -53,19 +52,12 @@ public class MetaClear extends SharedSubCommand {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         int before = holder.getNodes().size();
 
-        String server = ArgumentUtils.handleServer(0, args);
-        String world = ArgumentUtils.handleWorld(1, args);
+        MutableContextSet context = ArgumentUtils.handleContext(0, args);
 
-        switch (ContextHelper.determine(server, world)) {
-            case NONE:
-                holder.clearMeta();
-                break;
-            case SERVER:
-                holder.clearMeta(server);
-                break;
-            case SERVER_AND_WORLD:
-                holder.clearMeta(server, world);
-                break;
+        if (context.isEmpty()) {
+            holder.clearMeta();
+        } else {
+            holder.clearMeta(context);
         }
 
         int changed = before - holder.getNodes().size();

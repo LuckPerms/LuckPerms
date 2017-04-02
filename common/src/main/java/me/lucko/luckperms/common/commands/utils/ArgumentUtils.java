@@ -138,10 +138,9 @@ public class ArgumentUtils {
 
     public static MutableContextSet handleContext(int fromIndex, List<String> args) {
         if (args.size() > fromIndex) {
-
             MutableContextSet set = MutableContextSet.create();
 
-            List<String> contexts = args.subList(fromIndex, args.size() - 1);
+            List<String> contexts = args.subList(fromIndex, args.size());
 
             for (int i = 0; i < contexts.size(); i++) {
                 String pair = contexts.get(i);

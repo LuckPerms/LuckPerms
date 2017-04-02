@@ -41,7 +41,7 @@ public final class ImmutableContextSet implements ContextSet {
     private static final ImmutableContextSet EMPTY = new ImmutableContextSet(ImmutableSetMultimap.of());
 
     /**
-     * Make a singleton ImmutableContextSet from a context pair
+     * Creates an ImmutableContextSet from a context pair
      *
      * @param key   the key
      * @param value the value
@@ -60,7 +60,35 @@ public final class ImmutableContextSet implements ContextSet {
     }
 
     /**
-     * Creates a ImmutableContextSet from an existing map
+     * Creates an ImmutableContextSet from two context pairs
+     *
+     * @param key1 the first key
+     * @param value1 the first value
+     * @param key2 the second key
+     * @param value2 the second value
+     * @return a new ImmutableContextSet containing the two pairs
+     * @throws NullPointerException if any of the keys or values are null
+     * @since 3.1
+     */
+    public static ImmutableContextSet of(String key1, String value1, String key2, String value2) {
+        if (key1 == null) {
+            throw new NullPointerException("key1");
+        }
+        if (value1 == null) {
+            throw new NullPointerException("value1");
+        }
+        if (key2 == null) {
+            throw new NullPointerException("key2");
+        }
+        if (value2 == null) {
+            throw new NullPointerException("value2");
+        }
+
+        return new ImmutableContextSet(ImmutableSetMultimap.of(key1.toLowerCase(), value1, key2.toLowerCase(), value2));
+    }
+
+    /**
+     * Creates an ImmutableContextSet from an existing map
      *
      * @param map the map to copy from
      * @return a new ImmutableContextSet representing the pairs from the map
@@ -80,7 +108,7 @@ public final class ImmutableContextSet implements ContextSet {
     }
 
     /**
-     * Creates a ImmutableContextSet from an existing iterable of Map Entries
+     * Creates an ImmutableContextSet from an existing iterable of Map Entries
      *
      * @param iterable the iterable to copy from
      * @return a new ImmutableContextSet representing the pairs in the iterable
@@ -95,7 +123,7 @@ public final class ImmutableContextSet implements ContextSet {
     }
 
     /**
-     * Creates a ImmutableContextSet from an existing multimap
+     * Creates an ImmutableContextSet from an existing multimap
      *
      * @param multimap the multimap to copy from
      * @return a new ImmutableContextSet representing the pairs in the multimap
@@ -122,7 +150,7 @@ public final class ImmutableContextSet implements ContextSet {
     }
 
     /**
-     * Creates a new empty ContextSet.
+     * Creates an new empty ContextSet.
      *
      * @return a new ContextSet
      */

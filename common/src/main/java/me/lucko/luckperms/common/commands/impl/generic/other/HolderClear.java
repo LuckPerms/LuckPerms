@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Lucko (Luck) <luck@lucko.me>
+ * Copyright (c) 2017 Lucko (Luck) <luck@lucko.me>
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -20,18 +20,20 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.impl.group;
+package me.lucko.luckperms.common.commands.impl.generic.other;
 
+import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.ContextHelper;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.model.Group;
+import me.lucko.luckperms.common.core.model.PermissionHolder;
+import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
@@ -39,47 +41,45 @@ import me.lucko.luckperms.common.utils.Predicates;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class GroupClear extends SubCommand<Group> {
-    public GroupClear() {
-        super("clear", "Clears the group's permissions and parent groups", Permission.GROUP_CLEAR, Predicates.notInRange(0, 2),
+public class HolderClear<T extends PermissionHolder> extends SubCommand<T> {
+    public HolderClear(boolean user) {
+        super("clear", "Removes all permissions, parents and meta", user ? Permission.USER_CLEAR : Permission.GROUP_CLEAR,
+                Predicates.alwaysFalse(),
                 Arg.list(
-                        Arg.create("server", false, "the server name to filter by"),
-                        Arg.create("world", false, "the world name to filter by")
+                        Arg.create("context...", false, "the contexts to filter by")
                 )
         );
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) throws CommandException {
-        int before = group.getNodes().size();
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, T holder, List<String> args, String label) throws CommandException {
+        int before = holder.getNodes().size();
 
-        String server = ArgumentUtils.handleServer(0, args);
-        String world = ArgumentUtils.handleWorld(1, args);
+        MutableContextSet context = ArgumentUtils.handleContext(0, args);
 
-        switch (ContextHelper.determine(server, world)) {
-            case NONE:
-                group.clearNodes();
-                break;
-            case SERVER:
-                group.clearNodes(server);
-                break;
-            case SERVER_AND_WORLD:
-                group.clearNodes(server, world);
-                break;
-        }
-
-        int changed = before - group.getNodes().size();
-        if (changed == 1) {
-            Message.CLEAR_SUCCESS_SINGULAR.send(sender, group.getName(), changed);
+        if (context.isEmpty()) {
+            holder.clearNodes();
         } else {
-            Message.CLEAR_SUCCESS.send(sender, group.getName(), changed);
+            holder.clearNodes(context);
         }
 
-        LogEntry.build().actor(sender).acted(group)
+        int changed = before - holder.getNodes().size();
+        if (changed == 1) {
+            Message.CLEAR_SUCCESS_SINGULAR.send(sender, holder.getFriendlyName(), changed);
+        } else {
+            Message.CLEAR_SUCCESS.send(sender, holder.getFriendlyName(), changed);
+        }
+
+        LogEntry.build().actor(sender).acted(holder)
                 .action("clear " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
                 .build().submit(plugin, sender);
 
-        save(group, sender, plugin);
+        if (holder instanceof User) {
+            save((User) holder, sender, plugin);
+        } else if (holder instanceof Group) {
+            save((Group) holder, sender, plugin);
+        }
+
         return CommandResult.SUCCESS;
     }
 }

@@ -23,13 +23,14 @@
 package me.lucko.luckperms.common.commands.impl.generic.meta;
 
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.ContextHelper;
+import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeFactory;
@@ -37,19 +38,17 @@ import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class MetaSet extends SharedSubCommand {
     public MetaSet() {
-        super("set", "Sets a meta value", Permission.USER_META_SET, Permission.GROUP_META_SET, Predicates.notInRange(2, 4),
+        super("set", "Sets a meta value", Permission.USER_META_SET, Permission.GROUP_META_SET, Predicates.inRange(0, 1),
                 Arg.list(
                         Arg.create("key", true, "the key to set"),
                         Arg.create("value", true, "the value to set"),
-                        Arg.create("server", false, "the server to add the meta pair on"),
-                        Arg.create("world", false, "the world to add the meta pair on")
+                        Arg.create("context...", false, "the contexts to add the meta pair in")
                 )
         );
     }
@@ -58,35 +57,19 @@ public class MetaSet extends SharedSubCommand {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         String key = args.get(0);
         String value = args.get(1);
+        MutableContextSet context = ArgumentUtils.handleContext(2, args);
 
-        String server = ArgumentUtils.handleServer(2, args);
-        String world = ArgumentUtils.handleWorld(3, args);
-
-        Node n = NodeFactory.makeMetaNode(key, value).setServer(server).setWorld(world).build();
+        Node n = NodeFactory.makeMetaNode(key, value).withExtraContext(context).build();
 
         if (holder.hasPermission(n).asBoolean()) {
             Message.ALREADY_HAS_META.send(sender, holder.getFriendlyName());
             return CommandResult.STATE_ERROR;
         }
 
-        holder.clearMetaKeys(key, server, world, false);
+        holder.clearMetaKeys(key, context, false);
+        holder.setPermission(n);
 
-        try {
-            holder.setPermission(n);
-        } catch (ObjectAlreadyHasException ignored) {
-        }
-
-        switch (ContextHelper.determine(server, world)) {
-            case NONE:
-                Message.SET_META_SUCCESS.send(sender, key, value, holder.getFriendlyName());
-                break;
-            case SERVER:
-                Message.SET_META_SERVER_SUCCESS.send(sender, key, value, holder.getFriendlyName(), server);
-                break;
-            case SERVER_AND_WORLD:
-                Message.SET_META_SERVER_WORLD_SUCCESS.send(sender, key, value, holder.getFriendlyName(), server, world);
-                break;
-        }
+        Message.SET_META_SUCCESS.send(sender, key, value, holder.getFriendlyName(), Util.contextSetToString(context));
 
         LogEntry.build().actor(sender).acted(holder)
                 .action("meta set " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))

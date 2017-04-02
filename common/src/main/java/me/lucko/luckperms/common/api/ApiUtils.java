@@ -26,28 +26,10 @@ import lombok.experimental.UtilityClass;
 
 import com.google.common.base.Preconditions;
 
-import me.lucko.luckperms.api.Group;
-import me.lucko.luckperms.api.Track;
-import me.lucko.luckperms.api.User;
-import me.lucko.luckperms.common.api.delegates.GroupDelegate;
-import me.lucko.luckperms.common.api.delegates.TrackDelegate;
-import me.lucko.luckperms.common.api.delegates.UserDelegate;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
 
 @UtilityClass
 public class ApiUtils {
-
-    public static void checkUser(User user) {
-        Preconditions.checkState(user instanceof UserDelegate, "User instance cannot be handled by this implementation.");
-    }
-
-    public static void checkGroup(Group group) {
-        Preconditions.checkState(group instanceof GroupDelegate, "Group instance cannot be handled by this implementation.");
-    }
-
-    public static void checkTrack(Track track) {
-        Preconditions.checkState(track instanceof TrackDelegate, "Track instance cannot be handled by this implementation.");
-    }
 
     public static String checkUsername(String s) {
         Preconditions.checkArgument(

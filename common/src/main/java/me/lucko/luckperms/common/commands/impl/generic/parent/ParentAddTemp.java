@@ -22,17 +22,20 @@
 
 package me.lucko.luckperms.common.commands.impl.generic.parent;
 
+import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.ContextHelper;
+import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.NodeBuilder;
+import me.lucko.luckperms.common.core.DataMutateResult;
+import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.TemporaryModifier;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
@@ -40,9 +43,9 @@ import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getGroupTabComplete;
@@ -50,12 +53,11 @@ import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getGroup
 public class ParentAddTemp extends SharedSubCommand {
     public ParentAddTemp() {
         super("addtemp", "Sets another group for the object to inherit permissions from temporarily",
-                Permission.USER_PARENT_ADDTEMP, Permission.GROUP_PARENT_ADDTEMP, Predicates.notInRange(2, 4),
+                Permission.USER_PARENT_ADDTEMP, Permission.GROUP_PARENT_ADDTEMP, Predicates.inRange(0, 1),
                 Arg.list(
                         Arg.create("group", true, "the group to inherit from"),
                         Arg.create("duration", true, "the duration of the group membership"),
-                        Arg.create("server", false, "the server to add the group on"),
-                        Arg.create("world", false, "the world to add the group on")
+                        Arg.create("context...", false, "the contexts to inherit the group in")
                 )
         );
     }
@@ -64,8 +66,7 @@ public class ParentAddTemp extends SharedSubCommand {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         String groupName = ArgumentUtils.handleName(0, args);
         long duration = ArgumentUtils.handleDuration(1, args);
-        String server = ArgumentUtils.handleServer(2, args);
-        String world = ArgumentUtils.handleWorld(3, args);
+        MutableContextSet context = ArgumentUtils.handleContext(2, args);
         TemporaryModifier modifier = plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR);
 
         if (!plugin.getStorage().loadGroup(groupName).join()) {
@@ -79,31 +80,16 @@ public class ParentAddTemp extends SharedSubCommand {
             return CommandResult.INVALID_ARGS;
         }
 
-        try {
-            if (group.getName().equalsIgnoreCase(holder.getObjectName())) {
-                throw new ObjectAlreadyHasException();
-            }
+        if (group.getName().equalsIgnoreCase(holder.getObjectName())) {
+            Message.ALREADY_TEMP_INHERITS.send(sender, holder.getFriendlyName(), group.getDisplayName());
+            return CommandResult.STATE_ERROR;
+        }
 
-            switch (ContextHelper.determine(server, world)) {
-                case NONE:
-                    duration = holder.setPermission(new NodeBuilder("group." + group.getName()).setValue(true).setExpiry(duration).build(), modifier).getExpiryUnixTime();
-                    Message.SET_TEMP_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(),
-                            DateUtil.formatDateDiff(duration)
-                    );
-                    break;
-                case SERVER:
-                    duration = holder.setPermission(new NodeBuilder("group." + group.getName()).setValue(true).setServer(server).setExpiry(duration).build(), modifier).getExpiryUnixTime();
-                    Message.SET_TEMP_INHERIT_SERVER_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(),
-                            server, DateUtil.formatDateDiff(duration)
-                    );
-                    break;
-                case SERVER_AND_WORLD:
-                    duration = holder.setPermission(new NodeBuilder("group." + group.getName()).setValue(true).setServer(server).setWorld(world).setExpiry(duration).build(), modifier).getExpiryUnixTime();
-                    Message.SET_TEMP_INHERIT_SERVER_WORLD_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(),
-                            server, world, DateUtil.formatDateDiff(duration)
-                    );
-                    break;
-            }
+        Map.Entry<DataMutateResult, Node> ret = holder.setPermission(NodeFactory.newBuilder("group." + group.getName()).setExpiry(duration).withExtraContext(context).build(), modifier);
+
+        if (ret.getKey().asBoolean()) {
+            duration = ret.getValue().getExpiryUnixTime();
+            Message.SET_TEMP_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), group.getDisplayName(), DateUtil.formatDateDiff(duration), Util.contextSetToString(context));
 
             LogEntry.build().actor(sender).acted(holder)
                     .action("parent addtemp " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
@@ -111,8 +97,7 @@ public class ParentAddTemp extends SharedSubCommand {
 
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
-
-        } catch (ObjectAlreadyHasException e) {
+        } else {
             Message.ALREADY_TEMP_INHERITS.send(sender, holder.getFriendlyName(), group.getDisplayName());
             return CommandResult.STATE_ERROR;
         }

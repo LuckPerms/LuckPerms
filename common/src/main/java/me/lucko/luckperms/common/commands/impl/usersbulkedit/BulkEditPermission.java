@@ -35,8 +35,6 @@ import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
-import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -125,19 +123,8 @@ public class BulkEditPermission extends SubCommand<Storage> {
                 }
             }
 
-            toRemove.forEach(n -> {
-                try {
-                    user.unsetPermission(n);
-                } catch (ObjectLacksException ignored) {
-                }
-            });
-
-            toAdd.forEach(n -> {
-                try {
-                    user.setPermission(n);
-                } catch (ObjectAlreadyHasException ignored) {
-                }
-            });
+            toRemove.forEach(user::unsetPermission);
+            toAdd.forEach(user::setPermission);
 
             plugin.getStorage().saveUser(user);
             plugin.getUserManager().cleanup(user);

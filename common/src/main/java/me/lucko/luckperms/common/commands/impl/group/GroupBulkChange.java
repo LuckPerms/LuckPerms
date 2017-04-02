@@ -34,8 +34,6 @@ import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
-import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -95,19 +93,8 @@ public class GroupBulkChange extends SubCommand<Group> {
             }
         }
 
-        toRemove.forEach(n -> {
-            try {
-                group.unsetPermission(n);
-            } catch (ObjectLacksException ignored) {
-            }
-        });
-
-        toAdd.forEach(n -> {
-            try {
-                group.setPermission(n);
-            } catch (ObjectAlreadyHasException ignored) {
-            }
-        });
+        toRemove.forEach(group::unsetPermission);
+        toAdd.forEach(group::setPermission);
 
         save(group, sender, plugin);
         Message.BULK_CHANGE_SUCCESS.send(sender, toAdd.size());

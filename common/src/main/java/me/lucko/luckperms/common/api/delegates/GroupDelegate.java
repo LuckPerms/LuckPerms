@@ -26,147 +26,152 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 
+import com.google.common.base.Preconditions;
+
 import me.lucko.luckperms.api.Group;
+import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.List;
 import java.util.OptionalInt;
+import java.util.stream.Collectors;
 
-import static me.lucko.luckperms.common.api.ApiUtils.checkGroup;
 import static me.lucko.luckperms.common.api.ApiUtils.checkTime;
 
 /**
  * Provides a link between {@link Group} and {@link me.lucko.luckperms.common.core.model.Group}
  */
 public final class GroupDelegate extends PermissionHolderDelegate implements Group {
+    public static me.lucko.luckperms.common.core.model.Group cast(Group g) {
+        Preconditions.checkState(g instanceof GroupDelegate, "Illegal instance " + g.getClass() + " cannot be handled by this implementation.");
+        return ((GroupDelegate) g).getHandle();
+    }
 
     @Getter(AccessLevel.PACKAGE)
-    private final me.lucko.luckperms.common.core.model.Group master;
+    private final me.lucko.luckperms.common.core.model.Group handle;
 
-    public GroupDelegate(@NonNull me.lucko.luckperms.common.core.model.Group master) {
-        super(master);
-        this.master = master;
+    public GroupDelegate(@NonNull me.lucko.luckperms.common.core.model.Group handle) {
+        super(handle);
+        this.handle = handle;
     }
 
     @Override
     public String getName() {
-        return master.getName();
+        return handle.getName();
     }
 
     @Override
     public boolean inheritsGroup(@NonNull Group group) {
-        checkGroup(group);
-        return master.inheritsGroup(((GroupDelegate) group).getMaster());
+        return handle.inheritsGroup(cast(group));
     }
 
     @Override
     public boolean inheritsGroup(@NonNull Group group, @NonNull String server) {
-        checkGroup(group);
-        return master.inheritsGroup(((GroupDelegate) group).getMaster(), server);
+        return handle.inheritsGroup(((GroupDelegate) group).getHandle(), server);
     }
 
     @Override
     public boolean inheritsGroup(@NonNull Group group, @NonNull String server, @NonNull String world) {
-        checkGroup(group);
-        return master.inheritsGroup(((GroupDelegate) group).getMaster(), server, world);
+        return handle.inheritsGroup(cast(group), server, world);
     }
 
     @Override
     public void setInheritGroup(@NonNull Group group) throws ObjectAlreadyHasException {
-        checkGroup(group);
-        master.setInheritGroup(((GroupDelegate) group).getMaster());
+        handle.setPermission(NodeFactory.make(cast(group))).throwException();
     }
 
     @Override
     public void setInheritGroup(@NonNull Group group, @NonNull String server) throws ObjectAlreadyHasException {
-        checkGroup(group);
-        master.setInheritGroup(((GroupDelegate) group).getMaster(), server);
+        handle.setPermission(NodeFactory.make(cast(group), server)).throwException();
     }
 
     @Override
     public void setInheritGroup(@NonNull Group group, @NonNull String server, @NonNull String world) throws ObjectAlreadyHasException {
-        checkGroup(group);
-        master.setInheritGroup(((GroupDelegate) group).getMaster(), server, world);
+        handle.setPermission(NodeFactory.make(cast(group), server, world)).throwException();
     }
 
     @Override
     public void setInheritGroup(@NonNull Group group, @NonNull long expireAt) throws ObjectAlreadyHasException {
-        checkGroup(group);
-        master.setInheritGroup(((GroupDelegate) group).getMaster(), checkTime(expireAt));
+        handle.setPermission(NodeFactory.make(cast(group), checkTime(expireAt))).throwException();
     }
 
     @Override
     public void setInheritGroup(@NonNull Group group, @NonNull String server, @NonNull long expireAt) throws ObjectAlreadyHasException {
-        checkGroup(group);
-        master.setInheritGroup(((GroupDelegate) group).getMaster(), server, checkTime(expireAt));
+        handle.setPermission(NodeFactory.make(cast(group), server, checkTime(expireAt))).throwException();
     }
 
     @Override
     public void setInheritGroup(@NonNull Group group, @NonNull String server, @NonNull String world, @NonNull long expireAt) throws ObjectAlreadyHasException {
-        checkGroup(group);
-        master.setInheritGroup(((GroupDelegate) group).getMaster(), server, world, checkTime(expireAt));
+        handle.setPermission(NodeFactory.make(cast(group), server, world, checkTime(expireAt))).throwException();
     }
 
     @Override
     public void unsetInheritGroup(@NonNull Group group) throws ObjectLacksException {
-        checkGroup(group);
-        master.unsetInheritGroup(((GroupDelegate) group).getMaster());
+        handle.unsetPermission(NodeFactory.make(cast(group))).throwException();
     }
 
     @Override
     public void unsetInheritGroup(@NonNull Group group, @NonNull boolean temporary) throws ObjectLacksException {
-        checkGroup(group);
-        master.unsetInheritGroup(((GroupDelegate) group).getMaster(), temporary);
+        handle.unsetPermission(NodeFactory.make(cast(group), temporary)).throwException();
     }
 
     @Override
     public void unsetInheritGroup(@NonNull Group group, @NonNull String server) throws ObjectLacksException {
-        checkGroup(group);
-        master.unsetInheritGroup(((GroupDelegate) group).getMaster(), server);
+        handle.unsetPermission(NodeFactory.make(cast(group), server)).throwException();
     }
 
     @Override
     public void unsetInheritGroup(@NonNull Group group, @NonNull String server, @NonNull String world) throws ObjectLacksException {
-        checkGroup(group);
-        master.unsetInheritGroup(((GroupDelegate) group).getMaster(), server, world);
+        handle.unsetPermission(NodeFactory.make(cast(group), server, world)).throwException();
     }
 
     @Override
     public void unsetInheritGroup(@NonNull Group group, @NonNull String server, @NonNull boolean temporary) throws ObjectLacksException {
-        checkGroup(group);
-        master.unsetInheritGroup(((GroupDelegate) group).getMaster(), server, temporary);
+        handle.unsetPermission(NodeFactory.make(cast(group), server, temporary)).throwException();
     }
 
     @Override
     public void unsetInheritGroup(@NonNull Group group, @NonNull String server, @NonNull String world, @NonNull boolean temporary) throws ObjectLacksException {
-        checkGroup(group);
-        master.unsetInheritGroup(((GroupDelegate) group).getMaster(), server, world, temporary);
+        handle.unsetPermission(NodeFactory.make(cast(group), server, world, temporary)).throwException();
     }
 
     @Override
     public void clearNodes() {
-        master.clearNodes();
+        handle.clearNodes();
     }
 
     @Override
     public List<String> getGroupNames() {
-        return master.getGroupNames();
+        return handle.mergePermissionsToList().stream()
+                .filter(Node::isGroupNode)
+                .map(Node::getGroupName)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<String> getLocalGroups(@NonNull String server, @NonNull String world) {
-        return master.getLocalGroups(server, world);
+        return handle.mergePermissionsToList().stream()
+                .filter(Node::isGroupNode)
+                .filter(n -> n.shouldApplyOnWorld(world, false, true))
+                .filter(n -> n.shouldApplyOnServer(server, false, true))
+                .map(Node::getGroupName)
+                .collect(Collectors.toList());
     }
 
     @Override
     public OptionalInt getWeight() {
-        return master.getWeight();
+        return handle.getWeight();
     }
 
     @Override
     public List<String> getLocalGroups(@NonNull String server) {
-        return master.getLocalGroups(server);
+        return handle.mergePermissionsToList().stream()
+                .filter(Node::isGroupNode)
+                .filter(n -> n.shouldApplyOnServer(server, false, true))
+                .map(Node::getGroupName)
+                .collect(Collectors.toList());
     }
 
     public boolean equals(Object o) {

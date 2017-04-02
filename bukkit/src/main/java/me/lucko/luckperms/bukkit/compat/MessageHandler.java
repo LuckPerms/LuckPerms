@@ -39,7 +39,7 @@ public class MessageHandler {
     public void sendJsonMessage(CommandSender sender, FancyMessage message) {
         if (ReflectionUtil.isChatCompatible() && sender instanceof Player) {
             Player player = (Player) sender;
-            String json = message.toJSONString();
+            String json = message.exportToJson();
 
             // Try Bukkit.
             if (bukkitHandler.sendJsonMessage(player, json)) {

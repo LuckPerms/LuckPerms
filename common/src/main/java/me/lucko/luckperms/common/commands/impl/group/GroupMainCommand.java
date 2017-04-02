@@ -27,6 +27,7 @@ import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.common.commands.abstraction.Command;
 import me.lucko.luckperms.common.commands.abstraction.MainCommand;
 import me.lucko.luckperms.common.commands.impl.generic.meta.CommandMeta;
+import me.lucko.luckperms.common.commands.impl.generic.other.HolderClear;
 import me.lucko.luckperms.common.commands.impl.generic.other.HolderShowTracks;
 import me.lucko.luckperms.common.commands.impl.generic.parent.CommandParent;
 import me.lucko.luckperms.common.commands.impl.generic.permission.CommandPermission;
@@ -48,7 +49,7 @@ public class GroupMainCommand extends MainCommand<Group> {
                 .add(new GroupSetWeight())
                 .add(new HolderShowTracks<>(false))
                 .add(new GroupBulkChange())
-                .add(new GroupClear())
+                .add(new HolderClear<>(false))
                 .add(new GroupRename())
                 .add(new GroupClone())
                 .build()

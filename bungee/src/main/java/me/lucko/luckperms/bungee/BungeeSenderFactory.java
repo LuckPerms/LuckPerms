@@ -64,7 +64,7 @@ public class BungeeSenderFactory extends SenderFactory<CommandSender> {
     @Override
     protected void sendMessage(CommandSender sender, FancyMessage message) {
         try {
-            sender.sendMessage(ComponentSerializer.parse(message.toJSONString()));
+            sender.sendMessage(ComponentSerializer.parse(message.exportToJson()));
         } catch (Exception e) {
             sendMessage(sender, message.toOldMessageFormat());
         }
