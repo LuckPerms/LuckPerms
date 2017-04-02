@@ -25,9 +25,9 @@ package me.lucko.luckperms.sponge.service.calculated;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.CacheLoader;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -103,7 +103,7 @@ public class CalculatedSubjectData implements LPSubjectData {
     private final String calculatorDisplayName;
 
     private final Map<ContextSet, Map<String, Boolean>> permissions = new ConcurrentHashMap<>();
-    private final LoadingCache<ContextSet, CalculatorHolder> permissionCache = CacheBuilder.newBuilder()
+    private final LoadingCache<ContextSet, CalculatorHolder> permissionCache = Caffeine.newBuilder()
             .expireAfterAccess(10, TimeUnit.MINUTES)
             .build(new CacheLoader<ContextSet, CalculatorHolder>() {
                 @Override
@@ -131,7 +131,7 @@ public class CalculatedSubjectData implements LPSubjectData {
     }
 
     public Tristate getPermissionValue(ContextSet contexts, String permission) {
-        return permissionCache.getUnchecked(contexts).getCalculator().getPermissionValue(permission);
+        return permissionCache.get(contexts).getCalculator().getPermissionValue(permission);
     }
 
     public void replacePermissions(Map<ImmutableContextSet, Map<String, Boolean>> map) {

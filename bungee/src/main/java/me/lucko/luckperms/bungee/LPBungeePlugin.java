@@ -41,6 +41,7 @@ import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.contexts.ServerCalculator;
 import me.lucko.luckperms.common.core.UuidCache;
 import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.NoopLocaleManager;
@@ -73,6 +74,7 @@ import net.md_5.bungee.api.plugin.Plugin;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -105,11 +107,18 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     private PermissionVault permissionVault;
 
     @Override
-    public void onEnable() {
+    public void onLoad() {
+        // setup minimal functionality in order to load initial dependencies
         scheduler = new LPBungeeScheduler(this);
         localeManager = new NoopLocaleManager();
         senderFactory = new BungeeSenderFactory(this);
         log = new LoggerImpl(getConsoleSender());
+
+        DependencyManager.loadDependencies(this, Collections.singletonList(Dependency.CAFFEINE));
+    }
+
+    @Override
+    public void onEnable() {
         LuckPermsPlugin.sendStartupBanner(getConsoleSender(), this);
         verboseHandler = new VerboseHandler(scheduler.getAsyncExecutor(), getVersion());
         permissionVault = new PermissionVault(scheduler.getAsyncExecutor());

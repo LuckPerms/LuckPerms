@@ -24,9 +24,8 @@ package me.lucko.luckperms.common.calculators;
 
 import lombok.RequiredArgsConstructor;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -43,13 +42,7 @@ public class PermissionCalculator {
     private final String objectName;
     private final List<PermissionProcessor> processors;
 
-    private final LoadingCache<String, Tristate> cache = CacheBuilder.newBuilder()
-            .build(new CacheLoader<String, Tristate>() {
-                @Override
-                public Tristate load(String s) {
-                    return lookupPermissionValue(s);
-                }
-            });
+    private final LoadingCache<String, Tristate> cache = Caffeine.newBuilder().build(this::lookupPermissionValue);
 
     public void invalidateCache() {
         cache.invalidateAll();
@@ -57,7 +50,7 @@ public class PermissionCalculator {
 
     public Tristate getPermissionValue(String permission) {
         permission = permission.toLowerCase();
-        Tristate t = cache.getUnchecked(permission);
+        Tristate t = cache.get(permission);
         plugin.getVerboseHandler().offer(objectName, permission, t);
         plugin.getPermissionVault().offer(permission);
         return t;

@@ -22,12 +22,10 @@
 
 package me.lucko.luckperms.common.managers;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.CacheLoader;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 
 import me.lucko.luckperms.common.utils.Identifiable;
 
@@ -41,16 +39,7 @@ import java.util.Map;
  */
 public abstract class AbstractManager<I, T extends Identifiable<I>> implements Manager<I, T> {
 
-    @SuppressWarnings("unchecked")
-    private static <I> I lowerCase(I i) {
-        if (i instanceof String) {
-            return (I) ((String) i).toLowerCase();
-        } else {
-            return i;
-        }
-    }
-
-    private final LoadingCache<I, T> objects = CacheBuilder.newBuilder()
+    private final LoadingCache<I, T> objects = Caffeine.newBuilder()
             .build(new CacheLoader<I, T>() {
                 @Override
                 public T load(I i) {
@@ -58,8 +47,8 @@ public abstract class AbstractManager<I, T extends Identifiable<I>> implements M
                 }
 
                 @Override
-                public ListenableFuture<T> reload(I i, T t) {
-                    return Futures.immediateFuture(t); // Never needs to be refreshed.
+                public T reload(I i, T t) {
+                    return t; // Never needs to be refreshed.
                 }
             });
 
@@ -70,7 +59,7 @@ public abstract class AbstractManager<I, T extends Identifiable<I>> implements M
 
     @Override
     public T getOrMake(I id) {
-        return objects.getUnchecked(lowerCase(id));
+        return objects.get(lowerCase(id));
     }
 
     @Override
@@ -100,6 +89,15 @@ public abstract class AbstractManager<I, T extends Identifiable<I>> implements M
     @Override
     public void unloadAll() {
         objects.invalidateAll();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <I> I lowerCase(I i) {
+        if (i instanceof String) {
+            return (I) ((String) i).toLowerCase();
+        } else {
+            return i;
+        }
     }
 
 }

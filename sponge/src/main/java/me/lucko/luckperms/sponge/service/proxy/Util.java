@@ -25,9 +25,8 @@ package me.lucko.luckperms.sponge.service.proxy;
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.api.context.ContextSet;
@@ -41,28 +40,18 @@ import java.util.Set;
 
 @UtilityClass
 public class Util {
-    private static final LoadingCache<Set<Context>, ImmutableContextSet> SPONGE_TO_LP_CACHE = CacheBuilder.newBuilder()
-            .build(new CacheLoader<Set<Context>, ImmutableContextSet>() {
-                @Override
-                public ImmutableContextSet load(Set<Context> contexts) {
-                    return ImmutableContextSet.fromEntries(contexts);
-                }
-            });
+    private static final LoadingCache<Set<Context>, ImmutableContextSet> SPONGE_TO_LP_CACHE = Caffeine.newBuilder()
+            .build(ImmutableContextSet::fromEntries);
 
-    private static final LoadingCache<ImmutableContextSet, Set<Context>> LP_TO_SPONGE_CACHE = CacheBuilder.newBuilder()
-            .build(new CacheLoader<ImmutableContextSet, Set<Context>>() {
-                @Override
-                public Set<Context> load(ImmutableContextSet set) {
-                    return set.toSet().stream().map(e -> new Context(e.getKey(), e.getValue())).collect(ImmutableCollectors.toImmutableSet());
-                }
-            });
+    private static final LoadingCache<ImmutableContextSet, Set<Context>> LP_TO_SPONGE_CACHE = Caffeine.newBuilder()
+            .build(set -> set.toSet().stream().map(e -> new Context(e.getKey(), e.getValue())).collect(ImmutableCollectors.toImmutableSet()));
 
     public static ContextSet convertContexts(@NonNull Set<Context> contexts) {
-        return SPONGE_TO_LP_CACHE.getUnchecked(ImmutableSet.copyOf(contexts));
+        return SPONGE_TO_LP_CACHE.get(ImmutableSet.copyOf(contexts));
     }
 
     public static Set<Context> convertContexts(@NonNull ContextSet contexts) {
-        return LP_TO_SPONGE_CACHE.getUnchecked(contexts.makeImmutable());
+        return LP_TO_SPONGE_CACHE.get(contexts.makeImmutable());
     }
 
     public static Tristate convertTristate(me.lucko.luckperms.api.Tristate tristate) {

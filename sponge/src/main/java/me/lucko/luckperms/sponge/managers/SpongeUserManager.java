@@ -22,15 +22,13 @@
 
 package me.lucko.luckperms.sponge.managers;
 
+import lombok.Getter;
 import lombok.NonNull;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.CacheLoader;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.UncheckedExecutionException;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
@@ -57,13 +55,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 public class SpongeUserManager implements UserManager, LPSubjectCollection {
+
+    @Getter
     private final LPSpongePlugin plugin;
     
-    private final LoadingCache<UserIdentifier, SpongeUser> objects = CacheBuilder.newBuilder()
+    private final LoadingCache<UserIdentifier, SpongeUser> objects = Caffeine.newBuilder()
             .build(new CacheLoader<UserIdentifier, SpongeUser>() {
                 @Override
                 public SpongeUser load(UserIdentifier i) {
@@ -71,43 +70,40 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
                 }
 
                 @Override
-                public ListenableFuture<SpongeUser> reload(UserIdentifier i, SpongeUser t) {
-                    return Futures.immediateFuture(t); // Never needs to be refreshed.
+                public SpongeUser reload(UserIdentifier i, SpongeUser t) {
+                    return t; // Never needs to be refreshed.
                 }
             });
 
-    private final LoadingCache<UUID, LPSubject> subjectLoadingCache = CacheBuilder.newBuilder()
+    private final LoadingCache<UUID, LPSubject> subjectLoadingCache = Caffeine.<UUID, LPSubject>newBuilder()
             .expireAfterWrite(1, TimeUnit.MINUTES)
-            .build(new CacheLoader<UUID, LPSubject>() {
-                @Override
-                public LPSubject load(UUID u) throws Exception {
-                    if (isLoaded(UserIdentifier.of(u, null))) {
-
-                        SpongeUser user = get(u);
-                        if (user.getUserData() == null) {
-                            user.setupData(false);
-                        }
-
-                        return get(u).getSpongeData();
-                    }
-
-                    // Request load
-                    plugin.getStorage().loadUser(u, "null").join();
+            .build(u -> {
+                if (isLoaded(UserIdentifier.of(u, null))) {
 
                     SpongeUser user = get(u);
-                    if (user == null) {
-                        plugin.getLog().severe("Error whilst loading user '" + u + "'.");
-                        throw new RuntimeException();
-                    }
-
-                    user.setupData(false);
-
                     if (user.getUserData() == null) {
-                        plugin.getLog().warn("User data not present for requested user id: " + u);
+                        user.setupData(false);
                     }
 
-                    return user.getSpongeData();
+                    return get(u).getSpongeData();
                 }
+
+                // Request load
+                getPlugin().getStorage().loadUser(u, "null").join();
+
+                SpongeUser user = get(u);
+                if (user == null) {
+                    getPlugin().getLog().severe("Error whilst loading user '" + u + "'.");
+                    throw new RuntimeException();
+                }
+
+                user.setupData(false);
+
+                if (user.getUserData() == null) {
+                    getPlugin().getLog().warn("User data not present for requested user id: " + u);
+                }
+
+                return user.getSpongeData();
             });
 
     public SpongeUserManager(LPSpongePlugin plugin) {
@@ -144,7 +140,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
 
     @Override
     public SpongeUser getOrMake(UserIdentifier id) {
-        return objects.getUnchecked(id);
+        return objects.get(id);
     }
 
     @Override
@@ -251,7 +247,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
             UUID u = plugin.getUuidCache().getUUID(uuid);
             try {
                 return subjectLoadingCache.get(u);
-            } catch (UncheckedExecutionException | ExecutionException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 plugin.getLog().warn("Couldn't get user subject for id: " + id);
                 return plugin.getService().getFallbackUserSubjects().get(id); // fallback to the transient collection

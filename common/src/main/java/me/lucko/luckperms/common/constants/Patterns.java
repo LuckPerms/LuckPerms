@@ -24,40 +24,20 @@ package me.lucko.luckperms.common.constants;
 
 import lombok.experimental.UtilityClass;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.Maps;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.UncheckedExecutionException;
 
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
 @UtilityClass
 public class Patterns {
-    private static final LoadingCache<String, Pattern> CACHE = CacheBuilder.newBuilder()
-            .build(new CacheLoader<String, Pattern>() {
-                @Override
-                public Pattern load(String s) throws Exception {
-                    return Pattern.compile(s);
-                }
-
-                @Override
-                public ListenableFuture<Pattern> reload(String s, Pattern pattern) {
-                    return Futures.immediateFuture(pattern);
-                }
-            });
-
-    private static final LoadingCache<Map.Entry<String, String>, String> DELIMITER_CACHE = CacheBuilder.newBuilder()
-            .build(new CacheLoader<Map.Entry<String, String>, String>() {
-                @Override
-                public String load(Map.Entry<String, String> e) {
-                    // note the reversed order
-                    return "(?<!" + Pattern.quote(e.getValue()) + ")" + Pattern.quote(e.getKey());
-                }
+    private static final LoadingCache<String, Pattern> CACHE = Caffeine.newBuilder().build(Pattern::compile);
+    private static final LoadingCache<Map.Entry<String, String>, String> DELIMITER_CACHE = Caffeine.newBuilder()
+            .build(e -> {
+                // note the reversed order
+                return "(?<!" + Pattern.quote(e.getValue()) + ")" + Pattern.quote(e.getKey());
             });
 
     public static final Pattern COMMAND_SEPARATOR = Pattern.compile(" (?=([^\\\"]*\\\"[^\\\"]*\\\")*[^\\\"]*$)");
@@ -70,14 +50,14 @@ public class Patterns {
     public static Pattern compile(String regex) {
         try {
             return CACHE.get(regex);
-        } catch (UncheckedExecutionException | ExecutionException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 
     public static String buildDelimitedMatcher(String delim, String esc) {
-        return DELIMITER_CACHE.getUnchecked(Maps.immutableEntry(delim, esc));
+        return DELIMITER_CACHE.get(Maps.immutableEntry(delim, esc));
     }
 
     public static Pattern compileDelimitedMatcher(String delim, String esc) {

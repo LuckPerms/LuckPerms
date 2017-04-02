@@ -29,18 +29,18 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum Dependency {
 
-    MYSQL_DRIVER("https://repo1.maven.org/maven2/mysql/mysql-connector-java/5.1.6/mysql-connector-java-5.1.6.jar", "5.1.6", "com.mysql.jdbc.jdbc2.optional.MysqlDataSource"),
-    POSTGRESQL_DRIVER("https://repo1.maven.org/maven2/org/postgresql/postgresql/9.4.1212/postgresql-9.4.1212.jar", "9.4.1212", "org.postgresql.ds.PGSimpleDataSource"),
-    H2_DRIVER("https://repo1.maven.org/maven2/com/h2database/h2/1.4.193/h2-1.4.193.jar", "1.4.193", "org.h2.Driver"),
-    SQLITE_DRIVER("https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/3.15.1/sqlite-jdbc-3.15.1.jar", "3.15.1", "org.sqlite.JDBC"),
-    HIKARI("https://repo1.maven.org/maven2/com/zaxxer/HikariCP/2.6.1/HikariCP-2.6.1.jar", "2.6.1", "com.zaxxer.hikari.HikariConfig"),
-    SLF4J_SIMPLE("https://repo1.maven.org/maven2/org/slf4j/slf4j-simple/1.7.9/slf4j-simple-1.7.9.jar", "1.7.9", "org.slf4j.impl.SimpleLoggerFactory"),
-    SLF4J_API("https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.9/slf4j-api-1.7.9.jar", "1.7.9", "org.slf4j.helpers.BasicMarkerFactory"),
-    MONGODB_DRIVER("https://repo1.maven.org/maven2/org/mongodb/mongo-java-driver/3.4.1/mongo-java-driver-3.4.1.jar", "3.4.1", "com.mongodb.Mongo"),
-    JEDIS("https://github.com/lucko/jedis/releases/download/jedis-2.9.1-shaded/jedis-2.9.1-shaded.jar", "2.9.1-shaded", "redis.clients.jedis.shaded.Jedis");
+    CAFFEINE("https://repo1.maven.org/maven2/com/github/ben-manes/caffeine/caffeine/2.4.0/caffeine-2.4.0.jar", "2.4.0"),
+    MYSQL_DRIVER("https://repo1.maven.org/maven2/mysql/mysql-connector-java/5.1.6/mysql-connector-java-5.1.6.jar", "5.1.6"),
+    POSTGRESQL_DRIVER("https://repo1.maven.org/maven2/org/postgresql/postgresql/9.4.1212/postgresql-9.4.1212.jar", "9.4.1212"),
+    H2_DRIVER("https://repo1.maven.org/maven2/com/h2database/h2/1.4.193/h2-1.4.193.jar", "1.4.193"),
+    SQLITE_DRIVER("https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/3.15.1/sqlite-jdbc-3.15.1.jar", "3.15.1"),
+    HIKARI("https://repo1.maven.org/maven2/com/zaxxer/HikariCP/2.6.1/HikariCP-2.6.1.jar", "2.6.1"),
+    SLF4J_SIMPLE("https://repo1.maven.org/maven2/org/slf4j/slf4j-simple/1.7.9/slf4j-simple-1.7.9.jar", "1.7.9"),
+    SLF4J_API("https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.9/slf4j-api-1.7.9.jar", "1.7.9"),
+    MONGODB_DRIVER("https://repo1.maven.org/maven2/org/mongodb/mongo-java-driver/3.4.1/mongo-java-driver-3.4.1.jar", "3.4.1"),
+    JEDIS("https://github.com/lucko/jedis/releases/download/jedis-2.9.1-shaded/jedis-2.9.1-shaded.jar", "2.9.1-shaded");
 
     private final String url;
     private final String version;
-    private final String testClass;
 
 }

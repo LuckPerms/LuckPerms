@@ -30,15 +30,13 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.CacheLoader;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.MapMaker;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Tristate;
@@ -109,7 +107,7 @@ public class LuckPermsService implements PermissionService {
     private final Set<CalculatedSubjectData> localDataCaches;
 
     @Getter(value = AccessLevel.NONE)
-    private final LoadingCache<String, LPSubjectCollection> collections = CacheBuilder.newBuilder()
+    private final LoadingCache<String, LPSubjectCollection> collections = Caffeine.newBuilder()
             .build(new CacheLoader<String, LPSubjectCollection>() {
                 @Override
                 public LPSubjectCollection load(String s) {
@@ -117,8 +115,8 @@ public class LuckPermsService implements PermissionService {
                 }
 
                 @Override
-                public ListenableFuture<LPSubjectCollection> reload(String s, LPSubjectCollection collection) {
-                    return Futures.immediateFuture(collection); // Never needs to be refreshed.
+                public LPSubjectCollection reload(String s, LPSubjectCollection collection) {
+                    return collection; // Never needs to be refreshed.
                 }
             });
 
@@ -171,7 +169,7 @@ public class LuckPermsService implements PermissionService {
     @Override
     public LPSubjectCollection getSubjects(String s) {
         try (Timing ignored = plugin.getTimings().time(LPTiming.GET_SUBJECTS)) {
-            return collections.getUnchecked(s.toLowerCase());
+            return collections.get(s.toLowerCase());
         }
     }
 

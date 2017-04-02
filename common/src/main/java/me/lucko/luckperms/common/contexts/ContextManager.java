@@ -22,9 +22,8 @@
 
 package me.lucko.luckperms.common.contexts;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 
 import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.ContextSet;
@@ -38,15 +37,10 @@ public class ContextManager<T> {
 
     private final List<ContextCalculator<T>> calculators = new CopyOnWriteArrayList<>();
 
-    private final LoadingCache<T, ContextSet> cache = CacheBuilder.newBuilder()
+    private final LoadingCache<T, ContextSet> cache = Caffeine.newBuilder()
             .weakKeys()
             .expireAfterWrite(50L, TimeUnit.MILLISECONDS)
-            .build(new CacheLoader<T, ContextSet>() {
-                @Override
-                public ContextSet load(T t) {
-                    return calculateApplicableContext(t, MutableContextSet.create()).makeImmutable();
-                }
-            });
+            .build(t -> calculateApplicableContext(t, MutableContextSet.create()).makeImmutable());
 
     private MutableContextSet calculateApplicableContext(T subject, MutableContextSet accumulator) {
         for (ContextCalculator<T> calculator : calculators) {
@@ -56,7 +50,7 @@ public class ContextManager<T> {
     }
 
     public ContextSet getApplicableContext(T subject) {
-        return cache.getUnchecked(subject);
+        return cache.get(subject);
     }
 
     public void registerCalculator(ContextCalculator<T> calculator) {

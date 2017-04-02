@@ -25,12 +25,10 @@ package me.lucko.luckperms.common.caching;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.CacheLoader;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.caching.MetaData;
@@ -49,6 +47,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class UserCache implements UserData {
 
+
     /**
      * The user whom this data instance is representing
      */
@@ -59,7 +58,7 @@ public class UserCache implements UserData {
      */
     private final CalculatorFactory calculatorFactory;
 
-    private final LoadingCache<Contexts, PermissionCache> permission = CacheBuilder.newBuilder()
+    private final LoadingCache<Contexts, PermissionCache> permission = Caffeine.newBuilder()
             .expireAfterAccess(10, TimeUnit.MINUTES)
             .build(new CacheLoader<Contexts, PermissionCache>() {
                 @Override
@@ -68,13 +67,13 @@ public class UserCache implements UserData {
                 }
 
                 @Override
-                public ListenableFuture<PermissionCache> reload(Contexts contexts, PermissionCache oldData) {
+                public PermissionCache reload(Contexts contexts, PermissionCache oldData) {
                     oldData.comparePermissions(user.exportNodes(ExtractedContexts.generate(contexts), true));
-                    return Futures.immediateFuture(oldData);
+                    return oldData;
                 }
             });
 
-    private final LoadingCache<Contexts, MetaCache> meta = CacheBuilder.newBuilder()
+    private final LoadingCache<Contexts, MetaCache> meta = Caffeine.newBuilder()
             .expireAfterAccess(10, TimeUnit.MINUTES)
             .build(new CacheLoader<Contexts, MetaCache>() {
                 @Override
@@ -83,20 +82,20 @@ public class UserCache implements UserData {
                 }
 
                 @Override
-                public ListenableFuture<MetaCache> reload(Contexts contexts, MetaCache oldData) {
+                public MetaCache reload(Contexts contexts, MetaCache oldData) {
                     oldData.loadMeta(user.accumulateMeta(null, null, ExtractedContexts.generate(contexts)));
-                    return Futures.immediateFuture(oldData);
+                    return oldData;
                 }
             });
 
     @Override
     public PermissionData getPermissionData(@NonNull Contexts contexts) {
-        return permission.getUnchecked(contexts);
+        return permission.get(contexts);
     }
 
     @Override
     public MetaData getMetaData(@NonNull Contexts contexts) {
-        return meta.getUnchecked(contexts);
+        return meta.get(contexts);
     }
 
     @Override
@@ -142,8 +141,8 @@ public class UserCache implements UserData {
 
     @Override
     public void preCalculate(@NonNull Contexts contexts) {
-        permission.getUnchecked(contexts);
-        meta.getUnchecked(contexts);
+        permission.get(contexts);
+        meta.get(contexts);
     }
 
     public void invalidateCache() {

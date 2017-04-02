@@ -25,9 +25,8 @@ package me.lucko.luckperms.sponge.service.persisted;
 import lombok.Getter;
 import lombok.NonNull;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.api.Tristate;
@@ -67,31 +66,17 @@ public class PersistedSubject implements LPSubject {
     private final PersistedSubjectData subjectData;
     private final CalculatedSubjectData transientSubjectData;
 
-    private final LoadingCache<PermissionLookup, Tristate> permissionLookupCache = CacheBuilder.newBuilder()
+    private final LoadingCache<PermissionLookup, Tristate> permissionLookupCache = Caffeine.newBuilder()
             .expireAfterAccess(20, TimeUnit.MINUTES)
-            .build(new CacheLoader<PermissionLookup, Tristate>() {
-                @Override
-                public Tristate load(PermissionLookup lookup) {
-                    return lookupPermissionValue(lookup.getContexts(), lookup.getNode());
-                }
-            });
-    private final LoadingCache<ImmutableContextSet, Set<SubjectReference>> parentLookupCache = CacheBuilder.newBuilder()
-            .expireAfterAccess(20, TimeUnit.MINUTES)
-            .build(new CacheLoader<ImmutableContextSet, Set<SubjectReference>>() {
-                @Override
-                public Set<SubjectReference> load(ImmutableContextSet contexts) {
-                    return lookupParents(contexts);
-                }
-            });
-    private final LoadingCache<OptionLookup, Optional<String>> optionLookupCache = CacheBuilder.newBuilder()
-            .expireAfterAccess(20, TimeUnit.MINUTES)
-            .build(new CacheLoader<OptionLookup, Optional<String>>() {
-                @Override
-                public Optional<String> load(OptionLookup lookup) {
-                    return lookupOptionValue(lookup.getContexts(), lookup.getKey());
-                }
-            });
+            .build(lookup -> lookupPermissionValue(lookup.getContexts(), lookup.getNode()));
 
+    private final LoadingCache<ImmutableContextSet, Set<SubjectReference>> parentLookupCache = Caffeine.newBuilder()
+            .expireAfterAccess(20, TimeUnit.MINUTES)
+            .build(this::lookupParents);
+
+    private final LoadingCache<OptionLookup, Optional<String>> optionLookupCache = Caffeine.newBuilder()
+            .expireAfterAccess(20, TimeUnit.MINUTES)
+            .build(lookup -> lookupOptionValue(lookup.getContexts(), lookup.getKey()));
 
     private final BufferedRequest<Void> saveBuffer = new BufferedRequest<Void>(1000L, r -> PersistedSubject.this.service.getPlugin().doAsync(r)) {
         @Override
@@ -251,7 +236,7 @@ public class PersistedSubject implements LPSubject {
     @Override
     public Tristate getPermissionValue(@NonNull ContextSet contexts, @NonNull String node) {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.INTERNAL_SUBJECT_GET_PERMISSION_VALUE)) {
-            Tristate t = permissionLookupCache.getUnchecked(PermissionLookup.of(node, contexts.makeImmutable()));
+            Tristate t = permissionLookupCache.get(PermissionLookup.of(node, contexts.makeImmutable()));
             service.getPlugin().getVerboseHandler().offer("local:" + getParentCollection().getCollection() + "/" + identifier, node, t);
             return t;
         }
@@ -275,14 +260,14 @@ public class PersistedSubject implements LPSubject {
     @Override
     public Set<SubjectReference> getParents(@NonNull ContextSet contexts) {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.INTERNAL_SUBJECT_GET_PARENTS)) {
-            return parentLookupCache.getUnchecked(contexts.makeImmutable());
+            return parentLookupCache.get(contexts.makeImmutable());
         }
     }
 
     @Override
     public Optional<String> getOption(ContextSet contexts, String key) {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.INTERNAL_SUBJECT_GET_OPTION)) {
-            return optionLookupCache.getUnchecked(OptionLookup.of(key, contexts.makeImmutable()));
+            return optionLookupCache.get(OptionLookup.of(key, contexts.makeImmutable()));
         }
     }
 

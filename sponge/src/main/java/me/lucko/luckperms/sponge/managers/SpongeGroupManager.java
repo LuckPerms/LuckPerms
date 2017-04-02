@@ -22,15 +22,13 @@
 
 package me.lucko.luckperms.sponge.managers;
 
+import lombok.Getter;
 import lombok.NonNull;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.CacheLoader;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.UncheckedExecutionException;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
@@ -53,13 +51,14 @@ import co.aikar.timings.Timing;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
+
+    @Getter
     private final LPSpongePlugin plugin;
 
-    private final LoadingCache<String, SpongeGroup> objects = CacheBuilder.newBuilder()
+    private final LoadingCache<String, SpongeGroup> objects = Caffeine.newBuilder()
             .build(new CacheLoader<String, SpongeGroup>() {
                 @Override
                 public SpongeGroup load(String i) {
@@ -67,31 +66,28 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
                 }
 
                 @Override
-                public ListenableFuture<SpongeGroup> reload(String i, SpongeGroup t) {
-                    return Futures.immediateFuture(t); // Never needs to be refreshed.
+                public SpongeGroup reload(String i, SpongeGroup t) {
+                    return t; // Never needs to be refreshed.
                 }
             });
 
-    private final LoadingCache<String, LPSubject> subjectLoadingCache = CacheBuilder.newBuilder()
+    private final LoadingCache<String, LPSubject> subjectLoadingCache = Caffeine.newBuilder()
             .expireAfterWrite(1, TimeUnit.MINUTES)
-            .build(new CacheLoader<String, LPSubject>() {
-                @Override
-                public LPSubject load(String s) throws Exception {
-                    if (isLoaded(s)) {
-                        return getIfLoaded(s).getSpongeData();
-                    }
-
-                    // Request load
-                    plugin.getStorage().createAndLoadGroup(s, CreationCause.INTERNAL).join();
-
-                    SpongeGroup group = getIfLoaded(s);
-                    if (group == null) {
-                        plugin.getLog().severe("Error whilst loading group '" + s + "'.");
-                        throw new RuntimeException();
-                    }
-
-                    return group.getSpongeData();
+            .build(s -> {
+                if (isLoaded(s)) {
+                    return getIfLoaded(s).getSpongeData();
                 }
+
+                // Request load
+                getPlugin().getStorage().createAndLoadGroup(s, CreationCause.INTERNAL).join();
+
+                SpongeGroup group = getIfLoaded(s);
+                if (group == null) {
+                    getPlugin().getLog().severe("Error whilst loading group '" + s + "'.");
+                    throw new RuntimeException();
+                }
+
+                return group.getSpongeData();
             });
 
     public SpongeGroupManager(LPSpongePlugin plugin) {
@@ -114,7 +110,7 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
 
     @Override
     public SpongeGroup getOrMake(String id) {
-        return objects.getUnchecked(id.toLowerCase());
+        return objects.get(id.toLowerCase());
     }
 
     @Override
@@ -173,7 +169,7 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
 
             try {
                 return subjectLoadingCache.get(id);
-            } catch (UncheckedExecutionException | ExecutionException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 plugin.getLog().warn("Couldn't get group subject for id: " + id);
                 return plugin.getService().getFallbackGroupSubjects().get(id); // fallback to the transient collection

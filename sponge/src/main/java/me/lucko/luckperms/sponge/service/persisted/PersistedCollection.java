@@ -27,9 +27,8 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.api.Tristate;
@@ -55,13 +54,8 @@ public class PersistedCollection implements LPSubjectCollection {
     private final boolean transientHasPriority;
 
     @Getter(AccessLevel.NONE)
-    private final LoadingCache<String, PersistedSubject> subjects = CacheBuilder.newBuilder()
-            .build(new CacheLoader<String, PersistedSubject>() {
-                @Override
-                public PersistedSubject load(String s) {
-                    return new PersistedSubject(s, service, PersistedCollection.this);
-                }
-            });
+    private final LoadingCache<String, PersistedSubject> subjects = Caffeine.newBuilder()
+            .build(s -> new PersistedSubject(s, getService(), PersistedCollection.this));
 
     public void loadAll() {
         Map<String, SubjectStorageModel> holders = service.getStorage().loadAllFromFile(identifier);
@@ -73,7 +67,7 @@ public class PersistedCollection implements LPSubjectCollection {
 
     @Override
     public PersistedSubject get(@NonNull String id) {
-        return subjects.getUnchecked(id.toLowerCase());
+        return subjects.get(id.toLowerCase());
     }
 
     @Override

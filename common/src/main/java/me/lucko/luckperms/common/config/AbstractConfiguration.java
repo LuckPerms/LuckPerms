@@ -24,9 +24,8 @@ package me.lucko.luckperms.common.config;
 
 import lombok.Getter;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 
 import me.lucko.luckperms.common.api.delegates.LPConfigurationDelegate;
 import me.lucko.luckperms.common.config.keys.EnduringKey;
@@ -35,27 +34,22 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("unchecked")
 public abstract class AbstractConfiguration implements LuckPermsConfiguration {
-    private final LoadingCache<ConfigKey<?>, Optional<Object>> cache = CacheBuilder.newBuilder()
-            .build(new CacheLoader<ConfigKey<?>, Optional<Object>>() {
-                @Override
-                public Optional<Object> load(ConfigKey<?> key) {
-                    return Optional.ofNullable(key.get(AbstractConfiguration.this));
-                }
-            });
+    private final LoadingCache<ConfigKey<?>, Optional<Object>> cache = Caffeine.newBuilder()
+            .build(key -> Optional.ofNullable(key.get(AbstractConfiguration.this)));
 
     @Getter
     private final LPConfigurationDelegate delegate = new LPConfigurationDelegate(this);
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T> T get(ConfigKey<T> key) {
-        return (T) cache.getUnchecked(key).orElse(null);
+        return (T) cache.get(key).orElse(null);
     }
 
     @Override
     public void loadAll() {
-        ConfigKeys.getAllKeys().forEach(cache::getUnchecked);
+        ConfigKeys.getAllKeys().forEach(cache::get);
     }
 
     @Override

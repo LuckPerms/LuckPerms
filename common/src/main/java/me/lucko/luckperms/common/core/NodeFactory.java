@@ -24,11 +24,9 @@ package me.lucko.luckperms.common.core;
 
 import lombok.experimental.UtilityClass;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.base.Splitter;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.util.concurrent.UncheckedExecutionException;
 
 import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.api.Node;
@@ -38,33 +36,22 @@ import me.lucko.luckperms.common.core.model.Group;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Utility class to make Node(Builder) instances from serialised strings or existing Nodes
  */
 @UtilityClass
 public class NodeFactory {
-    private static final LoadingCache<String, Node> CACHE = CacheBuilder.newBuilder()
-            .build(new CacheLoader<String, Node>() {
-                @Override
-                public Node load(String s) throws Exception {
-                    return builderFromSerialisedNode(s, true).build();
-                }
-            });
+    private static final LoadingCache<String, Node> CACHE = Caffeine.newBuilder()
+            .build(s -> builderFromSerialisedNode(s, true).build());
 
-    private static final LoadingCache<String, Node> CACHE_NEGATED = CacheBuilder.newBuilder()
-            .build(new CacheLoader<String, Node>() {
-                @Override
-                public Node load(String s) throws Exception {
-                    return builderFromSerialisedNode(s, false).build();
-                }
-            });
+    private static final LoadingCache<String, Node> CACHE_NEGATED = Caffeine.newBuilder()
+            .build(s -> builderFromSerialisedNode(s, false).build());
 
     public static Node fromSerialisedNode(String s, Boolean b) {
         try {
             return b ? CACHE.get(s) : CACHE_NEGATED.get(s);
-        } catch (UncheckedExecutionException | ExecutionException e) {
+        } catch (Exception e) {
             throw new IllegalArgumentException(e);
         }
     }

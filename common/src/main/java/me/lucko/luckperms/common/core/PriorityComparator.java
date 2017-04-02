@@ -25,9 +25,8 @@ package me.lucko.luckperms.common.core;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
@@ -48,13 +47,7 @@ public class PriorityComparator implements Comparator<LocalizedNode> {
     }
 
     private final Collator collator = Collator.getInstance(Locale.ENGLISH);
-    private final LoadingCache<String, CollationKey> collationKeyCache = CacheBuilder.newBuilder()
-            .build(new CacheLoader<String, CollationKey>() {
-                @Override
-                public CollationKey load(String s) throws Exception {
-                    return collator.getCollationKey(s);
-                }
-            });
+    private final LoadingCache<String, CollationKey> collationKeyCache = Caffeine.newBuilder().build(collator::getCollationKey);
 
     @Override
     public int compare(LocalizedNode one, LocalizedNode two) {
