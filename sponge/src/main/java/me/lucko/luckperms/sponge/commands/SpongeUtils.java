@@ -27,6 +27,7 @@ import lombok.experimental.UtilityClass;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
+import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.sponge.service.references.SubjectReference;
 
 import java.util.List;
@@ -86,15 +87,7 @@ public class SpongeUtils {
     }
 
     public static String contextToString(ContextSet set) {
-        if (set.isEmpty()) {
-            return "&bGLOBAL";
-        }
-
-        StringBuilder sb = new StringBuilder();
-        for (Map.Entry<String, String> e : set.toSet()) {
-            sb.append("&f").append(e.getKey()).append("&7=&f").append(e.getValue()).append("&7, ");
-        }
-        return sb.delete(sb.length() - 2, sb.length()).toString();
+        return Util.contextSetToString(set);
     }
 
 }

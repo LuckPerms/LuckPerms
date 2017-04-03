@@ -35,6 +35,8 @@ import com.google.gson.JsonPrimitive;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.common.core.ContextSetComparator;
+import me.lucko.luckperms.common.core.PriorityComparator;
 import me.lucko.luckperms.sponge.service.calculated.CalculatedSubjectData;
 import me.lucko.luckperms.sponge.service.references.SubjectReference;
 
@@ -163,12 +165,18 @@ public class SubjectStorageModel {
         }
         this.parents = parentsBuilder.build();
     }
+
+    private static <T> List<Map.Entry<ImmutableContextSet, T>> sortContextMap(Map<ImmutableContextSet, T> map) {
+        List<Map.Entry<ImmutableContextSet, T>> entries = new ArrayList<>(map.entrySet());
+        entries.sort((o1, o2) -> ContextSetComparator.reverse().compare(o1.getKey(), o2.getKey()));
+        return entries;
+    }
     
     public JsonObject toJson() {
         JsonObject root = new JsonObject();
         
         JsonArray permissions = new JsonArray();
-        for (Map.Entry<ImmutableContextSet, Map<String, Boolean>> e : this.permissions.entrySet()) {
+        for (Map.Entry<ImmutableContextSet, Map<String, Boolean>> e : sortContextMap(this.permissions)) {
             if (e.getValue().isEmpty()) {
                 continue;
             }
@@ -177,7 +185,12 @@ public class SubjectStorageModel {
             section.add("context", contextsToJson(e.getKey()));
             
             JsonObject data = new JsonObject();
-            for (Map.Entry<String, Boolean> ent : e.getValue().entrySet()) {
+
+            // sort alphabetically.
+            List<Map.Entry<String, Boolean>> perms = new ArrayList<>(e.getValue().entrySet());
+            perms.sort((o1, o2) -> PriorityComparator.get().compareStrings(o1.getKey(), o2.getKey()));
+
+            for (Map.Entry<String, Boolean> ent : perms) {
                 data.addProperty(ent.getKey(), ent.getValue());
             }
             section.add("data", data);
@@ -187,7 +200,7 @@ public class SubjectStorageModel {
         root.add("permissions", permissions);
 
         JsonArray options = new JsonArray();
-        for (Map.Entry<ImmutableContextSet, Map<String, String>> e : this.options.entrySet()) {
+        for (Map.Entry<ImmutableContextSet, Map<String, String>> e : sortContextMap(this.options)) {
             if (e.getValue().isEmpty()) {
                 continue;
             }
@@ -196,7 +209,12 @@ public class SubjectStorageModel {
             section.add("context", contextsToJson(e.getKey()));
 
             JsonObject data = new JsonObject();
-            for (Map.Entry<String, String> ent : e.getValue().entrySet()) {
+
+            // sort alphabetically.
+            List<Map.Entry<String, String>> opts = new ArrayList<>(e.getValue().entrySet());
+            opts.sort((o1, o2) -> PriorityComparator.get().compareStrings(o1.getKey(), o2.getKey()));
+
+            for (Map.Entry<String, String> ent : opts) {
                 data.addProperty(ent.getKey(), ent.getValue());
             }
             section.add("data", data);
@@ -206,7 +224,7 @@ public class SubjectStorageModel {
         root.add("options", options);
 
         JsonArray parents = new JsonArray();
-        for (Map.Entry<ImmutableContextSet, List<SubjectReference>> e : this.parents.entrySet()) {
+        for (Map.Entry<ImmutableContextSet, List<SubjectReference>> e : sortContextMap(this.parents)) {
             if (e.getValue().isEmpty()) {
                 continue;
             }

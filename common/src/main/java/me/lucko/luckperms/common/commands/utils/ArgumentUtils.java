@@ -152,12 +152,22 @@ public class ArgumentUtils {
                     continue;
                 }
 
-                List<String> keyValue = CONTEXT_SPLITTER.splitToList(pair);
-                if (keyValue.size() != 2) {
+                int index = pair.indexOf('=');
+                if (index == -1) {
                     continue;
                 }
 
-                set.add(keyValue.get(0), keyValue.get(1));
+                String key = pair.substring(0, index);
+                if (key.equals("")) {
+                    continue;
+                }
+
+                String value = pair.substring(index + 1);
+                if (value.equals("")) {
+                    continue;
+                }
+
+                set.add(key, value);
             }
 
             return set;

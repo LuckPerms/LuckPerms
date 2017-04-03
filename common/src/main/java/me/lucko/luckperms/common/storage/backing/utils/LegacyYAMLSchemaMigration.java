@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -76,7 +77,7 @@ public class LegacyYAMLSchemaMigration implements Runnable {
                         Set<NodeDataHolder> nodes = perms.entrySet().stream()
                                 .map(e -> NodeFactory.fromSerialisedNode(e.getKey(), e.getValue()))
                                 .map(NodeDataHolder::fromNode)
-                                .collect(Collectors.toSet());
+                                .collect(Collectors.toCollection(LinkedHashSet::new));
 
                         if (!replacementFile.exists()) {
                             try {
@@ -127,7 +128,7 @@ public class LegacyYAMLSchemaMigration implements Runnable {
                         Set<NodeDataHolder> nodes = perms.entrySet().stream()
                                 .map(e -> NodeFactory.fromSerialisedNode(e.getKey(), e.getValue()))
                                 .map(NodeDataHolder::fromNode)
-                                .collect(Collectors.toSet());
+                                .collect(Collectors.toCollection(LinkedHashSet::new));
 
                         if (!replacementFile.exists()) {
                             try {

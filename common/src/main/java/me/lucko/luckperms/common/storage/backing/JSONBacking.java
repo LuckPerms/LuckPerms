@@ -53,6 +53,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -171,7 +172,7 @@ public class JSONBacking extends FlatfileBacking {
                 data.addProperty("name", user.getName());
                 data.addProperty("primaryGroup", user.getPrimaryGroup().getStoredValue());
 
-                Set<NodeDataHolder> nodes = user.getNodes().values().stream().map(NodeDataHolder::fromNode).collect(Collectors.toSet());
+                Set<NodeDataHolder> nodes = user.getNodes().values().stream().map(NodeDataHolder::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
                 data.add("permissions", serializePermissions(nodes));
 
                 return writeElementToFile(userFile, data);
@@ -270,7 +271,7 @@ public class JSONBacking extends FlatfileBacking {
                     JsonObject data = new JsonObject();
                     data.addProperty("name", group.getName());
 
-                    Set<NodeDataHolder> nodes = group.getNodes().values().stream().map(NodeDataHolder::fromNode).collect(Collectors.toSet());
+                    Set<NodeDataHolder> nodes = group.getNodes().values().stream().map(NodeDataHolder::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
                     data.add("permissions", serializePermissions(nodes));
 
                     return writeElementToFile(groupFile, data);
@@ -321,7 +322,7 @@ public class JSONBacking extends FlatfileBacking {
 
                 JsonObject data = new JsonObject();
                 data.addProperty("name", group.getName());
-                Set<NodeDataHolder> nodes = group.getNodes().values().stream().map(NodeDataHolder::fromNode).collect(Collectors.toSet());
+                Set<NodeDataHolder> nodes = group.getNodes().values().stream().map(NodeDataHolder::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
                 data.add("permissions", serializePermissions(nodes));
                 return writeElementToFile(groupFile, data);
             }, false);
