@@ -47,7 +47,7 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.contexts.ContextManager;
-import me.lucko.luckperms.common.contexts.ServerCalculator;
+import me.lucko.luckperms.common.contexts.StaticCalculator;
 import me.lucko.luckperms.common.core.UuidCache;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.dependencies.Dependency;
@@ -273,7 +273,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         contextManager = new ContextManager<>();
         worldCalculator = new WorldCalculator(this);
         contextManager.registerCalculator(worldCalculator);
-        contextManager.registerCalculator(new ServerCalculator<>(getConfiguration()));
+        contextManager.registerCalculator(new StaticCalculator<>(getConfiguration()));
 
         // Provide vault support
         tryVaultHook(false);
@@ -560,6 +560,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
                     MutableContextSet set = MutableContextSet.create();
                     set.add("server", getConfiguration().get(ConfigKeys.SERVER));
                     set.add("world", s);
+                    set.addAll(configuration.getStaticContexts().getContextSet());
                     return set.makeImmutable();
                 })
                 .collect(Collectors.toList())
@@ -574,6 +575,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
                         MutableContextSet set = MutableContextSet.create();
                         set.add("server", getConfiguration().get(ConfigKeys.VAULT_SERVER));
                         set.add("world", s);
+                        set.addAll(configuration.getStaticContexts().getContextSet());
                         return set.makeImmutable();
                     })
                     .collect(Collectors.toList())

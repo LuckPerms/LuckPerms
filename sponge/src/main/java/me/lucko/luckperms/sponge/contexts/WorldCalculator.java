@@ -32,8 +32,6 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
 
-import java.util.Map;
-
 @RequiredArgsConstructor
 public class WorldCalculator implements ContextCalculator<Subject> {
 
@@ -47,17 +45,6 @@ public class WorldCalculator implements ContextCalculator<Subject> {
         Player p = ((Player) source);
         accumulator.add(Context.WORLD_KEY, p.getWorld().getName());
         return accumulator;
-    }
-
-    @Override
-    public boolean isContextApplicable(Subject subject, Map.Entry<String, String> context) {
-        CommandSource source = subject.getCommandSource().orElse(null);
-        if (source == null || !(source instanceof Player)) {
-            return false;
-        }
-
-        Player p = ((Player) source);
-        return context.getKey().equals(Context.WORLD_KEY) && p.getWorld().getName().equals(context.getValue());
     }
 
 }

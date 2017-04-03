@@ -29,10 +29,8 @@ import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 
-import java.util.Map;
-
 @AllArgsConstructor
-public class ServerCalculator<T> implements ContextCalculator<T> {
+public class StaticCalculator<T> implements ContextCalculator<T> {
     private final LuckPermsConfiguration config;
 
     @Override
@@ -41,11 +39,10 @@ public class ServerCalculator<T> implements ContextCalculator<T> {
         if (!server.equals("global")) {
             accumulator.add("server", server);
         }
+
+        accumulator.addAll(config.getStaticContexts().getContextSet());
+
         return accumulator;
     }
 
-    @Override
-    public boolean isContextApplicable(T subject, Map.Entry<String, String> context) {
-        return context.getKey().equals("server") && config.get(ConfigKeys.SERVER).equalsIgnoreCase(context.getValue());
-    }
 }

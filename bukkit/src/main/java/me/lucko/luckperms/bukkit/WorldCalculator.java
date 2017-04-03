@@ -33,8 +33,6 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import org.bukkit.entity.Player;
 
-import java.util.Map;
-
 @RequiredArgsConstructor
 public class WorldCalculator implements ContextCalculator<Player> {
     private static final String WORLD_KEY = "world";
@@ -43,27 +41,13 @@ public class WorldCalculator implements ContextCalculator<Player> {
 
     @Override
     public MutableContextSet giveApplicableContext(Player subject, MutableContextSet accumulator) {
-        String world = getWorld(subject);
+        String world = subject.getWorld().getName();
+        world = plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).getOrDefault(world, world);
 
         if (world != null) {
             accumulator.add(Maps.immutableEntry(WORLD_KEY, world));
         }
 
         return accumulator;
-    }
-
-    @Override
-    public boolean isContextApplicable(Player subject, Map.Entry<String, String> context) {
-        if (!context.getKey().equals(WORLD_KEY)) {
-            return false;
-        }
-
-        String world = getWorld(subject);
-        return world != null && world.equals(context.getValue());
-    }
-
-    private String getWorld(Player player) {
-        String world = player.getWorld().getName();
-        return plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).getOrDefault(world, world);
     }
 }

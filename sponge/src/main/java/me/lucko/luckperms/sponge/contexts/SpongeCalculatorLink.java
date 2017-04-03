@@ -32,7 +32,6 @@ import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 @AllArgsConstructor
@@ -46,11 +45,5 @@ public class SpongeCalculatorLink implements ContextCalculator<Subject> {
 
         accumulator.addAll(Util.convertContexts(contexts));
         return accumulator;
-    }
-
-    @Override
-    public boolean isContextApplicable(Subject subject, Map.Entry<String, String> context) {
-        Context c = new Context(context.getKey(), context.getValue());
-        return calculator.matches(c, subject);
     }
 }

@@ -29,8 +29,6 @@ import me.lucko.luckperms.api.context.MutableContextSet;
 
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
-import java.util.Map;
-
 public class BackendServerCalculator implements ContextCalculator<ProxiedPlayer> {
     private static final String WORLD_KEY = "world";
 
@@ -47,15 +45,5 @@ public class BackendServerCalculator implements ContextCalculator<ProxiedPlayer>
         }
 
         return accumulator;
-    }
-
-    @Override
-    public boolean isContextApplicable(ProxiedPlayer subject, Map.Entry<String, String> context) {
-        if (!context.getKey().equals(WORLD_KEY)) {
-            return false;
-        }
-
-        String server = getServer(subject);
-        return server != null && server.equals(context.getValue());
     }
 }

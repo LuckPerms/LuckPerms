@@ -41,6 +41,9 @@ public abstract class AbstractConfiguration implements LuckPermsConfiguration {
     @Getter
     private final LPConfigurationDelegate delegate = new LPConfigurationDelegate(this);
 
+    @Getter
+    private final StaticContextsFile staticContexts = new StaticContextsFile(this);
+
     @SuppressWarnings("unchecked")
     @Override
     public <T> T get(ConfigKey<T> key) {
@@ -50,6 +53,7 @@ public abstract class AbstractConfiguration implements LuckPermsConfiguration {
     @Override
     public void loadAll() {
         ConfigKeys.getAllKeys().forEach(cache::get);
+        staticContexts.reload();
     }
 
     @Override
@@ -60,7 +64,7 @@ public abstract class AbstractConfiguration implements LuckPermsConfiguration {
         cache.invalidateAll(toInvalidate);
 
         loadAll();
-
+        staticContexts.reload();
         getPlugin().getApiProvider().getEventFactory().handleConfigReload();
     }
 }

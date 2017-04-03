@@ -34,6 +34,8 @@ public interface LuckPermsConfiguration {
 
     LuckPermsPlugin getPlugin();
 
+    StaticContextsFile getStaticContexts();
+
     void init();
 
     void reload();

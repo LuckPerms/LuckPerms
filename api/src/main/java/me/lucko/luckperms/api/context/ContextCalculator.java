@@ -22,8 +22,6 @@
 
 package me.lucko.luckperms.api.context;
 
-import java.util.Map;
-
 /**
  * Calculates whether contexts are applicable to {@link T}
  *
@@ -42,14 +40,5 @@ public interface ContextCalculator<T> {
      * @since 2.13
      */
     MutableContextSet giveApplicableContext(T subject, MutableContextSet accumulator);
-
-    /**
-     * Checks to see if a context is applicable to a subject
-     *
-     * @param subject the subject to check against
-     * @param context the context to check for
-     * @return true if met, or false if not. If this calculator does not calculate the given context, return false.
-     */
-    boolean isContextApplicable(T subject, Map.Entry<String, String> context);
 
 }

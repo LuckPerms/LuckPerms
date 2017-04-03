@@ -38,7 +38,7 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.contexts.ContextManager;
-import me.lucko.luckperms.common.contexts.ServerCalculator;
+import me.lucko.luckperms.common.contexts.StaticCalculator;
 import me.lucko.luckperms.common.core.UuidCache;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.dependencies.Dependency;
@@ -217,7 +217,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         contextManager = new ContextManager<>();
         BackendServerCalculator serverCalculator = new BackendServerCalculator();
         contextManager.registerCalculator(serverCalculator);
-        contextManager.registerCalculator(new ServerCalculator<>(configuration));
+        contextManager.registerCalculator(new StaticCalculator<>(configuration));
 
         // register with the LP API
         getLog().info("Registering API...");

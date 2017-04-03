@@ -39,7 +39,7 @@ import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.contexts.ContextManager;
-import me.lucko.luckperms.common.contexts.ServerCalculator;
+import me.lucko.luckperms.common.contexts.StaticCalculator;
 import me.lucko.luckperms.common.core.UuidCache;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
@@ -265,7 +265,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         cachedStateManager = new CachedStateManager(this);
 
         contextManager = new ContextManager<>();
-        contextManager.registerCalculator(new ServerCalculator<>(configuration));
+        contextManager.registerCalculator(new StaticCalculator<>(configuration));
         contextManager.registerCalculator(new WorldCalculator());
 
         // register the PermissionService with Sponge
