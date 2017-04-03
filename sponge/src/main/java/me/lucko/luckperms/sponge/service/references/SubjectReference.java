@@ -37,9 +37,8 @@ import org.spongepowered.api.service.permission.Subject;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
-@Getter
-@ToString
-@EqualsAndHashCode
+@ToString(of = {"collection", "identifier"})
+@EqualsAndHashCode(of = {"collection", "identifier"})
 @RequiredArgsConstructor(staticName = "of")
 public class SubjectReference {
     public static SubjectReference deserialize(String s) {
@@ -51,7 +50,10 @@ public class SubjectReference {
         return of(subject.getContainingCollection().getIdentifier(), subject.getIdentifier());
     }
 
+    @Getter
     private final String collection;
+
+    @Getter
     private final String identifier;
 
     private WeakReference<LPSubject> ref = null;
@@ -67,10 +69,6 @@ public class SubjectReference {
         LPSubject s = service.getSubjects(collection).get(identifier);
         ref = new WeakReference<>(s);
         return s;
-    }
-
-    public String serialize() {
-        return collection + "/" + identifier;
     }
 
 }

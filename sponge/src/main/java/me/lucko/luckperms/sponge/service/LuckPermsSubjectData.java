@@ -34,6 +34,7 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.caching.MetaAccumulator;
+import me.lucko.luckperms.common.core.DataMutateResult;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
@@ -48,8 +49,8 @@ import org.spongepowered.api.service.permission.PermissionService;
 
 import co.aikar.timings.Timing;
 
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -72,16 +73,19 @@ public class LuckPermsSubjectData implements LPSubjectData {
     @Override
     public Map<ImmutableContextSet, Map<String, Boolean>> getPermissions() {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_GET_PERMISSIONS)) {
-            Map<ImmutableContextSet, Map<String, Boolean>> perms = new HashMap<>();
+            Map<ImmutableContextSet, ImmutableMap.Builder<String, Boolean>> perms = new HashMap<>();
 
-            for (Node n : enduring ? holder.getNodes().values() : holder.getTransientNodes().values()) {
-                ContextSet contexts = n.getFullContexts();
-                perms.computeIfAbsent(contexts.makeImmutable(), cs -> new HashMap<>()).put(n.getPermission(), n.getValue());
+            for (Map.Entry<ImmutableContextSet, Collection<Node>> e : (enduring ? holder.getNodes() : holder.getTransientNodes()).asMap().entrySet()) {
+                ImmutableMap.Builder<String, Boolean> results = ImmutableMap.builder();
+                for (Node n : e.getValue()) {
+                    results.put(n.getPermission(), n.getValue());
+                }
+                perms.put(e.getKey(), results);
             }
 
             ImmutableMap.Builder<ImmutableContextSet, Map<String, Boolean>> map = ImmutableMap.builder();
-            for (Map.Entry<ImmutableContextSet, Map<String, Boolean>> e : perms.entrySet()) {
-                map.put(e.getKey(), ImmutableMap.copyOf(e.getValue()));
+            for (Map.Entry<ImmutableContextSet, ImmutableMap.Builder<String, Boolean>> e : perms.entrySet()) {
+                map.put(e.getKey(), e.getValue().build());
             }
             return map.build();
         }
@@ -127,10 +131,15 @@ public class LuckPermsSubjectData implements LPSubjectData {
     @Override
     public boolean clearPermissions() {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_CLEAR_PERMISSIONS)) {
+            boolean ret;
             if (enduring) {
-                holder.clearNodes();
+                ret = holder.clearNodes();
             } else {
-                holder.clearTransientNodes();
+                ret = holder.clearTransientNodes();
+            }
+
+            if (!ret) {
+                return false;
             }
 
             if (holder instanceof User) {
@@ -145,36 +154,50 @@ public class LuckPermsSubjectData implements LPSubjectData {
     @Override
     public boolean clearPermissions(@NonNull ContextSet set) {
         try (Timing i = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_CLEAR_PERMISSIONS)) {
-            List<Node> toRemove = streamNodes(enduring)
-                    .filter(n -> n.getFullContexts().equals(set))
-                    .collect(Collectors.toList());
+            boolean ret;
 
-            toRemove.forEach(makeUnsetConsumer(enduring));
+            if (enduring) {
+                ret = holder.clearNodes(set);
+            } else {
+                List<Node> toRemove = streamNodes(false)
+                        .filter(n -> n.getFullContexts().equals(set))
+                        .collect(Collectors.toList());
+
+                toRemove.forEach(makeUnsetConsumer(false));
+                ret = !toRemove.isEmpty();
+            }
+
+            if (!ret) {
+                return false;
+            }
 
             if (holder instanceof User) {
                 service.getPlugin().getUserManager().giveDefaultIfNeeded(((User) holder), false);
             }
 
             objectSave(holder);
-            return !toRemove.isEmpty();
+            return true;
         }
     }
 
     @Override
     public Map<ImmutableContextSet, Set<SubjectReference>> getParents() {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_GET_PARENTS)) {
-            Map<ImmutableContextSet, Set<SubjectReference>> parents = new HashMap<>();
+            Map<ImmutableContextSet, ImmutableSet.Builder<SubjectReference>> parents = new HashMap<>();
 
-            for (Node n : enduring ? holder.getNodes().values() : holder.getTransientNodes().values()) {
-                if (!n.isGroupNode()) continue;
-
-                ContextSet contexts = n.getFullContexts();
-                parents.computeIfAbsent(contexts.makeImmutable(), cs -> new HashSet<>()).add(service.getGroupSubjects().get(n.getGroupName()).toReference());
+            for (Map.Entry<ImmutableContextSet, Collection<Node>> e : (enduring ? holder.getNodes() : holder.getTransientNodes()).asMap().entrySet()) {
+                ImmutableSet.Builder<SubjectReference> results = ImmutableSet.builder();
+                for (Node n : e.getValue()) {
+                    if (n.isGroupNode()) {
+                        results.add(service.getGroupSubjects().get(n.getGroupName()).toReference());
+                    }
+                }
+                parents.put(e.getKey(), results);
             }
 
             ImmutableMap.Builder<ImmutableContextSet, Set<SubjectReference>> map = ImmutableMap.builder();
-            for (Map.Entry<ImmutableContextSet, Set<SubjectReference>> e : parents.entrySet()) {
-                map.put(e.getKey(), ImmutableSet.copyOf(e.getValue()));
+            for (Map.Entry<ImmutableContextSet, ImmutableSet.Builder<SubjectReference>> e : parents.entrySet()) {
+                map.put(e.getKey(), e.getValue().build());
             }
             return map.build();
         }
@@ -185,15 +208,20 @@ public class LuckPermsSubjectData implements LPSubjectData {
         try (Timing i = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_ADD_PARENT)) {
             if (subject.getCollection().equals(PermissionService.SUBJECTS_GROUP)) {
                 LPSubject permsSubject = subject.resolve(service);
+                DataMutateResult result;
 
                 if (enduring) {
-                    holder.setPermission(NodeFactory.newBuilder("group." + permsSubject.getIdentifier())
+                    result = holder.setPermission(NodeFactory.newBuilder("group." + permsSubject.getIdentifier())
                             .withExtraContext(contexts)
                             .build());
                 } else {
-                    holder.setTransientPermission(NodeFactory.newBuilder("group." + permsSubject.getIdentifier())
+                    result = holder.setTransientPermission(NodeFactory.newBuilder("group." + permsSubject.getIdentifier())
                             .withExtraContext(contexts)
                             .build());
+                }
+
+                if (!result.asBoolean()) {
+                    return false;
                 }
 
                 objectSave(holder);
@@ -208,15 +236,20 @@ public class LuckPermsSubjectData implements LPSubjectData {
         try (Timing i = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_REMOVE_PARENT)) {
             if (subject.getCollection().equals(PermissionService.SUBJECTS_GROUP)) {
                 LPSubject permsSubject = subject.resolve(service);
+                DataMutateResult result;
 
                 if (enduring) {
-                    holder.unsetPermission(NodeFactory.newBuilder("group." + permsSubject.getIdentifier())
+                    result = holder.unsetPermission(NodeFactory.newBuilder("group." + permsSubject.getIdentifier())
                             .withExtraContext(contexts)
                             .build());
                 } else {
-                    holder.unsetTransientPermission(NodeFactory.newBuilder("group." + permsSubject.getIdentifier())
+                    result = holder.unsetTransientPermission(NodeFactory.newBuilder("group." + permsSubject.getIdentifier())
                             .withExtraContext(contexts)
                             .build());
+                }
+
+                if (!result.asBoolean()) {
+                    return false;
                 }
 
                 objectSave(holder);
@@ -229,37 +262,58 @@ public class LuckPermsSubjectData implements LPSubjectData {
     @Override
     public boolean clearParents() {
         try (Timing i = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_CLEAR_PARENTS)) {
-            List<Node> toRemove = streamNodes(enduring)
-                    .filter(Node::isGroupNode)
-                    .collect(Collectors.toList());
+            boolean ret;
 
-            toRemove.forEach(makeUnsetConsumer(enduring));
+            if (enduring) {
+                ret = holder.clearParents(true);
+            } else {
+                List<Node> toRemove = streamNodes(false)
+                        .filter(Node::isGroupNode)
+                        .collect(Collectors.toList());
 
-            if (holder instanceof User) {
-                service.getPlugin().getUserManager().giveDefaultIfNeeded(((User) holder), false);
+                toRemove.forEach(makeUnsetConsumer(false));
+                ret = !toRemove.isEmpty();
+
+                if (ret && holder instanceof User) {
+                    service.getPlugin().getUserManager().giveDefaultIfNeeded(((User) holder), false);
+                }
+            }
+
+            if (!ret) {
+                return false;
             }
 
             objectSave(holder);
-            return !toRemove.isEmpty();
+            return true;
         }
     }
 
     @Override
     public boolean clearParents(@NonNull ContextSet set) {
         try (Timing i = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_CLEAR_PARENTS)) {
-            List<Node> toRemove = streamNodes(enduring)
-                    .filter(Node::isGroupNode)
-                    .filter(n -> n.getFullContexts().equals(set))
-                    .collect(Collectors.toList());
+            boolean ret;
+            if (enduring) {
+                ret = holder.clearParents(set, true);
+            } else {
+                List<Node> toRemove = streamNodes(false)
+                        .filter(Node::isGroupNode)
+                        .filter(n -> n.getFullContexts().equals(set))
+                        .collect(Collectors.toList());
 
-            toRemove.forEach(makeUnsetConsumer(enduring));
+                toRemove.forEach(makeUnsetConsumer(false));
+                ret = !toRemove.isEmpty();
 
-            if (holder instanceof User) {
-                service.getPlugin().getUserManager().giveDefaultIfNeeded(((User) holder), false);
+                if (ret && holder instanceof User) {
+                    service.getPlugin().getUserManager().giveDefaultIfNeeded(((User) holder), false);
+                }
+            }
+
+            if (!ret) {
+                return false;
             }
 
             objectSave(holder);
-            return !toRemove.isEmpty();
+            return true;
         }
     }
 
@@ -429,13 +483,21 @@ public class LuckPermsSubjectData implements LPSubjectData {
     }
 
     private void objectSave(PermissionHolder t) {
-        if (t instanceof User) {
-            service.getPlugin().getStorage().saveUser(((User) t))
-                    .thenRunAsync(() -> ((User) t).getRefreshBuffer().request(), service.getPlugin().getScheduler().getAsyncExecutor());
-        }
-        if (t instanceof Group) {
-            service.getPlugin().getStorage().saveGroup((Group) t)
-                    .thenRunAsync(() -> service.getPlugin().getUpdateTaskBuffer().request(), service.getPlugin().getScheduler().getAsyncExecutor());
+        if (!enduring) {
+            // don't bother saving to primary storage. just refresh
+            if (t instanceof User) {
+                ((User) t).getRefreshBuffer().request();
+            } else {
+                service.getPlugin().getUpdateTaskBuffer().request();
+            }
+        } else {
+            if (t instanceof User) {
+                service.getPlugin().getStorage().saveUser(((User) t))
+                        .thenRunAsync(() -> ((User) t).getRefreshBuffer().request(), service.getPlugin().getScheduler().getAsyncExecutor());
+            } else {
+                service.getPlugin().getStorage().saveGroup((Group) t)
+                        .thenRunAsync(() -> service.getPlugin().getUpdateTaskBuffer().request(), service.getPlugin().getScheduler().getAsyncExecutor());
+            }
         }
     }
 }

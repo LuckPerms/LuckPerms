@@ -32,13 +32,14 @@ import me.lucko.luckperms.sponge.service.proxy.LPSubjectCollection;
 
 import java.lang.ref.WeakReference;
 
-@Getter
-@ToString
-@EqualsAndHashCode
+@ToString(of = "collection")
+@EqualsAndHashCode(of = "collection")
 @RequiredArgsConstructor(staticName = "of")
 public class SubjectCollectionReference {
 
+    @Getter
     private final String collection;
+
     private WeakReference<LPSubjectCollection> ref = null;
 
     public synchronized LPSubjectCollection resolve(LuckPermsService service) {

@@ -59,43 +59,6 @@ import java.util.concurrent.TimeUnit;
 public class CalculatedSubjectData implements LPSubjectData {
     private static final ContextComparator CONTEXT_COMPARATOR = new ContextComparator();
 
-    private static <V> Map<String, V> flattenMap(ContextSet contexts, Map<ContextSet, Map<String, V>> source) {
-        Map<String, V> map = new HashMap<>();
-
-        SortedMap<ContextSet, Map<String, V>> ret = getRelevantEntries(contexts, source);
-        for (Map<String, V> m : ret.values()) {
-            for (Map.Entry<String, V> e : m.entrySet()) {
-                if (!map.containsKey(e.getKey())) {
-                    map.put(e.getKey(), e.getValue());
-                }
-            }
-        }
-
-        return ImmutableMap.copyOf(map);
-    }
-
-    private static <K, V> SortedMap<ContextSet, Map<K, V>> getRelevantEntries(ContextSet set, Map<ContextSet, Map<K, V>> map) {
-        ImmutableSortedMap.Builder<ContextSet, Map<K, V>> perms = ImmutableSortedMap.orderedBy(CONTEXT_COMPARATOR);
-
-        loop:
-        for (Map.Entry<ContextSet, Map<K, V>> e : map.entrySet()) {
-
-            for (Map.Entry<String, String> c : e.getKey().toSet()) {
-                if (!set.has(c.getKey(), c.getValue())) {
-                    continue loop;
-                }
-            }
-
-            perms.put(e.getKey().makeImmutable(), ImmutableMap.copyOf(e.getValue()));
-        }
-
-        return perms.build();
-    }
-
-    private static boolean stringEquals(String a, String b) {
-        return a == null && b == null || a != null && b != null && a.equalsIgnoreCase(b);
-    }
-
     @Getter
     private final LPSubject parentSubject;
 
@@ -340,6 +303,39 @@ public class CalculatedSubjectData implements LPSubjectData {
         options.remove(contexts);
         service.invalidateOptionCaches();
         return !map.isEmpty();
+    }
+
+    private static <V> Map<String, V> flattenMap(ContextSet contexts, Map<ContextSet, Map<String, V>> source) {
+        Map<String, V> map = new HashMap<>();
+
+        SortedMap<ContextSet, Map<String, V>> ret = getRelevantEntries(contexts, source);
+        for (Map<String, V> m : ret.values()) {
+            for (Map.Entry<String, V> e : m.entrySet()) {
+                if (!map.containsKey(e.getKey())) {
+                    map.put(e.getKey(), e.getValue());
+                }
+            }
+        }
+
+        return ImmutableMap.copyOf(map);
+    }
+
+    private static <K, V> SortedMap<ContextSet, Map<K, V>> getRelevantEntries(ContextSet set, Map<ContextSet, Map<K, V>> map) {
+        ImmutableSortedMap.Builder<ContextSet, Map<K, V>> perms = ImmutableSortedMap.orderedBy(CONTEXT_COMPARATOR);
+
+        for (Map.Entry<ContextSet, Map<K, V>> e : map.entrySet()) {
+            if (!e.getKey().isSatisfiedBy(set)) {
+                continue;
+            }
+
+            perms.put(e.getKey().makeImmutable(), ImmutableMap.copyOf(e.getValue()));
+        }
+
+        return perms.build();
+    }
+
+    private static boolean stringEquals(String a, String b) {
+        return a == null && b == null || a != null && b != null && a.equalsIgnoreCase(b);
     }
 
     private static class ContextComparator implements Comparator<ContextSet> {

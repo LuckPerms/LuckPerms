@@ -992,33 +992,44 @@ public abstract class PermissionHolder {
     /**
      * Clear all of the holders permission nodes
      */
-    public void clearNodes() {
+    public boolean clearNodes() {
         ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes().values());
         synchronized (nodes) {
             nodes.clear();
         }
         invalidateCache();
         ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes().values());
+
+        if (before.size() == after.size()) {
+            return false;
+        }
+
         plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
+        return true;
     }
 
-    public void clearNodes(ContextSet contextSet) {
+    public boolean clearNodes(ContextSet contextSet) {
         ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes().values());
         synchronized (nodes) {
             nodes.removeAll(contextSet.makeImmutable());
         }
         invalidateCache();
         ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes().values());
+
+        if (before.size() == after.size()) {
+            return false;
+        }
+
         plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
+        return true;
     }
 
-    public void clearParents(boolean giveDefault) {
+    public boolean clearParents(boolean giveDefault) {
         ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes().values());
-
         synchronized (nodes) {
             boolean b = nodes.values().removeIf(Node::isGroupNode);
             if (!b) {
-                return;
+                return false;
             }
         }
         if (this instanceof User && giveDefault) {
@@ -1027,19 +1038,20 @@ public abstract class PermissionHolder {
         invalidateCache();
         ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes().values());
         plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
+        return true;
     }
 
-    public void clearParents(ContextSet contextSet, boolean giveDefault) {
+    public boolean clearParents(ContextSet contextSet, boolean giveDefault) {
         ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes().values());
         synchronized (nodes) {
             SortedSet<Node> nodes = this.nodes.get(contextSet.makeImmutable());
             if (nodes == null) {
-                return;
+                return false;
             }
 
             boolean b = nodes.removeIf(Node::isGroupNode);
             if (!b) {
-                return;
+                return false;
             }
         }
         if (this instanceof User && giveDefault) {
@@ -1048,80 +1060,90 @@ public abstract class PermissionHolder {
         invalidateCache();
         ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes().values());
         plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
+        return true;
     }
 
-    public void clearMeta() {
+    public boolean clearMeta() {
         ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes().values());
 
         synchronized (nodes) {
             if (!nodes.values().removeIf(n -> n.isMeta() || n.isPrefix() || n.isSuffix())) {
-                return;
+                return false;
             }
         }
         invalidateCache();
         ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes().values());
         plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
+        return true;
     }
 
-    public void clearMeta(ContextSet contextSet) {
+    public boolean clearMeta(ContextSet contextSet) {
         ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes().values());
         synchronized (nodes) {
             SortedSet<Node> nodes = this.nodes.get(contextSet.makeImmutable());
             if (nodes == null) {
-                return;
+                return false;
             }
 
             boolean b = nodes.removeIf(n -> n.isMeta() || n.isPrefix() || n.isSuffix());
             if (!b) {
-                return;
+                return false;
             }
         }
         invalidateCache();
         ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes().values());
         plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
+        return true;
     }
 
-    public void clearMetaKeys(String key, boolean temp) {
+    public boolean clearMetaKeys(String key, boolean temp) {
         ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes().values());
         synchronized (nodes) {
             boolean b = this.nodes.values().removeIf(n -> n.isMeta() && (n.isTemporary() == temp) && n.getMeta().getKey().equalsIgnoreCase(key));
             if (!b) {
-                return;
+                return false;
             }
         }
         invalidateCache();
         ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes().values());
         plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
+        return true;
     }
 
-    public void clearMetaKeys(String key, ContextSet contextSet, boolean temp) {
+    public boolean clearMetaKeys(String key, ContextSet contextSet, boolean temp) {
         ImmutableSet<Node> before = ImmutableSet.copyOf(getNodes().values());
         synchronized (nodes) {
 
             SortedSet<Node> nodes = this.nodes.get(contextSet.makeImmutable());
             if (nodes == null) {
-                return;
+                return false;
             }
 
             boolean b = nodes.removeIf(n -> n.isMeta() && (n.isTemporary() == temp) && n.getMeta().getKey().equalsIgnoreCase(key));
             if (!b) {
-                return;
+                return false;
             }
         }
         invalidateCache();
         ImmutableSet<Node> after = ImmutableSet.copyOf(getNodes().values());
         plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
+        return true;
     }
 
-    public void clearTransientNodes() {
+    public boolean clearTransientNodes() {
         ImmutableSet<Node> before = ImmutableSet.copyOf(getTransientNodes().values());
-
         synchronized (transientNodes) {
             transientNodes.clear();
         }
         invalidateCache();
         ImmutableSet<Node> after = ImmutableSet.copyOf(getTransientNodes().values());
+
+        if (before.size() == after.size()) {
+            return false;
+        }
+
         plugin.getApiProvider().getEventFactory().handleNodeClear(this, before, after);
+        return true;
     }
 
     /**
