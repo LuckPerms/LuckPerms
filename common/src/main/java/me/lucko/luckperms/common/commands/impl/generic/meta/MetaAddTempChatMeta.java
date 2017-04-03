@@ -81,7 +81,7 @@ public class MetaAddTempChatMeta extends SharedSubCommand {
         if (ret.getKey().asBoolean()) {
             duration = ret.getValue().getExpiryUnixTime();
 
-            Message.ADD_TEMP_CHATMETA_SUCCESS.send(sender, holder.getFriendlyName(), DESCRIPTOR.apply(isPrefix), meta, meta, DateUtil.formatDateDiff(duration), Util.contextSetToString(context));
+            Message.ADD_TEMP_CHATMETA_SUCCESS.send(sender, holder.getFriendlyName(), DESCRIPTOR.apply(isPrefix), meta, priority, DateUtil.formatDateDiff(duration), Util.contextSetToString(context));
 
             LogEntry.build().actor(sender).acted(holder)
                     .action("meta addtemp" + DESCRIPTOR.apply(isPrefix) + " " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
