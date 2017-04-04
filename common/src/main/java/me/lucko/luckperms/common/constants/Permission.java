@@ -120,6 +120,7 @@ public enum Permission {
     GROUP_META_REMOVETEMP_PREFIX(list("meta.removetempprefix", "removetempprefix"), Type.GROUP),
     GROUP_META_REMOVETEMP_SUFFIX(list("meta.removetempsuffix", "removetempsuffix"), Type.GROUP),
     GROUP_META_CLEAR(list("meta.clear", "clearmeta"), Type.GROUP),
+    GROUP_LISTMEMBERS(list("listmembers"), Type.GROUP),
     GROUP_SHOWTRACKS(list("showtracks"), Type.GROUP),
     GROUP_SETWEIGHT(list("setweight"), Type.GROUP),
     GROUP_BULKCHANGE(list("bulkchange"), Type.GROUP),

@@ -112,6 +112,7 @@ public enum Message {
     TREE_URL("&aPermission Tree URL:", true),
 
     SEARCH_SEARCHING("&aSearching for users and groups with &b{0}&a...", true),
+    SEARCH_SEARCHING_MEMBERS("&aSearching for users and groups who inherit from &b{0}&a...", true),
     SEARCH_RESULT("&aFound &b{0}&a entries from &b{1}&a users and &b{2}&a groups.", true),
     SEARCH_SHOWING_USERS("&bShowing user entries:", true),
     SEARCH_SHOWING_GROUPS("&bShowing group entries:", true),
