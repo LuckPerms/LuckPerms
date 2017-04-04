@@ -30,18 +30,15 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 
-import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.core.ContextSetComparator;
+import me.lucko.luckperms.common.core.NodeModel;
 import me.lucko.luckperms.common.core.PriorityComparator;
 import me.lucko.luckperms.sponge.service.calculated.CalculatedSubjectData;
 import me.lucko.luckperms.sponge.service.references.SubjectReference;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -100,7 +97,7 @@ public class SubjectStorageModel {
             JsonObject context = section.get("context").getAsJsonObject();
             JsonObject data = section.get("data").getAsJsonObject();
             
-            ImmutableContextSet contextSet = contextsFromJson(context);
+            ImmutableContextSet contextSet = NodeModel.deserializeContextSet(context).makeImmutable();
             ImmutableMap.Builder<String, Boolean> perms = ImmutableMap.builder();
             for (Map.Entry<String, JsonElement> perm : data.entrySet()) {
                 perms.put(perm.getKey(), perm.getValue().getAsBoolean());
@@ -123,7 +120,7 @@ public class SubjectStorageModel {
             JsonObject context = section.get("context").getAsJsonObject();
             JsonObject data = section.get("data").getAsJsonObject();
 
-            ImmutableContextSet contextSet = contextsFromJson(context);
+            ImmutableContextSet contextSet = NodeModel.deserializeContextSet(context).makeImmutable();
             ImmutableMap.Builder<String, String> opts = ImmutableMap.builder();
             for (Map.Entry<String, JsonElement> opt : data.entrySet()) {
                 opts.put(opt.getKey(), opt.getValue().getAsString());
@@ -146,7 +143,7 @@ public class SubjectStorageModel {
             JsonObject context = section.get("context").getAsJsonObject();
             JsonArray data = section.get("data").getAsJsonArray();
 
-            ImmutableContextSet contextSet = contextsFromJson(context);
+            ImmutableContextSet contextSet = NodeModel.deserializeContextSet(context).makeImmutable();
             ImmutableList.Builder<SubjectReference> pars = ImmutableList.builder();
             for (JsonElement p : data) {
                 if (!p.isJsonObject()) {
@@ -182,7 +179,7 @@ public class SubjectStorageModel {
             }
 
             JsonObject section = new JsonObject();
-            section.add("context", contextsToJson(e.getKey()));
+            section.add("context", NodeModel.serializeContextSet(e.getKey()));
             
             JsonObject data = new JsonObject();
 
@@ -206,7 +203,7 @@ public class SubjectStorageModel {
             }
 
             JsonObject section = new JsonObject();
-            section.add("context", contextsToJson(e.getKey()));
+            section.add("context", NodeModel.serializeContextSet(e.getKey()));
 
             JsonObject data = new JsonObject();
 
@@ -230,7 +227,7 @@ public class SubjectStorageModel {
             }
 
             JsonObject section = new JsonObject();
-            section.add("context", contextsToJson(e.getKey()));
+            section.add("context", NodeModel.serializeContextSet(e.getKey()));
 
             JsonArray data = new JsonArray();
             for (SubjectReference ref : e.getValue()) {
@@ -252,41 +249,5 @@ public class SubjectStorageModel {
         subjectData.replacePermissions(permissions);
         subjectData.replaceOptions(options);
         subjectData.replaceParents(parents);
-    }
-    
-    private static ImmutableContextSet contextsFromJson(JsonObject contexts) {
-        MutableContextSet ret = MutableContextSet.create();
-        for (Map.Entry<String, JsonElement> e : contexts.entrySet()) {
-            String key = e.getKey();
-            
-            if (e.getValue().isJsonArray()) {
-                JsonArray values = e.getValue().getAsJsonArray();
-                for (JsonElement value : values) {
-                    ret.add(key, value.getAsString());
-                }
-            } else {
-                ret.add(key, e.getValue().getAsString());
-            }
-        }
-        return ret.makeImmutable();
-    }
-
-    private static JsonObject contextsToJson(ContextSet contexts) {
-        JsonObject ret = new JsonObject();
-        for (Map.Entry<String, Collection<String>> e : contexts.toMultimap().asMap().entrySet()) {
-            String key = e.getKey();
-            List<String> values = new ArrayList<>(e.getValue());
-            
-            if (values.size() == 1) {
-                ret.addProperty(key, values.get(0));
-            } else if (values.size() > 1) {
-                JsonArray arr = new JsonArray();
-                for (String s : values) {
-                    arr.add(new JsonPrimitive(s));
-                }
-                ret.add(key, arr);
-            }
-        }
-        return ret;
     }
 }

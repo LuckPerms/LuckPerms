@@ -237,7 +237,7 @@ public class MongoDBBacking extends AbstractBacking {
                         // User exists, let's load.
                         Document d = cursor.next();
                         user.setNodes(revert((Map<String, Boolean>) d.get("perms")).entrySet().stream()
-                                .map(e -> NodeFactory.fromSerialisedNode(e.getKey(), e.getValue()))
+                                .map(e -> NodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
                                 .collect(Collectors.toSet())
                         );
                         user.getPrimaryGroup().setStoredValue(d.getString("primaryGroup"));
@@ -341,7 +341,7 @@ public class MongoDBBacking extends AbstractBacking {
                     Map<String, Boolean> perms = revert((Map<String, Boolean>) d.get("perms"));
 
                     for (Map.Entry<String, Boolean> e : perms.entrySet()) {
-                        Node node = NodeFactory.fromSerialisedNode(e.getKey(), e.getValue());
+                        Node node = NodeFactory.fromSerializedNode(e.getKey(), e.getValue());
                         if (!node.getPermission().equalsIgnoreCase(permission)) {
                             continue;
                         }
@@ -369,7 +369,7 @@ public class MongoDBBacking extends AbstractBacking {
                         // Group exists, let's load.
                         Document d = cursor.next();
                         group.setNodes(revert((Map<String, Boolean>) d.get("perms")).entrySet().stream()
-                                .map(e -> NodeFactory.fromSerialisedNode(e.getKey(), e.getValue()))
+                                .map(e -> NodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
                                 .collect(Collectors.toSet())
                         );
                     } else {
@@ -396,7 +396,7 @@ public class MongoDBBacking extends AbstractBacking {
                         Document d = cursor.next();
 
                         group.setNodes(revert((Map<String, Boolean>) d.get("perms")).entrySet().stream()
-                                .map(e -> NodeFactory.fromSerialisedNode(e.getKey(), e.getValue()))
+                                .map(e -> NodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
                                 .collect(Collectors.toSet())
                         );
                         return true;
@@ -481,7 +481,7 @@ public class MongoDBBacking extends AbstractBacking {
                     Map<String, Boolean> perms = revert((Map<String, Boolean>) d.get("perms"));
 
                     for (Map.Entry<String, Boolean> e : perms.entrySet()) {
-                        Node node = NodeFactory.fromSerialisedNode(e.getKey(), e.getValue());
+                        Node node = NodeFactory.fromSerializedNode(e.getKey(), e.getValue());
                         if (!node.getPermission().equalsIgnoreCase(permission)) {
                             continue;
                         }

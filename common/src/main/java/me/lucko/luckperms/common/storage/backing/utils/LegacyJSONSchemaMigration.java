@@ -28,6 +28,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import me.lucko.luckperms.common.core.NodeFactory;
+import me.lucko.luckperms.common.core.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.backing.JSONBacking;
 
@@ -79,9 +80,9 @@ public class LegacyJSONSchemaMigration implements Runnable {
                             return true;
                         });
 
-                        Set<NodeDataHolder> nodes = perms.entrySet().stream()
-                                .map(e -> NodeFactory.fromSerialisedNode(e.getKey(), e.getValue()))
-                                .map(NodeDataHolder::fromNode)
+                        Set<NodeModel> nodes = perms.entrySet().stream()
+                                .map(e -> NodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
+                                .map(NodeModel::fromNode)
                                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
                         if (!replacementFile.exists()) {
@@ -133,9 +134,9 @@ public class LegacyJSONSchemaMigration implements Runnable {
                             return true;
                         });
 
-                        Set<NodeDataHolder> nodes = perms.entrySet().stream()
-                                .map(e -> NodeFactory.fromSerialisedNode(e.getKey(), e.getValue()))
-                                .map(NodeDataHolder::fromNode)
+                        Set<NodeModel> nodes = perms.entrySet().stream()
+                                .map(e -> NodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
+                                .map(NodeModel::fromNode)
                                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
                         if (!replacementFile.exists()) {

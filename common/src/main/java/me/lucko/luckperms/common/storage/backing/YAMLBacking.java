@@ -28,13 +28,13 @@ import com.google.common.collect.Iterables;
 
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.common.core.NodeModel;
 import me.lucko.luckperms.common.core.UserIdentifier;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.managers.impl.GenericUserManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.storage.backing.utils.NodeDataHolder;
 import me.lucko.luckperms.common.storage.holder.NodeHeldPermission;
 
 import org.yaml.snakeyaml.DumperOptions;
@@ -109,8 +109,8 @@ public class YAMLBacking extends FlatfileBacking {
                         String name = (String) values.get("name");
                         user.getPrimaryGroup().setStoredValue((String) values.get("primary-group"));
 
-                        Set<NodeDataHolder> data = deserializePermissions((List<Object>) values.get("permissions"));
-                        Set<Node> nodes = data.stream().map(NodeDataHolder::toNode).collect(Collectors.toSet());
+                        Set<NodeModel> data = deserializePermissions((List<Object>) values.get("permissions"));
+                        Set<Node> nodes = data.stream().map(NodeModel::toNode).collect(Collectors.toSet());
                         user.setNodes(nodes);
 
                         boolean save = plugin.getUserManager().giveDefaultIfNeeded(user, false);
@@ -171,7 +171,7 @@ public class YAMLBacking extends FlatfileBacking {
                 values.put("name", user.getName());
                 values.put("primary-group", user.getPrimaryGroup().getStoredValue());
 
-                Set<NodeDataHolder> data = user.getNodes().values().stream().map(NodeDataHolder::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
+                Set<NodeModel> data = user.getNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
                 values.put("permissions", serializePermissions(data));
 
                 return writeMapToFile(userFile, values);
@@ -190,7 +190,7 @@ public class YAMLBacking extends FlatfileBacking {
             for (File file : files) {
                 registerFileAction("users", file);
 
-                Set<NodeDataHolder> nodes = new HashSet<>();
+                Set<NodeModel> nodes = new HashSet<>();
                 readMapFromFile(file, values -> {
                     nodes.addAll(deserializePermissions((List<Object>) values.get("permissions")));
                     return true;
@@ -198,7 +198,7 @@ public class YAMLBacking extends FlatfileBacking {
 
                 boolean shouldDelete = false;
                 if (nodes.size() == 1) {
-                    for (NodeDataHolder e : nodes) {
+                    for (NodeModel e : nodes) {
                         // There's only one
                         shouldDelete = e.getPermission().equalsIgnoreCase("group.default") && e.isValue();
                     }
@@ -223,13 +223,13 @@ public class YAMLBacking extends FlatfileBacking {
                 registerFileAction("users", file);
 
                 UUID holder = UUID.fromString(file.getName().substring(0, file.getName().length() - 4));
-                Set<NodeDataHolder> nodes = new HashSet<>();
+                Set<NodeModel> nodes = new HashSet<>();
                 readMapFromFile(file, values -> {
                     nodes.addAll(deserializePermissions((List<Object>) values.get("permissions")));
                     return true;
                 });
 
-                for (NodeDataHolder e : nodes) {
+                for (NodeModel e : nodes) {
                     if (!e.getPermission().equalsIgnoreCase(permission)) {
                         continue;
                     }
@@ -253,8 +253,8 @@ public class YAMLBacking extends FlatfileBacking {
 
                 if (groupFile.exists()) {
                     return readMapFromFile(groupFile, values -> {
-                        Set<NodeDataHolder> data = deserializePermissions((List<Object>) values.get("permissions"));
-                        Set<Node> nodes = data.stream().map(NodeDataHolder::toNode).collect(Collectors.toSet());
+                        Set<NodeModel> data = deserializePermissions((List<Object>) values.get("permissions"));
+                        Set<Node> nodes = data.stream().map(NodeModel::toNode).collect(Collectors.toSet());
                         group.setNodes(nodes);
                         return true;
                     });
@@ -268,7 +268,7 @@ public class YAMLBacking extends FlatfileBacking {
 
                     Map<String, Object> values = new LinkedHashMap<>();
                     values.put("name", group.getName());
-                    Set<NodeDataHolder> data = group.getNodes().values().stream().map(NodeDataHolder::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
+                    Set<NodeModel> data = group.getNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
                     values.put("permissions", serializePermissions(data));
                     return writeMapToFile(groupFile, values);
                 }
@@ -288,8 +288,8 @@ public class YAMLBacking extends FlatfileBacking {
                 registerFileAction("groups", groupFile);
 
                 return groupFile.exists() && readMapFromFile(groupFile, values -> {
-                    Set<NodeDataHolder> data = deserializePermissions((List<Object>) values.get("permissions"));
-                    Set<Node> nodes = data.stream().map(NodeDataHolder::toNode).collect(Collectors.toSet());
+                    Set<NodeModel> data = deserializePermissions((List<Object>) values.get("permissions"));
+                    Set<Node> nodes = data.stream().map(NodeModel::toNode).collect(Collectors.toSet());
                     group.setNodes(nodes);
                     return true;
                 });
@@ -318,7 +318,7 @@ public class YAMLBacking extends FlatfileBacking {
 
                 Map<String, Object> values = new LinkedHashMap<>();
                 values.put("name", group.getName());
-                Set<NodeDataHolder> data = group.getNodes().values().stream().map(NodeDataHolder::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
+                Set<NodeModel> data = group.getNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
                 values.put("permissions", serializePermissions(data));
                 return writeMapToFile(groupFile, values);
             }, false);
@@ -338,13 +338,13 @@ public class YAMLBacking extends FlatfileBacking {
                 registerFileAction("groups", file);
 
                 String holder = file.getName().substring(0, file.getName().length() - 4);
-                Set<NodeDataHolder> nodes = new HashSet<>();
+                Set<NodeModel> nodes = new HashSet<>();
                 readMapFromFile(file, values -> {
                     nodes.addAll(deserializePermissions((List<Object>) values.get("permissions")));
                     return true;
                 });
 
-                for (NodeDataHolder e : nodes) {
+                for (NodeModel e : nodes) {
                     if (!e.getPermission().equalsIgnoreCase(permission)) {
                         continue;
                     }
@@ -437,8 +437,8 @@ public class YAMLBacking extends FlatfileBacking {
         }
     }
 
-    public static Set<NodeDataHolder> deserializePermissions(List<Object> permissionsSection) {
-        Set<NodeDataHolder> nodes = new HashSet<>();
+    public static Set<NodeModel> deserializePermissions(List<Object> permissionsSection) {
+        Set<NodeModel> nodes = new HashSet<>();
 
         for (Object perm : permissionsSection) {
 
@@ -498,17 +498,17 @@ public class YAMLBacking extends FlatfileBacking {
                     context = map.build();
                 }
 
-                nodes.add(NodeDataHolder.of(permission, value, server, world, expiry, context));
+                nodes.add(NodeModel.of(permission, value, server, world, expiry, context));
             }
         }
 
         return nodes;
     }
 
-    public static List<Map<String, Object>> serializePermissions(Set<NodeDataHolder> nodes) {
+    public static List<Map<String, Object>> serializePermissions(Set<NodeModel> nodes) {
         List<Map<String, Object>> data = new ArrayList<>();
 
-        for (NodeDataHolder node : nodes) {
+        for (NodeModel node : nodes) {
             Map<String, Object> attributes = new LinkedHashMap<>();
             attributes.put("value", node.isValue());
 

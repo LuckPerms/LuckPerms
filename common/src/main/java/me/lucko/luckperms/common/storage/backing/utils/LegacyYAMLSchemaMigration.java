@@ -25,6 +25,7 @@ package me.lucko.luckperms.common.storage.backing.utils;
 import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.common.core.NodeFactory;
+import me.lucko.luckperms.common.core.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.backing.YAMLBacking;
 
@@ -74,9 +75,9 @@ public class LegacyYAMLSchemaMigration implements Runnable {
                             return true;
                         });
 
-                        Set<NodeDataHolder> nodes = perms.entrySet().stream()
-                                .map(e -> NodeFactory.fromSerialisedNode(e.getKey(), e.getValue()))
-                                .map(NodeDataHolder::fromNode)
+                        Set<NodeModel> nodes = perms.entrySet().stream()
+                                .map(e -> NodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
+                                .map(NodeModel::fromNode)
                                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
                         if (!replacementFile.exists()) {
@@ -125,9 +126,9 @@ public class LegacyYAMLSchemaMigration implements Runnable {
                             return true;
                         });
 
-                        Set<NodeDataHolder> nodes = perms.entrySet().stream()
-                                .map(e -> NodeFactory.fromSerialisedNode(e.getKey(), e.getValue()))
-                                .map(NodeDataHolder::fromNode)
+                        Set<NodeModel> nodes = perms.entrySet().stream()
+                                .map(e -> NodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
+                                .map(NodeModel::fromNode)
                                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
                         if (!replacementFile.exists()) {

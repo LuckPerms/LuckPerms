@@ -3,14 +3,12 @@ package me.lucko.luckperms.common.config;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import com.google.common.collect.ImmutableSetMultimap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.common.core.NodeModel;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -18,7 +16,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Map;
 
 @RequiredArgsConstructor
 public class StaticContextsFile {
@@ -49,21 +46,7 @@ public class StaticContextsFile {
             }
 
             JsonObject contexts = data.get("context").getAsJsonObject();
-            ImmutableSetMultimap.Builder<String, String> map = ImmutableSetMultimap.builder();
-
-            for (Map.Entry<String, JsonElement> e : contexts.entrySet()) {
-                JsonElement val = e.getValue();
-                if (val.isJsonArray()) {
-                    JsonArray vals = val.getAsJsonArray();
-                    for (JsonElement element : vals) {
-                        map.put(e.getKey(), element.getAsString());
-                    }
-                } else {
-                    map.put(e.getKey(), val.getAsString());
-                }
-            }
-
-            contextSet = ImmutableContextSet.fromMultimap(map.build());
+            contextSet = NodeModel.deserializeContextSet(contexts).makeImmutable();
         } catch (IOException e) {
             e.printStackTrace();
         }

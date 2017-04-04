@@ -89,11 +89,11 @@ public class Rule {
 
         // The holder meets all of the requirements of this rule.
         for (String s : toTake) {
-            user.unsetPermission(NodeFactory.fromSerialisedNode(s, true));
+            user.unsetPermission(NodeFactory.fromSerializedNode(s, true));
         }
 
         for (String s : toGive) {
-            user.setPermission(NodeFactory.fromSerialisedNode(s, true));
+            user.setPermission(NodeFactory.fromSerializedNode(s, true));
         }
 
         if (setPrimaryGroup != null) {

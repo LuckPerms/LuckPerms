@@ -37,7 +37,7 @@ public class LogicParser {
         try {
             ScriptEngine engine = Scripting.getScriptEngine();
 
-            String expression = generateExpression(s, s1 -> holder.hasPermission(NodeFactory.fromSerialisedNode(s1, true)) == tristate);
+            String expression = generateExpression(s, s1 -> holder.hasPermission(NodeFactory.fromSerializedNode(s1, true)) == tristate);
             if (engine == null) {
                 throw new NullPointerException("script engine");
             }

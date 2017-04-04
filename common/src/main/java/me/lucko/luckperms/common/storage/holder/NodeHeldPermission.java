@@ -30,7 +30,7 @@ import com.google.common.collect.Multimap;
 
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.common.storage.backing.utils.NodeDataHolder;
+import me.lucko.luckperms.common.core.NodeModel;
 
 import java.util.Optional;
 import java.util.OptionalLong;
@@ -39,8 +39,8 @@ import java.util.OptionalLong;
 @EqualsAndHashCode
 @AllArgsConstructor(staticName = "of")
 public final class NodeHeldPermission<T> implements HeldPermission<T> {
-    public static <T> NodeHeldPermission<T> of(T holder, NodeDataHolder nodeDataHolder) {
-        return of(holder, nodeDataHolder.toNode());
+    public static <T> NodeHeldPermission<T> of(T holder, NodeModel nodeModel) {
+        return of(holder, nodeModel.toNode());
     }
 
     private final T holder;

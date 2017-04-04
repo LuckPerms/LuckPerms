@@ -28,6 +28,7 @@ import com.google.common.collect.Lists;
 import com.google.gson.reflect.TypeToken;
 
 import me.lucko.luckperms.common.core.NodeFactory;
+import me.lucko.luckperms.common.core.NodeModel;
 import me.lucko.luckperms.common.storage.backing.SQLBacking;
 
 import java.lang.reflect.Type;
@@ -147,21 +148,21 @@ public class LegacySQLSchemaMigration implements Runnable {
                 continue;
             }
 
-            Set<NodeDataHolder> nodes = convertedPerms.entrySet().stream()
-                    .map(e -> NodeFactory.fromSerialisedNode(e.getKey(), e.getValue()))
-                    .map(NodeDataHolder::fromNode)
+            Set<NodeModel> nodes = convertedPerms.entrySet().stream()
+                    .map(e -> NodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
+                    .map(NodeModel::fromNode)
                     .collect(Collectors.toSet());
 
             try (Connection c = backing.getProvider().getConnection()) {
                 try (PreparedStatement ps = c.prepareStatement(backing.getPrefix().apply("INSERT INTO {prefix}user_permissions(uuid, permission, value, server, world, expiry, contexts) VALUES(?, ?, ?, ?, ?, ?, ?)"))) {
-                    for (NodeDataHolder nd : nodes) {
+                    for (NodeModel nd : nodes) {
                         ps.setString(1, uuid.toString());
                         ps.setString(2, nd.getPermission());
                         ps.setBoolean(3, nd.isValue());
                         ps.setString(4, nd.getServer());
                         ps.setString(5, nd.getWorld());
                         ps.setLong(6, nd.getExpiry());
-                        ps.setString(7, nd.serialiseContext());
+                        ps.setString(7, nd.serializeContext());
                         ps.addBatch();
                     }
                     ps.executeBatch();
@@ -226,21 +227,21 @@ public class LegacySQLSchemaMigration implements Runnable {
                 continue;
             }
 
-            Set<NodeDataHolder> nodes = convertedPerms.entrySet().stream()
-                    .map(ent -> NodeFactory.fromSerialisedNode(ent.getKey(), ent.getValue()))
-                    .map(NodeDataHolder::fromNode)
+            Set<NodeModel> nodes = convertedPerms.entrySet().stream()
+                    .map(ent -> NodeFactory.fromSerializedNode(ent.getKey(), ent.getValue()))
+                    .map(NodeModel::fromNode)
                     .collect(Collectors.toSet());
 
             try (Connection c = backing.getProvider().getConnection()) {
                 try (PreparedStatement ps = c.prepareStatement(backing.getPrefix().apply("INSERT INTO {prefix}group_permissions(name, permission, value, server, world, expiry, contexts) VALUES(?, ?, ?, ?, ?, ?, ?)"))) {
-                    for (NodeDataHolder nd : nodes) {
+                    for (NodeModel nd : nodes) {
                         ps.setString(1, name);
                         ps.setString(2, nd.getPermission());
                         ps.setBoolean(3, nd.isValue());
                         ps.setString(4, nd.getServer());
                         ps.setString(5, nd.getWorld());
                         ps.setLong(6, nd.getExpiry());
-                        ps.setString(7, nd.serialiseContext());
+                        ps.setString(7, nd.serializeContext());
                         ps.addBatch();
                     }
                     ps.executeBatch();

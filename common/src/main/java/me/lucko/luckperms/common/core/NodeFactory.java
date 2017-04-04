@@ -43,12 +43,12 @@ import java.util.Map;
 @UtilityClass
 public class NodeFactory {
     private static final LoadingCache<String, Node> CACHE = Caffeine.newBuilder()
-            .build(s -> builderFromSerialisedNode(s, true).build());
+            .build(s -> builderFromSerializedNode(s, true).build());
 
     private static final LoadingCache<String, Node> CACHE_NEGATED = Caffeine.newBuilder()
-            .build(s -> builderFromSerialisedNode(s, false).build());
+            .build(s -> builderFromSerializedNode(s, false).build());
 
-    public static Node fromSerialisedNode(String s, Boolean b) {
+    public static Node fromSerializedNode(String s, Boolean b) {
         try {
             return b ? CACHE.get(s) : CACHE_NEGATED.get(s);
         } catch (Exception e) {
@@ -60,7 +60,7 @@ public class NodeFactory {
         return new NodeBuilder(s, false);
     }
 
-    public static Node.Builder builderFromSerialisedNode(String s, Boolean b) {
+    public static Node.Builder builderFromSerializedNode(String s, Boolean b) {
         // if contains /
         if (Patterns.compileDelimitedMatcher("/", "\\").matcher(s).find()) {
             List<String> parts = Splitter.on(Patterns.compileDelimitedMatcher("/", "\\")).limit(2).splitToList(s);

@@ -32,6 +32,7 @@ import com.google.gson.reflect.TypeToken;
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.common.core.NodeModel;
 import me.lucko.luckperms.common.core.UserIdentifier;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.Track;
@@ -43,7 +44,6 @@ import me.lucko.luckperms.common.managers.impl.GenericUserManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.backing.sqlprovider.SQLProvider;
 import me.lucko.luckperms.common.storage.backing.utils.LegacySQLSchemaMigration;
-import me.lucko.luckperms.common.storage.backing.utils.NodeDataHolder;
 import me.lucko.luckperms.common.storage.holder.NodeHeldPermission;
 
 import java.io.BufferedReader;
@@ -253,7 +253,7 @@ public class SQLBacking extends AbstractBacking {
         User user = plugin.getUserManager().getOrMake(UserIdentifier.of(uuid, username));
         user.getIoLock().lock();
         try {
-            List<NodeDataHolder> data = new ArrayList<>();
+            List<NodeModel> data = new ArrayList<>();
             AtomicReference<String> primaryGroup = new AtomicReference<>(null);
             AtomicReference<String> userName = new AtomicReference<>(null);
 
@@ -270,7 +270,7 @@ public class SQLBacking extends AbstractBacking {
                             String world = rs.getString("world");
                             long expiry = rs.getLong("expiry");
                             String contexts = rs.getString("contexts");
-                            data.add(NodeDataHolder.of(permission, value, server, world, expiry, contexts));
+                            data.add(NodeModel.deserialize(permission, value, server, world, expiry, contexts));
                         }
                     }
                 }
@@ -315,7 +315,7 @@ public class SQLBacking extends AbstractBacking {
 
             // If the user has any data in storage
             if (!data.isEmpty()) {
-                Set<Node> nodes = data.stream().map(NodeDataHolder::toNode).collect(Collectors.toSet());
+                Set<Node> nodes = data.stream().map(NodeModel::toNode).collect(Collectors.toSet());
                 user.setNodes(nodes);
 
                 // Save back to the store if data was changed
@@ -364,7 +364,7 @@ public class SQLBacking extends AbstractBacking {
             }
 
             // Get a snapshot of current data.
-            Set<NodeDataHolder> remote = new HashSet<>();
+            Set<NodeModel> remote = new HashSet<>();
             try (Connection c = provider.getConnection()) {
                 try (PreparedStatement ps = c.prepareStatement(prefix.apply(USER_PERMISSIONS_SELECT))) {
                     ps.setString(1, user.getUuid().toString());
@@ -377,7 +377,7 @@ public class SQLBacking extends AbstractBacking {
                             String world = rs.getString("world");
                             long expiry = rs.getLong("expiry");
                             String contexts = rs.getString("contexts");
-                            remote.add(NodeDataHolder.of(permission, value, server, world, expiry, contexts));
+                            remote.add(NodeModel.deserialize(permission, value, server, world, expiry, contexts));
                         }
                     }
                 }
@@ -385,24 +385,24 @@ public class SQLBacking extends AbstractBacking {
                 return false;
             }
 
-            Set<NodeDataHolder> local = user.getNodes().values().stream().map(NodeDataHolder::fromNode).collect(Collectors.toSet());
+            Set<NodeModel> local = user.getNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toSet());
 
-            Map.Entry<Set<NodeDataHolder>, Set<NodeDataHolder>> diff = compareSets(local, remote);
+            Map.Entry<Set<NodeModel>, Set<NodeModel>> diff = compareSets(local, remote);
 
-            Set<NodeDataHolder> toAdd = diff.getKey();
-            Set<NodeDataHolder> toRemove = diff.getValue();
+            Set<NodeModel> toAdd = diff.getKey();
+            Set<NodeModel> toRemove = diff.getValue();
 
             if (!toRemove.isEmpty()) {
                 try (Connection c = provider.getConnection()) {
                     try (PreparedStatement ps = c.prepareStatement(prefix.apply(USER_PERMISSIONS_DELETE_SPECIFIC))) {
-                        for (NodeDataHolder nd : toRemove) {
+                        for (NodeModel nd : toRemove) {
                             ps.setString(1, user.getUuid().toString());
                             ps.setString(2, nd.getPermission());
                             ps.setBoolean(3, nd.isValue());
                             ps.setString(4, nd.getServer());
                             ps.setString(5, nd.getWorld());
                             ps.setLong(6, nd.getExpiry());
-                            ps.setString(7, nd.serialiseContext());
+                            ps.setString(7, nd.serializeContext());
                             ps.addBatch();
                         }
                         ps.executeBatch();
@@ -416,14 +416,14 @@ public class SQLBacking extends AbstractBacking {
             if (!toAdd.isEmpty()) {
                 try (Connection c = provider.getConnection()) {
                     try (PreparedStatement ps = c.prepareStatement(prefix.apply(USER_PERMISSIONS_INSERT))) {
-                        for (NodeDataHolder nd : toAdd) {
+                        for (NodeModel nd : toAdd) {
                             ps.setString(1, user.getUuid().toString());
                             ps.setString(2, nd.getPermission());
                             ps.setBoolean(3, nd.isValue());
                             ps.setString(4, nd.getServer());
                             ps.setString(5, nd.getWorld());
                             ps.setLong(6, nd.getExpiry());
-                            ps.setString(7, nd.serialiseContext());
+                            ps.setString(7, nd.serializeContext());
                             ps.addBatch();
                         }
                         ps.executeBatch();
@@ -490,7 +490,7 @@ public class SQLBacking extends AbstractBacking {
                         long expiry = rs.getLong("expiry");
                         String contexts = rs.getString("contexts");
 
-                        NodeDataHolder data = NodeDataHolder.of(permission, value, server, world, expiry, contexts);
+                        NodeModel data = NodeModel.deserialize(permission, value, server, world, expiry, contexts);
                         held.add(NodeHeldPermission.of(holder, data));
                     }
                 }
@@ -558,7 +558,7 @@ public class SQLBacking extends AbstractBacking {
         Group group = plugin.getGroupManager().getOrMake(name);
         group.getIoLock().lock();
         try {
-            List<NodeDataHolder> data = new ArrayList<>();
+            List<NodeModel> data = new ArrayList<>();
 
             try (Connection c = provider.getConnection()) {
                 try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_PERMISSIONS_SELECT))) {
@@ -572,7 +572,7 @@ public class SQLBacking extends AbstractBacking {
                             String world = rs.getString("world");
                             long expiry = rs.getLong("expiry");
                             String contexts = rs.getString("contexts");
-                            data.add(NodeDataHolder.of(permission, value, server, world, expiry, contexts));
+                            data.add(NodeModel.deserialize(permission, value, server, world, expiry, contexts));
                         }
                     }
                 }
@@ -582,7 +582,7 @@ public class SQLBacking extends AbstractBacking {
             }
 
             if (!data.isEmpty()) {
-                Set<Node> nodes = data.stream().map(NodeDataHolder::toNode).collect(Collectors.toSet());
+                Set<Node> nodes = data.stream().map(NodeModel::toNode).collect(Collectors.toSet());
                 group.setNodes(nodes);
             } else {
                 group.clearNodes();
@@ -646,7 +646,7 @@ public class SQLBacking extends AbstractBacking {
             }
 
             // Get a snapshot of current data
-            Set<NodeDataHolder> remote = new HashSet<>();
+            Set<NodeModel> remote = new HashSet<>();
             try (Connection c = provider.getConnection()) {
                 try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_PERMISSIONS_SELECT))) {
                     ps.setString(1, group.getName());
@@ -659,7 +659,7 @@ public class SQLBacking extends AbstractBacking {
                             String world = rs.getString("world");
                             long expiry = rs.getLong("expiry");
                             String contexts = rs.getString("contexts");
-                            remote.add(NodeDataHolder.of(permission, value, server, world, expiry, contexts));
+                            remote.add(NodeModel.deserialize(permission, value, server, world, expiry, contexts));
                         }
                     }
                 }
@@ -668,24 +668,24 @@ public class SQLBacking extends AbstractBacking {
                 return false;
             }
 
-            Set<NodeDataHolder> local = group.getNodes().values().stream().map(NodeDataHolder::fromNode).collect(Collectors.toSet());
+            Set<NodeModel> local = group.getNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toSet());
 
-            Map.Entry<Set<NodeDataHolder>, Set<NodeDataHolder>> diff = compareSets(local, remote);
+            Map.Entry<Set<NodeModel>, Set<NodeModel>> diff = compareSets(local, remote);
 
-            Set<NodeDataHolder> toAdd = diff.getKey();
-            Set<NodeDataHolder> toRemove = diff.getValue();
+            Set<NodeModel> toAdd = diff.getKey();
+            Set<NodeModel> toRemove = diff.getValue();
 
             if (!toRemove.isEmpty()) {
                 try (Connection c = provider.getConnection()) {
                     try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_PERMISSIONS_DELETE_SPECIFIC))) {
-                        for (NodeDataHolder nd : toRemove) {
+                        for (NodeModel nd : toRemove) {
                             ps.setString(1, group.getName());
                             ps.setString(2, nd.getPermission());
                             ps.setBoolean(3, nd.isValue());
                             ps.setString(4, nd.getServer());
                             ps.setString(5, nd.getWorld());
                             ps.setLong(6, nd.getExpiry());
-                            ps.setString(7, nd.serialiseContext());
+                            ps.setString(7, nd.serializeContext());
                             ps.addBatch();
                         }
                         ps.executeBatch();
@@ -699,14 +699,14 @@ public class SQLBacking extends AbstractBacking {
             if (!toAdd.isEmpty()) {
                 try (Connection c = provider.getConnection()) {
                     try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_PERMISSIONS_INSERT))) {
-                        for (NodeDataHolder nd : toAdd) {
+                        for (NodeModel nd : toAdd) {
                             ps.setString(1, group.getName());
                             ps.setString(2, nd.getPermission());
                             ps.setBoolean(3, nd.isValue());
                             ps.setString(4, nd.getServer());
                             ps.setString(5, nd.getWorld());
                             ps.setLong(6, nd.getExpiry());
-                            ps.setString(7, nd.serialiseContext());
+                            ps.setString(7, nd.serializeContext());
                             ps.addBatch();
                         }
                         ps.executeBatch();
@@ -764,7 +764,7 @@ public class SQLBacking extends AbstractBacking {
                         long expiry = rs.getLong("expiry");
                         String contexts = rs.getString("contexts");
 
-                        NodeDataHolder data = NodeDataHolder.of(permission, value, server, world, expiry, contexts);
+                        NodeModel data = NodeModel.deserialize(permission, value, server, world, expiry, contexts);
                         held.add(NodeHeldPermission.of(holder, data));
                     }
                 }
@@ -1040,14 +1040,14 @@ public class SQLBacking extends AbstractBacking {
      * @param remote the remote set
      * @return the entries to add to remote, and the entries to remove from remote
      */
-    private static Map.Entry<Set<NodeDataHolder>, Set<NodeDataHolder>> compareSets(Set<NodeDataHolder> local, Set<NodeDataHolder> remote) {
+    private static Map.Entry<Set<NodeModel>, Set<NodeModel>> compareSets(Set<NodeModel> local, Set<NodeModel> remote) {
         // entries in local but not remote need to be added
         // entries in remote but not local need to be removed
 
-        Set<NodeDataHolder> toAdd = new HashSet<>(local);
+        Set<NodeModel> toAdd = new HashSet<>(local);
         toAdd.removeAll(remote);
 
-        Set<NodeDataHolder> toRemove = new HashSet<>(remote);
+        Set<NodeModel> toRemove = new HashSet<>(remote);
         toRemove.removeAll(local);
 
         return Maps.immutableEntry(toAdd, toRemove);
