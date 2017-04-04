@@ -44,7 +44,7 @@ import javax.script.ScriptEngine;
 
 @RequiredArgsConstructor
 public class VerboseListener {
-    private static final int DATA_TRUNCATION = 700;
+    private static final int DATA_TRUNCATION = 3500;
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
 
     private final long startTime = System.currentTimeMillis();

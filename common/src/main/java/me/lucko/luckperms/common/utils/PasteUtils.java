@@ -26,6 +26,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonWriter;
 
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.StringWriter;
@@ -36,8 +37,9 @@ import java.nio.charset.StandardCharsets;
 public class PasteUtils {
 
     public static String paste(String name, String desc, String contents) {
+        HttpURLConnection connection = null;
         try {
-            HttpURLConnection connection = (HttpURLConnection) new URL("https://api.github.com/gists").openConnection();
+            connection = (HttpURLConnection) new URL("https://api.github.com/gists").openConnection();
             connection.setRequestMethod("POST");
             connection.setDoInput(true);
             connection.setDoOutput(true);
@@ -58,11 +60,17 @@ public class PasteUtils {
             }
 
             if (connection.getResponseCode() >= 400) {
-                return null;
+                throw new RuntimeException("Connection returned response code: " + connection.getResponseCode() + " - " + connection.getResponseMessage());
             }
 
-            JsonObject response = new Gson().fromJson(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8), JsonObject.class);
-            String pasteUrl = response.get("html_url").getAsString();
+            String pasteUrl;
+            try (InputStream inputStream = connection.getInputStream()) {
+                try (InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
+                    JsonObject response = new Gson().fromJson(reader, JsonObject.class);
+                    pasteUrl = response.get("html_url").getAsString();
+                }
+            }
+
             connection.disconnect();
 
             try {
@@ -72,15 +80,31 @@ public class PasteUtils {
                 try (OutputStream os = connection.getOutputStream()) {
                     os.write(("url=" + pasteUrl).getBytes(StandardCharsets.UTF_8));
                 }
-                pasteUrl = connection.getHeaderField("Location");
-                connection.disconnect();
+
+                if (connection.getResponseCode() >= 400) {
+                    new RuntimeException("Connection returned response code: " + connection.getResponseCode() + " - " + connection.getResponseMessage()).printStackTrace();
+                } else {
+                    String shortUrl = connection.getHeaderField("Location");
+                    if (shortUrl != null) {
+                        pasteUrl = shortUrl;
+                    }
+                }
             } catch (Exception e) {
-                // ignored
+                e.printStackTrace();
             }
 
             return pasteUrl;
         } catch (Exception e) {
+            e.printStackTrace();
             return null;
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.disconnect();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 }
