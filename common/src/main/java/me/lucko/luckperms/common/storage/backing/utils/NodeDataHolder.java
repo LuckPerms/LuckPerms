@@ -47,7 +47,7 @@ import java.util.Map;
 @ToString
 @EqualsAndHashCode
 @AllArgsConstructor(staticName = "of")
-public class NodeDataHolder {
+public final class NodeDataHolder {
     private static final Gson GSON = new Gson();
 
     public static NodeDataHolder fromNode(Node node) {

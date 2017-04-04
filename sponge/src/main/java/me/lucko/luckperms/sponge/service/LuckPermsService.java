@@ -311,7 +311,7 @@ public class LuckPermsService implements PermissionService {
     @RequiredArgsConstructor
     @EqualsAndHashCode
     @ToString
-    public static class DescriptionBuilder implements PermissionDescription.Builder {
+    public static final class DescriptionBuilder implements PermissionDescription.Builder {
         private final LuckPermsService service;
         private final PluginContainer container;
         private final Map<String, Tristate> roles = new HashMap<>();
@@ -365,7 +365,7 @@ public class LuckPermsService implements PermissionService {
     @AllArgsConstructor
     @EqualsAndHashCode
     @ToString
-    public static class Description implements PermissionDescription {
+    public static final class Description implements PermissionDescription {
         private final LuckPermsService service;
         private final PluginContainer owner;
         private final String id;

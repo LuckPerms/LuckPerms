@@ -57,7 +57,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @ToString(of = {"permission", "value", "override", "server", "world", "expireAt", "contexts"})
 @EqualsAndHashCode(of = {"permission", "value", "override", "server", "world", "expireAt", "contexts"})
-public class ImmutableNode implements Node {
+public final class ImmutableNode implements Node {
 
     private static boolean shouldApply(String str, boolean applyRegex, String thisStr) {
         if (str.equalsIgnoreCase(thisStr)) {
@@ -387,6 +387,11 @@ public class ImmutableNode implements Node {
     public Map.Entry<Integer, String> getSuffix() {
         Preconditions.checkState(isSuffix(), "Node is not a suffix node");
         return suffix;
+    }
+
+    @Override
+    public boolean shouldApply(boolean includeGlobal, boolean includeGlobalWorld, String server, String world, ContextSet context, boolean applyRegex) {
+        return shouldApplyOnServer(server, includeGlobal, applyRegex) && shouldApplyOnWorld(world, includeGlobalWorld, applyRegex) && shouldApplyWithContext(context, false);
     }
 
     @Override

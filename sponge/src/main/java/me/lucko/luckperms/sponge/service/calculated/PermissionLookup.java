@@ -33,7 +33,7 @@ import me.lucko.luckperms.api.context.ImmutableContextSet;
 @ToString
 @EqualsAndHashCode
 @AllArgsConstructor(staticName = "of")
-public class PermissionLookup {
+public final class PermissionLookup {
 
     private final String node;
     private final ImmutableContextSet contexts;

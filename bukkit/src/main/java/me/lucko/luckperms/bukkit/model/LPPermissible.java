@@ -271,6 +271,10 @@ public class LPPermissible extends PermissibleBase {
 
     @Override
     public void recalculatePermissions() {
+        recalculatePermissions(true);
+    }
+
+    public void recalculatePermissions(boolean invalidate) {
         if (attachmentPermissions == null) {
             return;
         }
@@ -281,7 +285,7 @@ public class LPPermissible extends PermissibleBase {
             calculateChildPermissions(attachment.getPermissions(), false, attachment);
         }
 
-        if (hasData()) {
+        if (hasData() && invalidate) {
             user.getUserData().invalidatePermissionCalculators();
         }
     }

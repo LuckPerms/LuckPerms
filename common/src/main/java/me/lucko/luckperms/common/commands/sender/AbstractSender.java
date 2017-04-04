@@ -41,7 +41,7 @@ import java.util.UUID;
  */
 @Getter
 @EqualsAndHashCode(of = "uuid")
-public class AbstractSender<T> implements Sender {
+public final class AbstractSender<T> implements Sender {
     private final LuckPermsPlugin platform;
     private final SenderFactory<T> factory;
     private final WeakReference<T> ref;

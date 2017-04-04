@@ -171,6 +171,14 @@ public class ArgumentUtils {
                 set.add(key, value);
             }
 
+            // remove any potential "global" context mappings
+            set.remove("server", "global");
+            set.remove("world", "global");
+            set.remove("server", "null");
+            set.remove("world", "null");
+            set.remove("server", "*");
+            set.remove("world", "*");
+
             // remove excess entries from the set.
             // (it can only have one server and one world.)
             List<String> servers = new ArrayList<>(set.getValues("server"));

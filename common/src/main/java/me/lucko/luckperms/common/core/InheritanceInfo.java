@@ -40,7 +40,7 @@ import java.util.Optional;
 @ToString
 @EqualsAndHashCode
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class InheritanceInfo {
+public final class InheritanceInfo {
     public static InheritanceInfo of(@NonNull LocalizedNode node) {
         return new InheritanceInfo(node.getTristate(), node.getLocation());
     }

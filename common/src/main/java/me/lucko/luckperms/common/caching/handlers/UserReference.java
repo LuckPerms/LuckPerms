@@ -38,7 +38,7 @@ import java.util.function.Consumer;
 @ToString
 @EqualsAndHashCode
 @AllArgsConstructor(staticName = "of")
-public class UserReference implements HolderReference<UserIdentifier> {
+public final class UserReference implements HolderReference<UserIdentifier> {
     private final UserIdentifier id;
 
     @Override

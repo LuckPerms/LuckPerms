@@ -36,7 +36,7 @@ import java.util.UUID;
 @ToString
 @EqualsAndHashCode(of = "uuid")
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class UserIdentifier implements Identifiable<UUID> {
+public final class UserIdentifier implements Identifiable<UUID> {
     public static UserIdentifier of(UUID uuid, String username) {
         return new UserIdentifier(uuid, username);
     }

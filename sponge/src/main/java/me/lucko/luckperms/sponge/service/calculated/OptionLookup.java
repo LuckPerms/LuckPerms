@@ -33,7 +33,7 @@ import me.lucko.luckperms.api.context.ImmutableContextSet;
 @ToString
 @EqualsAndHashCode
 @AllArgsConstructor(staticName = "of")
-public class OptionLookup {
+public final class OptionLookup {
 
     private final String key;
     private final ImmutableContextSet contexts;

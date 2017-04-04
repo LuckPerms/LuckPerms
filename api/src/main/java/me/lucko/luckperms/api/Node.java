@@ -115,6 +115,20 @@ public interface Node extends Map.Entry<String, Boolean> {
     boolean hasSpecificContext();
 
     /**
+     * Returns if this node is able to apply in the given context
+     *
+     * @param includeGlobal if global server values should apply
+     * @param includeGlobalWorld if global world values should apply
+     * @param server the server being checked against, or null
+     * @param world the world being checked against, or null
+     * @param context the context being checked against, or null
+     * @param applyRegex if regex should be applied
+     * @return true if the node should apply, otherwise false
+     * @since 3.1
+     */
+    boolean shouldApply(boolean includeGlobal, boolean includeGlobalWorld, String server, String world, ContextSet context, boolean applyRegex);
+
+    /**
      * If this node should apply on a specific server
      *
      * @param server        the name of the server

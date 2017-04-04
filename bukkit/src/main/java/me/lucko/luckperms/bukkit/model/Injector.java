@@ -74,7 +74,7 @@ public class Injector {
             existing.clearPermissions();
 
             lpPermissible.getActive().set(true);
-            lpPermissible.recalculatePermissions();
+            lpPermissible.recalculatePermissions(false);
             lpPermissible.setOldPermissible(existing);
 
             lpPermissible.updateSubscriptionsAsync();

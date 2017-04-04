@@ -38,7 +38,7 @@ import java.util.OptionalLong;
 @Getter
 @EqualsAndHashCode
 @AllArgsConstructor(staticName = "of")
-public class NodeHeldPermission<T> implements HeldPermission<T> {
+public final class NodeHeldPermission<T> implements HeldPermission<T> {
     public static <T> NodeHeldPermission<T> of(T holder, NodeDataHolder nodeDataHolder) {
         return of(holder, nodeDataHolder.toNode());
     }

@@ -117,10 +117,6 @@ public abstract class PermissionHolder {
     /**
      * The holders persistent nodes.
      *
-     * <p>These are nodes which are never stored or persisted to a file, and only
-     * last until the end of the objects lifetime. (for a group, that's when the server stops, and for a user, it's when
-     * they log out, or get unloaded.)</p>
-     *
      * <p>Nodes are mapped by the result of {@link Node#getFullContexts()}, and keys are sorted by the weight of the
      * ContextSet. ContextSets are ordered first by the presence of a server key, then by the presence of a world
      * key, and finally by the overall size of the set. Nodes are ordered according to the priority rules
@@ -345,6 +341,25 @@ public abstract class PermissionHolder {
         }
     }
 
+    public LinkedHashSet<Node> flattenAndMergeNodes(ContextSet filter) {
+        LinkedHashSet<Node> set = new LinkedHashSet<>();
+        synchronized (transientNodes) {
+            for (Map.Entry<ImmutableContextSet, Collection<Node>> e : transientNodes.asMap().entrySet()) {
+                if (e.getKey().isSatisfiedBy(filter)) {
+                    set.addAll(e.getValue());
+                }
+            }
+        }
+        synchronized (nodes) {
+            for (Map.Entry<ImmutableContextSet, Collection<Node>> e : nodes.asMap().entrySet()) {
+                if (e.getKey().isSatisfiedBy(filter)) {
+                    set.addAll(e.getValue());
+                }
+            }
+        }
+        return set;
+    }
+
     public List<Node> flattenNodesToList() {
         synchronized (nodes) {
              return new ArrayList<>(nodes.values());
@@ -385,6 +400,25 @@ public abstract class PermissionHolder {
 
             return set;
         }
+    }
+
+    public List<Node> flattenAndMergeNodesToList(ContextSet filter) {
+        List<Node> set = new ArrayList<>();
+        synchronized (transientNodes) {
+            for (Map.Entry<ImmutableContextSet, Collection<Node>> e : transientNodes.asMap().entrySet()) {
+                if (e.getKey().isSatisfiedBy(filter)) {
+                    set.addAll(e.getValue());
+                }
+            }
+        }
+        synchronized (nodes) {
+            for (Map.Entry<ImmutableContextSet, Collection<Node>> e : nodes.asMap().entrySet()) {
+                if (e.getKey().isSatisfiedBy(filter)) {
+                    set.addAll(e.getValue());
+                }
+            }
+        }
+        return set;
     }
 
     public boolean removeIf(Predicate<Node> predicate) {
@@ -439,28 +473,26 @@ public abstract class PermissionHolder {
             excludedGroups.add(getObjectName().toLowerCase());
         }
 
-        // get the objects own nodes
-        flattenTransientNodesToList(context.getContextSet()).stream()
-                .map(n -> ImmutableLocalizedNode.of(n, getObjectName()))
-                .forEach(accumulator::add);
-
-        flattenNodesToList(context.getContextSet()).stream()
+        // get and add the objects own nodes
+        List<Node> nodes = flattenAndMergeNodesToList(context.getContextSet());
+        nodes.stream()
                 .map(n -> ImmutableLocalizedNode.of(n, getObjectName()))
                 .forEach(accumulator::add);
 
         Contexts contexts = context.getContexts();
-        String server = context.getServer();
-        String world = context.getWorld();
 
         // screw effectively final
         Set<String> finalExcludedGroups = excludedGroups;
         List<LocalizedNode> finalAccumulator = accumulator;
-        mergePermissions().stream()
+
+        // this allows you to negate parent permissions lower down the inheritance tree.
+        // there's no way to distinct the stream below based on a custom comparator.
+        NodeTools.removeIgnoreValue(nodes.iterator());
+
+        nodes.stream()
                 .filter(Node::getValue)
                 .filter(Node::isGroupNode)
-                .filter(n -> n.shouldApplyOnServer(server, contexts.isApplyGlobalGroups(), plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)))
-                .filter(n -> n.shouldApplyOnWorld(world, contexts.isApplyGlobalWorldGroups(), plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)))
-                .filter(n -> n.shouldApplyWithContext(contexts.getContexts(), false))
+                .filter(n -> !(!contexts.isApplyGlobalGroups() && !n.isServerSpecific()) && !(!contexts.isApplyGlobalWorldGroups() && !n.isWorldSpecific()))
                 .map(Node::getGroupName)
                 .distinct()
                 .map(n -> Optional.ofNullable(plugin.getGroupManager().getIfLoaded(n)))
@@ -498,8 +530,6 @@ public abstract class PermissionHolder {
 
     public SortedSet<LocalizedNode> getAllNodes(ExtractedContexts context) {
         Contexts contexts = context.getContexts();
-        String server = context.getServer();
-        String world = context.getWorld();
 
         List<LocalizedNode> entries;
         if (contexts.isApplyGroups()) {
@@ -508,13 +538,12 @@ public abstract class PermissionHolder {
             entries = flattenNodesToList(context.getContextSet()).stream().map(n -> ImmutableLocalizedNode.of(n, getObjectName())).collect(Collectors.toList());
         }
 
-        entries.removeIf(node ->
-                !node.isGroupNode() && (
-                        !node.shouldApplyOnServer(server, contexts.isIncludeGlobal(), plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) ||
-                        !node.shouldApplyOnWorld(world, contexts.isIncludeGlobalWorld(), plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) ||
-                        !node.shouldApplyWithContext(context.getContextSet(), false)
-                )
-        );
+        if (!contexts.isIncludeGlobal()) {
+            entries.removeIf(n -> !n.isGroupNode() && !n.isServerSpecific());
+        }
+        if (!contexts.isApplyGlobalWorldGroups()) {
+            entries.removeIf(n -> !n.isGroupNode() && !n.isWorldSpecific());
+        }
 
         NodeTools.removeSamePermission(entries.iterator());
         SortedSet<LocalizedNode> ret = new TreeSet<>(PriorityComparator.reverse());
@@ -524,8 +553,6 @@ public abstract class PermissionHolder {
 
     public Map<String, Boolean> exportNodes(ExtractedContexts context, boolean lowerCase) {
         Contexts contexts = context.getContexts();
-        String server = context.getServer();
-        String world = context.getWorld();
 
         List<? extends Node> entries;
         if (contexts.isApplyGroups()) {
@@ -534,27 +561,22 @@ public abstract class PermissionHolder {
             entries = flattenNodesToList(context.getContextSet());
         }
 
-        entries.removeIf(node ->
-                !node.isGroupNode() && (
-                        !node.shouldApplyOnServer(server, contexts.isIncludeGlobal(), plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) ||
-                        !node.shouldApplyOnWorld(world, contexts.isIncludeGlobalWorld(), plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) ||
-                        !node.shouldApplyWithContext(context.getContextSet(), false)
-                )
-        );
+        if (!contexts.isIncludeGlobal()) {
+            entries.removeIf(n -> !n.isGroupNode() && !n.isServerSpecific());
+        }
+        if (!contexts.isApplyGlobalWorldGroups()) {
+            entries.removeIf(n -> !n.isGroupNode() && !n.isWorldSpecific());
+        }
 
         Map<String, Boolean> perms = new HashMap<>();
-
         for (Node node : entries) {
             String perm = lowerCase ? node.getPermission().toLowerCase() : node.getPermission();
-            if (!perms.containsKey(perm)) {
-                perms.put(perm, node.getValue());
 
+            if (perms.putIfAbsent(perm, node.getValue()) == null) {
                 if (plugin.getConfiguration().get(ConfigKeys.APPLYING_SHORTHAND)) {
                     List<String> sh = node.resolveShorthand();
                     if (!sh.isEmpty()) {
-                        sh.stream().map(s -> lowerCase ? s.toLowerCase() : s)
-                                .filter(s -> !perms.containsKey(s))
-                                .forEach(s -> perms.put(s, node.getValue()));
+                        sh.stream().map(s -> lowerCase ? s.toLowerCase() : s).forEach(s -> perms.putIfAbsent(s, node.getValue()));
                     }
                 }
             }
@@ -580,27 +602,17 @@ public abstract class PermissionHolder {
         }
 
         Contexts contexts = context.getContexts();
-        String server = context.getServer();
-        String world = context.getWorld();
 
         // screw effectively final
         Set<String> finalExcludedGroups = excludedGroups;
         MetaAccumulator finalAccumulator = accumulator;
 
-        flattenTransientNodesToList(context.getContextSet()).stream()
+        // get and add the objects own nodes
+        List<Node> nodes = flattenAndMergeNodesToList(context.getContextSet());
+        nodes.stream()
                 .filter(Node::getValue)
                 .filter(n -> n.isMeta() || n.isPrefix() || n.isSuffix())
-                .filter(n -> n.shouldApplyOnServer(server, contexts.isIncludeGlobal(), false))
-                .filter(n -> n.shouldApplyOnWorld(world, contexts.isIncludeGlobalWorld(), false))
-                .filter(n -> n.shouldApplyWithContext(context.getContextSet(), false))
-                .forEach(n -> finalAccumulator.accumulateNode(ImmutableLocalizedNode.of(n, getObjectName())));
-
-        flattenNodesToList(context.getContextSet()).stream()
-                .filter(Node::getValue)
-                .filter(n -> n.isMeta() || n.isPrefix() || n.isSuffix())
-                .filter(n -> n.shouldApplyOnServer(server, contexts.isIncludeGlobal(), false))
-                .filter(n -> n.shouldApplyOnWorld(world, contexts.isIncludeGlobalWorld(), false))
-                .filter(n -> n.shouldApplyWithContext(context.getContextSet(), false))
+                .filter(n -> !(!contexts.isIncludeGlobal() && !n.isServerSpecific()) && !(!contexts.isIncludeGlobalWorld() && !n.isWorldSpecific()))
                 .forEach(n -> finalAccumulator.accumulateNode(ImmutableLocalizedNode.of(n, getObjectName())));
 
         OptionalInt w = getWeight();
@@ -608,12 +620,14 @@ public abstract class PermissionHolder {
             accumulator.accumulateWeight(w.getAsInt());
         }
 
-        mergePermissions().stream()
+        // this allows you to negate parent permissions lower down the inheritance tree.
+        // there's no way to distinct the stream below based on a custom comparator.
+        NodeTools.removeIgnoreValue(nodes.iterator());
+
+        nodes.stream()
                 .filter(Node::getValue)
                 .filter(Node::isGroupNode)
-                .filter(n -> n.shouldApplyOnServer(server, contexts.isApplyGlobalGroups(), plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)))
-                .filter(n -> n.shouldApplyOnWorld(world, contexts.isApplyGlobalWorldGroups(), plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)))
-                .filter(n -> n.shouldApplyWithContext(contexts.getContexts(), false))
+                .filter(n -> !(!contexts.isApplyGlobalGroups() && !n.isServerSpecific()) && !(!contexts.isApplyGlobalWorldGroups() && !n.isWorldSpecific()))
                 .map(Node::getGroupName)
                 .distinct()
                 .map(n -> Optional.ofNullable(plugin.getGroupManager().getIfLoaded(n)))

@@ -40,7 +40,7 @@ import java.util.List;
 @ToString(of = {"collection", "identifier"})
 @EqualsAndHashCode(of = {"collection", "identifier"})
 @RequiredArgsConstructor(staticName = "of")
-public class SubjectReference {
+public final class SubjectReference {
     public static SubjectReference deserialize(String s) {
         List<String> parts = Splitter.on('/').limit(2).splitToList(s);
         return of(parts.get(0), parts.get(1));

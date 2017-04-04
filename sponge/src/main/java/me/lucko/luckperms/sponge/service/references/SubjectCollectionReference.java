@@ -35,7 +35,7 @@ import java.lang.ref.WeakReference;
 @ToString(of = "collection")
 @EqualsAndHashCode(of = "collection")
 @RequiredArgsConstructor(staticName = "of")
-public class SubjectCollectionReference {
+public final class SubjectCollectionReference {
 
     @Getter
     private final String collection;

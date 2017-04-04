@@ -38,7 +38,7 @@ import me.lucko.luckperms.api.Node;
 @Getter
 @ToString
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class ImmutableLocalizedNode implements LocalizedNode {
+public final class ImmutableLocalizedNode implements LocalizedNode {
     public static ImmutableLocalizedNode of(@NonNull Node node, @NonNull String location) {
         return new ImmutableLocalizedNode(node, location);
     }

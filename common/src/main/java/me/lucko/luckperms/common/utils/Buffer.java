@@ -111,7 +111,7 @@ public abstract class Buffer<T, R> implements Runnable {
     @Getter
     @EqualsAndHashCode(of = "object")
     @AllArgsConstructor
-    private static class BufferedObject<T, R> {
+    private static final class BufferedObject<T, R> {
 
         @Setter
         private long bufferTime;
