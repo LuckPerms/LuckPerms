@@ -33,6 +33,7 @@ import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.common.utils.DateUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
@@ -168,6 +169,24 @@ public class ArgumentUtils {
                 }
 
                 set.add(key, value);
+            }
+
+            // remove excess entries from the set.
+            // (it can only have one server and one world.)
+            List<String> servers = new ArrayList<>(set.getValues("server"));
+            if (servers.size() > 1) {
+                // start iterating at index 1
+                for (int i = 1; i < servers.size(); i++) {
+                    set.remove("server", servers.get(i));
+                }
+            }
+
+            List<String> worlds = new ArrayList<>(set.getValues("world"));
+            if (worlds.size() > 1) {
+                // start iterating at index 1
+                for (int i = 1; i < worlds.size(); i++) {
+                    set.remove("world", worlds.get(i));
+                }
             }
 
             return set;
