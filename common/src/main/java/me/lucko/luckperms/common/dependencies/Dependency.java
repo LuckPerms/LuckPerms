@@ -30,6 +30,7 @@ import lombok.Getter;
 public enum Dependency {
 
     CAFFEINE("https://repo1.maven.org/maven2/com/github/ben-manes/caffeine/caffeine/2.4.0/caffeine-2.4.0.jar", "2.4.0"),
+    MARIADB_DRIVER("https://repo1.maven.org/maven2/org/mariadb/jdbc/mariadb-java-client/1.5.9/mariadb-java-client-1.5.9.jar", "1.5.9"),
     MYSQL_DRIVER("https://repo1.maven.org/maven2/mysql/mysql-connector-java/5.1.6/mysql-connector-java-5.1.6.jar", "5.1.6"),
     POSTGRESQL_DRIVER("https://repo1.maven.org/maven2/org/postgresql/postgresql/9.4.1212/postgresql-9.4.1212.jar", "9.4.1212"),
     H2_DRIVER("https://repo1.maven.org/maven2/com/h2database/h2/1.4.193/h2-1.4.193.jar", "1.4.193"),

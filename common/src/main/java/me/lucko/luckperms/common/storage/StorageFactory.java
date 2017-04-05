@@ -107,6 +107,7 @@ public class StorageFactory {
                 type = defaultMethod;
             }
 
+            plugin.getLog().info("Using " + type.getName() + " storage.");
             storage = makeInstance(type, plugin);
         }
 
@@ -122,7 +123,9 @@ public class StorageFactory {
     private static AbstractBacking makeBacking(StorageType method, LuckPermsPlugin plugin) {
         switch (method) {
             case MYSQL:
-                return new SQLBacking(plugin, new MySQLProvider(plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)), plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX));
+                return new SQLBacking(plugin, new MySQLProvider("MySQL", "org.mariadb.jdbc.MySQLDataSource", plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)), plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX));
+            case MYSQL_LEGACY:
+                return new SQLBacking(plugin, new MySQLProvider("MySQL-Legacy", "com.mysql.jdbc.jdbc2.optional.MysqlDataSource", plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)), plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX));
             case SQLITE:
                 return new SQLBacking(plugin, new SQLiteProvider(new File(plugin.getDataDirectory(), "luckperms-sqlite.db")), plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX));
             case H2:

@@ -30,18 +30,23 @@ import java.util.List;
 
 public enum StorageType {
 
-    JSON("json", "flatfile"),
-    YAML("yaml", "yml"),
-    MONGODB("mongodb"),
-    MYSQL("mysql"),
-    POSTGRESQL("postgresql"),
-    SQLITE("sqlite"),
-    H2("h2");
+    JSON("JSON", "json", "flatfile"),
+    YAML("YAML", "yaml", "yml"),
+    MONGODB("MongoDB", "mongodb"),
+    MYSQL("MySQL", "mysql"),
+    MYSQL_LEGACY("MySQL-Legacy", "mysql-legacy"),
+    POSTGRESQL("PostgreSQL", "postgresql"),
+    SQLITE("SQLite", "sqlite"),
+    H2("H2", "h2");
+
+    @Getter
+    private final String name;
 
     @Getter
     private final List<String> identifiers;
 
-    StorageType(String... identifiers) {
+    StorageType(String name, String... identifiers) {
+        this.name = name;
         this.identifiers = ImmutableList.copyOf(identifiers);
     }
 

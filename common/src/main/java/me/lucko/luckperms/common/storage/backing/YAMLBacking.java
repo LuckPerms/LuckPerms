@@ -28,6 +28,7 @@ import com.google.common.collect.Iterables;
 
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.core.NodeModel;
 import me.lucko.luckperms.common.core.UserIdentifier;
 import me.lucko.luckperms.common.core.model.Group;
@@ -498,7 +499,7 @@ public class YAMLBacking extends FlatfileBacking {
                     context = map.build();
                 }
 
-                nodes.add(NodeModel.of(permission, value, server, world, expiry, context));
+                nodes.add(NodeModel.of(permission, value, server, world, expiry, ImmutableContextSet.fromMultimap(context)));
             }
         }
 
@@ -526,7 +527,7 @@ public class YAMLBacking extends FlatfileBacking {
 
             if (!node.getContexts().isEmpty()) {
                 Map<String, Object> context = new HashMap<>();
-                Map<String, Collection<String>> map = node.getContexts().asMap();
+                Map<String, Collection<String>> map = node.getContexts().toMultimap().asMap();
 
                 for (Map.Entry<String, Collection<String>> e : map.entrySet()) {
                     List<String> vals = new ArrayList<>(e.getValue());

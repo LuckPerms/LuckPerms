@@ -34,11 +34,13 @@ import java.util.concurrent.TimeUnit;
 public class MySQLProvider extends SQLProvider {
 
     private final DatastoreConfiguration configuration;
+    private final String driverClass;
     private HikariDataSource hikari;
 
-    public MySQLProvider(DatastoreConfiguration configuration) {
-        super("MySQL");
+    public MySQLProvider(String name, String driverClass, DatastoreConfiguration configuration) {
+        super(name);
         this.configuration = configuration;
+        this.driverClass = driverClass;
     }
 
     @Override
@@ -57,23 +59,36 @@ public class MySQLProvider extends SQLProvider {
         config.setMaximumPoolSize(configuration.getPoolSize());
 
         config.setPoolName("luckperms");
-        config.setDataSourceClassName("com.mysql.jdbc.jdbc2.optional.MysqlDataSource");
+        config.setDataSourceClassName(driverClass);
         config.addDataSourceProperty("serverName", address);
         config.addDataSourceProperty("port", port);
         config.addDataSourceProperty("databaseName", database);
-        config.addDataSourceProperty("user", username);
-        config.addDataSourceProperty("password", password);
-        config.addDataSourceProperty("cachePrepStmts", "true");
-        config.addDataSourceProperty("prepStmtCacheSize", "250");
-        config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
-        config.addDataSourceProperty("useServerPrepStmts", "true");
-        config.addDataSourceProperty("cacheCallableStmts", "true");
-        config.addDataSourceProperty("alwaysSendSetIsolation", "false");
-        config.addDataSourceProperty("cacheServerConfiguration", "true");
-        config.addDataSourceProperty("elideSetAutoCommits", "true");
-        config.addDataSourceProperty("useLocalSessionState", "true");
-        config.addDataSourceProperty("characterEncoding", "utf8");
-        config.addDataSourceProperty("useUnicode", "true");
+        config.setUsername(username);
+        config.setPassword(password);
+
+        if (getName().toLowerCase().endsWith("legacy")) {
+
+            // doesn't exist on the MariaDB driver
+            config.addDataSourceProperty("cachePrepStmts", "true");
+            config.addDataSourceProperty("alwaysSendSetIsolation", "false");
+            config.addDataSourceProperty("cacheServerConfiguration", "true");
+            config.addDataSourceProperty("elideSetAutoCommits", "true");
+            config.addDataSourceProperty("useLocalSessionState", "true");
+
+            // already set as default on mariadb
+            config.addDataSourceProperty("useServerPrepStmts", "true");
+            config.addDataSourceProperty("prepStmtCacheSize", "250");
+            config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+            config.addDataSourceProperty("cacheCallableStmts", "true");
+
+            // make sure unicode characters can be used.
+            config.addDataSourceProperty("characterEncoding", "utf8");
+            config.addDataSourceProperty("useUnicode", "true");
+        } else {
+            // hack for mariadb. this will call #setProperties on the datasource, which will append these options
+            // onto the connections.
+            config.addDataSourceProperty("properties", "useUnicode=true;characterEncoding=utf8");
+        }
 
         // We will wait for 15 seconds to get a connection from the pool.
         // Default is 30, but it shouldn't be taking that long.
