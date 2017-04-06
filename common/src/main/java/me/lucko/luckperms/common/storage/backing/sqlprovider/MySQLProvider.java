@@ -66,7 +66,7 @@ public class MySQLProvider extends SQLProvider {
         config.setUsername(username);
         config.setPassword(password);
 
-        if (getName().toLowerCase().endsWith("legacy")) {
+        if (!getName().toLowerCase().equals("mariadb")) {
 
             // doesn't exist on the MariaDB driver
             config.addDataSourceProperty("cachePrepStmts", "true");

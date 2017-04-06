@@ -33,8 +33,8 @@ public enum StorageType {
     JSON("JSON", "json", "flatfile"),
     YAML("YAML", "yaml", "yml"),
     MONGODB("MongoDB", "mongodb"),
+    MARIADB("MariaDB", "mariadb"),
     MYSQL("MySQL", "mysql"),
-    MYSQL_LEGACY("MySQL-Legacy", "mysql-legacy"),
     POSTGRESQL("PostgreSQL", "postgresql"),
     SQLITE("SQLite", "sqlite"),
     H2("H2", "h2");

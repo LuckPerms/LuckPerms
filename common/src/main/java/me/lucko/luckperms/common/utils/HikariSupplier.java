@@ -43,7 +43,7 @@ public class HikariSupplier implements AutoCloseable {
         hikari = new HikariDataSource();
         hikari.setPoolName(poolName);
         hikari.setMaximumPoolSize(2);
-        hikari.setDataSourceClassName("org.mariadb.jdbc.Driver");
+        hikari.setDataSourceClassName("com.mysql.jdbc.jdbc2.optional.MysqlDataSource");
         hikari.addDataSourceProperty("serverName", address.split(":")[0]);
         hikari.addDataSourceProperty("port", address.split(":")[1]);
         hikari.addDataSourceProperty("databaseName", database);

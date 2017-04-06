@@ -35,11 +35,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class BungeeConfig extends AbstractConfiguration {
@@ -104,7 +104,7 @@ public class BungeeConfig extends AbstractConfiguration {
             return def;
         }
 
-        return Optional.ofNullable(section.getKeys().stream().collect(Collectors.toList())).orElse(def);
+        return Optional.of((List<String>) new ArrayList<>(section.getKeys())).orElse(def);
     }
 
     @Override

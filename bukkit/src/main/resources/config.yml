@@ -191,8 +191,12 @@ vault-debug: false
 # +------------------------------------------------------------------------+ #
 
 # Which storage method the plugin should use.
-# Currently supported: mysql, postgresql, sqlite, h2, json, yaml, mongodb
-# Fill out connection info below if you're using MySQL, PostgreSQL or MongoDB
+#
+# See: https://github.com/lucko/LuckPerms/wiki/Choosing-a-Storage-type
+# Currently supported: mysql, mariadb, postgresql, sqlite, h2, json, yaml, mongodb
+
+# Fill out connection info below if you're using MySQL, MariaDB, PostgreSQL or MongoDB
+# If your MySQL server supports it, the "mariadb" option is preferred over "mysql".
 storage-method: h2
 
 # When using a file-based storage type, LuckPerms can monitor the data files for changes, and then schedule automatic

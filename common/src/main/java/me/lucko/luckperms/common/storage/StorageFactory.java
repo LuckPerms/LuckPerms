@@ -122,16 +122,35 @@ public class StorageFactory {
 
     private static AbstractBacking makeBacking(StorageType method, LuckPermsPlugin plugin) {
         switch (method) {
+            case MARIADB:
+                return new SQLBacking(plugin, new MySQLProvider(
+                        "MariaDB",
+                        "org.mariadb.jdbc.MySQLDataSource",
+                        plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)),
+                        plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
+                );
             case MYSQL:
-                return new SQLBacking(plugin, new MySQLProvider("MySQL", "org.mariadb.jdbc.MySQLDataSource", plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)), plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX));
-            case MYSQL_LEGACY:
-                return new SQLBacking(plugin, new MySQLProvider("MySQL-Legacy", "com.mysql.jdbc.jdbc2.optional.MysqlDataSource", plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)), plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX));
+                return new SQLBacking(plugin, new MySQLProvider(
+                        "MySQL",
+                        "com.mysql.jdbc.jdbc2.optional.MysqlDataSource",
+                        plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)),
+                        plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
+                );
             case SQLITE:
-                return new SQLBacking(plugin, new SQLiteProvider(new File(plugin.getDataDirectory(), "luckperms-sqlite.db")), plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX));
+                return new SQLBacking(plugin, new SQLiteProvider(
+                        new File(plugin.getDataDirectory(), "luckperms-sqlite.db")),
+                        plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
+                );
             case H2:
-                return new SQLBacking(plugin, new H2Provider(new File(plugin.getDataDirectory(), "luckperms-h2")), plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX));
+                return new SQLBacking(plugin, new H2Provider(
+                        new File(plugin.getDataDirectory(), "luckperms-h2")),
+                        plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
+                );
             case POSTGRESQL:
-                return new SQLBacking(plugin, new PostgreSQLProvider(plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)), plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX));
+                return new SQLBacking(plugin, new PostgreSQLProvider(
+                        plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)),
+                        plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
+                );
             case MONGODB:
                 return new MongoDBBacking(plugin, plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES));
             case YAML:
