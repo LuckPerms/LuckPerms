@@ -88,18 +88,30 @@ public class MigrationBungeePerms extends SubCommand<Object> {
 
             // Migrate global perms
             for (String perm : g.getPerms()) {
+                if (perm.isEmpty()) {
+                    continue;
+                }
+
                 group.setPermission(MigrationUtils.parseNode(perm, true).build());
             }
 
             // Migrate per-server perms
             for (Map.Entry<String, Server> e : g.getServers().entrySet()) {
                 for (String perm : e.getValue().getPerms()) {
+                    if (perm.isEmpty()) {
+                        continue;
+                    }
+
                     group.setPermission(MigrationUtils.parseNode(perm, true).setWorld(e.getKey()).build());
                 }
 
                 // Migrate per-world perms
                 for (Map.Entry<String, World> we : e.getValue().getWorlds().entrySet()) {
                     for (String perm : we.getValue().getPerms()) {
+                        if (perm.isEmpty()) {
+                            continue;
+                        }
+
                         group.setPermission(MigrationUtils.parseNode(perm, true).setServer(e.getKey()).setWorld(we.getKey()).build());
                     }
                 }
@@ -107,6 +119,10 @@ public class MigrationBungeePerms extends SubCommand<Object> {
 
             // Migrate any parent groups
             for (String inherit : g.getInheritances()) {
+                if (inherit.isEmpty()) {
+                    continue;
+                }
+
                 group.setPermission(NodeFactory.make("group." + MigrationUtils.standardizeName(inherit)));
             }
 
@@ -145,18 +161,30 @@ public class MigrationBungeePerms extends SubCommand<Object> {
 
             // Migrate global perms
             for (String perm : u.getPerms()) {
+                if (perm.isEmpty()) {
+                    continue;
+                }
+
                 user.setPermission(MigrationUtils.parseNode(perm, true).build());
             }
 
             // Migrate per-server perms
             for (Map.Entry<String, Server> e : u.getServers().entrySet()) {
                 for (String perm : e.getValue().getPerms()) {
+                    if (perm.isEmpty()) {
+                        continue;
+                    }
+
                     user.setPermission(MigrationUtils.parseNode(perm, true).setWorld(e.getKey()).build());
                 }
 
                 // Migrate per-world perms
                 for (Map.Entry<String, World> we : e.getValue().getWorlds().entrySet()) {
                     for (String perm : we.getValue().getPerms()) {
+                        if (perm.isEmpty()) {
+                            continue;
+                        }
+
                         user.setPermission(MigrationUtils.parseNode(perm, true).setServer(e.getKey()).setWorld(we.getKey()).build());
                     }
                 }
@@ -164,6 +192,10 @@ public class MigrationBungeePerms extends SubCommand<Object> {
 
             // Migrate groups
             for (String group : u.getGroupsString()) {
+                if (group.isEmpty()) {
+                    continue;
+                }
+
                 user.setPermission(NodeFactory.make("group." + MigrationUtils.standardizeName(group)));
             }
 

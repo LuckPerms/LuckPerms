@@ -97,10 +97,18 @@ public class MigrationGroupManager extends SubCommand<Object> {
             me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().getIfLoaded(groupName);
 
             for (String node : g.getPermissionList()) {
+                if (node.isEmpty()) {
+                    continue;
+                }
+
                 group.setPermission(MigrationUtils.parseNode(node, true).build());
             }
 
             for (String s : g.getInherits()) {
+                if (s.isEmpty()) {
+                    continue;
+                }
+
                 group.setPermission(NodeFactory.make("group." + MigrationUtils.standardizeName(s)));
             }
 
@@ -131,10 +139,18 @@ public class MigrationGroupManager extends SubCommand<Object> {
                 groups.putIfAbsent(groupName, new HashSet<>());
 
                 for (String node : group.getPermissionList()) {
+                    if (node.isEmpty()) {
+                        continue;
+                    }
+
                     groups.get(groupName).add(MigrationUtils.parseNode(node, true).setWorld(worldMappingFunc.apply(world)).build());
                 }
 
                 for (String s : group.getInherits()) {
+                    if (s.isEmpty()) {
+                        continue;
+                    }
+
                     groups.get(groupName).add(NodeFactory.make("group." + MigrationUtils.standardizeName(s), true, null, worldMappingFunc.apply(world)));
                 }
 
@@ -143,6 +159,10 @@ public class MigrationGroupManager extends SubCommand<Object> {
                 for (String key : metaKeys) {
                     String value = group.getVariables().getVarString(key);
                     key = key.toLowerCase();
+
+                    if (key.isEmpty() || value.isEmpty()) {
+                        continue;
+                    }
 
                     if (key.equals("build")) {
                         continue;
@@ -172,12 +192,17 @@ public class MigrationGroupManager extends SubCommand<Object> {
                 users.putIfAbsent(uuid, new HashSet<>());
 
                 for (String node : user.getPermissionList()) {
+                    if (node.isEmpty()) {
+                        continue;
+                    }
+
                     users.get(uuid).add(MigrationUtils.parseNode(node, true).setWorld(worldMappingFunc.apply(world)).build());
                 }
 
                 // Collect sub groups
                 String finalWorld = worldMappingFunc.apply(world);
                 users.get(uuid).addAll(user.subGroupListStringCopy().stream()
+                        .filter(n -> !n.isEmpty())
                         .map(n -> "group." + MigrationUtils.standardizeName(n))
                         .map(n -> NodeFactory.make(n, true, null, finalWorld))
                         .collect(Collectors.toSet())
@@ -190,6 +215,10 @@ public class MigrationGroupManager extends SubCommand<Object> {
                 for (String key : metaKeys) {
                     String value = user.getVariables().getVarString(key);
                     key = key.toLowerCase();
+
+                    if (key.isEmpty() || value.isEmpty()) {
+                        continue;
+                    }
 
                     if (key.equals("build")) {
                         continue;

@@ -106,6 +106,10 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
 
             try {
                 for (String node : group.getOwnPermissions(null)) {
+                    if (node.isEmpty()) {
+                        continue;
+                    }
+
                     lpGroup.setPermission(MigrationUtils.parseNode(node, true).build());
                 }
             } catch (NullPointerException ignored) {
@@ -113,7 +117,15 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             }
 
             for (String world : worlds) {
+                if (world.isEmpty()) {
+                    continue;
+                }
+
                 for (String node : group.getOwnPermissions(world)) {
+                    if (node.isEmpty()) {
+                        continue;
+                    }
+
                     lpGroup.setPermission(MigrationUtils.parseNode(node, true).setWorld(world.toLowerCase()).build());
                 }
             }
@@ -123,6 +135,10 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             }
 
             for (String world : worlds) {
+                if (world.isEmpty()) {
+                    continue;
+                }
+
                 for (PermissionGroup g : group.getParents(world)) {
                     lpGroup.setPermission(NodeFactory.make("group." + MigrationUtils.standardizeName(g.getName()), true, "global", world.toLowerCase()));
                 }
@@ -176,6 +192,10 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
 
             try {
                 for (String node : user.getOwnPermissions(null)) {
+                    if (node.isEmpty()) {
+                        continue;
+                    }
+
                     lpUser.setPermission(MigrationUtils.parseNode(node, true).build());
                 }
             } catch (NullPointerException ignored) {
@@ -183,17 +203,37 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             }
 
             for (String world : worlds) {
+                if (world.isEmpty()) {
+                    continue;
+                }
+
                 for (String node : user.getOwnPermissions(world)) {
+                    if (node.isEmpty()) {
+                        continue;
+                    }
+
                     lpUser.setPermission(MigrationUtils.parseNode(node, true).setWorld(world.toLowerCase()).build());
                 }
             }
 
             for (String g : user.getGroupNames()) {
+                if (g.isEmpty()) {
+                    continue;
+                }
+
                 lpUser.setPermission(NodeFactory.make("group." + MigrationUtils.standardizeName(g)));
             }
 
             for (String world : worlds) {
+                if (world.isEmpty()) {
+                    continue;
+                }
+
                 for (String g : user.getGroupNames(world)) {
+                    if (g.isEmpty()) {
+                        continue;
+                    }
+
                     lpUser.setPermission(NodeFactory.make("group." + MigrationUtils.standardizeName(g), true, "global", world.toLowerCase()));
                 }
             }

@@ -189,10 +189,17 @@ public class MigrationBPermissions extends SubCommand<Object> {
     private static void migrateHolder(World world, Calculable c, PermissionHolder holder) {
         // Migrate the groups permissions in this world
         for (Permission p : c.getPermissions()) {
+            if (p.name().isEmpty()) {
+                continue;
+            }
             holder.setPermission(NodeFactory.make(p.name(), p.isTrue(), "global", world.getName()));
 
             // Include any child permissions
             for (Map.Entry<String, Boolean> child : p.getChildren().entrySet()) {
+                if (child.getKey().isEmpty()) {
+                    continue;
+                }
+
                 holder.setPermission(NodeFactory.make(child.getKey(), child.getValue(), "global", world.getName()));
             }
         }
@@ -209,6 +216,10 @@ public class MigrationBPermissions extends SubCommand<Object> {
 
         // Migrate existing meta
         for (Map.Entry<String, String> meta : c.getMeta().entrySet()) {
+            if (meta.getKey().isEmpty() || meta.getValue().isEmpty()) {
+                continue;
+            }
+
             if (meta.getKey().equalsIgnoreCase("prefix") || meta.getKey().equalsIgnoreCase("suffix")) {
                 holder.setPermission(NodeFactory.makeChatMetaNode(meta.getKey().equalsIgnoreCase("prefix"), c.getPriority(), meta.getValue()).setWorld(world.getName()).build());
                 continue;

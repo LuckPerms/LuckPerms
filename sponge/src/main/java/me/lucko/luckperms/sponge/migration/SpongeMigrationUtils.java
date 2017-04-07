@@ -55,6 +55,10 @@ public class SpongeMigrationUtils {
             ContextSet context = Util.convertContexts(e.getKey());
 
             for (Map.Entry<String, Boolean> perm : e.getValue().entrySet()) {
+                if (perm.getKey().isEmpty()) {
+                    continue;
+                }
+
                 holder.setPermission(NodeFactory.newBuilder(perm.getKey()).withExtraContext(context).setValue(perm.getValue()).build());
             }
         }
@@ -65,6 +69,10 @@ public class SpongeMigrationUtils {
             ContextSet context = Util.convertContexts(e.getKey());
 
             for (Map.Entry<String, String> opt : e.getValue().entrySet()) {
+                if (opt.getKey().isEmpty() || opt.getValue().isEmpty()) {
+                    continue;
+                }
+
                 if (opt.getKey().equalsIgnoreCase("prefix")) {
                     holder.setPermission(NodeFactory.makePrefixNode(priority, opt.getValue()).withExtraContext(context).setValue(true).build());
                 } else if (opt.getKey().equalsIgnoreCase("suffix")) {
