@@ -227,7 +227,7 @@ public class Exporter implements Runnable {
                             }
 
                             if (!user.getPrimaryGroup().getStoredValue().equalsIgnoreCase("default")) {
-                                output.add("/luckperms user " + user.getUuid().toString() + " switchprimarygroup " + user.getPrimaryGroup());
+                                output.add("/luckperms user " + user.getUuid().toString() + " switchprimarygroup " + user.getPrimaryGroup().getStoredValue());
                             }
 
                             if (!inDefault) {
