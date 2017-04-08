@@ -850,7 +850,7 @@ public abstract class PermissionHolder {
 
                     // Remove the old node & add the new one.
                     synchronized (nodes) {
-                        nodes.remove(previous.getContexts().makeImmutable(), previous);
+                        nodes.remove(previous.getFullContexts().makeImmutable(), previous);
                         nodes.put(newNode.getFullContexts().makeImmutable(), newNode);
                     }
 
