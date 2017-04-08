@@ -45,7 +45,7 @@ public class WorldCalculator implements ContextCalculator<Player> {
         world = plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).getOrDefault(world, world);
 
         if (world != null) {
-            accumulator.add(Maps.immutableEntry(WORLD_KEY, world));
+            accumulator.add(Maps.immutableEntry(WORLD_KEY, world.toLowerCase()));
         }
 
         return accumulator;

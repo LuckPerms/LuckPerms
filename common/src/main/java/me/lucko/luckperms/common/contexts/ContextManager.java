@@ -54,7 +54,8 @@ public class ContextManager<T> {
     }
 
     public void registerCalculator(ContextCalculator<T> calculator) {
-        calculators.add(calculator);
+        // calculators registered first should have priority (and be checked last.)
+        calculators.add(0, calculator);
     }
 
     public int getCalculatorsSize() {

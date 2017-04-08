@@ -43,7 +43,7 @@ public class WorldCalculator implements ContextCalculator<Subject> {
         }
 
         Player p = ((Player) source);
-        accumulator.add(Context.WORLD_KEY, p.getWorld().getName());
+        accumulator.add(Context.WORLD_KEY, p.getWorld().getName().toLowerCase());
         return accumulator;
     }
 

@@ -41,7 +41,7 @@ public class BackendServerCalculator implements ContextCalculator<ProxiedPlayer>
         String server = getServer(subject);
 
         if (server != null) {
-            accumulator.add(Maps.immutableEntry(WORLD_KEY, server));
+            accumulator.add(Maps.immutableEntry(WORLD_KEY, server.toLowerCase()));
         }
 
         return accumulator;
