@@ -301,7 +301,12 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         scheduler.doAsyncRepeating(new CacheHousekeepingTask(this), 2400L);
 
         // register permissions
-        registerPermissions(getConfiguration().get(ConfigKeys.COMMANDS_ALLOW_OP) ? PermissionDefault.OP : PermissionDefault.FALSE);
+        try {
+            registerPermissions(getConfiguration().get(ConfigKeys.COMMANDS_ALLOW_OP) ? PermissionDefault.OP : PermissionDefault.FALSE);
+        } catch (Exception e) {
+            // this throws an exception if the plugin is /reloaded, grr
+        }
+
         if (!getConfiguration().get(ConfigKeys.OPS_ENABLED)) {
             scheduler.doSync(() -> getServer().getOperators().forEach(o -> o.setOp(false)));
         }
