@@ -67,8 +67,10 @@ public class GroupMainCommand extends MainCommand<Group> {
 
         if (group == null) {
             Message.GROUP_NOT_FOUND.send(sender);
+            return null;
         }
 
+        group.auditTemporaryPermissions();
         return group;
     }
 

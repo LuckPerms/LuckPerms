@@ -91,6 +91,7 @@ public class UserMainCommand extends MainCommand<User> {
             return null;
         }
 
+        user.auditTemporaryPermissions();
         return user;
     }
 
