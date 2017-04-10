@@ -49,7 +49,6 @@ public class GroupMainCommand extends MainCommand<Group> {
                 .add(new GroupListMembers())
                 .add(new GroupSetWeight())
                 .add(new HolderShowTracks<>(false))
-                .add(new GroupBulkChange())
                 .add(new HolderClear<>(false))
                 .add(new GroupRename())
                 .add(new GroupClone())

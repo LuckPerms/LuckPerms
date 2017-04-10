@@ -53,7 +53,6 @@ public class UserMainCommand extends MainCommand<User> {
                 .add(new UserPromote())
                 .add(new UserDemote())
                 .add(new HolderShowTracks<>(true))
-                .add(new UserBulkChange())
                 .add(new HolderClear<>(true))
                 .build()
         );
