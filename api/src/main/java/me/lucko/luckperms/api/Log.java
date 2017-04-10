@@ -29,8 +29,8 @@ import java.util.UUID;
 /**
  * Represents the internal LuckPerms log.
  *
- * <p> The returned instance provides a copy of the data at the time of retrieval. Any changes made to log entries will
- * only apply to this instance of the log. You can add to the log using the {@link Storage}, and then request an updated copy.
+ * <p>The returned instance provides a copy of the data at the time of retrieval. Any changes made to log entries will
+ * only apply to this instance of the log. You can add to the log using the {@link Storage}, and then request an updated copy.</p>
  */
 public interface Log {
 

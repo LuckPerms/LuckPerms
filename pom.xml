@@ -6,7 +6,7 @@
 
     <groupId>me.lucko.luckperms</groupId>
     <artifactId>luckperms</artifactId>
-    <version>3.0-SNAPSHOT</version>
+    <version>3.1-SNAPSHOT</version>
     <modules>
         <module>api</module>
         <module>common</module>
@@ -40,12 +40,12 @@
         <skipTests>true</skipTests>
         <maven.test.skip>true</maven.test.skip>
 
-        <release.version>3.0</release.version>
+        <release.version>3.1</release.version>
         <patch.version>${git.closest.tag.commit.count}</patch.version>
 
         <compiler.version>3.6.1</compiler.version>
         <shade.version>3.0.0</shade.version>
-        <lombok.version>1.16.14</lombok.version>
+        <lombok.version>1.16.16</lombok.version>
     </properties>
 
     <distributionManagement>

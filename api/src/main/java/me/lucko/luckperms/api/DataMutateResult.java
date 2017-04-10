@@ -20,16 +20,13 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.core;
-
-import lombok.AllArgsConstructor;
+package me.lucko.luckperms.api;
 
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.function.Supplier;
 
-@AllArgsConstructor
 public enum DataMutateResult {
 
     SUCCESS(true, null),
@@ -37,8 +34,13 @@ public enum DataMutateResult {
     LACKS(false, ObjectLacksException::new),
     FAIL(false, RuntimeException::new);
 
-    private boolean bool;
+    private boolean value;
     private final Supplier<? extends Exception> exceptionSupplier;
+
+    DataMutateResult(boolean value, Supplier<? extends Exception> exceptionSupplier) {
+        this.value = value;
+        this.exceptionSupplier = exceptionSupplier;
+    }
 
     public void throwException() {
         if (exceptionSupplier != null) {
@@ -47,7 +49,7 @@ public enum DataMutateResult {
     }
 
     public boolean asBoolean() {
-        return bool;
+        return value;
     }
 
     // allows us to throw checked exceptions without declaring it, as #throwException throws a number of

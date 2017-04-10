@@ -29,8 +29,8 @@ import java.util.Optional;
 /**
  * Singleton for the {@link LuckPermsApi}.
  *
- * <p> Ideally, the ServiceManager for the platform should be used to obtain and cache an instance, however, this can be
- * used if you need static access.
+ * <p>Ideally, the ServiceManager for the platform should be used to obtain and cache an instance, however, this can be
+ * used if you need static access.</p>
  */
 public final class LuckPerms {
     private static LuckPermsApi api = null;

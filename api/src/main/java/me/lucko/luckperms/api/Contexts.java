@@ -27,7 +27,7 @@ import me.lucko.luckperms.api.context.ContextSet;
 /**
  * Context and options for a permission lookup.
  *
- * <p> All values are immutable.
+ * <p>All values are immutable.</p>
  *
  * @since 2.11
  */

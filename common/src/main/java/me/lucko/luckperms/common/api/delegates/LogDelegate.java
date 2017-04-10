@@ -39,100 +39,100 @@ import static me.lucko.luckperms.common.api.ApiUtils.checkName;
  */
 @AllArgsConstructor
 public class LogDelegate implements Log {
-    private final me.lucko.luckperms.common.data.Log master;
+    private final me.lucko.luckperms.common.data.Log handle;
 
     @Override
     public SortedSet<LogEntry> getContent() {
-        return master.getContent();
+        return handle.getContent();
     }
 
     @Override
     public SortedSet<LogEntry> getRecent() {
-        return master.getRecent();
+        return handle.getRecent();
     }
 
     @Override
     public SortedMap<Integer, LogEntry> getRecent(int pageNo) {
-        return master.getRecent(pageNo);
+        return handle.getRecent(pageNo);
     }
 
     @Override
     public int getRecentMaxPages() {
-        return master.getRecentMaxPages();
+        return handle.getRecentMaxPages();
     }
 
     @Override
     public SortedSet<LogEntry> getRecent(@NonNull UUID actor) {
-        return master.getRecent(actor);
+        return handle.getRecent(actor);
     }
 
     @Override
     public SortedMap<Integer, LogEntry> getRecent(int pageNo, @NonNull UUID actor) {
-        return master.getRecent(pageNo, actor);
+        return handle.getRecent(pageNo, actor);
     }
 
     @Override
     public int getRecentMaxPages(@NonNull UUID actor) {
-        return master.getRecentMaxPages(actor);
+        return handle.getRecentMaxPages(actor);
     }
 
     @Override
     public SortedSet<LogEntry> getUserHistory(@NonNull UUID uuid) {
-        return master.getUserHistory(uuid);
+        return handle.getUserHistory(uuid);
     }
 
     @Override
     public SortedMap<Integer, LogEntry> getUserHistory(int pageNo, @NonNull UUID uuid) {
-        return master.getUserHistory(pageNo, uuid);
+        return handle.getUserHistory(pageNo, uuid);
     }
 
     @Override
     public int getUserHistoryMaxPages(@NonNull UUID uuid) {
-        return master.getUserHistoryMaxPages(uuid);
+        return handle.getUserHistoryMaxPages(uuid);
     }
 
     @Override
     public SortedSet<LogEntry> getGroupHistory(@NonNull String name) {
-        return master.getGroupHistory(checkName(name));
+        return handle.getGroupHistory(checkName(name));
     }
 
     @Override
     public SortedMap<Integer, LogEntry> getGroupHistory(int pageNo, @NonNull String name) {
-        return master.getGroupHistory(pageNo, checkName(name));
+        return handle.getGroupHistory(pageNo, checkName(name));
     }
 
     @Override
     public int getGroupHistoryMaxPages(@NonNull String name) {
-        return master.getGroupHistoryMaxPages(checkName(name));
+        return handle.getGroupHistoryMaxPages(checkName(name));
     }
 
     @Override
     public SortedSet<LogEntry> getTrackHistory(@NonNull String name) {
-        return master.getTrackHistory(checkName(name));
+        return handle.getTrackHistory(checkName(name));
     }
 
     @Override
     public SortedMap<Integer, LogEntry> getTrackHistory(int pageNo, @NonNull String name) {
-        return master.getTrackHistory(pageNo, checkName(name));
+        return handle.getTrackHistory(pageNo, checkName(name));
     }
 
     @Override
     public int getTrackHistoryMaxPages(@NonNull String name) {
-        return master.getTrackHistoryMaxPages(checkName(name));
+        return handle.getTrackHistoryMaxPages(checkName(name));
     }
 
     @Override
     public SortedSet<LogEntry> getSearch(@NonNull String query) {
-        return master.getSearch(query);
+        return handle.getSearch(query);
     }
 
     @Override
     public SortedMap<Integer, LogEntry> getSearch(int pageNo, @NonNull String query) {
-        return master.getSearch(pageNo, query);
+        return handle.getSearch(pageNo, query);
     }
 
     @Override
     public int getSearchMaxPages(@NonNull String query) {
-        return master.getSearchMaxPages(query);
+        return handle.getSearchMaxPages(query);
     }
 }

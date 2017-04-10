@@ -41,7 +41,7 @@ public interface Track {
     /**
      * Gets an ordered list of the groups on this track
      *
-     * <p> Index 0 is the first/lowest group in (or start of) the track
+     * <p>Index 0 is the first/lowest group in (or start of) the track</p>
      *
      * @return an ordered {@link List} of the groups on this track
      */

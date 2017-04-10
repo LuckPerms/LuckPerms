@@ -35,6 +35,7 @@ import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.SortedSetMultimap;
 
 import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.DataMutateResult;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
@@ -46,7 +47,6 @@ import me.lucko.luckperms.common.caching.handlers.GroupReference;
 import me.lucko.luckperms.common.caching.handlers.HolderReference;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.core.ContextSetComparator;
-import me.lucko.luckperms.common.core.DataMutateResult;
 import me.lucko.luckperms.common.core.InheritanceInfo;
 import me.lucko.luckperms.common.core.NodeComparator;
 import me.lucko.luckperms.common.core.NodeFactory;

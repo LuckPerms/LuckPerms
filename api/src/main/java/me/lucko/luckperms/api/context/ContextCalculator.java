@@ -25,9 +25,8 @@ package me.lucko.luckperms.api.context;
 /**
  * Calculates whether contexts are applicable to {@link T}
  *
- * <p>Somewhat inspired by the system used on Sponge.
- *
  * @param <T> the subject type. Is ALWAYS the player class of the platform.
+ * @since 2.13
  */
 public interface ContextCalculator<T> {
 

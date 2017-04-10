@@ -82,7 +82,9 @@ public interface Group extends PermissionHolder {
      * @throws ObjectAlreadyHasException if the group already inherits the group
      * @throws NullPointerException      if the group is null
      * @throws IllegalStateException     if the group instance was not obtained from LuckPerms.
+     * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
+    @Deprecated
     void setInheritGroup(Group group) throws ObjectAlreadyHasException;
 
     /**
@@ -94,7 +96,9 @@ public interface Group extends PermissionHolder {
      * @throws NullPointerException      if the group or server is null
      * @throws IllegalStateException     if the group instance was not obtained from LuckPerms.
      * @throws IllegalArgumentException  if the server is invalid
+     * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
+    @Deprecated
     void setInheritGroup(Group group, String server) throws ObjectAlreadyHasException;
 
     /**
@@ -107,7 +111,9 @@ public interface Group extends PermissionHolder {
      * @throws NullPointerException      if the group, server or world is null
      * @throws IllegalStateException     if the group instance was not obtained from LuckPerms.
      * @throws IllegalArgumentException  if the server or world is invalid
+     * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
+    @Deprecated
     void setInheritGroup(Group group, String server, String world) throws ObjectAlreadyHasException;
 
     /**
@@ -119,7 +125,9 @@ public interface Group extends PermissionHolder {
      * @throws NullPointerException      if the group is null
      * @throws IllegalStateException     if the group instance was not obtained from LuckPerms.
      * @throws IllegalArgumentException  if the expiry time is in the past
+     * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
+    @Deprecated
     void setInheritGroup(Group group, long expireAt) throws ObjectAlreadyHasException;
 
     /**
@@ -132,7 +140,9 @@ public interface Group extends PermissionHolder {
      * @throws NullPointerException      if the group or server is null
      * @throws IllegalStateException     if the group instance was not obtained from LuckPerms.
      * @throws IllegalArgumentException  if the expiry time is in the past or the server is invalid
+     * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
+    @Deprecated
     void setInheritGroup(Group group, String server, long expireAt) throws ObjectAlreadyHasException;
 
     /**
@@ -146,7 +156,9 @@ public interface Group extends PermissionHolder {
      * @throws NullPointerException      if the group, server or world is null
      * @throws IllegalStateException     if the group instance was not obtained from LuckPerms.
      * @throws IllegalArgumentException  if the expiry time is in the past or the server/world is invalid
+     * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
+    @Deprecated
     void setInheritGroup(Group group, String server, String world, long expireAt) throws ObjectAlreadyHasException;
 
     /**
@@ -156,7 +168,9 @@ public interface Group extends PermissionHolder {
      * @throws ObjectLacksException  if the group does not already inherit the group
      * @throws NullPointerException  if the group is null
      * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
+     * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
+    @Deprecated
     void unsetInheritGroup(Group group) throws ObjectLacksException;
 
     /**
@@ -167,7 +181,9 @@ public interface Group extends PermissionHolder {
      * @throws ObjectLacksException  if the group does not already inherit the group
      * @throws NullPointerException  if the group is null
      * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
+     * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
+    @Deprecated
     void unsetInheritGroup(Group group, boolean temporary) throws ObjectLacksException;
 
     /**
@@ -179,7 +195,9 @@ public interface Group extends PermissionHolder {
      * @throws NullPointerException     if the group or server is null
      * @throws IllegalStateException    if the group instance was not obtained from LuckPerms.
      * @throws IllegalArgumentException if the server is invalid
+     * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
+    @Deprecated
     void unsetInheritGroup(Group group, String server) throws ObjectLacksException;
 
     /**
@@ -192,7 +210,9 @@ public interface Group extends PermissionHolder {
      * @throws NullPointerException     if the group, server or world is null
      * @throws IllegalStateException    if the group instance was not obtained from LuckPerms.
      * @throws IllegalArgumentException if the server or world is invalid
+     * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
+    @Deprecated
     void unsetInheritGroup(Group group, String server, String world) throws ObjectLacksException;
 
     /**
@@ -205,7 +225,9 @@ public interface Group extends PermissionHolder {
      * @throws NullPointerException     if the group or server is null
      * @throws IllegalStateException    if the group instance was not obtained from LuckPerms.
      * @throws IllegalArgumentException if the expiry time is in the past or the server is invalid
+     * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
+    @Deprecated
     void unsetInheritGroup(Group group, String server, boolean temporary) throws ObjectLacksException;
 
     /**
@@ -219,7 +241,9 @@ public interface Group extends PermissionHolder {
      * @throws NullPointerException     if the group, server or world is null
      * @throws IllegalStateException    if the group instance was not obtained from LuckPerms.
      * @throws IllegalArgumentException if the expiry time is in the past or the server/world is invalid
+     * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
+    @Deprecated
     void unsetInheritGroup(Group group, String server, String world, boolean temporary) throws ObjectLacksException;
 
     /**

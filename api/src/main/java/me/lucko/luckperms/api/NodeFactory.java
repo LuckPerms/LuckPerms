@@ -33,7 +33,7 @@ public interface NodeFactory {
      * Creates a node from a serialised node string
      *
      * @param serialisedPermission the serialised permission string
-     * @param value the value of the node
+     * @param value                the value of the node
      * @return a node instance
      * @throws NullPointerException if the permission is null
      */
@@ -60,8 +60,9 @@ public interface NodeFactory {
 
     /**
      * Creates a node builder from a serialised node string
+     *
      * @param serialisedPermission the serialised permission string
-     * @param value the value of the node
+     * @param value                the value of the node
      * @return a node builder instance
      * @throws NullPointerException if the permission is null
      */
@@ -69,9 +70,20 @@ public interface NodeFactory {
 
 
     /**
+     * Creates a node builder from a group
+     *
+     * @param group the group
+     * @return a node builder instance
+     * @throws NullPointerException  if the group is null
+     * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
+     * @since 3.1
+     */
+    Node.Builder makeGroupNode(Group group);
+
+    /**
      * Creates a node builder from a key value pair
      *
-     * @param key the key
+     * @param key   the key
      * @param value the value
      * @return a node builder instance
      * @throws NullPointerException if the key or value is null
@@ -82,7 +94,7 @@ public interface NodeFactory {
      * Creates a node builder from a prefix string and priority
      *
      * @param priority the priority
-     * @param prefix the prefix string
+     * @param prefix   the prefix string
      * @return a node builder instance
      * @throws NullPointerException if the prefix is null
      */
@@ -92,7 +104,7 @@ public interface NodeFactory {
      * Creates a node builder from a prefix string and priority
      *
      * @param priority the priority
-     * @param suffix the suffix string
+     * @param suffix   the suffix string
      * @return a node builder instance
      * @throws NullPointerException if the suffix is null
      */

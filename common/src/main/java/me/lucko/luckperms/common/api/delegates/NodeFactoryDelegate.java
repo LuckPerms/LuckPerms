@@ -24,6 +24,7 @@ package me.lucko.luckperms.common.api.delegates;
 
 import lombok.NonNull;
 
+import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.core.NodeFactory;
 
@@ -48,6 +49,11 @@ public class NodeFactoryDelegate implements me.lucko.luckperms.api.NodeFactory {
     @Override
     public Node.Builder newBuilderFromSerialisedNode(@NonNull String serialisedPermission, boolean value) {
         return NodeFactory.builderFromSerializedNode(serialisedPermission, value);
+    }
+
+    @Override
+    public Node.Builder makeGroupNode(Group group) {
+        return NodeFactory.newBuilder("group." + GroupDelegate.cast(group).getName());
     }
 
     @Override

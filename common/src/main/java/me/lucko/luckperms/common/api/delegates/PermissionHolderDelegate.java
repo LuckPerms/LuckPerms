@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
 
 import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.DataMutateResult;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.PermissionHolder;
@@ -53,201 +54,221 @@ import static me.lucko.luckperms.common.api.ApiUtils.checkTime;
  */
 @AllArgsConstructor
 public class PermissionHolderDelegate implements PermissionHolder {
-    private final me.lucko.luckperms.common.core.model.PermissionHolder master;
+    private final me.lucko.luckperms.common.core.model.PermissionHolder handle;
 
     @Override
     public String getObjectName() {
-        return master.getObjectName();
+        return handle.getObjectName();
     }
 
     @Override
     public SortedSet<? extends Node> getPermissions() {
-        return ImmutableSortedSet.copyOfSorted(master.mergePermissionsToSortedSet());
+        return ImmutableSortedSet.copyOfSorted(handle.mergePermissionsToSortedSet());
     }
 
     @Override
     public Set<Node> getEnduringPermissions() {
-        return ImmutableSet.copyOf(master.getNodes().values());
+        return ImmutableSet.copyOf(handle.getNodes().values());
     }
 
     @Override
     public Set<Node> getTransientPermissions() {
-        return ImmutableSet.copyOf(master.getTransientNodes().values());
+        return ImmutableSet.copyOf(handle.getTransientNodes().values());
     }
 
     @Override
     public SortedSet<LocalizedNode> getAllNodes(@NonNull Contexts contexts) {
-        return new TreeSet<>(master.resolveInheritancesAlmostEqual(ExtractedContexts.generate(contexts)));
+        return new TreeSet<>(handle.resolveInheritancesAlmostEqual(ExtractedContexts.generate(contexts)));
     }
 
     @Override
     public Set<LocalizedNode> getAllNodesFiltered(@NonNull Contexts contexts) {
-        return new HashSet<>(master.getAllNodes(ExtractedContexts.generate(contexts)));
+        return new HashSet<>(handle.getAllNodes(ExtractedContexts.generate(contexts)));
     }
 
     @Override
     public Map<String, Boolean> exportNodes(Contexts contexts, boolean lowerCase) {
-        return new HashMap<>(master.exportNodes(ExtractedContexts.generate(contexts), lowerCase));
+        return new HashMap<>(handle.exportNodes(ExtractedContexts.generate(contexts), lowerCase));
     }
 
     @Override
     public Tristate hasPermission(@NonNull Node node) {
-        return master.hasPermission(node, false);
+        return handle.hasPermission(node, false);
     }
 
     @Override
     public Tristate hasTransientPermission(@NonNull Node node) {
-        return master.hasPermission(node, true);
+        return handle.hasPermission(node, true);
     }
 
     @Override
     public boolean hasPermission(@NonNull String node, @NonNull boolean b) {
-        return master.hasPermission(node, b);
+        return handle.hasPermission(node, b);
     }
 
     @Override
     public boolean hasPermission(@NonNull String node, @NonNull boolean b, @NonNull String server) {
-        return master.hasPermission(node, b, server);
+        return handle.hasPermission(node, b, server);
     }
 
     @Override
     public boolean hasPermission(@NonNull String node, @NonNull boolean b, @NonNull String server, @NonNull String world) {
-        return master.hasPermission(node, b, server, world);
+        return handle.hasPermission(node, b, server, world);
     }
 
     @Override
     public boolean hasPermission(@NonNull String node, @NonNull boolean b, @NonNull boolean temporary) {
-        return master.hasPermission(node, b, temporary);
+        return handle.hasPermission(node, b, temporary);
     }
 
     @Override
     public boolean hasPermission(@NonNull String node, @NonNull boolean b, @NonNull String server, @NonNull boolean temporary) {
-        return master.hasPermission(node, b, server, temporary);
+        return handle.hasPermission(node, b, server, temporary);
     }
 
     @Override
     public boolean hasPermission(@NonNull String node, @NonNull boolean b, @NonNull String server, @NonNull String world, @NonNull boolean temporary) {
-        return master.hasPermission(node, b, server, world, temporary);
+        return handle.hasPermission(node, b, server, world, temporary);
     }
 
     @Override
     public Tristate inheritsPermission(@NonNull Node node) {
-        return master.inheritsPermission(node);
+        return handle.inheritsPermission(node);
     }
 
     @Override
     public boolean inheritsPermission(@NonNull String node, @NonNull boolean b) {
-        return master.inheritsPermission(node, b);
+        return handle.inheritsPermission(node, b);
     }
 
     @Override
     public boolean inheritsPermission(@NonNull String node, @NonNull boolean b, @NonNull String server) {
-        return master.inheritsPermission(node, b, server);
+        return handle.inheritsPermission(node, b, server);
     }
 
     @Override
     public boolean inheritsPermission(@NonNull String node, @NonNull boolean b, @NonNull String server, @NonNull String world) {
-        return master.inheritsPermission(node, b, server, world);
+        return handle.inheritsPermission(node, b, server, world);
     }
 
     @Override
     public boolean inheritsPermission(@NonNull String node, @NonNull boolean b, @NonNull boolean temporary) {
-        return master.inheritsPermission(node, b, temporary);
+        return handle.inheritsPermission(node, b, temporary);
     }
 
     @Override
     public boolean inheritsPermission(@NonNull String node, @NonNull boolean b, @NonNull String server, @NonNull boolean temporary) {
-        return master.inheritsPermission(node, b, server, temporary);
+        return handle.inheritsPermission(node, b, server, temporary);
     }
 
     @Override
     public boolean inheritsPermission(@NonNull String node, @NonNull boolean b, @NonNull String server, @NonNull String world, @NonNull boolean temporary) {
-        return master.inheritsPermission(node, b, server, world, temporary);
+        return handle.inheritsPermission(node, b, server, world, temporary);
     }
 
     @Override
     public void setPermission(@NonNull Node node) throws ObjectAlreadyHasException {
-        master.setPermission(node).throwException();
+        handle.setPermission(node).throwException();
+    }
+
+    @Override
+    public DataMutateResult setPermissionUnchecked(Node node) {
+        return handle.setPermission(node);
     }
 
     @Override
     public void setTransientPermission(@NonNull Node node) throws ObjectAlreadyHasException {
-        master.setTransientPermission(node).throwException();
+        handle.setTransientPermission(node).throwException();
+    }
+
+    @Override
+    public DataMutateResult setTransientPermissionUnchecked(Node node) {
+        return handle.setTransientPermission(node);
     }
 
     @Override
     public void setPermission(@NonNull String node, @NonNull boolean value) throws ObjectAlreadyHasException {
-        master.setPermission(NodeFactory.make(node, value)).throwException();
+        handle.setPermission(NodeFactory.make(node, value)).throwException();
     }
 
     @Override
     public void setPermission(@NonNull String node, @NonNull boolean value, @NonNull String server) throws ObjectAlreadyHasException {
-        master.setPermission(NodeFactory.make(node, value, server)).throwException();
+        handle.setPermission(NodeFactory.make(node, value, server)).throwException();
     }
 
     @Override
     public void setPermission(@NonNull String node, @NonNull boolean value, @NonNull String server, @NonNull String world) throws ObjectAlreadyHasException {
-        master.setPermission(NodeFactory.make(node, value, server, world)).throwException();
+        handle.setPermission(NodeFactory.make(node, value, server, world)).throwException();
     }
 
     @Override
     public void setPermission(@NonNull String node, @NonNull boolean value, @NonNull long expireAt) throws ObjectAlreadyHasException {
-        master.setPermission(NodeFactory.make(node, value, checkTime(expireAt))).throwException();
+        handle.setPermission(NodeFactory.make(node, value, checkTime(expireAt))).throwException();
     }
 
     @Override
     public void setPermission(@NonNull String node, @NonNull boolean value, @NonNull String server, @NonNull long expireAt) throws ObjectAlreadyHasException {
-        master.setPermission(NodeFactory.make(node, value, server, checkTime(expireAt))).throwException();
+        handle.setPermission(NodeFactory.make(node, value, server, checkTime(expireAt))).throwException();
     }
 
     @Override
     public void setPermission(@NonNull String node, @NonNull boolean value, @NonNull String server, @NonNull String world, @NonNull long expireAt) throws ObjectAlreadyHasException {
-        master.setPermission(NodeFactory.make(node, value, server, world, checkTime(expireAt))).throwException();
+        handle.setPermission(NodeFactory.make(node, value, server, world, checkTime(expireAt))).throwException();
     }
 
     @Override
     public void unsetPermission(@NonNull Node node) throws ObjectLacksException {
-        master.unsetPermission(node).throwException();
+        handle.unsetPermission(node).throwException();
+    }
+
+    @Override
+    public DataMutateResult unsetPermissionUnchecked(Node node) {
+        return handle.unsetPermission(node);
     }
 
     @Override
     public void unsetTransientPermission(@NonNull Node node) throws ObjectLacksException {
-        master.unsetTransientPermission(node).throwException();
+        handle.unsetTransientPermission(node).throwException();
+    }
+
+    @Override
+    public DataMutateResult unsetTransientPermissionUnchecked(Node node) {
+        return handle.unsetTransientPermission(node);
     }
 
     @Override
     public void unsetPermission(@NonNull String node, @NonNull boolean temporary) throws ObjectLacksException {
-        master.unsetPermission(NodeFactory.make(node, temporary)).throwException();
+        handle.unsetPermission(NodeFactory.make(node, temporary)).throwException();
     }
 
     @Override
     public void unsetPermission(@NonNull String node) throws ObjectLacksException {
-        master.unsetPermission(NodeFactory.make(node)).throwException();
+        handle.unsetPermission(NodeFactory.make(node)).throwException();
     }
 
     @Override
     public void unsetPermission(@NonNull String node, @NonNull String server) throws ObjectLacksException {
-        master.unsetPermission(NodeFactory.make(node, server)).throwException();
+        handle.unsetPermission(NodeFactory.make(node, server)).throwException();
     }
 
     @Override
     public void unsetPermission(@NonNull String node, @NonNull String server, @NonNull String world) throws ObjectLacksException {
-        master.unsetPermission(NodeFactory.make(node, server, world)).throwException();
+        handle.unsetPermission(NodeFactory.make(node, server, world)).throwException();
     }
 
     @Override
     public void unsetPermission(@NonNull String node, @NonNull String server, @NonNull boolean temporary) throws ObjectLacksException {
-        master.unsetPermission(NodeFactory.make(node, server, temporary)).throwException();
+        handle.unsetPermission(NodeFactory.make(node, server, temporary)).throwException();
     }
 
     @Override
     public void unsetPermission(@NonNull String node, @NonNull String server, @NonNull String world, @NonNull boolean temporary) throws ObjectLacksException {
-        master.unsetPermission(NodeFactory.make(node, server, world, temporary)).throwException();
+        handle.unsetPermission(NodeFactory.make(node, server, world, temporary)).throwException();
     }
 
     @Override
     public void clearNodes() {
-        master.clearNodes();
+        handle.clearNodes();
     }
 
     @Override
@@ -257,7 +278,7 @@ public class PermissionHolderDelegate implements PermissionHolder {
             set.add("server", server);
         }
 
-        master.clearNodes(set);
+        handle.clearNodes(set);
     }
 
     @Override
@@ -270,12 +291,12 @@ public class PermissionHolderDelegate implements PermissionHolder {
             set.add("world", world);
         }
 
-        master.clearNodes(set);
+        handle.clearNodes(set);
     }
 
     @Override
     public void clearParents() {
-        master.clearParents(true);
+        handle.clearParents(true);
     }
 
     @Override
@@ -285,7 +306,7 @@ public class PermissionHolderDelegate implements PermissionHolder {
             set.add("server", server);
         }
 
-        master.clearParents(set, true);
+        handle.clearParents(set, true);
     }
 
     @Override
@@ -298,12 +319,12 @@ public class PermissionHolderDelegate implements PermissionHolder {
             set.add("world", world);
         }
 
-        master.clearParents(set, true);
+        handle.clearParents(set, true);
     }
 
     @Override
     public void clearMeta() {
-        master.clearMeta();
+        handle.clearMeta();
     }
 
     @Override
@@ -313,7 +334,7 @@ public class PermissionHolderDelegate implements PermissionHolder {
             set.add("server", server);
         }
 
-        master.clearMeta(set);
+        handle.clearMeta(set);
     }
 
     @Override
@@ -326,7 +347,7 @@ public class PermissionHolderDelegate implements PermissionHolder {
             set.add("world", world);
         }
 
-        master.clearMeta(set);
+        handle.clearMeta(set);
     }
 
     @Override
@@ -339,27 +360,27 @@ public class PermissionHolderDelegate implements PermissionHolder {
             set.add("world", world);
         }
 
-        master.clearMetaKeys(key, set, temporary);
+        handle.clearMetaKeys(key, set, temporary);
     }
 
     @Override
     public void clearTransientNodes() {
-        master.clearTransientNodes();
+        handle.clearTransientNodes();
     }
 
     @Override
     public Set<Node> getTemporaryPermissionNodes() {
-        return master.getTemporaryNodes();
+        return handle.getTemporaryNodes();
     }
 
     @Override
     public Set<Node> getPermanentPermissionNodes() {
-        return master.getPermanentNodes();
+        return handle.getPermanentNodes();
     }
 
     @Override
     public void auditTemporaryPermissions() {
-        master.auditTemporaryPermissions();
+        handle.auditTemporaryPermissions();
     }
 
 }

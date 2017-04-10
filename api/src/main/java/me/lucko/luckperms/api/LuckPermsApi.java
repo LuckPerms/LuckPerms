@@ -113,7 +113,9 @@ public interface LuckPermsApi {
     User getUser(UUID uuid);
 
     /**
-     * Gets a wrapped user object from the user storage. This method does not return null, unlike {@link #getUser(UUID)}
+     * Gets a wrapped user object from the user storage.
+     *
+     * <p>This method does not return null, unlike {@link #getUser(UUID)}</p>
      *
      * @param uuid the uuid of the user to get
      * @return an optional {@link User} object
@@ -131,8 +133,9 @@ public interface LuckPermsApi {
     User getUser(String name);
 
     /**
-     * Gets a wrapped user object from the user storage. This method does not return null, unlike {@link
-     * #getUser(String)}
+     * Gets a wrapped user object from the user storage.
+     *
+     * <p>This method does not return null, unlike {@link #getUser(String)}</p>
      *
      * @param name the username of the user to get
      * @return an optional {@link User} object
@@ -175,7 +178,9 @@ public interface LuckPermsApi {
     Group getGroup(String name);
 
     /**
-     * Gets a wrapped group object from the group storage. This method does not return null, unlike {@link #getGroup}
+     * Gets a wrapped group object from the group storage.
+     *
+     * <p>This method does not return null, unlike {@link #getGroup}</p>
      *
      * @param name the name of the group to get
      * @return an optional {@link Group} object
@@ -209,7 +214,9 @@ public interface LuckPermsApi {
     Track getTrack(String name);
 
     /**
-     * Gets a wrapped track object from the track storage. This method does not return null, unlike {@link #getTrack}
+     * Gets a wrapped track object from the track storage.
+     *
+     * <p>This method does not return null, unlike {@link #getTrack}</p>
      *
      * @param name the name of the track to get
      * @return an optional {@link Track} object

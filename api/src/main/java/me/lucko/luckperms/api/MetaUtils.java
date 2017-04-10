@@ -34,7 +34,9 @@ import java.util.Set;
  * A collection of utilities to help retrieve meta values for {@link PermissionHolder}s
  *
  * @since 2.7
+ * @deprecated in favour of using {@link NodeFactory#makeMetaNode(String, String)} or {@link me.lucko.luckperms.api.caching.MetaData}.
  */
+@Deprecated
 public class MetaUtils {
 
     private static String escapeDelimiters(String s, String... delims) {
@@ -92,42 +94,24 @@ public class MetaUtils {
      * @param holder the holder to apply the meta node to
      * @param server the server to apply the meta on, can be null
      * @param world  the world to apply the meta on, can be null
-     * @param node   the meta node
+     * @param key    the meta key
      * @param value  the meta value
      * @throws NullPointerException     if the holder, node or value is null
      * @throws IllegalArgumentException if the node or value is empty
      */
-    public static void setMeta(PermissionHolder holder, String server, String world, String node, String value) {
-        if (holder == null) {
-            throw new NullPointerException("holder");
-        }
+    public static void setMeta(PermissionHolder holder, String server, String world, String key, String value) {
+        if (holder == null) throw new NullPointerException("holder");
+        if (key == null) throw new NullPointerException("node");
+        if (value == null) throw new NullPointerException("value");
+        if (key.equals("")) throw new IllegalArgumentException("node is empty");
+        if (value.equals("")) throw new IllegalArgumentException("value is empty");
 
-        if (node == null) {
-            throw new NullPointerException("node");
-        }
-
-        if (value == null) {
-            throw new NullPointerException("value");
-        }
-
-        if (node.equals("")) {
-            throw new IllegalArgumentException("node is empty");
-        }
-
-        if (value.equals("")) {
-            throw new IllegalArgumentException("value is empty");
-        }
-
-        if (server == null || server.equals("")) {
-            server = "global";
-        }
-
-        node = escapeCharacters(node);
+        key = escapeCharacters(key);
         value = escapeCharacters(value);
 
         Set<Node> toRemove = new HashSet<>();
         for (Node n : holder.getEnduringPermissions()) {
-            if (n.isMeta() && n.getMeta().getKey().equals(node)) {
+            if (n.isMeta() && n.getMeta().getKey().equals(key)) {
                 toRemove.add(n);
             }
         }
@@ -138,12 +122,12 @@ public class MetaUtils {
             } catch (ObjectLacksException ignored) {}
         }
 
-        Node.Builder metaNode = LuckPerms.getApi().buildNode("meta." + node + "." + value).setValue(true);
-        if (!server.equalsIgnoreCase("global")) {
+        Node.Builder metaNode = LuckPerms.getApi().buildNode("meta." + key + "." + value).setValue(true);
+        if (server != null) {
             metaNode.setServer(server);
         }
-        if (world != null && !world.equals("")) {
-            metaNode.setServer(server).setWorld(world);
+        if (world != null) {
+            metaNode.setWorld(world);
         }
 
         try {
@@ -165,18 +149,8 @@ public class MetaUtils {
      * @throws IllegalArgumentException if the node is empty
      */
     public static String getMeta(PermissionHolder holder, String server, String world, String node, String defaultValue, boolean includeGlobal) {
-        if (holder == null) {
-            throw new NullPointerException("holder");
-        }
-
-        if (server == null || server.equals("")) {
-            server = "global";
-        }
-
-        if (node == null) {
-            throw new NullPointerException("node");
-        }
-
+        if (holder == null) throw new NullPointerException("holder");
+        if (node == null) throw new NullPointerException("node");
         if (node.equals("")) {
             throw new IllegalArgumentException("node is empty");
         }
@@ -184,23 +158,10 @@ public class MetaUtils {
         node = escapeCharacters(node);
 
         for (Node n : holder.getPermissions()) {
-            if (!n.getValue()) {
-                continue;
-            }
+            if (!n.getValue() || !n.isMeta()) continue;
 
-            if (!n.isMeta()) {
-                continue;
-            }
-
-            if (!server.equalsIgnoreCase("global")) {
-                if (!n.shouldApplyOnServer(server, includeGlobal, false)) {
-                    continue;
-                }
-            }
-
-            if (!n.shouldApplyOnWorld(world, includeGlobal, false)) {
-                continue;
-            }
+            if (!n.shouldApplyOnServer(server, includeGlobal, false)) continue;
+            if (!n.shouldApplyOnWorld(world, includeGlobal, false)) continue;
 
             Map.Entry<String, String> meta = n.getMeta();
             if (meta.getKey().equalsIgnoreCase(node)) {
@@ -212,21 +173,18 @@ public class MetaUtils {
     }
 
     private static void setChatMeta(boolean prefix, PermissionHolder holder, String value, int priority, String server, String world) {
-        if (holder == null) {
-            throw new NullPointerException("holder");
-        }
-
+        if (holder == null) throw new NullPointerException("holder");
         if (value == null || value.equals("")) {
             throw new IllegalArgumentException("value is null/empty");
         }
 
         Node.Builder node = LuckPerms.getApi().buildNode(prefix ? "prefix" : "suffix" + "." + priority + "." + escapeCharacters(value));
         node.setValue(true);
-        if (!server.equalsIgnoreCase("global")) {
+        if (server != null) {
             node.setServer(server);
         }
-        if (world != null && !world.equals("")) {
-            node.setServer(server).setWorld(world);
+        if (world != null) {
+            node.setWorld(world);
         }
 
         try {
@@ -268,26 +226,14 @@ public class MetaUtils {
         if (holder == null) {
             throw new NullPointerException("holder");
         }
-        if (server == null) {
-            server = "global";
-        }
 
         int priority = Integer.MIN_VALUE;
         String meta = null;
         for (Node n : holder.getAllNodes(Contexts.allowAll())) {
-            if (!n.getValue()) {
-                continue;
-            }
+            if (!n.getValue()) continue;
 
-            if (!server.equalsIgnoreCase("global")) {
-                if (!n.shouldApplyOnServer(server, includeGlobal, false)) {
-                    continue;
-                }
-            }
-
-            if (!n.shouldApplyOnWorld(world, includeGlobal, false)) {
-                continue;
-            }
+            if (!n.shouldApplyOnServer(server, includeGlobal, false)) continue;
+            if (!n.shouldApplyOnWorld(world, includeGlobal, false)) continue;
 
             if (prefix ? !n.isPrefix() : !n.isSuffix()) {
                 continue;

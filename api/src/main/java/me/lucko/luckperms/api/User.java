@@ -69,8 +69,8 @@ public interface User extends PermissionHolder {
     /**
      * Refresh and re-assign the users permissions.
      *
-     * <p> This request is not buffered, and the refresh call will be ran directly. This should ideally be called on
-     * an asynchronous thread.
+     * <p>This request is not buffered, and the refresh call will be ran directly. This should ideally be called on
+     * an asynchronous thread.</p>
      */
     void refreshPermissions();
 
@@ -128,7 +128,9 @@ public interface User extends PermissionHolder {
      * @throws ObjectAlreadyHasException if the user is already a member of the group
      * @throws NullPointerException      if the group is null
      * @throws IllegalStateException     if the group instance was not obtained from LuckPerms.
+     * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
+    @Deprecated
     void addGroup(Group group) throws ObjectAlreadyHasException;
 
     /**
@@ -140,7 +142,9 @@ public interface User extends PermissionHolder {
      * @throws NullPointerException      if the group or server is null
      * @throws IllegalStateException     if the group instance was not obtained from LuckPerms.
      * @throws IllegalArgumentException  if the server is invalid
+     * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
+    @Deprecated
     void addGroup(Group group, String server) throws ObjectAlreadyHasException;
 
     /**
@@ -153,7 +157,9 @@ public interface User extends PermissionHolder {
      * @throws NullPointerException      if the group, server or world is null
      * @throws IllegalStateException     if the group instance was not obtained from LuckPerms.
      * @throws IllegalArgumentException  if the server or world is invalid
+     * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
+    @Deprecated
     void addGroup(Group group, String server, String world) throws ObjectAlreadyHasException;
 
     /**
@@ -165,7 +171,9 @@ public interface User extends PermissionHolder {
      * @throws NullPointerException      if the group is null
      * @throws IllegalStateException     if the group instance was not obtained from LuckPerms.
      * @throws IllegalArgumentException  if the expiry time is in the past
+     * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
+    @Deprecated
     void addGroup(Group group, long expireAt) throws ObjectAlreadyHasException;
 
     /**
@@ -178,7 +186,9 @@ public interface User extends PermissionHolder {
      * @throws NullPointerException      if the group or server is null
      * @throws IllegalStateException     if the group instance was not obtained from LuckPerms.
      * @throws IllegalArgumentException  if the expiry time is in the past or the server is invalid
+     * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
+    @Deprecated
     void addGroup(Group group, String server, long expireAt) throws ObjectAlreadyHasException;
 
     /**
@@ -192,7 +202,9 @@ public interface User extends PermissionHolder {
      * @throws NullPointerException      if the group, server or world is null
      * @throws IllegalStateException     if the group instance was not obtained from LuckPerms.
      * @throws IllegalArgumentException  if the expiry time is in the past or the server/world is invalid
+     * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
+    @Deprecated
     void addGroup(Group group, String server, String world, long expireAt) throws ObjectAlreadyHasException;
 
     /**
@@ -202,7 +214,9 @@ public interface User extends PermissionHolder {
      * @throws ObjectLacksException  if the user isn't a member of the group
      * @throws NullPointerException  if the group is null
      * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
+     * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
+    @Deprecated
     void removeGroup(Group group) throws ObjectLacksException;
 
     /**
@@ -213,7 +227,9 @@ public interface User extends PermissionHolder {
      * @throws ObjectLacksException  if the user isn't a member of the group
      * @throws NullPointerException  if the group is null
      * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
+     * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
+    @Deprecated
     void removeGroup(Group group, boolean temporary) throws ObjectLacksException;
 
     /**
@@ -225,7 +241,9 @@ public interface User extends PermissionHolder {
      * @throws NullPointerException     if the group or server is null
      * @throws IllegalStateException    if the group instance was not obtained from LuckPerms.
      * @throws IllegalArgumentException if the server is invalid
+     * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
+    @Deprecated
     void removeGroup(Group group, String server) throws ObjectLacksException;
 
     /**
@@ -238,7 +256,9 @@ public interface User extends PermissionHolder {
      * @throws NullPointerException     if the group, server or world is null
      * @throws IllegalStateException    if the group instance was not obtained from LuckPerms.
      * @throws IllegalArgumentException if the server or world is invalid
+     * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
+    @Deprecated
     void removeGroup(Group group, String server, String world) throws ObjectLacksException;
 
     /**
@@ -251,7 +271,9 @@ public interface User extends PermissionHolder {
      * @throws NullPointerException     if the group or server is null
      * @throws IllegalStateException    if the group instance was not obtained from LuckPerms.
      * @throws IllegalArgumentException if the expiry time is in the past or the server is invalid
+     * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
+    @Deprecated
     void removeGroup(Group group, String server, boolean temporary) throws ObjectLacksException;
 
     /**
@@ -265,7 +287,9 @@ public interface User extends PermissionHolder {
      * @throws NullPointerException     if the group, server or world is null
      * @throws IllegalStateException    if the group instance was not obtained from LuckPerms.
      * @throws IllegalArgumentException if the expiry time is in the past or the server/world is invalid
+     * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
+    @Deprecated
     void removeGroup(Group group, String server, String world, boolean temporary) throws ObjectLacksException;
 
     /**

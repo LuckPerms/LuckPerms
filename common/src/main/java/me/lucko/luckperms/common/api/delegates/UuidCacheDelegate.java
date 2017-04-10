@@ -34,15 +34,15 @@ import java.util.UUID;
  */
 @AllArgsConstructor
 public class UuidCacheDelegate implements UuidCache {
-    private final me.lucko.luckperms.common.core.UuidCache master;
+    private final me.lucko.luckperms.common.core.UuidCache handle;
 
     @Override
     public UUID getUUID(@NonNull UUID external) {
-        return master.getUUID(external);
+        return handle.getUUID(external);
     }
 
     @Override
     public UUID getExternalUUID(@NonNull UUID internal) {
-        return master.getExternalUUID(internal);
+        return handle.getExternalUUID(internal);
     }
 }

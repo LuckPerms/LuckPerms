@@ -30,7 +30,7 @@ import java.util.Set;
  * Holds cached permission and meta lookup data for a {@link me.lucko.luckperms.api.User}.
  *
  * <p>Data is only likely to be available for online users. All calls will account for inheritance, as well as any
- * default data provided by the platform. This calls are heavily cached and are therefore fast.
+ * default data provided by the platform. This calls are heavily cached and are therefore fast.</p>
  *
  * @since 2.13
  */
@@ -39,7 +39,7 @@ public interface UserData {
     /**
      * Gets PermissionData from the cache, given a specified context.
      *
-     * <p> If the data is not cached, it is calculated. Therefore, this call could be costly.
+     * <p>If the data is not cached, it is calculated. Therefore, this call could be costly.</p>
      *
      * @param contexts the contexts to get the permission data in
      * @return a permission data instance
@@ -50,7 +50,7 @@ public interface UserData {
     /**
      * Gets MetaData from the cache, given a specified context.
      *
-     * <p> If the data is not cached, it is calculated. Therefore, this call could be costly.
+     * <p>If the data is not cached, it is calculated. Therefore, this call could be costly.</p>
      *
      * @param contexts the contexts to get the permission data in
      * @return a meta data instance
@@ -79,8 +79,8 @@ public interface UserData {
     /**
      * Calculates permission data and stores it in the cache.
      *
-     * <p> If there is already data cached for the given contexts, and if the resultant output is different,
-     * the cached value is updated.
+     * <p>If there is already data cached for the given contexts, and if the resultant output is different,
+     * the cached value is updated.</p>
      *
      * @param contexts the contexts to recalculate in.
      * @throws NullPointerException if contexts is null
@@ -90,8 +90,8 @@ public interface UserData {
     /**
      * Calculates meta data and stores it in the cache.
      *
-     * <p> If there is already data cached for the given contexts, and if the resultant output is different,
-     * the cached value is updated.
+     * <p>If there is already data cached for the given contexts, and if the resultant output is different,
+     * the cached value is updated.</p>
      *
      * @param contexts the contexts to recalculate in.
      * @throws NullPointerException if contexts is null
@@ -119,7 +119,7 @@ public interface UserData {
     /**
      * Ensures that PermissionData and MetaData is cached for a context.
      *
-     * <p> If the cache does not contain any data for the context, it will be calculated and saved.
+     * <p>If the cache does not contain any data for the context, it will be calculated and saved.</p>
      *
      * @param contexts the contexts to pre-calculate for
      * @throws NullPointerException if contexts is null
@@ -128,7 +128,8 @@ public interface UserData {
 
     /**
      * Invalidates all of the underlying Permission calculators.
-     * Can be called to allow for an update in defaults.
+     *
+     * <p>Can be called to allow for an update in defaults.</p>
      */
     void invalidatePermissionCalculators();
 

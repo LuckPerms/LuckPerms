@@ -29,8 +29,9 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Holds contexts.
- * Implementations may be either mutable or immutable.
+ * Holder of contexts.
+ *
+ * <p>Implementations may be either mutable or immutable.</p>
  *
  * @since 2.13
  */

@@ -33,7 +33,7 @@ import java.util.Set;
 /**
  * An immutable permission node
  *
- * <p> Use {@link LuckPermsApi#buildNode(String)} to get an instance.
+ * <p>Use {@link LuckPermsApi#buildNode(String)} to get an instance.</p>
  *
  * @since 2.6
  */

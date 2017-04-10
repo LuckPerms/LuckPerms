@@ -28,7 +28,6 @@ import lombok.ToString;
 
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.common.caching.stacking.MetaStack;
-import me.lucko.luckperms.common.caching.stacking.NoopMetaStack;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -58,10 +57,6 @@ public class MetaAccumulator {
         this.suffixes = new TreeMap<>(Comparator.reverseOrder());
         this.prefixStack = prefixStack;
         this.suffixStack = suffixStack;
-    }
-
-    public MetaAccumulator() {
-        this(NoopMetaStack.INSTANCE, NoopMetaStack.INSTANCE);
     }
 
     public void accumulateNode(LocalizedNode n) {

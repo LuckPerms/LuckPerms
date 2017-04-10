@@ -27,7 +27,7 @@ import java.util.UUID;
 /**
  * A single entry in the log
  *
- * <p> Implements {@link Comparable} ordering based upon the timestamp of the entry.
+ * <p>Implements {@link Comparable} ordering based upon the timestamp of the entry.</p>
  */
 public class LogEntry implements Comparable<LogEntry> {
     private static final String FORMAT = "&8(&e%s&8) [&a%s&8] (&b%s&8) &7--> &f%s";

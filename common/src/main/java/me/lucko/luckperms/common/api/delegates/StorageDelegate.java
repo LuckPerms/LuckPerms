@@ -52,16 +52,16 @@ import static me.lucko.luckperms.common.api.ApiUtils.checkUsername;
 @AllArgsConstructor
 public class StorageDelegate implements Storage {
     private final LuckPermsPlugin plugin;
-    private final me.lucko.luckperms.common.storage.Storage master;
+    private final me.lucko.luckperms.common.storage.Storage handle;
 
     @Override
     public String getName() {
-        return master.getName();
+        return handle.getName();
     }
 
     @Override
     public boolean isAcceptingLogins() {
-        return master.isAcceptingLogins();
+        return handle.isAcceptingLogins();
     }
 
     @Override
@@ -76,57 +76,57 @@ public class StorageDelegate implements Storage {
 
     @Override
     public CompletableFuture<Boolean> logAction(@NonNull LogEntry entry) {
-        return master.force().logAction(entry);
+        return handle.force().logAction(entry);
     }
 
     @Override
     public CompletableFuture<Log> getLog() {
-        return master.force().getLog().thenApply(log -> log == null ? null : new LogDelegate(log));
+        return handle.force().getLog().thenApply(log -> log == null ? null : new LogDelegate(log));
     }
 
     @Override
     public CompletableFuture<Boolean> loadUser(UUID uuid, String username) {
-        return master.force().loadUser(uuid, checkUsername(username));
+        return handle.force().loadUser(uuid, checkUsername(username));
     }
 
     @Override
     public CompletableFuture<Boolean> saveUser(User user) {
-        return master.force().saveUser(UserDelegate.cast(user));
+        return handle.force().saveUser(UserDelegate.cast(user));
     }
 
     @Override
     public CompletableFuture<Boolean> cleanupUsers() {
-        return master.force().cleanupUsers();
+        return handle.force().cleanupUsers();
     }
 
     @Override
     public CompletableFuture<Set<UUID>> getUniqueUsers() {
-        return master.force().getUniqueUsers();
+        return handle.force().getUniqueUsers();
     }
 
     @Override
     public CompletableFuture<List<HeldPermission<UUID>>> getUsersWithPermission(@NonNull String permission) {
-        return master.force().getUsersWithPermission(permission);
+        return handle.force().getUsersWithPermission(permission);
     }
 
     @Override
     public CompletableFuture<Boolean> createAndLoadGroup(String name) {
-        return master.force().createAndLoadGroup(checkName(name), CreationCause.API);
+        return handle.force().createAndLoadGroup(checkName(name), CreationCause.API);
     }
 
     @Override
     public CompletableFuture<Boolean> loadGroup(String name) {
-        return master.force().loadGroup(checkName(name));
+        return handle.force().loadGroup(checkName(name));
     }
 
     @Override
     public CompletableFuture<Boolean> loadAllGroups() {
-        return master.force().loadAllGroups();
+        return handle.force().loadAllGroups();
     }
 
     @Override
     public CompletableFuture<Boolean> saveGroup(Group group) {
-        return master.force().saveGroup(GroupDelegate.cast(group));
+        return handle.force().saveGroup(GroupDelegate.cast(group));
     }
 
     @Override
@@ -134,51 +134,51 @@ public class StorageDelegate implements Storage {
         if (group.getName().equalsIgnoreCase(plugin.getConfiguration().get(ConfigKeys.DEFAULT_GROUP_NAME))) {
             throw new IllegalArgumentException("Cannot delete the default group.");
         }
-        return master.force().deleteGroup(GroupDelegate.cast(group), DeletionCause.API);
+        return handle.force().deleteGroup(GroupDelegate.cast(group), DeletionCause.API);
     }
 
     @Override
     public CompletableFuture<List<HeldPermission<String>>> getGroupsWithPermission(@NonNull String permission) {
-        return master.force().getGroupsWithPermission(permission);
+        return handle.force().getGroupsWithPermission(permission);
     }
 
     @Override
     public CompletableFuture<Boolean> createAndLoadTrack(String name) {
-        return master.force().createAndLoadTrack(checkName(name), CreationCause.API);
+        return handle.force().createAndLoadTrack(checkName(name), CreationCause.API);
     }
 
     @Override
     public CompletableFuture<Boolean> loadTrack(String name) {
-        return master.force().loadTrack(checkName(name));
+        return handle.force().loadTrack(checkName(name));
     }
 
     @Override
     public CompletableFuture<Boolean> loadAllTracks() {
-        return master.force().loadAllTracks();
+        return handle.force().loadAllTracks();
     }
 
     @Override
     public CompletableFuture<Boolean> saveTrack(Track track) {
-        return master.force().saveTrack(TrackDelegate.cast(track));
+        return handle.force().saveTrack(TrackDelegate.cast(track));
     }
 
     @Override
     public CompletableFuture<Boolean> deleteTrack(Track track) {
-        return master.force().deleteTrack(TrackDelegate.cast(track), DeletionCause.API);
+        return handle.force().deleteTrack(TrackDelegate.cast(track), DeletionCause.API);
     }
 
     @Override
     public CompletableFuture<Boolean> saveUUIDData(String username, UUID uuid) {
-        return master.force().saveUUIDData(checkUsername(username), uuid);
+        return handle.force().saveUUIDData(checkUsername(username), uuid);
     }
 
     @Override
     public CompletableFuture<UUID> getUUID(String username) {
-        return master.force().getUUID(checkUsername(username));
+        return handle.force().getUUID(checkUsername(username));
     }
 
     @Override
     public CompletableFuture<String> getName(@NonNull UUID uuid) {
-        return master.force().getName(uuid);
+        return handle.force().getName(uuid);
     }
 }

@@ -36,105 +36,105 @@ import java.util.Map;
  */
 @AllArgsConstructor
 public class LPConfigurationDelegate implements LPConfiguration {
-    private final LuckPermsConfiguration master;
+    private final LuckPermsConfiguration handle;
 
     @Override
     public String getServer() {
-        return master.get(ConfigKeys.SERVER);
+        return handle.get(ConfigKeys.SERVER);
     }
 
     @Override
     public int getSyncTime() {
-        return master.get(ConfigKeys.SYNC_TIME);
+        return handle.get(ConfigKeys.SYNC_TIME);
     }
 
     @Override
     public boolean getIncludeGlobalPerms() {
-        return master.get(ConfigKeys.INCLUDING_GLOBAL_PERMS);
+        return handle.get(ConfigKeys.INCLUDING_GLOBAL_PERMS);
     }
 
     @Override
     public boolean getIncludeGlobalWorldPerms() {
-        return master.get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS);
+        return handle.get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS);
     }
 
     @Override
     public boolean getApplyGlobalGroups() {
-        return master.get(ConfigKeys.APPLYING_GLOBAL_GROUPS);
+        return handle.get(ConfigKeys.APPLYING_GLOBAL_GROUPS);
     }
 
     @Override
     public boolean getApplyGlobalWorldGroups() {
-        return master.get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS);
+        return handle.get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS);
     }
 
     @Override
     public boolean getOnlineMode() {
-        return master.get(ConfigKeys.USE_SERVER_UUIDS);
+        return handle.get(ConfigKeys.USE_SERVER_UUIDS);
     }
 
     @Override
     public boolean getApplyWildcards() {
-        return master.get(ConfigKeys.APPLYING_WILDCARDS);
+        return handle.get(ConfigKeys.APPLYING_WILDCARDS);
     }
 
     @Override
     public boolean getApplyRegex() {
-        return master.get(ConfigKeys.APPLYING_REGEX);
+        return handle.get(ConfigKeys.APPLYING_REGEX);
     }
 
     @Override
     public boolean getApplyShorthand() {
-        return master.get(ConfigKeys.APPLYING_SHORTHAND);
+        return handle.get(ConfigKeys.APPLYING_SHORTHAND);
     }
 
     @Override
     public boolean getLogNotify() {
-        return master.get(ConfigKeys.LOG_NOTIFY);
+        return handle.get(ConfigKeys.LOG_NOTIFY);
     }
 
     @Override
     public boolean getEnableOps() {
-        return master.get(ConfigKeys.OPS_ENABLED);
+        return handle.get(ConfigKeys.OPS_ENABLED);
     }
 
     @Override
     public boolean getCommandsAllowOp() {
-        return master.get(ConfigKeys.COMMANDS_ALLOW_OP);
+        return handle.get(ConfigKeys.COMMANDS_ALLOW_OP);
     }
 
     @Override
     public boolean getAutoOp() {
-        return master.get(ConfigKeys.AUTO_OP);
+        return handle.get(ConfigKeys.AUTO_OP);
     }
 
     @Override
     public String getVaultServer() {
-        return master.get(ConfigKeys.VAULT_SERVER);
+        return handle.get(ConfigKeys.VAULT_SERVER);
     }
 
     @Override
     public boolean getVaultIncludeGlobal() {
-        return master.get(ConfigKeys.VAULT_INCLUDING_GLOBAL);
+        return handle.get(ConfigKeys.VAULT_INCLUDING_GLOBAL);
     }
 
     @Override
     public DatastoreConfiguration getDatastoreConfig() {
-        return master.get(ConfigKeys.DATABASE_VALUES);
+        return handle.get(ConfigKeys.DATABASE_VALUES);
     }
 
     @Override
     public String getStorageMethod() {
-        return master.get(ConfigKeys.STORAGE_METHOD);
+        return handle.get(ConfigKeys.STORAGE_METHOD);
     }
 
     @Override
     public boolean getSplitStorage() {
-        return master.get(ConfigKeys.SPLIT_STORAGE);
+        return handle.get(ConfigKeys.SPLIT_STORAGE);
     }
 
     @Override
     public Map<String, String> getSplitStorageOptions() {
-        return master.get(ConfigKeys.SPLIT_STORAGE_OPTIONS);
+        return handle.get(ConfigKeys.SPLIT_STORAGE_OPTIONS);
     }
 }

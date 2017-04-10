@@ -32,15 +32,15 @@ import java.util.SortedSet;
 /**
  * An object capable of holding permissions
  *
- * <p> Any changes made will be lost unless the instance is saved back to the {@link Storage}.
+ * <p>Any changes made will be lost unless the instance is saved back to the {@link Storage}.</p>
  */
 public interface PermissionHolder {
 
     /**
      * Gets the objects name
      *
-     * <p> {@link User#getUuid()}, {@link User#getName()} or {@link Group#getName()} should normally be used instead of
-     * this method.
+     * <p>{@link User#getUuid()}, {@link User#getName()} or {@link Group#getName()} should normally be used instead of
+     * this method.</p>
      *
      * @return the identifier for this object. Either a uuid string or name.
      */
@@ -74,9 +74,11 @@ public interface PermissionHolder {
 
     /**
      * Gets a mutable sorted set of the nodes that this object has and inherits, filtered by context
-     * Unlike {@link #getAllNodesFiltered(Contexts)}, this method will not filter individual nodes. The context is only
-     * used to determine which groups should apply.
-     * Nodes are sorted into priority order.
+     *
+     * <p>Unlike {@link #getAllNodesFiltered(Contexts)}, this method will not filter individual nodes. The context is only
+     * used to determine which groups should apply.</p>
+     *
+     * <p>Nodes are sorted into priority order.</p>
      *
      * @param contexts the context for the lookup,
      * @return a mutable sorted set of permissions
@@ -87,8 +89,9 @@ public interface PermissionHolder {
 
     /**
      * Gets a mutable set of the nodes that this object has and inherits, filtered by context.
-     * Unlike {@link #getAllNodes(Contexts)}, this method WILL filter individual nodes, and only return ones that fully
-     * meet the context provided.
+     *
+     * <p>Unlike {@link #getAllNodes(Contexts)}, this method WILL filter individual nodes, and only return ones that fully
+     * meet the context provided.</p>
      *
      * @param contexts the context for the lookup
      * @return a mutable set of permissions
@@ -99,6 +102,7 @@ public interface PermissionHolder {
 
     /**
      * Converts the output of {@link #getAllNodesFiltered(Contexts)}, and expands shorthand permissions.
+     *
      * @param contexts the context for the lookup
      * @param lowerCase if the keys should be made lowercase whilst being exported
      * @return a mutable map of permissions
@@ -206,7 +210,7 @@ public interface PermissionHolder {
     boolean hasPermission(String node, boolean b, String server, String world, boolean temporary);
 
     /**
-     * Cheks to see if the object inherits a certain permission
+     * Checks to see if the object inherits a certain permission
      *
      * @param node the node to check for
      * @return a Tristate for the holders inheritance status for the node
@@ -301,16 +305,26 @@ public interface PermissionHolder {
     void setPermission(Node node) throws ObjectAlreadyHasException;
 
     /**
+     * Sets a permission for the object
+     *
+     * @param node The node to be set
+     * @throws NullPointerException if the node is null
+     * @return the result of the operation
+     * @since 3.1
+     */
+    DataMutateResult setPermissionUnchecked(Node node);
+
+    /**
      * Sets a transient permission for the object
      *
-     * <p> A transient node is a permission that does not persist.
+     * <p>A transient node is a permission that does not persist.
      * Whenever a user logs out of the server, or the server restarts, this permission will disappear.
-     * It is never saved to the datastore, and therefore will not apply on other servers.
+     * It is never saved to the datastore, and therefore will not apply on other servers.</p>
      *
-     * <p> This is useful if you want to temporarily set a permission for a user while they're online, but don't
-     * want it to persist, and have to worry about removing it when they log out.
+     * <p>This is useful if you want to temporarily set a permission for a user while they're online, but don't
+     * want it to persist, and have to worry about removing it when they log out.</p>
      *
-     * <p> For unsetting a transient permission, see {@link #unsetTransientPermission(Node)}
+     * <p>For unsetting a transient permission, see {@link #unsetTransientPermission(Node)}</p>
      *
      * @param node The node to be set
      * @throws ObjectAlreadyHasException if the object already has the permission
@@ -318,6 +332,25 @@ public interface PermissionHolder {
      * @since 2.6
      */
     void setTransientPermission(Node node) throws ObjectAlreadyHasException;
+
+    /**
+     * Sets a transient permission for the object
+     *
+     * <p>A transient node is a permission that does not persist.
+     * Whenever a user logs out of the server, or the server restarts, this permission will disappear.
+     * It is never saved to the datastore, and therefore will not apply on other servers.</p>
+     *
+     * <p>This is useful if you want to temporarily set a permission for a user while they're online, but don't
+     * want it to persist, and have to worry about removing it when they log out.</p>
+     *
+     * <p>For unsetting a transient permission, see {@link #unsetTransientPermission(Node)}</p>
+     *
+     * @param node The node to be set
+     * @throws NullPointerException      if the node is null
+     * @return the result of the operation
+     * @since 3.1
+     */
+    DataMutateResult setTransientPermissionUnchecked(Node node);
 
     /**
      * Sets a permission for the object
@@ -417,6 +450,16 @@ public interface PermissionHolder {
     void unsetPermission(Node node) throws ObjectLacksException;
 
     /**
+     * Unsets a permission for the object
+     *
+     * @param node The node to be unset
+     * @throws NullPointerException if the node is null
+     * @return the result of the operation
+     * @since 3.1
+     */
+    DataMutateResult unsetPermissionUnchecked(Node node);
+
+    /**
      * Unsets a transient permission for the object
      *
      * @param node The node to be unset
@@ -425,6 +468,16 @@ public interface PermissionHolder {
      * @since 2.6
      */
     void unsetTransientPermission(Node node) throws ObjectLacksException;
+
+    /**
+     * Unsets a transient permission for the object
+     *
+     * @param node The node to be unset
+     * @throws NullPointerException if the node is null
+     * @return the result of the operation
+     * @since 3.1
+     */
+    DataMutateResult unsetTransientPermissionUnchecked(Node node);
 
     /**
      * Unsets a permission for the object
