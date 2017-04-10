@@ -32,6 +32,7 @@ import com.google.gson.reflect.TypeToken;
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.core.NodeModel;
 import me.lucko.luckperms.common.core.UserIdentifier;
 import me.lucko.luckperms.common.core.model.Group;
@@ -246,6 +247,42 @@ public class SQLBacking extends AbstractBacking {
             return null;
         }
         return log.build();
+    }
+
+    @Override
+    public boolean applyBulkUpdate(BulkUpdate bulkUpdate) {
+        boolean success = true;
+        String queryString = bulkUpdate.buildAsSql();
+
+        try (Connection c = provider.getConnection()) {
+            if (bulkUpdate.getDataType().isIncludingUsers()) {
+                String table = prefix.apply("{prefix}user_permissions");
+
+                try (Statement s = c.createStatement()) {
+                    s.execute(queryString.replace("{table}", table));
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    success = false;
+                }
+            }
+
+            if (bulkUpdate.getDataType().isIncludingGroups()) {
+                String table = prefix.apply("{prefix}group_permissions");
+
+                try (Statement s = c.createStatement()) {
+                    s.execute(queryString.replace("{table}", table));
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    success = false;
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            success = false;
+        }
+
+        return success;
     }
 
     @Override

@@ -32,6 +32,7 @@ import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
 import me.lucko.luckperms.common.api.delegates.StorageDelegate;
+import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.core.model.User;
@@ -89,6 +90,11 @@ public class AbstractStorage implements Storage {
     @Override
     public CompletableFuture<Log> getLog() {
         return makeFuture(backing::getLog);
+    }
+
+    @Override
+    public CompletableFuture<Boolean> applyBulkUpdate(BulkUpdate bulkUpdate) {
+        return makeFuture(() -> backing.applyBulkUpdate(bulkUpdate));
     }
 
     @Override

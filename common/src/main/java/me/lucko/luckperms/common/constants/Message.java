@@ -261,6 +261,17 @@ public enum Message {
     UNSET_META_SUCCESS("&aUnset meta value with key &f\"{0}&f\"&a for &b{1}&a in context {2}&a.", true),
     UNSET_META_TEMP_SUCCESS("&aUnset temporary meta value with key &f\"{0}&f\"&a for &b{1}&a in context {2}&a.", true),
 
+    BULK_UPDATE_INVALID_DATA_TYPE("Invalid type. Was expecting 'all', 'users' or 'groups'.", true),
+    BULK_UPDATE_INVALID_CONSTRAINT("Invalid constraint &4{0}&c. Constraints should be in the format '&f<field> <comparison operator> <value>&c'.", true),
+    BULK_UPDATE_INVALID_COMPARISON("Invalid comparison operator '&4{0}&c'. Expected one of the following: &f==  !=  ~~  ~!", true),
+    BULK_UPDATE_QUEUED("&aBulk update operation was queued. &7(&f{0}&7)", true),
+    BULK_UPDATE_CONFIRM("&aRun &b/{0} bulkupdate confirm {1} &ato execute the update.", true),
+    BULK_UPDATE_UNKNOWN_ID("&aOperation with id &b{0}&a does not exist or has expired.", true),
+
+    BULK_UPDATE_STARTING("&aRunning bulk update.", true),
+    BULK_UPDATE_SUCCESS("&bBulk update completed successfully.", true),
+    BULK_UPDATE_FAILURE("&cBulk update failed. Check the console for errors.", true),
+
     BULK_CHANGE_TYPE_ERROR("Invalid type. Was expecting 'server' or 'world'.", true),
     BULK_CHANGE_SUCCESS("&aApplied bulk change successfully. {0} records were changed.", true),
 

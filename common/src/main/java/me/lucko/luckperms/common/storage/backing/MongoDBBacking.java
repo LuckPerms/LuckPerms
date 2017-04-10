@@ -34,7 +34,9 @@ import com.mongodb.client.model.InsertOneOptions;
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.core.NodeFactory;
+import me.lucko.luckperms.common.core.NodeModel;
 import me.lucko.luckperms.common.core.UserIdentifier;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.Track;
@@ -55,6 +57,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -222,6 +225,81 @@ public class MongoDBBacking extends AbstractBacking {
 
             return log.build();
         }, null);
+    }
+
+    @Override
+    public boolean applyBulkUpdate(BulkUpdate bulkUpdate) {
+        return call(() -> {
+            if (bulkUpdate.getDataType().isIncludingUsers()) {
+                MongoCollection<Document> c = database.getCollection("users");
+
+                try (MongoCursor<Document> cursor = c.find().iterator()) {
+                    while (cursor.hasNext()) {
+                        Document d = cursor.next();
+
+                        UUID uuid = UUID.fromString(d.getString("_id"));
+                        Map<String, Boolean> perms = revert((Map<String, Boolean>) d.get("perms"));
+
+                        Set<NodeModel> nodes = new HashSet<>();
+                        for (Map.Entry<String, Boolean> e : perms.entrySet()) {
+                            Node node = NodeFactory.fromSerializedNode(e.getKey(), e.getValue());
+                            nodes.add(NodeModel.fromNode(node));
+                        }
+
+                        Set<Node> results = nodes.stream()
+                                .map(n -> Optional.ofNullable(bulkUpdate.apply(n)))
+                                .filter(Optional::isPresent)
+                                .map(Optional::get)
+                                .map(NodeModel::toNode)
+                                .collect(Collectors.toSet());
+
+                        Document permsDoc = new Document();
+                        for (Map.Entry<String, Boolean> e : convert(exportToLegacy(results)).entrySet()) {
+                            permsDoc.append(e.getKey(), e.getValue());
+                        }
+
+                        d.put("perms", perms);
+                        c.replaceOne(new Document("_id", uuid), d);
+                    }
+                }
+            }
+
+            if (bulkUpdate.getDataType().isIncludingGroups()) {
+                MongoCollection<Document> c = database.getCollection("groups");
+
+                try (MongoCursor<Document> cursor = c.find().iterator()) {
+                    while (cursor.hasNext()) {
+                        Document d = cursor.next();
+
+                        String holder = d.getString("_id");
+                        Map<String, Boolean> perms = revert((Map<String, Boolean>) d.get("perms"));
+
+                        Set<NodeModel> nodes = new HashSet<>();
+                        for (Map.Entry<String, Boolean> e : perms.entrySet()) {
+                            Node node = NodeFactory.fromSerializedNode(e.getKey(), e.getValue());
+                            nodes.add(NodeModel.fromNode(node));
+                        }
+
+                        Set<Node> results = nodes.stream()
+                                .map(n -> Optional.ofNullable(bulkUpdate.apply(n)))
+                                .filter(Optional::isPresent)
+                                .map(Optional::get)
+                                .map(NodeModel::toNode)
+                                .collect(Collectors.toSet());
+
+                        Document permsDoc = new Document();
+                        for (Map.Entry<String, Boolean> e : convert(exportToLegacy(results)).entrySet()) {
+                            permsDoc.append(e.getKey(), e.getValue());
+                        }
+
+                        d.put("perms", perms);
+                        c.replaceOne(new Document("_id", holder), d);
+                    }
+                }
+            }
+
+            return true;
+        }, false);
     }
 
     @Override

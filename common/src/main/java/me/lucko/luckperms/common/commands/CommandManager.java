@@ -33,6 +33,7 @@ import me.lucko.luckperms.common.commands.impl.group.GroupMainCommand;
 import me.lucko.luckperms.common.commands.impl.group.ListGroups;
 import me.lucko.luckperms.common.commands.impl.log.LogMainCommand;
 import me.lucko.luckperms.common.commands.impl.migration.MigrationMainCommand;
+import me.lucko.luckperms.common.commands.impl.misc.BulkUpdateCommand;
 import me.lucko.luckperms.common.commands.impl.misc.CheckCommand;
 import me.lucko.luckperms.common.commands.impl.misc.ExportCommand;
 import me.lucko.luckperms.common.commands.impl.misc.ImportCommand;
@@ -97,6 +98,7 @@ public class CommandManager {
                 .add(new ImportCommand())
                 .add(new ExportCommand())
                 .add(new ReloadConfigCommand())
+                .add(new BulkUpdateCommand())
                 .add(new MigrationMainCommand())
                 .add(new CreateGroup())
                 .add(new DeleteGroup())
@@ -160,7 +162,7 @@ public class CommandManager {
 
         // Check the correct number of args were given for the main command
         if (main.getArgumentCheck().test(arguments.size())) {
-            main.sendUsage(sender, label);
+            main.sendDetailedUsage(sender, label);
             return CommandResult.INVALID_ARGS;
         }
 

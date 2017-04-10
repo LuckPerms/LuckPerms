@@ -44,6 +44,7 @@ public enum Permission {
     IMPORT(list("import"), Type.NONE),
     EXPORT(list("export"), Type.NONE),
     RELOAD_CONFIG(list("reloadconfig"), Type.NONE),
+    BULK_UPDATE(list("bulkupdate"), Type.NONE),
     MIGRATION(list("migration"), Type.NONE),
 
     CREATE_GROUP(list("creategroup"), Type.NONE),
@@ -88,7 +89,6 @@ public enum Permission {
     USER_SHOWTRACKS(list("showtracks"), Type.USER),
     USER_PROMOTE(list("promote"), Type.USER),
     USER_DEMOTE(list("demote"), Type.USER),
-    USER_BULKCHANGE(list("bulkchange"), Type.USER),
     USER_CLEAR(list("clear"), Type.USER),
 
     GROUP_INFO(list("info"), Type.GROUP),
@@ -123,7 +123,6 @@ public enum Permission {
     GROUP_LISTMEMBERS(list("listmembers"), Type.GROUP),
     GROUP_SHOWTRACKS(list("showtracks"), Type.GROUP),
     GROUP_SETWEIGHT(list("setweight"), Type.GROUP),
-    GROUP_BULKCHANGE(list("bulkchange"), Type.GROUP),
     GROUP_CLEAR(list("clear"), Type.GROUP),
     GROUP_RENAME(list("rename"), Type.GROUP),
     GROUP_CLONE(list("clone"), Type.GROUP),

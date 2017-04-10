@@ -29,6 +29,7 @@ import lombok.Setter;
 
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.core.model.User;
@@ -59,6 +60,8 @@ public abstract class AbstractBacking {
     public abstract boolean logAction(LogEntry entry);
 
     public abstract Log getLog();
+
+    public abstract boolean applyBulkUpdate(BulkUpdate bulkUpdate);
 
     public abstract boolean loadUser(UUID uuid, String username);
 

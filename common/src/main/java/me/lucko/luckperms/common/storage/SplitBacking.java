@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.core.model.User;
@@ -74,6 +75,20 @@ public class SplitBacking extends AbstractBacking {
     @Override
     public Log getLog() {
         return backing.get(types.get("log")).getLog();
+    }
+
+    @Override
+    public boolean applyBulkUpdate(BulkUpdate bulkUpdate) {
+        String userType = types.get("user");
+        String groupType = types.get("group");
+
+        boolean ret = backing.get(userType).applyBulkUpdate(bulkUpdate);
+        if (!userType.equals(groupType)) {
+            if (!backing.get(groupType).applyBulkUpdate(bulkUpdate)) {
+                ret = false;
+            }
+        }
+        return ret;
     }
 
     @Override

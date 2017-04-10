@@ -170,7 +170,7 @@ public abstract class MainCommand<T> extends Command<Void, T> {
 
     @Override
     public void sendDetailedUsage(Sender sender, String label) {
-
+        sendUsage(sender, label);
     }
 
     @Override

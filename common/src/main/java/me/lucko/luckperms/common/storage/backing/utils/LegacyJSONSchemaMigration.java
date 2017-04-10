@@ -39,7 +39,6 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
@@ -69,16 +68,15 @@ public class LegacyJSONSchemaMigration implements Runnable {
                     try {
                         File replacementFile = new File(newGroupsDir, oldFile.getName());
 
-                        AtomicReference<String> name = new AtomicReference<>(null);
+                        JsonObject values = backing.readObjectFromFile(oldFile);
+
                         Map<String, Boolean> perms = new HashMap<>();
-                        backing.readObjectFromFile(oldFile, values -> {
-                            name.set(values.get("name").getAsString());
-                            JsonObject permsSection = values.get("perms").getAsJsonObject();
-                            for (Map.Entry<String, JsonElement> e : permsSection.entrySet()) {
-                                perms.put(e.getKey(), e.getValue().getAsBoolean());
-                            }
-                            return true;
-                        });
+                        String name = values.get("name").getAsString();
+                        JsonObject permsSection = values.get("perms").getAsJsonObject();
+                        for (Map.Entry<String, JsonElement> e : permsSection.entrySet()) {
+                            perms.put(e.getKey(), e.getValue().getAsBoolean());
+                        }
+
 
                         Set<NodeModel> nodes = perms.entrySet().stream()
                                 .map(e -> NodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
@@ -94,7 +92,7 @@ public class LegacyJSONSchemaMigration implements Runnable {
                         }
 
                         JsonObject data = new JsonObject();
-                        data.addProperty("name", name.get());
+                        data.addProperty("name", name);
                         data.add("permissions", JSONBacking.serializePermissions(nodes));
                         backing.writeElementToFile(replacementFile, data);
 
@@ -119,20 +117,16 @@ public class LegacyJSONSchemaMigration implements Runnable {
                     try {
                         File replacementFile = new File(newUsersDir, oldFile.getName());
 
-                        AtomicReference<String> uuid = new AtomicReference<>(null);
-                        AtomicReference<String> name = new AtomicReference<>(null);
-                        AtomicReference<String> primaryGroup = new AtomicReference<>(null);
+                        JsonObject values = backing.readObjectFromFile(oldFile);
+
                         Map<String, Boolean> perms = new HashMap<>();
-                        backing.readObjectFromFile(oldFile, values -> {
-                            uuid.set(values.get("uuid").getAsString());
-                            name.set(values.get("name").getAsString());
-                            primaryGroup.set(values.get("primaryGroup").getAsString());
-                            JsonObject permsSection = values.get("perms").getAsJsonObject();
-                            for (Map.Entry<String, JsonElement> e : permsSection.entrySet()) {
-                                perms.put(e.getKey(), e.getValue().getAsBoolean());
-                            }
-                            return true;
-                        });
+                        String uuid = values.get("uuid").getAsString();
+                        String name = values.get("name").getAsString();
+                        String primaryGroup = values.get("primaryGroup").getAsString();
+                        JsonObject permsSection = values.get("perms").getAsJsonObject();
+                        for (Map.Entry<String, JsonElement> e : permsSection.entrySet()) {
+                            perms.put(e.getKey(), e.getValue().getAsBoolean());
+                        }
 
                         Set<NodeModel> nodes = perms.entrySet().stream()
                                 .map(e -> NodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
@@ -148,9 +142,9 @@ public class LegacyJSONSchemaMigration implements Runnable {
                         }
 
                         JsonObject data = new JsonObject();
-                        data.addProperty("uuid", uuid.get());
-                        data.addProperty("name", name.get());
-                        data.addProperty("primaryGroup", primaryGroup.get());
+                        data.addProperty("uuid", uuid);
+                        data.addProperty("name", name);
+                        data.addProperty("primaryGroup", primaryGroup);
                         data.add("permissions", JSONBacking.serializePermissions(nodes));
                         backing.writeElementToFile(replacementFile, data);
 

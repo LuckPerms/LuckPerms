@@ -27,6 +27,7 @@ import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
 import me.lucko.luckperms.common.api.delegates.StorageDelegate;
+import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.core.model.User;
@@ -59,6 +60,8 @@ public interface Storage {
     CompletableFuture<Boolean> logAction(LogEntry entry);
 
     CompletableFuture<Log> getLog();
+
+    CompletableFuture<Boolean> applyBulkUpdate(BulkUpdate bulkUpdate);
 
     CompletableFuture<Boolean> loadUser(UUID uuid, String username);
 

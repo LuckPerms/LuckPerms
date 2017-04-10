@@ -34,6 +34,7 @@ import com.google.gson.JsonPrimitive;
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.core.NodeModel;
 import me.lucko.luckperms.common.core.PriorityComparator;
 import me.lucko.luckperms.common.core.UserIdentifier;
@@ -55,9 +56,9 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("ResultOfMethodCallIgnored")
@@ -81,16 +82,69 @@ public class JSONBacking extends FlatfileBacking {
         }
     }
 
-    public boolean readObjectFromFile(File file, Function<JsonObject, Boolean> readOperation) {
-        boolean success = false;
+    public JsonObject readObjectFromFile(File file) {
         try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
-            JsonObject object = gson.fromJson(reader, JsonObject.class);
-            success = readOperation.apply(object);
+            return gson.fromJson(reader, JsonObject.class);
         } catch (Throwable t) {
             plugin.getLog().warn("Exception whilst reading from file: " + file.getAbsolutePath());
             t.printStackTrace();
+            return null;
         }
-        return success;
+    }
+
+    @Override
+    public boolean applyBulkUpdate(BulkUpdate bulkUpdate) {
+        return call(() -> {
+            if (bulkUpdate.getDataType().isIncludingUsers()) {
+                File[] files = usersDir.listFiles((dir, name1) -> name1.endsWith(".json"));
+                if (files == null) return false;
+
+                for (File file : files) {
+                    registerFileAction("users", file);
+
+                    JsonObject object = readObjectFromFile(file);
+
+                    Set<NodeModel> nodes = new HashSet<>();
+                    nodes.addAll(deserializePermissions(object.get("permissions").getAsJsonArray()));
+
+                    Set<NodeModel> results = nodes.stream()
+                            .map(n -> Optional.ofNullable(bulkUpdate.apply(n)))
+                            .filter(Optional::isPresent)
+                            .map(Optional::get)
+                            .collect(Collectors.toSet());
+
+                    object.add("permissions", serializePermissions(results));
+
+                    writeElementToFile(file, object);
+                }
+            }
+
+            if (bulkUpdate.getDataType().isIncludingGroups()) {
+                File[] files = groupsDir.listFiles((dir, name1) -> name1.endsWith(".json"));
+                if (files == null) return false;
+
+                for (File file : files) {
+                    registerFileAction("groups", file);
+
+                    JsonObject object = readObjectFromFile(file);
+
+                    Set<NodeModel> nodes = new HashSet<>();
+                    nodes.addAll(deserializePermissions(object.get("permissions").getAsJsonArray()));
+
+                    Set<NodeModel> results = nodes.stream()
+                            .map(n -> Optional.ofNullable(bulkUpdate.apply(n)))
+                            .filter(Optional::isPresent)
+                            .map(Optional::get)
+                            .collect(Collectors.toSet());
+
+                    object.add("permissions", serializePermissions(results));
+
+                    writeElementToFile(file, object);
+                }
+            }
+
+            return true;
+        }, false);
     }
 
     @Override
@@ -103,30 +157,29 @@ public class JSONBacking extends FlatfileBacking {
                 registerFileAction("users", userFile);
 
                 if (userFile.exists()) {
-                    return readObjectFromFile(userFile, object -> {
-                        String name = object.get("name").getAsString();
-                        user.getPrimaryGroup().setStoredValue(object.get("primaryGroup").getAsString());
+                    JsonObject object = readObjectFromFile(userFile);
+                    String name = object.get("name").getAsString();
+                    user.getPrimaryGroup().setStoredValue(object.get("primaryGroup").getAsString());
 
-                        Set<NodeModel> data = deserializePermissions(object.get("permissions").getAsJsonArray());
-                        Set<Node> nodes = data.stream().map(NodeModel::toNode).collect(Collectors.toSet());
-                        user.setNodes(nodes);
+                    Set<NodeModel> data = deserializePermissions(object.get("permissions").getAsJsonArray());
+                    Set<Node> nodes = data.stream().map(NodeModel::toNode).collect(Collectors.toSet());
+                    user.setNodes(nodes);
 
-                        boolean save = plugin.getUserManager().giveDefaultIfNeeded(user, false);
+                    boolean save = plugin.getUserManager().giveDefaultIfNeeded(user, false);
 
-                        if (user.getName() == null || user.getName().equalsIgnoreCase("null")) {
-                            user.setName(name);
-                        } else {
-                            if (!name.equalsIgnoreCase(user.getName())) {
-                                save = true;
-                            }
+                    if (user.getName() == null || user.getName().equalsIgnoreCase("null")) {
+                        user.setName(name);
+                    } else {
+                        if (!name.equalsIgnoreCase(user.getName())) {
+                            save = true;
                         }
+                    }
 
-                        if (save) {
-                            saveUser(user);
-                        }
+                    if (save) {
+                        saveUser(user);
+                    }
 
-                        return true;
-                    });
+                    return true;
                 } else {
                     if (GenericUserManager.shouldSave(user)) {
                         user.clearNodes();
@@ -190,11 +243,10 @@ public class JSONBacking extends FlatfileBacking {
             for (File file : files) {
                 registerFileAction("users", file);
 
+                JsonObject object = readObjectFromFile(file);
+
                 Set<NodeModel> nodes = new HashSet<>();
-                readObjectFromFile(file, object -> {
-                   nodes.addAll(deserializePermissions(object.get("permissions").getAsJsonArray()));
-                   return true;
-                });
+                nodes.addAll(deserializePermissions(object.get("permissions").getAsJsonArray()));
 
                 boolean shouldDelete = false;
                 if (nodes.size() == 1) {
@@ -223,12 +275,11 @@ public class JSONBacking extends FlatfileBacking {
                 registerFileAction("users", file);
 
                 UUID holder = UUID.fromString(file.getName().substring(0, file.getName().length() - 5));
-                Set<NodeModel> nodes = new HashSet<>();
 
-                readObjectFromFile(file, object -> {
-                    nodes.addAll(deserializePermissions(object.get("permissions").getAsJsonArray()));
-                    return true;
-                });
+                JsonObject object = readObjectFromFile(file);
+
+                Set<NodeModel> nodes = new HashSet<>();
+                nodes.addAll(deserializePermissions(object.get("permissions").getAsJsonArray()));
 
                 for (NodeModel e : nodes) {
                     if (!e.getPermission().equalsIgnoreCase(permission)) {
@@ -253,12 +304,11 @@ public class JSONBacking extends FlatfileBacking {
                 registerFileAction("groups", groupFile);
 
                 if (groupFile.exists()) {
-                    return readObjectFromFile(groupFile, object -> {
-                        Set<NodeModel> data = deserializePermissions(object.get("permissions").getAsJsonArray());
-                        Set<Node> nodes = data.stream().map(NodeModel::toNode).collect(Collectors.toSet());
-                        group.setNodes(nodes);
-                        return true;
-                    });
+                    JsonObject object = readObjectFromFile(groupFile);
+                    Set<NodeModel> data = deserializePermissions(object.get("permissions").getAsJsonArray());
+                    Set<Node> nodes = data.stream().map(NodeModel::toNode).collect(Collectors.toSet());
+                    group.setNodes(nodes);
+                    return true;
                 } else {
                     try {
                         groupFile.createNewFile();
@@ -290,12 +340,15 @@ public class JSONBacking extends FlatfileBacking {
                 File groupFile = new File(groupsDir, name + ".json");
                 registerFileAction("groups", groupFile);
 
-                return groupFile.exists() && readObjectFromFile(groupFile, object -> {
-                    Set<NodeModel> data = deserializePermissions(object.get("permissions").getAsJsonArray());
-                    Set<Node> nodes = data.stream().map(NodeModel::toNode).collect(Collectors.toSet());
-                    group.setNodes(nodes);
-                    return true;
-                });
+                if (!groupFile.exists()) {
+                    return false;
+                }
+
+                JsonObject object = readObjectFromFile(groupFile);
+                Set<NodeModel> data = deserializePermissions(object.get("permissions").getAsJsonArray());
+                Set<Node> nodes = data.stream().map(NodeModel::toNode).collect(Collectors.toSet());
+                group.setNodes(nodes);
+                return true;
             }, false);
         } finally {
             group.getIoLock().unlock();
@@ -341,11 +394,11 @@ public class JSONBacking extends FlatfileBacking {
                 registerFileAction("groups", file);
 
                 String holder = file.getName().substring(0, file.getName().length() - 5);
+
+                JsonObject object = readObjectFromFile(file);
+
                 Set<NodeModel> nodes = new HashSet<>();
-                readObjectFromFile(file, element -> {
-                    nodes.addAll(deserializePermissions(element.get("permissions").getAsJsonArray()));
-                    return true;
-                });
+                nodes.addAll(deserializePermissions(object.get("permissions").getAsJsonArray()));
 
                 for (NodeModel e : nodes) {
                     if (!e.getPermission().equalsIgnoreCase(permission)) {
@@ -370,14 +423,13 @@ public class JSONBacking extends FlatfileBacking {
                 registerFileAction("tracks", trackFile);
 
                 if (trackFile.exists()) {
-                    return readObjectFromFile(trackFile, element -> {
-                        List<String> groups = new ArrayList<>();
-                        for (JsonElement g : element.get("groups").getAsJsonArray()) {
-                            groups.add(g.getAsString());
-                        }
-                        track.setGroups(groups);
-                        return true;
-                    });
+                    JsonObject object = readObjectFromFile(trackFile);
+                    List<String> groups = new ArrayList<>();
+                    for (JsonElement g : object.get("groups").getAsJsonArray()) {
+                        groups.add(g.getAsString());
+                    }
+                    track.setGroups(groups);
+                    return true;
                 } else {
                     try {
                         trackFile.createNewFile();
@@ -411,14 +463,17 @@ public class JSONBacking extends FlatfileBacking {
                 File trackFile = new File(tracksDir, name + ".json");
                 registerFileAction("tracks", trackFile);
 
-                return trackFile.exists() && readObjectFromFile(trackFile, element -> {
-                    List<String> groups = new ArrayList<>();
-                    for (JsonElement g : element.get("groups").getAsJsonArray()) {
-                        groups.add(g.getAsString());
-                    }
-                    track.setGroups(groups);
-                    return true;
-                });
+                if (!trackFile.exists()) {
+                    return false;
+                }
+
+                JsonObject object = readObjectFromFile(trackFile);
+                List<String> groups = new ArrayList<>();
+                for (JsonElement g : object.get("groups").getAsJsonArray()) {
+                    groups.add(g.getAsString());
+                }
+                track.setGroups(groups);
+                return true;
 
             }, false);
         } finally {

@@ -37,7 +37,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
@@ -67,13 +66,11 @@ public class LegacyYAMLSchemaMigration implements Runnable {
                     try {
                         File replacementFile = new File(newGroupsDir, oldFile.getName());
 
-                        AtomicReference<String> name = new AtomicReference<>(null);
+                        Map<String, Object> data = backing.readMapFromFile(oldFile);
+
                         Map<String, Boolean> perms = new HashMap<>();
-                        backing.readMapFromFile(oldFile, values -> {
-                            name.set((String) values.get("name"));
-                            perms.putAll((Map<String, Boolean>) values.get("perms"));
-                            return true;
-                        });
+                        String name = (String) data.get("name");
+                        perms.putAll((Map<String, Boolean>) data.get("perms"));
 
                         Set<NodeModel> nodes = perms.entrySet().stream()
                                 .map(e -> NodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
@@ -89,7 +86,7 @@ public class LegacyYAMLSchemaMigration implements Runnable {
                         }
 
                         Map<String, Object> values = new LinkedHashMap<>();
-                        values.put("name", name.get());
+                        values.put("name", name);
                         values.put("permissions", YAMLBacking.serializePermissions(nodes));
                         backing.writeMapToFile(replacementFile, values);
 
@@ -114,17 +111,13 @@ public class LegacyYAMLSchemaMigration implements Runnable {
                     try {
                         File replacementFile = new File(newUsersDir, oldFile.getName());
 
-                        AtomicReference<String> uuid = new AtomicReference<>(null);
-                        AtomicReference<String> name = new AtomicReference<>(null);
-                        AtomicReference<String> primaryGroup = new AtomicReference<>(null);
+                        Map<String, Object> data = backing.readMapFromFile(oldFile);
+
                         Map<String, Boolean> perms = new HashMap<>();
-                        backing.readMapFromFile(oldFile, values -> {
-                            uuid.set((String) values.get("uuid"));
-                            name.set((String) values.get("name"));
-                            primaryGroup.set((String) values.get("primary-group"));
-                            perms.putAll((Map<String, Boolean>) values.get("perms"));
-                            return true;
-                        });
+                        String uuid = (String) data.get("uuid");
+                        String name = (String) data.get("name");
+                        String primaryGroup = (String) data.get("primary-group");
+                        perms.putAll((Map<String, Boolean>) data.get("perms"));
 
                         Set<NodeModel> nodes = perms.entrySet().stream()
                                 .map(e -> NodeFactory.fromSerializedNode(e.getKey(), e.getValue()))
@@ -140,9 +133,9 @@ public class LegacyYAMLSchemaMigration implements Runnable {
                         }
 
                         Map<String, Object> values = new LinkedHashMap<>();
-                        values.put("uuid", uuid.get());
-                        values.put("name", name.get());
-                        values.put("primary-group", primaryGroup.get());
+                        values.put("uuid", uuid);
+                        values.put("name", name);
+                        values.put("primary-group", primaryGroup);
                         values.put("permissions", YAMLBacking.serializePermissions(nodes));
                         backing.writeMapToFile(replacementFile, values);
 
