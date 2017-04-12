@@ -119,11 +119,13 @@ public abstract class FlatfileBacking extends AbstractBacking {
 
     private void setupFiles() throws IOException {
         File data = new File(pluginDir, dataFolderName);
-        data.mkdirs();
 
-        // Perform schema migration
+        // Try to perform schema migration
         File oldData = new File(pluginDir, "data");
+
         if (!data.exists() && oldData.exists()) {
+            data.mkdirs();
+
             plugin.getLog().severe("===== Legacy Schema Migration =====");
             plugin.getLog().severe("Starting migration from legacy schema. This could take a while....");
             plugin.getLog().severe("Please do not stop your server while the migration takes place.");
@@ -141,6 +143,8 @@ public abstract class FlatfileBacking extends AbstractBacking {
                     e.printStackTrace();
                 }
             }
+        } else {
+            data.mkdirs();
         }
 
         usersDir = new File(data, "users");
