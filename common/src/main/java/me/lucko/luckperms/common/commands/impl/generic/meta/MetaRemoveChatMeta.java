@@ -56,8 +56,7 @@ public class MetaRemoveChatMeta extends SharedSubCommand {
                 Arg.list(
                         Arg.create("priority", true, "the priority to remove the " + DESCRIPTOR.apply(isPrefix) + " at"),
                         Arg.create(DESCRIPTOR.apply(isPrefix), false, "the " + DESCRIPTOR.apply(isPrefix) + " string"),
-                        Arg.create("server", false, "the server to remove the " + DESCRIPTOR.apply(isPrefix) + " on"),
-                        Arg.create("world", false, "the world to remove the " + DESCRIPTOR.apply(isPrefix) + " on")
+                        Arg.create("context...", false, "the contexts to remove the " + DESCRIPTOR.apply(isPrefix) + " in")
                 )
         );
         this.isPrefix = isPrefix;
