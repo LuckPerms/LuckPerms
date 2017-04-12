@@ -307,21 +307,17 @@ public enum Message {
     USER_PRIMARYGROUP_ERROR_ALREADYHAS("The user already has this group set as their primary group.", true),
     USER_PRIMARYGROUP_ERROR_NOTMEMBER("&b{0}&a was not already a member of &b{1}&a, adding them now.", true),
     USER_TRACK_ERROR_NOT_CONTAIN_GROUP("The user specified isn't already in any groups on this track.", true),
-    USER_TRACK_ADDED_TO_FIRST("&b{0}&a isn't in any groups on this track, so they were added to the first group, &b{1}&a.", true),
-    USER_TRACK_ADDED_TO_FIRST_SERVER("&b{0}&a isn't in any groups on this track, so they were added to the first group, &b{1}&a, on server &b{2}&a.", true),
-    USER_TRACK_ADDED_TO_FIRST_SERVER_WORLD("&b{0}&a isn't in any groups on this track, so they were added to the first group, &b{1}&a, on server &b{2}&a, world &b{3}&a.", true),
-    USER_PROMOTE_SUCCESS("&aPromoting user along track &b{0}&a from &b{1}&a to &b{2}&a.", true),
-    USER_PROMOTE_SUCCESS_SERVER("&aPromoting user along track &b{0}&a from &b{1}&a to &b{2}&a on server &b{3}&a.", true),
-    USER_PROMOTE_SUCCESS_SERVER_WORLD("&aPromoting user along track &b{0}&a from &b{1}&a to &b{2}&a on server &b{3}&a, world &b{4}&a.", true),
+
+    USER_TRACK_ADDED_TO_FIRST("&b{0}&a isn't in any groups on this track, so they were added to the first group, &b{1}&a in context {2}&a.", true),
+    USER_PROMOTE_SUCCESS("&aPromoting user along track &b{0}&a from &b{1}&a to &b{2}&a in context {3}&a.", true),
+
     USER_PROMOTE_ERROR_ENDOFTRACK("The end of track &4{0}&c was reached. Unable to promote user.", true),
     USER_PROMOTE_ERROR_MALFORMED(
             "{PREFIX}The next group on the track, {0}, no longer exists. Unable to promote user." + "\n" +
             "{PREFIX}Either create the group, or remove it from the track and try again.",
             false
     ),
-    USER_DEMOTE_SUCCESS("&aDemoting user along track &b{0}&a from &b{1}&a to &b{2}&a.", true),
-    USER_DEMOTE_SUCCESS_SERVER("&aDemoting user along track &b{0}&a from &b{1}&a to &b{2}&a on server &b{3}&a.", true),
-    USER_DEMOTE_SUCCESS_SERVER_WORLD("&aDemoting user along track &b{0}&a from &b{1}&a to &b{2}&a on server &b{3}&a, world &b{4}&a.", true),
+    USER_DEMOTE_SUCCESS("&aDemoting user along track &b{0}&a from &b{1}&a to &b{2}&a in context {3}&a.", true),
     USER_DEMOTE_ENDOFTRACK("The end of track &4{0}&c was reached, so &4{1}&c was removed from &4{2}&c.", true),
     USER_DEMOTE_ERROR_MALFORMED(
             "{PREFIX}The previous group on the track, {0}, no longer exists. Unable to demote user." + "\n" +

@@ -63,7 +63,7 @@ import java.util.stream.Collectors;
 public abstract class FlatfileBacking extends AbstractBacking {
     private static final String LOG_FORMAT = "%s(%s): [%s] %s(%s) --> %s";
 
-    private final Logger actionLogger = Logger.getLogger("lp_actions");
+    private final Logger actionLogger = Logger.getLogger("luckperms_actions");
     private Map<String, String> uuidCache = new ConcurrentHashMap<>();
 
     private final File pluginDir;

@@ -22,16 +22,14 @@
 
 package me.lucko.luckperms.common.commands.impl.user;
 
-import com.google.common.base.Objects;
-
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.ContextHelper;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
@@ -45,18 +43,16 @@ import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class UserDemote extends SubCommand<User> {
     public UserDemote() {
-        super("demote", "Demotes the user down a track", Permission.USER_DEMOTE, Predicates.notInRange(1, 3),
+        super("demote", "Demotes the user down a track", Permission.USER_DEMOTE, Predicates.is(0),
                 Arg.list(
                         Arg.create("track", true, "the track to demote the user down"),
-                        Arg.create("server", false, "the server to promote on"),
-                        Arg.create("world", false, "the world to promote on")
+                        Arg.create("context...", false, "the contexts to demote the user in")
                 )
         );
     }
@@ -85,32 +81,20 @@ public class UserDemote extends SubCommand<User> {
             return CommandResult.STATE_ERROR;
         }
 
-        String server = ArgumentUtils.handleServer(1, args);
-        String world = ArgumentUtils.handleWorld(2, args);
+        MutableContextSet context = ArgumentUtils.handleContext(1, args);
+        boolean silent = false;
+
+        if (args.contains("-s")) {
+            args.remove("-s");
+            silent = true;
+        }
 
         // Load applicable groups
-        Set<Node> nodes = new HashSet<>();
-        for (Node node : user.getNodes().values()) {
-            if (!node.isGroupNode()) {
-                continue;
-            }
-
-            if (!node.getValue()) {
-                continue;
-            }
-
-            String s = node.getServer().orElse(null);
-            if (!Objects.equal(s, server)) {
-                continue;
-            }
-
-            String w = node.getWorld().orElse(null);
-            if (!Objects.equal(w, world)) {
-                continue;
-            }
-
-            nodes.add(node);
-        }
+        Set<Node> nodes = user.getNodes().values().stream()
+                .filter(Node::isGroupNode)
+                .filter(Node::getValue)
+                .filter(node -> node.getFullContexts().makeImmutable().equals(context.makeImmutable()))
+                .collect(Collectors.toSet());
 
         nodes.removeIf(g -> !track.containsGroup(g.getGroupName()));
 
@@ -161,28 +145,21 @@ public class UserDemote extends SubCommand<User> {
         }
 
         user.unsetPermission(oldNode);
-        user.setPermission(NodeFactory.newBuilder("group." + previousGroup.getName()).setServer(server).setWorld(world).build());
+        user.setPermission(NodeFactory.newBuilder("group." + previousGroup.getName()).withExtraContext(context).build());
 
-        if (server == null && world == null && user.getPrimaryGroup().getStoredValue().equalsIgnoreCase(old)) {
+        if (context.isEmpty() && user.getPrimaryGroup().getStoredValue().equalsIgnoreCase(old)) {
             user.getPrimaryGroup().setStoredValue(previousGroup.getName());
         }
 
-        switch (ContextHelper.determine(server, world)) {
-            case NONE:
-                Message.USER_DEMOTE_SUCCESS.send(sender, track.getName(), old, previousGroup.getDisplayName());
-                break;
-            case SERVER:
-                Message.USER_DEMOTE_SUCCESS_SERVER.send(sender, track.getName(), old, previousGroup.getDisplayName(), server);
-                break;
-            case SERVER_AND_WORLD:
-                Message.USER_DEMOTE_SUCCESS_SERVER_WORLD.send(sender, track.getName(), old, previousGroup.getDisplayName(), server, world);
-                break;
+        Message.USER_DEMOTE_SUCCESS.send(sender, track.getName(), old, previousGroup.getDisplayName(), Util.contextSetToString(context));
+        if (!silent) {
+            Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), previousGroup.getDisplayName(), old, true));
         }
 
-        Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), previousGroup.getDisplayName(), old, true));
         LogEntry.build().actor(sender).acted(user)
                 .action("demote " + args.stream().collect(Collectors.joining(" ")))
                 .build().submit(plugin, sender);
+
         save(user, sender, plugin);
         plugin.getApiProvider().getEventFactory().handleUserDemote(user, track, old, previousGroup.getName());
         return CommandResult.SUCCESS;

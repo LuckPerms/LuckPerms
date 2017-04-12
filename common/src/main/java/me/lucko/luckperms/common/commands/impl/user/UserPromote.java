@@ -22,16 +22,14 @@
 
 package me.lucko.luckperms.common.commands.impl.user;
 
-import com.google.common.base.Objects;
-
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.commands.utils.ContextHelper;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
@@ -45,18 +43,16 @@ import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class UserPromote extends SubCommand<User> {
     public UserPromote() {
-        super("promote", "Promotes the user up a track", Permission.USER_PROMOTE, Predicates.notInRange(1, 3),
+        super("promote", "Promotes the user up a track", Permission.USER_PROMOTE, Predicates.is(0),
                 Arg.list(
                         Arg.create("track", true, "the track to promote the user up"),
-                        Arg.create("server", false, "the server to promote on"),
-                        Arg.create("world", false, "the world to promote on")
+                        Arg.create("context...", false, "the contexts to promote the user in")
                 )
         );
     }
@@ -85,32 +81,20 @@ public class UserPromote extends SubCommand<User> {
             return CommandResult.STATE_ERROR;
         }
 
-        String server = ArgumentUtils.handleServer(1, args);
-        String world = ArgumentUtils.handleWorld(2, args);
+        MutableContextSet context = ArgumentUtils.handleContext(1, args);
+        boolean silent = false;
+
+        if (args.contains("-s")) {
+            args.remove("-s");
+            silent = true;
+        }
 
         // Load applicable groups
-        Set<Node> nodes = new HashSet<>();
-        for (Node node : user.getNodes().values()) {
-            if (!node.isGroupNode()) {
-                continue;
-            }
-
-            if (!node.getValue()) {
-                continue;
-            }
-
-            String s = node.getServer().orElse(null);
-            if (!Objects.equal(s, server)) {
-                continue;
-            }
-
-            String w = node.getWorld().orElse(null);
-            if (!Objects.equal(w, world)) {
-                continue;
-            }
-
-            nodes.add(node);
-        }
+        Set<Node> nodes = user.getNodes().values().stream()
+                .filter(Node::isGroupNode)
+                .filter(Node::getValue)
+                .filter(node -> node.getFullContexts().makeImmutable().equals(context.makeImmutable()))
+                .collect(Collectors.toSet());
 
         nodes.removeIf(g -> !track.containsGroup(g.getGroupName()));
 
@@ -123,26 +107,14 @@ public class UserPromote extends SubCommand<User> {
                 return CommandResult.LOADING_ERROR;
             }
 
-            user.setPermission(NodeFactory.newBuilder("group." + first).setServer(server).setWorld(world).build());
+            user.setPermission(NodeFactory.newBuilder("group." + first).withExtraContext(context).build());
 
-            switch (ContextHelper.determine(server, world)) {
-                case NONE:
-                    Message.USER_TRACK_ADDED_TO_FIRST.send(sender, user.getName(), first);
-                    break;
-                case SERVER:
-                    Message.USER_TRACK_ADDED_TO_FIRST_SERVER.send(sender, user.getName(), first, server);
-                    break;
-                case SERVER_AND_WORLD:
-                    Message.USER_TRACK_ADDED_TO_FIRST_SERVER_WORLD.send(sender, user.getName(), first, server, world);
-                    break;
-            }
-
+            Message.USER_TRACK_ADDED_TO_FIRST.send(sender, user.getName(), first, Util.contextSetToString(context));
             LogEntry.build().actor(sender).acted(user)
                     .action("promote " + args.stream().collect(Collectors.joining(" ")))
                     .build().submit(plugin, sender);
             save(user, sender, plugin);
             plugin.getApiProvider().getEventFactory().handleUserPromote(user, track, null, first);
-
             return CommandResult.SUCCESS;
         }
 
@@ -178,25 +150,17 @@ public class UserPromote extends SubCommand<User> {
         }
 
         user.unsetPermission(oldNode);
-        user.setPermission(NodeFactory.newBuilder("group." + nextGroup.getName()).setServer(server).setWorld(world).build());
+        user.setPermission(NodeFactory.newBuilder("group." + nextGroup.getName()).withExtraContext(context).build());
 
-        if (server == null && world == null && user.getPrimaryGroup().getStoredValue().equalsIgnoreCase(old)) {
+        if (context.isEmpty() && user.getPrimaryGroup().getStoredValue().equalsIgnoreCase(old)) {
             user.getPrimaryGroup().setStoredValue(nextGroup.getName());
         }
 
-        switch (ContextHelper.determine(server, world)) {
-            case NONE:
-                Message.USER_PROMOTE_SUCCESS.send(sender, track.getName(), old, nextGroup.getDisplayName());
-                break;
-            case SERVER:
-                Message.USER_PROMOTE_SUCCESS_SERVER.send(sender, track.getName(), old, nextGroup.getDisplayName(), server);
-                break;
-            case SERVER_AND_WORLD:
-                Message.USER_PROMOTE_SUCCESS_SERVER_WORLD.send(sender, track.getName(), old, nextGroup.getDisplayName(), server, world);
-                break;
+        Message.USER_PROMOTE_SUCCESS.send(sender, track.getName(), old, nextGroup.getDisplayName(), Util.contextSetToString(context));
+        if (!silent) {
+            Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), old, nextGroup.getDisplayName(), false));
         }
 
-        Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), old, nextGroup.getDisplayName(), false));
         LogEntry.build().actor(sender).acted(user)
                 .action("promote " + args.stream().collect(Collectors.joining(" ")))
                 .build().submit(plugin, sender);
