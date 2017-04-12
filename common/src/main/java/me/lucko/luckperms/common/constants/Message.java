@@ -300,7 +300,6 @@ public enum Message {
 
     INFO_PARENT_HEADER("&f- &aParent Groups:", true),
     INFO_TEMP_PARENT_HEADER("&f- &aTemporary Parent Groups:", true),
-    USER_GETUUID("&bThe UUID of &b{0}&b is &b{1}&b.", true),
     USER_REMOVEGROUP_ERROR_PRIMARY("You cannot remove a user from their primary group.", true),
     USER_PRIMARYGROUP_SUCCESS("&b{0}&a's primary group was set to &b{1}&a.", true),
     USER_PRIMARYGROUP_WARN_OPTION("&cWarning: The primary group calculation method being used by this server &7({0}) &cmay not reflect this change.", true),

@@ -84,7 +84,6 @@ public enum Permission {
     USER_META_REMOVETEMP_PREFIX(list("meta.removetempprefix", "removetempprefix"), Type.USER),
     USER_META_REMOVETEMP_SUFFIX(list("meta.removetempsuffix", "removetempsuffix"), Type.USER),
     USER_META_CLEAR(list("meta.clear", "clearmeta"), Type.USER),
-    USER_GETUUID(list("getuuid"), Type.USER),
     USER_SWITCHPRIMARYGROUP(list("switchprimarygroup", "setprimarygroup"), Type.USER),
     USER_SHOWTRACKS(list("showtracks"), Type.USER),
     USER_PROMOTE(list("promote"), Type.USER),
