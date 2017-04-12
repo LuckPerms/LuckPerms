@@ -98,27 +98,30 @@ public class YAMLBacking extends FlatfileBacking {
 
     @Override
     public boolean applyBulkUpdate(BulkUpdate bulkUpdate) {
-        return call(() -> {
+        return call("null", () -> {
             if (bulkUpdate.getDataType().isIncludingUsers()) {
                 File[] files = usersDir.listFiles((dir, name1) -> name1.endsWith(".yml"));
                 if (files == null) return false;
 
                 for (File file : files) {
-                    registerFileAction("users", file);
+                    call(file.getName(), () -> {
+                        registerFileAction("users", file);
 
-                    Map<String, Object> values = readMapFromFile(file);
+                        Map<String, Object> values = readMapFromFile(file);
 
-                    Set<NodeModel> nodes = new HashSet<>();
-                    nodes.addAll(deserializePermissions((List<Object>) values.get("permissions")));
+                        Set<NodeModel> nodes = new HashSet<>();
+                        nodes.addAll(deserializePermissions((List<Object>) values.get("permissions")));
 
-                    Set<NodeModel> results = nodes.stream()
-                            .map(n -> Optional.ofNullable(bulkUpdate.apply(n)))
-                            .filter(Optional::isPresent)
-                            .map(Optional::get)
-                            .collect(Collectors.toSet());
+                        Set<NodeModel> results = nodes.stream()
+                                .map(n -> Optional.ofNullable(bulkUpdate.apply(n)))
+                                .filter(Optional::isPresent)
+                                .map(Optional::get)
+                                .collect(Collectors.toSet());
 
-                    values.put("permissions", serializePermissions(results));
-                    writeMapToFile(file, values);
+                        values.put("permissions", serializePermissions(results));
+                        writeMapToFile(file, values);
+                        return true;
+                    }, true);
                 }
             }
 
@@ -127,21 +130,24 @@ public class YAMLBacking extends FlatfileBacking {
                 if (files == null) return false;
 
                 for (File file : files) {
-                    registerFileAction("groups", file);
+                    call(file.getName(), () -> {
+                        registerFileAction("groups", file);
 
-                    Map<String, Object> values = readMapFromFile(file);
+                        Map<String, Object> values = readMapFromFile(file);
 
-                    Set<NodeModel> nodes = new HashSet<>();
-                    nodes.addAll(deserializePermissions((List<Object>) values.get("permissions")));
+                        Set<NodeModel> nodes = new HashSet<>();
+                        nodes.addAll(deserializePermissions((List<Object>) values.get("permissions")));
 
-                    Set<NodeModel> results = nodes.stream()
-                            .map(n -> Optional.ofNullable(bulkUpdate.apply(n)))
-                            .filter(Optional::isPresent)
-                            .map(Optional::get)
-                            .collect(Collectors.toSet());
+                        Set<NodeModel> results = nodes.stream()
+                                .map(n -> Optional.ofNullable(bulkUpdate.apply(n)))
+                                .filter(Optional::isPresent)
+                                .map(Optional::get)
+                                .collect(Collectors.toSet());
 
-                    values.put("permissions", serializePermissions(results));
-                    writeMapToFile(file, values);
+                        values.put("permissions", serializePermissions(results));
+                        writeMapToFile(file, values);
+                        return true;
+                    }, true);
                 }
             }
 
@@ -154,7 +160,7 @@ public class YAMLBacking extends FlatfileBacking {
         User user = plugin.getUserManager().getOrMake(UserIdentifier.of(uuid, username));
         user.getIoLock().lock();
         try {
-            return call(() -> {
+            return call(uuid.toString(), () -> {
                 File userFile = new File(usersDir, uuid.toString() + ".yml");
                 registerFileAction("users", userFile);
                 if (userFile.exists()) {
@@ -201,7 +207,7 @@ public class YAMLBacking extends FlatfileBacking {
     public boolean saveUser(User user) {
         user.getIoLock().lock();
         try {
-            return call(() -> {
+            return call(user.getUuid().toString(), () -> {
                 File userFile = new File(usersDir, user.getUuid().toString() + ".yml");
                 registerFileAction("users", userFile);
                 if (!GenericUserManager.shouldSave(user)) {
@@ -237,29 +243,32 @@ public class YAMLBacking extends FlatfileBacking {
 
     @Override
     public boolean cleanupUsers() {
-        return call(() -> {
+        return call("null", () -> {
             File[] files = usersDir.listFiles((dir, name1) -> name1.endsWith(".yml"));
             if (files == null) return false;
 
             for (File file : files) {
-                registerFileAction("users", file);
+                call(file.getName(), () -> {
+                    registerFileAction("users", file);
 
-                Map<String, Object> values = readMapFromFile(file);
+                    Map<String, Object> values = readMapFromFile(file);
 
-                Set<NodeModel> nodes = new HashSet<>();
-                nodes.addAll(deserializePermissions((List<Object>) values.get("permissions")));
+                    Set<NodeModel> nodes = new HashSet<>();
+                    nodes.addAll(deserializePermissions((List<Object>) values.get("permissions")));
 
-                boolean shouldDelete = false;
-                if (nodes.size() == 1) {
-                    for (NodeModel e : nodes) {
-                        // There's only one
-                        shouldDelete = e.getPermission().equalsIgnoreCase("group.default") && e.isValue();
+                    boolean shouldDelete = false;
+                    if (nodes.size() == 1) {
+                        for (NodeModel e : nodes) {
+                            // There's only one
+                            shouldDelete = e.getPermission().equalsIgnoreCase("group.default") && e.isValue();
+                        }
                     }
-                }
 
-                if (shouldDelete) {
-                    file.delete();
-                }
+                    if (shouldDelete) {
+                        file.delete();
+                    }
+                    return true;
+                }, true);
             }
             return true;
         }, false);
@@ -268,27 +277,30 @@ public class YAMLBacking extends FlatfileBacking {
     @Override
     public List<HeldPermission<UUID>> getUsersWithPermission(String permission) {
         ImmutableList.Builder<HeldPermission<UUID>> held = ImmutableList.builder();
-        boolean success = call(() -> {
+        boolean success = call("null", () -> {
             File[] files = usersDir.listFiles((dir, name1) -> name1.endsWith(".yml"));
             if (files == null) return false;
 
             for (File file : files) {
-                registerFileAction("users", file);
+                call(file.getName(), () -> {
+                    registerFileAction("users", file);
 
-                UUID holder = UUID.fromString(file.getName().substring(0, file.getName().length() - 4));
+                    UUID holder = UUID.fromString(file.getName().substring(0, file.getName().length() - 4));
 
-                Map<String, Object> values = readMapFromFile(file);
+                    Map<String, Object> values = readMapFromFile(file);
 
-                Set<NodeModel> nodes = new HashSet<>();
-                nodes.addAll(deserializePermissions((List<Object>) values.get("permissions")));
+                    Set<NodeModel> nodes = new HashSet<>();
+                    nodes.addAll(deserializePermissions((List<Object>) values.get("permissions")));
 
-                for (NodeModel e : nodes) {
-                    if (!e.getPermission().equalsIgnoreCase(permission)) {
-                        continue;
+                    for (NodeModel e : nodes) {
+                        if (!e.getPermission().equalsIgnoreCase(permission)) {
+                            continue;
+                        }
+
+                        held.add(NodeHeldPermission.of(holder, e));
                     }
-
-                    held.add(NodeHeldPermission.of(holder, e));
-                }
+                    return true;
+                }, true);
             }
             return true;
         }, false);
@@ -300,7 +312,7 @@ public class YAMLBacking extends FlatfileBacking {
         Group group = plugin.getGroupManager().getOrMake(name);
         group.getIoLock().lock();
         try {
-            return call(() -> {
+            return call(name, () -> {
                 File groupFile = new File(groupsDir, name + ".yml");
                 registerFileAction("groups", groupFile);
 
@@ -335,7 +347,7 @@ public class YAMLBacking extends FlatfileBacking {
         Group group = plugin.getGroupManager().getOrMake(name);
         group.getIoLock().lock();
         try {
-            return call(() -> {
+            return call(name, () -> {
                 File groupFile = new File(groupsDir, name + ".yml");
                 registerFileAction("groups", groupFile);
 
@@ -358,7 +370,7 @@ public class YAMLBacking extends FlatfileBacking {
     public boolean saveGroup(Group group) {
         group.getIoLock().lock();
         try {
-            return call(() -> {
+            return call(group.getName(), () -> {
                 File groupFile = new File(groupsDir, group.getName() + ".yml");
                 registerFileAction("groups", groupFile);
 
@@ -385,27 +397,31 @@ public class YAMLBacking extends FlatfileBacking {
     @Override
     public List<HeldPermission<String>> getGroupsWithPermission(String permission) {
         ImmutableList.Builder<HeldPermission<String>> held = ImmutableList.builder();
-        boolean success = call(() -> {
+        boolean success = call("null", () -> {
             File[] files = groupsDir.listFiles((dir, name1) -> name1.endsWith(".yml"));
             if (files == null) return false;
 
             for (File file : files) {
-                registerFileAction("groups", file);
+                call(file.getName(), () -> {
+                    registerFileAction("groups", file);
 
-                String holder = file.getName().substring(0, file.getName().length() - 4);
+                    String holder = file.getName().substring(0, file.getName().length() - 4);
 
-                Map<String, Object> values = readMapFromFile(file);
+                    Map<String, Object> values = readMapFromFile(file);
 
-                Set<NodeModel> nodes = new HashSet<>();
-                nodes.addAll(deserializePermissions((List<Object>) values.get("permissions")));
+                    Set<NodeModel> nodes = new HashSet<>();
+                    nodes.addAll(deserializePermissions((List<Object>) values.get("permissions")));
 
-                for (NodeModel e : nodes) {
-                    if (!e.getPermission().equalsIgnoreCase(permission)) {
-                        continue;
+                    for (NodeModel e : nodes) {
+                        if (!e.getPermission().equalsIgnoreCase(permission)) {
+                            continue;
+                        }
+
+                        held.add(NodeHeldPermission.of(holder, e));
                     }
 
-                    held.add(NodeHeldPermission.of(holder, e));
-                }
+                    return true;
+                }, true);
             }
             return true;
         }, false);
@@ -417,7 +433,7 @@ public class YAMLBacking extends FlatfileBacking {
         Track track = plugin.getTrackManager().getOrMake(name);
         track.getIoLock().lock();
         try {
-            return call(() -> {
+            return call(name, () -> {
                 File trackFile = new File(tracksDir, name + ".yml");
                 registerFileAction("tracks", trackFile);
 
@@ -450,7 +466,7 @@ public class YAMLBacking extends FlatfileBacking {
         Track track = plugin.getTrackManager().getOrMake(name);
         track.getIoLock().lock();
         try {
-            return call(() -> {
+            return call(name, () -> {
                 File trackFile = new File(tracksDir, name + ".yml");
                 registerFileAction("tracks", trackFile);
 
@@ -471,7 +487,7 @@ public class YAMLBacking extends FlatfileBacking {
     public boolean saveTrack(Track track) {
         track.getIoLock().lock();
         try {
-            return call(() -> {
+            return call(track.getName(), () -> {
                 File trackFile = new File(tracksDir, track.getName() + ".yml");
                 registerFileAction("tracks", trackFile);
 

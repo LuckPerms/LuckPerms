@@ -63,15 +63,6 @@ import java.util.stream.Collectors;
 public abstract class FlatfileBacking extends AbstractBacking {
     private static final String LOG_FORMAT = "%s(%s): [%s] %s(%s) --> %s";
 
-    protected static <T> T call(Callable<T> c, T def) {
-        try {
-            return c.call();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return def;
-        }
-    }
-
     private final Logger actionLogger = Logger.getLogger("lp_actions");
     private Map<String, String> uuidCache = new ConcurrentHashMap<>();
 
@@ -216,6 +207,16 @@ public abstract class FlatfileBacking extends AbstractBacking {
         plugin.applyToFileWatcher(fileWatcher -> fileWatcher.registerChange(type, file.getName()));
     }
 
+    protected <T> T call(String file, Callable<T> c, T def) {
+        try {
+            return c.call();
+        } catch (Exception e) {
+            plugin.getLog().warn("Exception thrown whilst performing i/o: " + file);
+            e.printStackTrace();
+            return def;
+        }
+    }
+
     @Override
     public boolean logAction(LogEntry entry) {
         actionLogger.info(String.format(LOG_FORMAT,
@@ -266,7 +267,7 @@ public abstract class FlatfileBacking extends AbstractBacking {
     public boolean deleteGroup(Group group) {
         group.getIoLock().lock();
         try {
-            return call(() -> {
+            return call(group.getName(), () -> {
                 File groupFile = new File(groupsDir, group.getName() + fileExtension);
                 registerFileAction("groups", groupFile);
 
@@ -301,7 +302,7 @@ public abstract class FlatfileBacking extends AbstractBacking {
     public boolean deleteTrack(Track track) {
         track.getIoLock().lock();
         try {
-            return call(() -> {
+            return call(track.getName(), () -> {
                 File trackFile = new File(tracksDir, track.getName() + fileExtension);
                 registerFileAction("tracks", trackFile);
 
