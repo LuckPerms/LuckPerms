@@ -123,7 +123,7 @@ public abstract class FlatfileBacking extends AbstractBacking {
 
         // Perform schema migration
         File oldData = new File(pluginDir, "data");
-        if (oldData.exists()) {
+        if (!data.exists() && oldData.exists()) {
             plugin.getLog().severe("===== Legacy Schema Migration =====");
             plugin.getLog().severe("Starting migration from legacy schema. This could take a while....");
             plugin.getLog().severe("Please do not stop your server while the migration takes place.");
