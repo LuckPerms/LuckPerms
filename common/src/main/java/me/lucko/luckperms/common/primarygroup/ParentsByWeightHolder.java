@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.primarygroup;
 
+import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.User;
@@ -49,7 +50,8 @@ public class ParentsByWeightHolder extends StoredHolder {
             return cachedValue;
         }
 
-        cachedValue = user.mergePermissionsToList().stream()
+        Contexts contexts = user.getPlugin().getContextForUser(user);
+        cachedValue = user.flattenAndMergeNodesToList(contexts.getContexts()).stream()
                 .filter(Node::isGroupNode)
                 .filter(Node::getValue)
                 .map(n -> Optional.ofNullable(user.getPlugin().getGroupManager().getIfLoaded(n.getGroupName())))
