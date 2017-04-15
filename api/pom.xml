@@ -12,6 +12,15 @@
     <artifactId>luckperms-api</artifactId>
     <build>
         <finalName>LuckPerms-API-${release.version}</finalName>
+        <resources>
+            <resource>
+                <directory>../</directory>
+                <filtering>false</filtering>
+                <includes>
+                    <include>LICENSE.txt</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

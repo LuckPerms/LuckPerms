@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 2016 Lucko (Luck) <luck@lucko.me>
+ * This file is part of LuckPerms, licensed under the MIT License.
+ *
+ *  Copyright (c) lucko (Luck) <luck@lucko.me>
+ *  Copyright (c) contributors
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -141,7 +144,7 @@ public class SQLBacking extends AbstractBacking {
 
             // Init tables
             if (!tableExists(prefix.apply("{prefix}user_permissions"))) {
-                String schemaFileName = "lp-schema-" + provider.getName().toLowerCase() + ".sql";
+                String schemaFileName = "schema/" + provider.getName().toLowerCase() + ".sql";
                 try (InputStream is = plugin.getResourceStream(schemaFileName)) {
                     if (is == null) {
                         throw new Exception("Couldn't locate schema file for " + provider.getName());

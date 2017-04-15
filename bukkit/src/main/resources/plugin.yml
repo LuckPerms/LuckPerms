@@ -16,8 +16,8 @@ softdepend: [LilyPad-Connect]
 commands:
   luckperms:
     description: Manage permissions
-    aliases: [perms, permissions, lp, perm]
+    aliases: [lp, perm, perms, permission, permissions]
 
 
 # Permissions are registered programmatically instead of here.
-# See: the last method in me.lucko.luckperms.bukkit.LPBukkitPlugin
+# See the last method in me.lucko.luckperms.bukkit.LPBukkitPlugin

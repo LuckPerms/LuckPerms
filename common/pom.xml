@@ -13,7 +13,7 @@
     <packaging>jar</packaging>
 
     <build>
-        <finalName>LuckPerms-Common-${release.version}.${patch.version}</finalName>
+        <finalName>LuckPerms-Common-${full.version}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -42,13 +42,6 @@
             <version>1.2.5</version>
             <scope>compile</scope>
         </dependency>
-        <!-- MySQL -->
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.40</version>
-            <scope>provided</scope>
-        </dependency>
         <!-- HikariCP -->
         <dependency>
             <groupId>com.zaxxer</groupId>
@@ -63,39 +56,11 @@
             <version>2.9.1-shaded</version>
             <scope>provided</scope>
         </dependency>
-        <!-- SQLite -->
-        <dependency>
-            <groupId>org.xerial</groupId>
-            <artifactId>sqlite-jdbc</artifactId>
-            <version>3.8.11.2</version>
-            <scope>provided</scope>
-        </dependency>
-        <!-- H2 -->
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <version>1.4.192</version>
-            <scope>provided</scope>
-        </dependency>
-        <!-- PostgreSQL -->
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>9.4.1212</version>
-            <scope>provided</scope>
-        </dependency>
         <!-- MongoDB -->
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongo-java-driver</artifactId>
             <version>3.3.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <!-- slf4j -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>1.7.9</version>
             <scope>provided</scope>
         </dependency>
         <!-- SnakeYAML -->

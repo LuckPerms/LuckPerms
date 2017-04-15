@@ -14,19 +14,11 @@
 
     <build>
         <defaultGoal>clean package</defaultGoal>
-        <finalName>LuckPerms-Sponge-${release.version}.${patch.version}</finalName>
-        <sourceDirectory>${basedir}/src/main/java</sourceDirectory>
+        <finalName>LuckPerms-Sponge-${full.version}</finalName>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
-            </resource>
-            <resource>
-                <directory>../</directory>
-                <filtering>false</filtering>
-                <includes>
-                    <include>LICENSE.txt</include>
-                </includes>
             </resource>
         </resources>
         <plugins>
@@ -108,4 +100,5 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
+
 </project>

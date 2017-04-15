@@ -14,19 +14,11 @@
 
     <build>
         <defaultGoal>clean package</defaultGoal>
-        <finalName>LuckPerms-Bungee-${release.version}.${patch.version}</finalName>
-        <sourceDirectory>${basedir}/src/main/java</sourceDirectory>
+        <finalName>LuckPerms-Bungee-${full.version}</finalName>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
-            </resource>
-            <resource>
-                <directory>../</directory>
-                <filtering>false</filtering>
-                <includes>
-                    <include>LICENSE.txt</include>
-                </includes>
             </resource>
         </resources>
         <plugins>
@@ -66,7 +58,7 @@
     </build>
 
     <dependencies>
-        <!-- BungeeCord API -->
+        <!-- BungeeCord -->
         <dependency>
             <groupId>net.md-5</groupId>
             <artifactId>bungeecord-api</artifactId>
@@ -94,12 +86,39 @@
             <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
-        <!-- **************Migration Plugins************** -->
+        <!-- ************** Migration Plugins ************** -->
+        <!-- BungeePerms -->
         <dependency>
             <groupId>net.alpenblock</groupId>
             <artifactId>BungeePerms</artifactId>
-            <version>3.0-dev-52</version>
+            <version>3.0</version>
             <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>net.md-5</groupId>
+                    <artifactId>bungeecord-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.projectlombok</groupId>
+                    <artifactId>lombok</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.spigotmc</groupId>
+                    <artifactId>spigot-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.sk89q</groupId>
+                    <artifactId>worldedit</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>net.milkbowl.vault</groupId>
+                    <artifactId>Vault</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>net.ess3</groupId>
+                    <artifactId>Essentials</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 

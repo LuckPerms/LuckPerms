@@ -12,16 +12,7 @@
     <artifactId>luckperms-bukkit-legacy</artifactId>
     <build>
         <defaultGoal>clean package</defaultGoal>
-        <finalName>LuckPerms-Bukkit-Legacy-${release.version}.${patch.version}</finalName>
-        <resources>
-            <resource>
-                <directory>../</directory>
-                <filtering>false</filtering>
-                <includes>
-                    <include>LICENSE.txt</include>
-                </includes>
-            </resource>
-        </resources>
+        <finalName>LuckPerms-Bukkit-Legacy-${full.version}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

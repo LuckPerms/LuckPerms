@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 2016 Lucko (Luck) <luck@lucko.me>
+ * This file is part of LuckPerms, licensed under the MIT License.
+ *
+ *  Copyright (c) lucko (Luck) <luck@lucko.me>
+ *  Copyright (c) contributors
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -253,7 +256,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         getLog().info("Registering commands...");
         CommandManager cmdService = game.getCommandManager();
         commandManager = new SpongeCommand(this);
-        cmdService.register(this, commandManager, "luckperms", "perms", "lp", "permissions", "perm");
+        cmdService.register(this, commandManager, "luckperms", "lp", "perm", "perms", "permission", "permissions");
 
         // load internal managers
         getLog().info("Loading internal permission managers...");

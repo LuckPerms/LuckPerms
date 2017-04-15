@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 2016 Lucko (Luck) <luck@lucko.me>
+ * This file is part of LuckPerms, licensed under the MIT License.
+ *
+ *  Copyright (c) lucko (Luck) <luck@lucko.me>
+ *  Copyright (c) contributors
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -259,7 +262,8 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         PluginCommand main = getServer().getPluginCommand("luckperms");
         main.setExecutor(commandManager);
         main.setTabCompleter(commandManager);
-        main.setAliases(Arrays.asList("perms", "lp", "permissions", "perm"));
+        main.setDescription("Manage permissions");
+        main.setAliases(Arrays.asList("lp", "perm", "perms", "permission", "permissions"));
 
         // load internal managers
         getLog().info("Loading internal permission managers...");
