@@ -39,6 +39,7 @@ import java.util.concurrent.TimeUnit;
 public class ContextManager<T> {
 
     private final List<ContextCalculator<T>> calculators = new CopyOnWriteArrayList<>();
+    private final List<ContextCalculator<?>> staticCalculators = new CopyOnWriteArrayList<>();
 
     private final LoadingCache<T, ContextSet> cache = Caffeine.newBuilder()
             .weakKeys()
@@ -59,6 +60,18 @@ public class ContextManager<T> {
     public void registerCalculator(ContextCalculator<T> calculator) {
         // calculators registered first should have priority (and be checked last.)
         calculators.add(0, calculator);
+    }
+
+    public void registerStaticCalculator(ContextCalculator<?> calculator) {
+        staticCalculators.add(0, calculator);
+    }
+
+    public ContextSet getStaticContexts() {
+        MutableContextSet accumulator = MutableContextSet.create();
+        for (ContextCalculator<?> calculator : staticCalculators) {
+            calculator.giveApplicableContext(null, accumulator);
+        }
+        return accumulator.makeImmutable();
     }
 
     public int getCalculatorsSize() {

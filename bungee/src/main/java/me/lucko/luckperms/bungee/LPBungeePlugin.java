@@ -220,7 +220,10 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         contextManager = new ContextManager<>();
         BackendServerCalculator serverCalculator = new BackendServerCalculator();
         contextManager.registerCalculator(serverCalculator);
-        contextManager.registerCalculator(new StaticCalculator<>(configuration));
+
+        StaticCalculator<ProxiedPlayer> staticCalculator = new StaticCalculator<>(getConfiguration());
+        contextManager.registerCalculator(staticCalculator);
+        contextManager.registerStaticCalculator(staticCalculator);
 
         // register with the LP API
         getLog().info("Registering API...");

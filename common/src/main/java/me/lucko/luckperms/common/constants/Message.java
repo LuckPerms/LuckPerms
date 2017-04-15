@@ -409,7 +409,7 @@ public enum Message {
     private static String format(String s, Object... objects) {
         for (int i = 0; i < objects.length; i++) {
             Object o = objects[i];
-            s = s.replace("{" + i + "}", o.toString());
+            s = s.replace("{" + i + "}", String.valueOf(o));
         }
         return s;
     }

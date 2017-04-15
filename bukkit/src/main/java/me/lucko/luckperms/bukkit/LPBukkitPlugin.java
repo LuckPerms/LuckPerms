@@ -277,7 +277,10 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         contextManager = new ContextManager<>();
         worldCalculator = new WorldCalculator(this);
         contextManager.registerCalculator(worldCalculator);
-        contextManager.registerCalculator(new StaticCalculator<>(getConfiguration()));
+
+        StaticCalculator<Player> staticCalculator = new StaticCalculator<>(getConfiguration());
+        contextManager.registerCalculator(staticCalculator);
+        contextManager.registerStaticCalculator(staticCalculator);
 
         // Provide vault support
         tryVaultHook(false);

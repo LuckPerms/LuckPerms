@@ -25,8 +25,11 @@
 
 package me.lucko.luckperms.common.primarygroup;
 
+import lombok.NonNull;
+
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.utils.ExtractedContexts;
@@ -40,7 +43,7 @@ public class AllParentsByWeightHolder extends StoredHolder {
     private String cachedValue = null;
     private boolean useCached = false;
 
-    public AllParentsByWeightHolder(User user) {
+    public AllParentsByWeightHolder(@NonNull User user) {
         super(user);
         user.getStateListeners().add(() -> useCached = false);
     }
@@ -52,7 +55,8 @@ public class AllParentsByWeightHolder extends StoredHolder {
         }
 
         Contexts contexts = user.getPlugin().getContextForUser(user);
-        cachedValue = user.resolveInheritancesAlmostEqual(ExtractedContexts.generate(contexts)).stream()
+        ContextSet contextSet = contexts != null ? contexts.getContexts() : user.getPlugin().getContextManager().getStaticContexts();
+        cachedValue = user.resolveInheritancesAlmostEqual(ExtractedContexts.generate(contextSet)).stream()
                 .filter(Node::isGroupNode)
                 .filter(Node::getValue)
                 .map(n -> Optional.ofNullable(user.getPlugin().getGroupManager().getIfLoaded(n.getGroupName())))
