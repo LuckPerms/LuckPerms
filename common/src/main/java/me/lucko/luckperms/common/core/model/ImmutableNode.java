@@ -57,7 +57,6 @@ import java.util.stream.Collectors;
 /**
  * An immutable permission node
  */
-@SuppressWarnings("OptionalGetWithoutIsPresent")
 @ToString(of = {"permission", "value", "override", "server", "world", "expireAt", "contexts"})
 @EqualsAndHashCode(of = {"permission", "value", "override", "server", "world", "expireAt", "contexts"})
 public final class ImmutableNode implements Node {
@@ -193,6 +192,7 @@ public final class ImmutableNode implements Node {
      * @param world      the world this node applies on
      * @param contexts   any additional contexts applying to this node
      */
+    @SuppressWarnings("deprecation")
     public ImmutableNode(String permission, boolean value, boolean override, long expireAt, String server, String world, ContextSet contexts) {
         if (permission == null || permission.equals("")) {
             throw new IllegalArgumentException("Empty permission");

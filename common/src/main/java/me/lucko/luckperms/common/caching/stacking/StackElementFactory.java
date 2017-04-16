@@ -28,9 +28,11 @@ package me.lucko.luckperms.common.caching.stacking;
 import lombok.experimental.UtilityClass;
 
 import me.lucko.luckperms.common.caching.stacking.elements.HighestPriorityElement;
+import me.lucko.luckperms.common.caching.stacking.elements.HighestPriorityNotOnTrackElement;
 import me.lucko.luckperms.common.caching.stacking.elements.HighestPriorityOwnElement;
 import me.lucko.luckperms.common.caching.stacking.elements.HighestPriorityTrackElement;
 import me.lucko.luckperms.common.caching.stacking.elements.LowestPriorityElement;
+import me.lucko.luckperms.common.caching.stacking.elements.LowestPriorityNotOnTrackElement;
 import me.lucko.luckperms.common.caching.stacking.elements.LowestPriorityOwnElement;
 import me.lucko.luckperms.common.caching.stacking.elements.LowestPriorityTrackElement;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -69,6 +71,16 @@ public class StackElementFactory {
         if (s.startsWith("lowest_on_track_") && s.length() > "lowest_on_track_".length()) {
             String track = s.substring("lowest_on_track_".length());
             return Optional.of(new LowestPriorityTrackElement(prefix, plugin, track));
+        }
+
+        if (s.startsWith("highest_not_on_track_") && s.length() > "highest_not_on_track_".length()) {
+            String track = s.substring("highest_not_on_track_".length());
+            return Optional.of(new HighestPriorityNotOnTrackElement(prefix, plugin, track));
+        }
+
+        if (s.startsWith("lowest_not_on_track_") && s.length() > "lowest_not_on_track_".length()) {
+            String track = s.substring("lowest_not_on_track_".length());
+            return Optional.of(new LowestPriorityNotOnTrackElement(prefix, plugin, track));
         }
 
         new IllegalArgumentException("Cannot parse MetaStackElement: " + s).printStackTrace();

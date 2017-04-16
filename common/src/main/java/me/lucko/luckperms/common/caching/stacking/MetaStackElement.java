@@ -94,4 +94,20 @@ public interface MetaStackElement {
         return t == null || !t.containsGroup(node.getLocation());
     }
 
+    /**
+     * Returns true if the node is held by a group on the track
+     * @param node the node to check
+     * @param track the track
+     * @return true if the accumulation should return
+     */
+    static boolean checkNotTrackElement(LuckPermsPlugin plugin, LocalizedNode node, String track) {
+        // it's not come from a group on this track (from the user directly)
+        if (node.getLocation() == null || node.getLocation().equals("")) {
+            return false;
+        }
+
+        Track t = plugin.getTrackManager().getIfLoaded(track);
+        return t == null || t.containsGroup(node.getLocation());
+    }
+
 }

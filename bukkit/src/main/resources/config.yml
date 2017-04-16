@@ -116,6 +116,8 @@ group-weight:
 # - lowest_own
 # - highest_on_track_<track>
 # - lowest_on_track_<track>
+# - highest_not_on_track_<track>
+# - lowest_not_on_track_<track>
 #
 # Each element is added in the order listed.
 meta-formatting:
