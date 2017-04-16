@@ -71,7 +71,7 @@ temporary-add-behaviour: deny
 # Available Options:
 # -> stored                 use the value stored against the users record in the file/database
 # -> parents-by-weight      just use the users most highly weighted parent
-# -> all-parents-by-weight  same as above, but calculates based upon all parents inherits from both directly and indirectly
+# -> all-parents-by-weight  same as above, but calculates based upon all parents inherited from both directly and indirectly
 primary-group-calculation: stored
 
 
