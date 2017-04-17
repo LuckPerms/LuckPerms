@@ -176,12 +176,8 @@ public class JSONBacking extends FlatfileBacking {
 
                     boolean save = plugin.getUserManager().giveDefaultIfNeeded(user, false);
 
-                    if (user.getName() == null || user.getName().equalsIgnoreCase("null")) {
-                        user.setName(name);
-                    } else {
-                        if (!name.equalsIgnoreCase(user.getName())) {
-                            save = true;
-                        }
+                    if (user.setName(name, false)) {
+                        save = true;
                     }
 
                     if (save) {
@@ -230,7 +226,7 @@ public class JSONBacking extends FlatfileBacking {
 
                 JsonObject data = new JsonObject();
                 data.addProperty("uuid", user.getUuid().toString());
-                data.addProperty("name", user.getName());
+                data.addProperty("name", user.getName().orElse("null"));
                 data.addProperty("primaryGroup", user.getPrimaryGroup().getStoredValue());
 
                 Set<NodeModel> nodes = user.getNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));

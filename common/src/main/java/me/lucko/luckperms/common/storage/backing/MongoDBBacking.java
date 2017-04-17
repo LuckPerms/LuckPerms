@@ -98,7 +98,7 @@ public class MongoDBBacking extends AbstractBacking {
 
     private static Document fromUser(User user) {
         Document main = new Document("_id", user.getUuid())
-                .append("name", user.getName())
+                .append("name", user.getName().orElse("null"))
                 .append("primaryGroup", user.getPrimaryGroup().getStoredValue());
 
         Document perms = new Document();
@@ -325,12 +325,8 @@ public class MongoDBBacking extends AbstractBacking {
 
                         boolean save = plugin.getUserManager().giveDefaultIfNeeded(user, false);
 
-                        if (user.getName() == null || user.getName().equalsIgnoreCase("null")) {
-                            user.setName(d.getString("name"));
-                        } else {
-                            if (!d.getString("name").equalsIgnoreCase(user.getName())) {
-                                save = true;
-                            }
+                        if (user.setName(name, false)) {
+                            save = true;
                         }
 
                         if (save) {

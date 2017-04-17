@@ -68,12 +68,12 @@ public class UserSwitchPrimaryGroup extends SubCommand<User> {
         }
 
         if (!user.inheritsGroup(group)) {
-            Message.USER_PRIMARYGROUP_ERROR_NOTMEMBER.send(sender, user.getName(), group.getName());
+            Message.USER_PRIMARYGROUP_ERROR_NOTMEMBER.send(sender, user.getFriendlyName(), group.getName());
             user.setInheritGroup(group, ContextSet.empty());
         }
 
         user.getPrimaryGroup().setStoredValue(group.getName());
-        Message.USER_PRIMARYGROUP_SUCCESS.send(sender, user.getName(), group.getDisplayName());
+        Message.USER_PRIMARYGROUP_SUCCESS.send(sender, user.getFriendlyName(), group.getDisplayName());
         LogEntry.build().actor(sender).acted(user)
                 .action("setprimarygroup " + group.getName())
                 .build().submit(plugin, sender);

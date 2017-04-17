@@ -56,6 +56,7 @@ import co.aikar.timings.Timing;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -115,9 +116,9 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
 
     @Override
     public SpongeUser apply(UserIdentifier id) {
-        return id.getUsername() == null ?
+        return !id.getUsername().isPresent() ?
                 new SpongeUser(id.getUuid(), plugin) :
-                new SpongeUser(id.getUuid(), id.getUsername(), plugin);
+                new SpongeUser(id.getUuid(), id.getUsername().get(), plugin);
     }
 
     public void performCleanup() {
@@ -182,7 +183,8 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
     @Override
     public SpongeUser getByUsername(String name) {
         for (SpongeUser user : getAll().values()) {
-            if (user.getName().equalsIgnoreCase(name)) {
+            Optional<String> n = user.getName();
+            if (n.isPresent() && n.get().equalsIgnoreCase(name)) {
                 return user;
             }
         }

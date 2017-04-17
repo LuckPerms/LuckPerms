@@ -69,6 +69,6 @@ public class BukkitCalculatorFactory extends AbstractCalculatorFactory {
         }
         processors.add(new DefaultsProcessor(contexts.isOp(), plugin.getDefaultsProvider()));
 
-        return registerCalculator(new PermissionCalculator(plugin, user.getName(), processors.build()));
+        return registerCalculator(new PermissionCalculator(plugin, user.getFriendlyName(), processors.build()));
     }
 }

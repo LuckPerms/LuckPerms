@@ -73,12 +73,12 @@ public class CheckCommand extends SingleCommand {
 
         UserCache data = user.getUserData();
         if (data == null) {
-            Message.USER_NO_DATA.send(sender, user.getName());
+            Message.USER_NO_DATA.send(sender, user.getFriendlyName());
             return CommandResult.STATE_ERROR;
         }
 
         Tristate tristate = data.getPermissionData(plugin.getContextForUser(user)).getPermissionValue(permission);
-        Message.CHECK_RESULT.send(sender, user.getName(), permission, Util.formatTristate(tristate));
+        Message.CHECK_RESULT.send(sender, user.getFriendlyName(), permission, Util.formatTristate(tristate));
         return CommandResult.SUCCESS;
     }
 }

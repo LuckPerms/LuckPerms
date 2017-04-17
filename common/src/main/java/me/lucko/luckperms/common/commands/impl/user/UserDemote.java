@@ -125,7 +125,7 @@ public class UserDemote extends SubCommand<User> {
 
             user.unsetPermission(oldNode);
 
-            Message.USER_DEMOTE_ENDOFTRACK.send(sender, track.getName(), user.getName(), old);
+            Message.USER_DEMOTE_ENDOFTRACK.send(sender, track.getName(), user.getFriendlyName(), old);
 
             LogEntry.build().actor(sender).acted(user)
                     .action("demote " + args.stream().collect(Collectors.joining(" ")))

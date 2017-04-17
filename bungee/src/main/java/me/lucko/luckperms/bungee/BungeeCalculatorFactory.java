@@ -54,6 +54,6 @@ public class BungeeCalculatorFactory extends AbstractCalculatorFactory {
             processors.add(new WildcardProcessor());
         }
 
-        return registerCalculator(new PermissionCalculator(plugin, user.getName(), processors.build()));
+        return registerCalculator(new PermissionCalculator(plugin, user.getFriendlyName(), processors.build()));
     }
 }

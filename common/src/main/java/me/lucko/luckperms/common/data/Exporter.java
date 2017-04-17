@@ -217,7 +217,7 @@ public class Exporter implements Runnable {
 
                             plugin.getStorage().loadUser(uuid, "null").join();
                             User user = plugin.getUserManager().get(uuid);
-                            output.add("# Export user: " + user.getUuid().toString() + " - " + user.getName());
+                            output.add("# Export user: " + user.getUuid().toString() + " - " + user.getName().orElse("unknown username"));
 
                             boolean inDefault = false;
                             for (Node node : user.getNodes().values()) {

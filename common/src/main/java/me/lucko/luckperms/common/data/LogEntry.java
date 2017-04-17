@@ -116,7 +116,7 @@ public class LogEntry extends me.lucko.luckperms.api.LogEntry {
 
         public LogEntryBuilder acted(PermissionHolder acted) {
             if (acted instanceof User) {
-                super.actedName(((User) acted).getName());
+                super.actedName(((User) acted).getName().orElse("null"));
                 super.acted(((User) acted).getUuid());
                 super.type('U');
             } else if (acted instanceof Group) {

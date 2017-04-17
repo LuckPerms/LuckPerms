@@ -49,9 +49,9 @@ import static me.lucko.luckperms.common.api.ApiUtils.checkTime;
  * Provides a link between {@link User} and {@link me.lucko.luckperms.common.core.model.User}
  */
 public final class UserDelegate extends PermissionHolderDelegate implements User {
-    public static me.lucko.luckperms.common.core.model.User cast(User g) {
-        Preconditions.checkState(g instanceof UserDelegate, "Illegal instance " + g.getClass() + " cannot be handled by this implementation.");
-        return ((UserDelegate) g).getHandle();
+    public static me.lucko.luckperms.common.core.model.User cast(User u) {
+        Preconditions.checkState(u instanceof UserDelegate, "Illegal instance " + u.getClass() + " cannot be handled by this implementation.");
+        return ((UserDelegate) u).getHandle();
     }
 
     @Getter
@@ -69,7 +69,7 @@ public final class UserDelegate extends PermissionHolderDelegate implements User
 
     @Override
     public String getName() {
-        return handle.getName();
+        return handle.getName().orElse(null);
     }
 
     @Override

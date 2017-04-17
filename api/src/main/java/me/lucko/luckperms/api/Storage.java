@@ -93,12 +93,22 @@ public interface Storage {
      * Loads a user's data from the main storage into the plugins local storage.
      *
      * @param uuid     the uuid of the user to load
-     * @param username the users username. (if you want to specify <code>null</code> here, just input "null" as a
-     *                 string.)
+     * @param username the users username, or null if it is not known.
      * @return if the operation completed successfully
-     * @throws NullPointerException if uuid or username is null
+     * @throws NullPointerException if uuid is null
      */
     CompletableFuture<Boolean> loadUser(UUID uuid, String username);
+
+    /**
+     * Loads a user's data from the main storage into the plugins local storage.
+     *
+     * @param uuid the uuid of the user to load
+     * @return if the operation completed successfully
+     * @throws NullPointerException if uuid is null
+     */
+    default CompletableFuture<Boolean> loadUser(UUID uuid) {
+        return loadUser(uuid, null);
+    }
 
     /**
      * Saves a user object back to storage. You should call this after you make any changes to a user.

@@ -76,7 +76,7 @@ public class BufferedOutputStorage implements Storage, Runnable {
     private final Buffer<UserIdentifier, Boolean> uuidDataOutputBuffer = new Buffer<UserIdentifier, Boolean>() {
         @Override
         protected Boolean dequeue(UserIdentifier userIdentifier) {
-            return backing.saveUUIDData(userIdentifier.getUsername(), userIdentifier.getUuid()).join();
+            return backing.saveUUIDData(userIdentifier.getUsername().get(), userIdentifier.getUuid()).join();
         }
     };
 

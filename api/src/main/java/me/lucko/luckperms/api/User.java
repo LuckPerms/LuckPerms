@@ -43,7 +43,7 @@ public interface User extends PermissionHolder {
     UUID getUuid();
 
     /**
-     * Gets the users username
+     * Gets the users username, or null if no username is associated with this user
      *
      * @return the Users Username
      */

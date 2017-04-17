@@ -92,7 +92,7 @@ public class TreeCommand extends SingleCommand {
 
             UserCache data = user.getUserData();
             if (data == null) {
-                Message.USER_NO_DATA.send(sender, user.getName());
+                Message.USER_NO_DATA.send(sender, user.getFriendlyName());
                 return CommandResult.STATE_ERROR;
             }
 
@@ -106,7 +106,7 @@ public class TreeCommand extends SingleCommand {
 
             Message.TREE_UPLOAD_START.send(sender);
 
-            String url = view.uploadPasteData(plugin.getVersion(), user.getName(), permissionData);
+            String url = view.uploadPasteData(plugin.getVersion(), user.getFriendlyName(), permissionData);
             if (url == null) {
                 url = "null";
             }

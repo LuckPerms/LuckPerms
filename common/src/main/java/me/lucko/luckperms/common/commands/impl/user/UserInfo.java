@@ -54,7 +54,7 @@ public class UserInfo extends SubCommand<User> {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) throws CommandException {
         Message.USER_INFO_GENERAL.send(sender,
-                user.getName(),
+                user.getName().orElse("Unknown"),
                 user.getUuid(),
                 plugin.getPlayerStatus(user.getUuid()),
                 user.getPrimaryGroup().getValue(),

@@ -106,13 +106,13 @@ public class UserPromote extends SubCommand<User> {
 
             Group nextGroup = plugin.getGroupManager().getIfLoaded(first);
             if (nextGroup == null) {
-                Message.USER_PROMOTE_ERROR_MALFORMED.send(sender, false);
+                Message.USER_PROMOTE_ERROR_MALFORMED.send(sender, first);
                 return CommandResult.LOADING_ERROR;
             }
 
             user.setPermission(NodeFactory.newBuilder("group." + first).withExtraContext(context).build());
 
-            Message.USER_TRACK_ADDED_TO_FIRST.send(sender, user.getName(), first, Util.contextSetToString(context));
+            Message.USER_TRACK_ADDED_TO_FIRST.send(sender, user.getFriendlyName(), first, Util.contextSetToString(context));
             LogEntry.build().actor(sender).acted(user)
                     .action("promote " + args.stream().collect(Collectors.joining(" ")))
                     .build().submit(plugin, sender);

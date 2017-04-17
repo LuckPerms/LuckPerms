@@ -124,7 +124,7 @@ public class VaultChatHook extends Chat {
         world = perms.isIgnoreWorld() ? null : world;
         node = escapeCharacters(node);
 
-        perms.log("Getting meta: '" + node + "' for user " + user.getName() + " on world " + world + ", server " + perms.getServer());
+        perms.log("Getting meta: '" + node + "' for user " + user.getFriendlyName() + " on world " + world + ", server " + perms.getServer());
 
         if (user.getUserData() == null) {
             return defaultValue;
@@ -142,7 +142,7 @@ public class VaultChatHook extends Chat {
         if (user == null) return "";
         world = perms.isIgnoreWorld() ? null : world;
 
-        perms.log("Getting " + (prefix ? "prefix" : "suffix") + " for user " + user.getName() + " on world " + world + ", server " + perms.getServer());
+        perms.log("Getting " + (prefix ? "prefix" : "suffix") + " for user " + user.getFriendlyName() + " on world " + world + ", server " + perms.getServer());
 
         if (user.getUserData() == null) {
             return "";

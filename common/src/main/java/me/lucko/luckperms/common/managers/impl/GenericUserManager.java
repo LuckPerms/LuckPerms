@@ -35,6 +35,7 @@ import me.lucko.luckperms.common.managers.AbstractManager;
 import me.lucko.luckperms.common.managers.UserManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -105,15 +106,16 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
 
     @Override
     public User apply(UserIdentifier id) {
-        return id.getUsername() == null ?
+        return !id.getUsername().isPresent() ?
                 new User(id.getUuid(), plugin) :
-                new User(id.getUuid(), id.getUsername(), plugin);
+                new User(id.getUuid(), id.getUsername().get(), plugin);
     }
 
     @Override
     public User getByUsername(String name) {
         for (User user : getAll().values()) {
-            if (user.getName().equalsIgnoreCase(name)) {
+            Optional<String> n = user.getName();
+            if (n.isPresent() && n.get().equalsIgnoreCase(name)) {
                 return user;
             }
         }

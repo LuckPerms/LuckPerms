@@ -98,7 +98,7 @@ public class SpongeUser extends User {
 
         private synchronized void checkData() {
             if (parent.getUserData() == null) {
-                plugin.getLog().warn("User " + parent.getName() + " - " + parent.getUuid() + " does not have any data loaded.");
+                plugin.getLog().warn("User " + parent.getName().orElse("unknown") + " - " + parent.getUuid() + " does not have any data loaded.");
                 parent.setupData(false);
             }
         }

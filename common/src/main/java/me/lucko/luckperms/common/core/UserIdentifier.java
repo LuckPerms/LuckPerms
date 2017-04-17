@@ -33,19 +33,28 @@ import lombok.ToString;
 
 import me.lucko.luckperms.common.utils.Identifiable;
 
+import java.util.Optional;
 import java.util.UUID;
 
-@Getter
 @ToString
 @EqualsAndHashCode(of = "uuid")
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public final class UserIdentifier implements Identifiable<UUID> {
     public static UserIdentifier of(UUID uuid, String username) {
+        if (username == null || username.equalsIgnoreCase("null") || username.isEmpty()) {
+            username = null;
+        }
+
         return new UserIdentifier(uuid, username);
     }
 
+    @Getter
     private final UUID uuid;
     private final String username;
+
+    public Optional<String> getUsername() {
+        return Optional.ofNullable(username);
+    }
 
     @Override
     public UUID getId() {

@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.core.model;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.ToString;
 
 import me.lucko.luckperms.api.caching.UserData;
@@ -42,6 +41,7 @@ import me.lucko.luckperms.common.primarygroup.PrimaryGroupHolder;
 import me.lucko.luckperms.common.utils.BufferedRequest;
 import me.lucko.luckperms.common.utils.Identifiable;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @ToString(of = {"uuid"})
@@ -57,9 +57,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
     /**
      * The last known username of a player
      */
-    @Getter
-    @Setter
-    private String name;
+    private String name = null;
 
     /**
      * The users primary group
@@ -88,14 +86,14 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
     public User(UUID uuid, LuckPermsPlugin plugin) {
         super(uuid.toString(), plugin);
         this.uuid = uuid;
-        this.name = null;
         this.primaryGroup = plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION).apply(this);
     }
 
     public User(UUID uuid, String name, LuckPermsPlugin plugin) {
         super(uuid.toString(), plugin);
         this.uuid = uuid;
-        this.name = name;
+        setName(name, true);
+
         this.primaryGroup = plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION).apply(this);
     }
 
@@ -104,9 +102,49 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
         return UserIdentifier.of(uuid, name);
     }
 
+    public Optional<String> getName() {
+        return Optional.ofNullable(name);
+    }
+
+    public boolean setName(String name, boolean force) {
+        // if the value being set is null
+        if (name == null || name.equalsIgnoreCase("null") || name.isEmpty()) {
+            // only apply the change if it is being forced
+            if (force) {
+                // if the name is already null, return false
+                if (this.name == null) {
+                    return false;
+                } else {
+                    // set the new null value
+                    this.name = null;
+                    return true;
+                }
+            } else {
+                // we already have a non-null value, so return false
+                return false;
+            }
+        } else {
+            // the name being set is not null
+            if (this.name == null) {
+                this.name = name;
+                return true;
+            }
+
+            // update the capitalisation, but still return false
+            if (this.name.equalsIgnoreCase(name)) {
+                this.name = name;
+                return false;
+            }
+
+            // completely new value, just set & return true
+            this.name = name;
+            return true;
+        }
+    }
+
     @Override
     public String getFriendlyName() {
-        return name;
+        return name != null ? name : uuid.toString();
     }
 
     @Override

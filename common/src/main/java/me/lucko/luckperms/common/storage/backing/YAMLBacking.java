@@ -179,12 +179,8 @@ public class YAMLBacking extends FlatfileBacking {
 
                     boolean save = plugin.getUserManager().giveDefaultIfNeeded(user, false);
 
-                    if (user.getName() == null || user.getName().equalsIgnoreCase("null")) {
-                        user.setName(name);
-                    } else {
-                        if (!name.equalsIgnoreCase(user.getName())) {
-                            save = true;
-                        }
+                    if (user.setName(name, false)) {
+                        save = true;
                     }
 
                     if (save) {
@@ -231,7 +227,7 @@ public class YAMLBacking extends FlatfileBacking {
 
                 Map<String, Object> values = new LinkedHashMap<>();
                 values.put("uuid", user.getUuid().toString());
-                values.put("name", user.getName());
+                values.put("name", user.getName().orElse("null"));
                 values.put("primary-group", user.getPrimaryGroup().getStoredValue());
 
                 Set<NodeModel> data = user.getNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));

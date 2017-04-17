@@ -349,9 +349,7 @@ public class SQLBacking extends AbstractBacking {
             }
 
             // Update their username to what was in the storage if the one in the local instance is null
-            if (user.getName() == null || user.getName().equalsIgnoreCase("null")) {
-                user.setName(name);
-            }
+            user.setName(name, false);
 
             // If the user has any data in storage
             if (!data.isEmpty()) {

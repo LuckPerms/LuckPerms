@@ -88,12 +88,12 @@ public class StorageDelegate implements Storage {
     }
 
     @Override
-    public CompletableFuture<Boolean> loadUser(UUID uuid, String username) {
-        return handle.force().loadUser(uuid, checkUsername(username));
+    public CompletableFuture<Boolean> loadUser(@NonNull UUID uuid, String username) {
+        return handle.force().loadUser(uuid, username == null ? null : checkUsername(username));
     }
 
     @Override
-    public CompletableFuture<Boolean> saveUser(User user) {
+    public CompletableFuture<Boolean> saveUser(@NonNull User user) {
         return handle.force().saveUser(UserDelegate.cast(user));
     }
 
@@ -113,12 +113,12 @@ public class StorageDelegate implements Storage {
     }
 
     @Override
-    public CompletableFuture<Boolean> createAndLoadGroup(String name) {
+    public CompletableFuture<Boolean> createAndLoadGroup(@NonNull String name) {
         return handle.force().createAndLoadGroup(checkName(name), CreationCause.API);
     }
 
     @Override
-    public CompletableFuture<Boolean> loadGroup(String name) {
+    public CompletableFuture<Boolean> loadGroup(@NonNull String name) {
         return handle.force().loadGroup(checkName(name));
     }
 
@@ -128,12 +128,12 @@ public class StorageDelegate implements Storage {
     }
 
     @Override
-    public CompletableFuture<Boolean> saveGroup(Group group) {
+    public CompletableFuture<Boolean> saveGroup(@NonNull Group group) {
         return handle.force().saveGroup(GroupDelegate.cast(group));
     }
 
     @Override
-    public CompletableFuture<Boolean> deleteGroup(Group group) {
+    public CompletableFuture<Boolean> deleteGroup(@NonNull Group group) {
         if (group.getName().equalsIgnoreCase(plugin.getConfiguration().get(ConfigKeys.DEFAULT_GROUP_NAME))) {
             throw new IllegalArgumentException("Cannot delete the default group.");
         }
@@ -146,12 +146,12 @@ public class StorageDelegate implements Storage {
     }
 
     @Override
-    public CompletableFuture<Boolean> createAndLoadTrack(String name) {
+    public CompletableFuture<Boolean> createAndLoadTrack(@NonNull String name) {
         return handle.force().createAndLoadTrack(checkName(name), CreationCause.API);
     }
 
     @Override
-    public CompletableFuture<Boolean> loadTrack(String name) {
+    public CompletableFuture<Boolean> loadTrack(@NonNull String name) {
         return handle.force().loadTrack(checkName(name));
     }
 
@@ -161,22 +161,22 @@ public class StorageDelegate implements Storage {
     }
 
     @Override
-    public CompletableFuture<Boolean> saveTrack(Track track) {
+    public CompletableFuture<Boolean> saveTrack(@NonNull Track track) {
         return handle.force().saveTrack(TrackDelegate.cast(track));
     }
 
     @Override
-    public CompletableFuture<Boolean> deleteTrack(Track track) {
+    public CompletableFuture<Boolean> deleteTrack(@NonNull Track track) {
         return handle.force().deleteTrack(TrackDelegate.cast(track), DeletionCause.API);
     }
 
     @Override
-    public CompletableFuture<Boolean> saveUUIDData(String username, UUID uuid) {
+    public CompletableFuture<Boolean> saveUUIDData(@NonNull String username, @NonNull UUID uuid) {
         return handle.force().saveUUIDData(checkUsername(username), uuid);
     }
 
     @Override
-    public CompletableFuture<UUID> getUUID(String username) {
+    public CompletableFuture<UUID> getUUID(@NonNull String username) {
         return handle.force().getUUID(checkUsername(username));
     }
 
