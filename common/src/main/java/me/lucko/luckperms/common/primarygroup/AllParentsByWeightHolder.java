@@ -29,7 +29,7 @@ import lombok.NonNull;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.utils.ExtractedContexts;
@@ -55,8 +55,19 @@ public class AllParentsByWeightHolder extends StoredHolder {
         }
 
         Contexts contexts = user.getPlugin().getContextForUser(user);
-        ContextSet contextSet = contexts != null ? contexts.getContexts() : user.getPlugin().getContextManager().getStaticContexts();
-        cachedValue = user.resolveInheritancesAlmostEqual(ExtractedContexts.generate(contextSet)).stream()
+        if (contexts == null) {
+            contexts = new Contexts(
+                    user.getPlugin().getContextManager().getStaticContexts(),
+                    user.getPlugin().getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
+                    user.getPlugin().getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
+                    true,
+                    user.getPlugin().getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
+                    user.getPlugin().getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
+                    false
+            );
+        }
+
+        cachedValue = user.resolveInheritancesAlmostEqual(ExtractedContexts.generate(contexts)).stream()
                 .filter(Node::isGroupNode)
                 .filter(Node::getValue)
                 .map(n -> Optional.ofNullable(user.getPlugin().getGroupManager().getIfLoaded(n.getGroupName())))
