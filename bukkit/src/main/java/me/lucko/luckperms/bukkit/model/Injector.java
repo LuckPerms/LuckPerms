@@ -27,7 +27,8 @@ package me.lucko.luckperms.bukkit.model;
 
 import lombok.experimental.UtilityClass;
 
-import org.bukkit.Bukkit;
+import me.lucko.luckperms.bukkit.compat.ReflectionUtil;
+
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissibleBase;
 import org.bukkit.permissions.PermissionAttachment;
@@ -54,7 +55,7 @@ public class Injector {
         try {
             try {
                 // craftbukkit
-                humanEntityField = Class.forName(getVersionedClassName("entity.CraftHumanEntity")).getDeclaredField("perm");
+                humanEntityField = ReflectionUtil.obcClass("entity.CraftHumanEntity").getDeclaredField("perm");
                 humanEntityField.setAccessible(true);
             } catch (Exception e) {
                 // glowstone
@@ -151,24 +152,6 @@ public class Injector {
 
     public static LPPermissible getPermissible(UUID uuid) {
         return INJECTED_PERMISSIBLES.get(uuid);
-    }
-
-    private static String getVersionedClassName(String className) throws ClassNotFoundException {
-        Class server = Bukkit.getServer().getClass();
-        if (!server.getSimpleName().equals("CraftServer")) {
-            throw new ClassNotFoundException("Couldn't inject into server " + server);
-        }
-
-        String version;
-        if (server.getName().equals("org.bukkit.craftbukkit.CraftServer")) {
-            // Non versioned class
-            version = ".";
-        } else {
-            version = server.getName().substring("org.bukkit.craftbukkit".length());
-            version = version.substring(0, version.length() - "CraftServer".length());
-        }
-
-        return "org.bukkit.craftbukkit" + version + className;
     }
 
 }
