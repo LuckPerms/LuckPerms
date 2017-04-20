@@ -46,32 +46,46 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Injector {
     private static final Map<UUID, LPPermissible> INJECTED_PERMISSIBLES = new ConcurrentHashMap<>();
 
-    private static Field HUMAN_ENTITY_FIELD;
-    private static Field PERMISSIBLEBASE_ATTACHMENTS;
+    private static Field humanEntityField;
+    private static Field permissibleAttachmentsField;
+    private static Throwable cachedThrowable = null;
 
     static {
         try {
-            HUMAN_ENTITY_FIELD = Class.forName(getVersionedClassName("entity.CraftHumanEntity")).getDeclaredField("perm");
-            HUMAN_ENTITY_FIELD.setAccessible(true);
+            try {
+                // craftbukkit
+                humanEntityField = Class.forName(getVersionedClassName("entity.CraftHumanEntity")).getDeclaredField("perm");
+                humanEntityField.setAccessible(true);
+            } catch (Exception e) {
+                // glowstone
+                humanEntityField = Class.forName("net.glowstone.entity.GlowHumanEntity").getDeclaredField("permissions");
+                humanEntityField.setAccessible(true);
+            }
 
-            PERMISSIBLEBASE_ATTACHMENTS = PermissibleBase.class.getDeclaredField("attachments");
-            PERMISSIBLEBASE_ATTACHMENTS.setAccessible(true);
+            permissibleAttachmentsField = PermissibleBase.class.getDeclaredField("attachments");
+            permissibleAttachmentsField.setAccessible(true);
 
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Throwable t) {
+            cachedThrowable = t;
+            t.printStackTrace();
         }
     }
 
     public static boolean inject(Player player, LPPermissible lpPermissible) {
+        if (cachedThrowable != null) {
+            cachedThrowable.printStackTrace();
+            return false;
+        }
+
         try {
-            PermissibleBase existing = (PermissibleBase) HUMAN_ENTITY_FIELD.get(player);
+            PermissibleBase existing = (PermissibleBase) humanEntityField.get(player);
             if (existing instanceof LPPermissible) {
                 // uh oh
                 throw new IllegalStateException("LPPermissible already injected into player " + player.toString());
             }
 
             // Move attachments over from the old permissible.
-            List<PermissionAttachment> attachments = (List<PermissionAttachment>) PERMISSIBLEBASE_ATTACHMENTS.get(existing);
+            List<PermissionAttachment> attachments = (List<PermissionAttachment>) permissibleAttachmentsField.get(existing);
             lpPermissible.addAttachments(attachments);
             attachments.clear();
             existing.clearPermissions();
@@ -82,7 +96,7 @@ public class Injector {
 
             lpPermissible.updateSubscriptionsAsync();
 
-            HUMAN_ENTITY_FIELD.set(player, lpPermissible);
+            humanEntityField.set(player, lpPermissible);
             INJECTED_PERMISSIBLES.put(player.getUniqueId(), lpPermissible);
             return true;
         } catch (Exception e) {
@@ -92,8 +106,13 @@ public class Injector {
     }
 
     public static boolean unInject(Player player, boolean dummy, boolean unsubscribe) {
+        if (cachedThrowable != null) {
+            cachedThrowable.printStackTrace();
+            return false;
+        }
+
         try {
-            PermissibleBase permissible = (PermissibleBase) HUMAN_ENTITY_FIELD.get(player);
+            PermissibleBase permissible = (PermissibleBase) humanEntityField.get(player);
             if (permissible instanceof LPPermissible) {
 
                 permissible.clearPermissions();
@@ -105,7 +124,7 @@ public class Injector {
                 ((LPPermissible) permissible).getActive().set(false);
 
                 if (dummy) {
-                    HUMAN_ENTITY_FIELD.set(player, new DummyPermissibleBase());
+                    humanEntityField.set(player, new DummyPermissibleBase());
                 } else {
                     LPPermissible lpp = ((LPPermissible) permissible);
                     List<PermissionAttachment> attachments = lpp.getAttachments();
@@ -115,11 +134,11 @@ public class Injector {
                         newPb = new PermissibleBase(player);
                     }
 
-                    List<PermissionAttachment> newAttachments = (List<PermissionAttachment>) PERMISSIBLEBASE_ATTACHMENTS.get(newPb);
+                    List<PermissionAttachment> newAttachments = (List<PermissionAttachment>) permissibleAttachmentsField.get(newPb);
                     newAttachments.addAll(attachments);
                     attachments.clear();
 
-                    HUMAN_ENTITY_FIELD.set(player, newPb);
+                    humanEntityField.set(player, newPb);
                 }
             }
             INJECTED_PERMISSIBLES.remove(player.getUniqueId());
@@ -134,10 +153,10 @@ public class Injector {
         return INJECTED_PERMISSIBLES.get(uuid);
     }
 
-    private static String getVersionedClassName(String className) {
+    private static String getVersionedClassName(String className) throws ClassNotFoundException {
         Class server = Bukkit.getServer().getClass();
         if (!server.getSimpleName().equals("CraftServer")) {
-            throw new RuntimeException("Couldn't inject into server " + server);
+            throw new ClassNotFoundException("Couldn't inject into server " + server);
         }
 
         String version;
