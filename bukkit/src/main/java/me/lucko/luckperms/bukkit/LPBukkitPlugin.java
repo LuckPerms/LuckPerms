@@ -102,6 +102,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
 @Getter
@@ -130,6 +131,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private CalculatorFactory calculatorFactory;
     private BufferedRequest<Void> updateTaskBuffer;
     private boolean started = false;
+    private CountDownLatch enableLatch = new CountDownLatch(1);
     private VerboseHandler verboseHandler;
     private BukkitSenderFactory senderFactory;
     private PermissionVault permissionVault;
@@ -147,6 +149,17 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
     @Override
     public void onEnable() {
+        try {
+            enable();
+            started = true;
+        } finally {
+            // count down the latch when onEnable has been called
+            // we don't care about the result here
+            enableLatch.countDown();
+        }
+    }
+
+    private void enable() {
         LuckPermsPlugin.sendStartupBanner(getConsoleSender(), this);
 
         ignoringLogs = ConcurrentHashMap.newKeySet();
@@ -324,7 +337,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         // Load any online users (in the case of a reload)
         for (Player player : getServer().getOnlinePlayers()) {
             scheduler.doAsync(() -> {
-                LoginHelper.loadUser(this, player.getUniqueId(), player.getName());
+                LoginHelper.loadUser(this, player.getUniqueId(), player.getName(), false);
                 User user = getUserManager().get(getUuidCache().getUUID(player.getUniqueId()));
                 if (user != null) {
                     scheduler.doSync(() -> {
@@ -339,7 +352,6 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
             });
         }
 
-        started = true;
         getLog().info("Successfully loaded.");
     }
 

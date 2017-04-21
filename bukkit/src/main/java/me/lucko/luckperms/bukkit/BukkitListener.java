@@ -50,6 +50,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @RequiredArgsConstructor
 public class BukkitListener implements Listener {
@@ -63,6 +64,14 @@ public class BukkitListener implements Listener {
         /* Called when the player first attempts a connection with the server.
            Listening on LOW priority to allow plugins to modify username / UUID data here. (auth plugins) */
 
+        /* wait for the plugin to enable. because these events are fired async, they can be called before
+           the plugin has enabled.  */
+        try {
+            plugin.getEnableLatch().await(30, TimeUnit.SECONDS);
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
+
         /* the player was denied entry to the server before this priority.
            log this, so we can handle appropriately later. */
         if (e.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
@@ -71,7 +80,7 @@ public class BukkitListener implements Listener {
             return;
         }
 
-        /* either the plugin hasn't finished starting yet, or there was an issue connecting to the DB, performing file i/o, etc.
+        /* there was an issue connecting to the DB, performing file i/o, etc.
            we don't let players join in this case, because it means they can connect to the server without their permissions data.
            some server admins rely on negating perms to stop users from causing damage etc, so it's really important that
            this data is loaded. */
@@ -96,7 +105,7 @@ public class BukkitListener implements Listener {
            - creating a user instance in the UserManager for this connection.
            - setting up cached data. */
         try {
-            LoginHelper.loadUser(plugin, e.getUniqueId(), e.getName());
+            LoginHelper.loadUser(plugin, e.getUniqueId(), e.getName(), false);
         } catch (Exception ex) {
             ex.printStackTrace();
 

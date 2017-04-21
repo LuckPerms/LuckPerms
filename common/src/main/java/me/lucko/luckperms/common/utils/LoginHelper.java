@@ -34,6 +34,7 @@ import me.lucko.luckperms.common.defaults.Rule;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Utilities for use in platform listeners
@@ -41,7 +42,7 @@ import java.util.UUID;
 @UtilityClass
 public class LoginHelper {
 
-    public static void loadUser(LuckPermsPlugin plugin, UUID u, String username) {
+    public static void loadUser(LuckPermsPlugin plugin, UUID u, String username, boolean joinUuidSave) {
         final long startTime = System.currentTimeMillis();
 
         final UuidCache cache = plugin.getUuidCache();
@@ -53,7 +54,10 @@ public class LoginHelper {
                 // No previous data for this player
                 plugin.getApiProvider().getEventFactory().handleUserFirstLogin(u, username);
                 cache.addToCache(u, u);
-                plugin.getStorage().force().saveUUIDData(username, u);
+                CompletableFuture<Boolean> future = plugin.getStorage().force().saveUUIDData(username, u);
+                if (joinUuidSave) {
+                    future.join();
+                }
             }
         } else {
             String name = plugin.getStorage().force().getName(u).join();
@@ -62,7 +66,10 @@ public class LoginHelper {
             }
 
             // Online mode, no cache needed. This is just for name -> uuid lookup.
-            plugin.getStorage().force().saveUUIDData(username, u);
+            CompletableFuture<Boolean> future = plugin.getStorage().force().saveUUIDData(username, u);
+            if (joinUuidSave) {
+                future.join();
+            }
         }
 
         plugin.getStorage().force().loadUser(cache.getUUID(u), username).join();

@@ -32,9 +32,8 @@ import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.core.UuidCache;
 import me.lucko.luckperms.common.core.model.User;
-import me.lucko.luckperms.common.defaults.Rule;
+import me.lucko.luckperms.common.utils.LoginHelper;
 
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.PendingConnection;
@@ -69,94 +68,58 @@ public class BungeeListener implements Listener {
            This means that a player will have the same UUID across the network, even if parts of the network are running in
            Offline mode. */
 
-        // registers the plugins intent to modify this events state going forward.
-        // this will prevent the event from completing until we're finished handling.
+        /* registers the plugins intent to modify this events state going forward.
+           this will prevent the event from completing until we're finished handling. */
         e.registerIntent(plugin);
 
-        final long startTime = System.currentTimeMillis();
         final PendingConnection c = e.getConnection();
-
-        /* either the plugin hasn't finished starting yet, or there was an issue connecting to the DB, performing file i/o, etc.
-           as this is bungeecord, we will still allow the login, as players can't really do much harm without permissions data.
-           the proxy will just fallback to using the config file perms. */
-        if (!plugin.getStorage().isAcceptingLogins()) {
-            // log that the user tried to login, but was denied at this stage.
-            deniedLogin.add(c.getUniqueId());
-            return;
-        }
 
         /* another plugin (or the proxy itself) has cancelled this connection already */
         if (e.isCancelled()) {
+
+            // log that we are not loading any data
             plugin.getLog().warn("Connection from " + c.getUniqueId() + " was already denied. No permissions data will be loaded.");
             deniedLogin.add(c.getUniqueId());
+
+            e.completeIntent(plugin);
             return;
         }
 
-        /* Actually process the login for the connection.
-           We do this here to delay the login until the data is ready.
-           If the login gets cancelled later on, then this will be cleaned up.
+        /* there was an issue connecting to the DB, performing file i/o, etc.
+           as this is bungeecord, we will still allow the login, as players can't really do much harm without permissions data.
+           the proxy will just fallback to using the config file perms. */
+        if (!plugin.getStorage().isAcceptingLogins()) {
 
-           This includes:
-           - loading uuid data
-           - loading permissions
-           - creating a user instance in the UserManager for this connection.
-           - setting up cached data. */
+            // log that the user tried to login, but was denied at this stage.
+            plugin.getLog().warn("Permissions storage is not loaded yet. No permissions data will be loaded for: " + c.getUniqueId() + " - " + c.getName());
+            deniedLogin.add(c.getUniqueId());
+
+            e.completeIntent(plugin);
+            return;
+        }
+
+
         plugin.doAsync(() -> {
-            final UuidCache cache = plugin.getUuidCache();
+            /* Actually process the login for the connection.
+               We do this here to delay the login until the data is ready.
+               If the login gets cancelled later on, then this will be cleaned up.
 
-            if (!plugin.getConfiguration().get(ConfigKeys.USE_SERVER_UUIDS)) {
-                UUID uuid = plugin.getStorage().getUUID(c.getName()).join();
-                if (uuid != null) {
-                    cache.addToCache(c.getUniqueId(), uuid);
-                } else {
-                    // No previous data for this player
-                    plugin.getApiProvider().getEventFactory().handleUserFirstLogin(c.getUniqueId(), c.getName());
-                    cache.addToCache(c.getUniqueId(), c.getUniqueId());
+               This includes:
+               - loading uuid data
+               - loading permissions
+               - creating a user instance in the UserManager for this connection.
+               - setting up cached data. */
+            try {
+                LoginHelper.loadUser(plugin, c.getUniqueId(), c.getName(), true);
+            } catch (Exception ex) {
+                ex.printStackTrace();
 
-                    // Join this call, as we want this to be set for when the player connects to the backend.
-                    plugin.getStorage().force().saveUUIDData(c.getName(), c.getUniqueId()).join();
-                }
-            } else {
-                String name = plugin.getStorage().getName(c.getUniqueId()).join();
-                if (name == null) {
-                    plugin.getApiProvider().getEventFactory().handleUserFirstLogin(c.getUniqueId(), c.getName());
-                }
-
-                // Online mode, no cache needed. This is just for name -> uuid lookup.
-                // Again, join this call so the data is available for the backend.
-                plugin.getStorage().force().saveUUIDData(c.getName(), c.getUniqueId()).join();
+                // there was some error loading
+                plugin.getLog().warn("Error loading data. No permissions data will be loaded for: " + c.getUniqueId() + " - " + c.getName());
+                deniedLogin.add(c.getUniqueId());
             }
 
-            /* We have to make a new user on this thread whilst the connection is being held, or we get concurrency issues
-               as the Bukkit server and the BungeeCord server try to make a new user at the same time. */
-            plugin.getStorage().force().loadUser(cache.getUUID(c.getUniqueId()), c.getName()).join();
-
-            User user = plugin.getUserManager().get(cache.getUUID(c.getUniqueId()));
-            if (user == null) {
-                plugin.getLog().warn("Failed to load user: " + c.getName());
-            } else {
-                // Setup defaults for the user
-                boolean save = false;
-                for (Rule rule : plugin.getConfiguration().get(ConfigKeys.DEFAULT_ASSIGNMENTS)) {
-                    if (rule.apply(user)) {
-                        save = true;
-                    }
-                }
-
-                // If they were given a default, persist the new assignments back to the storage.
-                if (save) {
-                    plugin.getStorage().force().saveUser(user).join();
-                }
-
-                user.setupData(false); // Pretty nasty calculation call. Sets up the caching system so data is ready when the user joins.
-            }
-
-            final long time = System.currentTimeMillis() - startTime;
-            if (time >= 1000) {
-                plugin.getLog().warn("Processing login for " + c.getName() + " took " + time + "ms.");
-            }
-
-            // finally, complete out intent to modify state, so the proxy can continue handling the connection.
+            // finally, complete our intent to modify state, so the proxy can continue handling the connection.
             e.completeIntent(plugin);
 
             // schedule a cleanup of the users data in a few seconds.

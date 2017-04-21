@@ -108,7 +108,7 @@ public class SpongeListener {
            - creating a user instance in the UserManager for this connection.
            - setting up cached data. */
         try {
-            LoginHelper.loadUser(plugin, p.getUniqueId(), p.getName().orElseThrow(() -> new RuntimeException("No username present for user " + p.getUniqueId())));
+            LoginHelper.loadUser(plugin, p.getUniqueId(), p.getName().orElseThrow(() -> new RuntimeException("No username present for user " + p.getUniqueId())), false);
         } catch (Exception ex) {
             ex.printStackTrace();
 
