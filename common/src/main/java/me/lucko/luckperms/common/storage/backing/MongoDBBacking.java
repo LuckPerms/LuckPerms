@@ -325,7 +325,7 @@ public class MongoDBBacking extends AbstractBacking {
 
                         boolean save = plugin.getUserManager().giveDefaultIfNeeded(user, false);
 
-                        if (user.setName(name, false)) {
+                        if (user.setName(d.getString("name"), false)) {
                             save = true;
                         }
 

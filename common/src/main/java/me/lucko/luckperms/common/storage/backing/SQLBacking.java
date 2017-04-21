@@ -343,13 +343,8 @@ public class SQLBacking extends AbstractBacking {
             }
             user.getPrimaryGroup().setStoredValue(pg);
 
-            String name = userName.get();
-            if (name == null) {
-                name = "null";
-            }
-
             // Update their username to what was in the storage if the one in the local instance is null
-            user.setName(name, false);
+            user.setName(userName.get(), false);
 
             // If the user has any data in storage
             if (!data.isEmpty()) {
