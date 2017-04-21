@@ -92,7 +92,7 @@ public class LogEntry implements Comparable<LogEntry> {
         return String.format(FORMAT,
                 String.valueOf(actorName).equals("null") ? actor.toString() : actorName,
                 Character.toString(type),
-                actedName,
+                String.valueOf(actedName).equals("null") && acted != null ? acted.toString() : actedName,
                 action
         );
     }
