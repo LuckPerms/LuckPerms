@@ -96,7 +96,10 @@ public class SQLBacking extends AbstractBacking {
     private static final String GROUP_PERMISSIONS_SELECT_PERMISSION = "SELECT name, value, server, world, expiry, contexts FROM {prefix}group_permissions WHERE permission=?";
 
     private static final String GROUP_SELECT_ALL = "SELECT name FROM {prefix}groups";
-    private static final String GROUP_INSERT = "INSERT INTO {prefix}groups VALUES(?)";
+    private static final String MYSQL_GROUP_INSERT = "INSERT INTO {prefix}groups (name) VALUES(?) ON DUPLICATE KEY UPDATE name=name";
+    private static final String H2_GROUP_INSERT = "MERGE INTO {prefix}groups (name) VALUES(?)";
+    private static final String SQLITE_GROUP_INSERT = "INSERT OR IGNORE INTO {prefix}groups (name) VALUES(?)";
+    private static final String POSTGRESQL_GROUP_INSERT = "INSERT INTO {prefix}groups (name) VALUES(?) ON CONFLICT (name) DO NOTHING";
     private static final String GROUP_DELETE = "DELETE FROM {prefix}groups WHERE name=?";
 
     private static final String TRACK_INSERT = "INSERT INTO {prefix}tracks VALUES(?, ?)";
@@ -537,30 +540,30 @@ public class SQLBacking extends AbstractBacking {
 
     @Override
     public boolean createAndLoadGroup(String name) {
-        List<String> groups = new ArrayList<>();
-        try (Connection c = provider.getConnection()) {
-            try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_SELECT_ALL))) {
-                try (ResultSet rs = ps.executeQuery()) {
-                    while (rs.next()) {
-                        groups.add(rs.getString("name").toLowerCase());
-                    }
-                }
-            }
+        String query;
+        switch (provider.getName()) {
+            case "H2":
+                query = H2_GROUP_INSERT;
+                break;
+            case "SQLite":
+                query = SQLITE_GROUP_INSERT;
+                break;
+            case "PostgreSQL":
+                query = POSTGRESQL_GROUP_INSERT;
+                break;
+            default:
+                query = MYSQL_GROUP_INSERT;
+                break;
+        }
 
+        try (Connection c = provider.getConnection()) {
+            try (PreparedStatement ps = c.prepareStatement(prefix.apply(query))) {
+                ps.setString(1, name);
+                ps.execute();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
-        }
-
-        if (!groups.contains(name)) {
-            try (Connection c = provider.getConnection()) {
-                try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_INSERT))) {
-                    ps.setString(1, name);
-                    ps.execute();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
 
         return loadGroup(name);
