@@ -28,6 +28,8 @@ package me.lucko.luckperms.common.commands.sender;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
+import com.google.common.base.Splitter;
+
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -45,6 +47,8 @@ import java.util.UUID;
 @Getter
 @EqualsAndHashCode(of = "uuid")
 public final class AbstractSender<T> implements Sender {
+    private static final Splitter NEW_LINE_SPLITTER = Splitter.on("\n");
+
     private final LuckPermsPlugin platform;
     private final SenderFactory<T> factory;
     private final WeakReference<T> ref;
@@ -63,12 +67,26 @@ public final class AbstractSender<T> implements Sender {
     public void sendMessage(String s) {
         final T t = ref.get();
         if (t != null) {
-            factory.sendMessage(t, s);
+
+            if (!isConsole()) {
+                factory.sendMessage(t, s);
+                return;
+            }
+
+            // if it is console, split up the lines and send individually.
+            for (String line : NEW_LINE_SPLITTER.split(s)) {
+                factory.sendMessage(t, line);
+            }
         }
     }
 
     @Override
     public void sendMessage(FancyMessage message) {
+        if (isConsole()) {
+            sendMessage(message.toOldMessageFormat());
+            return;
+        }
+
         final T t = ref.get();
         if (t != null) {
             factory.sendMessage(t, message);
