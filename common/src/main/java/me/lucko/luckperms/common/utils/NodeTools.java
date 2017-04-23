@@ -30,8 +30,10 @@ import lombok.experimental.UtilityClass;
 import me.lucko.luckperms.api.Node;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 @UtilityClass
 public class NodeTools {
@@ -88,19 +90,14 @@ public class NodeTools {
     }
 
     public static <T extends Node> void removeSamePermission(Iterator<T> it) {
-        List<T> alreadyIn = new ArrayList<>();
+        Set<String> alreadyIn = new HashSet<>();
 
-        iter:
         while (it.hasNext()) {
             T next = it.next();
-            for (T n : alreadyIn) {
-                if (next.getPermission().equals(n.getPermission())) {
-                    it.remove();
-                    continue iter;
-                }
-            }
 
-            alreadyIn.add(next);
+            if (!alreadyIn.add(next.getPermission())) {
+                it.remove();
+            }
         }
     }
 }
