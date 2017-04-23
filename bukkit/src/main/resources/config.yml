@@ -95,6 +95,24 @@ apply-regex: true
 # If set to true, LuckPerms will detect and expand shorthand node patterns.
 apply-shorthand: true
 
+# If the plugin should apply Bukkit child permissions.
+# Plugin authors can define custom permissions structures for their plugin, which will be resolved and used
+# by LuckPerms if this setting is enabled.
+apply-bukkit-child-permissions: true
+
+# If the plugin should apply Bukkit default permissions.
+# Plugin authors can define permissions which should be given to all users by default, or setup permissions
+# which should/shouldn't be given to opped players.
+# If this option is set to false, LuckPerms will ignore these defaults.
+apply-bukkit-default-permissions: true
+
+# If the plugin should apply attachment permissions.
+# Other plugins on the server are able to add their own "permission attachments" to players. This allows
+# them to grant players additional permissions which last until the end of the session, or until they're removed.
+# If this option is set to false, LuckPerms will not include these attachment permissions when considering if a
+# player should have access to a certain permission.
+apply-bukkit-attachment-permissions: true
+
 # Define special group weights for this server.
 # Default is just 0.
 group-weight:

@@ -27,6 +27,8 @@ package me.lucko.luckperms.bukkit.calculators;
 
 import lombok.RequiredArgsConstructor;
 
+import com.google.common.collect.Maps;
+
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.bukkit.model.ChildPermissionProvider;
 import me.lucko.luckperms.common.calculators.PermissionProcessor;
@@ -49,7 +51,7 @@ public class ChildProcessor implements PermissionProcessor {
     public void updateBacking(Map<String, Boolean> map) {
         childPermissions.clear();
         for (Map.Entry<String, Boolean> e : map.entrySet()) {
-            Map<String, Boolean> children = provider.getPermissions().get(e);
+            Map<String, Boolean> children = provider.getPermissions().get(Maps.immutableEntry(e.getKey(), e.getValue()));
             if (children != null) {
                 childPermissions.putAll(children);
             }

@@ -48,15 +48,24 @@ public class SpongeCalculatorFactory extends AbstractCalculatorFactory {
     @Override
     public PermissionCalculator build(Contexts contexts, User user) {
         ImmutableList.Builder<PermissionProcessor> processors = ImmutableList.builder();
+
         processors.add(new MapProcessor());
-        processors.add(new SpongeWildcardProcessor());
+
+        if (plugin.getConfiguration().get(ConfigKeys.APPLY_SPONGE_IMPLICIT_WILDCARDS)) {
+            processors.add(new SpongeWildcardProcessor());
+        }
+
         if (plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) {
             processors.add(new RegexProcessor());
         }
+
         if (plugin.getConfiguration().get(ConfigKeys.APPLYING_WILDCARDS)) {
             processors.add(new WildcardProcessor());
         }
-        processors.add(new DefaultsProcessor(plugin.getService(), contexts.getContexts()));
+
+        if (plugin.getConfiguration().get(ConfigKeys.APPLY_SPONGE_DEFAULT_SUBJECTS)) {
+            processors.add(new DefaultsProcessor(plugin.getService(), contexts.getContexts()));
+        }
 
         return registerCalculator(new PermissionCalculator(plugin, user.getFriendlyName(), processors.build()));
     }

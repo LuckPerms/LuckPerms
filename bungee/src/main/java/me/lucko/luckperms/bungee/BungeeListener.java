@@ -28,6 +28,7 @@ package me.lucko.luckperms.bungee;
 import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -161,6 +162,7 @@ public class BungeeListener implements Listener {
 
         User user = plugin.getUserManager().get(plugin.getUuidCache().getUUID(player.getUniqueId()));
         if (user == null) {
+            e.setHasPermission(false);
             return;
         }
 
@@ -168,6 +170,7 @@ public class BungeeListener implements Listener {
         if (userData == null) {
             plugin.getLog().warn("Player " + player.getName() + " does not have any user data setup.");
             plugin.doAsync(() -> user.setupData(false));
+            e.setHasPermission(false);
             return;
         }
 
@@ -181,7 +184,12 @@ public class BungeeListener implements Listener {
                 false
         );
 
-        e.setHasPermission(userData.getPermissionData(contexts).getPermissionValue(e.getPermission()).asBoolean());
+        Tristate result = userData.getPermissionData(contexts).getPermissionValue(e.getPermission());
+        if (result == Tristate.UNDEFINED && plugin.getConfiguration().get(ConfigKeys.APPLY_BUNGEE_CONFIG_PERMISSIONS)) {
+            return; // just use the result provided by the proxy when the event was created
+        }
+
+        e.setHasPermission(result.asBoolean());
     }
 
     // We don't pre-process all servers, so we have to do it here.

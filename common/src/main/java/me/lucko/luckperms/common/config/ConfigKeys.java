@@ -102,6 +102,12 @@ public class ConfigKeys {
     public static final ConfigKey<Boolean> APPLYING_WILDCARDS = EnduringKey.wrap(BooleanKey.of("apply-wildcards", true));
     public static final ConfigKey<Boolean> APPLYING_REGEX = EnduringKey.wrap(BooleanKey.of("apply-regex", true));
     public static final ConfigKey<Boolean> APPLYING_SHORTHAND = EnduringKey.wrap(BooleanKey.of("apply-shorthand", true));
+    public static final ConfigKey<Boolean> APPLY_BUKKIT_CHILD_PERMISSIONS = EnduringKey.wrap(BooleanKey.of("apply-bukkit-child-permissions", true));
+    public static final ConfigKey<Boolean> APPLY_BUKKIT_DEFAULT_PERMISSIONS = EnduringKey.wrap(BooleanKey.of("apply-bukkit-default-permissions", true));
+    public static final ConfigKey<Boolean> APPLY_BUKKIT_ATTACHMENT_PERMISSIONS = EnduringKey.wrap(BooleanKey.of("apply-bukkit-attachment-permissions", true));
+    public static final ConfigKey<Boolean> APPLY_BUNGEE_CONFIG_PERMISSIONS = EnduringKey.wrap(BooleanKey.of("apply-bungee-config-permissions", false));
+    public static final ConfigKey<Boolean> APPLY_SPONGE_IMPLICIT_WILDCARDS = EnduringKey.wrap(BooleanKey.of("apply-sponge-implicit-wildcards", true));
+    public static final ConfigKey<Boolean> APPLY_SPONGE_DEFAULT_SUBJECTS = EnduringKey.wrap(BooleanKey.of("apply-sponge-default-subjects", true));
     public static final ConfigKey<Map<String, Integer>> GROUP_WEIGHTS = AbstractKey.of(c -> {
         return c.getMap("group-weight", ImmutableMap.of()).entrySet().stream().collect(ImmutableCollectors.toImmutableMap(
                 e -> e.getKey().toLowerCase(),

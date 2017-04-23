@@ -52,22 +52,33 @@ public class BukkitCalculatorFactory extends AbstractCalculatorFactory {
 
     @Override
     public PermissionCalculator build(Contexts contexts, User user) {
-        UUID uuid = plugin.getUuidCache().getExternalUUID(user.getUuid());
-
         ImmutableList.Builder<PermissionProcessor> processors = ImmutableList.builder();
+
         processors.add(new MapProcessor());
-        processors.add(new ChildProcessor(plugin.getChildPermissionProvider()));
-        processors.add(new AttachmentProcessor(() -> {
-            LPPermissible permissible = Injector.getPermissible(uuid);
-            return permissible == null ? null : permissible.getAttachmentPermissions();
-        }));
+
+        if (plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_CHILD_PERMISSIONS)) {
+            processors.add(new ChildProcessor(plugin.getChildPermissionProvider()));
+        }
+
+        if (plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_ATTACHMENT_PERMISSIONS)) {
+            final UUID uuid = plugin.getUuidCache().getExternalUUID(user.getUuid());
+            processors.add(new AttachmentProcessor(() -> {
+                LPPermissible permissible = Injector.getPermissible(uuid);
+                return permissible == null ? null : permissible.getAttachmentPermissions();
+            }));
+        }
+
         if (plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) {
             processors.add(new RegexProcessor());
         }
+
         if (plugin.getConfiguration().get(ConfigKeys.APPLYING_WILDCARDS)) {
             processors.add(new WildcardProcessor());
         }
-        processors.add(new DefaultsProcessor(contexts.isOp(), plugin.getDefaultsProvider()));
+
+        if (plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_DEFAULT_PERMISSIONS)) {
+            processors.add(new DefaultsProcessor(contexts.isOp(), plugin.getDefaultsProvider()));
+        }
 
         return registerCalculator(new PermissionCalculator(plugin, user.getFriendlyName(), processors.build()));
     }

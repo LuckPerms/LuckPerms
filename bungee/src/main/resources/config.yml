@@ -14,7 +14,7 @@ server: bungee
 
 # If users on this server should have their global permissions applied.
 # If set to false, only server specific permissions will apply for users on this server
-include-global: false
+include-global: true
 
 # If users on this server should have their global world permissions applied.
 # If set to false, only world specific permissions will apply for users on this server
@@ -94,6 +94,10 @@ apply-regex: true
 # If the plugin should complete and apply shorthand permissions.
 # If set to true, LuckPerms will detect and expand shorthand node patterns.
 apply-shorthand: true
+
+# If the plugin should apply the permissions & groups defined in the BungeeCord config.yml
+# If set to false, LuckPerms will ignore these values.
+apply-bungee-config-permissions: false
 
 # Define special group weights for this server.
 # Default is just 0.
