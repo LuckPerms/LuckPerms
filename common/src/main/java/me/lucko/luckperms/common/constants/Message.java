@@ -253,9 +253,9 @@ public enum Message {
     ADD_CHATMETA_SUCCESS("&b{0}&a had {1} &f\"{2}&f\"&a set at a priority of &b{3}&a in context {4}&a.", true),
     ADD_TEMP_CHATMETA_SUCCESS("&b{0}&a had {1} &f\"{2}&f\"&a set at a priority of &b{3}&a for a duration of &b{4}&a in context {5}&a.", true),
     REMOVE_CHATMETA_SUCCESS("&b{0}&a had {1} &f\"{2}&f\"&a at priority &b{3}&a removed in context {4}&a.", true),
-    BULK_REMOVE_CHATMETA_SUCCESS("&b{0}&a had all {1}es at priority &b{3}&a removed in context {4}&a.", true),
+    BULK_REMOVE_CHATMETA_SUCCESS("&b{0}&a had all {1}es at priority &b{2}&a removed in context {3}&a.", true),
     REMOVE_TEMP_CHATMETA_SUCCESS("&b{0}&a had temporary {1} &f\"{2}&f\"&a at priority &b{3}&a removed in context {4}&a.", true),
-    BULK_REMOVE_TEMP_CHATMETA_SUCCESS("&b{0}&a had all temporary {1}es at priority &b{3}&a removed in context {4}&a.", true),
+    BULK_REMOVE_TEMP_CHATMETA_SUCCESS("&b{0}&a had all temporary {1}es at priority &b{2}&a removed in context {3}&a.", true),
 
     ALREADY_HAS_META("{0} already has that meta key value pair set.", true),
 

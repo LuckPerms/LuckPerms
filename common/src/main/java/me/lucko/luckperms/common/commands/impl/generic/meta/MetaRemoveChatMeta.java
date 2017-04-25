@@ -68,14 +68,14 @@ public class MetaRemoveChatMeta extends SharedSubCommand {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         int priority = ArgumentUtils.handlePriority(0, args);
-        String prefix = ArgumentUtils.handleStringOrElse(1, args, "null");
+        String meta = ArgumentUtils.handleStringOrElse(1, args, "null");
         MutableContextSet context = ArgumentUtils.handleContext(2, args);
 
         // Handle bulk removal
-        if (prefix.equalsIgnoreCase("null")) {
+        if (meta.equalsIgnoreCase("null") || meta.equals("*")) {
             holder.removeIf(n ->
-                    n.isPrefix() &&
-                    n.getPrefix().getKey() == priority &&
+                    (isPrefix ? n.isPrefix() : n.isSuffix()) &&
+                    (isPrefix ? n.getPrefix() : n.getSuffix()).getKey() == priority &&
                     !n.isTemporary() &&
                     n.getFullContexts().makeImmutable().equals(context.makeImmutable())
             );
@@ -84,10 +84,10 @@ public class MetaRemoveChatMeta extends SharedSubCommand {
             return CommandResult.SUCCESS;
         }
 
-        DataMutateResult result = holder.unsetPermission(NodeFactory.makeChatMetaNode(isPrefix, priority, prefix).withExtraContext(context).build());
+        DataMutateResult result = holder.unsetPermission(NodeFactory.makeChatMetaNode(isPrefix, priority, meta).withExtraContext(context).build());
 
         if (result.asBoolean()) {
-            Message.REMOVE_CHATMETA_SUCCESS.send(sender, holder.getFriendlyName(), DESCRIPTOR.apply(isPrefix), prefix, priority, Util.contextSetToString(context));
+            Message.REMOVE_CHATMETA_SUCCESS.send(sender, holder.getFriendlyName(), DESCRIPTOR.apply(isPrefix), meta, priority, Util.contextSetToString(context));
 
             LogEntry.build().actor(sender).acted(holder)
                     .action("meta remove" + DESCRIPTOR.apply(isPrefix) + " " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
