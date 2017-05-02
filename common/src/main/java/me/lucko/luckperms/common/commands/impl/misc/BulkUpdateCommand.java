@@ -103,23 +103,26 @@ public class BulkUpdateCommand extends SingleCommand {
         }
 
         String action = args.remove(0).toLowerCase();
-        if (action.equals("delete")) {
-            bulkUpdateBuilder.action(DeleteAction.create());
-        } else if (action.equals("update")) {
-            if (args.size() < 2) {
-                throw new ArgumentUtils.DetailedUsageException();
-            }
+        switch (action) {
+            case "delete":
+                bulkUpdateBuilder.action(DeleteAction.create());
+                break;
+            case "update":
+                if (args.size() < 2) {
+                    throw new ArgumentUtils.DetailedUsageException();
+                }
 
-            String field = args.remove(0);
-            QueryField queryField = QueryField.of(field);
-            if (queryField == null) {
-                throw new ArgumentUtils.DetailedUsageException();
-            }
-            String value = args.remove(0);
+                String field = args.remove(0);
+                QueryField queryField = QueryField.of(field);
+                if (queryField == null) {
+                    throw new ArgumentUtils.DetailedUsageException();
+                }
+                String value = args.remove(0);
 
-            bulkUpdateBuilder.action(UpdateAction.of(queryField, value));
-        } else {
-            throw new ArgumentUtils.DetailedUsageException();
+                bulkUpdateBuilder.action(UpdateAction.of(queryField, value));
+                break;
+            default:
+                throw new ArgumentUtils.DetailedUsageException();
         }
 
         for (String constraint : args) {

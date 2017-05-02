@@ -42,7 +42,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class MigrationMainCommand extends MainCommand<Object> {
     private static final Map<String, String> PLUGINS = ImmutableMap.<String, String>builder()
@@ -96,7 +95,7 @@ public class MigrationMainCommand extends MainCommand<Object> {
 
     @SuppressWarnings("unchecked")
     private static List<Command<Object, ?>> getAvailableCommands() {
-        List<SubCommand<Object>> l = new ArrayList<>();
+        List<Command<Object, ?>> l = new ArrayList<>();
 
         for (Map.Entry<String, String> plugin : PLUGINS.entrySet()) {
             try {
@@ -105,7 +104,7 @@ public class MigrationMainCommand extends MainCommand<Object> {
             } catch (Throwable ignored) {}
         }
 
-        return l.stream().collect(Collectors.toList());
+        return l;
     }
 
     /* Dummy */

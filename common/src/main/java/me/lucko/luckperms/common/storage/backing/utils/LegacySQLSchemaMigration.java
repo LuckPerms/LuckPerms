@@ -39,6 +39,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -76,7 +77,7 @@ public class LegacySQLSchemaMigration implements Runnable {
 
         backing.getPlugin().getLog().warn("Found " + uuidData.size() + " uuid data entries. Copying to new tables...");
 
-        List<Map.Entry<UUID, String>> uuidEntries = uuidData.entrySet().stream().collect(Collectors.toList());
+        List<Map.Entry<UUID, String>> uuidEntries = new ArrayList<>(uuidData.entrySet());
         List<List<Map.Entry<UUID, String>>> partitionedUuidEntries = Lists.partition(uuidEntries, 100);
 
         for (List<Map.Entry<UUID, String>> l : partitionedUuidEntries) {
