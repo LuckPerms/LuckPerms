@@ -96,13 +96,6 @@ public class SpongeUser extends User {
             return (now - lastUse) > 600000;
         }
 
-        private synchronized void checkData() {
-            if (parent.getUserData() == null) {
-                plugin.getLog().warn("User " + parent.getName().orElse("unknown") + " - " + parent.getUuid() + " does not have any data loaded.");
-                parent.setupData(false);
-            }
-        }
-
         @Override
         public String getIdentifier() {
             return plugin.getUuidCache().getExternalUUID(parent.getUuid()).toString();
@@ -134,7 +127,6 @@ public class SpongeUser extends User {
         public Tristate getPermissionValue(ContextSet contexts, String permission) {
             logUsage();
             try (Timing ignored = plugin.getTimings().time(LPTiming.USER_GET_PERMISSION_VALUE)) {
-                checkData();
                 return parent.getUserData().getPermissionData(plugin.getService().calculateContexts(contexts)).getPermissionValue(permission);
             }
         }
@@ -153,7 +145,6 @@ public class SpongeUser extends User {
             try (Timing ignored = plugin.getTimings().time(LPTiming.USER_GET_PARENTS)) {
                 ImmutableSet.Builder<SubjectReference> subjects = ImmutableSet.builder();
 
-                checkData();
                 for (String perm : parent.getUserData().getPermissionData(plugin.getService().calculateContexts(contexts)).getImmutableBacking().keySet()) {
                     if (!perm.startsWith("group.")) {
                         continue;
@@ -176,8 +167,6 @@ public class SpongeUser extends User {
         public Optional<String> getOption(ContextSet contexts, String s) {
             logUsage();
             try (Timing ignored = plugin.getTimings().time(LPTiming.USER_GET_OPTION)) {
-                checkData();
-
                 MetaData data = parent.getUserData().getMetaData(plugin.getService().calculateContexts(contexts));
                 if (s.equalsIgnoreCase("prefix")) {
                     if (data.getPrefix() != null) {

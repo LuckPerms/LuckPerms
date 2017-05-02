@@ -83,12 +83,8 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
             .expireAfterWrite(1, TimeUnit.MINUTES)
             .build(u -> {
                 if (isLoaded(UserIdentifier.of(u, null))) {
-
                     SpongeUser user = get(u);
-                    if (user.getUserData() == null) {
-                        user.setupData(false);
-                    }
-
+                    user.preCalculateData(false);
                     return get(u).getSpongeData();
                 }
 
@@ -101,12 +97,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
                     throw new RuntimeException();
                 }
 
-                user.setupData(false);
-
-                if (user.getUserData() == null) {
-                    getPlugin().getLog().warn("User data not present for requested user id: " + u);
-                }
-
+                user.preCalculateData(false);
                 return user.getSpongeData();
             });
 

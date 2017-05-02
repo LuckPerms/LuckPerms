@@ -280,8 +280,6 @@ public class LuckPermsService implements PermissionService {
 
         for (User user : plugin.getUserManager().getAll().values()) {
             UserCache userCache = user.getUserData();
-            if (userCache == null) continue;
-
             userCache.invalidateCache();
         }
 
@@ -305,8 +303,6 @@ public class LuckPermsService implements PermissionService {
 
         for (User user : plugin.getUserManager().getAll().values()) {
             UserCache userCache = user.getUserData();
-            if (userCache == null) continue;
-
             userCache.invalidateCache();
         }
     }

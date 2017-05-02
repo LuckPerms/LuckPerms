@@ -37,7 +37,6 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.caching.MetaData;
 import me.lucko.luckperms.api.caching.PermissionData;
 import me.lucko.luckperms.api.caching.UserData;
-import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.utils.ExtractedContexts;
 
@@ -50,16 +49,10 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class UserCache implements UserData {
 
-
     /**
      * The user whom this data instance is representing
      */
     private final User user;
-
-    /**
-     * A provider of {@link me.lucko.luckperms.common.calculators.PermissionCalculator}s for the instance
-     */
-    private final CalculatorFactory calculatorFactory;
 
     private final LoadingCache<Contexts, PermissionCache> permission = Caffeine.newBuilder()
             .expireAfterAccess(10, TimeUnit.MINUTES)
@@ -103,7 +96,7 @@ public class UserCache implements UserData {
 
     @Override
     public PermissionCache calculatePermissions(@NonNull Contexts contexts) {
-        PermissionCache data = new PermissionCache(contexts, user, calculatorFactory);
+        PermissionCache data = new PermissionCache(contexts, user, user.getPlugin().getCalculatorFactory());
         data.setPermissions(user.exportNodes(ExtractedContexts.generate(contexts), true));
         return data;
     }
@@ -161,6 +154,11 @@ public class UserCache implements UserData {
     public void cleanup() {
         permission.cleanUp();
         meta.cleanUp();
+    }
+
+    public void clear() {
+        permission.invalidateAll();
+        meta.invalidateAll();
     }
 
 }

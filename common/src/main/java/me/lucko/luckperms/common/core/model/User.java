@@ -29,7 +29,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
-import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.common.api.delegates.UserDelegate;
 import me.lucko.luckperms.common.caching.UserCache;
 import me.lucko.luckperms.common.caching.handlers.HolderReference;
@@ -69,7 +68,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
      * The users data cache instance, if present.
      */
     @Getter
-    private UserCache userData = null;
+    private final UserCache userData;
 
     @Getter
     private BufferedRequest<Void> refreshBuffer = new BufferedRequest<Void>(1000L, r -> getPlugin().doAsync(r)) {
@@ -86,15 +85,20 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
     public User(UUID uuid, LuckPermsPlugin plugin) {
         super(uuid.toString(), plugin);
         this.uuid = uuid;
+
         this.primaryGroup = plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION).apply(this);
+        this.userData = new UserCache(this);
+        getPlugin().getApiProvider().getEventFactory().handleUserCacheLoad(this, userData);
     }
 
     public User(UUID uuid, String name, LuckPermsPlugin plugin) {
         super(uuid.toString(), plugin);
         this.uuid = uuid;
-        setName(name, true);
 
+        setName(name, true);
         this.primaryGroup = plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION).apply(this);
+        this.userData = new UserCache(this);
+        getPlugin().getApiProvider().getEventFactory().handleUserCacheLoad(this, userData);
     }
 
     @Override
@@ -156,15 +160,8 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
      * Sets up the UserData cache
      * Blocking call.
      */
-    public synchronized void setupData(boolean op) {
-        if (userData != null) {
-            return;
-        }
-
-        userData = new UserCache(this, getPlugin().getCalculatorFactory());
+    public synchronized void preCalculateData(boolean op) {
         userData.preCalculate(getPlugin().getPreProcessContexts(op));
-
-        getPlugin().getApiProvider().getEventFactory().handleUserCacheLoad(this, userData);
         getPlugin().onUserRefresh(this);
     }
 
@@ -172,7 +169,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
      * Removes the UserData cache from this user
      */
     public void unregisterData() {
-        userData = null;
+        userData.clear();
     }
 
     /**
@@ -180,14 +177,9 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
      * Blocking call.
      */
     private synchronized void refreshPermissions() {
-        UserData ud = userData;
-        if (ud == null) {
-            return;
-        }
-
-        ud.recalculatePermissions();
-        ud.recalculateMeta();
-        getPlugin().getApiProvider().getEventFactory().handleUserDataRecalculate(this, ud);
+        userData.recalculatePermissions();
+        userData.recalculateMeta();
+        getPlugin().getApiProvider().getEventFactory().handleUserDataRecalculate(this, userData);
         getPlugin().onUserRefresh(this);
     }
 
@@ -213,9 +205,6 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
     }
 
     public void cleanup() {
-        UserCache cache = userData;
-        if (cache != null) {
-            cache.cleanup();
-        }
+        userData.cleanup();
     }
 }

@@ -28,7 +28,6 @@ package me.lucko.luckperms.common.commands.impl.user;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.caching.MetaData;
-import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
@@ -90,28 +89,25 @@ public class UserInfo extends SubCommand<User> {
             }
         }
 
-        UserData data = user.getUserData();
         String context = "&bNone";
         String prefix = "&bNone";
         String suffix = "&bNone";
-        if (data != null) {
-            Contexts contexts = plugin.getContextForUser(user);
-            if (contexts != null) {
-                context = contexts.getContexts().toSet().stream()
-                        .map(e -> Util.contextToString(e.getKey(), e.getValue()))
-                        .collect(Collectors.joining(" "));
+        Contexts contexts = plugin.getContextForUser(user);
+        if (contexts != null) {
+            context = contexts.getContexts().toSet().stream()
+                    .map(e -> Util.contextToString(e.getKey(), e.getValue()))
+                    .collect(Collectors.joining(" "));
 
-                MetaData meta = data.getMetaData(contexts);
-                if (meta.getPrefix() != null) {
-                    prefix = "&f\"" + meta.getPrefix() + "&f\"";
-                }
-                if (meta.getSuffix() != null) {
-                    suffix = "&f\"" + meta.getSuffix() + "&f\"";
-                }
+            MetaData meta = user.getUserData().getMetaData(contexts);
+            if (meta.getPrefix() != null) {
+                prefix = "&f\"" + meta.getPrefix() + "&f\"";
+            }
+            if (meta.getSuffix() != null) {
+                suffix = "&f\"" + meta.getSuffix() + "&f\"";
             }
         }
 
-        Message.USER_INFO_DATA.send(sender, Util.formatBoolean(data != null), context, prefix, suffix);
+        Message.USER_INFO_DATA.send(sender, Util.formatBoolean(contexts != null), context, prefix, suffix);
         return CommandResult.SUCCESS;
     }
 }

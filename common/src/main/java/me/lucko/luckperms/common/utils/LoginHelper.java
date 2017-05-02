@@ -91,7 +91,7 @@ public class LoginHelper {
                 plugin.getStorage().force().saveUser(user).join();
             }
 
-            user.setupData(false); // Pretty nasty calculation call. Sets up the caching system so data is ready when the user joins.
+            user.preCalculateData(false); // Pretty nasty calculation call. Sets up the caching system so data is ready when the user joins.
         }
 
         final long time = System.currentTimeMillis() - startTime;

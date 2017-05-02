@@ -97,12 +97,13 @@ public final class UserDelegate extends PermissionHolderDelegate implements User
 
     @Override
     public Optional<UserData> getUserDataCache() {
-        return Optional.ofNullable(handle.getUserData());
+        // TODO Deprecate this and return a nonnull instance
+        return Optional.of(handle.getUserData());
     }
 
     @Override
     public void setupDataCache() {
-        handle.setupData(false);
+        handle.preCalculateData(false);
     }
 
     @Override

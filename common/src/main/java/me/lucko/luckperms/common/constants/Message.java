@@ -294,7 +294,7 @@ public enum Message {
 
     USER_INFO_DATA(
             "{PREFIX}&f- &aCached Data:" + "\n" +
-            "{PREFIX}&f-    &3Is Loaded: {0}" + "\n" +
+            "{PREFIX}&f-    &3Has contextual data: {0}" + "\n" +
             "{PREFIX}&f-    &3Current Contexts: {1}" + "\n" +
             "{PREFIX}&f-    &3Current Prefix: {2}" + "\n" +
             "{PREFIX}&f-    &3Current Suffix: {3}",

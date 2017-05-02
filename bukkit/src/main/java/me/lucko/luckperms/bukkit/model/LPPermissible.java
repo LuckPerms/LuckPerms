@@ -76,7 +76,7 @@ public class LPPermissible extends PermissibleBase {
     private final Map<String, PermissionAttachmentInfo> attachmentPermissions = new ConcurrentHashMap<>();
     private final List<PermissionAttachment> attachments = Collections.synchronizedList(new LinkedList<>());
 
-    public LPPermissible(@NonNull Player parent, User user, LPBukkitPlugin plugin) {
+    public LPPermissible(@NonNull Player parent, @NonNull User user, @NonNull LPBukkitPlugin plugin) {
         super(parent);
         this.user = user;
         this.parent = parent;
@@ -139,10 +139,6 @@ public class LPPermissible extends PermissibleBase {
         );
     }
 
-    private boolean hasData() {
-        return user != null && user.getUserData() != null;
-    }
-
     @Override
     public void setOp(boolean value) {
         parent.setOp(value);
@@ -150,7 +146,7 @@ public class LPPermissible extends PermissibleBase {
 
     @Override
     public boolean isPermissionSet(@NonNull String name) {
-        return hasData() && user.getUserData().getPermissionData(calculateContexts()).getPermissionValue(name) != Tristate.UNDEFINED;
+        return user.getUserData().getPermissionData(calculateContexts()).getPermissionValue(name) != Tristate.UNDEFINED;
     }
 
     @Override
@@ -160,11 +156,9 @@ public class LPPermissible extends PermissibleBase {
 
     @Override
     public boolean hasPermission(@NonNull String name) {
-        if (hasData()) {
-            Tristate ts = user.getUserData().getPermissionData(calculateContexts()).getPermissionValue(name);
-            if (ts != Tristate.UNDEFINED) {
-                return ts.asBoolean();
-            }
+        Tristate ts = user.getUserData().getPermissionData(calculateContexts()).getPermissionValue(name);
+        if (ts != Tristate.UNDEFINED) {
+            return ts.asBoolean();
         }
 
         return Permission.DEFAULT_PERMISSION.getValue(isOp());
@@ -172,11 +166,9 @@ public class LPPermissible extends PermissibleBase {
 
     @Override
     public boolean hasPermission(@NonNull Permission perm) {
-        if (hasData()) {
-            Tristate ts = user.getUserData().getPermissionData(calculateContexts()).getPermissionValue(perm.getName());
-            if (ts != Tristate.UNDEFINED) {
-                return ts.asBoolean();
-            }
+        Tristate ts = user.getUserData().getPermissionData(calculateContexts()).getPermissionValue(perm.getName());
+        if (ts != Tristate.UNDEFINED) {
+            return ts.asBoolean();
         }
 
         return perm.getDefault().getValue(isOp());
@@ -187,13 +179,11 @@ public class LPPermissible extends PermissibleBase {
         Set<PermissionAttachmentInfo> perms = new HashSet<>();
         perms.addAll(attachmentPermissions.values());
 
-        if (hasData()) {
-            perms.addAll(
-                    user.getUserData().getPermissionData(calculateContexts()).getImmutableBacking().entrySet().stream()
-                            .map(e -> new PermissionAttachmentInfo(parent, e.getKey(), null, e.getValue()))
-                            .collect(Collectors.toList())
-            );
-        }
+        perms.addAll(
+                user.getUserData().getPermissionData(calculateContexts()).getImmutableBacking().entrySet().stream()
+                        .map(e -> new PermissionAttachmentInfo(parent, e.getKey(), null, e.getValue()))
+                        .collect(Collectors.toList())
+        );
 
         return perms;
     }
@@ -288,7 +278,7 @@ public class LPPermissible extends PermissibleBase {
             calculateChildPermissions(attachment.getPermissions(), false, attachment);
         }
 
-        if (hasData() && invalidate) {
+        if (invalidate) {
             user.getUserData().invalidatePermissionCalculators();
         }
     }

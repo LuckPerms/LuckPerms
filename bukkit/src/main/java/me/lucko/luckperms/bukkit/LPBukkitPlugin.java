@@ -42,7 +42,6 @@ import me.lucko.luckperms.bukkit.model.LPPermissible;
 import me.lucko.luckperms.bukkit.vault.VaultHook;
 import me.lucko.luckperms.common.api.ApiHandler;
 import me.lucko.luckperms.common.api.ApiProvider;
-import me.lucko.luckperms.common.caching.UserCache;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.commands.sender.Sender;
@@ -474,12 +473,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
                     return;
                 }
 
-                UserCache userData = user.getUserData();
-                if (userData == null) {
-                    return;
-                }
-
-                Map<String, Boolean> backing = userData.getPermissionData(permissible.calculateContexts()).getImmutableBacking();
+                Map<String, Boolean> backing = user.getUserData().getPermissionData(permissible.calculateContexts()).getImmutableBacking();
                 boolean op = Optional.ofNullable(backing.get("luckperms.autoop")).orElse(false);
                 player.setOp(op);
             } catch (Exception ignored) {}

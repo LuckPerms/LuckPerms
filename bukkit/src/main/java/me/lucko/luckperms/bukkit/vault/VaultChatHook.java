@@ -126,10 +126,6 @@ public class VaultChatHook extends Chat {
 
         perms.log("Getting meta: '" + node + "' for user " + user.getFriendlyName() + " on world " + world + ", server " + perms.getServer());
 
-        if (user.getUserData() == null) {
-            return defaultValue;
-        }
-
         String ret = user.getUserData().getMetaData(perms.createContextForWorld(world)).getMeta().get(node);
         if (ret == null) {
             return defaultValue;
@@ -143,10 +139,6 @@ public class VaultChatHook extends Chat {
         world = perms.isIgnoreWorld() ? null : world;
 
         perms.log("Getting " + (prefix ? "prefix" : "suffix") + " for user " + user.getFriendlyName() + " on world " + world + ", server " + perms.getServer());
-
-        if (user.getUserData() == null) {
-            return "";
-        }
 
         MetaData data = user.getUserData().getMetaData(perms.createContextForWorld(world));
         String v = prefix ? data.getPrefix() : data.getSuffix();

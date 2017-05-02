@@ -29,7 +29,6 @@ import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.Message;
@@ -166,14 +165,6 @@ public class BungeeListener implements Listener {
             return;
         }
 
-        UserData userData = user.getUserData();
-        if (userData == null) {
-            plugin.getLog().warn("Player " + player.getName() + " does not have any user data setup.");
-            plugin.doAsync(() -> user.setupData(false));
-            e.setHasPermission(false);
-            return;
-        }
-
         Contexts contexts = new Contexts(
                 plugin.getContextManager().getApplicableContext(player),
                 plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
@@ -184,7 +175,7 @@ public class BungeeListener implements Listener {
                 false
         );
 
-        Tristate result = userData.getPermissionData(contexts).getPermissionValue(e.getPermission());
+        Tristate result = user.getUserData().getPermissionData(contexts).getPermissionValue(e.getPermission());
         if (result == Tristate.UNDEFINED && plugin.getConfiguration().get(ConfigKeys.APPLY_BUNGEE_CONFIG_PERMISSIONS)) {
             return; // just use the result provided by the proxy when the event was created
         }
@@ -207,10 +198,6 @@ public class BungeeListener implements Listener {
             if (user == null) {
                 return;
             }
-            UserData userData = user.getUserData();
-            if (userData == null) {
-                return;
-            }
 
             Contexts contexts = new Contexts(
                     set.makeImmutable(),
@@ -222,7 +209,7 @@ public class BungeeListener implements Listener {
                     false
             );
 
-            userData.preCalculate(contexts);
+            user.getUserData().preCalculate(contexts);
         });
     }
 }

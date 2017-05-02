@@ -29,7 +29,6 @@ import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.bukkit.model.Injector;
 import me.lucko.luckperms.bukkit.model.LPPermissible;
-import me.lucko.luckperms.common.caching.UserCache;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.core.model.User;
@@ -182,14 +181,7 @@ public class BukkitListener implements Listener {
 
         // We assume all users are not op, but those who are need extra calculation.
         if (player.isOp()) {
-            plugin.doAsync(() -> {
-                UserCache userData = user.getUserData();
-                if (userData == null) {
-                    return;
-                }
-
-                userData.preCalculate(plugin.getPreProcessContexts(true));
-            });
+            plugin.doAsync(() -> user.getUserData().preCalculate(plugin.getPreProcessContexts(true)));
         }
     }
 

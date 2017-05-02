@@ -164,10 +164,6 @@ public class VaultPermissionHook extends Permission {
         User user = plugin.getUserManager().getByUsername(player);
         if (user == null) return false;
 
-        if (user.getUserData() == null) {
-            return false;
-        }
-
         // Effectively fallback to the standard Bukkit #hasPermission check.
         return user.getUserData().getPermissionData(createContextForWorld(world)).getPermissionValue(permission).asBoolean();
     }
