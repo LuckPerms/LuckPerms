@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.sponge.commands;
 
-import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -37,9 +37,9 @@ import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
-import me.lucko.luckperms.sponge.service.proxy.LPSubject;
-import me.lucko.luckperms.sponge.service.proxy.LPSubjectCollection;
-import me.lucko.luckperms.sponge.service.proxy.LPSubjectData;
+import me.lucko.luckperms.sponge.service.model.LPSubject;
+import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
+import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 
 import org.spongepowered.api.Sponge;
 
@@ -60,22 +60,22 @@ public class ParentRemove extends SubCommand<LPSubjectData> {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, List<String> args, String label) throws CommandException {
         String collection = args.get(0);
         String name = args.get(1);
-        ContextSet contextSet = ArgumentUtils.handleContexts(2, args);
+        ImmutableContextSet contextSet = ArgumentUtils.handleContexts(2, args);
 
         LuckPermsService service = Sponge.getServiceManager().provideUnchecked(LuckPermsService.class);
-        if (service.getCollections().keySet().stream().map(String::toLowerCase).noneMatch(s -> s.equalsIgnoreCase(collection))) {
+        if (service.getLoadedCollections().keySet().stream().map(String::toLowerCase).noneMatch(s -> s.equalsIgnoreCase(collection))) {
             Util.sendPluginMessage(sender, "Warning: SubjectCollection '&4" + collection + "&c' doesn't exist.");
         }
 
-        LPSubjectCollection c = service.getSubjects(collection);
-        if (!c.hasRegistered(name)) {
+        LPSubjectCollection c = service.getCollection(collection);
+        if (!c.hasRegistered(name).join()) {
             Util.sendPluginMessage(sender, "Warning: Subject '&4" + name + "&c' doesn't exist.");
         }
 
-        LPSubject subject = c.get(name);
+        LPSubject subject = c.loadSubject(name).join();
 
-        if (subjectData.removeParent(contextSet, subject.toReference())) {
-            Util.sendPluginMessage(sender, "&aRemoved parent &b" + subject.getContainingCollection().getIdentifier() +
+        if (subjectData.removeParent(contextSet, subject.toReference()).join()) {
+            Util.sendPluginMessage(sender, "&aRemoved parent &b" + subject.getParentCollection().getIdentifier() +
                     "&a/&b" + subject.getIdentifier() + "&a in context " + SpongeUtils.contextToString(contextSet));
         } else {
             Util.sendPluginMessage(sender, "Unable to remove parent. Are you sure the Subject has it added?");

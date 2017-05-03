@@ -28,15 +28,19 @@ package me.lucko.luckperms.sponge.service.persisted;
 import lombok.Getter;
 import lombok.Setter;
 
-import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.calculated.CalculatedSubjectData;
 import me.lucko.luckperms.sponge.service.references.SubjectReference;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
+
 /**
  * Extension of MemorySubjectData which persists data when modified
  */
-public class PersistedSubjectData extends CalculatedSubjectData {
+public class PersistedSubjectData extends CalculatedSubjectData implements Function<Boolean, Boolean> {
     private final PersistedSubject subject;
 
     @Getter
@@ -59,79 +63,63 @@ public class PersistedSubjectData extends CalculatedSubjectData {
     }
 
     @Override
-    public boolean setPermission(ContextSet contexts, String permission, me.lucko.luckperms.api.Tristate value) {
-        boolean r = super.setPermission(contexts, permission, value);
+    public Boolean apply(Boolean b) {
         save();
-        return r;
+        return b;
     }
 
     @Override
-    public boolean clearPermissions() {
-        boolean r = super.clearPermissions();
-        save();
-        return r;
+    public CompletableFuture<Boolean> setPermission(ImmutableContextSet contexts, String permission, Tristate value) {
+        return super.setPermission(contexts, permission, value).thenApply(this);
     }
 
     @Override
-    public boolean clearPermissions(ContextSet contexts) {
-        boolean r = super.clearPermissions(contexts);
-        save();
-        return r;
+    public CompletableFuture<Boolean> clearPermissions() {
+        return super.clearPermissions().thenApply(this);
     }
 
     @Override
-    public boolean addParent(ContextSet contexts, SubjectReference parent) {
-        boolean r = super.addParent(contexts, parent);
-        save();
-        return r;
+    public CompletableFuture<Boolean> clearPermissions(ImmutableContextSet contexts) {
+        return super.clearPermissions(contexts).thenApply(this);
     }
 
     @Override
-    public boolean removeParent(ContextSet contexts, SubjectReference parent) {
-        boolean r = super.removeParent(contexts, parent);
-        save();
-        return r;
+    public CompletableFuture<Boolean> addParent(ImmutableContextSet contexts, SubjectReference parent) {
+        return super.addParent(contexts, parent).thenApply(this);
     }
 
     @Override
-    public boolean clearParents() {
-        boolean r = super.clearParents();
-        save();
-        return r;
+    public CompletableFuture<Boolean> removeParent(ImmutableContextSet contexts, SubjectReference parent) {
+        return super.removeParent(contexts, parent).thenApply(this);
     }
 
     @Override
-    public boolean clearParents(ContextSet contexts) {
-        boolean r = super.clearParents(contexts);
-        save();
-        return r;
+    public CompletableFuture<Boolean> clearParents() {
+        return super.clearParents().thenApply(this);
     }
 
     @Override
-    public boolean setOption(ContextSet contexts, String key, String value) {
-        boolean r = super.setOption(contexts, key, value);
-        save();
-        return r;
+    public CompletableFuture<Boolean> clearParents(ImmutableContextSet contexts) {
+        return super.clearParents(contexts).thenApply(this);
     }
 
     @Override
-    public boolean unsetOption(ContextSet contexts, String key) {
-        boolean r = super.unsetOption(contexts, key);
-        save();
-        return r;
+    public CompletableFuture<Boolean> setOption(ImmutableContextSet contexts, String key, String value) {
+        return super.setOption(contexts, key, value).thenApply(this);
     }
 
     @Override
-    public boolean clearOptions(ContextSet contexts) {
-        boolean r = super.clearOptions(contexts);
-        save();
-        return r;
+    public CompletableFuture<Boolean> unsetOption(ImmutableContextSet contexts, String key) {
+        return super.unsetOption(contexts, key).thenApply(this);
     }
 
     @Override
-    public boolean clearOptions() {
-        boolean r = super.clearOptions();
-        save();
-        return r;
+    public CompletableFuture<Boolean> clearOptions() {
+        return super.clearOptions().thenApply(this);
+    }
+
+    @Override
+    public CompletableFuture<Boolean> clearOptions(ImmutableContextSet contexts) {
+        return super.clearOptions(contexts).thenApply(this);
     }
 }

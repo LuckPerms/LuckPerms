@@ -123,7 +123,7 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
     }
 
     @Override
-    public User get(UUID uuid) {
+    public User getIfLoaded(UUID uuid) {
         return getIfLoaded(UserIdentifier.of(uuid, null));
     }
 
@@ -142,7 +142,7 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
     @Override
     public void scheduleUnload(UUID uuid) {
         plugin.getScheduler().doAsyncLater(() -> {
-            User user = get(plugin.getUuidCache().getUUID(uuid));
+            User user = getIfLoaded(plugin.getUuidCache().getUUID(uuid));
             if (user != null && !plugin.isPlayerOnline(uuid)) {
                 user.unregisterData();
                 unload(user);

@@ -35,7 +35,6 @@ import me.lucko.luckperms.sponge.service.references.SubjectReference;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @UtilityClass
 public class SpongeUtils {
@@ -77,7 +76,7 @@ public class SpongeUtils {
         return sb.toString();
     }
 
-    public static String parentsToString(Set<SubjectReference> parents) {
+    public static String parentsToString(Iterable<SubjectReference> parents) {
         StringBuilder sb = new StringBuilder();
         for (SubjectReference s : parents) {
             sb.append("&3> &a")

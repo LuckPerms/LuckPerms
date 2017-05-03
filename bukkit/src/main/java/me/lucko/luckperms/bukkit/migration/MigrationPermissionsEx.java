@@ -191,7 +191,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             }
 
             plugin.getStorage().loadUser(u, user.getName()).join();
-            User lpUser = plugin.getUserManager().get(u);
+            User lpUser = plugin.getUserManager().getIfLoaded(u);
 
             try {
                 for (String node : user.getOwnPermissions(null)) {

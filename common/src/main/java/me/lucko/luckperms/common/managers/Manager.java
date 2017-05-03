@@ -48,6 +48,8 @@ public interface Manager<I, T extends Identifiable<I>> extends Function<I, T> {
     /**
      * Gets or creates an object by id
      *
+     * <p>Should only every be called by the storage implementation.</p>
+     *
      * @param id The id to search by
      * @return a {@link T} object if the object is loaded or makes and returns a new object
      */

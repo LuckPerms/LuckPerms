@@ -25,7 +25,8 @@
 
 package me.lucko.luckperms.sponge.commands;
 
-import me.lucko.luckperms.api.context.ContextSet;
+import com.google.common.collect.ImmutableMap;
+
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
@@ -37,7 +38,7 @@ import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.sponge.service.proxy.LPSubjectData;
+import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 
 import java.util.List;
 import java.util.Map;
@@ -51,16 +52,16 @@ public class OptionInfo extends SubCommand<LPSubjectData> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, List<String> args, String label) throws CommandException {
-        ContextSet contextSet = ArgumentUtils.handleContexts(0, args);
+        ImmutableContextSet contextSet = ArgumentUtils.handleContexts(0, args);
         if (contextSet.isEmpty()) {
             Util.sendPluginMessage(sender, "&aShowing options matching contexts &bANY&a.");
-            Map<ImmutableContextSet, Map<String, String>> options = subjectData.getOptions();
+            Map<ImmutableContextSet, ImmutableMap<String, String>> options = subjectData.getAllOptions();
             if (options.isEmpty()) {
                 Util.sendPluginMessage(sender, "That subject does not have any options defined.");
                 return CommandResult.SUCCESS;
             }
 
-            for (Map.Entry<ImmutableContextSet, Map<String, String>> e : options.entrySet()) {
+            for (Map.Entry<ImmutableContextSet, ImmutableMap<String, String>> e : options.entrySet()) {
                 Util.sendPluginMessage(sender, "&3>> &bContext: " + SpongeUtils.contextToString(e.getKey()) + "\n" + SpongeUtils.optionsToString(e.getValue()));
             }
 

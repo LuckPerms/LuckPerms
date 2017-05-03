@@ -39,6 +39,7 @@ import me.lucko.luckperms.common.core.ContextSetComparator;
 import me.lucko.luckperms.common.core.NodeModel;
 import me.lucko.luckperms.common.core.PriorityComparator;
 import me.lucko.luckperms.sponge.service.calculated.CalculatedSubjectData;
+import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.references.SubjectReference;
 
 import java.util.ArrayList;
@@ -50,35 +51,40 @@ import java.util.Map;
  */
 @Getter
 public class SubjectStorageModel {
+    private final LPPermissionService service;
     private final Map<ImmutableContextSet, Map<String, Boolean>> permissions;
     private final Map<ImmutableContextSet, Map<String, String>> options;
     private final Map<ImmutableContextSet, List<SubjectReference>> parents;
 
-    public SubjectStorageModel(Map<ImmutableContextSet, Map<String, Boolean>> permissions, Map<ImmutableContextSet, Map<String, String>> options, Map<ImmutableContextSet, List<SubjectReference>> parents) {
+    public SubjectStorageModel(LPPermissionService service, Map<ImmutableContextSet, ? extends Map<String, Boolean>> permissions, Map<ImmutableContextSet, ? extends Map<String, String>> options, Map<ImmutableContextSet, ? extends List<SubjectReference>> parents) {
+        this.service  = service;
+
         ImmutableMap.Builder<ImmutableContextSet, Map<String, Boolean>> permissionsBuilder = ImmutableMap.builder();
-        for (Map.Entry<ImmutableContextSet, Map<String, Boolean>> e : permissions.entrySet()) {
+        for (Map.Entry<ImmutableContextSet, ? extends Map<String, Boolean>> e : permissions.entrySet()) {
             permissionsBuilder.put(e.getKey(), ImmutableMap.copyOf(e.getValue()));
         }
         this.permissions = permissionsBuilder.build();
 
         ImmutableMap.Builder<ImmutableContextSet, Map<String, String>> optionsBuilder = ImmutableMap.builder();
-        for (Map.Entry<ImmutableContextSet, Map<String, String>> e : options.entrySet()) {
+        for (Map.Entry<ImmutableContextSet, ? extends Map<String, String>> e : options.entrySet()) {
             optionsBuilder.put(e.getKey(), ImmutableMap.copyOf(e.getValue()));
         }
         this.options = optionsBuilder.build();
 
         ImmutableMap.Builder<ImmutableContextSet, List<SubjectReference>> parentsBuilder = ImmutableMap.builder();
-        for (Map.Entry<ImmutableContextSet, List<SubjectReference>> e : parents.entrySet()) {
+        for (Map.Entry<ImmutableContextSet, ? extends List<SubjectReference>> e : parents.entrySet()) {
             parentsBuilder.put(e.getKey(), ImmutableList.copyOf(e.getValue()));
         }
         this.parents = parentsBuilder.build();
     }
 
     public SubjectStorageModel(CalculatedSubjectData data) {
-        this(data.getPermissions(), data.getOptions(), data.getParentsAsList());
+        this(data.getParentSubject().getService(), data.getAllPermissions(), data.getAllOptions(), data.getAllParents());
     }
     
-    public SubjectStorageModel(JsonObject root) {
+    public SubjectStorageModel(LPPermissionService service, JsonObject root) {
+        this.service = service;
+
         Preconditions.checkArgument(root.get("permissions").isJsonArray());
         Preconditions.checkArgument(root.get("options").isJsonArray());
         Preconditions.checkArgument(root.get("parents").isJsonArray());
@@ -158,7 +164,7 @@ public class SubjectStorageModel {
                 String collection = parent.get("collection").getAsString();
                 String subject = parent.get("subject").getAsString();
                 
-                pars.add(SubjectReference.of(collection, subject));
+                pars.add(SubjectReference.of(service, collection, subject));
             }
 
             parentsBuilder.put(contextSet, pars.build());

@@ -27,17 +27,18 @@ package me.lucko.luckperms.sponge.model;
 
 import lombok.Getter;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.caching.MetaData;
-import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.LuckPermsSubjectData;
-import me.lucko.luckperms.sponge.service.proxy.LPSubject;
-import me.lucko.luckperms.sponge.service.references.SubjectCollectionReference;
+import me.lucko.luckperms.sponge.service.model.LPSubject;
+import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.references.SubjectReference;
 import me.lucko.luckperms.sponge.timings.LPTiming;
 
@@ -49,12 +50,10 @@ import org.spongepowered.api.service.permission.PermissionService;
 import co.aikar.timings.Timing;
 
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 public class SpongeUser extends User {
 
-    @Getter
     private final UserSubject spongeData;
 
     public SpongeUser(UUID uuid, LPSpongePlugin plugin) {
@@ -67,6 +66,10 @@ public class SpongeUser extends User {
         this.spongeData = new UserSubject(plugin, this);
     }
 
+    public UserSubject sponge() {
+        return this.spongeData;
+    }
+
     public static class UserSubject implements LPSubject {
         private final SpongeUser parent;
         private final LPSpongePlugin plugin;
@@ -77,23 +80,11 @@ public class SpongeUser extends User {
         @Getter
         private final LuckPermsSubjectData transientSubjectData;
 
-        private long lastUse = System.currentTimeMillis();
-
         private UserSubject(LPSpongePlugin plugin, SpongeUser parent) {
             this.parent = parent;
             this.plugin = plugin;
             this.subjectData = new LuckPermsSubjectData(true, plugin.getService(), parent, this);
             this.transientSubjectData = new LuckPermsSubjectData(false, plugin.getService(), parent, this);
-        }
-
-        private void logUsage() {
-            lastUse = System.currentTimeMillis();
-        }
-
-        public boolean shouldCleanup() {
-            long now = System.currentTimeMillis();
-            // Expire after 10 minutes of idle
-            return (now - lastUse) > 600000;
         }
 
         @Override
@@ -114,8 +105,8 @@ public class SpongeUser extends User {
         }
 
         @Override
-        public SubjectCollectionReference getParentCollection() {
-            return plugin.getService().getUserSubjects().toReference();
+        public LPSubjectCollection getParentCollection() {
+            return plugin.getService().getUserSubjects();
         }
 
         @Override
@@ -124,24 +115,21 @@ public class SpongeUser extends User {
         }
 
         @Override
-        public Tristate getPermissionValue(ContextSet contexts, String permission) {
-            logUsage();
+        public Tristate getPermissionValue(ImmutableContextSet contexts, String permission) {
             try (Timing ignored = plugin.getTimings().time(LPTiming.USER_GET_PERMISSION_VALUE)) {
                 return parent.getUserData().getPermissionData(plugin.getService().calculateContexts(contexts)).getPermissionValue(permission);
             }
         }
 
         @Override
-        public boolean isChildOf(ContextSet contexts, SubjectReference parent) {
-            logUsage();
+        public boolean isChildOf(ImmutableContextSet contexts, SubjectReference parent) {
             try (Timing ignored = plugin.getTimings().time(LPTiming.USER_IS_CHILD_OF)) {
                 return parent.getCollection().equals(PermissionService.SUBJECTS_GROUP) && getPermissionValue(contexts, "group." + parent.getIdentifier()).asBoolean();
             }
         }
 
         @Override
-        public Set<SubjectReference> getParents(ContextSet contexts) {
-            logUsage();
+        public ImmutableList<SubjectReference> getParents(ImmutableContextSet contexts) {
             try (Timing ignored = plugin.getTimings().time(LPTiming.USER_GET_PARENTS)) {
                 ImmutableSet.Builder<SubjectReference> subjects = ImmutableSet.builder();
 
@@ -152,20 +140,19 @@ public class SpongeUser extends User {
 
                     String groupName = perm.substring("group.".length());
                     if (plugin.getGroupManager().isLoaded(groupName)) {
-                        subjects.add(plugin.getService().getGroupSubjects().get(groupName).toReference());
+                        subjects.add(plugin.getService().getGroupSubjects().loadSubject(groupName).join().toReference());
                     }
                 }
 
-                subjects.addAll(plugin.getService().getUserSubjects().getDefaultSubject().resolve(getService()).getParents(contexts));
+                subjects.addAll(plugin.getService().getUserSubjects().getDefaults().getParents(contexts));
                 subjects.addAll(plugin.getService().getDefaults().getParents(contexts));
 
-                return subjects.build();
+                return getService().sortSubjects(subjects.build());
             }
         }
 
         @Override
-        public Optional<String> getOption(ContextSet contexts, String s) {
-            logUsage();
+        public Optional<String> getOption(ImmutableContextSet contexts, String s) {
             try (Timing ignored = plugin.getTimings().time(LPTiming.USER_GET_OPTION)) {
                 MetaData data = parent.getUserData().getMetaData(plugin.getService().calculateContexts(contexts));
                 if (s.equalsIgnoreCase("prefix")) {
@@ -184,7 +171,7 @@ public class SpongeUser extends User {
                     return Optional.of(data.getMeta().get(s));
                 }
 
-                Optional<String> v = plugin.getService().getUserSubjects().getDefaultSubject().resolve(getService()).getOption(contexts, s);
+                Optional<String> v = plugin.getService().getUserSubjects().getDefaults().getOption(contexts, s);
                 if (v.isPresent()) {
                     return v;
                 }
@@ -194,10 +181,9 @@ public class SpongeUser extends User {
         }
 
         @Override
-        public ContextSet getActiveContextSet() {
-            logUsage();
+        public ImmutableContextSet getActiveContextSet() {
             try (Timing ignored = plugin.getTimings().time(LPTiming.USER_GET_ACTIVE_CONTEXTS)) {
-                return plugin.getContextManager().getApplicableContext(this);
+                return plugin.getContextManager().getApplicableContext(this.sponge()).makeImmutable();
             }
         }
     }

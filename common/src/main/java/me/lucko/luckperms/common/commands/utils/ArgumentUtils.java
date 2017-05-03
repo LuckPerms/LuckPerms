@@ -30,7 +30,7 @@ import lombok.Getter;
 
 import com.google.common.base.Splitter;
 
-import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.utils.ArgumentChecker;
@@ -214,9 +214,9 @@ public class ArgumentUtils {
         }
     }
 
-    public static ContextSet handleContexts(int fromIndex, List<String> args) {
+    public static ImmutableContextSet handleContexts(int fromIndex, List<String> args) {
         if (args.size() <= fromIndex) {
-            return ContextSet.empty();
+            return ImmutableContextSet.empty();
         }
 
         MutableContextSet contextSet = MutableContextSet.create();

@@ -27,7 +27,8 @@ package me.lucko.luckperms.sponge.service.legacystorage;
 
 import lombok.ToString;
 
-import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.references.SubjectReference;
 import me.lucko.luckperms.sponge.service.storage.SubjectStorageModel;
 
@@ -50,22 +51,22 @@ public class SubjectDataHolder {
         // For gson
     }
 
-    public SubjectStorageModel asSubjectModel() {
-        return new SubjectStorageModel(
+    public SubjectStorageModel asSubjectModel(LPPermissionService service) {
+        return new SubjectStorageModel(service,
                 permissions.entrySet().stream()
                         .collect(Collectors.toMap(
-                                k -> ContextSet.fromMap(k.getKey()),
+                                k -> ImmutableContextSet.fromMap(k.getKey()),
                                 Map.Entry::getValue
                         )),
                 options.entrySet().stream()
                         .collect(Collectors.toMap(
-                                k -> ContextSet.fromMap(k.getKey()),
+                                k -> ImmutableContextSet.fromMap(k.getKey()),
                                 Map.Entry::getValue
                         )),
                 parents.entrySet().stream()
                         .collect(Collectors.toMap(
-                                k -> ContextSet.fromMap(k.getKey()),
-                                v -> v.getValue().stream().map(SubjectReference::deserialize).collect(Collectors.toList())
+                                k -> ImmutableContextSet.fromMap(k.getKey()),
+                                v -> v.getValue().stream().map(s -> SubjectReference.deserialize(service, s)).collect(Collectors.toList())
                         ))
         );
     }

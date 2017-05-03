@@ -41,9 +41,9 @@ import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
-import me.lucko.luckperms.sponge.service.proxy.LPSubject;
-import me.lucko.luckperms.sponge.service.proxy.LPSubjectCollection;
-import me.lucko.luckperms.sponge.service.proxy.LPSubjectData;
+import me.lucko.luckperms.sponge.service.model.LPSubject;
+import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
+import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -100,7 +100,7 @@ public class SpongeMainCommand extends Command<Void, LPSubjectData> {
 
         if (args.size() < 1) {
             Util.sendPluginMessage(sender, "&aCurrent Subject Collections:\n" +
-                    Util.toCommaSep(service.getCollections().keySet().stream()
+                    Util.toCommaSep(service.getLoadedCollections().keySet().stream()
                             .filter(s -> !s.equalsIgnoreCase("user") && !s.equalsIgnoreCase("group"))
                             .sorted()
                             .collect(Collectors.toList())
@@ -116,14 +116,14 @@ public class SpongeMainCommand extends Command<Void, LPSubjectData> {
             return CommandResult.STATE_ERROR;
         }
 
-        if (service.getCollections().keySet().stream().map(String::toLowerCase).noneMatch(s -> s.equalsIgnoreCase(subjectCollection))) {
+        if (service.getLoadedCollections().keySet().stream().map(String::toLowerCase).noneMatch(s -> s.equalsIgnoreCase(subjectCollection))) {
             Util.sendPluginMessage(sender, "Warning: SubjectCollection '&4" + subjectCollection + "&c' doesn't already exist. Creating it now.");
         }
 
-        LPSubjectCollection collection = service.getSubjects(subjectCollection);
+        LPSubjectCollection collection = service.getCollection(subjectCollection);
 
         if (args.size() < 2) {
-            List<String> subjects = collection.getSubjects().stream()
+            List<String> subjects = collection.getLoadedSubjects().stream()
                     .map(LPSubject::getIdentifier)
                     .collect(Collectors.toList());
 
@@ -183,11 +183,11 @@ public class SpongeMainCommand extends Command<Void, LPSubjectData> {
         }
 
         String subjectId = args.get(1);
-        if (!collection.hasRegistered(subjectId)) {
+        if (!collection.hasRegistered(subjectId).join()) {
             Util.sendPluginMessage(sender, "Warning: Subject '&4" + subjectId + "&c' doesn't already exist. Creating it now.");
         }
 
-        LPSubject subject = collection.get(subjectId);
+        LPSubject subject = collection.loadSubject(subjectId).join();
         LPSubjectData subjectData = persistent ? subject.getSubjectData() : subject.getTransientSubjectData();
 
         CommandResult result;

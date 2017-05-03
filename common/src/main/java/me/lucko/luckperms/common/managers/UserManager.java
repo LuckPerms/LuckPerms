@@ -47,7 +47,7 @@ public interface UserManager extends Manager<UserIdentifier, User> {
      * @param uuid The uuid to search by
      * @return a {@link User} object if the user is loaded, returns null if the user is not loaded
      */
-    User get(UUID uuid);
+    User getIfLoaded(UUID uuid);
 
     /**
      * Gives the user the default group if necessary.

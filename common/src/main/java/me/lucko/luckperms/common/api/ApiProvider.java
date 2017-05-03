@@ -123,7 +123,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public User getUser(@NonNull UUID uuid) {
-        final me.lucko.luckperms.common.core.model.User user = plugin.getUserManager().get(uuid);
+        final me.lucko.luckperms.common.core.model.User user = plugin.getUserManager().getIfLoaded(uuid);
         return user == null ? null : user.getDelegate();
     }
 

@@ -32,7 +32,7 @@ import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
-import me.lucko.luckperms.sponge.service.proxy.Util;
+import me.lucko.luckperms.sponge.service.model.CompatibilityUtil;
 
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -55,7 +55,7 @@ public class SpongeMigrationUtils {
         // Migrate permissions
         Map<Set<Context>, Map<String, Boolean>> perms = subject.getSubjectData().getAllPermissions();
         for (Map.Entry<Set<Context>, Map<String, Boolean>> e : perms.entrySet()) {
-            ContextSet context = Util.convertContexts(e.getKey());
+            ContextSet context = CompatibilityUtil.convertContexts(e.getKey());
 
             for (Map.Entry<String, Boolean> perm : e.getValue().entrySet()) {
                 if (perm.getKey().isEmpty()) {
@@ -69,7 +69,7 @@ public class SpongeMigrationUtils {
         // Migrate options
         Map<Set<Context>, Map<String, String>> opts = subject.getSubjectData().getAllOptions();
         for (Map.Entry<Set<Context>, Map<String, String>> e : opts.entrySet()) {
-            ContextSet context = Util.convertContexts(e.getKey());
+            ContextSet context = CompatibilityUtil.convertContexts(e.getKey());
 
             for (Map.Entry<String, String> opt : e.getValue().entrySet()) {
                 if (opt.getKey().isEmpty() || opt.getValue().isEmpty()) {
@@ -89,7 +89,7 @@ public class SpongeMigrationUtils {
         // Migrate parents
         Map<Set<Context>, List<Subject>> parents = subject.getSubjectData().getAllParents();
         for (Map.Entry<Set<Context>, List<Subject>> e : parents.entrySet()) {
-            ContextSet context = Util.convertContexts(e.getKey());
+            ContextSet context = CompatibilityUtil.convertContexts(e.getKey());
 
             for (Subject s : e.getValue()) {
                 if (!s.getContainingCollection().getIdentifier().equalsIgnoreCase(PermissionService.SUBJECTS_GROUP)) {

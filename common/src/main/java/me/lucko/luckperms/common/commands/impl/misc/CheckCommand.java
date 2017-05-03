@@ -60,7 +60,7 @@ public class CheckCommand extends SingleCommand {
         User user;
         UUID u = Util.parseUuid(target);
         if (u != null) {
-            user = plugin.getUserManager().get(u);
+            user = plugin.getUserManager().getIfLoaded(u);
         } else {
             user = plugin.getUserManager().getByUsername(target);
         }

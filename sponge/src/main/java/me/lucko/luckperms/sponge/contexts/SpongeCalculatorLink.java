@@ -29,7 +29,7 @@ import lombok.AllArgsConstructor;
 
 import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.sponge.service.proxy.Util;
+import me.lucko.luckperms.sponge.service.model.CompatibilityUtil;
 
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
@@ -46,7 +46,7 @@ public class SpongeCalculatorLink implements ContextCalculator<Subject> {
         Set<Context> contexts = new HashSet<>();
         calculator.accumulateContexts(subject, contexts);
 
-        accumulator.addAll(Util.convertContexts(contexts));
+        accumulator.addAll(CompatibilityUtil.convertContexts(contexts));
         return accumulator;
     }
 }

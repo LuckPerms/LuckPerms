@@ -32,26 +32,32 @@ import lombok.ToString;
 
 import com.google.common.base.Splitter;
 
-import me.lucko.luckperms.sponge.service.LuckPermsService;
-import me.lucko.luckperms.sponge.service.proxy.LPSubject;
+import me.lucko.luckperms.sponge.service.model.LPPermissionService;
+import me.lucko.luckperms.sponge.service.model.LPSubject;
 
 import org.spongepowered.api.service.permission.Subject;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 @ToString(of = {"collection", "identifier"})
 @EqualsAndHashCode(of = {"collection", "identifier"})
 @RequiredArgsConstructor(staticName = "of")
 public final class SubjectReference {
-    public static SubjectReference deserialize(String s) {
+
+    @Deprecated
+    public static SubjectReference deserialize(LPPermissionService service, String s) {
         List<String> parts = Splitter.on('/').limit(2).splitToList(s);
-        return of(parts.get(0), parts.get(1));
+        return of(service, parts.get(0), parts.get(1));
     }
 
-    public static SubjectReference of(Subject subject) {
-        return of(subject.getContainingCollection().getIdentifier(), subject.getIdentifier());
+    public static SubjectReference of(LPPermissionService service, Subject subject) {
+        return of(service, subject.getContainingCollection().getIdentifier(), subject.getIdentifier());
     }
+
+    private final LPPermissionService service;
 
     @Getter
     private final String collection;
@@ -59,19 +65,42 @@ public final class SubjectReference {
     @Getter
     private final String identifier;
 
-    private WeakReference<LPSubject> ref = null;
+    private long lastLookup = 0L;
+    private WeakReference<LPSubject> cache = null;
 
-    public synchronized LPSubject resolve(LuckPermsService service) {
-        if (ref != null) {
-            LPSubject s = ref.get();
-            if (s != null) {
-                return s;
+    private synchronized LPSubject resolveDirectly() {
+        long sinceLast = System.currentTimeMillis() - lastLookup;
+
+        // try the cache
+        if (sinceLast < TimeUnit.SECONDS.toMillis(10)) {
+            if (cache != null) {
+                LPSubject s = cache.get();
+                if (s != null) {
+                    return s;
+                }
             }
         }
 
-        LPSubject s = service.getSubjects(collection).get(identifier);
-        ref = new WeakReference<>(s);
+        LPSubject s = service.getCollection(collection).loadSubject(identifier).join();
+        lastLookup = System.currentTimeMillis();
+        cache = new WeakReference<>(s);
         return s;
+    }
+
+    public CompletableFuture<LPSubject> resolve() {
+        long sinceLast = System.currentTimeMillis() - lastLookup;
+
+        // try the cache
+        if (sinceLast < TimeUnit.SECONDS.toMillis(10)) {
+            if (cache != null) {
+                LPSubject s = cache.get();
+                if (s != null) {
+                    return CompletableFuture.completedFuture(s);
+                }
+            }
+        }
+
+        return CompletableFuture.supplyAsync(this::resolveDirectly);
     }
 
 }

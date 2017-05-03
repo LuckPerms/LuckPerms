@@ -73,7 +73,7 @@ public class LoginHelper {
         }
 
         plugin.getStorage().force().loadUser(cache.getUUID(u), username).join();
-        User user = plugin.getUserManager().get(cache.getUUID(u));
+        User user = plugin.getUserManager().getIfLoaded(cache.getUUID(u));
         if (user == null) {
             plugin.getLog().warn("Failed to load user: " + username);
             throw new RuntimeException("Failed to load user");
@@ -101,7 +101,7 @@ public class LoginHelper {
     }
 
     public static void refreshPlayer(LuckPermsPlugin plugin, UUID uuid) {
-        final User user = plugin.getUserManager().get(plugin.getUuidCache().getUUID(uuid));
+        final User user = plugin.getUserManager().getIfLoaded(plugin.getUuidCache().getUUID(uuid));
         if (user != null) {
             user.getRefreshBuffer().requestDirectly();
         }

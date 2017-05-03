@@ -74,8 +74,9 @@ import me.lucko.luckperms.sponge.managers.SpongeUserManager;
 import me.lucko.luckperms.sponge.messaging.BungeeMessagingService;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.ServiceCacheHousekeepingTask;
+import me.lucko.luckperms.sponge.service.model.LPPermissionService;
+import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.persisted.PersistedCollection;
-import me.lucko.luckperms.sponge.service.proxy.LPSubjectCollection;
 import me.lucko.luckperms.sponge.timings.LPTimings;
 import me.lucko.luckperms.sponge.utils.VersionData;
 
@@ -99,21 +100,19 @@ import org.spongepowered.api.scheduler.SynchronousExecutor;
 import org.spongepowered.api.service.permission.PermissionDescription;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.text.Text;
 
 import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.util.AbstractCollection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Getter
 @Plugin(id = "luckperms", name = "LuckPerms", version = VersionData.VERSION, authors = {"Luck"}, description = "A permissions plugin")
@@ -283,7 +282,8 @@ public class LPSpongePlugin implements LuckPermsPlugin {
             getLog().warn("Delaying LuckPerms PermissionService registration.");
             lateLoad = true;
         } else {
-            game.getServiceManager().setProvider(this, PermissionService.class, service);
+            game.getServiceManager().setProvider(this, LPPermissionService.class, service);
+            game.getServiceManager().setProvider(this, PermissionService.class, service.sponge());
             game.getServiceManager().setProvider(this, LuckPermsService.class, service);
         }
 
@@ -308,7 +308,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         scheduler.doAsyncRepeating(new ExpireTemporaryTask(this), 60L);
         scheduler.doAsyncRepeating(new CacheHousekeepingTask(this), 2400L);
         scheduler.doAsyncRepeating(new ServiceCacheHousekeepingTask(service), 2400L);
-        scheduler.doAsyncRepeating(() -> userManager.performCleanup(), 2400L);
+        // scheduler.doAsyncRepeating(() -> userManager.performCleanup(), 2400L);
 
         getLog().info("Successfully loaded.");
     }
@@ -317,7 +317,8 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     public void onLateEnable(GamePreInitializationEvent event) {
         if (lateLoad) {
             getLog().info("Providing late registration of PermissionService...");
-            game.getServiceManager().setProvider(this, PermissionService.class, service);
+            game.getServiceManager().setProvider(this, LPPermissionService.class, service);
+            game.getServiceManager().setProvider(this, PermissionService.class, service.sponge());
             game.getServiceManager().setProvider(this, LuckPermsService.class, service);
         }
     }
@@ -359,7 +360,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
     @Override
     public void onPostUpdate() {
-        for (LPSubjectCollection collection : service.getCollections().values()) {
+        for (LPSubjectCollection collection : service.getLoadedCollections().values()) {
             if (collection instanceof PersistedCollection) {
                 ((PersistedCollection) collection).loadAll();
             }
@@ -475,23 +476,21 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     @Override
     public LinkedHashMap<String, Object> getExtraInfo() {
         LinkedHashMap<String, Object> map = new LinkedHashMap<>();
-        map.put("SubjectCollection count", service.getCollections().size());
+        map.put("SubjectCollection count", service.getLoadedCollections().size());
         map.put("Subject count",
-                service.getCollections().values().stream()
-                        .map(SubjectCollection::getAllSubjects)
-                        .flatMap(subjects -> StreamSupport.stream(subjects.spliterator(), false))
-                        .count()
+                service.getLoadedCollections().values().stream()
+                        .map(LPSubjectCollection::getLoadedSubjects)
+                        .mapToInt(AbstractCollection::size)
+                        .sum()
         );
         map.put("PermissionDescription count", service.getDescriptions().size());
         return map;
     }
 
     private void registerPermission(LuckPermsService p, String node) {
-        Optional<PermissionDescription.Builder> builder = p.newDescriptionBuilder(this);
-        if (!builder.isPresent()) return;
-
+        PermissionDescription.Builder builder = p.newDescriptionBuilder(this);
         try {
-            builder.get().assign(PermissionDescription.ROLE_ADMIN, true).description(Text.of(node)).id(node).register();
+            builder.assign(PermissionDescription.ROLE_ADMIN, true).description(Text.of(node)).id(node).register();
         } catch (IllegalStateException e) {
             e.printStackTrace();
         }

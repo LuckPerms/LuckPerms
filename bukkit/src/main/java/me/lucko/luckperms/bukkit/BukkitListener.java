@@ -153,7 +153,7 @@ public class BukkitListener implements Listener {
         }
 
         final Player player = e.getPlayer();
-        final User user = plugin.getUserManager().get(plugin.getUuidCache().getUUID(player.getUniqueId()));
+        final User user = plugin.getUserManager().getIfLoaded(plugin.getUuidCache().getUUID(player.getUniqueId()));
 
         /* User instance is null for whatever reason. Could be that it was unloaded between asyncpre and now. */
         if (user == null) {

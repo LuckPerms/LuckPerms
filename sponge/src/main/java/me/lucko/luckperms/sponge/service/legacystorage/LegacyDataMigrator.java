@@ -27,7 +27,7 @@ package me.lucko.luckperms.sponge.service.legacystorage;
 
 import lombok.RequiredArgsConstructor;
 
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.service.storage.SubjectStorage;
 
 import java.io.BufferedReader;
@@ -39,7 +39,7 @@ import java.nio.file.Files;
 @SuppressWarnings("deprecation")
 @RequiredArgsConstructor
 public class LegacyDataMigrator implements Runnable {
-    private final LuckPermsPlugin plugin;
+    private final LPSpongePlugin plugin;
 
     private final File oldDirectory;
     private final SubjectStorage storage;
@@ -69,7 +69,7 @@ public class LegacyDataMigrator implements Runnable {
 
                 try (BufferedReader reader = Files.newBufferedReader(subjectFile.toPath(), StandardCharsets.UTF_8)) {
                     SubjectDataHolder holder = storage.getGson().fromJson(reader, SubjectDataHolder.class);
-                    storage.saveToFile(holder.asSubjectModel(), storage.resolveFile(collectionDir.getName(), subjectName));
+                    storage.saveToFile(holder.asSubjectModel(plugin.getService()), storage.resolveFile(collectionDir.getName(), subjectName));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

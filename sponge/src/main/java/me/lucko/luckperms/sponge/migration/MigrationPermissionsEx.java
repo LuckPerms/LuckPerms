@@ -90,10 +90,10 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         for (SubjectCollection collection : pexService.getKnownSubjects().values()) {
             SpongeMigrationUtils.migrateSubjectData(
                     collection.getDefaults().getSubjectData(),
-                    lpService.getSubjects("defaults").get(collection.getIdentifier()).getSubjectData()
+                    lpService.getCollection("defaults").loadSubject(collection.getIdentifier()).join().sponge().getSubjectData()
             );
         }
-        SpongeMigrationUtils.migrateSubjectData(pexService.getDefaults().getSubjectData(), lpService.getDefaults().getSubjectData());
+        SpongeMigrationUtils.migrateSubjectData(pexService.getDefaults().getSubjectData(), lpService.getDefaults().sponge().getSubjectData());
 
         log.log("Calculating group weightings.");
         int maxWeight = 0;
@@ -182,7 +182,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
 
             // Make a LuckPerms user for the one being migrated
             plugin.getStorage().loadUser(uuid, "null").join();
-            User user = plugin.getUserManager().get(uuid);
+            User user = plugin.getUserManager().getIfLoaded(uuid);
             if (user.getNodes().size() <= 1) {
                 user.clearNodes(false);
             }

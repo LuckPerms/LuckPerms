@@ -79,7 +79,7 @@ public class TreeCommand extends SingleCommand {
             User user;
             UUID u = Util.parseUuid(player);
             if (u != null) {
-                user = plugin.getUserManager().get(u);
+                user = plugin.getUserManager().getIfLoaded(u);
             } else {
                 user = plugin.getUserManager().getByUsername(player);
             }

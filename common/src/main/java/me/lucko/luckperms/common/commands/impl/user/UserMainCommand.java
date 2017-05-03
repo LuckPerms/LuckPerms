@@ -87,7 +87,7 @@ public class UserMainCommand extends MainCommand<User> {
             Message.LOADING_ERROR.send(sender);
         }
 
-        User user = plugin.getUserManager().get(u);
+        User user = plugin.getUserManager().getIfLoaded(u);
         if (user == null) {
             Message.LOADING_ERROR.send(sender);
             return null;

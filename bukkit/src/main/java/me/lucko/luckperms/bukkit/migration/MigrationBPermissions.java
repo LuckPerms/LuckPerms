@@ -172,7 +172,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
 
                 // Make a LuckPerms user for the one being migrated.
                 plugin.getStorage().loadUser(uuid, "null").join();
-                User lpUser = plugin.getUserManager().get(uuid);
+                User lpUser = plugin.getUserManager().getIfLoaded(uuid);
 
                 migrateHolder(world, user, lpUser);
 

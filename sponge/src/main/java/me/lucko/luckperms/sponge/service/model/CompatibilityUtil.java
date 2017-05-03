@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.proxy;
+package me.lucko.luckperms.sponge.service.model;
 
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
@@ -41,19 +41,22 @@ import org.spongepowered.api.util.Tristate;
 
 import java.util.Set;
 
+/**
+ * Utility class for converting between Sponge and LuckPerms context and tristate classes
+ */
 @UtilityClass
-public class Util {
+public class CompatibilityUtil {
     private static final LoadingCache<Set<Context>, ImmutableContextSet> SPONGE_TO_LP_CACHE = Caffeine.newBuilder()
             .build(ImmutableContextSet::fromEntries);
 
-    private static final LoadingCache<ImmutableContextSet, Set<Context>> LP_TO_SPONGE_CACHE = Caffeine.newBuilder()
+    private static final LoadingCache<ImmutableContextSet, ImmutableSet<Context>> LP_TO_SPONGE_CACHE = Caffeine.newBuilder()
             .build(set -> set.toSet().stream().map(e -> new Context(e.getKey(), e.getValue())).collect(ImmutableCollectors.toImmutableSet()));
 
-    public static ContextSet convertContexts(@NonNull Set<Context> contexts) {
+    public static ImmutableContextSet convertContexts(@NonNull Set<Context> contexts) {
         return SPONGE_TO_LP_CACHE.get(ImmutableSet.copyOf(contexts));
     }
 
-    public static Set<Context> convertContexts(@NonNull ContextSet contexts) {
+    public static ImmutableSet<Context> convertContexts(@NonNull ContextSet contexts) {
         return LP_TO_SPONGE_CACHE.get(contexts.makeImmutable());
     }
 

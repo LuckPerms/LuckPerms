@@ -131,7 +131,7 @@ public class BungeeListener implements Listener {
     @EventHandler
     public void onPlayerPostLogin(PostLoginEvent e) {
         final ProxiedPlayer player = e.getPlayer();
-        final User user = plugin.getUserManager().get(plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId()));
+        final User user = plugin.getUserManager().getIfLoaded(plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId()));
 
         if (user == null) {
             plugin.getProxy().getScheduler().schedule(plugin, () -> {
@@ -159,7 +159,7 @@ public class BungeeListener implements Listener {
 
         final ProxiedPlayer player = ((ProxiedPlayer) e.getSender());
 
-        User user = plugin.getUserManager().get(plugin.getUuidCache().getUUID(player.getUniqueId()));
+        User user = plugin.getUserManager().getIfLoaded(plugin.getUuidCache().getUUID(player.getUniqueId()));
         if (user == null) {
             e.setHasPermission(false);
             return;
@@ -194,7 +194,7 @@ public class BungeeListener implements Listener {
             set.add("server", plugin.getConfiguration().get(ConfigKeys.SERVER));
             set.add("world", serverName);
 
-            User user = plugin.getUserManager().get(plugin.getUuidCache().getUUID(uuid));
+            User user = plugin.getUserManager().getIfLoaded(plugin.getUuidCache().getUUID(uuid));
             if (user == null) {
                 return;
             }

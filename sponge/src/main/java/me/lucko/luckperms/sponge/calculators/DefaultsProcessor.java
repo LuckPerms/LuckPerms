@@ -28,7 +28,7 @@ package me.lucko.luckperms.sponge.calculators;
 import lombok.AllArgsConstructor;
 
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.calculators.PermissionProcessor;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 
@@ -37,11 +37,11 @@ import java.util.Map;
 @AllArgsConstructor
 public class DefaultsProcessor implements PermissionProcessor {
     private final LuckPermsService service;
-    private final ContextSet contexts;
+    private final ImmutableContextSet contexts;
 
     @Override
     public Tristate hasPermission(String permission) {
-        Tristate t = service.getUserSubjects().getDefaultSubject().resolve(service).getPermissionValue(contexts, permission);
+        Tristate t = service.getUserSubjects().getDefaults().getPermissionValue(contexts, permission);
         if (t != Tristate.UNDEFINED) {
             return t;
         }

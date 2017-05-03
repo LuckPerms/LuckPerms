@@ -178,7 +178,7 @@ public abstract class FlatfileBacking extends AbstractBacking {
                     return;
                 }
 
-                User u = plugin.getUserManager().get(uuid);
+                User u = plugin.getUserManager().getIfLoaded(uuid);
                 if (u != null) {
                     plugin.getLog().info("[FileWatcher] Refreshing user " + u.getFriendlyName());
                     plugin.getStorage().loadUser(uuid, "null");

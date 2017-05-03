@@ -33,6 +33,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
+import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.persisted.PersistedSubject;
 
 import java.io.BufferedReader;
@@ -52,12 +53,15 @@ import java.util.stream.Collectors;
  */
 public class SubjectStorage {
 
+    private final LPPermissionService service;
+
     @Getter
     private final Gson gson;
 
     private final File container;
 
-    public SubjectStorage(File container) {
+    public SubjectStorage(LPPermissionService service, File container) {
+        this.service = service;
         this.gson = new GsonBuilder().setPrettyPrinting().create();
         this.container = container;
         checkContainer();
@@ -89,7 +93,7 @@ public class SubjectStorage {
     }
 
     public void saveToFile(PersistedSubject subject) throws IOException {
-        File subjectFile = resolveFile(subject.getContainingCollection().getIdentifier(), subject.getIdentifier());
+        File subjectFile = resolveFile(subject.getParentCollection().getIdentifier(), subject.getIdentifier());
         saveToFile(new SubjectStorageModel(subject.getSubjectData()), subjectFile);
     }
 
@@ -153,7 +157,7 @@ public class SubjectStorage {
 
         try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
             JsonObject data = gson.fromJson(reader, JsonObject.class);
-            SubjectStorageModel model = new SubjectStorageModel(data);
+            SubjectStorageModel model = new SubjectStorageModel(service, data);
             return Maps.immutableEntry(subjectName, model);
         }
     }

@@ -154,7 +154,7 @@ public class SpongeListener {
                 return;
             }
 
-            final User user = plugin.getUserManager().get(plugin.getUuidCache().getUUID(player.getUniqueId()));
+            final User user = plugin.getUserManager().getIfLoaded(plugin.getUuidCache().getUUID(player.getUniqueId()));
 
             /* User instance is null for whatever reason. Could be that it was unloaded between asyncpre and now. */
             if (user == null) {
@@ -179,13 +179,13 @@ public class SpongeListener {
 
                 plugin.doAsync(() -> {
                     UserData data = user.getUserData();
-                    data.preCalculate(plugin.getService().calculateContexts(context));
+                    data.preCalculate(plugin.getService().calculateContexts(context.makeImmutable()));
 
                     for (String world : worlds) {
                         MutableContextSet modified = MutableContextSet.fromSet(context);
                         modified.removeAll("world");
                         modified.add("world", world);
-                        data.preCalculate(plugin.getService().calculateContexts(modified));
+                        data.preCalculate(plugin.getService().calculateContexts(modified.makeImmutable()));
                     }
                 });
             }

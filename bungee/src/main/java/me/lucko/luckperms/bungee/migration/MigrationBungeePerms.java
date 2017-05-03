@@ -160,7 +160,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
 
             // Make a LuckPerms user for the one being migrated.
             plugin.getStorage().loadUser(u.getUUID(), u.getName()).join();
-            me.lucko.luckperms.common.core.model.User user = plugin.getUserManager().get(u.getUUID());
+            me.lucko.luckperms.common.core.model.User user = plugin.getUserManager().getIfLoaded(u.getUUID());
 
             // Migrate global perms
             for (String perm : u.getPerms()) {

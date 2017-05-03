@@ -64,7 +64,7 @@ public class SpongeCalculatorFactory extends AbstractCalculatorFactory {
         }
 
         if (plugin.getConfiguration().get(ConfigKeys.APPLY_SPONGE_DEFAULT_SUBJECTS)) {
-            processors.add(new DefaultsProcessor(plugin.getService(), contexts.getContexts()));
+            processors.add(new DefaultsProcessor(plugin.getService(), contexts.getContexts().makeImmutable()));
         }
 
         return registerCalculator(new PermissionCalculator(plugin, user.getFriendlyName(), processors.build()));

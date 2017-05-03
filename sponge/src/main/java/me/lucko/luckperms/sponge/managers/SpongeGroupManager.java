@@ -26,40 +26,49 @@
 package me.lucko.luckperms.sponge.managers;
 
 import lombok.Getter;
-import lombok.NonNull;
 
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 
+import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.managers.GroupManager;
-import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
+import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.model.SpongeGroup;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
-import me.lucko.luckperms.sponge.service.proxy.LPSubject;
-import me.lucko.luckperms.sponge.service.proxy.LPSubjectCollection;
+import me.lucko.luckperms.sponge.service.model.LPSubject;
+import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
+import me.lucko.luckperms.sponge.service.proxy.SubjectCollectionProxy;
 import me.lucko.luckperms.sponge.service.references.SubjectReference;
-import me.lucko.luckperms.sponge.timings.LPTiming;
 
 import org.spongepowered.api.service.permission.PermissionService;
+import org.spongepowered.api.service.permission.SubjectCollection;
 
-import co.aikar.timings.Timing;
-
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 
 public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
 
     @Getter
     private final LPSpongePlugin plugin;
+
+    private SubjectCollectionProxy spongeProxy = null;
 
     private final LoadingCache<String, SpongeGroup> objects = Caffeine.newBuilder()
             .build(new CacheLoader<String, SpongeGroup>() {
@@ -77,20 +86,26 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
     private final LoadingCache<String, LPSubject> subjectLoadingCache = Caffeine.newBuilder()
             .expireAfterWrite(1, TimeUnit.MINUTES)
             .build(s -> {
-                if (isLoaded(s)) {
-                    return getIfLoaded(s).getSpongeData();
+                SpongeGroup group = getIfLoaded(s);
+                if (group != null) {
+                    // they're already loaded, but the data might not actually be there yet
+                    // if stuff is being loaded, then the user's i/o lock will be locked by the storage impl
+                    group.getIoLock().lock();
+                    group.getIoLock().unlock();
+
+                    return group.sponge();
                 }
 
                 // Request load
                 getPlugin().getStorage().createAndLoadGroup(s, CreationCause.INTERNAL).join();
 
-                SpongeGroup group = getIfLoaded(s);
+                group = getIfLoaded(s);
                 if (group == null) {
                     getPlugin().getLog().severe("Error whilst loading group '" + s + "'.");
                     throw new RuntimeException();
                 }
 
-                return group.getSpongeData();
+                return group.sponge();
             });
 
     public SpongeGroupManager(LPSpongePlugin plugin) {
@@ -150,8 +165,11 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
      * ------------------------------------------ */
 
     @Override
-    public String getIdentifier() {
-        return PermissionService.SUBJECTS_GROUP;
+    public synchronized SubjectCollection sponge() {
+        if (spongeProxy == null) {
+            spongeProxy = new SubjectCollectionProxy(Preconditions.checkNotNull(plugin.getService(), "service"), this);
+        }
+        return spongeProxy;
     }
 
     @Override
@@ -160,52 +178,119 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
     }
 
     @Override
-    public LPSubject get(@NonNull String id) {
-        // Special Sponge method. This call will actually load the group from the datastore if not already present.
+    public String getIdentifier() {
+        return PermissionService.SUBJECTS_GROUP;
+    }
 
-        try (Timing ignored = plugin.getTimings().time(LPTiming.GROUP_COLLECTION_GET)) {
-            id = id.toLowerCase();
-            if (ArgumentChecker.checkNameWithSpace(id)) {
-                plugin.getLog().warn("Couldn't get group subject for id: " + id + " (invalid name)");
-                return plugin.getService().getFallbackGroupSubjects().get(id); // fallback to transient collection
-            }
+    @Override
+    public Predicate<String> getIdentifierValidityPredicate() {
+        // TODO change this to use the actual limitations
+        return Predicates.alwaysTrue();
+    }
 
-            try {
-                return subjectLoadingCache.get(id);
-            } catch (Exception e) {
-                e.printStackTrace();
-                plugin.getLog().warn("Couldn't get group subject for id: " + id);
-                return plugin.getService().getFallbackGroupSubjects().get(id); // fallback to the transient collection
-            }
+    @Override
+    public CompletableFuture<LPSubject> loadSubject(String identifier) {
+        LPSubject present = subjectLoadingCache.getIfPresent(identifier.toLowerCase());
+        if (present != null) {
+            return CompletableFuture.completedFuture(present);
+        }
+
+        return CompletableFuture.supplyAsync(() -> subjectLoadingCache.get(identifier.toLowerCase()), plugin.getScheduler().getAsyncExecutor());
+    }
+
+    @Override
+    public Optional<LPSubject> getSubject(String identifier) {
+        return Optional.ofNullable(getIfLoaded(identifier.toLowerCase())).map(SpongeGroup::sponge);
+    }
+
+    @Override
+    public CompletableFuture<Boolean> hasRegistered(String identifier) {
+        if (isLoaded(identifier.toLowerCase())) {
+            return CompletableFuture.completedFuture(true);
+        } else {
+            return CompletableFuture.completedFuture(false);
         }
     }
 
     @Override
-    public boolean hasRegistered(@NonNull String id) {
-        id = id.toLowerCase();
-        return !ArgumentChecker.checkName(id) && isLoaded(id);
+    public CompletableFuture<ImmutableCollection<LPSubject>> loadSubjects(Set<String> identifiers) {
+        return CompletableFuture.supplyAsync(() -> {
+            ImmutableSet.Builder<LPSubject> ret = ImmutableSet.builder();
+            for (String id : identifiers) {
+                ret.add(loadSubject(id.toLowerCase()).join());
+            }
+
+            return ret.build();
+        }, plugin.getScheduler().getAsyncExecutor());
     }
 
     @Override
-    public Collection<LPSubject> getSubjects() {
-        return objects.asMap().values().stream().map(SpongeGroup::getSpongeData).collect(ImmutableCollectors.toImmutableList());
+    public ImmutableCollection<LPSubject> getLoadedSubjects() {
+        return getAll().values().stream().map(SpongeGroup::sponge).collect(ImmutableCollectors.toImmutableSet());
     }
 
     @Override
-    public Map<LPSubject, Boolean> getWithPermission(@NonNull ContextSet contexts, @NonNull String node) {
+    public CompletableFuture<ImmutableSet<String>> getAllIdentifiers() {
+        return CompletableFuture.completedFuture(ImmutableSet.copyOf(getAll().keySet()));
+    }
+
+    @Override
+    public CompletableFuture<ImmutableMap<SubjectReference, Boolean>> getAllWithPermission(String permission) {
+        return CompletableFuture.supplyAsync(() -> {
+            ImmutableMap.Builder<SubjectReference, Boolean> ret = ImmutableMap.builder();
+
+            List<HeldPermission<String>> lookup = plugin.getStorage().getGroupsWithPermission(permission).join();
+            for (HeldPermission<String> holder : lookup) {
+                if (holder.asNode().getFullContexts().equals(ImmutableContextSet.empty())) {
+                    ret.put(getService().newSubjectReference(getIdentifier(), holder.getHolder()), holder.getValue());
+                }
+            }
+
+            return ret.build();
+        }, plugin.getScheduler().getAsyncExecutor());
+    }
+
+    @Override
+    public CompletableFuture<ImmutableMap<SubjectReference, Boolean>> getAllWithPermission(ImmutableContextSet contexts, String permission) {
+        return CompletableFuture.supplyAsync(() -> {
+            ImmutableMap.Builder<SubjectReference, Boolean> ret = ImmutableMap.builder();
+
+            List<HeldPermission<String>> lookup = plugin.getStorage().getGroupsWithPermission(permission).join();
+            for (HeldPermission<String> holder : lookup) {
+                if (holder.asNode().getFullContexts().equals(contexts)) {
+                    ret.put(getService().newSubjectReference(getIdentifier(), holder.getHolder()), holder.getValue());
+                }
+            }
+
+            return ret.build();
+        }, plugin.getScheduler().getAsyncExecutor());
+    }
+
+    @Override
+    public ImmutableMap<LPSubject, Boolean> getLoadedWithPermission(String permission) {
         return objects.asMap().values().stream()
-                .map(SpongeGroup::getSpongeData)
-                .filter(sub -> sub.getPermissionValue(contexts, node) != Tristate.UNDEFINED)
-                .collect(ImmutableCollectors.toImmutableMap(sub -> sub, sub -> sub.getPermissionValue(contexts, node).asBoolean()));
+                .map(SpongeGroup::sponge)
+                .map(sub -> Maps.immutableEntry(sub, sub.getPermissionValue(ImmutableContextSet.empty(), permission)))
+                .filter(pair -> pair.getValue() != Tristate.UNDEFINED)
+                .collect(ImmutableCollectors.toImmutableMap(Map.Entry::getKey, sub -> sub.getValue().asBoolean()));
     }
 
     @Override
-    public SubjectReference getDefaultSubject() {
-        return SubjectReference.of("defaults", getIdentifier());
+    public ImmutableMap<LPSubject, Boolean> getLoadedWithPermission(ImmutableContextSet contexts, String permission) {
+        return objects.asMap().values().stream()
+                .map(SpongeGroup::sponge)
+                .map(sub -> Maps.immutableEntry(sub, sub.getPermissionValue(contexts, permission)))
+                .filter(pair -> pair.getValue() != Tristate.UNDEFINED)
+                .collect(ImmutableCollectors.toImmutableMap(Map.Entry::getKey, sub -> sub.getValue().asBoolean()));
     }
 
     @Override
-    public boolean getTransientHasPriority() {
-        return true;
+    public LPSubject getDefaults() {
+        return getService().getDefaultSubjects().loadSubject(getIdentifier()).join();
+    }
+
+    @Override
+    public void suggestUnload(String identifier) {
+        // noop
     }
 }

@@ -261,7 +261,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
         AtomicInteger userCount = new AtomicInteger(0);
         for (Map.Entry<UUID, Set<Node>> e : users.entrySet()) {
             plugin.getStorage().loadUser(e.getKey(), "null").join();
-            me.lucko.luckperms.common.core.model.User user = plugin.getUserManager().get(e.getKey());
+            me.lucko.luckperms.common.core.model.User user = plugin.getUserManager().getIfLoaded(e.getKey());
 
             for (Node node : e.getValue()) {
                 user.setPermission(node);

@@ -25,7 +25,8 @@
 
 package me.lucko.luckperms.sponge.commands;
 
-import me.lucko.luckperms.api.context.ContextSet;
+import com.google.common.collect.ImmutableMap;
+
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
@@ -37,7 +38,7 @@ import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.sponge.service.proxy.LPSubjectData;
+import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 
 import java.util.List;
 import java.util.Map;
@@ -51,16 +52,16 @@ public class PermissionInfo extends SubCommand<LPSubjectData> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, List<String> args, String label) throws CommandException {
-        ContextSet contextSet = ArgumentUtils.handleContexts(0, args);
+        ImmutableContextSet contextSet = ArgumentUtils.handleContexts(0, args);
         if (contextSet.isEmpty()) {
             Util.sendPluginMessage(sender, "&aShowing permissions matching contexts &bANY&a.");
-            Map<ImmutableContextSet, Map<String, Boolean>> permissions = subjectData.getPermissions();
+            Map<ImmutableContextSet, ImmutableMap<String, Boolean>> permissions = subjectData.getAllPermissions();
             if (permissions.isEmpty()) {
                 Util.sendPluginMessage(sender, "That subject does not have any permissions defined.");
                 return CommandResult.SUCCESS;
             }
 
-            for (Map.Entry<ImmutableContextSet, Map<String, Boolean>> e : permissions.entrySet()) {
+            for (Map.Entry<ImmutableContextSet, ImmutableMap<String, Boolean>> e : permissions.entrySet()) {
                 Util.sendPluginMessage(sender, "&3>> &bContext: " + SpongeUtils.contextToString(e.getKey()) + "\n" + SpongeUtils.nodesToString(e.getValue()));
             }
 

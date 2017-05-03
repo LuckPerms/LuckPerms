@@ -230,7 +230,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
 
             // Create a LuckPerms user for the UUID
             plugin.getStorage().loadUser(uuid, "null").join();
-            User user = plugin.getUserManager().get(uuid);
+            User user = plugin.getUserManager().getIfLoaded(uuid);
 
             List<Permission> permissions = joinFuture(pm.getPlayerOwnPermissions(uuid));
 

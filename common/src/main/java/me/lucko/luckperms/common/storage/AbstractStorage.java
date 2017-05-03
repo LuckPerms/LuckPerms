@@ -104,7 +104,7 @@ public class AbstractStorage implements Storage {
     public CompletableFuture<Boolean> loadUser(UUID uuid, String username) {
         return makeFuture(() -> {
             if (backing.loadUser(uuid, username)) {
-                plugin.getApiProvider().getEventFactory().handleUserLoad(plugin.getUserManager().get(uuid));
+                plugin.getApiProvider().getEventFactory().handleUserLoad(plugin.getUserManager().getIfLoaded(uuid));
                 return true;
             }
             return false;

@@ -337,7 +337,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         for (Player player : getServer().getOnlinePlayers()) {
             scheduler.doAsync(() -> {
                 LoginHelper.loadUser(this, player.getUniqueId(), player.getName(), false);
-                User user = getUserManager().get(getUuidCache().getUUID(player.getUniqueId()));
+                User user = getUserManager().getIfLoaded(getUuidCache().getUUID(player.getUniqueId()));
                 if (user != null) {
                     scheduler.doSync(() -> {
                         try {
@@ -371,7 +371,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
                 player.setOp(false);
             }
 
-            final User user = getUserManager().get(getUuidCache().getUUID(player.getUniqueId()));
+            final User user = getUserManager().getIfLoaded(getUuidCache().getUUID(player.getUniqueId()));
             if (user != null) {
                 user.unregisterData();
                 getUserManager().unload(user);
