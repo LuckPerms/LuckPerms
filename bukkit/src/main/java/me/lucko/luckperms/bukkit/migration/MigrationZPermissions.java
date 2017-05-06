@@ -93,14 +93,18 @@ public class MigrationZPermissions extends SubCommand<Object> {
         // Migrate all groups
         log.log("Starting group migration.");
         AtomicInteger groupCount = new AtomicInteger(0);
+        int maxWeight = 0;
         for (String g : service.getAllGroups()) {
-            String groupName = MigrationUtils.standardizeName(g);
+            PermissionEntity entity = internalService.getEntity(g, null, true);
 
+            String groupName = MigrationUtils.standardizeName(g);
             plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
             Group group = plugin.getGroupManager().getIfLoaded(groupName);
 
-            PermissionEntity entity = internalService.getEntity(g, null, true);
-            migrateEntity(group, entity, null);
+            int weight = entity.getPriority();
+            maxWeight = Math.max(maxWeight, weight);
+            migrateEntity(group, entity, null, weight);
+            MigrationUtils.setGroupWeight(group, weight);
 
             plugin.getStorage().saveGroup(group);
             log.logAllProgress("Migrated {} groups so far.", groupCount.incrementAndGet());
@@ -124,6 +128,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
 
         // Migrate all users.
         log.log("Starting user migration.");
+        maxWeight += 10;
         AtomicInteger userCount = new AtomicInteger(0);
         for (UUID u : service.getAllPlayersUUID()) {
             PermissionEntity entity = internalService.getEntity(null, u, false);
@@ -134,7 +139,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
 
             plugin.getStorage().loadUser(u, username).join();
             User user = plugin.getUserManager().getIfLoaded(u);
-            migrateEntity(user, entity, internalService.getGroups(u));
+            migrateEntity(user, entity, internalService.getGroups(u), maxWeight);
             user.getPrimaryGroup().setStoredValue(MigrationUtils.standardizeName(service.getPlayerPrimaryGroup(u)));
 
             plugin.getUserManager().cleanup(user);
@@ -147,7 +152,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
         return CommandResult.SUCCESS;
     }
 
-    private void migrateEntity(PermissionHolder holder, PermissionEntity entity, List<Membership> memberships) {
+    private void migrateEntity(PermissionHolder holder, PermissionEntity entity, List<Membership> memberships, int weight) {
         for (Entry e : entity.getPermissions()) {
             if (e.getWorld() != null && !e.getWorld().getName().equals("")) {
                 holder.setPermission(NodeFactory.newBuilder(e.getPermission()).setValue(e.isValue()).setWorld(e.getWorld().getName()).build());
@@ -169,7 +174,6 @@ public class MigrationZPermissions extends SubCommand<Object> {
             }
         }
 
-        int weight = entity.isGroup() ? 50 : 100;
         for (EntityMetadata metadata : entity.getMetadata()) {
             String key = metadata.getName().toLowerCase();
 
