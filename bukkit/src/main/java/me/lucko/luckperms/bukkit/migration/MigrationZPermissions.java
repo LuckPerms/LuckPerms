@@ -150,9 +150,9 @@ public class MigrationZPermissions extends SubCommand<Object> {
     private void migrateEntity(PermissionHolder holder, PermissionEntity entity, List<Membership> memberships) {
         for (Entry e : entity.getPermissions()) {
             if (e.getWorld() != null && !e.getWorld().getName().equals("")) {
-                holder.setPermission(MigrationUtils.parseNode(e.getPermission(), true).setWorld(e.getWorld().getName()).build());
+                holder.setPermission(NodeFactory.newBuilder(e.getPermission()).setValue(e.isValue()).setWorld(e.getWorld().getName()).build());
             } else {
-                holder.setPermission(MigrationUtils.parseNode(e.getPermission(), true).build());
+                holder.setPermission(NodeFactory.newBuilder(e.getPermission()).setValue(e.isValue()).build());
             }
         }
 
