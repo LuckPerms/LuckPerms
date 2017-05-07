@@ -35,13 +35,16 @@ import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.selector.Selector;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import co.aikar.timings.Timing;
 
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
@@ -58,11 +61,29 @@ class SpongeCommand extends CommandManager implements CommandCallable {
     @Override
     public CommandResult process(CommandSource source, String s) throws CommandException {
         try (Timing ignored = plugin.getTimings().time(LPTiming.ON_COMMAND)) {
-            onCommand(
-                    plugin.getSenderFactory().wrap(source),
-                    "lp",
-                    Util.stripQuotes(Splitter.on(COMMAND_SEPARATOR_PATTERN).omitEmptyStrings().splitToList(s))
-            );
+            List<String> args = Util.stripQuotes(Splitter.on(COMMAND_SEPARATOR_PATTERN).omitEmptyStrings().splitToList(s));
+
+            // resolve selectors
+            ListIterator<String> it = args.listIterator();
+            while (it.hasNext()) {
+                String element = it.next();
+                if (element.startsWith("@")) {
+                    try {
+                        Player ret = Selector.parse(element).resolve(source).stream()
+                                .filter(e -> e instanceof Player)
+                                .map(e -> ((Player) e))
+                                .findFirst().orElse(null);
+
+                        if (ret != null) {
+                            it.set(ret.getUniqueId().toString());
+                        }
+                    } catch (IllegalArgumentException e) {
+                        // ignored
+                    }
+                }
+            }
+
+            onCommand(plugin.getSenderFactory().wrap(source), "lp", args);
             return CommandResult.success();
         }
     }
