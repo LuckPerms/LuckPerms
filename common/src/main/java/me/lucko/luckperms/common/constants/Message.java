@@ -93,7 +93,7 @@ public enum Message {
     USER_INVALID_ENTRY("&d{0}&c is not a valid username/uuid.", true),
     GROUP_INVALID_ENTRY("Group names can only contain alphanumeric characters.", true),
     TRACK_INVALID_ENTRY("Track names can only contain alphanumeric characters.", true),
-    SERVER_INVALID_ENTRY("Server names can only contain alphanumeric characters.", true),
+    SERVER_WORLD_INVALID_ENTRY("Server/world names can only contain alphanumeric characters and cannot exceed 36 characters in length.", true),
     USE_INHERIT_COMMAND("Use the 'parent add' and 'parent remove' commands instead of specifying the node.", true),
 
 

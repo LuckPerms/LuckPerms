@@ -29,14 +29,14 @@ import lombok.experimental.UtilityClass;
 
 import com.google.common.base.Preconditions;
 
-import me.lucko.luckperms.common.utils.ArgumentChecker;
+import me.lucko.luckperms.common.constants.DataConstraints;
 
 @UtilityClass
 public class ApiUtils {
 
     public static String checkUsername(String s) {
         Preconditions.checkArgument(
-                !ArgumentChecker.checkUsername(s),
+                DataConstraints.PLAYER_USERNAME_TEST.test(s),
                 "Invalid username entry '" + s + "'. Usernames must be less than 16 chars and only contain 'a-z A-Z 1-9 _'."
         );
         return s;
@@ -44,14 +44,14 @@ public class ApiUtils {
 
     public static String checkName(String s) {
         Preconditions.checkArgument(
-                !ArgumentChecker.checkName(s),
+                DataConstraints.GROUP_NAME_TEST.test(s),
                 "Invalid name entry '" + s + "'. Names must be less than 37 chars and only contain 'a-z A-Z 1-9'."
         );
         return s.toLowerCase();
     }
 
     public static long checkTime(long l) {
-        Preconditions.checkArgument(!ArgumentChecker.checkTime(l), "Unix time '" + l + "' is invalid, as it has already passed.");
+        Preconditions.checkArgument(DataConstraints.TIME_TEST.test(l), "Unix time '" + l + "' is invalid, as it has already passed.");
         return l;
     }
 

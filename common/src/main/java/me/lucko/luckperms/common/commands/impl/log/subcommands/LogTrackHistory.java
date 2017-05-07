@@ -31,11 +31,11 @@ import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.constants.DataConstraints;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.data.Log;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.utils.ArgumentChecker;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -68,7 +68,7 @@ public class LogTrackHistory extends SubCommand<Log> {
             }
         }
 
-        if (ArgumentChecker.checkName(track)) {
+        if (!DataConstraints.TRACK_NAME_TEST.test(track)) {
             Message.TRACK_INVALID_ENTRY.send(sender);
             return CommandResult.INVALID_ARGS;
         }

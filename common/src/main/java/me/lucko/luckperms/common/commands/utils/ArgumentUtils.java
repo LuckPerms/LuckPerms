@@ -28,12 +28,10 @@ package me.lucko.luckperms.common.commands.utils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import com.google.common.base.Splitter;
-
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.commands.CommandException;
-import me.lucko.luckperms.common.utils.ArgumentChecker;
+import me.lucko.luckperms.common.constants.DataConstraints;
 import me.lucko.luckperms.common.utils.DateUtil;
 
 import java.util.ArrayList;
@@ -44,7 +42,6 @@ import java.util.function.Function;
  * Utility class to help process arguments, and throw checked exceptions if the arguments are invalid.
  */
 public class ArgumentUtils {
-    private static final Splitter CONTEXT_SPLITTER = Splitter.on('=').limit(2).omitEmptyStrings();
     public static final Function<String, String> WRAPPER = s -> s.contains(" ") ? "\"" + s + "\"" : s;
 
 
@@ -84,7 +81,7 @@ public class ArgumentUtils {
 
     public static String handleName(int index, List<String> args) throws ArgumentException {
         String groupName = args.get(index).toLowerCase();
-        if (ArgumentChecker.checkName(groupName)) {
+        if (!DataConstraints.GROUP_NAME_TEST.test(groupName)) {
             throw new DetailedUsageException();
         }
         return groupName;
@@ -92,7 +89,7 @@ public class ArgumentUtils {
 
     public static String handleNameWithSpace(int index, List<String> args) throws ArgumentException {
         String groupName = args.get(index).toLowerCase();
-        if (ArgumentChecker.checkNameWithSpace(groupName)) {
+        if (!DataConstraints.GROUP_NAME_TEST_ALLOW_SPACE.test(groupName)) {
             throw new DetailedUsageException();
         }
         return groupName;
@@ -140,7 +137,7 @@ public class ArgumentUtils {
         return args.size() > index ? args.get(index).toLowerCase() : null;
     }
 
-    public static MutableContextSet handleContext(int fromIndex, List<String> args) {
+    public static MutableContextSet handleContext(int fromIndex, List<String> args) throws CommandException {
         if (args.size() > fromIndex) {
             MutableContextSet set = MutableContextSet.create();
 
@@ -152,6 +149,14 @@ public class ArgumentUtils {
                 // one of the first two values, and doesn't have a key
                 if (i <= 1 && !pair.contains("=")) {
                     String key = i == 0 ? "server" : "world";
+
+                    if (key.equals("server") && !DataConstraints.SERVER_NAME_TEST.test(pair)) {
+                        throw new InvalidServerWorldException();
+                    }
+                    if (key.equals("world") && !DataConstraints.WORLD_NAME_TEST.test(pair)) {
+                        throw new InvalidServerWorldException();
+                    }
+
                     set.add(key, pair);
                     continue;
                 }
@@ -169,6 +174,13 @@ public class ArgumentUtils {
                 String value = pair.substring(index + 1);
                 if (value.equals("")) {
                     continue;
+                }
+
+                if (key.equals("server") && !DataConstraints.SERVER_NAME_TEST.test(value)) {
+                    throw new InvalidServerWorldException();
+                }
+                if (key.equals("world") && !DataConstraints.WORLD_NAME_TEST.test(value)) {
+                    throw new InvalidServerWorldException();
                 }
 
                 set.add(key, value);
@@ -250,7 +262,7 @@ public class ArgumentUtils {
     public static class UseInheritException extends ArgumentException {
     }
 
-    public static class InvalidServerException extends ArgumentException {
+    public static class InvalidServerWorldException extends ArgumentException {
     }
 
     public static class PastDateException extends ArgumentException {

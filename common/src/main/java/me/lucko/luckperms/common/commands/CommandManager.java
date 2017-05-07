@@ -273,8 +273,8 @@ public class CommandManager {
                 return CommandResult.INVALID_ARGS;
             }
 
-            if (e instanceof ArgumentUtils.InvalidServerException) {
-                Message.SERVER_INVALID_ENTRY.send(sender);
+            if (e instanceof ArgumentUtils.InvalidServerWorldException) {
+                Message.SERVER_WORLD_INVALID_ENTRY.send(sender);
                 return CommandResult.INVALID_ARGS;
             }
 
