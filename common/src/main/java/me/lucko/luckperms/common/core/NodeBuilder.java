@@ -34,18 +34,21 @@ import com.google.common.base.Splitter;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.common.constants.Patterns;
 import me.lucko.luckperms.common.core.model.ImmutableNode;
+import me.lucko.luckperms.common.utils.PatternCache;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Builds Nodes
  */
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 class NodeBuilder implements Node.Builder {
+    private static final Pattern NODE_CONTEXTS_PATTERN = Pattern.compile("\\(.+\\).*");
+
     private final String permission;
     private final MutableContextSet extraContexts = MutableContextSet.create();
     private Boolean value = true;
@@ -58,15 +61,15 @@ class NodeBuilder implements Node.Builder {
         if (!shouldConvertContexts) {
             this.permission = permission;
         } else {
-            if (!Patterns.NODE_CONTEXTS.matcher(permission).matches()) {
+            if (!NODE_CONTEXTS_PATTERN.matcher(permission).matches()) {
                 this.permission = permission;
             } else {
-                List<String> contextParts = Splitter.on(Patterns.compileDelimitedMatcher(")", "\\")).limit(2).splitToList(permission.substring(1));
+                List<String> contextParts = Splitter.on(PatternCache.compileDelimitedMatcher(")", "\\")).limit(2).splitToList(permission.substring(1));
                 // 0 = context, 1 = node
 
                 this.permission = contextParts.get(1);
                 try {
-                    Map<String, String> map = Splitter.on(Patterns.compileDelimitedMatcher(",", "\\")).withKeyValueSeparator(Splitter.on(Patterns.compileDelimitedMatcher("=", "\\"))).split(contextParts.get(0));
+                    Map<String, String> map = Splitter.on(PatternCache.compileDelimitedMatcher(",", "\\")).withKeyValueSeparator(Splitter.on(PatternCache.compileDelimitedMatcher("=", "\\"))).split(contextParts.get(0));
                     for (Map.Entry<String, String> e : map.entrySet()) {
                         this.withExtraContext(NodeFactory.unescapeDelimiters(e.getKey(), "=", "(", ")", ","), NodeFactory.unescapeDelimiters(e.getValue(), "=", "(", ")", ","));
                     }

@@ -30,7 +30,6 @@ import com.google.common.base.Splitter;
 
 import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Patterns;
 
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Command;
@@ -53,7 +52,7 @@ class BungeeCommand extends Command implements TabExecutor {
         manager.onCommand(
                 plugin.getSenderFactory().wrap(sender),
                 "lpb",
-                Util.stripQuotes(Splitter.on(Patterns.COMMAND_SEPARATOR).omitEmptyStrings().splitToList(Joiner.on(' ').join(args)))
+                Util.stripQuotes(Splitter.on(CommandManager.COMMAND_SEPARATOR_PATTERN).omitEmptyStrings().splitToList(Joiner.on(' ').join(args)))
         );
     }
 

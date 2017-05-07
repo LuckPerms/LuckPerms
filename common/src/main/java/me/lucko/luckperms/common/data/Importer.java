@@ -38,7 +38,6 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Patterns;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
@@ -109,7 +108,7 @@ public class Importer implements Runnable {
                 CommandResult result = commandManager.onCommand(
                         fake,
                         "lp",
-                        Util.stripQuotes(Splitter.on(Patterns.COMMAND_SEPARATOR).omitEmptyStrings().splitToList(command))
+                        Util.stripQuotes(Splitter.on(CommandManager.COMMAND_SEPARATOR_PATTERN).omitEmptyStrings().splitToList(command))
                 ).get();
                 getResult(index, command).setResult(result);
 

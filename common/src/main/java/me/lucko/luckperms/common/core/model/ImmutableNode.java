@@ -40,8 +40,8 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.common.constants.Patterns;
 import me.lucko.luckperms.common.core.NodeFactory;
+import me.lucko.luckperms.common.utils.PatternCache;
 import me.lucko.luckperms.common.utils.ShorthandParser;
 
 import java.util.Collections;
@@ -70,7 +70,7 @@ public final class ImmutableNode implements Node {
         Set<String> expandedThisStr = ShorthandParser.parseShorthand(thisStr, false);
 
         if (str.toLowerCase().startsWith("r=") && applyRegex) {
-            Pattern p = Patterns.compile(str.substring(2));
+            Pattern p = PatternCache.compile(str.substring(2));
             if (p == null) {
                 return false;
             }
@@ -84,7 +84,7 @@ public final class ImmutableNode implements Node {
         }
 
         if (thisStr.toLowerCase().startsWith("r=") && applyRegex) {
-            Pattern p = Patterns.compile(thisStr.substring(2));
+            Pattern p = PatternCache.compile(thisStr.substring(2));
             if (p == null) {
                 return false;
             }
@@ -231,20 +231,20 @@ public final class ImmutableNode implements Node {
 
         isMeta = NodeFactory.isMetaNode(this.permission);
         if (isMeta) {
-            List<String> metaPart = Splitter.on(Patterns.compileDelimitedMatcher(".", "\\")).limit(2).splitToList(getPermission().substring("meta.".length()));
+            List<String> metaPart = Splitter.on(PatternCache.compileDelimitedMatcher(".", "\\")).limit(2).splitToList(getPermission().substring("meta.".length()));
             meta = Maps.immutableEntry(MetaUtils.unescapeCharacters(metaPart.get(0)), MetaUtils.unescapeCharacters(metaPart.get(1)));
         }
 
         isPrefix = NodeFactory.isPrefixNode(this.permission);
         if (isPrefix) {
-            List<String> prefixPart = Splitter.on(Patterns.compileDelimitedMatcher(".", "\\")).limit(2).splitToList(getPermission().substring("prefix.".length()));
+            List<String> prefixPart = Splitter.on(PatternCache.compileDelimitedMatcher(".", "\\")).limit(2).splitToList(getPermission().substring("prefix.".length()));
             Integer i = Integer.parseInt(prefixPart.get(0));
             prefix = Maps.immutableEntry(i, MetaUtils.unescapeCharacters(prefixPart.get(1)));
         }
 
         isSuffix = NodeFactory.isSuffixNode(this.permission);
         if (isSuffix) {
-            List<String> suffixPart = Splitter.on(Patterns.compileDelimitedMatcher(".", "\\")).limit(2).splitToList(getPermission().substring("suffix.".length()));
+            List<String> suffixPart = Splitter.on(PatternCache.compileDelimitedMatcher(".", "\\")).limit(2).splitToList(getPermission().substring("suffix.".length()));
             Integer i = Integer.parseInt(suffixPart.get(0));
             suffix = Maps.immutableEntry(i, MetaUtils.unescapeCharacters(suffixPart.get(1)));
         }

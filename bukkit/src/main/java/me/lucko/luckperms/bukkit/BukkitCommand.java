@@ -30,7 +30,6 @@ import com.google.common.base.Splitter;
 
 import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Patterns;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -53,7 +52,7 @@ public class BukkitCommand extends CommandManager implements CommandExecutor, Ta
         onCommand(
                 plugin.getSenderFactory().wrap(sender),
                 label,
-                Util.stripQuotes(Splitter.on(Patterns.COMMAND_SEPARATOR).omitEmptyStrings().splitToList(Joiner.on(' ').join(args)))
+                Util.stripQuotes(Splitter.on(COMMAND_SEPARATOR_PATTERN).omitEmptyStrings().splitToList(Joiner.on(' ').join(args)))
         );
         return true;
     }

@@ -32,8 +32,8 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.constants.DataConstraints;
 import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Patterns;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.data.Log;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -105,7 +105,7 @@ public class LogRecent extends SubCommand<Log> {
         u = Util.parseUuid(s);
         if (u == null) {
             if (s.length() <= 16) {
-                if (Patterns.NON_USERNAME.matcher(s).find()) {
+                if (!DataConstraints.PLAYER_USERNAME_TEST.test(s)) {
                     Message.USER_INVALID_ENTRY.send(sender, s);
                     return CommandResult.INVALID_ARGS;
                 }

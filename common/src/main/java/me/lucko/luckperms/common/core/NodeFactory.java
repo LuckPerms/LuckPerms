@@ -34,8 +34,8 @@ import com.google.common.base.Splitter;
 import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.common.constants.Patterns;
 import me.lucko.luckperms.common.core.model.Group;
+import me.lucko.luckperms.common.utils.PatternCache;
 
 import java.util.List;
 import java.util.Map;
@@ -65,18 +65,18 @@ public class NodeFactory {
 
     public static Node.Builder builderFromSerializedNode(String s, Boolean b) {
         // if contains /
-        if (Patterns.compileDelimitedMatcher("/", "\\").matcher(s).find()) {
-            List<String> parts = Splitter.on(Patterns.compileDelimitedMatcher("/", "\\")).limit(2).splitToList(s);
+        if (PatternCache.compileDelimitedMatcher("/", "\\").matcher(s).find()) {
+            List<String> parts = Splitter.on(PatternCache.compileDelimitedMatcher("/", "\\")).limit(2).splitToList(s);
             // 0=server(+world)   1=node
 
             // WORLD SPECIFIC
             // if parts[0] contains -
-            if (Patterns.compileDelimitedMatcher("-", "\\").matcher(parts.get(0)).find()) {
-                List<String> serverParts = Splitter.on(Patterns.compileDelimitedMatcher("-", "\\")).limit(2).splitToList(parts.get(0));
+            if (PatternCache.compileDelimitedMatcher("-", "\\").matcher(parts.get(0)).find()) {
+                List<String> serverParts = Splitter.on(PatternCache.compileDelimitedMatcher("-", "\\")).limit(2).splitToList(parts.get(0));
                 // 0=server   1=world
 
                 // if parts[1] contains $
-                if (Patterns.compileDelimitedMatcher("$", "\\").matcher(parts.get(1)).find()) {
+                if (PatternCache.compileDelimitedMatcher("$", "\\").matcher(parts.get(1)).find()) {
                     List<String> tempParts = Splitter.on('$').limit(2).splitToList(parts.get(1));
                     return new NodeBuilder(tempParts.get(0), true).setServer(serverParts.get(0)).setWorld(serverParts.get(1))
                             .setExpiry(Long.parseLong(tempParts.get(1))).setValue(b);
@@ -87,8 +87,8 @@ public class NodeFactory {
                 // SERVER BUT NOT WORLD SPECIFIC
 
                 // if parts[1] contains $
-                if (Patterns.compileDelimitedMatcher("$", "\\").matcher(parts.get(1)).find()) {
-                    List<String> tempParts = Splitter.on(Patterns.compileDelimitedMatcher("$", "\\")).limit(2).splitToList(parts.get(1));
+                if (PatternCache.compileDelimitedMatcher("$", "\\").matcher(parts.get(1)).find()) {
+                    List<String> tempParts = Splitter.on(PatternCache.compileDelimitedMatcher("$", "\\")).limit(2).splitToList(parts.get(1));
                     return new NodeBuilder(tempParts.get(0), true).setServer(parts.get(0)).setExpiry(Long.parseLong(tempParts.get(1))).setValue(b);
                 } else {
                     return new NodeBuilder(parts.get(1), true).setServer(parts.get(0)).setValue(b);
@@ -98,8 +98,8 @@ public class NodeFactory {
             // NOT SERVER SPECIFIC
 
             // if s contains $
-            if (Patterns.compileDelimitedMatcher("$", "\\").matcher(s).find()) {
-                List<String> tempParts = Splitter.on(Patterns.compileDelimitedMatcher("$", "\\")).limit(2).splitToList(s);
+            if (PatternCache.compileDelimitedMatcher("$", "\\").matcher(s).find()) {
+                List<String> tempParts = Splitter.on(PatternCache.compileDelimitedMatcher("$", "\\")).limit(2).splitToList(s);
                 return new NodeBuilder(tempParts.get(0), true).setExpiry(Long.parseLong(tempParts.get(1))).setValue(b);
             } else {
                 return new NodeBuilder(s, true).setValue(b);
@@ -214,7 +214,7 @@ public class NodeFactory {
             return false;
         }
         String parts = s.substring("meta.".length());
-        return Patterns.compileDelimitedMatcher(".", "\\").matcher(parts).find();
+        return PatternCache.compileDelimitedMatcher(".", "\\").matcher(parts).find();
     }
 
     private static boolean isChatMetaNode(String type, String s) {
@@ -223,11 +223,11 @@ public class NodeFactory {
         }
         String parts = s.substring((type + ".").length());
 
-        if (!Patterns.compileDelimitedMatcher(".", "\\").matcher(parts).find()) {
+        if (!PatternCache.compileDelimitedMatcher(".", "\\").matcher(parts).find()) {
             return false;
         }
 
-        List<String> metaParts = Splitter.on(Patterns.compileDelimitedMatcher(".", "\\")).limit(2).splitToList(parts);
+        List<String> metaParts = Splitter.on(PatternCache.compileDelimitedMatcher(".", "\\")).limit(2).splitToList(parts);
         String priority = metaParts.get(0);
         try {
             Integer.parseInt(priority);

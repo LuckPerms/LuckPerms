@@ -32,8 +32,8 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.constants.DataConstraints;
 import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Patterns;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.data.Log;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -103,7 +103,7 @@ public class LogUserHistory extends SubCommand<Log> {
         }
 
         if (user.length() <= 16) {
-            if (Patterns.NON_USERNAME.matcher(user).find()) {
+            if (!DataConstraints.PLAYER_USERNAME_TEST.test(user)) {
                 Message.USER_INVALID_ENTRY.send(sender, user);
                 return CommandResult.INVALID_ARGS;
             }

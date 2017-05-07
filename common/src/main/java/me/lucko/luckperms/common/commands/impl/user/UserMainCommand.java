@@ -36,8 +36,8 @@ import me.lucko.luckperms.common.commands.impl.generic.parent.CommandParent;
 import me.lucko.luckperms.common.commands.impl.generic.permission.CommandPermission;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.constants.DataConstraints;
 import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Patterns;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
@@ -65,7 +65,7 @@ public class UserMainCommand extends MainCommand<User> {
         UUID u = Util.parseUuid(target);
         if (u == null) {
             if (target.length() <= 16) {
-                if (Patterns.NON_USERNAME.matcher(target).find()) {
+                if (!DataConstraints.PLAYER_USERNAME_TEST.test(target)) {
                     Message.USER_INVALID_ENTRY.send(sender, target);
                     return null;
                 }

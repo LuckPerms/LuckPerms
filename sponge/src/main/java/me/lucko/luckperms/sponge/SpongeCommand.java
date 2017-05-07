@@ -29,7 +29,6 @@ import com.google.common.base.Splitter;
 
 import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Patterns;
 import me.lucko.luckperms.sponge.timings.LPTiming;
 
 import org.spongepowered.api.command.CommandCallable;
@@ -62,7 +61,7 @@ class SpongeCommand extends CommandManager implements CommandCallable {
             onCommand(
                     plugin.getSenderFactory().wrap(source),
                     "lp",
-                    Util.stripQuotes(Splitter.on(Patterns.COMMAND_SEPARATOR).omitEmptyStrings().splitToList(s))
+                    Util.stripQuotes(Splitter.on(COMMAND_SEPARATOR_PATTERN).omitEmptyStrings().splitToList(s))
             );
             return CommandResult.success();
         }

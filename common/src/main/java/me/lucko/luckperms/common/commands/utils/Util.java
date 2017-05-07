@@ -34,7 +34,6 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Patterns;
 
 import io.github.mkremins.fanciful.FancyMessage;
 
@@ -45,9 +44,11 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 @UtilityClass
 public class Util {
+    private static final Pattern STRIP_COLOR_PATTERN = Pattern.compile("(?i)" + String.valueOf('§') + "[0-9A-FK-OR]");
 
     /**
      * Sends a message to the sender, formatted with the plugin prefix and color scheme
@@ -111,7 +112,7 @@ public class Util {
      * @return the message without color
      */
     public static String stripColor(String s) {
-        return s == null ? null : Patterns.STRIP_COLOR_PATTERN.matcher(s).replaceAll("");
+        return s == null ? null : STRIP_COLOR_PATTERN.matcher(s).replaceAll("");
     }
 
     public static <T> List<List<T>> divideList(Iterable<T> source, int size) {

@@ -23,8 +23,9 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.constants;
+package me.lucko.luckperms.common.utils;
 
+import lombok.AllArgsConstructor;
 import lombok.experimental.UtilityClass;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -33,30 +34,29 @@ import com.google.common.collect.Maps;
 
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 @UtilityClass
-public class Patterns {
-    private static final LoadingCache<String, Pattern> CACHE = Caffeine.newBuilder().build(Pattern::compile);
+public class PatternCache {
+
+    private static final NullablePattern NULL_PATTERN = new NullablePattern(null);
+
+    private static final LoadingCache<String, NullablePattern> CACHE = Caffeine.newBuilder().build(s -> {
+        try {
+            return new NullablePattern(Pattern.compile(s));
+        } catch (PatternSyntaxException e) {
+            return NULL_PATTERN;
+        }
+    });
+
     private static final LoadingCache<Map.Entry<String, String>, String> DELIMITER_CACHE = Caffeine.newBuilder()
             .build(e -> {
                 // note the reversed order
                 return "(?<!" + Pattern.quote(e.getValue()) + ")" + Pattern.quote(e.getKey());
             });
 
-    public static final Pattern COMMAND_SEPARATOR = Pattern.compile(" (?=([^\\\"]*\\\"[^\\\"]*\\\")*[^\\\"]*$)");
-    public static final Pattern NON_ALPHA_NUMERIC = Pattern.compile("[\\/\\$\\. ]");
-    public static final Pattern NON_ALPHA_NUMERIC_SPACE = Pattern.compile("[\\/\\$\\.]");
-    public static final Pattern NON_USERNAME = Pattern.compile("[^A-Za-z0-9_ ]");
-    public static final Pattern STRIP_COLOR_PATTERN = Pattern.compile("(?i)" + String.valueOf('§') + "[0-9A-FK-OR]");
-    public static final Pattern NODE_CONTEXTS = Pattern.compile("\\(.+\\).*");
-
     public static Pattern compile(String regex) {
-        try {
-            return CACHE.get(regex);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+        return CACHE.get(regex).pattern;
     }
 
     public static String buildDelimitedMatcher(String delim, String esc) {
@@ -65,6 +65,11 @@ public class Patterns {
 
     public static Pattern compileDelimitedMatcher(String delim, String esc) {
         return compile(buildDelimitedMatcher(delim, esc));
+    }
+
+    @AllArgsConstructor
+    private static final class NullablePattern {
+        private final Pattern pattern;
     }
 
 }
