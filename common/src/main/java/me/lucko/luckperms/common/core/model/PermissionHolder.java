@@ -489,8 +489,9 @@ public abstract class PermissionHolder {
         List<LocalizedNode> finalAccumulator = accumulator;
 
         // this allows you to negate parent permissions lower down the inheritance tree.
+        // we can negate parent groups in a specific context at this level and prevent them from being applied.
         // there's no way to distinct the stream below based on a custom comparator.
-        NodeTools.removeIgnoreValue(nodes.iterator());
+        NodeTools.removeSamePermission(nodes.iterator());
 
         nodes.stream()
                 .filter(Node::getValue)
@@ -612,6 +613,12 @@ public abstract class PermissionHolder {
 
         // get and add the objects own nodes
         List<Node> nodes = flattenAndMergeNodesToList(context.getContextSet());
+
+        // this allows you to negate parent permissions lower down the inheritance tree.
+        // it also allows you to negate meta in specific contexts and have it override.
+        // there's no way to distinct the stream below based on a custom comparator.
+        NodeTools.removeSamePermission(nodes.iterator());
+
         nodes.stream()
                 .filter(Node::getValue)
                 .filter(n -> n.isMeta() || n.isPrefix() || n.isSuffix())
@@ -622,10 +629,6 @@ public abstract class PermissionHolder {
         if (w.isPresent()) {
             accumulator.accumulateWeight(w.getAsInt());
         }
-
-        // this allows you to negate parent permissions lower down the inheritance tree.
-        // there's no way to distinct the stream below based on a custom comparator.
-        NodeTools.removeIgnoreValue(nodes.iterator());
 
         nodes.stream()
                 .filter(Node::getValue)

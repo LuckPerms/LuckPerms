@@ -39,11 +39,11 @@ public class LogicParser {
     public static boolean parse(String s, PermissionHolder holder, Tristate tristate) throws IllegalArgumentException {
         try {
             ScriptEngine engine = Scripting.getScriptEngine();
-
-            String expression = generateExpression(s, s1 -> holder.hasPermission(NodeFactory.fromSerializedNode(s1, true)) == tristate);
             if (engine == null) {
                 throw new NullPointerException("script engine");
             }
+
+            String expression = generateExpression(s, s1 -> holder.hasPermission(NodeFactory.fromSerializedNode(s1, true)) == tristate);
             String result = engine.eval(expression).toString();
 
             if (!result.equals("true") && !result.equals("false")) {
