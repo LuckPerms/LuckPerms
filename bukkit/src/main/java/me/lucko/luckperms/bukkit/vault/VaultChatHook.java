@@ -43,9 +43,6 @@ import net.milkbowl.vault.chat.Chat;
 import java.util.HashMap;
 import java.util.Map;
 
-import static me.lucko.luckperms.api.MetaUtils.escapeCharacters;
-import static me.lucko.luckperms.api.MetaUtils.unescapeCharacters;
-
 /**
  * LuckPerms Vault Chat implementation
  * All user lookups are cached.
@@ -68,8 +65,7 @@ public class VaultChatHook extends Chat {
 
     private void setMeta(PermissionHolder holder, String world, String node, String value) {
         String finalWorld = perms.isIgnoreWorld() ? null : world;
-        if (holder == null) return;
-        if (node.equals("")) return;
+        if (holder == null || node.equals("")) return;
 
         perms.log("Setting meta: '" + node + "' for " + holder.getObjectName() + " on world " + world + ", server " + perms.getServer());
 
@@ -97,7 +93,6 @@ public class VaultChatHook extends Chat {
         perms.log("Setting " + (prefix ? "prefix" : "suffix") + " for " + holder.getObjectName() + " on world " + world + ", server " + perms.getServer());
 
         perms.getScheduler().execute(() -> {
-
             // remove all prefixes/suffixes directly set on the user/group
             holder.removeIf(n -> prefix ? n.isPrefix() : n.isSuffix());
 
@@ -122,16 +117,11 @@ public class VaultChatHook extends Chat {
     private String getUserMeta(User user, String world, String node, String defaultValue) {
         if (user == null) return defaultValue;
         world = perms.isIgnoreWorld() ? null : world;
-        node = escapeCharacters(node);
 
         perms.log("Getting meta: '" + node + "' for user " + user.getFriendlyName() + " on world " + world + ", server " + perms.getServer());
 
         String ret = user.getUserData().getMetaData(perms.createContextForWorld(world)).getMeta().get(node);
-        if (ret == null) {
-            return defaultValue;
-        } else {
-            return unescapeCharacters(ret);
-        }
+        return ret != null ? ret : defaultValue;
     }
 
     private String getUserChatMeta(boolean prefix, User user, String world) {
@@ -141,15 +131,13 @@ public class VaultChatHook extends Chat {
         perms.log("Getting " + (prefix ? "prefix" : "suffix") + " for user " + user.getFriendlyName() + " on world " + world + ", server " + perms.getServer());
 
         MetaData data = user.getUserData().getMetaData(perms.createContextForWorld(world));
-        String v = prefix ? data.getPrefix() : data.getSuffix();
-        return v == null ? "" : unescapeCharacters(v);
+        String ret = prefix ? data.getPrefix() : data.getSuffix();
+        return ret != null ? ret : "";
     }
 
     private String getGroupMeta(Group group, String world, String node, String defaultValue) {
         world = perms.isIgnoreWorld() ? null : world;
-        if (group == null) return defaultValue;
-        if (node.equals("")) return defaultValue;
-        node = escapeCharacters(node);
+        if (group == null || node.equals("")) return defaultValue;
 
         perms.log("Getting meta: '" + node + "' for group " + group.getName() + " on world " + world + ", server " + perms.getServer());
 
@@ -161,7 +149,7 @@ public class VaultChatHook extends Chat {
 
             Map.Entry<String, String> meta = n.getMeta();
             if (meta.getKey().equalsIgnoreCase(node)) {
-                return unescapeCharacters(meta.getValue());
+                return meta.getValue();
             }
         }
 
@@ -197,7 +185,7 @@ public class VaultChatHook extends Chat {
             }
         }
 
-        return meta == null ? "" : unescapeCharacters(meta);
+        return meta != null ? meta : "";
     }
 
     @Override
