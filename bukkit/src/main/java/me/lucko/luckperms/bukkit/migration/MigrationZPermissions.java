@@ -25,12 +25,14 @@
 
 package me.lucko.luckperms.bukkit.migration;
 
+import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
 import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.Group;
@@ -46,12 +48,15 @@ import org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsService;
 import org.tyrannyofheaven.bukkit.zPermissions.dao.PermissionService;
 import org.tyrannyofheaven.bukkit.zPermissions.model.EntityMetadata;
 import org.tyrannyofheaven.bukkit.zPermissions.model.Entry;
-import org.tyrannyofheaven.bukkit.zPermissions.model.Inheritance;
 import org.tyrannyofheaven.bukkit.zPermissions.model.Membership;
 import org.tyrannyofheaven.bukkit.zPermissions.model.PermissionEntity;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -92,19 +97,37 @@ public class MigrationZPermissions extends SubCommand<Object> {
 
         // Migrate all groups
         log.log("Starting group migration.");
+
+        Map<UUID, Set<Node>> userParents = new HashMap<>();
+
         AtomicInteger groupCount = new AtomicInteger(0);
         int maxWeight = 0;
-        for (String g : service.getAllGroups()) {
-            PermissionEntity entity = internalService.getEntity(g, null, true);
-
-            String groupName = MigrationUtils.standardizeName(g);
+        for (PermissionEntity entity : internalService.getEntities(true)) {
+            String groupName = MigrationUtils.standardizeName(entity.getDisplayName());
             plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
             Group group = plugin.getGroupManager().getIfLoaded(groupName);
 
             int weight = entity.getPriority();
             maxWeight = Math.max(maxWeight, weight);
-            migrateEntity(group, entity, null, weight);
+            migrateEntity(group, entity, weight);
             MigrationUtils.setGroupWeight(group, weight);
+
+            // store user data for later
+            Set<Membership> members = entity.getMemberships();
+            for (Membership membership : members) {
+                UUID uuid = Util.parseUuid(membership.getMember());
+                if (uuid == null) {
+                    continue;
+                }
+
+                Set<Node> nodes = userParents.computeIfAbsent(uuid, u -> new HashSet<>());
+                if (membership.getExpiration() == null) {
+                    nodes.add(NodeFactory.make("group." + groupName));
+                } else {
+                    long expiry = membership.getExpiration().toInstant().getEpochSecond();
+                    nodes.add(NodeFactory.newBuilder("group." + groupName).setExpiry(expiry).build());
+                }
+            }
 
             plugin.getStorage().saveGroup(group);
             log.logAllProgress("Migrated {} groups so far.", groupCount.incrementAndGet());
@@ -130,16 +153,32 @@ public class MigrationZPermissions extends SubCommand<Object> {
         log.log("Starting user migration.");
         maxWeight += 10;
         AtomicInteger userCount = new AtomicInteger(0);
-        for (UUID u : service.getAllPlayersUUID()) {
+
+        Set<UUID> usersToMigrate = new HashSet<>(userParents.keySet());
+        usersToMigrate.addAll(service.getAllPlayersUUID());
+
+        for (UUID u : usersToMigrate) {
             PermissionEntity entity = internalService.getEntity(null, u, false);
+
             String username = null;
-            if (!entity.isGroup()) {
+            if (entity != null) {
                 username = entity.getDisplayName();
             }
 
             plugin.getStorage().loadUser(u, username).join();
             User user = plugin.getUserManager().getIfLoaded(u);
-            migrateEntity(user, entity, internalService.getGroups(u), maxWeight);
+
+            // migrate permissions & meta
+            if (entity != null) {
+                migrateEntity(user, entity, maxWeight);
+            }
+
+            // migrate groups
+            Set<Node> parents = userParents.get(u);
+            if (parents != null) {
+                parents.forEach(user::setPermission);
+            }
+
             user.getPrimaryGroup().setStoredValue(MigrationUtils.standardizeName(service.getPlayerPrimaryGroup(u)));
 
             plugin.getUserManager().cleanup(user);
@@ -152,7 +191,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
         return CommandResult.SUCCESS;
     }
 
-    private void migrateEntity(PermissionHolder holder, PermissionEntity entity, List<Membership> memberships, int weight) {
+    private void migrateEntity(PermissionHolder holder, PermissionEntity entity, int weight) {
         for (Entry e : entity.getPermissions()) {
             if (e.getWorld() != null && !e.getWorld().getName().equals("")) {
                 holder.setPermission(NodeFactory.newBuilder(e.getPermission()).setValue(e.isValue()).setWorld(e.getWorld().getName()).build());
@@ -161,16 +200,12 @@ public class MigrationZPermissions extends SubCommand<Object> {
             }
         }
 
+        // only migrate inheritances for groups
         if (entity.isGroup()) {
-            // entity.getMemberships() doesn't work for groups (always returns 0 records)
-            for (Inheritance inheritance : entity.getInheritancesAsChild()) {
-                if (!inheritance.getParent().getName().equals(holder.getObjectName())) {
-                    holder.setPermission(NodeFactory.make("group." + MigrationUtils.standardizeName(inheritance.getParent().getName())));
+            for (PermissionEntity inheritance : entity.getParents()) {
+                if (!inheritance.getDisplayName().equals(holder.getObjectName())) {
+                    holder.setPermission(NodeFactory.make("group." + MigrationUtils.standardizeName(inheritance.getDisplayName())));
                 }
-            }
-        } else {
-            for (Membership membership : memberships) {
-                holder.setPermission(NodeFactory.make("group." + MigrationUtils.standardizeName(membership.getGroup().getDisplayName())));
             }
         }
 
