@@ -101,8 +101,8 @@ info: >
   {PREFIX}&f-     &3日志大小: &a{10}\n
   {PREFIX}&f-     &3UUID缓存大小: &a{11}\n
   {PREFIX}&f-     &3翻译加载: &a{12}\n
-  {PREFIX}&f-     &3预处理上下文: &a{13}\n
-  {PREFIX}&f-     &3上下文计算器: &a{14}\n
+  {PREFIX}&f-     &3预处理环境: &a{13}\n
+  {PREFIX}&f-     &3环境计算器: &a{14}\n
   {PREFIX}&f-     &3唯一权限: &a{15}\n
   {PREFIX}&f-  &b配置:\n
   {PREFIX}&f-     &3使用服务器UUIDs: {16}\n
@@ -147,17 +147,17 @@ context-pair--global-inline: "&e全局"
 context-pair-end: "&a."
 context-pair-sep: "&a, "
 context-pair: "&8(&7{0}=&f{1}&8)"
-check-permission: "&b在上下文&b{3}&b中,&b{0}&b的权限&b{1}&b被设置为&b{2}&b."
-check-permission-inherited: "&b{0}&a在上下文&b{3}&a中的&b{1}&a被设置为&b{2}&a,继承自&b{4}&a."
+check-permission: "&b在环境&b{3}&b中,&b{0}&b的权限&b{1}&b被设置为&b{2}&b."
+check-permission-inherited: "&b{0}&a在环境&b{3}&a中的&b{1}&a被设置为&b{2}&a,继承自&b{4}&a."
 setpermission-success: "&a在&b{3}&a中为&b{2}&a设置&b{0}&a为&b{1}&a."
-setpermission-temp-success: "&a在上下文&b{4}&a将&b{0}&a的&b{2}&a设为&b{1}&a,持续时间&b{3}&a."
-unsetpermission-success: "&a在上下文&b{2}&a中取消&b{1}&a的&b{0}&a."
-unset-temp-permission-success: "&a在上下文&b{2}&a中取消设置&b{1}&a的临时许可&b{0}&a."
-set-inherit-success: "&b{0}&a现在在上下文&b{2}&a中继承&b{1}&a的权限&a."
-set-temp-inherit-success: "&b{0}&a现在在上下文&b{3}&a中继承&b{1}&a的权限,持续时间&b{2}&a."
+setpermission-temp-success: "&a在环境&b{4}&a将&b{0}&a的&b{2}&a设为&b{1}&a,持续时间&b{3}&a."
+unsetpermission-success: "&a在环境&b{2}&a中取消&b{1}&a的&b{0}&a."
+unset-temp-permission-success: "&a在环境&b{2}&a中取消设置&b{1}&a的临时许可&b{0}&a."
+set-inherit-success: "&b{0}&a现在在环境&b{2}&a中继承&b{1}&a的权限&a."
+set-temp-inherit-success: "&b{0}&a现在在环境&b{3}&a中继承&b{1}&a的权限,持续时间&b{2}&a."
 set-parent-success: "&b{0}&a现有的父组被清除,现在只在&b{2}&a中继承&b{1}&a."
-unset-inherit-success: "&b{0}&a不再继承上下文&b{2}&a中的&b{1}&a权限."
-unset-temp-inherit-success: "&b{0}&a在上下文{2}中不再临时从&b{1}&a继承权限."
+unset-inherit-success: "&b{0}&a不再继承环境&b{2}&a中的&b{1}&a权限."
+unset-temp-inherit-success: "&b{0}&a在环境{2}中不再临时从&b{1}&a继承权限."
 clear-success: "&b{0}&a的权限被清除. (&b{1}&a节点被删除.)"
 clear-success-singular: "&b{0}&a的权限被清除. (&b{1}&a节点已被删除.)"
 parent-clear-success: "&b{0}&a的组被清除. (&b{1}&a节点被删除.)"
@@ -179,17 +179,17 @@ meta-none: "&b{0}没有元信息."
 meta-invalid-priority: "优先级'{0}'无效. 应该是一个数字."
 already-has-chat-meta: "{0}已经设置了{1}."
 does-not-have-chat-meta: "{0}没有设置{1}."
-add-chatmeta-success: "&b{0}&a在上下文&b{4}&a中将优先级&b{3}&a设置为 {1} &f\"{2}&f\"."
-add-temp-chatmeta-success: "&b{0}&a在上下文&b{5}&a中,设置为优先级&b{3}&a的{1} &f\"{2}&f\"&a,持续时间为&b{4}&a."
+add-chatmeta-success: "&b{0}&a在环境&b{4}&a中将优先级&b{3}&a设置为 {1} &f\"{2}&f\"."
+add-temp-chatmeta-success: "&b{0}&a在环境&b{5}&a中,设置为优先级&b{3}&a的{1} &f\"{2}&f\"&a,持续时间为&b{4}&a."
 remove-chatmeta-success: "&b{0}&a在&b{3}&a中删除了优先级&b{3}&a的{1} &f\"{2}&f\"&a."
 bulk-remove-chatmeta-success: "&b{0}&a had all {1}es at priority &b{3}&a removed in context {4}&a."
-remove-temp-chatmeta-success: "&b{0}&a在上下文&b{4}&a中删除了优先级&b{3}&a的临时{1} &f\"{2}&f\"&a."
-bulk-remove-temp-chatmeta-success: "&b{0}&a在上下文&b{4}&a中移除了优先级&b{3}&a的所有临时&b{1}&a.."
+remove-temp-chatmeta-success: "&b{0}&a在环境&b{4}&a中删除了优先级&b{3}&a的临时{1} &f\"{2}&f\"&a."
+bulk-remove-temp-chatmeta-success: "&b{0}&a在环境&b{4}&a中移除了优先级&b{3}&a的所有临时&b{1}&a.."
 already-has-meta: "{0}已经有了这个元信息集."
-set-meta-success: "将上下文&b{3}&a中的&b{2}&a的键&f\"{0}&f\"&a的元信息设置为&f\"{1}&f\"&a."
-set-meta-temp-success: "&a在上下文&b{4}&a中将&b{2}&a的键&f\"{0}&f\"&a的值设置为&f\"{1}&f\"&a,持续时间为&b{3}&a."
-unset-meta-success: "&a在上下文{2}中取消设置&b{1}&a的键&f\"{0}&f\"&a的元信息."
-unset-meta-temp-success: "&a在上下文{2}中取消设置&b{1}&a的键&f\"{0}&f\"&a的临时元信息."
+set-meta-success: "将环境&b{3}&a中的&b{2}&a的键&f\"{0}&f\"&a的元信息设置为&f\"{1}&f\"&a."
+set-meta-temp-success: "&a在环境&b{4}&a中将&b{2}&a的键&f\"{0}&f\"&a的值设置为&f\"{1}&f\"&a,持续时间为&b{3}&a."
+unset-meta-success: "&a在环境{2}中取消设置&b{1}&a的键&f\"{0}&f\"&a的元信息."
+unset-meta-temp-success: "&a在环境{2}中取消设置&b{1}&a的键&f\"{0}&f\"&a的临时元信息."
 bulk-update-invalid-data-type: "Invalid type. Was expecting 'all', 'users' or 'groups'."
 bulk-update-invalid-constraint: "无效的约束&4{0}&c.约束的格式应该是'&f<field> <comparison operator> <value>&c'."
 bulk-update-invalid-comparison: "比较运算符无效'&4{0}&c'. 应该以下之一: &f==  !=  ~~  ~!"
@@ -214,8 +214,8 @@ user-info-general: >
   {PREFIX}&f-    &3元信息: &a{8}
 user-info-data: >
   {PREFIX}&f- &aCached Data:\n
-  {PREFIX}&f-    &3具有上下文数据: {0}\n
-  {PREFIX}&f-    &3当前上下文: {1}\n
+  {PREFIX}&f-    &3具有环境数据: {0}\n
+  {PREFIX}&f-    &3当前环境: {1}\n
   {PREFIX}&f-    &3当前前缀: {2}\n
   {PREFIX}&f-    &3当前后缀: {3}
 info-parent-header: "&f- &a父组:"
@@ -227,13 +227,13 @@ user-primarygroup-warn-option: "&c警告：此服务器&7({0})&c使用的主组�
 user-primarygroup-error-alreadyhas: "用户已将此组设置为其主组."
 user-primarygroup-error-notmember: "&b{0}&a已经不是&b{1}&a的成员,现在添加它们."
 user-track-error-not-contain-group: "指定的用户尚未在此轨道上的任何组中."
-user-track-added-to-first: "&b{0}&a不在此轨道上的任何组中, 因此在上下文&b{2}&a中将其添加到第一组&b{2}&a."
-user-promote-success: "&a在上下文&b{3}&a中将用户沿轨道&b{0}&a从&b{1}&a提升到&b{2}&a."
+user-track-added-to-first: "&b{0}&a不在此轨道上的任何组中, 因此在环境&b{2}&a中将其添加到第一组&b{2}&a."
+user-promote-success: "&a在环境&b{3}&a中将用户沿轨道&b{0}&a从&b{1}&a提升到&b{2}&a."
 user-promote-error-endoftrack: "已达到轨道&4{0}&c的结尾,所以无法提升用户."
 user-promote-error-malformed: >
   {PREFIX}轨道上的下一个组{0}不存在. 无法提升用户.\n
   {PREFIX}创建组,或将其从轨道中删除,然后重试.
-user-demote-success: "&a在上下文&b{3}&a中将用户沿轨道&b{0}&a从&b{1}&a转移到&b{2}&a."
+user-demote-success: "&a在环境&b{3}&a中将用户沿轨道&b{0}&a从&b{1}&a转移到&b{2}&a."
 user-demote-endoftrack: "已达到轨道&4{0}&c的结尾,所以&4{1}&c已从&4{2}&c中移除."
 user-demote-error-malformed: >
   {PREFIX}轨道上的上一组{0}不存在.无法降级用户.\n
@@ -258,7 +258,7 @@ track-info: >
 track-clear: "&b{0}&a's groups track was cleared."
 track-append-success: "&a组&b{0}&a已成功添加到轨道&b{1}&a."
 track-insert-success: "&a组&b{0}&a已成功插入轨道&b{1}&a的&b{2}&a位置."
-track-insert-error-number: 没有预期的数量,而是收到: {0}"
+track-insert-error-number: "没有预期的数量,而是收到: {0}"
 track-insert-error-invalid-pos: "无法插入位置{0}. 索引超出范围."
 track-remove-success: "&aGroup &b{0}&a已成功从轨道&b{1}&a移除."
 log-load-error: "日志无法加载."
