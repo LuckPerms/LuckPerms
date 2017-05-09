@@ -32,6 +32,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
+import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.model.Group;
@@ -68,9 +69,9 @@ public class HolderClear<T extends PermissionHolder> extends SubCommand<T> {
 
         int changed = before - holder.getNodes().size();
         if (changed == 1) {
-            Message.CLEAR_SUCCESS_SINGULAR.send(sender, holder.getFriendlyName(), changed);
+            Message.CLEAR_SUCCESS_SINGULAR.send(sender, holder.getFriendlyName(), Util.contextSetToString(context), changed);
         } else {
-            Message.CLEAR_SUCCESS.send(sender, holder.getFriendlyName(), changed);
+            Message.CLEAR_SUCCESS.send(sender, holder.getFriendlyName(), Util.contextSetToString(context), changed);
         }
 
         LogEntry.build().actor(sender).acted(holder)
