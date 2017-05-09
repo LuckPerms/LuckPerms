@@ -25,10 +25,8 @@ already-has-temp-permission: "{0} already has this permission set temporarily!"
 does-not-have-temp-permission: "{0} does not have this permission set temporarily."
 user-not-found: "&bUser could not be found."
 user-not-online: "&bUser &a{0}&b is not online."
-user-no-data: "&bUser &a{0}&b does not have any data loaded."
 user-save-success: "&7(User data was saved to storage)"
 user-save-error: "There was an error whilst saving the user."
-user-create-fail: "There was an error whilst creating a new user."
 group-not-found: "&bGroup could not be found."
 group-save-success: "&7(Group data was saved to storage)"
 group-save-error: "There was an error whilst saving the group."
@@ -38,7 +36,7 @@ track-save-error: "There was an error whilst saving the track."
 user-invalid-entry: "&d{0}&c is not a valid username/uuid."
 group-invalid-entry: "Group names can only contain alphanumeric characters."
 track-invalid-entry: "Track names can only contain alphanumeric characters."
-server-invalid-entry: "Server names can only contain alphanumeric characters."
+server-world-invalid-entry: "Server/world names can only contain alphanumeric characters and cannot exceed 36 characters in length."
 use-inherit-command: "Use the 'parent add' and 'parent remove' commands instead of specifying the node."
 verbose-invalid-filter: "&cInvalid verbose filter: &f{0}"
 verbose-on: "&bVerbose checking output set to &aTRUE &bfor all permissions."
@@ -132,23 +130,15 @@ listparents: >
 listparents-temp: >
   &b{0}'s Temporary Parent Groups:\n
   {1}
-listgroups: >
-  &b{0}'s Groups:\n
-  {1}
-listgroups-temp: >
-  &b{0}'s Temporary Groups:\n
-  {1}
 list-tracks: >
   &b{0}'s Tracks:\n
   {1}
 list-tracks-empty: "{0} is not on any tracks."
 context-pair-inline: "&3{0}=&b{1}"
 context-pair--global-inline: "&eglobal"
-context-pair-end: "&a."
 context-pair-sep: "&a, "
 context-pair: "&8(&7{0}=&f{1}&8)"
 check-permission: "&b{0}&a has permission &b{1}&a set to {2}&a in context {3}&a."
-check-permission-inherited: "&b{0}&a has permission &b{1}&a set to {2}&a in context {3}&a, inherited from &b{4}&a."
 setpermission-success: "&aSet &b{0}&a to &b{1}&a for &b{2}&a in context {3}&a."
 setpermission-temp-success: "&aSet &b{0}&a to &b{1}&a for &b{2}&a for a duration of &b{3}&a in context {4}&a."
 unsetpermission-success: "&aUnset &b{0}&a for &b{1}&a in context {2}&a."
@@ -156,14 +146,17 @@ unset-temp-permission-success: "&aUnset temporary permission &b{0}&a for &b{1}&a
 set-inherit-success: "&b{0}&a now inherits permissions from &b{1}&a in context {2}&a."
 set-temp-inherit-success: "&b{0}&a now inherits permissions from &b{1}&a for a duration of &b{2}&a in context {3}&a."
 set-parent-success: "&b{0}&a had their existing parent groups cleared, and now only inherits &b{1}&a in context {2}&a."
+set-track-parent-success: "&b{0}&a had their existing parent groups on track &b{1}&a cleared, and now only inherits &b{2}&a in context {3}&a."
 unset-inherit-success: "&b{0}&a no longer inherits permissions from &b{1}&a in context {2}&a."
 unset-temp-inherit-success: "&b{0}&a no longer temporarily inherits permissions from &b{1}&a in context {2}&a."
-clear-success: "&b{0}&a's permissions were cleared. (&b{1}&a nodes were removed.)"
-clear-success-singular: "&b{0}&a's permissions were cleared. (&b{1}&a node was removed.)"
-parent-clear-success: "&b{0}&a's parents were cleared. (&b{1}&a nodes were removed.)"
-parent-clear-success-singular: "&b{0}&a's parents were cleared. (&b{1}&a node was removed.)"
-meta-clear-success: "&b{0}&a's meta was cleared. (&b{1}&a nodes were removed.)"
-meta-clear-success-singular: "&b{0}&a's meta was cleared. (&b{1}&a node was removed.)"
+clear-success: "&b{0}&a's permissions were cleared in context {1}&a. (&b{2}&a nodes were removed.)"
+clear-success-singular: "&b{0}&a's permissions were cleared in context {1}&a. (&b{2}&a node was removed.)"
+parent-clear-success: "&b{0}&a's parents were cleared in context {1}&a. &b{2}&a nodes were removed.)"
+parent-clear-success-singular: "&b{0}&a's parents were cleared in context {1}&a. &b{2}&a node was removed.)"
+parent-clear-track-success: "&b{0}&a's parents on track &b{1}&a were cleared in context {2}&a. &b{3}&a nodes were removed.)"
+parent-clear-track-success-singular: "&b{0}&a's parents on track &b{1}&a were cleared in context {2}&a. &b{3}&a node was removed.)"
+meta-clear-success: "&b{0}&a's meta was cleared in context {1}&a. &b{2}&a nodes were removed.)"
+meta-clear-success-singular: "&b{0}&a's meta was cleared in context {1}&a. &b{2}&a node was removed.)"
 illegal-date-error: "Could not parse date '{0}'."
 past-date-error: "You cannot set a date in the past!"
 chat-meta-prefix-header: "&b{0}'s Prefixes"
@@ -182,9 +175,9 @@ does-not-have-chat-meta: "{0} doesn't have that {1} set."
 add-chatmeta-success: "&b{0}&a had {1} &f\"{2}&f\"&a set at a priority of &b{3}&a in context {4}&a."
 add-temp-chatmeta-success: "&b{0}&a had {1} &f\"{2}&f\"&a set at a priority of &b{3}&a for a duration of &b{4}&a in context {5}&a."
 remove-chatmeta-success: "&b{0}&a had {1} &f\"{2}&f\"&a at priority &b{3}&a removed in context {4}&a."
-bulk-remove-chatmeta-success: "&b{0}&a had all {1}es at priority &b{3}&a removed in context {4}&a."
+bulk-remove-chatmeta-success: "&b{0}&a had all {1}es at priority &b{2}&a removed in context {3}&a."
 remove-temp-chatmeta-success: "&b{0}&a had temporary {1} &f\"{2}&f\"&a at priority &b{3}&a removed in context {4}&a."
-bulk-remove-temp-chatmeta-success: "&b{0}&a had all temporary {1}es at priority &b{3}&a removed in context {4}&a."
+bulk-remove-temp-chatmeta-success: "&b{0}&a had all temporary {1}es at priority &b{2}&a removed in context {3}&a."
 already-has-meta: "{0} already has that meta key value pair set."
 set-meta-success: "&aSet meta value for key &f\"{0}&f\"&a to &f\"{1}&f\"&a for &b{2}&a in context {3}&a."
 set-meta-temp-success: "&aSet meta value for key &f\"{0}&f\"&a to &f\"{1}&f\"&a for &b{2}&a for a duration of &b{3}&a in context {4}&a."
@@ -199,8 +192,6 @@ bulk-update-unknown-id: "&aOperation with id &b{0}&a does not exist or has expir
 bulk-update-starting: "&aRunning bulk update."
 bulk-update-success: "&bBulk update completed successfully."
 bulk-update-failure: "&cBulk update failed. Check the console for errors."
-bulk-change-type-error: "Invalid type. Was expecting 'server' or 'world'."
-bulk-change-success: "&aApplied bulk change successfully. {0} records were changed."
 user-info-general: >
   {PREFIX}&b&l> &bUser Info: &f{0}\n
   {PREFIX}&f- &3UUID: &f{1}\n
@@ -220,7 +211,6 @@ user-info-data: >
   {PREFIX}&f-    &3Current Suffix: {3}
 info-parent-header: "&f- &aParent Groups:"
 info-temp-parent-header: "&f- &aTemporary Parent Groups:"
-user-getuuid: "&bThe UUID of &b{0}&b is &b{1}&b."
 user-removegroup-error-primary: "You cannot remove a user from their primary group."
 user-primarygroup-success: "&b{0}&a's primary group was set to &b{1}&a."
 user-primarygroup-warn-option: "&cWarning: The primary group calculation method being used by this server &7({0}) &cmay not reflect this change."
@@ -238,9 +228,6 @@ user-demote-endoftrack: "The end of track &4{0}&c was reached, so &4{1}&c was re
 user-demote-error-malformed: >
   {PREFIX}The previous group on the track, {0}, no longer exists. Unable to demote user.\n
   {PREFIX}Either create the group, or remove it from the track and try again.
-user-showpos: >
-  &aShowing &b{0}&a's position on track &b{1}&a.\n
-  {2}
 group-info-general: >
   {PREFIX}&b&l> &bGroup Info: &f{0}\n
   {PREFIX}&f- &3Display Name: &f{1}\n

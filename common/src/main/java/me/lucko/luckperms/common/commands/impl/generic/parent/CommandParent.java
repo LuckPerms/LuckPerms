@@ -42,6 +42,7 @@ public class CommandParent<T extends PermissionHolder> extends SharedMainCommand
                 .add(new ParentAddTemp())
                 .add(new ParentRemoveTemp())
                 .add(new ParentClear())
+                .add(new ParentClearTrack())
                 .build());
     }
 }

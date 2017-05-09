@@ -73,10 +73,8 @@ public enum Message {
      */
     USER_NOT_FOUND("&bUser could not be found.", true),
     USER_NOT_ONLINE("&bUser &a{0}&b is not online.", true),
-    USER_NO_DATA("&bUser &a{0}&b does not have any data loaded.", true),
     USER_SAVE_SUCCESS("&7(User data was saved to storage)", true),
     USER_SAVE_ERROR("There was an error whilst saving the user.", true),
-    USER_CREATE_FAIL("There was an error whilst creating a new user.", true),
 
     GROUP_NOT_FOUND("&bGroup could not be found.", true),
     GROUP_SAVE_SUCCESS("&7(Group data was saved to storage)", true),
@@ -200,20 +198,16 @@ public enum Message {
     LISTNODES_TEMP("&b{0}'s Temporary Nodes:" + "\n" + "{1}", true),
     LISTPARENTS("&b{0}'s Parent Groups:" + "\n" + "{1}", true),
     LISTPARENTS_TEMP("&b{0}'s Temporary Parent Groups:" + "\n" + "{1}", true),
-    LISTGROUPS("&b{0}'s Groups:" + "\n" + "{1}", true),
-    LISTGROUPS_TEMP("&b{0}'s Temporary Groups:" + "\n" + "{1}", true),
     LIST_TRACKS("&b{0}'s Tracks:" + "\n" + "{1}", true),
     LIST_TRACKS_EMPTY("{0} is not on any tracks.", true),
 
     CONTEXT_PAIR_INLINE("&3{0}=&b{1}", false),
     CONTEXT_PAIR__GLOBAL_INLINE("&eglobal", false),
-    CONTEXT_PAIR_END("&a.", false),
     CONTEXT_PAIR_SEP("&a, ", false),
 
     CONTEXT_PAIR("&8(&7{0}=&f{1}&8)", false),
 
     CHECK_PERMISSION("&b{0}&a has permission &b{1}&a set to {2}&a in context {3}&a.", true),
-    CHECK_PERMISSION_INHERITED("&b{0}&a has permission &b{1}&a set to {2}&a in context {3}&a, inherited from &b{4}&a.", true),
     SETPERMISSION_SUCCESS("&aSet &b{0}&a to &b{1}&a for &b{2}&a in context {3}&a.", true),
     SETPERMISSION_TEMP_SUCCESS("&aSet &b{0}&a to &b{1}&a for &b{2}&a for a duration of &b{3}&a in context {4}&a.", true),
     UNSETPERMISSION_SUCCESS("&aUnset &b{0}&a for &b{1}&a in context {2}&a.", true),
@@ -221,7 +215,7 @@ public enum Message {
     SET_INHERIT_SUCCESS("&b{0}&a now inherits permissions from &b{1}&a in context {2}&a.", true),
     SET_TEMP_INHERIT_SUCCESS("&b{0}&a now inherits permissions from &b{1}&a for a duration of &b{2}&a in context {3}&a.", true),
     SET_PARENT_SUCCESS("&b{0}&a had their existing parent groups cleared, and now only inherits &b{1}&a in context {2}&a.", true),
-    SET_TRACK_PARENT_SUCCESS("&b{0}&a had their existing parent groups in track &b{1}&a cleared, and now only inherits &b{2}&a in context {3}&a.", true),
+    SET_TRACK_PARENT_SUCCESS("&b{0}&a had their existing parent groups on track &b{1}&a cleared, and now only inherits &b{2}&a in context {3}&a.", true),
     UNSET_INHERIT_SUCCESS("&b{0}&a no longer inherits permissions from &b{1}&a in context {2}&a.", true),
     UNSET_TEMP_INHERIT_SUCCESS("&b{0}&a no longer temporarily inherits permissions from &b{1}&a in context {2}&a.", true),
 
@@ -229,6 +223,10 @@ public enum Message {
     CLEAR_SUCCESS_SINGULAR("&b{0}&a's permissions were cleared in context {1}&a. (&b{2}&a node was removed.)", true),
     PARENT_CLEAR_SUCCESS("&b{0}&a's parents were cleared in context {1}&a. &b{2}&a nodes were removed.)", true),
     PARENT_CLEAR_SUCCESS_SINGULAR("&b{0}&a's parents were cleared in context {1}&a. &b{2}&a node was removed.)", true),
+
+    PARENT_CLEAR_TRACK_SUCCESS("&b{0}&a's parents on track &b{1}&a were cleared in context {2}&a. &b{3}&a nodes were removed.)", true),
+    PARENT_CLEAR_TRACK_SUCCESS_SINGULAR("&b{0}&a's parents on track &b{1}&a were cleared in context {2}&a. &b{3}&a node was removed.)", true),
+
     META_CLEAR_SUCCESS("&b{0}&a's meta was cleared in context {1}&a. &b{2}&a nodes were removed.)", true),
     META_CLEAR_SUCCESS_SINGULAR("&b{0}&a's meta was cleared in context {1}&a. &b{2}&a node was removed.)", true),
 
@@ -275,9 +273,6 @@ public enum Message {
     BULK_UPDATE_STARTING("&aRunning bulk update.", true),
     BULK_UPDATE_SUCCESS("&bBulk update completed successfully.", true),
     BULK_UPDATE_FAILURE("&cBulk update failed. Check the console for errors.", true),
-
-    BULK_CHANGE_TYPE_ERROR("Invalid type. Was expecting 'server' or 'world'.", true),
-    BULK_CHANGE_SUCCESS("&aApplied bulk change successfully. {0} records were changed.", true),
 
     USER_INFO_GENERAL(
             "{PREFIX}&b&l> &bUser Info: &f{0}" + "\n" +
@@ -327,7 +322,6 @@ public enum Message {
             "{PREFIX}Either create the group, or remove it from the track and try again.",
             false
     ),
-    USER_SHOWPOS("&aShowing &b{0}&a's position on track &b{1}&a.\n{2}", true),
 
     GROUP_INFO_GENERAL(
             "{PREFIX}&b&l> &bGroup Info: &f{0}" + "\n" +
