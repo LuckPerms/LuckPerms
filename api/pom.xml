@@ -10,6 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>luckperms-api</artifactId>
+
     <build>
         <finalName>LuckPerms-API-${release.version}</finalName>
         <resources>

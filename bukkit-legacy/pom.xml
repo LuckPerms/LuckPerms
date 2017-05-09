@@ -10,6 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>luckperms-bukkit-legacy</artifactId>
+
     <build>
         <defaultGoal>clean package</defaultGoal>
         <finalName>LuckPerms-Bukkit-Legacy-${full.version}</finalName>

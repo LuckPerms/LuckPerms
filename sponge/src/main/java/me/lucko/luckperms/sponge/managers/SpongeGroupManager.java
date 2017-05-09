@@ -40,10 +40,10 @@ import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.event.cause.CreationCause;
+import me.lucko.luckperms.common.constants.DataConstraints;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
-import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.model.SpongeGroup;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
@@ -184,12 +184,17 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
 
     @Override
     public Predicate<String> getIdentifierValidityPredicate() {
-        // TODO change this to use the actual limitations
-        return Predicates.alwaysTrue();
+        return DataConstraints.GROUP_NAME_TEST;
     }
 
     @Override
     public CompletableFuture<LPSubject> loadSubject(String identifier) {
+        if (!DataConstraints.GROUP_NAME_TEST.test(identifier)) {
+            CompletableFuture<LPSubject> fut = new CompletableFuture<>();
+            fut.completeExceptionally(new IllegalArgumentException("Illegal subject identifier"));
+            return fut;
+        }
+
         LPSubject present = subjectLoadingCache.getIfPresent(identifier.toLowerCase());
         if (present != null) {
             return CompletableFuture.completedFuture(present);
