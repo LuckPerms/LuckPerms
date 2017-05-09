@@ -53,7 +53,7 @@ public class ParentInfo extends SubCommand<LPSubjectData> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, List<String> args, String label) throws CommandException {
-        ImmutableContextSet contextSet = ArgumentUtils.handleContexts(0, args);
+        ImmutableContextSet contextSet = ArgumentUtils.handleContextSponge(0, args);
         if (contextSet.isEmpty()) {
             Util.sendPluginMessage(sender, "&aShowing parents matching contexts &bANY&a.");
             Map<ImmutableContextSet, ImmutableList<SubjectReference>> parents = subjectData.getAllParents();

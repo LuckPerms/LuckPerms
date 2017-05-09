@@ -60,7 +60,7 @@ public class ParentRemove extends SubCommand<LPSubjectData> {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, List<String> args, String label) throws CommandException {
         String collection = args.get(0);
         String name = args.get(1);
-        ImmutableContextSet contextSet = ArgumentUtils.handleContexts(2, args);
+        ImmutableContextSet contextSet = ArgumentUtils.handleContextSponge(2, args);
 
         LuckPermsService service = Sponge.getServiceManager().provideUnchecked(LuckPermsService.class);
         if (service.getLoadedCollections().keySet().stream().map(String::toLowerCase).noneMatch(s -> s.equalsIgnoreCase(collection))) {

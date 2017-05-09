@@ -52,7 +52,7 @@ public class PermissionInfo extends SubCommand<LPSubjectData> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, List<String> args, String label) throws CommandException {
-        ImmutableContextSet contextSet = ArgumentUtils.handleContexts(0, args);
+        ImmutableContextSet contextSet = ArgumentUtils.handleContextSponge(0, args);
         if (contextSet.isEmpty()) {
             Util.sendPluginMessage(sender, "&aShowing permissions matching contexts &bANY&a.");
             Map<ImmutableContextSet, ImmutableMap<String, Boolean>> permissions = subjectData.getAllPermissions();

@@ -69,7 +69,7 @@ public class ParentAddTemp extends SharedSubCommand {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         String groupName = ArgumentUtils.handleName(0, args);
         long duration = ArgumentUtils.handleDuration(1, args);
-        MutableContextSet context = ArgumentUtils.handleContext(2, args);
+        MutableContextSet context = ArgumentUtils.handleContext(2, args, plugin);
         TemporaryModifier modifier = plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR);
 
         if (!plugin.getStorage().loadGroup(groupName).join()) {

@@ -57,7 +57,7 @@ public class MetaUnset extends SharedSubCommand {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         String key = args.get(0);
-        MutableContextSet context = ArgumentUtils.handleContext(1, args);
+        MutableContextSet context = ArgumentUtils.handleContext(1, args, plugin);
 
         holder.clearMetaKeys(key, context, false);
         Message.UNSET_META_SUCCESS.send(sender, key, holder.getFriendlyName(), Util.contextSetToString(context));

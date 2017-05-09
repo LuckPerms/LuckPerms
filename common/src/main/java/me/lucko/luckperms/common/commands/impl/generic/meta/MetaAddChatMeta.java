@@ -69,7 +69,7 @@ public class MetaAddChatMeta extends SharedSubCommand {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         int priority = ArgumentUtils.handlePriority(0, args);
         String meta = ArgumentUtils.handleString(1, args);
-        MutableContextSet context = ArgumentUtils.handleContext(2, args);
+        MutableContextSet context = ArgumentUtils.handleContext(2, args, plugin);
 
         DataMutateResult result = holder.setPermission(NodeFactory.makeChatMetaNode(isPrefix, priority, meta).withExtraContext(context).build());
         if (result.asBoolean()) {

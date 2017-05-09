@@ -61,7 +61,7 @@ public class ParentSet extends SharedSubCommand {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         String groupName = ArgumentUtils.handleName(0, args);
-        MutableContextSet context = ArgumentUtils.handleContext(1, args);
+        MutableContextSet context = ArgumentUtils.handleContext(1, args, plugin);
 
         if (!plugin.getStorage().loadGroup(groupName).join()) {
             Message.GROUP_DOES_NOT_EXIST.send(sender);

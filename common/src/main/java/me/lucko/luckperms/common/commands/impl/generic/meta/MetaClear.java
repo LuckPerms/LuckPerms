@@ -55,7 +55,7 @@ public class MetaClear extends SharedSubCommand {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         int before = holder.getNodes().size();
 
-        MutableContextSet context = ArgumentUtils.handleContext(0, args);
+        MutableContextSet context = ArgumentUtils.handleContext(0, args, plugin);
 
         if (context.isEmpty()) {
             holder.clearMeta();

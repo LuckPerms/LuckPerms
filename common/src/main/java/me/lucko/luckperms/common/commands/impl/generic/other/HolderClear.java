@@ -58,7 +58,7 @@ public class HolderClear<T extends PermissionHolder> extends SubCommand<T> {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, T holder, List<String> args, String label) throws CommandException {
         int before = holder.getNodes().size();
 
-        MutableContextSet context = ArgumentUtils.handleContext(0, args);
+        MutableContextSet context = ArgumentUtils.handleContext(0, args, plugin);
 
         if (context.isEmpty()) {
             holder.clearNodes();

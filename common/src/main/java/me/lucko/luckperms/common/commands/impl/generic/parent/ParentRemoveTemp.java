@@ -61,7 +61,7 @@ public class ParentRemoveTemp extends SharedSubCommand {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         String groupName = ArgumentUtils.handleNameWithSpace(0, args);
-        MutableContextSet context = ArgumentUtils.handleContext(1, args);
+        MutableContextSet context = ArgumentUtils.handleContext(1, args, plugin);
 
         DataMutateResult result = holder.unsetPermission(NodeFactory.newBuilder("group." + groupName).setExpiry(10L).withExtraContext(context).build());
 

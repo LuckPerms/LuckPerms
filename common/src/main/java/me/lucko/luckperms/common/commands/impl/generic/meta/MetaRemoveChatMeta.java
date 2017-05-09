@@ -69,7 +69,7 @@ public class MetaRemoveChatMeta extends SharedSubCommand {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         int priority = ArgumentUtils.handlePriority(0, args);
         String meta = ArgumentUtils.handleStringOrElse(1, args, "null");
-        MutableContextSet context = ArgumentUtils.handleContext(2, args);
+        MutableContextSet context = ArgumentUtils.handleContext(2, args, plugin);
 
         // Handle bulk removal
         if (meta.equalsIgnoreCase("null") || meta.equals("*")) {

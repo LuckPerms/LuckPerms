@@ -59,7 +59,7 @@ public class PermissionCheck extends SharedSubCommand {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         String node = ArgumentUtils.handleString(0, args);
-        MutableContextSet context = ArgumentUtils.handleContext(1, args);
+        MutableContextSet context = ArgumentUtils.handleContext(1, args, plugin);
 
         Tristate result = holder.hasPermission(NodeFactory.newBuilder(node).withExtraContext(context).build());
         String s = Util.formatTristate(result);

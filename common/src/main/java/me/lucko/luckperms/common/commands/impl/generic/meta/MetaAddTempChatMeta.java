@@ -76,7 +76,7 @@ public class MetaAddTempChatMeta extends SharedSubCommand {
         int priority = ArgumentUtils.handlePriority(0, args);
         String meta = ArgumentUtils.handleString(1, args);
         long duration = ArgumentUtils.handleDuration(2, args);
-        MutableContextSet context = ArgumentUtils.handleContext(3, args);
+        MutableContextSet context = ArgumentUtils.handleContext(3, args, plugin);
         TemporaryModifier modifier = plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR);
 
         Map.Entry<DataMutateResult, Node> ret = holder.setPermission(NodeFactory.makeChatMetaNode(isPrefix, priority, meta).setExpiry(duration).withExtraContext(context).build(), modifier);

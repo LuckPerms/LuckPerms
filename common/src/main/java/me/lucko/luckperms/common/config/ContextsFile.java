@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.config;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -43,35 +44,66 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 @RequiredArgsConstructor
-public class StaticContextsFile {
+public class ContextsFile {
     private final LuckPermsConfiguration configuration;
 
     @Getter
-    private ImmutableContextSet contextSet = ImmutableContextSet.empty();
+    @Setter
+    private ImmutableContextSet staticContexts = ImmutableContextSet.empty();
 
-    public void reload() {
-        File file = new File(configuration.getPlugin().getConfigDirectory(), "static-contexts.json");
+    @Getter
+    @Setter
+    private ImmutableContextSet defaultContexts = ImmutableContextSet.empty();
+
+    public void load() {
+        File file = new File(configuration.getPlugin().getConfigDirectory(), "contexts.json");
+        File oldFile = new File(configuration.getPlugin().getConfigDirectory(), "static-contexts.json");
+        if (oldFile.exists()) {
+            oldFile.renameTo(file);
+        }
+
         if (!file.exists()) {
-            try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
-                JsonObject template = new JsonObject();
-                template.add("context", new JsonObject());
-                new GsonBuilder().setPrettyPrinting().create().toJson(template, writer);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            contextSet = ImmutableContextSet.empty();
+            save();
             return;
         }
 
+        boolean save = false;
         try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
             JsonObject data = new Gson().fromJson(reader, JsonObject.class);
 
-            if (!data.has("context") || !data.get("context").isJsonObject()) {
-                return;
+            if (data.has("context")) {
+                staticContexts = NodeModel.deserializeContextSet(data.get("context").getAsJsonObject()).makeImmutable();
+                save = true;
             }
 
-            JsonObject contexts = data.get("context").getAsJsonObject();
-            contextSet = NodeModel.deserializeContextSet(contexts).makeImmutable();
+            if (data.has("static-contexts")) {
+                staticContexts = NodeModel.deserializeContextSet(data.get("static-contexts").getAsJsonObject()).makeImmutable();
+            }
+
+            if (data.has("default-contexts")) {
+                defaultContexts = NodeModel.deserializeContextSet(data.get("default-contexts").getAsJsonObject()).makeImmutable();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if (save) {
+            save();
+        }
+    }
+
+    public void save() {
+        File file = new File(configuration.getPlugin().getConfigDirectory(), "contexts.json");
+
+        try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
+
+            JsonObject data = new JsonObject();
+            data.add("static-contexts", NodeModel.serializeContextSet(staticContexts));
+            data.add("default-contexts", NodeModel.serializeContextSet(defaultContexts));
+
+            new GsonBuilder().setPrettyPrinting().create().toJson(data, writer);
+            writer.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }

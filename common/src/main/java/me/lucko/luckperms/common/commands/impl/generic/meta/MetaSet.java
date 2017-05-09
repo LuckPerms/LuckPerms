@@ -60,7 +60,7 @@ public class MetaSet extends SharedSubCommand {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         String key = args.get(0);
         String value = args.get(1);
-        MutableContextSet context = ArgumentUtils.handleContext(2, args);
+        MutableContextSet context = ArgumentUtils.handleContext(2, args, plugin);
 
         Node n = NodeFactory.makeMetaNode(key, value).withExtraContext(context).build();
 

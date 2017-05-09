@@ -43,7 +43,7 @@ public class StaticCalculator<T> implements ContextCalculator<T> {
             accumulator.add("server", server);
         }
 
-        accumulator.addAll(config.getStaticContexts().getContextSet());
+        accumulator.addAll(config.getContextsFile().getStaticContexts());
 
         return accumulator;
     }

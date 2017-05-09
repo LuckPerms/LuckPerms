@@ -84,7 +84,7 @@ public class UserPromote extends SubCommand<User> {
             return CommandResult.STATE_ERROR;
         }
 
-        MutableContextSet context = ArgumentUtils.handleContext(1, args);
+        MutableContextSet context = ArgumentUtils.handleContext(1, args, plugin);
         boolean silent = false;
 
         if (args.contains("-s")) {

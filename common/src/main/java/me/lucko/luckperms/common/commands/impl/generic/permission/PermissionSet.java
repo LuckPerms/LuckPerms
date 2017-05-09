@@ -64,7 +64,7 @@ public class PermissionSet extends SharedSubCommand {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
         boolean b = ArgumentUtils.handleBoolean(1, args);
         String node = b ? ArgumentUtils.handleNode(0, args) : ArgumentUtils.handleString(0, args);
-        MutableContextSet context = ArgumentUtils.handleContext(2, args);
+        MutableContextSet context = ArgumentUtils.handleContext(2, args, plugin);
 
         DataMutateResult result = holder.setPermission(NodeFactory.newBuilder(node).setValue(b).withExtraContext(context).build());
 

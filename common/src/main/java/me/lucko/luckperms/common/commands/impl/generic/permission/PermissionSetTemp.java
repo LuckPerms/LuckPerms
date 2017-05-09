@@ -71,7 +71,7 @@ public class PermissionSetTemp extends SharedSubCommand {
         boolean b = ArgumentUtils.handleBoolean(1, args);
         String node = b ? ArgumentUtils.handleNode(0, args) : ArgumentUtils.handleString(0, args);
         long duration = ArgumentUtils.handleDuration(2, args);
-        MutableContextSet context = ArgumentUtils.handleContext(3, args);
+        MutableContextSet context = ArgumentUtils.handleContext(3, args, plugin);
 
         TemporaryModifier modifier = plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR);
         Map.Entry<DataMutateResult, Node> result = holder.setPermission(NodeFactory.newBuilder(node).setValue(b).withExtraContext(context).setExpiry(duration).build(), modifier);

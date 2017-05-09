@@ -578,7 +578,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
                     MutableContextSet set = MutableContextSet.create();
                     set.add("server", getConfiguration().get(ConfigKeys.SERVER));
                     set.add("world", s);
-                    set.addAll(configuration.getStaticContexts().getContextSet());
+                    set.addAll(configuration.getContextsFile().getStaticContexts());
                     return set.makeImmutable();
                 })
                 .collect(Collectors.toList())
@@ -593,7 +593,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
                         MutableContextSet set = MutableContextSet.create();
                         set.add("server", getConfiguration().get(ConfigKeys.VAULT_SERVER));
                         set.add("world", s);
-                        set.addAll(configuration.getStaticContexts().getContextSet());
+                        set.addAll(configuration.getContextsFile().getStaticContexts());
                         return set.makeImmutable();
                     })
                     .collect(Collectors.toList())

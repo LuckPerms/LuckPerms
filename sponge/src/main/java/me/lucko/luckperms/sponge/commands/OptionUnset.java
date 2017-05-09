@@ -53,7 +53,7 @@ public class OptionUnset extends SubCommand<LPSubjectData> {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, List<String> args, String label) throws CommandException {
         String key = args.get(0);
-        ImmutableContextSet contextSet = ArgumentUtils.handleContexts(1, args);
+        ImmutableContextSet contextSet = ArgumentUtils.handleContextSponge(1, args);
 
         if (subjectData.unsetOption(contextSet, key).join()) {
             Util.sendPluginMessage(sender, "&aUnset &f\"" + key + "&f\"&a in context " + SpongeUtils.contextToString(contextSet));
