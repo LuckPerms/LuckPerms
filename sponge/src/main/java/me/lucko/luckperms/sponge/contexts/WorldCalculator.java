@@ -29,14 +29,18 @@ import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
 
 @RequiredArgsConstructor
 public class WorldCalculator implements ContextCalculator<Subject> {
+    private static final String WORLD_KEY = "world";
+
+    private final LuckPermsPlugin plugin;
 
     @Override
     public MutableContextSet giveApplicableContext(Subject subject, MutableContextSet accumulator) {
@@ -46,7 +50,12 @@ public class WorldCalculator implements ContextCalculator<Subject> {
         }
 
         Player p = ((Player) source);
-        accumulator.add(Context.WORLD_KEY, p.getWorld().getName().toLowerCase());
+        String world = p.getWorld().getName().toLowerCase();
+        while (!accumulator.has(WORLD_KEY, world)) {
+            accumulator.add(WORLD_KEY, world);
+            world = plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).getOrDefault(world, world).toLowerCase();
+        }
+
         return accumulator;
     }
 

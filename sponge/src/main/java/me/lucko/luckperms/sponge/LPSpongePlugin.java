@@ -267,7 +267,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         cachedStateManager = new CachedStateManager(this);
 
         contextManager = new ContextManager<>();
-        contextManager.registerCalculator(new WorldCalculator());
+        contextManager.registerCalculator(new WorldCalculator(this));
 
         StaticCalculator<Subject> staticCalculator = new StaticCalculator<>(getConfiguration());
         contextManager.registerCalculator(staticCalculator);

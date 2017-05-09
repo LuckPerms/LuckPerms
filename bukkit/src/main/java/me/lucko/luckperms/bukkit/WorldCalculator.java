@@ -27,8 +27,6 @@ package me.lucko.luckperms.bukkit;
 
 import lombok.RequiredArgsConstructor;
 
-import com.google.common.collect.Maps;
-
 import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -44,11 +42,10 @@ public class WorldCalculator implements ContextCalculator<Player> {
 
     @Override
     public MutableContextSet giveApplicableContext(Player subject, MutableContextSet accumulator) {
-        String world = subject.getWorld().getName();
-        world = plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).getOrDefault(world, world);
-
-        if (world != null) {
-            accumulator.add(Maps.immutableEntry(WORLD_KEY, world.toLowerCase()));
+        String world = subject.getWorld().getName().toLowerCase();
+        while (!accumulator.has(WORLD_KEY, world)) {
+            accumulator.add(WORLD_KEY, world);
+            world = plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).getOrDefault(world, world).toLowerCase();
         }
 
         return accumulator;

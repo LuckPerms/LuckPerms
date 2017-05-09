@@ -218,7 +218,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         cachedStateManager = new CachedStateManager(this);
 
         contextManager = new ContextManager<>();
-        BackendServerCalculator serverCalculator = new BackendServerCalculator();
+        BackendServerCalculator serverCalculator = new BackendServerCalculator(this);
         contextManager.registerCalculator(serverCalculator);
 
         StaticCalculator<ProxiedPlayer> staticCalculator = new StaticCalculator<>(getConfiguration());

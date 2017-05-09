@@ -25,13 +25,16 @@
 
 package me.lucko.luckperms.bungee;
 
-import com.google.common.collect.Maps;
+import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
+@RequiredArgsConstructor
 public class BackendServerCalculator implements ContextCalculator<ProxiedPlayer> {
     private static final String WORLD_KEY = "world";
 
@@ -39,12 +42,14 @@ public class BackendServerCalculator implements ContextCalculator<ProxiedPlayer>
         return player.getServer() == null ? null : (player.getServer().getInfo() == null ? null : player.getServer().getInfo().getName());
     }
 
+    private final LuckPermsPlugin plugin;
+
     @Override
     public MutableContextSet giveApplicableContext(ProxiedPlayer subject, MutableContextSet accumulator) {
         String server = getServer(subject);
-
-        if (server != null) {
-            accumulator.add(Maps.immutableEntry(WORLD_KEY, server.toLowerCase()));
+        while (server != null && !accumulator.has(WORLD_KEY, server)) {
+            accumulator.add(WORLD_KEY, server);
+            server = plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).getOrDefault(server, server);
         }
 
         return accumulator;
