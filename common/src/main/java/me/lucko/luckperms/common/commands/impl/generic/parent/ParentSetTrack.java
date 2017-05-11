@@ -50,7 +50,7 @@ import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getTrack
 
 public class ParentSetTrack extends SharedSubCommand {
     public ParentSetTrack() {
-        super("settrack", "Removes all other groups the object inherits from already on the given track and adds them to the one given group",
+        super("settrack", "Removes all other groups the object inherits from already on the given track and adds them to the one given",
                 Permission.USER_PARENT_SET_TRACK, Permission.GROUP_PARENT_SET_TRACK, Predicates.is(0),
                 Arg.list(
                         Arg.create("track", true, "the track to set on"),
@@ -95,6 +95,10 @@ public class ParentSetTrack extends SharedSubCommand {
             groupName = track.getGroups().get(index - 1);
         } else {
             groupName = ArgumentUtils.handleName(1, args);
+            if (!track.containsGroup(groupName)) {
+                Message.TRACK_DOES_NOT_CONTAIN.send(sender, track.getName(), groupName);
+                return CommandResult.INVALID_ARGS;
+            }
         }
 
         MutableContextSet context = ArgumentUtils.handleContext(2, args, plugin);

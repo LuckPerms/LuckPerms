@@ -302,7 +302,7 @@ public final class ImmutableNode implements Node {
 
     @Override
     public boolean hasSpecificContext() {
-        return server != null && world != null && !contexts.isEmpty();
+        return server != null || world != null || !contexts.isEmpty();
     }
 
     @Override

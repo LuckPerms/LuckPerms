@@ -532,6 +532,78 @@ public abstract class PermissionHolder {
         return ret;
     }
 
+    /**
+     * Resolves inherited nodes and returns them
+     *
+     * @param excludedGroups a list of groups to exclude
+     * @return a set of nodes
+     */
+    protected List<LocalizedNode> resolveInheritances(List<LocalizedNode> accumulator, Set<String> excludedGroups) {
+        if (accumulator == null) {
+            accumulator = new ArrayList<>();
+        }
+
+        if (excludedGroups == null) {
+            excludedGroups = new HashSet<>();
+        }
+
+        if (this instanceof Group) {
+            excludedGroups.add(getObjectName().toLowerCase());
+        }
+
+        // get and add the objects own nodes
+        List<Node> nodes = mergePermissionsToList();
+        nodes.stream()
+                .map(n -> ImmutableLocalizedNode.of(n, getObjectName()))
+                .forEach(accumulator::add);
+
+        // screw effectively final
+        Set<String> finalExcludedGroups = excludedGroups;
+        List<LocalizedNode> finalAccumulator = accumulator;
+
+        // this allows you to negate parent permissions lower down the inheritance tree.
+        // we can negate parent groups in a specific context at this level and prevent them from being applied.
+        // there's no way to distinct the stream below based on a custom comparator.
+        NodeTools.removeSamePermission(nodes.iterator());
+
+        nodes.stream()
+                .filter(Node::getValue)
+                .filter(Node::isGroupNode)
+                .map(Node::getGroupName)
+                .distinct()
+                .map(n -> Optional.ofNullable(plugin.getGroupManager().getIfLoaded(n)))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .filter(g -> !finalExcludedGroups.contains(g.getObjectName().toLowerCase()))
+                .sorted((o1, o2) -> {
+                    int result = Integer.compare(o1.getWeight().orElse(0), o2.getWeight().orElse(0));
+                    return result == 1 ? -1 : 1;
+                })
+                .forEach(group -> group.resolveInheritances(finalAccumulator, finalExcludedGroups));
+
+        return accumulator;
+    }
+
+    public List<LocalizedNode> resolveInheritances() {
+        return resolveInheritances(null, null);
+    }
+
+    public SortedSet<LocalizedNode> resolveInheritancesAlmostEqual() {
+        List<LocalizedNode> nodes = resolveInheritances(null, null);
+        NodeTools.removeAlmostEqual(nodes.iterator());
+        SortedSet<LocalizedNode> ret = new TreeSet<>(PriorityComparator.reverse());
+        ret.addAll(nodes);
+        return ret;
+    }
+
+    public SortedSet<LocalizedNode> resolveInheritancesMergeTemp() {
+        List<LocalizedNode> nodes = resolveInheritances(null, null);
+        NodeTools.removeIgnoreValueOrTemp(nodes.iterator());
+        SortedSet<LocalizedNode> ret = new TreeSet<>(PriorityComparator.reverse());
+        ret.addAll(nodes);
+        return ret;
+    }
+
     public SortedSet<LocalizedNode> getAllNodes(ExtractedContexts context) {
         Contexts contexts = context.getContexts();
 

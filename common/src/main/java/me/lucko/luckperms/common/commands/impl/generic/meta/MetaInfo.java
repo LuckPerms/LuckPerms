@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.commands.impl.generic.meta;
 
-import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -37,7 +36,6 @@ import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.utils.ExtractedContexts;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.AbstractMap;
@@ -53,6 +51,10 @@ public class MetaInfo extends SharedSubCommand {
         return node.getLocation().equalsIgnoreCase(holder.getObjectName()) ? "self" : node.getLocation();
     }
 
+    public static String formatMetaValue(String val) {
+        return val.replace("&", "{color char}");
+    }
+
     public MetaInfo() {
         super("info", "Shows all chat meta", Permission.USER_META_INFO, Permission.GROUP_META_INFO, Predicates.alwaysFalse(), null);
     }
@@ -64,7 +66,7 @@ public class MetaInfo extends SharedSubCommand {
         Set<LocalizedNode> meta = new HashSet<>();
 
         // Collect data
-        for (LocalizedNode node : holder.resolveInheritancesAlmostEqual(ExtractedContexts.generate(Contexts.allowAll()))) {
+        for (LocalizedNode node : holder.resolveInheritances()) {
             if (!node.isSuffix() && !node.isPrefix() && !node.isMeta()) {
                 continue;
             }
@@ -99,7 +101,7 @@ public class MetaInfo extends SharedSubCommand {
             Message.CHAT_META_SUFFIX_HEADER.send(sender, holder.getFriendlyName());
             for (Map.Entry<Integer, LocalizedNode> e : suffixes) {
                 String location = processLocation(e.getValue(), holder);
-                if (e.getValue().isServerSpecific() || e.getValue().isWorldSpecific() || !e.getValue().getContexts().isEmpty()) {
+                if (e.getValue().hasSpecificContext()) {
                     String context = Util.getAppendableNodeContextString(e.getValue());
                     Message.CHAT_META_ENTRY_WITH_CONTEXT.send(sender, e.getKey(), e.getValue().getSuffix().getValue(), location, context);
                 } else {
@@ -114,11 +116,11 @@ public class MetaInfo extends SharedSubCommand {
             Message.META_HEADER.send(sender, holder.getFriendlyName());
             for (LocalizedNode m : meta) {
                 String location = processLocation(m, holder);
-                if (m.isServerSpecific() || m.isWorldSpecific() || !m.getContexts().isEmpty()) {
+                if (m.hasSpecificContext()) {
                     String context = Util.getAppendableNodeContextString(m);
                     Message.META_ENTRY_WITH_CONTEXT.send(sender, m.getMeta().getKey(), m.getMeta().getValue(), location, context);
                 } else {
-                    Message.META_ENTRY.send(sender, m.getMeta().getKey(), m.getMeta().getValue(), location);
+                    Message.META_ENTRY.send(sender, m.getMeta().getKey(), formatMetaValue(m.getMeta().getValue()), location);
                 }
             }
         }
