@@ -33,8 +33,8 @@ import me.lucko.luckperms.api.DataMutateResult;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.caching.PermissionData;
-import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.core.NodeFactory;
@@ -45,7 +45,8 @@ import me.lucko.luckperms.common.utils.ExtractedContexts;
 
 import net.milkbowl.vault.permission.Permission;
 
-import java.util.HashMap;
+import org.bukkit.entity.Player;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -147,13 +148,48 @@ public class VaultPermissionHook extends Permission {
         }
     }
 
-    public Contexts createContextForWorld(String world) {
-        Map<String, String> context = new HashMap<>();
+    public Contexts createContextForWorldSet(String world) {
+        MutableContextSet context = MutableContextSet.create();
         if (world != null && !world.equals("") && !world.equalsIgnoreCase("global")) {
-            context.put("world", world);
+            context.add("world", world);
         }
-        context.put("server", getServer());
-        return new Contexts(ContextSet.fromMap(context), isIncludeGlobal(), true, true, true, true, false);
+        context.add("server", getServer());
+        return new Contexts(context, isIncludeGlobal(), true, true, true, true, false);
+    }
+
+    public Contexts createContextForWorldLookup(String world) {
+        MutableContextSet context = MutableContextSet.create();
+        if (world != null && !world.equals("") && !world.equalsIgnoreCase("global")) {
+            context.add("world", world);
+        }
+        context.add("server", getServer());
+        context.addAll(plugin.getConfiguration().getContextsFile().getStaticContexts());
+        return new Contexts(context, isIncludeGlobal(), true, true, true, true, false);
+    }
+
+    public Contexts createContextForWorldLookup(Player player, String world) {
+        MutableContextSet context = MutableContextSet.create();
+
+        // use player context
+        if (player != null) {
+            ImmutableContextSet applicableContext = plugin.getContextManager().getApplicableContext(player);
+            context.addAll(applicableContext);
+        } else {
+            // at least given them the static context defined for this instance
+            context.addAll(plugin.getConfiguration().getContextsFile().getStaticContexts());
+        }
+
+        // worlds & servers get set depending on the config setting
+        context.removeAll("world");
+        context.removeAll("server");
+
+        // add the vault settings
+        if (world != null && !world.equals("") && !world.equalsIgnoreCase("global")) {
+            context.add("world", world);
+        }
+        context.add("server", getServer());
+
+        return new Contexts(context, isIncludeGlobal(), true, true, true, true, false);
     }
 
     @Override
@@ -165,7 +201,7 @@ public class VaultPermissionHook extends Permission {
         if (user == null) return false;
 
         // Effectively fallback to the standard Bukkit #hasPermission check.
-        return user.getUserData().getPermissionData(createContextForWorld(world)).getPermissionValue(permission).asBoolean();
+        return user.getUserData().getPermissionData(createContextForWorldLookup(plugin.getPlayer(user), world)).getPermissionValue(permission).asBoolean();
     }
 
     @Override
@@ -201,7 +237,7 @@ public class VaultPermissionHook extends Permission {
         if (group == null) return false;
 
         // This is a nasty call. Groups aren't cached. :(
-        Map<String, Boolean> permissions = group.exportNodes(ExtractedContexts.generate(createContextForWorld(world)), true);
+        Map<String, Boolean> permissions = group.exportNodes(ExtractedContexts.generate(createContextForWorldLookup(world)), true);
         return permissions.containsKey(permission.toLowerCase()) && permissions.get(permission.toLowerCase());
     }
 
@@ -240,8 +276,7 @@ public class VaultPermissionHook extends Permission {
         String w = world; // screw effectively final
         return user.getNodes().values().stream()
                 .filter(Node::isGroupNode)
-                .filter(n -> n.shouldApplyOnServer(getServer(), isIncludeGlobal(), false))
-                .filter(n -> n.shouldApplyOnWorld(w, true, false))
+                .filter(n -> n.shouldApplyWithContext(createContextForWorldLookup(plugin.getPlayer(user), w).getContexts()))
                 .map(Node::getGroupName)
                 .anyMatch(s -> s.equalsIgnoreCase(group));
     }
@@ -311,8 +346,7 @@ public class VaultPermissionHook extends Permission {
         String w = world; // screw effectively final
         return user.getNodes().values().stream()
                 .filter(Node::isGroupNode)
-                .filter(n -> n.shouldApplyOnServer(getServer(), isIncludeGlobal(), false))
-                .filter(n -> n.shouldApplyOnWorld(w, true, false))
+                .filter(n -> n.shouldApplyWithContext(createContextForWorldLookup(plugin.getPlayer(user), w).getContexts()))
                 .map(Node::getGroupName)
                 .toArray(String[]::new);
     }
@@ -336,7 +370,7 @@ public class VaultPermissionHook extends Permission {
         // we need to do the complex PGO checking. (it's been enabled in the config.)
         if (isPgoCheckInherited()) {
             // we can just check the cached data
-            PermissionData data = user.getUserData().getPermissionData(createContextForWorld(world));
+            PermissionData data = user.getUserData().getPermissionData(createContextForWorldLookup(plugin.getPlayer(user), world));
             for (Map.Entry<String, Boolean> e : data.getImmutableBacking().entrySet()) {
                 if (!e.getValue()) continue;
                 if (!e.getKey().toLowerCase().startsWith("vault.primarygroup.")) continue;

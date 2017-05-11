@@ -30,7 +30,6 @@ import lombok.NonNull;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.caching.MetaData;
-import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.caching.MetaAccumulator;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.Group;
@@ -40,7 +39,6 @@ import me.lucko.luckperms.common.utils.ExtractedContexts;
 
 import net.milkbowl.vault.chat.Chat;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -97,7 +95,7 @@ public class VaultChatHook extends Chat {
             holder.removeIf(n -> prefix ? n.isPrefix() : n.isSuffix());
 
             // find the max inherited priority & add 10
-            MetaAccumulator metaAccumulator = holder.accumulateMeta(null, null, ExtractedContexts.generate(perms.createContextForWorld(finalWorld)));
+            MetaAccumulator metaAccumulator = holder.accumulateMeta(null, null, ExtractedContexts.generate(perms.createContextForWorldSet(finalWorld)));
             int priority = (prefix ? metaAccumulator.getPrefixes() : metaAccumulator.getSuffixes()).keySet().stream()
                     .mapToInt(e -> e).max().orElse(0) + 10;
 
@@ -120,7 +118,7 @@ public class VaultChatHook extends Chat {
 
         perms.log("Getting meta: '" + node + "' for user " + user.getFriendlyName() + " on world " + world + ", server " + perms.getServer());
 
-        String ret = user.getUserData().getMetaData(perms.createContextForWorld(world)).getMeta().get(node);
+        String ret = user.getUserData().getMetaData(perms.createContextForWorldLookup(perms.getPlugin().getPlayer(user), world)).getMeta().get(node);
         return ret != null ? ret : defaultValue;
     }
 
@@ -130,7 +128,7 @@ public class VaultChatHook extends Chat {
 
         perms.log("Getting " + (prefix ? "prefix" : "suffix") + " for user " + user.getFriendlyName() + " on world " + world + ", server " + perms.getServer());
 
-        MetaData data = user.getUserData().getMetaData(perms.createContextForWorld(world));
+        MetaData data = user.getUserData().getMetaData(perms.createContextForWorldLookup(perms.getPlugin().getPlayer(user), world));
         String ret = prefix ? data.getPrefix() : data.getSuffix();
         return ret != null ? ret : "";
     }
@@ -144,8 +142,7 @@ public class VaultChatHook extends Chat {
         for (Node n : group.mergePermissionsToList()) {
             if (!n.getValue()) continue;
             if (!n.isMeta()) continue;
-            if (!n.shouldApplyOnServer(perms.getServer(), perms.isIncludeGlobal(), false)) continue;
-            if (!n.shouldApplyOnWorld(world, perms.isIncludeGlobal(), false)) continue;
+            if (!n.shouldApplyWithContext(perms.createContextForWorldLookup(world).getContexts())) continue;
 
             Map.Entry<String, String> meta = n.getMeta();
             if (meta.getKey().equalsIgnoreCase(node)) {
@@ -165,18 +162,11 @@ public class VaultChatHook extends Chat {
         int priority = Integer.MIN_VALUE;
         String meta = null;
 
-        Map<String, String> context = new HashMap<>();
-        context.put("server", perms.getServer());
-        if (world != null) {
-            context.put("world", world);
-        }
-
-        ExtractedContexts ec = ExtractedContexts.generate(new Contexts(ContextSet.fromMap(context), perms.isIncludeGlobal(), true, true, true, true, false));
+        ExtractedContexts ec = ExtractedContexts.generate(Contexts.of(perms.createContextForWorldLookup(world).getContexts(), perms.isIncludeGlobal(), true, true, true, true, false));
         for (Node n : group.getAllNodes(ec)) {
             if (!n.getValue()) continue;
             if (prefix ? !n.isPrefix() : !n.isSuffix()) continue;
-            if (!n.shouldApplyOnServer(perms.getServer(), perms.isIncludeGlobal(), false)) continue;
-            if (!n.shouldApplyOnWorld(world, perms.isIncludeGlobal(), false)) continue;
+            if (!n.shouldApplyWithContext(perms.createContextForWorldLookup(world).getContexts())) continue;
 
             Map.Entry<Integer, String> value = prefix ? n.getPrefix() : n.getSuffix();
             if (value.getKey() > priority) {

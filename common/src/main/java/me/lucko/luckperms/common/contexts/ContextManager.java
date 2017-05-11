@@ -29,7 +29,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
 import me.lucko.luckperms.api.context.ContextCalculator;
-import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 
 import java.util.List;
@@ -41,7 +41,7 @@ public class ContextManager<T> {
     private final List<ContextCalculator<T>> calculators = new CopyOnWriteArrayList<>();
     private final List<ContextCalculator<?>> staticCalculators = new CopyOnWriteArrayList<>();
 
-    private final LoadingCache<T, ContextSet> cache = Caffeine.newBuilder()
+    private final LoadingCache<T, ImmutableContextSet> cache = Caffeine.newBuilder()
             .weakKeys()
             .expireAfterWrite(50L, TimeUnit.MILLISECONDS)
             .build(t -> calculateApplicableContext(t, MutableContextSet.create()).makeImmutable());
@@ -53,7 +53,7 @@ public class ContextManager<T> {
         return accumulator;
     }
 
-    public ContextSet getApplicableContext(T subject) {
+    public ImmutableContextSet getApplicableContext(T subject) {
         return cache.get(subject);
     }
 
@@ -66,7 +66,7 @@ public class ContextManager<T> {
         staticCalculators.add(0, calculator);
     }
 
-    public ContextSet getStaticContexts() {
+    public ImmutableContextSet getStaticContexts() {
         MutableContextSet accumulator = MutableContextSet.create();
         for (ContextCalculator<?> calculator : staticCalculators) {
             calculator.giveApplicableContext(null, accumulator);
