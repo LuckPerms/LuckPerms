@@ -120,6 +120,18 @@ public enum Message {
     SEARCH_SHOWING_USERS_WITH_PAGE("&bShowing user entries:  {0}", true),
     SEARCH_SHOWING_GROUPS_WITH_PAGE("&bShowing group entries:  {0}", true),
 
+    APPLY_EDITS_INVALID_CODE("&aInvalid code. &7({0})", true),
+    APPLY_EDITS_UNABLE_TO_READ("&aUnable to read data using the given code. &7({0})", true),
+    APPLY_EDITS_NO_TARGET("&aUnable to parse the target of the edit. Please supply it as an extra argument.", true),
+    APPLY_EDITS_TARGET_GROUP_NOT_EXISTS("&aTarget group &b{0}&a does not exist.", true),
+    APPLY_EDITS_TARGET_USER_NOT_UUID("&aTarget user &b{0}&a is not a valid uuid.", true),
+    APPLY_EDITS_TARGET_USER_UNABLE_TO_LOAD("&aUnable to load target user &b{0}&a.", true),
+    APPLY_EDITS_TARGET_UNKNOWN("&aInvalid target. &7({0})", true),
+    APPLY_EDITS_SUCCESS("&aSuccessfully applied &b{0}&a nodes to &b{1}&a.", true),
+
+    EDITOR_UPLOAD_FAILURE("&cUnable to upload permission data to the editor.", true),
+    EDITOR_URL("&aEditor URL:", true),
+
     CHECK_RESULT("&aPermission check result on user &b{0}&a for permission &b{1}&a: &f{2}", true),
 
     CREATE_SUCCESS("&b{0}&a was successfully created.", true),

@@ -108,7 +108,7 @@ public abstract class SharedSubCommand {
         return user ? userPermission.isAuthorized(sender) : groupPermission.isAuthorized(sender);
     }
 
-    protected static void save(PermissionHolder holder, Sender sender, LuckPermsPlugin plugin) {
+    public static void save(PermissionHolder holder, Sender sender, LuckPermsPlugin plugin) {
         if (holder instanceof User) {
             User user = ((User) holder);
             SubCommand.save(user, sender, plugin);

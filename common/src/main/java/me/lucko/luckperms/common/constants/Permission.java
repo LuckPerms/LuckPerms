@@ -48,6 +48,7 @@ public enum Permission {
     EXPORT(list("export"), Type.NONE),
     RELOAD_CONFIG(list("reloadconfig"), Type.NONE),
     BULK_UPDATE(list("bulkupdate"), Type.NONE),
+    APPLY_EDITS(list("applyedits"), Type.NONE),
     MIGRATION(list("migration"), Type.NONE),
 
     CREATE_GROUP(list("creategroup"), Type.NONE),
@@ -89,6 +90,7 @@ public enum Permission {
     USER_META_REMOVETEMP_PREFIX(list("meta.removetempprefix", "removetempprefix"), Type.USER),
     USER_META_REMOVETEMP_SUFFIX(list("meta.removetempsuffix", "removetempsuffix"), Type.USER),
     USER_META_CLEAR(list("meta.clear", "clearmeta"), Type.USER),
+    USER_EDITOR(list("editor"), Type.USER),
     USER_SWITCHPRIMARYGROUP(list("switchprimarygroup", "setprimarygroup"), Type.USER),
     USER_SHOWTRACKS(list("showtracks"), Type.USER),
     USER_PROMOTE(list("promote"), Type.USER),
@@ -126,6 +128,7 @@ public enum Permission {
     GROUP_META_REMOVETEMP_PREFIX(list("meta.removetempprefix", "removetempprefix"), Type.GROUP),
     GROUP_META_REMOVETEMP_SUFFIX(list("meta.removetempsuffix", "removetempsuffix"), Type.GROUP),
     GROUP_META_CLEAR(list("meta.clear", "clearmeta"), Type.GROUP),
+    GROUP_EDITOR(list("editor"), Type.GROUP),
     GROUP_LISTMEMBERS(list("listmembers"), Type.GROUP),
     GROUP_SHOWTRACKS(list("showtracks"), Type.GROUP),
     GROUP_SETWEIGHT(list("setweight"), Type.GROUP),
