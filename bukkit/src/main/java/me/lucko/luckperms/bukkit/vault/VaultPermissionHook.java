@@ -140,11 +140,11 @@ public class VaultPermissionHook extends Permission {
     public void save(PermissionHolder holder) {
         if (holder instanceof User) {
             User u = (User) holder;
-            plugin.getStorage().saveUser(u).thenRunAsync(() -> u.getRefreshBuffer().request(), plugin.getScheduler().getAsyncExecutor());
+            plugin.getStorage().saveUser(u).thenRunAsync(() -> u.getRefreshBuffer().request(), plugin.getScheduler().async());
         }
         if (holder instanceof Group) {
             Group g = (Group) holder;
-            plugin.getStorage().saveGroup(g).thenRunAsync(() -> plugin.getUpdateTaskBuffer().request(), plugin.getScheduler().getAsyncExecutor());
+            plugin.getStorage().saveGroup(g).thenRunAsync(() -> plugin.getUpdateTaskBuffer().request(), plugin.getScheduler().async());
         }
     }
 

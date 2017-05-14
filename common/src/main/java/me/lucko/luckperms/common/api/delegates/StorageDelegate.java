@@ -69,12 +69,12 @@ public class StorageDelegate implements Storage {
 
     @Override
     public Executor getSyncExecutor() {
-        return plugin.getScheduler().getSyncExecutor();
+        return plugin.getScheduler().sync();
     }
 
     @Override
     public Executor getAsyncExecutor() {
-        return plugin.getScheduler().getAsyncExecutor();
+        return plugin.getScheduler().async();
     }
 
     @Override

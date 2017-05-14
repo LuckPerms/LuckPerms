@@ -200,7 +200,7 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
             return CompletableFuture.completedFuture(present);
         }
 
-        return CompletableFuture.supplyAsync(() -> subjectLoadingCache.get(identifier.toLowerCase()), plugin.getScheduler().getAsyncExecutor());
+        return CompletableFuture.supplyAsync(() -> subjectLoadingCache.get(identifier.toLowerCase()), plugin.getScheduler().async());
     }
 
     @Override
@@ -226,7 +226,7 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
             }
 
             return ret.build();
-        }, plugin.getScheduler().getAsyncExecutor());
+        }, plugin.getScheduler().async());
     }
 
     @Override
@@ -252,7 +252,7 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
             }
 
             return ret.build();
-        }, plugin.getScheduler().getAsyncExecutor());
+        }, plugin.getScheduler().async());
     }
 
     @Override
@@ -268,7 +268,7 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
             }
 
             return ret.build();
-        }, plugin.getScheduler().getAsyncExecutor());
+        }, plugin.getScheduler().async());
     }
 
     @Override

@@ -187,12 +187,12 @@ public interface LuckPermsPlugin {
      */
     LuckPermsScheduler getScheduler();
 
-    default void doAsync(Runnable r) {
-        getScheduler().doAsync(r);
+    default void doAsync(Runnable runnable) {
+        getScheduler().doAsync(runnable);
     }
 
-    default void doSync(Runnable r) {
-        getScheduler().doSync(r);
+    default void doSync(Runnable runnable) {
+        getScheduler().doSync(runnable);
     }
 
     /**

@@ -32,7 +32,7 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Message;
 
 @AllArgsConstructor
-public class LoggerImpl implements Logger {
+public class SenderLogger implements Logger {
     private final Sender console;
 
     @Override

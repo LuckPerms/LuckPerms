@@ -63,45 +63,45 @@ public class LPBukkitScheduler implements LuckPermsScheduler {
     }
 
     @Override
-    public Executor getAsyncExecutor() {
+    public Executor async() {
         return useBukkitAsync ? asyncBukkitExecutor : asyncLpExecutor;
     }
 
     @Override
-    public Executor getSyncExecutor() {
+    public Executor sync() {
         return syncExecutor;
     }
 
     @Override
-    public void doAsync(Runnable r) {
-        getAsyncExecutor().execute(r);
+    public void doAsync(Runnable runnable) {
+        async().execute(runnable);
     }
 
     @Override
-    public void doSync(Runnable r) {
-        getSyncExecutor().execute(r);
+    public void doSync(Runnable runnable) {
+        sync().execute(runnable);
     }
 
     @Override
-    public void doAsyncRepeating(Runnable r, long interval) {
-        BukkitTask task = plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, r, interval, interval);
+    public void asyncRepeating(Runnable runnable, long intervalTicks) {
+        BukkitTask task = plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, runnable, intervalTicks, intervalTicks);
         tasks.add(task);
     }
 
     @Override
-    public void doSyncRepeating(Runnable r, long interval) {
-        BukkitTask task = plugin.getServer().getScheduler().runTaskTimer(plugin, r, interval, interval);
+    public void syncRepeating(Runnable runnable, long intervalTicks) {
+        BukkitTask task = plugin.getServer().getScheduler().runTaskTimer(plugin, runnable, intervalTicks, intervalTicks);
         tasks.add(task);
     }
 
     @Override
-    public void doAsyncLater(Runnable r, long delay) {
-        plugin.getServer().getScheduler().runTaskLaterAsynchronously(plugin, r, delay);
+    public void asyncLater(Runnable runnable, long delayTicks) {
+        plugin.getServer().getScheduler().runTaskLaterAsynchronously(plugin, runnable, delayTicks);
     }
 
     @Override
-    public void doSyncLater(Runnable r, long delay) {
-        plugin.getServer().getScheduler().runTaskLater(plugin, r, delay);
+    public void syncLater(Runnable runnable, long delayTicks) {
+        plugin.getServer().getScheduler().runTaskLater(plugin, runnable, delayTicks);
     }
 
     @Override

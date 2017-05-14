@@ -53,9 +53,9 @@ import java.util.concurrent.TimeoutException;
  * A Datastore wrapping that ensures all tasks are completed before {@link Storage#shutdown()} is called.
  */
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class TolerantStorage implements Storage {
-    public static TolerantStorage wrap(Storage storage) {
-        return new TolerantStorage(storage);
+public class PhasedStorage implements Storage {
+    public static PhasedStorage wrap(Storage storage) {
+        return new PhasedStorage(storage);
     }
 
     @Delegate(types = Delegated.class)

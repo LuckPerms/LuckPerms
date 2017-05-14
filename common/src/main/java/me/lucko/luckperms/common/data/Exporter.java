@@ -246,7 +246,7 @@ public class Exporter implements Runnable {
                             e.printStackTrace();
                         }
                     }
-                }, plugin.getScheduler().getAsyncExecutor()));
+                }, plugin.getScheduler().async()));
             }
 
             // all of the threads have been scheduled now and are running. we just need to wait for them all to complete

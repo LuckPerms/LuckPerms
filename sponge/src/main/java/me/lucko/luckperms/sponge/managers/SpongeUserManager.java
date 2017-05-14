@@ -265,7 +265,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
             return CompletableFuture.completedFuture(present);
         }
 
-        return CompletableFuture.supplyAsync(() -> subjectLoadingCache.get(uuid), plugin.getScheduler().getAsyncExecutor());
+        return CompletableFuture.supplyAsync(() -> subjectLoadingCache.get(uuid), plugin.getScheduler().async());
     }
 
     @Override
@@ -314,7 +314,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
             }
 
             return ret.build();
-        }, plugin.getScheduler().getAsyncExecutor());
+        }, plugin.getScheduler().async());
     }
 
     @Override
@@ -331,7 +331,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
             plugin.getStorage().getUniqueUsers().join().forEach(uuid -> ids.add(uuid.toString()));
 
             return ids.build();
-        }, plugin.getScheduler().getAsyncExecutor());
+        }, plugin.getScheduler().async());
     }
 
     @Override
@@ -347,7 +347,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
             }
 
             return ret.build();
-        }, plugin.getScheduler().getAsyncExecutor());
+        }, plugin.getScheduler().async());
     }
 
     @Override
@@ -363,7 +363,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
             }
 
             return ret.build();
-        }, plugin.getScheduler().getAsyncExecutor());
+        }, plugin.getScheduler().async());
     }
 
     @Override

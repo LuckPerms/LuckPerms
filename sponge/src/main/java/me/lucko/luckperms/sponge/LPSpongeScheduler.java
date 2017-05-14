@@ -42,45 +42,45 @@ public class LPSpongeScheduler implements LuckPermsScheduler {
     }
 
     @Override
-    public Executor getAsyncExecutor() {
+    public Executor async() {
         return plugin.getAsyncExecutorService();
     }
 
     @Override
-    public Executor getSyncExecutor() {
+    public Executor sync() {
         return plugin.getSyncExecutorService();
     }
 
     @Override
-    public void doAsync(Runnable r) {
-        plugin.getSpongeScheduler().createTaskBuilder().async().execute(r).submit(plugin);
+    public void doAsync(Runnable runnable) {
+        plugin.getSpongeScheduler().createTaskBuilder().async().execute(runnable).submit(plugin);
     }
 
     @Override
-    public void doSync(Runnable r) {
-        plugin.getSpongeScheduler().createTaskBuilder().execute(r).submit(plugin);
+    public void doSync(Runnable runnable) {
+        plugin.getSpongeScheduler().createTaskBuilder().execute(runnable).submit(plugin);
     }
 
     @Override
-    public void doAsyncRepeating(Runnable r, long interval) {
-        Task task = plugin.getSpongeScheduler().createTaskBuilder().async().intervalTicks(interval).delayTicks(interval).execute(r).submit(plugin);
+    public void asyncRepeating(Runnable runnable, long intervalTicks) {
+        Task task = plugin.getSpongeScheduler().createTaskBuilder().async().intervalTicks(intervalTicks).delayTicks(intervalTicks).execute(runnable).submit(plugin);
         tasks.add(task);
     }
 
     @Override
-    public void doSyncRepeating(Runnable r, long interval) {
-        Task task = plugin.getSpongeScheduler().createTaskBuilder().intervalTicks(interval).delayTicks(interval).execute(r).submit(plugin);
+    public void syncRepeating(Runnable runnable, long intervalTicks) {
+        Task task = plugin.getSpongeScheduler().createTaskBuilder().intervalTicks(intervalTicks).delayTicks(intervalTicks).execute(runnable).submit(plugin);
         tasks.add(task);
     }
 
     @Override
-    public void doAsyncLater(Runnable r, long delay) {
-        plugin.getSpongeScheduler().createTaskBuilder().async().delayTicks(delay).execute(r).submit(plugin);
+    public void asyncLater(Runnable runnable, long delayTicks) {
+        plugin.getSpongeScheduler().createTaskBuilder().async().delayTicks(delayTicks).execute(runnable).submit(plugin);
     }
 
     @Override
-    public void doSyncLater(Runnable r, long delay) {
-        plugin.getSpongeScheduler().createTaskBuilder().delayTicks(delay).execute(r).submit(plugin);
+    public void syncLater(Runnable runnable, long delayTicks) {
+        plugin.getSpongeScheduler().createTaskBuilder().delayTicks(delayTicks).execute(runnable).submit(plugin);
     }
 
     @Override

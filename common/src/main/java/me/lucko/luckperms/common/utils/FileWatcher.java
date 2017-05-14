@@ -68,7 +68,7 @@ public class FileWatcher implements Runnable {
         }
 
         // Register with a delay to ignore changes made at startup
-        plugin.getScheduler().doAsyncLater(() -> {
+        plugin.getScheduler().asyncLater(() -> {
             try {
                 // doesn't need to be atomic
                 if (keyMap.containsKey(id)) {

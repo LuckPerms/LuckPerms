@@ -65,7 +65,7 @@ import me.lucko.luckperms.common.tasks.UpdateTask;
 import me.lucko.luckperms.common.treeview.PermissionVault;
 import me.lucko.luckperms.common.utils.BufferedRequest;
 import me.lucko.luckperms.common.utils.FileWatcher;
-import me.lucko.luckperms.common.utils.LoggerImpl;
+import me.lucko.luckperms.common.utils.SenderLogger;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 import me.lucko.luckperms.sponge.commands.SpongeMainCommand;
 import me.lucko.luckperms.sponge.contexts.WorldCalculator;
@@ -170,11 +170,11 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         scheduler = new LPSpongeScheduler(this);
         localeManager = new NoopLocaleManager();
         senderFactory = new SpongeSenderFactory(this);
-        log = new LoggerImpl(getConsoleSender());
+        log = new SenderLogger(getConsoleSender());
 
         LuckPermsPlugin.sendStartupBanner(getConsoleSender(), this);
-        verboseHandler = new VerboseHandler(scheduler.getAsyncExecutor(), getVersion());
-        permissionVault = new PermissionVault(scheduler.getAsyncExecutor());
+        verboseHandler = new VerboseHandler(scheduler.async(), getVersion());
+        permissionVault = new PermissionVault(scheduler.async());
         timings = new LPTimings(this);
 
         getLog().info("Loading configuration...");
@@ -190,7 +190,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
         if (getConfiguration().get(ConfigKeys.WATCH_FILES)) {
             fileWatcher = new FileWatcher(this);
-            getScheduler().doAsyncRepeating(fileWatcher, 30L);
+            getScheduler().asyncRepeating(fileWatcher, 30L);
         }
 
         // initialise datastore
@@ -297,18 +297,18 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         int mins = getConfiguration().get(ConfigKeys.SYNC_TIME);
         if (mins > 0) {
             long ticks = mins * 60 * 20;
-            scheduler.doAsyncRepeating(() -> updateTaskBuffer.request(), ticks);
+            scheduler.asyncRepeating(() -> updateTaskBuffer.request(), ticks);
         }
-        scheduler.doAsyncLater(() -> updateTaskBuffer.request(), 40L);
+        scheduler.asyncLater(() -> updateTaskBuffer.request(), 40L);
 
         // run an update instantly.
         updateTaskBuffer.requestDirectly();
 
         // register tasks
-        scheduler.doAsyncRepeating(new ExpireTemporaryTask(this), 60L);
-        scheduler.doAsyncRepeating(new CacheHousekeepingTask(this), 2400L);
-        scheduler.doAsyncRepeating(new ServiceCacheHousekeepingTask(service), 2400L);
-        // scheduler.doAsyncRepeating(() -> userManager.performCleanup(), 2400L);
+        scheduler.asyncRepeating(new ExpireTemporaryTask(this), 60L);
+        scheduler.asyncRepeating(new CacheHousekeepingTask(this), 2400L);
+        scheduler.asyncRepeating(new ServiceCacheHousekeepingTask(service), 2400L);
+        // scheduler.asyncRepeating(() -> userManager.performCleanup(), 2400L);
 
         getLog().info("Successfully loaded.");
     }

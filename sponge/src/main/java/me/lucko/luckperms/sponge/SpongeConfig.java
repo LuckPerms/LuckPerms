@@ -55,9 +55,9 @@ public class SpongeConfig extends AbstractConfiguration {
 
     private ConfigurationNode root;
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     private Path makeFile(Path file) throws IOException {
         File cfg = file.toFile();
+        //noinspection ResultOfMethodCallIgnored
         cfg.getParentFile().mkdirs();
 
         if (!cfg.exists()) {

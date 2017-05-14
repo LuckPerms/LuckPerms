@@ -52,33 +52,10 @@ public class BufferedOutputStorage implements Storage, Runnable {
 
     private final long flushTime;
 
-    private final Buffer<User, Boolean> userOutputBuffer = new Buffer<User, Boolean>() {
-        @Override
-        public Boolean dequeue(User user) {
-            return backing.saveUser(user).join();
-        }
-    };
-
-    private final Buffer<Group, Boolean> groupOutputBuffer = new Buffer<Group, Boolean>() {
-        @Override
-        public Boolean dequeue(Group group) {
-            return backing.saveGroup(group).join();
-        }
-    };
-
-    private final Buffer<Track, Boolean> trackOutputBuffer = new Buffer<Track, Boolean>() {
-        @Override
-        public Boolean dequeue(Track track) {
-            return backing.saveTrack(track).join();
-        }
-    };
-
-    private final Buffer<UserIdentifier, Boolean> uuidDataOutputBuffer = new Buffer<UserIdentifier, Boolean>() {
-        @Override
-        protected Boolean dequeue(UserIdentifier userIdentifier) {
-            return backing.saveUUIDData(userIdentifier.getUsername().get(), userIdentifier.getUuid()).join();
-        }
-    };
+    private final Buffer<User, Boolean> userOutputBuffer = Buffer.of(user -> backing.saveUser(user).join());
+    private final Buffer<Group, Boolean> groupOutputBuffer = Buffer.of(group -> backing.saveGroup(group).join());
+    private final Buffer<Track, Boolean> trackOutputBuffer = Buffer.of(track -> backing.saveTrack(track).join());
+    private final Buffer<UserIdentifier, Boolean> uuidDataOutputBuffer = Buffer.of(userIdentifier -> backing.saveUUIDData(userIdentifier.getUsername().get(), userIdentifier.getUuid()).join());
 
     @Override
     public void run() {

@@ -141,12 +141,12 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
 
     @Override
     public void scheduleUnload(UUID uuid) {
-        plugin.getScheduler().doAsyncLater(() -> {
+        plugin.getScheduler().asyncLater(() -> {
             // check once to see if the user can be unloaded.
             if (getIfLoaded(plugin.getUuidCache().getUUID(uuid)) != null && !plugin.isPlayerOnline(uuid)) {
 
                 // check again in 40 ticks, we want to be sure the player won't have re-logged before we unload them.
-                plugin.getScheduler().doAsyncLater(() -> {
+                plugin.getScheduler().asyncLater(() -> {
                     User user = getIfLoaded(plugin.getUuidCache().getUUID(uuid));
                     if (user != null && !plugin.isPlayerOnline(uuid)) {
                         user.unregisterData();

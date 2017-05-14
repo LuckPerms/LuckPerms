@@ -605,7 +605,7 @@ public class YAMLBacking extends FlatfileBacking {
                     int size = vals.size();
 
                     if (size == 1) {
-                        context.put(e.getKey(), vals.get(0));;
+                        context.put(e.getKey(), vals.get(0));
                     } else if (size > 1) {
                         context.put(e.getKey(), vals);
                     }

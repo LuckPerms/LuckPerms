@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Function;
 
 /**
  * Thread-safe buffer utility. Holds a buffer of objects to be processed after they've been waiting in the buffer
@@ -44,11 +45,20 @@ import java.util.concurrent.locks.ReentrantLock;
  * @param <T> the type of objects in the buffer
  * @param <R> the type of result produced by the final process
  */
-public abstract class Buffer<T, R> implements Runnable {
+public class Buffer<T, R> implements Runnable {
     private static final long DEFAULT_FLUSH_TIME = 1000; // 1 second
+
+    public static <T, R> Buffer<T, R> of(Function<T, R> dequeueFunc) {
+        return new Buffer<>(dequeueFunc);
+    }
 
     private final ReentrantLock lock = new ReentrantLock();
     private final List<BufferedObject<T, R>> buffer = new LinkedList<>();
+    private final Function<T, R> dequeueFunc;
+
+    private Buffer(Function<T, R> dequeueFunc) {
+        this.dequeueFunc = dequeueFunc;
+    }
 
     public CompletableFuture<R> enqueue(@NonNull T t) {
         lock.lock();
@@ -80,7 +90,9 @@ public abstract class Buffer<T, R> implements Runnable {
         }
     }
 
-    protected abstract R dequeue(T t);
+    protected R dequeue(T t) {
+        return dequeueFunc.apply(t);
+    }
 
     public void flush(long flushTime) {
         long time = System.currentTimeMillis();

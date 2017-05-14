@@ -43,7 +43,7 @@ import me.lucko.luckperms.common.data.Log;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.backing.AbstractBacking;
 import me.lucko.luckperms.common.storage.wrappings.BufferedOutputStorage;
-import me.lucko.luckperms.common.storage.wrappings.TolerantStorage;
+import me.lucko.luckperms.common.storage.wrappings.PhasedStorage;
 
 import java.util.List;
 import java.util.Set;
@@ -57,8 +57,8 @@ import java.util.function.Supplier;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class AbstractStorage implements Storage {
     public static Storage wrap(LuckPermsPlugin plugin, AbstractBacking backing) {
-        BufferedOutputStorage bufferedDs = BufferedOutputStorage.wrap(TolerantStorage.wrap(new AbstractStorage(plugin, backing)), 1000L);
-        plugin.getScheduler().doAsyncRepeating(bufferedDs, 10L);
+        BufferedOutputStorage bufferedDs = BufferedOutputStorage.wrap(PhasedStorage.wrap(new AbstractStorage(plugin, backing)), 1000L);
+        plugin.getScheduler().asyncRepeating(bufferedDs, 10L);
         return bufferedDs;
     }
 
@@ -77,7 +77,7 @@ public class AbstractStorage implements Storage {
     }
 
     private <T> CompletableFuture<T> makeFuture(Supplier<T> supplier) {
-        return CompletableFuture.supplyAsync(supplier, backing.getPlugin().getScheduler().getAsyncExecutor());
+        return CompletableFuture.supplyAsync(supplier, backing.getPlugin().getScheduler().async());
     }
 
     @Override

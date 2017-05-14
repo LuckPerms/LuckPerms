@@ -76,8 +76,8 @@ import me.lucko.luckperms.common.tasks.UpdateTask;
 import me.lucko.luckperms.common.treeview.PermissionVault;
 import me.lucko.luckperms.common.utils.BufferedRequest;
 import me.lucko.luckperms.common.utils.FileWatcher;
-import me.lucko.luckperms.common.utils.LoggerImpl;
 import me.lucko.luckperms.common.utils.LoginHelper;
+import me.lucko.luckperms.common.utils.SenderLogger;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 
 import org.bukkit.World;
@@ -141,7 +141,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         scheduler = new LPBukkitScheduler(this);
         localeManager = new NoopLocaleManager();
         senderFactory = new BukkitSenderFactory(this);
-        log = new LoggerImpl(getConsoleSender());
+        log = new SenderLogger(getConsoleSender());
 
         DependencyManager.loadDependencies(this, Collections.singletonList(Dependency.CAFFEINE));
     }
@@ -178,7 +178,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         childPermissionProvider = new ChildPermissionProvider();
 
         // give all plugins a chance to load their permissions, then refresh.
-        scheduler.doSyncLater(() -> {
+        scheduler.syncLater(() -> {
             defaultsProvider.refresh();
             childPermissionProvider.setup();
 
@@ -198,7 +198,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
         if (getConfiguration().get(ConfigKeys.WATCH_FILES)) {
             fileWatcher = new FileWatcher(this);
-            getScheduler().doAsyncRepeating(fileWatcher, 30L);
+            getScheduler().asyncRepeating(fileWatcher, 30L);
         }
 
         // initialise datastore
@@ -308,16 +308,16 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         int mins = getConfiguration().get(ConfigKeys.SYNC_TIME);
         if (mins > 0) {
             long ticks = mins * 60 * 20;
-            scheduler.doAsyncRepeating(() -> updateTaskBuffer.request(), ticks);
+            scheduler.asyncRepeating(() -> updateTaskBuffer.request(), ticks);
         }
-        scheduler.doAsyncLater(() -> updateTaskBuffer.request(), 40L);
+        scheduler.asyncLater(() -> updateTaskBuffer.request(), 40L);
 
         // run an update instantly.
         updateTaskBuffer.requestDirectly();
 
         // register tasks
-        scheduler.doAsyncRepeating(new ExpireTemporaryTask(this), 60L);
-        scheduler.doAsyncRepeating(new CacheHousekeepingTask(this), 2400L);
+        scheduler.asyncRepeating(new ExpireTemporaryTask(this), 60L);
+        scheduler.asyncRepeating(new CacheHousekeepingTask(this), 2400L);
 
         // register permissions
         try {
