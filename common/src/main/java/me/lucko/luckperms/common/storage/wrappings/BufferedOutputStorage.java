@@ -52,10 +52,10 @@ public class BufferedOutputStorage implements Storage, Runnable {
 
     private final long flushTime;
 
-    private final Buffer<User, Boolean> userOutputBuffer = Buffer.of(user -> backing.saveUser(user).join());
-    private final Buffer<Group, Boolean> groupOutputBuffer = Buffer.of(group -> backing.saveGroup(group).join());
-    private final Buffer<Track, Boolean> trackOutputBuffer = Buffer.of(track -> backing.saveTrack(track).join());
-    private final Buffer<UserIdentifier, Boolean> uuidDataOutputBuffer = Buffer.of(userIdentifier -> backing.saveUUIDData(userIdentifier.getUsername().get(), userIdentifier.getUuid()).join());
+    private final Buffer<User, Boolean> userOutputBuffer = Buffer.of(user -> BufferedOutputStorage.this.backing.saveUser(user).join());
+    private final Buffer<Group, Boolean> groupOutputBuffer = Buffer.of(group -> BufferedOutputStorage.this.backing.saveGroup(group).join());
+    private final Buffer<Track, Boolean> trackOutputBuffer = Buffer.of(track -> BufferedOutputStorage.this.backing.saveTrack(track).join());
+    private final Buffer<UserIdentifier, Boolean> uuidDataOutputBuffer = Buffer.of(userIdentifier -> BufferedOutputStorage.this.backing.saveUUIDData(userIdentifier.getUsername().get(), userIdentifier.getUuid()).join());
 
     @Override
     public void run() {
