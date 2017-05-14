@@ -36,10 +36,10 @@ import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeModel;
-import me.lucko.luckperms.common.core.PriorityComparator;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.User;
@@ -56,13 +56,16 @@ import java.io.StringWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
+    private static final String USER_ID_PATTERN = "user/";
+    private static final String GROUP_ID_PATTERN = "group/";
+    private static final String FILE_NAME = "luckperms-data.json";
+
     public HolderEditor(boolean user) {
         super("editor", "Opens the web permission editor", user ? Permission.USER_EDITOR : Permission.GROUP_EDITOR,
                 Predicates.alwaysFalse(), null
@@ -83,8 +86,8 @@ public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
         }
 
         List<String> parts = Splitter.on('/').splitToList(dataUrl);
-        String id = parts.get(4) + "/" + parts.get(6);
-        String url = "https://lpedit.lucko.me/?" + id;
+        String id = "?" + parts.get(4) + "/" + parts.get(6);
+        String url = plugin.getConfiguration().get(ConfigKeys.WEB_EDITOR_URL_PATTERN) + id;
 
         Message.EDITOR_URL.send(sender);
         sender.sendMessage(new FancyMessage(url).color(ChatColor.getByChar('b')).link(url));
@@ -94,10 +97,10 @@ public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
     private static String id(PermissionHolder holder) {
         if (holder instanceof User) {
             User user = ((User) holder);
-            return "user/" + user.getUuid().toString();
+            return USER_ID_PATTERN + user.getUuid().toString();
         } else {
             Group group = ((Group) holder);
-            return "group/" + group.getName();
+            return GROUP_ID_PATTERN + group.getName();
         }
     }
 
@@ -115,7 +118,7 @@ public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
                         .name("description").value("LuckPerms Web Permissions Editor Data")
                         .name("public").value(false)
                         .name("files")
-                        .beginObject().name("luckperms-data.json")
+                        .beginObject().name(FILE_NAME)
                         .beginObject().name("content").value(content)
                         .endObject()
                         .endObject()
@@ -131,7 +134,7 @@ public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
             try (InputStream inputStream = connection.getInputStream()) {
                 try (InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
                     JsonObject response = new Gson().fromJson(reader, JsonObject.class);
-                    return response.get("files").getAsJsonObject().get("luckperms-data.json").getAsJsonObject().get("raw_url").getAsString();
+                    return response.get("files").getAsJsonObject().get(FILE_NAME).getAsJsonObject().get("raw_url").getAsString();
                 }
             }
 
@@ -150,7 +153,7 @@ public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
     }
 
     private static JsonArray serializePermissions(Set<NodeModel> nodes) {
-        List<JsonObject> data = new ArrayList<>();
+        JsonArray arr = new JsonArray();
 
         for (NodeModel node : nodes) {
             JsonObject attributes = new JsonObject();
@@ -173,17 +176,7 @@ public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
                 attributes.add("context", node.getContextsAsJson());
             }
 
-            data.add(attributes);
-        }
-
-        data.sort((o1, o2) -> PriorityComparator.get().compareStrings(
-                o1.get("permission").getAsString(),
-                o2.get("permission").getAsString()
-        ));
-
-        JsonArray arr = new JsonArray();
-        for (JsonObject o : data) {
-            arr.add(o);
+            arr.add(attributes);
         }
 
         return arr;
