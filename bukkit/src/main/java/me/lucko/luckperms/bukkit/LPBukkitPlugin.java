@@ -433,17 +433,17 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
     public void tryVaultHook(boolean force) {
         if (vaultHook != null) {
-            return;
+            return; // already hooked
         }
 
-        getLog().info("Attempting to hook with Vault...");
+        if (force) {
+            getLog().info("Attempting to hook with Vault...");
+        }
         try {
             if (force || getServer().getPluginManager().isPluginEnabled("Vault")) {
                 vaultHook = new VaultHook();
                 vaultHook.hook(this);
                 getLog().info("Registered Vault permission & chat hook.");
-            } else {
-                getLog().info("Vault not found.");
             }
         } catch (Exception e) {
             vaultHook = null;
