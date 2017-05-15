@@ -397,7 +397,7 @@ public class ConfigKeys {
     /**
      * The URL of the web editor
      */
-    public static final ConfigKey<String> WEB_EDITOR_URL_PATTERN = StringKey.of("wed-editor-url", "https://lpedit.lucko.me/");
+    public static final ConfigKey<String> WEB_EDITOR_URL_PATTERN = StringKey.of("web-editor-url", "https://lpedit.lucko.me/");
 
     private static List<ConfigKey<?>> KEYS = null;
 
