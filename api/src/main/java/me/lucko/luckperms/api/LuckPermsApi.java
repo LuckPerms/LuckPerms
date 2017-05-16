@@ -25,6 +25,7 @@ package me.lucko.luckperms.api;
 import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.event.EventBus;
+import me.lucko.luckperms.api.metastacking.MetaStackFactory;
 
 import java.util.Optional;
 import java.util.Set;
@@ -42,6 +43,7 @@ public interface LuckPermsApi {
 
     /**
      * Gets the API version
+     *
      * @return the version of the API running on the platform
      * @since 2.6
      */
@@ -49,12 +51,14 @@ public interface LuckPermsApi {
 
     /**
      * Gets the plugin version
+     *
      * @return the version of the plugin running on the platform
      */
     String getVersion();
 
     /**
      * Gets the platform LuckPerms is running on
+     *
      * @return the platform LuckPerms is running on
      * @since 2.7
      */
@@ -62,6 +66,7 @@ public interface LuckPermsApi {
 
     /**
      * Gets the event bus, used for subscribing to events
+     *
      * @return the event bus
      * @since 3.0
      */
@@ -246,6 +251,14 @@ public interface LuckPermsApi {
      * @return the node factory
      */
     NodeFactory getNodeFactory();
+
+    /**
+     * Gets the MetaStackFactory, used for creating MetaStacks.
+     *
+     * @return the meta stack factory
+     * @since 3.2
+     */
+    MetaStackFactory getMetaStackFactory();
 
     /**
      * Returns a permission builder instance

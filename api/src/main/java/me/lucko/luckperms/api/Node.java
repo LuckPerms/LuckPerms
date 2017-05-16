@@ -40,12 +40,14 @@ import java.util.Set;
 public interface Node extends Map.Entry<String, Boolean> {
 
     /**
+     * Returns the actual permission string
+     *
      * @return the actual permission node
      */
     String getPermission();
 
     /**
-     * Get what value the permission is set to. A negated node would return <code>false</code>.
+     * Gets what value the permission is set to. A negated node would return <code>false</code>.
      *
      * @return the permission's value
      */
@@ -53,14 +55,22 @@ public interface Node extends Map.Entry<String, Boolean> {
     Boolean getValue();
 
     /**
+     * Returns the value of this node as a tristate
+     *
      * @return the value of this node as a Tristate
      */
-    Tristate getTristate();
+    default Tristate getTristate() {
+        return Tristate.fromBoolean(getValue());
+    }
 
     /**
+     * Returns if the node is negated
+     *
      * @return true if the node is negated
      */
-    boolean isNegated();
+    default boolean isNegated() {
+        return !getValue();
+    }
 
     /**
      * If this node is set to override explicitly.
@@ -201,28 +211,40 @@ public interface Node extends Map.Entry<String, Boolean> {
     List<String> resolveShorthand();
 
     /**
+     * Returns if this node will expire in the future
+     *
      * @return true if this node will expire in the future
      */
     boolean isTemporary();
 
     /**
+     * Returns if this node will not expire
+     *
      * @return true if this node will not expire
      */
-    boolean isPermanent();
+    default boolean isPermanent() {
+        return !isTemporary();
+    }
 
     /**
+     * Returns a unix timestamp in seconds when this node will expire
+     *
      * @return the time in Unix time when this node will expire
      * @throws IllegalStateException if the node is not temporary
      */
     long getExpiryUnixTime();
 
     /**
+     * Returns the date when this node will expire
+     *
      * @return the {@link Date} when this node will expire
      * @throws IllegalStateException if the node is not temporary
      */
     Date getExpiry();
 
     /**
+     * Return the number of seconds until this permission will expire
+     *
      * @return the number of seconds until this permission will expire
      * @throws IllegalStateException if the node is not temporary
      */
@@ -307,6 +329,8 @@ public interface Node extends Map.Entry<String, Boolean> {
     Map.Entry<String, String> getMeta();
 
     /**
+     * Returns if this node is a prefix node
+     *
      * @return true if this node is a prefix node
      */
     boolean isPrefix();
@@ -320,6 +344,8 @@ public interface Node extends Map.Entry<String, Boolean> {
     Map.Entry<Integer, String> getPrefix();
 
     /**
+     * Returns if this node is a suffix node
+     *
      * @return true if this node is a suffix node
      */
     boolean isSuffix();

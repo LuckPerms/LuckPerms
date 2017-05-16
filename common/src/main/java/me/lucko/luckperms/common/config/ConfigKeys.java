@@ -30,6 +30,7 @@ import lombok.experimental.UtilityClass;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
+import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
 import me.lucko.luckperms.common.config.keys.AbstractKey;
 import me.lucko.luckperms.common.config.keys.BooleanKey;
 import me.lucko.luckperms.common.config.keys.EnduringKey;
@@ -41,7 +42,7 @@ import me.lucko.luckperms.common.config.keys.StringKey;
 import me.lucko.luckperms.common.core.TemporaryModifier;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.defaults.Rule;
-import me.lucko.luckperms.common.metastacking.definition.MetaStackDefinition;
+import me.lucko.luckperms.common.metastacking.definition.SimpleMetaStackDefinition;
 import me.lucko.luckperms.common.metastacking.definition.StandardStackElements;
 import me.lucko.luckperms.common.primarygroup.AllParentsByWeightHolder;
 import me.lucko.luckperms.common.primarygroup.ParentsByWeightHolder;
@@ -227,7 +228,7 @@ public class ConfigKeys {
         String middleSpacer = l.getString("meta-formatting.prefix.middle-spacer", " ");
         String endSpacer = l.getString("meta-formatting.prefix.end-spacer", "");
 
-        return MetaStackDefinition.create(StandardStackElements.parseList(l.getPlugin(), format), startSpacer, middleSpacer, endSpacer);
+        return new SimpleMetaStackDefinition(StandardStackElements.parseList(l.getPlugin(), format), startSpacer, middleSpacer, endSpacer);
     });
 
     /**
@@ -242,7 +243,7 @@ public class ConfigKeys {
         String middleSpacer = l.getString("meta-formatting.suffix.middle-spacer", " ");
         String endSpacer = l.getString("meta-formatting.suffix.end-spacer", "");
 
-        return MetaStackDefinition.create(StandardStackElements.parseList(l.getPlugin(), format), startSpacer, middleSpacer, endSpacer);
+        return new SimpleMetaStackDefinition(StandardStackElements.parseList(l.getPlugin(), format), startSpacer, middleSpacer, endSpacer);
     });
 
     /**

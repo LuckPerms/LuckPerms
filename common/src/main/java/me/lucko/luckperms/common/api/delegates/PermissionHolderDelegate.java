@@ -37,8 +37,10 @@ import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.PermissionHolder;
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.core.NodeFactory;
+import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.utils.ExtractedContexts;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
@@ -49,6 +51,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.function.Predicate;
 
 import static me.lucko.luckperms.common.api.ApiUtils.checkTime;
 
@@ -62,6 +65,11 @@ public class PermissionHolderDelegate implements PermissionHolder {
     @Override
     public String getObjectName() {
         return handle.getObjectName();
+    }
+
+    @Override
+    public String getFriendlyName() {
+        return handle.getFriendlyName();
     }
 
     @Override
@@ -240,6 +248,19 @@ public class PermissionHolderDelegate implements PermissionHolder {
     }
 
     @Override
+    public void clearMatching(Predicate<Node> test) {
+        handle.removeIf(test);
+        if (handle instanceof User) {
+            handle.getPlugin().getUserManager().giveDefaultIfNeeded((User) handle, false);
+        }
+    }
+
+    @Override
+    public void clearMatchingTransient(Predicate<Node> test) {
+        handle.removeIfTransient(test);
+    }
+
+    @Override
     public void unsetPermission(@NonNull String node, @NonNull boolean temporary) throws ObjectLacksException {
         handle.unsetPermission(NodeFactory.make(node, temporary)).throwException();
     }
@@ -275,6 +296,11 @@ public class PermissionHolderDelegate implements PermissionHolder {
     }
 
     @Override
+    public void clearNodes(@NonNull ContextSet contextSet) {
+        handle.clearNodes(contextSet);
+    }
+
+    @Override
     public void clearNodes(String server) {
         MutableContextSet set = new MutableContextSet();
         if (server != null) {
@@ -303,6 +329,11 @@ public class PermissionHolderDelegate implements PermissionHolder {
     }
 
     @Override
+    public void clearParents(@NonNull ContextSet contextSet) {
+        handle.clearParents(contextSet, true);
+    }
+
+    @Override
     public void clearParents(String server) {
         MutableContextSet set = new MutableContextSet();
         if (server != null) {
@@ -328,6 +359,11 @@ public class PermissionHolderDelegate implements PermissionHolder {
     @Override
     public void clearMeta() {
         handle.clearMeta();
+    }
+
+    @Override
+    public void clearMeta(@NonNull ContextSet contextSet) {
+        handle.clearMeta(contextSet);
     }
 
     @Override

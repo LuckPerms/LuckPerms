@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.bukkit.migration;
 
+import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.commands.CommandException;
@@ -39,7 +40,6 @@ import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.core.model.User;
-import me.lucko.luckperms.common.metastacking.MetaType;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.common.utils.ProgressLogger;
@@ -214,7 +214,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
             String key = metadata.getName().toLowerCase();
 
             if (key.equals("prefix") || key.equals("suffix")) {
-                MetaType type = MetaType.valueOf(key.toUpperCase());
+                ChatMetaType type = ChatMetaType.valueOf(key.toUpperCase());
                 holder.setPermission(NodeFactory.makeChatMetaNode(type, weight, metadata.getStringValue()).build());
             } else {
                 holder.setPermission(NodeFactory.makeMetaNode(key, metadata.getStringValue()).build());

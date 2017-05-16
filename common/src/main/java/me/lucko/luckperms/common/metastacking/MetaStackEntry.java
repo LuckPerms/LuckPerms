@@ -26,7 +26,7 @@
 package me.lucko.luckperms.common.metastacking;
 
 import me.lucko.luckperms.api.LocalizedNode;
-import me.lucko.luckperms.common.metastacking.definition.MetaStackElement;
+import me.lucko.luckperms.api.metastacking.MetaStackElement;
 
 import java.util.Map;
 import java.util.Optional;

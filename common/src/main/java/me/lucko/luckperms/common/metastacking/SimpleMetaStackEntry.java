@@ -29,19 +29,20 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.LocalizedNode;
-import me.lucko.luckperms.common.metastacking.definition.MetaStackElement;
+import me.lucko.luckperms.api.metastacking.MetaStackElement;
 
 import java.util.Map;
 import java.util.Optional;
 
 @Getter
 @RequiredArgsConstructor
-public class SimpleMetaStackEntry implements MetaStackEntry {
+class SimpleMetaStackEntry implements MetaStackEntry {
 
     private final MetaStack parentStack;
     private final MetaStackElement element;
-    private final MetaType type;
+    private final ChatMetaType type;
 
     @Getter(AccessLevel.NONE)
     private Map.Entry<Integer, String> current = null;

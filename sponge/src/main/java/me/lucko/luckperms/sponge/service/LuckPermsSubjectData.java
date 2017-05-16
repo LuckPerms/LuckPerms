@@ -32,6 +32,7 @@ import lombok.NonNull;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
+import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.DataMutateResult;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
@@ -41,7 +42,6 @@ import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.User;
-import me.lucko.luckperms.common.metastacking.MetaType;
 import me.lucko.luckperms.common.utils.ExtractedContexts;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
@@ -370,7 +370,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
         try (Timing i = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_SET_OPTION)) {
             if (key.equalsIgnoreCase("prefix") || key.equalsIgnoreCase("suffix")) {
                 // special handling.
-                MetaType type = MetaType.valueOf(key.toUpperCase());
+                ChatMetaType type = ChatMetaType.valueOf(key.toUpperCase());
 
                 // remove all prefixes/suffixes from the user
                 List<Node> toRemove = streamNodes(enduring)

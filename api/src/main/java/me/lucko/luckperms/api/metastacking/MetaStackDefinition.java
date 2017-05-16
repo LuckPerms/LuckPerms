@@ -23,15 +23,49 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.metastacking.definition;
+package me.lucko.luckperms.api.metastacking;
 
-import me.lucko.luckperms.api.LocalizedNode;
-import me.lucko.luckperms.common.metastacking.MetaType;
+import java.util.List;
 
-import java.util.Map;
+/**
+ * Represents a meta stack model, consisting of a chain of elements, separated by spacers.
+ *
+ * <p>The resultant string is constructed as:
+ * [start spacer] [element] [middle spacer] [element] [middle spacer] [element] [end spacer]</p>
+ *
+ * <p>Definitions can be passed to a users UserData instance using MetaContexts, and the result of this stack can be
+ * retrieved from the returned MetaData instance.</p>
+ *
+ * @since 2.3
+ */
+public interface MetaStackDefinition {
 
-public interface MetaStackElement {
+    /**
+     * Gets an immutable list of the elements in this stack definition
+     *
+     * @return the elements in this stack
+     */
+    List<MetaStackElement> getElements();
 
-    boolean shouldAccumulate(LocalizedNode node, MetaType type, Map.Entry<Integer, String> current);
+    /**
+     * Gets the spacer string added before any stack elements
+     *
+     * @return the start spacer
+     */
+    String getStartSpacer();
+
+    /**
+     * Gets the spacer added between stack elements
+     *
+     * @return the middle spacer
+     */
+    String getMiddleSpacer();
+
+    /**
+     * Gets the spacer added after any stack elements
+     *
+     * @return the end spacer
+     */
+    String getEndSpacer();
 
 }

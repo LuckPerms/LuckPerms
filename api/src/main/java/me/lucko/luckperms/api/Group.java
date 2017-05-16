@@ -22,6 +22,7 @@
 
 package me.lucko.luckperms.api;
 
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
@@ -41,7 +42,7 @@ public interface Group extends PermissionHolder {
     String getName();
 
     /**
-     * Check to see if a group inherits a group
+     * Check to see if a group inherits another group directly
      *
      * @param group The group to check membership of
      * @return true if the group inherits the other group
@@ -49,6 +50,26 @@ public interface Group extends PermissionHolder {
      * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      */
     boolean inheritsGroup(Group group);
+
+    /**
+     * Check to see if a group inherits another group directly
+     *
+     * @param group The group to check membership of
+     * @param contextSet the context set to filter by
+     * @return true if the group inherits the other group
+     * @throws NullPointerException  if the group is null
+     * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
+     * @since 3.2
+     */
+    boolean inheritsGroup(Group group, ContextSet contextSet);
+
+    /**
+     * Gets the weight of this group, if present.
+     *
+     * @return the group weight
+     * @since 2.17
+     */
+    OptionalInt getWeight();
 
     /**
      * Check to see if the group inherits a group on a specific server
@@ -59,7 +80,9 @@ public interface Group extends PermissionHolder {
      * @throws NullPointerException     if the group or server is null
      * @throws IllegalStateException    if the group instance was not obtained from LuckPerms.
      * @throws IllegalArgumentException if the server is invalid
+     * @deprecated in favour of {@link #inheritsGroup(Group, ContextSet)}
      */
+    @Deprecated
     boolean inheritsGroup(Group group, String server);
 
     /**
@@ -72,7 +95,9 @@ public interface Group extends PermissionHolder {
      * @throws NullPointerException     if the group, server or world is null
      * @throws IllegalStateException    if the group instance was not obtained from LuckPerms.
      * @throws IllegalArgumentException if the server or world is invalid
+     * @deprecated in favour of {@link #inheritsGroup(Group, ContextSet)}
      */
+    @Deprecated
     boolean inheritsGroup(Group group, String server, String world);
 
     /**
@@ -250,7 +275,9 @@ public interface Group extends PermissionHolder {
      * Get a {@link List} of all of the groups the group inherits, on all servers
      *
      * @return a {@link List} of group names
+     * @deprecated in favour of just querying a users permissions
      */
+    @Deprecated
     List<String> getGroupNames();
 
     /**
@@ -260,7 +287,9 @@ public interface Group extends PermissionHolder {
      * @return a {@link List} of group names
      * @throws NullPointerException     if the server is null
      * @throws IllegalArgumentException if the server is invalid
+     * @deprecated in favour of just querying a users permissions
      */
+    @Deprecated
     List<String> getLocalGroups(String server);
 
 
@@ -272,15 +301,9 @@ public interface Group extends PermissionHolder {
      * @return a {@link List} of group names
      * @throws NullPointerException     if the server or world is null
      * @throws IllegalArgumentException if the server or world is invalid
+     * @deprecated in favour of just querying a users permissions
      */
+    @Deprecated
     List<String> getLocalGroups(String server, String world);
-
-    /**
-     * Gets the weight of this group, is present.
-     *
-     * @return the group weight
-     * @since 2.17
-     */
-    OptionalInt getWeight();
 
 }

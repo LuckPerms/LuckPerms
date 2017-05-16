@@ -23,10 +23,10 @@
 package me.lucko.luckperms.api;
 
 /**
- * A wrapper interface for platform logger instances
+ * Represents the logger instance being used by LuckPerms on the platform.
  *
- * <p>Bukkit/Bungee both use java.util.logging, and Sponge uses org.slf4j. This class wraps those classes so the
- * commons module can access a logger.</p>
+ * <p>Messages sent using the logger are sent prefixed with the LuckPerms tag, and on some implementations will be colored
+ * depending on the message type.</p>
  */
 public interface Logger {
 

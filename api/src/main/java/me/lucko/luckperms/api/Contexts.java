@@ -165,6 +165,7 @@ public class Contexts {
         return this.applyGlobalWorldGroups;
     }
 
+    @Override
     public String toString() {
         return "Contexts(" +
                 "context=" + this.getContexts() + ", " +
@@ -181,18 +182,12 @@ public class Contexts {
      * Ugly auto-generated lombok code
      */
 
-    /**
-     * Check for equality
-     *
-     * @param o the other
-     * @return true if equal
-     * @since 2.12
-     */
+    @Override
     public boolean equals(Object o) {
         if (o == this) return true;
         if (!(o instanceof Contexts)) return false;
         final Contexts other = (Contexts) o;
-        return (this.getContexts() == null ? other.getContexts() == null : this.getContexts().equals(other.getContexts())) &&
+        return this.getContexts().equals(other.getContexts()) &&
                 this.isOp() == other.isOp() &&
                 this.isIncludeGlobal() == other.isIncludeGlobal() &&
                 this.isIncludeGlobalWorld() == other.isIncludeGlobalWorld() &&
@@ -201,12 +196,7 @@ public class Contexts {
                 this.isApplyGlobalWorldGroups() == other.isApplyGlobalWorldGroups();
     }
 
-    /**
-     * Gets the hashcode
-     *
-     * @return the hashcode
-     * @since 2.12
-     */
+    @Override
     public int hashCode() {
         final int PRIME = 59;
         int result = 1;

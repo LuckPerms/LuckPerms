@@ -28,8 +28,9 @@ package me.lucko.luckperms.common.metastacking;
 import lombok.AccessLevel;
 import lombok.Getter;
 
+import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.LocalizedNode;
-import me.lucko.luckperms.common.metastacking.definition.MetaStackDefinition;
+import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
 import java.util.ArrayList;
@@ -39,12 +40,12 @@ import java.util.List;
 public class GenericMetaStack implements MetaStack {
 
     private final MetaStackDefinition definition;
-    private final MetaType targetType;
+    private final ChatMetaType targetType;
 
     @Getter(AccessLevel.NONE)
     private final List<MetaStackEntry> entries;
 
-    public GenericMetaStack(MetaStackDefinition definition, MetaType targetType) {
+    public GenericMetaStack(MetaStackDefinition definition, ChatMetaType targetType) {
         this.definition = definition;
         this.targetType = targetType;
         this.entries = definition.getElements().stream()

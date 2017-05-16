@@ -1062,6 +1062,10 @@ public abstract class PermissionHolder {
         return group.getName().equalsIgnoreCase(this.getObjectName()) || hasPermission("group." + group.getName(), true);
     }
 
+    public boolean inheritsGroup(Group group, ContextSet contextSet) {
+        return group.getName().equalsIgnoreCase(this.getObjectName()) || hasPermission(NodeFactory.newBuilder("group." + group.getName()).withExtraContext(contextSet).build()).asBoolean();
+    }
+
     public boolean inheritsGroup(Group group, String server) {
         return group.getName().equalsIgnoreCase(this.getObjectName()) || hasPermission("group." + group.getName(), true, server);
     }

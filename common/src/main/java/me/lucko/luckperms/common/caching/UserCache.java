@@ -33,11 +33,16 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableSet;
 
+import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.caching.MetaContexts;
 import me.lucko.luckperms.api.caching.MetaData;
 import me.lucko.luckperms.api.caching.PermissionData;
 import me.lucko.luckperms.api.caching.UserData;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.metastacking.GenericMetaStack;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.ExtractedContexts;
 
 import java.util.Set;
@@ -79,7 +84,7 @@ public class UserCache implements UserData {
 
                 @Override
                 public MetaCache reload(MetaContexts contexts, MetaCache oldData) {
-                    oldData.loadMeta(user.accumulateMeta(contexts.newAccumulator(), null, ExtractedContexts.generate(contexts.getContexts())));
+                    oldData.loadMeta(user.accumulateMeta(newAccumulator(contexts), null, ExtractedContexts.generate(contexts.getContexts())));
                     return oldData;
                 }
             });
@@ -90,13 +95,14 @@ public class UserCache implements UserData {
     }
 
     @Override
-    public MetaData getMetaData(@NonNull Contexts contexts) {
-        // just create a MetaContexts instance using the values in the config
-        return getMetaData(MetaContexts.makeFromConfig(contexts, user.getPlugin()));
-    }
-
     public MetaData getMetaData(@NonNull MetaContexts contexts) {
         return meta.get(contexts);
+    }
+
+    @Override
+    public MetaData getMetaData(@NonNull Contexts contexts) {
+        // just create a MetaContexts instance using the values in the config
+        return getMetaData(makeFromMetaContextsConfig(contexts, user.getPlugin()));
     }
 
     @Override
@@ -107,15 +113,16 @@ public class UserCache implements UserData {
     }
 
     @Override
-    public MetaCache calculateMeta(@NonNull Contexts contexts) {
-        // just create a MetaContexts instance using the values in the config
-        return calculateMeta(MetaContexts.makeFromConfig(contexts, user.getPlugin()));
-    }
-
     public MetaCache calculateMeta(@NonNull MetaContexts contexts) {
         MetaCache data = new MetaCache();
-        data.loadMeta(user.accumulateMeta(contexts.newAccumulator(), null, ExtractedContexts.generate(contexts.getContexts())));
+        data.loadMeta(user.accumulateMeta(newAccumulator(contexts), null, ExtractedContexts.generate(contexts.getContexts())));
         return data;
+    }
+
+    @Override
+    public MetaCache calculateMeta(@NonNull Contexts contexts) {
+        // just create a MetaContexts instance using the values in the config
+        return calculateMeta(makeFromMetaContextsConfig(contexts, user.getPlugin()));
     }
 
     @Override
@@ -124,12 +131,13 @@ public class UserCache implements UserData {
     }
 
     @Override
-    public void recalculateMeta(@NonNull Contexts contexts) {
-        recalculateMeta(MetaContexts.makeFromConfig(contexts, user.getPlugin()));
-    }
-
     public void recalculateMeta(@NonNull MetaContexts contexts) {
         meta.refresh(contexts);
+    }
+
+    @Override
+    public void recalculateMeta(@NonNull Contexts contexts) {
+        recalculateMeta(makeFromMetaContextsConfig(contexts, user.getPlugin()));
     }
 
     @Override
@@ -152,7 +160,7 @@ public class UserCache implements UserData {
     @Override
     public void preCalculate(@NonNull Contexts contexts) {
         permission.get(contexts);
-        meta.get(MetaContexts.makeFromConfig(contexts, user.getPlugin()));
+        meta.get(makeFromMetaContextsConfig(contexts, user.getPlugin()));
     }
 
     public void invalidateCache() {
@@ -173,6 +181,21 @@ public class UserCache implements UserData {
     public void clear() {
         permission.invalidateAll();
         meta.invalidateAll();
+    }
+
+    private static MetaContexts makeFromMetaContextsConfig(Contexts contexts, LuckPermsPlugin plugin) {
+        return new MetaContexts(
+                contexts,
+                plugin.getConfiguration().get(ConfigKeys.PREFIX_FORMATTING_OPTIONS),
+                plugin.getConfiguration().get(ConfigKeys.SUFFIX_FORMATTING_OPTIONS)
+        );
+    }
+
+    private static MetaAccumulator newAccumulator(MetaContexts contexts) {
+        return new MetaAccumulator(
+                new GenericMetaStack(contexts.getPrefixStackDefinition(), ChatMetaType.PREFIX),
+                new GenericMetaStack(contexts.getSuffixStackDefinition(), ChatMetaType.SUFFIX)
+        );
     }
 
 }

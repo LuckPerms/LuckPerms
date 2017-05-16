@@ -22,6 +22,8 @@
 
 package me.lucko.luckperms.api.caching;
 
+import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
+
 import java.util.Map;
 import java.util.SortedMap;
 
@@ -68,5 +70,21 @@ public interface MetaData {
      * @return a suffix string, or null
      */
     String getSuffix();
+
+    /**
+     * Gets the definition used for the prefix stack
+     *
+     * @return the definition used for the prefix stack
+     * @since 3.2
+     */
+    MetaStackDefinition getPrefixStackDefinition();
+
+    /**
+     * Gets the definition used for the suffix stack
+     *
+     * @return the definition used for the suffix stack
+     * @since 3.2
+     */
+    MetaStackDefinition getSuffixStackDefinition();
 
 }

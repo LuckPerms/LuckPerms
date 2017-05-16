@@ -33,6 +33,7 @@ import com.google.common.base.Preconditions;
 
 import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
@@ -71,8 +72,13 @@ public final class GroupDelegate extends PermissionHolderDelegate implements Gro
     }
 
     @Override
+    public boolean inheritsGroup(@NonNull Group group, @NonNull ContextSet contextSet) {
+        return handle.inheritsGroup(cast(group), contextSet);
+    }
+
+    @Override
     public boolean inheritsGroup(@NonNull Group group, @NonNull String server) {
-        return handle.inheritsGroup(((GroupDelegate) group).getHandle(), server);
+        return handle.inheritsGroup(cast(group), server);
     }
 
     @Override

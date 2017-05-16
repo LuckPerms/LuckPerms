@@ -49,7 +49,7 @@ public final class LuckPerms {
     }
 
     /**
-     * Gets an instance of {@link LuckPermsApi} safely.
+     * Gets an instance of {@link LuckPermsApi}, if it is loaded.
      *
      * <p> Unlike {@link LuckPerms#getApi}, this method will not throw an {@link IllegalStateException} if the API is
      * not loaded, rather return an empty {@link Optional}.
@@ -60,10 +60,12 @@ public final class LuckPerms {
         return Optional.ofNullable(api);
     }
 
+    /* method used by the implementation to set the singleton instance */
     static void registerProvider(LuckPermsApi luckPermsApi) {
         api = luckPermsApi;
     }
 
+    /* method used by the implementation to remove any previous instance */
     static void unregisterProvider() {
         api = null;
     }

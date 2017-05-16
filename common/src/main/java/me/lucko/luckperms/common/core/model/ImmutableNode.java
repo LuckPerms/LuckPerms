@@ -36,7 +36,6 @@ import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
@@ -266,16 +265,6 @@ public final class ImmutableNode implements Node {
     }
 
     @Override
-    public Tristate getTristate() {
-        return Tristate.fromBoolean(value);
-    }
-
-    @Override
-    public boolean isNegated() {
-        return !value;
-    }
-
-    @Override
     public Optional<String> getServer() {
         return optServer;
     }
@@ -308,11 +297,6 @@ public final class ImmutableNode implements Node {
     @Override
     public boolean isTemporary() {
         return expireAt != 0L;
-    }
-
-    @Override
-    public boolean isPermanent() {
-        return !isTemporary();
     }
 
     @Override

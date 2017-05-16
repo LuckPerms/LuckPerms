@@ -23,34 +23,42 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.metastacking.definition;
+package me.lucko.luckperms.common.api.delegates;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import lombok.AllArgsConstructor;
 import lombok.NonNull;
-import lombok.ToString;
 
 import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
 import me.lucko.luckperms.api.metastacking.MetaStackElement;
+import me.lucko.luckperms.api.metastacking.MetaStackFactory;
+import me.lucko.luckperms.common.metastacking.definition.SimpleMetaStackDefinition;
+import me.lucko.luckperms.common.metastacking.definition.StandardStackElements;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.List;
+import java.util.Optional;
 
-@Getter
-@EqualsAndHashCode
-@ToString
-public final class SimpleMetaStackDefinition implements MetaStackDefinition {
+@AllArgsConstructor
+public class MetaStackFactoryDelegate implements MetaStackFactory {
+    public final LuckPermsPlugin plugin;
 
-    private final List<MetaStackElement> elements;
-    private final String startSpacer;
-    private final String middleSpacer;
-    private final String endSpacer;
+    @Override
+    public Optional<MetaStackElement> fromString(@NonNull String definition) {
+        return StandardStackElements.parseFromString(plugin, definition);
+    }
 
-    public SimpleMetaStackDefinition(@NonNull List<MetaStackElement> elements, @NonNull String startSpacer, @NonNull String middleSpacer, @NonNull String endSpacer) {
-        this.elements = ImmutableList.copyOf(elements);
-        this.startSpacer = startSpacer;
-        this.middleSpacer = middleSpacer;
-        this.endSpacer = endSpacer;
+    @Override
+    public List<MetaStackElement> fromStrings(@NonNull List<String> definitions) {
+        if (definitions.isEmpty()) {
+            return ImmutableList.of();
+        }
+        return StandardStackElements.parseList(plugin, definitions);
+    }
+
+    @Override
+    public MetaStackDefinition createDefinition(List<MetaStackElement> elements, String startSpacer, String middleSpacer, String endSpacer) {
+        return new SimpleMetaStackDefinition(elements, startSpacer, middleSpacer, endSpacer);
     }
 }

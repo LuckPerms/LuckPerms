@@ -36,7 +36,10 @@ public interface NodeFactory {
      * @param value                the value of the node
      * @return a node instance
      * @throws NullPointerException if the permission is null
+     * @deprecated since this format isn't used internally for permissions anymore
+     * @see Node#toSerializedNode()
      */
+    @Deprecated
     Node fromSerialisedNode(String serialisedPermission, boolean value);
 
 
@@ -65,7 +68,10 @@ public interface NodeFactory {
      * @param value                the value of the node
      * @return a node builder instance
      * @throws NullPointerException if the permission is null
+     * @deprecated since this format isn't used internally for permissions anymore
+     * @see Node#toSerializedNode()
      */
+    @Deprecated
     Node.Builder newBuilderFromSerialisedNode(String serialisedPermission, boolean value);
 
 
@@ -89,6 +95,17 @@ public interface NodeFactory {
      * @throws NullPointerException if the key or value is null
      */
     Node.Builder makeMetaNode(String key, String value);
+
+    /**
+     * Creates a node builder for the given chat meta type
+     *
+     * @param priority the priority
+     * @param value the value for the prefix/suffix
+     * @return a node builder instance
+     * @throws NullPointerException if the type or value is null
+     * @since 3.2
+     */
+    Node.Builder makeChatMetaNode(ChatMetaType type, int priority, String value);
 
     /**
      * Creates a node builder from a prefix string and priority

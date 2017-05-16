@@ -23,14 +23,20 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.metastacking;
-
-import me.lucko.luckperms.api.Node;
+package me.lucko.luckperms.api;
 
 import java.util.Map;
 
-public enum MetaType {
+/**
+ * Represents a type of chat meta
+ *
+ * @since 3.2
+ */
+public enum ChatMetaType {
 
+    /**
+     * Represents a prefix
+     */
     PREFIX {
         @Override
         public boolean matches(Node node) {
@@ -48,6 +54,9 @@ public enum MetaType {
         }
     },
 
+    /**
+     * Represents a suffix
+     */
     SUFFIX {
         @Override
         public boolean matches(Node node) {
@@ -65,10 +74,29 @@ public enum MetaType {
         }
     };
 
+    /**
+     * Returns if the passed node matches the type
+     *
+     * @param node the node to test
+     * @return true if the node has the same type
+     */
     public abstract boolean matches(Node node);
 
+    /**
+     * Returns if the passed node should be ignored when searching for meta of this type
+     *
+     * @param node the node to test
+     * @return true if the node does not share the same type
+     */
     public abstract boolean shouldIgnore(Node node);
 
+    /**
+     * Maps the corresponding entry from the given node
+     *
+     * @param node the node to retrieve the entry from
+     * @return the entry
+     * @throws IllegalStateException if the node does not share the same type
+     */
     public abstract Map.Entry<Integer, String> getEntry(Node node);
 
 }

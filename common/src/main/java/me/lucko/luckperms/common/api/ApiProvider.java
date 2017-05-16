@@ -43,6 +43,7 @@ import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.UuidCache;
 import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.common.api.delegates.MetaStackFactoryDelegate;
 import me.lucko.luckperms.common.api.delegates.NodeFactoryDelegate;
 import me.lucko.luckperms.common.api.delegates.UserDelegate;
 import me.lucko.luckperms.common.core.UserIdentifier;
@@ -69,10 +70,14 @@ public class ApiProvider implements LuckPermsApi {
     @Getter
     private final EventFactory eventFactory;
 
+    @Getter
+    private final MetaStackFactoryDelegate metaStackFactory;
+
     public ApiProvider(LuckPermsPlugin plugin) {
         this.plugin = plugin;
         this.eventBus = new LuckPermsEventBus(plugin);
         this.eventFactory = new EventFactory(eventBus);
+        this.metaStackFactory = new MetaStackFactoryDelegate(plugin);
     }
 
     @Override
@@ -82,7 +87,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public double getApiVersion() {
-        return 3.1;
+        return 3.2;
     }
 
     @Override

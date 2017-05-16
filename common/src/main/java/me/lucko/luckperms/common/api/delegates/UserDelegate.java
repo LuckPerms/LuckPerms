@@ -34,6 +34,7 @@ import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.caching.UserData;
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
@@ -96,8 +97,12 @@ public final class UserDelegate extends PermissionHolderDelegate implements User
     }
 
     @Override
+    public UserData getCachedData() {
+        return handle.getUserData();
+    }
+
+    @Override
     public Optional<UserData> getUserDataCache() {
-        // TODO Deprecate this and return a nonnull instance
         return Optional.of(handle.getUserData());
     }
 
@@ -112,13 +117,18 @@ public final class UserDelegate extends PermissionHolderDelegate implements User
     }
 
     @Override
+    public boolean isInGroup(@NonNull Group group, @NonNull ContextSet contextSet) {
+        return handle.inheritsGroup(GroupDelegate.cast(group), contextSet);
+    }
+
+    @Override
     public boolean isInGroup(@NonNull Group group, @NonNull String server) {
-        return handle.inheritsGroup(((GroupDelegate) group).getHandle(), server);
+        return handle.inheritsGroup(GroupDelegate.cast(group), server);
     }
 
     @Override
     public boolean isInGroup(@NonNull Group group, @NonNull String server, @NonNull String world) {
-        return handle.inheritsGroup(((GroupDelegate) group).getHandle(), server, world);
+        return handle.inheritsGroup(GroupDelegate.cast(group), server, world);
     }
 
     @Override

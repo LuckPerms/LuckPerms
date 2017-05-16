@@ -25,14 +25,15 @@
 
 package me.lucko.luckperms.common.metastacking;
 
+import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.LocalizedNode;
-import me.lucko.luckperms.common.metastacking.definition.MetaStackDefinition;
+import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
 
 public interface MetaStack {
 
     MetaStackDefinition getDefinition();
 
-    MetaType getTargetType();
+    ChatMetaType getTargetType();
 
     String toFormattedString();
 

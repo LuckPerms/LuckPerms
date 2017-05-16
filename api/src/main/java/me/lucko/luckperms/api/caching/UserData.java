@@ -32,6 +32,10 @@ import java.util.Set;
  * <p>Data is only likely to be available for online users. All calls will account for inheritance, as well as any
  * default data provided by the platform. This calls are heavily cached and are therefore fast.</p>
  *
+ * <p>For meta, both methods accepting {@link Contexts} and {@link MetaContexts} are provided. The only difference is that
+ * the latter allows you to define how the meta stack should be structured internally. Where {@link Contexts} are passed, the
+ * values from the configuration are used.</p>
+ *
  * @since 2.13
  */
 public interface UserData {
@@ -46,6 +50,18 @@ public interface UserData {
      * @throws NullPointerException if contexts is null
      */
     PermissionData getPermissionData(Contexts contexts);
+
+    /**
+     * Gets MetaData from the cache, given a specified context.
+     *
+     * <p>If the data is not cached, it is calculated. Therefore, this call could be costly.</p>
+     *
+     * @param contexts the contexts to get the permission data in
+     * @return a meta data instance
+     * @throws NullPointerException if contexts is null
+     * @since 3.2
+     */
+    MetaData getMetaData(MetaContexts contexts);
 
     /**
      * Gets MetaData from the cache, given a specified context.
@@ -73,6 +89,16 @@ public interface UserData {
      * @param contexts the contexts to get meta data in
      * @return a meta data instance
      * @throws NullPointerException if contexts is null
+     * @since 3.2
+     */
+    MetaData calculateMeta(MetaContexts contexts);
+
+    /**
+     * Calculates meta data, bypassing the cache.
+     *
+     * @param contexts the contexts to get meta data in
+     * @return a meta data instance
+     * @throws NullPointerException if contexts is null
      */
     MetaData calculateMeta(Contexts contexts);
 
@@ -86,6 +112,18 @@ public interface UserData {
      * @throws NullPointerException if contexts is null
      */
     void recalculatePermissions(Contexts contexts);
+
+    /**
+     * Calculates meta data and stores it in the cache.
+     *
+     * <p>If there is already data cached for the given contexts, and if the resultant output is different,
+     * the cached value is updated.</p>
+     *
+     * @param contexts the contexts to recalculate in.
+     * @throws NullPointerException if contexts is null
+     * @since 3.2
+     */
+    void recalculateMeta(MetaContexts contexts);
 
     /**
      * Calculates meta data and stores it in the cache.

@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.commands.impl.generic.meta;
 
+import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.DataMutateResult;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.MutableContextSet;
@@ -42,7 +43,6 @@ import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.TemporaryModifier;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
-import me.lucko.luckperms.common.metastacking.MetaType;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
@@ -52,13 +52,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class MetaAddTempChatMeta extends SharedSubCommand {
-    private final MetaType type;
+    private final ChatMetaType type;
 
-    public MetaAddTempChatMeta(MetaType type) {
+    public MetaAddTempChatMeta(ChatMetaType type) {
         super("addtemp" + type.name().toLowerCase(),
                 "Adds a " + type.name().toLowerCase() + " temporarily",
-                type == MetaType.PREFIX ? Permission.USER_META_ADDTEMP_PREFIX : Permission.USER_META_ADDTEMP_SUFFIX,
-                type == MetaType.PREFIX ? Permission.GROUP_META_ADDTEMP_PREFIX : Permission.GROUP_META_ADDTEMP_SUFFIX,
+                type == ChatMetaType.PREFIX ? Permission.USER_META_ADDTEMP_PREFIX : Permission.USER_META_ADDTEMP_SUFFIX,
+                type == ChatMetaType.PREFIX ? Permission.GROUP_META_ADDTEMP_PREFIX : Permission.GROUP_META_ADDTEMP_SUFFIX,
                 Predicates.inRange(0, 2),
                 Arg.list(
                         Arg.create("priority", true, "the priority to add the " + type.name().toLowerCase() + " at"),

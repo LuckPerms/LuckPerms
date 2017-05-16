@@ -30,9 +30,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.UtilityClass;
 
+import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.LocalizedNode;
+import me.lucko.luckperms.api.metastacking.MetaStackElement;
 import me.lucko.luckperms.common.core.model.Track;
-import me.lucko.luckperms.common.metastacking.MetaType;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
@@ -167,7 +168,7 @@ public class StandardStackElements {
     @ToString
     private static final class HighestPriority implements MetaStackElement {
         @Override
-        public boolean shouldAccumulate(LocalizedNode node, MetaType type, Map.Entry<Integer, String> current) {
+        public boolean shouldAccumulate(LocalizedNode node, ChatMetaType type, Map.Entry<Integer, String> current) {
             if (type.shouldIgnore(node)) {
                 return false;
             }
@@ -180,7 +181,7 @@ public class StandardStackElements {
     @ToString
     private static final class HighestPriorityOwn implements MetaStackElement {
         @Override
-        public boolean shouldAccumulate(LocalizedNode node, MetaType type, Map.Entry<Integer, String> current) {
+        public boolean shouldAccumulate(LocalizedNode node, ChatMetaType type, Map.Entry<Integer, String> current) {
             if (type.shouldIgnore(node)) {
                 return false;
             }
@@ -202,7 +203,7 @@ public class StandardStackElements {
         private final String trackName;
 
         @Override
-        public boolean shouldAccumulate(LocalizedNode node, MetaType type, Map.Entry<Integer, String> current) {
+        public boolean shouldAccumulate(LocalizedNode node, ChatMetaType type, Map.Entry<Integer, String> current) {
             if (type.shouldIgnore(node)) {
                 return false;
             }
@@ -220,7 +221,7 @@ public class StandardStackElements {
         private final String trackName;
 
         @Override
-        public boolean shouldAccumulate(LocalizedNode node, MetaType type, Map.Entry<Integer, String> current) {
+        public boolean shouldAccumulate(LocalizedNode node, ChatMetaType type, Map.Entry<Integer, String> current) {
             if (type.shouldIgnore(node)) {
                 return false;
             }
@@ -233,7 +234,7 @@ public class StandardStackElements {
     @ToString
     private static final class LowestPriority implements MetaStackElement {
         @Override
-        public boolean shouldAccumulate(LocalizedNode node, MetaType type, Map.Entry<Integer, String> current) {
+        public boolean shouldAccumulate(LocalizedNode node, ChatMetaType type, Map.Entry<Integer, String> current) {
             if (type.shouldIgnore(node)) {
                 return false;
             }
@@ -246,7 +247,7 @@ public class StandardStackElements {
     @ToString
     private static final class LowestPriorityOwn implements MetaStackElement {
         @Override
-        public boolean shouldAccumulate(LocalizedNode node, MetaType type, Map.Entry<Integer, String> current) {
+        public boolean shouldAccumulate(LocalizedNode node, ChatMetaType type, Map.Entry<Integer, String> current) {
             if (type.shouldIgnore(node)) {
                 return false;
             }
@@ -268,7 +269,7 @@ public class StandardStackElements {
         private final String trackName;
 
         @Override
-        public boolean shouldAccumulate(LocalizedNode node, MetaType type, Map.Entry<Integer, String> current) {
+        public boolean shouldAccumulate(LocalizedNode node, ChatMetaType type, Map.Entry<Integer, String> current) {
             if (type.shouldIgnore(node)) {
                 return false;
             }
@@ -286,7 +287,7 @@ public class StandardStackElements {
         private final String trackName;
 
         @Override
-        public boolean shouldAccumulate(LocalizedNode node, MetaType type, Map.Entry<Integer, String> current) {
+        public boolean shouldAccumulate(LocalizedNode node, ChatMetaType type, Map.Entry<Integer, String> current) {
             if (type.shouldIgnore(node)) {
                 return false;
             }

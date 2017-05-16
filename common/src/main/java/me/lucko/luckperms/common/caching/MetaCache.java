@@ -32,6 +32,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedMap;
 
 import me.lucko.luckperms.api.caching.MetaData;
+import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
 import me.lucko.luckperms.common.metastacking.MetaStack;
 
 import java.util.Map;
@@ -92,6 +93,16 @@ public class MetaCache implements MetaData {
         } finally {
             lock.readLock().unlock();
         }
+    }
+
+    @Override
+    public MetaStackDefinition getPrefixStackDefinition() {
+        return prefixStack.getDefinition();
+    }
+
+    @Override
+    public MetaStackDefinition getSuffixStackDefinition() {
+        return suffixStack.getDefinition();
     }
 
 }

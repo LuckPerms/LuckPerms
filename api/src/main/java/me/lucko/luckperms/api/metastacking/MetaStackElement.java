@@ -23,30 +23,31 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.metastacking.definition;
+package me.lucko.luckperms.api.metastacking;
 
-import me.lucko.luckperms.common.metastacking.GenericMetaStack;
-import me.lucko.luckperms.common.metastacking.MetaStack;
-import me.lucko.luckperms.common.metastacking.MetaType;
+import me.lucko.luckperms.api.ChatMetaType;
+import me.lucko.luckperms.api.LocalizedNode;
+import me.lucko.luckperms.api.Node;
 
-import java.util.List;
+import java.util.Map;
 
-public interface MetaStackDefinition {
+/**
+ * Represents an element within a {@link MetaStackDefinition}.
+ *
+ * @since 3.2
+ */
+public interface MetaStackElement {
 
-    static MetaStackDefinition create(List<MetaStackElement> elements, String startSpacer, String middleSpacer, String endSpacer) {
-        return new SimpleMetaStackDefinition(elements, startSpacer, middleSpacer, endSpacer);
-    }
-
-    List<MetaStackElement> getElements();
-
-    String getStartSpacer();
-
-    String getMiddleSpacer();
-
-    String getEndSpacer();
-
-    default MetaStack newStack(MetaType type) {
-        return new GenericMetaStack(this, type);
-    }
+    /**
+     * Returns if the given node should be accumulated onto the stack.
+     *
+     * <p>The element being considered can be retrieved using {@link ChatMetaType#getEntry(Node)}.</p>
+     *
+     * @param node the node being considered
+     * @param type the type of entry being accumulated
+     * @param current the current value being used. If this returns true, the current value will be replaced by this entry
+     * @return true if the node should be accumulated into this element, replacing the current value
+     */
+    boolean shouldAccumulate(LocalizedNode node, ChatMetaType type, Map.Entry<Integer, String> current);
 
 }

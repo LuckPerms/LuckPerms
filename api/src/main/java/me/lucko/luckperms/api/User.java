@@ -23,6 +23,7 @@
 package me.lucko.luckperms.api;
 
 import me.lucko.luckperms.api.caching.UserData;
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
@@ -45,19 +46,22 @@ public interface User extends PermissionHolder {
     /**
      * Gets the users username, or null if no username is associated with this user
      *
-     * @return the Users Username
+     * @return the users username
      */
     String getName();
 
     /**
-     * Gets the users primary group
+     * Gets the users  current primary group.
+     *
+     * <p>The result of this method depends on which method is configured for primary group calculation. It may not
+     * be the same as any value set through {@link #setPrimaryGroup(String)}.</p>
      *
      * @return the users primary group
      */
     String getPrimaryGroup();
 
     /**
-     * Sets a users primary group
+     * Sets a users primary group. This will only take effect if platform is using stored primary groups.
      *
      * @param group the new primary group
      * @throws ObjectAlreadyHasException if the user already has this set as their primary group
@@ -69,34 +73,58 @@ public interface User extends PermissionHolder {
     /**
      * Refresh and re-assign the users permissions.
      *
-     * <p>This request is not buffered, and the refresh call will be ran directly. This should ideally be called on
-     * an asynchronous thread.</p>
+     * <p>This request is not buffered, and the refresh call will be ran directly. This should be called on an
+     * asynchronous thread.</p>
      */
     void refreshPermissions();
+
+    /**
+     * Gets the user's {@link UserData} cache.
+     *
+     * @return the users cached data.
+     * @since 3.2
+     */
+    UserData getCachedData();
+
+    /**
+     * Check to see if the user is a direct member of a group
+     *
+     * @param group The group to check membership of
+     * @return true if the user is a member of the group
+     * @throws NullPointerException if the group is null
+     * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
+     */
+    boolean isInGroup(Group group);
+
+    /**
+     * Check to see if the user is a direct member of a group in a specific context
+     *
+     * @param group the group to check membership of
+     * @param contextSet the context set to filter by
+     * @return true if the user is a member of the group
+     * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
+     * @since 3.2
+     */
+    boolean isInGroup(Group group, ContextSet contextSet);
 
     /**
      * Gets the user's {@link UserData} cache, if they have one setup.
      *
      * @return an optional, possibly containing the user's cached lookup data.
      * @since 2.13
+     * @deprecated in version 3.2, as this cache is now always loaded
      */
+    @Deprecated
     Optional<UserData> getUserDataCache();
 
     /**
      * Sets up the users data cache, if the don't have one setup already.
      *
      * @since 2.17
+     * @deprecated in version 3.2, as this cache is now always loaded.
      */
+    @Deprecated
     void setupDataCache();
-
-    /**
-     * Check to see if the user is a member of a group
-     *
-     * @param group The group to check membership of
-     * @return true if the user is a member of the group
-     * @throws NullPointerException if the group is null
-     */
-    boolean isInGroup(Group group);
 
     /**
      * Check to see if a user is a member of a group on a specific server
@@ -106,7 +134,9 @@ public interface User extends PermissionHolder {
      * @return true if the user is a member of the group
      * @throws NullPointerException     if the group or server is null
      * @throws IllegalArgumentException if the server is invalid
+     * @deprecated in favour of {@link #isInGroup(Group, ContextSet)}
      */
+    @Deprecated
     boolean isInGroup(Group group, String server);
 
     /**
@@ -118,7 +148,9 @@ public interface User extends PermissionHolder {
      * @return true if the user is a member of the group
      * @throws NullPointerException     if the group, server or world is null
      * @throws IllegalArgumentException if the server or world is invalid
+     * @deprecated in favour of {@link #isInGroup(Group, ContextSet)}
      */
+    @Deprecated
     boolean isInGroup(Group group, String server, String world);
 
     /**
@@ -296,7 +328,9 @@ public interface User extends PermissionHolder {
      * Get a {@link List} of all of the groups the user is a member of, on all servers
      *
      * @return a {@link List} of group names
+     * @deprecated in favour of just querying a users permissions
      */
+    @Deprecated
     List<String> getGroupNames();
 
     /**
@@ -307,7 +341,9 @@ public interface User extends PermissionHolder {
      * @return a {@link List} of group names
      * @throws NullPointerException     if the server or world is null
      * @throws IllegalArgumentException if the server or world is invalid
+     * @deprecated in favour of just querying a users permissions
      */
+    @Deprecated
     List<String> getLocalGroups(String server, String world);
 
     /**
@@ -317,7 +353,9 @@ public interface User extends PermissionHolder {
      * @return a {@link List} of group names
      * @throws NullPointerException     if the server is null
      * @throws IllegalArgumentException if the server is invalid
+     * @deprecated in favour of just querying a users permissions
      */
+    @Deprecated
     List<String> getLocalGroups(String server);
 
 }
