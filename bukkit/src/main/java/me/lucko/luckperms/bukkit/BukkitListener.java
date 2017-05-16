@@ -255,8 +255,9 @@ public class BukkitListener implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onWorldChange(PlayerChangedWorldEvent e) {
+        plugin.getContextManager().invalidateCache(e.getPlayer());
         plugin.refreshAutoOp(e.getPlayer());
     }
 }

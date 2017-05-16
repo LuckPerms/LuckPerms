@@ -62,6 +62,10 @@ public class ContextManager<T> {
         return cache.get(subject);
     }
 
+    public void invalidateCache(T subject){
+        cache.invalidate(subject);
+    }
+
     public void registerCalculator(ContextCalculator<T> calculator) {
         // calculators registered first should have priority (and be checked last.)
         calculators.add(0, calculator);
