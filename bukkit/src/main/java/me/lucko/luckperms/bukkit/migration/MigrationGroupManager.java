@@ -35,6 +35,7 @@ import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeFactory;
+import me.lucko.luckperms.common.metastacking.MetaType;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.common.utils.ProgressLogger;
@@ -172,7 +173,8 @@ public class MigrationGroupManager extends SubCommand<Object> {
                     }
 
                     if (key.equals("prefix") || key.equals("suffix")) {
-                        groups.get(groupName).add(NodeFactory.makeChatMetaNode(key.equals("prefix"), 50, value).setWorld(worldMappingFunc.apply(world)).build());
+                        MetaType type = MetaType.valueOf(key.toUpperCase());
+                        groups.get(groupName).add(NodeFactory.makeChatMetaNode(type, 50, value).setWorld(worldMappingFunc.apply(world)).build());
                     } else {
                         groups.get(groupName).add(NodeFactory.makeMetaNode(key, value).setWorld(worldMappingFunc.apply(world)).build());
                     }
@@ -228,7 +230,8 @@ public class MigrationGroupManager extends SubCommand<Object> {
                     }
 
                     if (key.equals("prefix") || key.equals("suffix")) {
-                        users.get(uuid).add(NodeFactory.makeChatMetaNode(key.equals("prefix"), 100, value).setWorld(worldMappingFunc.apply(world)).build());
+                        MetaType type = MetaType.valueOf(key.toUpperCase());
+                        users.get(uuid).add(NodeFactory.makeChatMetaNode(type, 100, value).setWorld(worldMappingFunc.apply(world)).build());
                     } else {
                         users.get(uuid).add(NodeFactory.makeMetaNode(key, value).setWorld(worldMappingFunc.apply(world)).build());
                     }

@@ -23,51 +23,22 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.caching.stacking.elements;
-
-import lombok.RequiredArgsConstructor;
+package me.lucko.luckperms.common.metastacking;
 
 import me.lucko.luckperms.api.LocalizedNode;
-import me.lucko.luckperms.common.caching.stacking.MetaStackElement;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.metastacking.definition.MetaStackElement;
 
 import java.util.Map;
 import java.util.Optional;
 
-@RequiredArgsConstructor
-public class HighestPriorityTrackElement implements MetaStackElement {
-    private final boolean prefix;
-    private final LuckPermsPlugin plugin;
-    private final String trackName;
+public interface MetaStackEntry {
 
-    private Map.Entry<Integer, String> entry = null;
+    MetaStack getParentStack();
 
-    @Override
-    public Optional<Map.Entry<Integer, String>> getEntry() {
-        return Optional.ofNullable(entry);
-    }
+    MetaStackElement getElement();
 
-    @Override
-    public boolean accumulateNode(LocalizedNode node) {
-        if (MetaStackElement.checkMetaType(prefix, node)) {
-            return false;
-        }
+    Optional<Map.Entry<Integer, String>> getEntry();
 
-        Map.Entry<Integer, String> entry = prefix ? node.getPrefix() : node.getSuffix();
-        if (HighestPriorityElement.compareEntries(this.entry, entry)) {
-            return false;
-        }
+    boolean accumulateNode(LocalizedNode node);
 
-        if (MetaStackElement.checkTrackElement(plugin, node, trackName)) {
-            return false;
-        }
-
-        this.entry = entry;
-        return true;
-    }
-
-    @Override
-    public MetaStackElement copy() {
-        return new HighestPriorityTrackElement(prefix, plugin, trackName);
-    }
 }

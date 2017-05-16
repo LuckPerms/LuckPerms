@@ -69,17 +69,17 @@ public class UserCache implements UserData {
                 }
             });
 
-    private final LoadingCache<Contexts, MetaCache> meta = Caffeine.newBuilder()
+    private final LoadingCache<MetaContexts, MetaCache> meta = Caffeine.newBuilder()
             .expireAfterAccess(10, TimeUnit.MINUTES)
-            .build(new CacheLoader<Contexts, MetaCache>() {
+            .build(new CacheLoader<MetaContexts, MetaCache>() {
                 @Override
-                public MetaCache load(Contexts contexts) {
+                public MetaCache load(MetaContexts contexts) {
                     return calculateMeta(contexts);
                 }
 
                 @Override
-                public MetaCache reload(Contexts contexts, MetaCache oldData) {
-                    oldData.loadMeta(user.accumulateMeta(null, null, ExtractedContexts.generate(contexts)));
+                public MetaCache reload(MetaContexts contexts, MetaCache oldData) {
+                    oldData.loadMeta(user.accumulateMeta(contexts.newAccumulator(), null, ExtractedContexts.generate(contexts.getContexts())));
                     return oldData;
                 }
             });
@@ -91,6 +91,11 @@ public class UserCache implements UserData {
 
     @Override
     public MetaData getMetaData(@NonNull Contexts contexts) {
+        // just create a MetaContexts instance using the values in the config
+        return getMetaData(MetaContexts.makeFromConfig(contexts, user.getPlugin()));
+    }
+
+    public MetaData getMetaData(@NonNull MetaContexts contexts) {
         return meta.get(contexts);
     }
 
@@ -103,8 +108,13 @@ public class UserCache implements UserData {
 
     @Override
     public MetaCache calculateMeta(@NonNull Contexts contexts) {
+        // just create a MetaContexts instance using the values in the config
+        return calculateMeta(MetaContexts.makeFromConfig(contexts, user.getPlugin()));
+    }
+
+    public MetaCache calculateMeta(@NonNull MetaContexts contexts) {
         MetaCache data = new MetaCache();
-        data.loadMeta(user.accumulateMeta(null, null, ExtractedContexts.generate(contexts)));
+        data.loadMeta(user.accumulateMeta(contexts.newAccumulator(), null, ExtractedContexts.generate(contexts.getContexts())));
         return data;
     }
 
@@ -115,6 +125,10 @@ public class UserCache implements UserData {
 
     @Override
     public void recalculateMeta(@NonNull Contexts contexts) {
+        recalculateMeta(MetaContexts.makeFromConfig(contexts, user.getPlugin()));
+    }
+
+    public void recalculateMeta(@NonNull MetaContexts contexts) {
         meta.refresh(contexts);
     }
 
@@ -126,7 +140,7 @@ public class UserCache implements UserData {
 
     @Override
     public void recalculateMeta() {
-        Set<Contexts> keys = ImmutableSet.copyOf(meta.asMap().keySet());
+        Set<MetaContexts> keys = ImmutableSet.copyOf(meta.asMap().keySet());
         keys.forEach(meta::refresh);
     }
 
@@ -138,7 +152,7 @@ public class UserCache implements UserData {
     @Override
     public void preCalculate(@NonNull Contexts contexts) {
         permission.get(contexts);
-        meta.get(contexts);
+        meta.get(MetaContexts.makeFromConfig(contexts, user.getPlugin()));
     }
 
     public void invalidateCache() {

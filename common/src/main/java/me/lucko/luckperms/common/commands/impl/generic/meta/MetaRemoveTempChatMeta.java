@@ -39,30 +39,29 @@ import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
+import me.lucko.luckperms.common.metastacking.MetaType;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class MetaRemoveTempChatMeta extends SharedSubCommand {
-    private static final Function<Boolean, String> DESCRIPTOR = b -> b ? "prefix" : "suffix";
-    private final boolean isPrefix;
+    private final MetaType type;
 
-    public MetaRemoveTempChatMeta(boolean isPrefix) {
-        super("removetemp" + DESCRIPTOR.apply(isPrefix),
-                "Removes a temporary " + DESCRIPTOR.apply(isPrefix),
-                isPrefix ? Permission.USER_META_REMOVETEMP_PREFIX : Permission.USER_META_REMOVETEMP_SUFFIX,
-                isPrefix ? Permission.GROUP_META_REMOVETEMP_PREFIX : Permission.GROUP_META_REMOVETEMP_SUFFIX,
+    public MetaRemoveTempChatMeta(MetaType type) {
+        super("removetemp" +type.name().toLowerCase(),
+                "Removes a temporary " + type.name().toLowerCase(),
+                type == MetaType.PREFIX ? Permission.USER_META_REMOVETEMP_PREFIX : Permission.USER_META_REMOVETEMP_SUFFIX,
+                type == MetaType.PREFIX ? Permission.GROUP_META_REMOVETEMP_PREFIX : Permission.GROUP_META_REMOVETEMP_SUFFIX,
                 Predicates.is(0),
                 Arg.list(
-                        Arg.create("priority", true, "the priority to remove the " + DESCRIPTOR.apply(isPrefix) + " at"),
-                        Arg.create(DESCRIPTOR.apply(isPrefix), false, "the " + DESCRIPTOR.apply(isPrefix) + " string"),
-                        Arg.create("context...", false, "the contexts to remove the " + DESCRIPTOR.apply(isPrefix) + " in")
+                        Arg.create("priority", true, "the priority to remove the " + type.name().toLowerCase() + " at"),
+                        Arg.create(type.name().toLowerCase(), false, "the " +type.name().toLowerCase() + " string"),
+                        Arg.create("context...", false, "the contexts to remove the " + type.name().toLowerCase() + " in")
                 )
         );
-        this.isPrefix = isPrefix;
+        this.type = type;
     }
 
     @Override
@@ -74,29 +73,29 @@ public class MetaRemoveTempChatMeta extends SharedSubCommand {
         // Handle bulk removal
         if (meta.equalsIgnoreCase("null") || meta.equals("*")) {
             holder.removeIf(n ->
-                    (isPrefix ? n.isPrefix() : n.isSuffix()) &&
-                    (isPrefix ? n.getPrefix() : n.getSuffix()).getKey() == priority &&
+                    type.matches(n) &&
+                    type.getEntry(n).getKey() == priority &&
                     !n.isPermanent() &&
                     n.getFullContexts().makeImmutable().equals(context.makeImmutable())
             );
-            Message.BULK_REMOVE_TEMP_CHATMETA_SUCCESS.send(sender, holder.getFriendlyName(), DESCRIPTOR.apply(isPrefix), priority, Util.contextSetToString(context));
+            Message.BULK_REMOVE_TEMP_CHATMETA_SUCCESS.send(sender, holder.getFriendlyName(), type.name().toLowerCase(), priority, Util.contextSetToString(context));
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         }
 
-        DataMutateResult result = holder.unsetPermission(NodeFactory.makeChatMetaNode(isPrefix, priority, meta).setExpiry(10L).withExtraContext(context).build());
+        DataMutateResult result = holder.unsetPermission(NodeFactory.makeChatMetaNode(type, priority, meta).setExpiry(10L).withExtraContext(context).build());
 
         if (result.asBoolean()) {
-            Message.REMOVE_TEMP_CHATMETA_SUCCESS.send(sender, holder.getFriendlyName(), DESCRIPTOR.apply(isPrefix), meta, priority, Util.contextSetToString(context));
+            Message.REMOVE_TEMP_CHATMETA_SUCCESS.send(sender, holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, Util.contextSetToString(context));
 
             LogEntry.build().actor(sender).acted(holder)
-                    .action("meta removetemp" + DESCRIPTOR.apply(isPrefix) + " " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                    .action("meta removetemp" + type.name().toLowerCase() + " " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
                     .build().submit(plugin, sender);
 
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.DOES_NOT_HAVE_CHAT_META.send(sender, holder.getFriendlyName(), DESCRIPTOR.apply(isPrefix));
+            Message.DOES_NOT_HAVE_CHAT_META.send(sender, holder.getFriendlyName(), type.name().toLowerCase());
             return CommandResult.STATE_ERROR;
         }
     }

@@ -23,48 +23,30 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.caching.stacking.elements;
+package me.lucko.luckperms.common.metastacking.definition;
 
-import lombok.RequiredArgsConstructor;
+import me.lucko.luckperms.common.metastacking.GenericMetaStack;
+import me.lucko.luckperms.common.metastacking.MetaStack;
+import me.lucko.luckperms.common.metastacking.MetaType;
 
-import me.lucko.luckperms.api.LocalizedNode;
-import me.lucko.luckperms.common.caching.stacking.MetaStackElement;
+import java.util.List;
 
-import java.util.Map;
-import java.util.Optional;
+public interface MetaStackDefinition {
 
-@RequiredArgsConstructor
-public class HighestPriorityOwnElement implements MetaStackElement {
-    private final boolean prefix;
-    private Map.Entry<Integer, String> entry = null;
-
-    @Override
-    public Optional<Map.Entry<Integer, String>> getEntry() {
-        return Optional.ofNullable(entry);
+    static MetaStackDefinition create(List<MetaStackElement> elements, String startSpacer, String middleSpacer, String endSpacer) {
+        return new SimpleMetaStackDefinition(elements, startSpacer, middleSpacer, endSpacer);
     }
 
-    @Override
-    public boolean accumulateNode(LocalizedNode node) {
-        if (MetaStackElement.checkMetaType(prefix, node)) {
-            return false;
-        }
+    List<MetaStackElement> getElements();
 
-        if (MetaStackElement.checkOwnElement(node)) {
-            return false;
-        }
+    String getStartSpacer();
 
-        Map.Entry<Integer, String> entry = prefix ? node.getPrefix() : node.getSuffix();
-        if (HighestPriorityElement.compareEntries(this.entry, entry)) {
-            return false;
-        }
+    String getMiddleSpacer();
 
-        this.entry = entry;
-        return true;
-    }
+    String getEndSpacer();
 
-    @Override
-    public MetaStackElement copy() {
-        return new HighestPriorityOwnElement(prefix);
+    default MetaStack newStack(MetaType type) {
+        return new GenericMetaStack(this, type);
     }
 
 }

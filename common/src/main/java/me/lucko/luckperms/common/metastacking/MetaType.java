@@ -23,26 +23,52 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.caching.stacking;
+package me.lucko.luckperms.common.metastacking;
 
-import java.util.Collections;
-import java.util.List;
+import me.lucko.luckperms.api.Node;
 
-public class NoopMetaStack implements MetaStack {
-    public static final NoopMetaStack INSTANCE = new NoopMetaStack();
+import java.util.Map;
 
-    @Override
-    public List<MetaStackElement> getElements() {
-        return Collections.emptyList();
-    }
+public enum MetaType {
 
-    @Override
-    public String toFormattedString() {
-        return null;
-    }
+    PREFIX {
+        @Override
+        public boolean matches(Node node) {
+            return node.isPrefix();
+        }
 
-    @Override
-    public MetaStack copy() {
-        return this;
-    }
+        @Override
+        public boolean shouldIgnore(Node node) {
+            return !node.isPrefix();
+        }
+
+        @Override
+        public Map.Entry<Integer, String> getEntry(Node node) {
+            return node.getPrefix();
+        }
+    },
+
+    SUFFIX {
+        @Override
+        public boolean matches(Node node) {
+            return node.isSuffix();
+        }
+
+        @Override
+        public boolean shouldIgnore(Node node) {
+            return !node.isSuffix();
+        }
+
+        @Override
+        public Map.Entry<Integer, String> getEntry(Node node) {
+            return node.getSuffix();
+        }
+    };
+
+    public abstract boolean matches(Node node);
+
+    public abstract boolean shouldIgnore(Node node);
+
+    public abstract Map.Entry<Integer, String> getEntry(Node node);
+
 }

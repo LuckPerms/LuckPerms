@@ -35,6 +35,7 @@ import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.metastacking.MetaType;
 import me.lucko.luckperms.common.utils.ExtractedContexts;
 
 import net.milkbowl.vault.chat.Chat;
@@ -83,23 +84,23 @@ public class VaultChatHook extends Chat {
         });
     }
 
-    private void setChatMeta(boolean prefix, PermissionHolder holder, String value, String world) {
+    private void setChatMeta(MetaType type, PermissionHolder holder, String value, String world) {
         String finalWorld = perms.isIgnoreWorld() ? null : world;
         if (holder == null) return;
         if (value.equals("")) return;
 
-        perms.log("Setting " + (prefix ? "prefix" : "suffix") + " for " + holder.getObjectName() + " on world " + world + ", server " + perms.getServer());
+        perms.log("Setting " + type.name().toLowerCase() + " for " + holder.getObjectName() + " on world " + world + ", server " + perms.getServer());
 
         perms.getScheduler().execute(() -> {
             // remove all prefixes/suffixes directly set on the user/group
-            holder.removeIf(n -> prefix ? n.isPrefix() : n.isSuffix());
+            holder.removeIf(type::matches);
 
             // find the max inherited priority & add 10
             MetaAccumulator metaAccumulator = holder.accumulateMeta(null, null, ExtractedContexts.generate(perms.createContextForWorldSet(finalWorld)));
-            int priority = (prefix ? metaAccumulator.getPrefixes() : metaAccumulator.getSuffixes()).keySet().stream()
+            int priority = (type == MetaType.PREFIX ? metaAccumulator.getPrefixes() : metaAccumulator.getSuffixes()).keySet().stream()
                     .mapToInt(e -> e).max().orElse(0) + 10;
 
-            Node.Builder chatMetaNode = NodeFactory.makeChatMetaNode(prefix, priority, value);
+            Node.Builder chatMetaNode = NodeFactory.makeChatMetaNode(type, priority, value);
             if (!perms.getServer().equalsIgnoreCase("global")) {
                 chatMetaNode.setServer(perms.getServer());
             }
@@ -122,14 +123,14 @@ public class VaultChatHook extends Chat {
         return ret != null ? ret : defaultValue;
     }
 
-    private String getUserChatMeta(boolean prefix, User user, String world) {
+    private String getUserChatMeta(MetaType type, User user, String world) {
         if (user == null) return "";
         world = perms.isIgnoreWorld() ? null : world;
 
-        perms.log("Getting " + (prefix ? "prefix" : "suffix") + " for user " + user.getFriendlyName() + " on world " + world + ", server " + perms.getServer());
+        perms.log("Getting " + type.name().toLowerCase() + " for user " + user.getFriendlyName() + " on world " + world + ", server " + perms.getServer());
 
         MetaData data = user.getUserData().getMetaData(perms.createContextForWorldLookup(perms.getPlugin().getPlayer(user), world));
-        String ret = prefix ? data.getPrefix() : data.getSuffix();
+        String ret = type == MetaType.PREFIX ? data.getPrefix() : data.getSuffix();
         return ret != null ? ret : "";
     }
 
@@ -153,11 +154,11 @@ public class VaultChatHook extends Chat {
         return defaultValue;
     }
 
-    private String getGroupChatMeta(boolean prefix, Group group, String world) {
+    private String getGroupChatMeta(MetaType type, Group group, String world) {
         world = perms.isIgnoreWorld() ? null : world;
         if (group == null) return "";
 
-        perms.log("Getting " + (prefix ? "prefix" : "suffix") + " for group " + group + " on world " + world + ", server " + perms.getServer());
+        perms.log("Getting " + type.name().toLowerCase() + " for group " + group + " on world " + world + ", server " + perms.getServer());
 
         int priority = Integer.MIN_VALUE;
         String meta = null;
@@ -165,10 +166,10 @@ public class VaultChatHook extends Chat {
         ExtractedContexts ec = ExtractedContexts.generate(Contexts.of(perms.createContextForWorldLookup(world).getContexts(), perms.isIncludeGlobal(), true, true, true, true, false));
         for (Node n : group.getAllNodes(ec)) {
             if (!n.getValue()) continue;
-            if (prefix ? !n.isPrefix() : !n.isSuffix()) continue;
+            if (type.shouldIgnore(n)) continue;
             if (!n.shouldApplyWithContext(perms.createContextForWorldLookup(world).getContexts())) continue;
 
-            Map.Entry<Integer, String> value = prefix ? n.getPrefix() : n.getSuffix();
+            Map.Entry<Integer, String> value = type.getEntry(n);
             if (value.getKey() > priority) {
                 meta = value.getValue();
                 priority = value.getKey();
@@ -181,49 +182,49 @@ public class VaultChatHook extends Chat {
     @Override
     public String getPlayerPrefix(String world, @NonNull String player) {
         final User user = perms.getPlugin().getUserManager().getByUsername(player);
-        return getUserChatMeta(true, user, world);
+        return getUserChatMeta(MetaType.PREFIX, user, world);
     }
 
     @Override
     public void setPlayerPrefix(String world, @NonNull String player, @NonNull String prefix) {
         final User user = perms.getPlugin().getUserManager().getByUsername(player);
-        setChatMeta(true, user, prefix, world);
+        setChatMeta(MetaType.PREFIX, user, prefix, world);
     }
 
     @Override
     public String getPlayerSuffix(String world, @NonNull String player) {
         final User user = perms.getPlugin().getUserManager().getByUsername(player);
-        return getUserChatMeta(false, user, world);
+        return getUserChatMeta(MetaType.SUFFIX, user, world);
     }
 
     @Override
     public void setPlayerSuffix(String world, @NonNull String player, @NonNull String suffix) {
         final User user = perms.getPlugin().getUserManager().getByUsername(player);
-        setChatMeta(false, user, suffix, world);
+        setChatMeta(MetaType.SUFFIX, user, suffix, world);
     }
 
     @Override
     public String getGroupPrefix(String world, @NonNull String group) {
         final Group g = perms.getPlugin().getGroupManager().getIfLoaded(group);
-        return getGroupChatMeta(true, g, world);
+        return getGroupChatMeta(MetaType.PREFIX, g, world);
     }
 
     @Override
     public void setGroupPrefix(String world, @NonNull String group, @NonNull String prefix) {
         final Group g = perms.getPlugin().getGroupManager().getIfLoaded(group);
-        setChatMeta(true, g, prefix, world);
+        setChatMeta(MetaType.PREFIX, g, prefix, world);
     }
 
     @Override
     public String getGroupSuffix(String world, @NonNull String group) {
         final Group g = perms.getPlugin().getGroupManager().getIfLoaded(group);
-        return getGroupChatMeta(false, g, world);
+        return getGroupChatMeta(MetaType.SUFFIX, g, world);
     }
 
     @Override
     public void setGroupSuffix(String world, @NonNull String group, @NonNull String suffix) {
         final Group g = perms.getPlugin().getGroupManager().getIfLoaded(group);
-        setChatMeta(false, g, suffix, world);
+        setChatMeta(MetaType.SUFFIX, g, suffix, world);
     }
 
     @Override

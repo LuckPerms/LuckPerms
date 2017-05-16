@@ -32,8 +32,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedMap;
 
 import me.lucko.luckperms.api.caching.MetaData;
-import me.lucko.luckperms.common.caching.stacking.MetaStack;
-import me.lucko.luckperms.common.caching.stacking.NoopMetaStack;
+import me.lucko.luckperms.common.metastacking.MetaStack;
 
 import java.util.Map;
 import java.util.SortedMap;
@@ -57,10 +56,10 @@ public class MetaCache implements MetaData {
     private SortedMap<Integer, String> suffixes = ImmutableSortedMap.of();
 
     @Getter
-    private MetaStack prefixStack = NoopMetaStack.INSTANCE;
+    private MetaStack prefixStack = null;
 
     @Getter
-    private MetaStack suffixStack = NoopMetaStack.INSTANCE;
+    private MetaStack suffixStack = null;
 
     public void loadMeta(MetaAccumulator meta) {
         lock.writeLock().lock();
@@ -79,7 +78,7 @@ public class MetaCache implements MetaData {
     public String getPrefix() {
         lock.readLock().lock();
         try {
-            return prefixStack.toFormattedString();
+            return prefixStack == null ? null : prefixStack.toFormattedString();
         } finally {
             lock.readLock().unlock();
         }
@@ -89,7 +88,7 @@ public class MetaCache implements MetaData {
     public String getSuffix() {
         lock.readLock().lock();
         try {
-            return suffixStack.toFormattedString();
+            return suffixStack == null ? null : suffixStack.toFormattedString();
         } finally {
             lock.readLock().unlock();
         }

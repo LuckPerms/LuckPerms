@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.common.commands.abstraction.SharedMainCommand;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
+import me.lucko.luckperms.common.metastacking.MetaType;
 
 public class CommandMeta<T extends PermissionHolder> extends SharedMainCommand<T> {
     public CommandMeta(boolean user) {
@@ -39,14 +40,14 @@ public class CommandMeta<T extends PermissionHolder> extends SharedMainCommand<T
                 .add(new MetaUnset())
                 .add(new MetaSetTemp())
                 .add(new MetaUnsetTemp())
-                .add(new MetaAddChatMeta(true))
-                .add(new MetaAddChatMeta(false))
-                .add(new MetaRemoveChatMeta(true))
-                .add(new MetaRemoveChatMeta(false))
-                .add(new MetaAddTempChatMeta(true))
-                .add(new MetaAddTempChatMeta(false))
-                .add(new MetaRemoveTempChatMeta(true))
-                .add(new MetaRemoveTempChatMeta(false))
+                .add(new MetaAddChatMeta(MetaType.PREFIX))
+                .add(new MetaAddChatMeta(MetaType.SUFFIX))
+                .add(new MetaRemoveChatMeta(MetaType.PREFIX))
+                .add(new MetaRemoveChatMeta(MetaType.SUFFIX))
+                .add(new MetaAddTempChatMeta(MetaType.PREFIX))
+                .add(new MetaAddTempChatMeta(MetaType.SUFFIX))
+                .add(new MetaRemoveTempChatMeta(MetaType.PREFIX))
+                .add(new MetaRemoveTempChatMeta(MetaType.SUFFIX))
                 .add(new MetaClear())
                 .build());
     }

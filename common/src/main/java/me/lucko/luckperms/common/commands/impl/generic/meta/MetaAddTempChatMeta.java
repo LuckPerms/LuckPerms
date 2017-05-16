@@ -42,33 +42,32 @@ import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.TemporaryModifier;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
+import me.lucko.luckperms.common.metastacking.MetaType;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class MetaAddTempChatMeta extends SharedSubCommand {
-    private static final Function<Boolean, String> DESCRIPTOR = b -> b ? "prefix" : "suffix";
-    private final boolean isPrefix;
+    private final MetaType type;
 
-    public MetaAddTempChatMeta(boolean isPrefix) {
-        super("addtemp" + DESCRIPTOR.apply(isPrefix),
-                "Adds a " + DESCRIPTOR.apply(isPrefix) + " temporarily",
-                isPrefix ? Permission.USER_META_ADDTEMP_PREFIX : Permission.USER_META_ADDTEMP_SUFFIX,
-                isPrefix ? Permission.GROUP_META_ADDTEMP_PREFIX : Permission.GROUP_META_ADDTEMP_SUFFIX,
+    public MetaAddTempChatMeta(MetaType type) {
+        super("addtemp" + type.name().toLowerCase(),
+                "Adds a " + type.name().toLowerCase() + " temporarily",
+                type == MetaType.PREFIX ? Permission.USER_META_ADDTEMP_PREFIX : Permission.USER_META_ADDTEMP_SUFFIX,
+                type == MetaType.PREFIX ? Permission.GROUP_META_ADDTEMP_PREFIX : Permission.GROUP_META_ADDTEMP_SUFFIX,
                 Predicates.inRange(0, 2),
                 Arg.list(
-                        Arg.create("priority", true, "the priority to add the " + DESCRIPTOR.apply(isPrefix) + " at"),
-                        Arg.create(DESCRIPTOR.apply(isPrefix), true, "the " + DESCRIPTOR.apply(isPrefix) + " string"),
-                        Arg.create("duration", true, "the duration until the " + DESCRIPTOR.apply(isPrefix) + " expires"),
-                        Arg.create("context...", false, "the contexts to add the " + DESCRIPTOR.apply(isPrefix) + " in")
+                        Arg.create("priority", true, "the priority to add the " + type.name().toLowerCase() + " at"),
+                        Arg.create(type.name().toLowerCase(), true, "the " + type.name().toLowerCase() + " string"),
+                        Arg.create("duration", true, "the duration until the " + type.name().toLowerCase() + " expires"),
+                        Arg.create("context...", false, "the contexts to add the " + type.name().toLowerCase() + " in")
                 )
         );
-        this.isPrefix = isPrefix;
+        this.type = type;
     }
 
     @Override
@@ -79,21 +78,21 @@ public class MetaAddTempChatMeta extends SharedSubCommand {
         MutableContextSet context = ArgumentUtils.handleContext(3, args, plugin);
         TemporaryModifier modifier = plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR);
 
-        Map.Entry<DataMutateResult, Node> ret = holder.setPermission(NodeFactory.makeChatMetaNode(isPrefix, priority, meta).setExpiry(duration).withExtraContext(context).build(), modifier);
+        Map.Entry<DataMutateResult, Node> ret = holder.setPermission(NodeFactory.makeChatMetaNode(type, priority, meta).setExpiry(duration).withExtraContext(context).build(), modifier);
 
         if (ret.getKey().asBoolean()) {
             duration = ret.getValue().getExpiryUnixTime();
 
-            Message.ADD_TEMP_CHATMETA_SUCCESS.send(sender, holder.getFriendlyName(), DESCRIPTOR.apply(isPrefix), meta, priority, DateUtil.formatDateDiff(duration), Util.contextSetToString(context));
+            Message.ADD_TEMP_CHATMETA_SUCCESS.send(sender, holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, DateUtil.formatDateDiff(duration), Util.contextSetToString(context));
 
             LogEntry.build().actor(sender).acted(holder)
-                    .action("meta addtemp" + DESCRIPTOR.apply(isPrefix) + " " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                    .action("meta addtemp" + type.name().toLowerCase() + " " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
                     .build().submit(plugin, sender);
 
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_HAS_CHAT_META.send(sender, holder.getFriendlyName(), DESCRIPTOR.apply(isPrefix));
+            Message.ALREADY_HAS_CHAT_META.send(sender, holder.getFriendlyName(), type.name().toLowerCase());
             return CommandResult.STATE_ERROR;
         }
     }

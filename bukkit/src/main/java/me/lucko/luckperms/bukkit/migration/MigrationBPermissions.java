@@ -41,6 +41,7 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.metastacking.MetaType;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.common.utils.ProgressLogger;
@@ -224,7 +225,8 @@ public class MigrationBPermissions extends SubCommand<Object> {
             }
 
             if (meta.getKey().equalsIgnoreCase("prefix") || meta.getKey().equalsIgnoreCase("suffix")) {
-                holder.setPermission(NodeFactory.makeChatMetaNode(meta.getKey().equalsIgnoreCase("prefix"), c.getPriority(), meta.getValue()).setWorld(world.getName()).build());
+                MetaType type = MetaType.valueOf(meta.getKey().toUpperCase());
+                holder.setPermission(NodeFactory.makeChatMetaNode(type, c.getPriority(), meta.getValue()).setWorld(world.getName()).build());
                 continue;
             }
 

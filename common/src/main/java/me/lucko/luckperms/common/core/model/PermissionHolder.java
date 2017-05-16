@@ -663,10 +663,7 @@ public abstract class PermissionHolder {
 
     public MetaAccumulator accumulateMeta(MetaAccumulator accumulator, Set<String> excludedGroups, ExtractedContexts context) {
         if (accumulator == null) {
-            accumulator = new MetaAccumulator(
-                    plugin.getConfiguration().get(ConfigKeys.PREFIX_FORMATTING_OPTIONS).copy(),
-                    plugin.getConfiguration().get(ConfigKeys.SUFFIX_FORMATTING_OPTIONS).copy()
-            );
+            accumulator = MetaAccumulator.makeFromConfig(plugin);
         }
 
         if (excludedGroups == null) {

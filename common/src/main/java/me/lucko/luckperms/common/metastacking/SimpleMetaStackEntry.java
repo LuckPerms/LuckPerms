@@ -23,54 +23,40 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.caching.stacking.elements;
+package me.lucko.luckperms.common.metastacking;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.api.LocalizedNode;
-import me.lucko.luckperms.common.caching.stacking.MetaStackElement;
+import me.lucko.luckperms.common.metastacking.definition.MetaStackElement;
 
 import java.util.Map;
 import java.util.Optional;
 
+@Getter
 @RequiredArgsConstructor
-public class LowestPriorityElement implements MetaStackElement {
+public class SimpleMetaStackEntry implements MetaStackEntry {
 
-    /**
-     * Returns true if the current node has the lesser priority
-     * @param current the current entry
-     * @param newEntry the new entry
-     * @return true if the accumulation should return
-     */
-    public static boolean compareEntries(Map.Entry<Integer, String> current, Map.Entry<Integer, String> newEntry) {
-        return current != null && current.getKey() <= newEntry.getKey();
-    }
+    private final MetaStack parentStack;
+    private final MetaStackElement element;
+    private final MetaType type;
 
-    private final boolean prefix;
-    private Map.Entry<Integer, String> entry = null;
+    @Getter(AccessLevel.NONE)
+    private Map.Entry<Integer, String> current = null;
 
     @Override
     public Optional<Map.Entry<Integer, String>> getEntry() {
-        return Optional.ofNullable(entry);
+        return Optional.ofNullable(current);
     }
 
     @Override
     public boolean accumulateNode(LocalizedNode node) {
-        if (MetaStackElement.checkMetaType(prefix, node)) {
-            return false;
+        if (element.shouldAccumulate(node, type, current)) {
+            this.current = type.getEntry(node);
+            return true;
         }
-
-        Map.Entry<Integer, String> entry = prefix ? node.getPrefix() : node.getSuffix();
-        if (compareEntries(this.entry, entry)) {
-            return false;
-        }
-
-        this.entry = entry;
-        return true;
-    }
-
-    @Override
-    public MetaStackElement copy() {
-        return new LowestPriorityElement(prefix);
+        return false;
     }
 }

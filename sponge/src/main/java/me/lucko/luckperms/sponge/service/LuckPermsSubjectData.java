@@ -41,6 +41,7 @@ import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.metastacking.MetaType;
 import me.lucko.luckperms.common.utils.ExtractedContexts;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
@@ -369,26 +370,24 @@ public class LuckPermsSubjectData implements LPSubjectData {
         try (Timing i = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_SET_OPTION)) {
             if (key.equalsIgnoreCase("prefix") || key.equalsIgnoreCase("suffix")) {
                 // special handling.
-                String type = key.toLowerCase();
-                boolean prefix = type.equals("prefix");
+                MetaType type = MetaType.valueOf(key.toUpperCase());
 
                 // remove all prefixes/suffixes from the user
                 List<Node> toRemove = streamNodes(enduring)
-                        .filter(n -> prefix ? n.isPrefix() : n.isSuffix())
+                        .filter(type::matches)
                         .filter(n -> n.getFullContexts().equals(context))
                         .collect(Collectors.toList());
 
                 toRemove.forEach(makeUnsetConsumer(enduring));
 
                 MetaAccumulator metaAccumulator = holder.accumulateMeta(null, null, ExtractedContexts.generate(service.calculateContexts(context)));
-                int priority = (type.equals("prefix") ? metaAccumulator.getPrefixes() : metaAccumulator.getSuffixes()).keySet().stream()
-                        .mapToInt(e -> e).max().orElse(0);
+                int priority = metaAccumulator.getChatMeta(type).keySet().stream().mapToInt(e -> e).max().orElse(0);
                 priority += 10;
 
                 if (enduring) {
-                    holder.setPermission(NodeFactory.makeChatMetaNode(type.equals("prefix"), priority, value).withExtraContext(context).build());
+                    holder.setPermission(NodeFactory.makeChatMetaNode(type, priority, value).withExtraContext(context).build());
                 } else {
-                    holder.setTransientPermission(NodeFactory.makeChatMetaNode(type.equals("prefix"), priority, value).withExtraContext(context).build());
+                    holder.setTransientPermission(NodeFactory.makeChatMetaNode(type, priority, value).withExtraContext(context).build());
                 }
 
             } else {

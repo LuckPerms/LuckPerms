@@ -35,6 +35,7 @@ import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.core.model.Group;
+import me.lucko.luckperms.common.metastacking.MetaType;
 import me.lucko.luckperms.common.utils.PatternCache;
 
 import java.util.List;
@@ -122,8 +123,8 @@ public class NodeFactory {
         return new NodeBuilder("meta." + MetaUtils.escapeCharacters(key) + "." + MetaUtils.escapeCharacters(value));
     }
 
-    public static Node.Builder makeChatMetaNode(boolean prefix, int priority, String s) {
-        return prefix ? makePrefixNode(priority, s) : makeSuffixNode(priority, s);
+    public static Node.Builder makeChatMetaNode(MetaType type, int priority, String s) {
+        return type == MetaType.PREFIX ? makePrefixNode(priority, s) : makeSuffixNode(priority, s);
     }
 
     public static Node.Builder makePrefixNode(int priority, String prefix) {

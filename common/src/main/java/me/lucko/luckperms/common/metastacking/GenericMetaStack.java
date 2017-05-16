@@ -23,28 +23,38 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.caching.stacking;
+package me.lucko.luckperms.common.metastacking;
 
+import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
+import me.lucko.luckperms.api.LocalizedNode;
+import me.lucko.luckperms.common.metastacking.definition.MetaStackDefinition;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-@RequiredArgsConstructor
 public class GenericMetaStack implements MetaStack {
 
-    private final List<MetaStackElement> elements;
-    private final String startSpacer;
-    private final String middleSpacer;
-    private final String endSpacer;
+    private final MetaStackDefinition definition;
+    private final MetaType targetType;
+
+    @Getter(AccessLevel.NONE)
+    private final List<MetaStackEntry> entries;
+
+    public GenericMetaStack(MetaStackDefinition definition, MetaType targetType) {
+        this.definition = definition;
+        this.targetType = targetType;
+        this.entries = definition.getElements().stream()
+                .map(element -> new SimpleMetaStackEntry(this, element, targetType))
+                .collect(ImmutableCollectors.toImmutableList());
+    }
 
     @Override
     public String toFormattedString() {
-        List<MetaStackElement> ret = new ArrayList<>(elements);
+        List<MetaStackEntry> ret = new ArrayList<>(entries);
         ret.removeIf(m -> !m.getEntry().isPresent());
 
         if (ret.isEmpty()) {
@@ -52,27 +62,22 @@ public class GenericMetaStack implements MetaStack {
         }
 
         StringBuilder sb = new StringBuilder();
-        sb.append(startSpacer);
+        sb.append(definition.getStartSpacer());
         for (int i = 0; i < ret.size(); i++) {
             if (i != 0) {
-                sb.append(middleSpacer);
+                sb.append(definition.getMiddleSpacer());
             }
 
-            MetaStackElement e = ret.get(i);
+            MetaStackEntry e = ret.get(i);
             sb.append(e.getEntry().get().getValue());
         }
-        sb.append(endSpacer);
+        sb.append(definition.getEndSpacer());
 
         return sb.toString();
     }
 
     @Override
-    public MetaStack copy() {
-        return new GenericMetaStack(
-                elements.stream().map(MetaStackElement::copy).collect(ImmutableCollectors.toImmutableList()),
-                startSpacer,
-                middleSpacer,
-                endSpacer
-        );
+    public void accumulateToAll(LocalizedNode node) {
+        entries.forEach(e -> e.accumulateNode(node));
     }
 }

@@ -58,9 +58,9 @@ public class SpongeSenderFactory extends SenderFactory<CommandSource> {
         return Constants.CONSOLE_UUID;
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     protected void sendMessage(CommandSource source, String s) {
+        //noinspection deprecation
         source.sendMessage(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(s));
     }
 

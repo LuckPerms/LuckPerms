@@ -43,7 +43,18 @@ public class SpongeCalculatorLink implements ContextCalculator<Subject> {
 
     @Override
     public MutableContextSet giveApplicableContext(Subject subject, MutableContextSet accumulator) {
-        Set<Context> contexts = new HashSet<>();
+        Set<Context> contexts = new HashSet<Context>() {
+
+            // don't allow null elements
+            @Override
+            public boolean add(Context context) {
+                if (context == null) {
+                    throw new NullPointerException("context");
+                }
+
+                return super.add(context);
+            }
+        };
 
         try {
             delegate.accumulateContexts(subject, contexts);

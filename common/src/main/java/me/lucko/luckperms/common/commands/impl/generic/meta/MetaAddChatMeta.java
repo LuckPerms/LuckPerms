@@ -39,30 +39,29 @@ import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
+import me.lucko.luckperms.common.metastacking.MetaType;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class MetaAddChatMeta extends SharedSubCommand {
-    private static final Function<Boolean, String> DESCRIPTOR = b -> b ? "prefix" : "suffix";
-    private final boolean isPrefix;
+    private final MetaType type;
 
-    public MetaAddChatMeta(boolean isPrefix) {
-        super("add" + DESCRIPTOR.apply(isPrefix),
-                "Adds a " + DESCRIPTOR.apply(isPrefix),
-                isPrefix ? Permission.USER_META_ADDPREFIX : Permission.USER_META_ADDSUFFIX,
-                isPrefix ? Permission.GROUP_META_ADDPREFIX : Permission.GROUP_META_ADDSUFFIX,
+    public MetaAddChatMeta(MetaType type) {
+        super("add" + type.name().toLowerCase(),
+                "Adds a " + type.name().toLowerCase(),
+                type == MetaType.PREFIX ? Permission.USER_META_ADDPREFIX : Permission.USER_META_ADDSUFFIX,
+                type == MetaType.PREFIX ? Permission.GROUP_META_ADDPREFIX : Permission.GROUP_META_ADDSUFFIX,
                 Predicates.inRange(0, 1),
                 Arg.list(
-                        Arg.create("priority", true, "the priority to add the " + DESCRIPTOR.apply(isPrefix) + " at"),
-                        Arg.create(DESCRIPTOR.apply(isPrefix), true, "the " + DESCRIPTOR.apply(isPrefix) + " string"),
-                        Arg.create("context...", false, "the contexts to add the " + DESCRIPTOR.apply(isPrefix) + " in")
+                        Arg.create("priority", true, "the priority to add the " + type.name().toLowerCase() + " at"),
+                        Arg.create(type.name().toLowerCase(), true, "the " + type.name().toLowerCase() + " string"),
+                        Arg.create("context...", false, "the contexts to add the " + type.name().toLowerCase() + " in")
                 )
         );
-        this.isPrefix = isPrefix;
+        this.type = type;
     }
 
     @Override
@@ -71,18 +70,18 @@ public class MetaAddChatMeta extends SharedSubCommand {
         String meta = ArgumentUtils.handleString(1, args);
         MutableContextSet context = ArgumentUtils.handleContext(2, args, plugin);
 
-        DataMutateResult result = holder.setPermission(NodeFactory.makeChatMetaNode(isPrefix, priority, meta).withExtraContext(context).build());
+        DataMutateResult result = holder.setPermission(NodeFactory.makeChatMetaNode(type, priority, meta).withExtraContext(context).build());
         if (result.asBoolean()) {
-            Message.ADD_CHATMETA_SUCCESS.send(sender, holder.getFriendlyName(), DESCRIPTOR.apply(isPrefix), meta, priority, Util.contextSetToString(context));
+            Message.ADD_CHATMETA_SUCCESS.send(sender, holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, Util.contextSetToString(context));
 
             LogEntry.build().actor(sender).acted(holder)
-                    .action("meta add" + DESCRIPTOR.apply(isPrefix) + " " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                    .action("meta add" + type.name().toLowerCase() + " " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
                     .build().submit(plugin, sender);
 
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_HAS_CHAT_META.send(sender, holder.getFriendlyName(), DESCRIPTOR.apply(isPrefix));
+            Message.ALREADY_HAS_CHAT_META.send(sender, holder.getFriendlyName(), type.name().toLowerCase());
             return CommandResult.STATE_ERROR;
         }
     }

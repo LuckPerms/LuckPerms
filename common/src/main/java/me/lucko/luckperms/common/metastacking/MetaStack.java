@@ -23,47 +23,19 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.caching.stacking.elements;
-
-import lombok.RequiredArgsConstructor;
+package me.lucko.luckperms.common.metastacking;
 
 import me.lucko.luckperms.api.LocalizedNode;
-import me.lucko.luckperms.common.caching.stacking.MetaStackElement;
+import me.lucko.luckperms.common.metastacking.definition.MetaStackDefinition;
 
-import java.util.Map;
-import java.util.Optional;
+public interface MetaStack {
 
-@RequiredArgsConstructor
-public class LowestPriorityOwnElement implements MetaStackElement {
-    private final boolean prefix;
-    private Map.Entry<Integer, String> entry = null;
+    MetaStackDefinition getDefinition();
 
-    @Override
-    public Optional<Map.Entry<Integer, String>> getEntry() {
-        return Optional.ofNullable(entry);
-    }
+    MetaType getTargetType();
 
-    @Override
-    public boolean accumulateNode(LocalizedNode node) {
-        if (MetaStackElement.checkMetaType(prefix, node)) {
-            return false;
-        }
+    String toFormattedString();
 
-        if (MetaStackElement.checkOwnElement(node)) {
-            return false;
-        }
+    void accumulateToAll(LocalizedNode node);
 
-        Map.Entry<Integer, String> entry = prefix ? node.getPrefix() : node.getSuffix();
-        if (LowestPriorityElement.compareEntries(this.entry, entry)) {
-            return false;
-        }
-
-        this.entry = entry;
-        return true;
-    }
-
-    @Override
-    public MetaStackElement copy() {
-        return new LowestPriorityOwnElement(prefix);
-    }
 }

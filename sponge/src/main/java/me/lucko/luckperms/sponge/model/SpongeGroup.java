@@ -37,6 +37,7 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.caching.MetaAccumulator;
 import me.lucko.luckperms.common.core.model.Group;
+import me.lucko.luckperms.common.metastacking.MetaType;
 import me.lucko.luckperms.common.utils.ExtractedContexts;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
@@ -197,10 +198,10 @@ public class SpongeGroup extends Group {
             try (Timing ignored = plugin.getService().getPlugin().getTimings().time(LPTiming.GROUP_GET_OPTION)) {
                 Optional<String> option;
                 if (s.equalsIgnoreCase("prefix")) {
-                    option = getChatMeta(contexts, true);
+                    option = getChatMeta(contexts, MetaType.PREFIX);
 
                 } else if (s.equalsIgnoreCase("suffix")) {
-                    option = getChatMeta(contexts, false);
+                    option = getChatMeta(contexts, MetaType.SUFFIX);
 
                 } else {
                     option = getMeta(contexts, s);
@@ -226,13 +227,9 @@ public class SpongeGroup extends Group {
             }
         }
 
-        private Optional<String> getChatMeta(ImmutableContextSet contexts, boolean prefix) {
+        private Optional<String> getChatMeta(ImmutableContextSet contexts, MetaType type) {
             MetaAccumulator metaAccumulator = parent.accumulateMeta(null, null, ExtractedContexts.generate(plugin.getService().calculateContexts(contexts)));
-            if (prefix) {
-                return Optional.ofNullable(metaAccumulator.getPrefixStack().toFormattedString());
-            } else {
-                return Optional.ofNullable(metaAccumulator.getSuffixStack().toFormattedString());
-            }
+            return Optional.ofNullable(metaAccumulator.getStack(type).toFormattedString());
         }
 
         private Optional<String> getMeta(ImmutableContextSet contexts, String key) {

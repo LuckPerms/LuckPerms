@@ -27,10 +27,14 @@ package me.lucko.luckperms.common.caching;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.ToString;
 
 import me.lucko.luckperms.api.LocalizedNode;
-import me.lucko.luckperms.common.caching.stacking.MetaStack;
+import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.metastacking.MetaStack;
+import me.lucko.luckperms.common.metastacking.MetaType;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -44,6 +48,12 @@ import java.util.TreeMap;
 @Getter
 @ToString
 public class MetaAccumulator {
+    public static MetaAccumulator makeFromConfig(LuckPermsPlugin plugin) {
+        return new MetaAccumulator(
+                plugin.getConfiguration().get(ConfigKeys.PREFIX_FORMATTING_OPTIONS).newStack(MetaType.PREFIX),
+                plugin.getConfiguration().get(ConfigKeys.SUFFIX_FORMATTING_OPTIONS).newStack(MetaType.SUFFIX)
+        );
+    }
 
     @Getter(AccessLevel.NONE)
     private final Map<String, String> meta;
@@ -54,7 +64,7 @@ public class MetaAccumulator {
     private final MetaStack prefixStack;
     private final MetaStack suffixStack;
 
-    public MetaAccumulator(MetaStack prefixStack, MetaStack suffixStack) {
+    public MetaAccumulator(@NonNull MetaStack prefixStack, @NonNull MetaStack suffixStack) {
         this.meta = new HashMap<>();
         this.prefixes = new TreeMap<>(Comparator.reverseOrder());
         this.suffixes = new TreeMap<>(Comparator.reverseOrder());
@@ -101,6 +111,14 @@ public class MetaAccumulator {
         }
 
         return this.meta;
+    }
+
+    public Map<Integer, String> getChatMeta(MetaType type) {
+        return type == MetaType.PREFIX ? prefixes : suffixes;
+    }
+
+    public MetaStack getStack(MetaType type) {
+        return type == MetaType.PREFIX ? prefixStack : suffixStack;
     }
 
 }

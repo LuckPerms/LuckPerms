@@ -23,20 +23,31 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.caching.stacking;
+package me.lucko.luckperms.common.metastacking.definition;
 
-import me.lucko.luckperms.api.LocalizedNode;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.ToString;
+
+import com.google.common.collect.ImmutableList;
 
 import java.util.List;
 
-public interface MetaStack {
+@Getter
+@EqualsAndHashCode
+@ToString
+final class SimpleMetaStackDefinition implements MetaStackDefinition {
 
-    List<MetaStackElement> getElements();
-    String toFormattedString();
-    MetaStack copy();
+    private final List<MetaStackElement> elements;
+    private final String startSpacer;
+    private final String middleSpacer;
+    private final String endSpacer;
 
-    default void accumulateToAll(LocalizedNode node) {
-        getElements().forEach(m -> m.accumulateNode(node));
+    public SimpleMetaStackDefinition(@NonNull List<MetaStackElement> elements, @NonNull String startSpacer, @NonNull String middleSpacer, @NonNull String endSpacer) {
+        this.elements = ImmutableList.copyOf(elements);
+        this.startSpacer = startSpacer;
+        this.middleSpacer = middleSpacer;
+        this.endSpacer = endSpacer;
     }
-
 }

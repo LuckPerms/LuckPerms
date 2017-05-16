@@ -30,8 +30,6 @@ import lombok.experimental.UtilityClass;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-import me.lucko.luckperms.common.caching.stacking.GenericMetaStack;
-import me.lucko.luckperms.common.caching.stacking.StackElementFactory;
 import me.lucko.luckperms.common.config.keys.AbstractKey;
 import me.lucko.luckperms.common.config.keys.BooleanKey;
 import me.lucko.luckperms.common.config.keys.EnduringKey;
@@ -43,6 +41,8 @@ import me.lucko.luckperms.common.config.keys.StringKey;
 import me.lucko.luckperms.common.core.TemporaryModifier;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.defaults.Rule;
+import me.lucko.luckperms.common.metastacking.definition.MetaStackDefinition;
+import me.lucko.luckperms.common.metastacking.definition.StandardStackElements;
 import me.lucko.luckperms.common.primarygroup.AllParentsByWeightHolder;
 import me.lucko.luckperms.common.primarygroup.ParentsByWeightHolder;
 import me.lucko.luckperms.common.primarygroup.PrimaryGroupHolder;
@@ -216,9 +216,9 @@ public class ConfigKeys {
     });
 
     /**
-     * Creates a new prefix MetaStack element based upon the configured values. Be aware that this instance should be copied for each unique user.
+     * Creates a new prefix MetaStack element based upon the configured values.
      */
-    public static final ConfigKey<GenericMetaStack> PREFIX_FORMATTING_OPTIONS = AbstractKey.of(l -> {
+    public static final ConfigKey<MetaStackDefinition> PREFIX_FORMATTING_OPTIONS = AbstractKey.of(l -> {
         List<String> format = l.getList("meta-formatting.prefix.format", new ArrayList<>());
         if (format.isEmpty()) {
             format.add("highest");
@@ -227,13 +227,13 @@ public class ConfigKeys {
         String middleSpacer = l.getString("meta-formatting.prefix.middle-spacer", " ");
         String endSpacer = l.getString("meta-formatting.prefix.end-spacer", "");
 
-        return new GenericMetaStack(StackElementFactory.fromList(l.getPlugin(), format, true), startSpacer, middleSpacer, endSpacer);
+        return MetaStackDefinition.create(StandardStackElements.parseList(l.getPlugin(), format), startSpacer, middleSpacer, endSpacer);
     });
 
     /**
-     * Creates a new suffix MetaStack element based upon the configured values. Be aware that this instance should be copied for each unique user.
+     * Creates a new suffix MetaStack element based upon the configured values.
      */
-    public static final ConfigKey<GenericMetaStack> SUFFIX_FORMATTING_OPTIONS = AbstractKey.of(l -> {
+    public static final ConfigKey<MetaStackDefinition> SUFFIX_FORMATTING_OPTIONS = AbstractKey.of(l -> {
         List<String> format = l.getList("meta-formatting.suffix.format", new ArrayList<>());
         if (format.isEmpty()) {
             format.add("highest");
@@ -242,7 +242,7 @@ public class ConfigKeys {
         String middleSpacer = l.getString("meta-formatting.suffix.middle-spacer", " ");
         String endSpacer = l.getString("meta-formatting.suffix.end-spacer", "");
 
-        return new GenericMetaStack(StackElementFactory.fromList(l.getPlugin(), format, false), startSpacer, middleSpacer, endSpacer);
+        return MetaStackDefinition.create(StandardStackElements.parseList(l.getPlugin(), format), startSpacer, middleSpacer, endSpacer);
     });
 
     /**
