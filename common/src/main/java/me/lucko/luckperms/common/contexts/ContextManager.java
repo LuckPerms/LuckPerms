@@ -48,7 +48,12 @@ public class ContextManager<T> {
 
     private MutableContextSet calculateApplicableContext(T subject, MutableContextSet accumulator) {
         for (ContextCalculator<T> calculator : calculators) {
-            calculator.giveApplicableContext(subject, accumulator);
+            try {
+                calculator.giveApplicableContext(subject, accumulator);
+            } catch (Exception e) {
+                new RuntimeException("Exception thrown by ContextCalculator: " + calculator.getClass().getName(), e).printStackTrace();
+            }
+
         }
         return accumulator;
     }
