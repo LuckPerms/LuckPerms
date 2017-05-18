@@ -74,7 +74,6 @@ public class BukkitListener implements Listener {
         /* the player was denied entry to the server before this priority.
            log this, so we can handle appropriately later. */
         if (e.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
-            plugin.getLog().warn("Connection from " + e.getUniqueId() + " was already denied. No permissions data will be loaded.");
             deniedAsyncLogin.add(e.getUniqueId());
             return;
         }
@@ -89,7 +88,7 @@ public class BukkitListener implements Listener {
             deniedAsyncLogin.add(e.getUniqueId());
 
             // actually deny the connection.
-            plugin.getLog().warn("Permissions storage is not loaded yet. Denying connection from: " + e.getUniqueId() + " - " + e.getName());
+            plugin.getLog().warn("Permissions storage is not loaded. Denying connection from: " + e.getUniqueId() + " - " + e.getName());
             e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, Message.LOADING_ERROR.asString(plugin.getLocaleManager()));
             return;
         }
@@ -121,6 +120,7 @@ public class BukkitListener implements Listener {
 
         // Check to see if this connection was denied at LOW.
         if (deniedAsyncLogin.remove(e.getUniqueId())) {
+            // their data was never loaded at LOW priority, now check to see if they have been magically allowed since then.
 
             // This is a problem, as they were denied at low priority, but are now being allowed.
             if (e.getLoginResult() == AsyncPlayerPreLoginEvent.Result.ALLOWED) {
@@ -131,7 +131,7 @@ public class BukkitListener implements Listener {
             return;
         }
 
-        // Login event was cancelled by another plugin
+        // Login event was cancelled by another plugin, but it wasn't cancelled when we handled it at LOW
         if (e.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
             // Schedule cleanup of this user.
             plugin.getUserManager().scheduleUnload(e.getUniqueId());
@@ -147,7 +147,6 @@ public class BukkitListener implements Listener {
         /* the player was denied entry to the server before this priority.
            log this, so we can handle appropriately later. */
         if (e.getResult() != PlayerLoginEvent.Result.ALLOWED) {
-            plugin.getLog().warn("Login from " + e.getPlayer().getUniqueId() + " was denied before an attachment could be injected.");
             deniedLogin.add(e.getPlayer().getUniqueId());
             return;
         }
@@ -190,20 +189,20 @@ public class BukkitListener implements Listener {
         /* Listen to see if the event was cancelled after we initially handled the login
            If the connection was cancelled here, we need to do something to clean up the data that was loaded. */
 
-        // Check to see if this connection was denied at LOW.
+        // Check to see if this connection was denied at LOW. Even if it was denied at LOW, their data will still be present.
+        boolean denied = false;
         if (deniedLogin.remove(e.getPlayer().getUniqueId())) {
+            denied = true;
 
             // This is a problem, as they were denied at low priority, but are now being allowed.
             if (e.getResult() == PlayerLoginEvent.Result.ALLOWED) {
                 plugin.getLog().severe("Player connection was re-allowed for " + e.getPlayer().getUniqueId());
                 e.disallow(PlayerLoginEvent.Result.KICK_OTHER, "");
             }
-
-            return;
         }
 
-        // Login event was cancelled by another plugin
-        if (e.getResult() != PlayerLoginEvent.Result.ALLOWED) {
+        // Login event was cancelled by another plugin since we first loaded their data
+        if (denied || e.getResult() != PlayerLoginEvent.Result.ALLOWED) {
             // Schedule cleanup of this user.
             plugin.getUserManager().scheduleUnload(e.getPlayer().getUniqueId());
             return;
@@ -236,8 +235,7 @@ public class BukkitListener implements Listener {
             return;
         }
 
-        String s = e.getMessage().toLowerCase()
-                .replace("/", "")
+        String s = e.getMessage().substring(1).toLowerCase()
                 .replace("bukkit:", "")
                 .replace("spigot:", "")
                 .replace("minecraft:", "");

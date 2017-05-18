@@ -75,7 +75,6 @@ public class SpongeListener {
         /* the player was denied entry to the server before this priority.
            log this, so we can handle appropriately later. */
         if (e.isCancelled()) {
-            plugin.getLog().warn("Connection from " + p.getUniqueId() + " was already denied. No permissions data will be loaded.");
             deniedAsyncLogin.add(p.getUniqueId());
             return;
         }
@@ -90,9 +89,9 @@ public class SpongeListener {
             deniedAsyncLogin.add(p.getUniqueId());
 
             // actually deny the connection.
-            plugin.getLog().warn("Permissions storage is not loaded yet. Denying connection from: " + p.getUniqueId() + " - " + p.getName());
+            plugin.getLog().warn("Permissions storage is not loaded. Denying connection from: " + p.getUniqueId() + " - " + p.getName());
             e.setCancelled(true);
-            e.setMessageCancelled(true);
+            e.setMessageCancelled(false);
             //noinspection deprecation
             e.setMessage(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(Message.LOADING_ERROR.asString(plugin.getLocaleManager())));
             return;
@@ -112,8 +111,10 @@ public class SpongeListener {
         } catch (Exception ex) {
             ex.printStackTrace();
 
+            deniedAsyncLogin.add(p.getUniqueId());
+
             e.setCancelled(true);
-            e.setMessageCancelled(true);
+            e.setMessageCancelled(false);
             //noinspection deprecation
             e.setMessage(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(Message.LOADING_ERROR.asString(plugin.getLocaleManager())));
         }
@@ -149,7 +150,6 @@ public class SpongeListener {
             /* the player was denied entry to the server before this priority.
                log this, so we can handle appropriately later. */
             if (e.isCancelled()) {
-                plugin.getLog().warn("Login from " + player.getUniqueId() + " was denied before an attachment could be injected.");
                 deniedLogin.add(player.getUniqueId());
                 return;
             }
@@ -162,7 +162,7 @@ public class SpongeListener {
 
                 plugin.getLog().warn("User " + player.getUniqueId() + " - " + player.getName() + " doesn't have data pre-loaded. - denying login.");
                 e.setCancelled(true);
-                e.setMessageCancelled(true);
+                e.setMessageCancelled(false);
                 //noinspection deprecation
                 e.setMessage(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(Message.LOADING_ERROR.asString(plugin.getLocaleManager())));
                 return;
@@ -188,6 +188,22 @@ public class SpongeListener {
                         data.preCalculate(plugin.getService().calculateContexts(modified.makeImmutable()));
                     }
                 });
+            }
+        }
+    }
+
+    @Listener(order = Order.BEFORE_POST)
+    @IsCancelled(Tristate.UNDEFINED)
+    public void onClientLoginMonitor(ClientConnectionEvent.Login e) {
+        /* Listen to see if the event was cancelled after we initially handled the login
+           If the connection was cancelled here, we need to do something to clean up the data that was loaded. */
+
+        // Check to see if this connection was denied at LOW. Even if it was denied at LOW, their data will still be present.
+        if (deniedLogin.remove(e.getProfile().getUniqueId())) {
+            // This is a problem, as they were denied at low priority, but are now being allowed.
+            if (!e.isCancelled()) {
+                plugin.getLog().severe("Player connection was re-allowed for " + e.getProfile().getUniqueId());
+                e.setCancelled(true);
             }
         }
     }

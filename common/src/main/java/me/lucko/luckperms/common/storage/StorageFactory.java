@@ -52,10 +52,7 @@ import java.util.Set;
 public class StorageFactory {
 
     public static Set<StorageType> getRequiredTypes(LuckPermsPlugin plugin, StorageType defaultMethod) {
-        plugin.getLog().info("Detecting storage method...");
         if (plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE)) {
-            plugin.getLog().info("Loading split storage options.");
-
             Map<String, String> types = new HashMap<>(plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE_OPTIONS));
             types.entrySet().stream()
                     .filter(e -> StorageType.parse(e.getValue()) == null)
@@ -82,10 +79,8 @@ public class StorageFactory {
 
     public static Storage getInstance(LuckPermsPlugin plugin, StorageType defaultMethod) {
         Storage storage;
-
-        plugin.getLog().info("Initializing storage backings...");
         if (plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE)) {
-            plugin.getLog().info("Using split storage.");
+            plugin.getLog().info("Loading storage provider... [SPLIT STORAGE]");
 
             Map<String, String> types = new HashMap<>(plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE_OPTIONS));
             types.entrySet().stream()
@@ -110,11 +105,10 @@ public class StorageFactory {
                 type = defaultMethod;
             }
 
-            plugin.getLog().info("Using " + type.getName() + " storage.");
+            plugin.getLog().info("Loading storage provider... [" + type.name() + "]");
             storage = makeInstance(type, plugin);
         }
 
-        plugin.getLog().info("Initialising storage provider...");
         storage.init();
         return storage;
     }

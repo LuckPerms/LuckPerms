@@ -78,7 +78,6 @@ public class BungeeListener implements Listener {
         if (e.isCancelled()) {
 
             // log that we are not loading any data
-            plugin.getLog().warn("Connection from " + c.getUniqueId() + " was already denied. No permissions data will be loaded.");
             deniedLogin.add(c.getUniqueId());
 
             e.completeIntent(plugin);
@@ -91,7 +90,7 @@ public class BungeeListener implements Listener {
         if (!plugin.getStorage().isAcceptingLogins()) {
 
             // log that the user tried to login, but was denied at this stage.
-            plugin.getLog().warn("Permissions storage is not loaded yet. No permissions data will be loaded for: " + c.getUniqueId() + " - " + c.getName());
+            plugin.getLog().warn("Permissions storage is not loaded. No permissions data will be loaded for: " + c.getUniqueId() + " - " + c.getName());
             deniedLogin.add(c.getUniqueId());
 
             e.completeIntent(plugin);

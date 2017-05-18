@@ -201,14 +201,16 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         if (messagingType.equals("none") && getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
             messagingType = "redis";
         }
+
+        if (!messagingType.equals("none")) {
+            getLog().info("Loading messaging service... [" + messagingType.toUpperCase() + "]");
+        }
+
         if (messagingType.equals("redis")) {
-            getLog().info("Loading redis...");
             if (getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
                 RedisMessaging redis = new RedisMessaging(this);
                 try {
                     redis.init(getConfiguration().get(ConfigKeys.REDIS_ADDRESS), getConfiguration().get(ConfigKeys.REDIS_PASSWORD));
-                    getLog().info("Loaded redis successfully...");
-
                     messagingService = redis;
                 } catch (Exception e) {
                     getLog().warn("Couldn't load redis...");
@@ -218,7 +220,6 @@ public class LPSpongePlugin implements LuckPermsPlugin {
                 getLog().warn("Messaging Service was set to redis, but redis is not enabled!");
             }
         } else if (messagingType.equals("bungee")) {
-            getLog().info("Loading bungee messaging service...");
             BungeeMessagingService bungeeMessaging = new BungeeMessagingService(this);
             bungeeMessaging.init();
             messagingService = bungeeMessaging;
@@ -243,7 +244,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         localeManager = new SimpleLocaleManager();
         File locale = new File(getDataDirectory(), "lang.yml");
         if (locale.exists()) {
-            getLog().info("Found locale file. Attempting to load from it.");
+            getLog().info("Found lang.yml - loading messages...");
             try {
                 localeManager.loadFromFile(locale);
             } catch (Exception e) {
@@ -252,7 +253,6 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         }
 
         // register commands
-        getLog().info("Registering commands...");
         CommandManager cmdService = game.getCommandManager();
         commandManager = new SpongeCommand(this);
         cmdService.register(this, commandManager, "luckperms", "lp", "perm", "perms", "permission", "permissions");
@@ -288,7 +288,6 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         }
 
         // register with the LP API
-        getLog().info("Registering API...");
         apiProvider = new ApiProvider(this);
         ApiHandler.registerProvider(apiProvider);
         game.getServiceManager().setProvider(this, LuckPermsApi.class, apiProvider);
@@ -302,6 +301,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         scheduler.asyncLater(() -> updateTaskBuffer.request(), 40L);
 
         // run an update instantly.
+        getLog().info("Performing initial data load...");
         updateTaskBuffer.requestDirectly();
 
         // register tasks
@@ -310,7 +310,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         scheduler.asyncRepeating(new ServiceCacheHousekeepingTask(service), 2400L);
         // scheduler.asyncRepeating(() -> userManager.performCleanup(), 2400L);
 
-        getLog().info("Successfully loaded.");
+        getLog().info("Successfully enabled.");
     }
 
     @Listener(order = Order.LATE)
@@ -325,7 +325,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
     @Listener
     public void onDisable(GameStoppingServerEvent event) {
-        getLog().info("Closing datastore...");
+        getLog().info("Closing storage...");
         storage.shutdown();
 
         if (fileWatcher != null) {
@@ -337,9 +337,9 @@ public class LPSpongePlugin implements LuckPermsPlugin {
             messagingService.close();
         }
 
-        getLog().info("Unregistering API...");
         ApiHandler.unregisterProvider();
 
+        getLog().info("Shutting down internal scheduler...");
         scheduler.shutdown();
     }
 
