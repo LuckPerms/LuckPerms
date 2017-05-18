@@ -46,6 +46,10 @@ public class ContextManager<T> {
             .expireAfterWrite(50L, TimeUnit.MILLISECONDS)
             .build(t -> calculateApplicableContext(t, MutableContextSet.create()).makeImmutable());
 
+    public ImmutableContextSet getApplicableContext(T subject) {
+        return cache.get(subject);
+    }
+
     private MutableContextSet calculateApplicableContext(T subject, MutableContextSet accumulator) {
         for (ContextCalculator<T> calculator : calculators) {
             try {
@@ -56,14 +60,6 @@ public class ContextManager<T> {
 
         }
         return accumulator;
-    }
-
-    public ImmutableContextSet getApplicableContext(T subject) {
-        return cache.get(subject);
-    }
-
-    public void invalidateCache(T subject){
-        cache.invalidate(subject);
     }
 
     public void registerCalculator(ContextCalculator<T> calculator) {
@@ -81,6 +77,10 @@ public class ContextManager<T> {
             calculator.giveApplicableContext(null, accumulator);
         }
         return accumulator.makeImmutable();
+    }
+
+    public void invalidateCache(T subject){
+        cache.invalidate(subject);
     }
 
     public int getCalculatorsSize() {

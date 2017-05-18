@@ -751,7 +751,7 @@ public interface PermissionHolder {
      * @param server the server to filter by, can be null
      * @param world the world to filter by, can be null
      * @param temporary whether the query is for temporary nodes or not.
-     * @deprecated in favour of {@link #removeIf(Predicate)}
+     * @deprecated in favour of {@link #clearMatching(Predicate)}
      */
     @Deprecated
     void clearMetaKeys(String key, String server, String world, boolean temporary);

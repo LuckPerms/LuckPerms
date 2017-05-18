@@ -39,7 +39,6 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.core.NodeModel;
-import me.lucko.luckperms.common.core.PriorityComparator;
 import me.lucko.luckperms.common.core.UserIdentifier;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.Track;
@@ -51,7 +50,6 @@ import me.lucko.luckperms.common.storage.holder.NodeHeldPermission;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -216,12 +214,7 @@ public class JSONBacking extends FlatfileBacking {
                 }
 
                 if (!userFile.exists()) {
-                    try {
-                        userFile.createNewFile();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        return false;
-                    }
+                    userFile.createNewFile();
                 }
 
                 JsonObject data = new JsonObject();
@@ -321,12 +314,7 @@ public class JSONBacking extends FlatfileBacking {
                     group.setNodes(nodes);
                     return true;
                 } else {
-                    try {
-                        groupFile.createNewFile();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        return false;
-                    }
+                    groupFile.createNewFile();
 
                     JsonObject data = new JsonObject();
                     data.addProperty("name", group.getName());
@@ -375,12 +363,7 @@ public class JSONBacking extends FlatfileBacking {
                 registerFileAction("groups", groupFile);
 
                 if (!groupFile.exists()) {
-                    try {
-                        groupFile.createNewFile();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        return false;
-                    }
+                    groupFile.createNewFile();
                 }
 
                 JsonObject data = new JsonObject();
@@ -445,12 +428,7 @@ public class JSONBacking extends FlatfileBacking {
                     track.setGroups(groups);
                     return true;
                 } else {
-                    try {
-                        trackFile.createNewFile();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        return false;
-                    }
+                    trackFile.createNewFile();
 
                     JsonObject data = new JsonObject();
                     data.addProperty("name", track.getName());
@@ -504,12 +482,7 @@ public class JSONBacking extends FlatfileBacking {
                 registerFileAction("tracks", trackFile);
 
                 if (!trackFile.exists()) {
-                    try {
-                        trackFile.createNewFile();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        return false;
-                    }
+                    trackFile.createNewFile();
                 }
 
                 JsonObject data = new JsonObject();
@@ -576,7 +549,7 @@ public class JSONBacking extends FlatfileBacking {
     }
 
     public static JsonArray serializePermissions(Set<NodeModel> nodes) {
-        List<JsonObject> data = new ArrayList<>();
+        JsonArray arr = new JsonArray();
 
         for (NodeModel node : nodes) {
             JsonObject attributes = new JsonObject();
@@ -600,17 +573,7 @@ public class JSONBacking extends FlatfileBacking {
 
             JsonObject perm = new JsonObject();
             perm.add(node.getPermission(), attributes);
-            data.add(perm);
-        }
-
-        data.sort((o1, o2) -> PriorityComparator.get().compareStrings(
-                Iterables.getFirst(o1.entrySet(), null).getKey(),
-                Iterables.getFirst(o2.entrySet(), null).getKey()
-        ));
-
-        JsonArray arr = new JsonArray();
-        for (JsonObject o : data) {
-            arr.add(o);
+            arr.add(perm);
         }
 
         return arr;

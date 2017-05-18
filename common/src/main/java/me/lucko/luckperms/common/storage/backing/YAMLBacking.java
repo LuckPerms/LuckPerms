@@ -48,7 +48,6 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -217,12 +216,7 @@ public class YAMLBacking extends FlatfileBacking {
                 }
 
                 if (!userFile.exists()) {
-                    try {
-                        userFile.createNewFile();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        return false;
-                    }
+                    userFile.createNewFile();
                 }
 
                 Map<String, Object> values = new LinkedHashMap<>();
@@ -322,12 +316,7 @@ public class YAMLBacking extends FlatfileBacking {
                     group.setNodes(nodes);
                     return true;
                 } else {
-                    try {
-                        groupFile.createNewFile();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        return false;
-                    }
+                    groupFile.createNewFile();
 
                     Map<String, Object> values = new LinkedHashMap<>();
                     values.put("name", group.getName());
@@ -374,12 +363,7 @@ public class YAMLBacking extends FlatfileBacking {
                 registerFileAction("groups", groupFile);
 
                 if (!groupFile.exists()) {
-                    try {
-                        groupFile.createNewFile();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        return false;
-                    }
+                    groupFile.createNewFile();
                 }
 
                 Map<String, Object> values = new LinkedHashMap<>();
@@ -441,12 +425,7 @@ public class YAMLBacking extends FlatfileBacking {
                     track.setGroups((List<String>) values.get("groups"));
                     return true;
                 } else {
-                    try {
-                        trackFile.createNewFile();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        return false;
-                    }
+                    trackFile.createNewFile();
 
                     Map<String, Object> values = new LinkedHashMap<>();
                     values.put("name", track.getName());
@@ -491,12 +470,7 @@ public class YAMLBacking extends FlatfileBacking {
                 registerFileAction("tracks", trackFile);
 
                 if (!trackFile.exists()) {
-                    try {
-                        trackFile.createNewFile();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        return false;
-                    }
+                    trackFile.createNewFile();
                 }
 
                 Map<String, Object> values = new LinkedHashMap<>();
