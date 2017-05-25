@@ -84,13 +84,8 @@ public class UserDemote extends SubCommand<User> {
             return CommandResult.STATE_ERROR;
         }
 
+        boolean silent = args.remove("-s");
         MutableContextSet context = ArgumentUtils.handleContext(1, args, plugin);
-        boolean silent = false;
-
-        if (args.contains("-s")) {
-            args.remove("-s");
-            silent = true;
-        }
 
         // Load applicable groups
         Set<Node> nodes = user.getNodes().values().stream()
