@@ -134,7 +134,11 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
 
     @Override
     public SpongeUser getOrMake(UserIdentifier id) {
-        return objects.get(id);
+        SpongeUser ret = objects.get(id);
+        if (id.getUsername().isPresent()) {
+            ret.setName(id.getUsername().get(), false);
+        }
+        return ret;
     }
 
     @Override

@@ -71,6 +71,15 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
         return true;
     }
 
+    @Override
+    public User getOrMake(UserIdentifier id) {
+        User ret = super.getOrMake(id);
+        if (id.getUsername().isPresent()) {
+            ret.setName(id.getUsername().get(), false);
+        }
+        return ret;
+    }
+
     /**
      * Check whether the user's state indicates that they should be persisted to storage.
      *
