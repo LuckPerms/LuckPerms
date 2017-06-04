@@ -105,7 +105,11 @@ public class SpongeGroup extends Group {
                             .map(LocalizedNode::getNode)
                             .filter(Node::isGroupNode)
                             .map(Node::getGroupName)
-                            .map(s -> getPlugin().getService().getGroupSubjects().loadSubject(s).join())
+                            .distinct()
+                            .map(n -> Optional.ofNullable(getPlugin().getGroupManager().getIfLoaded(n)))
+                            .filter(Optional::isPresent)
+                            .map(Optional::get)
+                            .map(SpongeGroup::sponge)
                             .map(LPSubject::toReference)
                             .collect(Collectors.toSet());
 
