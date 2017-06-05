@@ -149,7 +149,11 @@ public class StorageFactory {
                         plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
                 );
             case MONGODB:
-                return new MongoDBBacking(plugin, plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES));
+                return new MongoDBBacking(
+                        plugin,
+                        plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES),
+                        plugin.getConfiguration().get(ConfigKeys.MONGODB_COLLECTION_PREFIX)
+                );
             case YAML:
                 return new YAMLBacking(plugin, plugin.getDataDirectory(), "yaml-storage");
             default:

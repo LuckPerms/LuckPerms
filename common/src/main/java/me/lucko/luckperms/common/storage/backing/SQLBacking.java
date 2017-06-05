@@ -117,6 +117,7 @@ public class SQLBacking extends AbstractBacking {
 
     @Getter
     private final SQLProvider provider;
+
     @Getter
     private final Function<String, String> prefix;
 

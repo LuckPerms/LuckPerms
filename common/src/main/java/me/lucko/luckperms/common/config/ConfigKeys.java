@@ -343,6 +343,11 @@ public class ConfigKeys {
     public static final ConfigKey<String> SQL_TABLE_PREFIX = EnduringKey.wrap(StringKey.of("data.table_prefix", "luckperms_"));
 
     /**
+     * The prefix for any MongoDB collections
+     */
+    public static final ConfigKey<String> MONGODB_COLLECTION_PREFIX = EnduringKey.wrap(StringKey.of("data.mongodb_collection_prefix", ""));
+
+    /**
      * The name of the storage method being used
      */
     public static final ConfigKey<String> STORAGE_METHOD = EnduringKey.wrap(LowercaseStringKey.of("storage-method", "h2"));

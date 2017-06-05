@@ -185,6 +185,10 @@ data:
   # This should *not* be set to "lp_" if you have previously ran LuckPerms v2.16.81 or earlier with this database.
   table_prefix: 'luckperms_'
 
+  # The prefix to use for all LuckPerms collections. Change this if you want to use different collections for different servers.
+  # The default is no prefix.
+  mongodb_collection_prefix: ''
+
   # This option controls how frequently LuckPerms will perform a sync task.
   # A sync task will refresh all data from the storage, and ensure that the most up-to-date data is being used by the plugin.
   #

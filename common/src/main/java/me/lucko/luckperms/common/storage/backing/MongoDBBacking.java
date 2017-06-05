@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.common.storage.backing;
 
+import lombok.Getter;
+
 import com.google.common.collect.ImmutableList;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
@@ -130,9 +132,13 @@ public class MongoDBBacking extends AbstractBacking {
     private MongoClient mongoClient;
     private MongoDatabase database;
 
-    public MongoDBBacking(LuckPermsPlugin plugin, DatastoreConfiguration configuration) {
+    @Getter
+    private final String prefix;
+
+    public MongoDBBacking(LuckPermsPlugin plugin, DatastoreConfiguration configuration, String prefix) {
         super(plugin, "MongoDB");
         this.configuration = configuration;
+        this.prefix = prefix;
     }
 
     @Override
@@ -179,7 +185,7 @@ public class MongoDBBacking extends AbstractBacking {
     @Override
     public boolean logAction(LogEntry entry) {
         return call(() -> {
-            MongoCollection<Document> c = database.getCollection("action");
+            MongoCollection<Document> c = database.getCollection(prefix + "action");
 
             Document doc = new Document()
                     .append("timestamp", entry.getTimestamp())
@@ -202,7 +208,7 @@ public class MongoDBBacking extends AbstractBacking {
     public Log getLog() {
         return call(() -> {
             final Log.Builder log = Log.builder();
-            MongoCollection<Document> c = database.getCollection("action");
+            MongoCollection<Document> c = database.getCollection(prefix + "action");
 
             try (MongoCursor<Document> cursor = c.find().iterator()) {
                 while (cursor.hasNext()) {
@@ -234,7 +240,7 @@ public class MongoDBBacking extends AbstractBacking {
     public boolean applyBulkUpdate(BulkUpdate bulkUpdate) {
         return call(() -> {
             if (bulkUpdate.getDataType().isIncludingUsers()) {
-                MongoCollection<Document> c = database.getCollection("users");
+                MongoCollection<Document> c = database.getCollection(prefix + "users");
 
                 try (MongoCursor<Document> cursor = c.find().iterator()) {
                     while (cursor.hasNext()) {
@@ -268,7 +274,7 @@ public class MongoDBBacking extends AbstractBacking {
             }
 
             if (bulkUpdate.getDataType().isIncludingGroups()) {
-                MongoCollection<Document> c = database.getCollection("groups");
+                MongoCollection<Document> c = database.getCollection(prefix + "groups");
 
                 try (MongoCursor<Document> cursor = c.find().iterator()) {
                     while (cursor.hasNext()) {
@@ -311,7 +317,7 @@ public class MongoDBBacking extends AbstractBacking {
         user.getIoLock().lock();
         try {
             return call(() -> {
-                MongoCollection<Document> c = database.getCollection("users");
+                MongoCollection<Document> c = database.getCollection(prefix + "users");
 
                 try (MongoCursor<Document> cursor = c.find(new Document("_id", user.getUuid())).iterator()) {
                     if (cursor.hasNext()) {
@@ -354,7 +360,7 @@ public class MongoDBBacking extends AbstractBacking {
             user.getIoLock().lock();
             try {
                 return call(() -> {
-                    MongoCollection<Document> c = database.getCollection("users");
+                    MongoCollection<Document> c = database.getCollection(prefix + "users");
                     return c.deleteOne(new Document("_id", user.getUuid())).wasAcknowledged();
                 }, false);
             } finally {
@@ -365,7 +371,7 @@ public class MongoDBBacking extends AbstractBacking {
         user.getIoLock().lock();
         try {
             return call(() -> {
-                MongoCollection<Document> c = database.getCollection("users");
+                MongoCollection<Document> c = database.getCollection(prefix + "users");
                 try (MongoCursor<Document> cursor = c.find(new Document("_id", user.getUuid())).iterator()) {
                     if (!cursor.hasNext()) {
                         c.insertOne(fromUser(user));
@@ -389,7 +395,7 @@ public class MongoDBBacking extends AbstractBacking {
     public Set<UUID> getUniqueUsers() {
         Set<UUID> uuids = new HashSet<>();
         boolean success = call(() -> {
-            MongoCollection<Document> c = database.getCollection("users");
+            MongoCollection<Document> c = database.getCollection(prefix + "users");
 
             try (MongoCursor<Document> cursor = c.find().iterator()) {
                 while (cursor.hasNext()) {
@@ -408,7 +414,7 @@ public class MongoDBBacking extends AbstractBacking {
     public List<HeldPermission<UUID>> getUsersWithPermission(String permission) {
         ImmutableList.Builder<HeldPermission<UUID>> held = ImmutableList.builder();
         boolean success = call(() -> {
-            MongoCollection<Document> c = database.getCollection("users");
+            MongoCollection<Document> c = database.getCollection(prefix + "users");
 
             try (MongoCursor<Document> cursor = c.find().iterator()) {
                 while (cursor.hasNext()) {
@@ -439,7 +445,7 @@ public class MongoDBBacking extends AbstractBacking {
         group.getIoLock().lock();
         try {
             return call(() -> {
-                MongoCollection<Document> c = database.getCollection("groups");
+                MongoCollection<Document> c = database.getCollection(prefix + "groups");
 
                 try (MongoCursor<Document> cursor = c.find(new Document("_id", group.getName())).iterator()) {
                     if (cursor.hasNext()) {
@@ -466,7 +472,7 @@ public class MongoDBBacking extends AbstractBacking {
         group.getIoLock().lock();
         try {
             return call(() -> {
-                MongoCollection<Document> c = database.getCollection("groups");
+                MongoCollection<Document> c = database.getCollection(prefix + "groups");
 
                 try (MongoCursor<Document> cursor = c.find(new Document("_id", group.getName())).iterator()) {
                     if (cursor.hasNext()) {
@@ -490,7 +496,7 @@ public class MongoDBBacking extends AbstractBacking {
     public boolean loadAllGroups() {
         List<String> groups = new ArrayList<>();
         boolean success = call(() -> {
-            MongoCollection<Document> c = database.getCollection("groups");
+            MongoCollection<Document> c = database.getCollection(prefix + "groups");
 
             boolean b = true;
             try (MongoCursor<Document> cursor = c.find().iterator()) {
@@ -519,7 +525,7 @@ public class MongoDBBacking extends AbstractBacking {
         group.getIoLock().lock();
         try {
             return call(() -> {
-                MongoCollection<Document> c = database.getCollection("groups");
+                MongoCollection<Document> c = database.getCollection(prefix + "groups");
                 return c.replaceOne(new Document("_id", group.getName()), fromGroup(group)).wasAcknowledged();
             }, false);
         } finally {
@@ -533,7 +539,7 @@ public class MongoDBBacking extends AbstractBacking {
         boolean success;
         try {
             success = call(() -> {
-                MongoCollection<Document> c = database.getCollection("groups");
+                MongoCollection<Document> c = database.getCollection(prefix + "groups");
                 return c.deleteOne(new Document("_id", group.getName())).wasAcknowledged();
             }, false);
         } finally {
@@ -548,7 +554,7 @@ public class MongoDBBacking extends AbstractBacking {
     public List<HeldPermission<String>> getGroupsWithPermission(String permission) {
         ImmutableList.Builder<HeldPermission<String>> held = ImmutableList.builder();
         boolean success = call(() -> {
-            MongoCollection<Document> c = database.getCollection("groups");
+            MongoCollection<Document> c = database.getCollection(prefix + "groups");
 
             try (MongoCursor<Document> cursor = c.find().iterator()) {
                 while (cursor.hasNext()) {
@@ -579,7 +585,7 @@ public class MongoDBBacking extends AbstractBacking {
         track.getIoLock().lock();
         try {
             return call(() -> {
-                MongoCollection<Document> c = database.getCollection("tracks");
+                MongoCollection<Document> c = database.getCollection(prefix + "tracks");
 
                 try (MongoCursor<Document> cursor = c.find(new Document("_id", track.getName())).iterator()) {
                     if (!cursor.hasNext()) {
@@ -602,7 +608,7 @@ public class MongoDBBacking extends AbstractBacking {
         track.getIoLock().lock();
         try {
             return call(() -> {
-                MongoCollection<Document> c = database.getCollection("tracks");
+                MongoCollection<Document> c = database.getCollection(prefix + "tracks");
 
                 try (MongoCursor<Document> cursor = c.find(new Document("_id", track.getName())).iterator()) {
                     if (cursor.hasNext()) {
@@ -622,7 +628,7 @@ public class MongoDBBacking extends AbstractBacking {
     public boolean loadAllTracks() {
         List<String> tracks = new ArrayList<>();
         boolean success = call(() -> {
-            MongoCollection<Document> c = database.getCollection("tracks");
+            MongoCollection<Document> c = database.getCollection(prefix + "tracks");
 
             boolean b = true;
             try (MongoCursor<Document> cursor = c.find().iterator()) {
@@ -651,7 +657,7 @@ public class MongoDBBacking extends AbstractBacking {
         track.getIoLock().lock();
         try {
             return call(() -> {
-                MongoCollection<Document> c = database.getCollection("tracks");
+                MongoCollection<Document> c = database.getCollection(prefix + "tracks");
                 return c.replaceOne(new Document("_id", track.getName()), fromTrack(track)).wasAcknowledged();
             }, false);
         } finally {
@@ -665,7 +671,7 @@ public class MongoDBBacking extends AbstractBacking {
         boolean success;
         try {
             success = call(() -> {
-                MongoCollection<Document> c = database.getCollection("tracks");
+                MongoCollection<Document> c = database.getCollection(prefix + "tracks");
                 return c.deleteOne(new Document("_id", track.getName())).wasAcknowledged();
             }, false);
         } finally {
@@ -679,7 +685,7 @@ public class MongoDBBacking extends AbstractBacking {
     @Override
     public boolean saveUUIDData(String username, UUID uuid) {
         return call(() -> {
-            MongoCollection<Document> c = database.getCollection("uuid");
+            MongoCollection<Document> c = database.getCollection(prefix + "uuid");
 
             try (MongoCursor<Document> cursor = c.find(new Document("_id", uuid)).iterator()) {
                 if (cursor.hasNext()) {
@@ -696,7 +702,7 @@ public class MongoDBBacking extends AbstractBacking {
     @Override
     public UUID getUUID(String username) {
         return call(() -> {
-            MongoCollection<Document> c = database.getCollection("uuid");
+            MongoCollection<Document> c = database.getCollection(prefix + "uuid");
 
             try (MongoCursor<Document> cursor = c.find(new Document("name", username.toLowerCase())).iterator()) {
                 if (cursor.hasNext()) {
@@ -710,7 +716,7 @@ public class MongoDBBacking extends AbstractBacking {
     @Override
     public String getName(UUID uuid) {
         return call(() -> {
-            MongoCollection<Document> c = database.getCollection("uuid");
+            MongoCollection<Document> c = database.getCollection(prefix + "uuid");
 
             try (MongoCursor<Document> cursor = c.find(new Document("_id", uuid)).iterator()) {
                 if (cursor.hasNext()) {
