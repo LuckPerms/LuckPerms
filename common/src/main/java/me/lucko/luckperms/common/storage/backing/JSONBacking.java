@@ -504,6 +504,12 @@ public class JSONBacking extends FlatfileBacking {
         Set<NodeModel> nodes = new HashSet<>();
 
         for (JsonElement ent : permissionsSection) {
+            if (ent.isJsonPrimitive() && ent.getAsJsonPrimitive().isString()) {
+                String permission = ent.getAsJsonPrimitive().getAsString();
+                nodes.add(NodeModel.of(permission, true, "global", "global", 0L, ImmutableContextSet.empty()));
+                continue;
+            }
+
             if (!ent.isJsonObject()) {
                 continue;
             }
@@ -552,6 +558,19 @@ public class JSONBacking extends FlatfileBacking {
         JsonArray arr = new JsonArray();
 
         for (NodeModel node : nodes) {
+            // just a raw, default node.
+            boolean single = node.isValue() &&
+                    node.getServer().equalsIgnoreCase("global") &&
+                    node.getWorld().equalsIgnoreCase("global") &&
+                    node.getExpiry() == 0L &&
+                    node.getContexts().isEmpty();
+
+            // just add a string to the list.
+            if (single) {
+                arr.add(new JsonPrimitive(node.getPermission()));
+                continue;
+            }
+
             JsonObject attributes = new JsonObject();
             attributes.addProperty("value", node.isValue());
 

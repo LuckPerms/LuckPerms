@@ -487,17 +487,29 @@ public class YAMLBacking extends FlatfileBacking {
         Set<NodeModel> nodes = new HashSet<>();
 
         for (Object perm : permissionsSection) {
+            // each object in the permission list is either a String or Map.
 
+            // just a permission with no extra context.
+            if (perm instanceof String) {
+                String permission = (String) perm;
+                nodes.add(NodeModel.of(permission, true, "global", "global", 0L, ImmutableContextSet.empty()));
+                continue;
+            }
+
+            // it must be a map at this point.
             if (!(perm instanceof Map)) {
                 continue;
             }
 
-            Map<String, Object> data = (Map<String, Object>) perm;
-            Map.Entry<String, Object> entry = Iterables.getFirst(data.entrySet(), null);
-
-            if (entry == null) {
+            if (((Map) perm).isEmpty()) {
                 continue;
             }
+
+            // the permission object, should only contain one entry.
+            Map<String, Object> data = (Map<String, Object>) perm;
+
+            // get the only entry in the map. the key is the permission, the object is the attributes associated with it.
+            Map.Entry<String, Object> entry = Iterables.getFirst(data.entrySet(), null);
 
             String permission = entry.getKey();
 
@@ -551,10 +563,43 @@ public class YAMLBacking extends FlatfileBacking {
         return nodes;
     }
 
-    public static List<Map<String, Object>> serializePermissions(Set<NodeModel> nodes) {
-        List<Map<String, Object>> data = new ArrayList<>();
+    /**
+     * Serializes a set of nodes to a format which can be serialised by SnakeYAML.
+     * (Maps, Lists and raw types)
+     *
+     * Returns a list of objects.
+     *
+     * Each object is either instanceof String, just a raw permission node with value=true and default context
+     *
+     * OR
+     *
+     * Is a Map of String to Map. The map contains only one entry, where the key is the permission string, and the value
+     * is a map containing the attributes of the node.
+     *
+     * @param nodes the nodes to serialize
+     * @return a SnakeYAML friendly representation of the map
+     */
+    public static List<Object> serializePermissions(Set<NodeModel> nodes) {
+        List<Object> data = new ArrayList<>();
 
         for (NodeModel node : nodes) {
+            // just a raw, default node.
+            boolean single = node.isValue() &&
+                    node.getServer().equalsIgnoreCase("global") &&
+                    node.getWorld().equalsIgnoreCase("global") &&
+                    node.getExpiry() == 0L &&
+                    node.getContexts().isEmpty();
+
+            // just add a string to the list.
+            if (single) {
+                data.add(node.getPermission());
+                continue;
+            }
+
+            // otherwise, this node has some other special context which needs to be saved.
+            // we serialise this way so it gets represented nicely in YAML.
+
+            // create a map of node attributes
             Map<String, Object> attributes = new LinkedHashMap<>();
             attributes.put("value", node.isValue());
 
@@ -588,8 +633,14 @@ public class YAMLBacking extends FlatfileBacking {
                 attributes.put("context", context);
             }
 
+            // create a new map to represent this entry in the list
+            // the map will only contain one entry. (the permission --> attributes)
             Map<String, Object> perm = new HashMap<>();
+
+            // add the node to the map
             perm.put(node.getPermission(), attributes);
+
+            // add the map to the object list, and continue
             data.add(perm);
         }
 

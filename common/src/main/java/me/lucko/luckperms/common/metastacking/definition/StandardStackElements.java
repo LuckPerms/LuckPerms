@@ -195,7 +195,7 @@ public class StandardStackElements {
         }
     }
 
-    @ToString
+    @ToString(of = "trackName")
     @RequiredArgsConstructor
     @EqualsAndHashCode(of = "trackName")
     private static final class HighestPriorityTrack implements MetaStackElement {
@@ -213,7 +213,7 @@ public class StandardStackElements {
         }
     }
 
-    @ToString
+    @ToString(of = "trackName")
     @RequiredArgsConstructor
     @EqualsAndHashCode(of = "trackName")
     private static final class HighestPriorityNotOnTrack implements MetaStackElement {
@@ -261,7 +261,7 @@ public class StandardStackElements {
         }
     }
 
-    @ToString
+    @ToString(of = "trackName")
     @RequiredArgsConstructor
     @EqualsAndHashCode(of = "trackName")
     private static final class LowestPriorityTrack implements MetaStackElement {
@@ -279,7 +279,7 @@ public class StandardStackElements {
         }
     }
 
-    @ToString
+    @ToString(of = "trackName")
     @RequiredArgsConstructor
     @EqualsAndHashCode(of = "trackName")
     private static final class LowestPriorityNotOnTrack implements MetaStackElement {

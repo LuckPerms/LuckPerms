@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.core;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.ToString;
 
 import com.google.common.base.Preconditions;
@@ -76,11 +77,17 @@ public final class NodeModel {
         return of(permission, value, server, world, expiry, deserializeContextSet(context).makeImmutable());
     }
 
+    @NonNull
     private final String permission;
+    @NonNull
     private final boolean value;
+    @NonNull
     private final String server;
+    @NonNull
     private final String world;
+    @NonNull
     private final long expiry;
+    @NonNull
     private final ImmutableContextSet contexts;
 
     public String serializeContext() {
