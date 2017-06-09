@@ -34,6 +34,7 @@ import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.utils.DateUtil;
 
 import java.util.List;
 
@@ -135,7 +136,7 @@ public class LogEntry extends me.lucko.luckperms.api.LogEntry {
         @Override
         public LogEntry build() {
             if (getTimestamp() == 0L) {
-                super.timestamp(System.currentTimeMillis() / 1000L);
+                super.timestamp(DateUtil.unixSecondsNow());
             }
 
             return super.build();

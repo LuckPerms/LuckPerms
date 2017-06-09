@@ -37,25 +37,18 @@ import me.lucko.luckperms.common.data.Log;
 import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.storage.backing.utils.FileUuidCache;
 import me.lucko.luckperms.common.storage.backing.utils.LegacyJSONSchemaMigration;
 import me.lucko.luckperms.common.storage.backing.utils.LegacyYAMLSchemaMigration;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
 import java.util.logging.Level;
@@ -67,7 +60,7 @@ public abstract class FlatfileBacking extends AbstractBacking {
     private static final String LOG_FORMAT = "%s(%s): [%s] %s(%s) --> %s";
 
     private final Logger actionLogger = Logger.getLogger("luckperms_actions");
-    private Map<String, String> uuidCache = new ConcurrentHashMap<>();
+    private FileUuidCache uuidCache = new FileUuidCache();
 
     private final File pluginDir;
 
@@ -98,7 +91,7 @@ public abstract class FlatfileBacking extends AbstractBacking {
             return;
         }
 
-        uuidCache.putAll(getUUIDCache());
+        uuidCache.load(uuidData);
 
         try {
             FileHandler fh = new FileHandler(actionLog.getAbsolutePath(), 0, 1, true);
@@ -207,7 +200,7 @@ public abstract class FlatfileBacking extends AbstractBacking {
 
     @Override
     public void shutdown() {
-        saveUUIDCache(uuidCache);
+        uuidCache.save(uuidData);
     }
 
     protected void registerFileAction(String type, File file) {
@@ -325,51 +318,17 @@ public abstract class FlatfileBacking extends AbstractBacking {
 
     @Override
     public boolean saveUUIDData(String username, UUID uuid) {
-        username = username.toLowerCase();
-        uuidCache.put(username, uuid.toString());
+        uuidCache.addMapping(username, uuid);
         return true;
     }
 
     @Override
     public UUID getUUID(String username) {
-        username = username.toLowerCase();
-        if (uuidCache.get(username) == null) return null;
-        return UUID.fromString(uuidCache.get(username));
+        return uuidCache.lookupUUID(username);
     }
 
     @Override
     public String getName(UUID uuid) {
-        for (Map.Entry<String, String> e : uuidCache.entrySet()) {
-            if (e.getValue().equalsIgnoreCase(uuid.toString())) {
-                return e.getKey();
-            }
-        }
-        return null;
-    }
-
-    private Map<String, String> getUUIDCache() {
-        Map<String, String> cache = new HashMap<>();
-
-        try (BufferedReader reader = Files.newBufferedReader(uuidData.toPath(), StandardCharsets.UTF_8)) {
-            Properties props = new Properties();
-            props.load(reader);
-            for (String key : props.stringPropertyNames()) {
-                cache.put(key, props.getProperty(key));
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return cache;
-    }
-
-    private void saveUUIDCache(Map<String, String> cache) {
-        try (BufferedWriter writer = Files.newBufferedWriter(uuidData.toPath(), StandardCharsets.UTF_8)) {
-            Properties properties = new Properties();
-            properties.putAll(cache);
-            properties.store(writer, null);
-            writer.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        return uuidCache.lookupUsername(uuid);
     }
 }

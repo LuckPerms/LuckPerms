@@ -46,8 +46,12 @@ public class DateUtil {
     private static final Pattern TIME_PATTERN = Pattern.compile("(?:([0-9]+)\\s*y[a-z]*[,\\s]*)?" + "(?:([0-9]+)\\s*mo[a-z]*[,\\s]*)?" + "(?:([0-9]+)\\s*w[a-z]*[,\\s]*)?" + "(?:([0-9]+)\\s*d[a-z]*[,\\s]*)?" + "(?:([0-9]+)\\s*h[a-z]*[,\\s]*)?" + "(?:([0-9]+)\\s*m[a-z]*[,\\s]*)?" + "(?:([0-9]+)\\s*(?:s[a-z]*)?)?", Pattern.CASE_INSENSITIVE);
     private static final int MAX_YEARS = 100000;
 
+    public static long unixSecondsNow() {
+        return System.currentTimeMillis() / 1000L;
+    }
+
     public static boolean shouldExpire(long unixTime) {
-        return unixTime < (System.currentTimeMillis() / 1000);
+        return unixTime < (unixSecondsNow());
     }
 
     /**

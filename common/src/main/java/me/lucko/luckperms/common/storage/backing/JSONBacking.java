@@ -171,10 +171,10 @@ public class JSONBacking extends FlatfileBacking {
                     Set<NodeModel> data = deserializePermissions(object.get("permissions").getAsJsonArray());
                     Set<Node> nodes = data.stream().map(NodeModel::toNode).collect(Collectors.toSet());
                     user.setNodes(nodes);
+                    user.setName(name, true);
 
                     boolean save = plugin.getUserManager().giveDefaultIfNeeded(user, false);
-
-                    if (user.setName(name, false)) {
+                    if (user.getName().isPresent() && (name == null || !user.getName().get().equalsIgnoreCase(name))) {
                         save = true;
                     }
 

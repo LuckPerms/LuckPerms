@@ -328,10 +328,10 @@ public class MongoDBBacking extends AbstractBacking {
                                 .collect(Collectors.toSet())
                         );
                         user.getPrimaryGroup().setStoredValue(d.getString("primaryGroup"));
+                        user.setName(name, true);
 
                         boolean save = plugin.getUserManager().giveDefaultIfNeeded(user, false);
-
-                        if (user.setName(d.getString("name"), false)) {
+                        if (user.getName().isPresent() && (name == null || !user.getName().get().equalsIgnoreCase(name))) {
                             save = true;
                         }
 

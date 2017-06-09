@@ -95,7 +95,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
         super(uuid.toString(), plugin);
         this.uuid = uuid;
 
-        setName(name, true);
+        setName(name, false);
         this.primaryGroup = plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION).apply(this);
         this.userData = new UserCache(this);
         getPlugin().getApiProvider().getEventFactory().handleUserCacheLoad(this, userData);
@@ -110,39 +110,49 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
         return Optional.ofNullable(name);
     }
 
-    public boolean setName(String name, boolean force) {
-        // if the value being set is null
-        if (name == null || name.equalsIgnoreCase("null") || name.isEmpty()) {
-            // only apply the change if it is being forced
-            if (force) {
-                // if the name is already null, return false
-                if (this.name == null) {
-                    return false;
-                } else {
-                    // set the new null value
-                    this.name = null;
-                    return true;
-                }
-            } else {
-                // we already have a non-null value, so return false
-                return false;
+    /**
+     * Sets the users name
+     *
+     * @param name the name to set
+     * @param weak if true, the value will only be updated if a value hasn't been set previously.
+     * @return true if a change was made
+     */
+    public boolean setName(String name, boolean weak) {
+
+        // if weak is true, only update the value in the User if it's null
+        if (weak && this.name != null) {
+
+            // try to update casing if they're equalIgnoreCase
+            if (name != null && this.name.equalsIgnoreCase(name)) {
+                this.name = name;
             }
+
+            return false;
+        }
+
+        // consistency. if the name being set is equivalent to null, just make it null.
+        if (name != null && (name.isEmpty() || name.equalsIgnoreCase("null"))) {
+            name = null;
+        }
+
+        // if one or the other is null, just update and return true
+        if ((this.name == null) != (name == null)) {
+            this.name = name;
+            return true;
+        }
+
+        if (this.name == null) {
+            // they're both null
+            return false;
         } else {
-            // the name being set is not null
-            if (this.name == null) {
+            // both non-null
+            if (this.name.equalsIgnoreCase(name)) {
+                this.name = name; // update case anyway, but return false
+                return false;
+            } else {
                 this.name = name;
                 return true;
             }
-
-            // update the capitalisation, but still return false
-            if (this.name.equalsIgnoreCase(name)) {
-                this.name = name;
-                return false;
-            }
-
-            // completely new value, just set & return true
-            this.name = name;
-            return true;
         }
     }
 

@@ -40,6 +40,7 @@ import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.utils.DateUtil;
 
 import io.github.mkremins.fanciful.FancyMessage;
 
@@ -96,7 +97,7 @@ public class Importer implements Runnable {
 
         int index = 1;
         for (String command : commands) {
-            long time = System.currentTimeMillis() / 1000;
+            long time = DateUtil.unixSecondsNow();
             if (lastMsg < (time - PROGRESS_REPORT_SECONDS)) {
                 lastMsg = time;
 

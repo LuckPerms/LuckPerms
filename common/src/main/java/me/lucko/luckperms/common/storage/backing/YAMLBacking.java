@@ -175,10 +175,10 @@ public class YAMLBacking extends FlatfileBacking {
                     Set<NodeModel> data = deserializePermissions((List<Object>) values.get("permissions"));
                     Set<Node> nodes = data.stream().map(NodeModel::toNode).collect(Collectors.toSet());
                     user.setNodes(nodes);
+                    user.setName(name, true);
 
                     boolean save = plugin.getUserManager().giveDefaultIfNeeded(user, false);
-
-                    if (user.setName(name, false)) {
+                    if (user.getName().isPresent() && (name == null || !user.getName().get().equalsIgnoreCase(name))) {
                         save = true;
                     }
 
