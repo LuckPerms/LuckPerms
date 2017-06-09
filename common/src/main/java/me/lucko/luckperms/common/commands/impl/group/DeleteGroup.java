@@ -29,6 +29,7 @@ import me.lucko.luckperms.api.event.cause.DeletionCause;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
+import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.Message;
@@ -90,17 +91,6 @@ public class DeleteGroup extends SingleCommand {
 
     @Override
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
-        final List<String> groups = new ArrayList<>(plugin.getGroupManager().getAll().keySet());
-
-        if (args.size() <= 1) {
-            if (args.isEmpty() || args.get(0).equalsIgnoreCase("")) {
-                return groups;
-            }
-
-            return groups.stream().filter(s -> s.toLowerCase().startsWith(args.get(0).toLowerCase()))
-                    .collect(Collectors.toList());
-        }
-
-        return Collections.emptyList();
+        return SubCommand.getGroupTabComplete(args, plugin);
     }
 }

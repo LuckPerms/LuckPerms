@@ -159,7 +159,7 @@ public abstract class SubCommand<T> extends Command<T, Void> {
         return Collections.emptyList();
     }
 
-    private static List<String> getTabComplete(List<String> options, List<String> args) {
+    public static List<String> getTabComplete(List<String> options, List<String> args) {
         if (args.size() <= 1) {
             if (args.isEmpty() || args.get(0).equalsIgnoreCase("")) {
                 return options;

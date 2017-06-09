@@ -98,4 +98,9 @@ public class LogTrackHistory extends SubCommand<Log> {
 
         return CommandResult.SUCCESS;
     }
+
+    @Override
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+        return getTrackTabComplete(args, plugin);
+    }
 }

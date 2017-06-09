@@ -197,9 +197,12 @@ public class CommandManager {
     @SuppressWarnings("unchecked")
     public List<String> onTabComplete(Sender sender, List<String> args) {
         List<String> arguments = new ArrayList<>(args);
+
+        // we rewrite tab completions too!
         handleRewrites(arguments);
 
         final List<Command> mains = mainCommands.stream()
+                .filter(Command::shouldDisplay)
                 .filter(m -> m.isAuthorized(sender))
                 .collect(Collectors.toList());
 
@@ -239,12 +242,9 @@ public class CommandManager {
     private void sendCommandUsage(Sender sender, String label) {
         Util.sendPluginMessage(sender, "&2Running &bLuckPerms v" + plugin.getVersion() + "&2.");
         mainCommands.stream()
+                .filter(Command::shouldDisplay)
                 .filter(c -> c.isAuthorized(sender))
                 .forEach(c -> {
-                    if (!c.shouldDisplay()) {
-                        return;
-                    }
-
                     @SuppressWarnings("unchecked")
                     String permission = (String) c.getPermission().map(p -> ((Permission) p).getExample()).orElse("None");
                     FancyMessage msg = new FancyMessage("> ").color(c('3')).then().text(String.format(c.getUsage(), label)).color(c('a'))

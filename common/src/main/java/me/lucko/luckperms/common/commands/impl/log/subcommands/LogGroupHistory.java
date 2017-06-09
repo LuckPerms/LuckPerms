@@ -98,4 +98,9 @@ public class LogGroupHistory extends SubCommand<Log> {
 
         return CommandResult.SUCCESS;
     }
+
+    @Override
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+        return getGroupTabComplete(args, plugin);
+    }
 }

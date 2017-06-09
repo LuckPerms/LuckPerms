@@ -29,6 +29,7 @@ import me.lucko.luckperms.api.event.cause.DeletionCause;
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
+import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
@@ -38,9 +39,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class DeleteTrack extends SingleCommand {
     public DeleteTrack() {
@@ -83,18 +82,6 @@ public class DeleteTrack extends SingleCommand {
 
     @Override
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
-        final List<String> tracks = new ArrayList<>(plugin.getTrackManager().getAll().keySet());
-
-        if (args.size() <= 1) {
-            if (args.isEmpty() || args.get(0).equalsIgnoreCase("")) {
-                return tracks;
-            }
-
-            return tracks.stream()
-                    .filter(s -> s.toLowerCase().startsWith(args.get(0).toLowerCase()))
-                    .collect(Collectors.toList());
-        }
-
-        return Collections.emptyList();
+        return SubCommand.getTrackTabComplete(args, plugin);
     }
 }

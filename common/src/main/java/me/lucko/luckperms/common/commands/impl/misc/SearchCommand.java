@@ -33,6 +33,7 @@ import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
+import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
@@ -110,6 +111,11 @@ public class SearchCommand extends SingleCommand {
         }
 
         return CommandResult.SUCCESS;
+    }
+
+    @Override
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+        return SubCommand.getPermissionTabComplete(args, plugin.getPermissionVault());
     }
 
     private static Map.Entry<FancyMessage, String> searchUserResultToMessage(List<HeldPermission<UUID>> results, Function<UUID, String> uuidLookup, String label, int pageNumber) {

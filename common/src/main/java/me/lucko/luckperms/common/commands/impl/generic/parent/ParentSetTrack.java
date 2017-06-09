@@ -46,6 +46,7 @@ import me.lucko.luckperms.common.utils.Predicates;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getGroupTabComplete;
 import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getTrackTabComplete;
 
 public class ParentSetTrack extends SharedSubCommand {
@@ -129,6 +130,11 @@ public class ParentSetTrack extends SharedSubCommand {
 
     @Override
     public List<String> onTabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
-        return getTrackTabComplete(args, plugin);
+        if (args.size() == 0 || args.size() == 1) {
+            return getTrackTabComplete(args, plugin);
+        }
+
+        args.remove(0);
+        return getGroupTabComplete(args, plugin);
     }
 }

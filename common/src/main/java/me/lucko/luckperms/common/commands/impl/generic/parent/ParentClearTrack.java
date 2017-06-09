@@ -46,6 +46,8 @@ import me.lucko.luckperms.common.utils.Predicates;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getTrackTabComplete;
+
 public class ParentClearTrack extends SharedSubCommand {
     public ParentClearTrack() {
         super("cleartrack", "Clears all parents on a given track", Permission.USER_PARENT_CLEAR_TRACK, Permission.GROUP_PARENT_CLEAR_TRACK, Predicates.is(0),
@@ -107,5 +109,10 @@ public class ParentClearTrack extends SharedSubCommand {
 
         save(holder, sender, plugin);
         return CommandResult.SUCCESS;
+    }
+
+    @Override
+    public List<String> onTabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+        return getTrackTabComplete(args, plugin);
     }
 }

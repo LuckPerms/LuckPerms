@@ -29,7 +29,6 @@ import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.common.commands.abstraction.Command;
 import me.lucko.luckperms.common.commands.abstraction.MainCommand;
-import me.lucko.luckperms.common.commands.impl.log.subcommands.LogExport;
 import me.lucko.luckperms.common.commands.impl.log.subcommands.LogGroupHistory;
 import me.lucko.luckperms.common.commands.impl.log.subcommands.LogNotify;
 import me.lucko.luckperms.common.commands.impl.log.subcommands.LogRecent;
@@ -52,7 +51,6 @@ public class LogMainCommand extends MainCommand<Log> {
                 .add(new LogRecent())
                 .add(new LogSearch())
                 .add(new LogNotify())
-                .add(new LogExport())
                 .add(new LogUserHistory())
                 .add(new LogGroupHistory())
                 .add(new LogTrackHistory())

@@ -30,6 +30,7 @@ import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
+import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Message;
@@ -40,6 +41,7 @@ import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class CheckCommand extends SingleCommand {
     public CheckCommand() {
@@ -73,5 +75,19 @@ public class CheckCommand extends SingleCommand {
         Tristate tristate = user.getUserData().getPermissionData(plugin.getContextForUser(user)).getPermissionValue(permission);
         Message.CHECK_RESULT.send(sender, user.getFriendlyName(), permission, Util.formatTristate(tristate));
         return CommandResult.SUCCESS;
+    }
+
+    @Override
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+        if (args.isEmpty()) {
+            return plugin.getPlayerList();
+        }
+
+        if (args.size() == 1) {
+            return plugin.getPlayerList().stream().filter(s -> s.toLowerCase().startsWith(args.get(0).toLowerCase())).collect(Collectors.toList());
+        }
+
+        args.remove(0);
+        return SubCommand.getPermissionTabComplete(args, plugin.getPermissionVault());
     }
 }

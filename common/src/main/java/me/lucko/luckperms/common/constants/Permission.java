@@ -150,7 +150,6 @@ public enum Permission {
     LOG_TRACK_HISTORY(list("trackhistory"), Type.LOG),
     LOG_SEARCH(list("search"), Type.LOG),
     LOG_NOTIFY(list("notify"), Type.LOG),
-    LOG_EXPORT(list("export"), Type.LOG),
 
     SPONGE_PERMISSION_INFO(list("permission.info"), Type.SPONGE),
     SPONGE_PERMISSION_SET(list("permission.set"), Type.SPONGE),

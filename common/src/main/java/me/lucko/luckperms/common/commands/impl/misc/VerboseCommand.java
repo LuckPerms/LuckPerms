@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.common.commands.impl.misc;
 
+import com.google.common.collect.ImmutableList;
+
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
@@ -39,8 +41,10 @@ import io.github.mkremins.fanciful.ChatColor;
 import io.github.mkremins.fanciful.FancyMessage;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class VerboseCommand extends SingleCommand {
     public VerboseCommand() {
@@ -122,5 +126,18 @@ public class VerboseCommand extends SingleCommand {
 
         sendUsage(sender, label);
         return CommandResult.INVALID_ARGS;
+    }
+
+    @Override
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+        if (args.isEmpty()) {
+            return ImmutableList.of("on", "record", "off", "paste");
+        }
+
+        if (args.size() == 1) {
+            return Stream.of("on", "record", "off", "paste").filter(s -> s.toLowerCase().startsWith(args.get(0).toLowerCase())).collect(Collectors.toList());
+        }
+
+        return Collections.emptyList();
     }
 }

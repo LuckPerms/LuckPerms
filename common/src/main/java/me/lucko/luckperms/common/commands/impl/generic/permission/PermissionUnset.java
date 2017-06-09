@@ -45,6 +45,8 @@ import me.lucko.luckperms.common.utils.Predicates;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getPermissionTabComplete;
+
 public class PermissionUnset extends SharedSubCommand {
     public PermissionUnset() {
         super("unset", "Unsets a permission for the object", Permission.USER_PERM_UNSET, Permission.GROUP_PERM_UNSET,
@@ -83,5 +85,10 @@ public class PermissionUnset extends SharedSubCommand {
             Message.DOES_NOT_HAVEPERMISSION.send(sender, holder.getFriendlyName());
             return CommandResult.STATE_ERROR;
         }
+    }
+
+    @Override
+    public List<String> onTabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+        return getPermissionTabComplete(args, plugin.getPermissionVault());
     }
 }
