@@ -52,7 +52,7 @@ import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getTrack
 public class ParentSetTrack extends SharedSubCommand {
     public ParentSetTrack() {
         super("settrack", "Removes all other groups the object inherits from already on the given track and adds them to the one given",
-                Permission.USER_PARENT_SET_TRACK, Permission.GROUP_PARENT_SET_TRACK, Predicates.is(0),
+                Permission.USER_PARENT_SET_TRACK, Permission.GROUP_PARENT_SET_TRACK, Predicates.inRange(0, 1),
                 Arg.list(
                         Arg.create("track", true, "the track to set on"),
                         Arg.create("group", true, "the group to set to, or a number relating to the position of the group on the given track"),
