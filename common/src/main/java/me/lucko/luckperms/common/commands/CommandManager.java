@@ -56,12 +56,16 @@ import me.lucko.luckperms.common.commands.impl.user.UserMainCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.utils.TextUtils;
 
-import io.github.mkremins.fanciful.ChatColor;
-import io.github.mkremins.fanciful.FancyMessage;
+import net.kyori.text.Component;
+import net.kyori.text.event.ClickEvent;
+import net.kyori.text.event.HoverEvent;
+import net.kyori.text.serializer.ComponentSerializer;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -127,7 +131,7 @@ public class CommandManager {
         return executor.submit(() -> {
             try {
                 return execute(sender, label, args);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 plugin.getLog().severe("Exception whilst executing command: " + args.toString());
                 e.printStackTrace();
                 return null;
@@ -179,7 +183,7 @@ public class CommandManager {
             result = main.execute(plugin, sender, null, arguments, label);
         } catch (CommandException e) {
             result = handleException(e, sender, label, main);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             e.printStackTrace();
             result = CommandResult.FAILURE;
         }
@@ -247,22 +251,21 @@ public class CommandManager {
                 .forEach(c -> {
                     @SuppressWarnings("unchecked")
                     String permission = (String) c.getPermission().map(p -> ((Permission) p).getExample()).orElse("None");
-                    FancyMessage msg = new FancyMessage("> ").color(c('3')).then().text(String.format(c.getUsage(), label)).color(c('a'))
-                            .formattedTooltip(
-                                    new FancyMessage("Command: ").color(c('b')).then().text(c.getName()).color(c('2')),
-                                    new FancyMessage("Description: ").color(c('b')).then().text(c.getDescription()).color(c('2')),
-                                    new FancyMessage("Usage: ").color(c('b')).then().text(String.format(c.getUsage(), label)).color(c('2')),
-                                    new FancyMessage("Permission: ").color(c('b')).then().text(permission).color(c('2')),
-                                    new FancyMessage(" "),
-                                    new FancyMessage("Click to auto-complete.").color(c('7'))
-                            )
-                            .suggest(String.format(c.getUsage(), label));
-                    sender.sendMessage(msg);
+
+                    Component component = ComponentSerializer.parseFromLegacy("&3> &a" + String.format(c.getUsage(), label), Constants.FORMAT_CHAR)
+                            .applyRecursively(comp -> {
+                                comp.hoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentSerializer.parseFromLegacy(TextUtils.joinNewline(
+                                        "&bCommand: &2" + c.getName(),
+                                        "&bDescription: &2" + c.getDescription(),
+                                        "&bUsage: &2" + String.format(c.getUsage(), label),
+                                        "&bPermission: &2" + permission,
+                                        " ",
+                                        "&7Click to auto-complete."
+                                        ), Constants.FORMAT_CHAR)));
+                                comp.clickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, String.format(c.getUsage(), label)));
+                            });
+                    sender.sendMessage(component);
                 });
-    }
-    
-    private static ChatColor c(char c) {
-        return ChatColor.getByChar(c);
     }
 
     public static CommandResult handleException(CommandException e, Sender sender, String label, Command command) {

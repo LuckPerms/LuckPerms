@@ -37,8 +37,10 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.common.verbose.VerboseListener;
 
-import io.github.mkremins.fanciful.ChatColor;
-import io.github.mkremins.fanciful.FancyMessage;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.event.ClickEvent;
+import net.kyori.text.event.HoverEvent;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -114,7 +116,12 @@ public class VerboseCommand extends SingleCommand {
                     }
 
                     Message.VERBOSE_RECORDING_URL.send(sender);
-                    sender.sendMessage(new FancyMessage(url).color(ChatColor.getByChar('b')).link(url));
+
+                    Component message = new TextComponent(url).color('b')
+                            .clickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url))
+                            .hoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Click to open the results page.").color('7')));
+
+                    sender.sendMessage(message);
                     return CommandResult.SUCCESS;
                 }
             } else {

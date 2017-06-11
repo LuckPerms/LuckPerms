@@ -46,8 +46,10 @@ import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
-import io.github.mkremins.fanciful.ChatColor;
-import io.github.mkremins.fanciful.FancyMessage;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.event.ClickEvent;
+import net.kyori.text.event.HoverEvent;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -90,7 +92,12 @@ public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
         String url = plugin.getConfiguration().get(ConfigKeys.WEB_EDITOR_URL_PATTERN) + id;
 
         Message.EDITOR_URL.send(sender);
-        sender.sendMessage(new FancyMessage(url).color(ChatColor.getByChar('b')).link(url));
+
+        Component message = new TextComponent(url).color('b')
+                .clickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url))
+                .hoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Click to open the editor.").color('7')));
+
+        sender.sendMessage(message);
         return CommandResult.SUCCESS;
     }
 

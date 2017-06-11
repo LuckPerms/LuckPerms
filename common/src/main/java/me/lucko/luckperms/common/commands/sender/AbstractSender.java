@@ -34,7 +34,8 @@ import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import io.github.mkremins.fanciful.FancyMessage;
+import net.kyori.text.Component;
+import net.kyori.text.serializer.ComponentSerializer;
 
 import java.lang.ref.WeakReference;
 import java.util.UUID;
@@ -81,9 +82,9 @@ public final class AbstractSender<T> implements Sender {
     }
 
     @Override
-    public void sendMessage(FancyMessage message) {
+    public void sendMessage(Component message) {
         if (isConsole()) {
-            sendMessage(message.toOldMessageFormat());
+            sendMessage(ComponentSerializer.toLegacy(message, Constants.COLOR_CHAR));
             return;
         }
 

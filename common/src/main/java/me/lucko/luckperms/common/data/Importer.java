@@ -42,7 +42,8 @@ import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.DateUtil;
 
-import io.github.mkremins.fanciful.FancyMessage;
+import net.kyori.text.Component;
+import net.kyori.text.serializer.ComponentSerializer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -203,8 +204,8 @@ public class Importer implements Runnable {
         }
 
         @Override
-        public void sendMessage(FancyMessage message) {
-            logMessage(message.toOldMessageFormat());
+        public void sendMessage(Component message) {
+            logMessage(ComponentSerializer.toLegacy(message, Constants.COLOR_CHAR));
         }
 
         @Override

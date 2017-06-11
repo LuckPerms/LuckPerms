@@ -35,11 +35,11 @@
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
-        <!-- fanciful -->
+        <!-- text -->
         <dependency>
-            <groupId>io.github.mkremins</groupId>
-            <artifactId>fanciful</artifactId>
-            <version>1.2.5</version>
+            <groupId>net.kyori</groupId>
+            <artifactId>text</artifactId>
+            <version>1.12-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
         <!-- HikariCP -->

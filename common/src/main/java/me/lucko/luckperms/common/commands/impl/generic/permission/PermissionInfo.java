@@ -45,14 +45,19 @@ import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.common.utils.TextUtils;
 
-import io.github.mkremins.fanciful.ChatColor;
-import io.github.mkremins.fanciful.FancyMessage;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.event.ClickEvent;
+import net.kyori.text.event.HoverEvent;
+import net.kyori.text.serializer.ComponentSerializer;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.function.Consumer;
 
 public class PermissionInfo extends SharedSubCommand {
     public PermissionInfo() {
@@ -86,7 +91,7 @@ public class PermissionInfo extends SharedSubCommand {
         } else {
             int page = ArgumentUtils.handleIntOrElse(0, args, 1);
 
-            Map.Entry<FancyMessage, String> ent = permNodesToMessage(filter, holder.mergePermissionsToSortedSet(), holder, label, page);
+            Map.Entry<Component, String> ent = permNodesToMessage(filter, holder.mergePermissionsToSortedSet(), holder, label, page);
             if (ent.getValue() != null) {
                 Message.LISTNODES_WITH_PAGE.send(sender, holder.getFriendlyName(), ent.getValue());
                 sender.sendMessage(ent.getKey());
@@ -100,7 +105,7 @@ public class PermissionInfo extends SharedSubCommand {
         return CommandResult.SUCCESS;
     }
 
-    private static Map.Entry<FancyMessage, String> permNodesToMessage(String filter, SortedSet<LocalizedNode> nodes, PermissionHolder holder, String label, int pageNumber) {
+    private static Map.Entry<Component, String> permNodesToMessage(String filter, SortedSet<LocalizedNode> nodes, PermissionHolder holder, String label, int pageNumber) {
         List<Node> l = new ArrayList<>();
         for (Node node : nodes) {
             if (filter != null && !node.getPermission().startsWith(filter)) {
@@ -114,7 +119,7 @@ public class PermissionInfo extends SharedSubCommand {
         }
 
         if (l.isEmpty()) {
-            return Maps.immutableEntry(new FancyMessage("None").color(ChatColor.getByChar('3')), null);
+            return Maps.immutableEntry(new TextComponent("None").color('3'), null);
         }
 
         int index = pageNumber - 1;
@@ -127,7 +132,7 @@ public class PermissionInfo extends SharedSubCommand {
 
         List<Node> page = pages.get(index);
 
-        FancyMessage message = new FancyMessage("");
+        TextComponent message = new TextComponent("");
         String title = "&7(showing page &f" + pageNumber + "&7 of &f" + pages.size() + "&7 - &f" + nodes.size() + "&7 entries";
         if (filter != null) {
             title += " - filtered by &f\"" + filter + "\"&7)";
@@ -136,24 +141,19 @@ public class PermissionInfo extends SharedSubCommand {
         }
 
         for (Node node : page) {
-            message.then("> ").color(ChatColor.getByChar('3')).apply(m -> makeFancy(m, holder, label, node))
-                    .then(Util.color(node.getPermission())).color(node.getValue() ? ChatColor.getByChar('a') : ChatColor.getByChar('c')).apply(m -> makeFancy(m, holder, label, node))
-                    .apply(node, Util::appendNodeContextDescription)
-                    .then("\n");
+            String s = "&3> " + (node.getValue() ? "&a" : "&c") + node.getPermission() + Util.getAppendableNodeContextString(node) + "\n";
+            message.append(ComponentSerializer.parseFromLegacy(s, Constants.FORMAT_CHAR).applyRecursively(makeFancy(holder, label, node)));
         }
 
         return Maps.immutableEntry(message, title);
     }
 
-    private static void makeFancy(FancyMessage message, PermissionHolder holder, String label, Node node) {
-        message.formattedTooltip(
-                new FancyMessage("> ")
-                        .color(ChatColor.getByChar('3'))
-                        .then(node.getPermission())
-                        .color(node.getValue() ? ChatColor.getByChar('a') : ChatColor.getByChar('c')),
-                new FancyMessage(" "),
-                new FancyMessage("Click to remove this node from " + holder.getFriendlyName()).color(ChatColor.getByChar('7'))
-        );
+    private static Consumer<Component> makeFancy(PermissionHolder holder, String label, Node node) {
+        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentSerializer.parseFromLegacy(TextUtils.joinNewline(
+                "&3> " + (node.getValue() ? "&a" : "&c") + node.getPermission(),
+                " ",
+                "&7Click to remove this node from " + holder.getFriendlyName()
+        ), Constants.FORMAT_CHAR));
 
         boolean group = !(holder instanceof User);
         String command = NodeFactory.nodeAsCommand(node, group ? holder.getObjectName() : holder.getFriendlyName(), group)
@@ -163,7 +163,10 @@ public class PermissionInfo extends SharedSubCommand {
                 .replace(" true", "")
                 .replace(" false", "");
 
-        message.suggest(command);
+        return component -> {
+            component.hoverEvent(hoverEvent);
+            component.clickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command));
+        };
     }
 
     private static String permNodesToString(String filter, SortedSet<LocalizedNode> nodes) {

@@ -27,15 +27,11 @@ package me.lucko.luckperms.common.commands.utils;
 
 import lombok.experimental.UtilityClass;
 
-import com.google.common.collect.Maps;
-
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Message;
-
-import io.github.mkremins.fanciful.FancyMessage;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -238,18 +234,6 @@ public class Util {
         return sb.toString();
     }
 
-    public static void appendNodeContextDescription(FancyMessage message, Node node) {
-        if (node.isServerSpecific()) {
-            message.then(" ").apply(Maps.immutableEntry("server", node.getServer().get()), Util::appendContext);
-        }
-        if (node.isWorldSpecific()) {
-            message.then(" ").apply(Maps.immutableEntry("world", node.getWorld().get()), Util::appendContext);
-        }
-        for (Map.Entry<String, String> c : node.getContexts().toSet()) {
-            message.then(" ").apply(c, Util::appendContext);
-        }
-    }
-
     /**
      * Converts a context pair to a formatted string, surrounded by (  ) brackets.
      *
@@ -259,10 +243,6 @@ public class Util {
      */
     public static String contextToString(String key, String value) {
         return Message.CONTEXT_PAIR.asString(null, key, value);
-    }
-
-    public static void appendContext(FancyMessage message, Map.Entry<String, String> ent) {
-        message.addAll(FancyMessage.fromLegacyText(contextToString(ent.getKey(), ent.getValue())));
     }
 
     public static String contextSetToString(ContextSet set) {

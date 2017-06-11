@@ -37,5 +37,7 @@ public class Constants {
     public static final UUID IMPORT_UUID = UUID.fromString("11111111-1111-1111-1111-111111111111");
     public static final String IMPORT_NAME = "Import";
     public static final String LOG_FORMAT = "&8(&e%s&8)  [&a%s&8] (&b%s&8) &7--> &f%s";
+    public static final char COLOR_CHAR = '\u00A7';
+    public static final char FORMAT_CHAR = '&';
 
 }

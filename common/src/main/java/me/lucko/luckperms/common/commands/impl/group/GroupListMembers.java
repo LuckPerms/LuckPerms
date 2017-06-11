@@ -36,6 +36,7 @@ import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeFactory;
@@ -43,9 +44,13 @@ import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.common.utils.TextUtils;
 
-import io.github.mkremins.fanciful.ChatColor;
-import io.github.mkremins.fanciful.FancyMessage;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.event.ClickEvent;
+import net.kyori.text.event.HoverEvent;
+import net.kyori.text.serializer.ComponentSerializer;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -53,6 +58,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -90,8 +96,8 @@ public class GroupListMembers extends SubCommand<Group> {
             return s;
         });
 
-        Map.Entry<FancyMessage, String> msgUsers = searchUserResultToMessage(matchedUsers, lookupFunc, label, page);
-        Map.Entry<FancyMessage, String> msgGroups = searchGroupResultToMessage(matchedGroups, label, page);
+        Map.Entry<Component, String> msgUsers = searchUserResultToMessage(matchedUsers, lookupFunc, label, page);
+        Map.Entry<Component, String> msgGroups = searchGroupResultToMessage(matchedGroups, label, page);
 
         if (msgUsers.getValue() != null) {
             Message.SEARCH_SHOWING_USERS_WITH_PAGE.send(sender, msgUsers.getValue());
@@ -112,9 +118,9 @@ public class GroupListMembers extends SubCommand<Group> {
         return CommandResult.SUCCESS;
     }
 
-    private static Map.Entry<FancyMessage, String> searchUserResultToMessage(List<HeldPermission<UUID>> results, Function<UUID, String> uuidLookup, String label, int pageNumber) {
+    private static Map.Entry<Component, String> searchUserResultToMessage(List<HeldPermission<UUID>> results, Function<UUID, String> uuidLookup, String label, int pageNumber) {
         if (results.isEmpty()) {
-            return Maps.immutableEntry(new FancyMessage("None").color(ChatColor.getByChar('3')), null);
+            return Maps.immutableEntry(new TextComponent("None").color('3'), null);
         }
 
         List<HeldPermission<UUID>> sorted = new ArrayList<>(results);
@@ -133,23 +139,20 @@ public class GroupListMembers extends SubCommand<Group> {
                 .map(hp -> Maps.immutableEntry(uuidLookup.apply(hp.getHolder()), hp))
                 .collect(Collectors.toList());
 
-        FancyMessage message = new FancyMessage("");
+        TextComponent message = new TextComponent("");
         String title = "&7(page &f" + pageNumber + "&7 of &f" + pages.size() + "&7 - &f" + sorted.size() + "&7 entries)";
 
         for (Map.Entry<String, HeldPermission<UUID>> ent : uuidMappedPage) {
-            message.then("> ").color(ChatColor.getByChar('3')).apply(m -> makeFancy(m, ent.getKey(), false, label, ent.getValue()))
-                    .then(ent.getKey() + " ").color(ChatColor.getByChar('b')).apply(m -> makeFancy(m, ent.getKey(), false, label, ent.getValue()))
-                    .apply(ent.getValue().asNode(), GroupListMembers::appendNodeExpiry)
-                    .apply(ent.getValue().asNode(), Util::appendNodeContextDescription)
-                    .then("\n");
+            String s = "&3> &b" + ent.getKey() + " " + getNodeExpiryString(ent.getValue().asNode()) + Util.getAppendableNodeContextString(ent.getValue().asNode()) + "\n";
+            message.append(ComponentSerializer.parseFromLegacy(s, Constants.FORMAT_CHAR).applyRecursively(makeFancy(ent.getKey(), false, label, ent.getValue())));
         }
 
         return Maps.immutableEntry(message, title);
     }
 
-    private static Map.Entry<FancyMessage, String> searchGroupResultToMessage(List<HeldPermission<String>> results, String label, int pageNumber) {
+    private static Map.Entry<Component, String> searchGroupResultToMessage(List<HeldPermission<String>> results, String label, int pageNumber) {
         if (results.isEmpty()) {
-            return Maps.immutableEntry(new FancyMessage("None").color(ChatColor.getByChar('3')), null);
+            return Maps.immutableEntry(new TextComponent("None").color('3'), null);
         }
 
         List<HeldPermission<String>> sorted = new ArrayList<>(results);
@@ -165,49 +168,42 @@ public class GroupListMembers extends SubCommand<Group> {
 
         List<HeldPermission<String>> page = pages.get(index);
 
-        FancyMessage message = new FancyMessage("");
+        TextComponent message = new TextComponent("");
         String title = "&7(page &f" + pageNumber + "&7 of &f" + pages.size() + "&7 - &f" + sorted.size() + "&7 entries)";
 
         for (HeldPermission<String> ent : page) {
-            message.then("> ").color(ChatColor.getByChar('3')).apply(m -> makeFancy(m, ent.getHolder(), true, label, ent))
-                    .then(ent.getHolder() + " ").color(ChatColor.getByChar('b')).apply(m -> makeFancy(m, ent.getHolder(), true, label, ent))
-                    .apply(ent.asNode(), GroupListMembers::appendNodeExpiry)
-                    .apply(ent.asNode(), Util::appendNodeContextDescription)
-                    .then("\n");
+            String s = "&3> &b" + ent.getHolder() + " " + getNodeExpiryString(ent.asNode()) + Util.getAppendableNodeContextString(ent.asNode()) + "\n";
+            message.append(ComponentSerializer.parseFromLegacy(s, Constants.FORMAT_CHAR).applyRecursively(makeFancy(ent.getHolder(), true, label, ent)));
         }
 
         return Maps.immutableEntry(message, title);
     }
 
-    private static void appendNodeExpiry(FancyMessage message, Node node) {
+    private static String getNodeExpiryString(Node node) {
         if (!node.isTemporary()) {
-            return;
+            return "";
         }
 
-        message.then(" (").color(ChatColor.getByChar('8'))
-                .then("expires in " + DateUtil.formatDateDiff(node.getExpiryUnixTime())).color(ChatColor.getByChar('7'))
-                .then(")").color(ChatColor.getByChar('8'));
+        return " &8(&7expires in " + DateUtil.formatDateDiff(node.getExpiryUnixTime()) + "&8)";
     }
 
-    private static void makeFancy(FancyMessage message, String holderName, boolean group, String label, HeldPermission<?> perm) {
-        Node node = perm.asNode();
+    private static Consumer<Component> makeFancy(String holderName, boolean group, String label, HeldPermission<?> perm) {
+        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentSerializer.parseFromLegacy(TextUtils.joinNewline(
+                "&3> " + (perm.asNode().getValue() ? "&a" : "&c") + perm.asNode().getGroupName(),
+                " ",
+                "&7Click to remove this parent from " + holderName
+        ), Constants.FORMAT_CHAR));
 
-        message = message.formattedTooltip(
-                new FancyMessage("> ")
-                        .color(ChatColor.getByChar('3'))
-                        .then(node.getPermission())
-                        .color(node.getValue() ? ChatColor.getByChar('a') : ChatColor.getByChar('c')),
-                new FancyMessage(" "),
-                new FancyMessage("Click to remove this parent from " + holderName).color(ChatColor.getByChar('7'))
-        );
-
-        String command = NodeFactory.nodeAsCommand(node, holderName, group)
+        String command = NodeFactory.nodeAsCommand(perm.asNode(), holderName, group)
                 .replace("/luckperms", "/" + label)
                 .replace("permission set", "permission unset")
                 .replace("parent add", "parent remove")
                 .replace(" true", "")
                 .replace(" false", "");
 
-        message.suggest(command);
+        return component -> {
+            component.hoverEvent(hoverEvent);
+            component.clickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command));
+        };
     }
 }

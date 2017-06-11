@@ -30,10 +30,10 @@ import me.lucko.luckperms.common.commands.sender.SenderFactory;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
+import net.kyori.text.Component;
+
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
-import io.github.mkremins.fanciful.FancyMessage;
 
 import java.util.UUID;
 
@@ -67,7 +67,7 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
     }
 
     @Override
-    protected void sendMessage(CommandSender sender, FancyMessage message) {
+    protected void sendMessage(CommandSender sender, Component message) {
         messageHandler.sendJsonMessage(sender, message);
     }
 

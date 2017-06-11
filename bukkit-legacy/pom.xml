@@ -47,8 +47,8 @@
                                     <shadedPattern>me.lucko.luckperms.lib.gson</shadedPattern>
                                 </relocation>
                                 <relocation>
-                                    <pattern>io.github.mkremins.fanciful</pattern>
-                                    <shadedPattern>me.lucko.luckperms.lib.fanciful</shadedPattern>
+                                    <pattern>net.kyori.text</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.text</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>

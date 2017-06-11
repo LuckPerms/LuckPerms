@@ -29,11 +29,12 @@ import me.lucko.luckperms.common.commands.sender.SenderFactory;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
+import net.kyori.text.Component;
+import net.kyori.text.serializer.ComponentSerializer;
+
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.serializer.TextSerializers;
-
-import io.github.mkremins.fanciful.FancyMessage;
 
 import java.util.UUID;
 
@@ -65,11 +66,11 @@ public class SpongeSenderFactory extends SenderFactory<CommandSource> {
     }
 
     @Override
-    protected void sendMessage(CommandSource source, FancyMessage message) {
+    protected void sendMessage(CommandSource source, Component message) {
         try {
-            source.sendMessage(TextSerializers.JSON.deserialize(message.exportToJson()));
+            source.sendMessage(TextSerializers.JSON.deserialize(ComponentSerializer.serialize(message)));
         } catch (Exception e) {
-            sendMessage(source, message.toOldMessageFormat());
+            sendMessage(source, ComponentSerializer.toLegacy(message, Constants.COLOR_CHAR));
         }
     }
 

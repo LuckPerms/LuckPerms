@@ -25,10 +25,13 @@
 
 package me.lucko.luckperms.bukkit.compat;
 
+import me.lucko.luckperms.common.constants.Constants;
+
+import net.kyori.text.Component;
+import net.kyori.text.serializer.ComponentSerializer;
+
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
-import io.github.mkremins.fanciful.FancyMessage;
 
 public class MessageHandler {
     private final BukkitJsonMessageHandler bukkitHandler;
@@ -39,10 +42,10 @@ public class MessageHandler {
         spigotHandler = isSpigot() ? new SpigotJsonMessageHandler() : null;
     }
 
-    public void sendJsonMessage(CommandSender sender, FancyMessage message) {
+    public void sendJsonMessage(CommandSender sender, Component message) {
         if (ReflectionUtil.isChatCompatible() && sender instanceof Player) {
             Player player = (Player) sender;
-            String json = message.exportToJson();
+            String json = ComponentSerializer.serialize(message);
 
             // Try Bukkit.
             if (bukkitHandler.sendJsonMessage(player, json)) {
@@ -56,7 +59,7 @@ public class MessageHandler {
         }
 
         // Fallback to Bukkit
-        sender.sendMessage(message.toOldMessageFormat());
+        sender.sendMessage(ComponentSerializer.toLegacy(message, Constants.COLOR_CHAR));
     }
 
     private static boolean isSpigot() {

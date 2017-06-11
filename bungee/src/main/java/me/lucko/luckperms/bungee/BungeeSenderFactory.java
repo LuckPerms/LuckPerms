@@ -29,12 +29,11 @@ import me.lucko.luckperms.common.commands.sender.SenderFactory;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
+import net.kyori.text.Component;
+import net.kyori.text.serializer.ComponentSerializer;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.chat.ComponentSerializer;
-
-import io.github.mkremins.fanciful.FancyMessage;
 
 import java.util.UUID;
 
@@ -65,11 +64,11 @@ public class BungeeSenderFactory extends SenderFactory<CommandSender> {
     }
 
     @Override
-    protected void sendMessage(CommandSender sender, FancyMessage message) {
+    protected void sendMessage(CommandSender sender, Component message) {
         try {
-            sender.sendMessage(ComponentSerializer.parse(message.exportToJson()));
+            sender.sendMessage(net.md_5.bungee.chat.ComponentSerializer.parse(ComponentSerializer.serialize(message)));
         } catch (Exception e) {
-            sendMessage(sender, message.toOldMessageFormat());
+            sendMessage(sender, ComponentSerializer.toLegacy(message, Constants.COLOR_CHAR));
         }
     }
 

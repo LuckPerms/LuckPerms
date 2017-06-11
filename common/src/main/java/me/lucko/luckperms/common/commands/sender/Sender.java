@@ -29,7 +29,7 @@ import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import io.github.mkremins.fanciful.FancyMessage;
+import net.kyori.text.Component;
 
 import java.util.UUID;
 
@@ -71,7 +71,7 @@ public interface Sender {
      *
      * @param message the message to send.
      */
-    void sendMessage(FancyMessage message);
+    void sendMessage(Component message);
 
     /**
      * Check if the Sender has a permission.

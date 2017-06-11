@@ -29,7 +29,7 @@ import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import io.github.mkremins.fanciful.FancyMessage;
+import net.kyori.text.Component;
 
 import java.util.UUID;
 
@@ -48,7 +48,7 @@ public abstract class SenderFactory<T> {
 
     protected abstract void sendMessage(T t, String s);
 
-    protected abstract void sendMessage(T t, FancyMessage message);
+    protected abstract void sendMessage(T t, Component message);
 
     protected abstract boolean hasPermission(T t, String node);
 
