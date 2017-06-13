@@ -32,6 +32,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.kyori.text.Component;
 
+import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -63,6 +64,13 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
 
     @Override
     protected void sendMessage(CommandSender sender, String s) {
+
+        // send sync if command block
+        if (sender instanceof BlockCommandSender) {
+            getPlugin().getScheduler().doSync(() -> sender.sendMessage(s));
+            return;
+        }
+
         sender.sendMessage(s);
     }
 

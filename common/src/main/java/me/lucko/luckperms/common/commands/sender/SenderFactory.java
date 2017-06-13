@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.common.commands.sender;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -40,6 +42,8 @@ import java.util.UUID;
  */
 @RequiredArgsConstructor
 public abstract class SenderFactory<T> {
+
+    @Getter(AccessLevel.PROTECTED)
     private final LuckPermsPlugin plugin;
 
     protected abstract String getName(T t);
