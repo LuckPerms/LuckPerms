@@ -115,10 +115,14 @@ public class FileWatcher implements Runnable {
             List<WatchEvent<?>> watchEvents = key.pollEvents();
 
             for (WatchEvent<?> event : watchEvents) {
-                Path name = (Path) event.context();
-                Path file = path.resolve(name);
+                Path context = (Path) event.context();
 
-                String fileName = name.toString();
+                if (context == null) {
+                    continue;
+                }
+
+                Path file = path.resolve(context);
+                String fileName = context.toString();
 
                 if (internalChanges.containsKey(id + "/" + fileName)) {
                     // This file was modified by the system.
