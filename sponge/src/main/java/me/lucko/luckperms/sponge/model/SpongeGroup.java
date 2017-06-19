@@ -30,6 +30,7 @@ import lombok.Getter;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ListMultimap;
 
 import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.LocalizedNode;
@@ -54,6 +55,7 @@ import org.spongepowered.api.service.permission.PermissionService;
 
 import co.aikar.timings.Timing;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -238,8 +240,9 @@ public class SpongeGroup extends Group {
 
         private Optional<String> getMeta(ImmutableContextSet contexts, String key) {
             MetaAccumulator metaAccumulator = parent.accumulateMeta(null, null, ExtractedContexts.generate(plugin.getService().calculateContexts(contexts)));
-            Map<String, String> meta = metaAccumulator.getMeta();
-            return Optional.ofNullable(meta.get(key));
+            ListMultimap<String, String> meta = metaAccumulator.getMeta();
+            List<String> ret = meta.get(key);
+            return ret.isEmpty() ? Optional.empty() : Optional.of(ret.get(0));
         }
     }
 }

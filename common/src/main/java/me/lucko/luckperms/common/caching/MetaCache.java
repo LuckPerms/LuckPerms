@@ -25,16 +25,20 @@
 
 package me.lucko.luckperms.common.caching;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedMap;
+import com.google.common.collect.ListMultimap;
 
 import me.lucko.luckperms.api.caching.MetaData;
 import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
 import me.lucko.luckperms.common.metastacking.MetaStack;
 
+import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -43,29 +47,38 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 /**
  * Holds a user's cached meta for a given context
  */
+@Getter
 @NoArgsConstructor
 public class MetaCache implements MetaData {
+    @Getter(AccessLevel.NONE)
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
-    @Getter
+    private ListMultimap<String, String> metaMultimap = ImmutableListMultimap.of();
     private Map<String, String> meta = ImmutableMap.of();
-
-    @Getter
     private SortedMap<Integer, String> prefixes = ImmutableSortedMap.of();
-
-    @Getter
     private SortedMap<Integer, String> suffixes = ImmutableSortedMap.of();
-
-    @Getter
     private MetaStack prefixStack = null;
-
-    @Getter
     private MetaStack suffixStack = null;
 
     public void loadMeta(MetaAccumulator meta) {
         lock.writeLock().lock();
         try {
-            this.meta = ImmutableMap.copyOf(meta.getMeta());
+            this.metaMultimap = ImmutableListMultimap.copyOf(meta.getMeta());
+
+            //noinspection unchecked
+            Map<String, List<String>> metaMap = (Map) this.metaMultimap.asMap();
+            ImmutableMap.Builder<String, String> metaMapBuilder = ImmutableMap.builder();
+
+            for (Map.Entry<String, List<String>> e : metaMap.entrySet()) {
+                if (e.getValue().isEmpty()) {
+                    continue;
+                }
+
+                // take the value which was accumulated first
+                metaMapBuilder.put(e.getKey(), e.getValue().get(0));
+            }
+            this.meta = metaMapBuilder.build();
+
             this.prefixes = ImmutableSortedMap.copyOfSorted(meta.getPrefixes());
             this.suffixes = ImmutableSortedMap.copyOfSorted(meta.getSuffixes());
             this.prefixStack = meta.getPrefixStack();

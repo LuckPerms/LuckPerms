@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.api.caching;
 
+import com.google.common.collect.ListMultimap;
+
 import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
 
 import java.util.Map;
@@ -38,7 +40,24 @@ import java.util.SortedMap;
 public interface MetaData {
 
     /**
-     * Gets an immutable copy of the meta this user has
+     * Gets an immutable copy of the meta this user has.
+     *
+     * <p>A list multimap is used because when inherited values are included, each key can be
+     * mapped to multiple values.</p>
+     *
+     * <p>The first value to be accumulated (and used to represent the key in {@link #getMeta()} is at index 0
+     * in the list. Any additional values are stored in order of accumulation.</p>
+     *
+     * @return an immutable multimap of meta
+     * @since 3.3
+     */
+    ListMultimap<String, String> getMetaMultimap();
+
+    /**
+     * Gets an immutable copy of the meta this user has.
+     *
+     * <p>This map is formed by taking the entries in {@link #getMetaMultimap()}, and mapping each key
+     * to the value at index 0 in the corresponding list.</p>
      *
      * @return an immutable map of meta
      */
