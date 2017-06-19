@@ -33,12 +33,14 @@ import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeFactory;
+import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.common.utils.ProgressLogger;
 
 import net.alpenblock.bungeeperms.BungeePerms;
 import net.alpenblock.bungeeperms.Group;
+import net.alpenblock.bungeeperms.PermEntity;
 import net.alpenblock.bungeeperms.Server;
 import net.alpenblock.bungeeperms.User;
 import net.alpenblock.bungeeperms.World;
@@ -88,57 +90,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
             me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().getIfLoaded(groupName);
 
             MigrationUtils.setGroupWeight(group, groupWeight);
-
-            // Migrate global perms
-            for (String perm : g.getPerms()) {
-                if (perm.isEmpty()) {
-                    continue;
-                }
-
-                group.setPermission(MigrationUtils.parseNode(perm, true).build());
-            }
-
-            // Migrate per-server perms
-            for (Map.Entry<String, Server> e : g.getServers().entrySet()) {
-                for (String perm : e.getValue().getPerms()) {
-                    if (perm.isEmpty()) {
-                        continue;
-                    }
-
-                    group.setPermission(MigrationUtils.parseNode(perm, true).setWorld(e.getKey()).build());
-                }
-
-                // Migrate per-world perms
-                for (Map.Entry<String, World> we : e.getValue().getWorlds().entrySet()) {
-                    for (String perm : we.getValue().getPerms()) {
-                        if (perm.isEmpty()) {
-                            continue;
-                        }
-
-                        group.setPermission(MigrationUtils.parseNode(perm, true).setServer(e.getKey()).setWorld(we.getKey()).build());
-                    }
-                }
-            }
-
-            // Migrate any parent groups
-            for (String inherit : g.getInheritances()) {
-                if (inherit.isEmpty()) {
-                    continue;
-                }
-
-                group.setPermission(NodeFactory.make("group." + MigrationUtils.standardizeName(inherit)));
-            }
-
-            // Migrate prefix and suffix
-            String prefix = g.getPrefix();
-            String suffix = g.getSuffix();
-
-            if (prefix != null && !prefix.equals("")) {
-                group.setPermission(NodeFactory.makePrefixNode(groupWeight, prefix).build());
-            }
-            if (suffix != null && !suffix.equals("")) {
-                group.setPermission(NodeFactory.makeSuffixNode(groupWeight, suffix).build());
-            }
+            migrateHolder(g, g.getInheritances(), groupWeight, group);
 
             plugin.getStorage().saveGroup(group);
             log.logAllProgress("Migrated {} groups so far.", groupCount.incrementAndGet());
@@ -162,56 +114,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
             plugin.getStorage().loadUser(u.getUUID(), u.getName()).join();
             me.lucko.luckperms.common.core.model.User user = plugin.getUserManager().getIfLoaded(u.getUUID());
 
-            // Migrate global perms
-            for (String perm : u.getPerms()) {
-                if (perm.isEmpty()) {
-                    continue;
-                }
-
-                user.setPermission(MigrationUtils.parseNode(perm, true).build());
-            }
-
-            // Migrate per-server perms
-            for (Map.Entry<String, Server> e : u.getServers().entrySet()) {
-                for (String perm : e.getValue().getPerms()) {
-                    if (perm.isEmpty()) {
-                        continue;
-                    }
-
-                    user.setPermission(MigrationUtils.parseNode(perm, true).setWorld(e.getKey()).build());
-                }
-
-                // Migrate per-world perms
-                for (Map.Entry<String, World> we : e.getValue().getWorlds().entrySet()) {
-                    for (String perm : we.getValue().getPerms()) {
-                        if (perm.isEmpty()) {
-                            continue;
-                        }
-
-                        user.setPermission(MigrationUtils.parseNode(perm, true).setServer(e.getKey()).setWorld(we.getKey()).build());
-                    }
-                }
-            }
-
-            // Migrate groups
-            for (String group : u.getGroupsString()) {
-                if (group.isEmpty()) {
-                    continue;
-                }
-
-                user.setPermission(NodeFactory.make("group." + MigrationUtils.standardizeName(group)));
-            }
-
-            // Migrate prefix & suffix
-            String prefix = u.getPrefix();
-            String suffix = u.getSuffix();
-
-            if (prefix != null && !prefix.equals("")) {
-                user.setPermission(NodeFactory.makePrefixNode(maxWeight, prefix).build());
-            }
-            if (suffix != null && !suffix.equals("")) {
-                user.setPermission(NodeFactory.makeSuffixNode(maxWeight, suffix).build());
-            }
+            migrateHolder(u, u.getGroupsString(), maxWeight, user);
 
             plugin.getStorage().saveUser(user);
             plugin.getUserManager().cleanup(user);
@@ -222,5 +125,58 @@ public class MigrationBungeePerms extends SubCommand<Object> {
         log.log("Migrated " + userCount.get() + " users.");
         log.log("Success! Migration complete.");
         return CommandResult.SUCCESS;
+    }
+
+    private static void migrateHolder(PermEntity entity, List<String> parents, int weight, PermissionHolder holder) {
+        // Migrate global perms
+        for (String perm : entity.getPerms()) {
+            if (perm.isEmpty()) {
+                continue;
+            }
+
+            holder.setPermission(MigrationUtils.parseNode(perm, true).build());
+        }
+
+        // Migrate per-server perms
+        for (Map.Entry<String, Server> e : entity.getServers().entrySet()) {
+            for (String perm : e.getValue().getPerms()) {
+                if (perm.isEmpty()) {
+                    continue;
+                }
+
+                holder.setPermission(MigrationUtils.parseNode(perm, true).setServer(e.getKey()).build());
+            }
+
+            // Migrate per-world perms
+            for (Map.Entry<String, World> we : e.getValue().getWorlds().entrySet()) {
+                for (String perm : we.getValue().getPerms()) {
+                    if (perm.isEmpty()) {
+                        continue;
+                    }
+
+                    holder.setPermission(MigrationUtils.parseNode(perm, true).setServer(e.getKey()).setWorld(we.getKey()).build());
+                }
+            }
+        }
+
+        // Migrate any parent groups
+        for (String inherit : parents) {
+            if (inherit.isEmpty()) {
+                continue;
+            }
+
+            holder.setPermission(NodeFactory.make("group." + MigrationUtils.standardizeName(inherit)));
+        }
+
+        // Migrate prefix and suffix
+        String prefix = entity.getPrefix();
+        String suffix = entity.getSuffix();
+
+        if (prefix != null && !prefix.equals("")) {
+            holder.setPermission(NodeFactory.makePrefixNode(weight, prefix).build());
+        }
+        if (suffix != null && !suffix.equals("")) {
+            holder.setPermission(NodeFactory.makeSuffixNode(weight, suffix).build());
+        }
     }
 }
