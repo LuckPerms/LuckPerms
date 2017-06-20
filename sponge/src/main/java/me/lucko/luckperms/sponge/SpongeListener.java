@@ -64,7 +64,7 @@ public class SpongeListener {
     private final Set<UUID> deniedAsyncLogin = Collections.synchronizedSet(new HashSet<>());
     private final Set<UUID> deniedLogin = Collections.synchronizedSet(new HashSet<>());
 
-    @Listener(order = Order.AFTER_PRE)
+    @Listener(order = Order.EARLY)
     @IsCancelled(Tristate.UNDEFINED)
     public void onClientAuth(ClientConnectionEvent.Auth e) {
         /* Called when the player first attempts a connection with the server.
@@ -120,7 +120,7 @@ public class SpongeListener {
         }
     }
 
-    @Listener(order = Order.BEFORE_POST)
+    @Listener(order = Order.LAST)
     @IsCancelled(Tristate.UNDEFINED)
     public void onClientAuthMonitor(ClientConnectionEvent.Auth e) {
         /* Listen to see if the event was cancelled after we initially handled the connection
@@ -137,7 +137,7 @@ public class SpongeListener {
         }
     }
 
-    @Listener(order = Order.AFTER_PRE)
+    @Listener(order = Order.FIRST)
     @IsCancelled(Tristate.UNDEFINED)
     public void onClientLogin(ClientConnectionEvent.Login e) {
         try (Timing ignored = plugin.getTimings().time(LPTiming.ON_CLIENT_LOGIN)) {
@@ -147,10 +147,8 @@ public class SpongeListener {
 
             final GameProfile player = e.getProfile();
 
-            /* the player was denied entry to the server before this priority.
-               log this, so we can handle appropriately later. */
+            /* the player was denied entry to the server before this priority. */
             if (e.isCancelled()) {
-                deniedLogin.add(player.getUniqueId());
                 return;
             }
 
@@ -192,7 +190,7 @@ public class SpongeListener {
         }
     }
 
-    @Listener(order = Order.BEFORE_POST)
+    @Listener(order = Order.LAST)
     @IsCancelled(Tristate.UNDEFINED)
     public void onClientLoginMonitor(ClientConnectionEvent.Login e) {
         /* Listen to see if the event was cancelled after we initially handled the login
@@ -214,7 +212,7 @@ public class SpongeListener {
         plugin.doAsync(() -> LoginHelper.refreshPlayer(plugin, e.getTargetEntity().getUniqueId()));
     }
 
-    @Listener(order = Order.LAST)
+    @Listener(order = Order.POST)
     public void onClientLeave(ClientConnectionEvent.Disconnect e) {
         /* We don't actually remove the user instance here, as Sponge likes to keep performing checks
            on players when they disconnect. The instance gets cleared up on a housekeeping task
