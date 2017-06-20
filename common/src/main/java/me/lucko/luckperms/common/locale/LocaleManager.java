@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.locale;
 
-import me.lucko.luckperms.common.constants.Message;
-
 import java.io.File;
 
 /**
@@ -40,9 +38,18 @@ public interface LocaleManager {
 
     /**
      * Gets a translation for a given message key
+     *
      * @param key the key
-     * @return the translation, or null if there isn't a translation available.
+     * @return the translation, or null if there isn't any translation available.
      */
     String getTranslation(Message key);
+
+    /**
+     * Gets a translation for a given command spec key
+     *
+     * @param key the key
+     * @return the translation data, or null if there isn't any translation available.
+     */
+    CommandSpec.CommandSpecData getTranslation(CommandSpec key);
 
 }

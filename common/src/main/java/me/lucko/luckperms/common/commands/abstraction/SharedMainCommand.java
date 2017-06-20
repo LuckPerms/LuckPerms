@@ -30,8 +30,9 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
+import me.lucko.luckperms.common.locale.LocalizedSpec;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -55,8 +56,8 @@ public class SharedMainCommand<T extends PermissionHolder> extends SubCommand<T>
      */
     private boolean user;
 
-    public SharedMainCommand(String name, String description, boolean user, List<SharedSubCommand> secondaryCommands) {
-        super(name, description, null, Predicates.alwaysFalse(), null);
+    public SharedMainCommand(LocalizedSpec spec, String name, boolean user, List<SharedSubCommand> secondaryCommands) {
+        super(spec, name, null, Predicates.alwaysFalse());
         this.secondaryCommands = secondaryCommands;
         this.user = user;
     }
@@ -89,7 +90,7 @@ public class SharedMainCommand<T extends PermissionHolder> extends SubCommand<T>
             strippedArgs.addAll(args.subList(1, args.size()));
         }
 
-        if (sub.getIsArgumentInvalid().test(strippedArgs.size())) {
+        if (sub.getArgumentCheck().test(strippedArgs.size())) {
             sub.sendDetailedUsage(sender);
             return CommandResult.INVALID_ARGS;
         }

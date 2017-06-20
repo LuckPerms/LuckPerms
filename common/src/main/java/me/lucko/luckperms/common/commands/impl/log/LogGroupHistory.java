@@ -23,66 +23,76 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.impl.track;
+package me.lucko.luckperms.common.commands.impl.log;
 
+import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.DataConstraints;
 import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.model.Group;
-import me.lucko.luckperms.common.core.model.Track;
-import me.lucko.luckperms.common.data.LogEntry;
+import me.lucko.luckperms.common.data.Log;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
 
-public class TrackAppend extends SubCommand<Track> {
-    public TrackAppend(LocaleManager locale) {
-        super(CommandSpec.TRACK_APPEND.spec(locale), "append", Permission.TRACK_APPEND, Predicates.not(1));
+public class LogGroupHistory extends SubCommand<Log> {
+    public LogGroupHistory(LocaleManager locale) {
+        super(CommandSpec.LOG_GROUP_HISTORY.spec(locale), "grouphistory", Permission.LOG_GROUP_HISTORY, Predicates.notInRange(1, 2));
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args, String label) throws CommandException {
-        String groupName = args.get(0).toLowerCase();
-        if (!DataConstraints.GROUP_NAME_TEST.test(groupName)) {
-            sendDetailedUsage(sender, label);
-            return CommandResult.INVALID_ARGS;
-        }
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) throws CommandException {
+        String group = args.get(0).toLowerCase();
+        int page = -999;
 
-        if (!plugin.getStorage().loadGroup(groupName).join()) {
-            Message.GROUP_DOES_NOT_EXIST.send(sender);
-            return CommandResult.INVALID_ARGS;
-        }
-
-        Group group = plugin.getGroupManager().getIfLoaded(groupName);
-        if (group == null) {
-            Message.GROUP_DOES_NOT_EXIST.send(sender);
-            return CommandResult.LOADING_ERROR;
-        }
-
-        try {
-            track.appendGroup(group);
-            Message.TRACK_APPEND_SUCCESS.send(sender, group.getName(), track.getName());
-            if (track.getGroups().size() > 1) {
-                Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), group.getName()));
+        if (args.size() == 2) {
+            try {
+                page = Integer.parseInt(args.get(1));
+            } catch (NumberFormatException e) {
+                // invalid page
+                Message.LOG_INVALID_PAGE.send(sender);
+                return CommandResult.INVALID_ARGS;
             }
-            LogEntry.build().actor(sender).acted(track)
-                    .action("append " + group.getName())
-                    .build().submit(plugin, sender);
-            save(track, sender, plugin);
-            return CommandResult.SUCCESS;
-        } catch (ObjectAlreadyHasException e) {
-            Message.TRACK_ALREADY_CONTAINS.send(sender, track.getName(), group.getName());
+        }
+
+        if (!DataConstraints.GROUP_NAME_TEST.test(group)) {
+            Message.GROUP_INVALID_ENTRY.send(sender);
+            return CommandResult.INVALID_ARGS;
+        }
+
+        int maxPage = log.getGroupHistoryMaxPages(group);
+        if (maxPage == 0) {
+            Message.LOG_NO_ENTRIES.send(sender);
             return CommandResult.STATE_ERROR;
         }
+
+        if (page == -999) {
+            page = maxPage;
+        }
+
+        if (page < 1 || page > maxPage) {
+            Message.LOG_INVALID_PAGE_RANGE.send(sender, maxPage);
+            return CommandResult.INVALID_ARGS;
+        }
+
+        SortedMap<Integer, LogEntry> entries = log.getGroupHistory(page, group);
+        String name = entries.values().stream().findAny().get().getActedName();
+        Message.LOG_HISTORY_GROUP_HEADER.send(sender, name, page, maxPage);
+
+        for (Map.Entry<Integer, LogEntry> e : entries.entrySet()) {
+            Message.LOG_ENTRY.send(sender, e.getKey(), DateUtil.formatDateDiff(e.getValue().getTimestamp()), e.getValue().getFormatted());
+        }
+
+        return CommandResult.SUCCESS;
     }
 
     @Override

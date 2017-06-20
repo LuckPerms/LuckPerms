@@ -40,6 +40,8 @@ import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.common.utils.ProgressLogger;
@@ -62,8 +64,8 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MigrationZPermissions extends SubCommand<Object> {
-    public MigrationZPermissions() {
-        super("zpermissions", "Migration from zPermissions", Permission.MIGRATION, Predicates.alwaysFalse(), null);
+    public MigrationZPermissions(LocaleManager locale) {
+        super(CommandSpec.MIGRATION_COMMAND.spec(locale), "zpermissions", Permission.MIGRATION, Predicates.alwaysFalse());
     }
 
     @Override

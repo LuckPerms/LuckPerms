@@ -32,17 +32,18 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeModel;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -59,14 +60,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class ApplyEditsCommand extends SingleCommand {
-    public ApplyEditsCommand() {
-        super("ApplyEdits", "Applies permission changes made from the web editor",
-                "/%s applyedits <code> [target]", Permission.APPLY_EDITS, Predicates.notInRange(1, 2),
-                Arg.list(
-                        Arg.create("code", true, "the unique code for the data"),
-                        Arg.create("target", false, "who to apply the data to")
-                )
-        );
+    public ApplyEditsCommand(LocaleManager locale) {
+        super(CommandSpec.APPLY_EDITS.spec(locale), "ApplyEdits", Permission.APPLY_EDITS, Predicates.notInRange(1, 2));
     }
 
     @Override

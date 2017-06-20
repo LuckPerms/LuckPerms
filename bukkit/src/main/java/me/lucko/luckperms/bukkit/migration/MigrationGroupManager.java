@@ -28,7 +28,6 @@ package me.lucko.luckperms.bukkit.migration;
 import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.event.cause.CreationCause;
-import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
@@ -36,6 +35,8 @@ import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeFactory;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.common.utils.ProgressLogger;
@@ -60,10 +61,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class MigrationGroupManager extends SubCommand<Object> {
-    public MigrationGroupManager() {
-        super("groupmanager", "Migration from GroupManager", Permission.MIGRATION, Predicates.is(0),
-                Arg.list(Arg.create("migrate as global", true, "if world permissions should be ignored, and just migrated as global"))
-        );
+    public MigrationGroupManager(LocaleManager locale) {
+        super(CommandSpec.MIGRATION_GROUPMANAGER.spec(locale), "groupmanager", Permission.MIGRATION, Predicates.is(0));
     }
 
     @Override

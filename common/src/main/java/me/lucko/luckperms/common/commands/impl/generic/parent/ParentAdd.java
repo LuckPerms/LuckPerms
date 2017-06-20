@@ -27,18 +27,19 @@ package me.lucko.luckperms.common.commands.impl.generic.parent;
 
 import me.lucko.luckperms.api.DataMutateResult;
 import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -48,14 +49,8 @@ import java.util.stream.Collectors;
 import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getGroupTabComplete;
 
 public class ParentAdd extends SharedSubCommand {
-    public ParentAdd() {
-        super("add", "Sets another group for the object to inherit permissions from", Permission.USER_PARENT_ADD,
-                Permission.GROUP_PARENT_ADD, Predicates.is(0),
-                Arg.list(
-                        Arg.create("group", true, "the group to inherit from"),
-                        Arg.create("context...", false, "the contexts to inherit the group in")
-                )
-        );
+    public ParentAdd(LocaleManager locale) {
+        super(CommandSpec.PARENT_ADD.spec(locale), "add", Permission.USER_PARENT_ADD, Permission.GROUP_PARENT_ADD, Predicates.is(0));
     }
 
     @Override

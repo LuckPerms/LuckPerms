@@ -25,17 +25,18 @@
 
 package me.lucko.luckperms.common.commands.impl.track;
 
-import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.DataConstraints;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.data.LogEntry;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
@@ -43,10 +44,8 @@ import me.lucko.luckperms.exceptions.ObjectLacksException;
 import java.util.List;
 
 public class TrackRemove extends SubCommand<Track> {
-    public TrackRemove() {
-        super("remove", "Removes a group from the track", Permission.TRACK_REMOVE, Predicates.not(1),
-                Arg.list(Arg.create("group", true, "the group to remove"))
-        );
+    public TrackRemove(LocaleManager locale) {
+        super(CommandSpec.TRACK_REMOVE.spec(locale), "remove", Permission.TRACK_REMOVE, Predicates.not(1));
     }
 
     @Override

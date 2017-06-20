@@ -36,14 +36,15 @@ import me.lucko.luckperms.common.bulkupdate.action.UpdateAction;
 import me.lucko.luckperms.common.bulkupdate.comparisons.ComparisonType;
 import me.lucko.luckperms.common.bulkupdate.constraint.Constraint;
 import me.lucko.luckperms.common.bulkupdate.constraint.QueryField;
-import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -54,16 +55,8 @@ import java.util.concurrent.TimeUnit;
 public class BulkUpdateCommand extends SingleCommand {
     private final Cache<String, BulkUpdate> pendingOperations = Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.SECONDS).build();
 
-    public BulkUpdateCommand() {
-        super("BulkUpdate", "Execute bulk change queries on all data", "/%s bulkupdate", Permission.BULK_UPDATE, Predicates.alwaysFalse(),
-                Arg.list(
-                        Arg.create("data type", true, "the type of data being changed. ('all', 'users' or 'groups')"),
-                        Arg.create("action", true, "the action to perform on the data. ('update' or 'delete')"),
-                        Arg.create("action field", false, "the field to act upon. only required for 'update'. ('permission', 'server' or 'world')"),
-                        Arg.create("action value", false, "the value to replace with. only required for 'update'."),
-                        Arg.create("constraint...", false, "the constraints required for the update")
-                )
-        );
+    public BulkUpdateCommand(LocaleManager locale) {
+        super(CommandSpec.BULK_UPDATE.spec(locale), "BulkUpdate", Permission.BULK_UPDATE, Predicates.alwaysFalse());
     }
 
     @Override

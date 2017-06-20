@@ -25,26 +25,25 @@
 
 package me.lucko.luckperms.common.commands.impl.group;
 
-import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.Group;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 
 public class GroupSetWeight extends SubCommand<Group> {
-    public GroupSetWeight() {
-        super("setweight", "Set the groups weight", Permission.GROUP_SETWEIGHT, Predicates.not(1),
-                Arg.list(Arg.create("weight", true, "the weight to set"))
-        );
+    public GroupSetWeight(LocaleManager locale) {
+        super(CommandSpec.GROUP_SETWEIGHT.spec(locale), "setweight", Permission.GROUP_SETWEIGHT, Predicates.not(1));
     }
 
     @Override

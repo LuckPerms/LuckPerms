@@ -34,6 +34,7 @@ import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.locale.LocalizedSpec;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.Collections;
@@ -49,17 +50,14 @@ import java.util.function.Predicate;
  */
 public abstract class Command<T, S> {
 
+    @Getter
+    private final LocalizedSpec spec;
+
     /**
      * The name of the command. Should be properly capitalised.
      */
     @Getter
     private final String name;
-
-    /**
-     * A brief description of this command
-     */
-    @Getter
-    private final String description;
 
     /**
      * The permission required to use this command. Nullable.
@@ -73,31 +71,24 @@ public abstract class Command<T, S> {
     private final Predicate<Integer> argumentCheck;
 
     /**
-     * A list of arguments required for the command. These are just here for informational purposes, and aren't used
-     * for argument validation.
-     */
-    private final List<Arg> args;
-
-    /**
      * Child commands. Nullable.
      */
     private final List<Command<S, ?>> children;
 
-    public Command(String name, String description, Permission permission, Predicate<Integer> argumentCheck, List<Arg> args, List<Command<S, ?>> children) {
+    public Command(LocalizedSpec spec, String name, Permission permission, Predicate<Integer> argumentCheck, List<Command<S, ?>> children) {
+        this.spec = spec;
         this.name = name;
-        this.description = description;
         this.permission = permission;
         this.argumentCheck = argumentCheck;
-        this.args = args == null ? null : ImmutableList.copyOf(args);
         this.children = children == null ? null : ImmutableList.copyOf(children);
     }
 
-    public Command(String name, String description, Permission permission, Predicate<Integer> argumentCheck, List<Arg> args) {
-        this(name, description, permission, argumentCheck, args, null);
+    public Command(LocalizedSpec spec, String name, Permission permission, Predicate<Integer> argumentCheck) {
+        this(spec, name, permission, argumentCheck, null);
     }
 
-    public Command(String name, String description, Predicate<Integer> argumentCheck) {
-        this(name, description, null, argumentCheck, null, null);
+    public Command(LocalizedSpec spec, String name, Predicate<Integer> argumentCheck) {
+        this(spec, name, null, argumentCheck, null);
     }
 
     public abstract CommandResult execute(LuckPermsPlugin plugin, Sender sender, T t, List<String> args, String label) throws CommandException;
@@ -147,13 +138,18 @@ public abstract class Command<T, S> {
         return true;
     }
 
+    public String getDescription() {
+        return spec.description();
+    }
+
     /**
      * Returns the usage of this command. Will only return a non empty result for main commands.
      *
      * @return the usage of this command.
      */
     public String getUsage() {
-        return "";
+        String usage = spec.usage();
+        return usage == null ? "" : usage;
     }
 
     public Optional<Permission> getPermission() {
@@ -161,7 +157,7 @@ public abstract class Command<T, S> {
     }
 
     public Optional<List<Arg>> getArgs() {
-        return Optional.ofNullable(args);
+        return Optional.ofNullable(spec.args());
     }
 
     public Optional<List<Command<S, ?>>> getChildren() {

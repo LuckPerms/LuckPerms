@@ -28,7 +28,6 @@ package me.lucko.luckperms.sponge.commands;
 import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
@@ -36,6 +35,8 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
@@ -45,10 +46,8 @@ import java.util.List;
 import java.util.Map;
 
 public class ParentInfo extends SubCommand<LPSubjectData> {
-    public ParentInfo() {
-        super("info", "Shows info about the subject's parents", Permission.SPONGE_PARENT_INFO, Predicates.alwaysFalse(),
-                Arg.list(Arg.create("contexts...", false, "the contexts to filter by"))
-        );
+    public ParentInfo(LocaleManager locale) {
+        super(CommandSpec.SPONGE_PARENT_INFO.spec(locale), "info", Permission.SPONGE_PARENT_INFO, Predicates.alwaysFalse());
     }
 
     @Override

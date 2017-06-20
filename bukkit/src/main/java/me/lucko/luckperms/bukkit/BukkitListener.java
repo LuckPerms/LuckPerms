@@ -30,8 +30,8 @@ import lombok.RequiredArgsConstructor;
 import me.lucko.luckperms.bukkit.model.Injector;
 import me.lucko.luckperms.bukkit.model.LPPermissible;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.utils.LoginHelper;
 
 import org.bukkit.entity.Player;

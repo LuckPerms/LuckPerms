@@ -23,18 +23,18 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.impl.log.subcommands;
+package me.lucko.luckperms.common.commands.impl.log;
 
 import me.lucko.luckperms.api.LogEntry;
-import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.DataConstraints;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.data.Log;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
@@ -42,38 +42,27 @@ import me.lucko.luckperms.common.utils.Predicates;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
+import java.util.stream.Collectors;
 
-public class LogTrackHistory extends SubCommand<Log> {
-    public LogTrackHistory() {
-        super("trackhistory", "View a track's history", Permission.LOG_TRACK_HISTORY, Predicates.notInRange(1, 2),
-                Arg.list(
-                        Arg.create("track", true, "the name of the track"),
-                        Arg.create("page", false, "the page number to view")
-                )
-        );
+public class LogSearch extends SubCommand<Log> {
+    public LogSearch(LocaleManager locale) {
+        super(CommandSpec.LOG_SEARCH.spec(locale), "search", Permission.LOG_SEARCH, Predicates.is(0));
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) throws CommandException {
-        String track = args.get(0).toLowerCase();
         int page = -999;
-
-        if (args.size() == 2) {
+        if (args.size() > 1) {
             try {
-                page = Integer.parseInt(args.get(1));
-            } catch (NumberFormatException e) {
-                // invalid page
-                Message.LOG_INVALID_PAGE.send(sender);
-                return CommandResult.INVALID_ARGS;
+                page = Integer.parseInt(args.get(args.size() - 1));
+                args.remove(args.size() - 1);
+            } catch (NumberFormatException ignored) {
             }
         }
 
-        if (!DataConstraints.TRACK_NAME_TEST.test(track)) {
-            Message.TRACK_INVALID_ENTRY.send(sender);
-            return CommandResult.INVALID_ARGS;
-        }
+        final String query = args.stream().collect(Collectors.joining(" "));
 
-        int maxPage = log.getTrackHistoryMaxPages(track);
+        int maxPage = log.getSearchMaxPages(query);
         if (maxPage == 0) {
             Message.LOG_NO_ENTRIES.send(sender);
             return CommandResult.STATE_ERROR;
@@ -88,19 +77,13 @@ public class LogTrackHistory extends SubCommand<Log> {
             return CommandResult.INVALID_ARGS;
         }
 
-        SortedMap<Integer, LogEntry> entries = log.getTrackHistory(page, track);
-        String name = entries.values().stream().findAny().get().getActedName();
-        Message.LOG_HISTORY_TRACK_HEADER.send(sender, name, page, maxPage);
+        SortedMap<Integer, LogEntry> entries = log.getSearch(page, query);
+        Message.LOG_SEARCH_HEADER.send(sender, query, page, maxPage);
 
         for (Map.Entry<Integer, LogEntry> e : entries.entrySet()) {
             Message.LOG_ENTRY.send(sender, e.getKey(), DateUtil.formatDateDiff(e.getValue().getTimestamp()), e.getValue().getFormatted());
         }
 
         return CommandResult.SUCCESS;
-    }
-
-    @Override
-    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
-        return getTrackTabComplete(args, plugin);
     }
 }

@@ -29,8 +29,10 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -38,8 +40,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class ListTracks extends SingleCommand {
-    public ListTracks() {
-        super("ListTracks", "List all tracks on the platform", "/%s listtracks", Permission.LIST_TRACKS, Predicates.alwaysFalse(), null);
+    public ListTracks(LocaleManager locale) {
+        super(CommandSpec.LIST_TRACKS.spec(locale), "ListTracks", Permission.LIST_TRACKS, Predicates.alwaysFalse());
     }
 
     @Override

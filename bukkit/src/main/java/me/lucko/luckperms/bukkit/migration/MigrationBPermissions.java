@@ -42,6 +42,8 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.common.utils.ProgressLogger;
@@ -70,8 +72,8 @@ public class MigrationBPermissions extends SubCommand<Object> {
         }
     }
 
-    public MigrationBPermissions() {
-        super("bpermissions", "Migration from bPermissions", MIGRATION, Predicates.alwaysFalse(), null);
+    public MigrationBPermissions(LocaleManager locale) {
+        super(CommandSpec.MIGRATION_COMMAND.spec(locale), "bpermissions", MIGRATION, Predicates.alwaysFalse());
     }
 
     @Override

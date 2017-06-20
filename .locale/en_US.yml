@@ -288,3 +288,443 @@ import-end-error-header: >
   {PREFIX}&b(Import) &fOutput:
 import-end-error-content: "&b(Import) &b-> &c{0}"
 import-end-error-footer: "&b(Import) &7<------------------------------------------>"
+
+command-specs:
+  user:
+    description: "User commands"
+    usage: "/%s user <user>"
+  group:
+    description: "Group commands"
+    usage: "/%s group <group>"
+  track:
+    description: "Track commands"
+    usage: "/%s track <track>"
+  log:
+    description: "Log commands"
+    usage: "/%s log"
+  sync:
+    description: "Sync changes with the storage"
+    usage: "/%s sync"
+  info:
+    description: "Print general plugin info"
+    usage: "/%s info"
+  verbose:
+    description: "Manage verbose permission checking"
+    usage: "/%s verbose <true|false> [filter]"
+    args:
+      "on|record|off|paste": "whether to enable/disable logging, or to paste the logged output"
+      "filter": "the filter to match entries against"
+  tree:
+    description: "Generate a tree view of permissions"
+    usage: "/%s tree [selection] [max level] [player]"
+    args:
+      "selection": "the root of the tree. specify \".\" to include all permissions"
+      "max level": "how many branch levels should be returned"
+      "player": "the name of an online player to check against"
+  search:
+    description: "Search for users/groups with a specific permission"
+    usage: "/%s search <permission>"
+    args:
+      "permission": "the permission to search for"
+      "page": "the page to view"
+  check:
+    description: "Perform a standard permission check on an online player"
+    usage: "/%s check <user> <permission>"
+    args:
+      "user": "the user to check"
+      "permission": "the permission to check for"
+  network-sync:
+    description: "Sync changes with the storage and request that all other servers on the network do the same"
+    usage: "/%s networksync"
+  import:
+    description: "Import data from a file"
+    usage: "/%s import <file>"
+    args:
+      "file": "the file to import from"
+  export:
+    description: "Export data to a file"
+    usage: "/%s export <file>"
+    args:
+      "file": "the file to export to"
+  reload-config:
+    description: "Reload some of the config options"
+    usage: "/%s reloadconfig"
+  bulk-update:
+    description: "Execute bulk change queries on all data"
+    usage: "/%s bulkupdate"
+    args:
+      "data type": "the type of data being changed. ('all', 'users' or 'groups')"
+      "action": "the action to perform on the data. ('update' or 'delete')"
+      "action field": "the field to act upon. only required for 'update'. ('permission', 'server' or 'world')"
+      "action value": "the value to replace with. only required for 'update'."
+      "constraint...": "the constraints required for the update"
+  migration:
+    description: "Migration commands"
+    usage: "/%s migration"
+  apply-edits:
+    description: "Applies permission changes made from the web editor"
+    usage: "/%s applyedits <code> [target]"
+    args:
+      "code": "the unique code for the data"
+      "target": "who to apply the data to"
+  create-group:
+    description: "Create a new group"
+    usage: "/%s creategroup <group>"
+    args:
+      "name": "the name of the group"
+  delete-group:
+    description: "Delete a group"
+    usage: "/%s deletegroup <group>"
+    args:
+      "name": "the name of the group"
+  list-groups:
+    description: "List all groups on the platform"
+    usage: "/%s listgroups"
+  create-track:
+    description: "Create a new track"
+    usage: "/%s createtrack <track>"
+    args:
+      "name": "the name of the track"
+  delete-track:
+    description: "Delete a track"
+    usage: "/%s deletetrack <track>"
+    args:
+      "name": "the name of the track"
+  list-tracks:
+    description: "List all tracks on the platform"
+    usage: "/%s listtracks"
+  user-info:
+    description: "Shows info about the user"
+  user-switchprimarygroup:
+    description: "Switches the user's primary group"
+    args:
+      "group": "the group to switch to"
+  user-promote:
+    description: "Promotes the user up a track"
+    args:
+      "track": "the track to promote the user up"
+      "context...": "the contexts to promote the user in"
+  user-demote:
+    description: "Demotes the user down a track"
+    args:
+      "track": "the track to demote the user down"
+      "context...": "the contexts to demote the user in"
+  group-info:
+    description: "Gives info about the group"
+  group-listmembers:
+    description: "Show the users/groups who inherit from this group"
+    args:
+      "page": "the page to view"
+  group-setweight:
+    description: "Set the groups weight"
+    args:
+      "weight": "the weight to set"
+  group-rename:
+    description: "Rename the group"
+    args:
+      "name": "the new name"
+  group-clone:
+    description: "Clone the group"
+    args:
+      "name": "the name of the group to clone onto"
+  holder-editor:
+    description: "Opens the web permission editor"
+  holder-showtracks:
+    description: "Lists the tracks that the object is on"
+  holder-clear:
+    description: "Removes all permissions, parents and meta"
+    args:
+      "context...": "the contexts to filter by"
+  permission:
+    description: "Edit permissions"
+  parent:
+    description: "Edit inheritances"
+  meta:
+    description: "Edit metadata values"
+  permission-info:
+    description: "Lists the permission nodes the object has"
+    args:
+      "page": "the page to view"
+      "filter": "the string to filter by"
+  permission-set:
+    description: "Sets a permission for the object"
+    args:
+      "node": "the permission node to set"
+      "true|false": "the value of the node"
+      "context...": "the contexts to add the permission in"
+  permission-unset:
+    description: "Unsets a permission for the object"
+    args:
+      "node": "the permission node to unset"
+      "context...": "the contexts to remove the permission in"
+  permission-settemp:
+    description: "Sets a permission for the object temporarily"
+    args:
+      "node": "the permission node to set"
+      "true|false": "the value of the node"
+      "duration": "the duration until the permission node expires"
+      "context...": "the contexts to add the permission in"
+  permission-unsettemp:
+    description: "Unsets a temporary permission for the object"
+    args:
+      "node": "the permission node to unset"
+      "context...": "the contexts to remove the permission in"
+  permission-check:
+    description: "Checks to see if the object has a certain permission node"
+    args:
+      "node": "the permission node to check for"
+      "context...": "the contexts to check in"
+  permission-check-inherits:
+    description: "Checks to see if the object inherits a certain permission node"
+    args:
+      "node": "the permission node to check for"
+      "context...": "the contexts to check in"
+  parent-info:
+    description: "Lists the groups that this object inherits from"
+  parent-set:
+    description: "Removes all other groups the object inherits already and adds them to the one given"
+    args:
+      "group": "the group to set to"
+      "context...": "the contexts to set the group in"
+  parent-add:
+    description: "Sets another group for the object to inherit permissions from"
+    args:
+      "group": "the group to inherit from"
+      "context...": "the contexts to inherit the group in"
+  parent-remove:
+    description: "Removes a previously set inheritance rule"
+    args:
+      "group": "the group to remove"
+      "context...": "the contexts to remove the group in"
+  parent-set-track:
+    description: "Removes all other groups the object inherits from already on the given track and adds them to the one given"
+    args:
+      "track": "the track to set on"
+      "group": "the group to set to, or a number relating to the position of the group on the given track"
+      "context...": "the contexts to set the group in"
+  parent-add-temp:
+    description: "Sets another group for the object to inherit permissions from temporarily"
+    args:
+      "group": "the group to inherit from"
+      "duration": "the duration of the group membership"
+      "context...": "the contexts to inherit the group in"
+  parent-remove-temp:
+    description: "Removes a previously set temporary inheritance rule"
+    args:
+      "group": "the group to remove"
+      "context...": "the contexts to remove the group in"
+  parent-clear:
+    description: "Clears all parents"
+    args:
+      "context...": "the contexts to filter by"
+  parent-clear-track:
+    description: "Clears all parents on a given track"
+    args:
+      "track": "the track to remove on"
+      "context...": "the contexts to filter by"
+  meta-info:
+    description: "Shows all chat meta"
+  meta-set:
+    description: "Sets a meta value"
+    args:
+      "key": "the key to set"
+      "value": "the value to set"
+      "context...": "the contexts to add the meta pair in"
+  meta-unset:
+    description: "Unsets a meta value"
+    args:
+      "key": "the key to unset"
+      "context...": "the contexts to remove the meta pair in"
+  meta-settemp:
+    description: "Sets a meta value temporarily"
+    args:
+      "key": "the key to set"
+      "value": "the value to set"
+      "duration": "the duration until the meta value expires"
+      "context...": "the contexts to add the meta pair in"
+  meta-unsettemp:
+    description: "Unsets a temporary meta value"
+    args:
+      "key": "the key to unset"
+      "context...": "the contexts to remove the meta pair in"
+  meta-addprefix:
+    description: "Adds a prefix"
+    args:
+      "priority": "the priority to add the prefix at"
+      "prefix": "the prefix string"
+      "context...": "the contexts to add the prefix in"
+  meta-addsuffix:
+    description: "Adds a suffix"
+    args:
+      "priority": "the priority to add the suffix at"
+      "suffix": "the suffix string"
+      "context...": "the contexts to add the suffix in"
+  meta-removeprefix:
+    description: "Removes a prefix"
+    args:
+      "priority": "the priority to remove the prefix at"
+      "prefix": "the prefix string"
+      "context...": "the contexts to remove the prefix in"
+  meta-removesuffix:
+    description: "Removes a suffix"
+    args:
+      "priority": "the priority to remove the suffix at"
+      "suffix": "the suffix string"
+      "context...": "the contexts to remove the suffix in"
+  meta-addtemp-prefix:
+    description: "Adds a prefix temporarily"
+    args:
+      "priority": "the priority to add the prefix at"
+      "prefix": "the prefix string"
+      "duration": "the duration until the prefix expires"
+      "context...": "the contexts to add the prefix in"
+  meta-addtemp-suffix:
+    description: "Adds a suffix temporarily"
+    args:
+      "priority": "the priority to add the suffix at"
+      "suffix": "the suffix string"
+      "duration": "the duration until the suffix expires"
+      "context...": "the contexts to add the suffix in"
+  meta-removetemp-prefix:
+    description: "Removes a temporary prefix"
+    args:
+      "priority": "the priority to remove the prefix at"
+      "prefix": "the prefix string"
+      "context...": "the contexts to remove the prefix in"
+  meta-removetemp-suffix:
+    description: "Removes a temporary suffix"
+    args:
+      "priority": "the priority to remove the suffix at"
+      "suffix": "the suffix string"
+      "context...": "the contexts to remove the suffix in"
+  meta-clear:
+    description: "Clears all chat meta"
+    args:
+      "context...": "the contexts to filter by"
+  track-info:
+    description: "Gives info about the track"
+  track-append:
+    description: "Appends a group onto the end of the track"
+    args:
+      "group": "the group to append"
+  track-insert:
+    description: "Inserts a group at a given position along the track"
+    args:
+      "group": "the group to insert"
+      "position": "the position to insert the group at (the first position on the track is 1)"
+  track-remove:
+    description: "Removes a group from the track"
+    args:
+      "group": "the group to remove"
+  track-clear:
+    description: "Clears the groups on the track"
+  track-rename:
+    description: "Rename the track"
+    args:
+      "name": "the new name"
+  track-clone:
+    description: "Clone the track"
+    args:
+      "name": "the name of the track to clone onto"
+  log-recent:
+    description: "View recent actions"
+    args:
+      "user": "the name/uuid of the user to filter by"
+      "page": "the page number to view"
+  log-search:
+    description: "Search the log for an entry"
+    args:
+      "query": "the query to search by"
+      "page": "the page number to view"
+  log-notify:
+    description: "Toggle log notifications"
+    args:
+      "on|off": "whether to toggle on or off"
+  log-user-history:
+    description: "View a user's history"
+    args:
+      "user": "the name/uuid of the user"
+      "page": "the page number to view"
+  log-group-history:
+    description: "View an group's history"
+    args:
+      "group": "the name of the group"
+      "page": "the page number to view"
+  log-track-history:
+    description: "View a track's history"
+    args:
+      "track": "the name of the track"
+      "page": "the page number to view"
+  sponge:
+    description: "Edit extra Sponge data"
+    usage: "/%s sponge <collection> <subject>"
+    args:
+      "collection": "the collection to query"
+      "subject": "the subject to modify"
+  sponge-permission-info:
+    description: "Shows info about the subject's permissions"
+    args:
+      "contexts...": "the contexts to filter by"
+  sponge-permission-set:
+    description: "Sets a permission for the Subject"
+    args:
+      "node": "the permission node to set"
+      "tristate": "the value to set the permission to"
+      "contexts...": "the contexts to set the permission in"
+  sponge-permission-clear:
+    description: "Clears the Subjects permissions"
+    args:
+      "contexts...": "the contexts to clear permissions in"
+  sponge-parent-info:
+    description: "Shows info about the subject's parents"
+    args:
+      "contexts...": "the contexts to filter by"
+  sponge-parent-add:
+    description: "Adds a parent to the Subject"
+    args:
+      "collection": "the subject collection where the parent Subject is"
+      "subject": "the name of the parent Subject"
+      "contexts...": "the contexts to add the parent in"
+  sponge-parent-remove:
+    description: "Removes a parent from the Subject"
+    args:
+      "collection": "the subject collection where the parent Subject is"
+      "subject": "the name of the parent Subject"
+      "contexts...": "the contexts to remove the parent in"
+  sponge-parent-clear:
+    description: "Clears the Subjects parents"
+    args:
+      "contexts...": "the contexts to clear parents in"
+  sponge-option-info:
+    description: "Shows info about the subject's options"
+    args:
+      "contexts...": "the contexts to filter by"
+  sponge-option-set:
+    description: "Sets an option for the Subject"
+    args:
+      "key": "the key to set"
+      "value": "the value to set the key to"
+      "contexts...": "the contexts to set the option in"
+  sponge-option-unset:
+    description: "Unsets an option for the Subject"
+    args:
+      "key": "the key to unset"
+      "contexts...": "the contexts to unset the key in"
+  sponge-option-clear:
+    description: "Clears the Subjects options"
+    args:
+      "contexts...": "the contexts to clear options in"
+  migration-command:
+    description: "Migration command"
+  migration-groupmanager:
+    description: "Migration command"
+    args:
+      "migrate as global": "if world permissions should be ignored, and just migrated as global"
+  migration-powerfulperms:
+    description: "Migration command"
+    args:
+      "address": "the address of the PP database"
+      "database": "the name of the PP database"
+      "username": "the username to log into the DB"
+      "password": "the password to log into the DB"
+      "db table": "the name of the PP table where player data is stored"

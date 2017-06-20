@@ -32,9 +32,11 @@ import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.MetaComparator;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -55,8 +57,8 @@ public class MetaInfo extends SharedSubCommand {
         return val.replace("&", "{color char}");
     }
 
-    public MetaInfo() {
-        super("info", "Shows all chat meta", Permission.USER_META_INFO, Permission.GROUP_META_INFO, Predicates.alwaysFalse(), null);
+    public MetaInfo(LocaleManager locale) {
+        super(CommandSpec.META_INFO.spec(locale), "info", Permission.USER_META_INFO, Permission.GROUP_META_INFO, Predicates.alwaysFalse());
     }
 
     @Override

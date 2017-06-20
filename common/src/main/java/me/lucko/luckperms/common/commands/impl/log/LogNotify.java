@@ -23,71 +23,74 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.impl.log.subcommands;
+package me.lucko.luckperms.common.commands.impl.log;
 
-import me.lucko.luckperms.api.LogEntry;
-import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.data.Log;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.stream.Collectors;
+import java.util.Set;
+import java.util.UUID;
 
-public class LogSearch extends SubCommand<Log> {
-    public LogSearch() {
-        super("search", "Search the log for an entry", Permission.LOG_SEARCH, Predicates.is(0),
-                Arg.list(
-                        Arg.create("query", true, "the query to search by"),
-                        Arg.create("page", false, "the page number to view")
-                )
-        );
+public class LogNotify extends SubCommand<Log> {
+    public LogNotify(LocaleManager locale) {
+        super(CommandSpec.LOG_NOTIFY.spec(locale), "notify", Permission.LOG_NOTIFY, Predicates.notInRange(0, 1));
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) throws CommandException {
-        int page = -999;
-        if (args.size() > 1) {
-            try {
-                page = Integer.parseInt(args.get(args.size() - 1));
-                args.remove(args.size() - 1);
-            } catch (NumberFormatException ignored) {
+        final Set<UUID> ignoring = plugin.getIgnoringLogs();
+        final UUID uuid = sender.getUuid();
+        if (args.size() == 0) {
+            if (ignoring.contains(uuid)) {
+                // toggle on
+                ignoring.remove(uuid);
+                Message.LOG_NOTIFY_TOGGLE_ON.send(sender);
+                return CommandResult.SUCCESS;
             }
+            // toggle off
+            ignoring.add(uuid);
+            Message.LOG_NOTIFY_TOGGLE_OFF.send(sender);
+            return CommandResult.SUCCESS;
         }
 
-        final String query = args.stream().collect(Collectors.joining(" "));
+        if (args.get(0).equalsIgnoreCase("on")) {
+            if (!ignoring.contains(uuid)) {
+                // already on
+                Message.LOG_NOTIFY_ALREADY_ON.send(sender);
+                return CommandResult.STATE_ERROR;
+            }
 
-        int maxPage = log.getSearchMaxPages(query);
-        if (maxPage == 0) {
-            Message.LOG_NO_ENTRIES.send(sender);
-            return CommandResult.STATE_ERROR;
+            // toggle on
+            ignoring.remove(uuid);
+            Message.LOG_NOTIFY_TOGGLE_ON.send(sender);
+            return CommandResult.SUCCESS;
         }
 
-        if (page == -999) {
-            page = maxPage;
+        if (args.get(0).equalsIgnoreCase("off")) {
+            if (ignoring.contains(uuid)) {
+                // already off
+                Message.LOG_NOTIFY_ALREADY_OFF.send(sender);
+                return CommandResult.STATE_ERROR;
+            }
+
+            // toggle off
+            ignoring.add(uuid);
+            Message.LOG_NOTIFY_TOGGLE_OFF.send(sender);
+            return CommandResult.SUCCESS;
         }
 
-        if (page < 1 || page > maxPage) {
-            Message.LOG_INVALID_PAGE_RANGE.send(sender, maxPage);
-            return CommandResult.INVALID_ARGS;
-        }
-
-        SortedMap<Integer, LogEntry> entries = log.getSearch(page, query);
-        Message.LOG_SEARCH_HEADER.send(sender, query, page, maxPage);
-
-        for (Map.Entry<Integer, LogEntry> e : entries.entrySet()) {
-            Message.LOG_ENTRY.send(sender, e.getKey(), DateUtil.formatDateDiff(e.getValue().getTimestamp()), e.getValue().getFormatted());
-        }
-
-        return CommandResult.SUCCESS;
+        // not recognised
+        Message.LOG_NOTIFY_UNKNOWN.send(sender);
+        return CommandResult.INVALID_ARGS;
     }
 }

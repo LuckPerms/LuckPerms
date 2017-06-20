@@ -30,19 +30,21 @@ import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.common.commands.abstraction.SharedMainCommand;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
 
 public class CommandParent<T extends PermissionHolder> extends SharedMainCommand<T> {
-    public CommandParent(boolean user) {
-        super("Parent", "Edit inheritances", user, ImmutableList.<SharedSubCommand>builder()
-                .add(new ParentInfo())
-                .add(new ParentSet())
-                .add(new ParentAdd())
-                .add(new ParentRemove())
-                .add(new ParentSetTrack())
-                .add(new ParentAddTemp())
-                .add(new ParentRemoveTemp())
-                .add(new ParentClear())
-                .add(new ParentClearTrack())
+    public CommandParent(LocaleManager locale, boolean user) {
+        super(CommandSpec.PARENT.spec(locale), "Parent", user, ImmutableList.<SharedSubCommand>builder()
+                .add(new ParentInfo(locale))
+                .add(new ParentSet(locale))
+                .add(new ParentAdd(locale))
+                .add(new ParentRemove(locale))
+                .add(new ParentSetTrack(locale))
+                .add(new ParentAddTemp(locale))
+                .add(new ParentRemoveTemp(locale))
+                .add(new ParentClear(locale))
+                .add(new ParentClearTrack(locale))
                 .build());
     }
 }

@@ -29,7 +29,7 @@ import lombok.AllArgsConstructor;
 
 import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.Message;
+import me.lucko.luckperms.common.locale.Message;
 
 @AllArgsConstructor
 public class SenderLogger implements Logger {

@@ -29,7 +29,6 @@ import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
@@ -37,11 +36,13 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Constants;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
@@ -60,14 +61,8 @@ import java.util.SortedSet;
 import java.util.function.Consumer;
 
 public class PermissionInfo extends SharedSubCommand {
-    public PermissionInfo() {
-        super("info", "Lists the permission nodes the object has", Permission.USER_PERM_INFO,
-                Permission.GROUP_PERM_INFO, Predicates.notInRange(0, 2),
-                Arg.list(
-                        Arg.create("page", false, "the page to view"),
-                        Arg.create("filter", false, "the string to filter by")
-                )
-        );
+    public PermissionInfo(LocaleManager locale) {
+        super(CommandSpec.PERMISSION_INFO.spec(locale), "info", Permission.USER_PERM_INFO, Permission.GROUP_PERM_INFO, Predicates.notInRange(0, 2));
     }
 
     @Override

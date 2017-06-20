@@ -28,7 +28,6 @@ package me.lucko.luckperms.common.commands.impl.generic.permission;
 import me.lucko.luckperms.api.DataMutateResult;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
@@ -36,12 +35,14 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.TemporaryModifier;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
@@ -54,16 +55,8 @@ import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getBoolT
 import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getPermissionTabComplete;
 
 public class PermissionSetTemp extends SharedSubCommand {
-    public PermissionSetTemp() {
-        super("settemp", "Sets a permission for the object temporarily", Permission.USER_PERM_SETTEMP,
-                Permission.GROUP_PERM_SETTEMP, Predicates.inRange(0, 1),
-                Arg.list(
-                        Arg.create("node", true, "the permission node to set"),
-                        Arg.create("true|false", false, "the value of the node"),
-                        Arg.create("duration", true, "the duration until the permission node expires"),
-                        Arg.create("context...", false, "the contexts to add the permission in")
-                )
-        );
+    public PermissionSetTemp(LocaleManager locale) {
+        super(CommandSpec.PERMISSION_SETTEMP.spec(locale), "settemp", Permission.USER_PERM_SETTEMP, Permission.GROUP_PERM_SETTEMP, Predicates.inRange(0, 1));
     }
 
     @Override

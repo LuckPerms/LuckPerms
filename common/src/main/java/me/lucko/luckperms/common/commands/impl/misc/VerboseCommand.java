@@ -27,12 +27,13 @@ package me.lucko.luckperms.common.commands.impl.misc;
 
 import com.google.common.collect.ImmutableList;
 
-import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.common.verbose.VerboseListener;
@@ -49,13 +50,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class VerboseCommand extends SingleCommand {
-    public VerboseCommand() {
-        super("Verbose", "Manage verbose permission checking", "/%s verbose <true|false> [filter]", Permission.VERBOSE, Predicates.is(0),
-                Arg.list(
-                        Arg.create("on|record|off|paste", true, "whether to enable/disable logging, or to paste the logged output"),
-                        Arg.create("filter", false, "the filter to match entries against")
-                )
-        );
+    public VerboseCommand(LocaleManager locale) {
+        super(CommandSpec.VERBOSE.spec(locale), "Verbose", Permission.VERBOSE, Predicates.is(0));
     }
 
     @Override

@@ -25,8 +25,6 @@
 
 package me.lucko.luckperms.common.locale;
 
-import me.lucko.luckperms.common.constants.Message;
-
 import java.io.File;
 
 public class NoopLocaleManager implements LocaleManager {
@@ -43,6 +41,11 @@ public class NoopLocaleManager implements LocaleManager {
 
     @Override
     public String getTranslation(Message key) {
+        return null;
+    }
+
+    @Override
+    public CommandSpec.CommandSpecData getTranslation(CommandSpec key) {
         return null;
     }
 

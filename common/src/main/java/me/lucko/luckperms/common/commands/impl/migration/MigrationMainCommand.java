@@ -34,6 +34,8 @@ import me.lucko.luckperms.common.commands.abstraction.MainCommand;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -58,19 +60,19 @@ public class MigrationMainCommand extends MainCommand<Object> {
     private List<Command<Object, ?>> commands = null;
     private boolean display = true;
 
-    public MigrationMainCommand() {
-        super("Migration", "Migration commands", "/%s migration", 1, null);
+    public MigrationMainCommand(LocaleManager locale) {
+        super(CommandSpec.MIGRATION.spec(locale), "Migration", 1, null);
     }
 
     @Override
     public synchronized Optional<List<Command<Object, ?>>> getChildren() {
         if (commands == null) {
-            commands = getAvailableCommands();
+            commands = getAvailableCommands(getSpec().getLocaleManager());
 
             // Add dummy command to show in the list.
             if (commands.isEmpty()) {
                 display = false;
-                commands.add(new SubCommand<Object>("No available plugins to migrate from", "No available plugins to migrate from.", Permission.MIGRATION, Predicates.alwaysFalse(), null) {
+                commands.add(new SubCommand<Object>(CommandSpec.MIGRATION_COMMAND.spec(getSpec().getLocaleManager()), "No available plugins to migrate from", Permission.MIGRATION, Predicates.alwaysFalse()) {
                     @Override
                     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) throws CommandException {
                         return CommandResult.SUCCESS;
@@ -94,13 +96,13 @@ public class MigrationMainCommand extends MainCommand<Object> {
     }
 
     @SuppressWarnings("unchecked")
-    private static List<Command<Object, ?>> getAvailableCommands() {
+    private static List<Command<Object, ?>> getAvailableCommands(LocaleManager locale) {
         List<Command<Object, ?>> l = new ArrayList<>();
 
         for (Map.Entry<String, String> plugin : PLUGINS.entrySet()) {
             try {
                 Class.forName(plugin.getKey());
-                l.add((SubCommand<Object>) Class.forName(plugin.getValue()).newInstance());
+                l.add((SubCommand<Object>) Class.forName(plugin.getValue()).getConstructor(LocaleManager.class).newInstance(locale));
             } catch (Throwable ignored) {}
         }
 

@@ -30,7 +30,7 @@ import lombok.RequiredArgsConstructor;
 import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.PasteUtils;
 import me.lucko.luckperms.common.utils.Scripting;

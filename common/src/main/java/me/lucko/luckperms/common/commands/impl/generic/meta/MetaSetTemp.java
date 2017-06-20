@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.commands.impl.generic.meta;
 
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
@@ -35,12 +34,14 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.TemporaryModifier;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
@@ -49,15 +50,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class MetaSetTemp extends SharedSubCommand {
-    public MetaSetTemp() {
-        super("settemp", "Sets a meta value temporarily", Permission.USER_META_SETTEMP, Permission.GROUP_META_SETTEMP, Predicates.inRange(0, 2),
-                Arg.list(
-                        Arg.create("key", true, "the key to set"),
-                        Arg.create("value", true, "the value to set"),
-                        Arg.create("duration", true, "the duration until the meta value expires"),
-                        Arg.create("context...", false, "the contexts to add the meta pair in")
-                )
-        );
+    public MetaSetTemp(LocaleManager locale) {
+        super(CommandSpec.META_SETTEMP.spec(locale), "settemp", Permission.USER_META_SETTEMP, Permission.GROUP_META_SETTEMP, Predicates.inRange(0, 2));
     }
 
     @Override

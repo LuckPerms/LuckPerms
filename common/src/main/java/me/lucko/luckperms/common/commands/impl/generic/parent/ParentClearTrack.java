@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.commands.impl.generic.parent;
 
 import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
@@ -34,12 +33,14 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.DataConstraints;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.LogEntry;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -49,13 +50,8 @@ import java.util.stream.Collectors;
 import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getTrackTabComplete;
 
 public class ParentClearTrack extends SharedSubCommand {
-    public ParentClearTrack() {
-        super("cleartrack", "Clears all parents on a given track", Permission.USER_PARENT_CLEAR_TRACK, Permission.GROUP_PARENT_CLEAR_TRACK, Predicates.is(0),
-                Arg.list(
-                        Arg.create("track", true, "the track to remove on"),
-                        Arg.create("context...", false, "the contexts to filter by")
-                )
-        );
+    public ParentClearTrack(LocaleManager locale) {
+        super(CommandSpec.PARENT_CLEAR_TRACK.spec(locale), "cleartrack", Permission.USER_PARENT_CLEAR_TRACK, Permission.GROUP_PARENT_CLEAR_TRACK, Predicates.is(0));
     }
 
     @Override

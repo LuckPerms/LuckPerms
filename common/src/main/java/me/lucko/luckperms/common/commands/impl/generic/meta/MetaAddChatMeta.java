@@ -28,18 +28,19 @@ package me.lucko.luckperms.common.commands.impl.generic.meta;
 import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.DataMutateResult;
 import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -49,17 +50,13 @@ import java.util.stream.Collectors;
 public class MetaAddChatMeta extends SharedSubCommand {
     private final ChatMetaType type;
 
-    public MetaAddChatMeta(ChatMetaType type) {
-        super("add" + type.name().toLowerCase(),
-                "Adds a " + type.name().toLowerCase(),
+    public MetaAddChatMeta(LocaleManager locale, ChatMetaType type) {
+        super(
+                type == ChatMetaType.PREFIX ? CommandSpec.META_ADDPREFIX.spec(locale) : CommandSpec.META_ADDSUFFIX.spec(locale),
+                "add" + type.name().toLowerCase(),
                 type == ChatMetaType.PREFIX ? Permission.USER_META_ADDPREFIX : Permission.USER_META_ADDSUFFIX,
                 type == ChatMetaType.PREFIX ? Permission.GROUP_META_ADDPREFIX : Permission.GROUP_META_ADDSUFFIX,
-                Predicates.inRange(0, 1),
-                Arg.list(
-                        Arg.create("priority", true, "the priority to add the " + type.name().toLowerCase() + " at"),
-                        Arg.create(type.name().toLowerCase(), true, "the " + type.name().toLowerCase() + " string"),
-                        Arg.create("context...", false, "the contexts to add the " + type.name().toLowerCase() + " in")
-                )
+                Predicates.inRange(0, 1)
         );
         this.type = type;
     }

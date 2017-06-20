@@ -37,12 +37,14 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeModel;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -68,10 +70,8 @@ public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
     private static final String GROUP_ID_PATTERN = "group/";
     private static final String FILE_NAME = "luckperms-data.json";
 
-    public HolderEditor(boolean user) {
-        super("editor", "Opens the web permission editor", user ? Permission.USER_EDITOR : Permission.GROUP_EDITOR,
-                Predicates.alwaysFalse(), null
-        );
+    public HolderEditor(LocaleManager locale, boolean user) {
+        super(CommandSpec.HOLDER_EDITOR.spec(locale), "editor", user ? Permission.USER_EDITOR : Permission.GROUP_EDITOR, Predicates.alwaysFalse());
     }
 
     @Override

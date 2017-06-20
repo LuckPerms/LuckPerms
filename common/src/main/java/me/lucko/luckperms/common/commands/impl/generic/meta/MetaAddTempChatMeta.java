@@ -29,7 +29,6 @@ import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.DataMutateResult;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
@@ -37,12 +36,14 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.TemporaryModifier;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
@@ -54,18 +55,13 @@ import java.util.stream.Collectors;
 public class MetaAddTempChatMeta extends SharedSubCommand {
     private final ChatMetaType type;
 
-    public MetaAddTempChatMeta(ChatMetaType type) {
-        super("addtemp" + type.name().toLowerCase(),
-                "Adds a " + type.name().toLowerCase() + " temporarily",
+    public MetaAddTempChatMeta(LocaleManager locale, ChatMetaType type) {
+        super(
+                type == ChatMetaType.PREFIX ? CommandSpec.META_ADDTEMP_PREFIX.spec(locale) : CommandSpec.META_ADDTEMP_SUFFIX.spec(locale),
+                "addtemp" + type.name().toLowerCase(),
                 type == ChatMetaType.PREFIX ? Permission.USER_META_ADDTEMP_PREFIX : Permission.USER_META_ADDTEMP_SUFFIX,
                 type == ChatMetaType.PREFIX ? Permission.GROUP_META_ADDTEMP_PREFIX : Permission.GROUP_META_ADDTEMP_SUFFIX,
-                Predicates.inRange(0, 2),
-                Arg.list(
-                        Arg.create("priority", true, "the priority to add the " + type.name().toLowerCase() + " at"),
-                        Arg.create(type.name().toLowerCase(), true, "the " + type.name().toLowerCase() + " string"),
-                        Arg.create("duration", true, "the duration until the " + type.name().toLowerCase() + " expires"),
-                        Arg.create("context...", false, "the contexts to add the " + type.name().toLowerCase() + " in")
-                )
+                Predicates.inRange(0, 2)
         );
         this.type = type;
     }

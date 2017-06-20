@@ -32,9 +32,11 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
@@ -43,9 +45,8 @@ import java.util.List;
 import java.util.SortedSet;
 
 public class ParentInfo extends SharedSubCommand {
-    public ParentInfo() {
-        super("info", "Lists the groups that this object inherits from",
-                Permission.USER_PARENT_INFO, Permission.GROUP_PARENT_INFO, Predicates.alwaysFalse(), null);
+    public ParentInfo(LocaleManager locale) {
+        super(CommandSpec.PARENT_INFO.spec(locale), "info", Permission.USER_PARENT_INFO, Permission.GROUP_PARENT_INFO, Predicates.alwaysFalse());
     }
 
     @Override

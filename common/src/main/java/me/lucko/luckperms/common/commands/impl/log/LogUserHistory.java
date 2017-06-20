@@ -23,18 +23,20 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.impl.log.subcommands;
+package me.lucko.luckperms.common.commands.impl.log;
 
 import me.lucko.luckperms.api.LogEntry;
-import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.DataConstraints;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.data.Log;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
@@ -42,20 +44,16 @@ import me.lucko.luckperms.common.utils.Predicates;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
+import java.util.UUID;
 
-public class LogGroupHistory extends SubCommand<Log> {
-    public LogGroupHistory() {
-        super("grouphistory", "View an group's history", Permission.LOG_GROUP_HISTORY, Predicates.notInRange(1, 2),
-                Arg.list(
-                        Arg.create("group", true, "the name of the group"),
-                        Arg.create("page", false, "the page number to view")
-                )
-        );
+public class LogUserHistory extends SubCommand<Log> {
+    public LogUserHistory(LocaleManager locale) {
+        super(CommandSpec.LOG_USER_HISTORY.spec(locale), "userhistory", Permission.LOG_USER_HISTORY, Predicates.notInRange(1, 2));
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) throws CommandException {
-        String group = args.get(0).toLowerCase();
+        String user = args.get(0);
         int page = -999;
 
         if (args.size() == 2) {
@@ -63,24 +61,48 @@ public class LogGroupHistory extends SubCommand<Log> {
                 page = Integer.parseInt(args.get(1));
             } catch (NumberFormatException e) {
                 // invalid page
-                Message.LOG_INVALID_PAGE.send(sender);
-                return CommandResult.INVALID_ARGS;
+                return showLog(-1, null, sender, log);
             }
         }
 
-        if (!DataConstraints.GROUP_NAME_TEST.test(group)) {
-            Message.GROUP_INVALID_ENTRY.send(sender);
-            return CommandResult.INVALID_ARGS;
+        UUID uuid = Util.parseUuid(user);
+        if (uuid != null) {
+            if (page == -999) {
+                page = log.getUserHistoryMaxPages(uuid);
+            }
+
+            return showLog(page, uuid, sender, log);
         }
 
-        int maxPage = log.getGroupHistoryMaxPages(group);
+        if (user.length() <= 16) {
+            if (!DataConstraints.PLAYER_USERNAME_TEST.test(user)) {
+                Message.USER_INVALID_ENTRY.send(sender, user);
+                return CommandResult.INVALID_ARGS;
+            }
+
+            UUID uuid1 = plugin.getStorage().getUUID(user).join();
+
+            if (uuid1 == null) {
+                Message.USER_NOT_FOUND.send(sender);
+                return CommandResult.INVALID_ARGS;
+            }
+
+            if (page == -999) {
+                page = log.getUserHistoryMaxPages(uuid1);
+            }
+
+            return showLog(page, uuid1, sender, log);
+        }
+
+        Message.USER_INVALID_ENTRY.send(sender, user);
+        return CommandResult.INVALID_ARGS;
+    }
+
+    private static CommandResult showLog(int page, UUID user, Sender sender, Log log) {
+        int maxPage = log.getUserHistoryMaxPages(user);
         if (maxPage == 0) {
             Message.LOG_NO_ENTRIES.send(sender);
             return CommandResult.STATE_ERROR;
-        }
-
-        if (page == -999) {
-            page = maxPage;
         }
 
         if (page < 1 || page > maxPage) {
@@ -88,19 +110,14 @@ public class LogGroupHistory extends SubCommand<Log> {
             return CommandResult.INVALID_ARGS;
         }
 
-        SortedMap<Integer, LogEntry> entries = log.getGroupHistory(page, group);
+        SortedMap<Integer, LogEntry> entries = log.getUserHistory(page, user);
         String name = entries.values().stream().findAny().get().getActedName();
-        Message.LOG_HISTORY_GROUP_HEADER.send(sender, name, page, maxPage);
+        Message.LOG_HISTORY_USER_HEADER.send(sender, name, page, maxPage);
 
         for (Map.Entry<Integer, LogEntry> e : entries.entrySet()) {
             Message.LOG_ENTRY.send(sender, e.getKey(), DateUtil.formatDateDiff(e.getValue().getTimestamp()), e.getValue().getFormatted());
         }
 
         return CommandResult.SUCCESS;
-    }
-
-    @Override
-    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
-        return getGroupTabComplete(args, plugin);
     }
 }

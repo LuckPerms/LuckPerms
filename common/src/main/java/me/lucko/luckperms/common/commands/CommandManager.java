@@ -57,8 +57,9 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Constants;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.TextUtils;
 
@@ -92,31 +93,33 @@ public class CommandManager {
         this.plugin = plugin;
         this.executor = Executors.newSingleThreadExecutor();
 
+        LocaleManager locale = plugin.getLocaleManager();
+
         mainCommands = ImmutableList.<Command>builder()
-                .add(new UserMainCommand())
-                .add(new GroupMainCommand())
-                .add(new TrackMainCommand())
+                .add(new UserMainCommand(locale))
+                .add(new GroupMainCommand(locale))
+                .add(new TrackMainCommand(locale))
                 .addAll(plugin.getExtraCommands())
-                .add(new LogMainCommand())
-                .add(new SyncCommand())
-                .add(new InfoCommand())
-                .add(new VerboseCommand())
-                .add(new TreeCommand())
-                .add(new SearchCommand())
-                .add(new CheckCommand())
-                .add(new NetworkSyncCommand())
-                .add(new ImportCommand())
-                .add(new ExportCommand())
-                .add(new ReloadConfigCommand())
-                .add(new BulkUpdateCommand())
-                .add(new MigrationMainCommand())
-                .add(new ApplyEditsCommand())
-                .add(new CreateGroup())
-                .add(new DeleteGroup())
-                .add(new ListGroups())
-                .add(new CreateTrack())
-                .add(new DeleteTrack())
-                .add(new ListTracks())
+                .add(new LogMainCommand(locale))
+                .add(new SyncCommand(locale))
+                .add(new InfoCommand(locale))
+                .add(new VerboseCommand(locale))
+                .add(new TreeCommand(locale))
+                .add(new SearchCommand(locale))
+                .add(new CheckCommand(locale))
+                .add(new NetworkSyncCommand(locale))
+                .add(new ImportCommand(locale))
+                .add(new ExportCommand(locale))
+                .add(new ReloadConfigCommand(locale))
+                .add(new BulkUpdateCommand(locale))
+                .add(new MigrationMainCommand(locale))
+                .add(new ApplyEditsCommand(locale))
+                .add(new CreateGroup(locale))
+                .add(new DeleteGroup(locale))
+                .add(new ListGroups(locale))
+                .add(new CreateTrack(locale))
+                .add(new DeleteTrack(locale))
+                .add(new ListTracks(locale))
                 .build();
     }
 

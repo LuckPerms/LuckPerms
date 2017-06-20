@@ -31,24 +31,26 @@ import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.common.commands.abstraction.SharedMainCommand;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
 
 public class CommandMeta<T extends PermissionHolder> extends SharedMainCommand<T> {
-    public CommandMeta(boolean user) {
-        super("Meta", "Edit metadata values", user, ImmutableList.<SharedSubCommand>builder()
-                .add(new MetaInfo())
-                .add(new MetaSet())
-                .add(new MetaUnset())
-                .add(new MetaSetTemp())
-                .add(new MetaUnsetTemp())
-                .add(new MetaAddChatMeta(ChatMetaType.PREFIX))
-                .add(new MetaAddChatMeta(ChatMetaType.SUFFIX))
-                .add(new MetaRemoveChatMeta(ChatMetaType.PREFIX))
-                .add(new MetaRemoveChatMeta(ChatMetaType.SUFFIX))
-                .add(new MetaAddTempChatMeta(ChatMetaType.PREFIX))
-                .add(new MetaAddTempChatMeta(ChatMetaType.SUFFIX))
-                .add(new MetaRemoveTempChatMeta(ChatMetaType.PREFIX))
-                .add(new MetaRemoveTempChatMeta(ChatMetaType.SUFFIX))
-                .add(new MetaClear())
+    public CommandMeta(LocaleManager locale, boolean user) {
+        super(CommandSpec.META.spec(locale), "Meta", user, ImmutableList.<SharedSubCommand>builder()
+                .add(new MetaInfo(locale))
+                .add(new MetaSet(locale))
+                .add(new MetaUnset(locale))
+                .add(new MetaSetTemp(locale))
+                .add(new MetaUnsetTemp(locale))
+                .add(new MetaAddChatMeta(locale, ChatMetaType.PREFIX))
+                .add(new MetaAddChatMeta(locale, ChatMetaType.SUFFIX))
+                .add(new MetaRemoveChatMeta(locale, ChatMetaType.PREFIX))
+                .add(new MetaRemoveChatMeta(locale, ChatMetaType.SUFFIX))
+                .add(new MetaAddTempChatMeta(locale, ChatMetaType.PREFIX))
+                .add(new MetaAddTempChatMeta(locale, ChatMetaType.SUFFIX))
+                .add(new MetaRemoveTempChatMeta(locale, ChatMetaType.PREFIX))
+                .add(new MetaRemoveTempChatMeta(locale, ChatMetaType.SUFFIX))
+                .add(new MetaClear(locale))
                 .build());
     }
 }

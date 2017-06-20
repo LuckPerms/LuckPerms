@@ -26,7 +26,6 @@
 package me.lucko.luckperms.sponge.commands;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
@@ -34,6 +33,8 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
@@ -46,14 +47,8 @@ import org.spongepowered.api.Sponge;
 import java.util.List;
 
 public class ParentAdd extends SubCommand<LPSubjectData> {
-    public ParentAdd() {
-        super("add", "Adds a parent to the Subject", Permission.SPONGE_PARENT_ADD, Predicates.inRange(0, 1),
-                Arg.list(
-                        Arg.create("collection", true, "the subject collection where the parent Subject is"),
-                        Arg.create("subject", true, "the name of the parent Subject"),
-                        Arg.create("contexts...", false, "the contexts to add the parent in")
-                )
-        );
+    public ParentAdd(LocaleManager locale) {
+        super(CommandSpec.SPONGE_PARENT_ADD.spec(locale), "add", Permission.SPONGE_PARENT_ADD, Predicates.inRange(0, 1));
     }
 
     @Override

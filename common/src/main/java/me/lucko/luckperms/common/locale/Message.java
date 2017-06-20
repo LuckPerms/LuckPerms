@@ -23,15 +23,20 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.constants;
+package me.lucko.luckperms.common.locale;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.locale.LocaleManager;
 
+/**
+ * An enumeration of some of the messages used within the plugin.
+ *
+ * <p>The values in this enum are only defaults, and are only returned if no value for the key is present in the
+ * {@link LocaleManager}.</p>
+ */
 @SuppressWarnings("SpellCheckingInspection")
 @AllArgsConstructor
 public enum Message {
@@ -424,11 +429,6 @@ public enum Message {
     @Getter
     private String message;
     private boolean showPrefix;
-
-    @Override
-    public String toString() {
-        return asString(null);
-    }
 
     public String asString(LocaleManager localeManager, Object... objects) {
         String prefix = null;

@@ -25,10 +25,7 @@
 
 package me.lucko.luckperms.common.commands.abstraction;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-
-import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
@@ -39,6 +36,7 @@ import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.locale.LocalizedSpec;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.Collections;
@@ -50,18 +48,14 @@ import java.util.function.Predicate;
  * This doesn't extend the other Command or SubCommand classes to avoid generics hell.
  */
 @Getter
-@AllArgsConstructor
 public abstract class SharedSubCommand {
+
+    private final LocalizedSpec spec;
 
     /**
      * The name of the sub command
      */
     private final String name;
-
-    /**
-     * A brief description of what the sub command does
-     */
-    private final String description;
 
     /**
      * The permission needed to use this command
@@ -72,8 +66,15 @@ public abstract class SharedSubCommand {
     /**
      * Predicate to test if the argument length given is invalid
      */
-    private final Predicate<? super Integer> isArgumentInvalid;
-    private final ImmutableList<Arg> args;
+    private final Predicate<? super Integer> argumentCheck;
+
+    public SharedSubCommand(LocalizedSpec spec, String name, Permission userPermission, Permission groupPermission, Predicate<? super Integer> argumentCheck) {
+        this.spec = spec;
+        this.name = name;
+        this.userPermission = userPermission;
+        this.groupPermission = groupPermission;
+        this.argumentCheck = argumentCheck;
+    }
 
     public abstract CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException;
 
@@ -83,9 +84,9 @@ public abstract class SharedSubCommand {
 
     public void sendUsage(Sender sender) {
         StringBuilder sb = new StringBuilder();
-        if (args != null) {
+        if (getArgs() != null) {
             sb.append("&3 - &7");
-            for (Arg arg : args) {
+            for (Arg arg : getArgs()) {
                 sb.append(arg.asPrettyString()).append(" ");
             }
         }
@@ -96,9 +97,9 @@ public abstract class SharedSubCommand {
     public void sendDetailedUsage(Sender sender) {
         Util.sendPluginMessage(sender, "&3&lCommand Usage &3- &b" + getName());
         Util.sendPluginMessage(sender, "&b> &7" + getDescription());
-        if (args != null) {
+        if (getArgs() != null) {
             Util.sendPluginMessage(sender, "&3Arguments:");
-            for (Arg arg : args) {
+            for (Arg arg : getArgs()) {
                 Util.sendPluginMessage(sender, "&b- " + arg.asPrettyString() + "&3 -> &7" + arg.getDescription());
             }
         }
@@ -106,6 +107,14 @@ public abstract class SharedSubCommand {
 
     public boolean isAuthorized(Sender sender, boolean user) {
         return user ? userPermission.isAuthorized(sender) : groupPermission.isAuthorized(sender);
+    }
+
+    public String getDescription() {
+        return spec.description();
+    }
+
+    public List<Arg> getArgs() {
+        return spec.args();
     }
 
     public static void save(PermissionHolder holder, Sender sender, LuckPermsPlugin plugin) {

@@ -31,9 +31,11 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -42,9 +44,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class HolderShowTracks<T extends PermissionHolder> extends SubCommand<T> {
-    public HolderShowTracks(boolean user) {
-        super("showtracks", "Lists the tracks that the object is on",
-                user ? Permission.USER_SHOWTRACKS : Permission.GROUP_SHOWTRACKS, Predicates.alwaysFalse(), null);
+    public HolderShowTracks(LocaleManager locale, boolean user) {
+        super(CommandSpec.HOLDER_SHOWTRACKS.spec(locale), "showtracks", user ? Permission.USER_SHOWTRACKS : Permission.GROUP_SHOWTRACKS, Predicates.alwaysFalse());
     }
 
     @Override

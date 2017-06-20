@@ -31,8 +31,10 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.messaging.NoopMessagingService;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
@@ -44,21 +46,8 @@ import java.util.Map;
 import static me.lucko.luckperms.common.commands.utils.Util.formatBoolean;
 
 public class InfoCommand extends SingleCommand {
-    private static String formatValue(String value) {
-        if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
-            return Util.formatBoolean(Boolean.parseBoolean(value));
-        }
-
-        try {
-            int i = Integer.parseInt(value);
-            return "&a" + i;
-        } catch (NumberFormatException ignored) {}
-
-        return "&f" + value;
-    }
-
-    public InfoCommand() {
-        super("Info", "Print general plugin info", "/%s info", Permission.INFO, Predicates.alwaysFalse(), null);
+    public InfoCommand(LocaleManager locale) {
+        super(CommandSpec.INFO.spec(locale), "Info", Permission.INFO, Predicates.alwaysFalse());
     }
 
     @Override
@@ -102,5 +91,18 @@ public class InfoCommand extends SingleCommand {
         }
 
         return CommandResult.SUCCESS;
+    }
+
+    private static String formatValue(String value) {
+        if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
+            return Util.formatBoolean(Boolean.parseBoolean(value));
+        }
+
+        try {
+            int i = Integer.parseInt(value);
+            return "&a" + i;
+        } catch (NumberFormatException ignored) {}
+
+        return "&f" + value;
     }
 }

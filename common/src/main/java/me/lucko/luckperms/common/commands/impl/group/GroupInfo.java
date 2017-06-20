@@ -31,9 +31,11 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.model.Group;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
@@ -43,8 +45,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class GroupInfo extends SubCommand<Group> {
-    public GroupInfo() {
-        super("info", "Gives info about the group", Permission.GROUP_INFO, Predicates.alwaysFalse(), null);
+    public GroupInfo(LocaleManager locale) {
+        super(CommandSpec.GROUP_INFO.spec(locale), "info", Permission.GROUP_INFO, Predicates.alwaysFalse());
     }
 
     @Override

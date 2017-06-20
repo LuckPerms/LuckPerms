@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.commands.impl.generic.parent;
 
 import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
@@ -34,12 +33,14 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.DataConstraints;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.data.LogEntry;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -50,15 +51,8 @@ import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getGroup
 import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getTrackTabComplete;
 
 public class ParentSetTrack extends SharedSubCommand {
-    public ParentSetTrack() {
-        super("settrack", "Removes all other groups the object inherits from already on the given track and adds them to the one given",
-                Permission.USER_PARENT_SET_TRACK, Permission.GROUP_PARENT_SET_TRACK, Predicates.inRange(0, 1),
-                Arg.list(
-                        Arg.create("track", true, "the track to set on"),
-                        Arg.create("group", true, "the group to set to, or a number relating to the position of the group on the given track"),
-                        Arg.create("context...", false, "the contexts to set the group in")
-                )
-        );
+    public ParentSetTrack(LocaleManager locale) {
+        super(CommandSpec.PARENT_SET_TRACK.spec(locale), "settrack", Permission.USER_PARENT_SET_TRACK, Permission.GROUP_PARENT_SET_TRACK, Predicates.inRange(0, 1));
     }
 
     @Override

@@ -38,26 +38,28 @@ import me.lucko.luckperms.common.commands.impl.generic.permission.CommandPermiss
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.DataConstraints;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.List;
 import java.util.UUID;
 
 public class UserMainCommand extends MainCommand<User> {
-    public UserMainCommand() {
-        super("User", "User commands", "/%s user <user>", 2, ImmutableList.<Command<User, ?>>builder()
-                .add(new UserInfo())
-                .add(new CommandPermission<>(true))
-                .add(new CommandParent<>(true))
-                .add(new CommandMeta<>(true))
-                .add(new HolderEditor<>(true))
-                .add(new UserSwitchPrimaryGroup())
-                .add(new UserPromote())
-                .add(new UserDemote())
-                .add(new HolderShowTracks<>(true))
-                .add(new HolderClear<>(true))
+    public UserMainCommand(LocaleManager locale) {
+        super(CommandSpec.USER.spec(locale), "User", 2, ImmutableList.<Command<User, ?>>builder()
+                .add(new UserInfo(locale))
+                .add(new CommandPermission<>(locale, true))
+                .add(new CommandParent<>(locale, true))
+                .add(new CommandMeta<>(locale, true))
+                .add(new HolderEditor<>(locale, true))
+                .add(new UserSwitchPrimaryGroup(locale))
+                .add(new UserPromote(locale))
+                .add(new UserDemote(locale))
+                .add(new HolderShowTracks<>(locale, true))
+                .add(new HolderClear<>(locale, true))
                 .build()
         );
     }

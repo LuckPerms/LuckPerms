@@ -34,6 +34,8 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.common.utils.ProgressLogger;
@@ -50,8 +52,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MigrationBungeePerms extends SubCommand<Object> {
-    public MigrationBungeePerms() {
-        super("bungeeperms", "Migration from BungeePerms", Permission.MIGRATION, Predicates.alwaysFalse(), null);
+    public MigrationBungeePerms(LocaleManager locale) {
+        super(CommandSpec.MIGRATION_COMMAND.spec(locale), "bungeeperms", Permission.MIGRATION, Predicates.alwaysFalse());
     }
 
     @Override

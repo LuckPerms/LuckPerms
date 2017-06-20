@@ -23,19 +23,20 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.impl.log.subcommands;
+package me.lucko.luckperms.common.commands.impl.log;
 
 import me.lucko.luckperms.api.LogEntry;
-import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.DataConstraints;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.data.Log;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
@@ -46,39 +47,8 @@ import java.util.SortedMap;
 import java.util.UUID;
 
 public class LogRecent extends SubCommand<Log> {
-    private static CommandResult showLog(int page, UUID filter, Sender sender, Log log) {
-        int maxPage = (filter != null) ? log.getRecentMaxPages(filter) : log.getRecentMaxPages();
-        if (maxPage == 0) {
-            Message.LOG_NO_ENTRIES.send(sender);
-            return CommandResult.STATE_ERROR;
-        }
-
-        if (page < 1 || page > maxPage) {
-            Message.LOG_INVALID_PAGE_RANGE.send(sender, maxPage);
-            return CommandResult.INVALID_ARGS;
-        }
-
-        SortedMap<Integer, LogEntry> entries = (filter != null) ? log.getRecent(page, filter) : log.getRecent(page);
-        if (filter != null) {
-            String name = entries.values().stream().findAny().get().getActorName();
-            Message.LOG_RECENT_BY_HEADER.send(sender, name, page, maxPage);
-        } else {
-            Message.LOG_RECENT_HEADER.send(sender, page, maxPage);
-        }
-
-        for (Map.Entry<Integer, LogEntry> e : entries.entrySet()) {
-            Message.LOG_ENTRY.send(sender, e.getKey(), DateUtil.formatDateDiff(e.getValue().getTimestamp()), e.getValue().getFormatted());
-        }
-        return CommandResult.SUCCESS;
-    }
-
-    public LogRecent() {
-        super("recent", "View recent actions", Permission.LOG_RECENT, Predicates.notInRange(0, 2),
-                Arg.list(
-                        Arg.create("user", false, "the name/uuid of the user to filter by"),
-                        Arg.create("page", false, "the page number to view")
-                )
-        );
+    public LogRecent(LocaleManager locale) {
+        super(CommandSpec.LOG_RECENT.spec(locale), "recent", Permission.LOG_RECENT, Predicates.notInRange(0, 2));
     }
 
     @Override
@@ -149,5 +119,31 @@ public class LogRecent extends SubCommand<Log> {
                 return showLog(-1, null, sender, log);
             }
         }
+    }
+
+    private static CommandResult showLog(int page, UUID filter, Sender sender, Log log) {
+        int maxPage = (filter != null) ? log.getRecentMaxPages(filter) : log.getRecentMaxPages();
+        if (maxPage == 0) {
+            Message.LOG_NO_ENTRIES.send(sender);
+            return CommandResult.STATE_ERROR;
+        }
+
+        if (page < 1 || page > maxPage) {
+            Message.LOG_INVALID_PAGE_RANGE.send(sender, maxPage);
+            return CommandResult.INVALID_ARGS;
+        }
+
+        SortedMap<Integer, LogEntry> entries = (filter != null) ? log.getRecent(page, filter) : log.getRecent(page);
+        if (filter != null) {
+            String name = entries.values().stream().findAny().get().getActorName();
+            Message.LOG_RECENT_BY_HEADER.send(sender, name, page, maxPage);
+        } else {
+            Message.LOG_RECENT_HEADER.send(sender, page, maxPage);
+        }
+
+        for (Map.Entry<Integer, LogEntry> e : entries.entrySet()) {
+            Message.LOG_ENTRY.send(sender, e.getKey(), DateUtil.formatDateDiff(e.getValue().getTimestamp()), e.getValue().getFormatted());
+        }
+        return CommandResult.SUCCESS;
     }
 }

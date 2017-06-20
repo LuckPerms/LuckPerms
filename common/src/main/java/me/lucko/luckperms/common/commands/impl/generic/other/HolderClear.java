@@ -26,19 +26,20 @@
 package me.lucko.luckperms.common.commands.impl.generic.other;
 
 import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.LogEntry;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -46,13 +47,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class HolderClear<T extends PermissionHolder> extends SubCommand<T> {
-    public HolderClear(boolean user) {
-        super("clear", "Removes all permissions, parents and meta", user ? Permission.USER_CLEAR : Permission.GROUP_CLEAR,
-                Predicates.alwaysFalse(),
-                Arg.list(
-                        Arg.create("context...", false, "the contexts to filter by")
-                )
-        );
+    public HolderClear(LocaleManager locale, boolean user) {
+        super(CommandSpec.HOLDER_CLEAR.spec(locale), "clear", user ? Permission.USER_CLEAR : Permission.GROUP_CLEAR, Predicates.alwaysFalse());
     }
 
     @Override

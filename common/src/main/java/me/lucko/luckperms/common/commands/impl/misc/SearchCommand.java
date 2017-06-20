@@ -29,7 +29,6 @@ import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
@@ -38,9 +37,11 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Constants;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeFactory;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
@@ -63,14 +64,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class SearchCommand extends SingleCommand {
-    public SearchCommand() {
-        super("Search", "Search for users/groups with a specific permission",
-                "/%s search <permission>", Permission.SEARCH, Predicates.notInRange(1, 2),
-                Arg.list(
-                        Arg.create("permission", true, "the permission to search for"),
-                        Arg.create("page", false, "the page to view")
-                )
-        );
+    public SearchCommand(LocaleManager locale) {
+        super(CommandSpec.SEARCH.spec(locale), "Search", Permission.SEARCH, Predicates.notInRange(1, 2));
     }
 
     @Override

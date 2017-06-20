@@ -35,7 +35,6 @@ import com.github.cheesesoftware.PowerfulPermsAPI.PowerfulPermsPlugin;
 
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.event.cause.CreationCause;
-import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
@@ -46,6 +45,8 @@ import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.StorageType;
 import me.lucko.luckperms.common.utils.HikariSupplier;
@@ -71,16 +72,8 @@ import static me.lucko.luckperms.common.constants.Permission.MIGRATION;
 
 // Only supports the latest versions of the PP API. (it seems to change randomly almost every release)
 public class MigrationPowerfulPerms extends SubCommand<Object> {
-    public MigrationPowerfulPerms() {
-        super("powerfulperms", "Migration from PowerfulPerms", MIGRATION, Predicates.not(5),
-                Arg.list(
-                        Arg.create("address", true, "the address of the PP database"),
-                        Arg.create("database", true, "the name of the PP database"),
-                        Arg.create("username", true, "the username to log into the DB"),
-                        Arg.create("password", true, "the password to log into the DB"),
-                        Arg.create("db table", true, "the name of the PP table where player data is stored")
-                )
-        );
+    public MigrationPowerfulPerms(LocaleManager locale) {
+        super(CommandSpec.MIGRATION_POWERFULPERMS.spec(locale), "powerfulperms", MIGRATION, Predicates.not(5));
     }
 
     @Override

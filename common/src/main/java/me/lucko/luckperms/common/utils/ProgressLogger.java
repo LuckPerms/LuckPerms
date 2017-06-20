@@ -29,7 +29,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.Message;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 

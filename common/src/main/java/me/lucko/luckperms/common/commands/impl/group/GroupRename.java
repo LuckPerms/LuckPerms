@@ -27,26 +27,25 @@ package me.lucko.luckperms.common.commands.impl.group;
 
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
-import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.DataConstraints;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.data.LogEntry;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 
 public class GroupRename extends SubCommand<Group> {
-    public GroupRename() {
-        super("rename", "Rename the group", Permission.GROUP_RENAME, Predicates.not(1),
-                Arg.list(Arg.create("name", true, "the new name"))
-        );
+    public GroupRename(LocaleManager locale) {
+        super(CommandSpec.GROUP_RENAME.spec(locale), "rename", Permission.GROUP_RENAME, Predicates.not(1));
     }
 
     @Override
