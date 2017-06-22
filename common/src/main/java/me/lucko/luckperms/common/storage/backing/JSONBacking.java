@@ -34,6 +34,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
+import java.util.Iterator;
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
@@ -548,7 +549,15 @@ public class JSONBacking extends FlatfileBacking {
                 context = NodeModel.deserializeContextSet(contexts).makeImmutable();
             }
 
-            nodes.add(NodeModel.of(permission, value, server, world, expiry, context));
+            final JsonElement batchAttribute = attributes.get("permissions");
+            if (permission.startsWith("luckperms.batch") && batchAttribute != null && batchAttribute.isJsonArray()) {
+                for (JsonElement element : batchAttribute.getAsJsonArray()) {
+                    nodes.add(NodeModel.of(element.getAsString(), value, server, world, expiry, context));
+                }
+            } else {
+                nodes.add(NodeModel.of(permission, value, server, world, expiry, context));
+            }
+
         }
 
         return nodes;
