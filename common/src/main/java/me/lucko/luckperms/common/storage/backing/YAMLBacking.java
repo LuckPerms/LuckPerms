@@ -556,7 +556,15 @@ public class YAMLBacking extends FlatfileBacking {
                     context = map.build();
                 }
 
-                nodes.add(NodeModel.of(permission, value, server, world, expiry, ImmutableContextSet.fromMultimap(context)));
+                if (permission.startsWith("luckperms.batch") && attributes.get("permissions") instanceof List) {
+                    final List<String> batchPerms = (List<String>) attributes.get("permissions");
+                    for (String rawPerm : batchPerms) {
+                        nodes.add(NodeModel.of(rawPerm, value, server, world, expiry, ImmutableContextSet.fromMultimap(context)));
+                    }
+                } else {
+                    nodes.add(NodeModel.of(permission, value, server, world, expiry, ImmutableContextSet.fromMultimap(context)));
+                }
+
             }
         }
 

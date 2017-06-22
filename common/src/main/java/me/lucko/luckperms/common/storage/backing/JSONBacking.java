@@ -548,7 +548,15 @@ public class JSONBacking extends FlatfileBacking {
                 context = NodeModel.deserializeContextSet(contexts).makeImmutable();
             }
 
-            nodes.add(NodeModel.of(permission, value, server, world, expiry, context));
+            final JsonElement batchAttribute = attributes.get("permissions");
+            if (permission.startsWith("luckperms.batch") && batchAttribute != null && batchAttribute.isJsonArray()) {
+                for (JsonElement element : batchAttribute.getAsJsonArray()) {
+                    nodes.add(NodeModel.of(element.getAsString(), value, server, world, expiry, context));
+                }
+            } else {
+                nodes.add(NodeModel.of(permission, value, server, world, expiry, context));
+            }
+
         }
 
         return nodes;
