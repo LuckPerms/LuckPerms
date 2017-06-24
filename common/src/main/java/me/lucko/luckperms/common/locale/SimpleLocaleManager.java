@@ -80,7 +80,7 @@ public class SimpleLocaleManager implements LocaleManager {
                             String description = (String) attributes.get("description");
                             String usage = (String) attributes.get("usage");
                             Map<String, String> args = (Map<String, String>) attributes.get("args");
-                            if (args.isEmpty()) {
+                            if (args != null && args.isEmpty()) {
                                 args = null;
                             }
 
