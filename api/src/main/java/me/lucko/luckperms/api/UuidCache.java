@@ -27,6 +27,8 @@ package me.lucko.luckperms.api;
 
 import java.util.UUID;
 
+import javax.annotation.Nonnull;
+
 /**
  * A UUID cache for online users, between external Mojang UUIDs, and internal LuckPerms UUIDs.
  *
@@ -48,7 +50,8 @@ public interface UuidCache {
      * @param external the UUID assigned by the server, through Player#getUniqueId or ProxiedPlayer#getUniqueId
      * @return the corresponding internal UUID
      */
-    UUID getUUID(UUID external);
+    @Nonnull
+    UUID getUUID(@Nonnull UUID external);
 
     /**
      * Gets a users external, server assigned or Mojang assigned unique id, from the internal one used within LuckPerms.
@@ -56,6 +59,7 @@ public interface UuidCache {
      * @param internal the UUID used within LuckPerms, through User#getUuid
      * @return the corresponding external UUID
      */
-    UUID getExternalUUID(UUID internal);
+    @Nonnull
+    UUID getExternalUUID(@Nonnull UUID internal);
 
 }

@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.api;
 
+import javax.annotation.Nonnull;
+
 /**
  * Represents the logger instance being used by LuckPerms on the platform.
  *
@@ -33,10 +35,10 @@ package me.lucko.luckperms.api;
  */
 public interface Logger {
 
-    void info(String s);
+    void info(@Nonnull String s);
 
-    void warn(String s);
+    void warn(@Nonnull String s);
 
-    void severe(String s);
+    void severe(@Nonnull String s);
 
 }

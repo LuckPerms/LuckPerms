@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.api;
 
+import javax.annotation.Nonnull;
+
 /**
  * A node with a traceable origin
  *
@@ -37,6 +39,7 @@ public interface LocalizedNode extends Node {
      *
      * @return the node this instance is representing
      */
+    @Nonnull
     Node getNode();
 
     /**
@@ -45,6 +48,7 @@ public interface LocalizedNode extends Node {
      * @return where the node was inherited from. Will not return null.
      * @see PermissionHolder#getObjectName()
      */
+    @Nonnull
     String getLocation();
 
 }

@@ -28,6 +28,8 @@ package me.lucko.luckperms.api.event.track;
 import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 
+import javax.annotation.Nonnull;
+
 /**
  * Called when a track is loaded into memory from the storage.
  *
@@ -40,6 +42,7 @@ public interface TrackLoadEvent extends LuckPermsEvent {
      *
      * @return the track that was loaded
      */
+    @Nonnull
     Track getTrack();
 
 }

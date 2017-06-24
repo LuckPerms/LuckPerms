@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.api.context;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -36,6 +37,8 @@ import com.google.common.collect.SetMultimap;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+
+import javax.annotation.Nonnull;
 
 /**
  * A mutable implementation of {@link ContextSet}.
@@ -52,14 +55,10 @@ public final class MutableContextSet implements ContextSet {
      * @return a new MutableContextSet containing one KV pair
      * @throws NullPointerException if key or value is null
      */
-    public static MutableContextSet singleton(String key, String value) {
-        if (key == null) {
-            throw new NullPointerException("key");
-        }
-        if (value == null) {
-            throw new NullPointerException("value");
-        }
-
+    @Nonnull
+    public static MutableContextSet singleton(@Nonnull String key, @Nonnull String value) {
+        Preconditions.checkNotNull(key, "key");
+        Preconditions.checkNotNull(value, "value");
         MutableContextSet set = new MutableContextSet();
         set.add(key, value);
         return set;
@@ -76,20 +75,12 @@ public final class MutableContextSet implements ContextSet {
      * @throws NullPointerException if any of the keys or values are null
      * @since 3.1
      */
-    public static MutableContextSet of(String key1, String value1, String key2, String value2) {
-        if (key1 == null) {
-            throw new NullPointerException("key1");
-        }
-        if (value1 == null) {
-            throw new NullPointerException("value1");
-        }
-        if (key2 == null) {
-            throw new NullPointerException("key2");
-        }
-        if (value2 == null) {
-            throw new NullPointerException("value2");
-        }
-
+    @Nonnull
+    public static MutableContextSet of(@Nonnull String key1, @Nonnull String value1, @Nonnull String key2, @Nonnull String value2) {
+        Preconditions.checkNotNull(key1, "key1");
+        Preconditions.checkNotNull(value1, "value1");
+        Preconditions.checkNotNull(key2, "key2");
+        Preconditions.checkNotNull(value2, "value2");
         MutableContextSet ret = singleton(key1, value1);
         ret.add(key2, value2);
         return ret;
@@ -102,11 +93,9 @@ public final class MutableContextSet implements ContextSet {
      * @return a new MutableContextSet representing the pairs from the map
      * @throws NullPointerException if the map is null
      */
-    public static MutableContextSet fromMap(Map<String, String> map) {
-        if (map == null) {
-            throw new NullPointerException("map");
-        }
-
+    @Nonnull
+    public static MutableContextSet fromMap(@Nonnull Map<String, String> map) {
+        Preconditions.checkNotNull(map, "map");
         MutableContextSet set = new MutableContextSet();
         set.addAll(map);
         return set;
@@ -119,11 +108,9 @@ public final class MutableContextSet implements ContextSet {
      * @return a new MutableContextSet representing the pairs in the iterable
      * @throws NullPointerException if the iterable is null
      */
-    public static MutableContextSet fromEntries(Iterable<? extends Map.Entry<String, String>> iterable) {
-        if (iterable == null) {
-            throw new NullPointerException("iterable");
-        }
-
+    @Nonnull
+    public static MutableContextSet fromEntries(@Nonnull Iterable<? extends Map.Entry<String, String>> iterable) {
+        Preconditions.checkNotNull(iterable, "iterable");
         MutableContextSet set = new MutableContextSet();
         set.addAll(iterable);
         return set;
@@ -136,11 +123,9 @@ public final class MutableContextSet implements ContextSet {
      * @return a new MutableContextSet representing the pairs in the multimap
      * @throws NullPointerException if the multimap is null
      */
-    public static MutableContextSet fromMultimap(Multimap<String, String> multimap) {
-        if (multimap == null) {
-            throw new NullPointerException("multimap");
-        }
-
+    @Nonnull
+    public static MutableContextSet fromMultimap(@Nonnull Multimap<String, String> multimap) {
+        Preconditions.checkNotNull(multimap, "multimap");
         return fromEntries(multimap.entries());
     }
 
@@ -152,11 +137,9 @@ public final class MutableContextSet implements ContextSet {
      * @return a new MutableContextSet with the same content and the one provided
      * @throws NullPointerException if contextSet is null
      */
-    public static MutableContextSet fromSet(ContextSet contextSet) {
-        if (contextSet == null) {
-            throw new NullPointerException("contextSet");
-        }
-
+    @Nonnull
+    public static MutableContextSet fromSet(@Nonnull ContextSet contextSet) {
+        Preconditions.checkNotNull(contextSet, "contextSet");
         MutableContextSet set = new MutableContextSet();
         set.addAll(contextSet.toSet());
         return set;
@@ -167,6 +150,7 @@ public final class MutableContextSet implements ContextSet {
      *
      * @return a new MutableContextSet
      */
+    @Nonnull
     public static MutableContextSet create() {
         return new MutableContextSet();
     }

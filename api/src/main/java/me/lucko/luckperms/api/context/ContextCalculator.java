@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.api.context;
 
+import javax.annotation.Nonnull;
+
 /**
  * Calculates whether contexts are applicable to {@link T}
  *
@@ -41,6 +43,7 @@ public interface ContextCalculator<T> {
      * @return the map
      * @since 2.13
      */
-    MutableContextSet giveApplicableContext(T subject, MutableContextSet accumulator);
+    @Nonnull
+    MutableContextSet giveApplicableContext(@Nonnull T subject, @Nonnull MutableContextSet accumulator);
 
 }

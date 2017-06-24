@@ -27,6 +27,9 @@ package me.lucko.luckperms.api;
 
 import java.util.UUID;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
  * A single entry in the log
  *
@@ -35,6 +38,7 @@ import java.util.UUID;
 public class LogEntry implements Comparable<LogEntry> {
     private static final String FORMAT = "&8(&e%s&8) [&a%s&8] (&b%s&8) &7--> &f%s";
 
+    @Nonnull
     public static LogEntryBuilder builder() {
         return new LogEntryBuilder();
     }
@@ -47,7 +51,7 @@ public class LogEntry implements Comparable<LogEntry> {
     private String actedName;
     private String action;
 
-    public LogEntry(long timestamp, UUID actor, String actorName, char type, UUID acted, String actedName, String action) {
+    public LogEntry(long timestamp, @Nonnull UUID actor, @Nonnull String actorName, char type, @Nullable UUID acted, @Nonnull String actedName, @Nonnull String action) {
         if (actor == null) {
             throw new NullPointerException("actor");
         }
@@ -85,12 +89,13 @@ public class LogEntry implements Comparable<LogEntry> {
         return equals(o) ? 0 : (Long.compare(timestamp, o.getTimestamp()) == 0 ? 1 : Long.compare(timestamp, o.getTimestamp()));
     }
 
-    public boolean matchesSearch(String query) {
+    public boolean matchesSearch(@Nonnull String query) {
         query = query.toLowerCase();
         return actorName.toLowerCase().contains(query) || actedName.toLowerCase().contains(query)
                 || action.toLowerCase().contains(query);
     }
 
+    @Nonnull
     public String getFormatted() {
         return String.format(FORMAT,
                 String.valueOf(actorName).equals("null") ? actor.toString() : actorName,
@@ -108,19 +113,21 @@ public class LogEntry implements Comparable<LogEntry> {
         this.timestamp = timestamp;
     }
 
+    @Nonnull
     public UUID getActor() {
         return actor;
     }
 
-    void setActor(UUID actor) {
+    void setActor(@Nonnull UUID actor) {
         this.actor = actor;
     }
 
+    @Nonnull
     public String getActorName() {
         return actorName;
     }
 
-    void setActorName(String actorName) {
+    void setActorName(@Nonnull String actorName) {
         this.actorName = actorName;
     }
 
@@ -132,27 +139,30 @@ public class LogEntry implements Comparable<LogEntry> {
         this.type = type;
     }
 
+    @Nullable
     public UUID getActed() {
         return acted;
     }
 
-    void setActed(UUID acted) {
+    void setActed(@Nullable UUID acted) {
         this.acted = acted;
     }
 
+    @Nonnull
     public String getActedName() {
         return actedName;
     }
 
-    void setActedName(String actedName) {
+    void setActedName(@Nonnull String actedName) {
         this.actedName = actedName;
     }
 
+    @Nonnull
     public String getAction() {
         return action;
     }
 
-    void setAction(String action) {
+    void setAction(@Nonnull String action) {
         this.action = action;
     }
 

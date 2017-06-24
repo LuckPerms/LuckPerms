@@ -30,6 +30,9 @@ import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.List;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
  * An ordered collection of groups for easy promotions and demotions
  */
@@ -39,6 +42,7 @@ public interface Track {
      * Gets the name of this track
      * @return the name of this track
      */
+    @Nonnull
     String getName();
 
     /**
@@ -48,6 +52,7 @@ public interface Track {
      *
      * @return an ordered {@link List} of the groups on this track
      */
+    @Nonnull
     List<String> getGroups();
 
     /**
@@ -66,7 +71,8 @@ public interface Track {
      * @throws NullPointerException  if the group is null
      * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      */
-    String getNext(Group current) throws ObjectLacksException;
+    @Nullable
+    String getNext(@Nonnull Group current) throws ObjectLacksException;
 
     /**
      * Gets the previous group on the track, before the one provided
@@ -77,7 +83,8 @@ public interface Track {
      * @throws NullPointerException  if the group is null
      * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      */
-    String getPrevious(Group current) throws ObjectLacksException;
+    @Nullable
+    String getPrevious(@Nonnull Group current) throws ObjectLacksException;
 
     /**
      * Appends a group to the end of this track
@@ -87,7 +94,7 @@ public interface Track {
      * @throws NullPointerException      if the group is null
      * @throws IllegalStateException     if the group instance was not obtained from LuckPerms.
      */
-    void appendGroup(Group group) throws ObjectAlreadyHasException;
+    void appendGroup(@Nonnull Group group) throws ObjectAlreadyHasException;
 
     /**
      * Inserts a group at a certain position on this track
@@ -99,7 +106,7 @@ public interface Track {
      * @throws NullPointerException      if the group is null
      * @throws IllegalStateException     if the group instance was not obtained from LuckPerms.
      */
-    void insertGroup(Group group, int position) throws ObjectAlreadyHasException, IndexOutOfBoundsException;
+    void insertGroup(@Nonnull Group group, int position) throws ObjectAlreadyHasException, IndexOutOfBoundsException;
 
     /**
      * Removes a group from this track
@@ -109,7 +116,7 @@ public interface Track {
      * @throws NullPointerException  if the group is null
      * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      */
-    void removeGroup(Group group) throws ObjectLacksException;
+    void removeGroup(@Nonnull Group group) throws ObjectLacksException;
 
     /**
      * Removes a group from this track
@@ -118,7 +125,7 @@ public interface Track {
      * @throws ObjectLacksException if the group is not on this track
      * @throws NullPointerException if the group is null
      */
-    void removeGroup(String group) throws ObjectLacksException;
+    void removeGroup(@Nonnull String group) throws ObjectLacksException;
 
     /**
      * Checks if a group features on this track
@@ -128,7 +135,7 @@ public interface Track {
      * @throws NullPointerException  if the group is null
      * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      */
-    boolean containsGroup(Group group);
+    boolean containsGroup(@Nonnull Group group);
 
     /**
      * Checks if a group features on this track
@@ -137,7 +144,7 @@ public interface Track {
      * @return true if the group is on this track
      * @throws NullPointerException if the group is null
      */
-    boolean containsGroup(String group);
+    boolean containsGroup(@Nonnull String group);
 
     /**
      * Clear all of the groups from this track

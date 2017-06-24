@@ -32,6 +32,9 @@ import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
 import java.util.Map;
 import java.util.SortedMap;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
  * Holds cached Meta lookup data for a specific set of contexts
  *
@@ -51,6 +54,7 @@ public interface MetaData {
      * @return an immutable multimap of meta
      * @since 3.3
      */
+    @Nonnull
     ListMultimap<String, String> getMetaMultimap();
 
     /**
@@ -61,6 +65,7 @@ public interface MetaData {
      *
      * @return an immutable map of meta
      */
+    @Nonnull
     Map<String, String> getMeta();
 
     /**
@@ -69,6 +74,7 @@ public interface MetaData {
      *
      * @return a sorted map of prefixes
      */
+    @Nonnull
     SortedMap<Integer, String> getPrefixes();
 
     /**
@@ -77,6 +83,7 @@ public interface MetaData {
      *
      * @return a sorted map of suffixes
      */
+    @Nonnull
     SortedMap<Integer, String> getSuffixes();
 
     /**
@@ -84,6 +91,7 @@ public interface MetaData {
      *
      * @return a prefix string, or null
      */
+    @Nullable
     String getPrefix();
 
     /**
@@ -91,6 +99,7 @@ public interface MetaData {
      *
      * @return a suffix string, or null
      */
+    @Nullable
     String getSuffix();
 
     /**
@@ -99,6 +108,7 @@ public interface MetaData {
      * @return the definition used for the prefix stack
      * @since 3.2
      */
+    @Nonnull
     MetaStackDefinition getPrefixStackDefinition();
 
     /**
@@ -107,6 +117,7 @@ public interface MetaData {
      * @return the definition used for the suffix stack
      * @since 3.2
      */
+    @Nonnull
     MetaStackDefinition getSuffixStackDefinition();
 
 }

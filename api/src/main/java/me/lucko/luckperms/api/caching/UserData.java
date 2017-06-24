@@ -29,6 +29,8 @@ import me.lucko.luckperms.api.Contexts;
 
 import java.util.Set;
 
+import javax.annotation.Nonnull;
+
 /**
  * Holds cached permission and meta lookup data for a {@link me.lucko.luckperms.api.User}.
  *
@@ -52,7 +54,8 @@ public interface UserData {
      * @return a permission data instance
      * @throws NullPointerException if contexts is null
      */
-    PermissionData getPermissionData(Contexts contexts);
+    @Nonnull
+    PermissionData getPermissionData(@Nonnull Contexts contexts);
 
     /**
      * Gets MetaData from the cache, given a specified context.
@@ -64,7 +67,8 @@ public interface UserData {
      * @throws NullPointerException if contexts is null
      * @since 3.2
      */
-    MetaData getMetaData(MetaContexts contexts);
+    @Nonnull
+    MetaData getMetaData(@Nonnull MetaContexts contexts);
 
     /**
      * Gets MetaData from the cache, given a specified context.
@@ -75,7 +79,8 @@ public interface UserData {
      * @return a meta data instance
      * @throws NullPointerException if contexts is null
      */
-    MetaData getMetaData(Contexts contexts);
+    @Nonnull
+    MetaData getMetaData(@Nonnull Contexts contexts);
 
     /**
      * Calculates permission data, bypassing the cache.
@@ -84,7 +89,8 @@ public interface UserData {
      * @return a permission data instance
      * @throws NullPointerException if contexts is null
      */
-    PermissionData calculatePermissions(Contexts contexts);
+    @Nonnull
+    PermissionData calculatePermissions(@Nonnull Contexts contexts);
 
     /**
      * Calculates meta data, bypassing the cache.
@@ -94,7 +100,8 @@ public interface UserData {
      * @throws NullPointerException if contexts is null
      * @since 3.2
      */
-    MetaData calculateMeta(MetaContexts contexts);
+    @Nonnull
+    MetaData calculateMeta(@Nonnull MetaContexts contexts);
 
     /**
      * Calculates meta data, bypassing the cache.
@@ -103,7 +110,8 @@ public interface UserData {
      * @return a meta data instance
      * @throws NullPointerException if contexts is null
      */
-    MetaData calculateMeta(Contexts contexts);
+    @Nonnull
+    MetaData calculateMeta(@Nonnull Contexts contexts);
 
     /**
      * Calculates permission data and stores it in the cache.
@@ -114,7 +122,7 @@ public interface UserData {
      * @param contexts the contexts to recalculate in.
      * @throws NullPointerException if contexts is null
      */
-    void recalculatePermissions(Contexts contexts);
+    void recalculatePermissions(@Nonnull Contexts contexts);
 
     /**
      * Calculates meta data and stores it in the cache.
@@ -126,7 +134,7 @@ public interface UserData {
      * @throws NullPointerException if contexts is null
      * @since 3.2
      */
-    void recalculateMeta(MetaContexts contexts);
+    void recalculateMeta(@Nonnull MetaContexts contexts);
 
     /**
      * Calculates meta data and stores it in the cache.
@@ -137,7 +145,7 @@ public interface UserData {
      * @param contexts the contexts to recalculate in.
      * @throws NullPointerException if contexts is null
      */
-    void recalculateMeta(Contexts contexts);
+    void recalculateMeta(@Nonnull Contexts contexts);
 
     /**
      * Calls {@link #recalculatePermissions(Contexts)} for all current loaded contexts
@@ -155,7 +163,7 @@ public interface UserData {
      * @param contexts a set of contexts
      * @throws NullPointerException if contexts is null
      */
-    void preCalculate(Set<Contexts> contexts);
+    void preCalculate(@Nonnull Set<Contexts> contexts);
 
     /**
      * Ensures that PermissionData and MetaData is cached for a context.
@@ -165,7 +173,7 @@ public interface UserData {
      * @param contexts the contexts to pre-calculate for
      * @throws NullPointerException if contexts is null
      */
-    void preCalculate(Contexts contexts);
+    void preCalculate(@Nonnull Contexts contexts);
 
     /**
      * Invalidates all of the underlying Permission calculators.

@@ -217,18 +217,18 @@ public class ApiProvider implements LuckPermsApi {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void registerContextCalculator(ContextCalculator<?> contextCalculator) {
+    public void registerContextCalculator(@NonNull ContextCalculator<?> contextCalculator) {
         plugin.getContextManager().registerCalculator(contextCalculator);
     }
 
     @Override
-    public Optional<Contexts> getContextForUser(User user) {
+    public Optional<Contexts> getContextForUser(@NonNull User user) {
         return Optional.ofNullable(plugin.getContextForUser(UserDelegate.cast(user)));
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public ContextSet getContextForPlayer(Object player) {
+    public ContextSet getContextForPlayer(@NonNull Object player) {
         return plugin.getContextManager().getApplicableContext(player);
     }
 }

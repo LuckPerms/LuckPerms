@@ -27,6 +27,8 @@ package me.lucko.luckperms.api.metastacking;
 
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 /**
  * Represents a meta stack model, consisting of a chain of elements, separated by spacers.
  *
@@ -45,6 +47,7 @@ public interface MetaStackDefinition {
      *
      * @return the elements in this stack
      */
+    @Nonnull
     List<MetaStackElement> getElements();
 
     /**
@@ -52,6 +55,7 @@ public interface MetaStackDefinition {
      *
      * @return the start spacer
      */
+    @Nonnull
     String getStartSpacer();
 
     /**
@@ -59,6 +63,7 @@ public interface MetaStackDefinition {
      *
      * @return the middle spacer
      */
+    @Nonnull
     String getMiddleSpacer();
 
     /**
@@ -66,6 +71,7 @@ public interface MetaStackDefinition {
      *
      * @return the end spacer
      */
+    @Nonnull
     String getEndSpacer();
 
 }

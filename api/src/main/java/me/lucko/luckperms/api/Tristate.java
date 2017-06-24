@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.api;
 
+import javax.annotation.Nonnull;
+
 /**
  * Represents a permission setting.
  *
@@ -54,6 +56,7 @@ public enum Tristate {
      * @param b the boolean
      * @return {@link #TRUE} or {@link #FALSE}, depending on the value of the boolean.
      */
+    @Nonnull
     public static Tristate fromBoolean(boolean b) {
         return b ? TRUE : FALSE;
     }

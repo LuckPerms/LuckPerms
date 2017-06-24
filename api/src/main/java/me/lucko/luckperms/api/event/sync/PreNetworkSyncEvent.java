@@ -30,6 +30,8 @@ import me.lucko.luckperms.api.event.LuckPermsEvent;
 
 import java.util.UUID;
 
+import javax.annotation.Nonnull;
+
 /**
  * Called before a network sync task runs
  */
@@ -40,6 +42,7 @@ public interface PreNetworkSyncEvent extends LuckPermsEvent, Cancellable {
      *
      * @return the id of the sync request
      */
+    @Nonnull
     UUID getSyncId();
 
 }

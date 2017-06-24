@@ -29,6 +29,8 @@ import me.lucko.luckperms.api.LuckPermsApi;
 
 import java.util.Optional;
 
+import javax.annotation.Nonnull;
+
 /**
  * Singleton for the {@link LuckPermsApi}.
  *
@@ -44,6 +46,7 @@ public final class LuckPerms {
      * @return an api instance
      * @throws IllegalStateException if the api is not loaded
      */
+    @Nonnull
     public static LuckPermsApi getApi() {
         if (api == null) {
             throw new IllegalStateException("API is not loaded.");
@@ -59,6 +62,7 @@ public final class LuckPerms {
      *
      * @return an optional api instance
      */
+    @Nonnull
     public static Optional<LuckPermsApi> getApiSafe() {
         return Optional.ofNullable(api);
     }

@@ -28,6 +28,8 @@ package me.lucko.luckperms.api.metastacking;
 import java.util.List;
 import java.util.Optional;
 
+import javax.annotation.Nonnull;
+
 /**
  * Factory to create meta stack elements and definitions.
  *
@@ -41,7 +43,8 @@ public interface MetaStackFactory {
      * @param definition the definition
      * @return the parsed element, if present
      */
-    Optional<MetaStackElement> fromString(String definition);
+    @Nonnull
+    Optional<MetaStackElement> fromString(@Nonnull String definition);
 
     /**
      * Parses a list of {@link MetaStackElement}s from string, using the pre-defined elements in the plugin.
@@ -51,7 +54,8 @@ public interface MetaStackFactory {
      * @param definitions the definition strings
      * @return a list of parsed elements
      */
-    List<MetaStackElement> fromStrings(List<String> definitions);
+    @Nonnull
+    List<MetaStackElement> fromStrings(@Nonnull List<String> definitions);
 
     /**
      * Creates a new {@link MetaStackDefinition} with the given properties.
@@ -62,6 +66,7 @@ public interface MetaStackFactory {
      * @param endSpacer the spacer to be included at the end of the stacks output
      * @return the new stack definition instance
      */
-    MetaStackDefinition createDefinition(List<MetaStackElement> elements, String startSpacer, String middleSpacer, String endSpacer);
+    @Nonnull
+    MetaStackDefinition createDefinition(@Nonnull List<MetaStackElement> elements, @Nonnull String startSpacer, @Nonnull String middleSpacer, @Nonnull String endSpacer);
 
 }

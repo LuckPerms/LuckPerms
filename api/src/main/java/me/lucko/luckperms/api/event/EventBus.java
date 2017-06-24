@@ -28,6 +28,8 @@ package me.lucko.luckperms.api.event;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import javax.annotation.Nonnull;
+
 /**
  * The LuckPerms event bus. Used for subscribing (or registering listeners) to events.
  *
@@ -43,7 +45,8 @@ public interface EventBus {
      * @param <T>        the event class
      * @return an event handler instance representing this subscription
      */
-    <T extends LuckPermsEvent> EventHandler<T> subscribe(Class<T> eventClass, Consumer<T> handler);
+    @Nonnull
+    <T extends LuckPermsEvent> EventHandler<T> subscribe(@Nonnull Class<T> eventClass, @Nonnull Consumer<T> handler);
 
     /**
      * Gets a set of all registered handlers for a given event
@@ -52,6 +55,7 @@ public interface EventBus {
      * @param <T>        the event class
      * @return an immutable set of event handlers
      */
-    <T extends LuckPermsEvent> Set<EventHandler<T>> getHandlers(Class<T> eventClass);
+    @Nonnull
+    <T extends LuckPermsEvent> Set<EventHandler<T>> getHandlers(@Nonnull Class<T> eventClass);
 
 }

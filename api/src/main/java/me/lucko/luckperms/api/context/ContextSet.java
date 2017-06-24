@@ -25,11 +25,14 @@
 
 package me.lucko.luckperms.api.context;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Multimap;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
+import javax.annotation.Nonnull;
 
 /**
  * Holder of contexts.
@@ -48,7 +51,8 @@ public interface ContextSet {
      * @return a new ImmutableContextSet containing one KV pair
      * @throws NullPointerException if key or value is null
      */
-    static ImmutableContextSet singleton(String key, String value) {
+    @Nonnull
+    static ImmutableContextSet singleton(@Nonnull String key, @Nonnull String value) {
         return ImmutableContextSet.singleton(key, value);
     }
 
@@ -63,7 +67,8 @@ public interface ContextSet {
      * @throws NullPointerException if any of the keys or values are null
      * @since 3.1
      */
-    static ImmutableContextSet of(String key1, String value1, String key2, String value2) {
+    @Nonnull
+    static ImmutableContextSet of(@Nonnull String key1, @Nonnull String value1, @Nonnull String key2, @Nonnull String value2) {
         return ImmutableContextSet.of(key1, value1, key2, value2);
     }
 
@@ -74,7 +79,8 @@ public interface ContextSet {
      * @return a new ImmutableContextSet representing the pairs from the map
      * @throws NullPointerException if the map is null
      */
-    static ImmutableContextSet fromMap(Map<String, String> map) {
+    @Nonnull
+    static ImmutableContextSet fromMap(@Nonnull Map<String, String> map) {
         return ImmutableContextSet.fromMap(map);
     }
 
@@ -85,7 +91,8 @@ public interface ContextSet {
      * @return a new ImmutableContextSet representing the pairs in the iterable
      * @throws NullPointerException if the iterable is null
      */
-    static ImmutableContextSet fromEntries(Iterable<? extends Map.Entry<String, String>> iterable) {
+    @Nonnull
+    static ImmutableContextSet fromEntries(@Nonnull Iterable<? extends Map.Entry<String, String>> iterable) {
         return ImmutableContextSet.fromEntries(iterable);
     }
 
@@ -97,7 +104,8 @@ public interface ContextSet {
      * @throws NullPointerException if the multimap is null
      * @since 2.16
      */
-    static ImmutableContextSet fromMultimap(Multimap<String, String> multimap) {
+    @Nonnull
+    static ImmutableContextSet fromMultimap(@Nonnull Multimap<String, String> multimap) {
         return ImmutableContextSet.fromMultimap(multimap);
     }
 
@@ -109,7 +117,8 @@ public interface ContextSet {
      * @return a new ImmutableContextSet with the same content and the one provided
      * @throws NullPointerException if contextSet is null
      */
-    static ImmutableContextSet fromSet(ContextSet contextSet) {
+    @Nonnull
+    static ImmutableContextSet fromSet(@Nonnull ContextSet contextSet) {
         return ImmutableContextSet.fromSet(contextSet);
     }
 
@@ -118,6 +127,7 @@ public interface ContextSet {
      *
      * @return a new ImmutableContextSet
      */
+    @Nonnull
     static ImmutableContextSet empty() {
         return ImmutableContextSet.empty();
     }
@@ -134,6 +144,7 @@ public interface ContextSet {
      *
      * @return an immutable ContextSet
      */
+    @Nonnull
     ImmutableContextSet makeImmutable();
 
     /**
@@ -142,6 +153,7 @@ public interface ContextSet {
      * @return a mutable ContextSet
      * @since 2.16
      */
+    @Nonnull
     MutableContextSet mutableCopy();
 
     /**
@@ -149,6 +161,7 @@ public interface ContextSet {
      *
      * @return an immutable set
      */
+    @Nonnull
     Set<Map.Entry<String, String>> toSet();
 
     /**
@@ -159,6 +172,7 @@ public interface ContextSet {
      *
      * @return an immutable map
      */
+    @Nonnull
     Map<String, String> toMap();
 
     /**
@@ -167,6 +181,7 @@ public interface ContextSet {
      * @return a multimap
      * @since 2.16
      */
+    @Nonnull
     Multimap<String, String> toMultimap();
 
     /**
@@ -176,7 +191,7 @@ public interface ContextSet {
      * @return true if the set contains a value for the key
      * @throws NullPointerException if the key is null
      */
-    boolean containsKey(String key);
+    boolean containsKey(@Nonnull String key);
 
     /**
      * Gets a set of all of the values mapped to the given key
@@ -185,7 +200,8 @@ public interface ContextSet {
      * @return a set of values
      * @throws NullPointerException if the key is null
      */
-    Set<String> getValues(String key);
+    @Nonnull
+    Set<String> getValues(@Nonnull String key);
 
     /**
      * Returns any value from this set matching the key, if present.
@@ -194,7 +210,8 @@ public interface ContextSet {
      * @return an optional containing any match
      * @since 3.1
      */
-    default Optional<String> getAnyValue(String key) {
+    @Nonnull
+    default Optional<String> getAnyValue(@Nonnull String key) {
         return getValues(key).stream().findAny();
     }
 
@@ -206,7 +223,7 @@ public interface ContextSet {
      * @return true if the set contains the KV pair
      * @throws NullPointerException if the key or value is null
      */
-    boolean has(String key, String value);
+    boolean has(@Nonnull String key, @Nonnull String value);
 
     /**
      * Same as {@link #has(String, String)}, except ignores the case of the value.
@@ -216,7 +233,7 @@ public interface ContextSet {
      * @return true if the set contains the KV pair
      * @throws NullPointerException if the key or value is null
      */
-    boolean hasIgnoreCase(String key, String value);
+    boolean hasIgnoreCase(@Nonnull String key, @Nonnull String value);
 
     /**
      * Checks to see if all entries in this context set are also included in another set.
@@ -225,7 +242,8 @@ public interface ContextSet {
      * @return true if all entries in this set are also in the other set
      * @since 3.1
      */
-    default boolean isSatisfiedBy(ContextSet other) {
+    default boolean isSatisfiedBy(@Nonnull ContextSet other) {
+        Preconditions.checkNotNull(other, "other");
         if (this.isEmpty()) {
             // this is empty, so is therefore always satisfied.
             return true;

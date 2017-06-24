@@ -29,6 +29,8 @@ import me.lucko.luckperms.api.Track;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 
+import javax.annotation.Nonnull;
+
 /**
  * Called when a track is created
  */
@@ -39,6 +41,7 @@ public interface TrackCreateEvent extends LuckPermsEvent {
      *
      * @return the new track
      */
+    @Nonnull
     Track getTrack();
 
     /**
@@ -46,6 +49,7 @@ public interface TrackCreateEvent extends LuckPermsEvent {
      *
      * @return the cause of the creation
      */
+    @Nonnull
     CreationCause getCause();
 
 }

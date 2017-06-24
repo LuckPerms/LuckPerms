@@ -32,6 +32,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
  * A means of loading and saving data to/from the Storage provider.
  *
@@ -52,6 +55,7 @@ public interface Storage {
      *
      * @return the name of the implementation
      */
+    @Nonnull
     String getName();
 
     /**
@@ -66,6 +70,7 @@ public interface Storage {
      *
      * @return an executor instance
      */
+    @Nonnull
     Executor getSyncExecutor();
 
     /**
@@ -74,6 +79,7 @@ public interface Storage {
      *
      * @return an executor instance
      */
+    @Nonnull
     Executor getAsyncExecutor();
 
     /**
@@ -83,13 +89,15 @@ public interface Storage {
      * @return true if the operation completed successfully.
      * @throws NullPointerException if entry is null
      */
-    CompletableFuture<Boolean> logAction(LogEntry entry);
+    @Nonnull
+    CompletableFuture<Boolean> logAction(@Nonnull LogEntry entry);
 
     /**
      * Loads and returns the entire log from storage
      *
      * @return a log instance, could be null if loading failed
      */
+    @Nonnull
     CompletableFuture<Log> getLog();
 
     /**
@@ -100,7 +108,8 @@ public interface Storage {
      * @return if the operation completed successfully
      * @throws NullPointerException if uuid is null
      */
-    CompletableFuture<Boolean> loadUser(UUID uuid, String username);
+    @Nonnull
+    CompletableFuture<Boolean> loadUser(@Nonnull UUID uuid, @Nullable String username);
 
     /**
      * Loads a user's data from the main storage into the plugins local storage.
@@ -109,7 +118,8 @@ public interface Storage {
      * @return if the operation completed successfully
      * @throws NullPointerException if uuid is null
      */
-    default CompletableFuture<Boolean> loadUser(UUID uuid) {
+    @Nonnull
+    default CompletableFuture<Boolean> loadUser(@Nonnull UUID uuid) {
         return loadUser(uuid, null);
     }
 
@@ -121,13 +131,15 @@ public interface Storage {
      * @throws NullPointerException  if user is null
      * @throws IllegalStateException if the user instance was not obtained from LuckPerms.
      */
-    CompletableFuture<Boolean> saveUser(User user);
+    @Nonnull
+    CompletableFuture<Boolean> saveUser(@Nonnull User user);
 
     /**
      * Removes users from the main storage who are "default". This is called every time the plugin loads.
      *
      * @return true if the operation completed successfully
      */
+    @Nonnull
     CompletableFuture<Boolean> cleanupUsers();
 
     /**
@@ -136,6 +148,7 @@ public interface Storage {
      *
      * @return a set of uuids, or null if the operation failed.
      */
+    @Nonnull
     CompletableFuture<Set<UUID>> getUniqueUsers();
 
     /**
@@ -146,7 +159,8 @@ public interface Storage {
      * @throws NullPointerException if the permission is null
      * @since 2.17
      */
-    CompletableFuture<List<HeldPermission<UUID>>> getUsersWithPermission(String permission);
+    @Nonnull
+    CompletableFuture<List<HeldPermission<UUID>>> getUsersWithPermission(@Nonnull String permission);
 
     /**
      * Creates and loads a group into the plugins local storage
@@ -156,7 +170,8 @@ public interface Storage {
      * @throws NullPointerException     if name is null
      * @throws IllegalArgumentException if the name is invalid
      */
-    CompletableFuture<Boolean> createAndLoadGroup(String name);
+    @Nonnull
+    CompletableFuture<Boolean> createAndLoadGroup(@Nonnull String name);
 
     /**
      * Loads a group into the plugins local storage.
@@ -166,13 +181,15 @@ public interface Storage {
      * @throws NullPointerException     if name is null
      * @throws IllegalArgumentException if the name is invalid
      */
-    CompletableFuture<Boolean> loadGroup(String name);
+    @Nonnull
+    CompletableFuture<Boolean> loadGroup(@Nonnull String name);
 
     /**
      * Loads all groups from the storage into memory
      *
      * @return true if the operation completed successfully.
      */
+    @Nonnull
     CompletableFuture<Boolean> loadAllGroups();
 
     /**
@@ -183,7 +200,8 @@ public interface Storage {
      * @throws NullPointerException  if group is null
      * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      */
-    CompletableFuture<Boolean> saveGroup(Group group);
+    @Nonnull
+    CompletableFuture<Boolean> saveGroup(@Nonnull Group group);
 
     /**
      * Permanently deletes a group from storage.
@@ -193,7 +211,8 @@ public interface Storage {
      * @throws NullPointerException  if group is null
      * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      */
-    CompletableFuture<Boolean> deleteGroup(Group group);
+    @Nonnull
+    CompletableFuture<Boolean> deleteGroup(@Nonnull Group group);
 
     /**
      * Searches for a list of groups with a given permission.
@@ -203,7 +222,8 @@ public interface Storage {
      * @throws NullPointerException if the permission is null
      * @since 2.17
      */
-    CompletableFuture<List<HeldPermission<String>>> getGroupsWithPermission(String permission);
+    @Nonnull
+    CompletableFuture<List<HeldPermission<String>>> getGroupsWithPermission(@Nonnull String permission);
 
     /**
      * Creates and loads a track into the plugins local storage
@@ -213,7 +233,8 @@ public interface Storage {
      * @throws NullPointerException     if name is null
      * @throws IllegalArgumentException if the name is invalid
      */
-    CompletableFuture<Boolean> createAndLoadTrack(String name);
+    @Nonnull
+    CompletableFuture<Boolean> createAndLoadTrack(@Nonnull String name);
 
     /**
      * Loads a track into the plugins local storage.
@@ -223,13 +244,15 @@ public interface Storage {
      * @throws NullPointerException     if name is null
      * @throws IllegalArgumentException if the name is invalid
      */
-    CompletableFuture<Boolean> loadTrack(String name);
+    @Nonnull
+    CompletableFuture<Boolean> loadTrack(@Nonnull String name);
 
     /**
      * Loads all tracks from the storage into memory
      *
      * @return true if the operation completed successfully.
      */
+    @Nonnull
     CompletableFuture<Boolean> loadAllTracks();
 
     /**
@@ -240,7 +263,8 @@ public interface Storage {
      * @throws NullPointerException  if track is null
      * @throws IllegalStateException if the track instance was not obtained from LuckPerms.
      */
-    CompletableFuture<Boolean> saveTrack(Track track);
+    @Nonnull
+    CompletableFuture<Boolean> saveTrack(@Nonnull Track track);
 
     /**
      * Permanently deletes a track from storage
@@ -250,7 +274,8 @@ public interface Storage {
      * @throws NullPointerException  if track is null
      * @throws IllegalStateException if the track instance was not obtained from LuckPerms.
      */
-    CompletableFuture<Boolean> deleteTrack(Track track);
+    @Nonnull
+    CompletableFuture<Boolean> deleteTrack(@Nonnull Track track);
 
     /**
      * Saves UUID caching data to the global cache
@@ -261,7 +286,8 @@ public interface Storage {
      * @throws NullPointerException     if either parameters are null
      * @throws IllegalArgumentException if the username is invalid
      */
-    CompletableFuture<Boolean> saveUUIDData(String username, UUID uuid);
+    @Nonnull
+    CompletableFuture<Boolean> saveUUIDData(@Nonnull String username, @Nonnull UUID uuid);
 
     /**
      * Gets a UUID from a username
@@ -271,7 +297,8 @@ public interface Storage {
      * @throws NullPointerException     if either parameters are null
      * @throws IllegalArgumentException if the username is invalid
      */
-    CompletableFuture<UUID> getUUID(String username);
+    @Nonnull
+    CompletableFuture<UUID> getUUID(@Nonnull String username);
 
     /**
      * Gets a username from a UUID
@@ -281,6 +308,7 @@ public interface Storage {
      * @throws NullPointerException if either parameters are null
      * @since 2.17
      */
-    CompletableFuture<String> getName(UUID uuid);
+    @Nonnull
+    CompletableFuture<String> getName(@Nonnull UUID uuid);
 
 }

@@ -29,6 +29,8 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.UUID;
 
+import javax.annotation.Nonnull;
+
 /**
  * Represents the internal LuckPerms log.
  *
@@ -40,11 +42,13 @@ public interface Log {
     /**
      * @return a {@link SortedSet} of all of the {@link LogEntry} objects in this {@link Log}
      */
+    @Nonnull
     SortedSet<LogEntry> getContent();
 
     /**
      * @return all content in this log
      */
+    @Nonnull
     SortedSet<LogEntry> getRecent();
 
     /**
@@ -55,6 +59,7 @@ public interface Log {
      * @throws IllegalArgumentException if the pageNo is less than 1
      * @throws IllegalStateException if the log doesn't contain enough entries to populate the page. See {@link #getRecentMaxPages()}}
      */
+    @Nonnull
     SortedMap<Integer, LogEntry> getRecent(int pageNo);
 
     /**
@@ -67,7 +72,8 @@ public interface Log {
      * @param actor the uuid of the actor to filter by
      * @return all content in this log where is actor = uuid
      */
-    SortedSet<LogEntry> getRecent(UUID actor);
+    @Nonnull
+    SortedSet<LogEntry> getRecent(@Nonnull UUID actor);
 
     /**
      * Gets the recent content for the uuid, separated into pages
@@ -78,20 +84,22 @@ public interface Log {
      * @throws IllegalArgumentException if the pageNo is less than 1
      * @throws IllegalStateException if the log doesn't contain enough entries to populate the page. See {@link #getRecentMaxPages(UUID)}}
      */
-    SortedMap<Integer, LogEntry> getRecent(int pageNo, UUID actor);
+    @Nonnull
+    SortedMap<Integer, LogEntry> getRecent(int pageNo, @Nonnull UUID actor);
 
     /**
      * @param actor the actor to filter by
      * @return the max page number allowed in the {@link #getRecent(int, UUID)} method
      */
-    int getRecentMaxPages(UUID actor);
+    int getRecentMaxPages(@Nonnull UUID actor);
 
 
     /**
      * @param uuid the uuid to filter by
      * @return all content in this log where the user = uuid
      */
-    SortedSet<LogEntry> getUserHistory(UUID uuid);
+    @Nonnull
+    SortedSet<LogEntry> getUserHistory(@Nonnull UUID uuid);
 
     /**
      * Gets the user history content, separated by pages
@@ -102,20 +110,22 @@ public interface Log {
      * @throws IllegalArgumentException if the pageNo is less than 1
      * @throws IllegalStateException if the log doesn't contain enough entries to populate the page. See {@link #getUserHistoryMaxPages(UUID)}}
      */
-    SortedMap<Integer, LogEntry> getUserHistory(int pageNo, UUID uuid);
+    @Nonnull
+    SortedMap<Integer, LogEntry> getUserHistory(int pageNo, @Nonnull UUID uuid);
 
     /**
      * @param uuid the uuid to filter by
      * @return the max page number allowed in the {@link #getUserHistory(int, UUID)} method
      */
-    int getUserHistoryMaxPages(UUID uuid);
+    int getUserHistoryMaxPages(@Nonnull UUID uuid);
 
 
     /**
      * @param name the name to filter by
      * @return all content in this log where the group = name
      */
-    SortedSet<LogEntry> getGroupHistory(String name);
+    @Nonnull
+    SortedSet<LogEntry> getGroupHistory(@Nonnull String name);
 
     /**
      * Gets the group history content, separated by pages
@@ -126,20 +136,22 @@ public interface Log {
      * @throws IllegalArgumentException if the pageNo is less than 1
      * @throws IllegalStateException if the log doesn't contain enough entries to populate the page. See {@link #getGroupHistoryMaxPages(String)}}
      */
-    SortedMap<Integer, LogEntry> getGroupHistory(int pageNo, String name);
+    @Nonnull
+    SortedMap<Integer, LogEntry> getGroupHistory(int pageNo, @Nonnull String name);
 
     /**
      * @param name the name to filter by
      * @return the max page number allowed in the {@link #getGroupHistory(int, String)} method
      */
-    int getGroupHistoryMaxPages(String name);
+    int getGroupHistoryMaxPages(@Nonnull String name);
 
 
     /**
      * @param name the name to filter by
      * @return all content in this log where the track = name
      */
-    SortedSet<LogEntry> getTrackHistory(String name);
+    @Nonnull
+    SortedSet<LogEntry> getTrackHistory(@Nonnull String name);
 
     /**
      * Gets the track history content, separated by pages
@@ -148,7 +160,8 @@ public interface Log {
      * @param name   the name of the acted track to filter by
      * @return the page content
      */
-    SortedMap<Integer, LogEntry> getTrackHistory(int pageNo, String name);
+    @Nonnull
+    SortedMap<Integer, LogEntry> getTrackHistory(int pageNo, @Nonnull String name);
 
     /**
      * @param name the name to filter by
@@ -156,14 +169,15 @@ public interface Log {
      * @throws IllegalArgumentException if the pageNo is less than 1
      * @throws IllegalStateException if the log doesn't contain enough entries to populate the page. See {@link #getTrackHistoryMaxPages(String)}}
      */
-    int getTrackHistoryMaxPages(String name);
+    int getTrackHistoryMaxPages(@Nonnull String name);
 
 
     /**
      * @param query the query to filter by
      * @return all content in this log where the content matches query
      */
-    SortedSet<LogEntry> getSearch(String query);
+    @Nonnull
+    SortedSet<LogEntry> getSearch(@Nonnull String query);
 
     /**
      * Gets the search content, separated by pages
@@ -174,11 +188,12 @@ public interface Log {
      * @throws IllegalArgumentException if the pageNo is less than 1
      * @throws IllegalStateException if the log doesn't contain enough entries to populate the page. See {@link #getSearchMaxPages(String)}}
      */
-    SortedMap<Integer, LogEntry> getSearch(int pageNo, String query);
+    @Nonnull
+    SortedMap<Integer, LogEntry> getSearch(int pageNo, @Nonnull String query);
 
     /**
      * @param query the query to filter by
      * @return the max page number allowed in the {@link #getSearch(int, String)} method
      */
-    int getSearchMaxPages(String query);
+    int getSearchMaxPages(@Nonnull String query);
 }

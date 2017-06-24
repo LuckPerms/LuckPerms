@@ -29,6 +29,8 @@ import me.lucko.luckperms.api.Tristate;
 
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+
 /**
  * Holds cached Permission lookup data for a specific set of contexts
  *
@@ -43,7 +45,8 @@ public interface PermissionData {
      * @return a tristate result
      * @throws NullPointerException if permission is null
      */
-    Tristate getPermissionValue(String permission);
+    @Nonnull
+    Tristate getPermissionValue(@Nonnull String permission);
 
     /**
      * Invalidates the underlying permission calculator cache.
@@ -57,6 +60,7 @@ public interface PermissionData {
      *
      * @return an immutable set of permissions
      */
+    @Nonnull
     Map<String, Boolean> getImmutableBacking();
 
 }

@@ -30,6 +30,8 @@ import me.lucko.luckperms.api.event.cause.DeletionCause;
 
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 /**
  * Called when a track is deleted
  */
@@ -40,6 +42,7 @@ public interface TrackDeleteEvent extends LuckPermsEvent {
      *
      * @return the name of the deleted track
      */
+    @Nonnull
     String getTrackName();
 
     /**
@@ -47,6 +50,7 @@ public interface TrackDeleteEvent extends LuckPermsEvent {
      *
      * @return a copy of the tracks existing data
      */
+    @Nonnull
     List<String> getExistingData();
 
     /**
@@ -54,6 +58,7 @@ public interface TrackDeleteEvent extends LuckPermsEvent {
      *
      * @return the cause of the deletion
      */
+    @Nonnull
     DeletionCause getCause();
 
 }

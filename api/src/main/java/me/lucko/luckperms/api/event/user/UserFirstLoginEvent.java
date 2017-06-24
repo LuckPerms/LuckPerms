@@ -29,6 +29,8 @@ import me.lucko.luckperms.api.event.LuckPermsEvent;
 
 import java.util.UUID;
 
+import javax.annotation.Nonnull;
+
 /**
  * Called when the user logs into the network for the first time.
  *
@@ -47,6 +49,7 @@ public interface UserFirstLoginEvent extends LuckPermsEvent {
      *
      * @return the uuid of the user
      */
+    @Nonnull
     UUID getUuid();
 
     /**
@@ -54,6 +57,7 @@ public interface UserFirstLoginEvent extends LuckPermsEvent {
      *
      * @return the username of the user
      */
+    @Nonnull
     String getUsername();
 
 }

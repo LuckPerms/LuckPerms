@@ -29,6 +29,8 @@ import me.lucko.luckperms.api.data.DatastoreConfiguration;
 
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+
 /**
  * Read-only access to the LuckPerms configuration settings
  */
@@ -38,6 +40,7 @@ public interface LPConfiguration {
      * Returns the name of this server
      * @return the name of this server
      */
+    @Nonnull
     String getServer();
 
     /**
@@ -130,6 +133,7 @@ public interface LPConfiguration {
      * @return the name of the server used within Vault operations
      * @since 2.7
      */
+    @Nonnull
     String getVaultServer();
 
     /**
@@ -143,12 +147,14 @@ public interface LPConfiguration {
      * Returns the values set for data storage in the configuration
      * @return the values set for data storage in the configuration
      */
+    @Nonnull
     DatastoreConfiguration getDatastoreConfig();
 
     /**
      * Returns the storage method string from the configuration
      * @return the storage method string from the configuration
      */
+    @Nonnull
     String getStorageMethod();
 
     /**
@@ -164,6 +170,7 @@ public interface LPConfiguration {
      * method. For example: key = user, value = json
      * @since 2.7
      */
+    @Nonnull
     Map<String, String> getSplitStorageOptions();
 
 }

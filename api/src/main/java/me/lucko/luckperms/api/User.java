@@ -34,6 +34,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
  * A player holding permission data
  */
@@ -44,6 +47,7 @@ public interface User extends PermissionHolder {
      *
      * @return the users Mojang assigned unique id
      */
+    @Nonnull
     UUID getUuid();
 
     /**
@@ -51,16 +55,18 @@ public interface User extends PermissionHolder {
      *
      * @return the users username
      */
+    @Nullable
     String getName();
 
     /**
-     * Gets the users  current primary group.
+     * Gets the users current primary group.
      *
      * <p>The result of this method depends on which method is configured for primary group calculation. It may not
      * be the same as any value set through {@link #setPrimaryGroup(String)}.</p>
      *
      * @return the users primary group
      */
+    @Nonnull
     String getPrimaryGroup();
 
     /**
@@ -71,7 +77,7 @@ public interface User extends PermissionHolder {
      * @throws IllegalStateException     if the user is not a member of that group
      * @throws NullPointerException      if the group is null
      */
-    void setPrimaryGroup(String group) throws ObjectAlreadyHasException;
+    void setPrimaryGroup(@Nonnull String group) throws ObjectAlreadyHasException;
 
     /**
      * Refresh and re-assign the users permissions.
@@ -87,6 +93,7 @@ public interface User extends PermissionHolder {
      * @return the users cached data.
      * @since 3.2
      */
+    @Nonnull
     UserData getCachedData();
 
     /**
@@ -97,7 +104,7 @@ public interface User extends PermissionHolder {
      * @throws NullPointerException if the group is null
      * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      */
-    boolean isInGroup(Group group);
+    boolean isInGroup(@Nonnull Group group);
 
     /**
      * Check to see if the user is a direct member of a group in a specific context
@@ -108,7 +115,7 @@ public interface User extends PermissionHolder {
      * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      * @since 3.2
      */
-    boolean isInGroup(Group group, ContextSet contextSet);
+    boolean isInGroup(@Nonnull Group group, @Nonnull ContextSet contextSet);
 
     /**
      * Gets the user's {@link UserData} cache, if they have one setup.
@@ -118,6 +125,7 @@ public interface User extends PermissionHolder {
      * @deprecated in version 3.2, as this cache is now always loaded
      */
     @Deprecated
+    @Nonnull
     Optional<UserData> getUserDataCache();
 
     /**
@@ -140,7 +148,7 @@ public interface User extends PermissionHolder {
      * @deprecated in favour of {@link #isInGroup(Group, ContextSet)}
      */
     @Deprecated
-    boolean isInGroup(Group group, String server);
+    boolean isInGroup(@Nonnull Group group, @Nonnull String server);
 
     /**
      * Check to see if a user is a member of a group on a specific server and world
@@ -154,7 +162,7 @@ public interface User extends PermissionHolder {
      * @deprecated in favour of {@link #isInGroup(Group, ContextSet)}
      */
     @Deprecated
-    boolean isInGroup(Group group, String server, String world);
+    boolean isInGroup(@Nonnull Group group, @Nonnull String server, @Nonnull String world);
 
     /**
      * Add a user to a group
@@ -166,7 +174,7 @@ public interface User extends PermissionHolder {
      * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
     @Deprecated
-    void addGroup(Group group) throws ObjectAlreadyHasException;
+    void addGroup(@Nonnull Group group) throws ObjectAlreadyHasException;
 
     /**
      * Add a user to a group on a specific server
@@ -180,7 +188,7 @@ public interface User extends PermissionHolder {
      * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
     @Deprecated
-    void addGroup(Group group, String server) throws ObjectAlreadyHasException;
+    void addGroup(@Nonnull Group group, @Nonnull String server) throws ObjectAlreadyHasException;
 
     /**
      * Add a user to a group on a specific server and world
@@ -195,7 +203,7 @@ public interface User extends PermissionHolder {
      * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
     @Deprecated
-    void addGroup(Group group, String server, String world) throws ObjectAlreadyHasException;
+    void addGroup(@Nonnull Group group, @Nonnull String server, @Nonnull String world) throws ObjectAlreadyHasException;
 
     /**
      * Add a user to a group temporarily on a specific server
@@ -209,7 +217,7 @@ public interface User extends PermissionHolder {
      * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
     @Deprecated
-    void addGroup(Group group, long expireAt) throws ObjectAlreadyHasException;
+    void addGroup(@Nonnull Group group, long expireAt) throws ObjectAlreadyHasException;
 
     /**
      * Add a user to a group temporarily on a specific server
@@ -224,7 +232,7 @@ public interface User extends PermissionHolder {
      * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
     @Deprecated
-    void addGroup(Group group, String server, long expireAt) throws ObjectAlreadyHasException;
+    void addGroup(@Nonnull Group group, @Nonnull String server, long expireAt) throws ObjectAlreadyHasException;
 
     /**
      * Add a user to a group temporarily on a specific server and world
@@ -240,7 +248,7 @@ public interface User extends PermissionHolder {
      * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
     @Deprecated
-    void addGroup(Group group, String server, String world, long expireAt) throws ObjectAlreadyHasException;
+    void addGroup(@Nonnull Group group, @Nonnull String server, @Nonnull String world, long expireAt) throws ObjectAlreadyHasException;
 
     /**
      * Remove the user from a group
@@ -252,7 +260,7 @@ public interface User extends PermissionHolder {
      * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
     @Deprecated
-    void removeGroup(Group group) throws ObjectLacksException;
+    void removeGroup(@Nonnull Group group) throws ObjectLacksException;
 
     /**
      * Remove the user from a group
@@ -265,7 +273,7 @@ public interface User extends PermissionHolder {
      * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
     @Deprecated
-    void removeGroup(Group group, boolean temporary) throws ObjectLacksException;
+    void removeGroup(@Nonnull Group group, boolean temporary) throws ObjectLacksException;
 
     /**
      * Remove the user from a group on a specific server
@@ -279,7 +287,7 @@ public interface User extends PermissionHolder {
      * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
     @Deprecated
-    void removeGroup(Group group, String server) throws ObjectLacksException;
+    void removeGroup(@Nonnull Group group, @Nonnull String server) throws ObjectLacksException;
 
     /**
      * Remove the user from a group on a specific server and world
@@ -294,7 +302,7 @@ public interface User extends PermissionHolder {
      * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
     @Deprecated
-    void removeGroup(Group group, String server, String world) throws ObjectLacksException;
+    void removeGroup(@Nonnull Group group, @Nonnull String server, @Nonnull String world) throws ObjectLacksException;
 
     /**
      * Remove the user from a group on a specific server
@@ -309,7 +317,7 @@ public interface User extends PermissionHolder {
      * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
     @Deprecated
-    void removeGroup(Group group, String server, boolean temporary) throws ObjectLacksException;
+    void removeGroup(@Nonnull Group group, @Nonnull String server, boolean temporary) throws ObjectLacksException;
 
     /**
      * Remove the user from a group on a specific server and world
@@ -325,7 +333,7 @@ public interface User extends PermissionHolder {
      * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
     @Deprecated
-    void removeGroup(Group group, String server, String world, boolean temporary) throws ObjectLacksException;
+    void removeGroup(@Nonnull Group group, @Nonnull String server, @Nonnull String world, boolean temporary) throws ObjectLacksException;
 
     /**
      * Get a {@link List} of all of the groups the user is a member of, on all servers
@@ -334,6 +342,7 @@ public interface User extends PermissionHolder {
      * @deprecated in favour of just querying a users permissions
      */
     @Deprecated
+    @Nonnull
     List<String> getGroupNames();
 
     /**
@@ -347,7 +356,8 @@ public interface User extends PermissionHolder {
      * @deprecated in favour of just querying a users permissions
      */
     @Deprecated
-    List<String> getLocalGroups(String server, String world);
+    @Nonnull
+    List<String> getLocalGroups(@Nonnull String server, @Nonnull String world);
 
     /**
      * Get a {@link List} of the groups the user is a member of on a specific server
@@ -359,6 +369,7 @@ public interface User extends PermissionHolder {
      * @deprecated in favour of just querying a users permissions
      */
     @Deprecated
-    List<String> getLocalGroups(String server);
+    @Nonnull
+    List<String> getLocalGroups(@Nonnull String server);
 
 }

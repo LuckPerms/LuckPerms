@@ -32,6 +32,8 @@ import me.lucko.luckperms.exceptions.ObjectLacksException;
 import java.util.List;
 import java.util.OptionalInt;
 
+import javax.annotation.Nonnull;
+
 /**
  * A group which holds permission data.
  */
@@ -42,6 +44,7 @@ public interface Group extends PermissionHolder {
      *
      * @return the name of the group
      */
+    @Nonnull
     String getName();
 
     /**
@@ -52,7 +55,7 @@ public interface Group extends PermissionHolder {
      * @throws NullPointerException  if the group is null
      * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      */
-    boolean inheritsGroup(Group group);
+    boolean inheritsGroup(@Nonnull Group group);
 
     /**
      * Check to see if a group inherits another group directly
@@ -64,7 +67,7 @@ public interface Group extends PermissionHolder {
      * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      * @since 3.2
      */
-    boolean inheritsGroup(Group group, ContextSet contextSet);
+    boolean inheritsGroup(@Nonnull Group group, @Nonnull ContextSet contextSet);
 
     /**
      * Gets the weight of this group, if present.
@@ -72,6 +75,7 @@ public interface Group extends PermissionHolder {
      * @return the group weight
      * @since 2.17
      */
+    @Nonnull
     OptionalInt getWeight();
 
     /**
@@ -86,7 +90,7 @@ public interface Group extends PermissionHolder {
      * @deprecated in favour of {@link #inheritsGroup(Group, ContextSet)}
      */
     @Deprecated
-    boolean inheritsGroup(Group group, String server);
+    boolean inheritsGroup(@Nonnull Group group, @Nonnull String server);
 
     /**
      * Check to see if the group inherits a group on a specific server and world
@@ -101,7 +105,7 @@ public interface Group extends PermissionHolder {
      * @deprecated in favour of {@link #inheritsGroup(Group, ContextSet)}
      */
     @Deprecated
-    boolean inheritsGroup(Group group, String server, String world);
+    boolean inheritsGroup(@Nonnull Group group, @Nonnull String server, @Nonnull String world);
 
     /**
      * Make this group inherit another group
@@ -113,7 +117,7 @@ public interface Group extends PermissionHolder {
      * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
     @Deprecated
-    void setInheritGroup(Group group) throws ObjectAlreadyHasException;
+    void setInheritGroup(@Nonnull Group group) throws ObjectAlreadyHasException;
 
     /**
      * Make this group inherit another group on a specific server
@@ -127,7 +131,7 @@ public interface Group extends PermissionHolder {
      * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
     @Deprecated
-    void setInheritGroup(Group group, String server) throws ObjectAlreadyHasException;
+    void setInheritGroup(@Nonnull Group group, @Nonnull String server) throws ObjectAlreadyHasException;
 
     /**
      * Make this group inherit another group on a specific server and world
@@ -142,7 +146,7 @@ public interface Group extends PermissionHolder {
      * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
     @Deprecated
-    void setInheritGroup(Group group, String server, String world) throws ObjectAlreadyHasException;
+    void setInheritGroup(@Nonnull Group group, @Nonnull String server, @Nonnull String world) throws ObjectAlreadyHasException;
 
     /**
      * Make this group inherit another group temporarily
@@ -156,7 +160,7 @@ public interface Group extends PermissionHolder {
      * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
     @Deprecated
-    void setInheritGroup(Group group, long expireAt) throws ObjectAlreadyHasException;
+    void setInheritGroup(@Nonnull Group group, long expireAt) throws ObjectAlreadyHasException;
 
     /**
      * Make this group inherit another group on a specific server temporarily
@@ -171,7 +175,7 @@ public interface Group extends PermissionHolder {
      * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
     @Deprecated
-    void setInheritGroup(Group group, String server, long expireAt) throws ObjectAlreadyHasException;
+    void setInheritGroup(@Nonnull Group group, @Nonnull String server, long expireAt) throws ObjectAlreadyHasException;
 
     /**
      * Make this group inherit another group on a specific server and world temporarily
@@ -187,7 +191,7 @@ public interface Group extends PermissionHolder {
      * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
     @Deprecated
-    void setInheritGroup(Group group, String server, String world, long expireAt) throws ObjectAlreadyHasException;
+    void setInheritGroup(@Nonnull Group group, @Nonnull String server, @Nonnull String world, long expireAt) throws ObjectAlreadyHasException;
 
     /**
      * Remove a previously set inheritance rule
@@ -199,7 +203,7 @@ public interface Group extends PermissionHolder {
      * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
     @Deprecated
-    void unsetInheritGroup(Group group) throws ObjectLacksException;
+    void unsetInheritGroup(@Nonnull Group group) throws ObjectLacksException;
 
     /**
      * Remove a previously set inheritance rule
@@ -212,7 +216,7 @@ public interface Group extends PermissionHolder {
      * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
     @Deprecated
-    void unsetInheritGroup(Group group, boolean temporary) throws ObjectLacksException;
+    void unsetInheritGroup(@Nonnull Group group, boolean temporary) throws ObjectLacksException;
 
     /**
      * Remove a previously set inheritance rule on a specific server
@@ -226,7 +230,7 @@ public interface Group extends PermissionHolder {
      * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
     @Deprecated
-    void unsetInheritGroup(Group group, String server) throws ObjectLacksException;
+    void unsetInheritGroup(@Nonnull Group group, @Nonnull String server) throws ObjectLacksException;
 
     /**
      * Remove a previously set inheritance rule on a specific server and world
@@ -241,7 +245,7 @@ public interface Group extends PermissionHolder {
      * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
     @Deprecated
-    void unsetInheritGroup(Group group, String server, String world) throws ObjectLacksException;
+    void unsetInheritGroup(@Nonnull Group group, @Nonnull String server, @Nonnull String world) throws ObjectLacksException;
 
     /**
      * Remove a previously set inheritance rule on a specific server
@@ -256,7 +260,7 @@ public interface Group extends PermissionHolder {
      * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
     @Deprecated
-    void unsetInheritGroup(Group group, String server, boolean temporary) throws ObjectLacksException;
+    void unsetInheritGroup(@Nonnull Group group, @Nonnull String server, boolean temporary) throws ObjectLacksException;
 
     /**
      * Remove a previously set inheritance rule on a specific server and world
@@ -272,7 +276,7 @@ public interface Group extends PermissionHolder {
      * @deprecated in favour of {@link NodeFactory#makeGroupNode(Group)}
      */
     @Deprecated
-    void unsetInheritGroup(Group group, String server, String world, boolean temporary) throws ObjectLacksException;
+    void unsetInheritGroup(@Nonnull Group group, @Nonnull String server, @Nonnull String world, boolean temporary) throws ObjectLacksException;
 
     /**
      * Get a {@link List} of all of the groups the group inherits, on all servers
@@ -281,6 +285,7 @@ public interface Group extends PermissionHolder {
      * @deprecated in favour of just querying a users permissions
      */
     @Deprecated
+    @Nonnull
     List<String> getGroupNames();
 
     /**
@@ -293,7 +298,8 @@ public interface Group extends PermissionHolder {
      * @deprecated in favour of just querying a users permissions
      */
     @Deprecated
-    List<String> getLocalGroups(String server);
+    @Nonnull
+    List<String> getLocalGroups(@Nonnull String server);
 
 
     /**
@@ -307,6 +313,7 @@ public interface Group extends PermissionHolder {
      * @deprecated in favour of just querying a users permissions
      */
     @Deprecated
-    List<String> getLocalGroups(String server, String world);
+    @Nonnull
+    List<String> getLocalGroups(@Nonnull String server, @Nonnull String world);
 
 }

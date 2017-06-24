@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.api;
 
+import javax.annotation.Nonnull;
+
 /**
  * Builds {@link Node} instances
  *
@@ -43,7 +45,8 @@ public interface NodeFactory {
      * @see Node#toSerializedNode()
      */
     @Deprecated
-    Node fromSerialisedNode(String serialisedPermission, boolean value);
+    @Nonnull
+    Node fromSerialisedNode(@Nonnull String serialisedPermission, boolean value);
 
 
     /**
@@ -53,7 +56,8 @@ public interface NodeFactory {
      * @return a node builder instance
      * @throws NullPointerException if the permission is null
      */
-    Node.Builder newBuilder(String permission);
+    @Nonnull
+    Node.Builder newBuilder(@Nonnull String permission);
 
     /**
      * Creates a node builder instance from an existing node
@@ -62,7 +66,8 @@ public interface NodeFactory {
      * @return a node builder instance
      * @throws NullPointerException if the other node is null
      */
-    Node.Builder newBuilderFromExisting(Node other);
+    @Nonnull
+    Node.Builder newBuilderFromExisting(@Nonnull Node other);
 
     /**
      * Creates a node builder from a serialised node string
@@ -75,7 +80,8 @@ public interface NodeFactory {
      * @see Node#toSerializedNode()
      */
     @Deprecated
-    Node.Builder newBuilderFromSerialisedNode(String serialisedPermission, boolean value);
+    @Nonnull
+    Node.Builder newBuilderFromSerialisedNode(@Nonnull String serialisedPermission, boolean value);
 
 
     /**
@@ -87,7 +93,8 @@ public interface NodeFactory {
      * @throws IllegalStateException if the group instance was not obtained from LuckPerms.
      * @since 3.1
      */
-    Node.Builder makeGroupNode(Group group);
+    @Nonnull
+    Node.Builder makeGroupNode(@Nonnull Group group);
 
     /**
      * Creates a node builder from a key value pair
@@ -97,7 +104,8 @@ public interface NodeFactory {
      * @return a node builder instance
      * @throws NullPointerException if the key or value is null
      */
-    Node.Builder makeMetaNode(String key, String value);
+    @Nonnull
+    Node.Builder makeMetaNode(@Nonnull String key, @Nonnull String value);
 
     /**
      * Creates a node builder for the given chat meta type
@@ -108,7 +116,8 @@ public interface NodeFactory {
      * @throws NullPointerException if the type or value is null
      * @since 3.2
      */
-    Node.Builder makeChatMetaNode(ChatMetaType type, int priority, String value);
+    @Nonnull
+    Node.Builder makeChatMetaNode(@Nonnull ChatMetaType type, int priority, @Nonnull String value);
 
     /**
      * Creates a node builder from a prefix string and priority
@@ -118,7 +127,8 @@ public interface NodeFactory {
      * @return a node builder instance
      * @throws NullPointerException if the prefix is null
      */
-    Node.Builder makePrefixNode(int priority, String prefix);
+    @Nonnull
+    Node.Builder makePrefixNode(int priority, @Nonnull String prefix);
 
     /**
      * Creates a node builder from a prefix string and priority
@@ -128,6 +138,7 @@ public interface NodeFactory {
      * @return a node builder instance
      * @throws NullPointerException if the suffix is null
      */
-    Node.Builder makeSuffixNode(int priority, String suffix);
+    @Nonnull
+    Node.Builder makeSuffixNode(int priority, @Nonnull String suffix);
 
 }

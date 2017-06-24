@@ -27,6 +27,8 @@ package me.lucko.luckperms.api.event;
 
 import java.util.function.Consumer;
 
+import javax.annotation.Nonnull;
+
 /**
  * Represents a handler for a LuckPerms event
  *
@@ -39,6 +41,7 @@ public interface EventHandler<T extends LuckPermsEvent> {
      *
      * @return the event class
      */
+    @Nonnull
     Class<T> getEventClass();
 
     /**
@@ -60,6 +63,7 @@ public interface EventHandler<T extends LuckPermsEvent> {
      *
      * @return the event consumer
      */
+    @Nonnull
     Consumer<T> getConsumer();
 
     /**

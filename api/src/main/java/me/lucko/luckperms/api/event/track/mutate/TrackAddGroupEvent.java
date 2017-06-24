@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.api.event.track.mutate;
 
+import javax.annotation.Nonnull;
+
 /**
  * Called when a group is added to a track
  */
@@ -35,6 +37,7 @@ public interface TrackAddGroupEvent extends TrackMutateEvent {
      *
      * @return the group that was added
      */
+    @Nonnull
     String getGroup();
 
 }

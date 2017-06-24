@@ -27,6 +27,8 @@ package me.lucko.luckperms.api.event.node;
 
 import me.lucko.luckperms.api.Node;
 
+import javax.annotation.Nonnull;
+
 /**
  * Called when a node is added to a holder
  */
@@ -37,6 +39,7 @@ public interface NodeAddEvent extends NodeMutateEvent {
      *
      * @return the node that was added
      */
+    @Nonnull
     Node getNode();
 
 }

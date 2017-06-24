@@ -25,7 +25,11 @@
 
 package me.lucko.luckperms.api;
 
+import com.google.common.base.Preconditions;
+
 import java.util.Map;
+
+import javax.annotation.Nonnull;
 
 /**
  * Represents a type of chat meta
@@ -40,17 +44,17 @@ public enum ChatMetaType {
     PREFIX {
         @Override
         public boolean matches(Node node) {
-            return node.isPrefix();
+            return Preconditions.checkNotNull(node, "node").isPrefix();
         }
 
         @Override
         public boolean shouldIgnore(Node node) {
-            return !node.isPrefix();
+            return !Preconditions.checkNotNull(node, "node").isPrefix();
         }
 
         @Override
         public Map.Entry<Integer, String> getEntry(Node node) {
-            return node.getPrefix();
+            return Preconditions.checkNotNull(node, "node").getPrefix();
         }
     },
 
@@ -60,17 +64,17 @@ public enum ChatMetaType {
     SUFFIX {
         @Override
         public boolean matches(Node node) {
-            return node.isSuffix();
+            return Preconditions.checkNotNull(node, "node").isSuffix();
         }
 
         @Override
         public boolean shouldIgnore(Node node) {
-            return !node.isSuffix();
+            return !Preconditions.checkNotNull(node, "node").isSuffix();
         }
 
         @Override
         public Map.Entry<Integer, String> getEntry(Node node) {
-            return node.getSuffix();
+            return Preconditions.checkNotNull(node, "node").getSuffix();
         }
     };
 
@@ -80,7 +84,7 @@ public enum ChatMetaType {
      * @param node the node to test
      * @return true if the node has the same type
      */
-    public abstract boolean matches(Node node);
+    public abstract boolean matches(@Nonnull Node node);
 
     /**
      * Returns if the passed node should be ignored when searching for meta of this type
@@ -88,7 +92,7 @@ public enum ChatMetaType {
      * @param node the node to test
      * @return true if the node does not share the same type
      */
-    public abstract boolean shouldIgnore(Node node);
+    public abstract boolean shouldIgnore(@Nonnull Node node);
 
     /**
      * Maps the corresponding entry from the given node
@@ -97,6 +101,7 @@ public enum ChatMetaType {
      * @return the entry
      * @throws IllegalStateException if the node does not share the same type
      */
-    public abstract Map.Entry<Integer, String> getEntry(Node node);
+    @Nonnull
+    public abstract Map.Entry<Integer, String> getEntry(@Nonnull Node node);
 
 }

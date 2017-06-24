@@ -27,6 +27,8 @@ package me.lucko.luckperms.api;
 
 import me.lucko.luckperms.api.context.ContextSet;
 
+import javax.annotation.Nonnull;
+
 /**
  * Context and options for a permission lookup.
  *
@@ -44,11 +46,12 @@ public class Contexts {
      *
      * @return a context that will not apply any filters
      */
+    @Nonnull
     public static Contexts allowAll() {
         return ALLOW_ALL;
     }
 
-    public static Contexts of(ContextSet context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups, boolean op) {
+    public static Contexts of(@Nonnull ContextSet context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups, boolean op) {
         return new Contexts(context, includeGlobal, includeGlobalWorld, applyGroups, applyGlobalGroups, applyGlobalWorldGroups, op);
     }
 
@@ -90,7 +93,7 @@ public class Contexts {
      */
     private final boolean applyGlobalWorldGroups;
 
-    public Contexts(ContextSet context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups, boolean op) {
+    public Contexts(@Nonnull ContextSet context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups, boolean op) {
         if (context == null) {
             throw new NullPointerException("context");
         }
@@ -110,6 +113,7 @@ public class Contexts {
      * @return an immutable set of context key value pairs
      * @since 2.13
      */
+    @Nonnull
     public ContextSet getContexts() {
         return this.context;
     }
@@ -169,6 +173,7 @@ public class Contexts {
     }
 
     @Override
+    @Nonnull
     public String toString() {
         return "Contexts(" +
                 "context=" + this.getContexts() + ", " +

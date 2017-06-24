@@ -29,6 +29,8 @@ import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.event.Cancellable;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 
+import javax.annotation.Nonnull;
+
 /**
  * Called when a log entry is about to be sent to notifiable players on the platform
  */
@@ -39,6 +41,7 @@ public interface LogBroadcastEvent extends LuckPermsEvent, Cancellable {
      *
      * @return the log entry to be broadcasted
      */
+    @Nonnull
     LogEntry getEntry();
 
 }

@@ -30,6 +30,8 @@ import com.google.common.base.Preconditions;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
 
+import javax.annotation.Nonnull;
+
 /**
  * Represents the context for a meta lookup, consisting of a standard {@link Contexts} element, plus options to define how
  * the meta stack should be constructed.
@@ -46,7 +48,7 @@ public final class MetaContexts {
      * @param suffixStackDefinition the suffix stack definition to be used
      * @return the new instance
      */
-    public static MetaContexts of(Contexts contexts, MetaStackDefinition prefixStackDefinition, MetaStackDefinition suffixStackDefinition) {
+    public static MetaContexts of(@Nonnull Contexts contexts, @Nonnull MetaStackDefinition prefixStackDefinition, @Nonnull MetaStackDefinition suffixStackDefinition) {
         return new MetaContexts(contexts, prefixStackDefinition, suffixStackDefinition);
     }
 
@@ -61,25 +63,29 @@ public final class MetaContexts {
      * @param prefixStackDefinition the prefix stack definition to be used
      * @param suffixStackDefinition the suffix stack definition to be used
      */
-    public MetaContexts(Contexts contexts, MetaStackDefinition prefixStackDefinition, MetaStackDefinition suffixStackDefinition) {
+    public MetaContexts(@Nonnull Contexts contexts, @Nonnull MetaStackDefinition prefixStackDefinition, @Nonnull MetaStackDefinition suffixStackDefinition) {
         this.contexts = Preconditions.checkNotNull(contexts, "contexts");
         this.prefixStackDefinition = Preconditions.checkNotNull(prefixStackDefinition, "prefixStackDefinition");
         this.suffixStackDefinition = Preconditions.checkNotNull(suffixStackDefinition, "suffixStackDefinition");
     }
 
+    @Nonnull
     public Contexts getContexts() {
         return this.contexts;
     }
 
+    @Nonnull
     public MetaStackDefinition getPrefixStackDefinition() {
         return this.prefixStackDefinition;
     }
 
+    @Nonnull
     public MetaStackDefinition getSuffixStackDefinition() {
         return this.suffixStackDefinition;
     }
 
     @Override
+    @Nonnull
     public String toString() {
         return "MetaContexts(" +
                 "contexts=" + this.getContexts() + ", " +

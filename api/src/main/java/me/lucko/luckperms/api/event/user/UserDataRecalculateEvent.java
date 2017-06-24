@@ -29,6 +29,8 @@ import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 
+import javax.annotation.Nonnull;
+
 /**
  * Called when a users cached data is refreshed
  */
@@ -39,6 +41,7 @@ public interface UserDataRecalculateEvent extends LuckPermsEvent {
      *
      * @return the user
      */
+    @Nonnull
     User getUser();
 
     /**
@@ -46,6 +49,7 @@ public interface UserDataRecalculateEvent extends LuckPermsEvent {
      *
      * @return the data
      */
+    @Nonnull
     UserData getData();
 
 }

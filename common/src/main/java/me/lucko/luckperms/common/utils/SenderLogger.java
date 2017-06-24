@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.utils;
 
 import lombok.AllArgsConstructor;
+import lombok.NonNull;
 
 import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.common.commands.sender.Sender;
@@ -36,17 +37,17 @@ public class SenderLogger implements Logger {
     private final Sender console;
 
     @Override
-    public void info(String s) {
+    public void info(@NonNull String s) {
         Message.LOG_INFO.send(console, s);
     }
 
     @Override
-    public void warn(String s) {
+    public void warn(@NonNull String s) {
         Message.LOG_WARN.send(console, s);
     }
 
     @Override
-    public void severe(String s) {
+    public void severe(@NonNull String s) {
         Message.LOG_ERROR.send(console, s);
     }
 }

@@ -27,6 +27,8 @@ package me.lucko.luckperms.api.event;
 
 import me.lucko.luckperms.api.LuckPermsApi;
 
+import javax.annotation.Nonnull;
+
 /**
  * The base event interface
  *
@@ -39,6 +41,7 @@ public interface LuckPermsEvent {
      *
      * @return the api instance
      */
+    @Nonnull
     LuckPermsApi getApi();
 
 }

@@ -28,6 +28,8 @@ package me.lucko.luckperms.api.event.group;
 import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 
+import javax.annotation.Nonnull;
+
 /**
  * Called when a group is loaded into memory from the storage.
  *
@@ -40,6 +42,7 @@ public interface GroupLoadEvent extends LuckPermsEvent {
      *
      * @return the group that was loaded
      */
+    @Nonnull
     Group getGroup();
 
 }

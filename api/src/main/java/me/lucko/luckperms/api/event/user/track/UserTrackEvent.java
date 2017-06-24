@@ -31,6 +31,8 @@ import me.lucko.luckperms.api.event.LuckPermsEvent;
 
 import java.util.Optional;
 
+import javax.annotation.Nonnull;
+
 /**
  * Called when a user interacts with a track through a promotion or demotion
  */
@@ -41,6 +43,7 @@ public interface UserTrackEvent extends LuckPermsEvent {
      *
      * @return the track involved in the event
      */
+    @Nonnull
     Track getTrack();
 
     /**
@@ -48,6 +51,7 @@ public interface UserTrackEvent extends LuckPermsEvent {
      *
      * @return the user involved in the event
      */
+    @Nonnull
     User getUser();
 
     /**
@@ -55,6 +59,7 @@ public interface UserTrackEvent extends LuckPermsEvent {
      *
      * @return the action performed
      */
+    @Nonnull
     TrackAction getAction();
 
     /**
@@ -64,6 +69,7 @@ public interface UserTrackEvent extends LuckPermsEvent {
      *
      * @return the group the user was promoted/demoted from
      */
+    @Nonnull
     Optional<String> getGroupFrom();
 
     /**
@@ -71,6 +77,7 @@ public interface UserTrackEvent extends LuckPermsEvent {
      *
      * @return the group the user was promoted/demoted to
      */
+    @Nonnull
     Optional<String> getGroupTo();
 
 }

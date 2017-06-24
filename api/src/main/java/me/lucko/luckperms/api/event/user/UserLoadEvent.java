@@ -28,6 +28,8 @@ package me.lucko.luckperms.api.event.user;
 import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 
+import javax.annotation.Nonnull;
+
 /**
  * Called when a user is loaded into memory from the storage.
  */
@@ -38,6 +40,7 @@ public interface UserLoadEvent extends LuckPermsEvent {
      *
      * @return the user that was loaded
      */
+    @Nonnull
     User getUser();
 
 }

@@ -25,18 +25,24 @@
 
 package me.lucko.luckperms.api.data;
 
+import javax.annotation.Nullable;
+
 /**
  * Represents the data section of the main LuckPerms configuration.
  * All methods could return null.
  */
 public interface DatastoreConfiguration {
 
+    @Nullable
     String getAddress();
 
+    @Nullable
     String getDatabase();
 
+    @Nullable
     String getUsername();
 
+    @Nullable
     String getPassword();
 
 }

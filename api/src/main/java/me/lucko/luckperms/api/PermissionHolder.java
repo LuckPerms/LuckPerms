@@ -34,6 +34,9 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.function.Predicate;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
  * An object capable of holding permissions
  *
@@ -49,6 +52,7 @@ public interface PermissionHolder {
      *
      * @return the identifier for this object. Either a uuid string or name.
      */
+    @Nonnull
     String getObjectName();
 
     /**
@@ -60,6 +64,7 @@ public interface PermissionHolder {
      * @return a friendly identifier for this holder
      * @since 3.2
      */
+    @Nonnull
     String getFriendlyName();
 
     /**
@@ -68,6 +73,7 @@ public interface PermissionHolder {
      * @return an immutable set of permissions in priority order
      * @since 2.6
      */
+    @Nonnull
     SortedSet<? extends Node> getPermissions();
 
     /**
@@ -78,6 +84,7 @@ public interface PermissionHolder {
      * @return a set of nodes
      * @since 2.6
      */
+    @Nonnull
     Set<? extends Node> getEnduringPermissions();
 
     /**
@@ -88,6 +95,7 @@ public interface PermissionHolder {
      * @return a set of nodes
      * @since 2.6
      */
+    @Nonnull
     Set<? extends Node> getTransientPermissions();
 
     /**
@@ -96,6 +104,7 @@ public interface PermissionHolder {
      * @return a set of permanent nodes
      * @since 2.6
      */
+    @Nonnull
     Set<Node> getPermanentPermissionNodes();
 
     /**
@@ -104,6 +113,7 @@ public interface PermissionHolder {
      * @return a set of temporary nodes
      * @since 2.6
      */
+    @Nonnull
     Set<Node> getTemporaryPermissionNodes();
 
     /**
@@ -119,7 +129,8 @@ public interface PermissionHolder {
      * @throws NullPointerException if the context is null
      * @since 2.11
      */
-    SortedSet<LocalizedNode> getAllNodes(Contexts contexts);
+    @Nonnull
+    SortedSet<LocalizedNode> getAllNodes(@Nonnull Contexts contexts);
 
     /**
      * Gets a mutable set of the nodes that this object has and inherits, filtered by context.
@@ -132,7 +143,8 @@ public interface PermissionHolder {
      * @throws NullPointerException if the context is null
      * @since 2.11
      */
-    Set<LocalizedNode> getAllNodesFiltered(Contexts contexts);
+    @Nonnull
+    Set<LocalizedNode> getAllNodesFiltered(@Nonnull Contexts contexts);
 
     /**
      * Converts the output of {@link #getAllNodesFiltered(Contexts)}, and expands shorthand permissions.
@@ -141,7 +153,8 @@ public interface PermissionHolder {
      * @param lowerCase if the keys should be made lowercase whilst being exported
      * @return a mutable map of permissions
      */
-    Map<String, Boolean> exportNodes(Contexts contexts, boolean lowerCase);
+    @Nonnull
+    Map<String, Boolean> exportNodes(@Nonnull Contexts contexts, boolean lowerCase);
 
     /**
      * Removes temporary permissions that have expired
@@ -156,7 +169,8 @@ public interface PermissionHolder {
      * @throws NullPointerException if the node is null
      * @since 2.6
      */
-    Tristate hasPermission(Node node);
+    @Nonnull
+    Tristate hasPermission(@Nonnull Node node);
 
     /**
      * Checks to see if the object has a certain permission
@@ -166,7 +180,8 @@ public interface PermissionHolder {
      * @throws NullPointerException if the node is null
      * @since 2.6
      */
-    Tristate hasTransientPermission(Node node);
+    @Nonnull
+    Tristate hasTransientPermission(@Nonnull Node node);
 
     /**
      * Checks to see if the object inherits a certain permission
@@ -176,7 +191,8 @@ public interface PermissionHolder {
      * @throws NullPointerException if the node is null
      * @since 2.6
      */
-    Tristate inheritsPermission(Node node);
+    @Nonnull
+    Tristate inheritsPermission(@Nonnull Node node);
 
     /**
      * Sets a permission for the object
@@ -186,7 +202,7 @@ public interface PermissionHolder {
      * @throws NullPointerException      if the node is null
      * @since 2.6
      */
-    void setPermission(Node node) throws ObjectAlreadyHasException;
+    void setPermission(@Nonnull Node node) throws ObjectAlreadyHasException;
 
     /**
      * Sets a permission for the object
@@ -196,7 +212,8 @@ public interface PermissionHolder {
      * @return the result of the operation
      * @since 3.1
      */
-    DataMutateResult setPermissionUnchecked(Node node);
+    @Nonnull
+    DataMutateResult setPermissionUnchecked(@Nonnull Node node);
 
     /**
      * Sets a transient permission for the object
@@ -215,7 +232,7 @@ public interface PermissionHolder {
      * @throws NullPointerException      if the node is null
      * @since 2.6
      */
-    void setTransientPermission(Node node) throws ObjectAlreadyHasException;
+    void setTransientPermission(@Nonnull Node node) throws ObjectAlreadyHasException;
 
     /**
      * Sets a transient permission for the object
@@ -234,7 +251,8 @@ public interface PermissionHolder {
      * @return the result of the operation
      * @since 3.1
      */
-    DataMutateResult setTransientPermissionUnchecked(Node node);
+    @Nonnull
+    DataMutateResult setTransientPermissionUnchecked(@Nonnull Node node);
 
     /**
      * Unsets a permission for the object
@@ -244,7 +262,7 @@ public interface PermissionHolder {
      * @throws NullPointerException if the node is null
      * @since 2.6
      */
-    void unsetPermission(Node node) throws ObjectLacksException;
+    void unsetPermission(@Nonnull Node node) throws ObjectLacksException;
 
     /**
      * Unsets a permission for the object
@@ -254,7 +272,8 @@ public interface PermissionHolder {
      * @return the result of the operation
      * @since 3.1
      */
-    DataMutateResult unsetPermissionUnchecked(Node node);
+    @Nonnull
+    DataMutateResult unsetPermissionUnchecked(@Nonnull Node node);
 
     /**
      * Unsets a transient permission for the object
@@ -264,7 +283,7 @@ public interface PermissionHolder {
      * @throws NullPointerException if the node is null
      * @since 2.6
      */
-    void unsetTransientPermission(Node node) throws ObjectLacksException;
+    void unsetTransientPermission(@Nonnull Node node) throws ObjectLacksException;
 
     /**
      * Unsets a transient permission for the object
@@ -274,7 +293,8 @@ public interface PermissionHolder {
      * @return the result of the operation
      * @since 3.1
      */
-    DataMutateResult unsetTransientPermissionUnchecked(Node node);
+    @Nonnull
+    DataMutateResult unsetTransientPermissionUnchecked(@Nonnull Node node);
 
     /**
      * Clears any nodes from the holder which pass the predicate
@@ -282,7 +302,7 @@ public interface PermissionHolder {
      * @param test the predicate to test for nodes which should be removed
      * @since 3.2
      */
-    void clearMatching(Predicate<Node> test);
+    void clearMatching(@Nonnull Predicate<Node> test);
 
     /**
      * Clears any transient nodes from the holder which pass the predicate
@@ -290,7 +310,7 @@ public interface PermissionHolder {
      * @param test the predicate to test for nodes which should be removed
      * @since 3.2
      */
-    void clearMatchingTransient(Predicate<Node> test);
+    void clearMatchingTransient(@Nonnull Predicate<Node> test);
 
     /**
      * Clears all nodes held by the object
@@ -305,7 +325,7 @@ public interface PermissionHolder {
      * @param contextSet the contexts to filter by
      * @since 3.2
      */
-    void clearNodes(ContextSet contextSet);
+    void clearNodes(@Nonnull ContextSet contextSet);
 
     /**
      * Clears all parent groups
@@ -320,7 +340,7 @@ public interface PermissionHolder {
      * @param contextSet the contexts to filter by
      * @since 3.2
      */
-    void clearParents(ContextSet contextSet);
+    void clearParents(@Nonnull ContextSet contextSet);
 
     /**
      * Clears all meta held by the object
@@ -335,7 +355,7 @@ public interface PermissionHolder {
      * @param contextSet the contexts to filter by
      * @since 3.2
      */
-    void clearMeta(ContextSet contextSet);
+    void clearMeta(@Nonnull ContextSet contextSet);
 
     /**
      * Clears all transient permissions the holder has.
@@ -353,7 +373,7 @@ public interface PermissionHolder {
      * @deprecated in favour of {@link #hasPermission(Node)}
      */
     @Deprecated
-    boolean hasPermission(String node, boolean b);
+    boolean hasPermission(@Nonnull String node, boolean b);
 
     /**
      * Checks to see the the object has a permission on a certain server
@@ -367,7 +387,7 @@ public interface PermissionHolder {
      * @deprecated in favour of {@link #hasPermission(Node)}
      */
     @Deprecated
-    boolean hasPermission(String node, boolean b, String server);
+    boolean hasPermission(@Nonnull String node, boolean b, @Nonnull String server);
 
     /**
      * Checks to see the the object has a permission on a certain server and world
@@ -382,7 +402,7 @@ public interface PermissionHolder {
      * @deprecated in favour of {@link #hasPermission(Node)}
      */
     @Deprecated
-    boolean hasPermission(String node, boolean b, String server, String world);
+    boolean hasPermission(@Nonnull String node, boolean b, @Nonnull String server, @Nonnull String world);
 
     /**
      * Checks to see the the object has a permission
@@ -396,7 +416,7 @@ public interface PermissionHolder {
      * @deprecated in favour of {@link #hasPermission(Node)}
      */
     @Deprecated
-    boolean hasPermission(String node, boolean b, boolean temporary);
+    boolean hasPermission(@Nonnull String node, boolean b, boolean temporary);
 
     /**
      * Checks to see the the object has a permission on a certain server
@@ -411,7 +431,7 @@ public interface PermissionHolder {
      * @deprecated in favour of {@link #hasPermission(Node)}
      */
     @Deprecated
-    boolean hasPermission(String node, boolean b, String server, boolean temporary);
+    boolean hasPermission(@Nonnull String node, boolean b, @Nonnull String server, boolean temporary);
 
     /**
      * Checks to see the the object has a permission on a certain server and world
@@ -427,7 +447,7 @@ public interface PermissionHolder {
      * @deprecated in favour of {@link #hasPermission(Node)}
      */
     @Deprecated
-    boolean hasPermission(String node, boolean b, String server, String world, boolean temporary);
+    boolean hasPermission(@Nonnull String node, boolean b, @Nonnull String server, @Nonnull String world, boolean temporary);
 
     /**
      * Checks to see if the object inherits a certain permission
@@ -440,7 +460,7 @@ public interface PermissionHolder {
      * @deprecated in favour of {@link #hasPermission(Node)}
      */
     @Deprecated
-    boolean inheritsPermission(String node, boolean b);
+    boolean inheritsPermission(@Nonnull String node, boolean b);
 
     /**
      * Checks to see the the object inherits a permission on a certain server
@@ -454,7 +474,7 @@ public interface PermissionHolder {
      * @deprecated in favour of {@link #hasPermission(Node)}
      */
     @Deprecated
-    boolean inheritsPermission(String node, boolean b, String server);
+    boolean inheritsPermission(@Nonnull String node, boolean b, @Nonnull String server);
 
     /**
      * Checks to see the the object inherits a permission on a certain server and world
@@ -469,7 +489,7 @@ public interface PermissionHolder {
      * @deprecated in favour of {@link #hasPermission(Node)}
      */
     @Deprecated
-    boolean inheritsPermission(String node, boolean b, String server, String world);
+    boolean inheritsPermission(@Nonnull String node, boolean b, @Nonnull String server, @Nonnull String world);
 
     /**
      * Checks to see if the object inherits a permission
@@ -483,7 +503,7 @@ public interface PermissionHolder {
      * @deprecated in favour of {@link #hasPermission(Node)}
      */
     @Deprecated
-    boolean inheritsPermission(String node, boolean b, boolean temporary);
+    boolean inheritsPermission(@Nonnull String node, boolean b, boolean temporary);
 
     /**
      * Checks to see if the object inherits a permission on a certain server
@@ -498,7 +518,7 @@ public interface PermissionHolder {
      * @deprecated in favour of {@link #hasPermission(Node)}
      */
     @Deprecated
-    boolean inheritsPermission(String node, boolean b, String server, boolean temporary);
+    boolean inheritsPermission(@Nonnull String node, boolean b, @Nonnull String server, boolean temporary);
 
     /**
      * Checks to see if the object inherits a permission on a certain server and world
@@ -514,7 +534,7 @@ public interface PermissionHolder {
      * @deprecated in favour of {@link #hasPermission(Node)}
      */
     @Deprecated
-    boolean inheritsPermission(String node, boolean b, String server, String world, boolean temporary);
+    boolean inheritsPermission(@Nonnull String node, boolean b, @Nonnull String server, @Nonnull String world, boolean temporary);
 
     /**
      * Sets a permission for the object
@@ -527,7 +547,7 @@ public interface PermissionHolder {
      * @deprecated in favour of {@link #setPermission(Node)}
      */
     @Deprecated
-    void setPermission(String node, boolean value) throws ObjectAlreadyHasException;
+    void setPermission(@Nonnull String node, boolean value) throws ObjectAlreadyHasException;
 
     /**
      * Sets a permission for the object on a specific server
@@ -541,7 +561,7 @@ public interface PermissionHolder {
      * @deprecated in favour of {@link #setPermission(Node)}
      */
     @Deprecated
-    void setPermission(String node, boolean value, String server) throws ObjectAlreadyHasException;
+    void setPermission(@Nonnull String node, boolean value, @Nonnull String server) throws ObjectAlreadyHasException;
 
     /**
      * Sets a permission for the object on a specific server and world
@@ -556,7 +576,7 @@ public interface PermissionHolder {
      * @deprecated in favour of {@link #setPermission(Node)}
      */
     @Deprecated
-    void setPermission(String node, boolean value, String server, String world) throws ObjectAlreadyHasException;
+    void setPermission(@Nonnull String node, boolean value, @Nonnull String server, @Nonnull String world) throws ObjectAlreadyHasException;
 
     /**
      * Sets a temporary permission for the object
@@ -570,7 +590,7 @@ public interface PermissionHolder {
      * @deprecated in favour of {@link #setPermission(Node)}
      */
     @Deprecated
-    void setPermission(String node, boolean value, long expireAt) throws ObjectAlreadyHasException;
+    void setPermission(@Nonnull String node, boolean value, long expireAt) throws ObjectAlreadyHasException;
 
     /**
      * Sets a temporary permission for the object on a specific server
@@ -585,7 +605,7 @@ public interface PermissionHolder {
      * @deprecated in favour of {@link #setPermission(Node)}
      */
     @Deprecated
-    void setPermission(String node, boolean value, String server, long expireAt) throws ObjectAlreadyHasException;
+    void setPermission(@Nonnull String node, boolean value, @Nonnull String server, long expireAt) throws ObjectAlreadyHasException;
 
     /**
      * Sets a temporary permission for the object on a specific server and world
@@ -601,7 +621,7 @@ public interface PermissionHolder {
      * @deprecated in favour of {@link #setPermission(Node)}
      */
     @Deprecated
-    void setPermission(String node, boolean value, String server, String world, long expireAt) throws ObjectAlreadyHasException;
+    void setPermission(String node, boolean value, @Nonnull String server, @Nonnull String world, long expireAt) throws ObjectAlreadyHasException;
 
     /**
      * Unsets a permission for the object
@@ -614,7 +634,7 @@ public interface PermissionHolder {
      * @deprecated in favour of {@link #unsetPermission(Node)}
      */
     @Deprecated
-    void unsetPermission(String node, boolean temporary) throws ObjectLacksException;
+    void unsetPermission(@Nonnull String node, boolean temporary) throws ObjectLacksException;
 
     /**
      * Unsets a permission for the object
@@ -626,7 +646,7 @@ public interface PermissionHolder {
      * @deprecated in favour of {@link #unsetPermission(Node)}
      */
     @Deprecated
-    void unsetPermission(String node) throws ObjectLacksException;
+    void unsetPermission(@Nonnull String node) throws ObjectLacksException;
 
     /**
      * Unsets a permission for the object on a specific server
@@ -639,7 +659,7 @@ public interface PermissionHolder {
      * @deprecated in favour of {@link #unsetPermission(Node)}
      */
     @Deprecated
-    void unsetPermission(String node, String server) throws ObjectLacksException;
+    void unsetPermission(@Nonnull String node, @Nonnull String server) throws ObjectLacksException;
 
     /**
      * Unsets a permission for the object on a specific server and world
@@ -653,7 +673,7 @@ public interface PermissionHolder {
      * @deprecated in favour of {@link #unsetPermission(Node)}
      */
     @Deprecated
-    void unsetPermission(String node, String server, String world) throws ObjectLacksException;
+    void unsetPermission(@Nonnull String node, @Nonnull String server, @Nonnull String world) throws ObjectLacksException;
 
     /**
      * Unsets a permission for the object on a specific server
@@ -667,7 +687,7 @@ public interface PermissionHolder {
      * @deprecated in favour of {@link #unsetPermission(Node)}
      */
     @Deprecated
-    void unsetPermission(String node, String server, boolean temporary) throws ObjectLacksException;
+    void unsetPermission(@Nonnull String node, @Nonnull String server, boolean temporary) throws ObjectLacksException;
 
     /**
      * Unsets a permission for the object on a specific server and world
@@ -682,7 +702,7 @@ public interface PermissionHolder {
      * @deprecated in favour of {@link #unsetPermission(Node)}
      */
     @Deprecated
-    void unsetPermission(String node, String server, String world, boolean temporary) throws ObjectLacksException;
+    void unsetPermission(@Nonnull String node, @Nonnull String server, @Nonnull String world, boolean temporary) throws ObjectLacksException;
 
     /**
      * Clears all nodes held by the object on a specific server
@@ -692,7 +712,7 @@ public interface PermissionHolder {
      * @deprecated in favour of {@link #clearNodes(ContextSet)}
      */
     @Deprecated
-    void clearNodes(String server);
+    void clearNodes(@Nullable String server);
 
     /**
      * Clears all nodes held by the object on a specific server and world
@@ -703,7 +723,7 @@ public interface PermissionHolder {
      * @deprecated in favour of {@link #clearNodes(ContextSet)}
      */
     @Deprecated
-    void clearNodes(String server, String world);
+    void clearNodes(@Nullable String server, @Nullable String world);
 
     /**
      * Clears all parents on a specific server
@@ -713,7 +733,7 @@ public interface PermissionHolder {
      * @deprecated in favour of {@link #clearParents(ContextSet)}
      */
     @Deprecated
-    void clearParents(String server);
+    void clearParents(@Nullable String server);
 
     /**
      * Clears all parents on a specific server and world
@@ -724,7 +744,7 @@ public interface PermissionHolder {
      * @deprecated in favour of {@link #clearParents(ContextSet)}
      */
     @Deprecated
-    void clearParents(String server, String world);
+    void clearParents(@Nullable String server, @Nullable String world);
 
     /**
      * Clears all meta held by the object on a specific server
@@ -734,7 +754,7 @@ public interface PermissionHolder {
      * @deprecated in favour of {@link #clearMeta(ContextSet)}
      */
     @Deprecated
-    void clearMeta(String server);
+    void clearMeta(@Nullable String server);
 
     /**
      * Clears all meta held by the object on a specific server and world
@@ -745,7 +765,7 @@ public interface PermissionHolder {
      * @deprecated in favour of {@link #clearMeta(ContextSet)}
      */
     @Deprecated
-    void clearMeta(String server, String world);
+    void clearMeta(@Nullable String server, @Nullable String world);
 
     /**
      * Clears all meta for a given key.
@@ -757,6 +777,6 @@ public interface PermissionHolder {
      * @deprecated in favour of {@link #clearMatching(Predicate)}
      */
     @Deprecated
-    void clearMetaKeys(String key, String server, String world, boolean temporary);
+    void clearMetaKeys(@Nonnull String key, @Nullable String server, @Nullable String world, boolean temporary);
 
 }

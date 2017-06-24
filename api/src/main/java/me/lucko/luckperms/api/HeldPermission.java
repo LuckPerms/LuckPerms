@@ -30,6 +30,8 @@ import com.google.common.collect.Multimap;
 import java.util.Optional;
 import java.util.OptionalLong;
 
+import javax.annotation.Nonnull;
+
 /**
  * A relationship between a Holder and a permission
  *
@@ -43,6 +45,7 @@ public interface HeldPermission<T> {
      *
      * @return the holder
      */
+    @Nonnull
     T getHolder();
 
     /**
@@ -50,6 +53,7 @@ public interface HeldPermission<T> {
      *
      * @return the permission
      */
+    @Nonnull
     String getPermission();
 
     /**
@@ -64,6 +68,7 @@ public interface HeldPermission<T> {
      *
      * @return the server
      */
+    @Nonnull
     Optional<String> getServer();
 
     /**
@@ -71,6 +76,7 @@ public interface HeldPermission<T> {
      *
      * @return the world
      */
+    @Nonnull
     Optional<String> getWorld();
 
     /**
@@ -85,6 +91,7 @@ public interface HeldPermission<T> {
      *
      * @return the context
      */
+    @Nonnull
     Multimap<String, String> getContext();
 
     /**
@@ -92,6 +99,7 @@ public interface HeldPermission<T> {
      *
      * @return a Node copy of this permission
      */
+    @Nonnull
     Node asNode();
 
 }
