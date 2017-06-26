@@ -158,7 +158,7 @@ public class TreeView {
         List<Map.Entry<String, String>> ret = new ArrayList<>();
 
         for (Map.Entry<Integer, String> s : view.getNodeEndings()) {
-            if (s.getKey() > maxLevels) {
+            if (s.getKey() >= maxLevels) {
                 continue;
             }
 
