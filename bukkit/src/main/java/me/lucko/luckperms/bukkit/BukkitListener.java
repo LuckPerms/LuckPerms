@@ -71,13 +71,6 @@ public class BukkitListener implements Listener {
             ex.printStackTrace();
         }
 
-        /* the player was denied entry to the server before this priority.
-           log this, so we can handle appropriately later. */
-        if (e.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
-            deniedAsyncLogin.add(e.getUniqueId());
-            return;
-        }
-
         /* there was an issue connecting to the DB, performing file i/o, etc.
            we don't let players join in this case, because it means they can connect to the server without their permissions data.
            some server admins rely on negating perms to stop users from causing damage etc, so it's really important that
@@ -143,13 +136,6 @@ public class BukkitListener implements Listener {
         /* Called when the player starts logging into the server.
            At this point, the users data should be present and loaded.
            Listening on LOW priority to allow plugins to further modify data here. (auth plugins, etc.) */
-
-        /* the player was denied entry to the server before this priority.
-           log this, so we can handle appropriately later. */
-        if (e.getResult() != PlayerLoginEvent.Result.ALLOWED) {
-            deniedLogin.add(e.getPlayer().getUniqueId());
-            return;
-        }
 
         final Player player = e.getPlayer();
         final User user = plugin.getUserManager().getIfLoaded(plugin.getUuidCache().getUUID(player.getUniqueId()));

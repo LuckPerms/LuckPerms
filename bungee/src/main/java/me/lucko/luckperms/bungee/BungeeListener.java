@@ -47,17 +47,12 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @RequiredArgsConstructor
 public class BungeeListener implements Listener {
     private final LPBungeePlugin plugin;
-
-    private final Set<UUID> deniedLogin = Collections.synchronizedSet(new HashSet<>());
 
     @EventHandler(priority = EventPriority.LOW)
     public void onPlayerLogin(LoginEvent e) {
@@ -74,16 +69,6 @@ public class BungeeListener implements Listener {
 
         final PendingConnection c = e.getConnection();
 
-        /* another plugin (or the proxy itself) has cancelled this connection already */
-        if (e.isCancelled()) {
-
-            // log that we are not loading any data
-            deniedLogin.add(c.getUniqueId());
-
-            e.completeIntent(plugin);
-            return;
-        }
-
         /* there was an issue connecting to the DB, performing file i/o, etc.
            as this is bungeecord, we will still allow the login, as players can't really do much harm without permissions data.
            the proxy will just fallback to using the config file perms. */
@@ -91,7 +76,6 @@ public class BungeeListener implements Listener {
 
             // log that the user tried to login, but was denied at this stage.
             plugin.getLog().warn("Permissions storage is not loaded. No permissions data will be loaded for: " + c.getUniqueId() + " - " + c.getName());
-            deniedLogin.add(c.getUniqueId());
 
             e.completeIntent(plugin);
             return;
@@ -115,7 +99,6 @@ public class BungeeListener implements Listener {
 
                 // there was some error loading
                 plugin.getLog().warn("Error loading data. No permissions data will be loaded for: " + c.getUniqueId() + " - " + c.getName());
-                deniedLogin.add(c.getUniqueId());
             }
 
             // finally, complete our intent to modify state, so the proxy can continue handling the connection.

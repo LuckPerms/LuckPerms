@@ -72,13 +72,6 @@ public class SpongeListener {
 
         final GameProfile p = e.getProfile();
 
-        /* the player was denied entry to the server before this priority.
-           log this, so we can handle appropriately later. */
-        if (e.isCancelled()) {
-            deniedAsyncLogin.add(p.getUniqueId());
-            return;
-        }
-
         /* either the plugin hasn't finished starting yet, or there was an issue connecting to the DB, performing file i/o, etc.
            we don't let players join in this case, because it means they can connect to the server without their permissions data.
            some server admins rely on negating perms to stop users from causing damage etc, so it's really important that
@@ -146,11 +139,6 @@ public class SpongeListener {
                Listening on LOW priority to allow plugins to further modify data here. (auth plugins, etc.) */
 
             final GameProfile player = e.getProfile();
-
-            /* the player was denied entry to the server before this priority. */
-            if (e.isCancelled()) {
-                return;
-            }
 
             final User user = plugin.getUserManager().getIfLoaded(plugin.getUuidCache().getUUID(player.getUniqueId()));
 
