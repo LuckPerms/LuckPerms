@@ -82,8 +82,6 @@ public class LPPermissible extends PermissibleBase {
         this.parent = parent;
         this.plugin = plugin;
         this.subscriptions = new SubscriptionManager(this);
-
-        // recalculatePermissions();
     }
 
     public void updateSubscriptionsAsync() {
@@ -106,10 +104,12 @@ public class LPPermissible extends PermissibleBase {
 
         Set<String> ent = new HashSet<>(cache.getPermissionData(calculateContexts()).getImmutableBacking().keySet());
 
-        if (parent.isOp()) {
-            ent.addAll(plugin.getDefaultsProvider().getOpDefaults().keySet());
-        } else {
-            ent.addAll(plugin.getDefaultsProvider().getNonOpDefaults().keySet());
+        if (plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_DEFAULT_PERMISSIONS)) {
+            if (parent.isOp()) {
+                ent.addAll(plugin.getDefaultsProvider().getOpDefaults().keySet());
+            } else {
+                ent.addAll(plugin.getDefaultsProvider().getNonOpDefaults().keySet());
+            }
         }
 
         subscriptions.subscribe(ent);
@@ -171,7 +171,11 @@ public class LPPermissible extends PermissibleBase {
             return ts.asBoolean();
         }
 
-        return perm.getDefault().getValue(isOp());
+        if (!plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_DEFAULT_PERMISSIONS)) {
+            return Permission.DEFAULT_PERMISSION.getValue(isOp());
+        } else {
+            return perm.getDefault().getValue(isOp());
+        }
     }
 
     @Override
@@ -290,9 +294,6 @@ public class LPPermissible extends PermissibleBase {
         for (String name : perms) {
             Bukkit.getServer().getPluginManager().unsubscribeFromPermission(name, parent);
         }
-
-        // Bukkit.getServer().getPluginManager().unsubscribeFromDefaultPerms(false, parent);
-        // Bukkit.getServer().getPluginManager().unsubscribeFromDefaultPerms(true, parent);
 
         attachmentPermissions.clear();
     }
