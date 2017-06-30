@@ -29,7 +29,6 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.core.NodeFactory;
-import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.locale.Message;
@@ -110,20 +109,35 @@ public class Exporter implements Runnable {
 
             // Create the actual groups first
             write(writer, "# Create groups");
-            for (Group group : plugin.getGroupManager().getAll().values()) {
-                write(writer, "/luckperms creategroup " + group.getName());
-            }
+            plugin.getGroupManager().getAll().values().stream()
+                    .sorted((o1, o2) -> {
+                        int i = Integer.compare(o2.getWeight().orElse(0), o1.getWeight().orElse(0));
+                        return i != 0 ? i : o1.getName().compareToIgnoreCase(o2.getName());
+                    })
+                    .filter(g -> !g.getName().equals("default"))
+                    .forEach(group -> {
+                        write(writer, "/luckperms creategroup " + group.getName());
+                    });
+
             write(writer, "");
 
             AtomicInteger groupCount = new AtomicInteger(0);
-            for (Group group : plugin.getGroupManager().getAll().values()) {
-                write(writer, "# Export group: " + group.getName());
-                for (Node node : group.getNodes().values()) {
-                    write(writer, NodeFactory.nodeAsCommand(node, group.getName(), true));
-                }
-                write(writer, "");
-                log.logAllProgress("Exported {} groups so far.", groupCount.incrementAndGet());
-            }
+
+            // export groups in order of weight
+            plugin.getGroupManager().getAll().values().stream()
+                    .sorted((o1, o2) -> {
+                        int i = Integer.compare(o2.getWeight().orElse(0), o1.getWeight().orElse(0));
+                        return i != 0 ? i : o1.getName().compareToIgnoreCase(o2.getName());
+                    })
+                    .forEach(group -> {
+                        write(writer, "# Export group: " + group.getName());
+                        for (Node node : group.getNodes().values()) {
+                            write(writer, NodeFactory.nodeAsCommand(node, group.getName(), true));
+                        }
+                        write(writer, "");
+                        log.logAllProgress("Exported {} groups so far.", groupCount.incrementAndGet());
+                    });
+
             log.log("Exported " + groupCount.get() + " groups.");
 
             write(writer, "");
