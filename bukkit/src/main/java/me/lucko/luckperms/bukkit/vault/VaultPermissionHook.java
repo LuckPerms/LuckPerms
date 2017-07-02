@@ -151,7 +151,7 @@ public class VaultPermissionHook extends Permission {
     public Contexts createContextForWorldSet(String world) {
         MutableContextSet context = MutableContextSet.create();
         if (world != null && !world.equals("") && !world.equalsIgnoreCase("global")) {
-            context.add("world", world);
+            context.add("world", world.toLowerCase());
         }
         context.add("server", getServer());
         return new Contexts(context, isIncludeGlobal(), true, true, true, true, false);
@@ -160,7 +160,7 @@ public class VaultPermissionHook extends Permission {
     public Contexts createContextForWorldLookup(String world) {
         MutableContextSet context = MutableContextSet.create();
         if (world != null && !world.equals("") && !world.equalsIgnoreCase("global")) {
-            context.add("world", world);
+            context.add("world", world.toLowerCase());
         }
         context.add("server", getServer());
         context.addAll(plugin.getConfiguration().getContextsFile().getStaticContexts());
@@ -185,7 +185,7 @@ public class VaultPermissionHook extends Permission {
 
         // add the vault settings
         if (world != null && !world.equals("") && !world.equalsIgnoreCase("global")) {
-            context.add("world", world);
+            context.add("world", world.toLowerCase());
         }
         context.add("server", getServer());
 
