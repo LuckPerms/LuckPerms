@@ -28,7 +28,9 @@ package me.lucko.luckperms.common.verbose;
 import lombok.RequiredArgsConstructor;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 
+import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.utils.DateUtil;
@@ -39,16 +41,28 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.script.ScriptEngine;
 
 @RequiredArgsConstructor
 public class VerboseListener {
-    private static final int DATA_TRUNCATION = 3500;
+    private static final int DATA_TRUNCATION = 10000;
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
+    private static final Function<Tristate, String> TRISTATE_COLOR = tristate -> {
+        switch (tristate) {
+            case TRUE:
+                return "&2";
+            case FALSE:
+                return "&c";
+            default:
+                return "&7";
+        }
+    };
 
     private final long startTime = System.currentTimeMillis();
 
@@ -73,7 +87,7 @@ public class VerboseListener {
         }
 
         if (notify) {
-            Message.LOG.send(holder, "&7Checking &a" + data.getChecked() + "&7 for: &a" + data.getNode() + " &f(&7" + data.getValue().toString() + "&f)");
+            Message.VERBOSE_LOG.send(holder, "&a" + data.getChecked() + "&7 -- &a" + data.getNode() + "&7 -- " + TRISTATE_COLOR.apply(data.getValue()) + data.getValue().name().toLowerCase() + "");
         }
     }
 
@@ -198,14 +212,25 @@ public class VerboseListener {
                 .add("___")
                 .add("");
 
-        List<String> ret = results.stream()
-                .map(c -> "`" + c.getChecked() + "` - " + c.getNode() + " - **" + c.getValue().toString() + "**   ")
-                .collect(Collectors.toList());
+        ImmutableList.Builder<String> data = ImmutableList.<String>builder()
+                .add("User,Permission,Result");
 
-        output.addAll(ret);
+        results.stream()
+                .peek(c -> output.add("`" + c.getChecked() + "` - " + c.getNode() + " - **" + c.getValue().toString() + "**   "))
+                .forEach(c -> data.add(escapeCommas(c.getChecked()) + "," + escapeCommas(c.getNode()) + "," + c.getValue().name().toLowerCase()));
 
         results.clear();
-        return PasteUtils.paste("luckperms-verbose.md", "LuckPerms Verbose Checking Output", output.build().stream().collect(Collectors.joining("\n")));
+
+        List<Map.Entry<String, String>> content = ImmutableList.of(
+                Maps.immutableEntry("luckperms-verbose.md", output.build().stream().collect(Collectors.joining("\n"))),
+                Maps.immutableEntry("raw-data.csv", data.build().stream().collect(Collectors.joining("\n")))
+        );
+
+        return PasteUtils.paste("LuckPerms Verbose Checking Output", content);
+    }
+
+    private static String escapeCommas(String s) {
+        return s.contains(",") ? "\"" + s + "\"" : s;
     }
 
 }

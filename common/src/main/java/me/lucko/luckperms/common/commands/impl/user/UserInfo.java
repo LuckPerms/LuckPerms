@@ -57,7 +57,7 @@ public class UserInfo extends SubCommand<User> {
         Message.USER_INFO_GENERAL.send(sender,
                 user.getName().orElse("Unknown"),
                 user.getUuid(),
-                plugin.getPlayerStatus(user.getUuid()),
+                plugin.getPlayerStatus(user.getUuid()).asString(plugin.getLocaleManager()),
                 user.getPrimaryGroup().getValue(),
                 user.getPermanentNodes().size(),
                 user.getTemporaryNodes().size(),

@@ -78,7 +78,7 @@ public class TreeView {
         builder.add("```");
         ret.clear();
 
-        return PasteUtils.paste("luckperms-tree.md", "LuckPerms Permission Tree", builder.build().stream().collect(Collectors.joining("\n")));
+        return PasteUtils.paste("LuckPerms Permission Tree", ImmutableList.of(Maps.immutableEntry("luckperms-tree.md", builder.build().stream().collect(Collectors.joining("\n")))));
     }
 
     public String uploadPasteData(String version, String username, PermissionData checker) {
@@ -98,7 +98,7 @@ public class TreeView {
         builder.add("```");
         ret.clear();
 
-        return PasteUtils.paste("luckperms-tree.md", "LuckPerms Permission Tree", builder.build().stream().collect(Collectors.joining("\n")));
+        return PasteUtils.paste("LuckPerms Permission Tree", ImmutableList.of(Maps.immutableEntry("luckperms-tree.md", builder.build().stream().collect(Collectors.joining("\n")))));
     }
 
     private static String getTristateDiffPrefix(Tristate t) {
