@@ -93,6 +93,7 @@ import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.scheduler.AsynchronousExecutor;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.SpongeExecutorService;
@@ -109,9 +110,12 @@ import java.util.AbstractCollection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Getter
@@ -389,6 +393,17 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     @Override
     public Player getPlayer(User user) {
         return game.getServer().getPlayer(uuidCache.getExternalUUID(user.getUuid())).orElse(null);
+    }
+
+    @Override
+    public Optional<UUID> lookupUuid(String username) {
+        CompletableFuture<GameProfile> fut = game.getServer().getGameProfileManager().get(username);
+        try {
+            return Optional.of(fut.get().getUniqueId());
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            return Optional.empty();
+        }
     }
 
     @Override

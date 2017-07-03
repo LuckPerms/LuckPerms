@@ -56,6 +56,7 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -284,6 +285,14 @@ public interface LuckPermsPlugin {
      * @return a player object, or null, if one couldn't be found.
      */
     Object getPlayer(User user);
+
+    /**
+     * Lookup a uuid from a username, using the servers internal uuid cache.
+     *
+     * @param username the username to lookup
+     * @return an optional uuid, if found
+     */
+    Optional<UUID> lookupUuid(String username);
 
     /**
      * Gets a calculated context instance for the user using the rules of the platform.

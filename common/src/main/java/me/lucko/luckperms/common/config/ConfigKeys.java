@@ -117,6 +117,11 @@ public class ConfigKeys {
     });
 
     /**
+     * # If the servers own UUID cache/lookup facility should be used when there is no record for a player in the LuckPerms cache.
+     */
+    public static final ConfigKey<Boolean> USE_SERVER_UUID_CACHE = BooleanKey.of("use-server-uuid-cache", false);
+
+    /**
      * Controls how temporary add commands should behave
      */
     public static final ConfigKey<TemporaryModifier> TEMPORARY_ADD_BEHAVIOUR = AbstractKey.of(c -> {

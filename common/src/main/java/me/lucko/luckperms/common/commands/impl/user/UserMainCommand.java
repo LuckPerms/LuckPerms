@@ -37,6 +37,7 @@ import me.lucko.luckperms.common.commands.impl.generic.parent.CommandParent;
 import me.lucko.luckperms.common.commands.impl.generic.permission.CommandPermission;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.DataConstraints;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.locale.CommandSpec;
@@ -66,26 +67,32 @@ public class UserMainCommand extends MainCommand<User> {
 
     @Override
     protected User getTarget(String target, LuckPermsPlugin plugin, Sender sender) {
-        UUID u = Util.parseUuid(target);
+        UUID u = Util.parseUuid(target.toLowerCase());
         if (u == null) {
-            if (target.length() <= 16) {
-                if (!DataConstraints.PLAYER_USERNAME_TEST.test(target)) {
-                    Message.USER_INVALID_ENTRY.send(sender, target);
+            if (!DataConstraints.PLAYER_USERNAME_TEST.test(target)) {
+                Message.USER_INVALID_ENTRY.send(sender, target);
+                return null;
+            }
+
+            u = plugin.getStorage().getUUID(target.toLowerCase()).join();
+            if (u == null) {
+                if (!plugin.getConfiguration().get(ConfigKeys.USE_SERVER_UUID_CACHE)) {
+                    Message.USER_NOT_FOUND.send(sender);
                     return null;
                 }
 
-                u = plugin.getStorage().getUUID(target).join();
+                u = plugin.lookupUuid(target).orElse(null);
                 if (u == null) {
                     Message.USER_NOT_FOUND.send(sender);
                     return null;
                 }
-            } else {
-                Message.USER_INVALID_ENTRY.send(sender, target);
             }
         }
 
         String name = plugin.getStorage().getName(u).join();
-        if (name == null) name = "null";
+        if (name == null) {
+            name = "null";
+        }
 
         if (!plugin.getStorage().loadUser(u, name).join()) {
             Message.LOADING_ERROR.send(sender);

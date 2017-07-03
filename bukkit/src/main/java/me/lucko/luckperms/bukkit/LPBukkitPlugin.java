@@ -511,6 +511,17 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     }
 
     @Override
+    public Optional<UUID> lookupUuid(String username) {
+        try {
+            //noinspection deprecation
+            return Optional.ofNullable(getServer().getOfflinePlayer(username)).flatMap(p -> Optional.ofNullable(p.getUniqueId()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Optional.empty();
+        }
+    }
+
+    @Override
     public Contexts getContextForUser(User user) {
         Player player = getPlayer(user);
         if (player == null) {

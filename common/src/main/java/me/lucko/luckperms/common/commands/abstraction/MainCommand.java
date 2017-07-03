@@ -83,7 +83,7 @@ public abstract class MainCommand<T> extends Command<Void, T> {
             return CommandResult.INVALID_ARGS;
         }
 
-        final String name = args.get(0).toLowerCase();
+        final String name = args.get(0);
         T t = getTarget(name, plugin, sender);
         if (t != null) {
             CommandResult result;

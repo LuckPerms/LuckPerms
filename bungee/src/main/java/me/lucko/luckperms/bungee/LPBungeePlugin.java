@@ -32,6 +32,7 @@ import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.bungee.messaging.BungeeMessagingService;
+import me.lucko.luckperms.bungee.util.RedisBungeeUtil;
 import me.lucko.luckperms.common.api.ApiHandler;
 import me.lucko.luckperms.common.api.ApiProvider;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
@@ -80,6 +81,7 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -303,6 +305,19 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     @Override
     public ProxiedPlayer getPlayer(User user) {
         return getProxy().getPlayer(uuidCache.getExternalUUID(user.getUuid()));
+    }
+
+    @Override
+    public Optional<UUID> lookupUuid(String username) {
+        if (getProxy().getPluginManager().getPlugin("RedisBungee") != null) {
+            try {
+                return RedisBungeeUtil.lookupUuid(username);
+            } catch (Throwable t) {
+                t.printStackTrace();
+            }
+        }
+
+        return Optional.empty();
     }
 
     @Override

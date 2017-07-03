@@ -66,6 +66,13 @@ apply-global-world-groups: true
 # forwarding.
 use-server-uuids: true
 
+# If the servers own UUID cache/lookup facility should be used when there is no record for a player
+# in the LuckPerms cache.
+#
+# Since BungeeCord doesn't maintain it's own UUID cache, when this option is true, LuckPerms will
+# try to find a uuid for a username using RedisBungee, if installed.
+use-server-uuid-cache: false
+
 # If the plugin should send log notifications to users whenever permissions are modified.
 log-notify: true
 

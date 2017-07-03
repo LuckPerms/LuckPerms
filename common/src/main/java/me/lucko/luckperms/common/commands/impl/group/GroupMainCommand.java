@@ -65,6 +65,7 @@ public class GroupMainCommand extends MainCommand<Group> {
 
     @Override
     protected Group getTarget(String target, LuckPermsPlugin plugin, Sender sender) {
+        target = target.toLowerCase();
         if (!plugin.getStorage().loadGroup(target).join()) {
             Message.GROUP_NOT_FOUND.send(sender);
             return null;
