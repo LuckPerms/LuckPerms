@@ -65,7 +65,7 @@ import me.lucko.luckperms.common.managers.impl.GenericTrackManager;
 import me.lucko.luckperms.common.managers.impl.GenericUserManager;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.messaging.NoopMessagingService;
-import me.lucko.luckperms.common.messaging.RedisMessaging;
+import me.lucko.luckperms.common.messaging.RedisMessagingService;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.StorageFactory;
@@ -215,7 +215,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
         if (messagingType.equals("redis")) {
             if (getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
-                RedisMessaging redis = new RedisMessaging(this);
+                RedisMessagingService redis = new RedisMessagingService(this);
                 try {
                     redis.init(getConfiguration().get(ConfigKeys.REDIS_ADDRESS), getConfiguration().get(ConfigKeys.REDIS_PASSWORD));
                     messagingService = redis;

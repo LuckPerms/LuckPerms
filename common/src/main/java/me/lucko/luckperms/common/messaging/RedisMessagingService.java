@@ -37,12 +37,12 @@ import redis.clients.jedis.shaded.JedisPubSub;
 /**
  * An implementation of {@link me.lucko.luckperms.api.MessagingService} using Redis.
  */
-public class RedisMessaging extends AbstractMessagingService {
+public class RedisMessagingService extends AbstractMessagingService {
     private final LuckPermsPlugin plugin;
     private JedisPool jedisPool;
     private LPSub sub;
 
-    public RedisMessaging(LuckPermsPlugin plugin) {
+    public RedisMessagingService(LuckPermsPlugin plugin) {
         super(plugin, "Redis");
         this.plugin = plugin;
     }
@@ -85,7 +85,7 @@ public class RedisMessaging extends AbstractMessagingService {
 
     @RequiredArgsConstructor
     private static class LPSub extends JedisPubSub {
-        private final RedisMessaging parent;
+        private final RedisMessagingService parent;
 
         @Override
         public void onMessage(String channel, String msg) {

@@ -243,9 +243,12 @@ data:
 # LuckPerms to poll the database for changes.
 #
 # Available options:
-# -> bungee   uses the plugin messaging channels. Must be enabled on all connected servers to work.
-# -> redis    uses redis pub sub to push changes. Your redis server must be configured below.
-# -> none     nothing
+# -> bungee      uses the plugin messaging channels. Must be enabled on all connected servers to
+#                work.
+# -> redis       uses redis pub sub to push changes. Your redis server must be configured below.
+# -> redisbungee uses redis pub sub to push changes, using RedisBungee's API. You need to have the
+#                RedisBungee plugin installed.
+# -> none        nothing
 messaging-service: none
 
 # If LuckPerms should automatically push updates after a change has been made with a command.

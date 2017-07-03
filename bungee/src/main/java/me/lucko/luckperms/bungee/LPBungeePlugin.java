@@ -32,6 +32,7 @@ import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.bungee.messaging.BungeeMessagingService;
+import me.lucko.luckperms.bungee.messaging.RedisBungeeMessagingService;
 import me.lucko.luckperms.bungee.util.RedisBungeeUtil;
 import me.lucko.luckperms.common.api.ApiHandler;
 import me.lucko.luckperms.common.api.ApiProvider;
@@ -58,7 +59,7 @@ import me.lucko.luckperms.common.managers.impl.GenericTrackManager;
 import me.lucko.luckperms.common.managers.impl.GenericUserManager;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.messaging.NoopMessagingService;
-import me.lucko.luckperms.common.messaging.RedisMessaging;
+import me.lucko.luckperms.common.messaging.RedisMessagingService;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.LuckPermsScheduler;
 import me.lucko.luckperms.common.storage.Storage;
@@ -159,7 +160,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
         if (messagingType.equals("redis")) {
             if (getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
-                RedisMessaging redis = new RedisMessaging(this);
+                RedisMessagingService redis = new RedisMessagingService(this);
                 try {
                     redis.init(getConfiguration().get(ConfigKeys.REDIS_ADDRESS), getConfiguration().get(ConfigKeys.REDIS_PASSWORD));
                     messagingService = redis;
@@ -174,6 +175,14 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
             BungeeMessagingService bungeeMessaging = new BungeeMessagingService(this);
             bungeeMessaging.init();
             messagingService = bungeeMessaging;
+        } else if (messagingType.equals("redisbungee")) {
+            if (getProxy().getPluginManager().getPlugin("RedisBungee") == null) {
+                getLog().warn("RedisBungee plugin not present.");
+            } else {
+                RedisBungeeMessagingService redisBungeeMessaging = new RedisBungeeMessagingService(this);
+                redisBungeeMessaging.init();
+                messagingService = redisBungeeMessaging;
+            }
         } else if (!messagingType.equals("none")) {
             getLog().warn("Messaging service '" + messagingType + "' not recognised.");
         }
