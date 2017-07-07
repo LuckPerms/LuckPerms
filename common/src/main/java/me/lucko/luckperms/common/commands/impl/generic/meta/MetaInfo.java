@@ -169,12 +169,8 @@ public class MetaInfo extends SharedSubCommand {
         ), '¥'));
 
         boolean group = !(holder instanceof User);
-        String command = NodeFactory.nodeAsCommand(node, group ? holder.getObjectName() : holder.getFriendlyName(), group)
-                .replace("/luckperms", "/" + label)
-                .replace("permission set", "permission unset")
-                .replace("parent add", "parent remove")
-                .replace(" true", "")
-                .replace(" false", "");
+        String command = NodeFactory.nodeAsCommand(node, group ? holder.getObjectName() : holder.getFriendlyName(), group, false)
+                .replace("/luckperms", "/" + label);
 
         return component -> {
             component.hoverEvent(hoverEvent);
@@ -198,12 +194,8 @@ public class MetaInfo extends SharedSubCommand {
         ), '¥'));
 
         boolean group = !(holder instanceof User);
-        String command = NodeFactory.nodeAsCommand(node, group ? holder.getObjectName() : holder.getFriendlyName(), group)
-                .replace("/luckperms", "/" + label)
-                .replace("permission set", "permission unset")
-                .replace("parent add", "parent remove")
-                .replace(" true", "")
-                .replace(" false", "");
+        String command = NodeFactory.nodeAsCommand(node, group ? holder.getObjectName() : holder.getFriendlyName(), group, false)
+                .replace("/luckperms", "/" + label);
 
         return component -> {
             component.hoverEvent(hoverEvent);

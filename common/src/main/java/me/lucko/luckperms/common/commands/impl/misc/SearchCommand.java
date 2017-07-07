@@ -195,12 +195,8 @@ public class SearchCommand extends SingleCommand {
                 "&7Click to remove this node from " + holderName
         ), Constants.FORMAT_CHAR));
 
-        String command = NodeFactory.nodeAsCommand(perm.asNode(), holderName, group)
-                .replace("/luckperms", "/" + label)
-                .replace("permission set", "permission unset")
-                .replace("parent add", "parent remove")
-                .replace(" true", "")
-                .replace(" false", "");
+        String command = NodeFactory.nodeAsCommand(perm.asNode(), holderName, group, false)
+                .replace("/luckperms", "/" + label);
 
         return component -> {
             component.hoverEvent(hoverEvent);

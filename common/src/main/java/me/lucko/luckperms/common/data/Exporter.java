@@ -132,7 +132,7 @@ public class Exporter implements Runnable {
                     .forEach(group -> {
                         write(writer, "# Export group: " + group.getName());
                         for (Node node : group.getNodes().values()) {
-                            write(writer, NodeFactory.nodeAsCommand(node, group.getName(), true));
+                            write(writer, NodeFactory.nodeAsCommand(node, group.getName(), true, true));
                         }
                         write(writer, "");
                         log.logAllProgress("Exported {} groups so far.", groupCount.incrementAndGet());
@@ -240,7 +240,7 @@ public class Exporter implements Runnable {
                                     continue;
                                 }
 
-                                output.add(NodeFactory.nodeAsCommand(node, user.getUuid().toString(), false));
+                                output.add(NodeFactory.nodeAsCommand(node, user.getUuid().toString(), false, true));
                             }
 
                             if (!user.getPrimaryGroup().getStoredValue().equalsIgnoreCase("default")) {
