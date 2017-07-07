@@ -25,6 +25,9 @@
 
 package me.lucko.luckperms.common.commands.impl.generic.meta;
 
+import com.google.common.collect.Maps;
+
+import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
@@ -33,29 +36,35 @@ import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.MetaComparator;
 import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.core.NodeFactory;
+import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
+import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.common.utils.TextUtils;
 
-import java.util.AbstractMap;
+import net.kyori.text.Component;
+import net.kyori.text.event.ClickEvent;
+import net.kyori.text.event.HoverEvent;
+import net.kyori.text.serializer.ComponentSerializer;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.function.Consumer;
 
 public class MetaInfo extends SharedSubCommand {
     private static String processLocation(LocalizedNode node, PermissionHolder holder) {
         return node.getLocation().equalsIgnoreCase(holder.getObjectName()) ? "self" : node.getLocation();
-    }
-
-    public static String formatMetaValue(String val) {
-        return val.replace("&", "{color char}");
     }
 
     public MetaInfo(LocaleManager locale) {
@@ -80,9 +89,9 @@ public class MetaInfo extends SharedSubCommand {
             }
 
             if (node.isPrefix()) {
-                prefixes.add(new AbstractMap.SimpleEntry<>(node.getPrefix().getKey(), node));
+                prefixes.add(Maps.immutableEntry(node.getPrefix().getKey(), node));
             } else if (node.isSuffix()) {
-                suffixes.add(new AbstractMap.SimpleEntry<>(node.getSuffix().getKey(), node));
+                suffixes.add(Maps.immutableEntry(node.getSuffix().getKey(), node));
             } else if (node.isMeta()) {
                 meta.add(node);
             }
@@ -92,47 +101,113 @@ public class MetaInfo extends SharedSubCommand {
             Message.CHAT_META_PREFIX_NONE.send(sender, holder.getFriendlyName());
         } else {
             Message.CHAT_META_PREFIX_HEADER.send(sender, holder.getFriendlyName());
-            for (Map.Entry<Integer, LocalizedNode> e : prefixes) {
-                String location = processLocation(e.getValue(), holder);
-                if (e.getValue().isServerSpecific() || e.getValue().isWorldSpecific() || !e.getValue().getContexts().isEmpty()) {
-                    String context = Util.getAppendableNodeContextString(e.getValue());
-                    Message.CHAT_META_ENTRY_WITH_CONTEXT.send(sender, e.getKey(), e.getValue().getPrefix().getValue(), location, context);
-                } else {
-                    Message.CHAT_META_ENTRY.send(sender, e.getKey(), e.getValue().getPrefix().getValue(), location);
-                }
-            }
+            sendChatMetaMessage(ChatMetaType.PREFIX, prefixes, sender, holder, label);
         }
 
         if (suffixes.isEmpty()) {
             Message.CHAT_META_SUFFIX_NONE.send(sender, holder.getFriendlyName());
         } else {
             Message.CHAT_META_SUFFIX_HEADER.send(sender, holder.getFriendlyName());
-            for (Map.Entry<Integer, LocalizedNode> e : suffixes) {
-                String location = processLocation(e.getValue(), holder);
-                if (e.getValue().hasSpecificContext()) {
-                    String context = Util.getAppendableNodeContextString(e.getValue());
-                    Message.CHAT_META_ENTRY_WITH_CONTEXT.send(sender, e.getKey(), e.getValue().getSuffix().getValue(), location, context);
-                } else {
-                    Message.CHAT_META_ENTRY.send(sender, e.getKey(), e.getValue().getSuffix().getValue(), location);
-                }
-            }
+            sendChatMetaMessage(ChatMetaType.SUFFIX, suffixes, sender, holder, label);
         }
 
         if (meta.isEmpty()) {
             Message.META_NONE.send(sender, holder.getFriendlyName());
         } else {
             Message.META_HEADER.send(sender, holder.getFriendlyName());
-            for (LocalizedNode m : meta) {
-                String location = processLocation(m, holder);
-                if (m.hasSpecificContext()) {
-                    String context = Util.getAppendableNodeContextString(m);
-                    Message.META_ENTRY_WITH_CONTEXT.send(sender, m.getMeta().getKey(), m.getMeta().getValue(), location, context);
-                } else {
-                    Message.META_ENTRY.send(sender, m.getMeta().getKey(), formatMetaValue(m.getMeta().getValue()), location);
-                }
-            }
+            sendMetaMessage(meta, sender, holder, label);
         }
 
         return CommandResult.SUCCESS;
+    }
+
+    private static void sendMetaMessage(Set<LocalizedNode> meta, Sender sender, PermissionHolder holder, String label) {
+        for (LocalizedNode m : meta) {
+            String location = processLocation(m, holder);
+            if (m.hasSpecificContext()) {
+                String context = Util.getAppendableNodeContextString(m);
+                Component component = ComponentSerializer.parseFromLegacy(Message.META_ENTRY_WITH_CONTEXT.asString(sender.getPlatform().getLocaleManager(), m.getMeta().getKey(), m.getMeta().getValue(), location, context), Constants.COLOR_CHAR);
+                component.applyRecursively(makeFancy(holder, label, m));
+                sender.sendMessage(component);
+            } else {
+                Component component = ComponentSerializer.parseFromLegacy(Message.META_ENTRY.asString(sender.getPlatform().getLocaleManager(), m.getMeta().getKey(), m.getMeta().getValue(), location), Constants.COLOR_CHAR);
+                component.applyRecursively(makeFancy(holder, label, m));
+                sender.sendMessage(component);
+            }
+        }
+    }
+
+    private static void sendChatMetaMessage(ChatMetaType type, SortedSet<Map.Entry<Integer, LocalizedNode>> meta, Sender sender, PermissionHolder holder, String label) {
+        for (Map.Entry<Integer, LocalizedNode> e : meta) {
+            String location = processLocation(e.getValue(), holder);
+            if (e.getValue().hasSpecificContext()) {
+                String context = Util.getAppendableNodeContextString(e.getValue());
+                Component component = ComponentSerializer.parseFromLegacy(Message.CHAT_META_ENTRY_WITH_CONTEXT.asString(sender.getPlatform().getLocaleManager(), e.getKey(), e.getValue().getPrefix().getValue(), location, context), Constants.COLOR_CHAR);
+                component.applyRecursively(makeFancy(type, holder, label, e.getValue()));
+                sender.sendMessage(component);
+            } else {
+                Component component = ComponentSerializer.parseFromLegacy(Message.CHAT_META_ENTRY.asString(sender.getPlatform().getLocaleManager(), e.getKey(), e.getValue().getPrefix().getValue(), location), Constants.COLOR_CHAR);
+                component.applyRecursively(makeFancy(type, holder, label, e.getValue()));
+                sender.sendMessage(component);
+            }
+        }
+    }
+
+    private static Consumer<Component> makeFancy(ChatMetaType type, PermissionHolder holder, String label, LocalizedNode node) {
+        if (!node.getLocation().equals(holder.getObjectName())) {
+            // inherited.
+            Group group = holder.getPlugin().getGroupManager().getIfLoaded(node.getLocation());
+            if (group != null) {
+                holder = group;
+            }
+        }
+
+        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentSerializer.parseFromLegacy(TextUtils.joinNewline(
+                "¥3> ¥a" + type.getEntry(node).getKey() + " ¥7- ¥r" + type.getEntry(node).getValue(),
+                " ",
+                "¥7Click to remove this " + type.name().toLowerCase() + " from " + holder.getFriendlyName()
+        ), '¥'));
+
+        boolean group = !(holder instanceof User);
+        String command = NodeFactory.nodeAsCommand(node, group ? holder.getObjectName() : holder.getFriendlyName(), group)
+                .replace("/luckperms", "/" + label)
+                .replace("permission set", "permission unset")
+                .replace("parent add", "parent remove")
+                .replace(" true", "")
+                .replace(" false", "");
+
+        return component -> {
+            component.hoverEvent(hoverEvent);
+            component.clickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command));
+        };
+    }
+
+    private static Consumer<Component> makeFancy(PermissionHolder holder, String label, LocalizedNode node) {
+        if (!node.getLocation().equals(holder.getObjectName())) {
+            // inherited.
+            Group group = holder.getPlugin().getGroupManager().getIfLoaded(node.getLocation());
+            if (group != null) {
+                holder = group;
+            }
+        }
+
+        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentSerializer.parseFromLegacy(TextUtils.joinNewline(
+                "¥3> ¥r" + node.getMeta().getKey() + " ¥7- ¥r" + node.getMeta().getValue(),
+                " ",
+                "¥7Click to remove this meta pair from " + holder.getFriendlyName()
+        ), '¥'));
+
+        boolean group = !(holder instanceof User);
+        String command = NodeFactory.nodeAsCommand(node, group ? holder.getObjectName() : holder.getFriendlyName(), group)
+                .replace("/luckperms", "/" + label)
+                .replace("permission set", "permission unset")
+                .replace("parent add", "parent remove")
+                .replace(" true", "")
+                .replace(" false", "");
+
+        return component -> {
+            component.hoverEvent(hoverEvent);
+            component.clickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command));
+        };
     }
 }

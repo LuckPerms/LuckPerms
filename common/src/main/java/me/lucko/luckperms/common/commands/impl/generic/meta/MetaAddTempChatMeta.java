@@ -37,6 +37,7 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.TemporaryModifier;
@@ -48,6 +49,10 @@ import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
+
+import net.kyori.text.Component;
+import net.kyori.text.event.HoverEvent;
+import net.kyori.text.serializer.ComponentSerializer;
 
 import java.util.List;
 import java.util.Map;
@@ -90,7 +95,13 @@ public class MetaAddTempChatMeta extends SharedSubCommand {
         if (ret.getKey().asBoolean()) {
             duration = ret.getValue().getExpiryUnixTime();
 
-            Message.ADD_TEMP_CHATMETA_SUCCESS.send(sender, holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, DateUtil.formatDateDiff(duration), Util.contextSetToString(context));
+            Component component = ComponentSerializer.parseFromLegacy(Message.ADD_TEMP_CHATMETA_SUCCESS.asString(plugin.getLocaleManager(), holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, DateUtil.formatDateDiff(duration), Util.contextSetToString(context)), Constants.COLOR_CHAR);
+            HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentSerializer.parseFromLegacy(
+                    "¥3Raw " + type.name().toLowerCase() + ": ¥r" + meta,
+                    '¥'
+            ));
+            component.applyRecursively(c -> c.hoverEvent(event));
+            sender.sendMessage(component);
 
             LogEntry.build().actor(sender).acted(holder)
                     .action("meta addtemp" + type.name().toLowerCase() + " " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))

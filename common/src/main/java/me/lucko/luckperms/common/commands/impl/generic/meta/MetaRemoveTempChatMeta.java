@@ -35,6 +35,7 @@ import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.core.model.PermissionHolder;
@@ -44,6 +45,10 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
+
+import net.kyori.text.Component;
+import net.kyori.text.event.HoverEvent;
+import net.kyori.text.serializer.ComponentSerializer;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -94,7 +99,13 @@ public class MetaRemoveTempChatMeta extends SharedSubCommand {
         DataMutateResult result = holder.unsetPermission(NodeFactory.makeChatMetaNode(type, priority, meta).setExpiry(10L).withExtraContext(context).build());
 
         if (result.asBoolean()) {
-            Message.REMOVE_TEMP_CHATMETA_SUCCESS.send(sender, holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, Util.contextSetToString(context));
+            Component component = ComponentSerializer.parseFromLegacy(Message.REMOVE_TEMP_CHATMETA_SUCCESS.asString(plugin.getLocaleManager(), holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, Util.contextSetToString(context)), Constants.COLOR_CHAR);
+            HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentSerializer.parseFromLegacy(
+                    "¥3Raw " + type.name().toLowerCase() + ": ¥r" + meta,
+                    '¥'
+            ));
+            component.applyRecursively(c -> c.hoverEvent(event));
+            sender.sendMessage(component);
 
             LogEntry.build().actor(sender).acted(holder)
                     .action("meta removetemp" + type.name().toLowerCase() + " " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))

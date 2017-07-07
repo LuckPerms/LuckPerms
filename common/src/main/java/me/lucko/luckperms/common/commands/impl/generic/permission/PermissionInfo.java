@@ -86,36 +86,34 @@ public class PermissionInfo extends SharedSubCommand {
             filter = args.get(1);
         }
 
-        if (sender.getUuid().equals(Constants.CONSOLE_UUID)) {
-            Message.LISTNODES.send(sender, holder.getFriendlyName());
-            sender.sendMessage(Util.color(permNodesToString(filter, holder.mergePermissionsToSortedSet())));
-        } else {
-            int page = ArgumentUtils.handleIntOrElse(0, args, 1);
+        int page = ArgumentUtils.handleIntOrElse(0, args, 1);
 
-            Map.Entry<Component, String> ent = permNodesToMessage(filter, holder.mergePermissionsToSortedSet(), holder, label, page);
-            if (ent.getValue() != null) {
-                Message.LISTNODES_WITH_PAGE.send(sender, holder.getFriendlyName(), ent.getValue());
-                sender.sendMessage(ent.getKey());
-            } else {
-                Message.LISTNODES.send(sender, holder.getFriendlyName());
-                sender.sendMessage(ent.getKey());
-            }
+        Map.Entry<Component, String> ent = nodesToMessage(false, filter, holder.mergePermissionsToSortedSet(), holder, label, page, sender.isConsole());
+        if (ent.getValue() != null) {
+            Message.LISTNODES_WITH_PAGE.send(sender, holder.getFriendlyName(), ent.getValue());
+            sender.sendMessage(ent.getKey());
+        } else {
+            Message.LISTNODES.send(sender, holder.getFriendlyName());
+            sender.sendMessage(ent.getKey());
         }
 
-        Message.LISTNODES_TEMP.send(sender, holder.getFriendlyName(), tempNodesToString(filter, holder.mergePermissionsToSortedSet()));
+        Map.Entry<Component, String> tempEnt = nodesToMessage(true, filter, holder.mergePermissionsToSortedSet(), holder, label, page, sender.isConsole());
+        if (tempEnt.getValue() != null) {
+            Message.LISTNODES_TEMP_WITH_PAGE.send(sender, holder.getFriendlyName(), tempEnt.getValue());
+            sender.sendMessage(tempEnt.getKey());
+        } else {
+            Message.LISTNODES_TEMP.send(sender, holder.getFriendlyName());
+            sender.sendMessage(tempEnt.getKey());
+        }
+
         return CommandResult.SUCCESS;
     }
 
-    private static Map.Entry<Component, String> permNodesToMessage(String filter, SortedSet<LocalizedNode> nodes, PermissionHolder holder, String label, int pageNumber) {
+    private static Map.Entry<Component, String> nodesToMessage(boolean temp, String filter, SortedSet<LocalizedNode> nodes, PermissionHolder holder, String label, int pageNumber, boolean console) {
         List<Node> l = new ArrayList<>();
         for (Node node : nodes) {
-            if (filter != null && !node.getPermission().startsWith(filter)) {
-                continue;
-            }
-            if (node.isTemporary()) {
-                continue;
-            }
-
+            if (filter != null && !node.getPermission().startsWith(filter)) continue;
+            if (temp != node.isTemporary()) continue;
             l.add(node);
         }
 
@@ -134,7 +132,7 @@ public class PermissionInfo extends SharedSubCommand {
         List<Node> page = pages.get(index);
 
         TextComponent message = new TextComponent("");
-        String title = "&7(showing page &f" + pageNumber + "&7 of &f" + pages.size() + "&7 - &f" + nodes.size() + "&7 entries";
+        String title = "&7(showing page &f" + pageNumber + "&7 of &f" + pages.size() + "&7 - &f" + l.size() + "&7 entries";
         if (filter != null) {
             title += " - filtered by &f\"" + filter + "\"&7)";
         } else {
@@ -142,7 +140,11 @@ public class PermissionInfo extends SharedSubCommand {
         }
 
         for (Node node : page) {
-            String s = "&3> " + (node.getValue() ? "&a" : "&c") + node.getPermission() + Util.getAppendableNodeContextString(node) + "\n";
+            String s = "&3> " + (node.getValue() ? "&a" : "&c") + node.getPermission() + (console ? " &7(" + node.getValue() + "&7)" : "") + Util.getAppendableNodeContextString(node) + "\n";
+            if (temp) {
+                s += "&2-    expires in " + DateUtil.formatDateDiff(node.getExpiryUnixTime()) + "\n";
+            }
+
             message.append(ComponentSerializer.parseFromLegacy(s, Constants.FORMAT_CHAR).applyRecursively(makeFancy(holder, label, node)));
         }
 
@@ -151,10 +153,10 @@ public class PermissionInfo extends SharedSubCommand {
 
     private static Consumer<Component> makeFancy(PermissionHolder holder, String label, Node node) {
         HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentSerializer.parseFromLegacy(TextUtils.joinNewline(
-                "&3> " + (node.getValue() ? "&a" : "&c") + node.getPermission(),
+                "¥3> " + (node.getValue() ? "¥a" : "¥c") + node.getPermission(),
                 " ",
-                "&7Click to remove this node from " + holder.getFriendlyName()
-        ), Constants.FORMAT_CHAR));
+                "¥7Click to remove this node from " + holder.getFriendlyName()
+        ), '¥'));
 
         boolean group = !(holder instanceof User);
         String command = NodeFactory.nodeAsCommand(node, group ? holder.getObjectName() : holder.getFriendlyName(), group)
@@ -168,46 +170,5 @@ public class PermissionInfo extends SharedSubCommand {
             component.hoverEvent(hoverEvent);
             component.clickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command));
         };
-    }
-
-    private static String permNodesToString(String filter, SortedSet<LocalizedNode> nodes) {
-        StringBuilder sb = new StringBuilder();
-        for (Node node : nodes) {
-            if (filter != null && !node.getPermission().startsWith(filter)) {
-                continue;
-            }
-            if (node.isTemporary()) {
-                continue;
-            }
-
-            sb.append("&3> ")
-                    .append(node.getValue() ? "&a" : "&c")
-                    .append(node.getPermission())
-                    .append(" ").append("&7(").append(node.getValue()).append("&7)")
-                    .append(Util.getAppendableNodeContextString(node))
-                    .append("\n");
-        }
-        return sb.length() == 0 ? "&3None" : sb.toString();
-    }
-
-    private static String tempNodesToString(String filter, SortedSet<LocalizedNode> nodes) {
-        StringBuilder sb = new StringBuilder();
-        for (Node node : nodes) {
-            if (filter != null && !node.getPermission().startsWith(filter)) {
-                continue;
-            }
-            if (!node.isTemporary()) {
-                continue;
-            }
-
-            sb.append("&3> ")
-                    .append(node.getValue() ? "&a" : "&c")
-                    .append(node.getPermission())
-                    .append(Util.getAppendableNodeContextString(node))
-                    .append("\n&2-    expires in ")
-                    .append(DateUtil.formatDateDiff(node.getExpiryUnixTime()))
-                    .append("\n");
-        }
-        return sb.length() == 0 ? "&3None" : sb.toString();
     }
 }

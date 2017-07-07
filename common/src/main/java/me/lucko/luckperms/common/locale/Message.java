@@ -213,9 +213,10 @@ public enum Message {
 
     LISTNODES("&b{0}'s Nodes:", true),
     LISTNODES_WITH_PAGE("&b{0}'s Nodes:  {1}", true),
-    LISTNODES_TEMP("&b{0}'s Temporary Nodes:" + "\n" + "{1}", true),
-    LISTPARENTS("&b{0}'s Parent Groups:" + "\n" + "{1}", true),
-    LISTPARENTS_TEMP("&b{0}'s Temporary Parent Groups:" + "\n" + "{1}", true),
+    LISTNODES_TEMP("&b{0}'s Temporary Nodes:", true),
+    LISTNODES_TEMP_WITH_PAGE("&b{0}'s Temporary Nodes:  {1}", true),
+    LISTPARENTS("&b{0}'s Parent Groups:", true),
+    LISTPARENTS_TEMP("&b{0}'s Temporary Parent Groups:", true),
     LIST_TRACKS("&b{0}'s Tracks:" + "\n" + "{1}", true),
     LIST_TRACKS_EMPTY("{0} is not on any tracks.", true),
 
@@ -419,10 +420,15 @@ public enum Message {
     IMPORT_END_ERROR_CONTENT("&b(Import) &b-> &c{0}", true),
     IMPORT_END_ERROR_FOOTER("&b(Import) &7<------------------------------------------>", true);
 
+    public static final Object SKIP_ELEMENT = new Object();
+
     private static String format(String s, Object... objects) {
         for (int i = 0; i < objects.length; i++) {
             Object o = objects[i];
-            s = s.replace("{" + i + "}", String.valueOf(o));
+
+            if (o != SKIP_ELEMENT) {
+                s = s.replace("{" + i + "}", String.valueOf(o));
+            }
         }
         return s;
     }
@@ -446,6 +452,10 @@ public enum Message {
         }
         if (s == null) {
             s = message;
+        }
+
+        if (s.startsWith("&")) {
+            prefix = prefix.substring(0, prefix.length() - 2);
         }
 
         s = format(s.replace("{PREFIX}", prefix).replace("\\n", "\n"), objects);
