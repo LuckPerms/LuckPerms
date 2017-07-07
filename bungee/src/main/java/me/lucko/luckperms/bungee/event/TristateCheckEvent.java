@@ -23,43 +23,40 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.commands.sender;
+package me.lucko.luckperms.bungee.event;
 
-import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import net.kyori.text.Component;
-
-import java.util.UUID;
+import net.md_5.bungee.api.CommandSender;
+import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.plugin.Event;
 
 /**
- * Factory class to make a thread-safe sender instance
- *
- * @param <T> the command sender type
+ * Copy of the internal BungeeCord "PermissionCheckEvent", returning a tristate instead of a boolean.
  */
-@RequiredArgsConstructor
-public abstract class SenderFactory<T> {
-
-    @Getter(AccessLevel.PROTECTED)
-    private final LuckPermsPlugin plugin;
-
-    protected abstract String getName(T t);
-
-    protected abstract UUID getUuid(T t);
-
-    protected abstract void sendMessage(T t, String s);
-
-    protected abstract void sendMessage(T t, Component message);
-
-    protected abstract Tristate getPermissionValue(T t, String node);
-
-    protected abstract boolean hasPermission(T t, String node);
-
-    public final Sender wrap(T t) {
-        return new AbstractSender<>(plugin, this, t);
+@Getter
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
+@ToString
+public class TristateCheckEvent extends Event {
+    public static Tristate call(CommandSender sender, String permission) {
+        return ProxyServer.getInstance().getPluginManager().callEvent(new TristateCheckEvent(sender, permission)).getResult();
     }
+
+    private final CommandSender sender;
+    private final String permission;
+
+    @Setter
+    private Tristate result;
+
+    public TristateCheckEvent(CommandSender sender, String permission) {
+        this(sender, permission, sender.getPermissions().contains(permission) ? Tristate.TRUE : Tristate.UNDEFINED);
+    }
+
 }

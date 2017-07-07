@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.commands.impl.generic.meta;
 
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
@@ -50,9 +51,24 @@ public class MetaUnset extends SharedSubCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label, Permission permission) throws CommandException {
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, holder)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
         String key = args.get(0);
         MutableContextSet context = ArgumentUtils.handleContext(1, args, plugin);
+
+        if (ArgumentPermissions.checkContext(plugin, sender, permission, context)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
+        if (ArgumentPermissions.checkArguments(plugin, sender, permission, key)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
 
         holder.clearMetaKeys(key, context, false);
         Message.UNSET_META_SUCCESS.send(sender, key, holder.getFriendlyName(), Util.contextSetToString(context));

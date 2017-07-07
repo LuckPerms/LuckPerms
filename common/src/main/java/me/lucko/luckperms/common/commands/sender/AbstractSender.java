@@ -30,6 +30,7 @@ import lombok.Getter;
 
 import com.google.common.base.Splitter;
 
+import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -92,6 +93,32 @@ public final class AbstractSender<T> implements Sender {
         if (t != null) {
             factory.sendMessage(t, message);
         }
+    }
+
+    @Override
+    public Tristate getPermissionValue(String permission) {
+        if (isConsole()) return Tristate.TRUE;
+
+        T t = ref.get();
+        if (t != null) {
+            return factory.getPermissionValue(t, permission);
+        }
+
+        return Tristate.UNDEFINED;
+    }
+
+    @Override
+    public boolean hasPermission(String permission) {
+        if (isConsole()) return true;
+
+        T t = ref.get();
+        if (t != null) {
+            if (factory.hasPermission(t, permission)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override

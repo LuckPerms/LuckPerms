@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.commands.impl.user;
 
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
@@ -58,6 +59,11 @@ public class UserPromote extends SubCommand<User> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) throws CommandException {
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), user)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
         final String trackName = args.get(0).toLowerCase();
         if (!DataConstraints.TRACK_NAME_TEST.test(trackName)) {
             Message.TRACK_INVALID_ENTRY.send(sender);
@@ -83,6 +89,11 @@ public class UserPromote extends SubCommand<User> {
         boolean silent = args.remove("-s");
         MutableContextSet context = ArgumentUtils.handleContext(1, args, plugin);
 
+        if (ArgumentPermissions.checkContext(plugin, sender, getPermission().get(), context)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
         // Load applicable groups
         Set<Node> nodes = user.getNodes().values().stream()
                 .filter(Node::isGroupNode)
@@ -99,6 +110,11 @@ public class UserPromote extends SubCommand<User> {
             if (nextGroup == null) {
                 Message.USER_PROMOTE_ERROR_MALFORMED.send(sender, first);
                 return CommandResult.LOADING_ERROR;
+            }
+
+            if (ArgumentPermissions.checkArguments(plugin, sender, getPermission().get(), track.getName(), nextGroup.getName())) {
+                Message.COMMAND_NO_PERMISSION.send(sender);
+                return CommandResult.NO_PERMISSION;
             }
 
             user.setPermission(NodeFactory.newBuilder("group." + first).withExtraContext(context).build());
@@ -141,6 +157,11 @@ public class UserPromote extends SubCommand<User> {
         if (nextGroup == null) {
             Message.USER_PROMOTE_ERROR_MALFORMED.send(sender, next);
             return CommandResult.LOADING_ERROR;
+        }
+
+        if (ArgumentPermissions.checkArguments(plugin, sender, getPermission().get(), track.getName(), nextGroup.getName())) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
         }
 
         user.unsetPermission(oldNode);

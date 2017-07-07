@@ -25,8 +25,11 @@
 
 package me.lucko.luckperms.common.commands.impl.user;
 
+import com.google.common.collect.Iterables;
+
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
@@ -58,6 +61,11 @@ public class UserDemote extends SubCommand<User> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) throws CommandException {
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), user)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
         final String trackName = args.get(0).toLowerCase();
         if (!DataConstraints.TRACK_NAME_TEST.test(trackName)) {
             Message.TRACK_INVALID_ENTRY.send(sender);
@@ -83,6 +91,11 @@ public class UserDemote extends SubCommand<User> {
         boolean silent = args.remove("-s");
         MutableContextSet context = ArgumentUtils.handleContext(1, args, plugin);
 
+        if (ArgumentPermissions.checkContext(plugin, sender, getPermission().get(), context)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
         // Load applicable groups
         Set<Node> nodes = user.getNodes().values().stream()
                 .filter(Node::isGroupNode)
@@ -102,7 +115,7 @@ public class UserDemote extends SubCommand<User> {
             return CommandResult.FAILURE;
         }
 
-        final Node oldNode = nodes.stream().findAny().get();
+        final Node oldNode = Iterables.getFirst(nodes, null);
         final String old = oldNode.getGroupName();
         final String previous;
         try {
@@ -110,6 +123,11 @@ public class UserDemote extends SubCommand<User> {
         } catch (ObjectLacksException e) {
             Message.TRACK_DOES_NOT_CONTAIN.send(sender, track.getName(), old);
             return CommandResult.STATE_ERROR;
+        }
+
+        if (ArgumentPermissions.checkArguments(plugin, sender, getPermission().get(), track.getName(), oldNode.getGroupName())) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
         }
 
         if (previous == null) {

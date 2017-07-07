@@ -28,6 +28,8 @@ package me.lucko.luckperms.common.constants;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import com.google.common.base.Preconditions;
+
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
@@ -163,7 +165,7 @@ public enum Permission {
     SPONGE_OPTION_UNSET(list("option.unset"), Type.SPONGE),
     SPONGE_OPTION_CLEAR(list("option.clear"), Type.SPONGE);
 
-    private static final String IDENTIFIER = "luckperms.";
+    public static final String ROOT = "luckperms.";
 
     private static List<String> list(String... args) {
         return Arrays.asList(args);
@@ -174,15 +176,16 @@ public enum Permission {
 
     Permission(List<String> tags, Type type) {
         this.type = type;
+        Preconditions.checkArgument(tags != null && !tags.isEmpty());
 
         if (type == Type.NONE) {
-            this.nodes = tags.stream().map(t -> IDENTIFIER + t).collect(ImmutableCollectors.toImmutableList());
+            this.nodes = tags.stream().map(t -> ROOT + t).collect(ImmutableCollectors.toImmutableList());
         } else {
-            this.nodes = tags.stream().map(t -> IDENTIFIER + type.getTag() + "." + t).collect(ImmutableCollectors.toImmutableList());
+            this.nodes = tags.stream().map(t -> ROOT + type.getTag() + "." + t).collect(ImmutableCollectors.toImmutableList());
         }
     }
 
-    public String getExample() {
+    public String getPrimaryPermission() {
         return nodes.get(0);
     }
 

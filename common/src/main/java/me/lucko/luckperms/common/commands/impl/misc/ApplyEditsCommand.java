@@ -32,6 +32,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
@@ -132,6 +133,11 @@ public class ApplyEditsCommand extends SingleCommand {
         } else {
             Message.APPLY_EDITS_TARGET_UNKNOWN.send(sender, who);
             return CommandResult.STATE_ERROR;
+        }
+
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), holder)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
         }
 
         Set<NodeModel> nodes = deserializePermissions(data.getAsJsonArray("nodes"));

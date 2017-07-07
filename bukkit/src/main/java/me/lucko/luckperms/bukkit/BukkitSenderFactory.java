@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.bukkit;
 
+import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.bukkit.compat.MessageHandler;
 import me.lucko.luckperms.common.commands.sender.SenderFactory;
 import me.lucko.luckperms.common.constants.Constants;
@@ -77,6 +78,14 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
     @Override
     protected void sendMessage(CommandSender sender, Component message) {
         messageHandler.sendJsonMessage(sender, message);
+    }
+
+    @Override
+    protected Tristate getPermissionValue(CommandSender sender, String node) {
+        boolean isSet = sender.isPermissionSet(node);
+        boolean val = sender.hasPermission(node);
+
+        return !isSet ? val ? Tristate.TRUE : Tristate.UNDEFINED : Tristate.fromBoolean(val);
     }
 
     @Override

@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.commands.impl.user;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.caching.MetaData;
+import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
@@ -54,6 +55,11 @@ public class UserInfo extends SubCommand<User> {
     @SuppressWarnings("unchecked")
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) throws CommandException {
+        if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), user)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
         Message.USER_INFO_GENERAL.send(sender,
                 user.getName().orElse("Unknown"),
                 user.getUuid(),

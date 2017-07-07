@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.commands.impl.generic.other;
 
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
@@ -53,9 +54,19 @@ public class HolderClear<T extends PermissionHolder> extends SubCommand<T> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, T holder, List<String> args, String label) throws CommandException {
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), holder)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
         int before = holder.getNodes().size();
 
         MutableContextSet context = ArgumentUtils.handleContext(0, args, plugin);
+
+        if (ArgumentPermissions.checkContext(plugin, sender, getPermission().get(), context)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
 
         if (context.isEmpty()) {
             holder.clearNodes();

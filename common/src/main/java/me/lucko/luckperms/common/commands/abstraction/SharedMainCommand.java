@@ -97,7 +97,7 @@ public class SharedMainCommand<T extends PermissionHolder> extends SubCommand<T>
 
         CommandResult result;
         try {
-            result = sub.execute(plugin, sender, t, strippedArgs, label);
+            result = sub.execute(plugin, sender, t, strippedArgs, label, user ? sub.getUserPermission() : sub.getGroupPermission());
         } catch (CommandException e) {
             result = handleException(e, sender, sub);
         }
@@ -137,7 +137,7 @@ public class SharedMainCommand<T extends PermissionHolder> extends SubCommand<T>
 
     @Override
     public boolean isAuthorized(Sender sender) {
-        return secondaryCommands.stream().filter(sc -> sc.isAuthorized(sender, user)).count() != 0;
+        return secondaryCommands.stream().anyMatch(sc -> sc.isAuthorized(sender, user));
     }
 
     private void sendUsageDetailed(Sender sender, boolean user, String label) {

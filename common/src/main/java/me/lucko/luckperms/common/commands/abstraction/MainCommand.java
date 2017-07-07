@@ -174,7 +174,7 @@ public abstract class MainCommand<T> extends Command<Void, T> {
 
     @Override
     public boolean isAuthorized(Sender sender) {
-        return getChildren().get().stream().filter(sc -> sc.isAuthorized(sender)).count() != 0;
+        return getChildren().get().stream().anyMatch(sc -> sc.isAuthorized(sender));
     }
 
     @Override

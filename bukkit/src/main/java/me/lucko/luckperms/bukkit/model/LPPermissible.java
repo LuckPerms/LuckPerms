@@ -146,22 +146,28 @@ public class LPPermissible extends PermissibleBase {
 
     @Override
     public boolean isPermissionSet(@NonNull String name) {
-        return user.getUserData().getPermissionData(calculateContexts()).getPermissionValue(name) != Tristate.UNDEFINED;
+        Tristate ts = user.getUserData().getPermissionData(calculateContexts()).getPermissionValue(name);
+        return ts != Tristate.UNDEFINED || Permission.DEFAULT_PERMISSION.getValue(isOp());
     }
 
     @Override
     public boolean isPermissionSet(@NonNull Permission perm) {
-        return isPermissionSet(perm.getName());
+        Tristate ts = user.getUserData().getPermissionData(calculateContexts()).getPermissionValue(perm.getName());
+        if (ts != Tristate.UNDEFINED) {
+            return true;
+        }
+
+        if (!plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_DEFAULT_PERMISSIONS)) {
+            return Permission.DEFAULT_PERMISSION.getValue(isOp());
+        } else {
+            return perm.getDefault().getValue(isOp());
+        }
     }
 
     @Override
     public boolean hasPermission(@NonNull String name) {
         Tristate ts = user.getUserData().getPermissionData(calculateContexts()).getPermissionValue(name);
-        if (ts != Tristate.UNDEFINED) {
-            return ts.asBoolean();
-        }
-
-        return Permission.DEFAULT_PERMISSION.getValue(isOp());
+        return ts != Tristate.UNDEFINED ? ts.asBoolean() : Permission.DEFAULT_PERMISSION.getValue(isOp());
     }
 
     @Override

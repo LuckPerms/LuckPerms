@@ -104,6 +104,15 @@ temporary-add-behaviour: deny
 #                           directly and indirectly
 primary-group-calculation: stored
 
+# If the plugin should check for "extra" permissions with users run LP commands.
+#
+# These extra permissions allow finer control over what users can do with each command, and
+# who they have access to edit.
+#
+# The permissions are *not* static, unlike the 'base' permisssions, and will depend upon the
+# arguments given within the command.
+argument-based-command-permissions: false
+
 
 
 

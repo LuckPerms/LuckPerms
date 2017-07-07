@@ -32,6 +32,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonWriter;
 
+import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
@@ -76,6 +77,11 @@ public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, T holder, List<String> args, String label) throws CommandException {
+        if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), holder)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
         JsonObject data = new JsonObject();
         Set<NodeModel> nodes = holder.getNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
         data.add("nodes", serializePermissions(nodes));

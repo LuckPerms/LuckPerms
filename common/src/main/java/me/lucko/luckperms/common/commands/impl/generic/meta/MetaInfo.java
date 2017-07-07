@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.commands.impl.generic.meta;
 
 import me.lucko.luckperms.api.LocalizedNode;
+import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
@@ -62,7 +63,12 @@ public class MetaInfo extends SharedSubCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label, Permission permission) throws CommandException {
+        if (ArgumentPermissions.checkViewPerms(plugin, sender, permission, holder)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
         SortedSet<Map.Entry<Integer, LocalizedNode>> prefixes = new TreeSet<>(MetaComparator.INSTANCE.reversed());
         SortedSet<Map.Entry<Integer, LocalizedNode>> suffixes = new TreeSet<>(MetaComparator.INSTANCE.reversed());
         Set<LocalizedNode> meta = new HashSet<>();

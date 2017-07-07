@@ -32,6 +32,7 @@ import lombok.Setter;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
 
+import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.sender.Sender;
@@ -206,6 +207,16 @@ public class Importer implements Runnable {
         @Override
         public void sendMessage(Component message) {
             logMessage(ComponentSerializer.toLegacy(message, Constants.COLOR_CHAR));
+        }
+
+        @Override
+        public Tristate getPermissionValue(String permission) {
+            return Tristate.TRUE;
+        }
+
+        @Override
+        public boolean hasPermission(String permission) {
+            return true;
         }
 
         @Override

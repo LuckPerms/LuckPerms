@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.commands.impl.group;
 
+import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
@@ -48,6 +49,11 @@ public class GroupSetWeight extends SubCommand<Group> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) throws CommandException {
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), group)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
         int weight = ArgumentUtils.handlePriority(0, args);
 
         group.removeIf(n -> n.getPermission().startsWith("weight."));

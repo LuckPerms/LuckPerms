@@ -253,7 +253,7 @@ public class CommandManager {
                 .filter(c -> c.isAuthorized(sender))
                 .forEach(c -> {
                     @SuppressWarnings("unchecked")
-                    String permission = (String) c.getPermission().map(p -> ((Permission) p).getExample()).orElse("None");
+                    String permission = (String) c.getPermission().map(p -> ((Permission) p).getPrimaryPermission()).orElse("None");
 
                     Component component = ComponentSerializer.parseFromLegacy("&3> &a" + String.format(c.getUsage(), label), Constants.FORMAT_CHAR)
                             .applyRecursively(comp -> {

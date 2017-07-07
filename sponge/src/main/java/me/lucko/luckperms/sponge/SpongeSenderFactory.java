@@ -25,9 +25,11 @@
 
 package me.lucko.luckperms.sponge;
 
+import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.commands.sender.SenderFactory;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.sponge.service.model.CompatibilityUtil;
 
 import net.kyori.text.Component;
 import net.kyori.text.serializer.ComponentSerializer;
@@ -72,6 +74,11 @@ public class SpongeSenderFactory extends SenderFactory<CommandSource> {
         } catch (Exception e) {
             sendMessage(source, ComponentSerializer.toLegacy(message, Constants.COLOR_CHAR));
         }
+    }
+
+    @Override
+    protected Tristate getPermissionValue(CommandSource source, String node) {
+        return CompatibilityUtil.convertTristate(source.getPermissionValue(source.getActiveContexts(), node));
     }
 
     @Override

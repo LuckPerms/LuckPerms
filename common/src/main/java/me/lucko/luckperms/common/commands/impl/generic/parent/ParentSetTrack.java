@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.commands.impl.generic.parent;
 
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
@@ -56,7 +57,12 @@ public class ParentSetTrack extends SharedSubCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label, Permission permission) throws CommandException {
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, holder)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
         final String trackName = args.get(0).toLowerCase();
         if (!DataConstraints.TRACK_NAME_TEST.test(trackName)) {
             Message.TRACK_INVALID_ENTRY.send(sender);
@@ -107,6 +113,16 @@ public class ParentSetTrack extends SharedSubCommand {
         if (group == null) {
             Message.GROUP_DOES_NOT_EXIST.send(sender);
             return CommandResult.LOADING_ERROR;
+        }
+
+        if (ArgumentPermissions.checkContext(plugin, sender, permission, context)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
+        if (ArgumentPermissions.checkArguments(plugin, sender, permission, track.getName(), group.getName())) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
         }
 
         holder.removeIf(node -> node.isGroupNode() && node.getFullContexts().equals(context) && track.containsGroup(node.getGroupName()));

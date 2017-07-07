@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.commands.impl.user;
 
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
@@ -50,6 +51,11 @@ public class UserSwitchPrimaryGroup extends SubCommand<User> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) throws CommandException {
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), user)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
         String opt = plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION_METHOD);
         if (!opt.equals("stored")) {
             Message.USER_PRIMARYGROUP_WARN_OPTION.send(sender, opt);

@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.commands.impl.generic.parent;
 import me.lucko.luckperms.api.DataMutateResult;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
@@ -60,7 +61,12 @@ public class ParentAddTemp extends SharedSubCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label, Permission permission) throws CommandException {
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, holder)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
         String groupName = ArgumentUtils.handleName(0, args);
         long duration = ArgumentUtils.handleDuration(1, args);
         MutableContextSet context = ArgumentUtils.handleContext(2, args, plugin);
@@ -75,6 +81,16 @@ public class ParentAddTemp extends SharedSubCommand {
         if (group == null) {
             Message.GROUP_DOES_NOT_EXIST.send(sender);
             return CommandResult.INVALID_ARGS;
+        }
+
+        if (ArgumentPermissions.checkContext(plugin, sender, permission, context)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
+        if (ArgumentPermissions.checkArguments(plugin, sender, permission, group.getName())) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
         }
 
         if (group.getName().equalsIgnoreCase(holder.getObjectName())) {

@@ -161,6 +161,11 @@ public class ConfigKeys {
     }));
 
     /**
+     * If the plugin should check for "extra" permissions with users run LP commands
+     */
+    public static final ConfigKey<Boolean> USE_ARGUMENT_BASED_COMMAND_PERMISSIONS = BooleanKey.of("argument-based-command-permissions", false);
+
+    /**
      * If wildcards are being applied
      */
     public static final ConfigKey<Boolean> APPLYING_WILDCARDS = EnduringKey.wrap(BooleanKey.of("apply-wildcards", true));

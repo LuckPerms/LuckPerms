@@ -29,6 +29,7 @@ import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.DataMutateResult;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
@@ -67,12 +68,22 @@ public class MetaAddTempChatMeta extends SharedSubCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label, Permission permission) throws CommandException {
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, holder)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
         int priority = ArgumentUtils.handlePriority(0, args);
         String meta = ArgumentUtils.handleString(1, args);
         long duration = ArgumentUtils.handleDuration(2, args);
         MutableContextSet context = ArgumentUtils.handleContext(3, args, plugin);
         TemporaryModifier modifier = plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR);
+
+        if (ArgumentPermissions.checkContext(plugin, sender, permission, context)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
 
         Map.Entry<DataMutateResult, Node> ret = holder.setPermission(NodeFactory.makeChatMetaNode(type, priority, meta).setExpiry(duration).withExtraContext(context).build(), modifier);
 

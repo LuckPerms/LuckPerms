@@ -76,7 +76,7 @@ public abstract class SharedSubCommand {
         this.argumentCheck = argumentCheck;
     }
 
-    public abstract CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException;
+    public abstract CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label, Permission permission) throws CommandException;
 
     public List<String> onTabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         return Collections.emptyList();

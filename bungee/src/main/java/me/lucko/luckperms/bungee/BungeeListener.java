@@ -30,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.bungee.event.TristateCheckEvent;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.locale.Message;
@@ -163,6 +164,38 @@ public class BungeeListener implements Listener {
         }
 
         e.setHasPermission(result.asBoolean());
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onPlayerTristateCheck(TristateCheckEvent e) {
+        if (!(e.getSender() instanceof ProxiedPlayer)) {
+            return;
+        }
+
+        final ProxiedPlayer player = ((ProxiedPlayer) e.getSender());
+
+        User user = plugin.getUserManager().getIfLoaded(plugin.getUuidCache().getUUID(player.getUniqueId()));
+        if (user == null) {
+            e.setResult(Tristate.UNDEFINED);
+            return;
+        }
+
+        Contexts contexts = new Contexts(
+                plugin.getContextManager().getApplicableContext(player),
+                plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
+                plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
+                true,
+                plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
+                plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
+                false
+        );
+
+        Tristate result = user.getUserData().getPermissionData(contexts).getPermissionValue(e.getPermission());
+        if (result == Tristate.UNDEFINED && plugin.getConfiguration().get(ConfigKeys.APPLY_BUNGEE_CONFIG_PERMISSIONS)) {
+            return; // just use the result provided by the proxy when the event was created
+        }
+
+        e.setResult(result);
     }
 
     // We don't pre-process all servers, so we have to do it here.

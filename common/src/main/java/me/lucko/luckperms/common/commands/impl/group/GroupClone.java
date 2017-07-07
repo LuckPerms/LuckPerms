@@ -26,6 +26,7 @@
 package me.lucko.luckperms.common.commands.impl.group;
 
 import me.lucko.luckperms.api.event.cause.CreationCause;
+import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
@@ -49,6 +50,11 @@ public class GroupClone extends SubCommand<Group> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) throws CommandException {
+        if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), group)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
         String newGroupName = args.get(0).toLowerCase();
         if (!DataConstraints.GROUP_NAME_TEST.test(newGroupName)) {
             Message.GROUP_INVALID_ENTRY.send(sender);
@@ -61,6 +67,11 @@ public class GroupClone extends SubCommand<Group> {
         if (newGroup == null) {
             Message.GROUP_LOAD_ERROR.send(sender);
             return CommandResult.LOADING_ERROR;
+        }
+
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), newGroup)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
         }
 
         newGroup.replaceNodes(group.getNodes());

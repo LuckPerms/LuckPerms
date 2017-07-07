@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.bungee;
 
+import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.bungee.event.TristateCheckEvent;
 import me.lucko.luckperms.common.commands.sender.SenderFactory;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -70,6 +72,11 @@ public class BungeeSenderFactory extends SenderFactory<CommandSender> {
         } catch (Exception e) {
             sendMessage(sender, ComponentSerializer.toLegacy(message, Constants.COLOR_CHAR));
         }
+    }
+
+    @Override
+    protected Tristate getPermissionValue(CommandSender sender, String node) {
+        return TristateCheckEvent.call(sender, node);
     }
 
     @Override

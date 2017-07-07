@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.commands.impl.generic.parent;
 
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
@@ -50,7 +51,12 @@ public class ParentInfo extends SharedSubCommand {
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label, Permission permission) throws CommandException {
+        if (ArgumentPermissions.checkViewPerms(plugin, sender, permission, holder)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
         Message.LISTPARENTS.send(sender, holder.getFriendlyName(), permGroupsToString(holder.mergePermissionsToSortedSet()));
         Message.LISTPARENTS_TEMP.send(sender, holder.getFriendlyName(), tempGroupsToString(holder.mergePermissionsToSortedSet()));
         return CommandResult.SUCCESS;

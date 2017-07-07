@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.commands.sender;
 
+import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -72,6 +73,22 @@ public interface Sender {
      * @param message the message to send.
      */
     void sendMessage(Component message);
+
+    /**
+     * Gets the tristate a permission is set to.
+     *
+     * @param permission the permission to check for
+     * @return a tristate
+     */
+    Tristate getPermissionValue(String permission);
+
+    /**
+     * Check if the Sender has a permission.
+     *
+     * @param permission the permission to check for
+     * @return true if the sender has the permission
+     */
+    boolean hasPermission(String permission);
 
     /**
      * Check if the Sender has a permission.
