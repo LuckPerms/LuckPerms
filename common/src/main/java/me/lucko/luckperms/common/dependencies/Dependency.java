@@ -34,7 +34,7 @@ public enum Dependency {
 
     CAFFEINE("com.github.ben-manes.caffeine", "caffeine", "2.5.2"),
     MARIADB_DRIVER("org.mariadb.jdbc", "mariadb-java-client", "2.0.3"),
-    MYSQL_DRIVER("mysql", "mysql-connector-java", "6.0.6"),
+    MYSQL_DRIVER("mysql", "mysql-connector-java", "5.1.42"),
     POSTGRESQL_DRIVER("org.postgresql", "postgresql", "9.4.1212"),
     H2_DRIVER("com.h2database", "h2", "1.4.196"),
     SQLITE_DRIVER("org.xerial", "sqlite-jdbc", "3.19.3"),
