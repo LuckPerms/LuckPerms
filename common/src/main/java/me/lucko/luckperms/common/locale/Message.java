@@ -205,7 +205,9 @@ public enum Message {
     CREATE_GROUP_ERROR("There was an error whilst creating the group.", true),
     DELETE_GROUP_ERROR("There was an error whilst deleting the group.", true),
     DELETE_GROUP_ERROR_DEFAULT("You cannot delete the default group.", true),
-    GROUPS_LIST("&aGroups: {0}", true),
+    GROUPS_LIST("&aGroups: &7(name, weight, tracks)", true),
+    GROUPS_LIST_ENTRY("&f-  &3{0} &7- &b{1}", true),
+    GROUPS_LIST_ENTRY_WITH_TRACKS("&f-  &3{0} &7- &b{1} &7- [&3{2}&7]", true),
 
     CREATE_TRACK_ERROR("There was an error whilst creating the track.", true),
     DELETE_TRACK_ERROR("There was an error whilst deleting the track.", true),

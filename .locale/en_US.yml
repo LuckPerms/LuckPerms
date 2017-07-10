@@ -57,6 +57,16 @@ search-showing-users: "&bShowing user entries:"
 search-showing-groups: "&bShowing group entries:"
 search-showing-users-with-page: "&bShowing user entries:  {0}"
 search-showing-groups-with-page: "&bShowing group entries:  {0}"
+apply-edits-invalid-code: "&aInvalid code. &7({0})"
+apply-edits-unable-to-read: "&aUnable to read data using the given code. &7({0})"
+apply-edits-no-target: "&aUnable to parse the target of the edit. Please supply it as an extra argument."
+apply-edits-target-group-not-exists: "&aTarget group &b{0}&a does not exist."
+apply-edits-target-user-not-uuid: "&aTarget user &b{0}&a is not a valid uuid."
+apply-edits-target-user-unable-to-load: "&aUnable to load target user &b{0}&a."
+apply-edits-target-unknown: "&aInvalid target. &7({0})"
+apply-edits-success: "&aSuccessfully applied &b{0}&a nodes to &b{1}&a."
+editor-upload-failure: "&cUnable to upload permission data to the editor."
+editor-url: "&aEditor URL:"
 check-result: "&aPermission check result on user &b{0}&a for permission &b{1}&a: &f{2}"
 create-success: "&b{0}&a was successfully created."
 delete-success: "&b{0}&a was successfully deleted."
@@ -116,21 +126,18 @@ info: >
 create-group-error: "There was an error whilst creating the group."
 delete-group-error: "There was an error whilst deleting the group."
 delete-group-error-default: "You cannot delete the default group."
-groups-list: "&aGroups: {0}"
+groups-list: "&aGroups: &7(name, weight, tracks)"
+groups-list-entry: "&f-  &3{0} &7- &b{1}"
+groups-list-entry-with-tracks: "&f-  &3{0} &7- &b{1} &7- [&3{2}&7]"
 create-track-error: "There was an error whilst creating the track."
 delete-track-error: "There was an error whilst deleting the track."
 tracks-list: "&aTracks: {0}"
 listnodes: "&b{0}'s Nodes:"
 listnodes-with-page: "&b{0}'s Nodes:  {1}"
-listnodes-temp: >
-  &b{0}'s Temporary Nodes:\n
-  {1}
-listparents: >
-  &b{0}'s Parent Groups:\n
-  {1}
-listparents-temp: >
-  &b{0}'s Temporary Parent Groups:\n
-  {1}
+listnodes-temp: "&b{0}'s Temporary Nodes:"
+listnodes-temp-with-page: "&b{0}'s Temporary Nodes:  {1}"
+listparents: "&b{0}'s Parent Groups:"
+listparents-temp: "&b{0}'s Temporary Parent Groups:"
 list-tracks: >
   &b{0}'s Tracks:\n
   {1}

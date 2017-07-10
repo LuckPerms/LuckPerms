@@ -29,13 +29,20 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.model.Group;
+import me.lucko.luckperms.common.core.model.Track;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
+
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.event.ClickEvent;
+import net.kyori.text.event.HoverEvent;
+import net.kyori.text.serializer.ComponentSerializer;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,14 +59,37 @@ public class ListGroups extends SingleCommand {
             return CommandResult.LOADING_ERROR;
         }
 
-        Message.GROUPS_LIST.send(
-                sender,
-                Util.toCommaSep(plugin.getGroupManager().getAll().values().stream()
-                        .map(Group::getDisplayName)
-                        .sorted()
-                        .collect(Collectors.toList())
-                )
-        );
+        Message.GROUPS_LIST.send(sender);
+        plugin.getGroupManager().getAll().values().stream()
+                .sorted((o1, o2) -> {
+                    int i = Integer.compare(o2.getWeight().orElse(0), o1.getWeight().orElse(0));
+                    return i != 0 ? i : o1.getName().compareToIgnoreCase(o2.getName());
+                })
+                .forEach(group -> {
+                    List<String> tracks = plugin.getTrackManager().getAll().values().stream().filter(t -> t.containsGroup(group)).map(Track::getName).collect(Collectors.toList());
+                    Component component;
+
+                    if (tracks.isEmpty()) {
+                        component = ComponentSerializer.parseFromLegacy(Message.GROUPS_LIST_ENTRY.asString(plugin.getLocaleManager(),
+                                group.getDisplayName(),
+                                group.getWeight().orElse(0)
+                        ), Constants.COLOR_CHAR);
+                    } else {
+                        component = ComponentSerializer.parseFromLegacy(Message.GROUPS_LIST_ENTRY_WITH_TRACKS.asString(plugin.getLocaleManager(),
+                                group.getDisplayName(),
+                                group.getWeight().orElse(0),
+                                Util.toCommaSep(tracks)
+                        ), Constants.COLOR_CHAR);
+                    }
+
+                    component.applyRecursively(c -> {
+                        c.clickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + label + " group " + group.getName() + " info"));
+                        c.hoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Click to view more info about " + group.getName() + ".").color('7')));
+                    });
+
+                    sender.sendMessage(component);
+                });
+
         return CommandResult.SUCCESS;
     }
 }
