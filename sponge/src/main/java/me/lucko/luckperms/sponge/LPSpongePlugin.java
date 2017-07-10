@@ -64,6 +64,7 @@ import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.tasks.UpdateTask;
 import me.lucko.luckperms.common.treeview.PermissionVault;
 import me.lucko.luckperms.common.utils.BufferedRequest;
+import me.lucko.luckperms.common.utils.FakeSender;
 import me.lucko.luckperms.common.utils.FileWatcher;
 import me.lucko.luckperms.common.utils.SenderLogger;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
@@ -107,7 +108,9 @@ import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.AbstractCollection;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
@@ -392,11 +395,19 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
     @Override
     public Player getPlayer(User user) {
+        if (!game.isServerAvailable()) {
+            return null;
+        }
+
         return game.getServer().getPlayer(uuidCache.getExternalUUID(user.getUuid())).orElse(null);
     }
 
     @Override
     public Optional<UUID> lookupUuid(String username) {
+        if (!game.isServerAvailable()) {
+            return Optional.empty();
+        }
+
         CompletableFuture<GameProfile> fut = game.getServer().getGameProfileManager().get(username);
         try {
             return Optional.of(fut.get().getUniqueId());
@@ -448,26 +459,30 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
     @Override
     public int getPlayerCount() {
-        return game.getServer().getOnlinePlayers().size();
+        return game.isServerAvailable() ? game.getServer().getOnlinePlayers().size() : 0;
     }
 
     @Override
     public List<String> getPlayerList() {
-        return game.getServer().getOnlinePlayers().stream().map(Player::getName).collect(Collectors.toList());
+        return game.isServerAvailable() ? game.getServer().getOnlinePlayers().stream().map(Player::getName).collect(Collectors.toList()) : new ArrayList<>();
     }
 
     @Override
     public Set<UUID> getOnlinePlayers() {
-        return game.getServer().getOnlinePlayers().stream().map(Player::getUniqueId).collect(Collectors.toSet());
+        return game.isServerAvailable() ? game.getServer().getOnlinePlayers().stream().map(Player::getUniqueId).collect(Collectors.toSet()) : new HashSet<>();
     }
 
     @Override
     public boolean isPlayerOnline(UUID external) {
-        return game.getServer().getPlayer(external).map(Player::isOnline).orElse(false);
+        return game.isServerAvailable() ? game.getServer().getPlayer(external).map(Player::isOnline).orElse(false) : false;
     }
 
     @Override
     public List<Sender> getOnlineSenders() {
+        if (!game.isServerAvailable()) {
+            return new ArrayList<>();
+        }
+
         return game.getServer().getOnlinePlayers().stream()
                 .map(s -> getSenderFactory().wrap(s))
                 .collect(Collectors.toList());
@@ -475,6 +490,9 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
     @Override
     public Sender getConsoleSender() {
+        if (!game.isServerAvailable()) {
+            return new FakeSender(this, s -> logger.info(s));
+        }
         return getSenderFactory().wrap(game.getServer().getConsole());
     }
 

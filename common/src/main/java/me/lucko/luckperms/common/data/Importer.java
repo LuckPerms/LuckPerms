@@ -32,26 +32,19 @@ import lombok.Setter;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
 
-import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Constants;
-import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.locale.Message;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.DateUtil;
-
-import net.kyori.text.Component;
-import net.kyori.text.serializer.ComponentSerializer;
+import me.lucko.luckperms.common.utils.FakeSender;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -89,7 +82,7 @@ public class Importer implements Runnable {
                 .collect(Collectors.toList());
 
         this.cmdResult = new HashMap<>();
-        this.fake = new FakeSender();
+        this.fake = new FakeSender(commandManager.getPlugin(), this::logMessage);
     }
 
     @Override
@@ -179,59 +172,6 @@ public class Importer implements Runnable {
     private void logMessage(String msg) {
         if (executing != -1) {
             getResult(executing, "").getOutput().add(Util.stripColor(msg));
-        }
-    }
-
-    private class FakeSender implements Sender {
-
-        @Override
-        public LuckPermsPlugin getPlatform() {
-            return commandManager.getPlugin();
-        }
-
-        @Override
-        public String getName() {
-            return Constants.IMPORT_NAME;
-        }
-
-        @Override
-        public UUID getUuid() {
-            return Constants.IMPORT_UUID;
-        }
-
-        @Override
-        public void sendMessage(String s) {
-            logMessage(s);
-        }
-
-        @Override
-        public void sendMessage(Component message) {
-            logMessage(ComponentSerializer.toLegacy(message, Constants.COLOR_CHAR));
-        }
-
-        @Override
-        public Tristate getPermissionValue(String permission) {
-            return Tristate.TRUE;
-        }
-
-        @Override
-        public boolean hasPermission(String permission) {
-            return true;
-        }
-
-        @Override
-        public boolean hasPermission(Permission permission) {
-            return true;
-        }
-
-        @Override
-        public boolean isConsole() {
-            return true;
-        }
-
-        @Override
-        public boolean isImport() {
-            return true;
         }
     }
 

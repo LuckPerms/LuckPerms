@@ -159,9 +159,9 @@ public class SpongeListener {
             if (p.isPresent()) {
                 MutableContextSet context = MutableContextSet.fromSet(plugin.getContextManager().getApplicableContext(p.get()));
 
-                List<String> worlds = plugin.getGame().getServer().getWorlds().stream()
+                List<String> worlds = plugin.getGame().isServerAvailable() ? plugin.getGame().getServer().getWorlds().stream()
                         .map(World::getName)
-                        .collect(Collectors.toList());
+                        .collect(Collectors.toList()) : Collections.emptyList();
 
                 plugin.doAsync(() -> {
                     UserData data = user.getUserData();
