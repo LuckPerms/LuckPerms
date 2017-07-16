@@ -138,7 +138,7 @@ public class BulkUpdate {
             // ignored
         }
 
-        return "\"" + s + "\"";
+        return "'" + s + "'";
     }
 
 }
