@@ -40,7 +40,7 @@ import org.spongepowered.api.text.Text;
 import java.util.Map;
 
 @RequiredArgsConstructor
-public class PermissionDescription6Proxy implements PermissionDescription {
+public class PermissionDescriptionProxy implements PermissionDescription {
     private final LPPermissionService service;
     private final LPPermissionDescription handle;
 
@@ -63,7 +63,7 @@ public class PermissionDescription6Proxy implements PermissionDescription {
     public Map<Subject, Boolean> getAssignedSubjects(String s) {
         return handle.getAssignedSubjects(s).entrySet().stream()
                 .collect(ImmutableCollectors.toImmutableMap(
-                        e -> new Subject6Proxy(service, e.getKey().toReference()),
+                        e -> new SubjectProxy(service, e.getKey().toReference()),
                         Map.Entry::getValue
                 ));
     }

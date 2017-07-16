@@ -34,7 +34,7 @@ import me.lucko.luckperms.api.context.ImmutableContextSet;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * LuckPerms model for the Sponge SubjectData
+ * LuckPerms model for the Sponge {@link org.spongepowered.api.service.permission.SubjectData}
  */
 public interface LPSubjectData {
 

@@ -44,12 +44,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-/**
- * Proxies a LuckPerms Subject to implement {@link SubjectData}.
- */
 @SuppressWarnings("unchecked")
 @RequiredArgsConstructor
-public class SubjectData6Proxy implements SubjectData {
+public class SubjectDataProxy implements SubjectData {
     private final LPPermissionService service;
     private final SubjectReference ref;
     private final boolean enduring;
@@ -105,7 +102,7 @@ public class SubjectData6Proxy implements SubjectData {
                     .collect(ImmutableCollectors.toImmutableMap(
                             e -> CompatibilityUtil.convertContexts(e.getKey()),
                             e -> e.getValue().stream()
-                                    .map(s -> new Subject6Proxy(service, s))
+                                    .map(s -> new SubjectProxy(service, s))
                                     .collect(ImmutableCollectors.toImmutableList())
                             )
                     );
@@ -116,7 +113,7 @@ public class SubjectData6Proxy implements SubjectData {
     public List<Subject> getParents(Set<Context> contexts) {
         return (List) getHandle().thenApply(handle -> {
             return handle.getParents(CompatibilityUtil.convertContexts(contexts)).stream()
-                    .map(s -> new Subject6Proxy(service, s))
+                    .map(s -> new SubjectProxy(service, s))
                     .collect(ImmutableCollectors.toImmutableList());
         }).join();
     }

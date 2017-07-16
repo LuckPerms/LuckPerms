@@ -36,7 +36,7 @@ import org.spongepowered.api.service.permission.Subject;
 import java.util.Optional;
 
 /**
- * LuckPerms model for the Sponge Subject
+ * LuckPerms model for the Sponge {@link Subject}
  */
 public interface LPSubject {
 

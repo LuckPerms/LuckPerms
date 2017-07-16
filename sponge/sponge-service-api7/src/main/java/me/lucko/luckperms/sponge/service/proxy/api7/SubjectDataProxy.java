@@ -45,12 +45,9 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.annotation.Nullable;
 
-/**
- * Proxies a LuckPerms Subject to implement {@link SubjectData}.
- */
 @SuppressWarnings("unchecked")
 @RequiredArgsConstructor
-public class SubjectData7Proxy implements SubjectData {
+public class SubjectDataProxy implements SubjectData {
     private final LPPermissionService service;
     private final SubjectReference ref;
     private final boolean enduring;

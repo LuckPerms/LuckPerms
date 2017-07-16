@@ -39,7 +39,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
 /**
- * LuckPerms model for the Sponge SubjectCollection
+ * LuckPerms model for the Sponge {@link SubjectCollection}
  */
 public interface LPSubjectCollection {
 

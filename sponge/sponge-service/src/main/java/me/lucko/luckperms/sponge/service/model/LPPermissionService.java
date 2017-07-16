@@ -44,7 +44,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 /**
- * LuckPerms model for the Sponge PermissionService
+ * LuckPerms model for the Sponge {@link PermissionService}
  */
 public interface LPPermissionService {
 

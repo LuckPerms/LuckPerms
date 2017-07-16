@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.proxy.api7;
+package me.lucko.luckperms.sponge.service.proxy.api6;
 
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
@@ -48,7 +48,7 @@ import java.util.Map;
 @ToString(of = {"container", "roles", "id", "description"})
 @EqualsAndHashCode(of = {"container", "roles", "id", "description"})
 @RequiredArgsConstructor
-public final class SimpleDescription7Builder implements PermissionDescription.Builder {
+public final class SimpleDescriptionBuilder implements PermissionDescription.Builder {
     private final LPPermissionService service;
     private final PluginContainer container;
     private final Map<String, Tristate> roles = new HashMap<>();

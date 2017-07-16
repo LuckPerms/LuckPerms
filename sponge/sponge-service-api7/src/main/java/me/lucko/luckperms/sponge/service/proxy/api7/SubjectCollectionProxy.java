@@ -46,7 +46,7 @@ import java.util.function.Predicate;
 
 @SuppressWarnings("unchecked")
 @RequiredArgsConstructor
-public class SubjectCollection7Proxy implements SubjectCollection {
+public class SubjectCollectionProxy implements SubjectCollection {
     private final LPSubjectCollection handle;
 
     @Override

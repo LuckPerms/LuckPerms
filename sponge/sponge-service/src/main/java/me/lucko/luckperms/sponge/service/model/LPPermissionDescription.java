@@ -33,6 +33,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * LuckPerms model for the Sponge {@link PermissionDescription}
+ */
 public interface LPPermissionDescription {
 
     PermissionDescription sponge();

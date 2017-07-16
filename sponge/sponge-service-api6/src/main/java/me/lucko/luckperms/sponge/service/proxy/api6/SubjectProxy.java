@@ -23,11 +23,12 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.proxy.api7;
+package me.lucko.luckperms.sponge.service.proxy.api6;
 
 import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.model.CompatibilityUtil;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
@@ -47,7 +48,7 @@ import java.util.concurrent.CompletableFuture;
 
 @SuppressWarnings("unchecked")
 @RequiredArgsConstructor
-public class Subject7Proxy implements Subject {
+public class SubjectProxy implements Subject {
     private final LPPermissionService service;
     private final SubjectReference ref;
 
@@ -66,23 +67,13 @@ public class Subject7Proxy implements Subject {
     }
 
     @Override
-    public org.spongepowered.api.service.permission.SubjectReference asSubjectReference() {
-        return ref;
-    }
-
-    @Override
-    public boolean isSubjectDataPersisted() {
-        return true;
-    }
-
-    @Override
     public SubjectData getSubjectData() {
-        return new SubjectData7Proxy(service, ref, true);
+        return new SubjectDataProxy(service, ref, true);
     }
 
     @Override
     public SubjectData getTransientSubjectData() {
-        return new SubjectData7Proxy(service, ref, false);
+        return new SubjectDataProxy(service, ref, false);
     }
 
     @Override
@@ -107,30 +98,46 @@ public class Subject7Proxy implements Subject {
     }
 
     @Override
-    public boolean isChildOf(org.spongepowered.api.service.permission.SubjectReference parent) {
+    public boolean isChildOf(Subject parent) {
         return getHandle().thenApply(handle -> {
-            return handle.isChildOf(ImmutableContextSet.empty(), SubjectReference.cast(service, parent));
+            return handle.isChildOf(
+                    ImmutableContextSet.empty(),
+                    service.newSubjectReference(
+                            parent.getContainingCollection().getIdentifier(),
+                            parent.getIdentifier()
+                    )
+            );
         }).join();
     }
 
     @Override
-    public boolean isChildOf(Set<Context> contexts, org.spongepowered.api.service.permission.SubjectReference parent) {
+    public boolean isChildOf(Set<Context> contexts, Subject parent) {
         return getHandle().thenApply(handle -> {
-            return handle.isChildOf(CompatibilityUtil.convertContexts(contexts), SubjectReference.cast(service, parent));
+            return handle.isChildOf(
+                    CompatibilityUtil.convertContexts(contexts),
+                    service.newSubjectReference(
+                            parent.getContainingCollection().getIdentifier(),
+                            parent.getIdentifier()
+                    )
+            );
         }).join();
     }
 
     @Override
-    public List<org.spongepowered.api.service.permission.SubjectReference> getParents() {
+    public List<Subject> getParents() {
         return (List) getHandle().thenApply(handle -> {
-            return handle.getParents(ImmutableContextSet.empty());
+            return handle.getParents(ImmutableContextSet.empty()).stream()
+                    .map(s -> new SubjectProxy(service, s))
+                    .collect(ImmutableCollectors.toImmutableList());
         }).join();
     }
 
     @Override
-    public List<org.spongepowered.api.service.permission.SubjectReference> getParents(Set<Context> contexts) {
+    public List<Subject> getParents(Set<Context> contexts) {
         return (List) getHandle().thenApply(handle -> {
-            return handle.getParents(CompatibilityUtil.convertContexts(contexts));
+            return handle.getParents(CompatibilityUtil.convertContexts(contexts)).stream()
+                    .map(s -> new SubjectProxy(service, s))
+                    .collect(ImmutableCollectors.toImmutableList());
         }).join();
     }
 

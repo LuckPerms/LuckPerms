@@ -23,13 +23,16 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.proxy.api6;
+package me.lucko.luckperms.sponge.service.proxy.api7;
 
 import lombok.RequiredArgsConstructor;
+
+import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.model.LPPermissionDescription;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
+import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -38,13 +41,17 @@ import org.spongepowered.api.service.permission.PermissionDescription;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
+import org.spongepowered.api.service.permission.SubjectReference;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Predicate;
 
 @RequiredArgsConstructor
-public class PermissionService6Proxy implements PermissionService {
+public class PermissionServiceProxy implements PermissionService {
     private final LPPermissionService handle;
 
     @Override
@@ -63,12 +70,27 @@ public class PermissionService6Proxy implements PermissionService {
     }
 
     @Override
-    public SubjectCollection getSubjects(String s) {
-        return handle.getCollection(s).sponge();
+    public Predicate<String> getIdentifierValidityPredicate() {
+        return handle.getIdentifierValidityPredicate();
     }
 
     @Override
-    public Map<String, SubjectCollection> getKnownSubjects() {
+    public CompletableFuture<SubjectCollection> loadCollection(String s) {
+        return CompletableFuture.completedFuture(handle.getCollection(s).sponge());
+    }
+
+    @Override
+    public Optional<SubjectCollection> getCollection(String s) {
+        return Optional.ofNullable(handle.getLoadedCollections().get(s.toLowerCase())).map(LPSubjectCollection::sponge);
+    }
+
+    @Override
+    public CompletableFuture<Boolean> hasCollection(String s) {
+        return CompletableFuture.completedFuture(handle.getLoadedCollections().containsKey(s.toLowerCase()));
+    }
+
+    @Override
+    public Map<String, SubjectCollection> getLoadedCollections() {
         return handle.getLoadedCollections().entrySet().stream()
                 .collect(ImmutableCollectors.toImmutableMap(
                         Map.Entry::getKey,
@@ -77,13 +99,23 @@ public class PermissionService6Proxy implements PermissionService {
     }
 
     @Override
-    public Optional<PermissionDescription.Builder> newDescriptionBuilder(Object o) {
+    public CompletableFuture<Set<String>> getAllIdentifiers() {
+        return CompletableFuture.completedFuture(ImmutableSet.copyOf(handle.getLoadedCollections().keySet()));
+    }
+
+    @Override
+    public SubjectReference newSubjectReference(String s, String s1) {
+        return handle.newSubjectReference(s, s1);
+    }
+
+    @Override
+    public PermissionDescription.Builder newDescriptionBuilder(Object o) {
         Optional<PluginContainer> container = Sponge.getGame().getPluginManager().fromInstance(o);
         if (!container.isPresent()) {
             throw new IllegalArgumentException("Couldn't find a plugin container for " + o.getClass().getSimpleName());
         }
 
-        return Optional.of(new SimpleDescription6Builder(handle, container.get()));
+        return new SimpleDescriptionBuilder(handle, container.get());
     }
 
     @Override
