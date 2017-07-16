@@ -30,31 +30,33 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.sponge.LPSpongePlugin;
-import me.lucko.luckperms.sponge.service.references.SubjectReference;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import org.spongepowered.api.service.permission.PermissionDescription;
+import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.service.context.ContextCalculator;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
+import org.spongepowered.api.text.Text;
 
 import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Predicate;
 
 /**
- * LuckPerms model for the Sponge {@link org.spongepowered.api.service.permission.PermissionService}
+ * LuckPerms model for the Sponge PermissionService
  */
 public interface LPPermissionService {
 
-    LPSpongePlugin getPlugin();
+    LuckPermsPlugin getPlugin();
 
     PermissionService sponge();
 
     LPSubjectCollection getUserSubjects();
 
     LPSubjectCollection getGroupSubjects();
+
+    LPSubjectCollection getDefaultSubjects();
 
     default LPSubjectData getDefaultData() {
         return getDefaults().getSubjectData();
@@ -70,11 +72,11 @@ public interface LPPermissionService {
 
     SubjectReference newSubjectReference(String collectionIdentifier, String subjectIdentifier);
 
-    PermissionDescription.Builder newDescriptionBuilder(Object plugin);
+    LPPermissionDescription registerPermissionDescription(String id, Text description, PluginContainer owner);
 
-    Optional<PermissionDescription> getDescription(String permission);
+    Optional<LPPermissionDescription> getDescription(String permission);
 
-    ImmutableCollection<PermissionDescription> getDescriptions();
+    ImmutableCollection<LPPermissionDescription> getDescriptions();
 
     void registerContextCalculator(ContextCalculator<Subject> calculator);
 

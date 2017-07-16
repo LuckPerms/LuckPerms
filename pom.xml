@@ -14,6 +14,9 @@
         <module>bukkit</module>
         <module>bukkit-legacy</module>
         <module>bungee</module>
+        <module>sponge/sponge-service</module>
+        <module>sponge/sponge-service-api6</module>
+        <module>sponge/sponge-service-api7</module>
         <module>sponge</module>
     </modules>
 

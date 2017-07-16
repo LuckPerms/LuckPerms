@@ -29,9 +29,6 @@ import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.sponge.service.LuckPermsService;
-import me.lucko.luckperms.sponge.service.proxy.SubjectProxy;
-import me.lucko.luckperms.sponge.service.references.SubjectReference;
 
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.permission.Subject;
@@ -39,15 +36,13 @@ import org.spongepowered.api.service.permission.Subject;
 import java.util.Optional;
 
 /**
- * LuckPerms model for the Sponge {@link org.spongepowered.api.service.permission.Subject}
+ * LuckPerms model for the Sponge Subject
  */
 public interface LPSubject {
 
-    default Subject sponge() {
-        return new SubjectProxy(getService(), toReference());
-    }
+    Subject sponge();
 
-    LuckPermsService getService();
+    LPPermissionService getService();
 
     String getIdentifier();
 

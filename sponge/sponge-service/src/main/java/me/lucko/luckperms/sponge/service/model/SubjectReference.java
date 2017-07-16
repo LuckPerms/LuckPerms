@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.references;
+package me.lucko.luckperms.sponge.service.model;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -32,9 +32,6 @@ import lombok.ToString;
 
 import com.google.common.base.Splitter;
 
-import me.lucko.luckperms.sponge.service.model.LPPermissionService;
-import me.lucko.luckperms.sponge.service.model.LPSubject;
-
 import org.spongepowered.api.service.permission.Subject;
 
 import java.lang.ref.WeakReference;
@@ -42,10 +39,10 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-@ToString(of = {"collection", "identifier"})
-@EqualsAndHashCode(of = {"collection", "identifier"})
+@ToString(of = {"collectionIdentifier", "subjectIdentifier"})
+@EqualsAndHashCode(of = {"collectionIdentifier", "subjectIdentifier"})
 @RequiredArgsConstructor(staticName = "of")
-public final class SubjectReference {
+public final class SubjectReference implements org.spongepowered.api.service.permission.SubjectReference {
 
     @Deprecated
     public static SubjectReference deserialize(LPPermissionService service, String s) {
@@ -57,13 +54,21 @@ public final class SubjectReference {
         return of(service, subject.getContainingCollection().getIdentifier(), subject.getIdentifier());
     }
 
+    public static SubjectReference cast(LPPermissionService service, org.spongepowered.api.service.permission.SubjectReference reference) {
+        if (reference instanceof SubjectReference) {
+            return ((SubjectReference) reference);
+        } else {
+            return of(service, reference.getCollectionIdentifier(), reference.getSubjectIdentifier());
+        }
+    }
+
     private final LPPermissionService service;
 
     @Getter
-    private final String collection;
+    private final String collectionIdentifier;
 
     @Getter
-    private final String identifier;
+    private final String subjectIdentifier;
 
     private long lastLookup = 0L;
     private WeakReference<LPSubject> cache = null;
@@ -81,13 +86,13 @@ public final class SubjectReference {
             }
         }
 
-        LPSubject s = service.getCollection(collection).loadSubject(identifier).join();
+        LPSubject s = service.getCollection(collectionIdentifier).loadSubject(subjectIdentifier).join();
         lastLookup = System.currentTimeMillis();
         cache = new WeakReference<>(s);
         return s;
     }
 
-    public CompletableFuture<LPSubject> resolve() {
+    public CompletableFuture<LPSubject> resolveLp() {
         long sinceLast = System.currentTimeMillis() - lastLookup;
 
         // try the cache
@@ -103,4 +108,20 @@ public final class SubjectReference {
         return CompletableFuture.supplyAsync(this::resolveDirectly);
     }
 
+    @Override
+    public CompletableFuture<Subject> resolve() {
+        long sinceLast = System.currentTimeMillis() - lastLookup;
+
+        // try the cache
+        if (sinceLast < TimeUnit.SECONDS.toMillis(10)) {
+            if (cache != null) {
+                LPSubject s = cache.get();
+                if (s != null) {
+                    return CompletableFuture.completedFuture(s.sponge());
+                }
+            }
+        }
+
+        return CompletableFuture.supplyAsync(() -> resolveDirectly().sponge());
+    }
 }

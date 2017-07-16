@@ -30,8 +30,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.sponge.service.LuckPermsService;
-import me.lucko.luckperms.sponge.service.references.SubjectReference;
 
 import org.spongepowered.api.service.permission.SubjectCollection;
 
@@ -41,13 +39,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
 /**
- * LuckPerms model for the Sponge {@link org.spongepowered.api.service.permission.SubjectCollection}
+ * LuckPerms model for the Sponge SubjectCollection
  */
 public interface LPSubjectCollection {
 
     SubjectCollection sponge();
 
-    LuckPermsService getService();
+    LPPermissionService getService();
 
     String getIdentifier();
 

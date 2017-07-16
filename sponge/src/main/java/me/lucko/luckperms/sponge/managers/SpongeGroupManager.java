@@ -47,10 +47,10 @@ import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.model.SpongeGroup;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
+import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
-import me.lucko.luckperms.sponge.service.proxy.SubjectCollectionProxy;
-import me.lucko.luckperms.sponge.service.references.SubjectReference;
+import me.lucko.luckperms.sponge.service.model.SubjectReference;
 
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectCollection;
@@ -68,7 +68,7 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
     @Getter
     private final LPSpongePlugin plugin;
 
-    private SubjectCollectionProxy spongeProxy = null;
+    private SubjectCollection spongeProxy = null;
 
     private final LoadingCache<String, SpongeGroup> objects = Caffeine.newBuilder()
             .build(new CacheLoader<String, SpongeGroup>() {
@@ -167,7 +167,8 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
     @Override
     public synchronized SubjectCollection sponge() {
         if (spongeProxy == null) {
-            spongeProxy = new SubjectCollectionProxy(Preconditions.checkNotNull(plugin.getService(), "service"), this);
+            Preconditions.checkNotNull(plugin.getService(), "service");
+            spongeProxy = ProxyFactory.toSponge(this);
         }
         return spongeProxy;
     }

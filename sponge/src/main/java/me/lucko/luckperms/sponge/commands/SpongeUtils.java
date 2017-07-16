@@ -31,7 +31,7 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.sponge.service.references.SubjectReference;
+import me.lucko.luckperms.sponge.service.model.SubjectReference;
 
 import java.util.List;
 import java.util.Map;
@@ -80,9 +80,9 @@ public class SpongeUtils {
         StringBuilder sb = new StringBuilder();
         for (SubjectReference s : parents) {
             sb.append("&3> &a")
-                    .append(s.getIdentifier())
+                    .append(s.getSubjectIdentifier())
                     .append(" &bfrom collection &a")
-                    .append(s.getCollection())
+                    .append(s.getCollectionIdentifier())
                     .append("&b.\n");
         }
         return sb.toString();

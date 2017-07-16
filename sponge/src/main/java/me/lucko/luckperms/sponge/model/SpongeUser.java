@@ -37,15 +37,17 @@ import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.LuckPermsSubjectData;
+import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
-import me.lucko.luckperms.sponge.service.references.SubjectReference;
+import me.lucko.luckperms.sponge.service.model.SubjectReference;
 import me.lucko.luckperms.sponge.timings.LPTiming;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.permission.PermissionService;
+import org.spongepowered.api.service.permission.Subject;
 
 import co.aikar.timings.Timing;
 
@@ -110,6 +112,11 @@ public class SpongeUser extends User {
         }
 
         @Override
+        public Subject sponge() {
+            return ProxyFactory.toSponge(this);
+        }
+
+        @Override
         public LuckPermsService getService() {
             return plugin.getService();
         }
@@ -124,7 +131,7 @@ public class SpongeUser extends User {
         @Override
         public boolean isChildOf(ImmutableContextSet contexts, SubjectReference parent) {
             try (Timing ignored = plugin.getTimings().time(LPTiming.USER_IS_CHILD_OF)) {
-                return parent.getCollection().equals(PermissionService.SUBJECTS_GROUP) && getPermissionValue(contexts, "group." + parent.getIdentifier()).asBoolean();
+                return parent.getCollectionIdentifier().equals(PermissionService.SUBJECTS_GROUP) && getPermissionValue(contexts, "group." + parent.getSubjectIdentifier()).asBoolean();
             }
         }
 

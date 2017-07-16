@@ -99,10 +99,8 @@ import org.spongepowered.api.scheduler.AsynchronousExecutor;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.SpongeExecutorService;
 import org.spongepowered.api.scheduler.SynchronousExecutor;
-import org.spongepowered.api.service.permission.PermissionDescription;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.text.Text;
 
 import java.io.File;
 import java.io.InputStream;
@@ -521,11 +519,6 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     }
 
     private void registerPermission(LuckPermsService p, String node) {
-        PermissionDescription.Builder builder = p.newDescriptionBuilder(this);
-        try {
-            builder.assign(PermissionDescription.ROLE_ADMIN, true).description(Text.of(node)).id(node).register();
-        } catch (IllegalStateException e) {
-            e.printStackTrace();
-        }
+        p.registerPermissionDescription(node, null, game.getPluginManager().fromInstance(this).get());
     }
 }

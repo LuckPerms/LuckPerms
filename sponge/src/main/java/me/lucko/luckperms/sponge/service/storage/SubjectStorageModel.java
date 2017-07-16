@@ -40,7 +40,7 @@ import me.lucko.luckperms.common.core.NodeModel;
 import me.lucko.luckperms.common.core.PriorityComparator;
 import me.lucko.luckperms.sponge.service.calculated.CalculatedSubjectData;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
-import me.lucko.luckperms.sponge.service.references.SubjectReference;
+import me.lucko.luckperms.sponge.service.model.SubjectReference;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -241,8 +241,8 @@ public class SubjectStorageModel {
             JsonArray data = new JsonArray();
             for (SubjectReference ref : e.getValue()) {
                 JsonObject parent = new JsonObject();
-                parent.addProperty("collection", ref.getCollection());
-                parent.addProperty("subject", ref.getCollection());
+                parent.addProperty("collection", ref.getCollectionIdentifier());
+                parent.addProperty("subject", ref.getCollectionIdentifier());
                 data.add(parent);
             }
             section.add("data", data);

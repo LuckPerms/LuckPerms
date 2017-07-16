@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.proxy;
+package me.lucko.luckperms.sponge.service.proxy.api6;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,7 +32,7 @@ import me.lucko.luckperms.sponge.service.model.CompatibilityUtil;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
-import me.lucko.luckperms.sponge.service.references.SubjectReference;
+import me.lucko.luckperms.sponge.service.model.SubjectReference;
 
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
@@ -46,19 +46,16 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * Proxies a LuckPerms Subject to implement {@link SubjectData}.
- *
- * All methods which return "boolean" will return instantly, and the change will be applied in the background.
- * This will be changed as soon as Sponge implements futures into its API.
  */
 @SuppressWarnings("unchecked")
 @RequiredArgsConstructor
-public class SubjectDataProxy implements SubjectData {
+public class SubjectData6Proxy implements SubjectData {
     private final LPPermissionService service;
     private final SubjectReference ref;
     private final boolean enduring;
 
     private CompletableFuture<LPSubjectData> getHandle() {
-        return enduring ? ref.resolve().thenApply(LPSubject::getSubjectData) : ref.resolve().thenApply(LPSubject::getTransientSubjectData);
+        return enduring ? ref.resolveLp().thenApply(LPSubject::getSubjectData) : ref.resolveLp().thenApply(LPSubject::getTransientSubjectData);
     }
 
     @Override
@@ -108,7 +105,7 @@ public class SubjectDataProxy implements SubjectData {
                     .collect(ImmutableCollectors.toImmutableMap(
                             e -> CompatibilityUtil.convertContexts(e.getKey()),
                             e -> e.getValue().stream()
-                                    .map(s -> new SubjectProxy(service, s))
+                                    .map(s -> new Subject6Proxy(service, s))
                                     .collect(ImmutableCollectors.toImmutableList())
                             )
                     );
@@ -119,7 +116,7 @@ public class SubjectDataProxy implements SubjectData {
     public List<Subject> getParents(Set<Context> contexts) {
         return (List) getHandle().thenApply(handle -> {
             return handle.getParents(CompatibilityUtil.convertContexts(contexts)).stream()
-                    .map(s -> new SubjectProxy(service, s))
+                    .map(s -> new Subject6Proxy(service, s))
                     .collect(ImmutableCollectors.toImmutableList());
         }).join();
     }
@@ -160,7 +157,7 @@ public class SubjectDataProxy implements SubjectData {
 
     @Override
     public boolean clearParents(Set<Context> contexts) {
-        getHandle().thenCompose(handle -> handle.clearParents(CompatibilityUtil.convertContexts(contexts)));
+        ;
         return true;
     }
 

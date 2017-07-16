@@ -95,6 +95,27 @@
     </profiles>
 
     <dependencies>
+        <!-- LP Sponge Model -->
+        <dependency>
+            <groupId>me.lucko.luckperms</groupId>
+            <artifactId>luckperms-sponge-service</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <!-- LP Sponge Proxy for API6 -->
+        <dependency>
+            <groupId>me.lucko.luckperms</groupId>
+            <artifactId>luckperms-sponge-service-api6</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <!-- LP Sponge Proxy for API7 -->
+        <dependency>
+            <groupId>me.lucko.luckperms</groupId>
+            <artifactId>luckperms-sponge-service-api7</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
         <!-- Sponge API -->
         <dependency>
             <groupId>org.spongepowered</groupId>

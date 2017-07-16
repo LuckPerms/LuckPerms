@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.proxy;
+package me.lucko.luckperms.sponge.service.proxy.api6;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,7 +32,7 @@ import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.sponge.service.model.CompatibilityUtil;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
-import me.lucko.luckperms.sponge.service.references.SubjectReference;
+import me.lucko.luckperms.sponge.service.model.SubjectReference;
 
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.context.Context;
@@ -48,12 +48,12 @@ import java.util.concurrent.CompletableFuture;
 
 @SuppressWarnings("unchecked")
 @RequiredArgsConstructor
-public class SubjectProxy implements Subject {
+public class Subject6Proxy implements Subject {
     private final LPPermissionService service;
     private final SubjectReference ref;
 
     private CompletableFuture<LPSubject> getHandle() {
-        return ref.resolve();
+        return ref.resolveLp();
     }
 
     @Override
@@ -63,17 +63,17 @@ public class SubjectProxy implements Subject {
 
     @Override
     public SubjectCollection getContainingCollection() {
-        return service.getCollection(ref.getCollection()).sponge();
+        return service.getCollection(ref.getCollectionIdentifier()).sponge();
     }
 
     @Override
     public SubjectData getSubjectData() {
-        return new SubjectDataProxy(service, ref, true);
+        return new SubjectData6Proxy(service, ref, true);
     }
 
     @Override
     public SubjectData getTransientSubjectData() {
-        return new SubjectDataProxy(service, ref, false);
+        return new SubjectData6Proxy(service, ref, false);
     }
 
     @Override
@@ -127,7 +127,7 @@ public class SubjectProxy implements Subject {
     public List<Subject> getParents() {
         return (List) getHandle().thenApply(handle -> {
             return handle.getParents(ImmutableContextSet.empty()).stream()
-                    .map(s -> new SubjectProxy(service, s))
+                    .map(s -> new Subject6Proxy(service, s))
                     .collect(ImmutableCollectors.toImmutableList());
         }).join();
     }
@@ -136,7 +136,7 @@ public class SubjectProxy implements Subject {
     public List<Subject> getParents(Set<Context> contexts) {
         return (List) getHandle().thenApply(handle -> {
             return handle.getParents(CompatibilityUtil.convertContexts(contexts)).stream()
-                    .map(s -> new SubjectProxy(service, s))
+                    .map(s -> new Subject6Proxy(service, s))
                     .collect(ImmutableCollectors.toImmutableList());
         }).join();
     }
@@ -157,7 +157,7 @@ public class SubjectProxy implements Subject {
 
     @Override
     public String getIdentifier() {
-        return ref.getIdentifier();
+        return ref.getSubjectIdentifier();
     }
 
     @Override

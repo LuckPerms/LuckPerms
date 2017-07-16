@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.proxy;
+package me.lucko.luckperms.sponge.service.proxy.api6;
 
 import lombok.RequiredArgsConstructor;
 
@@ -43,7 +43,7 @@ import java.util.Set;
 
 @SuppressWarnings("unchecked")
 @RequiredArgsConstructor
-public class SubjectCollectionProxy implements SubjectCollection {
+public class SubjectCollection6Proxy implements SubjectCollection {
     private final LPPermissionService service;
     private final LPSubjectCollection handle;
 
@@ -71,7 +71,7 @@ public class SubjectCollectionProxy implements SubjectCollection {
         // this behaviour should be replaced when CompletableFutures are added to Sponge
         return (List) handle.getAllIdentifiers()
                 .thenApply(ids -> ids.stream()
-                        .map(s -> new SubjectProxy(service, service.newSubjectReference(getIdentifier(), s)))
+                        .map(s -> new Subject6Proxy(service, service.newSubjectReference(getIdentifier(), s)))
                         .collect(ImmutableCollectors.toImmutableList())
                 ).join();
     }
@@ -82,7 +82,7 @@ public class SubjectCollectionProxy implements SubjectCollection {
         return (Map) handle.getAllWithPermission(s).thenApply(map -> {
             return map.entrySet().stream()
                     .collect(ImmutableCollectors.toImmutableMap(
-                            e -> new SubjectProxy(service, e.getKey()),
+                            e -> new Subject6Proxy(service, e.getKey()),
                             Map.Entry::getValue
                     ));
         }).join();
@@ -93,7 +93,7 @@ public class SubjectCollectionProxy implements SubjectCollection {
         return (Map) handle.getAllWithPermission(CompatibilityUtil.convertContexts(set), s)
                 .thenApply(map -> map.entrySet().stream()
                         .collect(ImmutableCollectors.toImmutableMap(
-                                e -> new SubjectProxy(service, e.getKey()),
+                                e -> new Subject6Proxy(service, e.getKey()),
                                 Map.Entry::getValue
                         ))
                 ).join();

@@ -45,7 +45,7 @@ import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.utils.ExtractedContexts;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
-import me.lucko.luckperms.sponge.service.references.SubjectReference;
+import me.lucko.luckperms.sponge.service.model.SubjectReference;
 import me.lucko.luckperms.sponge.timings.LPTiming;
 
 import org.spongepowered.api.service.permission.PermissionService;
@@ -205,8 +205,8 @@ public class LuckPermsSubjectData implements LPSubjectData {
     @Override
     public CompletableFuture<Boolean> addParent(@NonNull ImmutableContextSet contexts, @NonNull SubjectReference subject) {
         try (Timing i = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_ADD_PARENT)) {
-            if (subject.getCollection().equals(PermissionService.SUBJECTS_GROUP)) {
-                return subject.resolve().thenCompose(sub -> {
+            if (subject.getCollectionIdentifier().equals(PermissionService.SUBJECTS_GROUP)) {
+                return subject.resolveLp().thenCompose(sub -> {
                     DataMutateResult result;
 
                     if (enduring) {
@@ -233,8 +233,8 @@ public class LuckPermsSubjectData implements LPSubjectData {
     @Override
     public CompletableFuture<Boolean> removeParent(@NonNull ImmutableContextSet contexts, @NonNull SubjectReference subject) {
         try (Timing i = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_REMOVE_PARENT)) {
-            if (subject.getCollection().equals(PermissionService.SUBJECTS_GROUP)) {
-                subject.resolve().thenCompose(sub -> {
+            if (subject.getCollectionIdentifier().equals(PermissionService.SUBJECTS_GROUP)) {
+                subject.resolveLp().thenCompose(sub -> {
                     DataMutateResult result;
 
                     if (enduring) {

@@ -23,48 +23,72 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.description;
+package me.lucko.luckperms.sponge.service;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import me.lucko.luckperms.common.utils.ImmutableCollectors;
+import me.lucko.luckperms.sponge.service.model.LPPermissionDescription;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
+import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
-import me.lucko.luckperms.sponge.service.proxy.SubjectProxy;
+import me.lucko.luckperms.sponge.service.model.SubjectReference;
 
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.permission.PermissionDescription;
-import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.text.Text;
 
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
-@SuppressWarnings("unchecked")
-@Getter
-@AllArgsConstructor
-@EqualsAndHashCode(of = {"owner", "id", "description"})
-@ToString(of = {"owner", "id", "description"})
-public final class SimpleDescription implements PermissionDescription {
+@RequiredArgsConstructor
+@EqualsAndHashCode(of = {"id", "description", "owner"})
+@ToString(of = {"id", "description", "owner"})
+public final class SimpleDescription implements LPPermissionDescription {
 
-    @Getter(AccessLevel.NONE)
+    @Getter
     private final LPPermissionService service;
-    private final PluginContainer owner;
+
+    @Getter
     private final String id;
+
     private final Text description;
 
+    private final PluginContainer owner;
+
+    private PermissionDescription spongeProxy = null;
+
     @Override
-    public Map<Subject, Boolean> getAssignedSubjects(String id) {
-        LPSubjectCollection subjects = service.getCollection(id);
-        return (Map) subjects.getAllWithPermission(this.id)
-                .thenApply(map -> map.entrySet().stream()
-                        .collect(ImmutableCollectors.toImmutableMap(
-                                e -> new SubjectProxy(service, e.getKey()),
-                                Map.Entry::getValue)
-                        )
-                ).join();
+    public synchronized PermissionDescription sponge() {
+        if (spongeProxy == null) {
+            spongeProxy = ProxyFactory.toSponge(this);
+        }
+        return spongeProxy;
+    }
+
+    @Override
+    public Optional<Text> getDescription() {
+        return Optional.ofNullable(description);
+    }
+
+    @Override
+    public Optional<PluginContainer> getOwner() {
+        return Optional.ofNullable(owner);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public CompletableFuture<Map<SubjectReference, Boolean>> findAssignedSubjects(String id) {
+        LPSubjectCollection collection = service.getCollection(id);
+        return (CompletableFuture) collection.getAllWithPermission(id);
+    }
+
+    @Override
+    public Map<LPSubject, Boolean> getAssignedSubjects(String id) {
+        LPSubjectCollection collection = service.getCollection(id);
+        return collection.getLoadedWithPermission(id);
     }
 }

@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.sponge.service.description;
+package me.lucko.luckperms.sponge.service.proxy.api7;
 
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
@@ -32,7 +32,8 @@ import lombok.ToString;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.sponge.service.LuckPermsService;
+import me.lucko.luckperms.sponge.service.model.LPPermissionDescription;
+import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 
@@ -47,8 +48,8 @@ import java.util.Map;
 @ToString(of = {"container", "roles", "id", "description"})
 @EqualsAndHashCode(of = {"container", "roles", "id", "description"})
 @RequiredArgsConstructor
-public final class SimpleDescriptionBuilder implements PermissionDescription.Builder {
-    private final LuckPermsService service;
+public final class SimpleDescription7Builder implements PermissionDescription.Builder {
+    private final LPPermissionService service;
     private final PluginContainer container;
     private final Map<String, Tristate> roles = new HashMap<>();
     private String id = null;
@@ -61,7 +62,7 @@ public final class SimpleDescriptionBuilder implements PermissionDescription.Bui
     }
 
     @Override
-    public PermissionDescription.Builder description(@NonNull Text text) {
+    public PermissionDescription.Builder description(Text text) {
         description = text;
         return this;
     }
@@ -77,12 +78,8 @@ public final class SimpleDescriptionBuilder implements PermissionDescription.Bui
         if (id == null) {
             throw new IllegalStateException("id cannot be null");
         }
-        if (description == null) {
-            throw new IllegalStateException("description cannot be null");
-        }
 
-        SimpleDescription d = new SimpleDescription(service, container, id, description);
-        service.getDescriptionSet().add(d);
+        LPPermissionDescription d = service.registerPermissionDescription(id, description, container);
 
         // Set role-templates
         LPSubjectCollection subjects = service.getCollection(PermissionService.SUBJECTS_ROLE_TEMPLATE);
@@ -98,6 +95,6 @@ public final class SimpleDescriptionBuilder implements PermissionDescription.Bui
         id = null;
         description = null;
 
-        return d;
+        return d.sponge();
     }
 }

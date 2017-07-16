@@ -45,7 +45,7 @@ import me.lucko.luckperms.sponge.calculators.SpongeWildcardProcessor;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
-import me.lucko.luckperms.sponge.service.references.SubjectReference;
+import me.lucko.luckperms.sponge.service.model.SubjectReference;
 
 import java.util.Comparator;
 import java.util.HashMap;
