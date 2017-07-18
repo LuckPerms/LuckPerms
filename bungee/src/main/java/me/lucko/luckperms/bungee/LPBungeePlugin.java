@@ -118,7 +118,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         scheduler = new LPBungeeScheduler(this);
         localeManager = new NoopLocaleManager();
         senderFactory = new BungeeSenderFactory(this);
-        log = new SenderLogger(getConsoleSender());
+        log = new SenderLogger(this, getConsoleSender());
 
         DependencyManager.loadDependencies(this, Collections.singletonList(Dependency.CAFFEINE));
     }

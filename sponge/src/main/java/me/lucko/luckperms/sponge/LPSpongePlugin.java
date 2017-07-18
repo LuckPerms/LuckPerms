@@ -175,7 +175,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         scheduler = new LPSpongeScheduler(this);
         localeManager = new NoopLocaleManager();
         senderFactory = new SpongeSenderFactory(this);
-        log = new SenderLogger(getConsoleSender());
+        log = new SenderLogger(this, getConsoleSender());
 
         LuckPermsPlugin.sendStartupBanner(getConsoleSender(), this);
         verboseHandler = new VerboseHandler(scheduler.async(), getVersion());

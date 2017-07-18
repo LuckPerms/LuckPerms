@@ -141,7 +141,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         scheduler = new LPBukkitScheduler(this);
         localeManager = new NoopLocaleManager();
         senderFactory = new BukkitSenderFactory(this);
-        log = new SenderLogger(getConsoleSender());
+        log = new SenderLogger(this, getConsoleSender());
 
         DependencyManager.loadDependencies(this, Collections.singletonList(Dependency.CAFFEINE));
     }

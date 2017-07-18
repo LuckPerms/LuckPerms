@@ -30,24 +30,36 @@ import lombok.NonNull;
 
 import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 @AllArgsConstructor
 public class SenderLogger implements Logger {
+    private final LuckPermsPlugin plugin;
     private final Sender console;
 
     @Override
     public void info(@NonNull String s) {
-        Message.LOG_INFO.send(console, s);
+        msg(Message.LOG_INFO, s);
     }
 
     @Override
     public void warn(@NonNull String s) {
-        Message.LOG_WARN.send(console, s);
+        msg(Message.LOG_WARN, s);
     }
 
     @Override
     public void severe(@NonNull String s) {
-        Message.LOG_ERROR.send(console, s);
+        msg(Message.LOG_ERROR, s);
+    }
+
+    private void msg(Message message, String s) {
+        String msg = message.asString(plugin.getLocaleManager(), s);
+        if (plugin.getConfiguration() != null && !plugin.getConfiguration().get(ConfigKeys.USE_COLORED_LOGGER)) {
+            msg = Util.stripColor(msg);
+        }
+        console.sendMessage(msg);
     }
 }
