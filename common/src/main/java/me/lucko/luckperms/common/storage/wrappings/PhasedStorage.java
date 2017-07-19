@@ -42,6 +42,7 @@ import me.lucko.luckperms.common.data.Log;
 import me.lucko.luckperms.common.storage.Storage;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -306,5 +307,6 @@ public class PhasedStorage implements Storage {
         boolean isAcceptingLogins();
         void setAcceptingLogins(boolean b);
         void init();
+        Map<String, String> getMeta();
     }
 }

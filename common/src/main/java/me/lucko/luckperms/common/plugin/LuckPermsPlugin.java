@@ -223,6 +223,13 @@ public interface LuckPermsPlugin {
     String getServerVersion();
 
     /**
+     * Gets the time when the plugin first started in millis.
+     *
+     * @return the enable time
+     */
+    long getStartTime();
+
+    /**
      * Gets the file watcher running on the platform, or null if it's not enabled.
      *
      * @return the file watcher, or null
@@ -344,6 +351,13 @@ public interface LuckPermsPlugin {
      * @return the console sender of the instance
      */
     Sender getConsoleSender();
+
+    /**
+     * Gets the unique players which have connected to the server since it started.
+     *
+     * @return the unique connections
+     */
+    Set<UUID> getUniqueConnections();
 
     /**
      * Gets a set of Contexts that should be pre-processed in advance

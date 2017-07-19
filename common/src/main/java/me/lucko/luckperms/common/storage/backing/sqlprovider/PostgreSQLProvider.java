@@ -32,6 +32,9 @@ import me.lucko.luckperms.common.storage.DatastoreConfiguration;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class PostgreSQLProvider extends SQLProvider {
@@ -85,6 +88,31 @@ public class PostgreSQLProvider extends SQLProvider {
         if (hikari != null) {
             hikari.close();
         }
+    }
+
+    @Override
+    public Map<String, String> getMeta() {
+        Map<String, String> ret = new LinkedHashMap<>();
+        boolean success = true;
+
+        long start = System.currentTimeMillis();
+        try (Connection c = hikari.getConnection()) {
+            try (Statement s = c.createStatement()) {
+                s.execute("/* ping */ SELECT 1");
+            }
+        } catch (SQLException e) {
+            success = false;
+        }
+        long duration = System.currentTimeMillis() - start;
+
+        if (success) {
+            ret.put("Ping", "&a" + duration + "ms");
+            ret.put("Connected", "true");
+        } else {
+            ret.put("Connected", "false");
+        }
+
+        return ret;
     }
 
     @Override

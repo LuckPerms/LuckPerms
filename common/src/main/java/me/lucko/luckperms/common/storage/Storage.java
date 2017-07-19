@@ -37,6 +37,7 @@ import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.Log;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -59,6 +60,8 @@ public interface Storage {
     void init();
 
     void shutdown();
+
+    Map<String, String> getMeta();
 
     CompletableFuture<Boolean> logAction(LogEntry entry);
 

@@ -172,34 +172,24 @@ public enum Message {
     UPDATE_TASK_PUSH_FAILURE("&cError whilst pushing changes to other servers.", true),
     UPDATE_TASK_PUSH_FAILURE_NOT_SETUP("&cError whilst pushing changes to other servers. A messaging service has not been configured.", true),
     RELOAD_CONFIG_SUCCESS("&aThe configuration file was reloaded. &7(some options will only apply after the server has restarted.)", true),
-    INFO(
+    INFO_TOP(
             "{PREFIX}&2Running &bLuckPerms v{0}&2 by &bLuck&2." + "\n" +
             "{PREFIX}&f-  &3Platform: &f{1}" + "\n" +
-            "{PREFIX}&f-  &3Storage Method: &f{2}" + "\n" +
-            "{PREFIX}&f-  &3Server Name: &f{3}" + "\n" +
-            "{PREFIX}&f-  &3Sync Interval: &a{4} &fminutes" + "\n" +
-            "{PREFIX}&f-  &3Messaging Service: &f{5}" + "\n" +
-            "{PREFIX}&f-  &bCounts:" + "\n" +
-            "{PREFIX}&f-     &3Online Players: &a{6}" + "\n" +
-            "{PREFIX}&f-     &3Loaded Users: &a{7}" + "\n" +
-            "{PREFIX}&f-     &3Loaded Groups: &a{8}" + "\n" +
-            "{PREFIX}&f-     &3Loaded Tracks: &a{9}" + "\n" +
-            "{PREFIX}&f-     &3Log size: &a{10}" + "\n" +
-            "{PREFIX}&f-     &3UUID Cache size: &a{11}" + "\n" +
-            "{PREFIX}&f-     &3Translations loaded: &a{12}" + "\n" +
-            "{PREFIX}&f-     &3Pre-process contexts: &a{13}" + "\n" +
-            "{PREFIX}&f-     &3Context Calculators: &a{14}" + "\n" +
-            "{PREFIX}&f-     &3Unique permissions: &a{15}" + "\n" +
-            "{PREFIX}&f-  &bConfiguration:" + "\n" +
-            "{PREFIX}&f-     &3Use Server UUIDs: {16}" + "\n" +
-            "{PREFIX}&f-     &bPermission Calculation:" + "\n" +
-            "{PREFIX}&f-        &3Including Global: {17}" + "\n" +
-            "{PREFIX}&f-        &3Including Global World: {18}" + "\n" +
-            "{PREFIX}&f-        &3Applying Global Groups: {19}" + "\n" +
-            "{PREFIX}&f-        &3Applying Global World Groups: {20}" + "\n" +
-            "{PREFIX}&f-        &3Applying Wildcards: {21}" + "\n" +
-            "{PREFIX}&f-        &3Applying Regex: {22}" + "\n" +
-            "{PREFIX}&f-        &3Applying Shorthand: {23}",
+            "{PREFIX}&f-  &3Server Brand: &f{2}" + "\n" +
+            "{PREFIX}&f-  &3Server Version: &f{3}",
+            false
+    ),
+    INFO_MIDDLE(
+            "{PREFIX}&f-  &bMessaging Type: &f{0}" + "\n" +
+            "{PREFIX}&f-  &bInstance:" + "\n" +
+            "{PREFIX}&f-     &3Server Name: &f{1}" + "\n" +
+            "{PREFIX}&f-     &3Online Players: &a{2}" + "\n" +
+            "{PREFIX}&f-     &3Unique Connections: &a{3}" + "\n" +
+            "{PREFIX}&f-     &3Uptime: &7{4}" + "\n" +
+            "{PREFIX}&f-     &3Local Data: &a{5} &7users, &a{6} &7groups, &a{7} &7tracks" + "\n" +
+            "{PREFIX}&f-     &3Context Calculators: &a{8}" + "\n" +
+            "{PREFIX}&f-     &3Known permissions: &a{9}" + "\n" +
+            "{PREFIX}&f-     &3Active processors: &7{10}",
             false
     ),
     CREATE_GROUP_ERROR("There was an error whilst creating the group.", true),

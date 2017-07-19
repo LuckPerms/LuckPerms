@@ -84,6 +84,8 @@ public class BungeeListener implements Listener {
 
 
         plugin.doAsync(() -> {
+            plugin.getUniqueConnections().add(c.getUniqueId());
+
             /* Actually process the login for the connection.
                We do this here to delay the login until the data is ready.
                If the login gets cancelled later on, then this will be cleaned up.

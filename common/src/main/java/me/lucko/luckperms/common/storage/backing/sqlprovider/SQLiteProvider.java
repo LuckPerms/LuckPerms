@@ -26,6 +26,8 @@
 package me.lucko.luckperms.common.storage.backing.sqlprovider;
 
 import java.io.File;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class SQLiteProvider extends FlatfileProvider {
     public SQLiteProvider(File file) {
@@ -36,6 +38,20 @@ public class SQLiteProvider extends FlatfileProvider {
         if (data.exists()) {
             data.renameTo(new File(file.getParent(), "luckperms-sqlite.db"));
         }
+    }
+
+    @Override
+    public Map<String, String> getMeta() {
+        Map<String, String> ret = new LinkedHashMap<>();
+
+        File databaseFile = new File(super.file.getParent(), "luckperms-sqlite.db");
+        if (databaseFile.exists()) {
+            ret.put("File Size", DF.format(databaseFile.length() / 1048576) + "MB");
+        } else {
+            ret.put("File Size", "0MB");
+        }
+
+        return ret;
     }
 
     @Override

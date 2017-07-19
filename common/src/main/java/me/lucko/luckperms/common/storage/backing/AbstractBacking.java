@@ -39,7 +39,9 @@ import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.Log;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -59,6 +61,10 @@ public abstract class AbstractBacking {
     public abstract void init();
 
     public abstract void shutdown();
+
+    public Map<String, String> getMeta() {
+        return Collections.emptyMap();
+    }
 
     public abstract boolean logAction(LogEntry entry);
 

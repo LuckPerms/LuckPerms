@@ -29,11 +29,13 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.util.concurrent.locks.ReentrantLock;
 
 abstract class FlatfileProvider extends SQLProvider {
+    protected static final DecimalFormat DF = new DecimalFormat("#.00");
 
-    private final File file;
+    protected final File file;
     private final ReentrantLock lock = new ReentrantLock();
     private WrappedConnection connection;
 

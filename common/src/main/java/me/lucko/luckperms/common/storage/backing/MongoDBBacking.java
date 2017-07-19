@@ -60,6 +60,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -180,6 +181,29 @@ public class MongoDBBacking extends AbstractBacking {
         if (mongoClient != null) {
             mongoClient.close();
         }
+    }
+
+    @Override
+    public Map<String, String> getMeta() {
+        Map<String, String> ret = new LinkedHashMap<>();
+        boolean success = true;
+
+        long start = System.currentTimeMillis();
+        try {
+            database.runCommand(new Document("ping", 1));
+        } catch (Exception e) {
+            success = false;
+        }
+        long duration = System.currentTimeMillis() - start;
+
+        if (success) {
+            ret.put("Ping", "&a" + duration + "ms");
+            ret.put("Connected", "true");
+        } else {
+            ret.put("Connected", "false");
+        }
+
+        return ret;
     }
 
     @Override

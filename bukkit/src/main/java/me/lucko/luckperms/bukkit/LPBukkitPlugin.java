@@ -107,6 +107,8 @@ import java.util.stream.Collectors;
 @Getter
 public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private Set<UUID> ignoringLogs;
+    private Set<UUID> uniqueConnections;
+    private long startTime;
     private LPBukkitScheduler scheduler;
     private BukkitCommand commandManager;
     private VaultHook vaultHook = null;
@@ -159,9 +161,11 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     }
 
     private void enable() {
+        startTime = System.currentTimeMillis();
         LuckPermsPlugin.sendStartupBanner(getConsoleSender(), this);
 
         ignoringLogs = ConcurrentHashMap.newKeySet();
+        uniqueConnections = ConcurrentHashMap.newKeySet();
         verboseHandler = new VerboseHandler(scheduler.getAsyncBukkitExecutor(), getVersion());
         permissionVault = new PermissionVault(scheduler.getAsyncBukkitExecutor());
 
@@ -349,7 +353,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
             });
         }
 
-        getLog().info("Successfully enabled.");
+        getLog().info("Successfully enabled. (took " + (System.currentTimeMillis() - startTime) + "ms)");
     }
 
     @Override
@@ -642,16 +646,8 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     public LinkedHashMap<String, Object> getExtraInfo() {
         LinkedHashMap<String, Object> map = new LinkedHashMap<>();
         map.put("Vault Enabled", vaultHook != null);
-        map.put("Vault Server", configuration.get(ConfigKeys.VAULT_SERVER));
         map.put("Bukkit Defaults count", defaultsProvider.size());
         map.put("Bukkit Child Permissions count", childPermissionProvider.getPermissions().size());
-        map.put("Vault Including Global", configuration.get(ConfigKeys.VAULT_INCLUDING_GLOBAL));
-        map.put("Vault Ignoring World", configuration.get(ConfigKeys.VAULT_IGNORE_WORLD));
-        map.put("Vault Primary Group Overrides", configuration.get(ConfigKeys.VAULT_PRIMARY_GROUP_OVERRIDES));
-        map.put("Vault Debug", configuration.get(ConfigKeys.VAULT_DEBUG));
-        map.put("OPs Enabled", configuration.get(ConfigKeys.OPS_ENABLED));
-        map.put("Auto OP", configuration.get(ConfigKeys.AUTO_OP));
-        map.put("Commands Allow OPs", configuration.get(ConfigKeys.COMMANDS_ALLOW_OP));
         return map;
     }
 

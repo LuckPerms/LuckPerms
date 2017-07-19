@@ -29,6 +29,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.Map;
 
 @RequiredArgsConstructor
 public abstract class SQLProvider {
@@ -39,6 +41,10 @@ public abstract class SQLProvider {
     public abstract void init() throws Exception;
 
     public abstract void shutdown() throws Exception;
+
+    public Map<String, String> getMeta() {
+        return Collections.emptyMap();
+    }
 
     public abstract WrappedConnection getConnection() throws SQLException;
 

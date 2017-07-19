@@ -91,6 +91,8 @@ import java.util.stream.Collectors;
 @Getter
 public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     private final Set<UUID> ignoringLogs = ConcurrentHashMap.newKeySet();
+    private Set<UUID> uniqueConnections = ConcurrentHashMap.newKeySet();
+    private long startTime;
     private LuckPermsScheduler scheduler;
     private CommandManager commandManager;
     private LuckPermsConfiguration configuration;
@@ -125,6 +127,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
     @Override
     public void onEnable() {
+        startTime = System.currentTimeMillis();
         LuckPermsPlugin.sendStartupBanner(getConsoleSender(), this);
         verboseHandler = new VerboseHandler(scheduler.async(), getVersion());
         permissionVault = new PermissionVault(scheduler.async());
@@ -256,7 +259,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         scheduler.asyncRepeating(new ExpireTemporaryTask(this), 60L);
         scheduler.asyncRepeating(new CacheHousekeepingTask(this), 2400L);
 
-        getLog().info("Successfully enabled.");
+        getLog().info("Successfully enabled. (took " + (System.currentTimeMillis() - startTime) + "ms)");
     }
 
     @Override

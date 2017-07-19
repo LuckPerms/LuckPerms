@@ -37,13 +37,13 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.messaging.NoopMessagingService;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import static me.lucko.luckperms.common.commands.utils.Util.formatBoolean;
+import java.util.stream.Collectors;
 
 public class InfoCommand extends SingleCommand {
     public InfoCommand(LocaleManager locale) {
@@ -53,31 +53,34 @@ public class InfoCommand extends SingleCommand {
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, List<String> args, String label) {
         final LuckPermsConfiguration c = plugin.getConfiguration();
-        Message.INFO.send(sender,
+
+        Message.INFO_TOP.send(sender,
                 plugin.getVersion(),
                 plugin.getServerType().getFriendlyName(),
-                plugin.getStorage().getName(),
-                c.get(ConfigKeys.SERVER),
-                c.get(ConfigKeys.SYNC_TIME),
+                plugin.getServerName(),
+                plugin.getServerVersion()
+        );
+
+        Map<String, String> storageInfo = plugin.getStorage().getMeta();
+
+        Message.EMPTY.send(sender, "&f-  &bStorage:");
+        Message.EMPTY.send(sender, "&f-     &3Type: &f" + plugin.getStorage().getName());
+        for (Map.Entry<String, String> e : storageInfo.entrySet()) {
+            Message.EMPTY.send(sender, "&f-     &3" + e.getKey() + ": " + formatValue(e.getValue()));
+        }
+
+        Message.INFO_MIDDLE.send(sender,
                 plugin.getMessagingService() instanceof NoopMessagingService ? "None" : plugin.getMessagingService().getName(),
+                c.get(ConfigKeys.SERVER),
                 plugin.getPlayerCount(),
+                plugin.getUniqueConnections().size(),
+                DateUtil.formatTime((System.currentTimeMillis() - plugin.getStartTime()) / 1000L),
                 plugin.getUserManager().getAll().size(),
                 plugin.getGroupManager().getAll().size(),
                 plugin.getTrackManager().getAll().size(),
-                plugin.getStorage().getLog().join().getContent().size(),
-                plugin.getUuidCache().getSize(),
-                plugin.getLocaleManager().getSize(),
-                plugin.getPreProcessContexts(false).size(),
                 plugin.getContextManager().getCalculatorsSize(),
                 plugin.getPermissionVault().getSize(),
-                formatBoolean(c.get(ConfigKeys.USE_SERVER_UUIDS)),
-                formatBoolean(c.get(ConfigKeys.INCLUDING_GLOBAL_PERMS)),
-                formatBoolean(c.get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS)),
-                formatBoolean(c.get(ConfigKeys.APPLYING_GLOBAL_GROUPS)),
-                formatBoolean(c.get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS)),
-                formatBoolean(c.get(ConfigKeys.APPLYING_WILDCARDS)),
-                formatBoolean(c.get(ConfigKeys.APPLYING_REGEX)),
-                formatBoolean(c.get(ConfigKeys.APPLYING_SHORTHAND))
+                plugin.getCalculatorFactory().getActiveProcessors().stream().collect(Collectors.joining(", "))
         );
 
         LinkedHashMap<String, Object> platformInfo = plugin.getExtraInfo();

@@ -37,6 +37,7 @@ import me.lucko.luckperms.common.data.Log;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.backing.AbstractBacking;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -68,6 +69,16 @@ public class SplitBacking extends AbstractBacking {
     @Override
     public void shutdown() {
         backing.values().forEach(AbstractBacking::shutdown);
+    }
+
+    @Override
+    public Map<String, String> getMeta() {
+        Map<String, String> ret = new LinkedHashMap<>();
+        ret.put("Types", types.toString());
+        for (AbstractBacking backing : backing.values()) {
+            ret.putAll(backing.getMeta());
+        }
+        return ret;
     }
 
     @Override

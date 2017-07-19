@@ -124,6 +124,7 @@ import java.util.stream.Collectors;
 public class LPSpongePlugin implements LuckPermsPlugin {
 
     private final Set<UUID> ignoringLogs = ConcurrentHashMap.newKeySet();
+    private Set<UUID> uniqueConnections = ConcurrentHashMap.newKeySet();
 
     @Inject
     private Logger logger;
@@ -147,6 +148,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
     private LPTimings timings;
     private boolean lateLoad = false;
+    private long startTime;
 
     private LuckPermsScheduler scheduler;
     private SpongeCommand commandManager;
@@ -172,6 +174,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
     @Listener(order = Order.FIRST)
     public void onEnable(GamePreInitializationEvent event) {
+        startTime = System.currentTimeMillis();
         scheduler = new LPSpongeScheduler(this);
         localeManager = new NoopLocaleManager();
         senderFactory = new SpongeSenderFactory(this);
@@ -315,7 +318,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         scheduler.asyncRepeating(new ServiceCacheHousekeepingTask(service), 2400L);
         // scheduler.asyncRepeating(() -> userManager.performCleanup(), 2400L);
 
-        getLog().info("Successfully enabled.");
+        getLog().info("Successfully enabled. (took " + (System.currentTimeMillis() - startTime) + "ms)");
     }
 
     @Listener(order = Order.LATE)

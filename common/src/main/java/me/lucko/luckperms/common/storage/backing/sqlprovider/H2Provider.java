@@ -26,6 +26,8 @@
 package me.lucko.luckperms.common.storage.backing.sqlprovider;
 
 import java.io.File;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class H2Provider extends FlatfileProvider {
     public H2Provider(File file) {
@@ -36,6 +38,20 @@ public class H2Provider extends FlatfileProvider {
         if (data.exists()) {
             data.renameTo(new File(file.getParent(), "luckperms-h2.mv.db"));
         }
+    }
+
+    @Override
+    public Map<String, String> getMeta() {
+        Map<String, String> ret = new LinkedHashMap<>();
+
+        File databaseFile = new File(super.file.getParent(), "luckperms-h2.mv.db");
+        if (databaseFile.exists()) {
+            ret.put("File Size", DF.format(databaseFile.length() / 1048576) + "MB");
+        } else {
+            ret.put("File Size", "0MB");
+        }
+
+        return ret;
     }
 
     @Override

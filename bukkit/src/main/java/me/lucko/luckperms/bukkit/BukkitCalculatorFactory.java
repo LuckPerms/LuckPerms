@@ -44,6 +44,7 @@ import me.lucko.luckperms.common.calculators.processors.WildcardProcessor;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.core.model.User;
 
+import java.util.List;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -81,5 +82,17 @@ public class BukkitCalculatorFactory extends AbstractCalculatorFactory {
         }
 
         return registerCalculator(new PermissionCalculator(plugin, user.getFriendlyName(), processors.build()));
+    }
+
+    @Override
+    public List<String> getActiveProcessors() {
+        ImmutableList.Builder<String> ret = ImmutableList.builder();
+        ret.add("Map");
+        if (plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_CHILD_PERMISSIONS)) ret.add("Child");
+        if (plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_ATTACHMENT_PERMISSIONS)) ret.add("Attachment");
+        if (plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) ret.add("Regex");
+        if (plugin.getConfiguration().get(ConfigKeys.APPLYING_WILDCARDS)) ret.add("Wildcard");
+        if (plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_DEFAULT_PERMISSIONS)) ret.add("Defaults");
+        return ret.build();
     }
 }

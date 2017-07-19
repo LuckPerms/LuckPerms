@@ -209,6 +209,11 @@ public class SQLBacking extends AbstractBacking {
     }
 
     @Override
+    public Map<String, String> getMeta() {
+        return provider.getMeta();
+    }
+
+    @Override
     public boolean logAction(LogEntry entry) {
         try (Connection c = provider.getConnection()) {
             try (PreparedStatement ps = c.prepareStatement(prefix.apply(ACTION_INSERT))) {

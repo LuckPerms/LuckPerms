@@ -54,7 +54,7 @@
         <dependency>
             <groupId>org.spongepowered</groupId>
             <artifactId>spongeapi</artifactId>
-            <version>7.0.0-SNAPSHOT</version>
+            <version>7.0.0-20170716.103113-1</version>
             <scope>provided</scope>
         </dependency>
         <!-- Lombok -->

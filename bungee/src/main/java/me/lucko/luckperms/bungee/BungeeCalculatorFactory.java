@@ -39,6 +39,8 @@ import me.lucko.luckperms.common.calculators.processors.WildcardProcessor;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.core.model.User;
 
+import java.util.List;
+
 @AllArgsConstructor
 public class BungeeCalculatorFactory extends AbstractCalculatorFactory {
     private final LPBungeePlugin plugin;
@@ -58,5 +60,14 @@ public class BungeeCalculatorFactory extends AbstractCalculatorFactory {
         }
 
         return registerCalculator(new PermissionCalculator(plugin, user.getFriendlyName(), processors.build()));
+    }
+
+    @Override
+    public List<String> getActiveProcessors() {
+        ImmutableList.Builder<String> ret = ImmutableList.builder();
+        ret.add("Map");
+        if (plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) ret.add("Regex");
+        if (plugin.getConfiguration().get(ConfigKeys.APPLYING_WILDCARDS)) ret.add("Wildcards");
+        return ret.build();
     }
 }

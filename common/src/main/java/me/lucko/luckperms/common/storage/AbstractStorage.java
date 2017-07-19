@@ -46,6 +46,7 @@ import me.lucko.luckperms.common.storage.wrappings.BufferedOutputStorage;
 import me.lucko.luckperms.common.storage.wrappings.PhasedStorage;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -258,5 +259,6 @@ public class AbstractStorage implements Storage {
         void setAcceptingLogins(boolean b);
         void init();
         void shutdown();
+        Map<String, String> getMeta();
     }
 }
