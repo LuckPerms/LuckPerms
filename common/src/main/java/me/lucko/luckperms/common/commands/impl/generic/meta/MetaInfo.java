@@ -142,11 +142,11 @@ public class MetaInfo extends SharedSubCommand {
             String location = processLocation(e.getValue(), holder);
             if (e.getValue().hasSpecificContext()) {
                 String context = Util.getAppendableNodeContextString(e.getValue());
-                Component component = ComponentSerializer.parseFromLegacy(Message.CHAT_META_ENTRY_WITH_CONTEXT.asString(sender.getPlatform().getLocaleManager(), e.getKey(), e.getValue().getPrefix().getValue(), location, context), Constants.COLOR_CHAR);
+                Component component = ComponentSerializer.parseFromLegacy(Message.CHAT_META_ENTRY_WITH_CONTEXT.asString(sender.getPlatform().getLocaleManager(), e.getKey(), type.getEntry(e.getValue()).getValue(), location, context), Constants.COLOR_CHAR);
                 component.applyRecursively(makeFancy(type, holder, label, e.getValue()));
                 sender.sendMessage(component);
             } else {
-                Component component = ComponentSerializer.parseFromLegacy(Message.CHAT_META_ENTRY.asString(sender.getPlatform().getLocaleManager(), e.getKey(), e.getValue().getPrefix().getValue(), location), Constants.COLOR_CHAR);
+                Component component = ComponentSerializer.parseFromLegacy(Message.CHAT_META_ENTRY.asString(sender.getPlatform().getLocaleManager(), e.getKey(), type.getEntry(e.getValue()).getValue(), location), Constants.COLOR_CHAR);
                 component.applyRecursively(makeFancy(type, holder, label, e.getValue()));
                 sender.sendMessage(component);
             }
