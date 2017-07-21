@@ -139,7 +139,10 @@ public class AbstractStorage implements Storage {
     public CompletableFuture<Boolean> createAndLoadGroup(String name, CreationCause cause) {
         return makeFuture(() -> {
             if (backing.createAndLoadGroup(name)) {
-                plugin.getApiProvider().getEventFactory().handleGroupCreate(plugin.getGroupManager().getIfLoaded(name), cause);
+                Group g = plugin.getGroupManager().getIfLoaded(name);
+                if (g != null) {
+                    plugin.getApiProvider().getEventFactory().handleGroupCreate(g, cause);
+                }
                 return true;
             }
             return false;
@@ -150,7 +153,10 @@ public class AbstractStorage implements Storage {
     public CompletableFuture<Boolean> loadGroup(String name) {
         return makeFuture(() -> {
             if (backing.loadGroup(name)) {
-                plugin.getApiProvider().getEventFactory().handleGroupLoad(plugin.getGroupManager().getIfLoaded(name));
+                Group g = plugin.getGroupManager().getIfLoaded(name);
+                if (g != null) {
+                    plugin.getApiProvider().getEventFactory().handleGroupLoad(g);
+                }
                 return true;
             }
             return false;
@@ -193,7 +199,10 @@ public class AbstractStorage implements Storage {
     public CompletableFuture<Boolean> createAndLoadTrack(String name, CreationCause cause) {
         return makeFuture(() -> {
             if (backing.createAndLoadTrack(name)) {
-                plugin.getApiProvider().getEventFactory().handleTrackCreate(plugin.getTrackManager().getIfLoaded(name), cause);
+                Track t = plugin.getTrackManager().getIfLoaded(name);
+                if (t != null) {
+                    plugin.getApiProvider().getEventFactory().handleTrackCreate(t, cause);
+                }
                 return true;
             }
             return false;
@@ -204,7 +213,10 @@ public class AbstractStorage implements Storage {
     public CompletableFuture<Boolean> loadTrack(String name) {
         return makeFuture(() -> {
             if (backing.loadTrack(name)) {
-                plugin.getApiProvider().getEventFactory().handleTrackLoad(plugin.getTrackManager().getIfLoaded(name));
+                Track t = plugin.getTrackManager().getIfLoaded(name);
+                if (t != null) {
+                    plugin.getApiProvider().getEventFactory().handleTrackLoad(t);
+                }
                 return true;
             }
             return false;
