@@ -59,7 +59,7 @@ import java.util.function.Supplier;
 public class AbstractStorage implements Storage {
     public static Storage wrap(LuckPermsPlugin plugin, AbstractBacking backing) {
         BufferedOutputStorage bufferedDs = BufferedOutputStorage.wrap(PhasedStorage.wrap(new AbstractStorage(plugin, backing)), 1000L);
-        plugin.getScheduler().asyncRepeating(bufferedDs, 10L);
+        plugin.getScheduler().asyncRepeating(bufferedDs, 5L);
         return bufferedDs;
     }
 
