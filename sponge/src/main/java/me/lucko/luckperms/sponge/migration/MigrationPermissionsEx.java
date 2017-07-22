@@ -62,6 +62,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static me.lucko.luckperms.sponge.migration.SpongeMigrationUtils.migrateSubject;
+import static me.lucko.luckperms.sponge.migration.SpongeMigrationUtils.migrateSubjectData;
 
 public class MigrationPermissionsEx extends SubCommand<Object> {
     public MigrationPermissionsEx(LocaleManager locale) {
@@ -90,12 +91,12 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         // Migrate defaults
         log.log("Migrating default subjects.");
         for (SubjectCollection collection : pexService.getKnownSubjects().values()) {
-            SpongeMigrationUtils.migrateSubjectData(
+            migrateSubjectData(
                     collection.getDefaults().getSubjectData(),
                     lpService.getCollection("defaults").loadSubject(collection.getIdentifier()).join().sponge().getSubjectData()
             );
         }
-        SpongeMigrationUtils.migrateSubjectData(pexService.getDefaults().getSubjectData(), lpService.getDefaults().sponge().getSubjectData());
+        migrateSubjectData(pexService.getDefaults().getSubjectData(), lpService.getDefaults().sponge().getSubjectData());
 
         log.log("Calculating group weightings.");
         int maxWeight = 0;

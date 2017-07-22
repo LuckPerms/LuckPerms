@@ -159,7 +159,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 }
             }
 
-            if (primary != null && !primary.equalsIgnoreCase("default")) {
+            if (primary != null && !primary.isEmpty() && !primary.equalsIgnoreCase("default")) {
                 lpUser.setPermission(NodeFactory.make("group." + primary.toLowerCase()));
                 lpUser.getPrimaryGroup().setStoredValue(primary);
                 lpUser.unsetPermission(NodeFactory.make("group.default"));
@@ -216,11 +216,11 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         String prefix = entity.getOwnPrefix();
         String suffix = entity.getOwnSuffix();
 
-        if (prefix != null && !prefix.equals("")) {
+        if (prefix != null && !prefix.isEmpty()) {
             holder.setPermission(NodeFactory.makePrefixNode(weight, prefix).build());
         }
 
-        if (suffix != null && !suffix.equals("")) {
+        if (suffix != null && !suffix.isEmpty()) {
             holder.setPermission(NodeFactory.makeSuffixNode(weight, suffix).build());
         }
 
@@ -228,7 +228,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         Map<String, Map<String, String>> options = entity.getAllOptions();
         for (Map.Entry<String, Map<String, String>> worldData : options.entrySet()) {
             String world = worldData.getKey();
-            if (world != null && (world.equals("") || world.equals("*"))) {
+            if (world != null && (world.isEmpty() || world.equals("*"))) {
                 world = null;
             }
             if (world != null) {

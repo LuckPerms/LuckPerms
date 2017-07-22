@@ -36,9 +36,17 @@ public class MigrationUtils {
 
     public static Node.Builder parseNode(String permission, boolean value) {
         if (permission.startsWith("-") || permission.startsWith("!")) {
+            if (permission.length() == 1) {
+                return NodeFactory.newBuilder(permission).setValue(value);
+            }
+
             permission = permission.substring(1);
             value = false;
         } else if (permission.startsWith("+")) {
+            if (permission.length() == 1) {
+                return NodeFactory.newBuilder(permission).setValue(value);
+            }
+
             permission = permission.substring(1);
             value = true;
         }

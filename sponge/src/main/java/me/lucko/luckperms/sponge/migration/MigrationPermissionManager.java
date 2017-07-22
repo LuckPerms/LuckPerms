@@ -56,6 +56,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static me.lucko.luckperms.sponge.migration.SpongeMigrationUtils.migrateSubject;
+import static me.lucko.luckperms.sponge.migration.SpongeMigrationUtils.migrateSubjectData;
 
 public class MigrationPermissionManager extends SubCommand<Object> {
     public MigrationPermissionManager(LocaleManager locale) {
@@ -93,12 +94,12 @@ public class MigrationPermissionManager extends SubCommand<Object> {
         // Migrate defaults
         log.log("Migrating default subjects.");
         for (SubjectCollection collection : pmService.getKnownSubjects().values()) {
-            SpongeMigrationUtils.migrateSubjectData(
+            migrateSubjectData(
                     collection.getDefaults().getSubjectData(),
                     lpService.getCollection("defaults").loadSubject(collection.getIdentifier()).join().sponge().getSubjectData()
             );
         }
-        SpongeMigrationUtils.migrateSubjectData(pmService.getDefaults().getSubjectData(), lpService.getDefaults().sponge().getSubjectData());
+        migrateSubjectData(pmService.getDefaults().getSubjectData(), lpService.getDefaults().sponge().getSubjectData());
 
         // Migrate groups
         log.log("Starting group migration.");

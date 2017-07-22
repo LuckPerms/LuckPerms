@@ -181,6 +181,10 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
 
             // server --> prefix afaik
             for (Map.Entry<String, String> prefix : g.getPrefixes().entrySet()) {
+                if (prefix.getValue().isEmpty()) {
+                    continue;
+                }
+
                 String server = prefix.getKey().toLowerCase();
                 if (prefix.getKey().equals("*") || prefix.getKey().equals("all")) {
                     server = null;
@@ -194,6 +198,10 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             }
 
             for (Map.Entry<String, String> suffix : g.getSuffixes().entrySet()) {
+                if (suffix.getValue().isEmpty()) {
+                    continue;
+                }
+
                 String server = suffix.getKey().toLowerCase();
                 if (suffix.getKey().equals("*") || suffix.getKey().equals("all")) {
                     server = null;
@@ -247,11 +255,11 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             String prefix = joinFuture(pm.getPlayerOwnPrefix(uuid));
             String suffix = joinFuture(pm.getPlayerOwnSuffix(uuid));
 
-            if (prefix != null && !prefix.equals("")) {
+            if (prefix != null && !prefix.isEmpty()) {
                 user.setPermission(NodeFactory.makePrefixNode(maxWeight, prefix).build());
             }
 
-            if (suffix != null && !suffix.equals("")) {
+            if (suffix != null && !suffix.isEmpty()) {
                 user.setPermission(NodeFactory.makeSuffixNode(maxWeight, suffix).build());
             }
 
@@ -279,6 +287,10 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
             value = false;
         }
 
+        if (node.isEmpty()) {
+            return;
+        }
+
         String server = p.getServer();
         if (server != null && (server.equalsIgnoreCase("all") || server.equalsIgnoreCase("*"))) {
             server = null;
@@ -299,18 +311,9 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
         }
 
         Node.Builder nb = NodeFactory.newBuilder(node).setValue(value);
-
-        if (expireAt != 0) {
-            nb.setExpiry(expireAt);
-        }
-
-        if (server != null) {
-            nb.setServer(server);
-        }
-
-        if (world != null) {
-            nb.setWorld(world);
-        }
+        if (expireAt != 0) nb.setExpiry(expireAt);
+        if (server != null) nb.setServer(server);
+        if (world != null) nb.setWorld(world);
 
         holder.setPermission(nb.build());
     }

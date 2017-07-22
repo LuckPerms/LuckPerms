@@ -270,7 +270,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
             }
 
             String primaryGroup = primaryGroups.get(e.getKey());
-            if (primaryGroup != null) {
+            if (primaryGroup != null && !primaryGroup.isEmpty()) {
                 user.setPermission(NodeFactory.make("group." + primaryGroup));
                 user.getPrimaryGroup().setStoredValue(primaryGroup);
                 user.unsetPermission(NodeFactory.make("group.default"));

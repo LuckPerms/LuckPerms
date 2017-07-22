@@ -174,10 +174,10 @@ public class MigrationBungeePerms extends SubCommand<Object> {
         String prefix = entity.getPrefix();
         String suffix = entity.getSuffix();
 
-        if (prefix != null && !prefix.equals("")) {
+        if (prefix != null && !prefix.isEmpty()) {
             holder.setPermission(NodeFactory.makePrefixNode(weight, prefix).build());
         }
-        if (suffix != null && !suffix.equals("")) {
+        if (suffix != null && !suffix.isEmpty()) {
             holder.setPermission(NodeFactory.makeSuffixNode(weight, suffix).build());
         }
     }

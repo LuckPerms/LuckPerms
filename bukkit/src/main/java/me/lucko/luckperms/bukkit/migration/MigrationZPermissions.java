@@ -196,6 +196,10 @@ public class MigrationZPermissions extends SubCommand<Object> {
 
     private void migrateEntity(PermissionHolder holder, PermissionEntity entity, int weight) {
         for (Entry e : entity.getPermissions()) {
+            if (e.getPermission().isEmpty()) {
+                continue;
+            }
+
             if (e.getWorld() != null && !e.getWorld().getName().equals("")) {
                 holder.setPermission(NodeFactory.newBuilder(e.getPermission()).setValue(e.isValue()).setWorld(e.getWorld().getName()).build());
             } else {
@@ -214,6 +218,10 @@ public class MigrationZPermissions extends SubCommand<Object> {
 
         for (EntityMetadata metadata : entity.getMetadata()) {
             String key = metadata.getName().toLowerCase();
+
+            if (key.isEmpty() || metadata.getStringValue().isEmpty()) {
+                continue;
+            }
 
             if (key.equals("prefix") || key.equals("suffix")) {
                 ChatMetaType type = ChatMetaType.valueOf(key.toUpperCase());
