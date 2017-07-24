@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.common.contexts;
 
+import lombok.NonNull;
+
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.github.benmanes.caffeine.cache.RemovalListener;
@@ -46,18 +48,23 @@ public abstract class ContextManager<T> {
     private final LoadingCache<T, ImmutableContextSet> activeContextCache = Caffeine.newBuilder()
             .weakKeys()
             .expireAfterWrite(50L, TimeUnit.MILLISECONDS)
-            .removalListener((RemovalListener<T, ImmutableContextSet>) (t, contextSet, removalCause) -> invalidateContextsCache(t))
+            .removalListener((RemovalListener<T, ImmutableContextSet>) (t, contextSet, removalCause) -> {
+                if (t != null) {
+                    invalidateContextsCache(t);
+                }
+            })
             .build(t -> calculateApplicableContext(t, MutableContextSet.create()).makeImmutable());
 
     private final LoadingCache<T, Contexts> contextsCache = Caffeine.newBuilder()
             .weakKeys()
+            .expireAfterWrite(100L, TimeUnit.MILLISECONDS)
             .build(t -> formContexts(t, getApplicableContext(t)));
 
-    public ImmutableContextSet getApplicableContext(T subject) {
+    public ImmutableContextSet getApplicableContext(@NonNull T subject) {
         return activeContextCache.get(subject);
     }
 
-    public Contexts getApplicableContexts(T subject) {
+    public Contexts getApplicableContexts(@NonNull T subject) {
         return contextsCache.get(subject);
     }
 
@@ -100,7 +107,7 @@ public abstract class ContextManager<T> {
         return accumulator.makeImmutable();
     }
 
-    public void invalidateCache(T subject){
+    public void invalidateCache(@NonNull T subject){
         activeContextCache.invalidate(subject);
     }
 
