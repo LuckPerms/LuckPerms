@@ -68,7 +68,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
      * The users data cache instance, if present.
      */
     @Getter
-    private final UserCache userData;
+    private final UserCache userData = new UserCache(this);
 
     @Getter
     private BufferedRequest<Void> refreshBuffer = new BufferedRequest<Void>(1000L, r -> getPlugin().doAsync(r)) {
@@ -87,7 +87,6 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
         this.uuid = uuid;
 
         this.primaryGroup = plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION).apply(this);
-        this.userData = new UserCache(this);
         getPlugin().getApiProvider().getEventFactory().handleUserCacheLoad(this, userData);
     }
 
@@ -97,7 +96,6 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
 
         setName(name, false);
         this.primaryGroup = plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION).apply(this);
-        this.userData = new UserCache(this);
         getPlugin().getApiProvider().getEventFactory().handleUserCacheLoad(this, userData);
     }
 

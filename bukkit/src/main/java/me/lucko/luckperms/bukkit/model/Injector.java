@@ -40,31 +40,49 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Injects a {@link LPPermissible} into a {@link Player}
+ * Injects a {@link LPPermissible} into a {@link Player}.
+ *
+ * This allows LuckPerms to directly intercept permission checks and take over all handling of
+ * checks made by plugins.
  */
-@SuppressWarnings("unchecked")
 @UtilityClass
 public class Injector {
     private static final Map<UUID, LPPermissible> INJECTED_PERMISSIBLES = new ConcurrentHashMap<>();
 
-    private static Field humanEntityField;
-    private static Field permissibleAttachmentsField;
-    private static Throwable cachedThrowable = null;
+    /**
+     * All permission checks made on standard Bukkit objects are effectively proxied to a
+     * {@link PermissibleBase} object, held as a parameter on the object.
+     *
+     * This field is where the permissible is stored on a HumanEntity.
+     */
+    private static Field humanEntityPermissibleField;
 
+    /**
+     * The field where attachments are stored on a permissible base.
+     */
+    private static Field permissibleBaseAttachmentsField;
+
+    private static Throwable cachedThrowable = null;
     static {
         try {
+            // Catch all. If this setup doesn't fully complete without
+            // exceptions, then the Injector will not work.
+
+            // Try to load the permissible field.
             try {
                 // craftbukkit
-                humanEntityField = ReflectionUtil.obcClass("entity.CraftHumanEntity").getDeclaredField("perm");
-                humanEntityField.setAccessible(true);
+                humanEntityPermissibleField = ReflectionUtil.obcClass("entity.CraftHumanEntity").getDeclaredField("perm");
+                humanEntityPermissibleField.setAccessible(true);
+
             } catch (Exception e) {
                 // glowstone
-                humanEntityField = Class.forName("net.glowstone.entity.GlowHumanEntity").getDeclaredField("permissions");
-                humanEntityField.setAccessible(true);
+                humanEntityPermissibleField = Class.forName("net.glowstone.entity.GlowHumanEntity").getDeclaredField("permissions");
+                humanEntityPermissibleField.setAccessible(true);
             }
 
-            permissibleAttachmentsField = PermissibleBase.class.getDeclaredField("attachments");
-            permissibleAttachmentsField.setAccessible(true);
+            // Try to load the attachments field.
+            permissibleBaseAttachmentsField = PermissibleBase.class.getDeclaredField("attachments");
+            permissibleBaseAttachmentsField.setAccessible(true);
 
         } catch (Throwable t) {
             cachedThrowable = t;
@@ -72,82 +90,107 @@ public class Injector {
         }
     }
 
-    public static boolean inject(Player player, LPPermissible lpPermissible) {
+    /**
+     * Injects a {@link LPPermissible} into a {@link Player}.
+     *
+     * @param player the player to inject into
+     * @param newPermissible the permissible to inject
+     * @throws Exception propagates any exceptions which were thrown during injection
+     */
+    public static void inject(Player player, LPPermissible newPermissible) throws Exception {
+
+        // make sure the class inited without errors, otherwise, print a trace
         if (cachedThrowable != null) {
-            cachedThrowable.printStackTrace();
-            return false;
+            throw new RuntimeException("Injector did not init successfully.", cachedThrowable);
         }
 
-        try {
-            PermissibleBase existing = (PermissibleBase) humanEntityField.get(player);
-            if (existing instanceof LPPermissible) {
-                // uh oh
-                throw new IllegalStateException("LPPermissible already injected into player " + player.toString());
-            }
+        // get the existing PermissibleBase held by the player
+        PermissibleBase oldPermissible = (PermissibleBase) humanEntityPermissibleField.get(player);
 
-            // Move attachments over from the old permissible.
-            List<PermissionAttachment> attachments = (List<PermissionAttachment>) permissibleAttachmentsField.get(existing);
-            lpPermissible.addAttachments(attachments);
-            attachments.clear();
-            existing.clearPermissions();
-
-            lpPermissible.getActive().set(true);
-            lpPermissible.recalculatePermissions(false);
-            lpPermissible.setOldPermissible(existing);
-
-            lpPermissible.updateSubscriptionsAsync();
-
-            humanEntityField.set(player, lpPermissible);
-            INJECTED_PERMISSIBLES.put(player.getUniqueId(), lpPermissible);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+        // seems we have already injected into this player.
+        if (oldPermissible instanceof LPPermissible) {
+            throw new IllegalStateException("LPPermissible already injected into player " + player.toString());
         }
+
+        // Move attachments over from the old permissible
+
+        //noinspection unchecked
+        List<PermissionAttachment> attachments = (List<PermissionAttachment>) permissibleBaseAttachmentsField.get(oldPermissible);
+
+        newPermissible.addAttachments(attachments);
+        attachments.clear();
+        oldPermissible.clearPermissions();
+
+        // Setup the new permissible
+        newPermissible.getActive().set(true);
+        newPermissible.recalculatePermissions(false);
+        newPermissible.setOldPermissible(oldPermissible);
+        newPermissible.updateSubscriptionsAsync();
+
+        // inject the new instance
+        humanEntityPermissibleField.set(player, newPermissible);
+
+        // register the injection with the map
+        INJECTED_PERMISSIBLES.put(player.getUniqueId(), newPermissible);
     }
 
-    public static boolean unInject(Player player, boolean dummy, boolean unsubscribe) {
+    /**
+     * Uninjects a {@link LPPermissible} from a {@link Player}.
+     *
+     * @param player the player to uninject from
+     * @param dummy if the replacement permissible should be a dummy.
+     * @param unsubscribe if the extracted permissible should unsubscribe itself. see {@link SubscriptionManager}.
+     * @throws Exception propagates any exceptions which were thrown during uninjection
+     */
+    public static void unInject(Player player, boolean dummy, boolean unsubscribe) throws Exception {
+        // make sure the class inited without errors, otherwise, print a trace
         if (cachedThrowable != null) {
-            cachedThrowable.printStackTrace();
-            return false;
+            throw new RuntimeException("Injector did not init successfully.", cachedThrowable);
         }
 
-        try {
-            PermissibleBase permissible = (PermissibleBase) humanEntityField.get(player);
-            if (permissible instanceof LPPermissible) {
+        // gets the players current permissible.
+        PermissibleBase permissible = (PermissibleBase) humanEntityPermissibleField.get(player);
 
-                permissible.clearPermissions();
+        // only uninject if the permissible was a luckperms one.
+        if (permissible instanceof LPPermissible) {
+            LPPermissible lpPermissible = ((LPPermissible) permissible);
 
-                if (unsubscribe) {
-                    ((LPPermissible) permissible).unsubscribeFromAllAsync();
-                }
+            // clear all permissions
+            lpPermissible.clearPermissions();
 
-                ((LPPermissible) permissible).getActive().set(false);
-
-                if (dummy) {
-                    humanEntityField.set(player, new DummyPermissibleBase());
-                } else {
-                    LPPermissible lpp = ((LPPermissible) permissible);
-                    List<PermissionAttachment> attachments = lpp.getAttachments();
-
-                    PermissibleBase newPb = lpp.getOldPermissible();
-                    if (newPb == null) {
-                        newPb = new PermissibleBase(player);
-                    }
-
-                    List<PermissionAttachment> newAttachments = (List<PermissionAttachment>) permissibleAttachmentsField.get(newPb);
-                    newAttachments.addAll(attachments);
-                    attachments.clear();
-
-                    humanEntityField.set(player, newPb);
-                }
+            // try to unsubscribe
+            if (unsubscribe) {
+                lpPermissible.unsubscribeFromAllAsync();
             }
-            INJECTED_PERMISSIBLES.remove(player.getUniqueId());
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+
+            // set to inactive
+            lpPermissible.getActive().set(false);
+
+            // handle the replacement permissible.
+            if (dummy) {
+                // just inject a dummy class. this is used when we know the player is about to quit the server.
+                humanEntityPermissibleField.set(player, new DummyPermissibleBase());
+
+            } else {
+                // otherwise, inject the permissible they had when we first injected.
+
+                List<PermissionAttachment> lpAttachments = lpPermissible.getAttachments();
+
+                PermissibleBase newPb = lpPermissible.getOldPermissible();
+                if (newPb == null) {
+                    newPb = new PermissibleBase(player);
+                }
+
+                //noinspection unchecked
+                List<PermissionAttachment> newPbAttachments = (List<PermissionAttachment>) permissibleBaseAttachmentsField.get(newPb);
+                newPbAttachments.addAll(lpAttachments);
+                lpAttachments.clear();
+
+                humanEntityPermissibleField.set(player, newPb);
+            }
         }
+
+        INJECTED_PERMISSIBLES.remove(player.getUniqueId());
     }
 
     public static LPPermissible getPermissible(UUID uuid) {

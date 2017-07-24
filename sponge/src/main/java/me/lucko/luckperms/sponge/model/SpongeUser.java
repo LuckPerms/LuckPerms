@@ -190,7 +190,7 @@ public class SpongeUser extends User {
         @Override
         public ImmutableContextSet getActiveContextSet() {
             try (Timing ignored = plugin.getTimings().time(LPTiming.USER_GET_ACTIVE_CONTEXTS)) {
-                return plugin.getContextManager().getApplicableContext(this.sponge()).makeImmutable();
+                return plugin.getContextManager().getApplicableContext(this.sponge());
             }
         }
     }

@@ -27,7 +27,9 @@ package me.lucko.luckperms.common.contexts;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.RemovalListener;
 
+import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
@@ -36,19 +38,30 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
-public class ContextManager<T> {
+public abstract class ContextManager<T> {
 
     private final List<ContextCalculator<T>> calculators = new CopyOnWriteArrayList<>();
     private final List<ContextCalculator<?>> staticCalculators = new CopyOnWriteArrayList<>();
 
-    private final LoadingCache<T, ImmutableContextSet> cache = Caffeine.newBuilder()
+    private final LoadingCache<T, ImmutableContextSet> activeContextCache = Caffeine.newBuilder()
             .weakKeys()
             .expireAfterWrite(50L, TimeUnit.MILLISECONDS)
+            .removalListener((RemovalListener<T, ImmutableContextSet>) (t, contextSet, removalCause) -> invalidateContextsCache(t))
             .build(t -> calculateApplicableContext(t, MutableContextSet.create()).makeImmutable());
 
+    private final LoadingCache<T, Contexts> contextsCache = Caffeine.newBuilder()
+            .weakKeys()
+            .build(t -> formContexts(t, getApplicableContext(t)));
+
     public ImmutableContextSet getApplicableContext(T subject) {
-        return cache.get(subject);
+        return activeContextCache.get(subject);
     }
+
+    public Contexts getApplicableContexts(T subject) {
+        return contextsCache.get(subject);
+    }
+
+    public abstract Contexts formContexts(T t, ImmutableContextSet contextSet);
 
     private MutableContextSet calculateApplicableContext(T subject, MutableContextSet accumulator) {
         for (ContextCalculator<T> calculator : calculators) {
@@ -62,13 +75,21 @@ public class ContextManager<T> {
         return accumulator;
     }
 
-    public void registerCalculator(ContextCalculator<T> calculator) {
-        // calculators registered first should have priority (and be checked last.)
-        calculators.add(0, calculator);
+    private void invalidateContextsCache(T t) {
+        contextsCache.invalidate(t);
     }
 
-    public void registerStaticCalculator(ContextCalculator<?> calculator) {
-        staticCalculators.add(0, calculator);
+    public void registerCalculator(ContextCalculator<T> calculator) {
+        registerCalculator(calculator, false);
+    }
+
+    public void registerCalculator(ContextCalculator<T> calculator, boolean isStatic) {
+        // calculators registered first should have priority (and be checked last.)
+        calculators.add(0, calculator);
+
+        if (isStatic) {
+            staticCalculators.add(0, calculator);
+        }
     }
 
     public ImmutableContextSet getStaticContexts() {
@@ -80,7 +101,7 @@ public class ContextManager<T> {
     }
 
     public void invalidateCache(T subject){
-        cache.invalidate(subject);
+        activeContextCache.invalidate(subject);
     }
 
     public int getCalculatorsSize() {

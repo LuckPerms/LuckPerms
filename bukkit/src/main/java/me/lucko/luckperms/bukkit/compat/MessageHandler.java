@@ -33,6 +33,9 @@ import net.kyori.text.serializer.ComponentSerializer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+/**
+ * Sends a json message to a command sender.
+ */
 public class MessageHandler {
     private final BukkitJsonMessageHandler bukkitHandler;
     private final SpigotJsonMessageHandler spigotHandler;

@@ -36,6 +36,9 @@ import org.bukkit.permissions.PermissionAttachmentInfo;
 import java.util.Map;
 import java.util.function.Supplier;
 
+/**
+ * Permission Processor for permissions set to a player via permission attachments.
+ */
 @AllArgsConstructor
 public class AttachmentProcessor implements PermissionProcessor {
 

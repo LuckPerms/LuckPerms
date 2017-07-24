@@ -33,49 +33,50 @@ import me.lucko.luckperms.api.Tristate;
 
 import org.bukkit.Bukkit;
 import org.bukkit.permissions.Permission;
+import org.bukkit.plugin.PluginManager;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Holds default permissions registered on the platform.
+ *
+ * The data stored in this class is pulled from the data in {@link PluginManager#getDefaultPermissions(boolean)}.
+ *
+ * The former method is not thread safe, so we populate this class when the server starts to get all of the data
+ * in a form which is easily queryable & thread safe.
+ *
+ * The {@link DummyPermissible}s are registered with Bukkit, so we can listen for any
+ * changes to default permissions.
+ */
 public class DefaultsProvider {
 
+    // defaults for opped players
     @Getter
     private Map<String, Boolean> opDefaults = ImmutableMap.of();
     private final DummyPermissible opDummy = new DummyPermissible(this::refreshOp);
-    
+
+    // defaults for non-opped players
     @Getter
     private Map<String, Boolean> nonOpDefaults = ImmutableMap.of();
     private final DummyPermissible nonOpDummy = new DummyPermissible(this::refreshNonOp);
 
+    /**
+     * Refreshes the data in this provider.
+     */
     public void refresh() {
         refreshOp();
         refreshNonOp();
     }
 
-    private void refreshOp() {
-        unregisterDefaults(opDefaults, opDummy);
-
-        Map<String, Boolean> builder = new HashMap<>();
-        calculateDefaults(builder, opDummy, true);
-
-        opDefaults = ImmutableMap.copyOf(builder);
-    }
-
-    private void refreshNonOp() {
-        unregisterDefaults(nonOpDefaults, nonOpDummy);
-
-        Map<String, Boolean> builder = new HashMap<>();
-        calculateDefaults(builder, nonOpDummy, false);
-
-        nonOpDefaults = ImmutableMap.copyOf(builder);
-    }
-
-    public void close() {
-        unregisterDefaults(opDefaults, opDummy);
-        unregisterDefaults(nonOpDefaults, nonOpDummy);
-    }
-
+    /**
+     * Queries whether a given permission should be granted by default.
+     *
+     * @param permission the permission to query
+     * @param isOp if the player is op
+     * @return a tristate result
+     */
     public Tristate hasDefault(String permission, boolean isOp) {
         Map<String, Boolean> map = isOp ? opDefaults : nonOpDefaults;
 
@@ -83,44 +84,94 @@ public class DefaultsProvider {
         return b == null ? Tristate.UNDEFINED : Tristate.fromBoolean(b);
     }
 
+    /**
+     * Gets the number of default permissions held by the provider.
+     *
+     * @return the number of permissions held
+     */
     public int size() {
         return opDefaults.size() + nonOpDefaults.size();
     }
 
-    private static void unregisterDefaults(Map<String, Boolean> map, DummyPermissible p) {
+    /**
+     * Refreshes the op data in this provider.
+     */
+    private void refreshOp() {
+        unregisterDefaults(opDefaults, opDummy, true);
+
+        Map<String, Boolean> builder = new HashMap<>();
+        calculateDefaults(builder, opDummy, true);
+
+        opDefaults = ImmutableMap.copyOf(builder);
+    }
+
+    /**
+     * Refreshes the non op data in this provider.
+     */
+    private void refreshNonOp() {
+        unregisterDefaults(nonOpDefaults, nonOpDummy, false);
+
+        Map<String, Boolean> builder = new HashMap<>();
+        calculateDefaults(builder, nonOpDummy, false);
+
+        nonOpDefaults = ImmutableMap.copyOf(builder);
+    }
+
+    /**
+     * Unregisters the dummy permissibles with Bukkit.
+     */
+    public void close() {
+        unregisterDefaults(opDefaults, opDummy, true);
+        unregisterDefaults(nonOpDefaults, nonOpDummy, false);
+    }
+
+    /**
+     * Unregisters defaults for a given permissible.
+     *
+     * @param map the map of current defaults
+     * @param p the permissible
+     */
+    private static void unregisterDefaults(Map<String, Boolean> map, DummyPermissible p, boolean op) {
         Set<String> perms = map.keySet();
 
         for (String name : perms) {
             Bukkit.getServer().getPluginManager().unsubscribeFromPermission(name, p);
         }
 
-        Bukkit.getServer().getPluginManager().unsubscribeFromDefaultPerms(false, p);
-        Bukkit.getServer().getPluginManager().unsubscribeFromDefaultPerms(true, p);
+        Bukkit.getServer().getPluginManager().unsubscribeFromDefaultPerms(op, p);
     }
 
     private static void calculateDefaults(Map<String, Boolean> map, DummyPermissible p, boolean op) {
-        Set<Permission> defaults = Bukkit.getServer().getPluginManager().getDefaultPermissions(op);
         Bukkit.getServer().getPluginManager().subscribeToDefaultPerms(op, p);
 
+        Set<Permission> defaults = Bukkit.getServer().getPluginManager().getDefaultPermissions(op);
         for (Permission perm : defaults) {
             String name = perm.getName().toLowerCase();
+
             map.put(name, true);
             Bukkit.getServer().getPluginManager().subscribeToPermission(name, p);
+
+            // register defaults for any children too
             calculateChildPermissions(map, p, perm.getChildren(), false);
         }
     }
 
-    private static void calculateChildPermissions(Map<String, Boolean> map, DummyPermissible p, Map<String, Boolean> children, boolean invert) {
+    private static void calculateChildPermissions(Map<String, Boolean> accumulator, DummyPermissible p, Map<String, Boolean> children, boolean invert) {
         for (Map.Entry<String, Boolean> e : children.entrySet()) {
-            Permission perm = Bukkit.getServer().getPluginManager().getPermission(e.getKey());
-            boolean value = e.getValue() ^ invert;
-            String lName = e.getKey().toLowerCase();
+            if (accumulator.containsKey(e.getKey())) {
+                continue; // Prevent infinite loops
+            }
 
-            map.put(lName, value);
+            // xor the value using the parent (bukkit logic, not mine)
+            boolean value = e.getValue() ^ invert;
+
+            accumulator.put(e.getKey().toLowerCase(), value);
             Bukkit.getServer().getPluginManager().subscribeToPermission(e.getKey(), p);
 
+            // lookup any deeper children & resolve if present
+            Permission perm = Bukkit.getServer().getPluginManager().getPermission(e.getKey());
             if (perm != null) {
-                calculateChildPermissions(map, p, perm.getChildren(), !value);
+                calculateChildPermissions(accumulator, p, perm.getChildren(), !value);
             }
         }
     }

@@ -45,37 +45,52 @@ import me.lucko.luckperms.common.utils.ExtractedContexts;
 
 import net.milkbowl.vault.permission.Permission;
 
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * LuckPerms Vault Permission implementation
- * Most lookups are cached.
+ * An implementation of the Vault {@link Permission} API using LuckPerms.
+ *
+ * Methods which change the state of data objects are likely to return immediately.
+ *
+ * LuckPerms is a multithreaded permissions plugin, and some actions require considerable
+ * time to execute. (database queries, re-population of caches, etc) In these cases, the
+ * methods will return immediately and the change will be executed asynchronously.
+ *
+ * Users of the Vault API expect these methods to be "main thread friendly", so unfortunately,
+ * we have to favour so called "performance" for consistency. The Vault API really wasn't designed
+ * with database backed permission plugins in mind. :(
+ *
+ * The methods which query offline players will explicitly FAIL if the corresponding player is not online.
+ * We cannot risk blocking the main thread to load in their data. Again, this is due to crap Vault
+ * design. There is nothing I can do about it.
  */
 @Getter
 public class VaultPermissionHook extends Permission {
+
+    // the plugin instance
     private LPBukkitPlugin plugin;
-    private VaultScheduler scheduler;
 
-    private final String name = "LuckPerms";
-
-    private Function<String, String> worldCorrectionFunction = s -> isIgnoreWorld() ? null : s;
+    // an executor for Vault modifications.
+    private VaultExecutor executor;
 
     public VaultPermissionHook(LPBukkitPlugin plugin) {
         this.plugin = plugin;
-        this.scheduler = new VaultScheduler(plugin);
-        super.plugin = plugin;
+        super.plugin = JavaPlugin.getProvidingPlugin(Permission.class);
+        this.executor = new VaultExecutor(plugin);
     }
 
-    public void log(String s) {
-        if (plugin.getConfiguration().get(ConfigKeys.VAULT_DEBUG)) {
-            plugin.getLog().info("[VAULT] " + s);
-        }
+    @Override
+    public String getName() {
+        return "LuckPerms";
     }
 
     @Override
@@ -88,149 +103,122 @@ public class VaultPermissionHook extends Permission {
         return true;
     }
 
-    /**
-     * Generic method to add a permission to a holder
-     *
-     * @param world      the world to add in
-     * @param holder     the holder to add the permission to
-     * @param permission the permission to add
-     */
-    private CompletableFuture<Void> add(String world, PermissionHolder holder, String permission) {
-        return CompletableFuture.runAsync(() -> {
-            DataMutateResult result;
-            if (world != null && !world.equals("") && !world.equalsIgnoreCase("global")) {
-                result = holder.setPermission(NodeFactory.make(permission, true, getServer(), world));
-            } else {
-                result = holder.setPermission(NodeFactory.make(permission, true, getServer()));
-            }
-
-            if (result.asBoolean()) {
-                save(holder);
-            }
-        }, scheduler);
+    @Override
+    public boolean hasGroupSupport() {
+        return true;
     }
 
-    /**
-     * Generic method to remove a permission from a holder
-     *
-     * @param world      the world to remove in
-     * @param holder     the holder to remove the permission from
-     * @param permission the permission to remove
-     */
-    private CompletableFuture<Void> remove(String world, PermissionHolder holder, String permission) {
-        return CompletableFuture.runAsync(() -> {
-            DataMutateResult result;
-            if (world != null && !world.equals("") && !world.equalsIgnoreCase("global")) {
-                result = holder.unsetPermission(NodeFactory.make(permission, getServer(), world));
-            } else {
-                result = holder.unsetPermission(NodeFactory.make(permission, getServer()));
-            }
-
-            if (result.asBoolean()) {
-                save(holder);
-            }
-        }, scheduler);
+    @Override
+    public String[] getGroups() {
+        return plugin.getGroupManager().getAll().keySet().toArray(new String[0]);
     }
 
-    /**
-     * Utility method to asynchronously save a user or group
-     *
-     * @param holder the holder instance
-     */
-    public void save(PermissionHolder holder) {
-        if (holder instanceof User) {
-            User u = (User) holder;
-            plugin.getStorage().saveUser(u).thenRunAsync(() -> u.getRefreshBuffer().request(), plugin.getScheduler().async());
-        }
-        if (holder instanceof Group) {
-            Group g = (Group) holder;
-            plugin.getStorage().saveGroup(g).thenRunAsync(() -> plugin.getUpdateTaskBuffer().request(), plugin.getScheduler().async());
-        }
+    @Override
+    public boolean has(@NonNull CommandSender sender, @NonNull String permission) {
+        return sender.hasPermission(permission);
     }
 
-    public Contexts createContextForWorldSet(String world) {
-        MutableContextSet context = MutableContextSet.create();
-        if (world != null && !world.equals("") && !world.equalsIgnoreCase("global")) {
-            context.add("world", world.toLowerCase());
-        }
-        context.add("server", getServer());
-        return new Contexts(context, isIncludeGlobal(), true, true, true, true, false);
-    }
-
-    public Contexts createContextForWorldLookup(String world) {
-        MutableContextSet context = MutableContextSet.create();
-        if (world != null && !world.equals("") && !world.equalsIgnoreCase("global")) {
-            context.add("world", world.toLowerCase());
-        }
-        context.add("server", getServer());
-        context.addAll(plugin.getConfiguration().getContextsFile().getStaticContexts());
-        return new Contexts(context, isIncludeGlobal(), true, true, true, true, false);
-    }
-
-    public Contexts createContextForWorldLookup(Player player, String world) {
-        MutableContextSet context = MutableContextSet.create();
-
-        // use player context
-        if (player != null) {
-            ImmutableContextSet applicableContext = plugin.getContextManager().getApplicableContext(player);
-            context.addAll(applicableContext);
-        } else {
-            // at least given them the static context defined for this instance
-            context.addAll(plugin.getConfiguration().getContextsFile().getStaticContexts());
-        }
-
-        // worlds & servers get set depending on the config setting
-        context.removeAll("world");
-        context.removeAll("server");
-
-        // add the vault settings
-        if (world != null && !world.equals("") && !world.equalsIgnoreCase("global")) {
-            context.add("world", world.toLowerCase());
-        }
-        context.add("server", getServer());
-
-        return new Contexts(context, isIncludeGlobal(), true, true, true, true, false);
+    @Override
+    public boolean has(@NonNull Player player, @NonNull String permission) {
+        return player.hasPermission(permission);
     }
 
     @Override
     public boolean playerHas(String world, @NonNull String player, @NonNull String permission) {
-        world = worldCorrectionFunction.apply(world);
+        return playerHas(world, Bukkit.getPlayerExact(player), permission);
+    }
+
+    @Override
+    public boolean playerHas(String world, @NonNull OfflinePlayer player, @NonNull String permission) {
+        return playerHas(world, player.getPlayer(), permission);
+    }
+
+    private boolean playerHas(String world, Player player, String permission) {
+        world = correctWorld(world);
         log("Checking if player " + player + " has permission: " + permission + " on world " + world + ", server " + getServer());
 
-        User user = plugin.getUserManager().getByUsername(player);
-        if (user == null) return false;
+        if (player == null) {
+            return false;
+        }
+
+        User user = plugin.getUserManager().getIfLoaded(plugin.getUuidCache().getUUID(player.getUniqueId()));
+        if (user == null) {
+            return false;
+        }
 
         // Effectively fallback to the standard Bukkit #hasPermission check.
-        return user.getUserData().getPermissionData(createContextForWorldLookup(plugin.getPlayer(user), world)).getPermissionValue(permission).asBoolean();
+        return user.getUserData().getPermissionData(createContextForWorldLookup(player, world)).getPermissionValue(permission).asBoolean();
     }
 
     @Override
     public boolean playerAdd(String world, @NonNull String player, @NonNull String permission) {
-        world = worldCorrectionFunction.apply(world);
+        return playerAdd(world, Bukkit.getPlayerExact(player), permission);
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    public boolean playerAdd(World world, @NonNull String player, @NonNull String permission) {
+        return playerAdd(world == null ? null : world.getName(), Bukkit.getPlayerExact(player), permission);
+    }
+
+    @Override
+    public boolean playerAdd(String world, @NonNull OfflinePlayer player, @NonNull String permission) {
+        return playerAdd(world, player.getPlayer(), permission);
+    }
+
+    private boolean playerAdd(String world, Player player, String permission) {
+        world = correctWorld(world);
         log("Adding permission to player " + player + ": '" + permission + "' on world " + world + ", server " + getServer());
 
-        final User user = plugin.getUserManager().getByUsername(player);
-        if (user == null) return false;
+        if (player == null) {
+            return false;
+        }
 
-        add(world, user, permission);
+        final User user = plugin.getUserManager().getIfLoaded(plugin.getUuidCache().getUUID(player.getUniqueId()));
+        if (user == null) {
+            return false;
+        }
+
+        holderAddPermission(user, permission, world);
         return true;
     }
 
     @Override
     public boolean playerRemove(String world, @NonNull String player, @NonNull String permission) {
-        world = worldCorrectionFunction.apply(world);
+        return playerRemove(world, Bukkit.getPlayerExact(player), permission);
+    }
+
+    @Override
+    public boolean playerRemove(String world, @NonNull OfflinePlayer player, @NonNull String permission) {
+        return playerRemove(world, player.getPlayer(), permission);
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    public boolean playerRemove(World world, @NonNull String player, @NonNull String permission) {
+        return playerRemove(world == null ? null : world.getName(), Bukkit.getPlayerExact(player), permission);
+    }
+
+    private boolean playerRemove(String world, Player player, String permission) {
+        world = correctWorld(world);
         log("Removing permission from player " + player + ": '" + permission + "' on world " + world + ", server " + getServer());
 
-        final User user = plugin.getUserManager().getByUsername(player);
-        if (user == null) return false;
+        if (player == null) {
+            return false;
+        }
 
-        remove(world, user, permission);
+        final User user = plugin.getUserManager().getIfLoaded(plugin.getUuidCache().getUUID(player.getUniqueId()));
+        if (user == null) {
+            return false;
+        }
+
+        holderRemovePermission(user, permission, world);
         return true;
     }
 
     @Override
     public boolean groupHas(String world, @NonNull String groupName, @NonNull String permission) {
-        world = worldCorrectionFunction.apply(world);
+        world = correctWorld(world);
         log("Checking if group " + groupName + " has permission: " + permission + " on world " + world + ", server " + getServer());
 
         final Group group = plugin.getGroupManager().getIfLoaded(groupName);
@@ -243,105 +231,123 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public boolean groupAdd(String world, @NonNull String groupName, @NonNull String permission) {
-        world = worldCorrectionFunction.apply(world);
+        world = correctWorld(world);
         log("Adding permission to group " + groupName + ": '" + permission + "' on world " + world + ", server " + getServer());
 
         final Group group = plugin.getGroupManager().getIfLoaded(groupName);
         if (group == null) return false;
 
-        add(world, group, permission);
+        holderAddPermission(group, permission, world);
         return true;
     }
 
     @Override
     public boolean groupRemove(String world, @NonNull String groupName, @NonNull String permission) {
-        world = worldCorrectionFunction.apply(world);
+        world = correctWorld(world);
         log("Removing permission from group " + groupName + ": '" + permission + "' on world " + world + ", server " + getServer());
 
         final Group group = plugin.getGroupManager().getIfLoaded(groupName);
         if (group == null) return false;
 
-        remove(world, group, permission);
+        holderRemovePermission(group, permission, world);
         return true;
     }
 
     @Override
-    public boolean playerInGroup(String world, @NonNull String player, @NonNull String group) {
-        world = worldCorrectionFunction.apply(world);
-        log("Checking if player " + player + " is in group: " + group + " on world " + world + ", server " + getServer());
+    public boolean playerInGroup(String world, String player, @NonNull String group) {
+        return playerHas(world, player, "group." + group);
+    }
 
-        final User user = plugin.getUserManager().getByUsername(player);
-        if (user == null) return false;
-
-        String w = world; // screw effectively final
-        return user.getNodes().values().stream()
-                .filter(Node::isGroupNode)
-                .filter(n -> n.shouldApplyWithContext(createContextForWorldLookup(plugin.getPlayer(user), w).getContexts()))
-                .map(Node::getGroupName)
-                .anyMatch(s -> s.equalsIgnoreCase(group));
+    @SuppressWarnings("deprecation")
+    @Override
+    public boolean playerInGroup(World world, String player, @NonNull String group) {
+        return playerHas(world, player, "group." + group);
     }
 
     @Override
-    public boolean playerAddGroup(String world, @NonNull String player, @NonNull String groupName) {
-        world = worldCorrectionFunction.apply(world);
-        log("Adding player " + player + " to group: '" + groupName + "' on world " + world + ", server " + getServer());
-
-        final User user = plugin.getUserManager().getByUsername(player);
-        if (user == null) return false;
-
-        final Group group = plugin.getGroupManager().getIfLoaded(groupName);
-        if (group == null) return false;
-
-        String w = world;
-        scheduler.execute(() -> {
-            DataMutateResult result;
-            if (w != null && !w.equals("") && !w.equalsIgnoreCase("global")) {
-                result = user.setInheritGroup(group, ImmutableContextSet.of("server", getServer(), "world", w));
-            } else {
-                result = user.setInheritGroup(group, ImmutableContextSet.singleton("server", getServer()));
-            }
-
-            if (result.asBoolean()) {
-                save(user);
-            }
-        });
-        return true;
+    public boolean playerInGroup(String world, OfflinePlayer player, @NonNull String group) {
+        return playerHas(world, player, "group." + group);
     }
 
     @Override
-    public boolean playerRemoveGroup(String world, @NonNull String player, @NonNull String groupName) {
-        world = worldCorrectionFunction.apply(world);
-        log("Removing player " + player + " from group: '" + groupName + "' on world " + world + ", server " + getServer());
+    public boolean playerInGroup(Player player, @NonNull String group) {
+        return playerHas(player, "group." + group);
+    }
 
-        final User user = plugin.getUserManager().getByUsername(player);
-        if (user == null) return false;
+    private boolean checkGroupExists(String group) {
+        return plugin.getGroupManager().isLoaded(group);
+    }
 
-        final Group group = plugin.getGroupManager().getIfLoaded(groupName);
-        if (group == null) return false;
+    @Override
+    public boolean playerAddGroup(String world, String player, @NonNull String group) {
+        return checkGroupExists(group) && playerAdd(world, player, "group." + group);
+    }
 
-        String w = world;
-        scheduler.execute(() -> {
-            DataMutateResult result;
-            if (w != null && !w.equals("") && !w.equalsIgnoreCase("global")) {
-                result = user.unsetInheritGroup(group, ImmutableContextSet.of("server", getServer(), "world", w));
-            } else {
-                result = user.unsetInheritGroup(group, ImmutableContextSet.singleton("server", getServer()));
-            }
+    @SuppressWarnings("deprecation")
+    @Override
+    public boolean playerAddGroup(World world, String player, @NonNull String group) {
+        return checkGroupExists(group) && playerAdd(world, player, "group." + group);
+    }
 
-            if (result.asBoolean()) {
-                save(user);
-            }
-        });
-        return true;
+    @Override
+    public boolean playerAddGroup(String world, OfflinePlayer player, @NonNull String group) {
+        return checkGroupExists(group) && playerAdd(world, player, "group." + group);
+    }
+
+    @Override
+    public boolean playerAddGroup(Player player, @NonNull String group) {
+        return checkGroupExists(group) && playerAdd(player, "group." + group);
+    }
+
+    @Override
+    public boolean playerRemoveGroup(String world, String player, @NonNull String group) {
+        return checkGroupExists(group) && playerRemove(world, player, "group." + group);
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    public boolean playerRemoveGroup(World world, String player, @NonNull String group) {
+        return checkGroupExists(group) && playerRemove(world, player, "group." + group);
+    }
+
+    @Override
+    public boolean playerRemoveGroup(String world, OfflinePlayer player, @NonNull String group) {
+        return checkGroupExists(group) && playerRemove(world, player, "group." + group);
+    }
+
+    @Override
+    public boolean playerRemoveGroup(Player player, @NonNull String group) {
+        return checkGroupExists(group) && playerRemove(player, "group." + group);
     }
 
     @Override
     public String[] getPlayerGroups(String world, @NonNull String player) {
-        world = worldCorrectionFunction.apply(world);
+        return getPlayerGroups(world, Bukkit.getPlayerExact(player));
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    public String[] getPlayerGroups(World world, @NonNull String player) {
+        return getPlayerGroups(world == null ? null : world.getName(), Bukkit.getPlayerExact(player));
+    }
+
+    @Override
+    public String[] getPlayerGroups(String world, @NonNull OfflinePlayer player) {
+        return getPlayerGroups(world, player.getPlayer());
+    }
+
+    private String[] getPlayerGroups(String world, Player player) {
+        world = correctWorld(world);
         log("Getting groups of player: " + player + ", on world " + world + ", server " + getServer());
 
-        User user = plugin.getUserManager().getByUsername(player);
-        if (user == null) return new String[0];
+        if (player == null) {
+            return new String[0];
+        }
+
+        User user = plugin.getUserManager().getIfLoaded(plugin.getUuidCache().getUUID(player.getUniqueId()));
+        if (user == null) {
+            return new String[0];
+        }
 
         String w = world; // screw effectively final
         return user.getNodes().values().stream()
@@ -353,9 +359,29 @@ public class VaultPermissionHook extends Permission {
 
     @Override
     public String getPrimaryGroup(String world, @NonNull String player) {
-        world = worldCorrectionFunction.apply(world);
+        return getPrimaryGroup(world, Bukkit.getPlayerExact(player));
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    public String getPrimaryGroup(World world, @NonNull String player) {
+        return getPrimaryGroup(world == null ? null : world.getName(), Bukkit.getPlayerExact(player));
+    }
+
+    @Override
+    public String getPrimaryGroup(String world, @NonNull OfflinePlayer player) {
+        return getPrimaryGroup(world, player.getPlayer());
+    }
+
+    private String getPrimaryGroup(String world, Player player) {
+        world = correctWorld(world);
         log("Getting primary group of player: " + player);
-        final User user = plugin.getUserManager().getByUsername(player);
+
+        if (player == null) {
+            return null;
+        }
+
+        final User user = plugin.getUserManager().getIfLoaded(plugin.getUuidCache().getUUID(player.getUniqueId()));
 
         if (user == null) {
             return null;
@@ -428,15 +454,101 @@ public class VaultPermissionHook extends Permission {
         return plugin.getConfiguration().get(ConfigKeys.GROUP_NAME_REWRITES).getOrDefault(g, g);
     }
 
-    @Override
-    public String[] getGroups() {
-        return plugin.getGroupManager().getAll().keySet().toArray(new String[0]);
+    public void log(String s) {
+        if (plugin.getConfiguration().get(ConfigKeys.VAULT_DEBUG)) {
+            plugin.getLog().info("[VAULT] " + s);
+        }
     }
 
-    @Override
-    public boolean hasGroupSupport() {
-        return true;
+    String correctWorld(String world) {
+        return isIgnoreWorld() ? null : world;
     }
+
+    // utility methods for modifying the state of PermissionHolders
+
+    private void holderAddPermission(PermissionHolder holder, String permission, String world) {
+        executor.execute(() -> {
+            DataMutateResult result;
+            if (world != null && !world.equals("") && !world.equalsIgnoreCase("global")) {
+                result = holder.setPermission(NodeFactory.make(permission, true, getServer(), world));
+            } else {
+                result = holder.setPermission(NodeFactory.make(permission, true, getServer()));
+            }
+
+            if (result.asBoolean()) {
+                holderSave(holder);
+            }
+        });
+    }
+
+    private void holderRemovePermission(PermissionHolder holder, String permission, String world) {
+        executor.execute(() -> {
+            DataMutateResult result;
+            if (world != null && !world.equals("") && !world.equalsIgnoreCase("global")) {
+                result = holder.unsetPermission(NodeFactory.make(permission, getServer(), world));
+            } else {
+                result = holder.unsetPermission(NodeFactory.make(permission, getServer()));
+            }
+
+            if (result.asBoolean()) {
+                holderSave(holder);
+            }
+        });
+    }
+
+    public void holderSave(PermissionHolder holder) {
+        if (holder instanceof User) {
+            User u = (User) holder;
+            plugin.getStorage().saveUser(u).thenRunAsync(() -> u.getRefreshBuffer().request(), plugin.getScheduler().async());
+        }
+        if (holder instanceof Group) {
+            Group g = (Group) holder;
+            plugin.getStorage().saveGroup(g).thenRunAsync(() -> plugin.getUpdateTaskBuffer().request(), plugin.getScheduler().async());
+        }
+    }
+
+    // helper methods to build Contexts instances for different world/server combinations
+
+    public Contexts createContextForWorldSet(String world) {
+        MutableContextSet context = MutableContextSet.create();
+        if (world != null && !world.equals("") && !world.equalsIgnoreCase("global")) {
+            context.add("world", world.toLowerCase());
+        }
+        context.add("server", getServer());
+        return new Contexts(context, isIncludeGlobal(), true, true, true, true, false);
+    }
+
+    public Contexts createContextForWorldLookup(String world) {
+        MutableContextSet context = MutableContextSet.create();
+        if (world != null && !world.equals("") && !world.equalsIgnoreCase("global")) {
+            context.add("world", world.toLowerCase());
+        }
+        context.add("server", getServer());
+        context.addAll(plugin.getConfiguration().getContextsFile().getStaticContexts());
+        return new Contexts(context, isIncludeGlobal(), true, true, true, true, false);
+    }
+
+    public Contexts createContextForWorldLookup(@NonNull Player player, String world) {
+        MutableContextSet context = MutableContextSet.create();
+
+        // use player context
+        ImmutableContextSet applicableContext = plugin.getContextManager().getApplicableContext(player);
+        context.addAll(applicableContext);
+
+        // worlds & servers get set depending on the config setting
+        context.removeAll("world");
+        context.removeAll("server");
+
+        // add the vault settings
+        if (world != null && !world.isEmpty() && !world.equalsIgnoreCase("global")) {
+            context.add("world", world.toLowerCase());
+        }
+        context.add("server", getServer());
+
+        return new Contexts(context, isIncludeGlobal(), true, true, true, true, false);
+    }
+
+    // helper methods to just pull values from the config.
 
     String getServer() {
         return plugin.getConfiguration().get(ConfigKeys.VAULT_SERVER);

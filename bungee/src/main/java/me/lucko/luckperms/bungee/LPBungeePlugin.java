@@ -31,6 +31,7 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.bungee.messaging.BungeeMessagingService;
 import me.lucko.luckperms.bungee.messaging.RedisBungeeMessagingService;
 import me.lucko.luckperms.bungee.util.RedisBungeeUtil;
@@ -231,13 +232,26 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         calculatorFactory = new BungeeCalculatorFactory(this);
         cachedStateManager = new CachedStateManager(this);
 
-        contextManager = new ContextManager<>();
+        contextManager = new ContextManager<ProxiedPlayer>() {
+            @Override
+            public Contexts formContexts(ProxiedPlayer player, ImmutableContextSet contextSet) {
+                return new Contexts(
+                        contextSet,
+                        getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
+                        getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
+                        true,
+                        getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
+                        getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
+                        false
+                );
+            }
+        };
+
         BackendServerCalculator serverCalculator = new BackendServerCalculator(this);
         contextManager.registerCalculator(serverCalculator);
 
         StaticCalculator<ProxiedPlayer> staticCalculator = new StaticCalculator<>(getConfiguration());
-        contextManager.registerCalculator(staticCalculator);
-        contextManager.registerStaticCalculator(staticCalculator);
+        contextManager.registerCalculator(staticCalculator, true);
 
         // register with the LP API
         apiProvider = new ApiProvider(this);
@@ -338,15 +352,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         if (player == null) {
             return null;
         }
-        return new Contexts(
-                getContextManager().getApplicableContext(player),
-                getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
-                getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
-                true,
-                getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
-                getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
-                false
-        );
+        return contextManager.getApplicableContexts(player);
     }
 
     @Override
@@ -384,19 +390,11 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
     @Override
     public Set<Contexts> getPreProcessContexts(boolean op) {
-        Set<ContextSet> c = new HashSet<>();
+        Set<ImmutableContextSet> c = new HashSet<>();
         c.add(ContextSet.empty());
         c.add(ContextSet.singleton("server", getConfiguration().get(ConfigKeys.SERVER)));
         return c.stream()
-                .map(set -> new Contexts(
-                        set,
-                        getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
-                        getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
-                        true,
-                        getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
-                        getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
-                        false
-                ))
+                .map(set -> contextManager.formContexts(null, set))
                 .collect(Collectors.toSet());
     }
 }

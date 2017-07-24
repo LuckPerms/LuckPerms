@@ -32,6 +32,7 @@ import com.google.inject.Inject;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.PlatformType;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.api.ApiHandler;
 import me.lucko.luckperms.common.api.ApiProvider;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
@@ -274,12 +275,25 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         calculatorFactory = new SpongeCalculatorFactory(this);
         cachedStateManager = new CachedStateManager(this);
 
-        contextManager = new ContextManager<>();
+        contextManager = new ContextManager<Subject>() {
+            @Override
+            public Contexts formContexts(Subject subject, ImmutableContextSet contextSet) {
+                return new Contexts(
+                        contextSet,
+                        getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
+                        getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
+                        true,
+                        getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
+                        getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
+                        false
+                );
+            }
+        };
+
         contextManager.registerCalculator(new WorldCalculator(this));
 
         StaticCalculator<Subject> staticCalculator = new StaticCalculator<>(getConfiguration());
-        contextManager.registerCalculator(staticCalculator);
-        contextManager.registerStaticCalculator(staticCalculator);
+        contextManager.registerCalculator(staticCalculator, true);
 
         // register the PermissionService with Sponge
         getLog().info("Registering PermissionService...");
@@ -424,15 +438,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         if (player == null) {
             return null;
         }
-        return new Contexts(
-                getContextManager().getApplicableContext(player),
-                getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
-                getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
-                true,
-                getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
-                getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
-                false
-        );
+        return contextManager.getApplicableContexts(player);
     }
 
     @Override

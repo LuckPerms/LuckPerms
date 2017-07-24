@@ -45,9 +45,10 @@ import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.permissions.PermissionRemovedExecutor;
 import org.bukkit.plugin.Plugin;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -57,24 +58,47 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 /**
- * Modified PermissibleBase for LuckPerms
+ * PermissibleBase for LuckPerms.
+ *
+ * This class overrides all methods defined in PermissibleBase, and provides custom handling
+ * from LuckPerms.
+ *
+ * This means that all permission checks made for a player are handled directly by the plugin.
+ * Method behaviour is retained, but alternate implementation is used.
+ *
+ * "Hot" method calls, (namely #hasPermission) are significantly faster than the base implementation.
+ *
+ * This class is **thread safe**. This means that when LuckPerms is installed on the server,
+ * is is safe to call Player#hasPermission asynchronously.
  */
 @Getter
 public class LPPermissible extends PermissibleBase {
 
+    // the LuckPerms user this permissible references.
     private final User user;
+
+    // the player this permissible is injected into.
     private final Player parent;
+
+    // the luckperms plugin instance
     private final LPBukkitPlugin plugin;
+
+    // the subscription manager, handling the players permission subscriptions.
     private final SubscriptionManager subscriptions;
 
+    // the players previous permissible. (the one they had before this one was injected)
     @Setter
     private PermissibleBase oldPermissible = null;
 
+    // if the permissible is currently active.
     private final AtomicBoolean active = new AtomicBoolean(false);
 
-    // Attachment stuff.
+    // the permissions registered by PermissionAttachments.
+    // stored in this format, as that's what is used by #getEffectivePermissions
     private final Map<String, PermissionAttachmentInfo> attachmentPermissions = new ConcurrentHashMap<>();
-    private final List<PermissionAttachment> attachments = Collections.synchronizedList(new LinkedList<>());
+
+    // the attachments hooked onto the permissible.
+    private final List<PermissionAttachment> attachments = Collections.synchronizedList(new ArrayList<>());
 
     public LPPermissible(@NonNull Player parent, @NonNull User user, @NonNull LPBukkitPlugin plugin) {
         super(parent);
@@ -84,6 +108,49 @@ public class LPPermissible extends PermissibleBase {
         this.subscriptions = new SubscriptionManager(this);
     }
 
+    @Override
+    public boolean isPermissionSet(@NonNull String permission) {
+        Tristate ts = user.getUserData().getPermissionData(calculateContexts()).getPermissionValue(permission);
+        return ts != Tristate.UNDEFINED || Permission.DEFAULT_PERMISSION.getValue(isOp());
+    }
+
+    @Override
+    public boolean isPermissionSet(@NonNull Permission permission) {
+        Tristate ts = user.getUserData().getPermissionData(calculateContexts()).getPermissionValue(permission.getName());
+        if (ts != Tristate.UNDEFINED) {
+            return true;
+        }
+
+        if (!plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_DEFAULT_PERMISSIONS)) {
+            return Permission.DEFAULT_PERMISSION.getValue(isOp());
+        } else {
+            return permission.getDefault().getValue(isOp());
+        }
+    }
+
+    @Override
+    public boolean hasPermission(@NonNull String permission) {
+        Tristate ts = user.getUserData().getPermissionData(calculateContexts()).getPermissionValue(permission);
+        return ts != Tristate.UNDEFINED ? ts.asBoolean() : Permission.DEFAULT_PERMISSION.getValue(isOp());
+    }
+
+    @Override
+    public boolean hasPermission(@NonNull Permission permission) {
+        Tristate ts = user.getUserData().getPermissionData(calculateContexts()).getPermissionValue(permission.getName());
+        if (ts != Tristate.UNDEFINED) {
+            return ts.asBoolean();
+        }
+
+        if (!plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_DEFAULT_PERMISSIONS)) {
+            return Permission.DEFAULT_PERMISSION.getValue(isOp());
+        } else {
+            return permission.getDefault().getValue(isOp());
+        }
+    }
+
+    /**
+     * Updates the players subscriptions asynchronously
+     */
     public void updateSubscriptionsAsync() {
         if (!active.get()) {
             return;
@@ -92,18 +159,20 @@ public class LPPermissible extends PermissibleBase {
         plugin.doAsync(this::updateSubscriptions);
     }
 
+    /**
+     * Updates the players subscriptions
+     */
     public void updateSubscriptions() {
         if (!active.get()) {
             return;
         }
 
         UserCache cache = user.getUserData();
-        if (cache == null) {
-            return;
-        }
 
+        // calculate their "active" permissions
         Set<String> ent = new HashSet<>(cache.getPermissionData(calculateContexts()).getImmutableBacking().keySet());
 
+        // include defaults, if enabled.
         if (plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_DEFAULT_PERMISSIONS)) {
             if (parent.isOp()) {
                 ent.addAll(plugin.getDefaultsProvider().getOpDefaults().keySet());
@@ -115,73 +184,42 @@ public class LPPermissible extends PermissibleBase {
         subscriptions.subscribe(ent);
     }
 
+    /**
+     * Unsubscribes from all permissions asynchronously
+     */
     public void unsubscribeFromAllAsync() {
         plugin.doAsync(this::unsubscribeFromAll);
     }
 
+    /**
+     * Unsubscribes from all permissions
+     */
     public void unsubscribeFromAll() {
         subscriptions.subscribe(Collections.emptySet());
     }
 
-    public void addAttachments(List<PermissionAttachment> attachments) {
+    /**
+     * Adds attachments to this permissible.
+     *
+     * @param attachments the attachments to add
+     */
+    public void addAttachments(Collection<PermissionAttachment> attachments) {
         this.attachments.addAll(attachments);
     }
 
+    /**
+     * Obtains a {@link Contexts} instance for the player.
+     * Values are determined using the plugins ContextManager.
+     *
+     * @return the calculated contexts for the player.
+     */
     public Contexts calculateContexts() {
-        return new Contexts(
-                plugin.getContextManager().getApplicableContext(parent),
-                plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
-                plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
-                true,
-                plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
-                plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
-                parent.isOp()
-        );
+        return plugin.getContextManager().getApplicableContexts(parent);
     }
 
     @Override
     public void setOp(boolean value) {
         parent.setOp(value);
-    }
-
-    @Override
-    public boolean isPermissionSet(@NonNull String name) {
-        Tristate ts = user.getUserData().getPermissionData(calculateContexts()).getPermissionValue(name);
-        return ts != Tristate.UNDEFINED || Permission.DEFAULT_PERMISSION.getValue(isOp());
-    }
-
-    @Override
-    public boolean isPermissionSet(@NonNull Permission perm) {
-        Tristate ts = user.getUserData().getPermissionData(calculateContexts()).getPermissionValue(perm.getName());
-        if (ts != Tristate.UNDEFINED) {
-            return true;
-        }
-
-        if (!plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_DEFAULT_PERMISSIONS)) {
-            return Permission.DEFAULT_PERMISSION.getValue(isOp());
-        } else {
-            return perm.getDefault().getValue(isOp());
-        }
-    }
-
-    @Override
-    public boolean hasPermission(@NonNull String name) {
-        Tristate ts = user.getUserData().getPermissionData(calculateContexts()).getPermissionValue(name);
-        return ts != Tristate.UNDEFINED ? ts.asBoolean() : Permission.DEFAULT_PERMISSION.getValue(isOp());
-    }
-
-    @Override
-    public boolean hasPermission(@NonNull Permission perm) {
-        Tristate ts = user.getUserData().getPermissionData(calculateContexts()).getPermissionValue(perm.getName());
-        if (ts != Tristate.UNDEFINED) {
-            return ts.asBoolean();
-        }
-
-        if (!plugin.getConfiguration().get(ConfigKeys.APPLY_BUKKIT_DEFAULT_PERMISSIONS)) {
-            return Permission.DEFAULT_PERMISSION.getValue(isOp());
-        } else {
-            return perm.getDefault().getValue(isOp());
-        }
     }
 
     @Override

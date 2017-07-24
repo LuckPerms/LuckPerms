@@ -150,16 +150,7 @@ public class BungeeListener implements Listener {
             return;
         }
 
-        Contexts contexts = new Contexts(
-                plugin.getContextManager().getApplicableContext(player),
-                plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
-                plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
-                true,
-                plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
-                plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
-                false
-        );
-
+        Contexts contexts = plugin.getContextManager().getApplicableContexts(player);
         Tristate result = user.getUserData().getPermissionData(contexts).getPermissionValue(e.getPermission());
         if (result == Tristate.UNDEFINED && plugin.getConfiguration().get(ConfigKeys.APPLY_BUNGEE_CONFIG_PERMISSIONS)) {
             return; // just use the result provided by the proxy when the event was created
@@ -182,16 +173,7 @@ public class BungeeListener implements Listener {
             return;
         }
 
-        Contexts contexts = new Contexts(
-                plugin.getContextManager().getApplicableContext(player),
-                plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
-                plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
-                true,
-                plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
-                plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
-                false
-        );
-
+        Contexts contexts = plugin.getContextManager().getApplicableContexts(player);
         Tristate result = user.getUserData().getPermissionData(contexts).getPermissionValue(e.getPermission());
         if (result == Tristate.UNDEFINED && plugin.getConfiguration().get(ConfigKeys.APPLY_BUNGEE_CONFIG_PERMISSIONS)) {
             return; // just use the result provided by the proxy when the event was created
@@ -216,16 +198,7 @@ public class BungeeListener implements Listener {
                 return;
             }
 
-            Contexts contexts = new Contexts(
-                    set.makeImmutable(),
-                    plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
-                    plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
-                    true,
-                    plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
-                    plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
-                    false
-            );
-
+            Contexts contexts = plugin.getContextManager().formContexts(e.getPlayer(), set.makeImmutable());
             user.getUserData().preCalculate(contexts);
         });
     }

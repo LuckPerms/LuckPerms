@@ -36,6 +36,9 @@ import me.lucko.luckperms.common.calculators.PermissionProcessor;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Permission Processor for Bukkits "child" permission system.
+ */
 @RequiredArgsConstructor
 public class ChildProcessor implements PermissionProcessor {
     private final ChildPermissionProvider provider;

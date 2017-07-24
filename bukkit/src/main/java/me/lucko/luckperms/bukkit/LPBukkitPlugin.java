@@ -32,6 +32,7 @@ import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.bukkit.messaging.BungeeMessagingService;
 import me.lucko.luckperms.bukkit.messaging.LilyPadMessagingService;
@@ -39,7 +40,7 @@ import me.lucko.luckperms.bukkit.model.ChildPermissionProvider;
 import me.lucko.luckperms.bukkit.model.DefaultsProvider;
 import me.lucko.luckperms.bukkit.model.Injector;
 import me.lucko.luckperms.bukkit.model.LPPermissible;
-import me.lucko.luckperms.bukkit.vault.VaultHook;
+import me.lucko.luckperms.bukkit.vault.VaultHookManager;
 import me.lucko.luckperms.common.api.ApiHandler;
 import me.lucko.luckperms.common.api.ApiProvider;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
@@ -111,7 +112,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private long startTime;
     private LPBukkitScheduler scheduler;
     private BukkitCommand commandManager;
-    private VaultHook vaultHook = null;
+    private VaultHookManager vaultHookManager = null;
     private LuckPermsConfiguration configuration;
     private UserManager userManager;
     private GroupManager groupManager;
@@ -288,13 +289,26 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         calculatorFactory = new BukkitCalculatorFactory(this);
         cachedStateManager = new CachedStateManager(this);
 
-        contextManager = new ContextManager<>();
+        contextManager = new ContextManager<Player>() {
+            @Override
+            public Contexts formContexts(Player player, ImmutableContextSet contextSet) {
+                return new Contexts(
+                        contextSet,
+                        getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
+                        getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
+                        true,
+                        getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
+                        getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
+                        player.isOp()
+                );
+            }
+        };
+
         worldCalculator = new WorldCalculator(this);
         contextManager.registerCalculator(worldCalculator);
 
         StaticCalculator<Player> staticCalculator = new StaticCalculator<>(getConfiguration());
-        contextManager.registerCalculator(staticCalculator);
-        contextManager.registerStaticCalculator(staticCalculator);
+        contextManager.registerCalculator(staticCalculator, true);
 
         // Provide vault support
         tryVaultHook(false);
@@ -368,7 +382,12 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         verboseHandler.setShutdown(true);
 
         for (Player player : getServer().getOnlinePlayers()) {
-            Injector.unInject(player, false, false);
+            try {
+                Injector.unInject(player, false, false);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
             if (getConfiguration().get(ConfigKeys.AUTO_OP)) {
                 player.setOp(false);
             }
@@ -395,8 +414,8 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         ApiHandler.unregisterProvider();
         getServer().getServicesManager().unregisterAll(this);
 
-        if (vaultHook != null) {
-            vaultHook.unhook(this);
+        if (vaultHookManager != null) {
+            vaultHookManager.unhook(this);
         }
 
         getLog().info("Shutting down internal scheduler...");
@@ -408,7 +427,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
         // Null everything
         ignoringLogs = null;
-        vaultHook = null;
+        vaultHookManager = null;
         configuration = null;
         userManager = null;
         groupManager = null;
@@ -434,18 +453,18 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     }
 
     public void tryVaultHook(boolean force) {
-        if (vaultHook != null) {
+        if (vaultHookManager != null) {
             return; // already hooked
         }
 
         try {
             if (force || getServer().getPluginManager().isPluginEnabled("Vault")) {
-                vaultHook = new VaultHook();
-                vaultHook.hook(this);
+                vaultHookManager = new VaultHookManager();
+                vaultHookManager.hook(this);
                 getLog().info("Registered Vault permission & chat hook.");
             }
         } catch (Exception e) {
-            vaultHook = null;
+            vaultHookManager = null;
             getLog().severe("Error occurred whilst hooking into Vault.");
             e.printStackTrace();
         }
@@ -531,15 +550,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         if (player == null) {
             return null;
         }
-        return new Contexts(
-                getContextManager().getApplicableContext(player),
-                getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
-                getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
-                true,
-                getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
-                getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
-                player.isOp()
-        );
+        return contextManager.getApplicableContexts(player);
     }
 
     @Override
@@ -645,7 +656,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     @Override
     public LinkedHashMap<String, Object> getExtraInfo() {
         LinkedHashMap<String, Object> map = new LinkedHashMap<>();
-        map.put("Vault Enabled", vaultHook != null);
+        map.put("Vault Enabled", vaultHookManager != null);
         map.put("Bukkit Defaults count", defaultsProvider.size());
         map.put("Bukkit Child Permissions count", childPermissionProvider.getPermissions().size());
         return map;

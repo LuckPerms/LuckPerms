@@ -36,6 +36,9 @@ import org.bukkit.permissions.Permission;
 
 import java.util.Map;
 
+/**
+ * Permission Processor for Bukkits "default" permission system.
+ */
 @AllArgsConstructor
 public class DefaultsProcessor implements PermissionProcessor {
     private final boolean isOp;

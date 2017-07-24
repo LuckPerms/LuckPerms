@@ -36,12 +36,12 @@ import java.util.concurrent.Executor;
 /**
  * Sequential executor for Vault modifications
  */
-public class VaultScheduler implements Runnable, Executor {
+public class VaultExecutor implements Runnable, Executor {
 
     private BukkitTask task = null;
     private final List<Runnable> tasks = new ArrayList<>();
 
-    public VaultScheduler(LPBukkitPlugin plugin) {
+    public VaultExecutor(LPBukkitPlugin plugin) {
         task = plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, this, 1L, 1L);
     }
 
@@ -60,15 +60,21 @@ public class VaultScheduler implements Runnable, Executor {
                 return;
             }
 
-            toRun = new ArrayList<>();
+            toRun = new ArrayList<>(tasks.size());
             toRun.addAll(tasks);
             tasks.clear();
         }
 
-        toRun.forEach(Runnable::run);
+        for (Runnable runnable : toRun) {
+            try {
+                runnable.run();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
-    public void cancelTask() {
+    public void close() {
         if (task != null) {
             task.cancel();
             task = null;

@@ -206,7 +206,11 @@ public class BukkitListener implements Listener {
         final Player player = e.getPlayer();
 
         // Remove the custom permissible
-        Injector.unInject(player, true, true);
+        try {
+            Injector.unInject(player, true, true);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
 
         // Handle auto op
         if (plugin.getConfiguration().get(ConfigKeys.AUTO_OP)) {
