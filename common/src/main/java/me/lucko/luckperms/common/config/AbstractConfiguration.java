@@ -67,7 +67,6 @@ public abstract class AbstractConfiguration implements LuckPermsConfiguration {
         cache.invalidateAll(toInvalidate);
 
         loadAll();
-        contextsFile.load();
         getPlugin().getApiProvider().getEventFactory().handleConfigReload();
     }
 }
