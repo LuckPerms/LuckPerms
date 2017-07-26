@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.commands.sender;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.api.Tristate;
@@ -59,7 +60,7 @@ public abstract class SenderFactory<T> {
 
     protected abstract boolean hasPermission(T t, String node);
 
-    public final Sender wrap(T t) {
-        return new AbstractSender<>(plugin, this, t);
+    public final Sender wrap(@NonNull T sender) {
+        return new AbstractSender<>(plugin, this, sender);
     }
 }
