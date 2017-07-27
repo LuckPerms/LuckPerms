@@ -133,11 +133,10 @@ public class BukkitListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOW)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerLogin(PlayerLoginEvent e) {
         /* Called when the player starts logging into the server.
-           At this point, the users data should be present and loaded.
-           Listening on LOW priority to allow plugins to further modify data here. (auth plugins, etc.) */
+           At this point, the users data should be present and loaded. */
 
         final Player player = e.getPlayer();
         final User user = plugin.getUserManager().getIfLoaded(plugin.getUuidCache().getUUID(player.getUniqueId()));
