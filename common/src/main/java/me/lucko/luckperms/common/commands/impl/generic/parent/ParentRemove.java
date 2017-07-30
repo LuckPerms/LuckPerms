@@ -97,6 +97,10 @@ public class ParentRemove extends SharedSubCommand {
                     .action("parent remove " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
                     .build().submit(plugin, sender);
 
+            if (holder instanceof User) {
+                plugin.getUserManager().giveDefaultIfNeeded(((User) holder), false);
+            }
+
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
