@@ -93,7 +93,7 @@ public class SpongeConfig extends AbstractConfiguration {
 
         for (String s : paths) {
             node = node.getNode(s);
-            
+
             if (node == null) {
                 return SimpleConfigurationNode.root();
             }
