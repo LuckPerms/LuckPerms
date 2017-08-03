@@ -154,6 +154,11 @@ public class SubjectProxy implements Subject {
     }
 
     @Override
+    public Optional<String> getFriendlyIdentifier() {
+        return getHandle().thenApply(LPSubject::getFriendlyIdentifier).join();
+    }
+
+    @Override
     public Set<Context> getActiveContexts() {
         return getHandle().thenApply(handle -> CompatibilityUtil.convertContexts(handle.getActiveContextSet())).join();
     }

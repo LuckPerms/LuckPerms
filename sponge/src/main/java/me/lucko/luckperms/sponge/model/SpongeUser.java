@@ -95,6 +95,11 @@ public class SpongeUser extends User {
         }
 
         @Override
+        public Optional<String> getFriendlyIdentifier() {
+            return parent.getName();
+        }
+
+        @Override
         public Optional<CommandSource> getCommandSource() {
             final UUID uuid = plugin.getUuidCache().getExternalUUID(parent.getUuid());
 
