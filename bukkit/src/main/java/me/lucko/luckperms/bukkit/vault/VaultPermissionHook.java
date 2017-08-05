@@ -352,7 +352,7 @@ public class VaultPermissionHook extends Permission {
         String w = world; // screw effectively final
         return user.getNodes().values().stream()
                 .filter(Node::isGroupNode)
-                .filter(n -> n.shouldApplyWithContext(createContextForWorldLookup(plugin.getPlayer(user), w).getContexts()))
+                .filter(n -> n.shouldApplyWithContext(createContextForWorldLookup(player, w).getContexts()))
                 .map(Node::getGroupName)
                 .toArray(String[]::new);
     }
