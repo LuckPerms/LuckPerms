@@ -1,6 +1,5 @@
 ![alt text](https://i.imgur.com/7TwJZ5e.png "Banner")
 # LuckPerms [![Build Status](https://ci.lucko.me/job/LuckPerms/badge/icon)](https://ci.lucko.me/job/LuckPerms/)
-此页面为 LuckPerms Wiki 汉化项目界面。
 LuckPerms is an advanced permissions implementation aiming to be a fast, reliable and flexible alternative to existing permission plugins. The project's main goals are centered around high performance and a wide feature set, filling the gaps of functionality and building upon existing features found in other plugins.
 
 LuckPerms also includes an extensive API for developers, and support for a variety of Minecraft server software & data storage options.
@@ -14,6 +13,7 @@ LuckPerms also includes an extensive API for developers, and support for a varie
 * **Development Builds** - <https://ci.lucko.me/job/LuckPerms>
 * **Javadocs** - <https://luckperms.lucko.me/javadocs/>
 * **Wiki** - <https://github.com/lucko/LuckPerms/wiki>
+* **Wiki(Simplified Chinese)** - <https://github.com/PluginsCDTribe/LuckPerms/wiki>
 
 ## Building
 LuckPerms uses Maven to handle dependencies.
