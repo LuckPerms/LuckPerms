@@ -13,6 +13,7 @@ LuckPerms also includes an extensive API for developers, and support for a varie
 * **Development Builds** - <https://ci.lucko.me/job/LuckPerms>
 * **Javadocs** - <https://luckperms.lucko.me/javadocs/>
 * **Wiki** - <https://github.com/lucko/LuckPerms/wiki>
+* **Wiki(Simplified Chinese)** - <https://github.com/PluginsCDTribe/LuckPerms/wiki>
 
 ## Building
 LuckPerms uses Maven to handle dependencies.
