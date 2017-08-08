@@ -83,12 +83,12 @@ public final class SimpleDescription implements LPPermissionDescription {
     @Override
     public CompletableFuture<Map<SubjectReference, Boolean>> findAssignedSubjects(String id) {
         LPSubjectCollection collection = service.getCollection(id);
-        return (CompletableFuture) collection.getAllWithPermission(id);
+        return (CompletableFuture) collection.getAllWithPermission(this.id);
     }
 
     @Override
     public Map<LPSubject, Boolean> getAssignedSubjects(String id) {
         LPSubjectCollection collection = service.getCollection(id);
-        return collection.getLoadedWithPermission(id);
+        return collection.getLoadedWithPermission(this.id);
     }
 }
