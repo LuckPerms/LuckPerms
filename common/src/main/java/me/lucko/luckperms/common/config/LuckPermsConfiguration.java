@@ -31,19 +31,59 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * The master configuration used by LuckPerms.
+ */
 public interface LuckPermsConfiguration {
 
+    /**
+     * Gets the API delegate for this class.
+     *
+     * @return the api delegate
+     */
     LPConfigurationDelegate getDelegate();
 
+    /**
+     * Gets the main plugin instance.
+     *
+     * @return the plugin instance
+     */
     LuckPermsPlugin getPlugin();
 
+    /**
+     * Gets the object which wraps the 'contexts.json' file.
+     *
+     * @return the contexts file wrapper object
+     */
     ContextsFile getContextsFile();
 
+    /**
+     * Initialises the configuration.
+     */
     void init();
 
+    /**
+     * Reloads the configuration.
+     */
     void reload();
 
+    /**
+     * Pre-loads all configuration keys into the cache.
+     */
     void loadAll();
+
+    /**
+     * Gets the value of a given context key.
+     *
+     * @param key the key
+     * @param <T> the key return type
+     * @return the value mapped to the given key. May be null.
+     */
+    <T> T get(ConfigKey<T> key);
+
+
+
+    /* methods used by config keys to load their values */
 
     boolean contains(String path);
 
@@ -58,7 +98,5 @@ public interface LuckPermsConfiguration {
     List<String> getObjectList(String path, List<String> def);
 
     Map<String, String> getMap(String path, Map<String, String> def);
-
-    <T> T get(ConfigKey<T> key);
 
 }

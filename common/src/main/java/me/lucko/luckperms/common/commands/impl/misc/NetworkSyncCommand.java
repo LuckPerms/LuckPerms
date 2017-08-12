@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.commands.impl.misc;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -41,7 +41,7 @@ import java.util.List;
 
 public class NetworkSyncCommand extends SingleCommand {
     public NetworkSyncCommand(LocaleManager locale) {
-        super(CommandSpec.NETWORK_SYNC.spec(locale), "NetworkSync", Permission.SYNC, Predicates.alwaysFalse());
+        super(CommandSpec.NETWORK_SYNC.spec(locale), "NetworkSync", CommandPermission.SYNC, Predicates.alwaysFalse());
     }
 
     @Override

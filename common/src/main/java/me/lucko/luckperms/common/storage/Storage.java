@@ -31,10 +31,10 @@ import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
 import me.lucko.luckperms.common.api.delegates.StorageDelegate;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
-import me.lucko.luckperms.common.core.model.Group;
-import me.lucko.luckperms.common.core.model.Track;
-import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.Log;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.Track;
+import me.lucko.luckperms.common.model.User;
 
 import java.util.List;
 import java.util.Map;

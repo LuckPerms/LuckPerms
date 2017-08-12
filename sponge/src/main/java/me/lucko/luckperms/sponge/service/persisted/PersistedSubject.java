@@ -34,7 +34,7 @@ import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.utils.BufferedRequest;
+import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.calculated.CalculatedSubjectData;

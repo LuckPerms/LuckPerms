@@ -32,7 +32,7 @@ import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -48,7 +48,7 @@ import java.util.List;
 
 public class ParentRemove extends SubCommand<LPSubjectData> {
     public ParentRemove(LocaleManager locale) {
-        super(CommandSpec.SPONGE_PARENT_REMOVE.spec(locale), "remove", Permission.SPONGE_PARENT_REMOVE, Predicates.inRange(0, 1));
+        super(CommandSpec.SPONGE_PARENT_REMOVE.spec(locale), "remove", CommandPermission.SPONGE_PARENT_REMOVE, Predicates.inRange(0, 1));
     }
 
     @Override

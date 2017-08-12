@@ -34,51 +34,53 @@ import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.bukkit.calculators.BukkitCalculatorFactory;
+import me.lucko.luckperms.bukkit.contexts.WorldCalculator;
 import me.lucko.luckperms.bukkit.messaging.BungeeMessagingService;
 import me.lucko.luckperms.bukkit.messaging.LilyPadMessagingService;
-import me.lucko.luckperms.bukkit.model.ChildPermissionProvider;
-import me.lucko.luckperms.bukkit.model.DefaultsProvider;
 import me.lucko.luckperms.bukkit.model.Injector;
 import me.lucko.luckperms.bukkit.model.LPPermissible;
+import me.lucko.luckperms.bukkit.processors.ChildPermissionProvider;
+import me.lucko.luckperms.bukkit.processors.DefaultsProvider;
 import me.lucko.luckperms.bukkit.vault.VaultHookManager;
 import me.lucko.luckperms.common.api.ApiHandler;
 import me.lucko.luckperms.common.api.ApiProvider;
+import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
-import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.contexts.ContextManager;
-import me.lucko.luckperms.common.contexts.StaticCalculator;
-import me.lucko.luckperms.common.core.UuidCache;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.contexts.LuckPermsCalculator;
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.NoopLocaleManager;
 import me.lucko.luckperms.common.locale.SimpleLocaleManager;
+import me.lucko.luckperms.common.logging.SenderLogger;
+import me.lucko.luckperms.common.managers.GenericGroupManager;
+import me.lucko.luckperms.common.managers.GenericTrackManager;
+import me.lucko.luckperms.common.managers.GenericUserManager;
 import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.managers.UserManager;
-import me.lucko.luckperms.common.managers.impl.GenericGroupManager;
-import me.lucko.luckperms.common.managers.impl.GenericTrackManager;
-import me.lucko.luckperms.common.managers.impl.GenericUserManager;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.messaging.NoopMessagingService;
 import me.lucko.luckperms.common.messaging.RedisMessagingService;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.StorageFactory;
 import me.lucko.luckperms.common.storage.StorageType;
+import me.lucko.luckperms.common.storage.backing.file.FileWatcher;
 import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.tasks.UpdateTask;
 import me.lucko.luckperms.common.treeview.PermissionVault;
-import me.lucko.luckperms.common.utils.BufferedRequest;
-import me.lucko.luckperms.common.utils.FileWatcher;
 import me.lucko.luckperms.common.utils.LoginHelper;
-import me.lucko.luckperms.common.utils.SenderLogger;
+import me.lucko.luckperms.common.utils.UuidCache;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 
 import org.bukkit.World;
@@ -287,7 +289,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         groupManager = new GenericGroupManager(this);
         trackManager = new GenericTrackManager(this);
         calculatorFactory = new BukkitCalculatorFactory(this);
-        cachedStateManager = new CachedStateManager(this);
+        cachedStateManager = new CachedStateManager();
 
         contextManager = new ContextManager<Player>() {
             @Override
@@ -307,7 +309,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         worldCalculator = new WorldCalculator(this);
         contextManager.registerCalculator(worldCalculator);
 
-        StaticCalculator<Player> staticCalculator = new StaticCalculator<>(getConfiguration());
+        LuckPermsCalculator<Player> staticCalculator = new LuckPermsCalculator<>(getConfiguration());
         contextManager.registerCalculator(staticCalculator, true);
 
         // Provide vault support
@@ -665,10 +667,8 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private void registerPermissions(PermissionDefault def) {
         PluginManager pm = getServer().getPluginManager();
 
-        for (Permission p : Permission.values()) {
-            for (String node : p.getNodes()) {
-                pm.addPermission(new org.bukkit.permissions.Permission(node, def));
-            }
+        for (CommandPermission p : CommandPermission.values()) {
+            pm.addPermission(new org.bukkit.permissions.Permission(p.getPermission(), def));
         }
     }
 }

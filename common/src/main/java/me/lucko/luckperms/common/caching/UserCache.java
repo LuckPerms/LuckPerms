@@ -40,10 +40,10 @@ import me.lucko.luckperms.api.caching.MetaData;
 import me.lucko.luckperms.api.caching.PermissionData;
 import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.contexts.ExtractedContexts;
 import me.lucko.luckperms.common.metastacking.GenericMetaStack;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.utils.ExtractedContexts;
 
 import java.util.Set;
 import java.util.concurrent.TimeUnit;

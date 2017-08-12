@@ -37,15 +37,15 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.Constants;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.NodeFactory;
-import me.lucko.luckperms.common.core.TemporaryModifier;
-import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.common.model.TemporaryModifier;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
@@ -65,15 +65,15 @@ public class MetaAddTempChatMeta extends SharedSubCommand {
         super(
                 type == ChatMetaType.PREFIX ? CommandSpec.META_ADDTEMP_PREFIX.spec(locale) : CommandSpec.META_ADDTEMP_SUFFIX.spec(locale),
                 "addtemp" + type.name().toLowerCase(),
-                type == ChatMetaType.PREFIX ? Permission.USER_META_ADDTEMP_PREFIX : Permission.USER_META_ADDTEMP_SUFFIX,
-                type == ChatMetaType.PREFIX ? Permission.GROUP_META_ADDTEMP_PREFIX : Permission.GROUP_META_ADDTEMP_SUFFIX,
+                type == ChatMetaType.PREFIX ? CommandPermission.USER_META_ADDTEMP_PREFIX : CommandPermission.USER_META_ADDTEMP_SUFFIX,
+                type == ChatMetaType.PREFIX ? CommandPermission.GROUP_META_ADDTEMP_PREFIX : CommandPermission.GROUP_META_ADDTEMP_SUFFIX,
                 Predicates.inRange(0, 2)
         );
         this.type = type;
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label, Permission permission) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label, CommandPermission permission) throws CommandException {
         if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, holder)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;

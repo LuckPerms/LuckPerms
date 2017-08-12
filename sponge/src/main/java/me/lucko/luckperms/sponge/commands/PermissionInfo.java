@@ -34,7 +34,7 @@ import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -46,7 +46,7 @@ import java.util.Map;
 
 public class PermissionInfo extends SubCommand<LPSubjectData> {
     public PermissionInfo(LocaleManager locale) {
-        super(CommandSpec.SPONGE_PERMISSION_INFO.spec(locale), "info", Permission.SPONGE_PERMISSION_INFO, Predicates.alwaysFalse());
+        super(CommandSpec.SPONGE_PERMISSION_INFO.spec(locale), "info", CommandPermission.SPONGE_PERMISSION_INFO, Predicates.alwaysFalse());
     }
 
     @Override

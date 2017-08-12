@@ -39,14 +39,14 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.core.NodeFactory;
-import me.lucko.luckperms.common.core.model.PermissionHolder;
-import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.logging.ProgressLogger;
+import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.common.utils.ProgressLogger;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
@@ -59,7 +59,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static me.lucko.luckperms.common.constants.Permission.MIGRATION;
+import static me.lucko.luckperms.common.constants.CommandPermission.MIGRATION;
 
 public class MigrationBPermissions extends SubCommand<Object> {
     private static Field uConfigField;
@@ -139,7 +139,7 @@ public class MigrationBPermissions extends SubCommand<Object> {
 
                 // Make a LuckPerms group for the one being migrated.
                 plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
-                me.lucko.luckperms.common.core.model.Group lpGroup = plugin.getGroupManager().getIfLoaded(groupName);
+                me.lucko.luckperms.common.model.Group lpGroup = plugin.getGroupManager().getIfLoaded(groupName);
 
                 MigrationUtils.setGroupWeight(lpGroup, group.getPriority());
                 migrateHolder(world, group, lpGroup);

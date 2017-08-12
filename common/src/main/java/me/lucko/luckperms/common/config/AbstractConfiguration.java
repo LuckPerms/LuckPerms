@@ -37,9 +37,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * An abstract implementation of {@link LuckPermsConfiguration}, backed by a cache.
+ */
 public abstract class AbstractConfiguration implements LuckPermsConfiguration {
-    private final LoadingCache<ConfigKey<?>, Optional<Object>> cache = Caffeine.newBuilder()
-            .build(key -> Optional.ofNullable(key.get(AbstractConfiguration.this)));
+
+    // the loading cache for config keys --> their value
+    // the value is wrapped in an optional as null values don't get cached.
+    private final LoadingCache<ConfigKey<?>, Optional<Object>> cache = Caffeine.newBuilder().build(this::loadKeyValue);
 
     @Getter
     private final LPConfigurationDelegate delegate = new LPConfigurationDelegate(this);
@@ -50,7 +55,11 @@ public abstract class AbstractConfiguration implements LuckPermsConfiguration {
     @SuppressWarnings("unchecked")
     @Override
     public <T> T get(ConfigKey<T> key) {
-        return (T) cache.get(key).orElse(null);
+        Optional<Object> ret = cache.get(key);
+        if (ret == null) {
+            return null;
+        }
+        return (T) ret.orElse(null);
     }
 
     @Override
@@ -68,5 +77,9 @@ public abstract class AbstractConfiguration implements LuckPermsConfiguration {
 
         loadAll();
         getPlugin().getApiProvider().getEventFactory().handleConfigReload();
+    }
+
+    private Optional<Object> loadKeyValue(ConfigKey<?> key) {
+        return Optional.ofNullable(key.get(this));
     }
 }

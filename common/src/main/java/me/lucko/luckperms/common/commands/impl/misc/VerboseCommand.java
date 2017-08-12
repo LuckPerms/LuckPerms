@@ -30,7 +30,7 @@ import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -51,7 +51,7 @@ import java.util.stream.Stream;
 
 public class VerboseCommand extends SingleCommand {
     public VerboseCommand(LocaleManager locale) {
-        super(CommandSpec.VERBOSE.spec(locale), "Verbose", Permission.VERBOSE, Predicates.is(0));
+        super(CommandSpec.VERBOSE.spec(locale), "Verbose", CommandPermission.VERBOSE, Predicates.is(0));
     }
 
     @Override

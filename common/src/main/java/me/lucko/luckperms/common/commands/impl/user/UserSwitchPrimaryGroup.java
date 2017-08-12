@@ -32,13 +32,13 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.model.Group;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -46,7 +46,7 @@ import java.util.List;
 
 public class UserSwitchPrimaryGroup extends SubCommand<User> {
     public UserSwitchPrimaryGroup(LocaleManager locale) {
-        super(CommandSpec.USER_SWITCHPRIMARYGROUP.spec(locale), "switchprimarygroup", Permission.USER_SWITCHPRIMARYGROUP, Predicates.not(1));
+        super(CommandSpec.USER_SWITCHPRIMARYGROUP.spec(locale), "switchprimarygroup", CommandPermission.USER_SWITCHPRIMARYGROUP, Predicates.not(1));
     }
 
     @Override

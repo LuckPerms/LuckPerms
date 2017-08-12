@@ -32,11 +32,11 @@ import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.model.Group;
-import me.lucko.luckperms.common.core.model.PermissionHolder;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.LocalizedSpec;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.Collections;
@@ -60,15 +60,15 @@ public abstract class SharedSubCommand {
     /**
      * The permission needed to use this command
      */
-    private final Permission userPermission;
-    private final Permission groupPermission;
+    private final CommandPermission userPermission;
+    private final CommandPermission groupPermission;
 
     /**
      * Predicate to test if the argument length given is invalid
      */
     private final Predicate<? super Integer> argumentCheck;
 
-    public SharedSubCommand(LocalizedSpec spec, String name, Permission userPermission, Permission groupPermission, Predicate<? super Integer> argumentCheck) {
+    public SharedSubCommand(LocalizedSpec spec, String name, CommandPermission userPermission, CommandPermission groupPermission, Predicate<? super Integer> argumentCheck) {
         this.spec = spec;
         this.name = name;
         this.userPermission = userPermission;
@@ -76,7 +76,7 @@ public abstract class SharedSubCommand {
         this.argumentCheck = argumentCheck;
     }
 
-    public abstract CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label, Permission permission) throws CommandException;
+    public abstract CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label, CommandPermission permission) throws CommandException;
 
     public List<String> onTabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
         return Collections.emptyList();

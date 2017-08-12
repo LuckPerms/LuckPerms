@@ -41,8 +41,8 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.caching.UserCache;
-import me.lucko.luckperms.common.core.model.Group;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.contexts.SpongeCalculatorLink;
@@ -52,7 +52,7 @@ import me.lucko.luckperms.sponge.model.SpongeGroup;
 import me.lucko.luckperms.sponge.service.calculated.CalculatedSubjectData;
 import me.lucko.luckperms.sponge.service.calculated.OptionLookup;
 import me.lucko.luckperms.sponge.service.calculated.PermissionLookup;
-import me.lucko.luckperms.sponge.service.legacystorage.LegacyDataMigrator;
+import me.lucko.luckperms.sponge.service.legacy.LegacyDataMigrator;
 import me.lucko.luckperms.sponge.service.model.LPPermissionDescription;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
@@ -184,7 +184,7 @@ public class LuckPermsService implements LPPermissionService {
 
     @Override
     public LPPermissionDescription registerPermissionDescription(String id, Text description, PluginContainer owner) {
-        SimpleDescription desc = new SimpleDescription(this, id, description, owner);
+        LuckPermsPermissionDescription desc = new LuckPermsPermissionDescription(this, id, description, owner);
         descriptionSet.add(desc);
         return desc;
     }

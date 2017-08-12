@@ -28,13 +28,13 @@ package me.lucko.luckperms.common.data;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.core.NodeFactory;
-import me.lucko.luckperms.common.core.model.Track;
-import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.logging.ProgressLogger;
+import me.lucko.luckperms.common.model.Track;
+import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.Storage;
-import me.lucko.luckperms.common.utils.ProgressLogger;
 
 import java.io.BufferedWriter;
 import java.io.IOException;

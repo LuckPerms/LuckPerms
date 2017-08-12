@@ -30,7 +30,7 @@ import lombok.NonNull;
 import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.common.core.NodeFactory;
+import me.lucko.luckperms.common.node.NodeFactory;
 
 public class NodeFactoryDelegate implements me.lucko.luckperms.api.NodeFactory {
     public static final NodeFactoryDelegate INSTANCE = new NodeFactoryDelegate();

@@ -32,11 +32,11 @@ import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.treeview.TreeView;
 import me.lucko.luckperms.common.treeview.TreeViewBuilder;
@@ -52,7 +52,7 @@ import java.util.UUID;
 
 public class TreeCommand extends SingleCommand {
     public TreeCommand(LocaleManager locale) {
-        super(CommandSpec.TREE.spec(locale), "Tree", Permission.TREE, Predicates.alwaysFalse());
+        super(CommandSpec.TREE.spec(locale), "Tree", CommandPermission.TREE, Predicates.alwaysFalse());
     }
 
     @Override

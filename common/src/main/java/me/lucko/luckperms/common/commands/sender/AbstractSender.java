@@ -31,8 +31,8 @@ import lombok.Getter;
 import com.google.common.base.Splitter;
 
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.Constants;
-import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.kyori.text.Component;
@@ -122,19 +122,8 @@ public final class AbstractSender<T> implements Sender {
     }
 
     @Override
-    public boolean hasPermission(Permission permission) {
-        if (isConsole()) return true;
-
-        T t = ref.get();
-        if (t != null) {
-            for (String s : permission.getNodes()) {
-                if (factory.hasPermission(t, s)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+    public boolean hasPermission(CommandPermission permission) {
+        return hasPermission(permission.getPermission());
     }
 
     @Override

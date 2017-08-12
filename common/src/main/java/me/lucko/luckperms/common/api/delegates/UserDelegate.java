@@ -35,7 +35,7 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.common.core.NodeFactory;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
@@ -47,18 +47,18 @@ import java.util.stream.Collectors;
 import static me.lucko.luckperms.common.api.ApiUtils.checkTime;
 
 /**
- * Provides a link between {@link User} and {@link me.lucko.luckperms.common.core.model.User}
+ * Provides a link between {@link User} and {@link me.lucko.luckperms.common.model.User}
  */
 public final class UserDelegate extends PermissionHolderDelegate implements User {
-    public static me.lucko.luckperms.common.core.model.User cast(User u) {
+    public static me.lucko.luckperms.common.model.User cast(User u) {
         Preconditions.checkState(u instanceof UserDelegate, "Illegal instance " + u.getClass() + " cannot be handled by this implementation.");
         return ((UserDelegate) u).getHandle();
     }
 
     @Getter
-    private final me.lucko.luckperms.common.core.model.User handle;
+    private final me.lucko.luckperms.common.model.User handle;
 
-    public UserDelegate(@NonNull me.lucko.luckperms.common.core.model.User handle) {
+    public UserDelegate(@NonNull me.lucko.luckperms.common.model.User handle) {
         super(handle);
         this.handle = handle;
     }

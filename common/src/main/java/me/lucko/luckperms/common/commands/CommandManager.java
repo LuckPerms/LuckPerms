@@ -56,8 +56,8 @@ import me.lucko.luckperms.common.commands.impl.user.UserMainCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.Constants;
-import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -253,7 +253,7 @@ public class CommandManager {
                 .filter(c -> c.isAuthorized(sender))
                 .forEach(c -> {
                     @SuppressWarnings("unchecked")
-                    String permission = (String) c.getPermission().map(p -> ((Permission) p).getPrimaryPermission()).orElse("None");
+                    String permission = (String) c.getPermission().map(p -> ((CommandPermission) p).getPermission()).orElse("None");
 
                     Component component = ComponentSerializer.parseFromLegacy("&3> &a" + String.format(c.getUsage(), label), Constants.FORMAT_CHAR)
                             .applyRecursively(comp -> {

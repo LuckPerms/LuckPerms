@@ -28,8 +28,8 @@ package me.lucko.luckperms.common.commands.impl.migration;
 import lombok.experimental.UtilityClass;
 
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.common.core.NodeFactory;
-import me.lucko.luckperms.common.core.model.Group;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.node.NodeFactory;
 
 @UtilityClass
 public class MigrationUtils {

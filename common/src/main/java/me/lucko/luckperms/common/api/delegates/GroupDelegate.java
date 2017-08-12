@@ -34,7 +34,7 @@ import com.google.common.base.Preconditions;
 import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.common.core.NodeFactory;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
@@ -45,18 +45,18 @@ import java.util.stream.Collectors;
 import static me.lucko.luckperms.common.api.ApiUtils.checkTime;
 
 /**
- * Provides a link between {@link Group} and {@link me.lucko.luckperms.common.core.model.Group}
+ * Provides a link between {@link Group} and {@link me.lucko.luckperms.common.model.Group}
  */
 public final class GroupDelegate extends PermissionHolderDelegate implements Group {
-    public static me.lucko.luckperms.common.core.model.Group cast(Group g) {
+    public static me.lucko.luckperms.common.model.Group cast(Group g) {
         Preconditions.checkState(g instanceof GroupDelegate, "Illegal instance " + g.getClass() + " cannot be handled by this implementation.");
         return ((GroupDelegate) g).getHandle();
     }
 
     @Getter(AccessLevel.PACKAGE)
-    private final me.lucko.luckperms.common.core.model.Group handle;
+    private final me.lucko.luckperms.common.model.Group handle;
 
-    public GroupDelegate(@NonNull me.lucko.luckperms.common.core.model.Group handle) {
+    public GroupDelegate(@NonNull me.lucko.luckperms.common.model.Group handle) {
         super(handle);
         this.handle = handle;
     }

@@ -28,7 +28,7 @@ package me.lucko.luckperms.common.commands.impl.misc;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.data.Exporter;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -47,7 +47,7 @@ public class ExportCommand extends SingleCommand {
     private AtomicBoolean running = new AtomicBoolean(false);
 
     public ExportCommand(LocaleManager locale) {
-        super(CommandSpec.EXPORT.spec(locale), "Export", Permission.EXPORT, Predicates.not(1));
+        super(CommandSpec.EXPORT.spec(locale), "Export", CommandPermission.EXPORT, Predicates.not(1));
     }
 
     @Override

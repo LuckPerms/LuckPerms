@@ -34,7 +34,7 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.caching.UserCache;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.model.User;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

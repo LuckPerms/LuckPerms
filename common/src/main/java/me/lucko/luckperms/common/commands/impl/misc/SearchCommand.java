@@ -36,12 +36,12 @@ import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.Constants;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.NodeFactory;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
@@ -65,7 +65,7 @@ import java.util.stream.Collectors;
 
 public class SearchCommand extends SingleCommand {
     public SearchCommand(LocaleManager locale) {
-        super(CommandSpec.SEARCH.spec(locale), "Search", Permission.SEARCH, Predicates.notInRange(1, 2));
+        super(CommandSpec.SEARCH.spec(locale), "Search", CommandPermission.SEARCH, Predicates.notInRange(1, 2));
     }
 
     @Override

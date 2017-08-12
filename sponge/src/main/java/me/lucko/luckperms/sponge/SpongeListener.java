@@ -29,10 +29,10 @@ import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.common.core.UuidCache;
-import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.utils.LoginHelper;
+import me.lucko.luckperms.common.utils.UuidCache;
 import me.lucko.luckperms.sponge.timings.LPTiming;
 
 import org.spongepowered.api.command.CommandSource;

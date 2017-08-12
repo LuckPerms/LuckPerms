@@ -39,11 +39,11 @@ import me.lucko.luckperms.common.config.keys.LowercaseStringKey;
 import me.lucko.luckperms.common.config.keys.MapKey;
 import me.lucko.luckperms.common.config.keys.StaticKey;
 import me.lucko.luckperms.common.config.keys.StringKey;
-import me.lucko.luckperms.common.core.TemporaryModifier;
-import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.defaults.Rule;
 import me.lucko.luckperms.common.metastacking.definition.SimpleMetaStackDefinition;
 import me.lucko.luckperms.common.metastacking.definition.StandardStackElements;
+import me.lucko.luckperms.common.model.TemporaryModifier;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.primarygroup.AllParentsByWeightHolder;
 import me.lucko.luckperms.common.primarygroup.ParentsByWeightHolder;
 import me.lucko.luckperms.common.primarygroup.PrimaryGroupHolder;
@@ -59,7 +59,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 /**
- * A class of static {@link ConfigKey}s used by the plugin.
+ * All of the {@link ConfigKey}s used by LuckPerms.
  */
 @UtilityClass
 public class ConfigKeys {

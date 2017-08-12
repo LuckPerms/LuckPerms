@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.LocalizedSpec;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
@@ -62,7 +62,7 @@ public abstract class Command<T, S> {
     /**
      * The permission required to use this command. Nullable.
      */
-    private final Permission permission;
+    private final CommandPermission permission;
 
     /**
      * A predicate used for testing the size of the arguments list passed to this command
@@ -75,7 +75,7 @@ public abstract class Command<T, S> {
      */
     private final List<Command<S, ?>> children;
 
-    public Command(LocalizedSpec spec, String name, Permission permission, Predicate<Integer> argumentCheck, List<Command<S, ?>> children) {
+    public Command(LocalizedSpec spec, String name, CommandPermission permission, Predicate<Integer> argumentCheck, List<Command<S, ?>> children) {
         this.spec = spec;
         this.name = name;
         this.permission = permission;
@@ -83,7 +83,7 @@ public abstract class Command<T, S> {
         this.children = children == null ? null : ImmutableList.copyOf(children);
     }
 
-    public Command(LocalizedSpec spec, String name, Permission permission, Predicate<Integer> argumentCheck) {
+    public Command(LocalizedSpec spec, String name, CommandPermission permission, Predicate<Integer> argumentCheck) {
         this(spec, name, permission, argumentCheck, null);
     }
 
@@ -152,7 +152,7 @@ public abstract class Command<T, S> {
         return usage == null ? "" : usage;
     }
 
-    public Optional<Permission> getPermission() {
+    public Optional<CommandPermission> getPermission() {
         return Optional.ofNullable(permission);
     }
 

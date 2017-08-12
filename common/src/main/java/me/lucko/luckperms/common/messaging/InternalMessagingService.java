@@ -26,7 +26,7 @@
 package me.lucko.luckperms.common.messaging;
 
 import me.lucko.luckperms.api.MessagingService;
-import me.lucko.luckperms.common.utils.BufferedRequest;
+import me.lucko.luckperms.common.buffers.BufferedRequest;
 
 public interface InternalMessagingService extends MessagingService {
 

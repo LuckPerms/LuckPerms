@@ -33,14 +33,14 @@ import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.model.Group;
-import me.lucko.luckperms.common.core.model.Track;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.LocalizedSpec;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.messaging.NoopMessagingService;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.Track;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.treeview.PermissionVault;
 import me.lucko.luckperms.common.treeview.TreeNode;
@@ -59,7 +59,7 @@ import java.util.stream.Collectors;
 @Getter
 public abstract class SubCommand<T> extends Command<T, Void> {
 
-    public SubCommand(LocalizedSpec spec, String name, Permission permission, Predicate<Integer> argumentCheck) {
+    public SubCommand(LocalizedSpec spec, String name, CommandPermission permission, Predicate<Integer> argumentCheck) {
         super(spec, name, permission, argumentCheck);
     }
 

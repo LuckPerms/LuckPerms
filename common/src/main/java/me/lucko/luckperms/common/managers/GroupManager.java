@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.managers;
 
-import me.lucko.luckperms.common.core.model.Group;
+import me.lucko.luckperms.common.model.Group;
 
 public interface GroupManager extends Manager<String, Group> {
 

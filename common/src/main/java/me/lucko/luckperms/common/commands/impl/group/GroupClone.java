@@ -31,13 +31,13 @@ import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.DataConstraints;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.model.Group;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -45,7 +45,7 @@ import java.util.List;
 
 public class GroupClone extends SubCommand<Group> {
     public GroupClone(LocaleManager locale) {
-        super(CommandSpec.GROUP_CLONE.spec(locale), "clone", Permission.GROUP_CLONE, Predicates.not(1));
+        super(CommandSpec.GROUP_CLONE.spec(locale), "clone", CommandPermission.GROUP_CLONE, Predicates.not(1));
     }
 
     @Override

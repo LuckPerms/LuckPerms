@@ -30,7 +30,7 @@ import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.data.Log;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 
 public class LogSearch extends SubCommand<Log> {
     public LogSearch(LocaleManager locale) {
-        super(CommandSpec.LOG_SEARCH.spec(locale), "search", Permission.LOG_SEARCH, Predicates.is(0));
+        super(CommandSpec.LOG_SEARCH.spec(locale), "search", CommandPermission.LOG_SEARCH, Predicates.is(0));
     }
 
     @Override

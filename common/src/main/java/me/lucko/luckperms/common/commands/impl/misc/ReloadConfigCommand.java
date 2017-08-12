@@ -29,7 +29,7 @@ import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -40,7 +40,7 @@ import java.util.List;
 
 public class ReloadConfigCommand extends SingleCommand {
     public ReloadConfigCommand(LocaleManager locale) {
-        super(CommandSpec.RELOAD_CONFIG.spec(locale), "ReloadConfig", Permission.RELOAD_CONFIG, Predicates.alwaysFalse());
+        super(CommandSpec.RELOAD_CONFIG.spec(locale), "ReloadConfig", CommandPermission.RELOAD_CONFIG, Predicates.alwaysFalse());
     }
 
     @Override

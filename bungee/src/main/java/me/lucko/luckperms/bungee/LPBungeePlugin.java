@@ -32,11 +32,14 @@ import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.bungee.calculators.BungeeCalculatorFactory;
+import me.lucko.luckperms.bungee.contexts.BackendServerCalculator;
 import me.lucko.luckperms.bungee.messaging.BungeeMessagingService;
 import me.lucko.luckperms.bungee.messaging.RedisBungeeMessagingService;
 import me.lucko.luckperms.bungee.util.RedisBungeeUtil;
 import me.lucko.luckperms.common.api.ApiHandler;
 import me.lucko.luckperms.common.api.ApiProvider;
+import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.commands.CommandManager;
@@ -44,35 +47,34 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.contexts.ContextManager;
-import me.lucko.luckperms.common.contexts.StaticCalculator;
-import me.lucko.luckperms.common.core.UuidCache;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.contexts.LuckPermsCalculator;
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.NoopLocaleManager;
 import me.lucko.luckperms.common.locale.SimpleLocaleManager;
+import me.lucko.luckperms.common.logging.SenderLogger;
+import me.lucko.luckperms.common.managers.GenericGroupManager;
+import me.lucko.luckperms.common.managers.GenericTrackManager;
+import me.lucko.luckperms.common.managers.GenericUserManager;
 import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.managers.UserManager;
-import me.lucko.luckperms.common.managers.impl.GenericGroupManager;
-import me.lucko.luckperms.common.managers.impl.GenericTrackManager;
-import me.lucko.luckperms.common.managers.impl.GenericUserManager;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.messaging.NoopMessagingService;
 import me.lucko.luckperms.common.messaging.RedisMessagingService;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.LuckPermsScheduler;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.StorageFactory;
 import me.lucko.luckperms.common.storage.StorageType;
+import me.lucko.luckperms.common.storage.backing.file.FileWatcher;
 import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.tasks.UpdateTask;
 import me.lucko.luckperms.common.treeview.PermissionVault;
-import me.lucko.luckperms.common.utils.BufferedRequest;
-import me.lucko.luckperms.common.utils.FileWatcher;
-import me.lucko.luckperms.common.utils.SenderLogger;
+import me.lucko.luckperms.common.utils.UuidCache;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -230,7 +232,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         groupManager = new GenericGroupManager(this);
         trackManager = new GenericTrackManager(this);
         calculatorFactory = new BungeeCalculatorFactory(this);
-        cachedStateManager = new CachedStateManager(this);
+        cachedStateManager = new CachedStateManager();
 
         contextManager = new ContextManager<ProxiedPlayer>() {
             @Override
@@ -250,7 +252,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         BackendServerCalculator serverCalculator = new BackendServerCalculator(this);
         contextManager.registerCalculator(serverCalculator);
 
-        StaticCalculator<ProxiedPlayer> staticCalculator = new StaticCalculator<>(getConfiguration());
+        LuckPermsCalculator<ProxiedPlayer> staticCalculator = new LuckPermsCalculator<>(getConfiguration());
         contextManager.registerCalculator(staticCalculator, true);
 
         // register with the LP API

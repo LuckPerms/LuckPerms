@@ -31,7 +31,7 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
-import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 
 public class InfoCommand extends SingleCommand {
     public InfoCommand(LocaleManager locale) {
-        super(CommandSpec.INFO.spec(locale), "Info", Permission.INFO, Predicates.alwaysFalse());
+        super(CommandSpec.INFO.spec(locale), "Info", CommandPermission.INFO, Predicates.alwaysFalse());
     }
 
     @Override

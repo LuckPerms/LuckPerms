@@ -38,14 +38,14 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.NodeModel;
-import me.lucko.luckperms.common.core.model.Group;
-import me.lucko.luckperms.common.core.model.PermissionHolder;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.node.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -72,7 +72,7 @@ public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
     private static final String FILE_NAME = "luckperms-data.json";
 
     public HolderEditor(LocaleManager locale, boolean user) {
-        super(CommandSpec.HOLDER_EDITOR.spec(locale), "editor", user ? Permission.USER_EDITOR : Permission.GROUP_EDITOR, Predicates.alwaysFalse());
+        super(CommandSpec.HOLDER_EDITOR.spec(locale), "editor", user ? CommandPermission.USER_EDITOR : CommandPermission.GROUP_EDITOR, Predicates.alwaysFalse());
     }
 
     @Override

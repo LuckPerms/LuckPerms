@@ -30,7 +30,7 @@ import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.LocalizedSpec;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
@@ -42,7 +42,7 @@ import java.util.function.Predicate;
  */
 public abstract class SingleCommand extends Command<Void, Void> {
 
-    public SingleCommand(LocalizedSpec spec, String name, Permission permission, Predicate<Integer> argumentCheck) {
+    public SingleCommand(LocalizedSpec spec, String name, CommandPermission permission, Predicate<Integer> argumentCheck) {
         super(spec, name, permission, argumentCheck, null);
     }
 

@@ -29,9 +29,9 @@ import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.common.commands.abstraction.SharedMainCommand;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
-import me.lucko.luckperms.common.core.model.PermissionHolder;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.model.PermissionHolder;
 
 public class CommandParent<T extends PermissionHolder> extends SharedMainCommand<T> {
     public CommandParent(LocaleManager locale, boolean user) {

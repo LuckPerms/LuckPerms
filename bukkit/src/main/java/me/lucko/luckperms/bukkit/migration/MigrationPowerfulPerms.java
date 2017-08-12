@@ -41,17 +41,17 @@ import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.core.NodeFactory;
-import me.lucko.luckperms.common.core.model.PermissionHolder;
-import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.logging.ProgressLogger;
+import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.StorageType;
 import me.lucko.luckperms.common.utils.HikariSupplier;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.common.utils.ProgressLogger;
 
 import org.bukkit.Bukkit;
 
@@ -68,7 +68,7 @@ import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static me.lucko.luckperms.common.constants.Permission.MIGRATION;
+import static me.lucko.luckperms.common.constants.CommandPermission.MIGRATION;
 
 // Only supports the latest versions of the PP API. (it seems to change randomly almost every release)
 public class MigrationPowerfulPerms extends SubCommand<Object> {
@@ -167,7 +167,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
 
             final String groupName = MigrationUtils.standardizeName(g.getName());
             plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
-            final me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().getIfLoaded(groupName);
+            final me.lucko.luckperms.common.model.Group group = plugin.getGroupManager().getIfLoaded(groupName);
 
             MigrationUtils.setGroupWeight(group, g.getRank());
 

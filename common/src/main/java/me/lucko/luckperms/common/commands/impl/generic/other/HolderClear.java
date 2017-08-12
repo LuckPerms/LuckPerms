@@ -33,14 +33,14 @@ import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.model.Group;
-import me.lucko.luckperms.common.core.model.PermissionHolder;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -49,7 +49,7 @@ import java.util.stream.Collectors;
 
 public class HolderClear<T extends PermissionHolder> extends SubCommand<T> {
     public HolderClear(LocaleManager locale, boolean user) {
-        super(CommandSpec.HOLDER_CLEAR.spec(locale), "clear", user ? Permission.USER_CLEAR : Permission.GROUP_CLEAR, Predicates.alwaysFalse());
+        super(CommandSpec.HOLDER_CLEAR.spec(locale), "clear", user ? CommandPermission.USER_CLEAR : CommandPermission.GROUP_CLEAR, Predicates.alwaysFalse());
     }
 
     @Override

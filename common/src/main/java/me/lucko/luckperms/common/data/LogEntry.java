@@ -27,12 +27,12 @@ package me.lucko.luckperms.common.data;
 
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.model.Group;
-import me.lucko.luckperms.common.core.model.PermissionHolder;
-import me.lucko.luckperms.common.core.model.Track;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.common.model.Track;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.DateUtil;
 
@@ -67,12 +67,12 @@ public class LogEntry extends me.lucko.luckperms.api.LogEntry {
 
         if (sender == null) {
             senders.stream()
-                    .filter(Permission.LOG_NOTIFY::isAuthorized)
+                    .filter(CommandPermission.LOG_NOTIFY::isAuthorized)
                     .filter(s -> !plugin.getIgnoringLogs().contains(s.getUuid()))
                     .forEach(s -> Message.LOG.send(s, msg));
         } else {
             senders.stream()
-                    .filter(Permission.LOG_NOTIFY::isAuthorized)
+                    .filter(CommandPermission.LOG_NOTIFY::isAuthorized)
                     .filter(s -> !plugin.getIgnoringLogs().contains(s.getUuid()))
                     .filter(s -> !s.getUuid().equals(sender.getUuid()))
                     .forEach(s -> Message.LOG.send(s, msg));

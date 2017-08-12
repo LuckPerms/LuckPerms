@@ -30,10 +30,10 @@ import com.google.common.collect.ImmutableMap;
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
-import me.lucko.luckperms.common.core.model.Group;
-import me.lucko.luckperms.common.core.model.Track;
-import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.data.Log;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.Track;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.backing.AbstractBacking;
 

@@ -32,11 +32,11 @@ import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 
 public class CheckCommand extends SingleCommand {
     public CheckCommand(LocaleManager locale) {
-        super(CommandSpec.CHECK.spec(locale), "Check", Permission.CHECK, Predicates.not(2));
+        super(CommandSpec.CHECK.spec(locale), "Check", CommandPermission.CHECK, Predicates.not(2));
     }
 
     @Override

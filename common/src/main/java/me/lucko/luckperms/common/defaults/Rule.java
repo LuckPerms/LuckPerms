@@ -30,8 +30,8 @@ import lombok.Getter;
 import lombok.ToString;
 
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.common.core.NodeFactory;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.node.NodeFactory;
 
 import java.util.List;
 

@@ -40,17 +40,17 @@ import me.lucko.luckperms.exceptions.ObjectLacksException;
 import java.util.List;
 
 /**
- * Provides a link between {@link Track} and {@link me.lucko.luckperms.common.core.model.Track}
+ * Provides a link between {@link Track} and {@link me.lucko.luckperms.common.model.Track}
  */
 @AllArgsConstructor
 public final class TrackDelegate implements Track {
-    public static me.lucko.luckperms.common.core.model.Track cast(Track g) {
+    public static me.lucko.luckperms.common.model.Track cast(Track g) {
         Preconditions.checkState(g instanceof TrackDelegate, "Illegal instance " + g.getClass() + " cannot be handled by this implementation.");
         return ((TrackDelegate) g).getHandle();
     }
 
     @Getter(AccessLevel.PACKAGE)
-    private final me.lucko.luckperms.common.core.model.Track handle;
+    private final me.lucko.luckperms.common.model.Track handle;
 
     @Override
     public String getName() {

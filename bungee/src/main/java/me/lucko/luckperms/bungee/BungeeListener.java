@@ -32,8 +32,8 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.bungee.event.TristateCheckEvent;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.utils.LoginHelper;
 
 import net.md_5.bungee.api.chat.TextComponent;

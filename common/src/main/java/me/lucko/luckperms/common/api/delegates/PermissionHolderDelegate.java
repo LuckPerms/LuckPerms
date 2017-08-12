@@ -39,9 +39,9 @@ import me.lucko.luckperms.api.PermissionHolder;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.common.core.NodeFactory;
-import me.lucko.luckperms.common.core.model.User;
-import me.lucko.luckperms.common.utils.ExtractedContexts;
+import me.lucko.luckperms.common.contexts.ExtractedContexts;
+import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
@@ -56,11 +56,11 @@ import java.util.function.Predicate;
 import static me.lucko.luckperms.common.api.ApiUtils.checkTime;
 
 /**
- * Provides a link between {@link PermissionHolder} and {@link me.lucko.luckperms.common.core.model.PermissionHolder}
+ * Provides a link between {@link PermissionHolder} and {@link me.lucko.luckperms.common.model.PermissionHolder}
  */
 @AllArgsConstructor
 public class PermissionHolderDelegate implements PermissionHolder {
-    private final me.lucko.luckperms.common.core.model.PermissionHolder handle;
+    private final me.lucko.luckperms.common.model.PermissionHolder handle;
 
     @Override
     public String getObjectName() {

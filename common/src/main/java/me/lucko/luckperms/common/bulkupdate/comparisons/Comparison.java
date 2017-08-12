@@ -25,10 +25,26 @@
 
 package me.lucko.luckperms.common.bulkupdate.comparisons;
 
+/**
+ * A method of comparing two strings
+ */
 public interface Comparison {
 
+    /**
+     * Gets the symbol which represents this comparison
+     *
+     * @return the comparison symbol
+     */
     String getSymbol();
 
+    /**
+     * Compares two strings according to this comparisons
+     * behaviour, and returns if they match.
+     *
+     * @param str the string
+     * @param expr the expression
+     * @return if the string matches the expression
+     */
     boolean matches(String str, String expr);
 
 }

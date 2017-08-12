@@ -34,13 +34,13 @@ import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.NodeFactory;
-import me.lucko.luckperms.common.core.model.PermissionHolder;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -51,11 +51,11 @@ import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getGroup
 
 public class ParentRemoveTemp extends SharedSubCommand {
     public ParentRemoveTemp(LocaleManager locale) {
-        super(CommandSpec.PARENT_REMOVE_TEMP.spec(locale), "removetemp", Permission.USER_PARENT_REMOVETEMP, Permission.GROUP_PARENT_REMOVETEMP, Predicates.is(0));
+        super(CommandSpec.PARENT_REMOVE_TEMP.spec(locale), "removetemp", CommandPermission.USER_PARENT_REMOVETEMP, CommandPermission.GROUP_PARENT_REMOVETEMP, Predicates.is(0));
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label, Permission permission) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label, CommandPermission permission) throws CommandException {
         if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, holder)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;

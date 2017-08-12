@@ -29,7 +29,7 @@ import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.data.Log;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -43,7 +43,7 @@ import java.util.UUID;
 
 public class LogNotify extends SubCommand<Log> {
     public LogNotify(LocaleManager locale) {
-        super(CommandSpec.LOG_NOTIFY.spec(locale), "notify", Permission.LOG_NOTIFY, Predicates.notInRange(0, 1));
+        super(CommandSpec.LOG_NOTIFY.spec(locale), "notify", CommandPermission.LOG_NOTIFY, Predicates.notInRange(0, 1));
     }
 
     @Override

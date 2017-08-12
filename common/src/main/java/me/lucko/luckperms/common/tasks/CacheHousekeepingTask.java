@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.tasks;
 
 import lombok.RequiredArgsConstructor;
 
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 @RequiredArgsConstructor

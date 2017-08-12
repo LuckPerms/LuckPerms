@@ -29,8 +29,8 @@ import lombok.AllArgsConstructor;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.Constants;
-import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.kyori.text.Component;
@@ -80,7 +80,7 @@ public class FakeSender implements Sender {
     }
 
     @Override
-    public boolean hasPermission(Permission permission) {
+    public boolean hasPermission(CommandPermission permission) {
         return true;
     }
 

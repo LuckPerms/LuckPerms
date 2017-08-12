@@ -28,8 +28,8 @@ package me.lucko.luckperms.common.messaging;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.utils.BufferedRequest;
 
 import java.util.Collections;
 import java.util.HashSet;

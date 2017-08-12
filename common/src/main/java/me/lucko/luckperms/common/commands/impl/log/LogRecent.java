@@ -31,8 +31,8 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.DataConstraints;
-import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.data.Log;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -48,7 +48,7 @@ import java.util.UUID;
 
 public class LogRecent extends SubCommand<Log> {
     public LogRecent(LocaleManager locale) {
-        super(CommandSpec.LOG_RECENT.spec(locale), "recent", Permission.LOG_RECENT, Predicates.notInRange(0, 2));
+        super(CommandSpec.LOG_RECENT.spec(locale), "recent", CommandPermission.LOG_RECENT, Predicates.notInRange(0, 2));
     }
 
     @Override

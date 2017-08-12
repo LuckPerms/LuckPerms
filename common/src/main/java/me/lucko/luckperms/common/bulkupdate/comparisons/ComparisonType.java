@@ -32,6 +32,9 @@ import me.lucko.luckperms.common.bulkupdate.comparisons.impl.ComparisonNotEqual;
 import me.lucko.luckperms.common.bulkupdate.comparisons.impl.ComparisonNotSimilar;
 import me.lucko.luckperms.common.bulkupdate.comparisons.impl.ComparisonSimilar;
 
+/**
+ * An enumeration of all {@link Comparison}s.
+ */
 @AllArgsConstructor
 public enum ComparisonType {
 
@@ -47,7 +50,7 @@ public enum ComparisonType {
         return symbol;
     }
 
-    public Comparison get() {
+    public Comparison getComparison() {
         return instance;
     }
 

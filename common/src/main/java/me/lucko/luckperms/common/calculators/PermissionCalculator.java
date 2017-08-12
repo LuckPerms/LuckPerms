@@ -32,6 +32,7 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.processors.PermissionProcessor;
 
 import java.util.List;
 import java.util.Map;
@@ -45,28 +46,44 @@ public class PermissionCalculator {
     private final String objectName;
     private final List<PermissionProcessor> processors;
 
-    private final LoadingCache<String, Tristate> cache = Caffeine.newBuilder().build(this::lookupPermissionValue);
+    // caches lookup calls.
+    private final LoadingCache<String, Tristate> lookupCache = Caffeine.newBuilder()
+            .build(this::lookupPermissionValue);
 
     public void invalidateCache() {
-        cache.invalidateAll();
+        lookupCache.invalidateAll();
     }
 
     public Tristate getPermissionValue(String permission) {
+
+        // convert the permission to lowercase, as all values in the backing map are also lowercase.
+        // this allows fast case insensitive lookups
         permission = permission.toLowerCase();
-        Tristate t = cache.get(permission);
-        plugin.getVerboseHandler().offer(objectName, permission, t);
-        plugin.getPermissionVault().offer(permission);
-        return t;
+
+        // get the result
+        Tristate result = lookupCache.get(permission);
+
+        // log this permission lookup to the verbose handler
+        plugin.getVerboseHandler().offer(objectName, permission, result);
+
+        // return the result
+        return result;
     }
 
     private Tristate lookupPermissionValue(String permission) {
+
+        // offer the permission to the permission vault
+        // we only need to do this once per permission, so it doesn't matter
+        // that this call is behind the cache.
+        plugin.getPermissionVault().offer(permission);
+
         for (PermissionProcessor processor : processors) {
-            Tristate v = processor.hasPermission(permission);
-            if (v == Tristate.UNDEFINED) {
+            Tristate result = processor.hasPermission(permission);
+            if (result == Tristate.UNDEFINED) {
                 continue;
             }
 
-            return v;
+            return result;
         }
 
         return Tristate.UNDEFINED;

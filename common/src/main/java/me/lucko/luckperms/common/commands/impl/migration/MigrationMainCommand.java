@@ -33,7 +33,7 @@ import me.lucko.luckperms.common.commands.abstraction.Command;
 import me.lucko.luckperms.common.commands.abstraction.MainCommand;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -72,7 +72,7 @@ public class MigrationMainCommand extends MainCommand<Object> {
             // Add dummy command to show in the list.
             if (commands.isEmpty()) {
                 display = false;
-                commands.add(new SubCommand<Object>(CommandSpec.MIGRATION_COMMAND.spec(getSpec().getLocaleManager()), "No available plugins to migrate from", Permission.MIGRATION, Predicates.alwaysFalse()) {
+                commands.add(new SubCommand<Object>(CommandSpec.MIGRATION_COMMAND.spec(getSpec().getLocaleManager()), "No available plugins to migrate from", CommandPermission.MIGRATION, Predicates.alwaysFalse()) {
                     @Override
                     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Object o, List<String> args, String label) throws CommandException {
                         return CommandResult.SUCCESS;
@@ -86,7 +86,7 @@ public class MigrationMainCommand extends MainCommand<Object> {
 
     @Override
     public boolean isAuthorized(Sender sender) {
-        return sender.hasPermission(Permission.MIGRATION);
+        return sender.hasPermission(CommandPermission.MIGRATION);
     }
 
     @Override

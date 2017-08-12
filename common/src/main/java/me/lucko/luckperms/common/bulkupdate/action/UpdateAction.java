@@ -29,12 +29,15 @@ import lombok.AllArgsConstructor;
 
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.bulkupdate.constraint.QueryField;
-import me.lucko.luckperms.common.core.NodeModel;
+import me.lucko.luckperms.common.node.NodeModel;
 
 @AllArgsConstructor(staticName = "of")
 public class UpdateAction implements Action {
 
+    // the field we're updating
     private final QueryField field;
+
+    // the new value of the field
     private final String value;
 
     @Override

@@ -31,10 +31,10 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.model.Group;
-import me.lucko.luckperms.common.core.model.Track;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.Track;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.Map;
@@ -43,20 +43,20 @@ import java.util.function.Function;
 
 @UtilityClass
 public class ArgumentPermissions {
-    private static final String USER_MODIFY_SELF = Permission.ROOT + "modify.user.self";
-    private static final String USER_MODIFY_OTHERS = Permission.ROOT + "modify.user.others";
-    private static final Function<String, String> GROUP_MODIFY = s -> Permission.ROOT + "modify.group." + s;
-    private static final Function<String, String> TRACK_MODIFY = s -> Permission.ROOT + "modify.track." + s;
+    private static final String USER_MODIFY_SELF = CommandPermission.ROOT + "modify.user.self";
+    private static final String USER_MODIFY_OTHERS = CommandPermission.ROOT + "modify.user.others";
+    private static final Function<String, String> GROUP_MODIFY = s -> CommandPermission.ROOT + "modify.group." + s;
+    private static final Function<String, String> TRACK_MODIFY = s -> CommandPermission.ROOT + "modify.track." + s;
 
-    private static final String USER_VIEW_SELF = Permission.ROOT + "view.user.self";
-    private static final String USER_VIEW_OTHERS = Permission.ROOT + "view.user.others";
-    private static final Function<String, String> GROUP_VIEW = s -> Permission.ROOT + "view.group." + s;
-    private static final Function<String, String> TRACK_VIEW = s -> Permission.ROOT + "view.track." + s;
+    private static final String USER_VIEW_SELF = CommandPermission.ROOT + "view.user.self";
+    private static final String USER_VIEW_OTHERS = CommandPermission.ROOT + "view.user.others";
+    private static final Function<String, String> GROUP_VIEW = s -> CommandPermission.ROOT + "view.group." + s;
+    private static final Function<String, String> TRACK_VIEW = s -> CommandPermission.ROOT + "view.track." + s;
 
-    private static final String CONTEXT_USE_GLOBAL = Permission.ROOT + "usecontext.global";
-    private static final BiFunction<String, String, String> CONTEXT_USE = (k, v) -> Permission.ROOT + "usecontext." + k + "." + v;
+    private static final String CONTEXT_USE_GLOBAL = CommandPermission.ROOT + "usecontext.global";
+    private static final BiFunction<String, String, String> CONTEXT_USE = (k, v) -> CommandPermission.ROOT + "usecontext." + k + "." + v;
 
-    public static boolean checkArguments(LuckPermsPlugin plugin, Sender sender, Permission base, String... args) {
+    public static boolean checkArguments(LuckPermsPlugin plugin, Sender sender, CommandPermission base, String... args) {
         if (!plugin.getConfiguration().get(ConfigKeys.USE_ARGUMENT_BASED_COMMAND_PERMISSIONS)) {
             return false;
         }
@@ -65,7 +65,7 @@ public class ArgumentPermissions {
             throw new IllegalStateException();
         }
 
-        StringBuilder permission = new StringBuilder(base.getPrimaryPermission());
+        StringBuilder permission = new StringBuilder(base.getPermission());
         for (String arg : args) {
             permission.append(".").append(arg);
         }
@@ -73,7 +73,7 @@ public class ArgumentPermissions {
         return !sender.hasPermission(permission.toString());
     }
 
-    public static boolean checkModifyPerms(LuckPermsPlugin plugin, Sender sender, Permission base, Object target) {
+    public static boolean checkModifyPerms(LuckPermsPlugin plugin, Sender sender, CommandPermission base, Object target) {
         if (!plugin.getConfiguration().get(ConfigKeys.USE_ARGUMENT_BASED_COMMAND_PERMISSIONS)) {
             return false;
         }
@@ -83,7 +83,7 @@ public class ArgumentPermissions {
             
             if (plugin.getUuidCache().getExternalUUID(targetUser.getUuid()).equals(sender.getUuid())) {
                 // the sender is trying to edit themselves
-                Tristate ret = sender.getPermissionValue(base.getPrimaryPermission() + ".modify.self");
+                Tristate ret = sender.getPermissionValue(base.getPermission() + ".modify.self");
                 if (ret != Tristate.UNDEFINED) {
                     return !ret.asBoolean();
                 } else {
@@ -93,7 +93,7 @@ public class ArgumentPermissions {
                 }
             } else {
                 // they're trying to edit another user
-                Tristate ret = sender.getPermissionValue(base.getPrimaryPermission() + ".modify.others");
+                Tristate ret = sender.getPermissionValue(base.getPermission() + ".modify.others");
                 if (ret != Tristate.UNDEFINED) {
                     return !ret.asBoolean();
                 } else {
@@ -105,7 +105,7 @@ public class ArgumentPermissions {
         } else if (target instanceof Group) {
             Group targetGroup = ((Group) target);
 
-            Tristate ret = sender.getPermissionValue(base.getPrimaryPermission() + ".modify." + targetGroup.getName());
+            Tristate ret = sender.getPermissionValue(base.getPermission() + ".modify." + targetGroup.getName());
             if (ret != Tristate.UNDEFINED) {
                 return !ret.asBoolean();
             } else {
@@ -116,7 +116,7 @@ public class ArgumentPermissions {
         } else if (target instanceof Track) {
             Track targetTrack = ((Track) target);
 
-            Tristate ret = sender.getPermissionValue(base.getPrimaryPermission() + ".modify." + targetTrack.getName());
+            Tristate ret = sender.getPermissionValue(base.getPermission() + ".modify." + targetTrack.getName());
             if (ret != Tristate.UNDEFINED) {
                 return !ret.asBoolean();
             } else {
@@ -129,7 +129,7 @@ public class ArgumentPermissions {
         }
     }
 
-    public static boolean checkViewPerms(LuckPermsPlugin plugin, Sender sender, Permission base, Object target) {
+    public static boolean checkViewPerms(LuckPermsPlugin plugin, Sender sender, CommandPermission base, Object target) {
         if (!plugin.getConfiguration().get(ConfigKeys.USE_ARGUMENT_BASED_COMMAND_PERMISSIONS)) {
             return false;
         }
@@ -139,7 +139,7 @@ public class ArgumentPermissions {
 
             if (plugin.getUuidCache().getExternalUUID(targetUser.getUuid()).equals(sender.getUuid())) {
                 // the sender is trying to view themselves
-                Tristate ret = sender.getPermissionValue(base.getPrimaryPermission() + ".view.self");
+                Tristate ret = sender.getPermissionValue(base.getPermission() + ".view.self");
                 if (ret != Tristate.UNDEFINED) {
                     return !ret.asBoolean();
                 } else {
@@ -149,7 +149,7 @@ public class ArgumentPermissions {
                 }
             } else {
                 // they're trying to view another user
-                Tristate ret = sender.getPermissionValue(base.getPrimaryPermission() + ".view.others");
+                Tristate ret = sender.getPermissionValue(base.getPermission() + ".view.others");
                 if (ret != Tristate.UNDEFINED) {
                     return !ret.asBoolean();
                 } else {
@@ -161,7 +161,7 @@ public class ArgumentPermissions {
         } else if (target instanceof Group) {
             Group targetGroup = ((Group) target);
 
-            Tristate ret = sender.getPermissionValue(base.getPrimaryPermission() + ".view." + targetGroup.getName());
+            Tristate ret = sender.getPermissionValue(base.getPermission() + ".view." + targetGroup.getName());
             if (ret != Tristate.UNDEFINED) {
                 return !ret.asBoolean();
             } else {
@@ -172,7 +172,7 @@ public class ArgumentPermissions {
         } else if (target instanceof Track) {
             Track targetTrack = ((Track) target);
 
-            Tristate ret = sender.getPermissionValue(base.getPrimaryPermission() + ".view." + targetTrack.getName());
+            Tristate ret = sender.getPermissionValue(base.getPermission() + ".view." + targetTrack.getName());
             if (ret != Tristate.UNDEFINED) {
                 return !ret.asBoolean();
             } else {
@@ -185,13 +185,13 @@ public class ArgumentPermissions {
         return false;
     }
 
-    public static boolean checkContext(LuckPermsPlugin plugin, Sender sender, Permission base, ContextSet contextSet) {
+    public static boolean checkContext(LuckPermsPlugin plugin, Sender sender, CommandPermission base, ContextSet contextSet) {
         if (!plugin.getConfiguration().get(ConfigKeys.USE_ARGUMENT_BASED_COMMAND_PERMISSIONS)) {
             return false;
         }
 
         if (contextSet.isEmpty()) {
-            Tristate ret = sender.getPermissionValue(base.getPrimaryPermission() + ".usecontext.global");
+            Tristate ret = sender.getPermissionValue(base.getPermission() + ".usecontext.global");
             if (ret != Tristate.UNDEFINED) {
                 return !ret.asBoolean();
             } else {
@@ -202,7 +202,7 @@ public class ArgumentPermissions {
         }
 
         for (Map.Entry<String, String> context : contextSet.toSet()) {
-            Tristate ret = sender.getPermissionValue(base.getPrimaryPermission() + ".usecontext." + context.getKey() + "." + context.getValue());
+            Tristate ret = sender.getPermissionValue(base.getPermission() + ".usecontext." + context.getKey() + "." + context.getValue());
             if (ret != Tristate.UNDEFINED) {
                 if (ret == Tristate.FALSE) {
                     return true;

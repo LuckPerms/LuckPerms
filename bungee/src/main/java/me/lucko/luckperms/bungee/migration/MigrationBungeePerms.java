@@ -31,14 +31,14 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.NodeFactory;
-import me.lucko.luckperms.common.core.model.PermissionHolder;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.logging.ProgressLogger;
+import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.common.utils.ProgressLogger;
 
 import net.alpenblock.bungeeperms.BungeePerms;
 import net.alpenblock.bungeeperms.Group;
@@ -53,7 +53,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class MigrationBungeePerms extends SubCommand<Object> {
     public MigrationBungeePerms(LocaleManager locale) {
-        super(CommandSpec.MIGRATION_COMMAND.spec(locale), "bungeeperms", Permission.MIGRATION, Predicates.alwaysFalse());
+        super(CommandSpec.MIGRATION_COMMAND.spec(locale), "bungeeperms", CommandPermission.MIGRATION, Predicates.alwaysFalse());
     }
 
     @Override
@@ -89,7 +89,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
             // Make a LuckPerms group for the one being migrated
             String groupName = MigrationUtils.standardizeName(g.getName());
             plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
-            me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().getIfLoaded(groupName);
+            me.lucko.luckperms.common.model.Group group = plugin.getGroupManager().getIfLoaded(groupName);
 
             MigrationUtils.setGroupWeight(group, groupWeight);
             migrateHolder(g, g.getInheritances(), groupWeight, group);
@@ -114,7 +114,7 @@ public class MigrationBungeePerms extends SubCommand<Object> {
 
             // Make a LuckPerms user for the one being migrated.
             plugin.getStorage().loadUser(u.getUUID(), u.getName()).join();
-            me.lucko.luckperms.common.core.model.User user = plugin.getUserManager().getIfLoaded(u.getUUID());
+            me.lucko.luckperms.common.model.User user = plugin.getUserManager().getIfLoaded(u.getUUID());
 
             migrateHolder(u, u.getGroupsString(), maxWeight, user);
 

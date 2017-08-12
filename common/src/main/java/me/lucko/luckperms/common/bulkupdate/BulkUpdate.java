@@ -32,7 +32,7 @@ import lombok.ToString;
 
 import me.lucko.luckperms.common.bulkupdate.action.Action;
 import me.lucko.luckperms.common.bulkupdate.constraint.Constraint;
-import me.lucko.luckperms.common.core.NodeModel;
+import me.lucko.luckperms.common.node.NodeModel;
 
 import java.util.List;
 

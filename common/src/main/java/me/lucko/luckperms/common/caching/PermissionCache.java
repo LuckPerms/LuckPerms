@@ -27,15 +27,14 @@ package me.lucko.luckperms.common.caching;
 
 import lombok.NonNull;
 
-import com.google.common.collect.ImmutableMap;
-
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.caching.PermissionData;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.calculators.PermissionCalculator;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.model.User;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -50,6 +49,11 @@ public class PermissionCache implements PermissionData {
     private final Map<String, Boolean> permissions;
 
     /**
+     * An immutable copy of {@link #permissions}
+     */
+    private final Map<String, Boolean> permissionsUnmodifiable;
+
+    /**
      * The calculator instance responsible for resolving the raw permission strings in the permission map.
      * This calculator will attempt to resolve all regex/wildcard permissions, as well as account for
      * defaults & attachment permissions (if applicable.)
@@ -58,6 +62,8 @@ public class PermissionCache implements PermissionData {
 
     public PermissionCache(Contexts contexts, User user, CalculatorFactory calculatorFactory) {
         permissions = new ConcurrentHashMap<>();
+        permissionsUnmodifiable = Collections.unmodifiableMap(permissions);
+
         calculator = calculatorFactory.build(contexts, user);
         calculator.updateBacking(permissions); // Initial setup.
     }
@@ -82,7 +88,7 @@ public class PermissionCache implements PermissionData {
 
     @Override
     public Map<String, Boolean> getImmutableBacking() {
-        return ImmutableMap.copyOf(permissions);
+        return permissionsUnmodifiable;
     }
 
     @Override

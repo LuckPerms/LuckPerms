@@ -25,12 +25,10 @@
 
 package me.lucko.luckperms.common.caching.handlers;
 
-import lombok.RequiredArgsConstructor;
-
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.references.HolderReference;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -39,11 +37,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * Manages the cached state of all permission holders
  */
-@RequiredArgsConstructor
 public class CachedStateManager {
-    // private static final Consumer<PermissionHolder> INVALIDATE_CONSUMER = PermissionHolder::invalidateInheritanceCaches;
-
-    private final LuckPermsPlugin plugin;
 
     // Group --> Groups/Users that inherit from that group. (reverse relationship)
     private final Multimap<HolderReference, HolderReference> map = HashMultimap.create();
@@ -117,16 +111,5 @@ public class CachedStateManager {
             lock.unlock();
         }
     }
-
-    /*
-    public void invalidateInheritances(HolderReference holder) {
-        Set<HolderReference> toInvalidate = getInheritances(holder);
-        invalidateInheritances(plugin, toInvalidate);
-    }
-
-    public static void invalidateInheritances(LuckPermsPlugin plugin, Set<HolderReference> references) {
-        references.forEach(hr -> hr.apply(plugin, INVALIDATE_CONSUMER));
-    }
-    */
 
 }

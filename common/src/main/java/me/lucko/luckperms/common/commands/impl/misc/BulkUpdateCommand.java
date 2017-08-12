@@ -41,7 +41,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -56,7 +56,7 @@ public class BulkUpdateCommand extends SingleCommand {
     private final Cache<String, BulkUpdate> pendingOperations = Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.SECONDS).build();
 
     public BulkUpdateCommand(LocaleManager locale) {
-        super(CommandSpec.BULK_UPDATE.spec(locale), "BulkUpdate", Permission.BULK_UPDATE, Predicates.alwaysFalse());
+        super(CommandSpec.BULK_UPDATE.spec(locale), "BulkUpdate", CommandPermission.BULK_UPDATE, Predicates.alwaysFalse());
     }
 
     @Override

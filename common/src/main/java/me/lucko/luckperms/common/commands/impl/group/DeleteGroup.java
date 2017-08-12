@@ -31,12 +31,12 @@ import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.model.Group;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -44,7 +44,7 @@ import java.util.List;
 
 public class DeleteGroup extends SingleCommand {
     public DeleteGroup(LocaleManager locale) {
-        super(CommandSpec.DELETE_GROUP.spec(locale), "DeleteGroup", Permission.DELETE_GROUP, Predicates.not(1));
+        super(CommandSpec.DELETE_GROUP.spec(locale), "DeleteGroup", CommandPermission.DELETE_GROUP, Predicates.not(1));
     }
 
     @Override

@@ -45,7 +45,6 @@ import java.util.function.Function;
 public class ArgumentUtils {
     public static final Function<String, String> WRAPPER = s -> s.contains(" ") ? "\"" + s + "\"" : s;
 
-
     public static String handleString(int index, List<String> args) {
         return args.get(index).replace("{SPACE}", " ");
     }
@@ -108,13 +107,6 @@ public class ArgumentUtils {
         return true;
     }
 
-    public static String handleServer(int index, List<String> args) throws ArgumentException {
-        if (args.size() > index) {
-            return args.get(index).toLowerCase();
-        }
-        return null;
-    }
-
     public static long handleDuration(int index, List<String> args) throws ArgumentException {
         long duration;
         try {
@@ -132,10 +124,6 @@ public class ArgumentUtils {
         }
 
         return duration;
-    }
-
-    public static String handleWorld(int index, List<String> args) {
-        return args.size() > index ? args.get(index).toLowerCase() : null;
     }
 
     public static MutableContextSet handleContext(int fromIndex, List<String> args, LuckPermsPlugin plugin) throws CommandException {

@@ -26,7 +26,7 @@
 package me.lucko.luckperms.common.calculators;
 
 import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.model.User;
 
 import java.util.List;
 

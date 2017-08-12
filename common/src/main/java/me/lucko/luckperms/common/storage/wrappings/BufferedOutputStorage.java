@@ -30,12 +30,12 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Delegate;
 
-import me.lucko.luckperms.common.core.UserIdentifier;
-import me.lucko.luckperms.common.core.model.Group;
-import me.lucko.luckperms.common.core.model.Track;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.buffers.Buffer;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.Track;
+import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.references.UserIdentifier;
 import me.lucko.luckperms.common.storage.Storage;
-import me.lucko.luckperms.common.utils.Buffer;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;

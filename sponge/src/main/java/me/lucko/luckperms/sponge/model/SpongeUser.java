@@ -33,7 +33,7 @@ import com.google.common.collect.ImmutableSet;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.caching.MetaData;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.LuckPermsSubjectData;

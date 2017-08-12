@@ -33,13 +33,13 @@ import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.InheritanceInfo;
-import me.lucko.luckperms.common.core.NodeFactory;
-import me.lucko.luckperms.common.core.model.PermissionHolder;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.common.node.InheritanceInfo;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -49,11 +49,11 @@ import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getPermi
 
 public class PermissionCheckInherits extends SharedSubCommand {
     public PermissionCheckInherits(LocaleManager locale) {
-        super(CommandSpec.PERMISSION_CHECK_INHERITS.spec(locale), "checkinherits", Permission.USER_PERM_CHECK_INHERITS, Permission.GROUP_PERM_CHECK_INHERITS, Predicates.is(0));
+        super(CommandSpec.PERMISSION_CHECK_INHERITS.spec(locale), "checkinherits", CommandPermission.USER_PERM_CHECK_INHERITS, CommandPermission.GROUP_PERM_CHECK_INHERITS, Predicates.is(0));
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label, Permission permission) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label, CommandPermission permission) throws CommandException {
         if (ArgumentPermissions.checkViewPerms(plugin, sender, permission, holder)) {
             Message.COMMAND_NO_PERMISSION.send(sender);
             return CommandResult.NO_PERMISSION;

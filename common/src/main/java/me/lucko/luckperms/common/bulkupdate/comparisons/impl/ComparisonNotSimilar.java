@@ -46,4 +46,5 @@ public class ComparisonNotSimilar implements Comparison {
 
         return !str.toLowerCase().matches(expr);
     }
+
 }

@@ -35,50 +35,51 @@ import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.api.ApiHandler;
 import me.lucko.luckperms.common.api.ApiProvider;
+import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.commands.abstraction.Command;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
-import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.contexts.ContextManager;
-import me.lucko.luckperms.common.contexts.StaticCalculator;
-import me.lucko.luckperms.common.core.UuidCache;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.contexts.LuckPermsCalculator;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.NoopLocaleManager;
 import me.lucko.luckperms.common.locale.SimpleLocaleManager;
+import me.lucko.luckperms.common.logging.SenderLogger;
+import me.lucko.luckperms.common.managers.GenericTrackManager;
 import me.lucko.luckperms.common.managers.TrackManager;
-import me.lucko.luckperms.common.managers.impl.GenericTrackManager;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.messaging.NoopMessagingService;
 import me.lucko.luckperms.common.messaging.RedisMessagingService;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.LuckPermsScheduler;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.StorageFactory;
 import me.lucko.luckperms.common.storage.StorageType;
+import me.lucko.luckperms.common.storage.backing.file.FileWatcher;
 import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.tasks.UpdateTask;
 import me.lucko.luckperms.common.treeview.PermissionVault;
-import me.lucko.luckperms.common.utils.BufferedRequest;
 import me.lucko.luckperms.common.utils.FakeSender;
-import me.lucko.luckperms.common.utils.FileWatcher;
-import me.lucko.luckperms.common.utils.SenderLogger;
+import me.lucko.luckperms.common.utils.UuidCache;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
+import me.lucko.luckperms.sponge.calculators.SpongeCalculatorFactory;
 import me.lucko.luckperms.sponge.commands.SpongeMainCommand;
 import me.lucko.luckperms.sponge.contexts.WorldCalculator;
 import me.lucko.luckperms.sponge.managers.SpongeGroupManager;
 import me.lucko.luckperms.sponge.managers.SpongeUserManager;
 import me.lucko.luckperms.sponge.messaging.BungeeMessagingService;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
-import me.lucko.luckperms.sponge.service.ServiceCacheHousekeepingTask;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.persisted.PersistedCollection;
+import me.lucko.luckperms.sponge.tasks.ServiceCacheHousekeepingTask;
 import me.lucko.luckperms.sponge.timings.LPTimings;
 import me.lucko.luckperms.sponge.utils.VersionData;
 
@@ -273,7 +274,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         groupManager = new SpongeGroupManager(this);
         trackManager = new GenericTrackManager(this);
         calculatorFactory = new SpongeCalculatorFactory(this);
-        cachedStateManager = new CachedStateManager(this);
+        cachedStateManager = new CachedStateManager();
 
         contextManager = new ContextManager<Subject>() {
             @Override
@@ -292,7 +293,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
         contextManager.registerCalculator(new WorldCalculator(this));
 
-        StaticCalculator<Subject> staticCalculator = new StaticCalculator<>(getConfiguration());
+        LuckPermsCalculator<Subject> staticCalculator = new LuckPermsCalculator<>(getConfiguration());
         contextManager.registerCalculator(staticCalculator, true);
 
         // register the PermissionService with Sponge
@@ -373,10 +374,8 @@ public class LPSpongePlugin implements LuckPermsPlugin {
             return;
         }
 
-        for (Permission perm : Permission.values()) {
-            for (String node : perm.getNodes()) {
-                registerPermission(service, node);
-            }
+        for (CommandPermission perm : CommandPermission.values()) {
+            registerPermission(service, perm.getPermission());
         }
     }
 

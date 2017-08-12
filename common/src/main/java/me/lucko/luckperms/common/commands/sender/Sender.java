@@ -26,8 +26,8 @@
 package me.lucko.luckperms.common.commands.sender;
 
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.Constants;
-import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.kyori.text.Component;
@@ -96,7 +96,7 @@ public interface Sender {
      * @param permission the permission to check for
      * @return true if the sender has the permission
      */
-    boolean hasPermission(Permission permission);
+    boolean hasPermission(CommandPermission permission);
 
     /**
      * Gets whether this sender is the console

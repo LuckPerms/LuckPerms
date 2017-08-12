@@ -30,8 +30,8 @@ import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.DataConstraints;
-import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.data.Log;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -46,7 +46,7 @@ import java.util.SortedMap;
 
 public class LogTrackHistory extends SubCommand<Log> {
     public LogTrackHistory(LocaleManager locale) {
-        super(CommandSpec.LOG_TRACK_HISTORY.spec(locale), "trackhistory", Permission.LOG_TRACK_HISTORY, Predicates.notInRange(1, 2));
+        super(CommandSpec.LOG_TRACK_HISTORY.spec(locale), "trackhistory", CommandPermission.LOG_TRACK_HISTORY, Predicates.notInRange(1, 2));
     }
 
     @Override

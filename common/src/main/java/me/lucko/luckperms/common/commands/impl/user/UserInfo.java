@@ -34,11 +34,11 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
@@ -49,7 +49,7 @@ import java.util.stream.Collectors;
 
 public class UserInfo extends SubCommand<User> {
     public UserInfo(LocaleManager locale) {
-        super(CommandSpec.USER_INFO.spec(locale), "info", Permission.USER_INFO, Predicates.alwaysFalse());
+        super(CommandSpec.USER_INFO.spec(locale), "info", CommandPermission.USER_INFO, Predicates.alwaysFalse());
     }
 
     @SuppressWarnings("unchecked")

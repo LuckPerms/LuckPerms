@@ -29,8 +29,8 @@ import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.DataConstraints;
-import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -42,7 +42,7 @@ import java.util.List;
 
 public class CreateGroup extends SingleCommand {
     public CreateGroup(LocaleManager locale) {
-        super(CommandSpec.CREATE_GROUP.spec(locale), "CreateGroup", Permission.CREATE_GROUP, Predicates.not(1));
+        super(CommandSpec.CREATE_GROUP.spec(locale), "CreateGroup", CommandPermission.CREATE_GROUP, Predicates.not(1));
     }
 
     @Override

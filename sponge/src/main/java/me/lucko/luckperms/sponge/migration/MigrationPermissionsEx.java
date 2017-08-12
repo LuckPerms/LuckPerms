@@ -32,15 +32,15 @@ import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.model.Group;
-import me.lucko.luckperms.common.core.model.Track;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.logging.ProgressLogger;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.Track;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.common.utils.ProgressLogger;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
@@ -66,7 +66,7 @@ import static me.lucko.luckperms.sponge.migration.SpongeMigrationUtils.migrateSu
 
 public class MigrationPermissionsEx extends SubCommand<Object> {
     public MigrationPermissionsEx(LocaleManager locale) {
-        super(CommandSpec.MIGRATION_COMMAND.spec(locale), "permissionsex", Permission.MIGRATION, Predicates.alwaysFalse());
+        super(CommandSpec.MIGRATION_COMMAND.spec(locale), "permissionsex", CommandPermission.MIGRATION, Predicates.alwaysFalse());
     }
 
     @Override

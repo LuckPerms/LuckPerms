@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.messaging;
 
-import me.lucko.luckperms.common.utils.BufferedRequest;
+import me.lucko.luckperms.common.buffers.BufferedRequest;
 
 public class NoopMessagingService implements InternalMessagingService {
 
