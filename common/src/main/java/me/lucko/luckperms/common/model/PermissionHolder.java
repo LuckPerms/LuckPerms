@@ -533,7 +533,7 @@ public abstract class PermissionHolder {
             if (!n.isGroupNode()) continue;
             String groupName = n.getGroupName();
 
-            if (!processedGroups.add(groupName) || excludedGroups.contains(groupName)) continue;
+            if (!processedGroups.add(groupName) || excludedGroups.contains(groupName) || !n.getValue()) continue;
 
             if (!((contexts.isApplyGlobalGroups() || n.isServerSpecific()) && (contexts.isApplyGlobalWorldGroups() || n.isWorldSpecific()))) {
                 continue;
@@ -611,7 +611,7 @@ public abstract class PermissionHolder {
             if (!n.isGroupNode()) continue;
             String groupName = n.getGroupName();
 
-            if (!processedGroups.add(groupName) || excludedGroups.contains(groupName)) continue;
+            if (!processedGroups.add(groupName) || excludedGroups.contains(groupName) || !n.getValue()) continue;
 
             Group g = plugin.getGroupManager().getIfLoaded(groupName);
             if (g != null) {
@@ -759,7 +759,7 @@ public abstract class PermissionHolder {
             if (!n.isGroupNode()) continue;
             String groupName = n.getGroupName();
 
-            if (!processedGroups.add(groupName) || excludedGroups.contains(groupName)) continue;
+            if (!processedGroups.add(groupName) || excludedGroups.contains(groupName) || !n.getValue()) continue;
 
             if (!((contexts.isApplyGlobalGroups() || n.isServerSpecific()) && (contexts.isApplyGlobalWorldGroups() || n.isWorldSpecific()))) {
                 continue;
@@ -819,7 +819,7 @@ public abstract class PermissionHolder {
             if (!n.isGroupNode()) continue;
             String groupName = n.getGroupName();
 
-            if (!processedGroups.add(groupName) || excludedGroups.contains(groupName)) continue;
+            if (!processedGroups.add(groupName) || excludedGroups.contains(groupName) || !n.getValue()) continue;
 
             Group g = plugin.getGroupManager().getIfLoaded(groupName);
             if (g != null) {
