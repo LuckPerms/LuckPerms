@@ -129,12 +129,13 @@ public interface User extends PermissionHolder {
     Optional<UserData> getUserDataCache();
 
     /**
-     * Sets up the users data cache, if the don't have one setup already.
+     * Pre-calculates some values in the user's data cache.
+     *
+     * <p>Is it <b>not</b> necessary to call this method before
+     * using {@link #getCachedData()}.</p>
      *
      * @since 2.17
-     * @deprecated in version 3.2, as this cache is now always loaded.
      */
-    @Deprecated
     void setupDataCache();
 
     /**

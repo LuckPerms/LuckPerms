@@ -717,6 +717,27 @@ public abstract class PermissionHolder {
         return ImmutableMap.copyOf(perms);
     }
 
+    public Map<String, Boolean> exportNodesAndShorthand(boolean lowerCase) {
+        List<LocalizedNode> entries = resolveInheritances();
+
+        Map<String, Boolean> perms = new HashMap<>();
+        boolean applyShorthand = plugin.getConfiguration().get(ConfigKeys.APPLYING_SHORTHAND);
+        for (Node node : entries) {
+            String perm = lowerCase ? node.getPermission().toLowerCase() : node.getPermission();
+
+            if (perms.putIfAbsent(perm, node.getValue()) == null) {
+                if (applyShorthand) {
+                    List<String> sh = node.resolveShorthand();
+                    if (!sh.isEmpty()) {
+                        sh.stream().map(s -> lowerCase ? s.toLowerCase() : s).forEach(s -> perms.putIfAbsent(s, node.getValue()));
+                    }
+                }
+            }
+        }
+
+        return ImmutableMap.copyOf(perms);
+    }
+
     public MetaAccumulator accumulateMeta(MetaAccumulator accumulator, Set<String> excludedGroups, ExtractedContexts context) {
         if (accumulator == null) {
             accumulator = MetaAccumulator.makeFromConfig(plugin);

@@ -53,6 +53,7 @@ import me.lucko.luckperms.common.messaging.NoopMessagingService;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.references.UserIdentifier;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -87,7 +88,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public double getApiVersion() {
-        return 3.2;
+        return 3.3;
     }
 
     @Override
@@ -230,5 +231,21 @@ public class ApiProvider implements LuckPermsApi {
     @Override
     public ContextSet getContextForPlayer(@NonNull Object player) {
         return plugin.getContextManager().getApplicableContext(player);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Contexts getContextsForPlayer(@NonNull Object player) {
+        return plugin.getContextManager().getApplicableContexts(player);
+    }
+
+    @Override
+    public Set<UUID> getUniqueConnections() {
+        return Collections.unmodifiableSet(plugin.getUniqueConnections());
+    }
+
+    @Override
+    public long getStartTime() {
+        return plugin.getStartTime();
     }
 }

@@ -29,6 +29,7 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.ImmutableSortedSet;
 
 import me.lucko.luckperms.api.Contexts;
@@ -38,6 +39,7 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.PermissionHolder;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.contexts.ExtractedContexts;
 import me.lucko.luckperms.common.model.User;
@@ -47,6 +49,7 @@ import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
@@ -73,6 +76,21 @@ public class PermissionHolderDelegate implements PermissionHolder {
     }
 
     @Override
+    public ImmutableSetMultimap<ImmutableContextSet, Node> getNodes() {
+        return handle.getEnduringNodes();
+    }
+
+    @Override
+    public ImmutableSetMultimap<ImmutableContextSet, Node> getTransientNodes() {
+        return handle.getTransientNodes();
+    }
+
+    @Override
+    public List<Node> getOwnNodes() {
+        return handle.getOwnNodes();
+    }
+
+    @Override
     public SortedSet<? extends Node> getPermissions() {
         return ImmutableSortedSet.copyOfSorted(handle.getOwnNodesSorted());
     }
@@ -90,6 +108,11 @@ public class PermissionHolderDelegate implements PermissionHolder {
     @Override
     public SortedSet<LocalizedNode> getAllNodes(@NonNull Contexts contexts) {
         return new TreeSet<>(handle.resolveInheritancesAlmostEqual(ExtractedContexts.generate(contexts)));
+    }
+
+    @Override
+    public SortedSet<LocalizedNode> getAllNodes() {
+        return new TreeSet<>(handle.resolveInheritancesAlmostEqual());
     }
 
     @Override
@@ -410,6 +433,16 @@ public class PermissionHolderDelegate implements PermissionHolder {
     @Override
     public Set<Node> getTemporaryPermissionNodes() {
         return handle.getTemporaryNodes();
+    }
+
+    @Override
+    public List<LocalizedNode> resolveInheritances(Contexts contexts) {
+        return null;
+    }
+
+    @Override
+    public List<LocalizedNode> resolveInheritances() {
+        return null;
     }
 
     @Override

@@ -39,16 +39,28 @@ import javax.annotation.Nonnull;
 public class Contexts {
     public static final String SERVER_KEY = "server";
     public static final String WORLD_KEY = "world";
-    private static final Contexts ALLOW_ALL = new Contexts(ContextSet.empty(), true, true, true, true, true, true);
+
+    private static final Contexts GLOBAL = new Contexts(ContextSet.empty(), true, true, true, true, true, false);
 
     /**
-     * Gets a context that will allow all nodes
+     * Gets the {@link FullySatisfiedContexts} instance.
      *
-     * @return a context that will not apply any filters
+     * @return a context that will satisfy all contextual requirements.
      */
     @Nonnull
     public static Contexts allowAll() {
-        return ALLOW_ALL;
+        return FullySatisfiedContexts.getInstance();
+    }
+
+    /**
+     * A contexts instance with no defined context.
+     *
+     * @return the global contexts
+     * @since 3.3
+     */
+    @Nonnull
+    public static Contexts global() {
+        return GLOBAL;
     }
 
     public static Contexts of(@Nonnull ContextSet context, boolean includeGlobal, boolean includeGlobalWorld, boolean applyGroups, boolean applyGlobalGroups, boolean applyGlobalWorldGroups, boolean op) {
@@ -193,7 +205,9 @@ public class Contexts {
     @Override
     public boolean equals(Object o) {
         if (o == this) return true;
+        if (o == allowAll()) return false;
         if (!(o instanceof Contexts)) return false;
+
         final Contexts other = (Contexts) o;
         return this.getContexts().equals(other.getContexts()) &&
                 this.isOp() == other.isOp() &&
@@ -209,7 +223,7 @@ public class Contexts {
         final int PRIME = 59;
         int result = 1;
         final Object contexts = this.getContexts();
-        result = result * PRIME + (contexts == null ? 43 : contexts.hashCode());
+        result = result * PRIME + contexts.hashCode();
         result = result * PRIME + (this.isOp() ? 79 : 97);
         result = result * PRIME + (this.isIncludeGlobal() ? 79 : 97);
         result = result * PRIME + (this.isIncludeGlobalWorld() ? 79 : 97);

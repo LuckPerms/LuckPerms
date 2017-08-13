@@ -25,10 +25,9 @@
 
 package me.lucko.luckperms.common.api.delegates;
 
-import lombok.AllArgsConstructor;
-
 import me.lucko.luckperms.api.LPConfiguration;
 import me.lucko.luckperms.api.data.DatastoreConfiguration;
+import me.lucko.luckperms.common.config.ConfigKey;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 
@@ -37,9 +36,14 @@ import java.util.Map;
 /**
  * Provides a link between {@link LPConfiguration} and {@link LuckPermsConfiguration}
  */
-@AllArgsConstructor
 public class LPConfigurationDelegate implements LPConfiguration {
     private final LuckPermsConfiguration handle;
+    private final Unsafe unsafe;
+
+    public LPConfigurationDelegate(LuckPermsConfiguration handle) {
+        this.handle = handle;
+        this.unsafe = new UnsafeImpl();
+    }
 
     @Override
     public String getServer() {
@@ -139,5 +143,22 @@ public class LPConfigurationDelegate implements LPConfiguration {
     @Override
     public Map<String, String> getSplitStorageOptions() {
         return handle.get(ConfigKeys.SPLIT_STORAGE_OPTIONS);
+    }
+
+    @Override
+    public Unsafe unsafe() {
+        return unsafe;
+    }
+
+    private final class UnsafeImpl implements Unsafe {
+
+        @Override
+        public Object getObject(String key) {
+            ConfigKey<?> configKey = ConfigKeys.getAllKeys().get(key.toUpperCase());
+            if (configKey == null) {
+                throw new IllegalArgumentException("Unknown key: " + key);
+            }
+            return handle.get(configKey);
+        }
     }
 }

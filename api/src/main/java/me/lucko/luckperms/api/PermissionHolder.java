@@ -25,10 +25,15 @@
 
 package me.lucko.luckperms.api;
 
+import com.google.common.collect.ImmutableSetMultimap;
+import com.google.common.collect.Multimap;
+
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
@@ -66,6 +71,47 @@ public interface PermissionHolder {
      */
     @Nonnull
     String getFriendlyName();
+
+    /**
+     * Gets the backing multimap containing every permission this holder has.
+     *
+     * <p>This method <b>does not</b> resolve inheritance rules, and returns a
+     * view of what's 'in the file'.</p>
+     *
+     * @return the holders own permissions
+     * @since 3.3
+     */
+    @Nonnull
+    ImmutableSetMultimap<ImmutableContextSet, Node> getNodes();
+
+    /**
+     * Gets the backing multimap containing every transient permission this holder has.
+     *
+     * <p>This method <b>does not</b> resolve inheritance rules.</p>
+     *
+     * <p>Transient permissions only exist for the duration of the session.</p>
+     *
+     * @return the holders own permissions
+     * @since 3.3
+     */
+    @Nonnull
+    ImmutableSetMultimap<ImmutableContextSet, Node> getTransientNodes();
+
+    /**
+     * Gets a flattened/squashed view of the holders permissions.
+     *
+     * <p>This list is constructed using the {@link Multimap#values()} method
+     * of both the transient and enduring backing multimaps.</p>
+     *
+     * <p>This means that it <b>may contain</b> duplicate entries.</p>
+     *
+     * <p>Use {@link #getPermissions()} for a view without duplicates.</p>
+     *
+     * @return a list of the holders own nodes.
+     * @since 3.3
+     */
+    @Nonnull
+    List<Node> getOwnNodes();
 
     /**
      * Gets a sorted set of all held permissions.
@@ -117,6 +163,38 @@ public interface PermissionHolder {
     Set<Node> getTemporaryPermissionNodes();
 
     /**
+     * Recursively resolves this holders permissions.
+     *
+     * <p>The returned list will contain every inherited
+     * node the holder has, in the order that they were inherited in.</p>
+     *
+     * <p>This means the list will contain duplicates.</p>
+     *
+     * @param contexts the contexts for the lookup
+     * @return a list of nodes
+     * @since 3.3
+     */
+    @Nonnull
+    List<LocalizedNode> resolveInheritances(Contexts contexts);
+
+    /**
+     * Recursively resolves this holders permissions.
+     *
+     * <p>The returned list will contain every inherited
+     * node the holder has, in the order that they were inherited in.</p>
+     *
+     * <p>This means the list will contain duplicates.</p>
+     *
+     * <p>Unlike {@link #resolveInheritances(Contexts)}, this method does not
+     * filter by context, at all.</p>
+     *
+     * @return a list of nodes
+     * @since 3.3
+     */
+    @Nonnull
+    List<LocalizedNode> resolveInheritances();
+
+    /**
      * Gets a mutable sorted set of the nodes that this object has and inherits, filtered by context
      *
      * <p>Unlike {@link #getAllNodesFiltered(Contexts)}, this method will not filter individual nodes. The context is only
@@ -131,6 +209,20 @@ public interface PermissionHolder {
      */
     @Nonnull
     SortedSet<LocalizedNode> getAllNodes(@Nonnull Contexts contexts);
+
+    /**
+     * Gets a mutable sorted set of the nodes that this object has and inherits.
+     *
+     * <p>Unlike {@link #getAllNodes(Contexts)}, this method does not filter by context, at all.</p>
+     *
+     * <p>Nodes are sorted into priority order.</p>
+     *
+     * @return a mutable sorted set of permissions
+     * @throws NullPointerException if the context is null
+     * @since 3.3
+     */
+    @Nonnull
+    SortedSet<LocalizedNode> getAllNodes();
 
     /**
      * Gets a mutable set of the nodes that this object has and inherits, filtered by context.

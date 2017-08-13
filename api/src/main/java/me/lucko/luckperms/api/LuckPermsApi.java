@@ -328,4 +328,31 @@ public interface LuckPermsApi {
     @Nonnull
     ContextSet getContextForPlayer(@Nonnull Object player);
 
+    /**
+     * Gets a Contexts instance for the player using the platforms {@link ContextCalculator}s.
+     *
+     * @param player the player to calculate for. Must be the player instance for the platform.
+     * @return a set of contexts.
+     * @since 3.3
+     */
+    @Nonnull
+    Contexts getContextsForPlayer(@Nonnull Object player);
+
+    /**
+     * Gets the unique players which have connected to the server since it started.
+     *
+     * @return the unique connections
+     * @since 3.3
+     */
+    @Nonnull
+    Set<UUID> getUniqueConnections();
+
+    /**
+     * Gets the time when the plugin first started in milliseconds.
+     *
+     * @return the enable time
+     * @since 3.3
+     */
+    long getStartTime();
+
 }

@@ -173,4 +173,24 @@ public interface LPConfiguration {
     @Nonnull
     Map<String, String> getSplitStorageOptions();
 
+    @Nonnull
+    Unsafe unsafe();
+
+    interface Unsafe {
+
+        /**
+         * Gets an Object from the config.
+         *
+         * <p>This method is nested under {@link Unsafe} because the keys
+         * and return types may change between versions without warning.</p>
+         *
+         * @param key the key, as defined as a parameter name in
+         *            the "ConfigKeys" class.
+         * @return the corresponding object, if one is present
+         * @throws IllegalArgumentException if the key isn't known
+         */
+        @Nonnull
+        Object getObject(String key);
+    }
+
 }

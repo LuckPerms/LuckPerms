@@ -64,7 +64,7 @@ public abstract class AbstractConfiguration implements LuckPermsConfiguration {
 
     @Override
     public void loadAll() {
-        ConfigKeys.getAllKeys().forEach(cache::get);
+        ConfigKeys.getAllKeys().values().forEach(cache::get);
         contextsFile.load();
     }
 

@@ -54,6 +54,7 @@ import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -420,16 +421,16 @@ public class ConfigKeys {
      */
     public static final ConfigKey<String> WEB_EDITOR_URL_PATTERN = StringKey.of("web-editor-url", "https://lpedit.lucko.me/");
 
-    private static List<ConfigKey<?>> KEYS = null;
+    private static Map<String, ConfigKey<?>> KEYS = null;
 
     /**
      * Gets all of the possible config keys defined in this class
      *
      * @return all of the possible config keys defined in this class
      */
-    public static synchronized List<ConfigKey<?>> getAllKeys() {
+    public static synchronized Map<String, ConfigKey<?>> getAllKeys() {
         if (KEYS == null) {
-            ImmutableList.Builder<ConfigKey<?>> keys = ImmutableList.builder();
+            Map<String, ConfigKey<?>> keys = new LinkedHashMap<>();
 
             try {
                 Field[] values = ConfigKeys.class.getFields();
@@ -440,14 +441,14 @@ public class ConfigKeys {
 
                     Object val = f.get(null);
                     if (val instanceof ConfigKey<?>) {
-                        keys.add((ConfigKey<?>) val);
+                        keys.put(f.getName(), (ConfigKey<?>) val);
                     }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-            KEYS =  keys.build();
+            KEYS = ImmutableMap.copyOf(keys);
         }
 
         return KEYS;
