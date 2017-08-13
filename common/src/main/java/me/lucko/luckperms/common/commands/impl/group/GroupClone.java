@@ -74,7 +74,7 @@ public class GroupClone extends SubCommand<Group> {
             return CommandResult.NO_PERMISSION;
         }
 
-        newGroup.replaceNodes(group.getNodes());
+        newGroup.replaceEnduringNodes(group.getEnduringNodes());
 
         Message.CLONE_SUCCESS.send(sender, group.getName(), newGroup.getName());
         LogEntry.build().actor(sender).acted(group).action("clone " + newGroup.getName()).build().submit(plugin, sender);

@@ -59,7 +59,7 @@ public class HolderClear<T extends PermissionHolder> extends SubCommand<T> {
             return CommandResult.NO_PERMISSION;
         }
 
-        int before = holder.getNodes().size();
+        int before = holder.getEnduringNodes().size();
 
         MutableContextSet context = ArgumentUtils.handleContext(0, args, plugin);
 
@@ -74,7 +74,7 @@ public class HolderClear<T extends PermissionHolder> extends SubCommand<T> {
             holder.clearNodes(context);
         }
 
-        int changed = before - holder.getNodes().size();
+        int changed = before - holder.getEnduringNodes().size();
         if (changed == 1) {
             Message.CLEAR_SUCCESS_SINGULAR.send(sender, holder.getFriendlyName(), Util.contextSetToString(context), changed);
         } else {

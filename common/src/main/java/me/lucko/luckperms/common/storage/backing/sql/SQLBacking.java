@@ -359,7 +359,7 @@ public class SQLBacking extends AbstractBacking {
             // If the user has any data in storage
             if (!data.isEmpty()) {
                 Set<Node> nodes = data.stream().map(NodeModel::toNode).collect(Collectors.toSet());
-                user.setNodes(nodes);
+                user.setEnduringNodes(nodes);
 
                 // Save back to the store if data was changed
                 if (plugin.getUserManager().giveDefaultIfNeeded(user, false)) {
@@ -428,7 +428,7 @@ public class SQLBacking extends AbstractBacking {
                 return false;
             }
 
-            Set<NodeModel> local = user.getNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toSet());
+            Set<NodeModel> local = user.getEnduringNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toSet());
 
             Map.Entry<Set<NodeModel>, Set<NodeModel>> diff = compareSets(local, remote);
 
@@ -626,7 +626,7 @@ public class SQLBacking extends AbstractBacking {
 
             if (!data.isEmpty()) {
                 Set<Node> nodes = data.stream().map(NodeModel::toNode).collect(Collectors.toSet());
-                group.setNodes(nodes);
+                group.setEnduringNodes(nodes);
             } else {
                 group.clearNodes();
             }
@@ -675,7 +675,7 @@ public class SQLBacking extends AbstractBacking {
         group.getIoLock().lock();
         try {
             // Empty data, just delete.
-            if (group.getNodes().isEmpty()) {
+            if (group.getEnduringNodes().isEmpty()) {
                 try (Connection c = provider.getConnection()) {
                     try (PreparedStatement ps = c.prepareStatement(prefix.apply(GROUP_PERMISSIONS_DELETE))) {
                         ps.setString(1, group.getName());
@@ -711,7 +711,7 @@ public class SQLBacking extends AbstractBacking {
                 return false;
             }
 
-            Set<NodeModel> local = group.getNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toSet());
+            Set<NodeModel> local = group.getEnduringNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toSet());
 
             Map.Entry<Set<NodeModel>, Set<NodeModel>> diff = compareSets(local, remote);
 

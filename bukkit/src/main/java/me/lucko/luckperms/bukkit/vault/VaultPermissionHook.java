@@ -225,7 +225,7 @@ public class VaultPermissionHook extends Permission {
         if (group == null) return false;
 
         // This is a nasty call. Groups aren't cached. :(
-        Map<String, Boolean> permissions = group.exportNodes(ExtractedContexts.generate(createContextForWorldLookup(world)), true);
+        Map<String, Boolean> permissions = group.exportNodesAndShorthand(ExtractedContexts.generate(createContextForWorldLookup(world)), true);
         return permissions.containsKey(permission.toLowerCase()) && permissions.get(permission.toLowerCase());
     }
 
@@ -350,7 +350,7 @@ public class VaultPermissionHook extends Permission {
         }
 
         String w = world; // screw effectively final
-        return user.getNodes().values().stream()
+        return user.getEnduringNodes().values().stream()
                 .filter(Node::isGroupNode)
                 .filter(n -> n.shouldApplyWithContext(createContextForWorldLookup(player, w).getContexts()))
                 .map(Node::getGroupName)
@@ -418,7 +418,7 @@ public class VaultPermissionHook extends Permission {
             }
         } else {
             // we need to check the users permissions only
-            for (Node node : user.mergePermissionsToList()) {
+            for (Node node : user.getOwnNodes()) {
                 if (!node.getValue()) continue;
                 if (!node.getPermission().toLowerCase().startsWith("vault.primarygroup.")) continue;
                 if (!node.shouldApplyOnServer(getServer(), isIncludeGlobal(), false)) continue;
@@ -433,7 +433,7 @@ public class VaultPermissionHook extends Permission {
 
                 if (isPgoCheckMemberOf()) {
                     String finalWorld = world;
-                    List<String> localGroups = user.mergePermissionsToList().stream()
+                    List<String> localGroups = user.getOwnNodes().stream()
                             .filter(Node::isGroupNode)
                             .filter(n -> n.shouldApplyOnWorld(finalWorld, isIncludeGlobal(), true))
                             .filter(n -> n.shouldApplyOnServer(getServer(), isIncludeGlobal(), true))

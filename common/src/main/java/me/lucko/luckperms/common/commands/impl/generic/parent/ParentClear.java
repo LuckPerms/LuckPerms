@@ -57,7 +57,7 @@ public class ParentClear extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        int before = holder.getNodes().size();
+        int before = holder.getEnduringNodes().size();
 
         MutableContextSet context = ArgumentUtils.handleContext(0, args, plugin);
 
@@ -72,7 +72,7 @@ public class ParentClear extends SharedSubCommand {
             holder.clearParents(context, true);
         }
 
-        int changed = before - holder.getNodes().size();
+        int changed = before - holder.getEnduringNodes().size();
         if (changed == 1) {
             Message.PARENT_CLEAR_SUCCESS_SINGULAR.send(sender, holder.getFriendlyName(), Util.contextSetToString(context), changed);
         } else {

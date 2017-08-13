@@ -88,7 +88,7 @@ public class PermissionInfo extends SharedSubCommand {
 
         int page = ArgumentUtils.handleIntOrElse(0, args, 1);
 
-        Map.Entry<Component, String> ent = nodesToMessage(false, filter, holder.mergePermissionsToSortedSet(), holder, label, page, sender.isConsole());
+        Map.Entry<Component, String> ent = nodesToMessage(false, filter, holder.getOwnNodesSorted(), holder, label, page, sender.isConsole());
         if (ent.getValue() != null) {
             Message.LISTNODES_WITH_PAGE.send(sender, holder.getFriendlyName(), ent.getValue());
             sender.sendMessage(ent.getKey());
@@ -97,7 +97,7 @@ public class PermissionInfo extends SharedSubCommand {
             sender.sendMessage(ent.getKey());
         }
 
-        Map.Entry<Component, String> tempEnt = nodesToMessage(true, filter, holder.mergePermissionsToSortedSet(), holder, label, page, sender.isConsole());
+        Map.Entry<Component, String> tempEnt = nodesToMessage(true, filter, holder.getOwnNodesSorted(), holder, label, page, sender.isConsole());
         if (tempEnt.getValue() != null) {
             Message.LISTNODES_TEMP_WITH_PAGE.send(sender, holder.getFriendlyName(), tempEnt.getValue());
             sender.sendMessage(tempEnt.getKey());

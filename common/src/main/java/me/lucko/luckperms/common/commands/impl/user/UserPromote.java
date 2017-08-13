@@ -95,7 +95,7 @@ public class UserPromote extends SubCommand<User> {
         }
 
         // Load applicable groups
-        Set<Node> nodes = user.getNodes().values().stream()
+        Set<Node> nodes = user.getEnduringNodes().values().stream()
                 .filter(Node::isGroupNode)
                 .filter(Node::getValue)
                 .filter(node -> node.getFullContexts().makeImmutable().equals(context.makeImmutable()))

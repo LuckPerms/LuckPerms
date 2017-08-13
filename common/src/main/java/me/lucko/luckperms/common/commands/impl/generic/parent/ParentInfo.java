@@ -69,11 +69,11 @@ public class ParentInfo extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        Component ent = permGroupsToMessage(holder.mergePermissionsToSortedSet(), holder, label);
+        Component ent = permGroupsToMessage(holder.getOwnNodesSorted(), holder, label);
         Message.LISTNODES.send(sender, holder.getFriendlyName());
         sender.sendMessage(ent);
 
-        Component tempEnt = tempGroupsToMessage(holder.mergePermissionsToSortedSet(), holder, label);
+        Component tempEnt = tempGroupsToMessage(holder.getOwnNodesSorted(), holder, label);
         Message.LISTNODES_TEMP.send(sender, holder.getFriendlyName());
         sender.sendMessage(tempEnt);
 

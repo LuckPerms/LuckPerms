@@ -61,7 +61,7 @@ public class NodeComparator implements Comparator<Node> {
             return o1.getWildcardLevel() > o2.getWildcardLevel() ? 1 : -1;
         }
 
-        return NodePriorityComparator.get().compareStrings(o1.getPermission(), o2.getPermission()) == 1 ? -1 : 1;
+        return NodeWithContextComparator.get().compareStrings(o1.getPermission(), o2.getPermission()) == 1 ? -1 : 1;
     }
 
 }

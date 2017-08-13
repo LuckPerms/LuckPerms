@@ -61,33 +61,11 @@ public class UserCache implements UserData {
 
     private final LoadingCache<Contexts, PermissionCache> permission = Caffeine.newBuilder()
             .expireAfterAccess(10, TimeUnit.MINUTES)
-            .build(new CacheLoader<Contexts, PermissionCache>() {
-                @Override
-                public PermissionCache load(Contexts contexts) {
-                    return calculatePermissions(contexts);
-                }
-
-                @Override
-                public PermissionCache reload(Contexts contexts, PermissionCache oldData) {
-                    oldData.comparePermissions(user.exportNodes(ExtractedContexts.generate(contexts), true));
-                    return oldData;
-                }
-            });
+            .build(new PermissionCacheLoader());
 
     private final LoadingCache<MetaContexts, MetaCache> meta = Caffeine.newBuilder()
             .expireAfterAccess(10, TimeUnit.MINUTES)
-            .build(new CacheLoader<MetaContexts, MetaCache>() {
-                @Override
-                public MetaCache load(MetaContexts contexts) {
-                    return calculateMeta(contexts);
-                }
-
-                @Override
-                public MetaCache reload(MetaContexts contexts, MetaCache oldData) {
-                    oldData.loadMeta(user.accumulateMeta(newAccumulator(contexts), null, ExtractedContexts.generate(contexts.getContexts())));
-                    return oldData;
-                }
-            });
+            .build(new MetaCacheLoader());
 
     @Override
     public PermissionData getPermissionData(@NonNull Contexts contexts) {
@@ -108,7 +86,7 @@ public class UserCache implements UserData {
     @Override
     public PermissionCache calculatePermissions(@NonNull Contexts contexts) {
         PermissionCache data = new PermissionCache(contexts, user, user.getPlugin().getCalculatorFactory());
-        data.setPermissions(user.exportNodes(ExtractedContexts.generate(contexts), true));
+        data.setPermissions(user.exportNodesAndShorthand(ExtractedContexts.generate(contexts), true));
         return data;
     }
 
@@ -181,6 +159,32 @@ public class UserCache implements UserData {
     public void clear() {
         permission.invalidateAll();
         meta.invalidateAll();
+    }
+
+    private final class PermissionCacheLoader implements CacheLoader<Contexts, PermissionCache> {
+        @Override
+        public PermissionCache load(Contexts contexts) {
+            return calculatePermissions(contexts);
+        }
+
+        @Override
+        public PermissionCache reload(Contexts contexts, PermissionCache oldData) {
+            oldData.comparePermissions(user.exportNodesAndShorthand(ExtractedContexts.generate(contexts), true));
+            return oldData;
+        }
+    }
+
+    private final class MetaCacheLoader implements CacheLoader<MetaContexts, MetaCache> {
+        @Override
+        public MetaCache load(MetaContexts contexts) {
+            return calculateMeta(contexts);
+        }
+
+        @Override
+        public MetaCache reload(MetaContexts contexts, MetaCache oldData) {
+            oldData.loadMeta(user.accumulateMeta(newAccumulator(contexts), null, ExtractedContexts.generate(contexts.getContexts())));
+            return oldData;
+        }
     }
 
     private static MetaContexts makeFromMetaContextsConfig(Contexts contexts, LuckPermsPlugin plugin) {

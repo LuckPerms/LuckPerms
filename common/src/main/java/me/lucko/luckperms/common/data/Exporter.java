@@ -131,7 +131,7 @@ public class Exporter implements Runnable {
                     })
                     .forEach(group -> {
                         write(writer, "# Export group: " + group.getName());
-                        for (Node node : group.getNodes().values()) {
+                        for (Node node : group.getEnduringNodes().values()) {
                             write(writer, NodeFactory.nodeAsCommand(node, group.getName(), true, true));
                         }
                         write(writer, "");
@@ -234,7 +234,7 @@ public class Exporter implements Runnable {
                             output.add("# Export user: " + user.getUuid().toString() + " - " + user.getName().orElse("unknown username"));
 
                             boolean inDefault = false;
-                            for (Node node : user.getNodes().values()) {
+                            for (Node node : user.getEnduringNodes().values()) {
                                 if (node.isGroupNode() && node.getGroupName().equalsIgnoreCase("default")) {
                                     inDefault = true;
                                     continue;

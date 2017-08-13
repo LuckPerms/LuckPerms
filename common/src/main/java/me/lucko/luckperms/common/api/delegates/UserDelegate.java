@@ -198,7 +198,7 @@ public final class UserDelegate extends PermissionHolderDelegate implements User
 
     @Override
     public List<String> getGroupNames() {
-        return handle.mergePermissionsToList().stream()
+        return handle.getOwnNodes().stream()
                 .filter(Node::isGroupNode)
                 .map(Node::getGroupName)
                 .collect(Collectors.toList());
@@ -206,7 +206,7 @@ public final class UserDelegate extends PermissionHolderDelegate implements User
 
     @Override
     public List<String> getLocalGroups(@NonNull String server, @NonNull String world) {
-        return handle.mergePermissionsToList().stream()
+        return handle.getOwnNodes().stream()
                 .filter(Node::isGroupNode)
                 .filter(n -> n.shouldApplyOnWorld(world, false, true))
                 .filter(n -> n.shouldApplyOnServer(server, false, true))
@@ -216,7 +216,7 @@ public final class UserDelegate extends PermissionHolderDelegate implements User
 
     @Override
     public List<String> getLocalGroups(@NonNull String server) {
-        return handle.mergePermissionsToList().stream()
+        return handle.getOwnNodes().stream()
                 .filter(Node::isGroupNode)
                 .filter(n -> n.shouldApplyOnServer(server, false, true))
                 .map(Node::getGroupName)

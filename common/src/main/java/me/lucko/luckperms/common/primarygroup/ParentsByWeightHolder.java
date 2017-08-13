@@ -55,7 +55,7 @@ public class ParentsByWeightHolder extends StoredHolder {
 
         Contexts contexts = user.getPlugin().getContextForUser(user);
         ContextSet contextSet = contexts != null ? contexts.getContexts() : user.getPlugin().getContextManager().getStaticContexts();
-        cachedValue = user.flattenAndMergeNodesToList(contextSet).stream()
+        cachedValue = user.filterNodes(contextSet).stream()
                 .filter(Node::isGroupNode)
                 .filter(Node::getValue)
                 .map(n -> Optional.ofNullable(user.getPlugin().getGroupManager().getIfLoaded(n.getGroupName())))

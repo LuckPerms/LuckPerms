@@ -141,7 +141,7 @@ public class ApplyEditsCommand extends SingleCommand {
         }
 
         Set<NodeModel> nodes = deserializePermissions(data.getAsJsonArray("nodes"));
-        holder.setNodes(nodes.stream().map(NodeModel::toNode).collect(Collectors.toSet()));
+        holder.setEnduringNodes(nodes.stream().map(NodeModel::toNode).collect(Collectors.toSet()));
         Message.APPLY_EDITS_SUCCESS.send(sender, nodes.size(), holder.getFriendlyName());
         SharedSubCommand.save(holder, sender, plugin);
         return CommandResult.SUCCESS;

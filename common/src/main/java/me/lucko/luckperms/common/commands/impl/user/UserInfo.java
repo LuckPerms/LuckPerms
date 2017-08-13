@@ -72,12 +72,12 @@ public class UserInfo extends SubCommand<User> {
                 user.getMetaNodes().size()
         );
 
-        Set<Node> parents = user.mergePermissions().stream()
+        Set<Node> parents = user.getOwnNodesSet().stream()
                 .filter(Node::isGroupNode)
                 .filter(Node::isPermanent)
                 .collect(Collectors.toSet());
 
-        Set<Node> tempParents = user.mergePermissions().stream()
+        Set<Node> tempParents = user.getOwnNodesSet().stream()
                 .filter(Node::isGroupNode)
                 .filter(Node::isTemporary)
                 .collect(Collectors.toSet());

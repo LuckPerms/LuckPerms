@@ -74,12 +74,12 @@ public class PermissionHolderDelegate implements PermissionHolder {
 
     @Override
     public SortedSet<? extends Node> getPermissions() {
-        return ImmutableSortedSet.copyOfSorted(handle.mergePermissionsToSortedSet());
+        return ImmutableSortedSet.copyOfSorted(handle.getOwnNodesSorted());
     }
 
     @Override
     public Set<Node> getEnduringPermissions() {
-        return ImmutableSet.copyOf(handle.getNodes().values());
+        return ImmutableSet.copyOf(handle.getEnduringNodes().values());
     }
 
     @Override
@@ -99,7 +99,7 @@ public class PermissionHolderDelegate implements PermissionHolder {
 
     @Override
     public Map<String, Boolean> exportNodes(Contexts contexts, boolean lowerCase) {
-        return new HashMap<>(handle.exportNodes(ExtractedContexts.generate(contexts), lowerCase));
+        return new HashMap<>(handle.exportNodesAndShorthand(ExtractedContexts.generate(contexts), lowerCase));
     }
 
     @Override

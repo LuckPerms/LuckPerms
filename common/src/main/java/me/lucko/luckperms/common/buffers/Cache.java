@@ -29,7 +29,6 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.Optional;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.function.Supplier;
 
 /**
  * Thread-safe caching utility
@@ -37,37 +36,43 @@ import java.util.function.Supplier;
  * @param <T> the type being stored
  */
 @RequiredArgsConstructor
-public class Cache<T> {
+public abstract class Cache<T> {
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-    private final Supplier<T> supplier;
 
     private T cached = null;
 
-    public T get() {
+    protected abstract T supply();
+
+    public final T get() {
+        // try to just read from the cached value
         lock.readLock().lock();
         try {
             if (cached != null) {
                 return cached;
             }
         } finally {
+            // we have to release the read lock, as it is not possible
+            // to acquire the write lock whilst holding a read lock
             lock.readLock().unlock();
         }
 
         lock.writeLock().lock();
         try {
-            // Check again
+            // Since the lock was unlocked momentarily, we need
+            // to check again for a cached value
             if (cached != null) {
                 return cached;
             }
 
-            cached = supplier.get();
+            // call the supplier and set the cached value
+            cached = supply();
             return cached;
         } finally {
             lock.writeLock().unlock();
         }
     }
 
-    public Optional<T> getIfPresent() {
+    public final Optional<T> getIfPresent() {
         lock.readLock().lock();
         try {
             return Optional.ofNullable(cached);
@@ -76,7 +81,7 @@ public class Cache<T> {
         }
     }
 
-    public void invalidate() {
+    public final void invalidate() {
         lock.writeLock().lock();
         try {
             cached = null;

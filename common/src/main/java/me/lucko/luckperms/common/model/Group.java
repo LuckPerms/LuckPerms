@@ -50,12 +50,12 @@ public class Group extends PermissionHolder implements Identifiable<String> {
 
     public Group(String name, LuckPermsPlugin plugin) {
         super(name, plugin);
-        this.name = name;
+        this.name = name.toLowerCase();
     }
 
     @Override
     public String getId() {
-        return name.toLowerCase();
+        return name;
     }
 
     public String getRawDisplayName() {

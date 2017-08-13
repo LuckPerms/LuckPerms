@@ -170,7 +170,7 @@ public class JSONBacking extends FlatfileBacking {
 
                     Set<NodeModel> data = deserializePermissions(object.get("permissions").getAsJsonArray());
                     Set<Node> nodes = data.stream().map(NodeModel::toNode).collect(Collectors.toSet());
-                    user.setNodes(nodes);
+                    user.setEnduringNodes(nodes);
                     user.setName(name, true);
 
                     boolean save = plugin.getUserManager().giveDefaultIfNeeded(user, false);
@@ -222,7 +222,7 @@ public class JSONBacking extends FlatfileBacking {
                 data.addProperty("name", user.getName().orElse("null"));
                 data.addProperty("primaryGroup", user.getPrimaryGroup().getStoredValue());
 
-                Set<NodeModel> nodes = user.getNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
+                Set<NodeModel> nodes = user.getEnduringNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
                 data.add("permissions", serializePermissions(nodes));
 
                 return writeElementToFile(userFile, data);
@@ -311,7 +311,7 @@ public class JSONBacking extends FlatfileBacking {
                     JsonObject object = readObjectFromFile(groupFile);
                     Set<NodeModel> data = deserializePermissions(object.get("permissions").getAsJsonArray());
                     Set<Node> nodes = data.stream().map(NodeModel::toNode).collect(Collectors.toSet());
-                    group.setNodes(nodes);
+                    group.setEnduringNodes(nodes);
                     return true;
                 } else {
                     groupFile.createNewFile();
@@ -319,7 +319,7 @@ public class JSONBacking extends FlatfileBacking {
                     JsonObject data = new JsonObject();
                     data.addProperty("name", group.getName());
 
-                    Set<NodeModel> nodes = group.getNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
+                    Set<NodeModel> nodes = group.getEnduringNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
                     data.add("permissions", serializePermissions(nodes));
 
                     return writeElementToFile(groupFile, data);
@@ -346,7 +346,7 @@ public class JSONBacking extends FlatfileBacking {
                 JsonObject object = readObjectFromFile(groupFile);
                 Set<NodeModel> data = deserializePermissions(object.get("permissions").getAsJsonArray());
                 Set<Node> nodes = data.stream().map(NodeModel::toNode).collect(Collectors.toSet());
-                group.setNodes(nodes);
+                group.setEnduringNodes(nodes);
                 return true;
             }, false);
         } finally {
@@ -368,7 +368,7 @@ public class JSONBacking extends FlatfileBacking {
 
                 JsonObject data = new JsonObject();
                 data.addProperty("name", group.getName());
-                Set<NodeModel> nodes = group.getNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
+                Set<NodeModel> nodes = group.getEnduringNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
                 data.add("permissions", serializePermissions(nodes));
                 return writeElementToFile(groupFile, data);
             }, false);

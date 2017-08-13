@@ -37,7 +37,7 @@ import com.google.gson.JsonObject;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.contexts.ContextSetComparator;
 import me.lucko.luckperms.common.node.NodeModel;
-import me.lucko.luckperms.common.node.NodePriorityComparator;
+import me.lucko.luckperms.common.node.NodeWithContextComparator;
 import me.lucko.luckperms.sponge.service.calculated.CalculatedSubjectData;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.SubjectReference;
@@ -194,7 +194,7 @@ public class SubjectStorageModel {
 
             // sort alphabetically.
             List<Map.Entry<String, Boolean>> perms = new ArrayList<>(e.getValue().entrySet());
-            perms.sort((o1, o2) -> NodePriorityComparator.get().compareStrings(o1.getKey(), o2.getKey()));
+            perms.sort((o1, o2) -> NodeWithContextComparator.get().compareStrings(o1.getKey(), o2.getKey()));
 
             for (Map.Entry<String, Boolean> ent : perms) {
                 data.addProperty(ent.getKey(), ent.getValue());
@@ -218,7 +218,7 @@ public class SubjectStorageModel {
 
             // sort alphabetically.
             List<Map.Entry<String, String>> opts = new ArrayList<>(e.getValue().entrySet());
-            opts.sort((o1, o2) -> NodePriorityComparator.get().compareStrings(o1.getKey(), o2.getKey()));
+            opts.sort((o1, o2) -> NodeWithContextComparator.get().compareStrings(o1.getKey(), o2.getKey()));
 
             for (Map.Entry<String, String> ent : opts) {
                 data.addProperty(ent.getKey(), ent.getValue());

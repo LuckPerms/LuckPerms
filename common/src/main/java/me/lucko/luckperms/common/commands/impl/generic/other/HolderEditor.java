@@ -83,7 +83,7 @@ public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
         }
 
         JsonObject data = new JsonObject();
-        Set<NodeModel> nodes = holder.getNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
+        Set<NodeModel> nodes = holder.getEnduringNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
         data.add("nodes", serializePermissions(nodes));
         data.addProperty("who", id(holder));
 

@@ -43,10 +43,10 @@ import java.util.Locale;
  * Compares permission nodes based upon their supposed "priority".
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class NodePriorityComparator implements Comparator<LocalizedNode> {
+public class NodeWithContextComparator implements Comparator<LocalizedNode> {
 
-    private static final NodePriorityComparator INSTANCE = new NodePriorityComparator();
-    public static NodePriorityComparator get() {
+    private static final NodeWithContextComparator INSTANCE = new NodeWithContextComparator();
+    public static NodeWithContextComparator get() {
         return INSTANCE;
     }
     public static Comparator<LocalizedNode> reverse() {

@@ -330,7 +330,7 @@ public class VaultChatHook extends Chat {
         world = perms.correctWorld(world);
         perms.log("Getting meta: '" + node + "' for group " + group.getName() + " on world " + world + ", server " + perms.getServer());
 
-        for (Node n : group.mergePermissionsToList()) {
+        for (Node n : group.getOwnNodes()) {
             if (!n.getValue()) continue;
             if (!n.isMeta()) continue;
             if (!n.shouldApplyWithContext(perms.createContextForWorldLookup(world).getContexts())) continue;

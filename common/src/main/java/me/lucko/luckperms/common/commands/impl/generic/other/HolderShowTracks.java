@@ -61,7 +61,7 @@ public class HolderShowTracks<T extends PermissionHolder> extends SubCommand<T> 
             return CommandResult.LOADING_ERROR;
         }
 
-        Set<Node> nodes = holder.getNodes().values().stream()
+        Set<Node> nodes = holder.getEnduringNodes().values().stream()
                 .filter(Node::isGroupNode)
                 .filter(Node::isPermanent)
                 .collect(Collectors.toSet());

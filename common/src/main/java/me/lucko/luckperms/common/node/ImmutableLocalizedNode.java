@@ -57,6 +57,6 @@ public final class ImmutableLocalizedNode implements LocalizedNode {
 
     @Override
     public boolean equals(Object obj) {
-        return node.equals(obj);
+        return this == obj || node.equals(obj);
     }
 }

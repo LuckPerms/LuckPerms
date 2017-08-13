@@ -84,7 +84,7 @@ public class ParentClearTrack extends SharedSubCommand {
             return CommandResult.STATE_ERROR;
         }
 
-        int before = holder.getNodes().size();
+        int before = holder.getEnduringNodes().size();
 
         MutableContextSet context = ArgumentUtils.handleContext(1, args, plugin);
 
@@ -108,7 +108,7 @@ public class ParentClearTrack extends SharedSubCommand {
             plugin.getUserManager().giveDefaultIfNeeded(((User) holder), false);
         }
 
-        int changed = before - holder.getNodes().size();
+        int changed = before - holder.getEnduringNodes().size();
 
         if (changed == 1) {
             Message.PARENT_CLEAR_TRACK_SUCCESS_SINGULAR.send(sender, holder.getFriendlyName(), track.getName(), Util.contextSetToString(context), changed);

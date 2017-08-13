@@ -130,7 +130,7 @@ public class MigrationPermissionManager extends SubCommand<Object> {
             // Make a LuckPerms user for the one being migrated
             plugin.getStorage().loadUser(uuid, "null").join();
             User user = plugin.getUserManager().getIfLoaded(uuid);
-            if (user.getNodes().size() <= 1) {
+            if (user.getEnduringNodes().size() <= 1) {
                 user.clearNodes(false);
             }
             migrateSubject(pmUser, user, 100);

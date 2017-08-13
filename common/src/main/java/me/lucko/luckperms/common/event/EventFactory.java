@@ -67,8 +67,8 @@ import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -86,7 +86,7 @@ public final class EventFactory {
     }
 
     public void handleGroupDelete(Group group, DeletionCause cause) {
-        EventGroupDelete event = new EventGroupDelete(group.getName(), ImmutableSet.copyOf(group.getNodes().values()), cause);
+        EventGroupDelete event = new EventGroupDelete(group.getName(), ImmutableSet.copyOf(group.getEnduringNodes().values()), cause);
         fireEvent(event);
     }
 
@@ -114,17 +114,17 @@ public final class EventFactory {
         return cancel.get();
     }
 
-    public void handleNodeAdd(Node node, PermissionHolder target, Set<Node> before, Set<Node> after) {
+    public void handleNodeAdd(Node node, PermissionHolder target, Collection<Node> before, Collection<Node> after) {
         EventNodeAdd event = new EventNodeAdd(node, target.getDelegate(), ImmutableSet.copyOf(before), ImmutableSet.copyOf(after));
         fireEvent(event);
     }
 
-    public void handleNodeClear(PermissionHolder target, Set<Node> before, Set<Node> after) {
+    public void handleNodeClear(PermissionHolder target, Collection<Node> before, Collection<Node> after) {
         EventNodeClear event = new EventNodeClear(target.getDelegate(), ImmutableSet.copyOf(before), ImmutableSet.copyOf(after));
         fireEvent(event);
     }
 
-    public void handleNodeRemove(Node node, PermissionHolder target, Set<Node> before, Set<Node> after) {
+    public void handleNodeRemove(Node node, PermissionHolder target, Collection<Node> before, Collection<Node> after) {
         EventNodeRemove event = new EventNodeRemove(node, target.getDelegate(), ImmutableSet.copyOf(before), ImmutableSet.copyOf(after));
         fireEvent(event);
     }

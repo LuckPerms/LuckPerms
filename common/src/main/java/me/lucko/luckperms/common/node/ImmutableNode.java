@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.node;
 
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -44,7 +43,6 @@ import me.lucko.luckperms.common.utils.PatternCache;
 
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -56,81 +54,7 @@ import java.util.stream.Collectors;
  * An immutable permission node
  */
 @ToString(of = {"permission", "value", "override", "server", "world", "expireAt", "contexts"})
-@EqualsAndHashCode(of = {"permission", "value", "override", "server", "world", "expireAt", "contexts"})
 public final class ImmutableNode implements Node {
-
-    private static boolean shouldApply(String str, boolean applyRegex, String thisStr) {
-        if (str.equalsIgnoreCase(thisStr)) {
-            return true;
-        }
-
-        Set<String> expandedStr = ShorthandParser.parseShorthand(str, false);
-        Set<String> expandedThisStr = ShorthandParser.parseShorthand(thisStr, false);
-
-        if (str.toLowerCase().startsWith("r=") && applyRegex) {
-            Pattern p = PatternCache.compile(str.substring(2));
-            if (p == null) {
-                return false;
-            }
-
-            for (String s : expandedThisStr) {
-                if (p.matcher(s).matches()) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        if (thisStr.toLowerCase().startsWith("r=") && applyRegex) {
-            Pattern p = PatternCache.compile(thisStr.substring(2));
-            if (p == null) {
-                return false;
-            }
-
-            for (String s : expandedStr) {
-                if (p.matcher(s).matches()) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        if (expandedStr.size() <= 1 && expandedThisStr.size() <= 1) {
-            return false;
-        }
-
-        for (String t : expandedThisStr) {
-            for (String s : expandedStr) {
-                if (t.equalsIgnoreCase(s)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    private static boolean isInt(String a, String b) {
-        try {
-            Integer.parseInt(a);
-            Integer.parseInt(b);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
-
-    private static boolean isChar(String a, String b) {
-        return a.length() == 1 && b.length() == 1;
-    }
-
-    private static Set<String> getCharRange(char a, char b) {
-        Set<String> s = new HashSet<>();
-        for (char c = a; c <= b; c++) {
-            s.add(Character.toString(c));
-        }
-        return s;
-    }
 
     @Getter
     private final String permission;
@@ -509,6 +433,49 @@ public final class ImmutableNode implements Node {
         return builder.toString();
     }
 
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof Node)) return false;
+        final Node other = (Node) o;
+
+        if (!this.permission.equals(other.getPermission())) return false;
+        if (!this.getValue().equals(other.getValue())) return false;
+        if (this.override != other.isOverride()) return false;
+
+        final String thisServer = this.getServer().orElse(null);
+        final String otherServer = other.getServer().orElse(null);
+        if (thisServer == null ? otherServer != null : !thisServer.equals(otherServer)) return false;
+
+        final String thisWorld = this.getWorld().orElse(null);
+        final String otherWorld = other.getWorld().orElse(null);
+        if (thisWorld == null ? otherWorld != null : !thisWorld.equals(otherWorld)) return false;
+
+        final long thisExpireAt = this.isTemporary() ? this.getExpiryUnixTime() : 0L;
+        final long otherExpireAt = other.isTemporary() ? other.getExpiryUnixTime() : 0L;
+
+        return thisExpireAt == otherExpireAt && this.getContexts().equals(other.getContexts());
+    }
+
+    public int hashCode() {
+        final int PRIME = 59;
+        int result = 1;
+
+        result = result * PRIME + this.permission.hashCode();
+        result = result * PRIME + Boolean.hashCode(this.value);
+        result = result * PRIME + (this.override ? 79 : 97);
+
+        final String server = this.getServer().orElse(null);
+        result = result * PRIME + (server == null ? 43 : server.hashCode());
+
+        final String world = this.getWorld().orElse(null);
+        result = result * PRIME + (world == null ? 43 : world.hashCode());
+
+        result = result * PRIME + (int) (this.expireAt >>> 32 ^ this.expireAt);
+        result = result * PRIME + this.contexts.hashCode();
+
+        return result;
+    }
+
     @Override
     public boolean equalsIgnoringValue(Node other) {
         if (!other.getPermission().equalsIgnoreCase(this.getPermission())) {
@@ -619,4 +586,55 @@ public final class ImmutableNode implements Node {
     public String getKey() {
         return getPermission();
     }
+
+    private static boolean shouldApply(String str, boolean applyRegex, String thisStr) {
+        if (str.equalsIgnoreCase(thisStr)) {
+            return true;
+        }
+
+        Set<String> expandedStr = ShorthandParser.parseShorthand(str, false);
+        Set<String> expandedThisStr = ShorthandParser.parseShorthand(thisStr, false);
+
+        if (str.toLowerCase().startsWith("r=") && applyRegex) {
+            Pattern p = PatternCache.compile(str.substring(2));
+            if (p == null) {
+                return false;
+            }
+
+            for (String s : expandedThisStr) {
+                if (p.matcher(s).matches()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        if (thisStr.toLowerCase().startsWith("r=") && applyRegex) {
+            Pattern p = PatternCache.compile(thisStr.substring(2));
+            if (p == null) {
+                return false;
+            }
+
+            for (String s : expandedStr) {
+                if (p.matcher(s).matches()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        if (expandedStr.size() <= 1 && expandedThisStr.size() <= 1) {
+            return false;
+        }
+
+        for (String t : expandedThisStr) {
+            for (String s : expandedStr) {
+                if (t.equalsIgnoreCase(s)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 }

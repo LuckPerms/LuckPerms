@@ -43,7 +43,7 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
         boolean hasGroup = false;
 
         if (user.getPrimaryGroup().getStoredValue() != null && !user.getPrimaryGroup().getStoredValue().isEmpty()) {
-            for (Node node : user.getNodes().values()) {
+            for (Node node : user.getEnduringNodes().values()) {
                 if (node.hasSpecificContext()) {
                     continue;
                 }
@@ -85,11 +85,11 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
      * @return true if the user should be saved
      */
     public static boolean shouldSave(User user) {
-        if (user.getNodes().size() != 1) {
+        if (user.getEnduringNodes().size() != 1) {
             return true;
         }
 
-        for (Node node : user.getNodes().values()) {
+        for (Node node : user.getEnduringNodes().values()) {
             // There's only one.
             if (!node.isGroupNode()) {
                 return true;
