@@ -30,9 +30,12 @@ import lombok.NonNull;
 import lombok.Setter;
 
 import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableSet;
 
 import java.util.List;
 import java.util.Queue;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
 
@@ -42,8 +45,14 @@ import java.util.concurrent.Executor;
 public class PermissionVault implements Runnable {
     private static final Splitter DOT_SPLIT = Splitter.on('.').omitEmptyStrings();
 
+    // the root node in the tree
     @Getter
     private final TreeNode rootNode;
+
+    // the known permissions already in the vault
+    private final Set<String> knownPermissions;
+
+    // a queue of permission strings to be processed by the tree
     private final Queue<String> queue;
 
     @Setter
@@ -51,6 +60,7 @@ public class PermissionVault implements Runnable {
 
     public PermissionVault(Executor executor) {
         rootNode = new TreeNode();
+        knownPermissions = ConcurrentHashMap.newKeySet(3000);
         queue = new ConcurrentLinkedQueue<>();
 
         executor.execute(this);
@@ -61,7 +71,10 @@ public class PermissionVault implements Runnable {
         while (true) {
             for (String e; (e = queue.poll()) != null; ) {
                 try {
-                    insert(e.toLowerCase());
+                    String s = e.toLowerCase();
+                    if (knownPermissions.add(s)) {
+                        insert(s);
+                    }
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -81,13 +94,19 @@ public class PermissionVault implements Runnable {
         queue.offer(permission);
     }
 
+    public Set<String> getKnownPermissions() {
+        return ImmutableSet.copyOf(knownPermissions);
+    }
+
     public int getSize() {
         return rootNode.getDeepSize();
     }
 
     private void insert(String permission) {
+        // split the permission up into parts
         List<String> parts = DOT_SPLIT.splitToList(permission);
 
+        // insert the permission into the node structure
         TreeNode current = rootNode;
         for (String part : parts) {
             current = current.getChildMap().computeIfAbsent(part, s -> new TreeNode());

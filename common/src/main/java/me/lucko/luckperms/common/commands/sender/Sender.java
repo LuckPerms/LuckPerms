@@ -112,4 +112,11 @@ public interface Sender {
      */
     boolean isImport();
 
+    /**
+     * Gets whether this sender is still valid & receiving messages.
+     *
+     * @return if this sender is valid
+     */
+    boolean isValid();
+
 }

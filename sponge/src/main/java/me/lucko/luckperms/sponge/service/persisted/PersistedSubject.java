@@ -247,7 +247,7 @@ public class PersistedSubject implements LPSubject {
     public Tristate getPermissionValue(@NonNull ImmutableContextSet contexts, @NonNull String node) {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.INTERNAL_SUBJECT_GET_PERMISSION_VALUE)) {
             Tristate t = permissionLookupCache.get(PermissionLookup.of(node, contexts));
-            service.getPlugin().getVerboseHandler().offer("local:" + getParentCollection().getIdentifier() + "/" + identifier, node, t);
+            service.getPlugin().getVerboseHandler().offerCheckData("local:" + getParentCollection().getIdentifier() + "/" + identifier, node, t);
             return t;
         }
     }

@@ -45,6 +45,7 @@ import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.contexts.LuckPermsCalculator;
+import me.lucko.luckperms.common.data.ImporterSender;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.NoopLocaleManager;
@@ -66,7 +67,6 @@ import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.tasks.UpdateTask;
 import me.lucko.luckperms.common.treeview.PermissionVault;
-import me.lucko.luckperms.common.utils.FakeSender;
 import me.lucko.luckperms.common.utils.UuidCache;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 import me.lucko.luckperms.sponge.calculators.SpongeCalculatorFactory;
@@ -497,7 +497,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     @Override
     public Sender getConsoleSender() {
         if (!game.isServerAvailable()) {
-            return new FakeSender(this, s -> logger.info(s));
+            return new ImporterSender(this, s -> logger.info(s));
         }
         return getSenderFactory().wrap(game.getServer().getConsole());
     }

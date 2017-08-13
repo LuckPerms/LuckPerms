@@ -45,7 +45,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @RequiredArgsConstructor
-@EqualsAndHashCode(of = {"id", "description", "owner"})
+@EqualsAndHashCode(of = "id")
 @ToString(of = {"id", "description", "owner"})
 public final class LuckPermsPermissionDescription implements LPPermissionDescription {
 

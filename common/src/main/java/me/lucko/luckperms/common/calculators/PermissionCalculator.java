@@ -64,7 +64,7 @@ public class PermissionCalculator {
         Tristate result = lookupCache.get(permission);
 
         // log this permission lookup to the verbose handler
-        plugin.getVerboseHandler().offer(objectName, permission, result);
+        plugin.getVerboseHandler().offerCheckData(objectName, permission, result);
 
         // return the result
         return result;

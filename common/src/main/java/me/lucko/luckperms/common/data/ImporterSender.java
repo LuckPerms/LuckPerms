@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.utils;
+package me.lucko.luckperms.common.data;
 
 import lombok.AllArgsConstructor;
 
@@ -40,7 +40,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 @AllArgsConstructor
-public class FakeSender implements Sender {
+public class ImporterSender implements Sender {
     private final LuckPermsPlugin plugin;
     private final Consumer<String> messageConsumer;
 
@@ -91,6 +91,11 @@ public class FakeSender implements Sender {
 
     @Override
     public boolean isImport() {
+        return true;
+    }
+
+    @Override
+    public boolean isValid() {
         return true;
     }
 }

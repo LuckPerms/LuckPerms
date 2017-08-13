@@ -36,6 +36,7 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.common.verbose.VerboseFilter;
 import me.lucko.luckperms.common.verbose.VerboseListener;
 
 import net.kyori.text.Component;
@@ -71,14 +72,14 @@ public class VerboseCommand extends SingleCommand {
 
             String filter = filters.isEmpty() ? "" : filters.stream().collect(Collectors.joining(" "));
 
-            if (!VerboseListener.isValidFilter(filter)) {
+            if (!VerboseFilter.isValidFilter(filter)) {
                 Message.VERBOSE_INVALID_FILTER.send(sender, filter);
                 return CommandResult.FAILURE;
             }
 
             boolean notify = !mode.equals("record");
 
-            plugin.getVerboseHandler().register(sender, filter, notify);
+            plugin.getVerboseHandler().registerListener(sender, filter, notify);
 
             if (notify) {
                 if (!filter.equals("")) {
@@ -98,7 +99,7 @@ public class VerboseCommand extends SingleCommand {
         }
 
         if (mode.equals("off") || mode.equals("false") || mode.equals("paste")) {
-            VerboseListener listener = plugin.getVerboseHandler().unregister(sender.getUuid());
+            VerboseListener listener = plugin.getVerboseHandler().unregisterListener(sender.getUuid());
 
             if (mode.equals("paste")) {
                 if (listener == null) {

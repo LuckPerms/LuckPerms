@@ -136,4 +136,9 @@ public final class AbstractSender<T> implements Sender {
         return this.uuid.equals(Constants.IMPORT_UUID);
     }
 
+    @Override
+    public boolean isValid() {
+        return ref.get() != null;
+    }
+
 }

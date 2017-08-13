@@ -38,7 +38,6 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.utils.DateUtil;
-import me.lucko.luckperms.common.utils.FakeSender;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,7 +57,7 @@ public class Importer implements Runnable {
     private final Set<Sender> notify;
     private final List<String> commands;
     private final Map<Integer, Result> cmdResult;
-    private final FakeSender fake;
+    private final ImporterSender fake;
 
     private long lastMsg = 0;
     private int executing = -1;
@@ -82,7 +81,7 @@ public class Importer implements Runnable {
                 .collect(Collectors.toList());
 
         this.cmdResult = new HashMap<>();
-        this.fake = new FakeSender(commandManager.getPlugin(), this::logMessage);
+        this.fake = new ImporterSender(commandManager.getPlugin(), this::logMessage);
     }
 
     @Override

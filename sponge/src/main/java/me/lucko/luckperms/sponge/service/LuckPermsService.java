@@ -73,6 +73,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -202,7 +203,19 @@ public class LuckPermsService implements LPPermissionService {
 
     @Override
     public ImmutableSet<LPPermissionDescription> getDescriptions() {
-        return ImmutableSet.copyOf(descriptionSet);
+        Set<LPPermissionDescription> descriptions = new HashSet<>(descriptionSet);
+
+        // collect known values from the permission vault
+        for (String knownPermission : plugin.getPermissionVault().getKnownPermissions()) {
+            LPPermissionDescription desc = new LuckPermsPermissionDescription(this, knownPermission, null, null);
+
+            // don't override plugin defined values
+            if (!descriptions.contains(desc)) {
+                descriptions.add(desc);
+            }
+        }
+
+        return ImmutableSet.copyOf(descriptions);
     }
 
     @Override
