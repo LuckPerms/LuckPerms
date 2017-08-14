@@ -983,7 +983,7 @@ public abstract class PermissionHolder {
      * @return the result of the lookup
      */
     public InheritanceInfo inheritsPermissionInfo(Node node) {
-        for (LocalizedNode n : resolveInheritances(ExtractedContexts.generate(Contexts.allowAll()))) {
+        for (LocalizedNode n : resolveInheritances()) {
             if (n.getNode().almostEquals(node)) {
                 return InheritanceInfo.of(n);
             }

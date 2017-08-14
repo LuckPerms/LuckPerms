@@ -219,6 +219,7 @@ public enum Message {
     CONTEXT_PAIR("&8(&7{0}=&f{1}&8)", false),
 
     CHECK_PERMISSION("&b{0}&a has permission &b{1}&a set to {2}&a in context {3}&a.", true),
+    CHECK_INHERITS_PERMISSION("&b{0}&a has permission &b{1}&a set to {2}&a in context {3}&a. &7(inherited from &a{4}&7)", true),
     SETPERMISSION_SUCCESS("&aSet &b{0}&a to &b{1}&a for &b{2}&a in context {3}&a.", true),
     SETPERMISSION_TEMP_SUCCESS("&aSet &b{0}&a to &b{1}&a for &b{2}&a for a duration of &b{3}&a in context {4}&a.", true),
     UNSETPERMISSION_SUCCESS("&aUnset &b{0}&a for &b{1}&a in context {2}&a.", true),
