@@ -151,6 +151,50 @@ public class NodeFactory {
             return appendContextToCommand(sb, node).toString();
         }
 
+        if (node.getValue() && (node.isPrefix() || node.isSuffix())) {
+            ChatMetaType type = node.isPrefix() ? ChatMetaType.PREFIX : ChatMetaType.SUFFIX;
+            String typeName = type.name().toLowerCase();
+
+
+            sb.append(node.isTemporary() ? (set ? "meta addtemp" + typeName + " " : "meta removetemp" + typeName + " ") : (set ? "meta add" + typeName + " " : "meta remove" + typeName + " "));
+            sb.append(type.getEntry(node).getKey()).append(" ");
+
+            if (type.getEntry(node).getValue().contains(" ")) {
+                sb.append("\"").append(type.getEntry(node).getValue()).append("\"");
+            } else {
+                sb.append(type.getEntry(node).getValue());
+            }
+            if (node.isTemporary()) {
+                sb.append(" ").append(node.getExpiryUnixTime());
+            }
+
+            return appendContextToCommand(sb, node).toString();
+        }
+
+        if (node.getValue() && node.isMeta()) {
+            sb.append(node.isTemporary() ? (set ? "meta settemp " : "meta unsettemp ") : (set ? "meta set " : "meta unset "));
+
+            if (node.getMeta().getKey().contains(" ")) {
+                sb.append("\"").append(node.getMeta().getKey()).append("\"");
+            } else {
+                sb.append(node.getMeta().getKey());
+            }
+
+            sb.append(" ");
+
+            if (node.getMeta().getValue().contains(" ")) {
+                sb.append("\"").append(node.getMeta().getValue()).append("\"");
+            } else {
+                sb.append(node.getMeta().getValue());
+            }
+
+            if (node.isTemporary()) {
+                sb.append(" ").append(node.getExpiryUnixTime());
+            }
+
+            return appendContextToCommand(sb, node).toString();
+        }
+
         sb.append(node.isTemporary() ? (set ? "permission settemp " : "permission unsettemp ") : (set ? "permission set " : "permission unset "));
         if (node.getPermission().contains(" ")) {
             sb.append("\"").append(node.getPermission()).append("\"");

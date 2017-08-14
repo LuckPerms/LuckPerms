@@ -9,13 +9,14 @@ import javax.annotation.Nonnull;
 /**
  * A special instance of {@link Contexts}, which when passed to:
  *
- * <p><ul>
- * <li>{@link UserData#getPermissionData(Contexts)}</li>
- * <li>{@link UserData#getMetaData(Contexts)}</li>
- * <li>{@link UserData#getMetaData(MetaContexts)}</li>
- * </ul></p>
+ * <p></p>
+ * <ul>
+ *     <li>{@link UserData#getPermissionData(Contexts)}</li>
+ *     <li>{@link UserData#getMetaData(Contexts)}</li>
+ *     <li>{@link UserData#getMetaData(MetaContexts)}</li>
+ * </ul>
  *
- * <p>will always satisfy all contextual requirements.</p>
+ * <p>... will always satisfy all contextual requirements.</p>
  *
  * <p>This effectively allows you to do lookups which ignore context.</p>
  *
