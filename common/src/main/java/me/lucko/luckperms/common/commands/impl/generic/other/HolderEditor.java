@@ -53,6 +53,7 @@ import net.kyori.text.Component;
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
+import net.kyori.text.format.TextColor;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -99,9 +100,10 @@ public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
 
         Message.EDITOR_URL.send(sender);
 
-        Component message = new TextComponent(url).color('b')
+        Component message = TextComponent.builder(url).color(TextColor.AQUA)
                 .clickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url))
-                .hoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Click to open the editor.").color('7')));
+                .hoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.of("Click to open the editor.").color(TextColor.GRAY)))
+                .build();
 
         sender.sendMessage(message);
         return CommandResult.SUCCESS;

@@ -34,7 +34,7 @@ import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.kyori.text.Component;
-import net.kyori.text.serializer.ComponentSerializer;
+import net.kyori.text.LegacyComponent;
 
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -64,9 +64,10 @@ public class ImporterSender implements Sender {
         messageConsumer.accept(s);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void sendMessage(Component message) {
-        messageConsumer.accept(ComponentSerializer.toLegacy(message, Constants.COLOR_CHAR));
+        messageConsumer.accept(LegacyComponent.to(message));
     }
 
     @Override

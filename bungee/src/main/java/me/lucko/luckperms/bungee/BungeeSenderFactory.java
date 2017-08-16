@@ -32,6 +32,7 @@ import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import net.kyori.text.Component;
+import net.kyori.text.LegacyComponent;
 import net.kyori.text.serializer.ComponentSerializer;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -70,7 +71,8 @@ public class BungeeSenderFactory extends SenderFactory<CommandSender> {
         try {
             sender.sendMessage(net.md_5.bungee.chat.ComponentSerializer.parse(ComponentSerializer.serialize(message)));
         } catch (Exception e) {
-            sendMessage(sender, ComponentSerializer.toLegacy(message, Constants.COLOR_CHAR));
+            //noinspection deprecation
+            sendMessage(sender, LegacyComponent.to(message));
         }
     }
 

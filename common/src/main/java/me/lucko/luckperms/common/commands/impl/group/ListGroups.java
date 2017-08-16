@@ -38,11 +38,11 @@ import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
-import net.kyori.text.Component;
+import net.kyori.text.LegacyComponent;
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
-import net.kyori.text.serializer.ComponentSerializer;
+import net.kyori.text.format.TextColor;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -67,25 +67,25 @@ public class ListGroups extends SingleCommand {
                 })
                 .forEach(group -> {
                     List<String> tracks = plugin.getTrackManager().getAll().values().stream().filter(t -> t.containsGroup(group)).map(Track::getName).collect(Collectors.toList());
-                    Component component;
+                    TextComponent component;
 
                     if (tracks.isEmpty()) {
-                        component = ComponentSerializer.parseFromLegacy(Message.GROUPS_LIST_ENTRY.asString(plugin.getLocaleManager(),
+                        component = LegacyComponent.from(Message.GROUPS_LIST_ENTRY.asString(plugin.getLocaleManager(),
                                 group.getDisplayName(),
                                 group.getWeight().orElse(0)
                         ), Constants.COLOR_CHAR);
                     } else {
-                        component = ComponentSerializer.parseFromLegacy(Message.GROUPS_LIST_ENTRY_WITH_TRACKS.asString(plugin.getLocaleManager(),
+                        component = LegacyComponent.from(Message.GROUPS_LIST_ENTRY_WITH_TRACKS.asString(plugin.getLocaleManager(),
                                 group.getDisplayName(),
                                 group.getWeight().orElse(0),
                                 Util.toCommaSep(tracks)
                         ), Constants.COLOR_CHAR);
                     }
 
-                    component.applyRecursively(c -> {
+                    component = component.toBuilder().applyDeep(c -> {
                         c.clickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + label + " group " + group.getName() + " info"));
-                        c.hoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Click to view more info about " + group.getName() + ".").color('7')));
-                    });
+                        c.hoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.of("Click to view more info about " + group.getName() + ".").color(TextColor.GRAY)));
+                    }).build();
 
                     sender.sendMessage(component);
                 });

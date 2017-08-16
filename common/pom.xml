@@ -39,7 +39,7 @@
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>text</artifactId>
-            <version>1.12-SNAPSHOT</version>
+            <version>1.11-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
         <!-- HikariCP -->

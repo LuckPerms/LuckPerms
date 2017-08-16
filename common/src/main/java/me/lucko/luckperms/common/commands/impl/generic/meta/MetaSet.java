@@ -35,7 +35,6 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.CommandPermission;
-import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
@@ -46,9 +45,9 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.common.utils.TextUtils;
 
-import net.kyori.text.Component;
+import net.kyori.text.LegacyComponent;
+import net.kyori.text.TextComponent;
 import net.kyori.text.event.HoverEvent;
-import net.kyori.text.serializer.ComponentSerializer;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -89,13 +88,13 @@ public class MetaSet extends SharedSubCommand {
         holder.clearMetaKeys(key, context, false);
         holder.setPermission(n);
 
-        Component component = ComponentSerializer.parseFromLegacy(Message.SET_META_SUCCESS.asString(plugin.getLocaleManager(), key, value, holder.getFriendlyName(), Util.contextSetToString(context)), Constants.COLOR_CHAR);
-        HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentSerializer.parseFromLegacy(
+        TextComponent.Builder builder = LegacyComponent.from(Message.SET_META_SUCCESS.asString(plugin.getLocaleManager(), key, value, holder.getFriendlyName(), Util.contextSetToString(context))).toBuilder();
+        HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, LegacyComponent.from(
                 TextUtils.joinNewline("¥3Raw key: ¥r" + key, "¥3Raw value: ¥r" + value),
                 '¥'
         ));
-        component.applyRecursively(c -> c.hoverEvent(event));
-        sender.sendMessage(component);
+        builder.applyDeep(c -> c.hoverEvent(event));
+        sender.sendMessage(builder.build());
 
         LogEntry.build().actor(sender).acted(holder)
                 .action("meta set " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))

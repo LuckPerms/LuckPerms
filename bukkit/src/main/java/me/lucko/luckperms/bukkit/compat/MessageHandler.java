@@ -25,9 +25,8 @@
 
 package me.lucko.luckperms.bukkit.compat;
 
-import me.lucko.luckperms.common.constants.Constants;
-
 import net.kyori.text.Component;
+import net.kyori.text.LegacyComponent;
 import net.kyori.text.serializer.ComponentSerializer;
 
 import org.bukkit.command.CommandSender;
@@ -62,7 +61,8 @@ public class MessageHandler {
         }
 
         // Fallback to Bukkit
-        sender.sendMessage(ComponentSerializer.toLegacy(message, Constants.COLOR_CHAR));
+        //noinspection deprecation
+        sender.sendMessage(LegacyComponent.to(message));
     }
 
     private static boolean isSpigot() {

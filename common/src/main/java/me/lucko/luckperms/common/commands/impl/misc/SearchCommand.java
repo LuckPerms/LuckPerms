@@ -47,11 +47,13 @@ import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.common.utils.TextUtils;
 
+import net.kyori.text.BuildableComponent;
 import net.kyori.text.Component;
+import net.kyori.text.LegacyComponent;
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
-import net.kyori.text.serializer.ComponentSerializer;
+import net.kyori.text.format.TextColor;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -121,7 +123,7 @@ public class SearchCommand extends SingleCommand {
 
     private static Map.Entry<Component, String> searchUserResultToMessage(List<HeldPermission<UUID>> results, Function<UUID, String> uuidLookup, String label, int pageNumber) {
         if (results.isEmpty()) {
-            return Maps.immutableEntry(new TextComponent("None").color('3'), null);
+            return Maps.immutableEntry(TextComponent.builder("None").color(TextColor.DARK_AQUA).build(), null);
         }
 
         List<HeldPermission<UUID>> sorted = new ArrayList<>(results);
@@ -140,20 +142,20 @@ public class SearchCommand extends SingleCommand {
                 .map(hp -> Maps.immutableEntry(uuidLookup.apply(hp.getHolder()), hp))
                 .collect(Collectors.toList());
 
-        TextComponent message = new TextComponent("");
+        TextComponent.Builder message = TextComponent.builder("");
         String title = "&7(page &f" + pageNumber + "&7 of &f" + pages.size() + "&7 - &f" + sorted.size() + "&7 entries)";
 
         for (Map.Entry<String, HeldPermission<UUID>> ent : uuidMappedPage) {
             String s = "&3> &b" + ent.getKey() + " &7- " + (ent.getValue().getValue() ? "&a" : "&c") + ent.getValue().getValue() + getNodeExpiryString(ent.getValue().asNode()) + Util.getAppendableNodeContextString(ent.getValue().asNode()) + "\n";
-            message.append(ComponentSerializer.parseFromLegacy(s, Constants.FORMAT_CHAR).applyRecursively(makeFancy(ent.getKey(), false, label, ent.getValue())));
+            message.append(LegacyComponent.from(s, Constants.FORMAT_CHAR).toBuilder().applyDeep(makeFancy(ent.getKey(), false, label, ent.getValue())).build());
         }
 
-        return Maps.immutableEntry(message, title);
+        return Maps.immutableEntry(message.build(), title);
     }
 
     private static Map.Entry<Component, String> searchGroupResultToMessage(List<HeldPermission<String>> results, String label, int pageNumber) {
         if (results.isEmpty()) {
-            return Maps.immutableEntry(new TextComponent("None").color('3'), null);
+            return Maps.immutableEntry(TextComponent.builder("None").color(TextColor.DARK_AQUA).build(), null);
         }
 
         List<HeldPermission<String>> sorted = new ArrayList<>(results);
@@ -169,15 +171,15 @@ public class SearchCommand extends SingleCommand {
 
         List<HeldPermission<String>> page = pages.get(index);
 
-        TextComponent message = new TextComponent("");
+        TextComponent.Builder message = TextComponent.builder("");
         String title = "&7(page &f" + pageNumber + "&7 of &f" + pages.size() + "&7 - &f" + sorted.size() + "&7 entries)";
 
         for (HeldPermission<String> ent : page) {
             String s = "&3> &b" + ent.getHolder() + " &7- " + (ent.getValue() ? "&a" : "&c") + ent.getValue() + getNodeExpiryString(ent.asNode()) + Util.getAppendableNodeContextString(ent.asNode()) + "\n";
-            message.append(ComponentSerializer.parseFromLegacy(s, Constants.FORMAT_CHAR).applyRecursively(makeFancy(ent.getHolder(), true, label, ent)));
+            message.append(LegacyComponent.from(s, Constants.FORMAT_CHAR).toBuilder().applyDeep(makeFancy(ent.getHolder(), true, label, ent)).build());
         }
 
-        return Maps.immutableEntry(message, title);
+        return Maps.immutableEntry(message.build(), title);
     }
 
     private static String getNodeExpiryString(Node node) {
@@ -188,8 +190,8 @@ public class SearchCommand extends SingleCommand {
         return " &8(&7expires in " + DateUtil.formatDateDiff(node.getExpiryUnixTime()) + "&8)";
     }
 
-    private static Consumer<Component> makeFancy(String holderName, boolean group, String label, HeldPermission<?> perm) {
-        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentSerializer.parseFromLegacy(TextUtils.joinNewline(
+    private static Consumer<BuildableComponent.Builder<?, ?>> makeFancy(String holderName, boolean group, String label, HeldPermission<?> perm) {
+        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, LegacyComponent.from(TextUtils.joinNewline(
                 "&3> " + (perm.asNode().getValue() ? "&a" : "&c") + perm.asNode().getPermission(),
                 " ",
                 "&7Click to remove this node from " + holderName

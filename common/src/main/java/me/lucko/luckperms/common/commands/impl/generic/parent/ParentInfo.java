@@ -46,11 +46,13 @@ import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.common.utils.TextUtils;
 
+import net.kyori.text.BuildableComponent;
 import net.kyori.text.Component;
+import net.kyori.text.LegacyComponent;
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
-import net.kyori.text.serializer.ComponentSerializer;
+import net.kyori.text.format.TextColor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -89,15 +91,15 @@ public class ParentInfo extends SharedSubCommand {
         }
 
         if (page.isEmpty()) {
-            return new TextComponent("None").color('3');
+            return TextComponent.builder("None").color(TextColor.DARK_AQUA).build();
         }
 
-        TextComponent message = new TextComponent("");
+        TextComponent.Builder message = TextComponent.builder("");
         for (Node node : page) {
             String s = "&3> &a" + node.getGroupName() + Util.getAppendableNodeContextString(node) + "\n";
-            message.append(ComponentSerializer.parseFromLegacy(s, Constants.FORMAT_CHAR).applyRecursively(makeFancy(holder, label, node)));
+            message.append(LegacyComponent.from(s, Constants.FORMAT_CHAR).toBuilder().applyDeep(makeFancy(holder, label, node)).build());
         }
-        return message;
+        return message.build();
     }
 
     private static Component tempGroupsToMessage(SortedSet<LocalizedNode> nodes, PermissionHolder holder, String label) {
@@ -109,19 +111,19 @@ public class ParentInfo extends SharedSubCommand {
         }
 
         if (page.isEmpty()) {
-            return new TextComponent("None").color('3');
+            return TextComponent.builder("None").color(TextColor.DARK_AQUA).build();
         }
 
-        TextComponent message = new TextComponent("");
+        TextComponent.Builder message = TextComponent.builder("");
         for (Node node : page) {
             String s = "&3> &a" + node.getPermission() + Util.getAppendableNodeContextString(node) + "\n&2-    expires in " + DateUtil.formatDateDiff(node.getExpiryUnixTime()) + "\n";
-            message.append(ComponentSerializer.parseFromLegacy(s, Constants.FORMAT_CHAR).applyRecursively(makeFancy(holder, label, node)));
+            message.append(LegacyComponent.from(s, Constants.FORMAT_CHAR).toBuilder().applyDeep(makeFancy(holder, label, node)).build());
         }
-        return message;
+        return message.build();
     }
 
-    private static Consumer<Component> makeFancy(PermissionHolder holder, String label, Node node) {
-        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentSerializer.parseFromLegacy(TextUtils.joinNewline(
+    private static Consumer<BuildableComponent.Builder<? ,?>> makeFancy(PermissionHolder holder, String label, Node node) {
+        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, LegacyComponent.from(TextUtils.joinNewline(
                 "&3> &f" + node.getGroupName(),
                 " ",
                 "&7Click to remove this parent from " + holder.getFriendlyName()

@@ -49,11 +49,13 @@ import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.common.utils.TextUtils;
 
+import net.kyori.text.BuildableComponent;
 import net.kyori.text.Component;
+import net.kyori.text.LegacyComponent;
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
-import net.kyori.text.serializer.ComponentSerializer;
+import net.kyori.text.format.TextColor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -118,7 +120,7 @@ public class PermissionInfo extends SharedSubCommand {
         }
 
         if (l.isEmpty()) {
-            return Maps.immutableEntry(new TextComponent("None").color('3'), null);
+            return Maps.immutableEntry(TextComponent.builder("None").color(TextColor.DARK_AQUA).build(), null);
         }
 
         int index = pageNumber - 1;
@@ -131,7 +133,7 @@ public class PermissionInfo extends SharedSubCommand {
 
         List<Node> page = pages.get(index);
 
-        TextComponent message = new TextComponent("");
+        TextComponent.Builder message = TextComponent.builder("");
         String title = "&7(showing page &f" + pageNumber + "&7 of &f" + pages.size() + "&7 - &f" + l.size() + "&7 entries";
         if (filter != null) {
             title += " - filtered by &f\"" + filter + "\"&7)";
@@ -145,14 +147,14 @@ public class PermissionInfo extends SharedSubCommand {
                 s += "&2-    expires in " + DateUtil.formatDateDiff(node.getExpiryUnixTime()) + "\n";
             }
 
-            message.append(ComponentSerializer.parseFromLegacy(s, Constants.FORMAT_CHAR).applyRecursively(makeFancy(holder, label, node)));
+            message.append(LegacyComponent.from(s, Constants.FORMAT_CHAR).toBuilder().applyDeep(makeFancy(holder, label, node)).build());
         }
 
-        return Maps.immutableEntry(message, title);
+        return Maps.immutableEntry(message.build(), title);
     }
 
-    private static Consumer<Component> makeFancy(PermissionHolder holder, String label, Node node) {
-        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentSerializer.parseFromLegacy(TextUtils.joinNewline(
+    private static Consumer<BuildableComponent.Builder<?, ?>> makeFancy(PermissionHolder holder, String label, Node node) {
+        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, LegacyComponent.from(TextUtils.joinNewline(
                 "¥3> " + (node.getValue() ? "¥a" : "¥c") + node.getPermission(),
                 " ",
                 "¥7Click to remove this node from " + holder.getFriendlyName()

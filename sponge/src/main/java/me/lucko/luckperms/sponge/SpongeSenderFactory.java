@@ -32,6 +32,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.sponge.service.model.CompatibilityUtil;
 
 import net.kyori.text.Component;
+import net.kyori.text.LegacyComponent;
 import net.kyori.text.serializer.ComponentSerializer;
 
 import org.spongepowered.api.command.CommandSource;
@@ -72,7 +73,8 @@ public class SpongeSenderFactory extends SenderFactory<CommandSource> {
         try {
             source.sendMessage(TextSerializers.JSON.deserialize(ComponentSerializer.serialize(message)));
         } catch (Exception e) {
-            sendMessage(source, ComponentSerializer.toLegacy(message, Constants.COLOR_CHAR));
+            //noinspection deprecation
+            sendMessage(source, LegacyComponent.to(message));
         }
     }
 

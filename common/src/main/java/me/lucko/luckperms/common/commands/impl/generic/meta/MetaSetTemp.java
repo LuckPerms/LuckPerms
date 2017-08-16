@@ -49,9 +49,9 @@ import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.common.utils.TextUtils;
 
-import net.kyori.text.Component;
+import net.kyori.text.LegacyComponent;
+import net.kyori.text.TextComponent;
 import net.kyori.text.event.HoverEvent;
-import net.kyori.text.serializer.ComponentSerializer;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -94,13 +94,13 @@ public class MetaSetTemp extends SharedSubCommand {
         holder.clearMetaKeys(key, context, true);
         duration = holder.setPermission(n, modifier).getValue().getExpiryUnixTime();
 
-        Component component = ComponentSerializer.parseFromLegacy(Message.SET_META_TEMP_SUCCESS.asString(plugin.getLocaleManager(), key, value, holder.getFriendlyName(), DateUtil.formatDateDiff(duration), Util.contextSetToString(context)), Constants.COLOR_CHAR);
-        HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentSerializer.parseFromLegacy(
+        TextComponent.Builder builder = LegacyComponent.from(Message.SET_META_TEMP_SUCCESS.asString(plugin.getLocaleManager(), key, value, holder.getFriendlyName(), DateUtil.formatDateDiff(duration), Util.contextSetToString(context)), Constants.COLOR_CHAR).toBuilder();
+        HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, LegacyComponent.from(
                 TextUtils.joinNewline("¥3Raw key: ¥r" + key, "¥3Raw value: ¥r" + value),
                 '¥'
         ));
-        component.applyRecursively(c -> c.hoverEvent(event));
-        sender.sendMessage(component);
+        builder.applyDeep(c -> c.hoverEvent(event));
+        sender.sendMessage(builder.build());
 
         LogEntry.build().actor(sender).acted(holder)
                 .action("meta settemp " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))

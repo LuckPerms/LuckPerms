@@ -49,10 +49,11 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.common.utils.TextUtils;
 
-import net.kyori.text.Component;
+import net.kyori.text.BuildableComponent;
+import net.kyori.text.LegacyComponent;
+import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
-import net.kyori.text.serializer.ComponentSerializer;
 
 import java.util.HashSet;
 import java.util.List;
@@ -126,13 +127,13 @@ public class MetaInfo extends SharedSubCommand {
             String location = processLocation(m, holder);
             if (m.hasSpecificContext()) {
                 String context = Util.getAppendableNodeContextString(m);
-                Component component = ComponentSerializer.parseFromLegacy(Message.META_ENTRY_WITH_CONTEXT.asString(sender.getPlatform().getLocaleManager(), m.getMeta().getKey(), m.getMeta().getValue(), location, context), Constants.COLOR_CHAR);
-                component.applyRecursively(makeFancy(holder, label, m));
-                sender.sendMessage(component);
+                TextComponent.Builder builder = LegacyComponent.from(Message.META_ENTRY_WITH_CONTEXT.asString(sender.getPlatform().getLocaleManager(), m.getMeta().getKey(), m.getMeta().getValue(), location, context), Constants.COLOR_CHAR).toBuilder();
+                builder.applyDeep(makeFancy(holder, label, m));
+                sender.sendMessage(builder.build());
             } else {
-                Component component = ComponentSerializer.parseFromLegacy(Message.META_ENTRY.asString(sender.getPlatform().getLocaleManager(), m.getMeta().getKey(), m.getMeta().getValue(), location), Constants.COLOR_CHAR);
-                component.applyRecursively(makeFancy(holder, label, m));
-                sender.sendMessage(component);
+                TextComponent.Builder builder = LegacyComponent.from(Message.META_ENTRY.asString(sender.getPlatform().getLocaleManager(), m.getMeta().getKey(), m.getMeta().getValue(), location), Constants.COLOR_CHAR).toBuilder();
+                builder.applyDeep(makeFancy(holder, label, m));
+                sender.sendMessage(builder.build());
             }
         }
     }
@@ -142,18 +143,18 @@ public class MetaInfo extends SharedSubCommand {
             String location = processLocation(e.getValue(), holder);
             if (e.getValue().hasSpecificContext()) {
                 String context = Util.getAppendableNodeContextString(e.getValue());
-                Component component = ComponentSerializer.parseFromLegacy(Message.CHAT_META_ENTRY_WITH_CONTEXT.asString(sender.getPlatform().getLocaleManager(), e.getKey(), type.getEntry(e.getValue()).getValue(), location, context), Constants.COLOR_CHAR);
-                component.applyRecursively(makeFancy(type, holder, label, e.getValue()));
-                sender.sendMessage(component);
+                TextComponent.Builder builder = LegacyComponent.from(Message.CHAT_META_ENTRY_WITH_CONTEXT.asString(sender.getPlatform().getLocaleManager(), e.getKey(), type.getEntry(e.getValue()).getValue(), location, context), Constants.COLOR_CHAR).toBuilder();
+                builder.applyDeep(makeFancy(type, holder, label, e.getValue()));
+                sender.sendMessage(builder.build());
             } else {
-                Component component = ComponentSerializer.parseFromLegacy(Message.CHAT_META_ENTRY.asString(sender.getPlatform().getLocaleManager(), e.getKey(), type.getEntry(e.getValue()).getValue(), location), Constants.COLOR_CHAR);
-                component.applyRecursively(makeFancy(type, holder, label, e.getValue()));
-                sender.sendMessage(component);
+                TextComponent.Builder builder = LegacyComponent.from(Message.CHAT_META_ENTRY.asString(sender.getPlatform().getLocaleManager(), e.getKey(), type.getEntry(e.getValue()).getValue(), location), Constants.COLOR_CHAR).toBuilder();
+                builder.applyDeep(makeFancy(type, holder, label, e.getValue()));
+                sender.sendMessage(builder.build());
             }
         }
     }
 
-    private static Consumer<Component> makeFancy(ChatMetaType type, PermissionHolder holder, String label, LocalizedNode node) {
+    private static Consumer<BuildableComponent.Builder<?, ?>> makeFancy(ChatMetaType type, PermissionHolder holder, String label, LocalizedNode node) {
         if (!node.getLocation().equals(holder.getObjectName())) {
             // inherited.
             Group group = holder.getPlugin().getGroupManager().getIfLoaded(node.getLocation());
@@ -162,7 +163,7 @@ public class MetaInfo extends SharedSubCommand {
             }
         }
 
-        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentSerializer.parseFromLegacy(TextUtils.joinNewline(
+        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, LegacyComponent.from(TextUtils.joinNewline(
                 "¥3> ¥a" + type.getEntry(node).getKey() + " ¥7- ¥r" + type.getEntry(node).getValue(),
                 " ",
                 "¥7Click to remove this " + type.name().toLowerCase() + " from " + holder.getFriendlyName()
@@ -178,7 +179,7 @@ public class MetaInfo extends SharedSubCommand {
         };
     }
 
-    private static Consumer<Component> makeFancy(PermissionHolder holder, String label, LocalizedNode node) {
+    private static Consumer<BuildableComponent.Builder<?, ?>> makeFancy(PermissionHolder holder, String label, LocalizedNode node) {
         if (!node.getLocation().equals(holder.getObjectName())) {
             // inherited.
             Group group = holder.getPlugin().getGroupManager().getIfLoaded(node.getLocation());
@@ -187,7 +188,7 @@ public class MetaInfo extends SharedSubCommand {
             }
         }
 
-        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentSerializer.parseFromLegacy(TextUtils.joinNewline(
+        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, LegacyComponent.from(TextUtils.joinNewline(
                 "¥3> ¥r" + node.getMeta().getKey() + " ¥7- ¥r" + node.getMeta().getValue(),
                 " ",
                 "¥7Click to remove this meta pair from " + holder.getFriendlyName()

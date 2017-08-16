@@ -46,9 +46,9 @@ import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
-import net.kyori.text.Component;
+import net.kyori.text.LegacyComponent;
+import net.kyori.text.TextComponent;
 import net.kyori.text.event.HoverEvent;
-import net.kyori.text.serializer.ComponentSerializer;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -99,13 +99,13 @@ public class MetaRemoveChatMeta extends SharedSubCommand {
         DataMutateResult result = holder.unsetPermission(NodeFactory.makeChatMetaNode(type, priority, meta).withExtraContext(context).build());
 
         if (result.asBoolean()) {
-            Component component = ComponentSerializer.parseFromLegacy(Message.REMOVE_CHATMETA_SUCCESS.asString(plugin.getLocaleManager(), holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, Util.contextSetToString(context)), Constants.COLOR_CHAR);
-            HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentSerializer.parseFromLegacy(
+            TextComponent.Builder builder = LegacyComponent.from(Message.REMOVE_CHATMETA_SUCCESS.asString(plugin.getLocaleManager(), holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, Util.contextSetToString(context)), Constants.COLOR_CHAR).toBuilder();
+            HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, LegacyComponent.from(
                     "¥3Raw " + type.name().toLowerCase() + ": ¥r" + meta,
                     '¥'
             ));
-            component.applyRecursively(c -> c.hoverEvent(event));
-            sender.sendMessage(component);
+            builder.applyDeep(c -> c.hoverEvent(event));
+            sender.sendMessage(builder.build());
 
             LogEntry.build().actor(sender).acted(holder)
                     .action("meta remove" + type.name().toLowerCase() + " " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
