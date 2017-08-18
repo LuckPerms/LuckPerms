@@ -112,9 +112,41 @@ public class PermissionInfo extends SharedSubCommand {
     }
 
     private static Map.Entry<Component, String> nodesToMessage(boolean temp, String filter, SortedSet<LocalizedNode> nodes, PermissionHolder holder, String label, int pageNumber, boolean console) {
+        // parse the filter
+        String nodeFilter = null;
+        Map.Entry<String, String> contextFilter = null;
+
+        if (filter != null) {
+            int index = filter.indexOf('=');
+
+            context:
+            if (index != -1) {
+                String key = filter.substring(0, index);
+                if (key.equals("")) {
+                    break context;
+                }
+
+                String value = filter.substring(index + 1);
+                if (value.equals("")) {
+                    break context;
+                }
+
+                contextFilter = Maps.immutableEntry(key, value);
+            }
+
+            if (contextFilter == null) {
+                nodeFilter = filter;
+            }
+        }
+
         List<Node> l = new ArrayList<>();
         for (Node node : nodes) {
-            if (filter != null && !node.getPermission().startsWith(filter)) continue;
+            if (nodeFilter != null && !node.getPermission().startsWith(nodeFilter)) {
+                continue;
+            }
+            if (contextFilter != null && !node.getFullContexts().hasIgnoreCase(contextFilter.getKey(), contextFilter.getValue())) {
+                continue;
+            }
             if (temp != node.isTemporary()) continue;
             l.add(node);
         }
