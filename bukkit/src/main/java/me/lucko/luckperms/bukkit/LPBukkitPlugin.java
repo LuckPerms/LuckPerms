@@ -142,6 +142,10 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
     @Override
     public void onLoad() {
+        if (checkInvalidVersion()) {
+            return;
+        }
+
         // setup minimal functionality in order to load initial dependencies
         scheduler = new LPBukkitScheduler(this);
         localeManager = new NoopLocaleManager();
@@ -153,6 +157,18 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
     @Override
     public void onEnable() {
+        if (checkInvalidVersion()) {
+            getLogger().severe("----------------------------------------------------------------------");
+            getLogger().severe("Your server version is not compatible with this build of LuckPerms. :(");
+            getLogger().severe("");
+            getLogger().severe("If your server is running 1.8, please update to 1.8.8 or higher.");
+            getLogger().severe("If your server is running 1.7.10, please download the Bukkit-Legacy version of LuckPerms from here:");
+            getLogger().severe("==> https://ci.lucko.me/job/LuckPerms/");
+            getLogger().severe("----------------------------------------------------------------------");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+
         try {
             enable();
             started = true;
@@ -374,6 +390,10 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
     @Override
     public void onDisable() {
+        if (checkInvalidVersion()) {
+            return;
+        }
+
         // Switch back to the LP executor, the bukkit one won't allow new tasks
         scheduler.setUseBukkitAsync(false);
 
@@ -669,6 +689,15 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
         for (CommandPermission p : CommandPermission.values()) {
             pm.addPermission(new org.bukkit.permissions.Permission(p.getPermission(), def));
+        }
+    }
+
+    private static boolean checkInvalidVersion() {
+        try {
+            Class.forName("com.google.gson.JsonElement");
+            return false;
+        } catch (ClassNotFoundException e) {
+            return true;
         }
     }
 }
