@@ -271,7 +271,7 @@ public class MongoDBBacking extends AbstractBacking {
                     while (cursor.hasNext()) {
                         Document d = cursor.next();
 
-                        UUID uuid = UUID.fromString(d.getString("_id"));
+                        UUID uuid = d.get("_id", UUID.class);
                         Map<String, Boolean> perms = revert((Map<String, Boolean>) d.get("perms"));
 
                         Set<NodeModel> nodes = new HashSet<>();
@@ -425,7 +425,7 @@ public class MongoDBBacking extends AbstractBacking {
             try (MongoCursor<Document> cursor = c.find().iterator()) {
                 while (cursor.hasNext()) {
                     Document d = cursor.next();
-                    uuids.add(UUID.fromString(d.getString("_id")));
+                    uuids.add(d.get("_id", UUID.class));
                 }
             }
 
