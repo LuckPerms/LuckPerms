@@ -183,6 +183,17 @@ public abstract class PermissionHolder {
     }
     private final TransientNodesCache transientNodesCopy = new TransientNodesCache();
 
+    /**
+     * Caches the holders weight lookup
+     */
+    private final class WeightCache extends Cache<OptionalInt> {
+        @Override
+        protected OptionalInt supply() {
+            return calculateWeight();
+        }
+    }
+    private final WeightCache weightCache = new WeightCache();
+
     // used to ensure thread safe access to the backing transientNodes map
     private final ReentrantLock transientNodesLock = new ReentrantLock();
 
@@ -201,6 +212,7 @@ public abstract class PermissionHolder {
     private void invalidateCache() {
         nodesCopy.invalidate();
         transientNodesCopy.invalidate();
+        weightCache.invalidate();
 
         // Invalidate listeners
         for (Runnable r : stateListeners) {
@@ -1482,16 +1494,34 @@ public abstract class PermissionHolder {
     }
 
     public OptionalInt getWeight() {
+        return weightCache.get();
+    }
+
+    private OptionalInt calculateWeight() {
         if (this instanceof User) return OptionalInt.empty();
 
-        OptionalInt weight = OptionalInt.empty();
-        try {
-            weight = getOwnNodes().stream()
-                    .filter(n -> n.getPermission().startsWith("weight."))
-                    .map(n -> n.getPermission().substring("weight.".length()))
-                    .mapToInt(Integer::parseInt)
-                    .max();
-        } catch (Exception ignored) {}
+        boolean seen = false;
+        int best = 0;
+        for (Node n : getOwnNodes()) {
+            if (!n.getPermission().startsWith("weight.")) {
+                continue;
+            }
+
+            String substring = n.getPermission().substring("weight.".length());
+
+            int i;
+            try {
+                i = Integer.parseInt(substring);
+            } catch (NumberFormatException e) {
+                continue;
+            }
+
+            if (!seen || i > best) {
+                seen = true;
+                best = i;
+            }
+        }
+        OptionalInt weight = seen ? OptionalInt.of(best) : OptionalInt.empty();
 
         if (!weight.isPresent()) {
             Integer w = plugin.getConfiguration().get(ConfigKeys.GROUP_WEIGHTS).get(getObjectName().toLowerCase());
