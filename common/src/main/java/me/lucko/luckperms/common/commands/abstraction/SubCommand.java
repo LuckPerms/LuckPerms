@@ -186,9 +186,7 @@ public abstract class SubCommand<T> extends Command<T, Void> {
             messagingService.getUpdateBuffer().request();
         }
 
-        if (success) {
-            Message.USER_SAVE_SUCCESS.send(sender);
-        } else {
+        if (!success) {
             Message.USER_SAVE_ERROR.send(sender);
         }
     }
@@ -207,9 +205,7 @@ public abstract class SubCommand<T> extends Command<T, Void> {
             messagingService.getUpdateBuffer().request();
         }
 
-        if (success) {
-            Message.GROUP_SAVE_SUCCESS.send(sender);
-        } else {
+        if (!success) {
             Message.GROUP_SAVE_ERROR.send(sender);
         }
     }
@@ -228,9 +224,7 @@ public abstract class SubCommand<T> extends Command<T, Void> {
             messagingService.getUpdateBuffer().request();
         }
 
-        if (success) {
-            Message.TRACK_SAVE_SUCCESS.send(sender);
-        } else {
+        if (!success) {
             Message.TRACK_SAVE_ERROR.send(sender);
         }
     }

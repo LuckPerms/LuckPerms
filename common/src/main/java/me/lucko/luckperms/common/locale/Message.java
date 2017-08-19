@@ -79,15 +79,12 @@ public enum Message {
      */
     USER_NOT_FOUND("&bUser could not be found.", true),
     USER_NOT_ONLINE("&bUser &a{0}&b is not online.", true),
-    USER_SAVE_SUCCESS("&7(User data was saved to storage)", true),
     USER_SAVE_ERROR("There was an error whilst saving the user.", true),
 
     GROUP_NOT_FOUND("&bGroup could not be found.", true),
-    GROUP_SAVE_SUCCESS("&7(Group data was saved to storage)", true),
     GROUP_SAVE_ERROR("There was an error whilst saving the group.", true),
 
     TRACK_NOT_FOUND("&bTrack could not be found.", true),
-    TRACK_SAVE_SUCCESS("&7(Track data was saved to storage)", true),
     TRACK_SAVE_ERROR("There was an error whilst saving the track.", true),
 
 
