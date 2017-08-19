@@ -113,7 +113,7 @@ public class VerboseListener {
         String startDate = DATE_FORMAT.format(new Date(startTime));
         String endDate = DATE_FORMAT.format(new Date(now));
         long secondsTaken = (now - startTime) / 1000L;
-        String duration = DateUtil.formatTime(secondsTaken);
+        String duration = DateUtil.formatTimeShort(secondsTaken);
 
         String filter = this.filter;
         if (filter == null || filter.equals("")){

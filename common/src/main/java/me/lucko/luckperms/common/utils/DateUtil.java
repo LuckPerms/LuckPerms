@@ -158,19 +158,40 @@ public class DateUtil {
         return diff;
     }
 
-    public static String formatDateDiff(long unixTime) {
-        Calendar c = new GregorianCalendar();
-        c.setTimeInMillis(unixTime * 1000);
+    public static String formatDateDiff(long seconds) {
         Calendar now = new GregorianCalendar();
-        return DateUtil.formatDateDiff(now, c);
+        Calendar then = new GregorianCalendar();
+        then.setTimeInMillis(seconds * 1000L);
+        return DateUtil.formatDateDiff(now, then);
     }
 
-    public static String formatTime(long seconds) {
-        Calendar c = new GregorianCalendar();
-        c.setTimeInMillis(0L);
-        Calendar c2 = new GregorianCalendar();
-        c2.setTimeInMillis(seconds * 1000L);
-        return DateUtil.formatDateDiff(c, c2);
+    public static String formatTimeShort(long seconds) {
+        if (seconds == 0) {
+            return "0s";
+        }
+
+        long minute = seconds / 60;
+        seconds = seconds % 60;
+        long hour = minute / 60;
+        minute = minute % 60;
+        long day = hour / 24;
+        hour = hour % 24;
+
+        StringBuilder time = new StringBuilder();
+        if (day != 0) {
+            time.append(day).append("d ");
+        }
+        if (hour != 0) {
+            time.append(hour).append("h ");
+        }
+        if (minute != 0) {
+            time.append(minute).append("m ");
+        }
+        if (seconds != 0) {
+            time.append(seconds).append("s");
+        }
+
+        return time.toString().trim();
     }
 
     private static String formatDateDiff(Calendar fromDate, Calendar toDate) {

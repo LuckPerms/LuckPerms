@@ -81,7 +81,9 @@ public class LogSearch extends SubCommand<Log> {
         Message.LOG_SEARCH_HEADER.send(sender, query, page, maxPage);
 
         for (Map.Entry<Integer, LogEntry> e : entries.entrySet()) {
-            Message.LOG_ENTRY.send(sender, e.getKey(), DateUtil.formatDateDiff(e.getValue().getTimestamp()), e.getValue().getFormatted());
+            long time = e.getValue().getTimestamp();
+            long now = DateUtil.unixSecondsNow();
+            Message.LOG_ENTRY.send(sender, e.getKey(), DateUtil.formatTimeShort(now - time), e.getValue().getFormatted());
         }
 
         return CommandResult.SUCCESS;
