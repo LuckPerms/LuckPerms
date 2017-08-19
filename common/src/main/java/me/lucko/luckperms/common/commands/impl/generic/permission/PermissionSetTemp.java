@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.commands.impl.generic.permission;
 import me.lucko.luckperms.api.DataMutateResult;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -37,7 +38,6 @@ import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.CommandPermission;
-import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -89,7 +89,7 @@ public class PermissionSetTemp extends SharedSubCommand {
             duration = result.getValue().getExpiryUnixTime();
             Message.SETPERMISSION_TEMP_SUCCESS.send(sender, node, b, holder.getFriendlyName(), DateUtil.formatDateDiff(duration), Util.contextSetToString(context));
 
-            LogEntry.build().actor(sender).acted(holder)
+            ExtendedLogEntry.build().actor(sender).acted(holder)
                     .action("permission settemp " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
                     .build().submit(plugin, sender);
 

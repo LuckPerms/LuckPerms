@@ -23,8 +23,9 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.data;
+package me.lucko.luckperms.common.actionlog;
 
+import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.CommandPermission;
@@ -38,13 +39,17 @@ import me.lucko.luckperms.common.utils.DateUtil;
 
 import java.util.List;
 
-public class LogEntry extends me.lucko.luckperms.api.LogEntry {
-    public static LogEntryBuilder build() {
-        return new LogEntryBuilder();
+/**
+ * An extended version of {@link LogEntry}, with helper methods for
+ * populating and using the entry using internal LuckPerms classes.
+ */
+public class ExtendedLogEntry extends LogEntry {
+    public static ExtendedLogEntryBuilder build() {
+        return new ExtendedLogEntryBuilder();
     }
 
-    private LogEntry() {
-        super();
+    public ExtendedLogEntry copy() {
+        return (ExtendedLogEntry) super.copy();
     }
 
     public void submit(LuckPermsPlugin plugin) {
@@ -79,62 +84,44 @@ public class LogEntry extends me.lucko.luckperms.api.LogEntry {
         }
     }
 
-    public static class LogEntryBuilder extends AbstractLogEntryBuilder<LogEntry, LogEntry.LogEntryBuilder> {
+    public static class ExtendedLogEntryBuilder extends AbstractLogEntryBuilder<ExtendedLogEntry, ExtendedLogEntryBuilder> {
 
         @Override
-        protected LogEntry createObj() {
-            return new LogEntry();
+        protected ExtendedLogEntry createEmptyLog() {
+            return new ExtendedLogEntry();
         }
 
         @Override
-        protected LogEntryBuilder getThis() {
+        protected ExtendedLogEntryBuilder getThisBuilder() {
             return this;
         }
 
-        public LogEntryBuilder actor(Sender actor) {
+        public ExtendedLogEntryBuilder actor(Sender actor) {
             super.actorName(actor.getName());
             super.actor(actor.getUuid());
             return this;
         }
 
-        public LogEntryBuilder type(String type) {
-            super.type(type.toCharArray()[0]);
-            return this;
-        }
-
-        public LogEntryBuilder type(Object object) {
-            if (object instanceof User) {
-                super.type('U');
-            } else if (object instanceof Group) {
-                super.type('G');
-            } else if (object instanceof Track) {
-                super.type('T');
-            } else {
-                throw new IllegalArgumentException();
-            }
-            return this;
-        }
-
-        public LogEntryBuilder acted(PermissionHolder acted) {
+        public ExtendedLogEntryBuilder acted(PermissionHolder acted) {
             if (acted instanceof User) {
                 super.actedName(((User) acted).getName().orElse("null"));
                 super.acted(((User) acted).getUuid());
-                super.type('U');
+                super.entryType(Type.USER);
             } else if (acted instanceof Group) {
                 super.actedName(((Group) acted).getName());
-                super.type('G');
+                super.entryType(Type.GROUP);
             }
             return this;
         }
 
-        public LogEntryBuilder acted(Track track) {
+        public ExtendedLogEntryBuilder acted(Track track) {
             super.actedName(track.getName());
-            super.type('T');
+            super.entryType(Type.TRACK);
             return this;
         }
 
         @Override
-        public LogEntry build() {
+        public ExtendedLogEntry build() {
             if (getTimestamp() == 0L) {
                 super.timestamp(DateUtil.unixSecondsNow());
             }

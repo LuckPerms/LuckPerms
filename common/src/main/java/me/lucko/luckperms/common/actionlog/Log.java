@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.data;
+package me.lucko.luckperms.common.actionlog;
 
 import lombok.Getter;
 
@@ -119,7 +119,8 @@ public class Log {
 
     public SortedSet<LogEntry> getUserHistory(UUID uuid) {
         return content.stream()
-                .filter(e -> e.getType() == 'U')
+                .filter(e -> e.getEntryType() == LogEntry.Type.USER)
+                .filter(e -> e.getActed() != null)
                 .filter(e -> e.getActed().equals(uuid))
                 .collect(Collectors.toCollection(TreeSet::new));
     }
@@ -130,14 +131,15 @@ public class Log {
 
     public int getUserHistoryMaxPages(UUID uuid) {
         return getMaxPages(content.stream()
-                .filter(e -> e.getType() == 'U')
+                .filter(e -> e.getEntryType() == LogEntry.Type.USER)
+                .filter(e -> e.getActed() != null)
                 .filter(e -> e.getActed().equals(uuid))
                 .count(), PAGE_ENTRIES);
     }
 
     public SortedSet<LogEntry> getGroupHistory(String name) {
         return content.stream()
-                .filter(e -> e.getType() == 'G')
+                .filter(e -> e.getEntryType() == LogEntry.Type.GROUP)
                 .filter(e -> e.getActedName().equals(name))
                 .collect(Collectors.toCollection(TreeSet::new));
     }
@@ -148,14 +150,14 @@ public class Log {
 
     public int getGroupHistoryMaxPages(String name) {
         return getMaxPages(content.stream()
-                .filter(e -> e.getType() == 'G')
+                .filter(e -> e.getEntryType() == LogEntry.Type.GROUP)
                 .filter(e -> e.getActedName().equals(name))
                 .count(), PAGE_ENTRIES);
     }
 
     public SortedSet<LogEntry> getTrackHistory(String name) {
         return content.stream()
-                .filter(e -> e.getType() == 'T')
+                .filter(e -> e.getEntryType() == LogEntry.Type.TRACK)
                 .filter(e -> e.getActedName().equals(name))
                 .collect(Collectors.toCollection(TreeSet::new));
     }
@@ -166,7 +168,7 @@ public class Log {
 
     public int getTrackHistoryMaxPages(String name) {
         return getMaxPages(content.stream()
-                .filter(e -> e.getType() == 'T')
+                .filter(e -> e.getEntryType() == LogEntry.Type.TRACK)
                 .filter(e -> e.getActedName().equals(name))
                 .count(), PAGE_ENTRIES);
     }

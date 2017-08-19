@@ -28,9 +28,9 @@ package me.lucko.luckperms.common.storage.backing.file;
 import lombok.Getter;
 
 import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.Constants;
-import me.lucko.luckperms.common.data.Log;
 import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.model.Group;

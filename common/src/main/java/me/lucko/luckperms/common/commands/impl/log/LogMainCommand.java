@@ -27,10 +27,10 @@ package me.lucko.luckperms.common.commands.impl.log;
 
 import com.google.common.collect.ImmutableList;
 
+import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.commands.abstraction.Command;
 import me.lucko.luckperms.common.commands.abstraction.MainCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.data.Log;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;

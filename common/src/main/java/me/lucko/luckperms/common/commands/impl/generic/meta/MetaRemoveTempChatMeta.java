@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.commands.impl.generic.meta;
 import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.DataMutateResult;
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -37,7 +38,6 @@ import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.Constants;
-import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -107,7 +107,7 @@ public class MetaRemoveTempChatMeta extends SharedSubCommand {
             builder.applyDeep(c -> c.hoverEvent(event));
             sender.sendMessage(builder.build());
 
-            LogEntry.build().actor(sender).acted(holder)
+            ExtendedLogEntry.build().actor(sender).acted(holder)
                     .action("meta removetemp" + type.name().toLowerCase() + " " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
                     .build().submit(plugin, sender);
 

@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.data;
+package me.lucko.luckperms.common.backup;
 
 import lombok.AllArgsConstructor;
 

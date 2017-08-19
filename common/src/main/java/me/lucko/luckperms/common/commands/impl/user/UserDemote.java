@@ -29,6 +29,7 @@ import com.google.common.collect.Iterables;
 
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -38,7 +39,6 @@ import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.DataConstraints;
-import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -136,7 +136,7 @@ public class UserDemote extends SubCommand<User> {
 
             Message.USER_DEMOTE_ENDOFTRACK.send(sender, track.getName(), user.getFriendlyName(), old);
 
-            LogEntry.build().actor(sender).acted(user)
+            ExtendedLogEntry.build().actor(sender).acted(user)
                     .action("demote " + args.stream().collect(Collectors.joining(" ")))
                     .build().submit(plugin, sender);
             save(user, sender, plugin);
@@ -168,7 +168,7 @@ public class UserDemote extends SubCommand<User> {
             Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), previousGroup.getDisplayName(), old, true));
         }
 
-        LogEntry.build().actor(sender).acted(user)
+        ExtendedLogEntry.build().actor(sender).acted(user)
                 .action("demote " + args.stream().collect(Collectors.joining(" ")))
                 .build().submit(plugin, sender);
 

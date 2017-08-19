@@ -38,11 +38,11 @@ import java.util.UUID;
 import static me.lucko.luckperms.common.api.ApiUtils.checkName;
 
 /**
- * Provides a link between {@link Log} and {@link me.lucko.luckperms.common.data.Log}
+ * Provides a link between {@link Log} and {@link me.lucko.luckperms.common.actionlog.Log}
  */
 @AllArgsConstructor
 public class LogDelegate implements Log {
-    private final me.lucko.luckperms.common.data.Log handle;
+    private final me.lucko.luckperms.common.actionlog.Log handle;
 
     @Override
     public SortedSet<LogEntry> getContent() {

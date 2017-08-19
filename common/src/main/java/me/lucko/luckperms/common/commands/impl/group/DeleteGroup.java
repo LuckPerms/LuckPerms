@@ -26,13 +26,13 @@
 package me.lucko.luckperms.common.commands.impl.group;
 
 import me.lucko.luckperms.api.event.cause.DeletionCause;
+import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.CommandPermission;
-import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -78,7 +78,7 @@ public class DeleteGroup extends SingleCommand {
         }
 
         Message.DELETE_SUCCESS.send(sender, group.getDisplayName());
-        LogEntry.build().actor(sender).actedName(groupName).type('G').action("delete").build().submit(plugin, sender);
+        ExtendedLogEntry.build().actor(sender).actedName(groupName).type('G').action("delete").build().submit(plugin, sender);
         plugin.getUpdateTaskBuffer().request();
         return CommandResult.SUCCESS;
     }

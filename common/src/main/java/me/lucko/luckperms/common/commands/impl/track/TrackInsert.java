@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.commands.impl.track;
 
+import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
@@ -32,7 +33,6 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.DataConstraints;
-import me.lucko.luckperms.common.data.LogEntry;
 import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
@@ -82,7 +82,7 @@ public class TrackInsert extends SubCommand<Track> {
             if (track.getGroups().size() > 1) {
                 Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), group.getName()));
             }
-            LogEntry.build().actor(sender).acted(track)
+            ExtendedLogEntry.build().actor(sender).acted(track)
                     .action("insert " + group.getName() + " " + pos)
                     .build().submit(plugin, sender);
             save(track, sender, plugin);
