@@ -89,7 +89,7 @@ public class BungeeMessagingService extends AbstractMessagingService implements 
 
         onMessage(e.getTag(), msg, u -> {
             // Forward to other servers
-            plugin.doAsync(() -> sendMessage(CHANNEL, "update:" + u.toString()));
+            plugin.doAsync(() -> sendMessage(CHANNEL, u));
         });
     }
 }

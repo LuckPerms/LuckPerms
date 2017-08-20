@@ -23,52 +23,26 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.api.event.log;
+package me.lucko.luckperms.common.event.impl;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.ToString;
 
 import me.lucko.luckperms.api.LogEntry;
-import me.lucko.luckperms.api.event.Cancellable;
-import me.lucko.luckperms.api.event.LuckPermsEvent;
+import me.lucko.luckperms.api.event.log.LogNetworkPublishEvent;
+import me.lucko.luckperms.common.event.AbstractEvent;
 
-import javax.annotation.Nonnull;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-/**
- * Called when a log entry is about to be sent to notifiable players on the platform
- */
-public interface LogBroadcastEvent extends LuckPermsEvent, Cancellable {
+@Getter
+@ToString
+@AllArgsConstructor
+public class EventLogNetworkPublish extends AbstractEvent implements LogNetworkPublishEvent {
 
-    /**
-     * Gets the log entry to be broadcasted
-     *
-     * @return the log entry to be broadcasted
-     */
-    @Nonnull
-    LogEntry getEntry();
-
-    /**
-     * Gets where the log entry originated from.
-     *
-     * @return the origin of the log
-     * @since 3.3
-     */
-    @Nonnull
-    Origin getOrigin();
-
-    /**
-     * Represents where a log entry is from
-     *
-     * @since 3.3
-     */
-    enum Origin {
-
-        /**
-         * Represents a log entry which originated from the current server instance
-         */
-        LOCAL,
-
-        /**
-         * Represents a log entry which was sent to this server via the messaging service
-         */
-        REMOTE
-    }
+    private final AtomicBoolean cancellationState;
+    private final UUID logId;
+    private final LogEntry entry;
 
 }

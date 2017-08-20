@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.plugin;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.PlatformType;
+import me.lucko.luckperms.common.actionlog.LogDispatcher;
 import me.lucko.luckperms.common.api.ApiProvider;
 import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
@@ -180,6 +181,13 @@ public interface LuckPermsPlugin {
      * @return the permission cache instance
      */
     PermissionVault getPermissionVault();
+
+    /**
+     * Gets the log dispatcher running on the platform
+     *
+     * @return the log dispatcher
+     */
+    LogDispatcher getLogDispatcher();
 
     /**
      * Gets the LuckPerms Scheduler instance
@@ -379,13 +387,6 @@ public interface LuckPermsPlugin {
     default LinkedHashMap<String, Object> getExtraInfo() {
         return null;
     }
-
-    /**
-     * Gets a set of players ignoring logging output
-     *
-     * @return a {@link Set} of {@link UUID}s
-     */
-    Set<UUID> getIgnoringLogs();
 
     /**
      * Gets the update task buffer of the platform, used for scheduling and running update tasks.

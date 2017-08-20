@@ -33,6 +33,7 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.common.actionlog.LogDispatcher;
 import me.lucko.luckperms.common.api.ApiHandler;
 import me.lucko.luckperms.common.api.ApiProvider;
 import me.lucko.luckperms.common.backup.ImporterSender;
@@ -125,9 +126,6 @@ import java.util.stream.Collectors;
 @Plugin(id = "luckperms", name = "LuckPerms", version = VersionData.VERSION, authors = {"Luck"}, description = "A permissions plugin")
 public class LPSpongePlugin implements LuckPermsPlugin {
 
-    private final Set<UUID> ignoringLogs = ConcurrentHashMap.newKeySet();
-    private Set<UUID> uniqueConnections = ConcurrentHashMap.newKeySet();
-
     @Inject
     private Logger logger;
 
@@ -173,6 +171,8 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     private VerboseHandler verboseHandler;
     private SpongeSenderFactory senderFactory;
     private PermissionVault permissionVault;
+    private LogDispatcher logDispatcher;
+    private Set<UUID> uniqueConnections = ConcurrentHashMap.newKeySet();
 
     @Listener(order = Order.FIRST)
     public void onEnable(GamePreInitializationEvent event) {
@@ -185,6 +185,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         LuckPermsPlugin.sendStartupBanner(getConsoleSender(), this);
         verboseHandler = new VerboseHandler(scheduler.async(), getVersion());
         permissionVault = new PermissionVault(scheduler.async());
+        logDispatcher = new LogDispatcher(this);
         timings = new LPTimings(this);
 
         getLog().info("Loading configuration...");

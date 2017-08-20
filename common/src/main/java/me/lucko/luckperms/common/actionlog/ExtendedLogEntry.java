@@ -25,11 +25,12 @@
 
 package me.lucko.luckperms.common.actionlog;
 
+import com.google.common.collect.Maps;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.constants.CommandPermission;
-import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.Track;
@@ -37,7 +38,8 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.DateUtil;
 
-import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * An extended version of {@link LogEntry}, with helper methods for
@@ -52,36 +54,41 @@ public class ExtendedLogEntry extends LogEntry {
         return (ExtendedLogEntry) super.copy();
     }
 
-    public void submit(LuckPermsPlugin plugin) {
-        submit(plugin, null);
+    public void submit(LuckPermsPlugin plugin, Sender sender) {
+        plugin.getLogDispatcher().dispatch(this, sender);
     }
 
-    public void submit(LuckPermsPlugin plugin, Sender sender) {
-        if (!plugin.getApiProvider().getEventFactory().handleLogPublish(false, this)) {
-            plugin.getStorage().logAction(this);
+    public static JsonObject serializeWithId(UUID id, LogEntry entry) {
+        JsonObject data = new JsonObject();
+
+        data.add("id", new JsonPrimitive(id.toString()));
+        data.add("actor", new JsonPrimitive(entry.getActor().toString()));
+        data.add("actorName", new JsonPrimitive(entry.getActorName()));
+        data.add("type", new JsonPrimitive(entry.getEntryType().name()));
+        if (entry.getActed() != null) {
+            data.add("acted", new JsonPrimitive(entry.getActed().toString()));
         }
+        data.add("actedName", new JsonPrimitive(entry.getActedName()));
+        data.add("action", new JsonPrimitive(entry.getAction()));
 
-        if (plugin.getApiProvider().getEventFactory().handleLogBroadcast(!plugin.getConfiguration().get(ConfigKeys.LOG_NOTIFY), this)) {
-            return;
+        return data;
+    }
+
+    public static Map.Entry<UUID, LogEntry> deserialize(JsonObject object) {
+        LogEntry.LogEntryBuilder builder = LogEntry.builder();
+
+        UUID id = UUID.fromString(object.get("id").getAsString());
+
+        builder.actor(UUID.fromString(object.get("actor").getAsString()));
+        builder.actorName(object.get("actorName").getAsString());
+        builder.entryType(Type.valueOf(object.get("type").getAsString()));
+        if (object.has("acted")) {
+            builder.actor(UUID.fromString(object.get("acted").getAsString()));
         }
+        builder.actedName(object.get("actedName").getAsString());
+        builder.action(object.get("action").getAsString());
 
-        final String msg = super.getFormatted();
-
-        List<Sender> senders = plugin.getOnlineSenders();
-        senders.add(plugin.getConsoleSender());
-
-        if (sender == null) {
-            senders.stream()
-                    .filter(CommandPermission.LOG_NOTIFY::isAuthorized)
-                    .filter(s -> !plugin.getIgnoringLogs().contains(s.getUuid()))
-                    .forEach(s -> Message.LOG.send(s, msg));
-        } else {
-            senders.stream()
-                    .filter(CommandPermission.LOG_NOTIFY::isAuthorized)
-                    .filter(s -> !plugin.getIgnoringLogs().contains(s.getUuid()))
-                    .filter(s -> !s.getUuid().equals(sender.getUuid()))
-                    .forEach(s -> Message.LOG.send(s, msg));
-        }
+        return Maps.immutableEntry(id, builder.build());
     }
 
     public static class ExtendedLogEntryBuilder extends AbstractLogEntryBuilder<ExtendedLogEntry, ExtendedLogEntryBuilder> {

@@ -392,7 +392,7 @@ public class ConfigKeys {
     }));
 
     /**
-     * The name of the messaging service in use, or "none" if not enabled.
+     * The name of the messaging service in use, or "none" if not enabled
      */
     public static final ConfigKey<String> MESSAGING_SERVICE = EnduringKey.wrap(LowercaseStringKey.of("messaging-service", "none"));
 
@@ -400,6 +400,16 @@ public class ConfigKeys {
      * If updates should be automatically pushed by the messaging service
      */
     public static final ConfigKey<Boolean> AUTO_PUSH_UPDATES = EnduringKey.wrap(BooleanKey.of("auto-push-updates", true));
+
+    /**
+     * If LuckPerms should push logging entries to connected servers via the messaging service
+     */
+    public static final ConfigKey<Boolean> PUSH_LOG_ENTRIES = EnduringKey.wrap(BooleanKey.of("push-log-entries", true));
+
+    /**
+     * If LuckPerms should broadcast received logging entries to players on this platform
+     */
+    public static final ConfigKey<Boolean> BROADCAST_RECEIVED_LOG_ENTRIES = EnduringKey.wrap(BooleanKey.of("broadcast-received-log-entries", false));
 
     /**
      * If redis messaging is enabled

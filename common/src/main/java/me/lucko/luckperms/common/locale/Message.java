@@ -364,6 +364,7 @@ public enum Message {
     LOG_NO_ENTRIES("&bNo log entries to show.", true),
     LOG_ENTRY("&b#{0} -> &8(&7{1} ago&8) {2}", true),
 
+    LOG_NOTIFY_CONSOLE("&cCannot toggle notifications for console.", true),
     LOG_NOTIFY_TOGGLE_ON("&aEnabled&b logging output.", true),
     LOG_NOTIFY_TOGGLE_OFF("&cDisabled&b logging output.", true),
     LOG_NOTIFY_ALREADY_ON("You are already receiving notifications.", true),

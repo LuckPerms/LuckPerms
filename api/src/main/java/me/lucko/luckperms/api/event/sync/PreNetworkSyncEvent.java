@@ -33,7 +33,7 @@ import java.util.UUID;
 import javax.annotation.Nonnull;
 
 /**
- * Called before a network sync task runs
+ * Called before a received network sync task runs
  */
 public interface PreNetworkSyncEvent extends LuckPermsEvent, Cancellable {
 

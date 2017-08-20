@@ -36,13 +36,16 @@ import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
+import me.lucko.luckperms.api.event.log.LogBroadcastEvent;
 import me.lucko.luckperms.common.event.impl.EventConfigReload;
 import me.lucko.luckperms.common.event.impl.EventGroupCreate;
 import me.lucko.luckperms.common.event.impl.EventGroupDelete;
 import me.lucko.luckperms.common.event.impl.EventGroupLoad;
 import me.lucko.luckperms.common.event.impl.EventGroupLoadAll;
 import me.lucko.luckperms.common.event.impl.EventLogBroadcast;
+import me.lucko.luckperms.common.event.impl.EventLogNetworkPublish;
 import me.lucko.luckperms.common.event.impl.EventLogPublish;
+import me.lucko.luckperms.common.event.impl.EventLogReceive;
 import me.lucko.luckperms.common.event.impl.EventNodeAdd;
 import me.lucko.luckperms.common.event.impl.EventNodeClear;
 import me.lucko.luckperms.common.event.impl.EventNodeRemove;
@@ -100,9 +103,9 @@ public final class EventFactory {
         fireEvent(event);
     }
 
-    public boolean handleLogBroadcast(boolean initialState, LogEntry entry) {
+    public boolean handleLogBroadcast(boolean initialState, LogEntry entry, LogBroadcastEvent.Origin origin) {
         AtomicBoolean cancel = new AtomicBoolean(initialState);
-        EventLogBroadcast event = new EventLogBroadcast(cancel, entry);
+        EventLogBroadcast event = new EventLogBroadcast(cancel, entry, origin);
         eventBus.fireEvent(event);
         return cancel.get();
     }
@@ -112,6 +115,18 @@ public final class EventFactory {
         EventLogPublish event = new EventLogPublish(cancel, entry);
         eventBus.fireEvent(event);
         return cancel.get();
+    }
+
+    public boolean handleLogNetworkPublish(boolean initialState, UUID id, LogEntry entry) {
+        AtomicBoolean cancel = new AtomicBoolean(initialState);
+        EventLogNetworkPublish event = new EventLogNetworkPublish(cancel, id, entry);
+        eventBus.fireEvent(event);
+        return cancel.get();
+    }
+
+    public void handleLogReceive(UUID id, LogEntry entry) {
+        EventLogReceive event = new EventLogReceive(id, entry);
+        fireEvent(event);
     }
 
     public void handleNodeAdd(Node node, PermissionHolder target, Collection<Node> before, Collection<Node> after) {

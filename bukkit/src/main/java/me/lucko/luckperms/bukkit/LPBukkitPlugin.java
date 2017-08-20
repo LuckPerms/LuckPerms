@@ -43,6 +43,7 @@ import me.lucko.luckperms.bukkit.model.LPPermissible;
 import me.lucko.luckperms.bukkit.processors.ChildPermissionProvider;
 import me.lucko.luckperms.bukkit.processors.DefaultsProvider;
 import me.lucko.luckperms.bukkit.vault.VaultHookManager;
+import me.lucko.luckperms.common.actionlog.LogDispatcher;
 import me.lucko.luckperms.common.api.ApiHandler;
 import me.lucko.luckperms.common.api.ApiProvider;
 import me.lucko.luckperms.common.buffers.BufferedRequest;
@@ -109,8 +110,7 @@ import java.util.stream.Collectors;
 
 @Getter
 public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
-    private Set<UUID> ignoringLogs;
-    private Set<UUID> uniqueConnections;
+
     private long startTime;
     private LPBukkitScheduler scheduler;
     private BukkitCommand commandManager;
@@ -139,6 +139,8 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private VerboseHandler verboseHandler;
     private BukkitSenderFactory senderFactory;
     private PermissionVault permissionVault;
+    private LogDispatcher logDispatcher;
+    private Set<UUID> uniqueConnections = ConcurrentHashMap.newKeySet();
 
     @Override
     public void onLoad() {
@@ -182,11 +184,9 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private void enable() {
         startTime = System.currentTimeMillis();
         LuckPermsPlugin.sendStartupBanner(getConsoleSender(), this);
-
-        ignoringLogs = ConcurrentHashMap.newKeySet();
-        uniqueConnections = ConcurrentHashMap.newKeySet();
-        verboseHandler = new VerboseHandler(scheduler.getAsyncBukkitExecutor(), getVersion());
-        permissionVault = new PermissionVault(scheduler.getAsyncBukkitExecutor());
+        verboseHandler = new VerboseHandler(scheduler.asyncBukkit(), getVersion());
+        permissionVault = new PermissionVault(scheduler.asyncBukkit());
+        logDispatcher = new LogDispatcher(this);
 
         getLog().info("Loading configuration...");
         configuration = new BukkitConfig(this);
@@ -448,7 +448,6 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         HandlerList.unregisterAll(this);
 
         // Null everything
-        ignoringLogs = null;
         vaultHookManager = null;
         configuration = null;
         userManager = null;
@@ -472,6 +471,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         verboseHandler = null;
         senderFactory = null;
         permissionVault = null;
+        logDispatcher = null;
     }
 
     public void tryVaultHook(boolean force) {

@@ -37,6 +37,7 @@ import me.lucko.luckperms.bungee.contexts.BackendServerCalculator;
 import me.lucko.luckperms.bungee.messaging.BungeeMessagingService;
 import me.lucko.luckperms.bungee.messaging.RedisBungeeMessagingService;
 import me.lucko.luckperms.bungee.util.RedisBungeeUtil;
+import me.lucko.luckperms.common.actionlog.LogDispatcher;
 import me.lucko.luckperms.common.api.ApiHandler;
 import me.lucko.luckperms.common.api.ApiProvider;
 import me.lucko.luckperms.common.buffers.BufferedRequest;
@@ -93,8 +94,7 @@ import java.util.stream.Collectors;
 
 @Getter
 public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
-    private final Set<UUID> ignoringLogs = ConcurrentHashMap.newKeySet();
-    private Set<UUID> uniqueConnections = ConcurrentHashMap.newKeySet();
+
     private long startTime;
     private LuckPermsScheduler scheduler;
     private CommandManager commandManager;
@@ -116,6 +116,8 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     private VerboseHandler verboseHandler;
     private BungeeSenderFactory senderFactory;
     private PermissionVault permissionVault;
+    private LogDispatcher logDispatcher;
+    private Set<UUID> uniqueConnections = ConcurrentHashMap.newKeySet();
 
     @Override
     public void onLoad() {
@@ -134,6 +136,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         LuckPermsPlugin.sendStartupBanner(getConsoleSender(), this);
         verboseHandler = new VerboseHandler(scheduler.async(), getVersion());
         permissionVault = new PermissionVault(scheduler.async());
+        logDispatcher = new LogDispatcher(this);
 
         getLog().info("Loading configuration...");
         configuration = new BungeeConfig(this);

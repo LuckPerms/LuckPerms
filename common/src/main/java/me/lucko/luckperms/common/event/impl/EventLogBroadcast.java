@@ -42,5 +42,6 @@ public class EventLogBroadcast extends AbstractEvent implements LogBroadcastEven
 
     private final AtomicBoolean cancellationState;
     private final LogEntry entry;
+    private final Origin origin;
 
 }

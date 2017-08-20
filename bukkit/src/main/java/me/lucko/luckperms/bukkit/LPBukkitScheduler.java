@@ -27,6 +27,7 @@ package me.lucko.luckperms.bukkit;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 
 import me.lucko.luckperms.common.plugin.LuckPermsScheduler;
 
@@ -43,10 +44,16 @@ public class LPBukkitScheduler implements LuckPermsScheduler {
     private final LPBukkitPlugin plugin;
 
     @Getter
-    private ExecutorService asyncLpExecutor;
+    @Accessors(fluent = true)
+    private ExecutorService asyncLp;
+
     @Getter
-    private Executor asyncBukkitExecutor;
-    private Executor syncExecutor;
+    @Accessors(fluent = true)
+    private Executor asyncBukkit;
+
+    @Getter
+    @Accessors(fluent = true)
+    private Executor sync;
 
     @Getter
     @Setter
@@ -57,19 +64,14 @@ public class LPBukkitScheduler implements LuckPermsScheduler {
     public LPBukkitScheduler(LPBukkitPlugin plugin) {
         this.plugin = plugin;
 
-        this.asyncLpExecutor = Executors.newCachedThreadPool();
-        this.asyncBukkitExecutor = r -> plugin.getServer().getScheduler().runTaskAsynchronously(plugin, r);
-        this.syncExecutor = r -> plugin.getServer().getScheduler().runTask(plugin, r);
+        this.asyncLp = Executors.newCachedThreadPool();
+        this.asyncBukkit = r -> plugin.getServer().getScheduler().runTaskAsynchronously(plugin, r);
+        this.sync = r -> plugin.getServer().getScheduler().runTask(plugin, r);
     }
 
     @Override
     public Executor async() {
-        return useBukkitAsync ? asyncBukkitExecutor : asyncLpExecutor;
-    }
-
-    @Override
-    public Executor sync() {
-        return syncExecutor;
+        return useBukkitAsync ? asyncBukkit : asyncLp;
     }
 
     @Override
@@ -108,9 +110,9 @@ public class LPBukkitScheduler implements LuckPermsScheduler {
     public void shutdown() {
         tasks.forEach(BukkitTask::cancel);
         // wait for executor
-        asyncLpExecutor.shutdown();
+        asyncLp.shutdown();
         try {
-            asyncLpExecutor.awaitTermination(30, TimeUnit.SECONDS);
+            asyncLp.awaitTermination(30, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
