@@ -61,7 +61,7 @@ public abstract class AbstractMessagingService implements InternalMessagingServi
     private final Gson gson = new Gson();
 
     @Getter
-    private final BufferedRequest<Void> updateBuffer = new BufferedRequest<Void>(10000L, r -> getPlugin().doAsync(r)) {
+    private final BufferedRequest<Void> updateBuffer = new BufferedRequest<Void>(3000L, r -> getPlugin().doAsync(r)) {
         @Override
         protected Void perform() {
             pushUpdate();

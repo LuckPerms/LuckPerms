@@ -48,8 +48,11 @@ public class LogEntry implements Comparable<LogEntry> {
             .thenComparing(LogEntry::getActor)
             .thenComparing(LogEntry::getActorName, String.CASE_INSENSITIVE_ORDER)
             .thenComparing(LogEntry::getEntryType)
-            .thenComparing(Comparator.nullsFirst(Comparator.comparing(LogEntry::getActed)))
-            .thenComparing(LogEntry::getActorName, String.CASE_INSENSITIVE_ORDER)
+            .thenComparing(e -> {
+                UUID u = e.getActed();
+                return u == null ? "" : u.toString();
+            })
+            .thenComparing(LogEntry::getActedName, String.CASE_INSENSITIVE_ORDER)
             .thenComparing(LogEntry::getAction);
 
     /**
@@ -219,7 +222,7 @@ public class LogEntry implements Comparable<LogEntry> {
 
     @Nonnull
     public UUID getActor() {
-        return actor;
+        return Preconditions.checkNotNull(actor, "actor");
     }
 
     void setActor(@Nonnull UUID actor) {
@@ -228,7 +231,7 @@ public class LogEntry implements Comparable<LogEntry> {
 
     @Nonnull
     public String getActorName() {
-        return actorName;
+        return Preconditions.checkNotNull(actorName, "actorName");
     }
 
     void setActorName(@Nonnull String actorName) {
@@ -243,7 +246,7 @@ public class LogEntry implements Comparable<LogEntry> {
      */
     @Nonnull
     public Type getEntryType() {
-        return type;
+        return Preconditions.checkNotNull(type, "type");
     }
 
     /**
@@ -264,7 +267,7 @@ public class LogEntry implements Comparable<LogEntry> {
      */
     @Deprecated
     public char getType() {
-        return type.getCode();
+        return getEntryType().getCode();
     }
 
     /**
@@ -289,7 +292,7 @@ public class LogEntry implements Comparable<LogEntry> {
 
     @Nonnull
     public String getActedName() {
-        return actedName;
+        return Preconditions.checkNotNull(actedName, "actedName");
     }
 
     void setActedName(@Nonnull String actedName) {
@@ -298,7 +301,7 @@ public class LogEntry implements Comparable<LogEntry> {
 
     @Nonnull
     public String getAction() {
-        return action;
+        return Preconditions.checkNotNull(action, "action");
     }
 
     void setAction(@Nonnull String action) {
