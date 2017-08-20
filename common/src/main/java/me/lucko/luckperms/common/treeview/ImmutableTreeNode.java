@@ -35,24 +35,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * An immutable and sorted version of TreeNode
  *
- * Entries in the children map are sorted first by whether they have any children, and then alphabetically
+ * Entries in the children map are sorted first by whether they have
+ * any children, and then alphabetically
  */
 public class ImmutableTreeNode implements Comparable<ImmutableTreeNode> {
     private Map<String, ImmutableTreeNode> children = null;
 
-    public ImmutableTreeNode(Map<String, ImmutableTreeNode> children) {
+    public ImmutableTreeNode(Stream<Map.Entry<String, ImmutableTreeNode>> children) {
         if (children != null) {
-            LinkedHashMap<String, ImmutableTreeNode> sortedMap = children.entrySet().stream()
+            LinkedHashMap<String, ImmutableTreeNode> sortedMap = children
                     .sorted((o1, o2) -> {
+                        // sort first by if the node has any children
                         int childStatus = o1.getValue().compareTo(o2.getValue());
                         if (childStatus != 0) {
                             return childStatus;
                         }
 
+                        // then alphabetically
                         return String.CASE_INSENSITIVE_ORDER.compare(o1.getKey(), o2.getKey());
                     })
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -65,6 +69,13 @@ public class ImmutableTreeNode implements Comparable<ImmutableTreeNode> {
         return Optional.ofNullable(children);
     }
 
+    /**
+     * Gets the node endings of each branch of the tree at this stage
+     *
+     * The key represents the depth of the node.
+     *
+     * @return the node endings
+     */
     public List<Map.Entry<Integer, String>> getNodeEndings() {
         if (children == null) {
             return Collections.emptyList();
@@ -80,6 +91,7 @@ public class ImmutableTreeNode implements Comparable<ImmutableTreeNode> {
             results.addAll(node.getValue().getNodeEndings().stream()
                     .map(e -> Maps.immutableEntry(
                             e.getKey() + 1, // increment level
+                            // add this node's key infront of the child value
                             node.getKey() + "." + e.getValue())
                     )
                     .collect(Collectors.toList()));

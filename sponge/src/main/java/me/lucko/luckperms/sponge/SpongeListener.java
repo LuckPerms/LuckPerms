@@ -29,10 +29,10 @@ import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.core.UuidCache;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.utils.LoginHelper;
+import me.lucko.luckperms.common.utils.UuidCache;
 import me.lucko.luckperms.sponge.timings.LPTiming;
 
 import org.spongepowered.api.command.CommandSource;
@@ -64,21 +64,13 @@ public class SpongeListener {
     private final Set<UUID> deniedAsyncLogin = Collections.synchronizedSet(new HashSet<>());
     private final Set<UUID> deniedLogin = Collections.synchronizedSet(new HashSet<>());
 
-    @Listener(order = Order.AFTER_PRE)
+    @Listener(order = Order.EARLY)
     @IsCancelled(Tristate.UNDEFINED)
     public void onClientAuth(ClientConnectionEvent.Auth e) {
         /* Called when the player first attempts a connection with the server.
            Listening on AFTER_PRE priority to allow plugins to modify username / UUID data here. (auth plugins) */
 
         final GameProfile p = e.getProfile();
-
-        /* the player was denied entry to the server before this priority.
-           log this, so we can handle appropriately later. */
-        if (e.isCancelled()) {
-            plugin.getLog().warn("Connection from " + p.getUniqueId() + " was already denied. No permissions data will be loaded.");
-            deniedAsyncLogin.add(p.getUniqueId());
-            return;
-        }
 
         /* either the plugin hasn't finished starting yet, or there was an issue connecting to the DB, performing file i/o, etc.
            we don't let players join in this case, because it means they can connect to the server without their permissions data.
@@ -90,13 +82,15 @@ public class SpongeListener {
             deniedAsyncLogin.add(p.getUniqueId());
 
             // actually deny the connection.
-            plugin.getLog().warn("Permissions storage is not loaded yet. Denying connection from: " + p.getUniqueId() + " - " + p.getName());
+            plugin.getLog().warn("Permissions storage is not loaded. Denying connection from: " + p.getUniqueId() + " - " + p.getName());
             e.setCancelled(true);
-            e.setMessageCancelled(true);
+            e.setMessageCancelled(false);
             //noinspection deprecation
             e.setMessage(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(Message.LOADING_ERROR.asString(plugin.getLocaleManager())));
             return;
         }
+
+        plugin.getUniqueConnections().add(p.getUniqueId());
 
         /* Actually process the login for the connection.
            We do this here to delay the login until the data is ready.
@@ -112,14 +106,16 @@ public class SpongeListener {
         } catch (Exception ex) {
             ex.printStackTrace();
 
+            deniedAsyncLogin.add(p.getUniqueId());
+
             e.setCancelled(true);
-            e.setMessageCancelled(true);
+            e.setMessageCancelled(false);
             //noinspection deprecation
             e.setMessage(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(Message.LOADING_ERROR.asString(plugin.getLocaleManager())));
         }
     }
 
-    @Listener(order = Order.BEFORE_POST)
+    @Listener(order = Order.LAST)
     @IsCancelled(Tristate.UNDEFINED)
     public void onClientAuthMonitor(ClientConnectionEvent.Auth e) {
         /* Listen to see if the event was cancelled after we initially handled the connection
@@ -136,7 +132,7 @@ public class SpongeListener {
         }
     }
 
-    @Listener(order = Order.AFTER_PRE)
+    @Listener(order = Order.FIRST)
     @IsCancelled(Tristate.UNDEFINED)
     public void onClientLogin(ClientConnectionEvent.Login e) {
         try (Timing ignored = plugin.getTimings().time(LPTiming.ON_CLIENT_LOGIN)) {
@@ -146,14 +142,6 @@ public class SpongeListener {
 
             final GameProfile player = e.getProfile();
 
-            /* the player was denied entry to the server before this priority.
-               log this, so we can handle appropriately later. */
-            if (e.isCancelled()) {
-                plugin.getLog().warn("Login from " + player.getUniqueId() + " was denied before an attachment could be injected.");
-                deniedLogin.add(player.getUniqueId());
-                return;
-            }
-
             final User user = plugin.getUserManager().getIfLoaded(plugin.getUuidCache().getUUID(player.getUniqueId()));
 
             /* User instance is null for whatever reason. Could be that it was unloaded between asyncpre and now. */
@@ -162,7 +150,7 @@ public class SpongeListener {
 
                 plugin.getLog().warn("User " + player.getUniqueId() + " - " + player.getName() + " doesn't have data pre-loaded. - denying login.");
                 e.setCancelled(true);
-                e.setMessageCancelled(true);
+                e.setMessageCancelled(false);
                 //noinspection deprecation
                 e.setMessage(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(Message.LOADING_ERROR.asString(plugin.getLocaleManager())));
                 return;
@@ -173,9 +161,9 @@ public class SpongeListener {
             if (p.isPresent()) {
                 MutableContextSet context = MutableContextSet.fromSet(plugin.getContextManager().getApplicableContext(p.get()));
 
-                List<String> worlds = plugin.getGame().getServer().getWorlds().stream()
+                List<String> worlds = plugin.getGame().isServerAvailable() ? plugin.getGame().getServer().getWorlds().stream()
                         .map(World::getName)
-                        .collect(Collectors.toList());
+                        .collect(Collectors.toList()) : Collections.emptyList();
 
                 plugin.doAsync(() -> {
                     UserData data = user.getUserData();
@@ -192,13 +180,29 @@ public class SpongeListener {
         }
     }
 
+    @Listener(order = Order.LAST)
+    @IsCancelled(Tristate.UNDEFINED)
+    public void onClientLoginMonitor(ClientConnectionEvent.Login e) {
+        /* Listen to see if the event was cancelled after we initially handled the login
+           If the connection was cancelled here, we need to do something to clean up the data that was loaded. */
+
+        // Check to see if this connection was denied at LOW. Even if it was denied at LOW, their data will still be present.
+        if (deniedLogin.remove(e.getProfile().getUniqueId())) {
+            // This is a problem, as they were denied at low priority, but are now being allowed.
+            if (!e.isCancelled()) {
+                plugin.getLog().severe("Player connection was re-allowed for " + e.getProfile().getUniqueId());
+                e.setCancelled(true);
+            }
+        }
+    }
+
     @Listener(order = Order.EARLY)
     public void onClientJoin(ClientConnectionEvent.Join e) {
         // Refresh permissions again
         plugin.doAsync(() -> LoginHelper.refreshPlayer(plugin, e.getTargetEntity().getUniqueId()));
     }
 
-    @Listener(order = Order.LAST)
+    @Listener(order = Order.POST)
     public void onClientLeave(ClientConnectionEvent.Disconnect e) {
         /* We don't actually remove the user instance here, as Sponge likes to keep performing checks
            on players when they disconnect. The instance gets cleared up on a housekeeping task

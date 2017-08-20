@@ -27,18 +27,13 @@ package me.lucko.luckperms.common.commands.impl.log;
 
 import com.google.common.collect.ImmutableList;
 
+import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.commands.abstraction.Command;
 import me.lucko.luckperms.common.commands.abstraction.MainCommand;
-import me.lucko.luckperms.common.commands.impl.log.subcommands.LogExport;
-import me.lucko.luckperms.common.commands.impl.log.subcommands.LogGroupHistory;
-import me.lucko.luckperms.common.commands.impl.log.subcommands.LogNotify;
-import me.lucko.luckperms.common.commands.impl.log.subcommands.LogRecent;
-import me.lucko.luckperms.common.commands.impl.log.subcommands.LogSearch;
-import me.lucko.luckperms.common.commands.impl.log.subcommands.LogTrackHistory;
-import me.lucko.luckperms.common.commands.impl.log.subcommands.LogUserHistory;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.data.Log;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.Collections;
@@ -47,15 +42,14 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class LogMainCommand extends MainCommand<Log> {
-    public LogMainCommand() {
-        super("Log", "Log commands", "/%s log", 1, ImmutableList.<Command<Log, ?>>builder()
-                .add(new LogRecent())
-                .add(new LogSearch())
-                .add(new LogNotify())
-                .add(new LogExport())
-                .add(new LogUserHistory())
-                .add(new LogGroupHistory())
-                .add(new LogTrackHistory())
+    public LogMainCommand(LocaleManager locale) {
+        super(CommandSpec.LOG.spec(locale), "Log", 1, ImmutableList.<Command<Log, ?>>builder()
+                .add(new LogRecent(locale))
+                .add(new LogSearch(locale))
+                .add(new LogNotify(locale))
+                .add(new LogUserHistory(locale))
+                .add(new LogGroupHistory(locale))
+                .add(new LogTrackHistory(locale))
                 .build()
         );
     }

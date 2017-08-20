@@ -34,11 +34,11 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 @RequiredArgsConstructor
 public class BukkitConfig extends AbstractConfiguration {
@@ -82,7 +82,8 @@ public class BukkitConfig extends AbstractConfiguration {
 
     @Override
     public List<String> getList(String path, List<String> def) {
-        return Optional.ofNullable(configuration.getStringList(path)).orElse(def);
+        List<String> ret = configuration.getStringList(path);
+        return ret == null ? def : ret;
     }
 
     @Override
@@ -92,7 +93,8 @@ public class BukkitConfig extends AbstractConfiguration {
             return def;
         }
 
-        return Optional.ofNullable(section.getKeys(false).stream().collect(Collectors.toList())).orElse(def);
+        Set<String> keys = section.getKeys(false);
+        return keys == null ? def : new ArrayList<>(keys);
     }
 
     @Override

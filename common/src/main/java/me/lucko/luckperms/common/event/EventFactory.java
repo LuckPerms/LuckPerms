@@ -36,17 +36,16 @@ import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
-import me.lucko.luckperms.common.core.model.Group;
-import me.lucko.luckperms.common.core.model.PermissionHolder;
-import me.lucko.luckperms.common.core.model.Track;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.api.event.log.LogBroadcastEvent;
 import me.lucko.luckperms.common.event.impl.EventConfigReload;
 import me.lucko.luckperms.common.event.impl.EventGroupCreate;
 import me.lucko.luckperms.common.event.impl.EventGroupDelete;
 import me.lucko.luckperms.common.event.impl.EventGroupLoad;
 import me.lucko.luckperms.common.event.impl.EventGroupLoadAll;
 import me.lucko.luckperms.common.event.impl.EventLogBroadcast;
+import me.lucko.luckperms.common.event.impl.EventLogNetworkPublish;
 import me.lucko.luckperms.common.event.impl.EventLogPublish;
+import me.lucko.luckperms.common.event.impl.EventLogReceive;
 import me.lucko.luckperms.common.event.impl.EventNodeAdd;
 import me.lucko.luckperms.common.event.impl.EventNodeClear;
 import me.lucko.luckperms.common.event.impl.EventNodeRemove;
@@ -66,9 +65,13 @@ import me.lucko.luckperms.common.event.impl.EventUserDemote;
 import me.lucko.luckperms.common.event.impl.EventUserFirstLogin;
 import me.lucko.luckperms.common.event.impl.EventUserLoad;
 import me.lucko.luckperms.common.event.impl.EventUserPromote;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.common.model.Track;
+import me.lucko.luckperms.common.model.User;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -86,7 +89,7 @@ public final class EventFactory {
     }
 
     public void handleGroupDelete(Group group, DeletionCause cause) {
-        EventGroupDelete event = new EventGroupDelete(group.getName(), ImmutableSet.copyOf(group.getNodes().values()), cause);
+        EventGroupDelete event = new EventGroupDelete(group.getName(), ImmutableSet.copyOf(group.getEnduringNodes().values()), cause);
         fireEvent(event);
     }
 
@@ -100,9 +103,9 @@ public final class EventFactory {
         fireEvent(event);
     }
 
-    public boolean handleLogBroadcast(boolean initialState, LogEntry entry) {
+    public boolean handleLogBroadcast(boolean initialState, LogEntry entry, LogBroadcastEvent.Origin origin) {
         AtomicBoolean cancel = new AtomicBoolean(initialState);
-        EventLogBroadcast event = new EventLogBroadcast(cancel, entry);
+        EventLogBroadcast event = new EventLogBroadcast(cancel, entry, origin);
         eventBus.fireEvent(event);
         return cancel.get();
     }
@@ -114,17 +117,29 @@ public final class EventFactory {
         return cancel.get();
     }
 
-    public void handleNodeAdd(Node node, PermissionHolder target, Set<Node> before, Set<Node> after) {
+    public boolean handleLogNetworkPublish(boolean initialState, UUID id, LogEntry entry) {
+        AtomicBoolean cancel = new AtomicBoolean(initialState);
+        EventLogNetworkPublish event = new EventLogNetworkPublish(cancel, id, entry);
+        eventBus.fireEvent(event);
+        return cancel.get();
+    }
+
+    public void handleLogReceive(UUID id, LogEntry entry) {
+        EventLogReceive event = new EventLogReceive(id, entry);
+        fireEvent(event);
+    }
+
+    public void handleNodeAdd(Node node, PermissionHolder target, Collection<Node> before, Collection<Node> after) {
         EventNodeAdd event = new EventNodeAdd(node, target.getDelegate(), ImmutableSet.copyOf(before), ImmutableSet.copyOf(after));
         fireEvent(event);
     }
 
-    public void handleNodeClear(PermissionHolder target, Set<Node> before, Set<Node> after) {
+    public void handleNodeClear(PermissionHolder target, Collection<Node> before, Collection<Node> after) {
         EventNodeClear event = new EventNodeClear(target.getDelegate(), ImmutableSet.copyOf(before), ImmutableSet.copyOf(after));
         fireEvent(event);
     }
 
-    public void handleNodeRemove(Node node, PermissionHolder target, Set<Node> before, Set<Node> after) {
+    public void handleNodeRemove(Node node, PermissionHolder target, Collection<Node> before, Collection<Node> after) {
         EventNodeRemove event = new EventNodeRemove(node, target.getDelegate(), ImmutableSet.copyOf(before), ImmutableSet.copyOf(after));
         fireEvent(event);
     }

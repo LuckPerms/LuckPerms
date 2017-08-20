@@ -32,19 +32,20 @@ import lombok.NonNull;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
+import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.DataMutateResult;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.caching.MetaAccumulator;
-import me.lucko.luckperms.common.core.NodeFactory;
-import me.lucko.luckperms.common.core.model.Group;
-import me.lucko.luckperms.common.core.model.PermissionHolder;
-import me.lucko.luckperms.common.core.model.User;
-import me.lucko.luckperms.common.utils.ExtractedContexts;
+import me.lucko.luckperms.common.contexts.ExtractedContexts;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
-import me.lucko.luckperms.sponge.service.references.SubjectReference;
+import me.lucko.luckperms.sponge.service.model.SubjectReference;
 import me.lucko.luckperms.sponge.timings.LPTiming;
 
 import org.spongepowered.api.service.permission.PermissionService;
@@ -77,7 +78,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_GET_PERMISSIONS)) {
             Map<ImmutableContextSet, ImmutableMap.Builder<String, Boolean>> perms = new HashMap<>();
 
-            for (Map.Entry<ImmutableContextSet, Collection<Node>> e : (enduring ? holder.getNodes() : holder.getTransientNodes()).asMap().entrySet()) {
+            for (Map.Entry<ImmutableContextSet, Collection<Node>> e : (enduring ? holder.getEnduringNodes() : holder.getTransientNodes()).asMap().entrySet()) {
                 ImmutableMap.Builder<String, Boolean> results = ImmutableMap.builder();
                 for (Node n : e.getValue()) {
                     results.put(n.getPermission(), n.getValue());
@@ -183,7 +184,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_GET_PARENTS)) {
             Map<ImmutableContextSet, ImmutableList.Builder<SubjectReference>> parents = new HashMap<>();
 
-            for (Map.Entry<ImmutableContextSet, Collection<Node>> e : (enduring ? holder.getNodes() : holder.getTransientNodes()).asMap().entrySet()) {
+            for (Map.Entry<ImmutableContextSet, Collection<Node>> e : (enduring ? holder.getEnduringNodes() : holder.getTransientNodes()).asMap().entrySet()) {
                 ImmutableList.Builder<SubjectReference> results = ImmutableList.builder();
                 for (Node n : e.getValue()) {
                     if (n.isGroupNode()) {
@@ -204,8 +205,8 @@ public class LuckPermsSubjectData implements LPSubjectData {
     @Override
     public CompletableFuture<Boolean> addParent(@NonNull ImmutableContextSet contexts, @NonNull SubjectReference subject) {
         try (Timing i = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_ADD_PARENT)) {
-            if (subject.getCollection().equals(PermissionService.SUBJECTS_GROUP)) {
-                return subject.resolve().thenCompose(sub -> {
+            if (subject.getCollectionIdentifier().equals(PermissionService.SUBJECTS_GROUP)) {
+                return subject.resolveLp().thenCompose(sub -> {
                     DataMutateResult result;
 
                     if (enduring) {
@@ -232,8 +233,8 @@ public class LuckPermsSubjectData implements LPSubjectData {
     @Override
     public CompletableFuture<Boolean> removeParent(@NonNull ImmutableContextSet contexts, @NonNull SubjectReference subject) {
         try (Timing i = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_REMOVE_PARENT)) {
-            if (subject.getCollection().equals(PermissionService.SUBJECTS_GROUP)) {
-                subject.resolve().thenCompose(sub -> {
+            if (subject.getCollectionIdentifier().equals(PermissionService.SUBJECTS_GROUP)) {
+                subject.resolveLp().thenCompose(sub -> {
                     DataMutateResult result;
 
                     if (enduring) {
@@ -320,7 +321,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
             Map<ImmutableContextSet, Integer> minPrefixPriority = new HashMap<>();
             Map<ImmutableContextSet, Integer> minSuffixPriority = new HashMap<>();
 
-            for (Node n : enduring ? holder.getNodes().values() : holder.getTransientNodes().values()) {
+            for (Node n : enduring ? holder.getEnduringNodes().values() : holder.getTransientNodes().values()) {
                 if (!n.getValue()) continue;
                 if (!n.isMeta() && !n.isPrefix() && !n.isSuffix()) continue;
 
@@ -369,26 +370,24 @@ public class LuckPermsSubjectData implements LPSubjectData {
         try (Timing i = service.getPlugin().getTimings().time(LPTiming.LP_SUBJECT_SET_OPTION)) {
             if (key.equalsIgnoreCase("prefix") || key.equalsIgnoreCase("suffix")) {
                 // special handling.
-                String type = key.toLowerCase();
-                boolean prefix = type.equals("prefix");
+                ChatMetaType type = ChatMetaType.valueOf(key.toUpperCase());
 
                 // remove all prefixes/suffixes from the user
                 List<Node> toRemove = streamNodes(enduring)
-                        .filter(n -> prefix ? n.isPrefix() : n.isSuffix())
+                        .filter(type::matches)
                         .filter(n -> n.getFullContexts().equals(context))
                         .collect(Collectors.toList());
 
                 toRemove.forEach(makeUnsetConsumer(enduring));
 
                 MetaAccumulator metaAccumulator = holder.accumulateMeta(null, null, ExtractedContexts.generate(service.calculateContexts(context)));
-                int priority = (type.equals("prefix") ? metaAccumulator.getPrefixes() : metaAccumulator.getSuffixes()).keySet().stream()
-                        .mapToInt(e -> e).max().orElse(0);
+                int priority = metaAccumulator.getChatMeta(type).keySet().stream().mapToInt(e -> e).max().orElse(0);
                 priority += 10;
 
                 if (enduring) {
-                    holder.setPermission(NodeFactory.makeChatMetaNode(type.equals("prefix"), priority, value).withExtraContext(context).build());
+                    holder.setPermission(NodeFactory.makeChatMetaNode(type, priority, value).withExtraContext(context).build());
                 } else {
-                    holder.setTransientPermission(NodeFactory.makeChatMetaNode(type.equals("prefix"), priority, value).withExtraContext(context).build());
+                    holder.setTransientPermission(NodeFactory.makeChatMetaNode(type, priority, value).withExtraContext(context).build());
                 }
 
             } else {
@@ -461,7 +460,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
     }
 
     private Stream<Node> streamNodes(boolean enduring) {
-        return (enduring ? holder.getNodes() : holder.getTransientNodes()).values().stream();
+        return (enduring ? holder.getEnduringNodes() : holder.getTransientNodes()).values().stream();
     }
 
     private Consumer<Node> makeUnsetConsumer(boolean enduring) {
@@ -486,10 +485,10 @@ public class LuckPermsSubjectData implements LPSubjectData {
         } else {
             if (t instanceof User) {
                 User user = ((User) t);
-                return service.getPlugin().getStorage().saveUser(user).thenCombineAsync(user.getRefreshBuffer().request(), (b, v) -> v, service.getPlugin().getScheduler().getAsyncExecutor());
+                return service.getPlugin().getStorage().saveUser(user).thenCombineAsync(user.getRefreshBuffer().request(), (b, v) -> v, service.getPlugin().getScheduler().async());
             } else {
                 Group group = ((Group) t);
-                return service.getPlugin().getStorage().saveGroup(group).thenCombineAsync(service.getPlugin().getUpdateTaskBuffer().request(), (b, v) -> v, service.getPlugin().getScheduler().getAsyncExecutor());
+                return service.getPlugin().getStorage().saveGroup(group).thenCombineAsync(service.getPlugin().getUpdateTaskBuffer().request(), (b, v) -> v, service.getPlugin().getScheduler().async());
             }
         }
     }

@@ -26,14 +26,17 @@
 package me.lucko.luckperms.common.commands.impl.group;
 
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.model.Group;
+import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
@@ -43,12 +46,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class GroupInfo extends SubCommand<Group> {
-    public GroupInfo() {
-        super("info", "Gives info about the group", Permission.GROUP_INFO, Predicates.alwaysFalse(), null);
+    public GroupInfo(LocaleManager locale) {
+        super(CommandSpec.GROUP_INFO.spec(locale), "info", CommandPermission.GROUP_INFO, Predicates.alwaysFalse());
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) throws CommandException {
+        if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), group)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
         Message.GROUP_INFO_GENERAL.send(sender,
                 group.getId(),
                 group.getDisplayName(),
@@ -60,12 +68,12 @@ public class GroupInfo extends SubCommand<Group> {
                 group.getMetaNodes().size()
         );
 
-        Set<Node> parents = group.mergePermissions().stream()
+        Set<Node> parents = group.getOwnNodesSet().stream()
                 .filter(Node::isGroupNode)
                 .filter(Node::isPermanent)
                 .collect(Collectors.toSet());
 
-        Set<Node> tempParents = group.mergePermissions().stream()
+        Set<Node> tempParents = group.getOwnNodesSet().stream()
                 .filter(Node::isGroupNode)
                 .filter(Node::isTemporary)
                 .collect(Collectors.toSet());

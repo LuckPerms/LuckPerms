@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 2016 Lucko (Luck) <luck@lucko.me>
+ * This file is part of LuckPerms, licensed under the MIT License.
+ *
+ *  Copyright (c) lucko (Luck) <luck@lucko.me>
+ *  Copyright (c) contributors
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -22,11 +25,13 @@
 
 package me.lucko.luckperms.api;
 
+import javax.annotation.Nonnull;
+
 /**
  * Represents a permission setting.
  *
- * <p>Consider a value of {@link #FALSE} to be a "negated" setting, and a value of {@link #UNDEFINED} to be a
- * non-existent value.</p>
+ * <p>Consider a value of {@link #TRUE} to be a positive setting, {@link #FALSE} to be a "negated" setting,
+ * and a value of {@link #UNDEFINED} to be a non-existent value.</p>
  */
 public enum Tristate {
 
@@ -51,6 +56,7 @@ public enum Tristate {
      * @param b the boolean
      * @return {@link #TRUE} or {@link #FALSE}, depending on the value of the boolean.
      */
+    @Nonnull
     public static Tristate fromBoolean(boolean b) {
         return b ? TRUE : FALSE;
     }

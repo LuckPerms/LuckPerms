@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 2016 Lucko (Luck) <luck@lucko.me>
+ * This file is part of LuckPerms, licensed under the MIT License.
+ *
+ *  Copyright (c) lucko (Luck) <luck@lucko.me>
+ *  Copyright (c) contributors
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +29,8 @@ import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 
+import javax.annotation.Nonnull;
+
 /**
  * Called when a group is created
  */
@@ -36,6 +41,7 @@ public interface GroupCreateEvent extends LuckPermsEvent {
      *
      * @return the new group
      */
+    @Nonnull
     Group getGroup();
 
     /**
@@ -43,6 +49,7 @@ public interface GroupCreateEvent extends LuckPermsEvent {
      *
      * @return the cause of the creation
      */
+    @Nonnull
     CreationCause getCause();
 
 }

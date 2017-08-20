@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 2016 Lucko (Luck) <luck@lucko.me>
+ * This file is part of LuckPerms, licensed under the MIT License.
+ *
+ *  Copyright (c) lucko (Luck) <luck@lucko.me>
+ *  Copyright (c) contributors
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +30,8 @@ import me.lucko.luckperms.api.event.cause.DeletionCause;
 
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 /**
  * Called when a track is deleted
  */
@@ -37,6 +42,7 @@ public interface TrackDeleteEvent extends LuckPermsEvent {
      *
      * @return the name of the deleted track
      */
+    @Nonnull
     String getTrackName();
 
     /**
@@ -44,6 +50,7 @@ public interface TrackDeleteEvent extends LuckPermsEvent {
      *
      * @return a copy of the tracks existing data
      */
+    @Nonnull
     List<String> getExistingData();
 
     /**
@@ -51,6 +58,7 @@ public interface TrackDeleteEvent extends LuckPermsEvent {
      *
      * @return the cause of the deletion
      */
+    @Nonnull
     DeletionCause getCause();
 
 }

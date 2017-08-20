@@ -30,29 +30,34 @@ import lombok.Getter;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ListMultimap;
 
+import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.caching.MetaAccumulator;
-import me.lucko.luckperms.common.core.model.Group;
-import me.lucko.luckperms.common.utils.ExtractedContexts;
+import me.lucko.luckperms.common.contexts.ExtractedContexts;
+import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.LuckPermsSubjectData;
+import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.model.CompatibilityUtil;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
-import me.lucko.luckperms.sponge.service.references.SubjectReference;
+import me.lucko.luckperms.sponge.service.model.SubjectReference;
 import me.lucko.luckperms.sponge.timings.LPTiming;
 
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.permission.NodeTree;
 import org.spongepowered.api.service.permission.PermissionService;
+import org.spongepowered.api.service.permission.Subject;
 
 import co.aikar.timings.Timing;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -104,7 +109,11 @@ public class SpongeGroup extends Group {
                             .map(LocalizedNode::getNode)
                             .filter(Node::isGroupNode)
                             .map(Node::getGroupName)
-                            .map(s -> getPlugin().getService().getGroupSubjects().loadSubject(s).join())
+                            .distinct()
+                            .map(n -> Optional.ofNullable(getPlugin().getGroupManager().getIfLoaded(n)))
+                            .filter(Optional::isPresent)
+                            .map(Optional::get)
+                            .map(SpongeGroup::sponge)
                             .map(LPSubject::toReference)
                             .collect(Collectors.toSet());
 
@@ -141,7 +150,8 @@ public class SpongeGroup extends Group {
 
         @Override
         public Optional<String> getFriendlyIdentifier() {
-            return Optional.of(parent.getFriendlyName());
+            String rawDisplayName = parent.getRawDisplayName();
+            return rawDisplayName.equals(getIdentifier()) ? Optional.empty() : Optional.of(rawDisplayName);
         }
 
         @Override
@@ -152,6 +162,11 @@ public class SpongeGroup extends Group {
         @Override
         public LPSubjectCollection getParentCollection() {
             return plugin.getService().getGroupSubjects();
+        }
+
+        @Override
+        public Subject sponge() {
+            return ProxyFactory.toSponge(this);
         }
 
         @Override
@@ -181,7 +196,7 @@ public class SpongeGroup extends Group {
         @Override
         public boolean isChildOf(ImmutableContextSet contexts, SubjectReference parent) {
             try (Timing ignored = plugin.getTimings().time(LPTiming.GROUP_IS_CHILD_OF)) {
-                return parent.getCollection().equals(PermissionService.SUBJECTS_GROUP) && getPermissionValue(contexts, "group." + parent.getIdentifier()).asBoolean();
+                return parent.getCollectionIdentifier().equals(PermissionService.SUBJECTS_GROUP) && getPermissionValue(contexts, "group." + parent.getSubjectIdentifier()).asBoolean();
             }
         }
 
@@ -197,10 +212,10 @@ public class SpongeGroup extends Group {
             try (Timing ignored = plugin.getService().getPlugin().getTimings().time(LPTiming.GROUP_GET_OPTION)) {
                 Optional<String> option;
                 if (s.equalsIgnoreCase("prefix")) {
-                    option = getChatMeta(contexts, true);
+                    option = getChatMeta(contexts, ChatMetaType.PREFIX);
 
                 } else if (s.equalsIgnoreCase("suffix")) {
-                    option = getChatMeta(contexts, false);
+                    option = getChatMeta(contexts, ChatMetaType.SUFFIX);
 
                 } else {
                     option = getMeta(contexts, s);
@@ -226,19 +241,16 @@ public class SpongeGroup extends Group {
             }
         }
 
-        private Optional<String> getChatMeta(ImmutableContextSet contexts, boolean prefix) {
+        private Optional<String> getChatMeta(ImmutableContextSet contexts, ChatMetaType type) {
             MetaAccumulator metaAccumulator = parent.accumulateMeta(null, null, ExtractedContexts.generate(plugin.getService().calculateContexts(contexts)));
-            if (prefix) {
-                return Optional.ofNullable(metaAccumulator.getPrefixStack().toFormattedString());
-            } else {
-                return Optional.ofNullable(metaAccumulator.getSuffixStack().toFormattedString());
-            }
+            return Optional.ofNullable(metaAccumulator.getStack(type).toFormattedString());
         }
 
         private Optional<String> getMeta(ImmutableContextSet contexts, String key) {
             MetaAccumulator metaAccumulator = parent.accumulateMeta(null, null, ExtractedContexts.generate(plugin.getService().calculateContexts(contexts)));
-            Map<String, String> meta = metaAccumulator.getMeta();
-            return Optional.ofNullable(meta.get(key));
+            ListMultimap<String, String> meta = metaAccumulator.getMeta();
+            List<String> ret = meta.get(key);
+            return ret.isEmpty() ? Optional.empty() : Optional.of(ret.get(0));
         }
     }
 }

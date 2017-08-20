@@ -40,10 +40,10 @@ import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
+import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
-import me.lucko.luckperms.sponge.service.proxy.SubjectCollectionProxy;
-import me.lucko.luckperms.sponge.service.references.SubjectReference;
+import me.lucko.luckperms.sponge.service.model.SubjectReference;
 import me.lucko.luckperms.sponge.service.storage.SubjectStorageModel;
 
 import org.spongepowered.api.service.permission.SubjectCollection;
@@ -63,7 +63,7 @@ public class PersistedCollection implements LPSubjectCollection {
     private final String identifier;
 
     @Getter(AccessLevel.NONE)
-    private final SubjectCollectionProxy spongeProxy;
+    private final SubjectCollection spongeProxy;
 
     @Getter(AccessLevel.NONE)
     private final LoadingCache<String, PersistedSubject> subjects = Caffeine.newBuilder()
@@ -72,7 +72,7 @@ public class PersistedCollection implements LPSubjectCollection {
     public PersistedCollection(LuckPermsService service, String identifier) {
         this.service = service;
         this.identifier = identifier;
-        this.spongeProxy = new SubjectCollectionProxy(service, this);
+        this.spongeProxy = ProxyFactory.toSponge(this);
     }
 
     public void loadAll() {

@@ -28,14 +28,15 @@ package me.lucko.luckperms.sponge.commands;
 import com.google.common.collect.ImmutableMap;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
@@ -44,15 +45,13 @@ import java.util.List;
 import java.util.Map;
 
 public class PermissionInfo extends SubCommand<LPSubjectData> {
-    public PermissionInfo() {
-        super("info", "Shows info about the subject's permissions", Permission.SPONGE_PERMISSION_INFO, Predicates.alwaysFalse(),
-                Arg.list(Arg.create("contexts...", false, "the contexts to filter by"))
-        );
+    public PermissionInfo(LocaleManager locale) {
+        super(CommandSpec.SPONGE_PERMISSION_INFO.spec(locale), "info", CommandPermission.SPONGE_PERMISSION_INFO, Predicates.alwaysFalse());
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, List<String> args, String label) throws CommandException {
-        ImmutableContextSet contextSet = ArgumentUtils.handleContexts(0, args);
+        ImmutableContextSet contextSet = ArgumentUtils.handleContextSponge(0, args);
         if (contextSet.isEmpty()) {
             Util.sendPluginMessage(sender, "&aShowing permissions matching contexts &bANY&a.");
             Map<ImmutableContextSet, ImmutableMap<String, Boolean>> permissions = subjectData.getAllPermissions();

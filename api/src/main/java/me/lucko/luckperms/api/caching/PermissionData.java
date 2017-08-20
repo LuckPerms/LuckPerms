@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 2016 Lucko (Luck) <luck@lucko.me>
+ * This file is part of LuckPerms, licensed under the MIT License.
+ *
+ *  Copyright (c) lucko (Luck) <luck@lucko.me>
+ *  Copyright (c) contributors
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +29,8 @@ import me.lucko.luckperms.api.Tristate;
 
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+
 /**
  * Holds cached Permission lookup data for a specific set of contexts
  *
@@ -40,7 +45,8 @@ public interface PermissionData {
      * @return a tristate result
      * @throws NullPointerException if permission is null
      */
-    Tristate getPermissionValue(String permission);
+    @Nonnull
+    Tristate getPermissionValue(@Nonnull String permission);
 
     /**
      * Invalidates the underlying permission calculator cache.
@@ -54,6 +60,7 @@ public interface PermissionData {
      *
      * @return an immutable set of permissions
      */
+    @Nonnull
     Map<String, Boolean> getImmutableBacking();
 
 }

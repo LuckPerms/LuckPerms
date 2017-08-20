@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 2016 Lucko (Luck) <luck@lucko.me>
+ * This file is part of LuckPerms, licensed under the MIT License.
+ *
+ *  Copyright (c) lucko (Luck) <luck@lucko.me>
+ *  Copyright (c) contributors
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +25,8 @@
 
 package me.lucko.luckperms.api.context;
 
+import javax.annotation.Nonnull;
+
 /**
  * Calculates whether contexts are applicable to {@link T}
  *
@@ -38,6 +43,7 @@ public interface ContextCalculator<T> {
      * @return the map
      * @since 2.13
      */
-    MutableContextSet giveApplicableContext(T subject, MutableContextSet accumulator);
+    @Nonnull
+    MutableContextSet giveApplicableContext(@Nonnull T subject, @Nonnull MutableContextSet accumulator);
 
 }

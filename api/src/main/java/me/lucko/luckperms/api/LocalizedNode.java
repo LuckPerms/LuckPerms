@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 2016 Lucko (Luck) <luck@lucko.me>
+ * This file is part of LuckPerms, licensed under the MIT License.
+ *
+ *  Copyright (c) lucko (Luck) <luck@lucko.me>
+ *  Copyright (c) contributors
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +25,8 @@
 
 package me.lucko.luckperms.api;
 
+import javax.annotation.Nonnull;
+
 /**
  * A node with a traceable origin
  *
@@ -34,6 +39,7 @@ public interface LocalizedNode extends Node {
      *
      * @return the node this instance is representing
      */
+    @Nonnull
     Node getNode();
 
     /**
@@ -42,6 +48,7 @@ public interface LocalizedNode extends Node {
      * @return where the node was inherited from. Will not return null.
      * @see PermissionHolder#getObjectName()
      */
+    @Nonnull
     String getLocation();
 
 }

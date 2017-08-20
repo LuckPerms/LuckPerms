@@ -26,14 +26,15 @@
 package me.lucko.luckperms.sponge.commands;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
@@ -41,17 +42,13 @@ import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 import java.util.List;
 
 public class OptionClear extends SubCommand<LPSubjectData> {
-    public OptionClear() {
-        super("clear", "Clears the Subjects options", Permission.SPONGE_OPTION_CLEAR, Predicates.alwaysFalse(),
-                Arg.list(
-                        Arg.create("contexts...", false, "the contexts to clear options in")
-                )
-        );
+    public OptionClear(LocaleManager locale) {
+        super(CommandSpec.SPONGE_OPTION_CLEAR.spec(locale), "clear", CommandPermission.SPONGE_OPTION_CLEAR, Predicates.alwaysFalse());
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, List<String> args, String label) throws CommandException {
-        ImmutableContextSet contextSet = ArgumentUtils.handleContexts(0, args);
+        ImmutableContextSet contextSet = ArgumentUtils.handleContextSponge(0, args);
         if (contextSet.isEmpty()) {
             subjectData.clearOptions();
             Util.sendPluginMessage(sender, "&aCleared options matching contexts &bANY&a.");

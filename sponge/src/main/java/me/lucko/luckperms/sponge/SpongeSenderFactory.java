@@ -25,15 +25,19 @@
 
 package me.lucko.luckperms.sponge;
 
+import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.commands.sender.SenderFactory;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.sponge.service.model.CompatibilityUtil;
+
+import net.kyori.text.Component;
+import net.kyori.text.LegacyComponent;
+import net.kyori.text.serializer.ComponentSerializer;
 
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.serializer.TextSerializers;
-
-import io.github.mkremins.fanciful.FancyMessage;
 
 import java.util.UUID;
 
@@ -58,19 +62,25 @@ public class SpongeSenderFactory extends SenderFactory<CommandSource> {
         return Constants.CONSOLE_UUID;
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     protected void sendMessage(CommandSource source, String s) {
+        //noinspection deprecation
         source.sendMessage(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(s));
     }
 
     @Override
-    protected void sendMessage(CommandSource source, FancyMessage message) {
+    protected void sendMessage(CommandSource source, Component message) {
         try {
-            source.sendMessage(TextSerializers.JSON.deserialize(message.exportToJson()));
+            source.sendMessage(TextSerializers.JSON.deserialize(ComponentSerializer.serialize(message)));
         } catch (Exception e) {
-            sendMessage(source, message.toOldMessageFormat());
+            //noinspection deprecation
+            sendMessage(source, LegacyComponent.to(message));
         }
+    }
+
+    @Override
+    protected Tristate getPermissionValue(CommandSource source, String node) {
+        return CompatibilityUtil.convertTristate(source.getPermissionValue(source.getActiveContexts(), node));
     }
 
     @Override

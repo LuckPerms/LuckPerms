@@ -28,11 +28,18 @@ package me.lucko.luckperms.common.messaging;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
+import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.buffers.BufferedRequest;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.utils.BufferedRequest;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -50,10 +57,11 @@ public abstract class AbstractMessagingService implements InternalMessagingServi
     @Getter
     private final String name;
 
-    private final Set<UUID> receivedMsgs = Collections.synchronizedSet(new HashSet<>());
+    private final Set<UUID> receivedMessages = Collections.synchronizedSet(new HashSet<>());
+    private final Gson gson = new Gson();
 
     @Getter
-    private final BufferedRequest<Void> updateBuffer = new BufferedRequest<Void>(10000L, r -> getPlugin().doAsync(r)) {
+    private final BufferedRequest<Void> updateBuffer = new BufferedRequest<Void>(3000L, r -> getPlugin().doAsync(r)) {
         @Override
         protected Void perform() {
             pushUpdate();
@@ -63,54 +71,91 @@ public abstract class AbstractMessagingService implements InternalMessagingServi
 
     protected abstract void sendMessage(String channel, String message);
 
-    protected void onMessage(String channel, String msg, Consumer<UUID> callback) {
+    protected void onMessage(String channel, String msg, Consumer<String> callback) {
         if (!channel.equals(CHANNEL)) {
             return;
         }
 
-        UUID uuid = parseUpdateMessage(msg);
-        if (uuid == null) {
-            return;
+        if (msg.startsWith("update:") && msg.length() > "update:".length()) {
+            UUID uuid = parseUpdateMessage(msg);
+            if (uuid == null) {
+                return;
+            }
+
+            if (!receivedMessages.add(uuid)) {
+                return;
+            }
+
+            plugin.getLog().info("[" + name + " Messaging] Received update ping with id: " + uuid.toString());
+
+            if (plugin.getApiProvider().getEventFactory().handleNetworkPreSync(false, uuid)) {
+                return;
+            }
+
+            plugin.getUpdateTaskBuffer().request();
+
+            if (callback != null) {
+                callback.accept(msg);
+            }
+
+        } else if (msg.startsWith("log:") && msg.length() > "log:".length()) {
+            String logData = msg.substring("log:".length());
+            Map.Entry<UUID, LogEntry> entry = null;
+            try {
+                entry = ExtendedLogEntry.deserialize(gson.fromJson(logData, JsonObject.class));
+            } catch (Exception e) {
+                plugin.getLog().warn("Error whilst deserializing log: " + logData);
+                e.printStackTrace();
+            }
+
+            if (entry == null) {
+                return;
+            }
+
+            if (!receivedMessages.add(entry.getKey())) {
+                return;
+            }
+
+            plugin.getApiProvider().getEventFactory().handleLogReceive(entry.getKey(), entry.getValue());
+            plugin.getLogDispatcher().dispatchFromRemote(entry.getValue());
+
+            if (callback != null) {
+                callback.accept(msg);
+            }
         }
+    }
 
-        if (!receivedMsgs.add(uuid)) {
-            return;
-        }
+    @Override
+    public void pushLog(LogEntry logEntry) {
+        plugin.doAsync(() -> {
+            UUID id = generatePingId();
 
-        plugin.getLog().info("[" + name + " Messaging] Received update ping with id: " + uuid.toString());
+            if (plugin.getApiProvider().getEventFactory().handleLogNetworkPublish(!plugin.getConfiguration().get(ConfigKeys.PUSH_LOG_ENTRIES), id, logEntry)) {
+                return;
+            }
 
-        if (plugin.getApiProvider().getEventFactory().handleNetworkPreSync(false, uuid)) {
-            return;
-        }
-
-        plugin.getUpdateTaskBuffer().request();
-
-        if (callback != null) {
-            callback.accept(uuid);
-        }
+            plugin.getLog().info("[" + name + " Messaging] Sending log with id: " + id.toString());
+            sendMessage(CHANNEL, "log:" + gson.toJson(ExtendedLogEntry.serializeWithId(id, logEntry)));
+        });
     }
 
     @Override
     public void pushUpdate() {
         plugin.doAsync(() -> {
-            UUID id = generateId();
+            UUID id = generatePingId();
             plugin.getLog().info("[" + name + " Messaging] Sending ping with id: " + id.toString());
 
             sendMessage(CHANNEL, "update:" + id.toString());
         });
     }
 
-    private UUID generateId() {
+    private UUID generatePingId() {
         UUID uuid = UUID.randomUUID();
-        receivedMsgs.add(uuid);
+        receivedMessages.add(uuid);
         return uuid;
     }
 
     private static UUID parseUpdateMessage(String msg) {
-        if (!msg.startsWith("update:")) {
-            return null;
-        }
-
         String requestId = msg.substring("update:".length());
         try {
             return UUID.fromString(requestId);

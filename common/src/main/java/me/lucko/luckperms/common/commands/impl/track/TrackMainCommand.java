@@ -30,29 +30,32 @@ import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.common.commands.abstraction.Command;
 import me.lucko.luckperms.common.commands.abstraction.MainCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.core.model.Track;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class TrackMainCommand extends MainCommand<Track> {
-    public TrackMainCommand() {
-        super("Track", "Track commands", "/%s track <track>", 2, ImmutableList.<Command<Track, ?>>builder()
-                .add(new TrackInfo())
-                .add(new TrackAppend())
-                .add(new TrackInsert())
-                .add(new TrackRemove())
-                .add(new TrackClear())
-                .add(new TrackRename())
-                .add(new TrackClone())
+    public TrackMainCommand(LocaleManager locale) {
+        super(CommandSpec.TRACK.spec(locale), "Track", 2, ImmutableList.<Command<Track, ?>>builder()
+                .add(new TrackInfo(locale))
+                .add(new TrackAppend(locale))
+                .add(new TrackInsert(locale))
+                .add(new TrackRemove(locale))
+                .add(new TrackClear(locale))
+                .add(new TrackRename(locale))
+                .add(new TrackClone(locale))
                 .build()
         );
     }
 
     @Override
     protected Track getTarget(String target, LuckPermsPlugin plugin, Sender sender) {
+        target = target.toLowerCase();
         if (!plugin.getStorage().loadTrack(target).join()) {
             Message.TRACK_NOT_FOUND.send(sender);
             return null;

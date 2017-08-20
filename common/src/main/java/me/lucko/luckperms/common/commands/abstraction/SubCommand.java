@@ -33,13 +33,14 @@ import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.model.Group;
-import me.lucko.luckperms.common.core.model.Track;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.locale.LocalizedSpec;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.messaging.NoopMessagingService;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.Track;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.treeview.PermissionVault;
 import me.lucko.luckperms.common.treeview.TreeNode;
@@ -58,8 +59,8 @@ import java.util.stream.Collectors;
 @Getter
 public abstract class SubCommand<T> extends Command<T, Void> {
 
-    public SubCommand(String name, String description, Permission permission, Predicate<Integer> argumentCheck, List<Arg> args) {
-        super(name, description, permission, argumentCheck, args);
+    public SubCommand(LocalizedSpec spec, String name, CommandPermission permission, Predicate<Integer> argumentCheck) {
+        super(spec, name, permission, argumentCheck);
     }
 
     /**
@@ -159,7 +160,7 @@ public abstract class SubCommand<T> extends Command<T, Void> {
         return Collections.emptyList();
     }
 
-    private static List<String> getTabComplete(List<String> options, List<String> args) {
+    public static List<String> getTabComplete(List<String> options, List<String> args) {
         if (args.size() <= 1) {
             if (args.isEmpty() || args.get(0).equalsIgnoreCase("")) {
                 return options;
@@ -185,9 +186,7 @@ public abstract class SubCommand<T> extends Command<T, Void> {
             messagingService.getUpdateBuffer().request();
         }
 
-        if (success) {
-            Message.USER_SAVE_SUCCESS.send(sender);
-        } else {
+        if (!success) {
             Message.USER_SAVE_ERROR.send(sender);
         }
     }
@@ -206,9 +205,7 @@ public abstract class SubCommand<T> extends Command<T, Void> {
             messagingService.getUpdateBuffer().request();
         }
 
-        if (success) {
-            Message.GROUP_SAVE_SUCCESS.send(sender);
-        } else {
+        if (!success) {
             Message.GROUP_SAVE_ERROR.send(sender);
         }
     }
@@ -227,9 +224,7 @@ public abstract class SubCommand<T> extends Command<T, Void> {
             messagingService.getUpdateBuffer().request();
         }
 
-        if (success) {
-            Message.TRACK_SAVE_SUCCESS.send(sender);
-        } else {
+        if (!success) {
             Message.TRACK_SAVE_ERROR.send(sender);
         }
     }

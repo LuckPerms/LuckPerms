@@ -37,30 +37,37 @@ import java.util.stream.Collector;
 @UtilityClass
 public class ImmutableCollectors {
 
+    private static final Collector<Object, ImmutableList.Builder<Object>, ImmutableList<Object>> LIST = Collector.of(
+            ImmutableList.Builder::new,
+            ImmutableList.Builder::add,
+            (l, r) -> l.addAll(r.build()),
+            ImmutableList.Builder::build
+    );
+
+    private static final Collector<Object, ImmutableSet.Builder<Object>, ImmutableSet<Object>> SET = Collector.of(
+            ImmutableSet.Builder::new,
+            ImmutableSet.Builder::add,
+            (l, r) -> l.addAll(r.build()),
+            ImmutableSet.Builder::build
+    );
+
+    public static <T> Collector<T, ImmutableList.Builder<T>, ImmutableList<T>> toImmutableList() {
+        //noinspection unchecked
+        return (Collector) LIST;
+    }
+
+    public static <T> Collector<T, ImmutableSet.Builder<T>, ImmutableSet<T>> toImmutableSet() {
+        //noinspection unchecked
+        return (Collector) SET;
+    }
+
     public static <T, K, V> Collector<T, ImmutableMap.Builder<K, V>, ImmutableMap<K, V>> toImmutableMap(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper) {
         return Collector.of(
                 ImmutableMap.Builder<K, V>::new,
                 (r, t) -> r.put(keyMapper.apply(t), valueMapper.apply(t)),
                 (l, r) -> l.putAll(r.build()),
-                ImmutableMap.Builder::build,
-                Collector.Characteristics.UNORDERED);
-    }
-
-    public static <T> Collector<T, ImmutableSet.Builder<T>, ImmutableSet<T>> toImmutableSet() {
-        return Collector.of(
-                ImmutableSet.Builder<T>::new,
-                ImmutableSet.Builder<T>::add,
-                (l, r) -> l.addAll(r.build()),
-                ImmutableSet.Builder<T>::build,
-                Collector.Characteristics.UNORDERED);
-    }
-
-    public static <T> Collector<T, ImmutableList.Builder<T>, ImmutableList<T>> toImmutableList() {
-        return Collector.of(
-                ImmutableList.Builder<T>::new,
-                ImmutableList.Builder<T>::add,
-                (l, r) -> l.addAll(r.build()),
-                ImmutableList.Builder<T>::build);
+                ImmutableMap.Builder::build
+        );
     }
 
 }

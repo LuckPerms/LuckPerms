@@ -27,40 +27,56 @@ package me.lucko.luckperms.common.commands.impl.generic.meta;
 
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.common.commands.Arg;
+import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.NodeFactory;
-import me.lucko.luckperms.common.core.model.PermissionHolder;
-import me.lucko.luckperms.common.data.LogEntry;
+import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.common.utils.TextUtils;
+
+import net.kyori.text.LegacyComponent;
+import net.kyori.text.TextComponent;
+import net.kyori.text.event.HoverEvent;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class MetaSet extends SharedSubCommand {
-    public MetaSet() {
-        super("set", "Sets a meta value", Permission.USER_META_SET, Permission.GROUP_META_SET, Predicates.inRange(0, 1),
-                Arg.list(
-                        Arg.create("key", true, "the key to set"),
-                        Arg.create("value", true, "the value to set"),
-                        Arg.create("context...", false, "the contexts to add the meta pair in")
-                )
-        );
+    public MetaSet(LocaleManager locale) {
+        super(CommandSpec.META_SET.spec(locale), "set", CommandPermission.USER_META_SET, CommandPermission.GROUP_META_SET, Predicates.inRange(0, 1));
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label, CommandPermission permission) throws CommandException {
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, holder)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
         String key = args.get(0);
         String value = args.get(1);
-        MutableContextSet context = ArgumentUtils.handleContext(2, args);
+        MutableContextSet context = ArgumentUtils.handleContext(2, args, plugin);
+
+        if (ArgumentPermissions.checkContext(plugin, sender, permission, context)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
+        if (ArgumentPermissions.checkArguments(plugin, sender, permission, key)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
 
         Node n = NodeFactory.makeMetaNode(key, value).withExtraContext(context).build();
 
@@ -72,9 +88,15 @@ public class MetaSet extends SharedSubCommand {
         holder.clearMetaKeys(key, context, false);
         holder.setPermission(n);
 
-        Message.SET_META_SUCCESS.send(sender, key, value, holder.getFriendlyName(), Util.contextSetToString(context));
+        TextComponent.Builder builder = LegacyComponent.from(Message.SET_META_SUCCESS.asString(plugin.getLocaleManager(), key, value, holder.getFriendlyName(), Util.contextSetToString(context))).toBuilder();
+        HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, LegacyComponent.from(
+                TextUtils.joinNewline("¥3Raw key: ¥r" + key, "¥3Raw value: ¥r" + value),
+                '¥'
+        ));
+        builder.applyDeep(c -> c.hoverEvent(event));
+        sender.sendMessage(builder.build());
 
-        LogEntry.build().actor(sender).acted(holder)
+        ExtendedLogEntry.build().actor(sender).acted(holder)
                 .action("meta set " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
                 .build().submit(plugin, sender);
 

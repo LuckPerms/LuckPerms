@@ -26,18 +26,20 @@
 package me.lucko.luckperms.common.commands.impl.generic.permission;
 
 import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.common.commands.Arg;
+import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.InheritanceInfo;
-import me.lucko.luckperms.common.core.NodeFactory;
-import me.lucko.luckperms.common.core.model.PermissionHolder;
+import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.common.node.InheritanceInfo;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -46,20 +48,19 @@ import java.util.List;
 import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getPermissionTabComplete;
 
 public class PermissionCheckInherits extends SharedSubCommand {
-    public PermissionCheckInherits() {
-        super("checkinherits", "Checks to see if the object inherits a certain permission node",
-                Permission.USER_PERM_CHECK_INHERITS, Permission.GROUP_PERM_CHECK_INHERITS, Predicates.is(0),
-                Arg.list(
-                        Arg.create("node", true, "the permission node to check for"),
-                        Arg.create("context...", false, "the contexts to check in")
-                )
-        );
+    public PermissionCheckInherits(LocaleManager locale) {
+        super(CommandSpec.PERMISSION_CHECK_INHERITS.spec(locale), "checkinherits", CommandPermission.USER_PERM_CHECK_INHERITS, CommandPermission.GROUP_PERM_CHECK_INHERITS, Predicates.is(0));
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label, CommandPermission permission) throws CommandException {
+        if (ArgumentPermissions.checkViewPerms(plugin, sender, permission, holder)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
         String node = ArgumentUtils.handleString(0, args);
-        MutableContextSet context = ArgumentUtils.handleContext(1, args);
+        MutableContextSet context = ArgumentUtils.handleContext(1, args, plugin);
 
         InheritanceInfo result = holder.inheritsPermissionInfo(NodeFactory.newBuilder(node).withExtraContext(context).build());
 
@@ -69,7 +70,7 @@ public class PermissionCheckInherits extends SharedSubCommand {
         }
 
         String s = Util.formatTristate(result.getResult());
-        Message.CHECK_PERMISSION.send(sender, holder.getFriendlyName(), node, s, Util.contextSetToString(context), location);
+        Message.CHECK_INHERITS_PERMISSION.send(sender, holder.getFriendlyName(), node, s, Util.contextSetToString(context), String.valueOf(location));
         return CommandResult.SUCCESS;
     }
 

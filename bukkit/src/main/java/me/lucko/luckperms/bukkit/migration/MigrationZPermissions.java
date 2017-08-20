@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.bukkit.migration;
 
+import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.commands.CommandException;
@@ -33,15 +34,17 @@ import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.NodeFactory;
-import me.lucko.luckperms.common.core.model.Group;
-import me.lucko.luckperms.common.core.model.PermissionHolder;
-import me.lucko.luckperms.common.core.model.Track;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.logging.ProgressLogger;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.common.model.Track;
+import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.common.utils.ProgressLogger;
 
 import org.bukkit.Bukkit;
 import org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsService;
@@ -61,8 +64,8 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MigrationZPermissions extends SubCommand<Object> {
-    public MigrationZPermissions() {
-        super("zpermissions", "Migration from zPermissions", Permission.MIGRATION, Predicates.alwaysFalse(), null);
+    public MigrationZPermissions(LocaleManager locale) {
+        super(CommandSpec.MIGRATION_COMMAND.spec(locale), "zpermissions", CommandPermission.MIGRATION, Predicates.alwaysFalse());
     }
 
     @Override
@@ -193,6 +196,10 @@ public class MigrationZPermissions extends SubCommand<Object> {
 
     private void migrateEntity(PermissionHolder holder, PermissionEntity entity, int weight) {
         for (Entry e : entity.getPermissions()) {
+            if (e.getPermission().isEmpty()) {
+                continue;
+            }
+
             if (e.getWorld() != null && !e.getWorld().getName().equals("")) {
                 holder.setPermission(NodeFactory.newBuilder(e.getPermission()).setValue(e.isValue()).setWorld(e.getWorld().getName()).build());
             } else {
@@ -212,8 +219,13 @@ public class MigrationZPermissions extends SubCommand<Object> {
         for (EntityMetadata metadata : entity.getMetadata()) {
             String key = metadata.getName().toLowerCase();
 
+            if (key.isEmpty() || metadata.getStringValue().isEmpty()) {
+                continue;
+            }
+
             if (key.equals("prefix") || key.equals("suffix")) {
-                holder.setPermission(NodeFactory.makeChatMetaNode(key.equals("prefix"), weight, metadata.getStringValue()).build());
+                ChatMetaType type = ChatMetaType.valueOf(key.toUpperCase());
+                holder.setPermission(NodeFactory.makeChatMetaNode(type, weight, metadata.getStringValue()).build());
             } else {
                 holder.setPermission(NodeFactory.makeMetaNode(key, metadata.getStringValue()).build());
             }

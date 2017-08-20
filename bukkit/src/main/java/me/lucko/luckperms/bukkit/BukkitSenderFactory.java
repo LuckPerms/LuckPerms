@@ -25,15 +25,17 @@
 
 package me.lucko.luckperms.bukkit;
 
+import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.bukkit.compat.MessageHandler;
 import me.lucko.luckperms.common.commands.sender.SenderFactory;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
+import net.kyori.text.Component;
+
+import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
-import io.github.mkremins.fanciful.FancyMessage;
 
 import java.util.UUID;
 
@@ -63,12 +65,27 @@ public class BukkitSenderFactory extends SenderFactory<CommandSender> {
 
     @Override
     protected void sendMessage(CommandSender sender, String s) {
+
+        // send sync if command block
+        if (sender instanceof BlockCommandSender) {
+            getPlugin().getScheduler().doSync(() -> sender.sendMessage(s));
+            return;
+        }
+
         sender.sendMessage(s);
     }
 
     @Override
-    protected void sendMessage(CommandSender sender, FancyMessage message) {
+    protected void sendMessage(CommandSender sender, Component message) {
         messageHandler.sendJsonMessage(sender, message);
+    }
+
+    @Override
+    protected Tristate getPermissionValue(CommandSender sender, String node) {
+        boolean isSet = sender.isPermissionSet(node);
+        boolean val = sender.hasPermission(node);
+
+        return !isSet ? val ? Tristate.TRUE : Tristate.UNDEFINED : Tristate.fromBoolean(val);
     }
 
     @Override

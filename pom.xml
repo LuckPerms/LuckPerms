@@ -6,13 +6,17 @@
 
     <groupId>me.lucko.luckperms</groupId>
     <artifactId>luckperms</artifactId>
-    <version>3.1-SNAPSHOT</version>
+    <version>3.3-SNAPSHOT</version>
+
     <modules>
         <module>api</module>
         <module>common</module>
         <module>bukkit</module>
         <module>bukkit-legacy</module>
         <module>bungee</module>
+        <module>sponge/sponge-service</module>
+        <module>sponge/sponge-service-api6</module>
+        <module>sponge/sponge-service-api7</module>
         <module>sponge</module>
     </modules>
 
@@ -43,7 +47,7 @@
         <maven.test.skip>true</maven.test.skip>
 
         <!-- Manually entered release version -->
-        <release.version>3.1</release.version>
+        <release.version>3.3</release.version>
 
         <!-- Get how many commits have been made since the last tag (the previous release) -->
         <patch.version>${git.closest.tag.commit.count}</patch.version>
@@ -53,7 +57,8 @@
         <!-- Standard versions used by the whole project -->
         <compiler.version>3.6.1</compiler.version>
         <shade.version>3.0.0</shade.version>
-        <lombok.version>1.16.16</lombok.version>
+        <lombok.version>1.16.18</lombok.version>
+        <gpg.version>1.6</gpg.version>
     </properties>
 
     <distributionManagement>
@@ -82,7 +87,7 @@
             <plugin>
                 <groupId>pl.project13.maven</groupId>
                 <artifactId>git-commit-id-plugin</artifactId>
-                <version>2.2.1</version>
+                <version>2.2.2</version>
                 <executions>
                     <execution>
                         <phase>validate</phase>
@@ -101,6 +106,10 @@
     </build>
 
     <repositories>
+        <repository>
+            <id>sonatype-snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+        </repository>
         <repository>
             <id>luck-repo</id>
             <url>https://repo.lucko.me/</url>

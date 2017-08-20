@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 2016 Lucko (Luck) <luck@lucko.me>
+ * This file is part of LuckPerms, licensed under the MIT License.
+ *
+ *  Copyright (c) lucko (Luck) <luck@lucko.me>
+ *  Copyright (c) contributors
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +29,8 @@ import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 
+import javax.annotation.Nonnull;
+
 /**
  * Called when a users {@link me.lucko.luckperms.api.caching.UserData} is loaded.
  */
@@ -36,6 +41,7 @@ public interface UserCacheLoadEvent extends LuckPermsEvent {
      *
      * @return the user
      */
+    @Nonnull
     User getUser();
 
     /**
@@ -43,6 +49,7 @@ public interface UserCacheLoadEvent extends LuckPermsEvent {
      *
      * @return the loaded data
      */
+    @Nonnull
     UserData getLoadedData();
 
 }

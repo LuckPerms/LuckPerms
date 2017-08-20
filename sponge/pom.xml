@@ -5,7 +5,7 @@
     <parent>
         <artifactId>luckperms</artifactId>
         <groupId>me.lucko.luckperms</groupId>
-        <version>3.1-SNAPSHOT</version>
+        <version>3.3-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -46,8 +46,8 @@
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <relocations>
                                 <relocation>
-                                    <pattern>io.github.mkremins.fanciful</pattern>
-                                    <shadedPattern>me.lucko.luckperms.lib.fanciful</shadedPattern>
+                                    <pattern>net.kyori.text</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.text</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
@@ -70,12 +70,57 @@
         </plugins>
     </build>
 
+    <profiles>
+        <profile>
+            <id>sign</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>${gpg.version}</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
     <dependencies>
+        <!-- LP Sponge Model -->
+        <dependency>
+            <groupId>me.lucko.luckperms</groupId>
+            <artifactId>luckperms-sponge-service</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <!-- LP Sponge Proxy for API6 -->
+        <dependency>
+            <groupId>me.lucko.luckperms</groupId>
+            <artifactId>luckperms-sponge-service-api6</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <!-- LP Sponge Proxy for API7 -->
+        <dependency>
+            <groupId>me.lucko.luckperms</groupId>
+            <artifactId>luckperms-sponge-service-api7</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
         <!-- Sponge API -->
         <dependency>
             <groupId>org.spongepowered</groupId>
             <artifactId>spongeapi</artifactId>
-            <version>5.1.0</version>
+            <version>6.0.0</version>
             <scope>provided</scope>
         </dependency>
         <!-- LuckPerms Common -->

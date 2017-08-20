@@ -30,11 +30,13 @@ import lombok.Getter;
 
 import com.google.common.base.Splitter;
 
+import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.Constants;
-import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import io.github.mkremins.fanciful.FancyMessage;
+import net.kyori.text.Component;
+import net.kyori.text.LegacyComponent;
 
 import java.lang.ref.WeakReference;
 import java.util.UUID;
@@ -80,10 +82,11 @@ public final class AbstractSender<T> implements Sender {
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Override
-    public void sendMessage(FancyMessage message) {
+    public void sendMessage(Component message) {
         if (isConsole()) {
-            sendMessage(message.toOldMessageFormat());
+            sendMessage(LegacyComponent.to(message));
             return;
         }
 
@@ -94,19 +97,34 @@ public final class AbstractSender<T> implements Sender {
     }
 
     @Override
-    public boolean hasPermission(Permission permission) {
+    public Tristate getPermissionValue(String permission) {
+        if (isConsole()) return Tristate.TRUE;
+
+        T t = ref.get();
+        if (t != null) {
+            return factory.getPermissionValue(t, permission);
+        }
+
+        return Tristate.UNDEFINED;
+    }
+
+    @Override
+    public boolean hasPermission(String permission) {
         if (isConsole()) return true;
 
         T t = ref.get();
         if (t != null) {
-            for (String s : permission.getNodes()) {
-                if (factory.hasPermission(t, s)) {
-                    return true;
-                }
+            if (factory.hasPermission(t, permission)) {
+                return true;
             }
         }
 
         return false;
+    }
+
+    @Override
+    public boolean hasPermission(CommandPermission permission) {
+        return hasPermission(permission.getPermission());
     }
 
     @Override
@@ -117,6 +135,11 @@ public final class AbstractSender<T> implements Sender {
     @Override
     public boolean isImport() {
         return this.uuid.equals(Constants.IMPORT_UUID);
+    }
+
+    @Override
+    public boolean isValid() {
+        return ref.get() != null;
     }
 
 }

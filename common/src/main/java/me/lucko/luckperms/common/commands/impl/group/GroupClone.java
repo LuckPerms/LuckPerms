@@ -26,30 +26,35 @@
 package me.lucko.luckperms.common.commands.impl.group;
 
 import me.lucko.luckperms.api.event.cause.CreationCause;
-import me.lucko.luckperms.common.commands.Arg;
+import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.DataConstraints;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.model.Group;
-import me.lucko.luckperms.common.data.LogEntry;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 
 public class GroupClone extends SubCommand<Group> {
-    public GroupClone() {
-        super("clone", "Clone the group", Permission.GROUP_CLONE, Predicates.not(1),
-                Arg.list(Arg.create("name", true, "the name of the group to clone onto"))
-        );
+    public GroupClone(LocaleManager locale) {
+        super(CommandSpec.GROUP_CLONE.spec(locale), "clone", CommandPermission.GROUP_CLONE, Predicates.not(1));
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) throws CommandException {
+        if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), group)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
         String newGroupName = args.get(0).toLowerCase();
         if (!DataConstraints.GROUP_NAME_TEST.test(newGroupName)) {
             Message.GROUP_INVALID_ENTRY.send(sender);
@@ -64,10 +69,15 @@ public class GroupClone extends SubCommand<Group> {
             return CommandResult.LOADING_ERROR;
         }
 
-        newGroup.replaceNodes(group.getNodes());
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), newGroup)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
+        newGroup.replaceEnduringNodes(group.getEnduringNodes());
 
         Message.CLONE_SUCCESS.send(sender, group.getName(), newGroup.getName());
-        LogEntry.build().actor(sender).acted(group).action("clone " + newGroup.getName()).build().submit(plugin, sender);
+        ExtendedLogEntry.build().actor(sender).acted(group).action("clone " + newGroup.getName()).build().submit(plugin, sender);
         save(newGroup, sender, plugin);
         return CommandResult.SUCCESS;
     }

@@ -27,7 +27,8 @@ package me.lucko.luckperms.common.commands.impl.generic.meta;
 
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.common.commands.Arg;
+import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
@@ -35,38 +36,53 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.NodeFactory;
-import me.lucko.luckperms.common.core.TemporaryModifier;
-import me.lucko.luckperms.common.core.model.PermissionHolder;
-import me.lucko.luckperms.common.data.LogEntry;
+import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.constants.Constants;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.common.model.TemporaryModifier;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.common.utils.TextUtils;
+
+import net.kyori.text.LegacyComponent;
+import net.kyori.text.TextComponent;
+import net.kyori.text.event.HoverEvent;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class MetaSetTemp extends SharedSubCommand {
-    public MetaSetTemp() {
-        super("settemp", "Sets a meta value temporarily", Permission.USER_META_SETTEMP, Permission.GROUP_META_SETTEMP, Predicates.inRange(0, 2),
-                Arg.list(
-                        Arg.create("key", true, "the key to set"),
-                        Arg.create("value", true, "the value to set"),
-                        Arg.create("duration", true, "the duration until the meta value expires"),
-                        Arg.create("context...", false, "the contexts to add the meta pair in")
-                )
-        );
+    public MetaSetTemp(LocaleManager locale) {
+        super(CommandSpec.META_SETTEMP.spec(locale), "settemp", CommandPermission.USER_META_SETTEMP, CommandPermission.GROUP_META_SETTEMP, Predicates.inRange(0, 2));
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label, CommandPermission permission) throws CommandException {
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, holder)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
         String key = args.get(0);
         String value = args.get(1);
         long duration = ArgumentUtils.handleDuration(2, args);
-        MutableContextSet context = ArgumentUtils.handleContext(2, args);
+        MutableContextSet context = ArgumentUtils.handleContext(3, args, plugin);
         TemporaryModifier modifier = plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR);
+
+        if (ArgumentPermissions.checkContext(plugin, sender, permission, context)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
+        if (ArgumentPermissions.checkArguments(plugin, sender, permission, key)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
 
         Node n = NodeFactory.makeMetaNode(key, value).withExtraContext(context).setExpiry(duration).build();
 
@@ -78,9 +94,15 @@ public class MetaSetTemp extends SharedSubCommand {
         holder.clearMetaKeys(key, context, true);
         duration = holder.setPermission(n, modifier).getValue().getExpiryUnixTime();
 
-        Message.SET_META_TEMP_SUCCESS.send(sender, key, value, holder.getFriendlyName(), DateUtil.formatDateDiff(duration), Util.contextSetToString(context));
+        TextComponent.Builder builder = LegacyComponent.from(Message.SET_META_TEMP_SUCCESS.asString(plugin.getLocaleManager(), key, value, holder.getFriendlyName(), DateUtil.formatDateDiff(duration), Util.contextSetToString(context)), Constants.COLOR_CHAR).toBuilder();
+        HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, LegacyComponent.from(
+                TextUtils.joinNewline("¥3Raw key: ¥r" + key, "¥3Raw value: ¥r" + value),
+                '¥'
+        ));
+        builder.applyDeep(c -> c.hoverEvent(event));
+        sender.sendMessage(builder.build());
 
-        LogEntry.build().actor(sender).acted(holder)
+        ExtendedLogEntry.build().actor(sender).acted(holder)
                 .action("meta settemp " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
                 .build().submit(plugin, sender);
 

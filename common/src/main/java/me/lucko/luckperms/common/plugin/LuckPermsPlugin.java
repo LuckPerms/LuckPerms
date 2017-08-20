@@ -28,7 +28,9 @@ package me.lucko.luckperms.common.plugin;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.PlatformType;
+import me.lucko.luckperms.common.actionlog.LogDispatcher;
 import me.lucko.luckperms.common.api.ApiProvider;
+import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.commands.CommandManager;
@@ -36,19 +38,18 @@ import me.lucko.luckperms.common.commands.abstraction.Command;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
-import me.lucko.luckperms.common.constants.Message;
 import me.lucko.luckperms.common.contexts.ContextManager;
-import me.lucko.luckperms.common.core.UuidCache;
-import me.lucko.luckperms.common.core.model.User;
 import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.managers.UserManager;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.storage.Storage;
+import me.lucko.luckperms.common.storage.backing.file.FileWatcher;
 import me.lucko.luckperms.common.treeview.PermissionVault;
-import me.lucko.luckperms.common.utils.BufferedRequest;
-import me.lucko.luckperms.common.utils.FileWatcher;
+import me.lucko.luckperms.common.utils.UuidCache;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 
 import java.io.File;
@@ -56,6 +57,7 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -181,18 +183,25 @@ public interface LuckPermsPlugin {
     PermissionVault getPermissionVault();
 
     /**
+     * Gets the log dispatcher running on the platform
+     *
+     * @return the log dispatcher
+     */
+    LogDispatcher getLogDispatcher();
+
+    /**
      * Gets the LuckPerms Scheduler instance
      *
      * @return the scheduler
      */
     LuckPermsScheduler getScheduler();
 
-    default void doAsync(Runnable r) {
-        getScheduler().doAsync(r);
+    default void doAsync(Runnable runnable) {
+        getScheduler().doAsync(runnable);
     }
 
-    default void doSync(Runnable r) {
-        getScheduler().doSync(r);
+    default void doSync(Runnable runnable) {
+        getScheduler().doSync(runnable);
     }
 
     /**
@@ -220,6 +229,13 @@ public interface LuckPermsPlugin {
      * @return the server version
      */
     String getServerVersion();
+
+    /**
+     * Gets the time when the plugin first started in millis.
+     *
+     * @return the enable time
+     */
+    long getStartTime();
 
     /**
      * Gets the file watcher running on the platform, or null if it's not enabled.
@@ -286,6 +302,14 @@ public interface LuckPermsPlugin {
     Object getPlayer(User user);
 
     /**
+     * Lookup a uuid from a username, using the servers internal uuid cache.
+     *
+     * @param username the username to lookup
+     * @return an optional uuid, if found
+     */
+    Optional<UUID> lookupUuid(String username);
+
+    /**
      * Gets a calculated context instance for the user using the rules of the platform.
      *
      * @param user the user instance
@@ -337,6 +361,13 @@ public interface LuckPermsPlugin {
     Sender getConsoleSender();
 
     /**
+     * Gets the unique players which have connected to the server since it started.
+     *
+     * @return the unique connections
+     */
+    Set<UUID> getUniqueConnections();
+
+    /**
      * Gets a set of Contexts that should be pre-processed in advance
      *
      * @param op if the user being processed is op
@@ -356,13 +387,6 @@ public interface LuckPermsPlugin {
     default LinkedHashMap<String, Object> getExtraInfo() {
         return null;
     }
-
-    /**
-     * Gets a set of players ignoring logging output
-     *
-     * @return a {@link Set} of {@link UUID}s
-     */
-    Set<UUID> getIgnoringLogs();
 
     /**
      * Gets the update task buffer of the platform, used for scheduling and running update tasks.

@@ -33,6 +33,7 @@ import com.google.common.base.Splitter;
 import me.lucko.luckperms.common.config.AbstractConfiguration;
 
 import ninja.leaping.configurate.ConfigurationNode;
+import ninja.leaping.configurate.SimpleConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
@@ -55,9 +56,9 @@ public class SpongeConfig extends AbstractConfiguration {
 
     private ConfigurationNode root;
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     private Path makeFile(Path file) throws IOException {
         File cfg = file.toFile();
+        //noinspection ResultOfMethodCallIgnored
         cfg.getParentFile().mkdirs();
 
         if (!cfg.exists()) {
@@ -86,8 +87,16 @@ public class SpongeConfig extends AbstractConfiguration {
         Iterable<String> paths = Splitter.on('.').split(path);
         ConfigurationNode node = root;
 
+        if (node == null) {
+            throw new RuntimeException("Config is not loaded.");
+        }
+
         for (String s : paths) {
             node = node.getNode(s);
+
+            if (node == null) {
+                return SimpleConfigurationNode.root();
+            }
         }
 
         return node;

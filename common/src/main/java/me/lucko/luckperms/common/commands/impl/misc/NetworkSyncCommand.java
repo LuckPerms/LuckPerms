@@ -28,8 +28,10 @@ package me.lucko.luckperms.common.commands.impl.misc;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.messaging.NoopMessagingService;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -38,9 +40,8 @@ import me.lucko.luckperms.common.utils.Predicates;
 import java.util.List;
 
 public class NetworkSyncCommand extends SingleCommand {
-    public NetworkSyncCommand() {
-        super("NetworkSync", "Sync changes with the storage and request that all other servers on the network do the same",
-                "/%s networksync", Permission.SYNC, Predicates.alwaysFalse(), null);
+    public NetworkSyncCommand(LocaleManager locale) {
+        super(CommandSpec.NETWORK_SYNC.spec(locale), "NetworkSync", CommandPermission.SYNC, Predicates.alwaysFalse());
     }
 
     @Override

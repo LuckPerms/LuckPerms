@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 2016 Lucko (Luck) <luck@lucko.me>
+ * This file is part of LuckPerms, licensed under the MIT License.
+ *
+ *  Copyright (c) lucko (Luck) <luck@lucko.me>
+ *  Copyright (c) contributors
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +29,8 @@ import me.lucko.luckperms.api.data.DatastoreConfiguration;
 
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+
 /**
  * Read-only access to the LuckPerms configuration settings
  */
@@ -35,6 +40,7 @@ public interface LPConfiguration {
      * Returns the name of this server
      * @return the name of this server
      */
+    @Nonnull
     String getServer();
 
     /**
@@ -127,6 +133,7 @@ public interface LPConfiguration {
      * @return the name of the server used within Vault operations
      * @since 2.7
      */
+    @Nonnull
     String getVaultServer();
 
     /**
@@ -140,12 +147,14 @@ public interface LPConfiguration {
      * Returns the values set for data storage in the configuration
      * @return the values set for data storage in the configuration
      */
+    @Nonnull
     DatastoreConfiguration getDatastoreConfig();
 
     /**
      * Returns the storage method string from the configuration
      * @return the storage method string from the configuration
      */
+    @Nonnull
     String getStorageMethod();
 
     /**
@@ -161,6 +170,27 @@ public interface LPConfiguration {
      * method. For example: key = user, value = json
      * @since 2.7
      */
+    @Nonnull
     Map<String, String> getSplitStorageOptions();
+
+    @Nonnull
+    Unsafe unsafe();
+
+    interface Unsafe {
+
+        /**
+         * Gets an Object from the config.
+         *
+         * <p>This method is nested under {@link Unsafe} because the keys
+         * and return types may change between versions without warning.</p>
+         *
+         * @param key the key, as defined as a parameter name in
+         *            the "ConfigKeys" class.
+         * @return the corresponding object, if one is present
+         * @throws IllegalArgumentException if the key isn't known
+         */
+        @Nonnull
+        Object getObject(String key);
+    }
 
 }

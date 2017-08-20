@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 2016 Lucko (Luck) <luck@lucko.me>
+ * This file is part of LuckPerms, licensed under the MIT License.
+ *
+ *  Copyright (c) lucko (Luck) <luck@lucko.me>
+ *  Copyright (c) contributors
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +27,8 @@ package me.lucko.luckperms.api.event;
 
 import java.util.function.Consumer;
 
+import javax.annotation.Nonnull;
+
 /**
  * Represents a handler for a LuckPerms event
  *
@@ -36,6 +41,7 @@ public interface EventHandler<T extends LuckPermsEvent> {
      *
      * @return the event class
      */
+    @Nonnull
     Class<T> getEventClass();
 
     /**
@@ -57,6 +63,7 @@ public interface EventHandler<T extends LuckPermsEvent> {
      *
      * @return the event consumer
      */
+    @Nonnull
     Consumer<T> getConsumer();
 
     /**

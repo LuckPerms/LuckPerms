@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.managers;
 
-import me.lucko.luckperms.common.core.model.Track;
+import me.lucko.luckperms.common.model.Track;
 
 public interface TrackManager extends Manager<String, Track> {
 

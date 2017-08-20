@@ -36,10 +36,12 @@ import java.io.StringWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
 
 public class PasteUtils {
 
-    public static String paste(String name, String desc, String contents) {
+    public static String paste(String desc, List<Map.Entry<String, String>> files) {
         HttpURLConnection connection = null;
         try {
             connection = (HttpURLConnection) new URL("https://api.github.com/gists").openConnection();
@@ -49,16 +51,19 @@ public class PasteUtils {
             
             try (OutputStream os = connection.getOutputStream()) {
                 StringWriter sw = new StringWriter();
-                new JsonWriter(sw).beginObject()
+
+                JsonWriter jw = new JsonWriter(sw)
+                        .beginObject()
                         .name("description").value(desc)
                         .name("public").value(false)
                         .name("files")
-                        .beginObject().name(name)
-                        .beginObject().name("content").value(contents)
-                        .endObject()
-                        .endObject()
-                        .endObject();
+                        .beginObject();
 
+                for (Map.Entry<String, String> file : files) {
+                    jw.name(file.getKey()).beginObject().name("content").value(file.getValue()).endObject();
+                }
+
+                jw.endObject().endObject();
                 os.write(sw.toString().getBytes(StandardCharsets.UTF_8));
             }
 

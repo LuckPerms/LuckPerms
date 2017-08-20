@@ -25,13 +25,14 @@
 
 package me.lucko.luckperms.common.commands.impl.misc;
 
-import me.lucko.luckperms.common.commands.Arg;
+import me.lucko.luckperms.common.backup.Importer;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.data.Importer;
+import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -46,12 +47,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ImportCommand extends SingleCommand {
     private AtomicBoolean running = new AtomicBoolean(false);
 
-    public ImportCommand() {
-        super("Import", "Import data from a file", "/%s import <file>", Permission.IMPORT, Predicates.not(1),
-                Arg.list(
-                        Arg.create("file", true, "the file to import from")
-                )
-        );
+    public ImportCommand(LocaleManager locale) {
+        super(CommandSpec.IMPORT.spec(locale), "Import", CommandPermission.IMPORT, Predicates.not(1));
     }
 
     @Override

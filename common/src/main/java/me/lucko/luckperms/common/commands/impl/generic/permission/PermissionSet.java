@@ -27,18 +27,20 @@ package me.lucko.luckperms.common.commands.impl.generic.permission;
 
 import me.lucko.luckperms.api.DataMutateResult;
 import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.common.commands.Arg;
+import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.NodeFactory;
-import me.lucko.luckperms.common.core.model.PermissionHolder;
-import me.lucko.luckperms.common.data.LogEntry;
+import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -49,29 +51,37 @@ import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getBoolT
 import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getPermissionTabComplete;
 
 public class PermissionSet extends SharedSubCommand {
-    public PermissionSet() {
-        super("set", "Sets a permission for the object", Permission.USER_PERM_SET, Permission.GROUP_PERM_SET,
-                Predicates.is(0),
-                Arg.list(
-                        Arg.create("node", true, "the permission node to set"),
-                        Arg.create("true|false", false, "the value of the node"),
-                        Arg.create("context...", false, "the contexts to add the permission in")
-                )
-        );
+    public PermissionSet(LocaleManager locale) {
+        super(CommandSpec.PERMISSION_SET.spec(locale), "set", CommandPermission.USER_PERM_SET, CommandPermission.GROUP_PERM_SET, Predicates.is(0));
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label, CommandPermission permission) throws CommandException {
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, holder)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
         boolean b = ArgumentUtils.handleBoolean(1, args);
         String node = b ? ArgumentUtils.handleNode(0, args) : ArgumentUtils.handleString(0, args);
-        MutableContextSet context = ArgumentUtils.handleContext(2, args);
+        MutableContextSet context = ArgumentUtils.handleContext(2, args, plugin);
+
+        if (ArgumentPermissions.checkContext(plugin, sender, permission, context)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
+        if (ArgumentPermissions.checkArguments(plugin, sender, permission, node)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
 
         DataMutateResult result = holder.setPermission(NodeFactory.newBuilder(node).setValue(b).withExtraContext(context).build());
 
         if (result.asBoolean()) {
             Message.SETPERMISSION_SUCCESS.send(sender, node, b, holder.getFriendlyName(), Util.contextSetToString(context));
 
-            LogEntry.build().actor(sender).acted(holder)
+            ExtendedLogEntry.build().actor(sender).acted(holder)
                     .action("permission set " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
                     .build().submit(plugin, sender);
 

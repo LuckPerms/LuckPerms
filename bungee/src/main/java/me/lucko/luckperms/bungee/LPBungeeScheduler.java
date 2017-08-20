@@ -46,46 +46,46 @@ public class LPBungeeScheduler implements LuckPermsScheduler {
     }
 
     @Override
-    public Executor getAsyncExecutor() {
+    public Executor async() {
         return asyncExecutor;
     }
 
     @Override
-    public Executor getSyncExecutor() {
+    public Executor sync() {
         return asyncExecutor;
     }
 
     @Override
-    public void doAsync(Runnable r) {
-        asyncExecutor.execute(r);
+    public void doAsync(Runnable runnable) {
+        asyncExecutor.execute(runnable);
     }
 
     @Override
-    public void doSync(Runnable r) {
-        doAsync(r);
+    public void doSync(Runnable runnable) {
+        doAsync(runnable);
     }
 
     @Override
-    public void doAsyncRepeating(Runnable r, long interval) {
-        long millis = interval * 50L; // convert from ticks to milliseconds
-        ScheduledTask task = plugin.getProxy().getScheduler().schedule(plugin, r, millis, millis, TimeUnit.MILLISECONDS);
+    public void asyncRepeating(Runnable runnable, long intervalTicks) {
+        long millis = intervalTicks * 50L; // convert from ticks to milliseconds
+        ScheduledTask task = plugin.getProxy().getScheduler().schedule(plugin, runnable, millis, millis, TimeUnit.MILLISECONDS);
         tasks.add(task);
     }
 
     @Override
-    public void doSyncRepeating(Runnable r, long interval) {
-        doAsyncRepeating(r, interval);
+    public void syncRepeating(Runnable runnable, long intervalTicks) {
+        asyncRepeating(runnable, intervalTicks);
     }
 
     @Override
-    public void doAsyncLater(Runnable r, long delay) {
-        long millis = delay * 50L; // convert from ticks to milliseconds
-        plugin.getProxy().getScheduler().schedule(plugin, r, millis, TimeUnit.MILLISECONDS);
+    public void asyncLater(Runnable runnable, long delayTicks) {
+        long millis = delayTicks * 50L; // convert from ticks to milliseconds
+        plugin.getProxy().getScheduler().schedule(plugin, runnable, millis, TimeUnit.MILLISECONDS);
     }
 
     @Override
-    public void doSyncLater(Runnable r, long delay) {
-        doAsyncLater(r, delay);
+    public void syncLater(Runnable runnable, long delayTicks) {
+        asyncLater(runnable, delayTicks);
     }
 
     @Override

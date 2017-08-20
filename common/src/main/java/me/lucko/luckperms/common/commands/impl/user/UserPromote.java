@@ -27,21 +27,23 @@ package me.lucko.luckperms.common.commands.impl.user;
 
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.common.commands.Arg;
+import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.DataConstraints;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.NodeFactory;
-import me.lucko.luckperms.common.core.model.Group;
-import me.lucko.luckperms.common.core.model.Track;
-import me.lucko.luckperms.common.core.model.User;
-import me.lucko.luckperms.common.data.LogEntry;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.Track;
+import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
@@ -51,17 +53,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class UserPromote extends SubCommand<User> {
-    public UserPromote() {
-        super("promote", "Promotes the user up a track", Permission.USER_PROMOTE, Predicates.is(0),
-                Arg.list(
-                        Arg.create("track", true, "the track to promote the user up"),
-                        Arg.create("context...", false, "the contexts to promote the user in")
-                )
-        );
+    public UserPromote(LocaleManager locale) {
+        super(CommandSpec.USER_PROMOTE.spec(locale), "promote", CommandPermission.USER_PROMOTE, Predicates.is(0));
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) throws CommandException {
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), user)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
         final String trackName = args.get(0).toLowerCase();
         if (!DataConstraints.TRACK_NAME_TEST.test(trackName)) {
             Message.TRACK_INVALID_ENTRY.send(sender);
@@ -84,16 +86,16 @@ public class UserPromote extends SubCommand<User> {
             return CommandResult.STATE_ERROR;
         }
 
-        MutableContextSet context = ArgumentUtils.handleContext(1, args);
-        boolean silent = false;
+        boolean silent = args.remove("-s");
+        MutableContextSet context = ArgumentUtils.handleContext(1, args, plugin);
 
-        if (args.contains("-s")) {
-            args.remove("-s");
-            silent = true;
+        if (ArgumentPermissions.checkContext(plugin, sender, getPermission().get(), context)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
         }
 
         // Load applicable groups
-        Set<Node> nodes = user.getNodes().values().stream()
+        Set<Node> nodes = user.getEnduringNodes().values().stream()
                 .filter(Node::isGroupNode)
                 .filter(Node::getValue)
                 .filter(node -> node.getFullContexts().makeImmutable().equals(context.makeImmutable()))
@@ -110,10 +112,15 @@ public class UserPromote extends SubCommand<User> {
                 return CommandResult.LOADING_ERROR;
             }
 
+            if (ArgumentPermissions.checkArguments(plugin, sender, getPermission().get(), track.getName(), nextGroup.getName())) {
+                Message.COMMAND_NO_PERMISSION.send(sender);
+                return CommandResult.NO_PERMISSION;
+            }
+
             user.setPermission(NodeFactory.newBuilder("group." + first).withExtraContext(context).build());
 
             Message.USER_TRACK_ADDED_TO_FIRST.send(sender, user.getFriendlyName(), first, Util.contextSetToString(context));
-            LogEntry.build().actor(sender).acted(user)
+            ExtendedLogEntry.build().actor(sender).acted(user)
                     .action("promote " + args.stream().collect(Collectors.joining(" ")))
                     .build().submit(plugin, sender);
             save(user, sender, plugin);
@@ -152,6 +159,11 @@ public class UserPromote extends SubCommand<User> {
             return CommandResult.LOADING_ERROR;
         }
 
+        if (ArgumentPermissions.checkArguments(plugin, sender, getPermission().get(), track.getName(), nextGroup.getName())) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
         user.unsetPermission(oldNode);
         user.setPermission(NodeFactory.newBuilder("group." + nextGroup.getName()).withExtraContext(context).build());
 
@@ -164,7 +176,7 @@ public class UserPromote extends SubCommand<User> {
             Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), old, nextGroup.getDisplayName(), false));
         }
 
-        LogEntry.build().actor(sender).acted(user)
+        ExtendedLogEntry.build().actor(sender).acted(user)
                 .action("promote " + args.stream().collect(Collectors.joining(" ")))
                 .build().submit(plugin, sender);
 

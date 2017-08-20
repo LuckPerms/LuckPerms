@@ -26,14 +26,17 @@
 package me.lucko.luckperms.common.commands.impl.generic.other;
 
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.model.PermissionHolder;
+import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -42,19 +45,23 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class HolderShowTracks<T extends PermissionHolder> extends SubCommand<T> {
-    public HolderShowTracks(boolean user) {
-        super("showtracks", "Lists the tracks that the object is on",
-                user ? Permission.USER_SHOWTRACKS : Permission.GROUP_SHOWTRACKS, Predicates.alwaysFalse(), null);
+    public HolderShowTracks(LocaleManager locale, boolean user) {
+        super(CommandSpec.HOLDER_SHOWTRACKS.spec(locale), "showtracks", user ? CommandPermission.USER_SHOWTRACKS : CommandPermission.GROUP_SHOWTRACKS, Predicates.alwaysFalse());
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, T holder, List<String> args, String label) throws CommandException {
+        if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), holder)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
         if (!plugin.getStorage().loadAllTracks().join()) {
             Message.TRACKS_LOAD_ERROR.send(sender);
             return CommandResult.LOADING_ERROR;
         }
 
-        Set<Node> nodes = holder.getNodes().values().stream()
+        Set<Node> nodes = holder.getEnduringNodes().values().stream()
                 .filter(Node::isGroupNode)
                 .filter(Node::isPermanent)
                 .collect(Collectors.toSet());

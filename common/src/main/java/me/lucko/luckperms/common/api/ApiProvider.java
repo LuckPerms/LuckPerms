@@ -43,15 +43,17 @@ import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.UuidCache;
 import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.common.api.delegates.MetaStackFactoryDelegate;
 import me.lucko.luckperms.common.api.delegates.NodeFactoryDelegate;
 import me.lucko.luckperms.common.api.delegates.UserDelegate;
-import me.lucko.luckperms.common.core.UserIdentifier;
 import me.lucko.luckperms.common.event.EventFactory;
 import me.lucko.luckperms.common.event.LuckPermsEventBus;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.messaging.NoopMessagingService;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.references.UserIdentifier;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -69,10 +71,14 @@ public class ApiProvider implements LuckPermsApi {
     @Getter
     private final EventFactory eventFactory;
 
+    @Getter
+    private final MetaStackFactoryDelegate metaStackFactory;
+
     public ApiProvider(LuckPermsPlugin plugin) {
         this.plugin = plugin;
         this.eventBus = new LuckPermsEventBus(plugin);
         this.eventFactory = new EventFactory(eventBus);
+        this.metaStackFactory = new MetaStackFactoryDelegate(plugin);
     }
 
     @Override
@@ -82,7 +88,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public double getApiVersion() {
-        return 3.1;
+        return 3.3;
     }
 
     @Override
@@ -123,7 +129,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public User getUser(@NonNull UUID uuid) {
-        final me.lucko.luckperms.common.core.model.User user = plugin.getUserManager().getIfLoaded(uuid);
+        final me.lucko.luckperms.common.model.User user = plugin.getUserManager().getIfLoaded(uuid);
         return user == null ? null : user.getDelegate();
     }
 
@@ -134,7 +140,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public User getUser(@NonNull String name) {
-        final me.lucko.luckperms.common.core.model.User user = plugin.getUserManager().getByUsername(name);
+        final me.lucko.luckperms.common.model.User user = plugin.getUserManager().getByUsername(name);
         return user == null ? null : user.getDelegate();
     }
 
@@ -160,7 +166,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public Group getGroup(@NonNull String name) {
-        final me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().getIfLoaded(name);
+        final me.lucko.luckperms.common.model.Group group = plugin.getGroupManager().getIfLoaded(name);
         return group == null ? null : group.getDelegate();
     }
 
@@ -181,7 +187,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public Track getTrack(@NonNull String name) {
-        final me.lucko.luckperms.common.core.model.Track track = plugin.getTrackManager().getIfLoaded(name);
+        final me.lucko.luckperms.common.model.Track track = plugin.getTrackManager().getIfLoaded(name);
         return track == null ? null : track.getDelegate();
     }
 
@@ -207,23 +213,39 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public Node.Builder buildNode(@NonNull String permission) throws IllegalArgumentException {
-        return me.lucko.luckperms.common.core.NodeFactory.newBuilder(permission);
+        return me.lucko.luckperms.common.node.NodeFactory.newBuilder(permission);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public void registerContextCalculator(ContextCalculator<?> contextCalculator) {
+    public void registerContextCalculator(@NonNull ContextCalculator<?> contextCalculator) {
         plugin.getContextManager().registerCalculator(contextCalculator);
     }
 
     @Override
-    public Optional<Contexts> getContextForUser(User user) {
+    public Optional<Contexts> getContextForUser(@NonNull User user) {
         return Optional.ofNullable(plugin.getContextForUser(UserDelegate.cast(user)));
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public ContextSet getContextForPlayer(Object player) {
+    public ContextSet getContextForPlayer(@NonNull Object player) {
         return plugin.getContextManager().getApplicableContext(player);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Contexts getContextsForPlayer(@NonNull Object player) {
+        return plugin.getContextManager().getApplicableContexts(player);
+    }
+
+    @Override
+    public Set<UUID> getUniqueConnections() {
+        return Collections.unmodifiableSet(plugin.getUniqueConnections());
+    }
+
+    @Override
+    public long getStartTime() {
+        return plugin.getStartTime();
     }
 }

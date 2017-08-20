@@ -32,6 +32,7 @@ import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.constants.DataConstraints;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.DateUtil;
 
 import java.util.ArrayList;
@@ -43,7 +44,6 @@ import java.util.function.Function;
  */
 public class ArgumentUtils {
     public static final Function<String, String> WRAPPER = s -> s.contains(" ") ? "\"" + s + "\"" : s;
-
 
     public static String handleString(int index, List<String> args) {
         return args.get(index).replace("{SPACE}", " ");
@@ -107,13 +107,6 @@ public class ArgumentUtils {
         return true;
     }
 
-    public static String handleServer(int index, List<String> args) throws ArgumentException {
-        if (args.size() > index) {
-            return args.get(index).toLowerCase();
-        }
-        return null;
-    }
-
     public static long handleDuration(int index, List<String> args) throws ArgumentException {
         long duration;
         try {
@@ -133,11 +126,7 @@ public class ArgumentUtils {
         return duration;
     }
 
-    public static String handleWorld(int index, List<String> args) {
-        return args.size() > index ? args.get(index).toLowerCase() : null;
-    }
-
-    public static MutableContextSet handleContext(int fromIndex, List<String> args) throws CommandException {
+    public static MutableContextSet handleContext(int fromIndex, List<String> args, LuckPermsPlugin plugin) throws CommandException {
         if (args.size() > fromIndex) {
             MutableContextSet set = MutableContextSet.create();
 
@@ -149,14 +138,6 @@ public class ArgumentUtils {
                 // one of the first two values, and doesn't have a key
                 if (i <= 1 && !pair.contains("=")) {
                     String key = i == 0 ? "server" : "world";
-
-                    if (key.equals("server") && !DataConstraints.SERVER_NAME_TEST.test(pair)) {
-                        throw new InvalidServerWorldException();
-                    }
-                    if (key.equals("world") && !DataConstraints.WORLD_NAME_TEST.test(pair)) {
-                        throw new InvalidServerWorldException();
-                    }
-
                     set.add(key, pair);
                     continue;
                 }
@@ -176,46 +157,57 @@ public class ArgumentUtils {
                     continue;
                 }
 
-                if (key.equals("server") && !DataConstraints.SERVER_NAME_TEST.test(value)) {
-                    throw new InvalidServerWorldException();
-                }
-                if (key.equals("world") && !DataConstraints.WORLD_NAME_TEST.test(value)) {
-                    throw new InvalidServerWorldException();
-                }
-
                 set.add(key, value);
             }
 
-            // remove any potential "global" context mappings
-            set.remove("server", "global");
-            set.remove("world", "global");
-            set.remove("server", "null");
-            set.remove("world", "null");
-            set.remove("server", "*");
-            set.remove("world", "*");
-
-            // remove excess entries from the set.
-            // (it can only have one server and one world.)
-            List<String> servers = new ArrayList<>(set.getValues("server"));
-            if (servers.size() > 1) {
-                // start iterating at index 1
-                for (int i = 1; i < servers.size(); i++) {
-                    set.remove("server", servers.get(i));
-                }
-            }
-
-            List<String> worlds = new ArrayList<>(set.getValues("world"));
-            if (worlds.size() > 1) {
-                // start iterating at index 1
-                for (int i = 1; i < worlds.size(); i++) {
-                    set.remove("world", worlds.get(i));
-                }
-            }
-
-            return set;
+            return sanitizeContexts(set);
         } else {
-            return MutableContextSet.create();
+            return sanitizeContexts(plugin.getConfiguration().getContextsFile().getDefaultContexts().mutableCopy());
         }
+    }
+
+    public static MutableContextSet sanitizeContexts(MutableContextSet set) throws ArgumentException {
+        // remove any potential "global" context mappings
+        set.remove("server", "global");
+        set.remove("world", "global");
+        set.remove("server", "null");
+        set.remove("world", "null");
+        set.remove("server", "*");
+        set.remove("world", "*");
+
+        // remove excess entries from the set.
+        // (it can only have one server and one world.)
+        List<String> servers = new ArrayList<>(set.getValues("server"));
+        if (servers.size() > 1) {
+            // start iterating at index 1
+            for (int i = 1; i < servers.size(); i++) {
+                set.remove("server", servers.get(i));
+            }
+        }
+
+        List<String> worlds = new ArrayList<>(set.getValues("world"));
+        if (worlds.size() > 1) {
+            // start iterating at index 1
+            for (int i = 1; i < worlds.size(); i++) {
+                set.remove("world", worlds.get(i));
+            }
+        }
+
+        // there's either none or 1
+        for (String server : servers) {
+            if (!DataConstraints.SERVER_NAME_TEST.test(server)) {
+                throw new InvalidServerWorldException();
+            }
+        }
+
+        // there's either none or 1
+        for (String world : worlds) {
+            if (!DataConstraints.WORLD_NAME_TEST.test(world)) {
+                throw new InvalidServerWorldException();
+            }
+        }
+
+        return set;
     }
 
     public static int handlePriority(int index, List<String> args) throws ArgumentException {
@@ -226,7 +218,7 @@ public class ArgumentUtils {
         }
     }
 
-    public static ImmutableContextSet handleContexts(int fromIndex, List<String> args) {
+    public static ImmutableContextSet handleContextSponge(int fromIndex, List<String> args) {
         if (args.size() <= fromIndex) {
             return ImmutableContextSet.empty();
         }

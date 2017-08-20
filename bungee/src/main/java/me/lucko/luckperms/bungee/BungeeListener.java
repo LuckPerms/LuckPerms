@@ -30,9 +30,10 @@ import lombok.RequiredArgsConstructor;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.bungee.event.TristateCheckEvent;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.utils.LoginHelper;
 
 import net.md_5.bungee.api.chat.TextComponent;
@@ -47,17 +48,12 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @RequiredArgsConstructor
 public class BungeeListener implements Listener {
     private final LPBungeePlugin plugin;
-
-    private final Set<UUID> deniedLogin = Collections.synchronizedSet(new HashSet<>());
 
     @EventHandler(priority = EventPriority.LOW)
     public void onPlayerLogin(LoginEvent e) {
@@ -74,25 +70,13 @@ public class BungeeListener implements Listener {
 
         final PendingConnection c = e.getConnection();
 
-        /* another plugin (or the proxy itself) has cancelled this connection already */
-        if (e.isCancelled()) {
-
-            // log that we are not loading any data
-            plugin.getLog().warn("Connection from " + c.getUniqueId() + " was already denied. No permissions data will be loaded.");
-            deniedLogin.add(c.getUniqueId());
-
-            e.completeIntent(plugin);
-            return;
-        }
-
         /* there was an issue connecting to the DB, performing file i/o, etc.
            as this is bungeecord, we will still allow the login, as players can't really do much harm without permissions data.
            the proxy will just fallback to using the config file perms. */
         if (!plugin.getStorage().isAcceptingLogins()) {
 
             // log that the user tried to login, but was denied at this stage.
-            plugin.getLog().warn("Permissions storage is not loaded yet. No permissions data will be loaded for: " + c.getUniqueId() + " - " + c.getName());
-            deniedLogin.add(c.getUniqueId());
+            plugin.getLog().warn("Permissions storage is not loaded. No permissions data will be loaded for: " + c.getUniqueId() + " - " + c.getName());
 
             e.completeIntent(plugin);
             return;
@@ -100,6 +84,8 @@ public class BungeeListener implements Listener {
 
 
         plugin.doAsync(() -> {
+            plugin.getUniqueConnections().add(c.getUniqueId());
+
             /* Actually process the login for the connection.
                We do this here to delay the login until the data is ready.
                If the login gets cancelled later on, then this will be cleaned up.
@@ -116,7 +102,6 @@ public class BungeeListener implements Listener {
 
                 // there was some error loading
                 plugin.getLog().warn("Error loading data. No permissions data will be loaded for: " + c.getUniqueId() + " - " + c.getName());
-                deniedLogin.add(c.getUniqueId());
             }
 
             // finally, complete our intent to modify state, so the proxy can continue handling the connection.
@@ -165,22 +150,36 @@ public class BungeeListener implements Listener {
             return;
         }
 
-        Contexts contexts = new Contexts(
-                plugin.getContextManager().getApplicableContext(player),
-                plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
-                plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
-                true,
-                plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
-                plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
-                false
-        );
-
+        Contexts contexts = plugin.getContextManager().getApplicableContexts(player);
         Tristate result = user.getUserData().getPermissionData(contexts).getPermissionValue(e.getPermission());
         if (result == Tristate.UNDEFINED && plugin.getConfiguration().get(ConfigKeys.APPLY_BUNGEE_CONFIG_PERMISSIONS)) {
             return; // just use the result provided by the proxy when the event was created
         }
 
         e.setHasPermission(result.asBoolean());
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onPlayerTristateCheck(TristateCheckEvent e) {
+        if (!(e.getSender() instanceof ProxiedPlayer)) {
+            return;
+        }
+
+        final ProxiedPlayer player = ((ProxiedPlayer) e.getSender());
+
+        User user = plugin.getUserManager().getIfLoaded(plugin.getUuidCache().getUUID(player.getUniqueId()));
+        if (user == null) {
+            e.setResult(Tristate.UNDEFINED);
+            return;
+        }
+
+        Contexts contexts = plugin.getContextManager().getApplicableContexts(player);
+        Tristate result = user.getUserData().getPermissionData(contexts).getPermissionValue(e.getPermission());
+        if (result == Tristate.UNDEFINED && plugin.getConfiguration().get(ConfigKeys.APPLY_BUNGEE_CONFIG_PERMISSIONS)) {
+            return; // just use the result provided by the proxy when the event was created
+        }
+
+        e.setResult(result);
     }
 
     // We don't pre-process all servers, so we have to do it here.
@@ -199,16 +198,7 @@ public class BungeeListener implements Listener {
                 return;
             }
 
-            Contexts contexts = new Contexts(
-                    set.makeImmutable(),
-                    plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
-                    plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
-                    true,
-                    plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
-                    plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
-                    false
-            );
-
+            Contexts contexts = plugin.getContextManager().formContexts(e.getPlayer(), set.makeImmutable());
             user.getUserData().preCalculate(contexts);
         });
     }

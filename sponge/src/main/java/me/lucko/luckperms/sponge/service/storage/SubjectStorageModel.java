@@ -35,12 +35,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.core.ContextSetComparator;
-import me.lucko.luckperms.common.core.NodeModel;
-import me.lucko.luckperms.common.core.PriorityComparator;
+import me.lucko.luckperms.common.contexts.ContextSetComparator;
+import me.lucko.luckperms.common.node.NodeModel;
+import me.lucko.luckperms.common.node.NodeWithContextComparator;
 import me.lucko.luckperms.sponge.service.calculated.CalculatedSubjectData;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
-import me.lucko.luckperms.sponge.service.references.SubjectReference;
+import me.lucko.luckperms.sponge.service.model.SubjectReference;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -194,7 +194,7 @@ public class SubjectStorageModel {
 
             // sort alphabetically.
             List<Map.Entry<String, Boolean>> perms = new ArrayList<>(e.getValue().entrySet());
-            perms.sort((o1, o2) -> PriorityComparator.get().compareStrings(o1.getKey(), o2.getKey()));
+            perms.sort((o1, o2) -> NodeWithContextComparator.get().compareStrings(o1.getKey(), o2.getKey()));
 
             for (Map.Entry<String, Boolean> ent : perms) {
                 data.addProperty(ent.getKey(), ent.getValue());
@@ -218,7 +218,7 @@ public class SubjectStorageModel {
 
             // sort alphabetically.
             List<Map.Entry<String, String>> opts = new ArrayList<>(e.getValue().entrySet());
-            opts.sort((o1, o2) -> PriorityComparator.get().compareStrings(o1.getKey(), o2.getKey()));
+            opts.sort((o1, o2) -> NodeWithContextComparator.get().compareStrings(o1.getKey(), o2.getKey()));
 
             for (Map.Entry<String, String> ent : opts) {
                 data.addProperty(ent.getKey(), ent.getValue());
@@ -241,8 +241,8 @@ public class SubjectStorageModel {
             JsonArray data = new JsonArray();
             for (SubjectReference ref : e.getValue()) {
                 JsonObject parent = new JsonObject();
-                parent.addProperty("collection", ref.getCollection());
-                parent.addProperty("subject", ref.getCollection());
+                parent.addProperty("collection", ref.getCollectionIdentifier());
+                parent.addProperty("subject", ref.getCollectionIdentifier());
                 data.add(parent);
             }
             section.add("data", data);

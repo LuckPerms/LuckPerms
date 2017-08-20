@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 2016 Lucko (Luck) <luck@lucko.me>
+ * This file is part of LuckPerms, licensed under the MIT License.
+ *
+ *  Copyright (c) lucko (Luck) <luck@lucko.me>
+ *  Copyright (c) contributors
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +31,8 @@ import me.lucko.luckperms.api.event.LuckPermsEvent;
 
 import java.util.Optional;
 
+import javax.annotation.Nonnull;
+
 /**
  * Called when a user interacts with a track through a promotion or demotion
  */
@@ -38,6 +43,7 @@ public interface UserTrackEvent extends LuckPermsEvent {
      *
      * @return the track involved in the event
      */
+    @Nonnull
     Track getTrack();
 
     /**
@@ -45,6 +51,7 @@ public interface UserTrackEvent extends LuckPermsEvent {
      *
      * @return the user involved in the event
      */
+    @Nonnull
     User getUser();
 
     /**
@@ -52,6 +59,7 @@ public interface UserTrackEvent extends LuckPermsEvent {
      *
      * @return the action performed
      */
+    @Nonnull
     TrackAction getAction();
 
     /**
@@ -61,6 +69,7 @@ public interface UserTrackEvent extends LuckPermsEvent {
      *
      * @return the group the user was promoted/demoted from
      */
+    @Nonnull
     Optional<String> getGroupFrom();
 
     /**
@@ -68,6 +77,7 @@ public interface UserTrackEvent extends LuckPermsEvent {
      *
      * @return the group the user was promoted/demoted to
      */
+    @Nonnull
     Optional<String> getGroupTo();
 
 }

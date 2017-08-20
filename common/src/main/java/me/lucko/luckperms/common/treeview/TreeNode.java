@@ -25,13 +25,14 @@
 
 package me.lucko.luckperms.common.treeview;
 
+import com.google.common.collect.Maps;
+
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
- * Represents one "branch" of the node tree
+ * Represents one "branch" or "level" of the node tree
  */
 public class TreeNode {
     private Map<String, TreeNode> children = null;
@@ -60,7 +61,12 @@ public class TreeNode {
         if (children == null) {
             return new ImmutableTreeNode(null);
         } else {
-            return new ImmutableTreeNode(children.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().makeImmutableCopy())));
+            return new ImmutableTreeNode(children.entrySet().stream()
+                    .map(e -> Maps.immutableEntry(
+                            e.getKey(),
+                            e.getValue().makeImmutableCopy()
+                    ))
+            );
         }
     }
 }

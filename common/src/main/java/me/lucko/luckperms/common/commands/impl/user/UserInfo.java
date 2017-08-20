@@ -28,14 +28,17 @@ package me.lucko.luckperms.common.commands.impl.user;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.caching.MetaData;
+import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
@@ -45,17 +48,22 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class UserInfo extends SubCommand<User> {
-    public UserInfo() {
-        super("info", "Shows info about the user", Permission.USER_INFO, Predicates.alwaysFalse(), null);
+    public UserInfo(LocaleManager locale) {
+        super(CommandSpec.USER_INFO.spec(locale), "info", CommandPermission.USER_INFO, Predicates.alwaysFalse());
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) throws CommandException {
+        if (ArgumentPermissions.checkViewPerms(plugin, sender, getPermission().get(), user)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
         Message.USER_INFO_GENERAL.send(sender,
                 user.getName().orElse("Unknown"),
                 user.getUuid(),
-                plugin.getPlayerStatus(user.getUuid()),
+                plugin.getPlayerStatus(user.getUuid()).asString(plugin.getLocaleManager()),
                 user.getPrimaryGroup().getValue(),
                 user.getPermanentNodes().size(),
                 user.getTemporaryNodes().size(),
@@ -64,12 +72,12 @@ public class UserInfo extends SubCommand<User> {
                 user.getMetaNodes().size()
         );
 
-        Set<Node> parents = user.mergePermissions().stream()
+        Set<Node> parents = user.getOwnNodesSet().stream()
                 .filter(Node::isGroupNode)
                 .filter(Node::isPermanent)
                 .collect(Collectors.toSet());
 
-        Set<Node> tempParents = user.mergePermissions().stream()
+        Set<Node> tempParents = user.getOwnNodesSet().stream()
                 .filter(Node::isGroupNode)
                 .filter(Node::isTemporary)
                 .collect(Collectors.toSet());

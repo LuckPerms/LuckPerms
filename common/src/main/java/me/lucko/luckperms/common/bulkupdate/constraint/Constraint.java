@@ -30,7 +30,7 @@ import lombok.Getter;
 
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
 import me.lucko.luckperms.common.bulkupdate.comparisons.ComparisonType;
-import me.lucko.luckperms.common.core.NodeModel;
+import me.lucko.luckperms.common.node.NodeModel;
 
 /**
  * Represents a query constraint
@@ -43,7 +43,7 @@ public class Constraint {
     private final QueryField field;
 
     // the comparison type being used in this constraint
-    private final ComparisonType comparison;
+    private final ComparisonType comparisonType;
 
     // the expression being compared against
     private final String value;
@@ -57,23 +57,18 @@ public class Constraint {
     public boolean isSatisfiedBy(NodeModel node) {
         switch (field) {
             case PERMISSION:
-                return comparison.get().matches(node.getPermission(), value);
+                return comparisonType.getComparison().matches(node.getPermission(), value);
             case SERVER:
-                return comparison.get().matches(node.getServer(), value);
+                return comparisonType.getComparison().matches(node.getServer(), value);
             case WORLD:
-                return comparison.get().matches(node.getWorld(), value);
+                return comparisonType.getComparison().matches(node.getWorld(), value);
             default:
                 throw new RuntimeException();
         }
     }
 
     public String getAsSql() {
-        // WHERE permission = "thing"
-        // WHERE permission != ""
-        // WHERE permission LIKE ""
-        // WHERE permission NOT LIKE ""
-
-        switch (comparison) {
+        switch (comparisonType) {
             case EQUAL:
                 return field.getSqlName() + " = " + BulkUpdate.escapeStringForSql(value);
             case NOT_EQUAL:

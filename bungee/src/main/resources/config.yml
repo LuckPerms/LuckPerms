@@ -1,13 +1,25 @@
-##############################################################################
-# +------------------------------------------------------------------------+ #
-# |                       LuckPerms Configuration                          | #
-# |                  https://github.com/lucko/LuckPerms                    | #
-# +------------------------------------------------------------------------+ #
-##############################################################################
+####################################################################################################
+# +----------------------------------------------------------------------------------------------+ #
+# |                                   __         __   ___  __         __                         | #
+# |                        |    |  | /  ` |__/  |__) |__  |__)  |\/| /__`                        | #
+# |                        |___ \__/ \__, |  \  |    |___ |  \  |  | .__/                        | #
+# |                                                                                              | #
+# |                                                                                              | #
+# |  SOURCE CODE: https://github.com/lucko/LuckPerms                                             | #
+# |  WIKI:        https://github.com/lucko/LuckPerms/wiki                                        | #
+# |  BUG REPORTS: https://github.com/lucko/LuckPerms/issues                                      | #
+# |                                                                                              | #
+# |  Each option in this file is documented and explained here:                                  | #
+# |   ==>  https://github.com/lucko/LuckPerms/wiki/Configuration                                 | #
+# |                                                                                              | #
+# |  New options are not added to this file automatically. Default values are used if an         | #
+# |  option cannot be found. The latest config versions can be obtained at the link above.       | #
+# +----------------------------------------------------------------------------------------------+ #
+####################################################################################################
 
-# +------------------------------------------------------------------------+ #
-# |                               General                                  | #
-# +------------------------------------------------------------------------+ #
+# +----------------------------------------------------------------------------------------------+ #
+# |                                            General                                           | #
+# +----------------------------------------------------------------------------------------------+ #
 
 # The name of the server, used for server specific permissions. Set to 'global' to disable.
 server: bungee
@@ -26,35 +38,52 @@ apply-global-groups: true
 # If users on this server should have global (non-world specific) groups applied
 apply-global-world-groups: true
 
-# If UUIDs should be pulled from the server, or looked up by username based upon previous connections.
+# If UUIDs should be pulled from the server, or looked up by username based upon previous
+# connections.
 #
-# This option should be set to true in most cases. When set to false, in order to get a player's UUID, LuckPerms will:
-# 1. Check if a player with the given username has joined before, if they have, use the UUID they used on their previous login.
+# This option should be set to true in most cases. When set to false, in order to get a player's
+# UUID, LuckPerms will:
+#
+# 1. Check if a player with the given username has joined before, if they have, use the UUID they
+#    used on their previous login.
 # 2. Save and return the players "current" uuid.
 #
 # For offline mode (cracked) servers, a players UUID is generated based upon their username.
 #
 # IMPORTANT:
-# If you are using BungeeCord proxy running in online mode, it is important that "online-mode=false" is set all backend server.properties, but
-# "bungeecord: true" is set in the spigot.yml. You also need to set "ip_forward: true" in BungeeCord's config.yml.
-# If for whatever reason you are not able to do this, and do not have ip-forward enabled, then you may need to set "use-server-uuids" to false.
+# If you are using BungeeCord proxy running in online mode, it is important that "online-mode=false"
+# is set in server.properties, but "bungeecord: true" is set in the spigot.yml. You also need to set
+# "ip_forward: true" in BungeeCord's config.yml.
 #
-# If your proxy is running in offline mode, you should still be setting up ip-forwarding as described above, but may also find that you need to set
-# "bungee-online-mode" to false in paper.yml, if you are using PaperSpigot. (https://ci.destroystokyo.com/job/PaperSpigot/)
+# If for whatever reason you are not able to do this, and do not have ip-forward enabled, then you
+# may need to set "use-server-uuids" to false.
 #
-# This option should always be set to true on the BungeeCord side. Don't change unless you're sure you know what you're doing.
+# If your proxy is running in offline mode, you should still be setting up ip-forwarding as
+# described above, but may also find that you need to set "bungee-online-mode" to false in
+# paper.yml, if you are using Paper. (https://ci.destroystokyo.com/job/PaperSpigot/)
+#
+# This option only really exists for networks who for whatever reason cannot setup proper ip
+# forwarding.
 use-server-uuids: true
+
+# If the servers own UUID cache/lookup facility should be used when there is no record for a player
+# in the LuckPerms cache.
+#
+# Since BungeeCord doesn't maintain it's own UUID cache, when this option is true, LuckPerms will
+# try to find a uuid for a username using RedisBungee, if installed.
+use-server-uuid-cache: false
 
 # If the plugin should send log notifications to users whenever permissions are modified.
 log-notify: true
 
-# Mirrors world names. Whenever LuckPerms checks what world a user is in, if the world name is in this list, the value assigned
-# will be sent forward for permission calculation instead.
+# Mirrors world names. Whenever LuckPerms checks what world a user is in, if the world name is in
+# this list, the value assigned will be sent forward for permission calculation instead.
 world-rewrite:
 #  world_nether: world
 #  world_the_end: world
 
-# Rewrites group names. The underlying name of the group does not change, just the output in commands / placeholders / Vault.
+# Rewrites group names. The underlying name of the group does not change, just the output in
+# commands / placeholders / Vault.
 group-name-rewrite:
 #  default: Member
 
@@ -71,24 +100,34 @@ temporary-add-behaviour: deny
 # Available Options:
 # -> stored                 use the value stored against the users record in the file/database
 # -> parents-by-weight      just use the users most highly weighted parent
-# -> all-parents-by-weight  same as above, but calculates based upon all parents inherited from both directly and indirectly
+# -> all-parents-by-weight  same as above, but calculates based upon all parents inherited from both
+#                           directly and indirectly
 primary-group-calculation: stored
 
+# If the plugin should check for "extra" permissions with users run LP commands.
+#
+# These extra permissions allow finer control over what users can do with each command, and
+# who they have access to edit.
+#
+# The permissions are *not* static, unlike the 'base' permisssions, and will depend upon the
+# arguments given within the command.
+argument-based-command-permissions: false
 
 
 
-# +------------------------------------------------------------------------+ #
-# |                        Permission Calculation                          | #
-# +------------------------------------------------------------------------+ #
+
+# +----------------------------------------------------------------------------------------------+ #
+# |                                    Permission Calculation                                    | #
+# +----------------------------------------------------------------------------------------------+ #
 
 # If the plugin should apply wildcard permissions.
-# If set to true, LuckPerms will detect wildcard permissions, and resolve & apply all registered permissions matching
-# the wildcard.
+# If set to true, LuckPerms will detect wildcard permissions, and resolve & apply all registered
+# permissions matching the wildcard.
 apply-wildcards: true
 
 # If the plugin should parse regex permissions.
-# If set to true, LuckPerms will detect regex permissions, marked with "r=" at the start of the node, and resolve &
-# apply all registered permissions matching the regex.
+# If set to true, LuckPerms will detect regex permissions, marked with "r=" at the start of the
+# node, and resolve & apply all registered permissions matching the regex.
 apply-regex: true
 
 # If the plugin should complete and apply shorthand permissions.
@@ -107,9 +146,9 @@ group-weight:
 
 
 
-# +------------------------------------------------------------------------+ #
-# |                      Meta Formatting & Stacking                        | #
-# +------------------------------------------------------------------------+ #
+# +----------------------------------------------------------------------------------------------+ #
+# |                                  Meta Formatting & Stacking                                  | #
+# +----------------------------------------------------------------------------------------------+ #
 
 # Allows you to setup prefix/suffix stacking options.
 #
@@ -141,21 +180,21 @@ meta-formatting:
 
 
 
-# +------------------------------------------------------------------------+ #
-# |                               Storage                                  | #
-# +------------------------------------------------------------------------+ #
+# +----------------------------------------------------------------------------------------------+ #
+# |                                            Storage                                           | #
+# +----------------------------------------------------------------------------------------------+ #
 
 # Which storage method the plugin should use.
 #
 # See: https://github.com/lucko/LuckPerms/wiki/Choosing-a-Storage-type
 # Currently supported: mysql, mariadb, postgresql, sqlite, h2, json, yaml, mongodb
-
+#
 # Fill out connection info below if you're using MySQL, MariaDB, PostgreSQL or MongoDB
 # If your MySQL server supports it, the "mariadb" option is preferred over "mysql".
 storage-method: h2
 
-# When using a file-based storage type, LuckPerms can monitor the data files for changes, and then schedule automatic
-# updates when changes are detected.
+# When using a file-based storage type, LuckPerms can monitor the data files for changes, and then
+# schedule automatic updates when changes are detected.
 #
 # If you don't want this to happen, set this option to false.
 watch-files: true
@@ -181,15 +220,24 @@ data:
   password: ''
   pool-size: 10 # The size of the MySQL connection pool.
 
-  # The prefix for all LuckPerms tables. Change this is you want to use different tables for different servers.
-  # This should *not* be set to "lp_" if you have previously ran LuckPerms v2.16.81 or earlier with this database.
+  # The prefix for all LuckPerms tables. Change this is you want to use different tables for
+  # different servers.
+  #
+  # This should *not* be set to "lp_" if you have previously ran LuckPerms v2.16.81 or earlier with
+  # this database.
   table_prefix: 'luckperms_'
 
+  # The prefix to use for all LuckPerms collections. Change this if you want to use different
+  # collections for different servers. The default is no prefix.
+  mongodb_collection_prefix: ''
+
   # This option controls how frequently LuckPerms will perform a sync task.
-  # A sync task will refresh all data from the storage, and ensure that the most up-to-date data is being used by the plugin.
+  # A sync task will refresh all data from the storage, and ensure that the most up-to-date data is
+  # being used by the plugin.
   #
-  # This is disabled by default, as most users will not need it. However, if you're using a remote storage type
-  # without a messaging service setup, you may wish to set this value to something like 3.
+  # This is disabled by default, as most users will not need it. However, if you're using a remote
+  # storage type without a messaging service setup, you may wish to set this value to something like
+  # 3.
   #
   # Set to -1 to disable the task completely.
   sync-minutes: -1
@@ -200,17 +248,30 @@ data:
 # connected servers of changes. Use the command "/luckpermsbungee networksync" to push changes.
 # Data is NOT stored using this service. It is only used as a messaging platform.
 #
-# If you decide to enable this feature, you should set "sync-minutes" to -1, as there is no need for LuckPerms
-# to poll the database for changes.
+# If you decide to enable this feature, you should set "sync-minutes" to -1, as there is no need for
+# LuckPerms to poll the database for changes.
 #
 # Available options:
-# bungee ==> uses the plugin messaging channels. Must be enabled on all connected servers to work.
-# redis ==> uses redis pub sub to push changes. Your redis server must be configured below.
-# none ==> nothing
+# -> bungee      uses the plugin messaging channels. Must be enabled on all connected servers to
+#                work.
+# -> redis       uses redis pub sub to push changes. Your redis server must be configured below.
+# -> redisbungee uses redis pub sub to push changes, using RedisBungee's API. You need to have the
+#                RedisBungee plugin installed.
+# -> none        nothing
 messaging-service: none
 
 # If LuckPerms should automatically push updates after a change has been made with a command.
 auto-push-updates: true
+
+# If LuckPerms should push logging entries to connected servers via the messaging service.
+push-log-entries: true
+
+# If LuckPerms should broadcast received logging entries to players on this platform.
+#
+# If you have LuckPerms installed on your backend servers as well as a BungeeCord proxy, you should
+# set this option to false on either your backends or your proxies, to avoid players being messaged
+# twice about log entries.
+broadcast-received-log-entries: false
 
 # Settings for Redis.
 # Port 6379 is used by default; set address to "host:port" if differs
@@ -222,56 +283,60 @@ redis:
 
 
 
-# +------------------------------------------------------------------------+ #
-# |                         Default Assignments                            | #
-# +------------------------------------------------------------------------+ #
+# +----------------------------------------------------------------------------------------------+ #
+# |                                      Default Assignments                                     | #
+# +----------------------------------------------------------------------------------------------+ #
 
 # This section allows you to define defaults to give users whenever they connect to the server.
 # The default assignments are highly configurable and conditional.
 #
-# There is one default assignment built into LuckPerms, which will add all users to the "default" group if they
-# are not a member of any other group. This setting cannot be disabled. However, you can use this section to add more of
-# your own.
+# There is one default assignment built into LuckPerms, which will add all users to the "default"
+# group if they are not a member of any other group. This setting cannot be disabled. However, you
+# can use this section to add more of your own.
 #
 # IMPORTANT:
-# In order to save storage space, LuckPerms does not store users who have no permissions defined, and are only a member
-# of the default group. Adding default assignments to this section will negate this effect. It is HIGHLY RECCOMENDED
-# that instead of assigning defaults here, you add permissions to the "default" group, or set the "default" group to inherit
-# other groups, and then use the group-name-rewrite rule above.
+# In order to save storage space, LuckPerms does not store users who have no permissions defined,
+# and are only a member of the default group. Adding default assignments to this section will negate
+# this effect. It is HIGHLY RECCOMENDED that instead of assigning defaults here, you add permissions
+# to the "default" group, or set the "default" group to inherit other groups, and then use the
+# group-name-rewrite rule above.
 #
-# It is also important to note that these rules are considered every time a player logs into the server, and are applied
-# directly to the user's data. Simply removing a rule here will not reserse the effect of that rule on any users who have
-# already had it applied to them.
+# It is also important to note that these rules are considered every time a player logs into the
+# server, and are applied directly to the user's data. Simply removing a rule here will not reverse
+# the effect of that rule on any users who have already had it applied to them.
 #
-# The "has" and "lacks" conditions below support standard boolean logic, using the 'and' & 'or' characters used in Java.
-# e.g. "(some.other.permission | some.permission.other) & some.thing.else" == a user has 'some.other.permission', or
-# 'some.permission.other', and they also have 'some.thing.else'
+# The "has" and "lacks" conditions below support standard boolean logic, using the 'and' & 'or'
+# characters used in Java.
+# e.g. "(some.other.permission | some.permission.other) & some.thing.else" == a user has
+# 'some.other.permission', or 'some.permission.other', and they also have 'some.thing.else'
 #
 # Groups are represented by the permission node: group.<group name>
-# Per server and per world nodes are represented by: "server-world/permission" or "server/permission"
+# Per server and per world nodes are represented by "server-world/permission" or "server/permission"
 #
 # Within conditions, permission nodes MUST be escaped using "<" and ">". See the example below.
 #
 # Explanation of the examples below: (they're just to demonstrate the features & use cases)
 #
 # rule1:
-# If a user is either in the vip or vip+ group, and they have the "titles.titlecollector" permission set to true, and the
-# "some.random.permission" set to false... if they're not in the group "prison_titlepack" on the "prison" server, then
-# give add them to the "prison_titlepack" group on the "prison" server, and remove "some.random.permission".
+# If a user is either in the vip or vip+ group, and they have the "titles.titlecollector" permission
+# set to true, and the "some.random.permission" set to false... if they're not in the group
+# "prison_titlepack" on the "prison" server, then give add them to the "prison_titlepack" group on
+# the "prison" server, and remove "some.random.permission".
 #
 # rule2:
-# If the user isn't in any of the following groups on the skyblock server: sb_level1, sb_level2, sb_level3, then add
-# them to sb_level1 on the skyblock server.
+# If the user isn't in any of the following groups on the skyblock server: sb_level1, sb_level2,
+# sb_level3, then add them to sb_level1 on the skyblock server.
 #
 # rule3:
-# If the user is a member of the default group, remove them from default, add them to member, and set their primary group
-# to member.
+# If the user is a member of the default group, remove them from default, add them to member, and
+# set their primary group to member.
 #
-# WARNING: Unlike internal commands, this system does not ensure that a group exists before adding a user to it.
-# It also does not unsure that a user is a member of a group before making that group their primary group.
+# WARNING: Unlike internal commands, this system does not ensure that a group exists before adding
+# a user to it. It also does not unsure that a user is a member of a group before making that group
+# their primary group.
 #
-# Before you use "give: group.<name>" or "set-primary-group", make sure that the group exists, and that the user is
-# a member of the group.
+# Before you use "give: group.<name>" or "set-primary-group", make sure that the group exists, and
+# that the user is a member of the group.
 default-assignments:
 #  rule1:
 #    if:

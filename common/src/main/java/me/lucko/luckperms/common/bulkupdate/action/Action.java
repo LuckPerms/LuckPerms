@@ -25,10 +25,18 @@
 
 package me.lucko.luckperms.common.bulkupdate.action;
 
-import me.lucko.luckperms.common.core.NodeModel;
+import me.lucko.luckperms.common.node.NodeModel;
 
+/**
+ * Represents an action to be applied to a given node.
+ */
 public interface Action {
 
+    /**
+     * Gets the name of this action
+     *
+     * @return the name of the action
+     */
     String getName();
 
     /**
@@ -39,6 +47,13 @@ public interface Action {
      */
     NodeModel apply(NodeModel from);
 
+    /**
+     * Gets this action in SQL form.
+     *
+     * Will include a placeholder for the table, as "{table}".
+     *
+     * @return the action in sql form
+     */
     String getAsSql();
 
 }

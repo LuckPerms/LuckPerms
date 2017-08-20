@@ -28,6 +28,9 @@ package me.lucko.luckperms.common.treeview;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+/**
+ * Builds a {@link TreeView}.
+ */
 @Accessors(fluent = true)
 public class TreeViewBuilder {
     public static TreeViewBuilder newBuilder() {

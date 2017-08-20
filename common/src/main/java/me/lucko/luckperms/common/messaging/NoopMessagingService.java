@@ -25,7 +25,8 @@
 
 package me.lucko.luckperms.common.messaging;
 
-import me.lucko.luckperms.common.utils.BufferedRequest;
+import me.lucko.luckperms.api.LogEntry;
+import me.lucko.luckperms.common.buffers.BufferedRequest;
 
 public class NoopMessagingService implements InternalMessagingService {
 
@@ -42,6 +43,11 @@ public class NoopMessagingService implements InternalMessagingService {
     @Override
     public BufferedRequest<Void> getUpdateBuffer() {
         return null;
+    }
+
+    @Override
+    public void pushLog(LogEntry logEntry) {
+
     }
 
     @Override

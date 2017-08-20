@@ -32,13 +32,15 @@ import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.model.Group;
-import me.lucko.luckperms.common.core.model.Track;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.logging.ProgressLogger;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.Track;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.common.utils.ProgressLogger;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
@@ -60,10 +62,11 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static me.lucko.luckperms.sponge.migration.SpongeMigrationUtils.migrateSubject;
+import static me.lucko.luckperms.sponge.migration.SpongeMigrationUtils.migrateSubjectData;
 
 public class MigrationPermissionsEx extends SubCommand<Object> {
-    public MigrationPermissionsEx() {
-        super("permissionsex", "Migration from PermissionsEx", Permission.MIGRATION, Predicates.alwaysFalse(), null);
+    public MigrationPermissionsEx(LocaleManager locale) {
+        super(CommandSpec.MIGRATION_COMMAND.spec(locale), "permissionsex", CommandPermission.MIGRATION, Predicates.alwaysFalse());
     }
 
     @Override
@@ -88,12 +91,12 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         // Migrate defaults
         log.log("Migrating default subjects.");
         for (SubjectCollection collection : pexService.getKnownSubjects().values()) {
-            SpongeMigrationUtils.migrateSubjectData(
+            migrateSubjectData(
                     collection.getDefaults().getSubjectData(),
                     lpService.getCollection("defaults").loadSubject(collection.getIdentifier()).join().sponge().getSubjectData()
             );
         }
-        SpongeMigrationUtils.migrateSubjectData(pexService.getDefaults().getSubjectData(), lpService.getDefaults().sponge().getSubjectData());
+        migrateSubjectData(pexService.getDefaults().getSubjectData(), lpService.getDefaults().sponge().getSubjectData());
 
         log.log("Calculating group weightings.");
         int maxWeight = 0;
@@ -183,7 +186,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             // Make a LuckPerms user for the one being migrated
             plugin.getStorage().loadUser(uuid, "null").join();
             User user = plugin.getUserManager().getIfLoaded(uuid);
-            if (user.getNodes().size() <= 1) {
+            if (user.getEnduringNodes().size() <= 1) {
                 user.clearNodes(false);
             }
             migrateSubject(pexUser, user, maxWeight);

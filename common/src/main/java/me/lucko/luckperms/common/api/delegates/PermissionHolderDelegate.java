@@ -29,6 +29,7 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.ImmutableSortedSet;
 
 import me.lucko.luckperms.api.Contexts;
@@ -37,27 +38,32 @@ import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.PermissionHolder;
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.common.core.NodeFactory;
-import me.lucko.luckperms.common.utils.ExtractedContexts;
+import me.lucko.luckperms.common.contexts.ExtractedContexts;
+import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.function.Predicate;
 
 import static me.lucko.luckperms.common.api.ApiUtils.checkTime;
 
 /**
- * Provides a link between {@link PermissionHolder} and {@link me.lucko.luckperms.common.core.model.PermissionHolder}
+ * Provides a link between {@link PermissionHolder} and {@link me.lucko.luckperms.common.model.PermissionHolder}
  */
 @AllArgsConstructor
 public class PermissionHolderDelegate implements PermissionHolder {
-    private final me.lucko.luckperms.common.core.model.PermissionHolder handle;
+    private final me.lucko.luckperms.common.model.PermissionHolder handle;
 
     @Override
     public String getObjectName() {
@@ -65,13 +71,33 @@ public class PermissionHolderDelegate implements PermissionHolder {
     }
 
     @Override
+    public String getFriendlyName() {
+        return handle.getFriendlyName();
+    }
+
+    @Override
+    public ImmutableSetMultimap<ImmutableContextSet, Node> getNodes() {
+        return handle.getEnduringNodes();
+    }
+
+    @Override
+    public ImmutableSetMultimap<ImmutableContextSet, Node> getTransientNodes() {
+        return handle.getTransientNodes();
+    }
+
+    @Override
+    public List<Node> getOwnNodes() {
+        return handle.getOwnNodes();
+    }
+
+    @Override
     public SortedSet<? extends Node> getPermissions() {
-        return ImmutableSortedSet.copyOfSorted(handle.mergePermissionsToSortedSet());
+        return ImmutableSortedSet.copyOfSorted(handle.getOwnNodesSorted());
     }
 
     @Override
     public Set<Node> getEnduringPermissions() {
-        return ImmutableSet.copyOf(handle.getNodes().values());
+        return ImmutableSet.copyOf(handle.getEnduringNodes().values());
     }
 
     @Override
@@ -85,13 +111,18 @@ public class PermissionHolderDelegate implements PermissionHolder {
     }
 
     @Override
+    public SortedSet<LocalizedNode> getAllNodes() {
+        return new TreeSet<>(handle.resolveInheritancesAlmostEqual());
+    }
+
+    @Override
     public Set<LocalizedNode> getAllNodesFiltered(@NonNull Contexts contexts) {
         return new HashSet<>(handle.getAllNodes(ExtractedContexts.generate(contexts)));
     }
 
     @Override
     public Map<String, Boolean> exportNodes(Contexts contexts, boolean lowerCase) {
-        return new HashMap<>(handle.exportNodes(ExtractedContexts.generate(contexts), lowerCase));
+        return new HashMap<>(handle.exportNodesAndShorthand(ExtractedContexts.generate(contexts), lowerCase));
     }
 
     @Override
@@ -240,6 +271,19 @@ public class PermissionHolderDelegate implements PermissionHolder {
     }
 
     @Override
+    public void clearMatching(Predicate<Node> test) {
+        handle.removeIf(test);
+        if (handle instanceof User) {
+            handle.getPlugin().getUserManager().giveDefaultIfNeeded((User) handle, false);
+        }
+    }
+
+    @Override
+    public void clearMatchingTransient(Predicate<Node> test) {
+        handle.removeIfTransient(test);
+    }
+
+    @Override
     public void unsetPermission(@NonNull String node, @NonNull boolean temporary) throws ObjectLacksException {
         handle.unsetPermission(NodeFactory.make(node, temporary)).throwException();
     }
@@ -275,6 +319,11 @@ public class PermissionHolderDelegate implements PermissionHolder {
     }
 
     @Override
+    public void clearNodes(@NonNull ContextSet contextSet) {
+        handle.clearNodes(contextSet);
+    }
+
+    @Override
     public void clearNodes(String server) {
         MutableContextSet set = new MutableContextSet();
         if (server != null) {
@@ -303,6 +352,11 @@ public class PermissionHolderDelegate implements PermissionHolder {
     }
 
     @Override
+    public void clearParents(@NonNull ContextSet contextSet) {
+        handle.clearParents(contextSet, true);
+    }
+
+    @Override
     public void clearParents(String server) {
         MutableContextSet set = new MutableContextSet();
         if (server != null) {
@@ -328,6 +382,11 @@ public class PermissionHolderDelegate implements PermissionHolder {
     @Override
     public void clearMeta() {
         handle.clearMeta();
+    }
+
+    @Override
+    public void clearMeta(@NonNull ContextSet contextSet) {
+        handle.clearMeta(contextSet);
     }
 
     @Override
@@ -374,6 +433,16 @@ public class PermissionHolderDelegate implements PermissionHolder {
     @Override
     public Set<Node> getTemporaryPermissionNodes() {
         return handle.getTemporaryNodes();
+    }
+
+    @Override
+    public List<LocalizedNode> resolveInheritances(Contexts contexts) {
+        return null;
+    }
+
+    @Override
+    public List<LocalizedNode> resolveInheritances() {
+        return null;
     }
 
     @Override

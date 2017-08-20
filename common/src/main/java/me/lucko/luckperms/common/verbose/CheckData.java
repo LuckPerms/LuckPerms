@@ -30,12 +30,26 @@ import lombok.Getter;
 
 import me.lucko.luckperms.api.Tristate;
 
+/**
+ * Holds the data from a permission check
+ */
 @Getter
 @AllArgsConstructor
 public class CheckData {
 
-    private final String checked;
-    private final String node;
-    private final Tristate value;
+    /**
+     * The name of the entity which was checked
+     */
+    private final String checkTarget;
+
+    /**
+     * The permission which was checked for
+     */
+    private final String permission;
+
+    /**
+     * The result of the permission check
+     */
+    private final Tristate result;
 
 }

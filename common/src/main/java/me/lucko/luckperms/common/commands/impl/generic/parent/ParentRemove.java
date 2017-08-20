@@ -27,7 +27,8 @@ package me.lucko.luckperms.common.commands.impl.generic.parent;
 
 import me.lucko.luckperms.api.DataMutateResult;
 import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.common.commands.Arg;
+import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
@@ -35,12 +36,13 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.NodeFactory;
-import me.lucko.luckperms.common.core.model.PermissionHolder;
-import me.lucko.luckperms.common.core.model.User;
-import me.lucko.luckperms.common.data.LogEntry;
+import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -50,20 +52,29 @@ import java.util.stream.Collectors;
 import static me.lucko.luckperms.common.commands.abstraction.SubCommand.getGroupTabComplete;
 
 public class ParentRemove extends SharedSubCommand {
-    public ParentRemove() {
-        super("remove", "Removes a previously set inheritance rule", Permission.USER_PARENT_REMOVE,
-                Permission.GROUP_PARENT_REMOVE, Predicates.is(0),
-                Arg.list(
-                        Arg.create("group", true, "the group to remove"),
-                        Arg.create("context...", false, "the contexts to remove the group in")
-                )
-        );
+    public ParentRemove(LocaleManager locale) {
+        super(CommandSpec.PARENT_REMOVE.spec(locale), "remove", CommandPermission.USER_PARENT_REMOVE, CommandPermission.GROUP_PARENT_REMOVE, Predicates.is(0));
     }
 
     @Override
-    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label) throws CommandException {
+    public CommandResult execute(LuckPermsPlugin plugin, Sender sender, PermissionHolder holder, List<String> args, String label, CommandPermission permission) throws CommandException {
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, permission, holder)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
         String groupName = ArgumentUtils.handleNameWithSpace(0, args);
-        MutableContextSet context = ArgumentUtils.handleContext(1, args);
+        MutableContextSet context = ArgumentUtils.handleContext(1, args, plugin);
+
+        if (ArgumentPermissions.checkContext(plugin, sender, permission, context)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
+        if (ArgumentPermissions.checkArguments(plugin, sender, permission, groupName)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
 
         if (holder instanceof User) {
             User user = (User) holder;
@@ -82,9 +93,13 @@ public class ParentRemove extends SharedSubCommand {
         if (result.asBoolean()) {
             Message.UNSET_INHERIT_SUCCESS.send(sender, holder.getFriendlyName(), groupName, Util.contextSetToString(context));
 
-            LogEntry.build().actor(sender).acted(holder)
+            ExtendedLogEntry.build().actor(sender).acted(holder)
                     .action("parent remove " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
                     .build().submit(plugin, sender);
+
+            if (holder instanceof User) {
+                plugin.getUserManager().giveDefaultIfNeeded(((User) holder), false);
+            }
 
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;

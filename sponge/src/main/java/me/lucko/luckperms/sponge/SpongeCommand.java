@@ -95,13 +95,6 @@ class SpongeCommand extends CommandManager implements CommandCallable {
         }
     }
 
-    // For API 4
-    public List<String> getSuggestions(CommandSource source, String s) throws CommandException {
-        try (Timing ignored = plugin.getTimings().time(LPTiming.COMMAND_TAB_COMPLETE)) {
-            return onTabComplete(plugin.getSenderFactory().wrap(source), Splitter.on(' ').splitToList(s));
-        }
-    }
-
     @Override
     public boolean testPermission(CommandSource source) {
         return true;
@@ -114,11 +107,11 @@ class SpongeCommand extends CommandManager implements CommandCallable {
 
     @Override
     public Optional<Text> getHelp(CommandSource source) {
-        return Optional.of(Text.of("Type /perms for help."));
+        return Optional.of(Text.of("Type /luckperms for help."));
     }
 
     @Override
     public Text getUsage(CommandSource source) {
-        return Text.of("/perms");
+        return Text.of("/luckperms");
     }
 }

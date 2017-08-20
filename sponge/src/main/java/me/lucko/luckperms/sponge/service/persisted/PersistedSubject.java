@@ -34,17 +34,19 @@ import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.utils.BufferedRequest;
+import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
+import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.calculated.CalculatedSubjectData;
 import me.lucko.luckperms.sponge.service.calculated.OptionLookup;
 import me.lucko.luckperms.sponge.service.calculated.PermissionLookup;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
-import me.lucko.luckperms.sponge.service.references.SubjectReference;
+import me.lucko.luckperms.sponge.service.model.SubjectReference;
 import me.lucko.luckperms.sponge.service.storage.SubjectStorageModel;
 import me.lucko.luckperms.sponge.timings.LPTiming;
 
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.service.permission.Subject;
 
 import co.aikar.timings.Timing;
 
@@ -128,6 +130,11 @@ public class PersistedSubject implements LPSubject {
     }
 
     @Override
+    public Subject sponge() {
+        return ProxyFactory.toSponge(this);
+    }
+
+    @Override
     public Optional<CommandSource> getCommandSource() {
         return Optional.empty();
     }
@@ -159,7 +166,7 @@ public class PersistedSubject implements LPSubject {
         }
 
         for (SubjectReference parent : getParents(contexts)) {
-            res = parent.resolve().join().getPermissionValue(contexts, node);
+            res = parent.resolveLp().join().getPermissionValue(contexts, node);
             if (res != Tristate.UNDEFINED) {
                 return res;
             }
@@ -218,7 +225,7 @@ public class PersistedSubject implements LPSubject {
         }
 
         for (SubjectReference parent : getParents(contexts)) {
-            res = parent.resolve().join().getOption(contexts, key);
+            res = parent.resolveLp().join().getOption(contexts, key);
             if (res.isPresent()) {
                 return res;
             }
@@ -240,7 +247,7 @@ public class PersistedSubject implements LPSubject {
     public Tristate getPermissionValue(@NonNull ImmutableContextSet contexts, @NonNull String node) {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.INTERNAL_SUBJECT_GET_PERMISSION_VALUE)) {
             Tristate t = permissionLookupCache.get(PermissionLookup.of(node, contexts));
-            service.getPlugin().getVerboseHandler().offer("local:" + getParentCollection().getIdentifier() + "/" + identifier, node, t);
+            service.getPlugin().getVerboseHandler().offerCheckData("local:" + getParentCollection().getIdentifier() + "/" + identifier, node, t);
             return t;
         }
     }

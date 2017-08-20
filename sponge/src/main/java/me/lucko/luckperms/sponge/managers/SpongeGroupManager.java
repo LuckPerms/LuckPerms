@@ -40,17 +40,17 @@ import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.event.cause.CreationCause;
-import me.lucko.luckperms.common.core.model.Group;
+import me.lucko.luckperms.common.constants.DataConstraints;
 import me.lucko.luckperms.common.managers.GroupManager;
+import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
-import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.model.SpongeGroup;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
+import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
-import me.lucko.luckperms.sponge.service.proxy.SubjectCollectionProxy;
-import me.lucko.luckperms.sponge.service.references.SubjectReference;
+import me.lucko.luckperms.sponge.service.model.SubjectReference;
 
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectCollection;
@@ -68,7 +68,7 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
     @Getter
     private final LPSpongePlugin plugin;
 
-    private SubjectCollectionProxy spongeProxy = null;
+    private SubjectCollection spongeProxy = null;
 
     private final LoadingCache<String, SpongeGroup> objects = Caffeine.newBuilder()
             .build(new CacheLoader<String, SpongeGroup>() {
@@ -167,7 +167,8 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
     @Override
     public synchronized SubjectCollection sponge() {
         if (spongeProxy == null) {
-            spongeProxy = new SubjectCollectionProxy(Preconditions.checkNotNull(plugin.getService(), "service"), this);
+            Preconditions.checkNotNull(plugin.getService(), "service");
+            spongeProxy = ProxyFactory.toSponge(this);
         }
         return spongeProxy;
     }
@@ -184,18 +185,23 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
 
     @Override
     public Predicate<String> getIdentifierValidityPredicate() {
-        // TODO change this to use the actual limitations
-        return Predicates.alwaysTrue();
+        return DataConstraints.GROUP_NAME_TEST;
     }
 
     @Override
     public CompletableFuture<LPSubject> loadSubject(String identifier) {
+        if (!DataConstraints.GROUP_NAME_TEST.test(identifier)) {
+            CompletableFuture<LPSubject> fut = new CompletableFuture<>();
+            fut.completeExceptionally(new IllegalArgumentException("Illegal subject identifier"));
+            return fut;
+        }
+
         LPSubject present = subjectLoadingCache.getIfPresent(identifier.toLowerCase());
         if (present != null) {
             return CompletableFuture.completedFuture(present);
         }
 
-        return CompletableFuture.supplyAsync(() -> subjectLoadingCache.get(identifier.toLowerCase()), plugin.getScheduler().getAsyncExecutor());
+        return CompletableFuture.supplyAsync(() -> subjectLoadingCache.get(identifier.toLowerCase()), plugin.getScheduler().async());
     }
 
     @Override
@@ -221,7 +227,7 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
             }
 
             return ret.build();
-        }, plugin.getScheduler().getAsyncExecutor());
+        }, plugin.getScheduler().async());
     }
 
     @Override
@@ -247,7 +253,7 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
             }
 
             return ret.build();
-        }, plugin.getScheduler().getAsyncExecutor());
+        }, plugin.getScheduler().async());
     }
 
     @Override
@@ -263,7 +269,7 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
             }
 
             return ret.build();
-        }, plugin.getScheduler().getAsyncExecutor());
+        }, plugin.getScheduler().async());
     }
 
     @Override

@@ -34,7 +34,8 @@ import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.caching.UserData;
-import me.lucko.luckperms.common.core.NodeFactory;
+import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
@@ -46,18 +47,18 @@ import java.util.stream.Collectors;
 import static me.lucko.luckperms.common.api.ApiUtils.checkTime;
 
 /**
- * Provides a link between {@link User} and {@link me.lucko.luckperms.common.core.model.User}
+ * Provides a link between {@link User} and {@link me.lucko.luckperms.common.model.User}
  */
 public final class UserDelegate extends PermissionHolderDelegate implements User {
-    public static me.lucko.luckperms.common.core.model.User cast(User u) {
+    public static me.lucko.luckperms.common.model.User cast(User u) {
         Preconditions.checkState(u instanceof UserDelegate, "Illegal instance " + u.getClass() + " cannot be handled by this implementation.");
         return ((UserDelegate) u).getHandle();
     }
 
     @Getter
-    private final me.lucko.luckperms.common.core.model.User handle;
+    private final me.lucko.luckperms.common.model.User handle;
 
-    public UserDelegate(@NonNull me.lucko.luckperms.common.core.model.User handle) {
+    public UserDelegate(@NonNull me.lucko.luckperms.common.model.User handle) {
         super(handle);
         this.handle = handle;
     }
@@ -96,8 +97,12 @@ public final class UserDelegate extends PermissionHolderDelegate implements User
     }
 
     @Override
+    public UserData getCachedData() {
+        return handle.getUserData();
+    }
+
+    @Override
     public Optional<UserData> getUserDataCache() {
-        // TODO Deprecate this and return a nonnull instance
         return Optional.of(handle.getUserData());
     }
 
@@ -112,13 +117,18 @@ public final class UserDelegate extends PermissionHolderDelegate implements User
     }
 
     @Override
+    public boolean isInGroup(@NonNull Group group, @NonNull ContextSet contextSet) {
+        return handle.inheritsGroup(GroupDelegate.cast(group), contextSet);
+    }
+
+    @Override
     public boolean isInGroup(@NonNull Group group, @NonNull String server) {
-        return handle.inheritsGroup(((GroupDelegate) group).getHandle(), server);
+        return handle.inheritsGroup(GroupDelegate.cast(group), server);
     }
 
     @Override
     public boolean isInGroup(@NonNull Group group, @NonNull String server, @NonNull String world) {
-        return handle.inheritsGroup(((GroupDelegate) group).getHandle(), server, world);
+        return handle.inheritsGroup(GroupDelegate.cast(group), server, world);
     }
 
     @Override
@@ -188,7 +198,7 @@ public final class UserDelegate extends PermissionHolderDelegate implements User
 
     @Override
     public List<String> getGroupNames() {
-        return handle.mergePermissionsToList().stream()
+        return handle.getOwnNodes().stream()
                 .filter(Node::isGroupNode)
                 .map(Node::getGroupName)
                 .collect(Collectors.toList());
@@ -196,7 +206,7 @@ public final class UserDelegate extends PermissionHolderDelegate implements User
 
     @Override
     public List<String> getLocalGroups(@NonNull String server, @NonNull String world) {
-        return handle.mergePermissionsToList().stream()
+        return handle.getOwnNodes().stream()
                 .filter(Node::isGroupNode)
                 .filter(n -> n.shouldApplyOnWorld(world, false, true))
                 .filter(n -> n.shouldApplyOnServer(server, false, true))
@@ -206,7 +216,7 @@ public final class UserDelegate extends PermissionHolderDelegate implements User
 
     @Override
     public List<String> getLocalGroups(@NonNull String server) {
-        return handle.mergePermissionsToList().stream()
+        return handle.getOwnNodes().stream()
                 .filter(Node::isGroupNode)
                 .filter(n -> n.shouldApplyOnServer(server, false, true))
                 .map(Node::getGroupName)

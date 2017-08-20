@@ -25,19 +25,21 @@
 
 package me.lucko.luckperms.bukkit.migration;
 
+import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.event.cause.CreationCause;
-import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.NodeFactory;
+import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.logging.ProgressLogger;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.common.utils.ProgressLogger;
 
 import org.anjocaido.groupmanager.GlobalGroups;
 import org.anjocaido.groupmanager.GroupManager;
@@ -59,10 +61,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class MigrationGroupManager extends SubCommand<Object> {
-    public MigrationGroupManager() {
-        super("groupmanager", "Migration from GroupManager", Permission.MIGRATION, Predicates.is(0),
-                Arg.list(Arg.create("migrate as global", true, "if world permissions should be ignored, and just migrated as global"))
-        );
+    public MigrationGroupManager(LocaleManager locale) {
+        super(CommandSpec.MIGRATION_GROUPMANAGER.spec(locale), "groupmanager", CommandPermission.MIGRATION, Predicates.is(0));
     }
 
     @Override
@@ -97,7 +97,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
             String groupName = MigrationUtils.standardizeName(g.getName());
 
             plugin.getStorage().createAndLoadGroup(groupName, CreationCause.INTERNAL).join();
-            me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().getIfLoaded(groupName);
+            me.lucko.luckperms.common.model.Group group = plugin.getGroupManager().getIfLoaded(groupName);
 
             for (String node : g.getPermissionList()) {
                 if (node.isEmpty()) {
@@ -172,7 +172,8 @@ public class MigrationGroupManager extends SubCommand<Object> {
                     }
 
                     if (key.equals("prefix") || key.equals("suffix")) {
-                        groups.get(groupName).add(NodeFactory.makeChatMetaNode(key.equals("prefix"), 50, value).setWorld(worldMappingFunc.apply(world)).build());
+                        ChatMetaType type = ChatMetaType.valueOf(key.toUpperCase());
+                        groups.get(groupName).add(NodeFactory.makeChatMetaNode(type, 50, value).setWorld(worldMappingFunc.apply(world)).build());
                     } else {
                         groups.get(groupName).add(NodeFactory.makeMetaNode(key, value).setWorld(worldMappingFunc.apply(world)).build());
                     }
@@ -228,7 +229,8 @@ public class MigrationGroupManager extends SubCommand<Object> {
                     }
 
                     if (key.equals("prefix") || key.equals("suffix")) {
-                        users.get(uuid).add(NodeFactory.makeChatMetaNode(key.equals("prefix"), 100, value).setWorld(worldMappingFunc.apply(world)).build());
+                        ChatMetaType type = ChatMetaType.valueOf(key.toUpperCase());
+                        users.get(uuid).add(NodeFactory.makeChatMetaNode(type, 100, value).setWorld(worldMappingFunc.apply(world)).build());
                     } else {
                         users.get(uuid).add(NodeFactory.makeMetaNode(key, value).setWorld(worldMappingFunc.apply(world)).build());
                     }
@@ -246,7 +248,7 @@ public class MigrationGroupManager extends SubCommand<Object> {
         AtomicInteger groupCount = new AtomicInteger(0);
         for (Map.Entry<String, Set<Node>> e : groups.entrySet()) {
             plugin.getStorage().createAndLoadGroup(e.getKey(), CreationCause.INTERNAL).join();
-            me.lucko.luckperms.common.core.model.Group group = plugin.getGroupManager().getIfLoaded(e.getKey());
+            me.lucko.luckperms.common.model.Group group = plugin.getGroupManager().getIfLoaded(e.getKey());
 
             for (Node node : e.getValue()) {
                 group.setPermission(node);
@@ -261,14 +263,14 @@ public class MigrationGroupManager extends SubCommand<Object> {
         AtomicInteger userCount = new AtomicInteger(0);
         for (Map.Entry<UUID, Set<Node>> e : users.entrySet()) {
             plugin.getStorage().loadUser(e.getKey(), "null").join();
-            me.lucko.luckperms.common.core.model.User user = plugin.getUserManager().getIfLoaded(e.getKey());
+            me.lucko.luckperms.common.model.User user = plugin.getUserManager().getIfLoaded(e.getKey());
 
             for (Node node : e.getValue()) {
                 user.setPermission(node);
             }
 
             String primaryGroup = primaryGroups.get(e.getKey());
-            if (primaryGroup != null) {
+            if (primaryGroup != null && !primaryGroup.isEmpty()) {
                 user.setPermission(NodeFactory.make("group." + primaryGroup));
                 user.getPrimaryGroup().setStoredValue(primaryGroup);
                 user.unsetPermission(NodeFactory.make("group.default"));

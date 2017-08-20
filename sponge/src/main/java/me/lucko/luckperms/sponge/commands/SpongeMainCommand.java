@@ -28,14 +28,15 @@ package me.lucko.luckperms.sponge.commands;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.Command;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Message;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 import me.lucko.luckperms.common.utils.Predicates;
@@ -55,41 +56,35 @@ import java.util.stream.Collectors;
 public class SpongeMainCommand extends Command<Void, LPSubjectData> {
     private final LPSpongePlugin plugin;
 
-    private final Map<String, List<Command<LPSubjectData, ?>>> subCommands = ImmutableMap.<String, List<Command<LPSubjectData, ?>>>builder()
-            .put("permission", ImmutableList.<Command<LPSubjectData, ?>>builder()
-                    .add(new PermissionInfo())
-                    .add(new PermissionSet())
-                    .add(new PermissionClear())
-                    .build()
-            )
-            .put("parent", ImmutableList.<Command<LPSubjectData, ?>>builder()
-                    .add(new ParentInfo())
-                    .add(new ParentAdd())
-                    .add(new ParentRemove())
-                    .add(new ParentClear())
-                    .build()
-            )
-            .put("option", ImmutableList.<Command<LPSubjectData, ?>>builder()
-                    .add(new OptionInfo())
-                    .add(new OptionSet())
-                    .add(new OptionUnset())
-                    .add(new OptionClear())
-                    .build()
-            )
-            .build();
+    private final Map<String, List<Command<LPSubjectData, ?>>> subCommands;
 
     public SpongeMainCommand(LPSpongePlugin plugin) {
-        super(
-                "Sponge",
-                "Edit extra Sponge data",
-                null,
-                Predicates.alwaysFalse(),
-                Arg.list(
-                        Arg.create("collection", true, "the collection to query"),
-                        Arg.create("subject", true, "the subject to modify")
-                ),
-                null
-        );
+        super(CommandSpec.SPONGE.spec(plugin.getLocaleManager()), "Sponge", null, Predicates.alwaysFalse());
+
+        LocaleManager locale = plugin.getLocaleManager();
+
+        subCommands = ImmutableMap.<String, List<Command<LPSubjectData, ?>>>builder()
+                .put("permission", ImmutableList.<Command<LPSubjectData, ?>>builder()
+                        .add(new PermissionInfo(locale))
+                        .add(new PermissionSet(locale))
+                        .add(new PermissionClear(locale))
+                        .build()
+                )
+                .put("parent", ImmutableList.<Command<LPSubjectData, ?>>builder()
+                        .add(new ParentInfo(locale))
+                        .add(new ParentAdd(locale))
+                        .add(new ParentRemove(locale))
+                        .add(new ParentClear(locale))
+                        .build()
+                )
+                .put("option", ImmutableList.<Command<LPSubjectData, ?>>builder()
+                        .add(new OptionInfo(locale))
+                        .add(new OptionSet(locale))
+                        .add(new OptionUnset(locale))
+                        .add(new OptionClear(locale))
+                        .build()
+                )
+                .build();
 
         this.plugin = plugin;
     }
@@ -199,8 +194,6 @@ public class SpongeMainCommand extends Command<Void, LPSubjectData> {
         return result;
     }
 
-    // TODO tab completion
-
     @Override
     public void sendUsage(Sender sender, String label) {
         Util.sendPluginMessage(sender, "&3> &a" + String.format(getUsage(), label));
@@ -226,11 +219,6 @@ public class SpongeMainCommand extends Command<Void, LPSubjectData> {
     @Override
     public boolean isAuthorized(Sender sender) {
         return getSubCommands().stream().filter(sc -> sc.isAuthorized(sender)).count() != 0;
-    }
-
-    @Override
-    public String getUsage() {
-        return "/%s sponge <collection> <subject>";
     }
 
     public List<Command<LPSubjectData, ?>> getSubCommands() {

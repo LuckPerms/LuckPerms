@@ -26,37 +26,34 @@
 package me.lucko.luckperms.common.commands.impl.misc;
 
 import me.lucko.luckperms.api.caching.PermissionData;
-import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.treeview.TreeView;
 import me.lucko.luckperms.common.treeview.TreeViewBuilder;
 import me.lucko.luckperms.common.utils.Predicates;
 
-import io.github.mkremins.fanciful.ChatColor;
-import io.github.mkremins.fanciful.FancyMessage;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.event.ClickEvent;
+import net.kyori.text.event.HoverEvent;
+import net.kyori.text.format.TextColor;
 
 import java.util.List;
 import java.util.UUID;
 
 public class TreeCommand extends SingleCommand {
-    public TreeCommand() {
-        super("Tree", "Generate a tree view of permissions",
-                "/%s tree [selection] [max level] [player]", Permission.TREE, Predicates.alwaysFalse(),
-                Arg.list(
-                        Arg.create("selection", false, "the root of the tree. specify \".\" to include all permissions"),
-                        Arg.create("max level", false, "how many branch levels should be returned"),
-                        Arg.create("player", false, "the name of an online player to check against")
-                )
-        );
+    public TreeCommand(LocaleManager locale) {
+        super(CommandSpec.TREE.spec(locale), "Tree", CommandPermission.TREE, Predicates.alwaysFalse());
     }
 
     @Override
@@ -105,7 +102,13 @@ public class TreeCommand extends SingleCommand {
             }
 
             Message.TREE_URL.send(sender);
-            sender.sendMessage(new FancyMessage(url).color(ChatColor.getByChar('b')).link(url));
+
+            Component message = TextComponent.builder(url).color(TextColor.AQUA)
+                    .clickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url))
+                    .hoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.of("Click to open the tree view.").color(TextColor.GRAY)))
+                    .build();
+
+            sender.sendMessage(message);
             return CommandResult.SUCCESS;
         }
 
@@ -124,7 +127,13 @@ public class TreeCommand extends SingleCommand {
         }
 
         Message.TREE_URL.send(sender);
-        sender.sendMessage(new FancyMessage(url).color(ChatColor.getByChar('b')).link(url));
+
+        Component message = TextComponent.builder(url).color(TextColor.AQUA)
+                .clickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url))
+                .hoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.of("Click to open the tree view.").color(TextColor.GRAY)))
+                .build();
+
+        sender.sendMessage(message);
         return CommandResult.SUCCESS;
     }
 }

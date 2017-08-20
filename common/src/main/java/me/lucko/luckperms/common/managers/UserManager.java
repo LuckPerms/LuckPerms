@@ -25,9 +25,9 @@
 
 package me.lucko.luckperms.common.managers;
 
-import me.lucko.luckperms.common.core.UserIdentifier;
-import me.lucko.luckperms.common.core.model.User;
-import me.lucko.luckperms.common.utils.Identifiable;
+import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.references.Identifiable;
+import me.lucko.luckperms.common.references.UserIdentifier;
 
 import java.util.UUID;
 

@@ -5,7 +5,7 @@
     <parent>
         <artifactId>luckperms</artifactId>
         <groupId>me.lucko.luckperms</groupId>
-        <version>3.1-SNAPSHOT</version>
+        <version>3.3-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -46,8 +46,8 @@
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <relocations>
                                 <relocation>
-                                    <pattern>io.github.mkremins.fanciful</pattern>
-                                    <shadedPattern>me.lucko.luckperms.lib.fanciful</shadedPattern>
+                                    <pattern>net.kyori.text</pattern>
+                                    <shadedPattern>me.lucko.luckperms.lib.text</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
@@ -57,12 +57,36 @@
         </plugins>
     </build>
 
+    <profiles>
+        <profile>
+            <id>sign</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>${gpg.version}</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
     <dependencies>
         <!-- BungeeCord -->
         <dependency>
             <groupId>net.md-5</groupId>
             <artifactId>bungeecord-api</artifactId>
-            <version>1.11-SNAPSHOT</version>
+            <version>1.12-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <!-- LuckPerms Common -->
@@ -86,6 +110,14 @@
             <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
+        <!-- RedisBungee -->
+        <dependency>
+            <groupId>com.imaginarycode.minecraft</groupId>
+            <artifactId>RedisBungee</artifactId>
+            <version>0.4</version>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- ************** Migration Plugins ************** -->
         <!-- BungeePerms -->
         <dependency>

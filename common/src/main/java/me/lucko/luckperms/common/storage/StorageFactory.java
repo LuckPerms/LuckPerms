@@ -32,14 +32,14 @@ import com.google.common.collect.ImmutableSet;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.backing.AbstractBacking;
-import me.lucko.luckperms.common.storage.backing.JSONBacking;
-import me.lucko.luckperms.common.storage.backing.MongoDBBacking;
-import me.lucko.luckperms.common.storage.backing.SQLBacking;
-import me.lucko.luckperms.common.storage.backing.YAMLBacking;
-import me.lucko.luckperms.common.storage.backing.sqlprovider.H2Provider;
-import me.lucko.luckperms.common.storage.backing.sqlprovider.MySQLProvider;
-import me.lucko.luckperms.common.storage.backing.sqlprovider.PostgreSQLProvider;
-import me.lucko.luckperms.common.storage.backing.sqlprovider.SQLiteProvider;
+import me.lucko.luckperms.common.storage.backing.file.JSONBacking;
+import me.lucko.luckperms.common.storage.backing.file.YAMLBacking;
+import me.lucko.luckperms.common.storage.backing.mongodb.MongoDBBacking;
+import me.lucko.luckperms.common.storage.backing.sql.SQLBacking;
+import me.lucko.luckperms.common.storage.backing.sql.provider.H2Provider;
+import me.lucko.luckperms.common.storage.backing.sql.provider.MySQLProvider;
+import me.lucko.luckperms.common.storage.backing.sql.provider.PostgreSQLProvider;
+import me.lucko.luckperms.common.storage.backing.sql.provider.SQLiteProvider;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
 import java.io.File;
@@ -52,10 +52,7 @@ import java.util.Set;
 public class StorageFactory {
 
     public static Set<StorageType> getRequiredTypes(LuckPermsPlugin plugin, StorageType defaultMethod) {
-        plugin.getLog().info("Detecting storage method...");
         if (plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE)) {
-            plugin.getLog().info("Loading split storage options.");
-
             Map<String, String> types = new HashMap<>(plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE_OPTIONS));
             types.entrySet().stream()
                     .filter(e -> StorageType.parse(e.getValue()) == null)
@@ -82,10 +79,8 @@ public class StorageFactory {
 
     public static Storage getInstance(LuckPermsPlugin plugin, StorageType defaultMethod) {
         Storage storage;
-
-        plugin.getLog().info("Initializing storage backings...");
         if (plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE)) {
-            plugin.getLog().info("Using split storage.");
+            plugin.getLog().info("Loading storage provider... [SPLIT STORAGE]");
 
             Map<String, String> types = new HashMap<>(plugin.getConfiguration().get(ConfigKeys.SPLIT_STORAGE_OPTIONS));
             types.entrySet().stream()
@@ -110,11 +105,10 @@ public class StorageFactory {
                 type = defaultMethod;
             }
 
-            plugin.getLog().info("Using " + type.getName() + " storage.");
+            plugin.getLog().info("Loading storage provider... [" + type.name() + "]");
             storage = makeInstance(type, plugin);
         }
 
-        plugin.getLog().info("Initialising storage provider...");
         storage.init();
         return storage;
     }
@@ -155,7 +149,11 @@ public class StorageFactory {
                         plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
                 );
             case MONGODB:
-                return new MongoDBBacking(plugin, plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES));
+                return new MongoDBBacking(
+                        plugin,
+                        plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES),
+                        plugin.getConfiguration().get(ConfigKeys.MONGODB_COLLECTION_PREFIX)
+                );
             case YAML:
                 return new YAMLBacking(plugin, plugin.getDataDirectory(), "yaml-storage");
             default:

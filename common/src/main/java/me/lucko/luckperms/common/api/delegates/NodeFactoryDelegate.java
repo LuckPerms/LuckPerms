@@ -27,9 +27,10 @@ package me.lucko.luckperms.common.api.delegates;
 
 import lombok.NonNull;
 
+import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.common.core.NodeFactory;
+import me.lucko.luckperms.common.node.NodeFactory;
 
 public class NodeFactoryDelegate implements me.lucko.luckperms.api.NodeFactory {
     public static final NodeFactoryDelegate INSTANCE = new NodeFactoryDelegate();
@@ -62,6 +63,11 @@ public class NodeFactoryDelegate implements me.lucko.luckperms.api.NodeFactory {
     @Override
     public Node.Builder makeMetaNode(@NonNull String key, @NonNull String value) {
         return NodeFactory.makeMetaNode(key, value);
+    }
+
+    @Override
+    public Node.Builder makeChatMetaNode(@NonNull ChatMetaType type, int priority, @NonNull String value) {
+        return NodeFactory.makeChatMetaNode(type, priority, value);
     }
 
     @Override

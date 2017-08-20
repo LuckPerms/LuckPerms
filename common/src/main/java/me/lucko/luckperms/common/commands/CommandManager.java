@@ -36,6 +36,7 @@ import me.lucko.luckperms.common.commands.impl.group.GroupMainCommand;
 import me.lucko.luckperms.common.commands.impl.group.ListGroups;
 import me.lucko.luckperms.common.commands.impl.log.LogMainCommand;
 import me.lucko.luckperms.common.commands.impl.migration.MigrationMainCommand;
+import me.lucko.luckperms.common.commands.impl.misc.ApplyEditsCommand;
 import me.lucko.luckperms.common.commands.impl.misc.BulkUpdateCommand;
 import me.lucko.luckperms.common.commands.impl.misc.CheckCommand;
 import me.lucko.luckperms.common.commands.impl.misc.ExportCommand;
@@ -55,12 +56,17 @@ import me.lucko.luckperms.common.commands.impl.user.UserMainCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.constants.Constants;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.utils.TextUtils;
 
-import io.github.mkremins.fanciful.ChatColor;
-import io.github.mkremins.fanciful.FancyMessage;
+import net.kyori.text.LegacyComponent;
+import net.kyori.text.TextComponent;
+import net.kyori.text.event.ClickEvent;
+import net.kyori.text.event.HoverEvent;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -87,30 +93,33 @@ public class CommandManager {
         this.plugin = plugin;
         this.executor = Executors.newSingleThreadExecutor();
 
+        LocaleManager locale = plugin.getLocaleManager();
+
         mainCommands = ImmutableList.<Command>builder()
-                .add(new UserMainCommand())
-                .add(new GroupMainCommand())
-                .add(new TrackMainCommand())
+                .add(new UserMainCommand(locale))
+                .add(new GroupMainCommand(locale))
+                .add(new TrackMainCommand(locale))
                 .addAll(plugin.getExtraCommands())
-                .add(new LogMainCommand())
-                .add(new SyncCommand())
-                .add(new InfoCommand())
-                .add(new VerboseCommand())
-                .add(new TreeCommand())
-                .add(new SearchCommand())
-                .add(new CheckCommand())
-                .add(new NetworkSyncCommand())
-                .add(new ImportCommand())
-                .add(new ExportCommand())
-                .add(new ReloadConfigCommand())
-                .add(new BulkUpdateCommand())
-                .add(new MigrationMainCommand())
-                .add(new CreateGroup())
-                .add(new DeleteGroup())
-                .add(new ListGroups())
-                .add(new CreateTrack())
-                .add(new DeleteTrack())
-                .add(new ListTracks())
+                .add(new LogMainCommand(locale))
+                .add(new SyncCommand(locale))
+                .add(new InfoCommand(locale))
+                .add(new VerboseCommand(locale))
+                .add(new TreeCommand(locale))
+                .add(new SearchCommand(locale))
+                .add(new CheckCommand(locale))
+                .add(new NetworkSyncCommand(locale))
+                .add(new ImportCommand(locale))
+                .add(new ExportCommand(locale))
+                .add(new ReloadConfigCommand(locale))
+                .add(new BulkUpdateCommand(locale))
+                .add(new MigrationMainCommand(locale))
+                .add(new ApplyEditsCommand(locale))
+                .add(new CreateGroup(locale))
+                .add(new DeleteGroup(locale))
+                .add(new ListGroups(locale))
+                .add(new CreateTrack(locale))
+                .add(new DeleteTrack(locale))
+                .add(new ListTracks(locale))
                 .build();
     }
 
@@ -125,7 +134,7 @@ public class CommandManager {
         return executor.submit(() -> {
             try {
                 return execute(sender, label, args);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 plugin.getLog().severe("Exception whilst executing command: " + args.toString());
                 e.printStackTrace();
                 return null;
@@ -177,7 +186,7 @@ public class CommandManager {
             result = main.execute(plugin, sender, null, arguments, label);
         } catch (CommandException e) {
             result = handleException(e, sender, label, main);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             e.printStackTrace();
             result = CommandResult.FAILURE;
         }
@@ -195,9 +204,12 @@ public class CommandManager {
     @SuppressWarnings("unchecked")
     public List<String> onTabComplete(Sender sender, List<String> args) {
         List<String> arguments = new ArrayList<>(args);
+
+        // we rewrite tab completions too!
         handleRewrites(arguments);
 
         final List<Command> mains = mainCommands.stream()
+                .filter(Command::shouldDisplay)
                 .filter(m -> m.isAuthorized(sender))
                 .collect(Collectors.toList());
 
@@ -237,30 +249,26 @@ public class CommandManager {
     private void sendCommandUsage(Sender sender, String label) {
         Util.sendPluginMessage(sender, "&2Running &bLuckPerms v" + plugin.getVersion() + "&2.");
         mainCommands.stream()
+                .filter(Command::shouldDisplay)
                 .filter(c -> c.isAuthorized(sender))
                 .forEach(c -> {
-                    if (!c.shouldDisplay()) {
-                        return;
-                    }
-
                     @SuppressWarnings("unchecked")
-                    String permission = (String) c.getPermission().map(p -> ((Permission) p).getExample()).orElse("None");
-                    FancyMessage msg = new FancyMessage("> ").color(c('3')).then().text(String.format(c.getUsage(), label)).color(c('a'))
-                            .formattedTooltip(
-                                    new FancyMessage("Command: ").color(c('b')).then().text(c.getName()).color(c('2')),
-                                    new FancyMessage("Description: ").color(c('b')).then().text(c.getDescription()).color(c('2')),
-                                    new FancyMessage("Usage: ").color(c('b')).then().text(String.format(c.getUsage(), label)).color(c('2')),
-                                    new FancyMessage("Permission: ").color(c('b')).then().text(permission).color(c('2')),
-                                    new FancyMessage(" "),
-                                    new FancyMessage("Click to auto-complete.").color(c('7'))
-                            )
-                            .suggest(String.format(c.getUsage(), label));
-                    sender.sendMessage(msg);
+                    String permission = (String) c.getPermission().map(p -> ((CommandPermission) p).getPermission()).orElse("None");
+
+                    TextComponent component = LegacyComponent.from("&3> &a" + String.format(c.getUsage(), label), Constants.FORMAT_CHAR)
+                            .toBuilder().applyDeep(comp -> {
+                                comp.hoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, LegacyComponent.from(TextUtils.joinNewline(
+                                        "&bCommand: &2" + c.getName(),
+                                        "&bDescription: &2" + c.getDescription(),
+                                        "&bUsage: &2" + String.format(c.getUsage(), label),
+                                        "&bPermission: &2" + permission,
+                                        " ",
+                                        "&7Click to auto-complete."
+                                ), Constants.FORMAT_CHAR)));
+                                comp.clickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, String.format(c.getUsage(), label)));
+                            }).build();
+                    sender.sendMessage(component);
                 });
-    }
-    
-    private static ChatColor c(char c) {
-        return ChatColor.getByChar(c);
     }
 
     public static CommandResult handleException(CommandException e, Sender sender, String label, Command command) {

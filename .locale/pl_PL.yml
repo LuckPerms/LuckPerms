@@ -1,0 +1,290 @@
+# LuckPerms Language File
+# Locale: pl_PL (Polish)
+# Author: dzegarek
+
+prefix: "&7&l[&b&lL&3&lP&7&l] &c"
+log-info: "&7&l[&bL&3P&7&l] &3{0}"
+log-warn: "&7&l[&bLuck&3Perms&7&l] &c[UWAGA] {0}"
+log-error: "&7&l[&bLuck&3Perms&7&l] &4[BŁĄD] {0}"
+empty: "{0}"
+player-online: "&aOnline"
+player-offline: "&cOffline"
+loading-error: "Nie można załadować danych uprawnień. Spróbuj ponownie później."
+op-disabled: "&bSystem vanilla OP jest wyłączony na tym serwerze."
+op-disabled-sponge: "&2Stan operatora serwera nie ma wpływu na instalację wtyczki uprawnień. Proszę bezpośrednio edytować dane użytkownika."
+log: "&3LOG &3&l> {0}"
+export-log: "&3Eksport &3&l> &f{0}"
+export-log-progress: "&3Eksport &3&l> &7{0}"
+migration-log: "&3MIGRACJA &7[&3{0}&7] &3&l> &f{1}"
+migration-log-progress: "&3MIGRACJA &7[&3{0}&7] &3&l> &7{1}"
+command-not-recognised: "Komenda nie została rozpoznana."
+command-no-permission: "Nie masz uprawnień do korzystania z tego polecenia!"
+already-haspermission: "{0} ma już to uprawnienie!"
+does-not-havepermission: "{0} nie ma tego zestawu uprawnień."
+already-has-temp-permission: "{0} ma już tymczasowo uprawnienie!"
+does-not-have-temp-permission: "{0} nie ma tymczasowego zezwolenia."
+user-not-found: "&bNie można znaleźć użytkownika."
+user-not-online: "&bUżytkownik &a{0}&b nie jest online."
+user-save-success: "&7(Dane użytkownika zostały zapisane w pamięci)"
+user-save-error: "Podczas zapisywania użytkownika wystąpił błąd."
+group-not-found: "&bNie można odnaleźć grupy."
+group-save-success: "&7(Dane grupy zostały zapisane w pamięci)"
+group-save-error: "Podczas zapisywania grupy wystąpił błąd."
+track-not-found: "&bŚcieżka nie została odnaleziona."
+track-save-success: "&7(Dane ścieżki zostały zapisane w pamięci)"
+track-save-error: "Podczas zapisywania ścieżki wystąpił błąd."
+user-invalid-entry: "&d{0}&c nie jest poprawną nazwą użytkownika/uuid."
+group-invalid-entry: "Nazwy grup mogą zawierać tylko znaki alfanumeryczne."
+track-invalid-entry: "Nazwy dróg mogą zawierać tylko znaki alfanumeryczne."
+server-world-invalid-entry: "Nazwy serwerów/świata mogą zawierać znaki alfanumeryczne, ale nie mogą przekraczać 36 znaków."
+use-inherit-command: "Użyj komendy 'parent add' lub 'parent remove' zamiast określenia węzła."
+verbose-invalid-filter: "&cNieprawidłowy szczegółowy filtr: &f{0}"
+verbose-on: "&bZapis szczegółowych plików wyjściowych ustawiony jest na & aTRUE & bdla wszystkich uprawnień."
+verbose-on-query: "&bZapis szczegółowych plików wyjściowych ustawiony jest na & aTRUE & bdla wszystkich pasujących do filtra: &f{0}"
+verbose-off: "&bZapis szczegółowych plików wyjściowych jest ustawiony na &cFALSE&b."
+verbose-recording-on: "&bVerbose recording set to &aTRUE &bfor all permissions."
+verbose-recording-on-query: "&bZapis szczegółowych zapisów jest ustawiony na &aTRUE &bdla wszystkich uprawnień pasujących do filtra: &f{0}"
+verbose-recording-upload-start: "&Zapis szczegółowych zapisów został wyłączony. Przesyłanie wyników..."
+verbose-recording-url: "&aSzczegółowe URL wyników:"
+tree-upload-start: "&bGenerowanie drzewa uprawnień..."
+tree-empty: "&aNie można wygenerować drzewa. Nie znaleziono żadnych wyników."
+tree-url: "&aURL drzewa uprawnień:"
+search-searching: "&aPoszukiwanie użytkowników i grup &b{0}&a..."
+search-searching-members: "&aWyszukiwanie użytkowników i grup, które dziedziczą &b{0}&a..."
+search-result: "&aZnaleziono &b{0}&a wpisy z &b{1}&a użytkowników i &b{2}&a grup."
+search-showing-users: "&bWyświetlanie wpisów użytkownika:"
+search-showing-groups: "&bWyświetlanie wpisów grup:"
+search-showing-users-with-page: "&bWyświetlanie wpisów użytkownika:  {0}"
+search-showing-groups-with-page: "&bWyświetlanie wpisów grup:  {0}"
+check-result: "&aWynik sprawdzenia uprawnień dla użytkownika &b{0}&a dla uprawnień &b{1}&a: &f{2}"
+create-success: "&b{0}&a został pomyślnie utworzone."
+delete-success: "&b{0}&a został pomyślnie usunięty."
+rename-success: "&b{0}&a został pomyślnie zmieniony na &b{1}&a."
+clone-success: "&b{0}&a został pomyślnie sklonowany na &b{1}&a."
+already-inherits: "{0} już dziedziczy '{1}'."
+does-not-inherit: "{0} nie dziedziczy '{1}'."
+already-temp-inherits: "{0} już tymczasowo dziedziczy '{1}'."
+does-not-temp-inherit: "{0} nie dziedziczy tymczasowo '{1}'."
+track-already-contains: "Ścieżka {0} zawiera już grupę '{1}'."
+track-does-not-contain: "Ścieżka {0} nie zawiera tej grupy '{1}'."
+track-ambiguous-call: "Podany użytkownik jest członkiem wielu grup na tej ścieżce. Nie można określić ich lokalizacji."
+group-already-exists: "Ta grupa już istnieje!"
+group-does-not-exist: "Ta grupa nie istnieje!"
+group-load-error: "Wystąpił nieoczekiwany błąd. Grupa nie została załadowana."
+groups-load-error: "Wystąpił nieoczekiwany błąd. Nie można załadować wszystkich grup."
+track-already-exists: "Ta ścieżka już istnieje!"
+track-does-not-exist: "Ta ścieżka nie istnieje!"
+track-load-error: "Wystąpił nieoczekiwany błąd. Ścieżka nie została załadowana."
+tracks-load-error: "Wystąpił nieoczekiwany błąd. Nie można wczytać wszystkich ścieżek."
+track-empty: "Ścieżka nie może być używana jako pusta lub zawierać tylko jedną grupę."
+update-task-request: "&bZaktualizuj zaplanowane zadanie."
+update-task-complete: "&aZaktualizowano zadanie."
+update-task-complete-network: "&aZaktualizowano zadanie. Teraz próbuj wejść na inne serwery."
+update-task-push-success: "&aInne serwery zostały powiadomione za pośrednictwem & b {0} wiadomości &apomyślnie."
+update-task-push-failure: "&cPodczas przesyłania zmian do innych serwerów wystąpił błąd."
+update-task-push-failure-not-setup: "&cPodczas przesyłania zmian do innych serwerów wystąpił błąd. Usługa wiadomości nie została skonfigurowana."
+reload-config-success: "&aPlik konfiguracyjny został ponownie załadowany. &7(niektóre opcje będą obowiązywać tylko po ponownym uruchomieniu serwera.)"
+info: >
+  {PREFIX}&2Uruchamianie &bLuckPerms v{0}&2 by &bLuck&2.\n
+  {PREFIX}&f-  &3Platforma: &f{1}\n
+  {PREFIX}&f-  &3Metoda Składowania: &f{2}\n
+  {PREFIX}&f-  &3Nazwa Serwera: &f{3}\n
+  {PREFIX}&f-  &3Synchronizacja Czasu: &a{4} &fminuty\n
+  {PREFIX}&f-  &3Usługa wiadomości: &f{5}\n
+  {PREFIX}&f-  &bLiczba:\n
+  {PREFIX}&f-     &3Online Graczy: &a{6}\n
+  {PREFIX}&f-     &3Załadowanych użytkowników: &a{7}\n
+  {PREFIX}&f-     &3Załadowanych grup: &a{8}\n
+  {PREFIX}&f-     &3Załadowanych Ścieżek: &a{9}\n
+  {PREFIX}&f-     &3Rozmiar Loga: &a{10}\n
+  {PREFIX}&f-     &3Rozmiar pamięci podręcznej UUID: &a{11}\n
+  {PREFIX}&f-     &3Załadowane tłumaczenia: &a{12}\n
+  {PREFIX}&f-     &3Kontrole wstępne: &a{13}\n
+  {PREFIX}&f-     &3Kalkulatory Kontekstu: &a{14}\n
+  {PREFIX}&f-     &3Unikalne uprawnienia: &a{15}\n
+  {PREFIX}&f-  &bKonfiguracja:\n
+  {PREFIX}&f-     &3Używany Server UUIDs: {16}\n
+  {PREFIX}&f-     &bObliczanie uprawnień:\n
+  {PREFIX}&f-        &3Łącznie ze światem: {17}\n
+  {PREFIX}&f-        &3Łącznie z globalnym światem: {18}\n
+  {PREFIX}&f-        &3Stosowanie grup globalnych: {19}\n
+  {PREFIX}&f-        &3Stosowanie Globalnych Grup Światowych: {20}\n
+  {PREFIX}&f-        &3Stosowanie symboli wieloznacznych: {21}\n
+  {PREFIX}&f-        &3Stosowanie Regex: {22}\n
+  {PREFIX}&f-        &3Stosowanie skrótu: {23}
+create-group-error: "Podczas tworzenia grupy wystąpił błąd."
+delete-group-error: "Podczas usuwania grupy wystąpił błąd."
+delete-group-error-default: "Nie można usunąć grupy domyślnej."
+groups-list: "&aGrupy: {0}"
+create-track-error: "Podczas tworzenia ścieżki wystąpił błąd."
+delete-track-error: "Podczas usuwania ścieżki wystąpił błąd."
+tracks-list: "&aŚcieżki: {0}"
+listnodes: "&b{0}'s Węzły:"
+listnodes-with-page: "&b{0}'s Węzły:  {1}"
+listnodes-temp: >
+  &b{0}'s Tymczasowe Węzły:\n
+  {1}
+listparents: >
+  &b{0}'s Grupy Rodzicielskie:\n
+  {1}
+listparents-temp: >
+  &b{0}'s Tymczasowe Grupy Rodzicielskie:\n
+  {1}
+list-tracks: >
+  &b{0}'s Ścieżki:\n
+  {1}
+list-tracks-empty: "{0} nie jest na żadnej ścieżce."
+context-pair-inline: "&3{0}=&b{1}"
+context-pair--global-inline: "&eglobalnie"
+context-pair-sep: "&a, "
+context-pair: "&8(&7{0}=&f{1}&8)"
+check-permission: "&b{0}&a ma uprawnienia &b{1}&a ustawione na {2}&a w kontekście {3}&a."
+setpermission-success: "&aUstawiono &b{0}&a na &b{1}&a dla &b{2}&a w kontekście {3}&a."
+setpermission-temp-success: "&aUstawiono &b{0}&a na &b{1}&a dla &b{2}&a na czas trwania &b{3}&a w kontekście {4}&a."
+unsetpermission-success: "&aUsunięto &b{0}&a dla &b{1}&a w kontekście {2}&a."
+unset-temp-permission-success: "&aTymczasowe uprawnienia &b{0}&a dla &b{1}&a w kontekście {2}&a."
+set-inherit-success: "&b{0}&a teraz dziedziczy uprawnienia od &b{1}&a w kontekście {2}&a."
+set-temp-inherit-success: "&b{0}&a teraz dziedziczy uprawnienia &b{1}&a na czas trwania &b{2}&a w kontekście {3}&a."
+set-parent-success: "&b{0}&a gdyby istniejące grupy macierzyste zostały wyczyszczone, a teraz tylko dziedziczą &b{1}&a w kontekście {2}&a."
+set-track-parent-success: "&b{0}&a miały istniejące grupy macierzyste na ścieżce &b{1}&a wyczyszczone, a teraz dziedziczą &b{2}&a w kontekście {3}&a."
+unset-inherit-success: "&b{0}&a już nie dziedziczy uprawnień &b{1}&a w kontekście {2}&a."
+unset-temp-inherit-success: "&b{0}&a przestaje tymczasowo dziedziczyć uprawnienia &b{1}&a w kontekście {2}&a."
+clear-success: "&b{0}&a's uprawnienia zostały wyczyszczone w kontekście {1}&a. (&b{2}&a węzły zostały usunięte.)"
+clear-success-singular: "&b{0}&a's uprawnienia zostały wyczyszczone w kontekście {1}&a. (&b{2}&a węzeł został usunięty.)"
+parent-clear-success: "&b{0}&a's rodzice zostali wyczyszczeni w kontekście {1}&a. &b{2}&a węzły zostały usunięte.)"
+parent-clear-success-singular: "&b{0}&a's rodzice zostali wyczyszczeni w kontekście {1}&a. &b{2}&a węzeł został usunięty.)"
+parent-clear-track-success: "&b{0}&a's rodzice na ścieżce &b{1}&a zostali wyczyszczeni w kontekście {2}&a. &b{3}&a węzły zostały usunięte.)"
+parent-clear-track-success-singular: "&b{0}&a's parents on track &b{1}&a were cleared in context {2}&a. &b{3}&a węzeł został usunięty.)"
+meta-clear-success: "&b{0}&a's meta zostały usunięte w kontekście {1}&a. &b{2}&a węzły zostały usunięte.)"
+meta-clear-success-singular: "&b{0}&a's meta zostały usunięte w kontekście {1}&a. &b{2}&a węzeł został usunięty.)"
+illegal-date-error: "Nie można przeanalizować daty '{0}'."
+past-date-error: "W przeszłości nie można ustawić daty!"
+chat-meta-prefix-header: "&b{0}'s Prefiksy"
+chat-meta-suffix-header: "&b{0}'s Suffiksy"
+meta-header: "&b{0}'s Meta"
+chat-meta-entry: "&b-> {0} &f- &f\"{1}&f\" &8(&7odziedziczone po &a{2}&8)"
+chat-meta-entry-with-context: "&b-> {0} &f- &f\"{1}&f\" &8(&7odziedziczone po &a{2}&8){3}"
+meta-entry: "&b-> &a{0} &f= &f\"{1}&f\" &8(&7odziedziczone po &a{2}&8)"
+meta-entry-with-context: "&b-> &a{0} &f= &f\"{1}&f\" &8(&7odziedziczone po &a{2}&8){3}"
+chat-meta-prefix-none: "&b{0} nie ma prefiksów."
+chat-meta-suffix-none: "&b{0} has no suffiksów."
+meta-none: "&b{0} nie ma meta."
+meta-invalid-priority: "Nieprawidłowy priorytet '{0}'. Spodziewany numer."
+already-has-chat-meta: "{0} już to ma {1} ustawione."
+does-not-have-chat-meta: "{0} nie ma tego {1} ustawionego."
+add-chatmeta-success: "&b{0}&a ma {1} &f\"{2}&f\"&a ustawiony priorytet z &b{3}&a w kontekście {4}&a."
+add-temp-chatmeta-success: "&b{0}&a ma {1} &f\"{2}&f\"&a ustawiony priorytet z &b{3}&a na czas trwania &b{4}&a w kontekście {5}&a."
+remove-chatmeta-success: "&b{0}&a ma {1} &f\"{2}&f\"&a at priority &b{3}&a removed in context {4}&a."
+bulk-remove-chatmeta-success: "&b{0}&a ma cały {1}es na priorytecie &b{2}&a usunięte w kontekście {3}&a."
+remove-temp-chatmeta-success: "&b{0}&a ma tymczasowo {1} &f\"{2}&f\"&a at priority &b{3}&a usunięte w kontekście {4}&a."
+bulk-remove-temp-chatmeta-success: "&b{0}&a miał wszystkie tymczasowe {1}es na priorytecie &b{2}&a usunięte w kontekście {3}&a."
+already-has-meta: "{0} ma już tę parę par kluczy meta."
+set-meta-success: "&aUstawiono wartość meta dla klucza &f\"{0}&f\"&a do &f\"{1}&f\"&a dla &b{2}&a w kontekście {3}&a."
+set-meta-temp-success: "&aUstawiono wartości meta dla klucza &f\"{0}&f\"&a do &f\"{1}&f\"&a dla &b{2}&a na czas trwania &b{3}&a w kontekście {4}&a."
+unset-meta-success: "&aUsunięto wartość meta za pomocą klucza &f\"{0}&f\"&a dla &b{1}&a w kontekście {2}&a."
+unset-meta-temp-success: "&aUsunięcie tymczasowej wartości meta za pomocą klucza &f\"{0}&f\"&a dla &b{1}&a w kontekście {2}&a."
+bulk-update-invalid-data-type: "Nieprawidłowy typ. Spodziewane 'all', 'users' lub 'groups'."
+bulk-update-invalid-constraint: "Nieprawidłowe ograniczenie &4{0}&c. Ograniczenia powinny być w formacie '&f<field> <comparison operator> <value>&c'."
+bulk-update-invalid-comparison: "Nieprawidłowy operator porównania '&4{0}&c'. Oczekiwany jeden z poniższych: &f==  !=  ~~  ~!"
+bulk-update-queued: "&aOperacja aktualizacji została w kolejce. &7(&f{0}&7)"
+bulk-update-confirm: "&aUruchom &b/{0} uaktualnianie zbiorcze {1} &a i wykonaj aktualizacje."
+bulk-update-unknown-id: "&aOperacja z id &b{0}&a nie istnieje lub upłynął."
+bulk-update-starting: "&aUaktualnianie zbiorcze."
+bulk-update-success: "&bAktualizacja zbiorcza powiodła się pomyślnie."
+bulk-update-failure: "&cAktualizacja zbiorcza nie powiodła się. Sprawdź, czy konsola nie zawiera błędów."
+user-info-general: >
+  {PREFIX}&b&l> &bInfo Użytkownika: &f{0}\n
+  {PREFIX}&f- &3UUID: &f{1}\n
+  {PREFIX}&f- &3Status: {2}\n
+  {PREFIX}&f- &3Grupa Podstawowa: &f{3}\n
+  {PREFIX}&f- &aLiczba:\n
+  {PREFIX}&f-    &3Uprawnień: &a{4}\n
+  {PREFIX}&f-    &3Tymczasowych uprawnień: &a{5}\n
+  {PREFIX}&f-    &3Prefiksów: &a{6}\n
+  {PREFIX}&f-    &3Suffiksów: &a{7}\n
+  {PREFIX}&f-    &3Meta: &a{8}
+user-info-data: >
+  {PREFIX}&f- &aDane buforowane:\n
+  {PREFIX}&f-    &3Posiada dane kontekstowe: {0}\n
+  {PREFIX}&f-    &3Obecne konteksty: {1}\n
+  {PREFIX}&f-    &3Obecny Prefiks: {2}\n
+  {PREFIX}&f-    &3Obecny Suffiks: {3}
+info-parent-header: "&f- &aGrupy Rodziców:"
+info-temp-parent-header: "&f- &aTymczasowe Grupy Rodziców:"
+user-removegroup-error-primary: "Nie można usunąć użytkownika z podstawowej grupy."
+user-primarygroup-success: "&b{0}&a's pierwsza grupa została ustawiona na &b{1}&a."
+user-primarygroup-warn-option: "&cUwaga: Podstawowa metoda obliczania grupy jest używana przez ten serwer &7({0}) &cmoże nie odzwierciedlać tej zmiany."
+user-primarygroup-error-alreadyhas: "Użytkownik ma już tę grupę jako pierwszą."
+user-primarygroup-error-notmember: "&b{0}&a nie był już użytkownikiem z &b{1}&a, dodając je teraz."
+user-track-error-not-contain-group: "Podany przez Ciebie użytkownik nie jest jeszcze w żadnej z grup na tej ścieżce."
+user-track-added-to-first: "&b{0}&a nie jest w żadnej grupie na tej ścieżce, więc został dodany do pierwszej grupy, &b{1}&a w kontekście {2}&a."
+user-promote-success: "&aPromowanie użytkownika wzdłuż toru &b{0}&a z &b{1}&a do &b{2}&a w kontekście {3}&a."
+user-promote-error-endoftrack: "Koniec ścieżki &4{0}&c został osiągnięty. Nie można promować użytkownika."
+user-promote-error-malformed: >
+  {PREFIX}Następna grupa na ścieżce, {0}, już nie istnieje. Nie można promować użytkownika..\n
+  {PREFIX}Albo utwórz grupę lub usuń ją ze ścieżki i spróbuj ponownie.
+user-demote-success: "&aObniżanie użytkownika wzdłuż ścieżki &b{0}&a z &b{1}&a do &b{2}&a w kontekście {3}&a."
+user-demote-endoftrack: "Koniec ścieżki &4{0}&c został osiągnięty, więc &4{1}&c zostało usunięte z &4{2}&c."
+user-demote-error-malformed: >
+  {PREFIX}Poprzednia grupa na ścieżce, {0}, już nie istnieje. Nie można obniżyć użytkownika.\n
+  {PREFIX}Albo utwórz grupę lub usuń ją ze ścieżki i spróbuj ponownie.
+group-info-general: >
+  {PREFIX}&b&l> &bInfo Grupy: &f{0}\n
+  {PREFIX}&f- &3Wyświetlana Nazwa: &f{1}\n
+  {PREFIX}&f- &3Rola: &f{2}\n
+  {PREFIX}&f- &aLiczba:\n
+  {PREFIX}&f-    &3Uprawnienia: &a{3}\n
+  {PREFIX}&f-    &3Tymczasowe Uprawnienia: &a{4}\n
+  {PREFIX}&f-    &3Prefiksy: &a{5}\n
+  {PREFIX}&f-    &3Suffiksy: &a{6}\n
+  {PREFIX}&f-    &3Meta: &a{7}
+group-set-weight: "&aSet weight to &b{0}&a for group &b{1}&a."
+track-info: >
+  {PREFIX}&b&l> &bWyświetlanie ścieżki: &f{0}\n
+  {PREFIX}&f- &7Ścieżka: &f{1}
+track-clear: "&b{0}&a grupy zostały usunięte"
+track-append-success: "&aGrupa &b{0}&a została z powodzeniem dodana do śledzenia &b{1}&a."
+track-insert-success: "&aGrupa &b{0}&a została pomyślnie wstawiona do ścieżki &b{1}&a na pozycji &b{2}&a."
+track-insert-error-number: "Przewidywany numer, ale otrzymany: {0}"
+track-insert-error-invalid-pos: "Nie można wstawić w pozycji {0}. Wyloguj się z granic."
+track-remove-success: "&aGrupa &b{0}&a została z powodzeniem usunięta ze ścieżki &b{1}&a."
+log-load-error: "Nie można załadować loga."
+log-invalid-page: "Nieprawidłowy numer strony."
+log-invalid-page-range: "Nieprawidłowy numer strony. Wprowadź wartość między 1 a {0}."
+log-no-entries: "&bBrak wpisów do logów."
+log-entry: "&b#{0} -> &8(&7{1} temu&8) {2}"
+log-notify-toggle-on: "&aWłączone&b wyjście z logowania."
+log-notify-toggle-off: "&cWyłączone&b wyjście z logowania."
+log-notify-already-on: "Obecnie otrzymujesz powiadomienia."
+log-notify-already-off: "Obecnie nie otrzymujesz powiadomień."
+log-notify-unknown: "Stan nieznany. Oczekiwanie na \"on\" lub \"off\"."
+log-search-header: "&aWyświetlanie ostatnich działań dotyczących zapytania &b{0} &a(strona &f{1}&a z &f{2}&a)"
+log-recent-header: "&aWyświetlanie ostatnich działań (strona &f{0}&a z &f{1}&a)"
+log-recent-by-header: "&aPokazanie ostatnich działań przez &b{0} &a(strona &f{1}&a z &f{2}&a)"
+log-history-user-header: "&aWyświetlanie historii dla użytkowników &b{0} &a(strona &f{1}&a z &f{2}&a)"
+log-history-group-header: "&aWyświetlanie historii dla grup &b{0} &a(strona &f{1}&a z &f{2}&a)"
+log-history-track-header: "&aWyświetlanie historii dla ścieżki &b{0} &a(strona &f{1}&a z &f{2}&a)"
+log-export-already-exists: "Błąd: Plik {0} już istnieje."
+log-export-not-writable: "Błąd: Plik {0} jest tylko do odczytu."
+log-export-empty: "Log jest pusty i dlatego nie może być eksportowany"
+log-export-failure: "Podczas zapisywania do pliku wystąpił nieoczekiwany błąd."
+log-export-success: "&aPomyślnie exportowano log do &b{0}&a."
+import-already-running: "Inny proces importowania jest już uruchomiony. Spróbuj ponownie później."
+export-already-running: "Inny proces eksportowania jest już uruchomiony. Spróbuj ponownie później."
+import-log-doesnt-exist: "Błąd: Plik {0} nie istnieje."
+import-log-not-readable: "Błąd: Plik {0} nie można odczytać."
+import-log-failure: "Podczas odtwarzania loga wystąpił nieoczekiwany błąd."
+import-progress: "&b(Import) &b-> &f{0} &fprocent kompletne &7- &b{1}&f/&b{2} &foperacja zakończona z &c{3} &fbłędami."
+import-progress-sin: "&b(Import) &b-> &f{0} &fprocent kompletne &7- &b{1}&f/&b{2} &foperacja zakończona z &c{3} &fbłędami."
+import-start: "&b(Import) &b-> &fUruchamianie procesu importowania."
+import-end-complete: "&b(Import) &a&lZAKOŃCZONE &7- zajęło &b{0} &7sekundy - &7Nie ma błędów."
+import-end-complete-err: "&b(Import) &a&lZAKOŃCZONE &7- zajęło &b{0} &7sekundy - &c{1} błędy."
+import-end-complete-err-sin: "&b(Import) &a&lZAKOŃCZONE &7- zajęło &b{0} &7sekundy - &c{1} błąd."
+import-end-error-header: >
+  {PREFIX}&b(Import) &7------------> &fWyświetlanie błędu #&b{0} &7<------------\n
+  {PREFIX}&b(Import) &fWykonując: &3Komende #{1}\n
+  {PREFIX}&b(Import) &fKomenda: &7{2}\n
+  {PREFIX}&b(Import) &fWpisane: &3{3}\n 
+  {PREFIX}&b(Import) &fWyjście:
+import-end-error-content: "&b(Import) &b-> &c{0}"
+import-end-error-footer: "&b(Import) &7<------------------------------------------>"

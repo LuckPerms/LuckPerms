@@ -28,17 +28,25 @@ package me.lucko.luckperms.common.commands.impl.migration;
 import lombok.experimental.UtilityClass;
 
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.common.core.NodeFactory;
-import me.lucko.luckperms.common.core.model.Group;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.node.NodeFactory;
 
 @UtilityClass
 public class MigrationUtils {
 
     public static Node.Builder parseNode(String permission, boolean value) {
         if (permission.startsWith("-") || permission.startsWith("!")) {
+            if (permission.length() == 1) {
+                return NodeFactory.newBuilder(permission).setValue(value);
+            }
+
             permission = permission.substring(1);
             value = false;
         } else if (permission.startsWith("+")) {
+            if (permission.length() == 1) {
+                return NodeFactory.newBuilder(permission).setValue(value);
+            }
+
             permission = permission.substring(1);
             value = true;
         }

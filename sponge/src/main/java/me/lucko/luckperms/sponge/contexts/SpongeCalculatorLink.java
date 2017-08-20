@@ -39,14 +39,30 @@ import java.util.Set;
 
 @AllArgsConstructor
 public class SpongeCalculatorLink implements ContextCalculator<Subject> {
-    private final org.spongepowered.api.service.context.ContextCalculator<Subject> calculator;
+    private final org.spongepowered.api.service.context.ContextCalculator<Subject> delegate;
 
     @Override
     public MutableContextSet giveApplicableContext(Subject subject, MutableContextSet accumulator) {
-        Set<Context> contexts = new HashSet<>();
-        calculator.accumulateContexts(subject, contexts);
+        Set<Context> contexts = new HashSet<Context>() {
 
-        accumulator.addAll(CompatibilityUtil.convertContexts(contexts));
+            // don't allow null elements
+            @Override
+            public boolean add(Context context) {
+                if (context == null) {
+                    throw new NullPointerException("context");
+                }
+
+                return super.add(context);
+            }
+        };
+
+        try {
+            delegate.accumulateContexts(subject, contexts);
+            accumulator.addAll(CompatibilityUtil.convertContexts(contexts));
+        } catch (Exception e) {
+            new RuntimeException("Exception thrown by delegate Sponge calculator: " + delegate.getClass().getName(), e).printStackTrace();
+        }
+
         return accumulator;
     }
 }

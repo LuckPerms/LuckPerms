@@ -27,8 +27,8 @@ package me.lucko.luckperms.common.tasks;
 
 import lombok.AllArgsConstructor;
 
-import me.lucko.luckperms.common.core.model.Group;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 @AllArgsConstructor

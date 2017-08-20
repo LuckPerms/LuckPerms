@@ -25,31 +25,35 @@
 
 package me.lucko.luckperms.common.commands.impl.misc;
 
-import me.lucko.luckperms.common.commands.Arg;
+import com.google.common.collect.ImmutableList;
+
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.common.verbose.VerboseFilter;
 import me.lucko.luckperms.common.verbose.VerboseListener;
 
-import io.github.mkremins.fanciful.ChatColor;
-import io.github.mkremins.fanciful.FancyMessage;
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.event.ClickEvent;
+import net.kyori.text.event.HoverEvent;
+import net.kyori.text.format.TextColor;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class VerboseCommand extends SingleCommand {
-    public VerboseCommand() {
-        super("Verbose", "Manage verbose permission checking", "/%s verbose <true|false> [filter]", Permission.VERBOSE, Predicates.is(0),
-                Arg.list(
-                        Arg.create("on|record|off|paste", true, "whether to enable/disable logging, or to paste the logged output"),
-                        Arg.create("filter", false, "the filter to match entries against")
-                )
-        );
+    public VerboseCommand(LocaleManager locale) {
+        super(CommandSpec.VERBOSE.spec(locale), "Verbose", CommandPermission.VERBOSE, Predicates.is(0));
     }
 
     @Override
@@ -69,14 +73,14 @@ public class VerboseCommand extends SingleCommand {
 
             String filter = filters.isEmpty() ? "" : filters.stream().collect(Collectors.joining(" "));
 
-            if (!VerboseListener.isValidFilter(filter)) {
+            if (!VerboseFilter.isValidFilter(filter)) {
                 Message.VERBOSE_INVALID_FILTER.send(sender, filter);
                 return CommandResult.FAILURE;
             }
 
             boolean notify = !mode.equals("record");
 
-            plugin.getVerboseHandler().register(sender, filter, notify);
+            plugin.getVerboseHandler().registerListener(sender, filter, notify);
 
             if (notify) {
                 if (!filter.equals("")) {
@@ -96,7 +100,7 @@ public class VerboseCommand extends SingleCommand {
         }
 
         if (mode.equals("off") || mode.equals("false") || mode.equals("paste")) {
-            VerboseListener listener = plugin.getVerboseHandler().unregister(sender.getUuid());
+            VerboseListener listener = plugin.getVerboseHandler().unregisterListener(sender.getUuid());
 
             if (mode.equals("paste")) {
                 if (listener == null) {
@@ -110,7 +114,13 @@ public class VerboseCommand extends SingleCommand {
                     }
 
                     Message.VERBOSE_RECORDING_URL.send(sender);
-                    sender.sendMessage(new FancyMessage(url).color(ChatColor.getByChar('b')).link(url));
+
+                    Component message = TextComponent.builder(url).color(TextColor.AQUA)
+                            .clickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url))
+                            .hoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.of("Click to open the results page.").color(TextColor.GRAY)))
+                            .build();
+
+                    sender.sendMessage(message);
                     return CommandResult.SUCCESS;
                 }
             } else {
@@ -122,5 +132,18 @@ public class VerboseCommand extends SingleCommand {
 
         sendUsage(sender, label);
         return CommandResult.INVALID_ARGS;
+    }
+
+    @Override
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+        if (args.isEmpty()) {
+            return ImmutableList.of("on", "record", "off", "paste");
+        }
+
+        if (args.size() == 1) {
+            return Stream.of("on", "record", "off", "paste").filter(s -> s.toLowerCase().startsWith(args.get(0).toLowerCase())).collect(Collectors.toList());
+        }
+
+        return Collections.emptyList();
     }
 }

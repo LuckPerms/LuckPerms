@@ -30,9 +30,9 @@ import lombok.NonNull;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.core.model.Group;
-import me.lucko.luckperms.common.core.model.User;
-import me.lucko.luckperms.common.utils.ExtractedContexts;
+import me.lucko.luckperms.common.contexts.ExtractedContexts;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.User;
 
 import java.util.Collections;
 import java.util.Comparator;

@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 2016 Lucko (Luck) <luck@lucko.me>
+ * This file is part of LuckPerms, licensed under the MIT License.
+ *
+ *  Copyright (c) lucko (Luck) <luck@lucko.me>
+ *  Copyright (c) contributors
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +31,8 @@ import me.lucko.luckperms.api.event.cause.DeletionCause;
 
 import java.util.Set;
 
+import javax.annotation.Nonnull;
+
 /**
  * Called when a group is deleted
  */
@@ -38,6 +43,7 @@ public interface GroupDeleteEvent extends LuckPermsEvent {
      *
      * @return the name of the deleted group
      */
+    @Nonnull
     String getGroupName();
 
     /**
@@ -45,6 +51,7 @@ public interface GroupDeleteEvent extends LuckPermsEvent {
      *
      * @return a copy of the groups existing data
      */
+    @Nonnull
     Set<Node> getExistingData();
 
     /**
@@ -52,6 +59,7 @@ public interface GroupDeleteEvent extends LuckPermsEvent {
      *
      * @return the cause of the deletion
      */
+    @Nonnull
     DeletionCause getCause();
 
 }

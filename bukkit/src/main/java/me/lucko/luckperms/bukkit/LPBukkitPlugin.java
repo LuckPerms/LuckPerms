@@ -32,52 +32,56 @@ import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.bukkit.calculators.BukkitCalculatorFactory;
+import me.lucko.luckperms.bukkit.contexts.WorldCalculator;
 import me.lucko.luckperms.bukkit.messaging.BungeeMessagingService;
 import me.lucko.luckperms.bukkit.messaging.LilyPadMessagingService;
-import me.lucko.luckperms.bukkit.model.ChildPermissionProvider;
-import me.lucko.luckperms.bukkit.model.DefaultsProvider;
 import me.lucko.luckperms.bukkit.model.Injector;
 import me.lucko.luckperms.bukkit.model.LPPermissible;
-import me.lucko.luckperms.bukkit.vault.VaultHook;
+import me.lucko.luckperms.bukkit.processors.ChildPermissionProvider;
+import me.lucko.luckperms.bukkit.processors.DefaultsProvider;
+import me.lucko.luckperms.bukkit.vault.VaultHookManager;
+import me.lucko.luckperms.common.actionlog.LogDispatcher;
 import me.lucko.luckperms.common.api.ApiHandler;
 import me.lucko.luckperms.common.api.ApiProvider;
+import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
-import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.contexts.ContextManager;
-import me.lucko.luckperms.common.contexts.StaticCalculator;
-import me.lucko.luckperms.common.core.UuidCache;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.contexts.LuckPermsCalculator;
 import me.lucko.luckperms.common.dependencies.Dependency;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.NoopLocaleManager;
 import me.lucko.luckperms.common.locale.SimpleLocaleManager;
+import me.lucko.luckperms.common.logging.SenderLogger;
+import me.lucko.luckperms.common.managers.GenericGroupManager;
+import me.lucko.luckperms.common.managers.GenericTrackManager;
+import me.lucko.luckperms.common.managers.GenericUserManager;
 import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.managers.UserManager;
-import me.lucko.luckperms.common.managers.impl.GenericGroupManager;
-import me.lucko.luckperms.common.managers.impl.GenericTrackManager;
-import me.lucko.luckperms.common.managers.impl.GenericUserManager;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.messaging.NoopMessagingService;
-import me.lucko.luckperms.common.messaging.RedisMessaging;
+import me.lucko.luckperms.common.messaging.RedisMessagingService;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.Storage;
 import me.lucko.luckperms.common.storage.StorageFactory;
 import me.lucko.luckperms.common.storage.StorageType;
+import me.lucko.luckperms.common.storage.backing.file.FileWatcher;
 import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
 import me.lucko.luckperms.common.tasks.UpdateTask;
 import me.lucko.luckperms.common.treeview.PermissionVault;
-import me.lucko.luckperms.common.utils.BufferedRequest;
-import me.lucko.luckperms.common.utils.FileWatcher;
-import me.lucko.luckperms.common.utils.LoggerImpl;
 import me.lucko.luckperms.common.utils.LoginHelper;
+import me.lucko.luckperms.common.utils.UuidCache;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 
 import org.bukkit.World;
@@ -106,10 +110,11 @@ import java.util.stream.Collectors;
 
 @Getter
 public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
-    private Set<UUID> ignoringLogs;
+
+    private long startTime;
     private LPBukkitScheduler scheduler;
     private BukkitCommand commandManager;
-    private VaultHook vaultHook = null;
+    private VaultHookManager vaultHookManager = null;
     private LuckPermsConfiguration configuration;
     private UserManager userManager;
     private GroupManager groupManager;
@@ -134,20 +139,38 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private VerboseHandler verboseHandler;
     private BukkitSenderFactory senderFactory;
     private PermissionVault permissionVault;
+    private LogDispatcher logDispatcher;
+    private Set<UUID> uniqueConnections = ConcurrentHashMap.newKeySet();
 
     @Override
     public void onLoad() {
+        if (checkInvalidVersion()) {
+            return;
+        }
+
         // setup minimal functionality in order to load initial dependencies
         scheduler = new LPBukkitScheduler(this);
         localeManager = new NoopLocaleManager();
         senderFactory = new BukkitSenderFactory(this);
-        log = new LoggerImpl(getConsoleSender());
+        log = new SenderLogger(this, getConsoleSender());
 
         DependencyManager.loadDependencies(this, Collections.singletonList(Dependency.CAFFEINE));
     }
 
     @Override
     public void onEnable() {
+        if (checkInvalidVersion()) {
+            getLogger().severe("----------------------------------------------------------------------");
+            getLogger().severe("Your server version is not compatible with this build of LuckPerms. :(");
+            getLogger().severe("");
+            getLogger().severe("If your server is running 1.8, please update to 1.8.8 or higher.");
+            getLogger().severe("If your server is running 1.7.10, please download the Bukkit-Legacy version of LuckPerms from here:");
+            getLogger().severe("==> https://ci.lucko.me/job/LuckPerms/");
+            getLogger().severe("----------------------------------------------------------------------");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+
         try {
             enable();
             started = true;
@@ -159,11 +182,11 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     }
 
     private void enable() {
+        startTime = System.currentTimeMillis();
         LuckPermsPlugin.sendStartupBanner(getConsoleSender(), this);
-
-        ignoringLogs = ConcurrentHashMap.newKeySet();
-        verboseHandler = new VerboseHandler(scheduler.getAsyncBukkitExecutor(), getVersion());
-        permissionVault = new PermissionVault(scheduler.getAsyncBukkitExecutor());
+        verboseHandler = new VerboseHandler(scheduler.asyncBukkit(), getVersion());
+        permissionVault = new PermissionVault(scheduler.asyncBukkit());
+        logDispatcher = new LogDispatcher(this);
 
         getLog().info("Loading configuration...");
         configuration = new BukkitConfig(this);
@@ -178,7 +201,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         childPermissionProvider = new ChildPermissionProvider();
 
         // give all plugins a chance to load their permissions, then refresh.
-        scheduler.doSyncLater(() -> {
+        scheduler.syncLater(() -> {
             defaultsProvider.refresh();
             childPermissionProvider.setup();
 
@@ -192,13 +215,12 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         }, 1L);
 
         // register events
-        PluginManager pm = getServer().getPluginManager();
         listener = new BukkitListener(this);
-        pm.registerEvents(listener, this);
+        getServer().getPluginManager().registerEvents(listener, this);
 
         if (getConfiguration().get(ConfigKeys.WATCH_FILES)) {
             fileWatcher = new FileWatcher(this);
-            getScheduler().doAsyncRepeating(fileWatcher, 30L);
+            getScheduler().asyncRepeating(fileWatcher, 30L);
         }
 
         // initialise datastore
@@ -209,14 +231,16 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         if (messagingType.equals("none") && getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
             messagingType = "redis";
         }
+
+        if (!messagingType.equals("none")) {
+            getLog().info("Loading messaging service... [" + messagingType.toUpperCase() + "]");
+        }
+
         if (messagingType.equals("redis")) {
-            getLog().info("Loading redis...");
             if (getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
-                RedisMessaging redis = new RedisMessaging(this);
+                RedisMessagingService redis = new RedisMessagingService(this);
                 try {
                     redis.init(getConfiguration().get(ConfigKeys.REDIS_ADDRESS), getConfiguration().get(ConfigKeys.REDIS_PASSWORD));
-                    getLog().info("Loaded redis successfully...");
-
                     messagingService = redis;
                 } catch (Exception e) {
                     getLog().warn("Couldn't load redis...");
@@ -226,12 +250,10 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
                 getLog().warn("Messaging Service was set to redis, but redis is not enabled!");
             }
         } else if (messagingType.equals("bungee")) {
-            getLog().info("Loading bungee messaging service...");
             BungeeMessagingService bungeeMessaging = new BungeeMessagingService(this);
             bungeeMessaging.init();
             messagingService = bungeeMessaging;
         } else if (messagingType.equals("lilypad")) {
-            getLog().info("Loading LilyPad messaging service...");
             if (getServer().getPluginManager().getPlugin("LilyPad-Connect") == null) {
                 getLog().warn("LilyPad-Connect plugin not present.");
             } else {
@@ -260,7 +282,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         localeManager = new SimpleLocaleManager();
         File locale = new File(getDataFolder(), "lang.yml");
         if (locale.exists()) {
-            getLog().info("Found locale file. Attempting to load from it.");
+            getLog().info("Found lang.yml - loading messages...");
             try {
                 localeManager.loadFromFile(locale);
             } catch (Exception e) {
@@ -269,7 +291,6 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         }
 
         // register commands
-        getLog().info("Registering commands...");
         commandManager = new BukkitCommand(this);
         PluginCommand main = getServer().getPluginCommand("luckperms");
         main.setExecutor(commandManager);
@@ -284,21 +305,33 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         groupManager = new GenericGroupManager(this);
         trackManager = new GenericTrackManager(this);
         calculatorFactory = new BukkitCalculatorFactory(this);
-        cachedStateManager = new CachedStateManager(this);
+        cachedStateManager = new CachedStateManager();
 
-        contextManager = new ContextManager<>();
+        contextManager = new ContextManager<Player>() {
+            @Override
+            public Contexts formContexts(Player player, ImmutableContextSet contextSet) {
+                return new Contexts(
+                        contextSet,
+                        getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
+                        getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
+                        true,
+                        getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
+                        getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
+                        player.isOp()
+                );
+            }
+        };
+
         worldCalculator = new WorldCalculator(this);
         contextManager.registerCalculator(worldCalculator);
 
-        StaticCalculator<Player> staticCalculator = new StaticCalculator<>(getConfiguration());
-        contextManager.registerCalculator(staticCalculator);
-        contextManager.registerStaticCalculator(staticCalculator);
+        LuckPermsCalculator<Player> staticCalculator = new LuckPermsCalculator<>(getConfiguration());
+        contextManager.registerCalculator(staticCalculator, true);
 
         // Provide vault support
         tryVaultHook(false);
 
         // register with the LP API
-        getLog().info("Registering API...");
         apiProvider = new ApiProvider(this);
         ApiHandler.registerProvider(apiProvider);
         getServer().getServicesManager().register(LuckPermsApi.class, apiProvider, this, ServicePriority.Normal);
@@ -308,16 +341,17 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         int mins = getConfiguration().get(ConfigKeys.SYNC_TIME);
         if (mins > 0) {
             long ticks = mins * 60 * 20;
-            scheduler.doAsyncRepeating(() -> updateTaskBuffer.request(), ticks);
+            scheduler.asyncRepeating(() -> updateTaskBuffer.request(), ticks);
         }
-        scheduler.doAsyncLater(() -> updateTaskBuffer.request(), 40L);
+        scheduler.asyncLater(() -> updateTaskBuffer.request(), 40L);
 
         // run an update instantly.
+        getLog().info("Performing initial data load...");
         updateTaskBuffer.requestDirectly();
 
         // register tasks
-        scheduler.doAsyncRepeating(new ExpireTemporaryTask(this), 60L);
-        scheduler.doAsyncRepeating(new CacheHousekeepingTask(this), 2400L);
+        scheduler.asyncRepeating(new ExpireTemporaryTask(this), 60L);
+        scheduler.asyncRepeating(new CacheHousekeepingTask(this), 2400L);
 
         // register permissions
         try {
@@ -351,11 +385,15 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
             });
         }
 
-        getLog().info("Successfully loaded.");
+        getLog().info("Successfully enabled. (took " + (System.currentTimeMillis() - startTime) + "ms)");
     }
 
     @Override
     public void onDisable() {
+        if (checkInvalidVersion()) {
+            return;
+        }
+
         // Switch back to the LP executor, the bukkit one won't allow new tasks
         scheduler.setUseBukkitAsync(false);
 
@@ -366,7 +404,12 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         verboseHandler.setShutdown(true);
 
         for (Player player : getServer().getOnlinePlayers()) {
-            Injector.unInject(player, false, false);
+            try {
+                Injector.unInject(player, false, false);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
             if (getConfiguration().get(ConfigKeys.AUTO_OP)) {
                 player.setOp(false);
             }
@@ -378,7 +421,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
             }
         }
 
-        getLog().info("Closing datastore...");
+        getLog().info("Closing storage...");
         storage.shutdown();
 
         if (fileWatcher != null) {
@@ -390,14 +433,14 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
             messagingService.close();
         }
 
-        getLog().info("Unregistering API...");
         ApiHandler.unregisterProvider();
         getServer().getServicesManager().unregisterAll(this);
 
-        if (vaultHook != null) {
-            vaultHook.unhook(this);
+        if (vaultHookManager != null) {
+            vaultHookManager.unhook(this);
         }
 
+        getLog().info("Shutting down internal scheduler...");
         scheduler.shutdown();
 
         // Bukkit will do this again when #onDisable completes, but we do it early to prevent NPEs elsewhere.
@@ -405,8 +448,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         HandlerList.unregisterAll(this);
 
         // Null everything
-        ignoringLogs = null;
-        vaultHook = null;
+        vaultHookManager = null;
         configuration = null;
         userManager = null;
         groupManager = null;
@@ -429,24 +471,22 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         verboseHandler = null;
         senderFactory = null;
         permissionVault = null;
+        logDispatcher = null;
     }
 
     public void tryVaultHook(boolean force) {
-        if (vaultHook != null) {
-            return;
+        if (vaultHookManager != null) {
+            return; // already hooked
         }
 
-        getLog().info("Attempting to hook with Vault...");
         try {
             if (force || getServer().getPluginManager().isPluginEnabled("Vault")) {
-                vaultHook = new VaultHook();
-                vaultHook.hook(this);
+                vaultHookManager = new VaultHookManager();
+                vaultHookManager.hook(this);
                 getLog().info("Registered Vault permission & chat hook.");
-            } else {
-                getLog().info("Vault not found.");
             }
         } catch (Exception e) {
-            vaultHook = null;
+            vaultHookManager = null;
             getLog().severe("Error occurred whilst hooking into Vault.");
             e.printStackTrace();
         }
@@ -516,20 +556,23 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     }
 
     @Override
+    public Optional<UUID> lookupUuid(String username) {
+        try {
+            //noinspection deprecation
+            return Optional.ofNullable(getServer().getOfflinePlayer(username)).flatMap(p -> Optional.ofNullable(p.getUniqueId()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Optional.empty();
+        }
+    }
+
+    @Override
     public Contexts getContextForUser(User user) {
         Player player = getPlayer(user);
         if (player == null) {
             return null;
         }
-        return new Contexts(
-                getContextManager().getApplicableContext(player),
-                getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
-                getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
-                true,
-                getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
-                getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
-                player.isOp()
-        );
+        return contextManager.getApplicableContexts(player);
     }
 
     @Override
@@ -578,7 +621,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
                     MutableContextSet set = MutableContextSet.create();
                     set.add("server", getConfiguration().get(ConfigKeys.SERVER));
                     set.add("world", s);
-                    set.addAll(configuration.getStaticContexts().getContextSet());
+                    set.addAll(configuration.getContextsFile().getStaticContexts());
                     return set.makeImmutable();
                 })
                 .collect(Collectors.toList())
@@ -593,7 +636,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
                         MutableContextSet set = MutableContextSet.create();
                         set.add("server", getConfiguration().get(ConfigKeys.VAULT_SERVER));
                         set.add("world", s);
-                        set.addAll(configuration.getStaticContexts().getContextSet());
+                        set.addAll(configuration.getContextsFile().getStaticContexts());
                         return set.makeImmutable();
                     })
                     .collect(Collectors.toList())
@@ -635,27 +678,26 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     @Override
     public LinkedHashMap<String, Object> getExtraInfo() {
         LinkedHashMap<String, Object> map = new LinkedHashMap<>();
-        map.put("Vault Enabled", vaultHook != null);
-        map.put("Vault Server", configuration.get(ConfigKeys.VAULT_SERVER));
+        map.put("Vault Enabled", vaultHookManager != null);
         map.put("Bukkit Defaults count", defaultsProvider.size());
         map.put("Bukkit Child Permissions count", childPermissionProvider.getPermissions().size());
-        map.put("Vault Including Global", configuration.get(ConfigKeys.VAULT_INCLUDING_GLOBAL));
-        map.put("Vault Ignoring World", configuration.get(ConfigKeys.VAULT_IGNORE_WORLD));
-        map.put("Vault Primary Group Overrides", configuration.get(ConfigKeys.VAULT_PRIMARY_GROUP_OVERRIDES));
-        map.put("Vault Debug", configuration.get(ConfigKeys.VAULT_DEBUG));
-        map.put("OPs Enabled", configuration.get(ConfigKeys.OPS_ENABLED));
-        map.put("Auto OP", configuration.get(ConfigKeys.AUTO_OP));
-        map.put("Commands Allow OPs", configuration.get(ConfigKeys.COMMANDS_ALLOW_OP));
         return map;
     }
 
     private void registerPermissions(PermissionDefault def) {
         PluginManager pm = getServer().getPluginManager();
 
-        for (Permission p : Permission.values()) {
-            for (String node : p.getNodes()) {
-                pm.addPermission(new org.bukkit.permissions.Permission(node, def));
-            }
+        for (CommandPermission p : CommandPermission.values()) {
+            pm.addPermission(new org.bukkit.permissions.Permission(p.getPermission(), def));
+        }
+    }
+
+    private static boolean checkInvalidVersion() {
+        try {
+            Class.forName("com.google.gson.JsonElement");
+            return false;
+        } catch (ClassNotFoundException e) {
+            return true;
         }
     }
 }

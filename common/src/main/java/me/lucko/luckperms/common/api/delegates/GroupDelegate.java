@@ -33,7 +33,8 @@ import com.google.common.base.Preconditions;
 
 import me.lucko.luckperms.api.Group;
 import me.lucko.luckperms.api.Node;
-import me.lucko.luckperms.common.core.NodeFactory;
+import me.lucko.luckperms.api.context.ContextSet;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
 
@@ -44,18 +45,18 @@ import java.util.stream.Collectors;
 import static me.lucko.luckperms.common.api.ApiUtils.checkTime;
 
 /**
- * Provides a link between {@link Group} and {@link me.lucko.luckperms.common.core.model.Group}
+ * Provides a link between {@link Group} and {@link me.lucko.luckperms.common.model.Group}
  */
 public final class GroupDelegate extends PermissionHolderDelegate implements Group {
-    public static me.lucko.luckperms.common.core.model.Group cast(Group g) {
+    public static me.lucko.luckperms.common.model.Group cast(Group g) {
         Preconditions.checkState(g instanceof GroupDelegate, "Illegal instance " + g.getClass() + " cannot be handled by this implementation.");
         return ((GroupDelegate) g).getHandle();
     }
 
     @Getter(AccessLevel.PACKAGE)
-    private final me.lucko.luckperms.common.core.model.Group handle;
+    private final me.lucko.luckperms.common.model.Group handle;
 
-    public GroupDelegate(@NonNull me.lucko.luckperms.common.core.model.Group handle) {
+    public GroupDelegate(@NonNull me.lucko.luckperms.common.model.Group handle) {
         super(handle);
         this.handle = handle;
     }
@@ -71,8 +72,13 @@ public final class GroupDelegate extends PermissionHolderDelegate implements Gro
     }
 
     @Override
+    public boolean inheritsGroup(@NonNull Group group, @NonNull ContextSet contextSet) {
+        return handle.inheritsGroup(cast(group), contextSet);
+    }
+
+    @Override
     public boolean inheritsGroup(@NonNull Group group, @NonNull String server) {
-        return handle.inheritsGroup(((GroupDelegate) group).getHandle(), server);
+        return handle.inheritsGroup(cast(group), server);
     }
 
     @Override
@@ -147,7 +153,7 @@ public final class GroupDelegate extends PermissionHolderDelegate implements Gro
 
     @Override
     public List<String> getGroupNames() {
-        return handle.mergePermissionsToList().stream()
+        return handle.getOwnNodes().stream()
                 .filter(Node::isGroupNode)
                 .map(Node::getGroupName)
                 .collect(Collectors.toList());
@@ -155,7 +161,7 @@ public final class GroupDelegate extends PermissionHolderDelegate implements Gro
 
     @Override
     public List<String> getLocalGroups(@NonNull String server, @NonNull String world) {
-        return handle.mergePermissionsToList().stream()
+        return handle.getOwnNodes().stream()
                 .filter(Node::isGroupNode)
                 .filter(n -> n.shouldApplyOnWorld(world, false, true))
                 .filter(n -> n.shouldApplyOnServer(server, false, true))
@@ -170,7 +176,7 @@ public final class GroupDelegate extends PermissionHolderDelegate implements Gro
 
     @Override
     public List<String> getLocalGroups(@NonNull String server) {
-        return handle.mergePermissionsToList().stream()
+        return handle.getOwnNodes().stream()
                 .filter(Node::isGroupNode)
                 .filter(n -> n.shouldApplyOnServer(server, false, true))
                 .map(Node::getGroupName)

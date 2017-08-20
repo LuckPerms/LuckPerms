@@ -26,14 +26,15 @@
 package me.lucko.luckperms.sponge.commands;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
@@ -46,21 +47,15 @@ import org.spongepowered.api.Sponge;
 import java.util.List;
 
 public class ParentRemove extends SubCommand<LPSubjectData> {
-    public ParentRemove() {
-        super("remove", "Removes a parent from the Subject", Permission.SPONGE_PARENT_REMOVE, Predicates.inRange(0, 1),
-                Arg.list(
-                        Arg.create("collection", true, "the subject collection where the parent Subject is"),
-                        Arg.create("subject", true, "the name of the parent Subject"),
-                        Arg.create("contexts...", false, "the contexts to remove the parent in")
-                )
-        );
+    public ParentRemove(LocaleManager locale) {
+        super(CommandSpec.SPONGE_PARENT_REMOVE.spec(locale), "remove", CommandPermission.SPONGE_PARENT_REMOVE, Predicates.inRange(0, 1));
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, List<String> args, String label) throws CommandException {
         String collection = args.get(0);
         String name = args.get(1);
-        ImmutableContextSet contextSet = ArgumentUtils.handleContexts(2, args);
+        ImmutableContextSet contextSet = ArgumentUtils.handleContextSponge(2, args);
 
         LuckPermsService service = Sponge.getServiceManager().provideUnchecked(LuckPermsService.class);
         if (service.getLoadedCollections().keySet().stream().map(String::toLowerCase).noneMatch(s -> s.equalsIgnoreCase(collection))) {

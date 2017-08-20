@@ -27,14 +27,15 @@ package me.lucko.luckperms.sponge.commands;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
@@ -42,21 +43,15 @@ import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 import java.util.List;
 
 public class PermissionSet extends SubCommand<LPSubjectData> {
-    public PermissionSet() {
-        super("set", "Sets a permission for the Subject", Permission.SPONGE_PERMISSION_SET, Predicates.inRange(0, 1),
-                Arg.list(
-                        Arg.create("node", true, "the permission node to set"),
-                        Arg.create("tristate", true, "the value to set the permission to"),
-                        Arg.create("contexts...", false, "the contexts to set the permission in")
-                )
-        );
+    public PermissionSet(LocaleManager locale) {
+        super(CommandSpec.SPONGE_PERMISSION_SET.spec(locale), "set", CommandPermission.SPONGE_PERMISSION_SET, Predicates.inRange(0, 1));
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, List<String> args, String label) throws CommandException {
         String node = args.get(0);
         Tristate tristate = SpongeUtils.parseTristate(1, args);
-        ImmutableContextSet contextSet = ArgumentUtils.handleContexts(2, args);
+        ImmutableContextSet contextSet = ArgumentUtils.handleContextSponge(2, args);
 
         if (subjectData.setPermission(contextSet, node, tristate).join()) {
             Util.sendPluginMessage(sender, "&aSet &b" + node + "&a to &b" + tristate.toString().toLowerCase() + "&a in context " + SpongeUtils.contextToString(contextSet));

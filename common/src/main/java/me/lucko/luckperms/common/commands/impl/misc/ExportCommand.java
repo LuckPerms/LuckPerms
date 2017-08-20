@@ -25,13 +25,14 @@
 
 package me.lucko.luckperms.common.commands.impl.misc;
 
-import me.lucko.luckperms.common.commands.Arg;
+import me.lucko.luckperms.common.backup.Exporter;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.data.Exporter;
+import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -45,12 +46,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ExportCommand extends SingleCommand {
     private AtomicBoolean running = new AtomicBoolean(false);
 
-    public ExportCommand() {
-        super("Export", "Export data to a file", "/%s export <file>", Permission.EXPORT, Predicates.not(1),
-                Arg.list(
-                        Arg.create("file", true, "the file to export to")
-                )
-        );
+    public ExportCommand(LocaleManager locale) {
+        super(CommandSpec.EXPORT.spec(locale), "Export", CommandPermission.EXPORT, Predicates.not(1));
     }
 
     @Override

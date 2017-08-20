@@ -38,4 +38,5 @@ public class ComparisonNotEqual implements Comparison {
     public boolean matches(String str, String expr) {
         return !str.equalsIgnoreCase(expr);
     }
+
 }

@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 2016 Lucko (Luck) <luck@lucko.me>
+ * This file is part of LuckPerms, licensed under the MIT License.
+ *
+ *  Copyright (c) lucko (Luck) <luck@lucko.me>
+ *  Copyright (c) contributors
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -22,18 +25,20 @@
 
 package me.lucko.luckperms.api;
 
+import javax.annotation.Nonnull;
+
 /**
- * A wrapper interface for platform logger instances
+ * Represents the logger instance being used by LuckPerms on the platform.
  *
- * <p>Bukkit/Bungee both use java.util.logging, and Sponge uses org.slf4j. This class wraps those classes so the
- * commons module can access a logger.</p>
+ * <p>Messages sent using the logger are sent prefixed with the LuckPerms tag, and on some implementations will be colored
+ * depending on the message type.</p>
  */
 public interface Logger {
 
-    void info(String s);
+    void info(@Nonnull String s);
 
-    void warn(String s);
+    void warn(@Nonnull String s);
 
-    void severe(String s);
+    void severe(@Nonnull String s);
 
 }

@@ -27,6 +27,7 @@ package me.lucko.luckperms.bukkit;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 
 import me.lucko.luckperms.common.plugin.LuckPermsScheduler;
 
@@ -43,10 +44,16 @@ public class LPBukkitScheduler implements LuckPermsScheduler {
     private final LPBukkitPlugin plugin;
 
     @Getter
-    private ExecutorService asyncLpExecutor;
+    @Accessors(fluent = true)
+    private ExecutorService asyncLp;
+
     @Getter
-    private Executor asyncBukkitExecutor;
-    private Executor syncExecutor;
+    @Accessors(fluent = true)
+    private Executor asyncBukkit;
+
+    @Getter
+    @Accessors(fluent = true)
+    private Executor sync;
 
     @Getter
     @Setter
@@ -57,60 +64,55 @@ public class LPBukkitScheduler implements LuckPermsScheduler {
     public LPBukkitScheduler(LPBukkitPlugin plugin) {
         this.plugin = plugin;
 
-        this.asyncLpExecutor = Executors.newCachedThreadPool();
-        this.asyncBukkitExecutor = r -> plugin.getServer().getScheduler().runTaskAsynchronously(plugin, r);
-        this.syncExecutor = r -> plugin.getServer().getScheduler().runTask(plugin, r);
+        this.asyncLp = Executors.newCachedThreadPool();
+        this.asyncBukkit = r -> plugin.getServer().getScheduler().runTaskAsynchronously(plugin, r);
+        this.sync = r -> plugin.getServer().getScheduler().runTask(plugin, r);
     }
 
     @Override
-    public Executor getAsyncExecutor() {
-        return useBukkitAsync ? asyncBukkitExecutor : asyncLpExecutor;
+    public Executor async() {
+        return useBukkitAsync ? asyncBukkit : asyncLp;
     }
 
     @Override
-    public Executor getSyncExecutor() {
-        return syncExecutor;
+    public void doAsync(Runnable runnable) {
+        async().execute(runnable);
     }
 
     @Override
-    public void doAsync(Runnable r) {
-        getAsyncExecutor().execute(r);
+    public void doSync(Runnable runnable) {
+        sync().execute(runnable);
     }
 
     @Override
-    public void doSync(Runnable r) {
-        getSyncExecutor().execute(r);
-    }
-
-    @Override
-    public void doAsyncRepeating(Runnable r, long interval) {
-        BukkitTask task = plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, r, interval, interval);
+    public void asyncRepeating(Runnable runnable, long intervalTicks) {
+        BukkitTask task = plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, runnable, intervalTicks, intervalTicks);
         tasks.add(task);
     }
 
     @Override
-    public void doSyncRepeating(Runnable r, long interval) {
-        BukkitTask task = plugin.getServer().getScheduler().runTaskTimer(plugin, r, interval, interval);
+    public void syncRepeating(Runnable runnable, long intervalTicks) {
+        BukkitTask task = plugin.getServer().getScheduler().runTaskTimer(plugin, runnable, intervalTicks, intervalTicks);
         tasks.add(task);
     }
 
     @Override
-    public void doAsyncLater(Runnable r, long delay) {
-        plugin.getServer().getScheduler().runTaskLaterAsynchronously(plugin, r, delay);
+    public void asyncLater(Runnable runnable, long delayTicks) {
+        plugin.getServer().getScheduler().runTaskLaterAsynchronously(plugin, runnable, delayTicks);
     }
 
     @Override
-    public void doSyncLater(Runnable r, long delay) {
-        plugin.getServer().getScheduler().runTaskLater(plugin, r, delay);
+    public void syncLater(Runnable runnable, long delayTicks) {
+        plugin.getServer().getScheduler().runTaskLater(plugin, runnable, delayTicks);
     }
 
     @Override
     public void shutdown() {
         tasks.forEach(BukkitTask::cancel);
         // wait for executor
-        asyncLpExecutor.shutdown();
+        asyncLp.shutdown();
         try {
-            asyncLpExecutor.awaitTermination(30, TimeUnit.SECONDS);
+            asyncLp.awaitTermination(30, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

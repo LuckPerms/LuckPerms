@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 2016 Lucko (Luck) <luck@lucko.me>
+ * This file is part of LuckPerms, licensed under the MIT License.
+ *
+ *  Copyright (c) lucko (Luck) <luck@lucko.me>
+ *  Copyright (c) contributors
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +29,8 @@ import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.event.Cancellable;
 import me.lucko.luckperms.api.event.LuckPermsEvent;
 
+import javax.annotation.Nonnull;
+
 /**
  * Called when a log entry is about to be sent to notifiable players on the platform
  */
@@ -36,6 +41,34 @@ public interface LogBroadcastEvent extends LuckPermsEvent, Cancellable {
      *
      * @return the log entry to be broadcasted
      */
+    @Nonnull
     LogEntry getEntry();
+
+    /**
+     * Gets where the log entry originated from.
+     *
+     * @return the origin of the log
+     * @since 3.3
+     */
+    @Nonnull
+    Origin getOrigin();
+
+    /**
+     * Represents where a log entry is from
+     *
+     * @since 3.3
+     */
+    enum Origin {
+
+        /**
+         * Represents a log entry which originated from the current server instance
+         */
+        LOCAL,
+
+        /**
+         * Represents a log entry which was sent to this server via the messaging service
+         */
+        REMOTE
+    }
 
 }

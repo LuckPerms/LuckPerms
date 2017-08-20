@@ -29,18 +29,20 @@ import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.common.commands.abstraction.SharedMainCommand;
 import me.lucko.luckperms.common.commands.abstraction.SharedSubCommand;
-import me.lucko.luckperms.common.core.model.PermissionHolder;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.model.PermissionHolder;
 
 public class CommandPermission<T extends PermissionHolder> extends SharedMainCommand<T> {
-    public CommandPermission(boolean user) {
-        super("Permission", "Edit permissions", user, ImmutableList.<SharedSubCommand>builder()
-                .add(new PermissionInfo())
-                .add(new PermissionSet())
-                .add(new PermissionUnset())
-                .add(new PermissionSetTemp())
-                .add(new PermissionUnsetTemp())
-                .add(new PermissionCheck())
-                .add(new PermissionCheckInherits())
+    public CommandPermission(LocaleManager locale, boolean user) {
+        super(CommandSpec.PERMISSION.spec(locale), "Permission", user, ImmutableList.<SharedSubCommand>builder()
+                .add(new PermissionInfo(locale))
+                .add(new PermissionSet(locale))
+                .add(new PermissionUnset(locale))
+                .add(new PermissionSetTemp(locale))
+                .add(new PermissionUnsetTemp(locale))
+                .add(new PermissionCheck(locale))
+                .add(new PermissionCheckInherits(locale))
                 .build());
     }
 }

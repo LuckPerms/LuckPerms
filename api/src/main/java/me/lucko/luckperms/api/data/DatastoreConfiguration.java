@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 2016 Lucko (Luck) <luck@lucko.me>
+ * This file is part of LuckPerms, licensed under the MIT License.
+ *
+ *  Copyright (c) lucko (Luck) <luck@lucko.me>
+ *  Copyright (c) contributors
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -22,18 +25,24 @@
 
 package me.lucko.luckperms.api.data;
 
+import javax.annotation.Nullable;
+
 /**
  * Represents the data section of the main LuckPerms configuration.
  * All methods could return null.
  */
 public interface DatastoreConfiguration {
 
+    @Nullable
     String getAddress();
 
+    @Nullable
     String getDatabase();
 
+    @Nullable
     String getUsername();
 
+    @Nullable
     String getPassword();
 
 }

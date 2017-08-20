@@ -26,30 +26,27 @@
 package me.lucko.luckperms.common.commands.impl.misc;
 
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
+import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class CheckCommand extends SingleCommand {
-    public CheckCommand() {
-        super("Check", "Perform a standard permission check on an online player",
-                "/%s check <user> <permission>", Permission.CHECK, Predicates.not(2),
-                Arg.list(
-                        Arg.create("user", true, "the user to check"),
-                        Arg.create("permission", true, "the permission to check for")
-                )
-        );
+    public CheckCommand(LocaleManager locale) {
+        super(CommandSpec.CHECK.spec(locale), "Check", CommandPermission.CHECK, Predicates.not(2));
     }
 
     @Override
@@ -73,5 +70,19 @@ public class CheckCommand extends SingleCommand {
         Tristate tristate = user.getUserData().getPermissionData(plugin.getContextForUser(user)).getPermissionValue(permission);
         Message.CHECK_RESULT.send(sender, user.getFriendlyName(), permission, Util.formatTristate(tristate));
         return CommandResult.SUCCESS;
+    }
+
+    @Override
+    public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
+        if (args.isEmpty()) {
+            return plugin.getPlayerList();
+        }
+
+        if (args.size() == 1) {
+            return plugin.getPlayerList().stream().filter(s -> s.toLowerCase().startsWith(args.get(0).toLowerCase())).collect(Collectors.toList());
+        }
+
+        args.remove(0);
+        return SubCommand.getPermissionTabComplete(args, plugin.getPermissionVault());
     }
 }

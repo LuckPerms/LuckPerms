@@ -25,14 +25,13 @@
 
 package me.lucko.luckperms.common.commands.abstraction;
 
-import lombok.Getter;
-
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Message;
+import me.lucko.luckperms.common.locale.LocalizedSpec;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -44,13 +43,10 @@ import java.util.stream.Collectors;
 
 public abstract class MainCommand<T> extends Command<Void, T> {
 
-    @Getter
-    private final String usage;
     private final int minArgs; // equals 1 if the command doesn't take a mid argument, e.g. /lp user <USER> sub-command....
 
-    public MainCommand(String name, String description, String usage, int minArgs, List<Command<T, ?>> children) {
-        super(name, description, null, Predicates.alwaysFalse(), null, children);
-        this.usage = usage;
+    public MainCommand(LocalizedSpec spec, String name, int minArgs, List<Command<T, ?>> children) {
+        super(spec, name, null, Predicates.alwaysFalse(), children);
         this.minArgs = minArgs;
     }
 
@@ -87,7 +83,7 @@ public abstract class MainCommand<T> extends Command<Void, T> {
             return CommandResult.INVALID_ARGS;
         }
 
-        final String name = args.get(0).toLowerCase();
+        final String name = args.get(0);
         T t = getTarget(name, plugin, sender);
         if (t != null) {
             CommandResult result;
@@ -160,7 +156,7 @@ public abstract class MainCommand<T> extends Command<Void, T> {
                 .collect(Collectors.toList());
 
         if (subs.size() > 0) {
-            Util.sendPluginMessage(sender, "&b" + getName() + " Sub Commands: &7(" + String.format(usage, label) + " ...)");
+            Util.sendPluginMessage(sender, "&b" + getName() + " Sub Commands: &7(" + String.format(getUsage(), label) + " ...)");
 
             for (Command s : subs) {
                 s.sendUsage(sender, label);
@@ -178,7 +174,7 @@ public abstract class MainCommand<T> extends Command<Void, T> {
 
     @Override
     public boolean isAuthorized(Sender sender) {
-        return getChildren().get().stream().filter(sc -> sc.isAuthorized(sender)).count() != 0;
+        return getChildren().get().stream().anyMatch(sc -> sc.isAuthorized(sender));
     }
 
     @Override

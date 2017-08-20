@@ -29,18 +29,27 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.model.Group;
+import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.constants.Constants;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
+
+import net.kyori.text.LegacyComponent;
+import net.kyori.text.TextComponent;
+import net.kyori.text.event.ClickEvent;
+import net.kyori.text.event.HoverEvent;
+import net.kyori.text.format.TextColor;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class ListGroups extends SingleCommand {
-    public ListGroups() {
-        super("ListGroups", "List all groups on the platform", "/%s listgroups", Permission.LIST_GROUPS, Predicates.alwaysFalse(), null);
+    public ListGroups(LocaleManager locale) {
+        super(CommandSpec.LIST_GROUPS.spec(locale), "ListGroups", CommandPermission.LIST_GROUPS, Predicates.alwaysFalse());
     }
 
     @Override
@@ -50,14 +59,37 @@ public class ListGroups extends SingleCommand {
             return CommandResult.LOADING_ERROR;
         }
 
-        Message.GROUPS_LIST.send(
-                sender,
-                Util.toCommaSep(plugin.getGroupManager().getAll().values().stream()
-                        .map(Group::getDisplayName)
-                        .sorted()
-                        .collect(Collectors.toList())
-                )
-        );
+        Message.GROUPS_LIST.send(sender);
+        plugin.getGroupManager().getAll().values().stream()
+                .sorted((o1, o2) -> {
+                    int i = Integer.compare(o2.getWeight().orElse(0), o1.getWeight().orElse(0));
+                    return i != 0 ? i : o1.getName().compareToIgnoreCase(o2.getName());
+                })
+                .forEach(group -> {
+                    List<String> tracks = plugin.getTrackManager().getAll().values().stream().filter(t -> t.containsGroup(group)).map(Track::getName).collect(Collectors.toList());
+                    TextComponent component;
+
+                    if (tracks.isEmpty()) {
+                        component = LegacyComponent.from(Message.GROUPS_LIST_ENTRY.asString(plugin.getLocaleManager(),
+                                group.getDisplayName(),
+                                group.getWeight().orElse(0)
+                        ), Constants.COLOR_CHAR);
+                    } else {
+                        component = LegacyComponent.from(Message.GROUPS_LIST_ENTRY_WITH_TRACKS.asString(plugin.getLocaleManager(),
+                                group.getDisplayName(),
+                                group.getWeight().orElse(0),
+                                Util.toCommaSep(tracks)
+                        ), Constants.COLOR_CHAR);
+                    }
+
+                    component = component.toBuilder().applyDeep(c -> {
+                        c.clickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + label + " group " + group.getName() + " info"));
+                        c.hoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.of("Click to view more info about " + group.getName() + ".").color(TextColor.GRAY)));
+                    }).build();
+
+                    sender.sendMessage(component);
+                });
+
         return CommandResult.SUCCESS;
     }
 }

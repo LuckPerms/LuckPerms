@@ -30,17 +30,19 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.model.Track;
+import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 
 public class TrackInfo extends SubCommand<Track> {
-    public TrackInfo() {
-        super("info", "Gives info about the track", Permission.TRACK_INFO, Predicates.alwaysFalse(), null);
+    public TrackInfo(LocaleManager locale) {
+        super(CommandSpec.TRACK_INFO.spec(locale), "info", CommandPermission.TRACK_INFO, Predicates.alwaysFalse());
     }
 
     @Override

@@ -29,16 +29,18 @@ import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 
 public class ReloadConfigCommand extends SingleCommand {
-    public ReloadConfigCommand() {
-        super("ReloadConfig", "Reload some of the config options", "/%s reloadconfig", Permission.RELOAD_CONFIG, Predicates.alwaysFalse(), null);
+    public ReloadConfigCommand(LocaleManager locale) {
+        super(CommandSpec.RELOAD_CONFIG.spec(locale), "ReloadConfig", CommandPermission.RELOAD_CONFIG, Predicates.alwaysFalse());
     }
 
     @Override

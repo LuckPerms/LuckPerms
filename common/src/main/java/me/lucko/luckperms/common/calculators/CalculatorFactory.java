@@ -26,7 +26,9 @@
 package me.lucko.luckperms.common.calculators;
 
 import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.model.User;
+
+import java.util.List;
 
 /**
  * Creates a calculator instance given a set of contexts
@@ -41,6 +43,13 @@ public interface CalculatorFactory {
      * @return a permission calculator instance
      */
     PermissionCalculator build(Contexts contexts, User user);
+
+    /**
+     * Gets the processors which are currently being added to built calculators
+     *
+     * @return a list of processors
+     */
+    List<String> getActiveProcessors();
 
     /**
      * Invalidates all calculators build by this factory

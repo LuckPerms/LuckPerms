@@ -29,9 +29,9 @@ import lombok.experimental.UtilityClass;
 
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
-import me.lucko.luckperms.common.core.NodeFactory;
-import me.lucko.luckperms.common.core.model.Group;
-import me.lucko.luckperms.common.core.model.PermissionHolder;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.sponge.service.model.CompatibilityUtil;
 
 import org.spongepowered.api.service.context.Context;

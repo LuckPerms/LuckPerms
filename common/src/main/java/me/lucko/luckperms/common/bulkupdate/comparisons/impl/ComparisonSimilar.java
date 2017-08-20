@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.bulkupdate.comparisons.impl;
 import me.lucko.luckperms.common.bulkupdate.comparisons.Comparison;
 
 public class ComparisonSimilar implements Comparison {
+
     @Override
     public String getSymbol() {
         return "~~";
@@ -45,4 +46,5 @@ public class ComparisonSimilar implements Comparison {
 
         return str.toLowerCase().matches(expr);
     }
+
 }

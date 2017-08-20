@@ -71,8 +71,6 @@ public class DependencyManager {
             .build();
 
     public static void loadDependencies(LuckPermsPlugin plugin, Set<StorageType> storageTypes) {
-        plugin.getLog().info("Loading dependencies...");
-
         List<Dependency> dependencies = new ArrayList<>();
         for (StorageType storageType : storageTypes) {
             dependencies.addAll(STORAGE_DEPENDENCIES.get(storageType));

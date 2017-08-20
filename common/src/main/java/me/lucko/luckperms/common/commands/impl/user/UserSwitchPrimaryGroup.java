@@ -26,31 +26,36 @@
 package me.lucko.luckperms.common.commands.impl.user;
 
 import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.common.commands.Arg;
+import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.model.Group;
-import me.lucko.luckperms.common.core.model.User;
-import me.lucko.luckperms.common.data.LogEntry;
+import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
 import java.util.List;
 
 public class UserSwitchPrimaryGroup extends SubCommand<User> {
-    public UserSwitchPrimaryGroup() {
-        super("switchprimarygroup", "Switches the user's primary group", Permission.USER_SWITCHPRIMARYGROUP, Predicates.not(1),
-                Arg.list(Arg.create("group", true, "the group to switch to"))
-        );
+    public UserSwitchPrimaryGroup(LocaleManager locale) {
+        super(CommandSpec.USER_SWITCHPRIMARYGROUP.spec(locale), "switchprimarygroup", CommandPermission.USER_SWITCHPRIMARYGROUP, Predicates.not(1));
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, User user, List<String> args, String label) throws CommandException {
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), user)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
+
         String opt = plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION_METHOD);
         if (!opt.equals("stored")) {
             Message.USER_PRIMARYGROUP_WARN_OPTION.send(sender, opt);
@@ -74,7 +79,7 @@ public class UserSwitchPrimaryGroup extends SubCommand<User> {
 
         user.getPrimaryGroup().setStoredValue(group.getName());
         Message.USER_PRIMARYGROUP_SUCCESS.send(sender, user.getFriendlyName(), group.getDisplayName());
-        LogEntry.build().actor(sender).acted(user)
+        ExtendedLogEntry.build().actor(sender).acted(user)
                 .action("setprimarygroup " + group.getName())
                 .build().submit(plugin, sender);
 

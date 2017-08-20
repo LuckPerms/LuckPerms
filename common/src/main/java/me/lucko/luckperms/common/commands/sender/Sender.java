@@ -25,11 +25,12 @@
 
 package me.lucko.luckperms.common.commands.sender;
 
+import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.Constants;
-import me.lucko.luckperms.common.constants.Permission;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import io.github.mkremins.fanciful.FancyMessage;
+import net.kyori.text.Component;
 
 import java.util.UUID;
 
@@ -71,7 +72,15 @@ public interface Sender {
      *
      * @param message the message to send.
      */
-    void sendMessage(FancyMessage message);
+    void sendMessage(Component message);
+
+    /**
+     * Gets the tristate a permission is set to.
+     *
+     * @param permission the permission to check for
+     * @return a tristate
+     */
+    Tristate getPermissionValue(String permission);
 
     /**
      * Check if the Sender has a permission.
@@ -79,7 +88,15 @@ public interface Sender {
      * @param permission the permission to check for
      * @return true if the sender has the permission
      */
-    boolean hasPermission(Permission permission);
+    boolean hasPermission(String permission);
+
+    /**
+     * Check if the Sender has a permission.
+     *
+     * @param permission the permission to check for
+     * @return true if the sender has the permission
+     */
+    boolean hasPermission(CommandPermission permission);
 
     /**
      * Gets whether this sender is the console
@@ -94,5 +111,12 @@ public interface Sender {
      * @return if the sender is an import process
      */
     boolean isImport();
+
+    /**
+     * Gets whether this sender is still valid & receiving messages.
+     *
+     * @return if this sender is valid
+     */
+    boolean isValid();
 
 }

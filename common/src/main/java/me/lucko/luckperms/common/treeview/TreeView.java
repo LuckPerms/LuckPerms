@@ -42,63 +42,189 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * A readable view of a branch of {@link TreeNode}s.
+ */
 public class TreeView {
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
 
+    // the root of the tree
     private final String rootPosition;
-    private final int maxLevels;
 
+    // how many levels / branches to display
+    private final int maxLevel;
+
+    // the actual tree object
     private final ImmutableTreeNode view;
 
-    public TreeView(PermissionVault source, String rootPosition, int maxLevels) {
+    public TreeView(PermissionVault source, String rootPosition, int maxLevel) {
         this.rootPosition = rootPosition;
-        this.maxLevels = maxLevels;
+        this.maxLevel = maxLevel;
 
-        Optional<TreeNode> root = findRoot(source);
+        Optional<TreeNode> root = findRoot(rootPosition, source);
         this.view = root.map(TreeNode::makeImmutableCopy).orElse(null);
     }
 
+    /**
+     * Gets if this TreeView has any content.
+     *
+     * @return true if the treeview has data
+     */
     public boolean hasData() {
         return view != null;
     }
 
+    /**
+     * Finds the root of the tree node at the given position
+     *
+     * @param source the node source
+     * @return the root, if it exists
+     */
+    private static Optional<TreeNode> findRoot(String rootPosition, PermissionVault source) {
+        // get the root of the permission vault
+        TreeNode root = source.getRootNode();
+
+        // just return the root
+        if (rootPosition.equals(".")) {
+            return Optional.of(root);
+        }
+
+        // get the parts of the node
+        List<String> parts = Splitter.on('.').omitEmptyStrings().splitToList(rootPosition);
+
+        // for each part
+        for (String part : parts) {
+
+            // check the current root has some children
+            if (!root.getChildren().isPresent()) {
+                return Optional.empty();
+            }
+
+            // get the current roots children
+            Map<String, TreeNode> branch = root.getChildren().get();
+
+            // get the new root
+            root = branch.get(part);
+            if (root == null) {
+                return Optional.empty();
+            }
+        }
+
+        return Optional.of(root);
+    }
+
+    /**
+     * Converts the view to a readable list
+     *
+     * <p>The list contains KV pairs, where the key is the tree padding/structure,
+     * and the value is the actual permission.</p>
+     *
+     * @return a list of the nodes in this view
+     */
+    private List<Map.Entry<String, String>> asTreeList() {
+        // work out the prefix to apply
+        // since the view is relative, we need to prepend this to all permissions
+        String prefix = rootPosition.equals(".") ? "" : (rootPosition + ".");
+
+
+        List<Map.Entry<String, String>> ret = new ArrayList<>();
+
+        // iterate the node endings in the view
+        for (Map.Entry<Integer, String> s : view.getNodeEndings()) {
+            // don't include the node if it exceeds the max level
+            if (s.getKey() >= maxLevel) {
+                continue;
+            }
+
+            // generate the tree padding characters from the node level
+            String treeStructure = Strings.repeat("│  ", s.getKey()) + "├── ";
+            // generate the permission, using the prefix and the node
+            String permission = prefix + s.getValue();
+
+            ret.add(Maps.immutableEntry(treeStructure, permission));
+        }
+
+        return ret;
+    }
+
+    /**
+     * Uploads the data contained in this TreeView to a paste, and returns the URL.
+     *
+     * @param version the plugin version string
+     * @return the url, or null
+     * @see PasteUtils#paste(String, List)
+     */
     public String uploadPasteData(String version) {
+        // only paste if there is actually data here
         if (!hasData()) {
             throw new IllegalStateException();
         }
 
+        // get the data contained in the view in a list form
+        // for each entry, the key is the padding tree characters
+        // and the value is the actual permission string
         List<Map.Entry<String, String>> ret = asTreeList();
-        ImmutableList.Builder<String> builder = getPasteHeader(version, "none", ret.size());
-        builder.add("```");
 
+        // build the header of the paste
+        ImmutableList.Builder<String> builder = getPasteHeader(version, "none", ret.size());
+
+        // add the tree data
+        builder.add("```");
         for (Map.Entry<String, String> e : ret) {
             builder.add(e.getKey() + e.getValue());
         }
-
         builder.add("```");
+
+        // clear the initial data map
         ret.clear();
 
-        return PasteUtils.paste("luckperms-tree.md", "LuckPerms Permission Tree", builder.build().stream().collect(Collectors.joining("\n")));
+        // upload the return the data
+        return PasteUtils.paste("LuckPerms Permission Tree", ImmutableList.of(Maps.immutableEntry("luckperms-tree.md", builder.build().stream().collect(Collectors.joining("\n")))));
     }
 
+    /**
+     * Uploads the data contained in this TreeView to a paste, and returns the URL.
+     *
+     * <p>Unlike {@link #uploadPasteData(String)}, this method will check each permission
+     * against a corresponding user, and colorize the output depending on the check results.</p>
+     *
+     * @param version the plugin version string
+     * @param username the username of the reference user
+     * @param checker the permission data instance to check against
+     * @return the url, or null
+     * @see PasteUtils#paste(String, List)
+     */
     public String uploadPasteData(String version, String username, PermissionData checker) {
+        // only paste if there is actually data here
         if (!hasData()) {
             throw new IllegalStateException();
         }
 
+        // get the data contained in the view in a list form
+        // for each entry, the key is the padding tree characters
+        // and the value is the actual permission string
         List<Map.Entry<String, String>> ret = asTreeList();
-        ImmutableList.Builder<String> builder = getPasteHeader(version, username, ret.size());
-        builder.add("```diff");
 
+        // build the header of the paste
+        ImmutableList.Builder<String> builder = getPasteHeader(version, username, ret.size());
+
+        // add the tree data
+        builder.add("```diff");
         for (Map.Entry<String, String> e : ret) {
+
+            // lookup a permission value for the node
             Tristate tristate = checker.getPermissionValue(e.getValue());
+
+            // append the data to the paste
             builder.add(getTristateDiffPrefix(tristate) + e.getKey() + e.getValue());
         }
-
         builder.add("```");
+
+        // clear the initial data map
         ret.clear();
 
-        return PasteUtils.paste("luckperms-tree.md", "LuckPerms Permission Tree", builder.build().stream().collect(Collectors.joining("\n")));
+        // upload the return the data
+        return PasteUtils.paste("LuckPerms Permission Tree", ImmutableList.of(Maps.immutableEntry("luckperms-tree.md", builder.build().stream().collect(Collectors.joining("\n")))));
     }
 
     private static String getTristateDiffPrefix(Tristate t) {
@@ -123,52 +249,9 @@ public class TreeView {
                 .add("### Metadata")
                 .add("| Selection | Max Recursion | Reference User | Size | Produced at |")
                 .add("|-----------|---------------|----------------|------|-------------|")
-                .add("| " + selection + " | " + maxLevels + " | " + referenceUser + " | **" + size + "** | " + date + " |")
+                .add("| " + selection + " | " + maxLevel + " | " + referenceUser + " | **" + size + "** | " + date + " |")
                 .add("")
                 .add("### Output");
-    }
-
-    private Optional<TreeNode> findRoot(PermissionVault source) {
-        TreeNode root = source.getRootNode();
-
-        if (rootPosition.equals(".")) {
-            return Optional.of(root);
-        }
-
-        List<String> parts = Splitter.on('.').omitEmptyStrings().splitToList(rootPosition);
-        for (String part : parts) {
-
-            if (!root.getChildren().isPresent()) {
-                return Optional.empty();
-            }
-
-            Map<String, TreeNode> branch = root.getChildren().get();
-
-            root = branch.get(part);
-            if (root == null) {
-                return Optional.empty();
-            }
-        }
-
-        return Optional.of(root);
-    }
-
-    private List<Map.Entry<String, String>> asTreeList() {
-        String prefix = rootPosition.equals(".") ? "" : (rootPosition + ".");
-        List<Map.Entry<String, String>> ret = new ArrayList<>();
-
-        for (Map.Entry<Integer, String> s : view.getNodeEndings()) {
-            if (s.getKey() > maxLevels) {
-                continue;
-            }
-
-            String treeStructure = Strings.repeat("│  ", s.getKey()) + "├── ";
-            String node = prefix + s.getValue();
-
-            ret.add(Maps.immutableEntry(treeStructure, node));
-        }
-
-        return ret;
     }
 
 }

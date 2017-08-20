@@ -26,14 +26,15 @@
 package me.lucko.luckperms.sponge.commands;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
@@ -41,21 +42,15 @@ import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 import java.util.List;
 
 public class OptionSet extends SubCommand<LPSubjectData> {
-    public OptionSet() {
-        super("set", "Sets an option for the Subject", Permission.SPONGE_OPTION_SET, Predicates.inRange(0, 1),
-                Arg.list(
-                        Arg.create("key", true, "the key to set"),
-                        Arg.create("value", true, "the value to set the key to"),
-                        Arg.create("contexts...", false, "the contexts to set the option in")
-                )
-        );
+    public OptionSet(LocaleManager locale) {
+        super(CommandSpec.SPONGE_OPTION_SET.spec(locale), "set", CommandPermission.SPONGE_OPTION_SET, Predicates.inRange(0, 1));
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, List<String> args, String label) throws CommandException {
         String key = args.get(0);
         String value = args.get(1);
-        ImmutableContextSet contextSet = ArgumentUtils.handleContexts(2, args);
+        ImmutableContextSet contextSet = ArgumentUtils.handleContextSponge(2, args);
 
         if (subjectData.setOption(contextSet, key, value).join()) {
             Util.sendPluginMessage(sender, "&aSet &f\"" + key + "&f\"&a to &f\"" + value + "&f\"&a in context " + SpongeUtils.contextToString(contextSet));

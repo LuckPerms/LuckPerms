@@ -31,18 +31,21 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.impl.migration.MigrationUtils;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.NodeFactory;
-import me.lucko.luckperms.common.core.model.Group;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.logging.ProgressLogger;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.common.utils.ProgressLogger;
 
 import org.bukkit.Bukkit;
-import org.bukkit.World;
 
 import ru.tehkode.permissions.NativeInterface;
+import ru.tehkode.permissions.PermissionEntity;
 import ru.tehkode.permissions.PermissionGroup;
 import ru.tehkode.permissions.PermissionManager;
 import ru.tehkode.permissions.PermissionUser;
@@ -50,13 +53,13 @@ import ru.tehkode.permissions.bukkit.PermissionsEx;
 
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 public class MigrationPermissionsEx extends SubCommand<Object> {
-    public MigrationPermissionsEx() {
-        super("permissionsex", "Migration from PermissionsEx", Permission.MIGRATION, Predicates.alwaysFalse(), null);
+    public MigrationPermissionsEx(LocaleManager locale) {
+        super(CommandSpec.MIGRATION_COMMAND.spec(locale), "permissionsex", CommandPermission.MIGRATION, Predicates.alwaysFalse());
     }
 
     @SuppressWarnings("deprecation")
@@ -72,8 +75,6 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             log.logErr("Plugin not loaded.");
             return CommandResult.STATE_ERROR;
         }
-
-        List<String> worlds = Bukkit.getWorlds().stream().map(World::getName).map(String::toLowerCase).collect(Collectors.toList());
 
         PermissionsEx pex = (PermissionsEx) Bukkit.getPluginManager().getPlugin("PermissionsEx");
         PermissionManager manager = pex.getPermissionsManager();
@@ -107,56 +108,8 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
 
             MigrationUtils.setGroupWeight(lpGroup, groupWeight);
 
-            try {
-                for (String node : group.getOwnPermissions(null)) {
-                    if (node.isEmpty()) {
-                        continue;
-                    }
-
-                    lpGroup.setPermission(MigrationUtils.parseNode(node, true).build());
-                }
-            } catch (NullPointerException ignored) {
-                // No docs on if #getOwnPermissions(null) is ok. Should be fine though.
-            }
-
-            for (String world : worlds) {
-                if (world.isEmpty()) {
-                    continue;
-                }
-
-                for (String node : group.getOwnPermissions(world)) {
-                    if (node.isEmpty()) {
-                        continue;
-                    }
-
-                    lpGroup.setPermission(MigrationUtils.parseNode(node, true).setWorld(world.toLowerCase()).build());
-                }
-            }
-
-            for (PermissionGroup g : group.getParents()) {
-                lpGroup.setPermission(NodeFactory.make("group." + MigrationUtils.standardizeName(g.getName())));
-            }
-
-            for (String world : worlds) {
-                if (world.isEmpty()) {
-                    continue;
-                }
-
-                for (PermissionGroup g : group.getParents(world)) {
-                    lpGroup.setPermission(NodeFactory.make("group." + MigrationUtils.standardizeName(g.getName()), true, "global", world.toLowerCase()));
-                }
-            }
-
-            String prefix = group.getOwnPrefix();
-            String suffix = group.getOwnSuffix();
-
-            if (prefix != null && !prefix.equals("")) {
-                lpGroup.setPermission(NodeFactory.makePrefixNode(groupWeight, prefix).build());
-            }
-
-            if (suffix != null && !suffix.equals("")) {
-                lpGroup.setPermission(NodeFactory.makeSuffixNode(groupWeight, suffix).build());
-            }
+            // migrate data
+            migrateEntity(group, lpGroup, groupWeight);
 
             plugin.getStorage().saveGroup(lpGroup);
             log.logAllProgress("Migrated {} groups so far.", groupCount.incrementAndGet());
@@ -193,64 +146,8 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             plugin.getStorage().loadUser(u, user.getName()).join();
             User lpUser = plugin.getUserManager().getIfLoaded(u);
 
-            try {
-                for (String node : user.getOwnPermissions(null)) {
-                    if (node.isEmpty()) {
-                        continue;
-                    }
-
-                    lpUser.setPermission(MigrationUtils.parseNode(node, true).build());
-                }
-            } catch (NullPointerException ignored) {
-                // No docs on if #getOwnPermissions(null) is ok. Should be fine though.
-            }
-
-            for (String world : worlds) {
-                if (world.isEmpty()) {
-                    continue;
-                }
-
-                for (String node : user.getOwnPermissions(world)) {
-                    if (node.isEmpty()) {
-                        continue;
-                    }
-
-                    lpUser.setPermission(MigrationUtils.parseNode(node, true).setWorld(world.toLowerCase()).build());
-                }
-            }
-
-            for (String g : user.getGroupNames()) {
-                if (g.isEmpty()) {
-                    continue;
-                }
-
-                lpUser.setPermission(NodeFactory.make("group." + MigrationUtils.standardizeName(g)));
-            }
-
-            for (String world : worlds) {
-                if (world.isEmpty()) {
-                    continue;
-                }
-
-                for (String g : user.getGroupNames(world)) {
-                    if (g.isEmpty()) {
-                        continue;
-                    }
-
-                    lpUser.setPermission(NodeFactory.make("group." + MigrationUtils.standardizeName(g), true, "global", world.toLowerCase()));
-                }
-            }
-
-            String prefix = user.getOwnPrefix();
-            String suffix = user.getOwnSuffix();
-
-            if (prefix != null && !prefix.equals("")) {
-                lpUser.setPermission(NodeFactory.makePrefixNode(maxWeight, prefix).build());
-            }
-
-            if (suffix != null && !suffix.equals("")) {
-                lpUser.setPermission(NodeFactory.makeSuffixNode(maxWeight, suffix).build());
-            }
+            // migrate data
+            migrateEntity(user, lpUser, maxWeight);
 
             // Lowest rank is the highest group #logic
             String primary = null;
@@ -262,7 +159,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 }
             }
 
-            if (primary != null && !primary.equalsIgnoreCase("default")) {
+            if (primary != null && !primary.isEmpty() && !primary.equalsIgnoreCase("default")) {
                 lpUser.setPermission(NodeFactory.make("group." + primary.toLowerCase()));
                 lpUser.getPrimaryGroup().setStoredValue(primary);
                 lpUser.unsetPermission(NodeFactory.make("group.default"));
@@ -276,5 +173,80 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
         log.log("Migrated " + userCount.get() + " users.");
         log.log("Success! Migration complete.");
         return CommandResult.SUCCESS;
+    }
+
+    private static void migrateEntity(PermissionEntity entity, PermissionHolder holder, int weight) {
+        // migrate permissions
+        Map<String, List<String>> permissions = entity.getAllPermissions();
+        for (Map.Entry<String, List<String>> worldData : permissions.entrySet()) {
+            String world = worldData.getKey();
+            if (world != null && (world.equals("") || world.equals("*"))) {
+                world = null;
+            }
+            if (world != null) {
+                world = world.toLowerCase();
+            }
+
+            for (String node : worldData.getValue()) {
+                if (node.isEmpty()) {
+                    continue;
+                }
+
+                holder.setPermission(MigrationUtils.parseNode(node, true).setWorld(world).build());
+            }
+        }
+
+        // migrate parents
+        Map<String, List<PermissionGroup>> parents = entity.getAllParents();
+        for (Map.Entry<String, List<PermissionGroup>> worldData : parents.entrySet()) {
+            String world = worldData.getKey();
+            if (world != null && (world.equals("") || world.equals("*"))) {
+                world = null;
+            }
+            if (world != null) {
+                world = world.toLowerCase();
+            }
+
+            for (PermissionGroup parent : worldData.getValue()) {
+                holder.setPermission(NodeFactory.newBuilder("group." + MigrationUtils.standardizeName(parent.getName())).setWorld(world).build());
+            }
+        }
+
+        // migrate prefix / suffix
+        String prefix = entity.getOwnPrefix();
+        String suffix = entity.getOwnSuffix();
+
+        if (prefix != null && !prefix.isEmpty()) {
+            holder.setPermission(NodeFactory.makePrefixNode(weight, prefix).build());
+        }
+
+        if (suffix != null && !suffix.isEmpty()) {
+            holder.setPermission(NodeFactory.makeSuffixNode(weight, suffix).build());
+        }
+
+        // migrate options
+        Map<String, Map<String, String>> options = entity.getAllOptions();
+        for (Map.Entry<String, Map<String, String>> worldData : options.entrySet()) {
+            String world = worldData.getKey();
+            if (world != null && (world.isEmpty() || world.equals("*"))) {
+                world = null;
+            }
+            if (world != null) {
+                world = world.toLowerCase();
+            }
+
+            for (Map.Entry<String, String> opt : worldData.getValue().entrySet()) {
+                if (opt.getKey() == null || opt.getKey().isEmpty() || opt.getValue() == null || opt.getValue().isEmpty()) {
+                    continue;
+                }
+
+                String key = opt.getKey().toLowerCase();
+                if (key.equals("prefix") || key.equals("suffix") || key.equals("weight") || key.equals("rank") || key.equals("name") || key.equals("username")) {
+                    continue;
+                }
+
+                holder.setPermission(NodeFactory.makeMetaNode(opt.getKey(), opt.getValue()).setWorld(world).build());
+            }
+        }
     }
 }

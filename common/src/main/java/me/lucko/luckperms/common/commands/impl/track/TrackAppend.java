@@ -25,18 +25,19 @@
 
 package me.lucko.luckperms.common.commands.impl.track;
 
-import me.lucko.luckperms.common.commands.Arg;
+import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.DataConstraints;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.model.Group;
-import me.lucko.luckperms.common.core.model.Track;
-import me.lucko.luckperms.common.data.LogEntry;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
@@ -44,10 +45,8 @@ import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import java.util.List;
 
 public class TrackAppend extends SubCommand<Track> {
-    public TrackAppend() {
-        super("append", "Appends a group onto the end of the track", Permission.TRACK_APPEND, Predicates.not(1),
-                Arg.list(Arg.create("group", true, "the group to append"))
-        );
+    public TrackAppend(LocaleManager locale) {
+        super(CommandSpec.TRACK_APPEND.spec(locale), "append", CommandPermission.TRACK_APPEND, Predicates.not(1));
     }
 
     @Override
@@ -75,7 +74,7 @@ public class TrackAppend extends SubCommand<Track> {
             if (track.getGroups().size() > 1) {
                 Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), group.getName()));
             }
-            LogEntry.build().actor(sender).acted(track)
+            ExtendedLogEntry.build().actor(sender).acted(track)
                     .action("append " + group.getName())
                     .build().submit(plugin, sender);
             save(track, sender, plugin);

@@ -25,8 +25,22 @@
 
 package me.lucko.luckperms.common.config;
 
+/**
+ * Represents a key in the configuration.
+ *
+ * @param <T> the value type
+ */
 public interface ConfigKey<T> {
 
+    /**
+     * Resolves and returns the value mapped to this key using the given config instance.
+     *
+     * <p>The {@link LuckPermsConfiguration#get(ConfigKey)} method should be used to
+     * retrieve the value, as opposed to calling this directly.</p>
+     *
+     * @param config the config instance
+     * @return the value mapped to this key
+     */
     T get(LuckPermsConfiguration config);
 
 }

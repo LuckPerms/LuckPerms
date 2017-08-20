@@ -25,11 +25,15 @@
 
 package me.lucko.luckperms.common.commands.sender;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
-import io.github.mkremins.fanciful.FancyMessage;
+import net.kyori.text.Component;
 
 import java.util.UUID;
 
@@ -40,6 +44,8 @@ import java.util.UUID;
  */
 @RequiredArgsConstructor
 public abstract class SenderFactory<T> {
+
+    @Getter(AccessLevel.PROTECTED)
     private final LuckPermsPlugin plugin;
 
     protected abstract String getName(T t);
@@ -48,11 +54,13 @@ public abstract class SenderFactory<T> {
 
     protected abstract void sendMessage(T t, String s);
 
-    protected abstract void sendMessage(T t, FancyMessage message);
+    protected abstract void sendMessage(T t, Component message);
+
+    protected abstract Tristate getPermissionValue(T t, String node);
 
     protected abstract boolean hasPermission(T t, String node);
 
-    public final Sender wrap(T t) {
-        return new AbstractSender<>(plugin, this, t);
+    public final Sender wrap(@NonNull T sender) {
+        return new AbstractSender<>(plugin, this, sender);
     }
 }

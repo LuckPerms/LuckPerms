@@ -29,7 +29,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.model.User;
 
 @RequiredArgsConstructor
 public class StoredHolder implements PrimaryGroupHolder {

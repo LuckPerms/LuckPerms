@@ -26,18 +26,21 @@
 package me.lucko.luckperms.common.commands.impl.generic.other;
 
 import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.common.commands.Arg;
+import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
+import me.lucko.luckperms.common.commands.ArgumentPermissions;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.model.Group;
-import me.lucko.luckperms.common.core.model.PermissionHolder;
-import me.lucko.luckperms.common.core.model.User;
-import me.lucko.luckperms.common.data.LogEntry;
+import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -45,20 +48,25 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class HolderClear<T extends PermissionHolder> extends SubCommand<T> {
-    public HolderClear(boolean user) {
-        super("clear", "Removes all permissions, parents and meta", user ? Permission.USER_CLEAR : Permission.GROUP_CLEAR,
-                Predicates.alwaysFalse(),
-                Arg.list(
-                        Arg.create("context...", false, "the contexts to filter by")
-                )
-        );
+    public HolderClear(LocaleManager locale, boolean user) {
+        super(CommandSpec.HOLDER_CLEAR.spec(locale), "clear", user ? CommandPermission.USER_CLEAR : CommandPermission.GROUP_CLEAR, Predicates.alwaysFalse());
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, T holder, List<String> args, String label) throws CommandException {
-        int before = holder.getNodes().size();
+        if (ArgumentPermissions.checkModifyPerms(plugin, sender, getPermission().get(), holder)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
 
-        MutableContextSet context = ArgumentUtils.handleContext(0, args);
+        int before = holder.getEnduringNodes().size();
+
+        MutableContextSet context = ArgumentUtils.handleContext(0, args, plugin);
+
+        if (ArgumentPermissions.checkContext(plugin, sender, getPermission().get(), context)) {
+            Message.COMMAND_NO_PERMISSION.send(sender);
+            return CommandResult.NO_PERMISSION;
+        }
 
         if (context.isEmpty()) {
             holder.clearNodes();
@@ -66,14 +74,14 @@ public class HolderClear<T extends PermissionHolder> extends SubCommand<T> {
             holder.clearNodes(context);
         }
 
-        int changed = before - holder.getNodes().size();
+        int changed = before - holder.getEnduringNodes().size();
         if (changed == 1) {
-            Message.CLEAR_SUCCESS_SINGULAR.send(sender, holder.getFriendlyName(), changed);
+            Message.CLEAR_SUCCESS_SINGULAR.send(sender, holder.getFriendlyName(), Util.contextSetToString(context), changed);
         } else {
-            Message.CLEAR_SUCCESS.send(sender, holder.getFriendlyName(), changed);
+            Message.CLEAR_SUCCESS.send(sender, holder.getFriendlyName(), Util.contextSetToString(context), changed);
         }
 
-        LogEntry.build().actor(sender).acted(holder)
+        ExtendedLogEntry.build().actor(sender).acted(holder)
                 .action("clear " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
                 .build().submit(plugin, sender);
 

@@ -25,8 +25,9 @@
 
 package me.lucko.luckperms.common.messaging;
 
+import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.MessagingService;
-import me.lucko.luckperms.common.utils.BufferedRequest;
+import me.lucko.luckperms.common.buffers.BufferedRequest;
 
 public interface InternalMessagingService extends MessagingService {
 
@@ -48,5 +49,12 @@ public interface InternalMessagingService extends MessagingService {
      * @return the update buffer
      */
     BufferedRequest<Void> getUpdateBuffer();
+
+    /**
+     * Pushes a log entry to connected servers.
+     *
+     * @param logEntry the log entry
+     */
+    void pushLog(LogEntry logEntry);
 
 }

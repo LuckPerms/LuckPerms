@@ -27,7 +27,7 @@ package me.lucko.luckperms.common.bulkupdate.action;
 
 import lombok.AllArgsConstructor;
 
-import me.lucko.luckperms.common.core.NodeModel;
+import me.lucko.luckperms.common.node.NodeModel;
 
 @AllArgsConstructor(staticName = "create")
 public class DeleteAction implements Action {
@@ -39,7 +39,7 @@ public class DeleteAction implements Action {
 
     @Override
     public NodeModel apply(NodeModel from) {
-        return null;
+        return null; // this action just deletes nodes, so return null
     }
 
     @Override

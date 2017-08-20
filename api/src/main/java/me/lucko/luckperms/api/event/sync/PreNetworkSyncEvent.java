@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 2016 Lucko (Luck) <luck@lucko.me>
+ * This file is part of LuckPerms, licensed under the MIT License.
+ *
+ *  Copyright (c) lucko (Luck) <luck@lucko.me>
+ *  Copyright (c) contributors
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -27,8 +30,10 @@ import me.lucko.luckperms.api.event.LuckPermsEvent;
 
 import java.util.UUID;
 
+import javax.annotation.Nonnull;
+
 /**
- * Called before a network sync task runs
+ * Called before a received network sync task runs
  */
 public interface PreNetworkSyncEvent extends LuckPermsEvent, Cancellable {
 
@@ -37,6 +42,7 @@ public interface PreNetworkSyncEvent extends LuckPermsEvent, Cancellable {
      *
      * @return the id of the sync request
      */
+    @Nonnull
     UUID getSyncId();
 
 }

@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 2016 Lucko (Luck) <luck@lucko.me>
+ * This file is part of LuckPerms, licensed under the MIT License.
+ *
+ *  Copyright (c) lucko (Luck) <luck@lucko.me>
+ *  Copyright (c) contributors
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +30,8 @@ import me.lucko.luckperms.api.event.LuckPermsEvent;
 
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 /**
  * Called when a track is changed
  */
@@ -37,6 +42,7 @@ public interface TrackMutateEvent extends LuckPermsEvent {
      *
      * @return the track that was mutated
      */
+    @Nonnull
     Track getTrack();
 
     /**
@@ -44,6 +50,7 @@ public interface TrackMutateEvent extends LuckPermsEvent {
      *
      * @return the data before the change
      */
+    @Nonnull
     List<String> getDataBefore();
 
     /**
@@ -51,6 +58,7 @@ public interface TrackMutateEvent extends LuckPermsEvent {
      *
      * @return the data after the change
      */
+    @Nonnull
     List<String> getDataAfter();
 
 }

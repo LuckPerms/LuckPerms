@@ -25,14 +25,13 @@
 
 package me.lucko.luckperms.common.commands.abstraction;
 
-import lombok.Getter;
-
 import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.locale.LocalizedSpec;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.List;
@@ -43,12 +42,8 @@ import java.util.function.Predicate;
  */
 public abstract class SingleCommand extends Command<Void, Void> {
 
-    @Getter
-    private final String usage;
-
-    public SingleCommand(String name, String description, String usage, Permission permission, Predicate<Integer> argumentCheck, List<Arg> args) {
-        super(name, description, permission, argumentCheck, args, null);
-        this.usage = usage;
+    public SingleCommand(LocalizedSpec spec, String name, CommandPermission permission, Predicate<Integer> argumentCheck) {
+        super(spec, name, permission, argumentCheck, null);
     }
 
     @Override

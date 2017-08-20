@@ -27,20 +27,70 @@ package me.lucko.luckperms.common.plugin;
 
 import java.util.concurrent.Executor;
 
+/**
+ * A scheduler for running tasks using the systems provided by the platform
+ */
 public interface LuckPermsScheduler {
 
-    Executor getAsyncExecutor();
-    Executor getSyncExecutor();
+    /**
+     * Gets an async executor instance
+     *
+     * @return an async executor instance
+     */
+    Executor async();
 
-    void doAsync(Runnable r);
-    void doSync(Runnable r);
+    /**
+     * Gets a sync executor instance
+     *
+     * @return a sync executor instance
+     */
+    Executor sync();
 
-    void doAsyncRepeating(Runnable r, long interval);
-    void doSyncRepeating(Runnable r, long interval);
+    /**
+     * Executes a runnable async
+     *
+     * @param runnable the runnable
+     */
+    void doAsync(Runnable runnable);
 
-    void doAsyncLater(Runnable r, long delay);
-    void doSyncLater(Runnable r, long delay);
+    /**
+     * Executes a runnable sync
+     *
+     * @param runnable the runnable
+     */
+    void doSync(Runnable runnable);
 
+    /**
+     * Runs a runnable repeatedly until the plugin disables. Will wait for the interval before the first iteration of the task is ran.
+     *  @param runnable the runnable
+     * @param intervalTicks the interval in ticks.
+     */
+    void asyncRepeating(Runnable runnable, long intervalTicks);
+
+    /**
+     * Runs a runnable repeatedly until the plugin disables. Will wait for the interval before the first iteration of the task is ran.
+     *  @param runnable the runnable
+     * @param intervalTicks the interval in ticks.
+     */
+    void syncRepeating(Runnable runnable, long intervalTicks);
+
+    /**
+     * Runs a runnable with a delay
+     *  @param runnable the runnable
+     * @param delayTicks the delay in ticks
+     */
+    void asyncLater(Runnable runnable, long delayTicks);
+
+    /**
+     * Runs a runnable with a delay
+     *  @param runnable the runnable
+     * @param delayTicks the delay in ticks
+     */
+    void syncLater(Runnable runnable, long delayTicks);
+
+    /**
+     * Shuts down this executor instance
+     */
     void shutdown();
 
 }

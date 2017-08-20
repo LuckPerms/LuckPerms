@@ -27,13 +27,20 @@ package me.lucko.luckperms.common.caching;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.ToString;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
+
+import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.LocalizedNode;
-import me.lucko.luckperms.common.caching.stacking.MetaStack;
+import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.metastacking.GenericMetaStack;
+import me.lucko.luckperms.common.metastacking.MetaStack;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -44,9 +51,15 @@ import java.util.TreeMap;
 @Getter
 @ToString
 public class MetaAccumulator {
+    public static MetaAccumulator makeFromConfig(LuckPermsPlugin plugin) {
+        return new MetaAccumulator(
+                new GenericMetaStack(plugin.getConfiguration().get(ConfigKeys.PREFIX_FORMATTING_OPTIONS), ChatMetaType.PREFIX),
+                new GenericMetaStack(plugin.getConfiguration().get(ConfigKeys.SUFFIX_FORMATTING_OPTIONS), ChatMetaType.SUFFIX)
+        );
+    }
 
     @Getter(AccessLevel.NONE)
-    private final Map<String, String> meta;
+    private final ListMultimap<String, String> meta;
     private final SortedMap<Integer, String> prefixes;
     private final SortedMap<Integer, String> suffixes;
     private int weight = 0;
@@ -54,8 +67,8 @@ public class MetaAccumulator {
     private final MetaStack prefixStack;
     private final MetaStack suffixStack;
 
-    public MetaAccumulator(MetaStack prefixStack, MetaStack suffixStack) {
-        this.meta = new HashMap<>();
+    public MetaAccumulator(@NonNull MetaStack prefixStack, @NonNull MetaStack suffixStack) {
+        this.meta = ArrayListMultimap.create();
         this.prefixes = new TreeMap<>(Comparator.reverseOrder());
         this.suffixes = new TreeMap<>(Comparator.reverseOrder());
         this.prefixStack = prefixStack;
@@ -65,9 +78,7 @@ public class MetaAccumulator {
     public void accumulateNode(LocalizedNode n) {
         if (n.isMeta()) {
             Map.Entry<String, String> entry = n.getMeta();
-            if (!meta.containsKey(entry.getKey())) {
-                meta.put(entry.getKey(), entry.getValue());
-            }
+            meta.put(entry.getKey(), entry.getValue());
         }
 
         if (n.isPrefix()) {
@@ -95,12 +106,20 @@ public class MetaAccumulator {
 
     // We can assume that if this method is being called, this holder is effectively finalized. (it's not going to accumulate more nodes)
     // Therefore, it should be ok to set the weight meta key, if not already present.
-    public Map<String, String> getMeta() {
+    public ListMultimap<String, String> getMeta() {
         if (!this.meta.containsKey("weight") && this.weight != 0) {
             this.meta.put("weight", String.valueOf(this.weight));
         }
 
         return this.meta;
+    }
+
+    public Map<Integer, String> getChatMeta(ChatMetaType type) {
+        return type == ChatMetaType.PREFIX ? prefixes : suffixes;
+    }
+
+    public MetaStack getStack(ChatMetaType type) {
+        return type == ChatMetaType.PREFIX ? prefixStack : suffixStack;
     }
 
 }

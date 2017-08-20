@@ -30,8 +30,8 @@ import lombok.NonNull;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.common.core.model.Group;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.User;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -55,7 +55,7 @@ public class ParentsByWeightHolder extends StoredHolder {
 
         Contexts contexts = user.getPlugin().getContextForUser(user);
         ContextSet contextSet = contexts != null ? contexts.getContexts() : user.getPlugin().getContextManager().getStaticContexts();
-        cachedValue = user.flattenAndMergeNodesToList(contextSet).stream()
+        cachedValue = user.filterNodes(contextSet).stream()
                 .filter(Node::isGroupNode)
                 .filter(Node::getValue)
                 .map(n -> Optional.ofNullable(user.getPlugin().getGroupManager().getIfLoaded(n.getGroupName())))

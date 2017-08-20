@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 2016 Lucko (Luck) <luck@lucko.me>
+ * This file is part of LuckPerms, licensed under the MIT License.
+ *
+ *  Copyright (c) lucko (Luck) <luck@lucko.me>
+ *  Copyright (c) contributors
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +27,8 @@ package me.lucko.luckperms.api.event.node;
 
 import me.lucko.luckperms.api.Node;
 
+import javax.annotation.Nonnull;
+
 /**
  * Called when a node is added to a holder
  */
@@ -34,6 +39,7 @@ public interface NodeAddEvent extends NodeMutateEvent {
      *
      * @return the node that was added
      */
+    @Nonnull
     Node getNode();
 
 }

@@ -34,18 +34,19 @@ import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.api.event.cause.DeletionCause;
+import me.lucko.luckperms.common.actionlog.Log;
 import me.lucko.luckperms.common.api.delegates.StorageDelegate;
 import me.lucko.luckperms.common.bulkupdate.BulkUpdate;
-import me.lucko.luckperms.common.core.model.Group;
-import me.lucko.luckperms.common.core.model.Track;
-import me.lucko.luckperms.common.core.model.User;
-import me.lucko.luckperms.common.data.Log;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.Track;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.backing.AbstractBacking;
 import me.lucko.luckperms.common.storage.wrappings.BufferedOutputStorage;
-import me.lucko.luckperms.common.storage.wrappings.TolerantStorage;
+import me.lucko.luckperms.common.storage.wrappings.PhasedStorage;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -57,8 +58,8 @@ import java.util.function.Supplier;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class AbstractStorage implements Storage {
     public static Storage wrap(LuckPermsPlugin plugin, AbstractBacking backing) {
-        BufferedOutputStorage bufferedDs = BufferedOutputStorage.wrap(TolerantStorage.wrap(new AbstractStorage(plugin, backing)), 1000L);
-        plugin.getScheduler().doAsyncRepeating(bufferedDs, 10L);
+        BufferedOutputStorage bufferedDs = BufferedOutputStorage.wrap(PhasedStorage.wrap(new AbstractStorage(plugin, backing)), 1000L);
+        plugin.getScheduler().asyncRepeating(bufferedDs, 5L);
         return bufferedDs;
     }
 
@@ -77,7 +78,7 @@ public class AbstractStorage implements Storage {
     }
 
     private <T> CompletableFuture<T> makeFuture(Supplier<T> supplier) {
-        return CompletableFuture.supplyAsync(supplier, backing.getPlugin().getScheduler().getAsyncExecutor());
+        return CompletableFuture.supplyAsync(supplier, backing.getPlugin().getScheduler().async());
     }
 
     @Override
@@ -138,7 +139,10 @@ public class AbstractStorage implements Storage {
     public CompletableFuture<Boolean> createAndLoadGroup(String name, CreationCause cause) {
         return makeFuture(() -> {
             if (backing.createAndLoadGroup(name)) {
-                plugin.getApiProvider().getEventFactory().handleGroupCreate(plugin.getGroupManager().getIfLoaded(name), cause);
+                Group g = plugin.getGroupManager().getIfLoaded(name);
+                if (g != null) {
+                    plugin.getApiProvider().getEventFactory().handleGroupCreate(g, cause);
+                }
                 return true;
             }
             return false;
@@ -149,7 +153,10 @@ public class AbstractStorage implements Storage {
     public CompletableFuture<Boolean> loadGroup(String name) {
         return makeFuture(() -> {
             if (backing.loadGroup(name)) {
-                plugin.getApiProvider().getEventFactory().handleGroupLoad(plugin.getGroupManager().getIfLoaded(name));
+                Group g = plugin.getGroupManager().getIfLoaded(name);
+                if (g != null) {
+                    plugin.getApiProvider().getEventFactory().handleGroupLoad(g);
+                }
                 return true;
             }
             return false;
@@ -192,7 +199,10 @@ public class AbstractStorage implements Storage {
     public CompletableFuture<Boolean> createAndLoadTrack(String name, CreationCause cause) {
         return makeFuture(() -> {
             if (backing.createAndLoadTrack(name)) {
-                plugin.getApiProvider().getEventFactory().handleTrackCreate(plugin.getTrackManager().getIfLoaded(name), cause);
+                Track t = plugin.getTrackManager().getIfLoaded(name);
+                if (t != null) {
+                    plugin.getApiProvider().getEventFactory().handleTrackCreate(t, cause);
+                }
                 return true;
             }
             return false;
@@ -203,7 +213,10 @@ public class AbstractStorage implements Storage {
     public CompletableFuture<Boolean> loadTrack(String name) {
         return makeFuture(() -> {
             if (backing.loadTrack(name)) {
-                plugin.getApiProvider().getEventFactory().handleTrackLoad(plugin.getTrackManager().getIfLoaded(name));
+                Track t = plugin.getTrackManager().getIfLoaded(name);
+                if (t != null) {
+                    plugin.getApiProvider().getEventFactory().handleTrackLoad(t);
+                }
                 return true;
             }
             return false;
@@ -258,5 +271,6 @@ public class AbstractStorage implements Storage {
         void setAcceptingLogins(boolean b);
         void init();
         void shutdown();
+        Map<String, String> getMeta();
     }
 }

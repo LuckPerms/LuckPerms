@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 2016 Lucko (Luck) <luck@lucko.me>
+ * This file is part of LuckPerms, licensed under the MIT License.
+ *
+ *  Copyright (c) lucko (Luck) <luck@lucko.me>
+ *  Copyright (c) contributors
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +33,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
  * An immutable permission node
  *
@@ -40,27 +46,40 @@ import java.util.Set;
 public interface Node extends Map.Entry<String, Boolean> {
 
     /**
+     * Returns the actual permission string
+     *
      * @return the actual permission node
      */
+    @Nonnull
     String getPermission();
 
     /**
-     * Get what value the permission is set to. A negated node would return <code>false</code>.
+     * Gets what value the permission is set to. A negated node would return <code>false</code>.
      *
      * @return the permission's value
      */
     @Override
+    @Nonnull
     Boolean getValue();
 
     /**
+     * Returns the value of this node as a tristate
+     *
      * @return the value of this node as a Tristate
      */
-    Tristate getTristate();
+    @Nonnull
+    default Tristate getTristate() {
+        return Tristate.fromBoolean(getValue());
+    }
 
     /**
+     * Returns if the node is negated
+     *
      * @return true if the node is negated
      */
-    boolean isNegated();
+    default boolean isNegated() {
+        return !getValue();
+    }
 
     /**
      * If this node is set to override explicitly.
@@ -75,6 +94,7 @@ public interface Node extends Map.Entry<String, Boolean> {
      *
      * @return an {@link Optional} containing the server, if one is defined
      */
+    @Nonnull
     Optional<String> getServer();
 
     /**
@@ -82,6 +102,7 @@ public interface Node extends Map.Entry<String, Boolean> {
      *
      * @return an {@link Optional} containing the world, if one is defined
      */
+    @Nonnull
     Optional<String> getWorld();
 
     /**
@@ -126,7 +147,7 @@ public interface Node extends Map.Entry<String, Boolean> {
      * @return true if the node should apply, otherwise false
      * @since 3.1
      */
-    boolean shouldApply(boolean includeGlobal, boolean includeGlobalWorld, String server, String world, ContextSet context, boolean applyRegex);
+    boolean shouldApply(boolean includeGlobal, boolean includeGlobalWorld, @Nullable String server, @Nullable String world, @Nullable ContextSet context, boolean applyRegex);
 
     /**
      * If this node should apply on a specific server
@@ -136,7 +157,7 @@ public interface Node extends Map.Entry<String, Boolean> {
      * @param applyRegex    if regex should be applied
      * @return true if the node should apply
      */
-    boolean shouldApplyOnServer(String server, boolean includeGlobal, boolean applyRegex);
+    boolean shouldApplyOnServer(@Nullable String server, boolean includeGlobal, boolean applyRegex);
 
     /**
      * If this node should apply on a specific world
@@ -146,7 +167,7 @@ public interface Node extends Map.Entry<String, Boolean> {
      * @param applyRegex    if regex should be applied
      * @return true if the node should apply
      */
-    boolean shouldApplyOnWorld(String world, boolean includeGlobal, boolean applyRegex);
+    boolean shouldApplyOnWorld(@Nullable String world, boolean includeGlobal, boolean applyRegex);
 
     /**
      * If this node should apply in the given context
@@ -156,7 +177,7 @@ public interface Node extends Map.Entry<String, Boolean> {
      * @return true if the node should apply
      * @since 2.13
      */
-    boolean shouldApplyWithContext(ContextSet context, boolean worldAndServer);
+    boolean shouldApplyWithContext(@Nonnull ContextSet context, boolean worldAndServer);
 
     /**
      * If this node should apply in the given context
@@ -165,7 +186,7 @@ public interface Node extends Map.Entry<String, Boolean> {
      * @return true if the node should apply
      * @since 2.13
      */
-    boolean shouldApplyWithContext(ContextSet context);
+    boolean shouldApplyWithContext(@Nonnull ContextSet context);
 
     /**
      * Similar to {@link #shouldApplyOnServer(String, boolean, boolean)}, except this method accepts a List
@@ -174,7 +195,7 @@ public interface Node extends Map.Entry<String, Boolean> {
      * @param includeGlobal if global permissions should apply
      * @return true if the node should apply
      */
-    boolean shouldApplyOnAnyServers(List<String> servers, boolean includeGlobal);
+    boolean shouldApplyOnAnyServers(@Nonnull List<String> servers, boolean includeGlobal);
 
     /**
      * Similar to {@link #shouldApplyOnWorld(String, boolean, boolean)}, except this method accepts a List
@@ -183,7 +204,7 @@ public interface Node extends Map.Entry<String, Boolean> {
      * @param includeGlobal if global permissions should apply
      * @return true if the node should apply
      */
-    boolean shouldApplyOnAnyWorlds(List<String> worlds, boolean includeGlobal);
+    boolean shouldApplyOnAnyWorlds(@Nonnull List<String> worlds, boolean includeGlobal);
 
     /**
      * Resolves a list of wildcards that match this node
@@ -191,42 +212,57 @@ public interface Node extends Map.Entry<String, Boolean> {
      * @param possibleNodes a list of possible permission nodes
      * @return a list of permissions that match this wildcard
      */
-    List<String> resolveWildcard(List<String> possibleNodes);
+    @Nonnull
+    List<String> resolveWildcard(@Nonnull List<String> possibleNodes);
 
     /**
      * Resolves any shorthand parts of this node and returns the full list
      *
      * @return a list of full nodes
      */
+    @Nonnull
     List<String> resolveShorthand();
 
     /**
+     * Returns if this node will expire in the future
+     *
      * @return true if this node will expire in the future
      */
     boolean isTemporary();
 
     /**
+     * Returns if this node will not expire
+     *
      * @return true if this node will not expire
      */
-    boolean isPermanent();
+    default boolean isPermanent() {
+        return !isTemporary();
+    }
 
     /**
+     * Returns a unix timestamp in seconds when this node will expire
+     *
      * @return the time in Unix time when this node will expire
      * @throws IllegalStateException if the node is not temporary
      */
-    long getExpiryUnixTime();
+    long getExpiryUnixTime() throws IllegalStateException;
 
     /**
+     * Returns the date when this node will expire
+     *
      * @return the {@link Date} when this node will expire
      * @throws IllegalStateException if the node is not temporary
      */
-    Date getExpiry();
+    @Nonnull
+    Date getExpiry() throws IllegalStateException;
 
     /**
+     * Return the number of seconds until this permission will expire
+     *
      * @return the number of seconds until this permission will expire
      * @throws IllegalStateException if the node is not temporary
      */
-    long getSecondsTilExpiry();
+    long getSecondsTilExpiry() throws IllegalStateException;
 
     /**
      * Return true if the node has expired.
@@ -242,6 +278,7 @@ public interface Node extends Map.Entry<String, Boolean> {
      * @return the extra contexts required for this node to apply
      * @since 2.13
      */
+    @Nonnull
     ContextSet getContexts();
 
     /**
@@ -250,6 +287,7 @@ public interface Node extends Map.Entry<String, Boolean> {
      * @return the full contexts required for this node to apply
      * @since 3.1
      */
+    @Nonnull
     ContextSet getFullContexts();
 
     /**
@@ -259,6 +297,7 @@ public interface Node extends Map.Entry<String, Boolean> {
      * @deprecated because this serialized form is no longer used by the implementation.
      */
     @Deprecated
+    @Nonnull
     String toSerializedNode();
 
     /**
@@ -274,7 +313,8 @@ public interface Node extends Map.Entry<String, Boolean> {
      * @return the name of the group
      * @throws IllegalStateException if this is not a group node. See {@link #isGroupNode()}
      */
-    String getGroupName();
+    @Nonnull
+    String getGroupName() throws IllegalStateException;
 
     /**
      * Returns if this node is a wildcard node
@@ -289,7 +329,7 @@ public interface Node extends Map.Entry<String, Boolean> {
      * @return the wildcard level
      * @throws IllegalStateException if this is not a wildcard
      */
-    int getWildcardLevel();
+    int getWildcardLevel() throws IllegalStateException;
 
     /**
      * Returns if this node is a meta node
@@ -304,9 +344,12 @@ public interface Node extends Map.Entry<String, Boolean> {
      * @return the meta value
      * @throws IllegalStateException if this node is not a meta node
      */
-    Map.Entry<String, String> getMeta();
+    @Nonnull
+    Map.Entry<String, String> getMeta() throws IllegalStateException;
 
     /**
+     * Returns if this node is a prefix node
+     *
      * @return true if this node is a prefix node
      */
     boolean isPrefix();
@@ -317,9 +360,12 @@ public interface Node extends Map.Entry<String, Boolean> {
      * @return the prefix value
      * @throws IllegalStateException if this node is a not a prefix node
      */
-    Map.Entry<Integer, String> getPrefix();
+    @Nonnull
+    Map.Entry<Integer, String> getPrefix() throws IllegalStateException;
 
     /**
+     * Returns if this node is a suffix node
+     *
      * @return true if this node is a suffix node
      */
     boolean isSuffix();
@@ -330,7 +376,8 @@ public interface Node extends Map.Entry<String, Boolean> {
      * @return the suffix value
      * @throws IllegalStateException if this node is a not a suffix node
      */
-    Map.Entry<Integer, String> getSuffix();
+    @Nonnull
+    Map.Entry<Integer, String> getSuffix() throws IllegalStateException;
 
     /**
      * Checks if this Node is equal to another node
@@ -339,6 +386,7 @@ public interface Node extends Map.Entry<String, Boolean> {
      * @return true if this node is equal to the other provided
      * @see #equalsIgnoringValue(Node) for a less strict implementation of this method
      */
+    @Override
     boolean equals(Object obj);
 
     /**
@@ -347,7 +395,7 @@ public interface Node extends Map.Entry<String, Boolean> {
      * @param other the other node
      * @return true if the two nodes are almost equal
      */
-    boolean equalsIgnoringValue(Node other);
+    boolean equalsIgnoringValue(@Nonnull Node other);
 
     /**
      * Similar to {@link Node#equals(Object)}, except doesn't take note of the expiry time or value
@@ -355,7 +403,7 @@ public interface Node extends Map.Entry<String, Boolean> {
      * @param other the other node
      * @return true if the two nodes are almost equal
      */
-    boolean almostEquals(Node other);
+    boolean almostEquals(@Nonnull Node other);
 
     /**
      * Similar to {@link Node#equals(Object)}, except doesn't take note of the value or if the node is temporary
@@ -364,38 +412,51 @@ public interface Node extends Map.Entry<String, Boolean> {
      * @return true if the two nodes are almost equal
      * @since 2.8
      */
-    boolean equalsIgnoringValueOrTemp(Node other);
+    boolean equalsIgnoringValueOrTemp(@Nonnull Node other);
 
     /**
      * Builds a Node instance
      */
     interface Builder {
+
+        @Nonnull
         Builder setNegated(boolean negated);
 
+        @Nonnull
         Builder setValue(boolean value);
 
         /**
          * Warning: this value does not persist, and disappears when the holder is re-loaded.
          * It is therefore only useful for transient nodes.
          */
+        @Nonnull
         Builder setOverride(boolean override);
 
+        @Nonnull
         Builder setExpiry(long expireAt);
 
-        Builder setWorld(String world);
+        @Nonnull
+        Builder setWorld(@Nonnull String world);
 
-        Builder setServer(String server) throws IllegalArgumentException;
+        @Nonnull
+        Builder setServer(@Nonnull String server) throws IllegalArgumentException;
 
-        Builder withExtraContext(String key, String value);
+        @Nonnull
+        Builder withExtraContext(@Nonnull String key, @Nonnull String value);
 
-        Builder withExtraContext(Map<String, String> map);
+        @Nonnull
+        Builder withExtraContext(@Nonnull Map<String, String> map);
 
-        Builder withExtraContext(Set<Map.Entry<String, String>> context);
+        @Nonnull
+        Builder withExtraContext(@Nonnull Set<Map.Entry<String, String>> context);
 
-        Builder withExtraContext(Map.Entry<String, String> entry);
+        @Nonnull
+        Builder withExtraContext(@Nonnull Map.Entry<String, String> entry);
 
-        Builder withExtraContext(ContextSet set);
+        @Nonnull
+        Builder withExtraContext(@Nonnull ContextSet set);
 
+        @Nonnull
         Node build();
     }
 

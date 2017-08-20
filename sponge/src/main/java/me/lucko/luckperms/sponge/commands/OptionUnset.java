@@ -26,14 +26,15 @@
 package me.lucko.luckperms.sponge.commands;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.commands.Arg;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.ArgumentUtils;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.common.constants.Permission;
+import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.sponge.service.model.LPSubjectData;
@@ -41,19 +42,14 @@ import me.lucko.luckperms.sponge.service.model.LPSubjectData;
 import java.util.List;
 
 public class OptionUnset extends SubCommand<LPSubjectData> {
-    public OptionUnset() {
-        super("unset", "Unsets an option for the Subject", Permission.SPONGE_OPTION_UNSET, Predicates.is(0),
-                Arg.list(
-                        Arg.create("key", true, "the key to unset"),
-                        Arg.create("contexts...", false, "the contexts to unset the key in")
-                )
-        );
+    public OptionUnset(LocaleManager locale) {
+        super(CommandSpec.SPONGE_OPTION_UNSET.spec(locale), "unset", CommandPermission.SPONGE_OPTION_UNSET, Predicates.is(0));
     }
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, LPSubjectData subjectData, List<String> args, String label) throws CommandException {
         String key = args.get(0);
-        ImmutableContextSet contextSet = ArgumentUtils.handleContexts(1, args);
+        ImmutableContextSet contextSet = ArgumentUtils.handleContextSponge(1, args);
 
         if (subjectData.unsetOption(contextSet, key).join()) {
             Util.sendPluginMessage(sender, "&aUnset &f\"" + key + "&f\"&a in context " + SpongeUtils.contextToString(contextSet));

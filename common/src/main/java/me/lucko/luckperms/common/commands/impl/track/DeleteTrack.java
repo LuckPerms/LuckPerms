@@ -26,29 +26,24 @@
 package me.lucko.luckperms.common.commands.impl.track;
 
 import me.lucko.luckperms.api.event.cause.DeletionCause;
-import me.lucko.luckperms.common.commands.Arg;
+import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
+import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
-import me.lucko.luckperms.common.constants.Message;
-import me.lucko.luckperms.common.constants.Permission;
-import me.lucko.luckperms.common.core.model.Track;
-import me.lucko.luckperms.common.data.LogEntry;
+import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.locale.CommandSpec;
+import me.lucko.luckperms.common.locale.LocaleManager;
+import me.lucko.luckperms.common.locale.Message;
+import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class DeleteTrack extends SingleCommand {
-    public DeleteTrack() {
-        super("DeleteTrack", "Delete a track", "/%s deletetrack <track>", Permission.DELETE_TRACK, Predicates.not(1),
-                Arg.list(
-                        Arg.create("name", true, "the name of the track")
-                )
-        );
+    public DeleteTrack(LocaleManager locale) {
+        super(CommandSpec.DELETE_TRACK.spec(locale), "DeleteTrack", CommandPermission.DELETE_TRACK, Predicates.not(1));
     }
 
     @Override
@@ -76,25 +71,13 @@ public class DeleteTrack extends SingleCommand {
         }
 
         Message.DELETE_SUCCESS.send(sender, trackName);
-        LogEntry.build().actor(sender).actedName(trackName).type('T').action("delete").build().submit(plugin, sender);
+        ExtendedLogEntry.build().actor(sender).actedName(trackName).type('T').action("delete").build().submit(plugin, sender);
         plugin.getUpdateTaskBuffer().request();
         return CommandResult.SUCCESS;
     }
 
     @Override
     public List<String> tabComplete(LuckPermsPlugin plugin, Sender sender, List<String> args) {
-        final List<String> tracks = new ArrayList<>(plugin.getTrackManager().getAll().keySet());
-
-        if (args.size() <= 1) {
-            if (args.isEmpty() || args.get(0).equalsIgnoreCase("")) {
-                return tracks;
-            }
-
-            return tracks.stream()
-                    .filter(s -> s.toLowerCase().startsWith(args.get(0).toLowerCase()))
-                    .collect(Collectors.toList());
-        }
-
-        return Collections.emptyList();
+        return SubCommand.getTrackTabComplete(args, plugin);
     }
 }

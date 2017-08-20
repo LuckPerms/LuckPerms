@@ -39,35 +39,33 @@ import com.google.common.collect.MapMaker;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.caching.UserCache;
-import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.core.model.Group;
-import me.lucko.luckperms.common.core.model.User;
+import me.lucko.luckperms.common.model.Group;
+import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
+import me.lucko.luckperms.sponge.contexts.SpongeCalculatorLink;
 import me.lucko.luckperms.sponge.managers.SpongeGroupManager;
 import me.lucko.luckperms.sponge.managers.SpongeUserManager;
 import me.lucko.luckperms.sponge.model.SpongeGroup;
 import me.lucko.luckperms.sponge.service.calculated.CalculatedSubjectData;
 import me.lucko.luckperms.sponge.service.calculated.OptionLookup;
 import me.lucko.luckperms.sponge.service.calculated.PermissionLookup;
-import me.lucko.luckperms.sponge.service.description.SimpleDescriptionBuilder;
-import me.lucko.luckperms.sponge.service.legacystorage.LegacyDataMigrator;
+import me.lucko.luckperms.sponge.service.legacy.LegacyDataMigrator;
+import me.lucko.luckperms.sponge.service.model.LPPermissionDescription;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
+import me.lucko.luckperms.sponge.service.model.SubjectReference;
 import me.lucko.luckperms.sponge.service.persisted.PersistedCollection;
-import me.lucko.luckperms.sponge.service.proxy.PermissionServiceProxy;
-import me.lucko.luckperms.sponge.service.references.SubjectReference;
 import me.lucko.luckperms.sponge.service.storage.SubjectStorage;
 import me.lucko.luckperms.sponge.timings.LPTiming;
 
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.service.permission.PermissionDescription;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
+import org.spongepowered.api.text.Text;
 
 import co.aikar.timings.Timing;
 
@@ -75,6 +73,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -91,13 +90,13 @@ public class LuckPermsService implements LPPermissionService {
     private final LPSpongePlugin plugin;
 
     @Getter(AccessLevel.NONE)
-    private final PermissionServiceProxy spongeProxy;
+    private final PermissionService spongeProxy;
 
     private final SubjectStorage storage;
     private final SpongeUserManager userSubjects;
     private final SpongeGroupManager groupSubjects;
     private final PersistedCollection defaultSubjects;
-    private final Set<PermissionDescription> descriptionSet;
+    private final Set<LPPermissionDescription> descriptionSet;
 
     private final Set<LoadingCache<PermissionLookup, Tristate>> localPermissionCaches;
     private final Set<LoadingCache<ImmutableContextSet, ImmutableList<SubjectReference>>> localParentCaches;
@@ -120,7 +119,7 @@ public class LuckPermsService implements LPPermissionService {
 
     public LuckPermsService(LPSpongePlugin plugin) {
         this.plugin = plugin;
-        this.spongeProxy = new PermissionServiceProxy(this);
+        this.spongeProxy = ProxyFactory.toSponge(this);
 
         localPermissionCaches = Collections.newSetFromMap(new MapMaker().weakKeys().makeMap());
         localParentCaches = Collections.newSetFromMap(new MapMaker().weakKeys().makeMap());
@@ -185,18 +184,15 @@ public class LuckPermsService implements LPPermissionService {
     }
 
     @Override
-    public PermissionDescription.Builder newDescriptionBuilder(@NonNull Object o) {
-        Optional<PluginContainer> container = plugin.getGame().getPluginManager().fromInstance(o);
-        if (!container.isPresent()) {
-            throw new IllegalArgumentException("Couldn't find a plugin container for " + o.getClass().getSimpleName());
-        }
-
-        return new SimpleDescriptionBuilder(this, container.get());
+    public LPPermissionDescription registerPermissionDescription(String id, Text description, PluginContainer owner) {
+        LuckPermsPermissionDescription desc = new LuckPermsPermissionDescription(this, id, description, owner);
+        descriptionSet.add(desc);
+        return desc;
     }
 
     @Override
-    public Optional<PermissionDescription> getDescription(@NonNull String s) {
-        for (PermissionDescription d : descriptionSet) {
+    public Optional<LPPermissionDescription> getDescription(@NonNull String s) {
+        for (LPPermissionDescription d : descriptionSet) {
             if (d.getId().equals(s)) {
                 return Optional.of(d);
             }
@@ -206,13 +202,25 @@ public class LuckPermsService implements LPPermissionService {
     }
 
     @Override
-    public ImmutableSet<PermissionDescription> getDescriptions() {
-        return ImmutableSet.copyOf(descriptionSet);
+    public ImmutableSet<LPPermissionDescription> getDescriptions() {
+        Set<LPPermissionDescription> descriptions = new HashSet<>(descriptionSet);
+
+        // collect known values from the permission vault
+        for (String knownPermission : plugin.getPermissionVault().getKnownPermissions()) {
+            LPPermissionDescription desc = new LuckPermsPermissionDescription(this, knownPermission, null, null);
+
+            // don't override plugin defined values
+            if (!descriptions.contains(desc)) {
+                descriptions.add(desc);
+            }
+        }
+
+        return ImmutableSet.copyOf(descriptions);
     }
 
     @Override
-    public void registerContextCalculator(@NonNull ContextCalculator<Subject> contextCalculator) {
-        plugin.getContextManager().registerCalculator(contextCalculator);
+    public void registerContextCalculator(org.spongepowered.api.service.context.ContextCalculator<Subject> calculator) {
+        plugin.getContextManager().registerCalculator(new SpongeCalculatorLink(calculator));
     }
 
     @Override
@@ -223,8 +231,8 @@ public class LuckPermsService implements LPPermissionService {
                 return 0;
             }
 
-            boolean o1isGroup = o1.getCollection().equals(PermissionService.SUBJECTS_GROUP);
-            boolean o2isGroup = o2.getCollection().equals(PermissionService.SUBJECTS_GROUP);
+            boolean o1isGroup = o1.getCollectionIdentifier().equals(PermissionService.SUBJECTS_GROUP);
+            boolean o2isGroup = o2.getCollectionIdentifier().equals(PermissionService.SUBJECTS_GROUP);
 
             if (o1isGroup != o2isGroup) {
                 return o1isGroup ? 1 : -1;
@@ -235,8 +243,8 @@ public class LuckPermsService implements LPPermissionService {
                 return 1;
             }
 
-            Group g1 = plugin.getGroupManager().getIfLoaded(o1.getIdentifier());
-            Group g2 = plugin.getGroupManager().getIfLoaded(o2.getIdentifier());
+            Group g1 = plugin.getGroupManager().getIfLoaded(o1.getSubjectIdentifier());
+            Group g2 = plugin.getGroupManager().getIfLoaded(o2.getSubjectIdentifier());
 
             boolean g1Null = g1 == null;
             boolean g2Null = g2 == null;
@@ -257,15 +265,7 @@ public class LuckPermsService implements LPPermissionService {
 
     @Override
     public Contexts calculateContexts(ImmutableContextSet contextSet) {
-        return new Contexts(
-                contextSet,
-                plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
-                plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
-                true,
-                plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
-                plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
-                false
-        );
+        return plugin.getContextManager().formContexts(null, contextSet);
     }
 
     @Override
