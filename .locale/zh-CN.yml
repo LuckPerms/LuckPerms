@@ -13,6 +13,7 @@ loading-error: "无法加载权限数据,请稍后再试."
 op-disabled: "&b此服务器上禁用了vanilla OP系统."
 op-disabled-sponge: "&2服务器管理员状态在安装权限插件时无效,请直接编辑用户数据."
 log: "&3日志 &3&l> {0}"
+verbose-log: "&3详细 &3&l> {0}"
 export-log: "&3输出 &3&l> &f{0}"
 export-log-progress: "&3输出 &3&l> &7{0}"
 migration-log: "&3移动 &7[&3{0}&7] &3&l> &f{1}"
@@ -25,10 +26,8 @@ already-has-temp-permission: "{0}已经设置此临时权限!"
 does-not-have-temp-permission: "{0}没有设置此临时权限."
 user-not-found: "&b找不到用户."
 user-not-online: "&b用户&a{0}&b不在线."
-user-no-data: "&b没有加载用户&a{0}&b任何数据."
 user-save-success: "&7(保存用户数据到文件)"
 user-save-error: "保存用户数据时出错."
-user-create-fail: "创建新用户时出错."
 group-not-found: "&b找不到组."
 group-save-success: "&7(保存组数据到文件)"
 group-save-error: "保存组数据时出错."
@@ -38,7 +37,7 @@ track-save-error: "保存轨道时出错."
 user-invalid-entry: "&d{0}&c不是有效的用户名/uuid."
 group-invalid-entry: "组名只能包含字母数字字符."
 track-invalid-entry: "轨道名称只能包含字母数字字符."
-server-invalid-entry: "服务器名称只能包含字母数字字符."
+server-world-invalid-entry: "服务器/世界名称只能包含字母数字字符，长度不能超过36个字符。"
 use-inherit-command: "使用'parent add'和'parent remove'命令,而不是指定节点."
 verbose-invalid-filter: "&c无效的详细过滤器: &f{0}"
 verbose-on: "&b所有权限的详细输出设置为&a开&b."
@@ -58,6 +57,16 @@ search-showing-users: "&b显示用户条目:"
 search-showing-groups: "&b显示组条目:"
 search-showing-users-with-page: "&b显示用户条目: {0}"
 search-showing-groups-with-page: "&b显示组条目: {0}"
+apply-edits-invalid-code: "&a无效的代码. &7({0})"
+apply-edits-unable-to-read: "&a无法使用给定代码读取数据。 &7({0})"
+apply-edits-no-target: "&a无法解析编辑的目标。 请提供它作为一个额外的参数。"
+apply-edits-target-group-not-exists: "&a目标组&b{0}&a不存在."
+apply-edits-target-user-not-uuid: "&a目标用户&b{0}&a不是一个有效的uuid。"
+apply-edits-target-user-unable-to-load: "&a无法加载目标用户&b{0}&a."
+apply-edits-target-unknown: "&a目标无效. &7({0})"
+apply-edits-success: "&a成功应用&b{0}&a节点到&b{1}&a."
+editor-upload-failure: "&c无法将权限数据上传到编辑器。"
+editor-url: "&a编辑器URL:"
 check-result: "&a用户&b{0}&a获得允许&b{1}&a权限的检查结果&a: &f{2}"
 create-success: "&b{0}&a成功创建."
 delete-success: "&b{0}&a成功删除."
@@ -117,38 +126,27 @@ info: >
 create-group-error: "创建组时出错."
 delete-group-error: "删除组时出错."
 delete-group-error-default: "您不能删除默认组."
-groups-list: "&aGroups: {0}"
+groups-list: "&a组: &7(名字,权重,轨道)"
+groups-list-entry: "&f-  &3{0} &7- &b{1}"
+groups-list-entry-with-tracks: "&f-  &3{0} &7- &b{1} &7- [&3{2}&7]"
 create-track-error: "创建轨道时出错."
 delete-track-error: "删除轨道时出错."
 tracks-list: "&a轨道: {0}"
 listnodes: "&b{0}的节点:"
 listnodes-with-page: "&b{0}的节点:  {1}"
-listnodes-temp: >
-  &b{0}的临时节点:\n
-  {1}
-listparents: >
-  &b{0}的父组:\n
-  {1}
-listparents-temp: >
-  &b{0}的临时父组:\n
-  {1}
-listgroups: >
-  &b{0}的组:\n
-  {1}
-listgroups-temp: >
-  &b{0}的临时组:\n
-  {1}
+listnodes-temp: "&b{0}的临时节点:"
+listnodes-temp-with-page: "&b{0}的临时节点:  {1}"
+listparents: "&b{0}的父组"
+listparents-temp: "&b{0}的临时父组:"
 list-tracks: >
   &b{0}的轨道:\n
   {1}
 list-tracks-empty: "{0}不在任何轨道上."
 context-pair-inline: "&3{0}=&b{1}"
 context-pair--global-inline: "&e全局"
-context-pair-end: "&a."
 context-pair-sep: "&a, "
 context-pair: "&8(&7{0}=&f{1}&8)"
 check-permission: "&b在环境&b{3}&b中,&b{0}&b的权限&b{1}&b被设置为&b{2}&b."
-check-permission-inherited: "&b{0}&a在环境&b{3}&a中的&b{1}&a被设置为&b{2}&a,继承自&b{4}&a."
 setpermission-success: "&a在&b{3}&a中为&b{2}&a设置&b{0}&a为&b{1}&a."
 setpermission-temp-success: "&a在环境&b{4}&a将&b{0}&a的&b{2}&a设为&b{1}&a,持续时间&b{3}&a."
 unsetpermission-success: "&a在环境&b{2}&a中取消&b{1}&a的&b{0}&a."
@@ -156,14 +154,17 @@ unset-temp-permission-success: "&a在环境&b{2}&a中取消设置&b{1}&a的临�
 set-inherit-success: "&b{0}&a现在在环境&b{2}&a中继承&b{1}&a的权限&a."
 set-temp-inherit-success: "&b{0}&a现在在环境&b{3}&a中继承&b{1}&a的权限,持续时间&b{2}&a."
 set-parent-success: "&b{0}&a现有的父组被清除,现在只在&b{2}&a中继承&b{1}&a."
+set-track-parent-success: "在轨道&b{1}&a上&b{0}&a现有的父组被清除,现在只在&b{3}&a中继承&b{2}&a."
 unset-inherit-success: "&b{0}&a不再继承环境&b{2}&a中的&b{1}&a权限."
 unset-temp-inherit-success: "&b{0}&a在环境{2}中不再临时从&b{1}&a继承权限."
-clear-success: "&b{0}&a的权限被清除. (&b{1}&a节点被删除.)"
-clear-success-singular: "&b{0}&a的权限被清除. (&b{1}&a节点已被删除.)"
-parent-clear-success: "&b{0}&a的组被清除. (&b{1}&a节点被删除.)"
-parent-clear-success-singular: "&b{0}&a的组被清除. (&b{1}&a节点已被删除.)"
-meta-clear-success: "&b{0}&a的父组被清除. (&b{1}&a节点被删除.)"
-meta-clear-success-singular: "已经清除了这个&b{0}&a的元数据. (&b{1}&a节点已被删除.)"
+clear-success: "&b{0}&a的权限在环境&b{1}&a中被清除. (&b{2}&a节点已被删除.)"
+clear-success-singular: "&b{0}&a的权限在环境&b{1}&a中被清除. (&b{2}&a节点已被删除.)"
+parent-clear-success: "&b{0}&a的父组在环境&b{1}&a中被清除. &b{2}&a节点被删除.)"
+parent-clear-success-singular: "&b{0}&a的父组在环境&b{1}&a中被清除. &b{2}&a节点被删除.)"
+parent-clear-track-success: "在轨道&b{1}&a上,&b{0}&a的父组在环境&b{2}&a中被清除. &b{3}&a节点被删除.)"
+parent-clear-track-success-singular: "在轨道&b{1}&a上,&b{0}&a的父组在环境&b{2}&a中被清除. &b{3}&a节点被删除.)"
+meta-clear-success: "&b{0}&a的元数据在环境&b{1}&a中被清除. &b{2}&a节点已被删除.)"
+meta-clear-success-singular: "&b{0}&a的元数据在环境&b{1}&a中被清除. &b{2}&a节点已被删除.)"
 illegal-date-error: "无法解析日期'{0}'."
 past-date-error: "您不能设定一个过去的日期!"
 chat-meta-prefix-header: "&b{0}的前缀"
@@ -182,25 +183,23 @@ does-not-have-chat-meta: "{0}没有设置{1}."
 add-chatmeta-success: "&b{0}&a在环境&b{4}&a中将优先级&b{3}&a设置为 {1} &f\"{2}&f\"."
 add-temp-chatmeta-success: "&b{0}&a在环境&b{5}&a中,设置为优先级&b{3}&a的{1} &f\"{2}&f\"&a,持续时间为&b{4}&a."
 remove-chatmeta-success: "&b{0}&a在&b{3}&a中删除了优先级&b{3}&a的{1} &f\"{2}&f\"&a."
-bulk-remove-chatmeta-success: "&b{0}&a had all {1}es at priority &b{3}&a removed in context {4}&a."
+bulk-remove-chatmeta-success: "&b{0}&a had all {1}es at priority &b{2}&a removed in context {3}&a."
 remove-temp-chatmeta-success: "&b{0}&a在环境&b{4}&a中删除了优先级&b{3}&a的临时{1} &f\"{2}&f\"&a."
-bulk-remove-temp-chatmeta-success: "&b{0}&a在环境&b{4}&a中移除了优先级&b{3}&a的所有临时&b{1}&a.."
+bulk-remove-temp-chatmeta-success: "&b{0}&a had all temporary {1}es at priority &b{2}&a removed in context {3}&a."
 already-has-meta: "{0}已经有了这个元信息集."
 set-meta-success: "将环境&b{3}&a中的&b{2}&a的键&f\"{0}&f\"&a的元信息设置为&f\"{1}&f\"&a."
 set-meta-temp-success: "&a在环境&b{4}&a中将&b{2}&a的键&f\"{0}&f\"&a的值设置为&f\"{1}&f\"&a,持续时间为&b{3}&a."
 unset-meta-success: "&a在环境{2}中取消设置&b{1}&a的键&f\"{0}&f\"&a的元信息."
 unset-meta-temp-success: "&a在环境{2}中取消设置&b{1}&a的键&f\"{0}&f\"&a的临时元信息."
-bulk-update-invalid-data-type: "Invalid type. Was expecting 'all', 'users' or 'groups'."
+bulk-update-invalid-data-type: "类型无效. 期望类型是'全部'、'用户'或'群体'."
 bulk-update-invalid-constraint: "无效的约束&4{0}&c.约束的格式应该是'&f<field> <comparison operator> <value>&c'."
 bulk-update-invalid-comparison: "比较运算符无效'&4{0}&c'. 应该以下之一: &f==  !=  ~~  ~!"
 bulk-update-queued: "&a批量更新操作已排队.&7(&f{0}&7)"
 bulk-update-confirm: "&a运行&b/{0} bulkupdate &a确认{1}执行更新."
 bulk-update-unknown-id: "&a使用id&b{0}&a的操作不存在或已过期."
 bulk-update-starting: "&a运行批量更新."
-bulk-update-success: "&b量更新已成功完成."
-bulk-update-failure: "&cBulk update failed. Check the console for errors."
-bulk-change-type-error: "类型无效. 应该是 'server' 或 'world'."
-bulk-change-success: "&a应用批量更改成功. {0}记录已更改."
+bulk-update-success: "&b批量更新已成功完成."
+bulk-update-failure: "&c批量更新失败. 检查控制台是否有错误."
 user-info-general: >
   {PREFIX}&b&l> &bUser Info: &f{0}\n
   {PREFIX}&f- &3UUID: &f{1}\n
@@ -220,7 +219,6 @@ user-info-data: >
   {PREFIX}&f-    &3当前后缀: {3}
 info-parent-header: "&f- &a父组:"
 info-temp-parent-header: "&f- &a临时父组:"
-user-getuuid: "&b{0}&b的UUID是&b{1}&b."
 user-removegroup-error-primary: "您不能从其主组中删除用户."
 user-primarygroup-success: "&b{0}&的主组已设为&b{1}&a."
 user-primarygroup-warn-option: "&c警告：此服务器&7({0})&c使用的主组计算方法可能无法反映此更改."
@@ -238,9 +236,6 @@ user-demote-endoftrack: "已达到轨道&4{0}&c的结尾,所以&4{1}&c已从&4{2
 user-demote-error-malformed: >
   {PREFIX}轨道上的上一组{0}不存在.无法降级用户.\n
   {PREFIX}创建组,或将其从轨道中删除,然后重试.
-user-showpos: >
-  &a显示&b{0}&a在轨道&b{1}&a的位置.\n
-  {2}
 group-info-general: >
   {PREFIX}&b&l> &b组信息: &f{0}\n
   {PREFIX}&f- &3显示名称: &f{1}\n
@@ -301,3 +296,443 @@ import-end-error-header: >
   {PREFIX}&b(导入) &f输出:
 import-end-error-content: "&b(导入) &b-> &c{0}"
 import-end-error-footer: "&b(导入) &7<------------------------------------------>"
+
+command-specs:
+  user:
+    description: "用户命令"
+    usage: "/%s user <用户>"
+  group:
+    description: "组命令"
+    usage: "/%s group <组>"
+  track:
+    description: "轨道指令"
+    usage: "/%s track <轨道>"
+  log:
+    description: "日志命令"
+    usage: "/%s log"
+  sync:
+    description: "与存储同步更改"
+    usage: "/%s sync"
+  info:
+    description: "打印通用插件信息"
+    usage: "/%s info"
+  verbose:
+    description: "管理详细权限检查"
+    usage: "/%s verbose <true|false> [filter]"
+    args:
+      "on|record|off|paste": "是否启用/禁用日志记录，或粘贴记录的输出"
+      "filter": "过滤器匹配项"
+  tree:
+    description: "生成权限的树视图"
+    usage: "/%s tree [selection] [max level] [player]"
+    args:
+      "selection": "树的根，指定\".\"包括所有权限"
+      "max level": "应该返回多少分支级别"
+      "player": "要检查的在线玩家的名称"
+  search:
+    description: "搜索具有特定权限的用户/组"
+    usage: "/%s search <permission>"
+    args:
+      "permission": "许可搜索"
+      "page": "页面查看"
+  check:
+    description: "对用户执行标准的权限检查"
+    usage: "/%s check <user> <permission>"
+    args:
+      "user": "检查用户"
+      "permission": "允许检查"
+  network-sync:
+    description: "与存储同步更改并请求网络上所有其他服务器都同步"
+    usage: "/%s networksync"
+  import:
+    description: "从文件导入数据"
+    usage: "/%s import <file>"
+    args:
+      "file": "要导入的文件"
+  export:
+    description: "将数据导出到文件"
+    usage: "/%s export <file>"
+    args:
+      "file": "要导出的文件"
+  reload-config:
+    description: "重新加载部分配置选项"
+    usage: "/%s reloadconfig"
+  bulk-update:
+    description: "对所有数据执行批量更改查询"
+    usage: "/%s bulkupdate"
+    args:
+      "data type": "正在更改的数据类型. ('all', 'users' or 'groups')"
+      "action": "对数据执行的操作. ('update' or 'delete')"
+      "action field": "要采取行动的领域. 只需要'update'. ('permission', 'server' or 'world')"
+      "action value": "替换的值.只需要'update'."
+      "constraint...": "更新所需的限制"
+  migration:
+    description: "迁移命令"
+    usage: "/%s migration"
+  apply-edits:
+    description: "应用从Web编辑器进行的权限更改"
+    usage: "/%s applyedits <code> [target]"
+    args:
+      "code": "数据的唯一代码"
+      "target": "应用数据到谁"
+  create-group:
+    description: "创建新组"
+    usage: "/%s creategroup <group>"
+    args:
+      "name": "组的名称"
+  delete-group:
+    description: "删除组"
+    usage: "/%s deletegroup <group>"
+    args:
+      "name": "组的名称"
+  list-groups:
+    description: "列出平台上的所有组"
+    usage: "/%s listgroups"
+  create-track:
+    description: "创建新轨道"
+    usage: "/%s createtrack <track>"
+    args:
+      "name": "轨道的名称"
+  delete-track:
+    description: "删除轨道"
+    usage: "/%s deletetrack <track>"
+    args:
+      "name": "轨道的名称"
+  list-tracks:
+    description: "列出平台上的所有轨道"
+    usage: "/%s listtracks"
+  user-info:
+    description: "显示有关用户的信息"
+  user-switchprimarygroup:
+    description: "切换用户的主组"
+    args:
+      "group": "组切换到"
+  user-promote:
+    description: "在轨道提升用户"
+    args:
+      "track": "提升用户的轨道"
+      "context...": "提升用户使用的环境"
+  user-demote:
+    description: "在轨道降低用户"
+    args:
+      "track": "降低用户的轨道"
+      "context...": "降低用户使用的环境"
+  group-info:
+    description: "提供有关组的信息"
+  group-listmembers:
+    description: "显示从该组继承的用户/组"
+    args:
+      "page": "页面查看"
+  group-setweight:
+    description: "设置组权重"
+    args:
+      "weight": "设定权重"
+  group-rename:
+    description: "重命名组"
+    args:
+      "name": "新名字"
+  group-clone:
+    description: "克隆群"
+    args:
+      "name": "要克隆到的组的名称"
+  holder-editor:
+    description: "打开网页权限编辑器"
+  holder-showtracks:
+    description: "列出对象所在的轨道"
+  holder-clear:
+    description: "删除所有权限，父组和元"
+    args:
+      "context...": "过滤的环境"
+  permission:
+    description: "编辑权限"
+  parent:
+    description: "编辑继承"
+  meta:
+    description: "编辑元数据值"
+  permission-info:
+    description: "列出对象拥有的权限节点"
+    args:
+      "page": "页面查看"
+      "filter": "要过滤的字符串"
+  permission-set:
+    description: "设置对象的权限"
+    args:
+      "node": "要添加的权限"
+      "true|false": "节点的值"
+      "context...": "添加权限的环境"
+  permission-unset:
+    description: "取消对象的权限"
+    args:
+      "node": "取消的权限节点"
+      "context...": "删除权限的环境"
+  permission-settemp:
+    description: "设置对象的临时权限"
+    args:
+      "node": "要添加的权限"
+      "true|false": "节点的值"
+      "duration": "到期时间"
+      "context...": "权限的环境"
+  permission-unsettemp:
+    description: "取消对对象的临时权限"
+    args:
+      "node": "要取消的权限"
+      "context...": "权限的环境"
+  permission-check:
+    description: "检查对象是否具有某个权限节点"
+    args:
+      "node": "要检查的权限"
+      "context...": "权限的环境"
+  permission-check-inherits:
+    description: "检查对象是否继承某个权限节点"
+    args:
+      "node": "要检查的权限"
+      "context...": "权限的环境"
+  parent-info:
+    description: "列出此对象从哪里继承的组"
+  parent-set:
+    description: "删除对象已经继承的所有其他组,并将其添加到给定的对象组中."
+    args:
+      "group": "组设为"
+      "context...": "设置组的环境"
+  parent-add:
+    description: "为该对象设置另一个组来继承权限"
+    args:
+      "group": "要继承的组"
+      "context...": "继承该组的环境"
+  parent-remove:
+    description: "删除先前设置的继承规则"
+    args:
+      "group": "删除的组"
+      "context...": "删除组的环境"
+  parent-set-track:
+    description: "删除对象在给定轨道上继承的所有其他组，并将其添加到给定的轨道上."
+    args:
+      "track": "设置的轨道"
+      "group": "组中设置的组，或与组中在给定轨道上的位置相关的数字"
+      "context...": "设置组的环境"
+  parent-add-temp:
+    description: "为对象设置另一个组，以便从临时继承权限"
+    args:
+      "group": "要继承的组"
+      "duration": "持续时间"
+      "context...": "继承该组的环境"
+  parent-remove-temp:
+    description: "删除以前设置的临时继承规则"
+    args:
+      "group": "组删除"
+      "context...": "删除组中的环境"
+  parent-clear:
+    description: "清除所有的父组"
+    args:
+      "context...": "过滤的环境"
+  parent-clear-track:
+    description: "清除给定轨道上的所有父组"
+    args:
+      "track": "删除的轨道"
+      "contexts...": "选择的环境"
+  meta-info:
+    description: "显示所有聊天元"
+  meta-set:
+    description: "设置元值"
+    args:
+      "key": "设定的键"
+      "value": "要设置的值"
+      "context...": "将元组添加到"
+  meta-unset:
+    description: "取消设定元值"
+    args:
+      "key": "要取消的键"
+      "context...": "删除元的环境"
+  meta-settemp:
+    description: "暂时设置一个元值"
+    args:
+      "key": "设定的键"
+      "value": "要设置的值"
+      "duration": "持续时间"
+      "context...": "将元组添加到"
+  meta-unsettemp:
+    description: "取消设置临时元值"
+    args:
+      "key": "要取消的键"
+      "context...": "删除元的环境"
+  meta-addprefix:
+    description: "添加前缀"
+    args:
+      "priority": "添加的前缀优先级"
+      "prefix": "前缀字符串"
+      "context...": "添加前缀的环境"
+  meta-addsuffix:
+    description: "添加后缀"
+    args:
+      "priority": "添加的后缀优先级"
+      "suffix": "后缀字符串"
+      "context...": "添加后缀的环境"
+  meta-removeprefix:
+    description: "删除前缀"
+    args:
+      "priority": "删除的前缀优先级"
+      "prefix": "前缀字符串"
+      "context...": "删除前缀的环境"
+  meta-removesuffix:
+    description: "删除后缀"
+    args:
+      "priority": "删除的后缀优先级"
+      "suffix": "后缀字符串"
+      "context...": "删除后缀的环境"
+  meta-addtemp-prefix:
+    description: "添加临时前缀"
+    args:
+      "priority": "删除的前缀优先级"
+      "prefix": "前缀字符串"
+      "duration": "持续时间"
+      "context...": "添加前缀的环境"
+  meta-addtemp-suffix:
+    description: "添加临时后缀"
+    args:
+      "priority": "添加的后缀优先级"
+      "suffix": "后缀字符串"
+      "duration": "持续时间"
+      "context...": "添加后缀的环境"
+  meta-removetemp-prefix:
+    description: "删除临时前缀"
+    args:
+      "priority": "删除的前缀优先级"
+      "prefix": "前缀字符串"
+      "context...": "删除前缀的环境"
+  meta-removetemp-suffix:
+    description: "删除临时后缀"
+    args:
+      "priority": "删除的后缀优先级"
+      "suffix": "后缀字符串"
+      "context...": "删除后缀的环境"
+  meta-clear:
+    description: "清除所有聊天元"
+    args:
+      "context...": "过滤的环境"
+  track-info:
+    description: "提供有关轨道的信息"
+  track-append:
+    description: "追加一个组到轨道的最后"
+    args:
+      "group": "追加的组"
+  track-insert:
+    description: "在轨道上的给定位置插入一个组"
+    args:
+      "group": "插入的组"
+      "position": "插入组的位置（轨道上的第一个位置为1）"
+  track-remove:
+    description: "从轨道中删除一个组"
+    args:
+      "group": "删除的组"
+  track-clear:
+    description: "清除轨道上的组"
+  track-rename:
+    description: "重命名轨道"
+    args:
+      "name": "新名字"
+  track-clone:
+    description: "克隆轨道"
+    args:
+      "name": "要克隆的轨道的名称"
+  log-recent:
+    description: "查看最近的登陆"
+    args:
+      "user": "用户的名称/uuid"
+      "page": "要查看的页码"
+  log-search:
+    description: "搜索日志中的条目"
+    args:
+      "query": "搜索的查询"
+      "page": "要查看的页码"
+  log-notify:
+    description: "切换日志通知"
+    args:
+      "on|off": "是否打开或关闭"
+  log-user-history:
+    description: "查看用户的历史记录"
+    args:
+      "user": "用户名/ uuid"
+      "page": "要查看的页码"
+  log-group-history:
+    description: "查看组的历史"
+    args:
+      "group": "组名"
+      "page": "要查看的页码"
+  log-track-history:
+    description: "查看轨道的历史"
+    args:
+      "track": "轨道的名称"
+      "page": "要查看的页码"
+  sponge:
+    description: "编辑额外的Sponge数据"
+    usage: "/%s sponge <collection> <subject>"
+    args:
+      "collection": "要查询的集合"
+      "subject": "修改的主题"
+  sponge-permission-info:
+    description: "显示有关主题权限的信息"
+    args:
+      "contexts...": "选择的环境"
+  sponge-permission-set:
+    description: "设置一个主题的权限"
+    args:
+      "node": "要设置的权限节点"
+      "tristate": "设置允许值"
+      "contexts...": "选择的环境"
+  sponge-permission-clear:
+    description: "清除一个主题的权限"
+    args:
+      "contexts...": "清除的环境"
+  sponge-parent-info:
+    description: "显示关于该主题父项的信息"
+    args:
+      "contexts...": "选择的环境"
+  sponge-parent-add:
+    description: "向主题添加父项"
+    args:
+      "collection": "父主题的主题集合"
+      "subject": "父主题的名称"
+      "contexts...": "添加父项的环境"
+  sponge-parent-remove:
+    description: "从主题中删除父项"
+    args:
+      "collection": "父主题的主题集合"
+      "subject": "父主题的名称"
+      "contexts...": "删除父项的环境"
+  sponge-parent-clear:
+    description: "清除主题父项"
+    args:
+      "contexts...": "清除父项的主题"
+  sponge-option-info:
+    description: "显示有关主题选项的信息"
+    args:
+      "contexts...": "选择的环境"
+  sponge-option-set:
+    description: "为主题设置一个选项"
+    args:
+      "key": "设定键"
+      "value": "设置的键"
+      "contexts...": "设置选项的环境"
+  sponge-option-unset:
+    description: "取消主题一个选项"
+    args:
+      "key": "取消的键"
+      "contexts...": "取消选项的环境"
+  sponge-option-clear:
+    description: "清除对象的选择"
+    args:
+      "contexts...": "清除选项的环境"
+  migration-command:
+    description: "迁移命令"
+  migration-groupmanager:
+    description: "迁移命令"
+    args:
+      "migrate as global": "如果世界权限应该被忽略，并且刚刚迁移为全局"
+  migration-powerfulperms:
+    description: "迁移命令"
+    args:
+      "address": "PP数据库的地址"
+      "database": "PP数据库的名称"
+      "username": "登录DB的用户名"
+      "password": "登录DB的用密码"
+      "db table": "存储用户数据的PP表的名称"
