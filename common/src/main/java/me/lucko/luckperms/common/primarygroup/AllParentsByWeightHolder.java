@@ -28,15 +28,16 @@ package me.lucko.luckperms.common.primarygroup;
 import lombok.NonNull;
 
 import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.contexts.ExtractedContexts;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.User;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Optional;
+import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class AllParentsByWeightHolder extends StoredHolder {
 
@@ -67,18 +68,51 @@ public class AllParentsByWeightHolder extends StoredHolder {
             );
         }
 
-        cachedValue = user.resolveInheritancesAlmostEqual(ExtractedContexts.generate(contexts)).stream()
-                .filter(Node::isGroupNode)
-                .filter(Node::getValue)
-                .map(n -> Optional.ofNullable(user.getPlugin().getGroupManager().getIfLoaded(n.getGroupName())))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .sorted(Collections.reverseOrder(Comparator.comparingInt(o -> o.getWeight().orElse(0))))
-                .findFirst()
-                .map(Group::getName)
-                .orElse(null);
+        // hack to get a list of groups the holder is inheriting from
+        Set<String> groupNames = new HashSet<>();
+        user.resolveInheritances(new NoopList<>(), groupNames, ExtractedContexts.generate(contexts));
 
+        List<Group> groups = new ArrayList<>();
+        for (String groupName : groupNames) {
+            Group group = user.getPlugin().getGroupManager().getIfLoaded(groupName);
+            if (group != null) {
+                groups.add(group);
+            }
+        }
+
+        Group bestGroup = null;
+
+        if (!groups.isEmpty()) {
+            int best = 0;
+            for (Group g : groups) {
+                int weight = g.getWeight().orElse(0);
+                if (bestGroup == null || g.getWeight().orElse(0) > best) {
+                    bestGroup = g;
+                    best = weight;
+                }
+            }
+        }
+
+        cachedValue = bestGroup == null ? null : bestGroup.getName();
         useCached = true;
         return cachedValue;
+    }
+
+    private static final class NoopList<E> extends AbstractList<E> implements List<E> {
+
+        @Override
+        public boolean add(E e) {
+            return true;
+        }
+
+        @Override
+        public E get(int index) {
+            return null;
+        }
+
+        @Override
+        public int size() {
+            return 0;
+        }
     }
 }

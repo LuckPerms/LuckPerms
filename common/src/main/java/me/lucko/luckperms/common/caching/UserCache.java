@@ -41,7 +41,7 @@ import me.lucko.luckperms.api.caching.PermissionData;
 import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.contexts.ExtractedContexts;
-import me.lucko.luckperms.common.metastacking.GenericMetaStack;
+import me.lucko.luckperms.common.metastacking.SimpleMetaStack;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
@@ -219,8 +219,8 @@ public class UserCache implements UserData {
 
     private static MetaAccumulator newAccumulator(MetaContexts contexts) {
         return new MetaAccumulator(
-                new GenericMetaStack(contexts.getPrefixStackDefinition(), ChatMetaType.PREFIX),
-                new GenericMetaStack(contexts.getSuffixStackDefinition(), ChatMetaType.SUFFIX)
+                new SimpleMetaStack(contexts.getPrefixStackDefinition(), ChatMetaType.PREFIX),
+                new SimpleMetaStack(contexts.getSuffixStackDefinition(), ChatMetaType.SUFFIX)
         );
     }
 

@@ -515,7 +515,7 @@ public abstract class PermissionHolder {
      * @param context       context to decide if groups should be applied
      * @return a set of nodes
      */
-    protected List<LocalizedNode> resolveInheritances(List<LocalizedNode> accumulator, Set<String> excludedGroups, ExtractedContexts context) {
+    public List<LocalizedNode> resolveInheritances(List<LocalizedNode> accumulator, Set<String> excludedGroups, ExtractedContexts context) {
         if (accumulator == null) {
             accumulator = new ArrayList<>();
         }
@@ -595,7 +595,7 @@ public abstract class PermissionHolder {
      * @param excludedGroups a list of groups to exclude
      * @return a set of nodes
      */
-    protected List<LocalizedNode> resolveInheritances(List<LocalizedNode> accumulator, Set<String> excludedGroups) {
+    public List<LocalizedNode> resolveInheritances(List<LocalizedNode> accumulator, Set<String> excludedGroups) {
         if (accumulator == null) {
             accumulator = new ArrayList<>();
         }

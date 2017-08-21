@@ -36,8 +36,8 @@ import com.google.common.collect.ListMultimap;
 import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.metastacking.GenericMetaStack;
 import me.lucko.luckperms.common.metastacking.MetaStack;
+import me.lucko.luckperms.common.metastacking.SimpleMetaStack;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.Comparator;
@@ -46,15 +46,16 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 /**
- * Holds temporary mutable meta whilst this object is passed up the inheritance tree to accumulate meta from parents
+ * Holds temporary mutable meta whilst this object is passed up the
+ * inheritance tree to accumulate meta from parents
  */
 @Getter
 @ToString
 public class MetaAccumulator {
     public static MetaAccumulator makeFromConfig(LuckPermsPlugin plugin) {
         return new MetaAccumulator(
-                new GenericMetaStack(plugin.getConfiguration().get(ConfigKeys.PREFIX_FORMATTING_OPTIONS), ChatMetaType.PREFIX),
-                new GenericMetaStack(plugin.getConfiguration().get(ConfigKeys.SUFFIX_FORMATTING_OPTIONS), ChatMetaType.SUFFIX)
+                new SimpleMetaStack(plugin.getConfiguration().get(ConfigKeys.PREFIX_FORMATTING_OPTIONS), ChatMetaType.PREFIX),
+                new SimpleMetaStack(plugin.getConfiguration().get(ConfigKeys.SUFFIX_FORMATTING_OPTIONS), ChatMetaType.SUFFIX)
         );
     }
 
@@ -104,7 +105,8 @@ public class MetaAccumulator {
         this.weight = Math.max(this.weight, weight);
     }
 
-    // We can assume that if this method is being called, this holder is effectively finalized. (it's not going to accumulate more nodes)
+    // We can assume that if this method is being called, this holder is effectively finalized.
+    // (it's not going to accumulate more nodes)
     // Therefore, it should be ok to set the weight meta key, if not already present.
     public ListMultimap<String, String> getMeta() {
         if (!this.meta.containsKey("weight") && this.weight != 0) {

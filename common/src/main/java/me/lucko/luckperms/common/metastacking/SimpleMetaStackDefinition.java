@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.metastacking.definition;
+package me.lucko.luckperms.common.metastacking;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

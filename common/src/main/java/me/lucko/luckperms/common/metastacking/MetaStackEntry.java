@@ -31,14 +31,39 @@ import me.lucko.luckperms.api.metastacking.MetaStackElement;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Represents a specific entry in a {@link MetaStack}.
+ * An entry is basically a live/mutable version of a {@link MetaStackElement}.
+ */
 public interface MetaStackEntry {
 
+    /**
+     * Gets the stack this entry belongs to.
+     *
+     * @return the parent stack
+     */
     MetaStack getParentStack();
 
+    /**
+     * Gets the element this entry was formed form
+     *
+     * @return the forming element
+     */
     MetaStackElement getElement();
 
-    Optional<Map.Entry<Integer, String>> getEntry();
+    /**
+     * Gets the value currently held by this entry.
+     *
+     * @return the entry
+     */
+    Optional<Map.Entry<Integer, String>> getCurrentValue();
 
+    /**
+     * Accumulates a node to this entry
+     *
+     * @param node the node to accumulate
+     * @return if the node was accepted
+     */
     boolean accumulateNode(LocalizedNode node);
 
 }

@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.metastacking.definition;
+package me.lucko.luckperms.common.metastacking;
 
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +42,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Contains the standard {@link MetaStackElement}s provided by LuckPerms.
+ */
 @UtilityClass
 public class StandardStackElements {
 
