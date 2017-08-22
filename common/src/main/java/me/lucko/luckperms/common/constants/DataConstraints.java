@@ -124,7 +124,7 @@ public class DataConstraints {
         return true;
     };
 
-    public static final Predicate<Long> TIME_TEST = DateUtil::shouldExpire;
+    public static final Predicate<Long> TIME_TEST = unixTime -> !DateUtil.shouldExpire(unixTime);
 
     public static final Predicate<String> SERVER_NAME_TEST = s -> {
         if (s.length() <= 0 || s.length() > MAX_SERVER_LENGTH) {
