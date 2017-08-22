@@ -37,8 +37,8 @@ import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.common.utils.TextUtils;
 
-import net.kyori.text.LegacyComponent;
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
@@ -70,12 +70,12 @@ public class ListGroups extends SingleCommand {
                     TextComponent component;
 
                     if (tracks.isEmpty()) {
-                        component = LegacyComponent.from(Message.GROUPS_LIST_ENTRY.asString(plugin.getLocaleManager(),
+                        component = TextUtils.fromLegacy(Message.GROUPS_LIST_ENTRY.asString(plugin.getLocaleManager(),
                                 group.getDisplayName(),
                                 group.getWeight().orElse(0)
                         ), Constants.COLOR_CHAR);
                     } else {
-                        component = LegacyComponent.from(Message.GROUPS_LIST_ENTRY_WITH_TRACKS.asString(plugin.getLocaleManager(),
+                        component = TextUtils.fromLegacy(Message.GROUPS_LIST_ENTRY_WITH_TRACKS.asString(plugin.getLocaleManager(),
                                 group.getDisplayName(),
                                 group.getWeight().orElse(0),
                                 Util.toCommaSep(tracks)

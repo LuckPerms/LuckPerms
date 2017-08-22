@@ -63,7 +63,6 @@ import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.TextUtils;
 
-import net.kyori.text.LegacyComponent;
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
@@ -255,9 +254,9 @@ public class CommandManager {
                     @SuppressWarnings("unchecked")
                     String permission = (String) c.getPermission().map(p -> ((CommandPermission) p).getPermission()).orElse("None");
 
-                    TextComponent component = LegacyComponent.from("&3> &a" + String.format(c.getUsage(), label), Constants.FORMAT_CHAR)
+                    TextComponent component = TextUtils.fromLegacy("&3> &a" + String.format(c.getUsage(), label), Constants.FORMAT_CHAR)
                             .toBuilder().applyDeep(comp -> {
-                                comp.hoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, LegacyComponent.from(TextUtils.joinNewline(
+                                comp.hoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(TextUtils.joinNewline(
                                         "&bCommand: &2" + c.getName(),
                                         "&bDescription: &2" + c.getDescription(),
                                         "&bUsage: &2" + String.format(c.getUsage(), label),

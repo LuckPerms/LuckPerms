@@ -34,9 +34,9 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.utils.TextUtils;
 
 import net.kyori.text.Component;
-import net.kyori.text.LegacyComponent;
 
 import java.lang.ref.WeakReference;
 import java.util.UUID;
@@ -86,7 +86,7 @@ public final class AbstractSender<T> implements Sender {
     @Override
     public void sendMessage(Component message) {
         if (isConsole()) {
-            sendMessage(LegacyComponent.to(message));
+            sendMessage(TextUtils.toLegacy(message));
             return;
         }
 

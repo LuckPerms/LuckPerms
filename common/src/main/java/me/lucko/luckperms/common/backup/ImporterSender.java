@@ -32,9 +32,9 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.utils.TextUtils;
 
 import net.kyori.text.Component;
-import net.kyori.text.LegacyComponent;
 
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -67,7 +67,7 @@ public class ImporterSender implements Sender {
     @SuppressWarnings("deprecation")
     @Override
     public void sendMessage(Component message) {
-        messageConsumer.accept(LegacyComponent.to(message));
+        messageConsumer.accept(TextUtils.toLegacy(message));
     }
 
     @Override

@@ -25,9 +25,10 @@
 
 package me.lucko.luckperms.bukkit.compat;
 
+import me.lucko.luckperms.common.utils.TextUtils;
+
 import net.kyori.text.Component;
-import net.kyori.text.LegacyComponent;
-import net.kyori.text.serializer.ComponentSerializer;
+import net.kyori.text.serializer.ComponentSerializers;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -47,7 +48,7 @@ public class MessageHandler {
     public void sendJsonMessage(CommandSender sender, Component message) {
         if (ReflectionUtil.isChatCompatible() && sender instanceof Player) {
             Player player = (Player) sender;
-            String json = ComponentSerializer.serialize(message);
+            String json = ComponentSerializers.JSON.serialize(message);
 
             // Try Bukkit.
             if (bukkitHandler.sendJsonMessage(player, json)) {
@@ -61,8 +62,7 @@ public class MessageHandler {
         }
 
         // Fallback to Bukkit
-        //noinspection deprecation
-        sender.sendMessage(LegacyComponent.to(message));
+        sender.sendMessage(TextUtils.toLegacy(message));
     }
 
     private static boolean isSpigot() {

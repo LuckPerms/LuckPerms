@@ -51,7 +51,6 @@ import me.lucko.luckperms.common.utils.TextUtils;
 
 import net.kyori.text.BuildableComponent;
 import net.kyori.text.Component;
-import net.kyori.text.LegacyComponent;
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
@@ -179,14 +178,14 @@ public class PermissionInfo extends SharedSubCommand {
                 s += "&2-    expires in " + DateUtil.formatDateDiff(node.getExpiryUnixTime()) + "\n";
             }
 
-            message.append(LegacyComponent.from(s, Constants.FORMAT_CHAR).toBuilder().applyDeep(makeFancy(holder, label, node)).build());
+            message.append(TextUtils.fromLegacy(s, Constants.FORMAT_CHAR).toBuilder().applyDeep(makeFancy(holder, label, node)).build());
         }
 
         return Maps.immutableEntry(message.build(), title);
     }
 
     private static Consumer<BuildableComponent.Builder<?, ?>> makeFancy(PermissionHolder holder, String label, Node node) {
-        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, LegacyComponent.from(TextUtils.joinNewline(
+        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(TextUtils.joinNewline(
                 "¥3> " + (node.getValue() ? "¥a" : "¥c") + node.getPermission(),
                 " ",
                 "¥7Click to remove this node from " + holder.getFriendlyName()
