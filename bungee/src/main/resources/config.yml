@@ -73,6 +73,10 @@ use-server-uuids: true
 # try to find a uuid for a username using RedisBungee, if installed.
 use-server-uuid-cache: false
 
+# If LuckPerms should produce extra logging output when it handles logins.
+# Useful if you're having issues with UUID forwarding or data not being loaded.
+debug-logins: false
+
 # If the plugin should send log notifications to users whenever permissions are modified.
 log-notify: true
 

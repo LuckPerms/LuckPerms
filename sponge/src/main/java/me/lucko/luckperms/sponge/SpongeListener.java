@@ -29,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.utils.LoginHelper;
@@ -71,6 +72,10 @@ public class SpongeListener {
            Listening on AFTER_PRE priority to allow plugins to modify username / UUID data here. (auth plugins) */
 
         final GameProfile p = e.getProfile();
+
+        if (plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
+            plugin.getLog().info("Processing auth event for " + p.getUniqueId() + " - " + p.getName());
+        }
 
         /* either the plugin hasn't finished starting yet, or there was an issue connecting to the DB, performing file i/o, etc.
            we don't let players join in this case, because it means they can connect to the server without their permissions data.
@@ -141,6 +146,10 @@ public class SpongeListener {
                Listening on LOW priority to allow plugins to further modify data here. (auth plugins, etc.) */
 
             final GameProfile player = e.getProfile();
+
+            if (plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
+                plugin.getLog().info("Processing login event for " + player.getUniqueId() + " - " + player.getName());
+            }
 
             final User user = plugin.getUserManager().getIfLoaded(plugin.getUuidCache().getUUID(player.getUniqueId()));
 

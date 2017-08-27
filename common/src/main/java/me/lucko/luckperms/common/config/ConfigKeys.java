@@ -123,6 +123,11 @@ public class ConfigKeys {
     public static final ConfigKey<Boolean> USE_SERVER_UUID_CACHE = BooleanKey.of("use-server-uuid-cache", false);
 
     /**
+     * If LuckPerms should produce extra logging output when it handles logins.
+     */
+    public static final ConfigKey<Boolean> DEBUG_LOGINS = BooleanKey.of("debug-logins", false);
+
+    /**
      * Controls how temporary add commands should behave
      */
     public static final ConfigKey<TemporaryModifier> TEMPORARY_ADD_BEHAVIOUR = AbstractKey.of(c -> {

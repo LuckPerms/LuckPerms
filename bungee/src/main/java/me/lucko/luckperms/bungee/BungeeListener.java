@@ -70,6 +70,10 @@ public class BungeeListener implements Listener {
 
         final PendingConnection c = e.getConnection();
 
+        if (plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
+            plugin.getLog().info("Processing pre-login for " + c.getUniqueId() + " - " + c.getName());
+        }
+
         /* there was an issue connecting to the DB, performing file i/o, etc.
            as this is bungeecord, we will still allow the login, as players can't really do much harm without permissions data.
            the proxy will just fallback to using the config file perms. */
@@ -117,6 +121,10 @@ public class BungeeListener implements Listener {
     public void onPlayerPostLogin(PostLoginEvent e) {
         final ProxiedPlayer player = e.getPlayer();
         final User user = plugin.getUserManager().getIfLoaded(plugin.getUuidCache().getUUID(e.getPlayer().getUniqueId()));
+
+        if (plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
+            plugin.getLog().info("Processing post-login for " + player.getUniqueId() + " - " + player.getName());
+        }
 
         if (user == null) {
             plugin.getProxy().getScheduler().schedule(plugin, () -> {

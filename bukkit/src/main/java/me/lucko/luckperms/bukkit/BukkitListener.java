@@ -71,6 +71,10 @@ public class BukkitListener implements Listener {
             ex.printStackTrace();
         }
 
+        if (plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
+            plugin.getLog().info("Processing pre-login for " + e.getUniqueId() + " - " + e.getName());
+        }
+
         /* there was an issue connecting to the DB, performing file i/o, etc.
            we don't let players join in this case, because it means they can connect to the server without their permissions data.
            some server admins rely on negating perms to stop users from causing damage etc, so it's really important that
@@ -139,6 +143,11 @@ public class BukkitListener implements Listener {
            At this point, the users data should be present and loaded. */
 
         final Player player = e.getPlayer();
+
+        if (plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
+            plugin.getLog().info("Processing login for " + player.getUniqueId() + " - " + player.getName());
+        }
+
         final User user = plugin.getUserManager().getIfLoaded(plugin.getUuidCache().getUUID(player.getUniqueId()));
 
         /* User instance is null for whatever reason. Could be that it was unloaded between asyncpre and now. */
