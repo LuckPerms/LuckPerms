@@ -109,7 +109,9 @@ public abstract class FlatfileBacking extends AbstractBacking {
             e.printStackTrace();
         }
 
-        cleanupUsers();
+        // schedule user cleanup
+        plugin.getScheduler().asyncLater(this::cleanupUsers, 10L);
+
         setAcceptingLogins(true);
     }
 
