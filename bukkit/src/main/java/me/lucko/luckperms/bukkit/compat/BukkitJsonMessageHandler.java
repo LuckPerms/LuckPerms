@@ -91,7 +91,7 @@ public class BukkitJsonMessageHandler {
             setup(player);
             setup = true;
             return true;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             triedAndFailed = true;
             return false;
         }
