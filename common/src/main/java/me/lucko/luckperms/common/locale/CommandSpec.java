@@ -368,8 +368,9 @@ public enum CommandSpec {
                     Arg.create("context...", false, "the contexts to remove the suffix in")
             )
     ),
-    META_CLEAR("Clears all chat meta",
+    META_CLEAR("Clears all meta",
             Arg.list(
+                    Arg.create("type", false, "the type of meta to remove"),
                     Arg.create("context...", false, "the contexts to filter by")
             )
     ),

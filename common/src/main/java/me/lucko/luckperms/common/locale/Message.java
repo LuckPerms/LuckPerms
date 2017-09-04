@@ -230,14 +230,14 @@ public enum Message {
 
     CLEAR_SUCCESS("&b{0}&a's permissions were cleared in context {1}&a. (&b{2}&a nodes were removed.)", true),
     CLEAR_SUCCESS_SINGULAR("&b{0}&a's permissions were cleared in context {1}&a. (&b{2}&a node was removed.)", true),
-    PARENT_CLEAR_SUCCESS("&b{0}&a's parents were cleared in context {1}&a. &b{2}&a nodes were removed.)", true),
-    PARENT_CLEAR_SUCCESS_SINGULAR("&b{0}&a's parents were cleared in context {1}&a. &b{2}&a node was removed.)", true),
+    PARENT_CLEAR_SUCCESS("&b{0}&a's parents were cleared in context {1}&a. (&b{2}&a nodes were removed.)", true),
+    PARENT_CLEAR_SUCCESS_SINGULAR("&b{0}&a's parents were cleared in context {1}&a. (&b{2}&a node was removed.)", true),
 
-    PARENT_CLEAR_TRACK_SUCCESS("&b{0}&a's parents on track &b{1}&a were cleared in context {2}&a. &b{3}&a nodes were removed.)", true),
-    PARENT_CLEAR_TRACK_SUCCESS_SINGULAR("&b{0}&a's parents on track &b{1}&a were cleared in context {2}&a. &b{3}&a node was removed.)", true),
+    PARENT_CLEAR_TRACK_SUCCESS("&b{0}&a's parents on track &b{1}&a were cleared in context {2}&a. (&b{3}&a nodes were removed.)", true),
+    PARENT_CLEAR_TRACK_SUCCESS_SINGULAR("&b{0}&a's parents on track &b{1}&a were cleared in context {2}&a. (&b{3}&a node was removed.)", true),
 
-    META_CLEAR_SUCCESS("&b{0}&a's meta was cleared in context {1}&a. &b{2}&a nodes were removed.)", true),
-    META_CLEAR_SUCCESS_SINGULAR("&b{0}&a's meta was cleared in context {1}&a. &b{2}&a node was removed.)", true),
+    META_CLEAR_SUCCESS("&b{0}&a's meta matching type &b{1}&a was cleared in context {2}&a. (&b{3}&a nodes were removed.)", true),
+    META_CLEAR_SUCCESS_SINGULAR("&b{0}&a's meta matching type &b{1}&a was cleared in context {2}&a. (&b{3}&a node was removed.)", true),
 
     ILLEGAL_DATE_ERROR("Could not parse date '{0}'.", true),
     PAST_DATE_ERROR("You cannot set a date in the past!", true),

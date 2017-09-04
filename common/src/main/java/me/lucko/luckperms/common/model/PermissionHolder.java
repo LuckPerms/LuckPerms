@@ -53,6 +53,7 @@ import me.lucko.luckperms.common.contexts.ContextSetComparator;
 import me.lucko.luckperms.common.contexts.ExtractedContexts;
 import me.lucko.luckperms.common.node.ImmutableLocalizedNode;
 import me.lucko.luckperms.common.node.InheritanceInfo;
+import me.lucko.luckperms.common.node.MetaType;
 import me.lucko.luckperms.common.node.NodeComparator;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.node.NodeTools;
@@ -1361,12 +1362,12 @@ public abstract class PermissionHolder {
         return true;
     }
 
-    public boolean clearMeta() {
+    public boolean clearMeta(MetaType type) {
         ImmutableCollection<Node> before = getEnduringNodes().values();
 
         nodesLock.lock();
         try {
-            if (!nodes.values().removeIf(n -> n.isMeta() || n.isPrefix() || n.isSuffix())) {
+            if (!nodes.values().removeIf(type::matches)) {
                 return false;
             }
         } finally {
@@ -1379,7 +1380,7 @@ public abstract class PermissionHolder {
         return true;
     }
 
-    public boolean clearMeta(ContextSet contextSet) {
+    public boolean clearMeta(MetaType type, ContextSet contextSet) {
         ImmutableCollection<Node> before = getEnduringNodes().values();
 
         nodesLock.lock();
@@ -1389,7 +1390,7 @@ public abstract class PermissionHolder {
                 return false;
             }
 
-            boolean b = nodes.removeIf(n -> n.isMeta() || n.isPrefix() || n.isSuffix());
+            boolean b = nodes.removeIf(type::matches);
             if (!b) {
                 return false;
             }

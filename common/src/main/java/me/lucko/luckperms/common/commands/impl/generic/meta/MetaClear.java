@@ -39,6 +39,7 @@ import me.lucko.luckperms.common.locale.CommandSpec;
 import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.PermissionHolder;
+import me.lucko.luckperms.common.node.MetaType;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 
@@ -57,6 +58,34 @@ public class MetaClear extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
+        MetaType type = null;
+        if (args.size() > 0) {
+            String typeId = args.get(0).toLowerCase();
+            if (typeId.equals("any") || typeId.equals("all") || typeId.equals("*")) {
+                type = MetaType.ANY;
+            }
+            if (typeId.equals("chat") || typeId.equals("chatmeta")) {
+                type = MetaType.CHAT;
+            }
+            if (typeId.equals("meta")) {
+                type = MetaType.META;
+            }
+            if (typeId.equals("prefix") || typeId.equals("prefixes")) {
+                type = MetaType.PREFIX;
+            }
+            if (typeId.equals("suffix") || typeId.equals("suffixes")) {
+                type = MetaType.SUFFIX;
+            }
+
+            if (type != null) {
+                args.remove(0);
+            }
+        }
+
+        if (type == null) {
+            type = MetaType.ANY;
+        }
+
         int before = holder.getEnduringNodes().size();
 
         MutableContextSet context = ArgumentUtils.handleContext(0, args, plugin);
@@ -67,16 +96,16 @@ public class MetaClear extends SharedSubCommand {
         }
 
         if (context.isEmpty()) {
-            holder.clearMeta();
+            holder.clearMeta(type);
         } else {
-            holder.clearMeta(context);
+            holder.clearMeta(type, context);
         }
 
         int changed = before - holder.getEnduringNodes().size();
         if (changed == 1) {
-            Message.META_CLEAR_SUCCESS_SINGULAR.send(sender, holder.getFriendlyName(), Util.contextSetToString(context), changed);
+            Message.META_CLEAR_SUCCESS_SINGULAR.send(sender, holder.getFriendlyName(), type.name().toLowerCase(), Util.contextSetToString(context), changed);
         } else {
-            Message.META_CLEAR_SUCCESS.send(sender, holder.getFriendlyName(), Util.contextSetToString(context), changed);
+            Message.META_CLEAR_SUCCESS.send(sender, holder.getFriendlyName(), type.name().toLowerCase(), Util.contextSetToString(context), changed);
         }
 
         ExtendedLogEntry.build().actor(sender).acted(holder)
