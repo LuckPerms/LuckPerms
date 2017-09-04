@@ -35,6 +35,7 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.Storage;
+import me.lucko.luckperms.common.utils.Cycle;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -44,7 +45,6 @@ import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -54,22 +54,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * Handles export operations
  */
 public class Exporter implements Runnable {
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-
-    // number of users --> the value to divide the list by. base value of 1000 per thread, with a max of 10 threads. so, 3000 = 3 threads, 10000+ = 10 threads
-    private static final Function<Integer, Integer> THREAD_COUNT_FUNCTION = usersCount -> {
-        // how many threads to make. must be 1 <= x <= 15
-        int i = Math.max(1, Math.min(15, usersCount / 1000));
-
-        // then work out the value to split at. e.g. if we have 1,000 users to export and 2 threads, we should split at every 500 users.
-        return Math.max(1, usersCount / i);
-    };
 
     private static void write(BufferedWriter writer, String s) {
         try {
@@ -109,27 +99,27 @@ public class Exporter implements Runnable {
 
             // Create the actual groups first
             write(writer, "# Create groups");
-            plugin.getGroupManager().getAll().values().stream()
-                    .sorted((o1, o2) -> {
-                        int i = Integer.compare(o2.getWeight().orElse(0), o1.getWeight().orElse(0));
-                        return i != 0 ? i : o1.getName().compareToIgnoreCase(o2.getName());
-                    })
-                    .filter(g -> !g.getName().equals("default"))
-                    .forEach(group -> {
-                        write(writer, "/luckperms creategroup " + group.getName());
-                    });
-
-            write(writer, "");
 
             AtomicInteger groupCount = new AtomicInteger(0);
 
-            // export groups in order of weight
             plugin.getGroupManager().getAll().values().stream()
+                    // export groups in order of weight
                     .sorted((o1, o2) -> {
                         int i = Integer.compare(o2.getWeight().orElse(0), o1.getWeight().orElse(0));
                         return i != 0 ? i : o1.getName().compareToIgnoreCase(o2.getName());
                     })
+                    // create all groups initially
+                    .peek(group -> {
+                        if (!group.getName().equals("default")) {
+                            write(writer, "/luckperms creategroup " + group.getName());
+                        }
+                    })
+                    // then export the content of each group
                     .forEach(group -> {
+                        if (groupCount.get() == 0) {
+                            write(writer, "");
+                        }
+
                         write(writer, "# Export group: " + group.getName());
                         for (Node node : group.getEnduringNodes().values()) {
                             write(writer, NodeFactory.nodeAsCommand(node, group.getName(), true, true));
@@ -187,17 +177,13 @@ public class Exporter implements Runnable {
 
             write(writer, "# Export users");
 
-            List<List<UUID>> subUsers;
-            AtomicInteger userCount = new AtomicInteger(0);
-
-            // not really that many users, so it's not really worth spreading the load.
-            if (users.size() < 1500) {
-                subUsers = Collections.singletonList(new ArrayList<>(users));
-            } else {
-                subUsers = Util.divideList(users, THREAD_COUNT_FUNCTION.apply(users.size()));
+            // divide into 16 pools.
+            Cycle<List<UUID>> userPools = new Cycle<>(Util.nInstances(16, ArrayList::new));
+            for (UUID uuid : users) {
+                userPools.next().add(uuid);
             }
 
-            log.log("Split users into " + subUsers.size() + " threads for export.");
+            log.log("Split users into " + userPools.getBacking().size() + " threads for export.");
 
             // Setup a file writing lock. We don't want multiple threads writing at the same time.
             // The write function accepts a list of strings, as we want a user's data to be grouped together.
@@ -217,8 +203,10 @@ public class Exporter implements Runnable {
             // A set of futures, which are really just the threads we need to wait for.
             Set<CompletableFuture<Void>> futures = new HashSet<>();
 
+            AtomicInteger userCount = new AtomicInteger(0);
+
             // iterate through each user sublist.
-            for (List<UUID> subList : subUsers) {
+            for (List<UUID> subList : userPools.getBacking()) {
 
                 // register and start a new thread to process the sublist
                 futures.add(CompletableFuture.runAsync(() -> {
@@ -229,7 +217,7 @@ public class Exporter implements Runnable {
                             // actually export the user. this output will be fed to the writing function when we have all of the user's data.
                             List<String> output = new ArrayList<>();
 
-                            plugin.getStorage().loadUser(uuid, "null").join();
+                            plugin.getStorage().loadUser(uuid, null).join();
                             User user = plugin.getUserManager().getIfLoaded(uuid);
                             output.add("# Export user: " + user.getUuid().toString() + " - " + user.getName().orElse("unknown username"));
 

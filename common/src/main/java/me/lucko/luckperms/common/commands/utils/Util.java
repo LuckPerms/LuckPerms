@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 @UtilityClass
@@ -109,6 +110,14 @@ public class Util {
      */
     public static String stripColor(String s) {
         return s == null ? null : STRIP_COLOR_PATTERN.matcher(s).replaceAll("");
+    }
+
+    public static <T> List<T> nInstances(int count, Supplier<T> supplier) {
+        List<T> ret = new ArrayList<>(count);
+        for (int i = 0; i < count; i++) {
+            ret.add(supplier.get());
+        }
+        return ret;
     }
 
     public static <T> List<List<T>> divideList(Iterable<T> source, int size) {
