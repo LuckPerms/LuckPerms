@@ -167,6 +167,12 @@ public class ConfigKeys {
     }));
 
     /**
+     * If set to false, the plugin will allow a Users primary group to be removed with the
+     * 'parent remove' command, and will set their primary group back to default.
+     */
+    public static final ConfigKey<Boolean> PREVENT_PRIMARY_GROUP_REMOVAL = BooleanKey.of("prevent-primary-group-removal", true);
+
+    /**
      * If the plugin should check for "extra" permissions with users run LP commands
      */
     public static final ConfigKey<Boolean> USE_ARGUMENT_BASED_COMMAND_PERMISSIONS = BooleanKey.of("argument-based-command-permissions", false);

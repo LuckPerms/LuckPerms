@@ -79,7 +79,8 @@ public class ParentRemove extends SharedSubCommand {
         if (holder instanceof User) {
             User user = (User) holder;
 
-            boolean shouldPrevent = (context.isEmpty() || context.has("server", "global")) &&
+            boolean shouldPrevent = plugin.getConfiguration().get(ConfigKeys.PREVENT_PRIMARY_GROUP_REMOVAL) &&
+                    context.isEmpty() &&
                     plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION_METHOD).equals("stored") &&
                     user.getPrimaryGroup().getStoredValue().equalsIgnoreCase(groupName);
 

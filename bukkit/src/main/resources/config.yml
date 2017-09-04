@@ -105,6 +105,10 @@ temporary-add-behaviour: deny
 #                           directly and indirectly
 primary-group-calculation: stored
 
+# If set to false, the plugin will allow a Users primary group to be removed with the
+# 'parent remove' command, and will set their primary group back to default.
+prevent-primary-group-removal: false
+
 # If the plugin should check for "extra" permissions with users run LP commands.
 #
 # These extra permissions allow finer control over what users can do with each command, and
