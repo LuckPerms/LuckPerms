@@ -309,6 +309,7 @@ public class CommandManager {
     }
 
     private static void handleRewrites(List<String> args) {
+        // Provide aliases
         if (args.size() >= 1) {
             if (args.get(0).equalsIgnoreCase("u")) {
                 args.remove(0);
@@ -317,6 +318,14 @@ public class CommandManager {
             if (args.get(0).equalsIgnoreCase("g")) {
                 args.remove(0);
                 args.add(0, "group");
+            }
+            if (args.get(0).equalsIgnoreCase("t")) {
+                args.remove(0);
+                args.add(0, "track");
+            }
+            if (args.get(0).equalsIgnoreCase("i")) {
+                args.remove(0);
+                args.add(0, "info");
             }
         }
 
@@ -341,7 +350,6 @@ public class CommandManager {
                     break;
                 case "i":
                 case "about":
-                case "list":
                     args.remove(2);
                     args.add(2, "info");
                     break;
@@ -349,6 +357,7 @@ public class CommandManager {
                 case "inheritances":
                 case "group":
                 case "groups":
+                case "g":
                 case "rank":
                 case "ranks":
                 case "parents":
@@ -439,7 +448,7 @@ public class CommandManager {
             boolean lazyInfo = (
                     args.size() >= 4 &&
                     (args.get(2).equalsIgnoreCase("permission") || args.get(2).equalsIgnoreCase("parent") || args.get(2).equalsIgnoreCase("meta")) &&
-                    (args.get(3).equalsIgnoreCase("i") || args.get(3).equalsIgnoreCase("about") || args.get(3).equalsIgnoreCase("list"))
+                    (args.get(3).equalsIgnoreCase("i") || args.get(3).equalsIgnoreCase("about"))
             );
 
             if (lazyInfo) {
