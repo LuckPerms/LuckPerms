@@ -55,6 +55,7 @@ import java.util.stream.Collectors;
  */
 @ToString(of = {"permission", "value", "override", "server", "world", "expireAt", "contexts"})
 public final class ImmutableNode implements Node {
+    private static final int NODE_SEPARATOR_CHAR = Character.getNumericValue('.');
 
     @Getter
     private final String permission;
@@ -149,7 +150,7 @@ public final class ImmutableNode implements Node {
         }
 
         isWildcard = this.permission.endsWith(".*");
-        wildcardLevel = (int) this.permission.chars().filter(num -> num == Character.getNumericValue('.')).count();
+        wildcardLevel = this.permission.chars().filter(num -> num == NODE_SEPARATOR_CHAR).sum();
 
         isMeta = NodeFactory.isMetaNode(this.permission);
         if (isMeta) {

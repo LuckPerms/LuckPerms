@@ -392,8 +392,8 @@ public enum Message {
     IMPORT_LOG_NOT_READABLE("Error: File {0} is not readable.", true),
     IMPORT_LOG_FAILURE("An unexpected error occured whilst reading from the log file.", true),
 
-    IMPORT_PROGRESS("&b(Import) &b-> &f{0} &fpercent complete &7- &b{1}&f/&b{2} &foperations complete with &c{3} &ferrors.", true),
-    IMPORT_PROGRESS_SIN("&b(Import) &b-> &f{0} &fpercent complete &7- &b{1}&f/&b{2} &foperations complete with &c{3} &ferror.", true),
+    IMPORT_PROGRESS("&b(Import) &b-> &f{0}&f% complete &7- &b{1}&f/&b{2} &foperations complete with &c{3} &ferrors.", true),
+    IMPORT_PROGRESS_SIN("&b(Import) &b-> &f{0}&f% complete &7- &b{1}&f/&b{2} &foperations complete with &c{3} &ferror.", true),
     IMPORT_START("&b(Import) &b-> &fStarting import process.", true),
 
     IMPORT_END_COMPLETE("&b(Import) &a&lCOMPLETED &7- took &b{0} &7seconds - &7No errors.", true),

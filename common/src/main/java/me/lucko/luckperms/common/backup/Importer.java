@@ -36,7 +36,6 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.locale.Message;
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Cycle;
 
 import java.util.ArrayList;
@@ -89,12 +88,18 @@ public class Importer implements Runnable {
         // form instances for all commands, and register them
         int index = 1;
         for (String command : commands) {
-            toExecute.add(new ImportCommand(commandManager.getPlugin(), index, command));
+            ImportCommand cmd = new ImportCommand(commandManager, index, command);
+            toExecute.add(cmd);
+
+            if (cmd.getCommand().startsWith("creategroup ") || cmd.getCommand().startsWith("createtrack")) {
+                cmd.process(); // process immediately
+            }
+
             index++;
         }
 
         // divide commands up into pools
-        Cycle<List<ImportCommand>> commandPools = new Cycle<>(Util.nInstances(16, ArrayList::new));
+        Cycle<List<ImportCommand>> commandPools = new Cycle<>(Util.nInstances(128, ArrayList::new));
 
         String lastTarget = null;
         for (ImportCommand cmd : toExecute) {
@@ -120,19 +125,7 @@ public class Importer implements Runnable {
 
                 // iterate through each user in the sublist, and grab their data.
                 for (ImportCommand cmd : subList) {
-                    try {
-                        CommandResult result = commandManager.onCommand(
-                                cmd,
-                                "lp",
-                                Util.stripQuotes(Splitter.on(CommandManager.COMMAND_SEPARATOR_PATTERN).omitEmptyStrings().splitToList(cmd.getCommand()))
-                        ).get();
-                        cmd.setResult(result);
-
-                    } catch (Exception e) {
-                        cmd.setResult(CommandResult.FAILURE);
-                        e.printStackTrace();
-                    }
-
+                    cmd.process();
                     processedCount.incrementAndGet();
                 }
             }, commandManager.getPlugin().getScheduler().async()));
@@ -190,7 +183,7 @@ public class Importer implements Runnable {
 
     private void sendProgress(int processedCount) {
         int percent = (processedCount * 100) / commands.size();
-        int errors = (int) toExecute.stream().filter(v -> !v.getResult().asBoolean()).count();
+        int errors = (int) toExecute.stream().filter(v -> v.isCompleted() && !v.getResult().asBoolean()).count();
 
         if (errors == 1) {
             notify.forEach(s -> Message.IMPORT_PROGRESS_SIN.send(s, percent, processedCount, commands.size(), errors));
@@ -203,18 +196,23 @@ public class Importer implements Runnable {
     private static class ImportCommand extends ImporterSender {
         private static final Splitter SPACE_SPLIT = Splitter.on(" ");
 
+        private final CommandManager commandManager;
         private final int id;
         private final String command;
 
         private final String target;
+
+        @Setter
+        private boolean completed = false;
 
         private final List<String> output = new ArrayList<>();
 
         @Setter
         private CommandResult result = CommandResult.FAILURE;
 
-        ImportCommand(LuckPermsPlugin plugin, int id, String command) {
-            super(plugin);
+        ImportCommand(CommandManager commandManager, int id, String command) {
+            super(commandManager.getPlugin());
+            this.commandManager = commandManager;
             this.id = id;
             this.command = command;
             this.target = determineTarget(command);
@@ -223,6 +221,27 @@ public class Importer implements Runnable {
         @Override
         protected void consumeMessage(String s) {
             output.add(s);
+        }
+
+        public void process() {
+            if (isCompleted()) {
+                return;
+            }
+
+            try {
+                CommandResult result = commandManager.onCommand(
+                        this,
+                        "lp",
+                        Util.stripQuotes(Splitter.on(CommandManager.COMMAND_SEPARATOR_PATTERN).omitEmptyStrings().splitToList(getCommand()))
+                ).get();
+                setResult(result);
+
+            } catch (Exception e) {
+                setResult(CommandResult.FAILURE);
+                e.printStackTrace();
+            }
+
+            setCompleted(true);
         }
 
         private static String determineTarget(String command) {
@@ -253,6 +272,16 @@ public class Importer implements Runnable {
                 }
 
                 String targetTrack = SPACE_SPLIT.split(subCmd).iterator().next();
+                return "t:" + targetTrack;
+            }
+
+            if (command.startsWith("creategroup ") && command.length() > "creategroup ".length()) {
+                String targetGroup = command.substring("creategroup ".length());
+                return "g:" + targetGroup;
+            }
+
+            if (command.startsWith("createtrack ") && command.length() > "createtrack ".length()) {
+                String targetTrack = command.substring("createtrack ".length());
                 return "t:" + targetTrack;
             }
 

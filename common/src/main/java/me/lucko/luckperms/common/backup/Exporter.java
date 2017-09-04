@@ -30,6 +30,7 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.logging.ProgressLogger;
+import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeFactory;
@@ -54,6 +55,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * Handles export operations
@@ -102,31 +104,31 @@ public class Exporter implements Runnable {
 
             AtomicInteger groupCount = new AtomicInteger(0);
 
-            plugin.getGroupManager().getAll().values().stream()
+            List<? extends Group> groups = plugin.getGroupManager().getAll().values().stream()
                     // export groups in order of weight
                     .sorted((o1, o2) -> {
                         int i = Integer.compare(o2.getWeight().orElse(0), o1.getWeight().orElse(0));
                         return i != 0 ? i : o1.getName().compareToIgnoreCase(o2.getName());
-                    })
-                    // create all groups initially
-                    .peek(group -> {
-                        if (!group.getName().equals("default")) {
-                            write(writer, "/luckperms creategroup " + group.getName());
-                        }
-                    })
-                    // then export the content of each group
-                    .forEach(group -> {
-                        if (groupCount.get() == 0) {
-                            write(writer, "");
-                        }
+                    }).collect(Collectors.toList());
 
-                        write(writer, "# Export group: " + group.getName());
-                        for (Node node : group.getEnduringNodes().values()) {
-                            write(writer, NodeFactory.nodeAsCommand(node, group.getName(), true, true));
-                        }
-                        write(writer, "");
-                        log.logAllProgress("Exported {} groups so far.", groupCount.incrementAndGet());
-                    });
+            for (Group group : groups) {
+                if (!group.getName().equals("default")) {
+                    write(writer, "/luckperms creategroup " + group.getName());
+                }
+            }
+
+            for (Group group : groups) {
+                if (groupCount.get() == 0) {
+                    write(writer, "");
+                }
+
+                write(writer, "# Export group: " + group.getName());
+                for (Node node : group.getEnduringNodes().values()) {
+                    write(writer, NodeFactory.nodeAsCommand(node, group.getName(), true, true));
+                }
+                write(writer, "");
+                log.logAllProgress("Exported {} groups so far.", groupCount.incrementAndGet());
+            }
 
             log.log("Exported " + groupCount.get() + " groups.");
 
@@ -178,7 +180,7 @@ public class Exporter implements Runnable {
             write(writer, "# Export users");
 
             // divide into 16 pools.
-            Cycle<List<UUID>> userPools = new Cycle<>(Util.nInstances(16, ArrayList::new));
+            Cycle<List<UUID>> userPools = new Cycle<>(Util.nInstances(32, ArrayList::new));
             for (UUID uuid : users) {
                 userPools.next().add(uuid);
             }
