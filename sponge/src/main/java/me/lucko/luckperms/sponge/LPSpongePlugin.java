@@ -45,6 +45,7 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.config.LuckPermsConfiguration;
 import me.lucko.luckperms.common.constants.CommandPermission;
+import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.contexts.ContextManager;
 import me.lucko.luckperms.common.contexts.LuckPermsCalculator;
 import me.lucko.luckperms.common.dependencies.DependencyManager;
@@ -434,7 +435,28 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     @Override
     public Sender getConsoleSender() {
         if (!game.isServerAvailable()) {
-            return new ImporterSender(this, s -> logger.info(s));
+            return new ImporterSender(this) {
+
+                @Override
+                public String getName() {
+                    return Constants.CONSOLE_NAME;
+                }
+
+                @Override
+                public UUID getUuid() {
+                    return Constants.CONSOLE_UUID;
+                }
+
+                @Override
+                public boolean isImport() {
+                    return false;
+                }
+
+                @Override
+                protected void consumeMessage(String s) {
+                    logger.info(s);
+                }
+            };
         }
         return getSenderFactory().wrap(game.getServer().getConsole());
     }
