@@ -78,7 +78,7 @@ public class LogNotify extends SubCommand<Log> {
             user.removeIf(n -> n.getPermission().equalsIgnoreCase("luckperms.log.notify.ignoring"));
         }
 
-        plugin.getStorage().force().saveUser(user).join();
+        plugin.getStorage().noBuffer().saveUser(user).join();
     }
 
     @Override

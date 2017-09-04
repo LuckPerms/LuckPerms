@@ -23,37 +23,22 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.locale;
+package me.lucko.luckperms.common.buffers;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.tasks.UpdateTask;
 
-import java.io.File;
+public class UpdateTaskBuffer extends BufferedRequest<Void> {
+    private final LuckPermsPlugin plugin;
 
-public class NoopLocaleManager implements LocaleManager {
-
-    @Override
-    public void tryLoad(LuckPermsPlugin plugin, File file) {
-
+    public UpdateTaskBuffer(LuckPermsPlugin plugin) {
+        super(250L, 50L, plugin::doAsync);
+        this.plugin = plugin;
     }
 
     @Override
-    public void loadFromFile(File file) throws Exception {
-
-    }
-
-    @Override
-    public int getSize() {
-        return 0;
-    }
-
-    @Override
-    public String getTranslation(Message key) {
+    protected Void perform() {
+        new UpdateTask(plugin).run();
         return null;
     }
-
-    @Override
-    public CommandSpec.CommandSpecData getTranslation(CommandSpec key) {
-        return null;
-    }
-
 }

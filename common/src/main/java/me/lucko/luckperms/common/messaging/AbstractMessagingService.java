@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.messaging;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -47,9 +46,8 @@ import java.util.function.Consumer;
 /**
  * An abstract implementation of {@link me.lucko.luckperms.api.MessagingService}.
  */
-@RequiredArgsConstructor
 public abstract class AbstractMessagingService implements InternalMessagingService {
-    public static final String CHANNEL = "lpuc";
+    protected static final String CHANNEL = "lpuc";
 
     @Getter
     private final LuckPermsPlugin plugin;
@@ -57,17 +55,19 @@ public abstract class AbstractMessagingService implements InternalMessagingServi
     @Getter
     private final String name;
 
-    private final Set<UUID> receivedMessages = Collections.synchronizedSet(new HashSet<>());
-    private final Gson gson = new Gson();
+    private final Set<UUID> receivedMessages;
+    private final Gson gson;
 
     @Getter
-    private final BufferedRequest<Void> updateBuffer = new BufferedRequest<Void>(3000L, r -> getPlugin().doAsync(r)) {
-        @Override
-        protected Void perform() {
-            pushUpdate();
-            return null;
-        }
-    };
+    private final BufferedRequest<Void> updateBuffer;
+
+    public AbstractMessagingService(LuckPermsPlugin plugin, String name) {
+        this.plugin = plugin;
+        this.name = name;
+        this.receivedMessages = Collections.synchronizedSet(new HashSet<>());
+        this.gson = new Gson();
+        this.updateBuffer = new PushUpdateBuffer(plugin);
+    }
 
     protected abstract void sendMessage(String channel, String message);
 
@@ -160,6 +160,18 @@ public abstract class AbstractMessagingService implements InternalMessagingServi
         try {
             return UUID.fromString(requestId);
         } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    private final class PushUpdateBuffer extends BufferedRequest<Void> {
+        public PushUpdateBuffer(LuckPermsPlugin plugin) {
+            super(3000L, 200L, plugin::doAsync);
+        }
+
+        @Override
+        protected Void perform() {
+            pushUpdate();
             return null;
         }
     }

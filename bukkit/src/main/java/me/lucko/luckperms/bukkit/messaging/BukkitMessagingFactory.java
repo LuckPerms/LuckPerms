@@ -23,37 +23,33 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.locale;
+package me.lucko.luckperms.bukkit.messaging;
 
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.bukkit.LPBukkitPlugin;
+import me.lucko.luckperms.common.messaging.InternalMessagingService;
+import me.lucko.luckperms.common.messaging.MessagingFactory;
 
-import java.io.File;
-
-public class NoopLocaleManager implements LocaleManager {
-
-    @Override
-    public void tryLoad(LuckPermsPlugin plugin, File file) {
-
+public class BukkitMessagingFactory extends MessagingFactory<LPBukkitPlugin> {
+    public BukkitMessagingFactory(LPBukkitPlugin plugin) {
+        super(plugin);
     }
 
     @Override
-    public void loadFromFile(File file) throws Exception {
+    protected InternalMessagingService getServiceFor(String messagingType) {
+        if (messagingType.equals("bungee")) {
+            BungeeMessagingService bungeeMessaging = new BungeeMessagingService(getPlugin());
+            bungeeMessaging.init();
+            return bungeeMessaging;
+        } else if (messagingType.equals("lilypad")) {
+            if (getPlugin().getServer().getPluginManager().getPlugin("LilyPad-Connect") == null) {
+                getPlugin().getLog().warn("LilyPad-Connect plugin not present.");
+            } else {
+                LilyPadMessagingService lilyPadMessaging = new LilyPadMessagingService(getPlugin());
+                lilyPadMessaging.init();
+                return lilyPadMessaging;
+            }
+        }
 
+        return super.getServiceFor(messagingType);
     }
-
-    @Override
-    public int getSize() {
-        return 0;
-    }
-
-    @Override
-    public String getTranslation(Message key) {
-        return null;
-    }
-
-    @Override
-    public CommandSpec.CommandSpecData getTranslation(CommandSpec key) {
-        return null;
-    }
-
 }

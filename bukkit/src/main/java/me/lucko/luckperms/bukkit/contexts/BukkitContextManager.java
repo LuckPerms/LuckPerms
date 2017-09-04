@@ -23,37 +23,32 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.locale;
+package me.lucko.luckperms.bukkit.contexts;
 
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import lombok.RequiredArgsConstructor;
 
-import java.io.File;
+import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.bukkit.LPBukkitPlugin;
+import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.contexts.ContextManager;
 
-public class NoopLocaleManager implements LocaleManager {
+import org.bukkit.entity.Player;
 
-    @Override
-    public void tryLoad(LuckPermsPlugin plugin, File file) {
-
-    }
-
-    @Override
-    public void loadFromFile(File file) throws Exception {
-
-    }
+@RequiredArgsConstructor
+public class BukkitContextManager extends ContextManager<Player> {
+    private final LPBukkitPlugin plugin;
 
     @Override
-    public int getSize() {
-        return 0;
+    public Contexts formContexts(Player subject, ImmutableContextSet contextSet) {
+        return new Contexts(
+                contextSet,
+                plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
+                plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
+                true,
+                plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
+                plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
+                subject.isOp()
+        );
     }
-
-    @Override
-    public String getTranslation(Message key) {
-        return null;
-    }
-
-    @Override
-    public CommandSpec.CommandSpecData getTranslation(CommandSpec key) {
-        return null;
-    }
-
 }

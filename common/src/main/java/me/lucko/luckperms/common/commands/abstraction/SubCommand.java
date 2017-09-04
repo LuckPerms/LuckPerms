@@ -173,7 +173,7 @@ public abstract class SubCommand<T> extends Command<T, Void> {
     }
 
     public static void save(User user, Sender sender, LuckPermsPlugin plugin) {
-        boolean success = plugin.getStorage().force().saveUser(user).join();
+        boolean success = plugin.getStorage().noBuffer().saveUser(user).join();
 
         if (sender.isImport()) {
             user.getRefreshBuffer().request();
@@ -192,7 +192,7 @@ public abstract class SubCommand<T> extends Command<T, Void> {
     }
 
     public static void save(Group group, Sender sender, LuckPermsPlugin plugin) {
-        boolean success = plugin.getStorage().force().saveGroup(group).join();
+        boolean success = plugin.getStorage().noBuffer().saveGroup(group).join();
 
         if (sender.isImport()) {
             plugin.getUpdateTaskBuffer().request();
@@ -211,7 +211,7 @@ public abstract class SubCommand<T> extends Command<T, Void> {
     }
 
     public static void save(Track track, Sender sender, LuckPermsPlugin plugin) {
-        boolean success = plugin.getStorage().force().saveTrack(track).join();
+        boolean success = plugin.getStorage().noBuffer().saveTrack(track).join();
 
         if (sender.isImport()) {
             plugin.getUpdateTaskBuffer().request();

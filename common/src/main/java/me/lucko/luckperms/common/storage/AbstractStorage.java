@@ -58,8 +58,8 @@ import java.util.function.Supplier;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class AbstractStorage implements Storage {
     public static Storage wrap(LuckPermsPlugin plugin, AbstractBacking backing) {
-        BufferedOutputStorage bufferedDs = BufferedOutputStorage.wrap(PhasedStorage.wrap(new AbstractStorage(plugin, backing)), 1000L);
-        plugin.getScheduler().asyncRepeating(bufferedDs, 5L);
+        BufferedOutputStorage bufferedDs = BufferedOutputStorage.wrap(PhasedStorage.wrap(new AbstractStorage(plugin, backing)), 250L);
+        plugin.getScheduler().asyncRepeating(bufferedDs, 2L);
         return bufferedDs;
     }
 
@@ -82,7 +82,7 @@ public class AbstractStorage implements Storage {
     }
 
     @Override
-    public Storage force() {
+    public Storage noBuffer() {
         return this;
     }
 

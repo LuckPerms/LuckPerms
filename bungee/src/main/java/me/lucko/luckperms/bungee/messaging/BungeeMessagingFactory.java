@@ -23,37 +23,33 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.locale;
+package me.lucko.luckperms.bungee.messaging;
 
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.bungee.LPBungeePlugin;
+import me.lucko.luckperms.common.messaging.InternalMessagingService;
+import me.lucko.luckperms.common.messaging.MessagingFactory;
 
-import java.io.File;
-
-public class NoopLocaleManager implements LocaleManager {
-
-    @Override
-    public void tryLoad(LuckPermsPlugin plugin, File file) {
-
+public class BungeeMessagingFactory extends MessagingFactory<LPBungeePlugin> {
+    public BungeeMessagingFactory(LPBungeePlugin plugin) {
+        super(plugin);
     }
 
     @Override
-    public void loadFromFile(File file) throws Exception {
+    protected InternalMessagingService getServiceFor(String messagingType) {
+        if (messagingType.equals("bungee")) {
+            BungeeMessagingService bungeeMessaging = new BungeeMessagingService(getPlugin());
+            bungeeMessaging.init();
+            return bungeeMessaging;
+        } else if (messagingType.equals("redisbungee")) {
+            if (getPlugin().getProxy().getPluginManager().getPlugin("RedisBungee") == null) {
+                getPlugin().getLog().warn("RedisBungee plugin not present.");
+            } else {
+                RedisBungeeMessagingService redisBungeeMessaging = new RedisBungeeMessagingService(getPlugin());
+                redisBungeeMessaging.init();
+                return redisBungeeMessaging;
+            }
+        }
 
+        return super.getServiceFor(messagingType);
     }
-
-    @Override
-    public int getSize() {
-        return 0;
-    }
-
-    @Override
-    public String getTranslation(Message key) {
-        return null;
-    }
-
-    @Override
-    public CommandSpec.CommandSpecData getTranslation(CommandSpec key) {
-        return null;
-    }
-
 }

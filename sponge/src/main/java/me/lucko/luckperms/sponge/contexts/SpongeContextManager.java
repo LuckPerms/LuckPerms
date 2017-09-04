@@ -23,37 +23,32 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.locale;
+package me.lucko.luckperms.sponge.contexts;
 
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import lombok.RequiredArgsConstructor;
 
-import java.io.File;
+import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
+import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.contexts.ContextManager;
+import me.lucko.luckperms.sponge.LPSpongePlugin;
 
-public class NoopLocaleManager implements LocaleManager {
+import org.spongepowered.api.service.permission.Subject;
 
-    @Override
-    public void tryLoad(LuckPermsPlugin plugin, File file) {
-
-    }
-
-    @Override
-    public void loadFromFile(File file) throws Exception {
-
-    }
+@RequiredArgsConstructor
+public class SpongeContextManager extends ContextManager<Subject> {
+    private final LPSpongePlugin plugin;
 
     @Override
-    public int getSize() {
-        return 0;
+    public Contexts formContexts(Subject subject, ImmutableContextSet contextSet) {
+        return new Contexts(
+                contextSet,
+                plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
+                plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
+                true,
+                plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
+                plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
+                false
+        );
     }
-
-    @Override
-    public String getTranslation(Message key) {
-        return null;
-    }
-
-    @Override
-    public CommandSpec.CommandSpecData getTranslation(CommandSpec key) {
-        return null;
-    }
-
 }

@@ -34,13 +34,14 @@ import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.bungee.calculators.BungeeCalculatorFactory;
 import me.lucko.luckperms.bungee.contexts.BackendServerCalculator;
-import me.lucko.luckperms.bungee.messaging.BungeeMessagingService;
-import me.lucko.luckperms.bungee.messaging.RedisBungeeMessagingService;
+import me.lucko.luckperms.bungee.contexts.BungeeContextManager;
+import me.lucko.luckperms.bungee.messaging.BungeeMessagingFactory;
 import me.lucko.luckperms.bungee.util.RedisBungeeUtil;
 import me.lucko.luckperms.common.actionlog.LogDispatcher;
 import me.lucko.luckperms.common.api.ApiHandler;
 import me.lucko.luckperms.common.api.ApiProvider;
 import me.lucko.luckperms.common.buffers.BufferedRequest;
+import me.lucko.luckperms.common.buffers.UpdateTaskBuffer;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.commands.CommandManager;
@@ -62,8 +63,6 @@ import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.managers.UserManager;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
-import me.lucko.luckperms.common.messaging.NoopMessagingService;
-import me.lucko.luckperms.common.messaging.RedisMessagingService;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.plugin.LuckPermsScheduler;
@@ -73,7 +72,6 @@ import me.lucko.luckperms.common.storage.StorageType;
 import me.lucko.luckperms.common.storage.backing.file.FileWatcher;
 import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
-import me.lucko.luckperms.common.tasks.UpdateTask;
 import me.lucko.luckperms.common.treeview.PermissionVault;
 import me.lucko.luckperms.common.utils.UuidCache;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
@@ -158,68 +156,14 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         storage = StorageFactory.getInstance(this, StorageType.H2);
 
         // initialise messaging
-        String messagingType = getConfiguration().get(ConfigKeys.MESSAGING_SERVICE).toLowerCase();
-        if (messagingType.equals("none") && getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
-            messagingType = "redis";
-        }
-
-        if (!messagingType.equals("none")) {
-            getLog().info("Loading messaging service... [" + messagingType.toUpperCase() + "]");
-        }
-
-        if (messagingType.equals("redis")) {
-            if (getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
-                RedisMessagingService redis = new RedisMessagingService(this);
-                try {
-                    redis.init(getConfiguration().get(ConfigKeys.REDIS_ADDRESS), getConfiguration().get(ConfigKeys.REDIS_PASSWORD));
-                    messagingService = redis;
-                } catch (Exception e) {
-                    getLog().warn("Couldn't load redis...");
-                    e.printStackTrace();
-                }
-            } else {
-                getLog().warn("Messaging Service was set to redis, but redis is not enabled!");
-            }
-        } else if (messagingType.equals("bungee")) {
-            BungeeMessagingService bungeeMessaging = new BungeeMessagingService(this);
-            bungeeMessaging.init();
-            messagingService = bungeeMessaging;
-        } else if (messagingType.equals("redisbungee")) {
-            if (getProxy().getPluginManager().getPlugin("RedisBungee") == null) {
-                getLog().warn("RedisBungee plugin not present.");
-            } else {
-                RedisBungeeMessagingService redisBungeeMessaging = new RedisBungeeMessagingService(this);
-                redisBungeeMessaging.init();
-                messagingService = redisBungeeMessaging;
-            }
-        } else if (!messagingType.equals("none")) {
-            getLog().warn("Messaging service '" + messagingType + "' not recognised.");
-        }
-
-        if (messagingService == null) {
-            messagingService = new NoopMessagingService();
-        }
+        messagingService = new BungeeMessagingFactory(this).getInstance();
 
         // setup the update task buffer
-        updateTaskBuffer = new BufferedRequest<Void>(1000L, this::doAsync) {
-            @Override
-            protected Void perform() {
-                new UpdateTask(LPBungeePlugin.this).run();
-                return null;
-            }
-        };
+        updateTaskBuffer = new UpdateTaskBuffer(this);
 
         // load locale
         localeManager = new SimpleLocaleManager();
-        File locale = new File(getDataFolder(), "lang.yml");
-        if (locale.exists()) {
-            getLog().info("Found lang.yml - loading messages...");
-            try {
-                localeManager.loadFromFile(locale);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+        localeManager.tryLoad(this, new File(getDataFolder(), "lang.yml"));
 
         // register commands
         commandManager = new CommandManager(this);
@@ -237,26 +181,10 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         calculatorFactory = new BungeeCalculatorFactory(this);
         cachedStateManager = new CachedStateManager();
 
-        contextManager = new ContextManager<ProxiedPlayer>() {
-            @Override
-            public Contexts formContexts(ProxiedPlayer player, ImmutableContextSet contextSet) {
-                return new Contexts(
-                        contextSet,
-                        getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
-                        getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
-                        true,
-                        getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
-                        getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
-                        false
-                );
-            }
-        };
-
-        BackendServerCalculator serverCalculator = new BackendServerCalculator(this);
-        contextManager.registerCalculator(serverCalculator);
-
-        LuckPermsCalculator<ProxiedPlayer> staticCalculator = new LuckPermsCalculator<>(getConfiguration());
-        contextManager.registerCalculator(staticCalculator, true);
+        // setup context manager
+        contextManager = new BungeeContextManager(this);
+        contextManager.registerCalculator(new BackendServerCalculator(this));
+        contextManager.registerCalculator(new LuckPermsCalculator<>(getConfiguration()), true);
 
         // register with the LP API
         apiProvider = new ApiProvider(this);

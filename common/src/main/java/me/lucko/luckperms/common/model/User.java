@@ -70,7 +70,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
     private final UserCache userData = new UserCache(this);
 
     @Getter
-    private BufferedRequest<Void> refreshBuffer = new BufferedRequest<Void>(1000L, r -> getPlugin().doAsync(r)) {
+    private BufferedRequest<Void> refreshBuffer = new BufferedRequest<Void>(250L, 50L, r -> getPlugin().doAsync(r)) {
         @Override
         protected Void perform() {
             refreshPermissions();
