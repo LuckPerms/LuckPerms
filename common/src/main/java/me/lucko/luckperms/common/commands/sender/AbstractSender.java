@@ -134,7 +134,8 @@ public final class AbstractSender<T> implements Sender {
 
     @Override
     public boolean isImport() {
-        return this.uuid.equals(Constants.IMPORT_UUID);
+        // the importer uses it's own instance of Sender
+        return false;
     }
 
     @Override

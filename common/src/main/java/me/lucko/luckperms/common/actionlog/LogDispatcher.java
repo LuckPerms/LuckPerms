@@ -45,8 +45,14 @@ public class LogDispatcher {
     private final LuckPermsPlugin plugin;
 
     public void dispatch(LogEntry entry, Sender sender) {
-        if (!plugin.getApiProvider().getEventFactory().handleLogPublish(false, entry)) {
+        // set the event to cancelled if the sender is import
+        if (!plugin.getApiProvider().getEventFactory().handleLogPublish(sender.isImport(), entry)) {
             plugin.getStorage().logAction(entry);
+        }
+
+        // don't dispatch log entries sent by an import process
+        if (sender.isImport()) {
+            return;
         }
 
         InternalMessagingService messagingService = plugin.getMessagingService();
