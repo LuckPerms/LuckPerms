@@ -181,9 +181,11 @@ public abstract class SubCommand<T> extends Command<T, Void> {
             user.getRefreshBuffer().requestDirectly();
         }
 
-        InternalMessagingService messagingService = plugin.getMessagingService();
-        if (!sender.isImport() && !(messagingService instanceof NoopMessagingService) && plugin.getConfiguration().get(ConfigKeys.AUTO_PUSH_UPDATES)) {
-            messagingService.getUpdateBuffer().request();
+        if (!sender.isImport()) {
+            InternalMessagingService messagingService = plugin.getMessagingService();
+            if (!(messagingService instanceof NoopMessagingService) && plugin.getConfiguration().get(ConfigKeys.AUTO_PUSH_UPDATES)) {
+                messagingService.getUpdateBuffer().request();
+            }
         }
 
         if (!success) {
@@ -200,9 +202,11 @@ public abstract class SubCommand<T> extends Command<T, Void> {
             plugin.getUpdateTaskBuffer().requestDirectly();
         }
 
-        InternalMessagingService messagingService = plugin.getMessagingService();
-        if (!sender.isImport() && !(messagingService instanceof NoopMessagingService) && plugin.getConfiguration().get(ConfigKeys.AUTO_PUSH_UPDATES)) {
-            messagingService.getUpdateBuffer().request();
+        if (!sender.isImport()) {
+            InternalMessagingService messagingService = plugin.getMessagingService();
+            if (!(messagingService instanceof NoopMessagingService) && plugin.getConfiguration().get(ConfigKeys.AUTO_PUSH_UPDATES)) {
+                messagingService.getUpdateBuffer().request();
+            }
         }
 
         if (!success) {
@@ -219,9 +223,11 @@ public abstract class SubCommand<T> extends Command<T, Void> {
             plugin.getUpdateTaskBuffer().requestDirectly();
         }
 
-        InternalMessagingService messagingService = plugin.getMessagingService();
-        if (!sender.isImport() && !(messagingService instanceof NoopMessagingService) && plugin.getConfiguration().get(ConfigKeys.AUTO_PUSH_UPDATES)) {
-            messagingService.getUpdateBuffer().request();
+        if (!sender.isImport()) {
+            InternalMessagingService messagingService = plugin.getMessagingService();
+            if (!(messagingService instanceof NoopMessagingService) && plugin.getConfiguration().get(ConfigKeys.AUTO_PUSH_UPDATES)) {
+                messagingService.getUpdateBuffer().request();
+            }
         }
 
         if (!success) {

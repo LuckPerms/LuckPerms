@@ -39,9 +39,12 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
-public class LogMainCommand extends MainCommand<Log> {
+public class LogMainCommand extends MainCommand<Log, Object> {
+    private final ReentrantLock lock = new ReentrantLock();
+
     public LogMainCommand(LocaleManager locale) {
         super(CommandSpec.LOG.spec(locale), "Log", 1, ImmutableList.<Command<Log, ?>>builder()
                 .add(new LogRecent(locale))
@@ -55,7 +58,17 @@ public class LogMainCommand extends MainCommand<Log> {
     }
 
     @Override
-    protected Log getTarget(String target, LuckPermsPlugin plugin, Sender sender) {
+    protected ReentrantLock getLockForTarget(Object target) {
+        return lock; // all commands target the same log, so we share a lock between all "targets"
+    }
+
+    @Override
+    protected Object parseTarget(String target, LuckPermsPlugin plugin, Sender sender) {
+        return this;
+    }
+
+    @Override
+    protected Log getTarget(Object target, LuckPermsPlugin plugin, Sender sender) {
         Log log = plugin.getStorage().getLog().join();
 
         if (log == null) {
@@ -72,7 +85,7 @@ public class LogMainCommand extends MainCommand<Log> {
 
     @Override
     protected List<String> getTargets(LuckPermsPlugin plugin) {
-        return null;
+        return null; // only used for tab completion in super, and we override this method
     }
 
     @Override

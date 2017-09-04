@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.common.commands.impl.track;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.common.commands.abstraction.Command;
@@ -38,8 +40,19 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
-public class TrackMainCommand extends MainCommand<Track> {
+public class TrackMainCommand extends MainCommand<Track, String> {
+
+    // we use a lock per unique track
+    // this helps prevent race conditions where commands are being executed concurrently
+    // and overriding each other.
+    // it's not a great solution, but it mostly works.
+    private final LoadingCache<String, ReentrantLock> locks = Caffeine.newBuilder()
+            .expireAfterAccess(1, TimeUnit.HOURS)
+            .build(key -> new ReentrantLock());
+
     public TrackMainCommand(LocaleManager locale) {
         super(CommandSpec.TRACK.spec(locale), "Track", 2, ImmutableList.<Command<Track, ?>>builder()
                 .add(new TrackInfo(locale))
@@ -54,8 +67,12 @@ public class TrackMainCommand extends MainCommand<Track> {
     }
 
     @Override
+    protected String parseTarget(String target, LuckPermsPlugin plugin, Sender sender) {
+        return target.toLowerCase();
+    }
+
+    @Override
     protected Track getTarget(String target, LuckPermsPlugin plugin, Sender sender) {
-        target = target.toLowerCase();
         if (!plugin.getStorage().loadTrack(target).join()) {
             Message.TRACK_NOT_FOUND.send(sender);
             return null;
@@ -68,6 +85,11 @@ public class TrackMainCommand extends MainCommand<Track> {
         }
 
         return track;
+    }
+
+    @Override
+    protected ReentrantLock getLockForTarget(String target) {
+        return locks.get(target);
     }
 
     @Override

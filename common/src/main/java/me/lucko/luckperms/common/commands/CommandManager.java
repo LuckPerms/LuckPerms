@@ -71,9 +71,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -83,14 +81,11 @@ public class CommandManager {
     @Getter
     private final LuckPermsPlugin plugin;
 
-    private final ExecutorService executor;
-
     @Getter
     private final List<Command> mainCommands;
 
     public CommandManager(LuckPermsPlugin plugin) {
         this.plugin = plugin;
-        this.executor = Executors.newSingleThreadExecutor();
 
         LocaleManager locale = plugin.getLocaleManager();
 
@@ -129,8 +124,8 @@ public class CommandManager {
      * @param label  the command label used
      * @param args   the arguments provided
      */
-    public Future<CommandResult> onCommand(Sender sender, String label, List<String> args) {
-        return executor.submit(() -> {
+    public CompletableFuture<CommandResult> onCommand(Sender sender, String label, List<String> args) {
+        return CompletableFuture.supplyAsync(() -> {
             try {
                 return execute(sender, label, args);
             } catch (Throwable e) {
@@ -138,7 +133,7 @@ public class CommandManager {
                 e.printStackTrace();
                 return null;
             }
-        });
+        }, plugin.getScheduler().async());
     }
 
     @SuppressWarnings("unchecked")
