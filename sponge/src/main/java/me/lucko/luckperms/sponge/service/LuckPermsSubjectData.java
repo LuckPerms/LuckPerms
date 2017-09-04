@@ -485,10 +485,24 @@ public class LuckPermsSubjectData implements LPSubjectData {
         } else {
             if (t instanceof User) {
                 User user = ((User) t);
-                return service.getPlugin().getStorage().saveUser(user).thenCombineAsync(user.getRefreshBuffer().request(), (b, v) -> v, service.getPlugin().getScheduler().async());
+                return service.getPlugin().getStorage().saveUser(user).thenApplyAsync(success -> {
+                    if (!success) {
+                        return null;
+                    }
+
+                    user.getRefreshBuffer().request().join();
+                    return null;
+                }, service.getPlugin().getScheduler().async());
             } else {
                 Group group = ((Group) t);
-                return service.getPlugin().getStorage().saveGroup(group).thenCombineAsync(service.getPlugin().getUpdateTaskBuffer().request(), (b, v) -> v, service.getPlugin().getScheduler().async());
+                return service.getPlugin().getStorage().saveGroup(group).thenApplyAsync(success -> {
+                    if (!success) {
+                        return null;
+                    }
+
+                    service.getPlugin().getUpdateTaskBuffer().request().join();
+                    return null;
+                }, service.getPlugin().getScheduler().async());
             }
         }
     }
