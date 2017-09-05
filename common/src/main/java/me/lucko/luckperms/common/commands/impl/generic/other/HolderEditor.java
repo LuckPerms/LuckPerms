@@ -85,8 +85,11 @@ public class HolderEditor<T extends PermissionHolder> extends SubCommand<T> {
 
         JsonObject data = new JsonObject();
         Set<NodeModel> nodes = holder.getEnduringNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
-        data.add("nodes", serializePermissions(nodes));
         data.addProperty("who", id(holder));
+        data.addProperty("cmdAlias", label);
+        data.addProperty("uploadedBy", sender.getName());
+        data.addProperty("time", System.currentTimeMillis());
+        data.add("nodes", serializePermissions(nodes));
 
         String dataUrl = paste(new GsonBuilder().setPrettyPrinting().create().toJson(data));
         if (dataUrl == null) {
