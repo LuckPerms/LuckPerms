@@ -180,16 +180,18 @@ public class NodeFactory {
                 sb.append(node.getMeta().getKey());
             }
 
-            sb.append(" ");
+            if (set) {
+                sb.append(" ");
 
-            if (node.getMeta().getValue().contains(" ")) {
-                sb.append("\"").append(node.getMeta().getValue()).append("\"");
-            } else {
-                sb.append(node.getMeta().getValue());
-            }
+                if (node.getMeta().getValue().contains(" ")) {
+                    sb.append("\"").append(node.getMeta().getValue()).append("\"");
+                } else {
+                    sb.append(node.getMeta().getValue());
+                }
 
-            if (node.isTemporary()) {
-                sb.append(" ").append(node.getExpiryUnixTime());
+                if (node.isTemporary()) {
+                    sb.append(" ").append(node.getExpiryUnixTime());
+                }
             }
 
             return appendContextToCommand(sb, node).toString();

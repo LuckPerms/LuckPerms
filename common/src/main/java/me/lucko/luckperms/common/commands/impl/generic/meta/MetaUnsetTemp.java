@@ -70,14 +70,18 @@ public class MetaUnsetTemp extends SharedSubCommand {
             return CommandResult.NO_PERMISSION;
         }
 
-        holder.clearMetaKeys(key, context, true);
-        Message.UNSET_META_TEMP_SUCCESS.send(sender, key, holder.getFriendlyName(), Util.contextSetToString(context));
+        if (holder.clearMetaKeys(key, context, true)) {
+            Message.UNSET_META_TEMP_SUCCESS.send(sender, key, holder.getFriendlyName(), Util.contextSetToString(context));
 
-        ExtendedLogEntry.build().actor(sender).acted(holder)
-                .action("meta unsettemp " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
-                .build().submit(plugin, sender);
+            ExtendedLogEntry.build().actor(sender).acted(holder)
+                    .action("meta unsettemp " + args.stream().map(ArgumentUtils.WRAPPER).collect(Collectors.joining(" ")))
+                    .build().submit(plugin, sender);
 
-        save(holder, sender, plugin);
-        return CommandResult.SUCCESS;
+            save(holder, sender, plugin);
+            return CommandResult.SUCCESS;
+        } else {
+            Message.DOESNT_HAVE_META.send(sender, holder.getFriendlyName());
+            return CommandResult.STATE_ERROR;
+        }
     }
 }

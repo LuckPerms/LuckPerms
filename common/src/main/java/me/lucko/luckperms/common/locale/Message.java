@@ -265,12 +265,14 @@ public enum Message {
     REMOVE_TEMP_CHATMETA_SUCCESS("&b{0}&a had temporary {1} &f\"{2}&f\"&a at priority &b{3}&a removed in context {4}&a.", true),
     BULK_REMOVE_TEMP_CHATMETA_SUCCESS("&b{0}&a had all temporary {1}es at priority &b{2}&a removed in context {3}&a.", true),
 
-    ALREADY_HAS_META("{0} already has that meta key value pair set.", true),
+    ALREADY_HAS_META("{0} already has that meta pair set.", true),
 
     SET_META_SUCCESS("&aSet meta value for key &f\"{0}&f\"&a to &f\"{1}&f\"&a for &b{2}&a in context {3}&a.", true),
     SET_META_TEMP_SUCCESS("&aSet meta value for key &f\"{0}&f\"&a to &f\"{1}&f\"&a for &b{2}&a for a duration of &b{3}&a in context {4}&a.", true),
     UNSET_META_SUCCESS("&aUnset meta value with key &f\"{0}&f\"&a for &b{1}&a in context {2}&a.", true),
     UNSET_META_TEMP_SUCCESS("&aUnset temporary meta value with key &f\"{0}&f\"&a for &b{1}&a in context {2}&a.", true),
+
+    DOESNT_HAVE_META("{0} does not have that meta pair set.", true),
 
     BULK_UPDATE_INVALID_DATA_TYPE("Invalid type. Was expecting 'all', 'users' or 'groups'.", true),
     BULK_UPDATE_INVALID_CONSTRAINT("Invalid constraint &4{0}&c. Constraints should be in the format '&f<field> <comparison operator> <value>&c'.", true),
