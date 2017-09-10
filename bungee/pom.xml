@@ -150,6 +150,10 @@
                     <groupId>net.ess3</groupId>
                     <artifactId>Essentials</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>net.ess3</groupId>
+                    <artifactId>EssentialsX</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
     </dependencies>
