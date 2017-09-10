@@ -36,7 +36,6 @@ import com.google.common.collect.ImmutableSet;
 import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.caching.MetaContexts;
-import me.lucko.luckperms.api.caching.MetaData;
 import me.lucko.luckperms.api.caching.PermissionData;
 import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.common.config.ConfigKeys;
@@ -68,17 +67,17 @@ public class UserCache implements UserData {
             .build(new MetaCacheLoader());
 
     @Override
-    public PermissionData getPermissionData(@NonNull Contexts contexts) {
+    public PermissionCache getPermissionData(@NonNull Contexts contexts) {
         return permission.get(contexts);
     }
 
     @Override
-    public MetaData getMetaData(@NonNull MetaContexts contexts) {
+    public MetaCache getMetaData(@NonNull MetaContexts contexts) {
         return meta.get(contexts);
     }
 
     @Override
-    public MetaData getMetaData(@NonNull Contexts contexts) {
+    public MetaCache getMetaData(@NonNull Contexts contexts) {
         // just create a MetaContexts instance using the values in the config
         return getMetaData(makeFromMetaContextsConfig(contexts, user.getPlugin()));
     }

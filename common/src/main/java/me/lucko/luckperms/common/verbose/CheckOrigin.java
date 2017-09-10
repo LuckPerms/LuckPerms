@@ -23,21 +23,38 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.exceptions;
+package me.lucko.luckperms.common.verbose;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 /**
- * Thrown when a certain membership state is / isn't met.
- *
- * For example, when:
- * <p></p>
- * <ul>
- *     <li>a permission holding object doesn't have a permission</li>
- *     <li>a permission holding object already has a permission</li>
- *     <li>a permission holding object is already a member of a group</li>
- *     <li>a permission holding object isn't already a member of a group</li>
- * </ul>
- *
- * @since 2.7
+ * Represents the origin of a permission check
  */
-public abstract class MembershipException extends Exception {
+@Getter
+@AllArgsConstructor
+public enum CheckOrigin {
+
+    /**
+     * Indicates the check was caused by a 'hasPermission' check on the platform
+     */
+    PLATFORM_PERMISSION_CHECK('C'),
+
+    /**
+     * Indicates the check was caused by a 'hasPermissionSet' type check on the platform
+     */
+    PLATFORM_LOOKUP_CHECK('L'),
+
+    /**
+     * Indicates the check was caused by an API call
+     */
+    API('A'),
+
+    /**
+     * Indicates the check was caused by a LuckPerms internal
+     */
+    INTERNAL('I');
+
+    private final char code;
+
 }

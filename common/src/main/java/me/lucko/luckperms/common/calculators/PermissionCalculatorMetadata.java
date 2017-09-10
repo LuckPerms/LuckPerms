@@ -23,21 +23,25 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.exceptions;
+package me.lucko.luckperms.common.calculators;
 
-/**
- * Thrown when a certain membership state is / isn't met.
- *
- * For example, when:
- * <p></p>
- * <ul>
- *     <li>a permission holding object doesn't have a permission</li>
- *     <li>a permission holding object already has a permission</li>
- *     <li>a permission holding object is already a member of a group</li>
- *     <li>a permission holding object isn't already a member of a group</li>
- * </ul>
- *
- * @since 2.7
- */
-public abstract class MembershipException extends Exception {
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+import me.lucko.luckperms.api.context.ContextSet;
+
+@Getter
+@AllArgsConstructor(staticName = "of")
+public class PermissionCalculatorMetadata {
+
+    /**
+     * The name of the object which owns the permission calculator
+     */
+    private final String objectName;
+
+    /**
+     * The context the permission calculator works with
+     */
+    private final ContextSet context;
+
 }

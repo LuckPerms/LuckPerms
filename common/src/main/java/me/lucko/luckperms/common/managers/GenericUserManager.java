@@ -39,35 +39,8 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 public class GenericUserManager extends AbstractManager<UserIdentifier, User> implements UserManager {
-    public static boolean giveDefaultIfNeeded(User user, boolean save, LuckPermsPlugin plugin) {
-        boolean hasGroup = false;
 
-        if (user.getPrimaryGroup().getStoredValue() != null && !user.getPrimaryGroup().getStoredValue().isEmpty()) {
-            for (Node node : user.getEnduringNodes().values()) {
-                if (node.hasSpecificContext()) {
-                    continue;
-                }
-
-                if (node.isGroupNode()) {
-                    hasGroup = true;
-                    break;
-                }
-            }
-        }
-
-        if (hasGroup) {
-            return false;
-        }
-
-        user.getPrimaryGroup().setStoredValue("default");
-        user.setPermission(NodeFactory.make("group.default"));
-
-        if (save) {
-            plugin.getStorage().saveUser(user);
-        }
-
-        return true;
-    }
+    private final LuckPermsPlugin plugin;
 
     @Override
     public User getOrMake(UserIdentifier id) {
@@ -77,39 +50,6 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
         }
         return ret;
     }
-
-    /**
-     * Check whether the user's state indicates that they should be persisted to storage.
-     *
-     * @param user the user to check
-     * @return true if the user should be saved
-     */
-    public static boolean shouldSave(User user) {
-        if (user.getEnduringNodes().size() != 1) {
-            return true;
-        }
-
-        for (Node node : user.getEnduringNodes().values()) {
-            // There's only one.
-            if (!node.isGroupNode()) {
-                return true;
-            }
-
-            if (node.isTemporary() || node.isServerSpecific() || node.isWorldSpecific()) {
-                return true;
-            }
-
-            if (!node.getGroupName().equalsIgnoreCase("default")) {
-                // The user's only node is not the default group one.
-                return true;
-            }
-        }
-
-        // Not in the default primary group
-        return !user.getPrimaryGroup().getStoredValue().equalsIgnoreCase("default");
-    }
-
-    private final LuckPermsPlugin plugin;
 
     @Override
     public User apply(UserIdentifier id) {
@@ -140,9 +80,12 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
     }
 
     @Override
-    public void cleanup(User user) {
+    public boolean cleanup(User user) {
         if (!plugin.isPlayerOnline(plugin.getUuidCache().getExternalUUID(user.getUuid()))) {
             unload(user);
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -176,5 +119,66 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
                 }
             });
         });
+    }
+
+    public static boolean giveDefaultIfNeeded(User user, boolean save, LuckPermsPlugin plugin) {
+        boolean hasGroup = false;
+
+        if (user.getPrimaryGroup().getStoredValue() != null && !user.getPrimaryGroup().getStoredValue().isEmpty()) {
+            for (Node node : user.getEnduringNodes().values()) {
+                if (node.hasSpecificContext()) {
+                    continue;
+                }
+
+                if (node.isGroupNode()) {
+                    hasGroup = true;
+                    break;
+                }
+            }
+        }
+
+        if (hasGroup) {
+            return false;
+        }
+
+        user.getPrimaryGroup().setStoredValue("default");
+        user.setPermission(NodeFactory.make("group.default"));
+
+        if (save) {
+            plugin.getStorage().saveUser(user);
+        }
+
+        return true;
+    }
+
+    /**
+     * Check whether the user's state indicates that they should be persisted to storage.
+     *
+     * @param user the user to check
+     * @return true if the user should be saved
+     */
+    public static boolean shouldSave(User user) {
+        if (user.getEnduringNodes().size() != 1) {
+            return true;
+        }
+
+        for (Node node : user.getEnduringNodes().values()) {
+            // There's only one.
+            if (!node.isGroupNode()) {
+                return true;
+            }
+
+            if (node.isTemporary() || node.isServerSpecific() || node.isWorldSpecific()) {
+                return true;
+            }
+
+            if (!node.getGroupName().equalsIgnoreCase("default")) {
+                // The user's only node is not the default group one.
+                return true;
+            }
+        }
+
+        // Not in the default primary group
+        return !user.getPrimaryGroup().getStoredValue().equalsIgnoreCase("default");
     }
 }

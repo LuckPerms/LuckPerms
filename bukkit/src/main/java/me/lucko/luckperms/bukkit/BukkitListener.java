@@ -102,7 +102,8 @@ public class BukkitListener implements Listener {
            - creating a user instance in the UserManager for this connection.
            - setting up cached data. */
         try {
-            LoginHelper.loadUser(plugin, e.getUniqueId(), e.getName(), false);
+            User user = LoginHelper.loadUser(plugin, e.getUniqueId(), e.getName(), false);
+            plugin.getApiProvider().getEventFactory().handleUserLoginProcess(e.getUniqueId(), e.getName(), user);
         } catch (Exception ex) {
             ex.printStackTrace();
 

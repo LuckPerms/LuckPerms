@@ -331,7 +331,7 @@ public class VaultChatHook extends Chat {
         perms.log("Getting meta: '" + node + "' for group " + group.getName() + " on world " + world + ", server " + perms.getServer());
 
         for (Node n : group.getOwnNodes()) {
-            if (!n.getValue()) continue;
+            if (!n.getValuePrimitive()) continue;
             if (!n.isMeta()) continue;
             if (!n.shouldApplyWithContext(perms.createContextForWorldLookup(world).getContexts())) continue;
 
@@ -357,7 +357,7 @@ public class VaultChatHook extends Chat {
 
         ExtractedContexts ec = ExtractedContexts.generate(Contexts.of(perms.createContextForWorldLookup(world).getContexts(), perms.isIncludeGlobal(), true, true, true, true, false));
         for (Node n : group.getAllNodes(ec)) {
-            if (!n.getValue()) continue;
+            if (!n.getValuePrimitive()) continue;
             if (type.shouldIgnore(n)) continue;
             if (!n.shouldApplyWithContext(perms.createContextForWorldLookup(world).getContexts())) continue;
 

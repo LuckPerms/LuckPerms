@@ -34,21 +34,24 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * An ordered collection of groups for easy promotions and demotions
+ * An ordered chain of {@link Group}s.
  */
 public interface Track {
 
     /**
      * Gets the name of this track
+     *
      * @return the name of this track
      */
     @Nonnull
     String getName();
 
     /**
-     * Gets an ordered list of the groups on this track
+     * Gets a list of the groups on this track
      *
-     * <p>Index 0 is the first/lowest group in (or start of) the track</p>
+     * <p>Index 0 is the first/lowest group in (or start of) the track.</p>
+     *
+     * <p>The returned collection is immutable, and cannot be modified.</p>
      *
      * @return an ordered {@link List} of the groups on this track
      */

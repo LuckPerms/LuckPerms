@@ -70,13 +70,7 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
     private final UserCache userData = new UserCache(this);
 
     @Getter
-    private BufferedRequest<Void> refreshBuffer = new BufferedRequest<Void>(250L, 50L, r -> getPlugin().doAsync(r)) {
-        @Override
-        protected Void perform() {
-            refreshPermissions();
-            return null;
-        }
-    };
+    private BufferedRequest<Void> refreshBuffer = new UserRefreshBuffer(this);
 
     @Getter
     private final UserDelegate delegate = new UserDelegate(this);
@@ -214,4 +208,20 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
     public void cleanup() {
         userData.cleanup();
     }
+
+    private static final class UserRefreshBuffer extends BufferedRequest<Void> {
+        private final User user;
+
+        private UserRefreshBuffer(User user) {
+            super(250L, 50L, r -> user.getPlugin().doAsync(r));
+            this.user = user;
+        }
+
+        @Override
+        protected Void perform() {
+            user.refreshPermissions();
+            return null;
+        }
+    }
+
 }

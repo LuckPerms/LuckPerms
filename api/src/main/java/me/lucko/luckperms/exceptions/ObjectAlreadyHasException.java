@@ -26,8 +26,15 @@
 package me.lucko.luckperms.exceptions;
 
 /**
- * Thrown when a permission holding object already has a permission, is already a member of a group, or when a track
- * already contains a group.
+ * Thrown when an object already has something.
+ *
+ * <p>For example, when:</p>
+ * <p></p>
+ * <ul>
+ *     <li>a permission holding object already has a permission</li>
+ *     <li>a permission holding object is already a member of a group</li>
+ *     <li>a track already contains a group</li>
+ * </ul>
  */
 public class ObjectAlreadyHasException extends MembershipException {
 }

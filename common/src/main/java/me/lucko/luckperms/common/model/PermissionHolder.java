@@ -546,7 +546,7 @@ public abstract class PermissionHolder {
             if (!n.isGroupNode()) continue;
             String groupName = n.getGroupName();
 
-            if (!processedGroups.add(groupName) || excludedGroups.contains(groupName) || !n.getValue()) continue;
+            if (!processedGroups.add(groupName) || excludedGroups.contains(groupName) || !n.getValuePrimitive()) continue;
 
             if (!((contexts.isApplyGlobalGroups() || n.isServerSpecific()) && (contexts.isApplyGlobalWorldGroups() || n.isWorldSpecific()))) {
                 continue;
@@ -624,7 +624,7 @@ public abstract class PermissionHolder {
             if (!n.isGroupNode()) continue;
             String groupName = n.getGroupName();
 
-            if (!processedGroups.add(groupName) || excludedGroups.contains(groupName) || !n.getValue()) continue;
+            if (!processedGroups.add(groupName) || excludedGroups.contains(groupName) || !n.getValuePrimitive()) continue;
 
             Group g = plugin.getGroupManager().getIfLoaded(groupName);
             if (g != null) {
@@ -717,11 +717,11 @@ public abstract class PermissionHolder {
         for (Node node : entries) {
             String perm = lowerCase ? node.getPermission().toLowerCase() : node.getPermission();
 
-            if (perms.putIfAbsent(perm, node.getValue()) == null) {
+            if (perms.putIfAbsent(perm, node.getValuePrimitive()) == null) {
                 if (applyShorthand) {
                     List<String> sh = node.resolveShorthand();
                     if (!sh.isEmpty()) {
-                        sh.stream().map(s -> lowerCase ? s.toLowerCase() : s).forEach(s -> perms.putIfAbsent(s, node.getValue()));
+                        sh.stream().map(s -> lowerCase ? s.toLowerCase() : s).forEach(s -> perms.putIfAbsent(s, node.getValuePrimitive()));
                     }
                 }
             }
@@ -738,11 +738,11 @@ public abstract class PermissionHolder {
         for (Node node : entries) {
             String perm = lowerCase ? node.getPermission().toLowerCase() : node.getPermission();
 
-            if (perms.putIfAbsent(perm, node.getValue()) == null) {
+            if (perms.putIfAbsent(perm, node.getValuePrimitive()) == null) {
                 if (applyShorthand) {
                     List<String> sh = node.resolveShorthand();
                     if (!sh.isEmpty()) {
-                        sh.stream().map(s -> lowerCase ? s.toLowerCase() : s).forEach(s -> perms.putIfAbsent(s, node.getValue()));
+                        sh.stream().map(s -> lowerCase ? s.toLowerCase() : s).forEach(s -> perms.putIfAbsent(s, node.getValuePrimitive()));
                     }
                 }
             }
@@ -770,7 +770,7 @@ public abstract class PermissionHolder {
         List<Node> nodes = filterNodes(context.getContextSet());
 
         for (Node node : nodes) {
-            if (!node.getValue()) continue;
+            if (!node.getValuePrimitive()) continue;
             if (!node.isMeta() && !node.isPrefix() && !node.isSuffix()) continue;
 
             if (!((contexts.isIncludeGlobal() || node.isServerSpecific()) && (contexts.isIncludeGlobalWorld() || node.isWorldSpecific()))) {
@@ -793,7 +793,7 @@ public abstract class PermissionHolder {
             if (!n.isGroupNode()) continue;
             String groupName = n.getGroupName();
 
-            if (!processedGroups.add(groupName) || excludedGroups.contains(groupName) || !n.getValue()) continue;
+            if (!processedGroups.add(groupName) || excludedGroups.contains(groupName) || !n.getValuePrimitive()) continue;
 
             if (!((contexts.isApplyGlobalGroups() || n.isServerSpecific()) && (contexts.isApplyGlobalWorldGroups() || n.isWorldSpecific()))) {
                 continue;
@@ -834,7 +834,7 @@ public abstract class PermissionHolder {
         List<Node> nodes = getOwnNodes();
 
         for (Node node : nodes) {
-            if (!node.getValue()) continue;
+            if (!node.getValuePrimitive()) continue;
             if (!node.isMeta() && !node.isPrefix() && !node.isSuffix()) continue;
 
             accumulator.accumulateNode(ImmutableLocalizedNode.of(node, getObjectName()));
@@ -853,7 +853,7 @@ public abstract class PermissionHolder {
             if (!n.isGroupNode()) continue;
             String groupName = n.getGroupName();
 
-            if (!processedGroups.add(groupName) || excludedGroups.contains(groupName) || !n.getValue()) continue;
+            if (!processedGroups.add(groupName) || excludedGroups.contains(groupName) || !n.getValuePrimitive()) continue;
 
             Group g = plugin.getGroupManager().getIfLoaded(groupName);
             if (g != null) {

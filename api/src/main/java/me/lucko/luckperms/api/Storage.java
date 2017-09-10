@@ -36,14 +36,14 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * A means of loading and saving data to/from the Storage provider.
+ * A means of loading and saving permission data to/from the backend.
  *
- * <p>All methods return {@link CompletableFuture}s, which will be populated with the result once the data has been
- * loaded asynchronously. Care should be taken when using the methods to ensure that the main server thread is not
+ * <p>All blocking methods return {@link CompletableFuture}s, which will be populated with the result once the data has been
+ * loaded/saved asynchronously. Care should be taken when using such methods to ensure that the main server thread is not
  * blocked.</p>
  *
  * <p>Methods such as {@link CompletableFuture#get()} and equivalent should <strong>not</strong> be called on the main
- * server thread. If you need to use the result of these operations on the main server thread, please register a
+ * server thread. If you need to use the result of these operations on the main server thread, register a
  * callback using {@link CompletableFuture#thenAcceptAsync(Consumer, Executor)} and {@link #getSyncExecutor()}.</p>
  *
  * @since 2.14
@@ -59,7 +59,7 @@ public interface Storage {
     String getName();
 
     /**
-     * Return whether the storage instance is allowing logins on the platform.
+     * Gets whether the storage instance is allowing logins on the platform.
      *
      * @return true if logins are enabled
      */
@@ -144,7 +144,8 @@ public interface Storage {
 
     /**
      * Gets a set all "unique" user UUIDs.
-     * "Unique" meaning the user isn't just a member of the "default" group.
+     *
+     * <p>"Unique" meaning the user isn't just a member of the "default" group.</p>
      *
      * @return a set of uuids, or null if the operation failed.
      */

@@ -25,7 +25,7 @@
 
 package me.lucko.luckperms.common.commands.impl.misc;
 
-import me.lucko.luckperms.api.caching.PermissionData;
+import me.lucko.luckperms.common.caching.PermissionCache;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SingleCommand;
@@ -86,7 +86,7 @@ public class TreeCommand extends SingleCommand {
                 return CommandResult.STATE_ERROR;
             }
 
-            PermissionData permissionData = user.getUserData().getPermissionData(plugin.getContextForUser(user));
+            PermissionCache permissionData = user.getUserData().getPermissionData(plugin.getContextForUser(user));
             TreeView view = TreeViewBuilder.newBuilder().rootPosition(selection).maxLevels(maxLevel).build(plugin.getPermissionVault());
 
             if (!view.hasData()) {

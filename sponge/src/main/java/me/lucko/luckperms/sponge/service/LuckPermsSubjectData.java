@@ -81,7 +81,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
             for (Map.Entry<ImmutableContextSet, Collection<Node>> e : (enduring ? holder.getEnduringNodes() : holder.getTransientNodes()).asMap().entrySet()) {
                 ImmutableMap.Builder<String, Boolean> results = ImmutableMap.builder();
                 for (Node n : e.getValue()) {
-                    results.put(n.getPermission(), n.getValue());
+                    results.put(n.getPermission(), n.getValuePrimitive());
                 }
                 perms.put(e.getKey(), results);
             }
@@ -322,7 +322,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
             Map<ImmutableContextSet, Integer> minSuffixPriority = new HashMap<>();
 
             for (Node n : enduring ? holder.getEnduringNodes().values() : holder.getTransientNodes().values()) {
-                if (!n.getValue()) continue;
+                if (!n.getValuePrimitive()) continue;
                 if (!n.isMeta() && !n.isPrefix() && !n.isSuffix()) continue;
 
                 ImmutableContextSet immutableContexts = n.getFullContexts().makeImmutable();

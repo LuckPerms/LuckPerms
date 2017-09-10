@@ -28,26 +28,11 @@ package me.lucko.luckperms.api;
 import javax.annotation.Nonnull;
 
 /**
- * Builds {@link Node} instances
+ * Assists with constructing {@link Node} instances.
  *
  * @since 2.17
  */
 public interface NodeFactory {
-
-    /**
-     * Creates a node from a serialised node string
-     *
-     * @param serialisedPermission the serialised permission string
-     * @param value                the value of the node
-     * @return a node instance
-     * @throws NullPointerException if the permission is null
-     * @deprecated since this format isn't used internally for permissions anymore
-     * @see Node#toSerializedNode()
-     */
-    @Deprecated
-    @Nonnull
-    Node fromSerialisedNode(@Nonnull String serialisedPermission, boolean value);
-
 
     /**
      * Creates a new node builder from a given base permission string
@@ -68,20 +53,6 @@ public interface NodeFactory {
      */
     @Nonnull
     Node.Builder newBuilderFromExisting(@Nonnull Node other);
-
-    /**
-     * Creates a node builder from a serialised node string
-     *
-     * @param serialisedPermission the serialised permission string
-     * @param value                the value of the node
-     * @return a node builder instance
-     * @throws NullPointerException if the permission is null
-     * @deprecated since this format isn't used internally for permissions anymore
-     * @see Node#toSerializedNode()
-     */
-    @Deprecated
-    @Nonnull
-    Node.Builder newBuilderFromSerialisedNode(@Nonnull String serialisedPermission, boolean value);
 
 
     /**
@@ -140,5 +111,36 @@ public interface NodeFactory {
      */
     @Nonnull
     Node.Builder makeSuffixNode(int priority, @Nonnull String suffix);
+
+
+    /**
+     * Creates a node from a serialised node string
+     *
+     * <p>This format is what was previously used in YAML/JSON storage files.</p>
+     *
+     * @param serialisedPermission the serialised permission string
+     * @param value                the value of the node
+     * @return a node instance
+     * @throws NullPointerException if the permission is null
+     * @deprecated since this format isn't used internally for permissions anymore
+     * @see Node#toSerializedNode()
+     */
+    @Deprecated
+    @Nonnull
+    Node fromSerialisedNode(@Nonnull String serialisedPermission, boolean value);
+
+    /**
+     * Creates a node builder from a serialised node string
+     *
+     * @param serialisedPermission the serialised permission string
+     * @param value                the value of the node
+     * @return a node builder instance
+     * @throws NullPointerException if the permission is null
+     * @deprecated since this format isn't used internally for permissions anymore
+     * @see Node#toSerializedNode()
+     */
+    @Deprecated
+    @Nonnull
+    Node.Builder newBuilderFromSerialisedNode(@Nonnull String serialisedPermission, boolean value);
 
 }

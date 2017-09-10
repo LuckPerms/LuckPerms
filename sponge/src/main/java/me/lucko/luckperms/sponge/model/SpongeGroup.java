@@ -97,7 +97,7 @@ public class SpongeGroup extends Group {
                     // TODO move this away from NodeTree
                     Map<String, Boolean> permissions = getParent().getAllNodes(ExtractedContexts.generate(getPlugin().getService().calculateContexts(contexts))).stream()
                             .map(LocalizedNode::getNode)
-                            .collect(Collectors.toMap(Node::getPermission, Node::getValue));
+                            .collect(Collectors.toMap(Node::getPermission, Node::getValuePrimitive));
 
                     return NodeTree.of(permissions);
                 });

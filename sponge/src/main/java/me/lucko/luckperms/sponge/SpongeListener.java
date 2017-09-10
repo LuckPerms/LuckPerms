@@ -72,6 +72,7 @@ public class SpongeListener {
            Listening on AFTER_PRE priority to allow plugins to modify username / UUID data here. (auth plugins) */
 
         final GameProfile p = e.getProfile();
+        final String username = p.getName().orElseThrow(() -> new RuntimeException("No username present for user " + p.getUniqueId()));
 
         if (plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
             plugin.getLog().info("Processing auth event for " + p.getUniqueId() + " - " + p.getName());
@@ -107,7 +108,8 @@ public class SpongeListener {
            - creating a user instance in the UserManager for this connection.
            - setting up cached data. */
         try {
-            LoginHelper.loadUser(plugin, p.getUniqueId(), p.getName().orElseThrow(() -> new RuntimeException("No username present for user " + p.getUniqueId())), false);
+            User user = LoginHelper.loadUser(plugin, p.getUniqueId(), username, false);
+            plugin.getApiProvider().getEventFactory().handleUserLoginProcess(p.getUniqueId(), username, user);
         } catch (Exception ex) {
             ex.printStackTrace();
 

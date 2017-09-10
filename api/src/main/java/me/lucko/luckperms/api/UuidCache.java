@@ -32,34 +32,34 @@ import javax.annotation.Nonnull;
 /**
  * A UUID cache for online users, between external Mojang UUIDs, and internal LuckPerms UUIDs.
  *
- * <p>This UuidCache is a means of allowing users to have the same internal UUID across a network of offline mode
- * servers or mixed offline mode and online mode servers. Platforms running in offline mode generate a UUID for a
- * user when they first join the server, but this UUID will then not be consistent across the network. LuckPerms will
- * instead check the datastore cache, to get a UUID for a user that is consistent across an entire network.</p>
+ * <p>A user's internal LuckPerms UUID is always the same as their Mojang one,
+ * unless <code>use-server-uuids</code> is disabled.</p>
  *
- * <p>If you want to get a user object from the Storage using the api on a server in offline mode, you will need to use
- * this cache, OR use Storage#getUUID, for users that are not online.</p>
+ * <p>When this setting is disabled, this cache becomes active, and allows you to convert
+ * between 'internal' and 'server provided' uuids.</p>
  *
  * <p><strong>This is only effective for online players. Use {@link Storage#getUUID(String)} for offline players.</strong></p>
  */
 public interface UuidCache {
 
     /**
-     * Gets a users internal "LuckPerms" UUID, from the one given by the server.
+     * Gets a users "internal" LuckPerms UUID, from the one given by the server.
      *
-     * @param external the UUID assigned by the server, through Player#getUniqueId or ProxiedPlayer#getUniqueId
+     * <p>When <code>use-server-uuids</code> is true, this returns the same UUID instance.</p>
+     *
+     * @param mojangUuid the UUID assigned by the server, through <code>Player#getUniqueId</code> or <code>ProxiedPlayer#getUniqueId</code>
      * @return the corresponding internal UUID
      */
     @Nonnull
-    UUID getUUID(@Nonnull UUID external);
+    UUID getUUID(@Nonnull UUID mojangUuid);
 
     /**
-     * Gets a users external, server assigned or Mojang assigned unique id, from the internal one used within LuckPerms.
+     * Gets a users "external", server assigned unique id, from the internal one used within LuckPerms.
      *
-     * @param internal the UUID used within LuckPerms, through User#getUuid
+     * @param internalUuid the UUID used within LuckPerms, through <code>User#getUuid</code>
      * @return the corresponding external UUID
      */
     @Nonnull
-    UUID getExternalUUID(@Nonnull UUID internal);
+    UUID getExternalUUID(@Nonnull UUID internalUuid);
 
 }

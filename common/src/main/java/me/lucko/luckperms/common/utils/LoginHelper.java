@@ -41,7 +41,7 @@ import java.util.concurrent.CompletableFuture;
 @UtilityClass
 public class LoginHelper {
 
-    public static void loadUser(LuckPermsPlugin plugin, UUID u, String username, boolean joinUuidSave) {
+    public static User loadUser(LuckPermsPlugin plugin, UUID u, String username, boolean joinUuidSave) {
         final long startTime = System.currentTimeMillis();
 
         final UuidCache cache = plugin.getUuidCache();
@@ -97,6 +97,8 @@ public class LoginHelper {
         if (time >= 1000) {
             plugin.getLog().warn("Processing login for " + username + " took " + time + "ms.");
         }
+
+        return user;
     }
 
     public static void refreshPlayer(LuckPermsPlugin plugin, UUID uuid) {

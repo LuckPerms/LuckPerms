@@ -192,7 +192,7 @@ public class GroupListMembers extends SubCommand<Group> {
 
     private static Consumer<BuildableComponent.Builder<? ,?>> makeFancy(String holderName, boolean group, String label, HeldPermission<?> perm) {
         HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(TextUtils.joinNewline(
-                "&3> " + (perm.asNode().getValue() ? "&a" : "&c") + perm.asNode().getGroupName(),
+                "&3> " + (perm.asNode().getValuePrimitive() ? "&a" : "&c") + perm.asNode().getGroupName(),
                 " ",
                 "&7Click to remove this parent from " + holderName
         ), Constants.FORMAT_CHAR));

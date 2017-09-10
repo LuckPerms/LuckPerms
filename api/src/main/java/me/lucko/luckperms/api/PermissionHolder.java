@@ -43,14 +43,15 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * An object capable of holding permissions
+ * An object which holds permissions.
  *
- * <p>Any changes made will be lost unless the instance is saved back to the {@link Storage}.</p>
+ * <p>Any changes made to permission holding objects will be lost unless the
+ * instance is saved back to the {@link Storage}.</p>
  */
 public interface PermissionHolder {
 
     /**
-     * Gets the objects name
+     * Gets the objects name.
      *
      * <p>{@link User#getUuid()}, {@link User#getName()} or {@link Group#getName()} should normally be used instead of
      * this method.</p>
@@ -123,7 +124,7 @@ public interface PermissionHolder {
     SortedSet<? extends Node> getPermissions();
 
     /**
-     * Similar to {@link #getPermissions()}, except without transient permissions
+     * Similar to {@link #getPermissions()}, except without transient permissions.
      *
      * <p>Unlike transient permissions, enduring permissions will be saved to storage, and exist after the session.</p>
      *
@@ -134,7 +135,7 @@ public interface PermissionHolder {
     Set<? extends Node> getEnduringPermissions();
 
     /**
-     * Similar to {@link #getPermissions()}, except without enduring permissions
+     * Similar to {@link #getPermissions()}, except without enduring permissions.
      *
      * <p>Transient permissions only exist for the duration of the session.</p>
      *

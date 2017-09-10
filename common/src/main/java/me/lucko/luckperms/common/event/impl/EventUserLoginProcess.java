@@ -23,21 +23,25 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.exceptions;
+package me.lucko.luckperms.common.event.impl;
 
-/**
- * Thrown when a certain membership state is / isn't met.
- *
- * For example, when:
- * <p></p>
- * <ul>
- *     <li>a permission holding object doesn't have a permission</li>
- *     <li>a permission holding object already has a permission</li>
- *     <li>a permission holding object is already a member of a group</li>
- *     <li>a permission holding object isn't already a member of a group</li>
- * </ul>
- *
- * @since 2.7
- */
-public abstract class MembershipException extends Exception {
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.ToString;
+
+import me.lucko.luckperms.api.User;
+import me.lucko.luckperms.api.event.user.UserLoginProcessEvent;
+import me.lucko.luckperms.common.event.AbstractEvent;
+
+import java.util.UUID;
+
+@Getter
+@ToString
+@AllArgsConstructor
+public class EventUserLoginProcess extends AbstractEvent implements UserLoginProcessEvent {
+
+    private final UUID uuid;
+    private final String username;
+    private final User user;
+
 }

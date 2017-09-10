@@ -38,6 +38,7 @@ import me.lucko.luckperms.bukkit.processors.ChildProcessor;
 import me.lucko.luckperms.bukkit.processors.DefaultsProcessor;
 import me.lucko.luckperms.common.calculators.AbstractCalculatorFactory;
 import me.lucko.luckperms.common.calculators.PermissionCalculator;
+import me.lucko.luckperms.common.calculators.PermissionCalculatorMetadata;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.processors.MapProcessor;
@@ -82,7 +83,11 @@ public class BukkitCalculatorFactory extends AbstractCalculatorFactory {
             processors.add(new DefaultsProcessor(contexts.isOp(), plugin.getDefaultsProvider()));
         }
 
-        return registerCalculator(new PermissionCalculator(plugin, user.getFriendlyName(), processors.build()));
+        return registerCalculator(new PermissionCalculator(
+                plugin,
+                PermissionCalculatorMetadata.of(user.getFriendlyName(), contexts.getContexts()),
+                processors.build()
+        ));
     }
 
     @Override

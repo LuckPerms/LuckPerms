@@ -23,21 +23,50 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.exceptions;
+package me.lucko.luckperms.api.event.user;
+
+import me.lucko.luckperms.api.User;
+import me.lucko.luckperms.api.event.LuckPermsEvent;
+
+import java.util.UUID;
+
+import javax.annotation.Nonnull;
 
 /**
- * Thrown when a certain membership state is / isn't met.
+ * Called when LuckPerms has finished processing a certain Player's connection.
  *
- * For example, when:
- * <p></p>
- * <ul>
- *     <li>a permission holding object doesn't have a permission</li>
- *     <li>a permission holding object already has a permission</li>
- *     <li>a permission holding object is already a member of a group</li>
- *     <li>a permission holding object isn't already a member of a group</li>
- * </ul>
+ * <p>This event will always execute during the platforms async login/auth event.
+ * All handlers will be called instantly.</p>
  *
- * @since 2.7
+ * <p>This, among other things, allows you to wait until permission data is loaded
+ * for a User during the BungeeCord 'LoginEvent', as event priorities are ignored
+ * by the current implementation.</p>
+ *
+ * @since 3.4
  */
-public abstract class MembershipException extends Exception {
+public interface UserLoginProcessEvent extends LuckPermsEvent {
+
+    /**
+     * Gets the UUID of the connection which was processed
+     *
+     * @return the uuid of the connection which was processed
+     */
+    @Nonnull
+    UUID getUuid();
+
+    /**
+     * Gets the username of the connection which was processed
+     *
+     * @return the username of the connection which was processed
+     */
+    @Nonnull
+    String getUsername();
+
+    /**
+     * Gets the resultant User instance which was loaded.
+     *
+     * @return the user instance
+     */
+    User getUser();
+
 }

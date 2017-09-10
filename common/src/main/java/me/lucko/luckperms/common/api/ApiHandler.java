@@ -31,18 +31,23 @@ import me.lucko.luckperms.api.LuckPermsApi;
 import java.lang.reflect.Method;
 
 public class ApiHandler {
-    private static Method REGISTER;
-    private static Method UNREGISTER;
+    private static final Method REGISTER;
+    private static final Method UNREGISTER;
     static {
+        Method register = null;
+        Method unregister = null;
         try {
-            REGISTER = LuckPerms.class.getDeclaredMethod("registerProvider", LuckPermsApi.class);
-            REGISTER.setAccessible(true);
+            register = LuckPerms.class.getDeclaredMethod("registerProvider", LuckPermsApi.class);
+            register.setAccessible(true);
 
-            UNREGISTER = LuckPerms.class.getDeclaredMethod("unregisterProvider");
-            UNREGISTER.setAccessible(true);
+            unregister = LuckPerms.class.getDeclaredMethod("unregisterProvider");
+            unregister.setAccessible(true);
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        REGISTER = register;
+        UNREGISTER = unregister;
     }
 
     public static void registerProvider(LuckPermsApi luckPermsApi) {

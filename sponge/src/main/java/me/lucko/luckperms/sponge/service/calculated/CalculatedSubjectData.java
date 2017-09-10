@@ -39,8 +39,10 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.calculators.PermissionCalculator;
+import me.lucko.luckperms.common.calculators.PermissionCalculatorMetadata;
 import me.lucko.luckperms.common.processors.MapProcessor;
 import me.lucko.luckperms.common.processors.PermissionProcessor;
+import me.lucko.luckperms.common.verbose.CheckOrigin;
 import me.lucko.luckperms.sponge.processors.SpongeWildcardProcessor;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
@@ -84,7 +86,7 @@ public class CalculatedSubjectData implements LPSubjectData {
                     processors.add(new MapProcessor());
                     processors.add(new SpongeWildcardProcessor());
 
-                    CalculatorHolder holder = new CalculatorHolder(new PermissionCalculator(service.getPlugin(), calculatorDisplayName, processors.build()));
+                    CalculatorHolder holder = new CalculatorHolder(new PermissionCalculator(service.getPlugin(), PermissionCalculatorMetadata.of(calculatorDisplayName, contexts), processors.build()));
                     holder.setPermissions(flattenMap(contexts, permissions));
 
                     return holder;
@@ -100,7 +102,7 @@ public class CalculatedSubjectData implements LPSubjectData {
     }
 
     public Tristate getPermissionValue(ContextSet contexts, String permission) {
-        return permissionCache.get(contexts).getCalculator().getPermissionValue(permission);
+        return permissionCache.get(contexts).getCalculator().getPermissionValue(permission, CheckOrigin.INTERNAL);
     }
 
     public void replacePermissions(Map<ImmutableContextSet, Map<String, Boolean>> map) {

@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.verbose;
 import lombok.Setter;
 
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.commands.sender.Sender;
 
 import java.util.Map;
@@ -70,18 +71,23 @@ public class VerboseHandler implements Runnable {
      * <p>The check data is added to a queue to be processed later, to avoid blocking
      * the main thread each time a permission check is made.</p>
      *
+     * @param checkOrigin the origin of the check
      * @param checkTarget the target of the permission check
+     * @param checkContext the contexts where the check occurred
      * @param permission the permission which was checked for
      * @param result the result of the permission check
      */
-    public void offerCheckData(String checkTarget, String permission, Tristate result) {
+    public void offerCheckData(CheckOrigin checkOrigin, String checkTarget, ContextSet checkContext, String permission, Tristate result) {
         // don't bother even processing the check if there are no listeners registered
         if (!listening) {
             return;
         }
 
+        //noinspection ThrowableNotThrown
+        StackTraceElement[] trace = new Exception().getStackTrace();
+
         // add the check data to a queue to be processed later.
-        queue.offer(new CheckData(checkTarget, permission, result));
+        queue.offer(new CheckData(checkOrigin, checkTarget, checkContext.makeImmutable(), trace, permission, result));
     }
 
     /**

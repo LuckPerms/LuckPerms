@@ -35,6 +35,7 @@ import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.buffers.BufferedRequest;
+import me.lucko.luckperms.common.verbose.CheckOrigin;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.ProxyFactory;
 import me.lucko.luckperms.sponge.service.calculated.CalculatedSubjectData;
@@ -247,7 +248,7 @@ public class PersistedSubject implements LPSubject {
     public Tristate getPermissionValue(@NonNull ImmutableContextSet contexts, @NonNull String node) {
         try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.INTERNAL_SUBJECT_GET_PERMISSION_VALUE)) {
             Tristate t = permissionLookupCache.get(PermissionLookup.of(node, contexts));
-            service.getPlugin().getVerboseHandler().offerCheckData("local:" + getParentCollection().getIdentifier() + "/" + identifier, node, t);
+            service.getPlugin().getVerboseHandler().offerCheckData(CheckOrigin.INTERNAL, "local:" + getParentCollection().getIdentifier() + "/" + identifier, contexts, node, t);
             return t;
         }
     }

@@ -57,7 +57,7 @@ public class ParentsByWeightHolder extends StoredHolder {
 
         List<Group> groups = new ArrayList<>();
         for (Node node : user.filterNodes(contextSet)) {
-            if (!node.getValue() || !node.isGroupNode()) {
+            if (!node.getValuePrimitive() || !node.isGroupNode()) {
                 continue;
             }
 

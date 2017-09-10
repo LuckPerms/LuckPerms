@@ -57,7 +57,8 @@ public enum CommandSpec {
     VERBOSE("Manage verbose permission checking", "/%s verbose <true|false> [filter]",
             Arg.list(
                     Arg.create("on|record|off|paste", true, "whether to enable/disable logging, or to paste the logged output"),
-                    Arg.create("filter", false, "the filter to match entries against")
+                    Arg.create("filter", false, "the filter to match entries against"),
+                    Arg.create("--slim", false, "add \"--slim\" to exclude trace data from the pasted output")
             )
     ),
     TREE("Generate a tree view of permissions", "/%s tree [selection] [max level] [player]",
