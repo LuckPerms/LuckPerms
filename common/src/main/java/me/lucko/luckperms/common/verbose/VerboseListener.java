@@ -174,7 +174,7 @@ public class VerboseListener {
      * @return the url
      * @see PasteUtils#paste(String, List)
      */
-    public String uploadPasteData(boolean showTraces) {
+    public String uploadPasteData(boolean showTraces, boolean attachRaw) {
         long now = System.currentTimeMillis();
         String startDate = DATE_FORMAT.format(new Date(startTime));
         String endDate = DATE_FORMAT.format(new Date(now));
@@ -216,7 +216,7 @@ public class VerboseListener {
         }
 
         prettyOutput.add("### Output")
-                .add("Format: `<checked>` `<origin>` `<permission>` `<value>`")
+                .add("Format: `<checked>` `<permission>` `<value>`")
                 .add("")
                 .add("___")
                 .add("");
@@ -267,14 +267,23 @@ public class VerboseListener {
                 prettyOutput.add("</pre></p></details>");
             }
 
-            csvOutput.add(escapeCommas(c.getCheckTarget()) + "," + escapeCommas(c.getPermission()) + "," + c.getResult().name().toLowerCase());
+            if (attachRaw) {
+                csvOutput.add(escapeCommas(c.getCheckTarget()) + "," + escapeCommas(c.getPermission()) + "," + c.getResult().name().toLowerCase());
+            }
         });
         results.clear();
 
-        List<Map.Entry<String, String>> content = ImmutableList.of(
-                Maps.immutableEntry("luckperms-verbose.md", prettyOutput.build().stream().collect(Collectors.joining("\n"))),
-                Maps.immutableEntry("raw-data.csv", csvOutput.build().stream().collect(Collectors.joining("\n")))
-        );
+        List<Map.Entry<String, String>> content;
+        if (attachRaw) {
+            content = ImmutableList.of(
+                    Maps.immutableEntry("luckperms-verbose.md", prettyOutput.build().stream().collect(Collectors.joining("\n"))),
+                    Maps.immutableEntry("raw-data.csv", csvOutput.build().stream().collect(Collectors.joining("\n")))
+            );
+        } else {
+            content = ImmutableList.of(
+                    Maps.immutableEntry("luckperms-verbose.md", prettyOutput.build().stream().collect(Collectors.joining("\n")))
+            );
+        }
 
         return PasteUtils.paste("LuckPerms Verbose Checking Output", content);
     }

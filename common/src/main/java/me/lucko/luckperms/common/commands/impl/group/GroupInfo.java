@@ -61,8 +61,8 @@ public class GroupInfo extends SubCommand<Group> {
                 group.getId(),
                 group.getDisplayName(),
                 group.getWeight().isPresent() ? group.getWeight().getAsInt() : "None",
-                group.getPermanentNodes().size(),
-                group.getTemporaryNodes().size(),
+                group.getOwnNodes().size(),
+                group.getOwnNodes().stream().filter(n -> !(n.isGroupNode() || n.isPrefix() || n.isSuffix() || n.isMeta())).mapToInt(n -> 1).sum(),
                 group.getPrefixNodes().size(),
                 group.getSuffixNodes().size(),
                 group.getMetaNodes().size()

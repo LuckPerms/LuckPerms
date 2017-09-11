@@ -68,23 +68,23 @@ public class UserDemote extends SubCommand<User> {
 
         final String trackName = args.get(0).toLowerCase();
         if (!DataConstraints.TRACK_NAME_TEST.test(trackName)) {
-            Message.TRACK_INVALID_ENTRY.send(sender);
+            Message.TRACK_INVALID_ENTRY.send(sender, trackName);
             return CommandResult.INVALID_ARGS;
         }
 
         if (!plugin.getStorage().loadTrack(trackName).join()) {
-            Message.TRACK_DOES_NOT_EXIST.send(sender);
+            Message.DOES_NOT_EXIST.send(sender, trackName);
             return CommandResult.INVALID_ARGS;
         }
 
         Track track = plugin.getTrackManager().getIfLoaded(trackName);
         if (track == null) {
-            Message.TRACK_DOES_NOT_EXIST.send(sender);
+            Message.DOES_NOT_EXIST.send(sender, trackName);
             return CommandResult.LOADING_ERROR;
         }
 
         if (track.getSize() <= 1) {
-            Message.TRACK_EMPTY.send(sender);
+            Message.TRACK_EMPTY.send(sender, track.getName());
             return CommandResult.STATE_ERROR;
         }
 
@@ -106,12 +106,12 @@ public class UserDemote extends SubCommand<User> {
         nodes.removeIf(g -> !track.containsGroup(g.getGroupName()));
 
         if (nodes.isEmpty()) {
-            Message.USER_TRACK_ERROR_NOT_CONTAIN_GROUP.send(sender);
+            Message.USER_TRACK_ERROR_NOT_CONTAIN_GROUP.send(sender, user.getFriendlyName(), track.getName());
             return CommandResult.FAILURE;
         }
 
         if (nodes.size() != 1) {
-            Message.TRACK_AMBIGUOUS_CALL.send(sender);
+            Message.TRACK_AMBIGUOUS_CALL.send(sender, user.getFriendlyName());
             return CommandResult.FAILURE;
         }
 

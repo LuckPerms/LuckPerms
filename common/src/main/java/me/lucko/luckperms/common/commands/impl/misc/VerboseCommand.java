@@ -64,6 +64,7 @@ public class VerboseCommand extends SingleCommand {
         }
 
         boolean noTraces = args.remove("--notrace") || args.remove("--notraces") || args.remove("--slim") || args.remove("-s");
+        boolean attachRaw = args.remove("--raw");
         String mode = args.get(0).toLowerCase();
 
         if (mode.equals("on") || mode.equals("true") || mode.equals("record")) {
@@ -107,14 +108,14 @@ public class VerboseCommand extends SingleCommand {
                 if (listener == null) {
                     Message.VERBOSE_OFF.send(sender);
                 } else {
-                    Message.VERBOSE_RECORDING_UPLOAD_START.send(sender);
+                    Message.VERBOSE_UPLOAD_START.send(sender);
 
-                    String url = listener.uploadPasteData(!noTraces);
+                    String url = listener.uploadPasteData(!noTraces, attachRaw);
                     if (url == null) {
                         url = "null";
                     }
 
-                    Message.VERBOSE_RECORDING_URL.send(sender);
+                    Message.VERBOSE_RESULTS_URL.send(sender);
 
                     Component message = TextComponent.builder(url).color(TextColor.AQUA)
                             .clickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url))

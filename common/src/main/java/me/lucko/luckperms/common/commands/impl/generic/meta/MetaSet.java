@@ -80,7 +80,7 @@ public class MetaSet extends SharedSubCommand {
         Node n = NodeFactory.makeMetaNode(key, value).withExtraContext(context).build();
 
         if (holder.hasPermission(n).asBoolean()) {
-            Message.ALREADY_HAS_META.send(sender, holder.getFriendlyName());
+            Message.ALREADY_HAS_META.send(sender, holder.getFriendlyName(), key, value, Util.contextSetToString(context));
             return CommandResult.STATE_ERROR;
         }
 

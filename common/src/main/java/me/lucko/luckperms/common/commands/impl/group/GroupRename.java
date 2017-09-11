@@ -52,17 +52,17 @@ public class GroupRename extends SubCommand<Group> {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Group group, List<String> args, String label) throws CommandException {
         String newGroupName = args.get(0).toLowerCase();
         if (!DataConstraints.GROUP_NAME_TEST.test(newGroupName)) {
-            Message.GROUP_INVALID_ENTRY.send(sender);
+            Message.GROUP_INVALID_ENTRY.send(sender, newGroupName);
             return CommandResult.INVALID_ARGS;
         }
 
         if (plugin.getStorage().loadGroup(newGroupName).join()) {
-            Message.GROUP_ALREADY_EXISTS.send(sender);
+            Message.ALREADY_EXISTS.send(sender, newGroupName);
             return CommandResult.INVALID_ARGS;
         }
 
         if (!plugin.getStorage().createAndLoadGroup(newGroupName, CreationCause.COMMAND).join()) {
-            Message.CREATE_GROUP_ERROR.send(sender);
+            Message.CREATE_ERROR.send(sender, newGroupName);
             return CommandResult.FAILURE;
         }
 
@@ -73,7 +73,7 @@ public class GroupRename extends SubCommand<Group> {
         }
 
         if (!plugin.getStorage().deleteGroup(group, DeletionCause.COMMAND).join()) {
-            Message.DELETE_GROUP_ERROR.send(sender);
+            Message.DELETE_ERROR.send(sender, group.getFriendlyName());
             return CommandResult.FAILURE;
         }
 

@@ -105,7 +105,7 @@ public class ParentRemove extends SharedSubCommand {
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.DOES_NOT_INHERIT.send(sender, holder.getFriendlyName(), groupName);
+            Message.DOES_NOT_INHERIT.send(sender, holder.getFriendlyName(), groupName, Util.contextSetToString(context));
             return CommandResult.STATE_ERROR;
         }
     }

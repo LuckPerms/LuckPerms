@@ -93,7 +93,7 @@ public class PermissionUnset extends SharedSubCommand {
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.DOES_NOT_HAVEPERMISSION.send(sender, holder.getFriendlyName());
+            Message.DOES_NOT_HAVE_PERMISSION.send(sender, holder.getFriendlyName(), node, Util.contextSetToString(context));
             return CommandResult.STATE_ERROR;
         }
     }

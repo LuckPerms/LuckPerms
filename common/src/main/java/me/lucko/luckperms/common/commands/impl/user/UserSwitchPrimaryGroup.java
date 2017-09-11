@@ -63,12 +63,12 @@ public class UserSwitchPrimaryGroup extends SubCommand<User> {
 
         Group group = plugin.getGroupManager().getIfLoaded(args.get(0).toLowerCase());
         if (group == null) {
-            Message.GROUP_DOES_NOT_EXIST.send(sender);
+            Message.DOES_NOT_EXIST.send(sender, args.get(0).toLowerCase());
             return CommandResult.INVALID_ARGS;
         }
 
         if (user.getPrimaryGroup().getStoredValue().equalsIgnoreCase(group.getName())) {
-            Message.USER_PRIMARYGROUP_ERROR_ALREADYHAS.send(sender);
+            Message.USER_PRIMARYGROUP_ERROR_ALREADYHAS.send(sender, user.getFriendlyName(), group.getFriendlyName());
             return CommandResult.STATE_ERROR;
         }
 

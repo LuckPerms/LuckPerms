@@ -65,8 +65,8 @@ public class UserInfo extends SubCommand<User> {
                 user.getUuid(),
                 plugin.getPlayerStatus(user.getUuid()).asString(plugin.getLocaleManager()),
                 user.getPrimaryGroup().getValue(),
-                user.getPermanentNodes().size(),
-                user.getTemporaryNodes().size(),
+                user.getOwnNodes().size(),
+                user.getOwnNodes().stream().filter(n -> !(n.isGroupNode() || n.isPrefix() || n.isSuffix() || n.isMeta())).mapToInt(n -> 1).sum(),
                 user.getPrefixNodes().size(),
                 user.getSuffixNodes().size(),
                 user.getMetaNodes().size()

@@ -65,23 +65,23 @@ public class ParentSetTrack extends SharedSubCommand {
 
         final String trackName = args.get(0).toLowerCase();
         if (!DataConstraints.TRACK_NAME_TEST.test(trackName)) {
-            Message.TRACK_INVALID_ENTRY.send(sender);
+            Message.TRACK_INVALID_ENTRY.send(sender, trackName);
             return CommandResult.INVALID_ARGS;
         }
 
         if (!plugin.getStorage().loadTrack(trackName).join()) {
-            Message.TRACK_DOES_NOT_EXIST.send(sender);
+            Message.DOES_NOT_EXIST.send(sender, trackName);
             return CommandResult.INVALID_ARGS;
         }
 
         Track track = plugin.getTrackManager().getIfLoaded(trackName);
         if (track == null) {
-            Message.TRACK_DOES_NOT_EXIST.send(sender);
+            Message.DOES_NOT_EXIST.send(sender, trackName);
             return CommandResult.LOADING_ERROR;
         }
 
         if (track.getSize() <= 1) {
-            Message.TRACK_EMPTY.send(sender);
+            Message.TRACK_EMPTY.send(sender, track.getName());
             return CommandResult.STATE_ERROR;
         }
 
@@ -90,7 +90,7 @@ public class ParentSetTrack extends SharedSubCommand {
         if (index > 0) {
             List<String> trackGroups = track.getGroups();
             if ((index - 1) >= trackGroups.size()) {
-                Message.GROUP_DOES_NOT_EXIST.send(sender);
+                Message.DOES_NOT_EXIST.send(sender, index);
                 return CommandResult.INVALID_ARGS;
             }
             groupName = track.getGroups().get(index - 1);
@@ -105,13 +105,13 @@ public class ParentSetTrack extends SharedSubCommand {
         MutableContextSet context = ArgumentUtils.handleContext(2, args, plugin);
 
         if (!plugin.getStorage().loadGroup(groupName).join()) {
-            Message.GROUP_DOES_NOT_EXIST.send(sender);
+            Message.DOES_NOT_EXIST.send(sender, groupName);
             return CommandResult.INVALID_ARGS;
         }
 
         Group group = plugin.getGroupManager().getIfLoaded(groupName);
         if (group == null) {
-            Message.GROUP_DOES_NOT_EXIST.send(sender);
+            Message.DOES_NOT_EXIST.send(sender, groupName);
             return CommandResult.LOADING_ERROR;
         }
 

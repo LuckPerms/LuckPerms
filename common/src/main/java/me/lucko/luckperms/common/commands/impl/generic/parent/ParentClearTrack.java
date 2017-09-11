@@ -64,23 +64,23 @@ public class ParentClearTrack extends SharedSubCommand {
 
         final String trackName = args.get(0).toLowerCase();
         if (!DataConstraints.TRACK_NAME_TEST.test(trackName)) {
-            Message.TRACK_INVALID_ENTRY.send(sender);
+            Message.TRACK_INVALID_ENTRY.send(sender, trackName);
             return CommandResult.INVALID_ARGS;
         }
 
         if (!plugin.getStorage().loadTrack(trackName).join()) {
-            Message.TRACK_DOES_NOT_EXIST.send(sender);
+            Message.DOES_NOT_EXIST.send(sender, trackName);
             return CommandResult.INVALID_ARGS;
         }
 
         Track track = plugin.getTrackManager().getIfLoaded(trackName);
         if (track == null) {
-            Message.TRACK_DOES_NOT_EXIST.send(sender);
+            Message.DOES_NOT_EXIST.send(sender, trackName);
             return CommandResult.LOADING_ERROR;
         }
 
         if (track.getSize() <= 1) {
-            Message.TRACK_EMPTY.send(sender);
+            Message.TRACK_EMPTY.send(sender, track.getName());
             return CommandResult.STATE_ERROR;
         }
 

@@ -100,7 +100,7 @@ public class MetaAddChatMeta extends SharedSubCommand {
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_HAS_CHAT_META.send(sender, holder.getFriendlyName(), type.name().toLowerCase());
+            Message.ALREADY_HAS_CHAT_META.send(sender, holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, Util.contextSetToString(context));
             return CommandResult.STATE_ERROR;
         }
     }

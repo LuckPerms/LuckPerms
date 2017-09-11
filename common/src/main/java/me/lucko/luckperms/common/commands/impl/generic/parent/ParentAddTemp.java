@@ -73,13 +73,13 @@ public class ParentAddTemp extends SharedSubCommand {
         TemporaryModifier modifier = plugin.getConfiguration().get(ConfigKeys.TEMPORARY_ADD_BEHAVIOUR);
 
         if (!plugin.getStorage().loadGroup(groupName).join()) {
-            Message.GROUP_DOES_NOT_EXIST.send(sender);
+            Message.DOES_NOT_EXIST.send(sender, groupName);
             return CommandResult.INVALID_ARGS;
         }
 
         Group group = plugin.getGroupManager().getIfLoaded(groupName);
         if (group == null) {
-            Message.GROUP_DOES_NOT_EXIST.send(sender);
+            Message.DOES_NOT_EXIST.send(sender, groupName);
             return CommandResult.INVALID_ARGS;
         }
 
@@ -94,7 +94,7 @@ public class ParentAddTemp extends SharedSubCommand {
         }
 
         if (group.getName().equalsIgnoreCase(holder.getObjectName())) {
-            Message.ALREADY_TEMP_INHERITS.send(sender, holder.getFriendlyName(), group.getDisplayName());
+            Message.ALREADY_TEMP_INHERITS.send(sender, holder.getFriendlyName(), group.getDisplayName(), Util.contextSetToString(context));
             return CommandResult.STATE_ERROR;
         }
 
@@ -111,7 +111,7 @@ public class ParentAddTemp extends SharedSubCommand {
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_TEMP_INHERITS.send(sender, holder.getFriendlyName(), group.getDisplayName());
+            Message.ALREADY_TEMP_INHERITS.send(sender, holder.getFriendlyName(), group.getDisplayName(), Util.contextSetToString(context));
             return CommandResult.STATE_ERROR;
         }
     }

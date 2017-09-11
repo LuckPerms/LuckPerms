@@ -96,7 +96,7 @@ public class PermissionSetTemp extends SharedSubCommand {
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_HAS_TEMP_PERMISSION.send(sender, holder.getFriendlyName());
+            Message.ALREADY_HAS_TEMP_PERMISSION.send(sender, holder.getFriendlyName(), node, Util.contextSetToString(context));
             return CommandResult.STATE_ERROR;
         }
     }

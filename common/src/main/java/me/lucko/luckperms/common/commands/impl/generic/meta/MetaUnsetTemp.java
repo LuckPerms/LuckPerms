@@ -80,7 +80,7 @@ public class MetaUnsetTemp extends SharedSubCommand {
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.DOESNT_HAVE_META.send(sender, holder.getFriendlyName());
+            Message.DOESNT_HAVE_TEMP_META.send(sender, holder.getFriendlyName(), key, Util.contextSetToString(context));
             return CommandResult.STATE_ERROR;
         }
     }

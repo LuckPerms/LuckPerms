@@ -91,13 +91,13 @@ public class UserMainCommand extends MainCommand<User, UserIdentifier> {
             uuid = plugin.getStorage().getUUID(target.toLowerCase()).join();
             if (uuid == null) {
                 if (!plugin.getConfiguration().get(ConfigKeys.USE_SERVER_UUID_CACHE)) {
-                    Message.USER_NOT_FOUND.send(sender);
+                    Message.USER_NOT_FOUND.send(sender, target);
                     return null;
                 }
 
                 uuid = plugin.lookupUuid(target).orElse(null);
                 if (uuid == null) {
-                    Message.USER_NOT_FOUND.send(sender);
+                    Message.USER_NOT_FOUND.send(sender, target);
                     return null;
                 }
             }

@@ -62,7 +62,7 @@ public class DeleteGroup extends SingleCommand {
         }
 
         if (!plugin.getStorage().loadGroup(groupName).join()) {
-            Message.GROUP_DOES_NOT_EXIST.send(sender);
+            Message.DOES_NOT_EXIST.send(sender, groupName);
             return CommandResult.INVALID_ARGS;
         }
 
@@ -73,7 +73,7 @@ public class DeleteGroup extends SingleCommand {
         }
 
         if (!plugin.getStorage().deleteGroup(group, DeletionCause.COMMAND).join()) {
-            Message.DELETE_GROUP_ERROR.send(sender);
+            Message.DELETE_ERROR.send(sender, group.getFriendlyName());
             return CommandResult.FAILURE;
         }
 

@@ -189,7 +189,7 @@ public abstract class SubCommand<T> extends Command<T, Void> {
         }
 
         if (!success) {
-            Message.USER_SAVE_ERROR.send(sender);
+            Message.USER_SAVE_ERROR.send(sender, user.getFriendlyName());
         }
     }
 
@@ -210,7 +210,7 @@ public abstract class SubCommand<T> extends Command<T, Void> {
         }
 
         if (!success) {
-            Message.GROUP_SAVE_ERROR.send(sender);
+            Message.GROUP_SAVE_ERROR.send(sender, group.getFriendlyName());
         }
     }
 
@@ -231,7 +231,7 @@ public abstract class SubCommand<T> extends Command<T, Void> {
         }
 
         if (!success) {
-            Message.TRACK_SAVE_ERROR.send(sender);
+            Message.TRACK_SAVE_ERROR.send(sender, track.getName());
         }
     }
 }

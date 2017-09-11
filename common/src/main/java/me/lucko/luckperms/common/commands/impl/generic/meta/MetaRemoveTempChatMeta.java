@@ -114,7 +114,7 @@ public class MetaRemoveTempChatMeta extends SharedSubCommand {
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.DOES_NOT_HAVE_CHAT_META.send(sender, holder.getFriendlyName(), type.name().toLowerCase());
+            Message.DOES_NOT_HAVE_TEMP_CHAT_META.send(sender, holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, Util.contextSetToString(context));
             return CommandResult.STATE_ERROR;
         }
     }

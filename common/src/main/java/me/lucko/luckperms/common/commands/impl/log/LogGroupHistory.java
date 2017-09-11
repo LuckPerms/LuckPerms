@@ -65,7 +65,7 @@ public class LogGroupHistory extends SubCommand<Log> {
         }
 
         if (!DataConstraints.GROUP_NAME_TEST.test(group)) {
-            Message.GROUP_INVALID_ENTRY.send(sender);
+            Message.GROUP_INVALID_ENTRY.send(sender, group);
             return CommandResult.INVALID_ARGS;
         }
 

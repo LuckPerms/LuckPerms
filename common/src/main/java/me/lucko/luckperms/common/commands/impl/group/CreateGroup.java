@@ -54,17 +54,17 @@ public class CreateGroup extends SingleCommand {
 
         String groupName = args.get(0).toLowerCase();
         if (!DataConstraints.GROUP_NAME_TEST.test(groupName)) {
-            Message.GROUP_INVALID_ENTRY.send(sender);
+            Message.GROUP_INVALID_ENTRY.send(sender, groupName);
             return CommandResult.INVALID_ARGS;
         }
 
         if (plugin.getStorage().loadGroup(groupName).join()) {
-            Message.GROUP_ALREADY_EXISTS.send(sender);
+            Message.ALREADY_EXISTS.send(sender, groupName);
             return CommandResult.INVALID_ARGS;
         }
 
         if (!plugin.getStorage().createAndLoadGroup(groupName, CreationCause.COMMAND).join()) {
-            Message.CREATE_GROUP_ERROR.send(sender);
+            Message.CREATE_ERROR.send(sender, groupName);
             return CommandResult.FAILURE;
         }
 

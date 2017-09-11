@@ -164,7 +164,7 @@ public class NodeFactory {
             } else {
                 sb.append(type.getEntry(node).getValue());
             }
-            if (node.isTemporary()) {
+            if (set && node.isTemporary()) {
                 sb.append(" ").append(node.getExpiryUnixTime());
             }
 
@@ -216,15 +216,10 @@ public class NodeFactory {
 
     private static StringBuilder appendContextToCommand(StringBuilder sb, Node node) {
         if (node.isServerSpecific()) {
-            sb.append(" ").append(node.getServer().get());
-
-            if (node.isWorldSpecific()) {
-                sb.append(" ").append(node.getWorld().get());
-            }
-        } else {
-            if (node.isWorldSpecific()) {
-                sb.append(" world=").append(node.getWorld().get());
-            }
+            sb.append(" server=").append(node.getServer().get());
+        }
+        if (node.isWorldSpecific()) {
+            sb.append(" world=").append(node.getWorld().get());
         }
 
         ContextSet contexts = node.getContexts();

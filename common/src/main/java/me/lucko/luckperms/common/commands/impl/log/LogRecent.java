@@ -32,6 +32,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.DataConstraints;
 import me.lucko.luckperms.common.locale.CommandSpec;
@@ -69,51 +70,37 @@ public class LogRecent extends SubCommand<Log> {
         }
 
         // User and possibly page
-        final String s = args.get(0);
-        UUID u;
-
-        u = Util.parseUuid(s);
-        if (u == null) {
-            if (s.length() <= 16) {
-                if (!DataConstraints.PLAYER_USERNAME_TEST.test(s)) {
-                    Message.USER_INVALID_ENTRY.send(sender, s);
-                    return CommandResult.INVALID_ARGS;
-                }
-
-                UUID uuid = plugin.getStorage().getUUID(s).join();
-
-                if (uuid == null) {
-                    Message.USER_NOT_FOUND.send(sender);
-                    return CommandResult.INVALID_ARGS;
-                }
-
-                if (args.size() != 2) {
-                    // Just user
-                    return showLog(log.getRecentMaxPages(uuid), uuid, sender, log);
-                }
-
-                try {
-                    int p = Integer.parseInt(args.get(1));
-                    // User and page
-                    return showLog(p, uuid, sender, log);
-                } catch (NumberFormatException e) {
-                    // Invalid page
-                    return showLog(-1, null, sender, log);
-                }
+        final String target = args.get(0);
+        UUID uuid = Util.parseUuid(target.toLowerCase());
+        if (uuid == null) {
+            if (!DataConstraints.PLAYER_USERNAME_TEST.test(target)) {
+                Message.USER_INVALID_ENTRY.send(sender, target);
+                return CommandResult.INVALID_ARGS;
             }
 
-            Message.USER_INVALID_ENTRY.send(sender, s);
-            return CommandResult.INVALID_ARGS;
+            uuid = plugin.getStorage().getUUID(target.toLowerCase()).join();
+            if (uuid == null) {
+                if (!plugin.getConfiguration().get(ConfigKeys.USE_SERVER_UUID_CACHE)) {
+                    Message.USER_NOT_FOUND.send(sender, target);
+                    return CommandResult.INVALID_ARGS;
+                }
+
+                uuid = plugin.lookupUuid(target).orElse(null);
+                if (uuid == null) {
+                    Message.USER_NOT_FOUND.send(sender, target);
+                    return CommandResult.INVALID_ARGS;
+                }
+            }
         }
 
         if (args.size() != 2) {
             // Just user
-            return showLog(log.getRecentMaxPages(u), u, sender, log);
+            return showLog(log.getRecentMaxPages(uuid), uuid, sender, log);
         } else {
             try {
                 int p = Integer.parseInt(args.get(1));
                 // User and page
-                return showLog(p, u, sender, log);
+                return showLog(p, uuid, sender, log);
             } catch (NumberFormatException e) {
                 // Invalid page
                 return showLog(-1, null, sender, log);

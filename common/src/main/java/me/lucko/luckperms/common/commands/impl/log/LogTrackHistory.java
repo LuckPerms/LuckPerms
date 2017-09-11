@@ -65,7 +65,7 @@ public class LogTrackHistory extends SubCommand<Log> {
         }
 
         if (!DataConstraints.TRACK_NAME_TEST.test(track)) {
-            Message.TRACK_INVALID_ENTRY.send(sender);
+            Message.TRACK_INVALID_ENTRY.send(sender, track);
             return CommandResult.INVALID_ARGS;
         }
 

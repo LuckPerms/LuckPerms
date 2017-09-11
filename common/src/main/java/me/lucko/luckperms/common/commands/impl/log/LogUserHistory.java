@@ -32,6 +32,7 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.abstraction.SubCommand;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.DataConstraints;
 import me.lucko.luckperms.common.locale.CommandSpec;
@@ -53,7 +54,7 @@ public class LogUserHistory extends SubCommand<Log> {
 
     @Override
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Log log, List<String> args, String label) throws CommandException {
-        String user = args.get(0);
+        String target = args.get(0);
         int page = -999;
 
         if (args.size() == 2) {
@@ -65,37 +66,33 @@ public class LogUserHistory extends SubCommand<Log> {
             }
         }
 
-        UUID uuid = Util.parseUuid(user);
-        if (uuid != null) {
-            if (page == -999) {
-                page = log.getUserHistoryMaxPages(uuid);
+        UUID uuid = Util.parseUuid(target.toLowerCase());
+        if (uuid == null) {
+            if (!DataConstraints.PLAYER_USERNAME_TEST.test(target)) {
+                Message.USER_INVALID_ENTRY.send(sender, target);
+                return null;
             }
 
-            return showLog(page, uuid, sender, log);
+            uuid = plugin.getStorage().getUUID(target.toLowerCase()).join();
+            if (uuid == null) {
+                if (!plugin.getConfiguration().get(ConfigKeys.USE_SERVER_UUID_CACHE)) {
+                    Message.USER_NOT_FOUND.send(sender, target);
+                    return null;
+                }
+
+                uuid = plugin.lookupUuid(target).orElse(null);
+                if (uuid == null) {
+                    Message.USER_NOT_FOUND.send(sender, target);
+                    return null;
+                }
+            }
         }
 
-        if (user.length() <= 16) {
-            if (!DataConstraints.PLAYER_USERNAME_TEST.test(user)) {
-                Message.USER_INVALID_ENTRY.send(sender, user);
-                return CommandResult.INVALID_ARGS;
-            }
-
-            UUID uuid1 = plugin.getStorage().getUUID(user).join();
-
-            if (uuid1 == null) {
-                Message.USER_NOT_FOUND.send(sender);
-                return CommandResult.INVALID_ARGS;
-            }
-
-            if (page == -999) {
-                page = log.getUserHistoryMaxPages(uuid1);
-            }
-
-            return showLog(page, uuid1, sender, log);
+        if (page == -999) {
+            page = log.getUserHistoryMaxPages(uuid);
         }
 
-        Message.USER_INVALID_ENTRY.send(sender, user);
-        return CommandResult.INVALID_ARGS;
+        return showLog(page, uuid, sender, log);
     }
 
     private static CommandResult showLog(int page, UUID user, Sender sender, Log log) {

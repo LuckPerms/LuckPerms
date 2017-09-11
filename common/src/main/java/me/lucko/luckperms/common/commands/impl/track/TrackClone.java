@@ -51,7 +51,7 @@ public class TrackClone extends SubCommand<Track> {
     public CommandResult execute(LuckPermsPlugin plugin, Sender sender, Track track, List<String> args, String label) throws CommandException {
         String newTrackName = args.get(0).toLowerCase();
         if (!DataConstraints.TRACK_NAME_TEST.test(newTrackName)) {
-            Message.TRACK_INVALID_ENTRY.send(sender);
+            Message.TRACK_INVALID_ENTRY.send(sender, newTrackName);
             return CommandResult.INVALID_ARGS;
         }
 

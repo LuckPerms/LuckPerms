@@ -66,23 +66,23 @@ public class UserPromote extends SubCommand<User> {
 
         final String trackName = args.get(0).toLowerCase();
         if (!DataConstraints.TRACK_NAME_TEST.test(trackName)) {
-            Message.TRACK_INVALID_ENTRY.send(sender);
+            Message.TRACK_INVALID_ENTRY.send(sender, trackName);
             return CommandResult.INVALID_ARGS;
         }
 
         if (!plugin.getStorage().loadTrack(trackName).join()) {
-            Message.TRACK_DOES_NOT_EXIST.send(sender);
+            Message.DOES_NOT_EXIST.send(sender, trackName);
             return CommandResult.INVALID_ARGS;
         }
 
         Track track = plugin.getTrackManager().getIfLoaded(trackName);
         if (track == null) {
-            Message.TRACK_DOES_NOT_EXIST.send(sender);
+            Message.DOES_NOT_EXIST.send(sender, trackName);
             return CommandResult.LOADING_ERROR;
         }
 
         if (track.getSize() <= 1) {
-            Message.TRACK_EMPTY.send(sender);
+            Message.TRACK_EMPTY.send(sender, track.getName());
             return CommandResult.STATE_ERROR;
         }
 
@@ -129,7 +129,7 @@ public class UserPromote extends SubCommand<User> {
         }
 
         if (nodes.size() != 1) {
-            Message.TRACK_AMBIGUOUS_CALL.send(sender);
+            Message.TRACK_AMBIGUOUS_CALL.send(sender, user.getFriendlyName());
             return CommandResult.FAILURE;
         }
 
@@ -144,7 +144,7 @@ public class UserPromote extends SubCommand<User> {
         }
 
         if (next == null) {
-            Message.USER_PROMOTE_ERROR_ENDOFTRACK.send(sender, track.getName());
+            Message.USER_PROMOTE_ERROR_ENDOFTRACK.send(sender, track.getName(), user.getFriendlyName());
             return CommandResult.STATE_ERROR;
         }
 
@@ -171,7 +171,7 @@ public class UserPromote extends SubCommand<User> {
             user.getPrimaryGroup().setStoredValue(nextGroup.getName());
         }
 
-        Message.USER_PROMOTE_SUCCESS.send(sender, track.getName(), old, nextGroup.getDisplayName(), Util.contextSetToString(context));
+        Message.USER_PROMOTE_SUCCESS.send(sender, user.getFriendlyName(), track.getName(), old, nextGroup.getDisplayName(), Util.contextSetToString(context));
         if (!silent) {
             Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), old, nextGroup.getDisplayName(), false));
         }

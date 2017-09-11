@@ -140,13 +140,11 @@ public class PermissionInfo extends SharedSubCommand {
 
         List<Node> l = new ArrayList<>();
         for (Node node : nodes) {
-            if (nodeFilter != null && !node.getPermission().startsWith(nodeFilter)) {
-                continue;
-            }
-            if (contextFilter != null && !node.getFullContexts().hasIgnoreCase(contextFilter.getKey(), contextFilter.getValue())) {
-                continue;
-            }
+            if (node.isGroupNode() || node.isPrefix() || node.isSuffix() || node.isMeta()) continue;
+            if (nodeFilter != null && !node.getPermission().startsWith(nodeFilter)) continue;
+            if (contextFilter != null && !node.getFullContexts().hasIgnoreCase(contextFilter.getKey(), contextFilter.getValue())) continue;
             if (temp != node.isTemporary()) continue;
+
             l.add(node);
         }
 

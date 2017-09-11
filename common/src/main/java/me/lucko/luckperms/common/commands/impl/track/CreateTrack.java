@@ -54,17 +54,17 @@ public class CreateTrack extends SingleCommand {
 
         String trackName = args.get(0).toLowerCase();
         if (!DataConstraints.TRACK_NAME_TEST.test(trackName)) {
-            Message.TRACK_INVALID_ENTRY.send(sender);
+            Message.TRACK_INVALID_ENTRY.send(sender, trackName);
             return CommandResult.INVALID_ARGS;
         }
 
         if (plugin.getStorage().loadTrack(trackName).join()) {
-            Message.TRACK_ALREADY_EXISTS.send(sender);
+            Message.ALREADY_EXISTS.send(sender, trackName);
             return CommandResult.INVALID_ARGS;
         }
 
         if (!plugin.getStorage().createAndLoadTrack(trackName, CreationCause.COMMAND).join()) {
-            Message.CREATE_TRACK_ERROR.send(sender);
+            Message.CREATE_ERROR.send(sender, trackName);
             return CommandResult.FAILURE;
         }
 

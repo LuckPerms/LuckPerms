@@ -84,13 +84,13 @@ public class GroupMainCommand extends MainCommand<Group, String> {
     @Override
     protected Group getTarget(String target, LuckPermsPlugin plugin, Sender sender) {
         if (!plugin.getStorage().loadGroup(target).join()) {
-            Message.GROUP_NOT_FOUND.send(sender);
+            Message.GROUP_NOT_FOUND.send(sender, target);
             return null;
         }
 
         Group group = plugin.getGroupManager().getIfLoaded(target);
         if (group == null) {
-            Message.GROUP_NOT_FOUND.send(sender);
+            Message.GROUP_NOT_FOUND.send(sender, target);
             return null;
         }
 

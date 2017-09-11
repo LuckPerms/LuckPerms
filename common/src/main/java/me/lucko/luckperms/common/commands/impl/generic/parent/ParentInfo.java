@@ -71,11 +71,11 @@ public class ParentInfo extends SharedSubCommand {
         }
 
         Component ent = permGroupsToMessage(holder.getOwnNodesSorted(), holder, label);
-        Message.LISTNODES.send(sender, holder.getFriendlyName());
+        Message.LISTPARENTS.send(sender, holder.getFriendlyName());
         sender.sendMessage(ent);
 
         Component tempEnt = tempGroupsToMessage(holder.getOwnNodesSorted(), holder, label);
-        Message.LISTNODES_TEMP.send(sender, holder.getFriendlyName());
+        Message.LISTPARENTS_TEMP.send(sender, holder.getFriendlyName());
         sender.sendMessage(tempEnt);
 
         return CommandResult.SUCCESS;

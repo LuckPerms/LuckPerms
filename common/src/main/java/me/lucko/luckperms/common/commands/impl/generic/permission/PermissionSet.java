@@ -88,7 +88,7 @@ public class PermissionSet extends SharedSubCommand {
             save(holder, sender, plugin);
             return CommandResult.SUCCESS;
         } else {
-            Message.ALREADY_HASPERMISSION.send(sender, holder.getFriendlyName());
+            Message.ALREADY_HASPERMISSION.send(sender, holder.getFriendlyName(), node, Util.contextSetToString(context));
             return CommandResult.STATE_ERROR;
         }
     }
