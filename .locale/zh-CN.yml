@@ -26,13 +26,10 @@ already-has-temp-permission: "{0}已经设置此临时权限!"
 does-not-have-temp-permission: "{0}没有设置此临时权限。"
 user-not-found: "&b找不到用户。"
 user-not-online: "&b用户&a{0}&b不在线。"
-user-save-success: "&7(保存用户数据到文件)"
 user-save-error: "保存用户数据时出错。"
 group-not-found: "&b找不到组。"
-group-save-success: "&7(保存组数据到文件)"
 group-save-error: "保存组数据时出错。"
 track-not-found: "&b无法找到权限组轨道。"
-track-save-success: "&7(保存权限组轨道到文件)"
 track-save-error: "保存权限组轨道时出错。"
 user-invalid-entry: "&d{0}&c不是有效的用户名/uuid。"
 group-invalid-entry: "组名只能包含字母数字字符。"
@@ -95,34 +92,22 @@ update-task-push-success: "&a其他服务器通过&b{0}消息传递成功通知�
 update-task-push-failure: "&c将更改推送到其他服务器时出错。"
 update-task-push-failure-not-setup: "&c将更改推送到其他服务器时出错，未配置消息传递服务。"
 reload-config-success: "&a重新加载配置文件。&7(一些选项将仅在服务器重新启动后才应用。)"
-info: >
+info-top: >
   {PREFIX}&2运行 &bLuckPerms v{0}&2 by &bLuck&2。\n
   {PREFIX}&f-  &3平台: &f{1}\n
-  {PREFIX}&f-  &3存储方式: &f{2}\n
-  {PREFIX}&f-  &3服务器名称: &f{3}\n
-  {PREFIX}&f-  &3同步间隔: &a{4} &f分钟\n
-  {PREFIX}&f-  &3消息服务: &f{5}\n
-  {PREFIX}&f-  &b统计:\n
-  {PREFIX}&f-     &3在线玩家: &a{6}\n
-  {PREFIX}&f-     &3加载用户: &a{7}\n
-  {PREFIX}&f-     &3加载组: &a{8}\n
-  {PREFIX}&f-     &3加载权限组轨道: &a{9}\n
-  {PREFIX}&f-     &3日志大小: &a{10}\n
-  {PREFIX}&f-     &3UUID缓存大小: &a{11}\n
-  {PREFIX}&f-     &3翻译加载: &a{12}\n
-  {PREFIX}&f-     &3预处理环境: &a{13}\n
-  {PREFIX}&f-     &3环境计算器: &a{14}\n
-  {PREFIX}&f-     &3唯一权限: &a{15}\n
-  {PREFIX}&f-  &b配置:\n
-  {PREFIX}&f-     &3使用服务器UUIDs: {16}\n
-  {PREFIX}&f-     &b权限计算:\n
-  {PREFIX}&f-        &3包括全部: {17}\n
-  {PREFIX}&f-        &3包括全部世界: {18}\n
-  {PREFIX}&f-        &3应用全部组: {19}\n
-  {PREFIX}&f-        &3应用全部世界组: {20}\n
-  {PREFIX}&f-        &3应用通配符: {21}\n
-  {PREFIX}&f-        &3应用正则表达式: {22}\n
-  {PREFIX}&f-        &3应用速记: {23}
+  {PREFIX}&f-  &3服务器型号: &f{2}\n
+  {PREFIX}&f-  &3服务器版本: &f{3}
+info-middle: >
+  {PREFIX}&f-  &3消息类型: &f{0}\n
+  {PREFIX}&f-  &b详情:\n
+  {PREFIX}&f-     &3服务器名称: &f{1}\n
+  {PREFIX}&f-     &3在线玩家: &a{2}\n
+  {PREFIX}&f-     &3唯一连接: &a{3}\n
+  {PREFIX}&f-     &3正常运行时间: &7{4}\n
+  {PREFIX}&f-     &3本地数据: &a{5}&7用户，&a{6}&7组，&a{7}&7权限组轨道\n
+  {PREFIX}&f-     &3环境统计: &a{8}\n
+  {PREFIX}&f-     &3已知权限: &a{9}\n
+  {PREFIX}&f-     &3活动处理器: &7{10}
 create-group-error: "创建组时出错。"
 delete-group-error: "删除组时出错。"
 delete-group-error-default: "您不能删除默认组。"
@@ -147,6 +132,7 @@ context-pair--global-inline: "&e全局"
 context-pair-sep: "&a，"
 context-pair: "&8(&7{0}=&f{1}&8)"
 check-permission: "&b在环境&b{3}&b中，&b{0}&b的权限&b{1}&b被设置为&b{2}&b。"
+check-inherits-permission: "&a在环境&b{3}&a中将&b{0}&a的&b{1}&a权限设置为&b{2}&a。&7(从&a{4}&7继承)"
 setpermission-success: "&a在环境&b{3}&a中将&b{2}&a的&b{0}&a权限设置为&b{1}&a。"
 setpermission-temp-success: "&a在环境&b{4}&a中将&b{2}&a的&b{0}&a临时权限设为&b{1}&a，持续时间&b{3}&a。"
 unsetpermission-success: "&a在环境&b{2}&a中取消&b{1}&a的&b{0}&a权限。"
@@ -159,12 +145,12 @@ unset-inherit-success: "&b{0}&a不再继承环境&b{2}&a中&b{1}&a的权限。"
 unset-temp-inherit-success: "&b{0}&a在环境&b{2}&a中不再继承临时权限&b{1}&a。"
 clear-success: "&b{0}&a的权限在环境&b{1}&a中被清除。(&b{2}&a节点已被删除。)"
 clear-success-singular: "&b{0}&a的权限在环境&b{1}&a中被清除。(&b{2}&a节点已被删除。)"
-parent-clear-success: "&b{0}&a的父组在环境&b{1}&a中被清除。&b{2}&a节点被删除。)"
-parent-clear-success-singular: "&b{0}&a的父组在环境&b{1}&a中被清除。&b{2}&a节点被删除。)"
-parent-clear-track-success: "在权限组轨道&b{1}&a上，&b{0}&a的父组在环境&b{2}&a中被清除。&b{3}&a节点被删除。)"
-parent-clear-track-success-singular: "在权限组轨道&b{1}&a上，&b{0}&a的父组在环境&b{2}&a中被清除。&b{3}&a节点被删除。)"
-meta-clear-success: "&b{0}&a的元数据在环境&b{1}&a中被清除。&b{2}&a节点已被删除。)"
-meta-clear-success-singular: "&b{0}&a的元数据在环境&b{1}&a中被清除。&b{2}&a节点已被删除。)"
+parent-clear-success: "&b{0}&a的父组在环境&b{1}&a中被清除。(&b{2}&a节点被删除。)"
+parent-clear-success-singular: "&b{0}&a的父组在环境&b{1}&a中被清除。(&b{2}&a节点被删除。)"
+parent-clear-track-success: "在权限组轨道&b{1}&a上，&b{0}&a的父组在环境&b{2}&a中被清除。(&b{3}&a节点被删除。)"
+parent-clear-track-success-singular: "在权限组轨道&b{1}&a上，&b{0}&a的父组在环境&b{2}&a中被清除。(&b{3}&a节点被删除。)"
+meta-clear-success: "&b{0}&a的元数据匹配类型&b{1}&a在环境&b{2}&a中被清除。(&b{3}&a节点已被删除。)"
+meta-clear-success-singular: "&b{0}&a的元数据匹配类型&b{1}&a在环境&b{2}&a中被清除。(&b{3}&a节点已被删除。)"
 illegal-date-error: "无法解析日期'{0}'。"
 past-date-error: "您不能设定一个过去的日期!"
 chat-meta-prefix-header: "&b{0}的前缀"
@@ -261,6 +247,7 @@ log-invalid-page: "页码无效。"
 log-invalid-page-range: "页码无效，请输入1和{0}之间的值。"
 log-no-entries: "&b没有日志条目显示。"
 log-entry: "&b#{0} -> &8(&7{1} ago&8) {2}"
+log-notify-console: "&c无法切换控制台通知。"   
 log-notify-toggle-on: "&a启用&b记录输出。"
 log-notify-toggle-off: "&c禁用&b记录输出。"
 log-notify-already-on: "您已经收到通知。"
@@ -606,8 +593,9 @@ command-specs:
       "suffix": "后缀字符串"
       "context...": "删除后缀的环境"
   meta-clear:
-    description: "清除所有聊天元"
+    description: "清除所有元"
     args:
+      "type": "要删除的元数据类型"
       "context...": "过滤的环境"
   track-info:
     description: "提供有关权限组轨道的信息"
