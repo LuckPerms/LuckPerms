@@ -6,7 +6,7 @@
 
     <groupId>me.lucko.luckperms</groupId>
     <artifactId>luckperms</artifactId>
-    <version>3.3-SNAPSHOT</version>
+    <version>3.4-SNAPSHOT</version>
 
     <modules>
         <module>api</module>
@@ -47,7 +47,7 @@
         <maven.test.skip>true</maven.test.skip>
 
         <!-- Manually entered release version -->
-        <release.version>3.3</release.version>
+        <release.version>3.4</release.version>
 
         <!-- Get how many commits have been made since the last tag (the previous release) -->
         <patch.version>${git.closest.tag.commit.count}</patch.version>
@@ -106,10 +106,6 @@
     </build>
 
     <repositories>
-        <repository>
-            <id>sonatype-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-        </repository>
         <repository>
             <id>luck-repo</id>
             <url>https://repo.lucko.me/</url>

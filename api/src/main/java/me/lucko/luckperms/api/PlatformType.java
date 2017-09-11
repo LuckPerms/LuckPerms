@@ -28,7 +28,7 @@ package me.lucko.luckperms.api;
 import javax.annotation.Nonnull;
 
 /**
- * The platforms which LuckPerms can run on
+ * Represents a type of platform which LuckPerms can run on.
  *
  * @since 2.7
  */
@@ -44,6 +44,11 @@ public enum PlatformType {
         this.friendlyName = friendlyName;
     }
 
+    /**
+     * Gets a readable name for the platform type.
+     *
+     * @return a readable name
+     */
     @Nonnull
     public String getFriendlyName() {
         return friendlyName;

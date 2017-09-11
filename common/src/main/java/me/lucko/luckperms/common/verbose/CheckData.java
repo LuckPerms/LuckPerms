@@ -29,6 +29,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import me.lucko.luckperms.api.Tristate;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 
 /**
  * Holds the data from a permission check
@@ -38,9 +39,24 @@ import me.lucko.luckperms.api.Tristate;
 public class CheckData {
 
     /**
+     * The origin of the check
+     */
+    private final CheckOrigin checkOrigin;
+
+    /**
      * The name of the entity which was checked
      */
     private final String checkTarget;
+
+    /**
+     * The contexts where the check took place
+     */
+    private final ImmutableContextSet checkContext;
+
+    /**
+     * The stack trace when the check took place
+     */
+    private final StackTraceElement[] checkTrace;
 
     /**
      * The permission which was checked for

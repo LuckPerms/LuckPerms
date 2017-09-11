@@ -151,7 +151,7 @@ public class NodeFactory {
             return appendContextToCommand(sb, node).toString();
         }
 
-        if (node.getValue() && (node.isPrefix() || node.isSuffix())) {
+        if (node.getValuePrimitive() && (node.isPrefix() || node.isSuffix())) {
             ChatMetaType type = node.isPrefix() ? ChatMetaType.PREFIX : ChatMetaType.SUFFIX;
             String typeName = type.name().toLowerCase();
 
@@ -171,7 +171,7 @@ public class NodeFactory {
             return appendContextToCommand(sb, node).toString();
         }
 
-        if (node.getValue() && node.isMeta()) {
+        if (node.getValuePrimitive() && node.isMeta()) {
             sb.append(node.isTemporary() ? (set ? "meta settemp " : "meta unsettemp ") : (set ? "meta set " : "meta unset "));
 
             if (node.getMeta().getKey().contains(" ")) {
@@ -180,16 +180,18 @@ public class NodeFactory {
                 sb.append(node.getMeta().getKey());
             }
 
-            sb.append(" ");
+            if (set) {
+                sb.append(" ");
 
-            if (node.getMeta().getValue().contains(" ")) {
-                sb.append("\"").append(node.getMeta().getValue()).append("\"");
-            } else {
-                sb.append(node.getMeta().getValue());
-            }
+                if (node.getMeta().getValue().contains(" ")) {
+                    sb.append("\"").append(node.getMeta().getValue()).append("\"");
+                } else {
+                    sb.append(node.getMeta().getValue());
+                }
 
-            if (node.isTemporary()) {
-                sb.append(" ").append(node.getExpiryUnixTime());
+                if (node.isTemporary()) {
+                    sb.append(" ").append(node.getExpiryUnixTime());
+                }
             }
 
             return appendContextToCommand(sb, node).toString();
@@ -202,7 +204,7 @@ public class NodeFactory {
             sb.append(node.getPermission());
         }
         if (set) {
-            sb.append(" ").append(node.getValue());
+            sb.append(" ").append(node.getValuePrimitive());
 
             if (node.isTemporary()) {
                 sb.append(" ").append(node.getExpiryUnixTime());

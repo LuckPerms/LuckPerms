@@ -43,6 +43,7 @@ import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.contexts.ExtractedContexts;
 import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.node.MetaType;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.exceptions.ObjectLacksException;
@@ -381,12 +382,12 @@ public class PermissionHolderDelegate implements PermissionHolder {
 
     @Override
     public void clearMeta() {
-        handle.clearMeta();
+        handle.clearMeta(MetaType.ANY);
     }
 
     @Override
     public void clearMeta(@NonNull ContextSet contextSet) {
-        handle.clearMeta(contextSet);
+        handle.clearMeta(MetaType.ANY, contextSet);
     }
 
     @Override
@@ -396,7 +397,7 @@ public class PermissionHolderDelegate implements PermissionHolder {
             set.add("server", server);
         }
 
-        handle.clearMeta(set);
+        handle.clearMeta(MetaType.ANY, set);
     }
 
     @Override
@@ -409,7 +410,7 @@ public class PermissionHolderDelegate implements PermissionHolder {
             set.add("world", world);
         }
 
-        handle.clearMeta(set);
+        handle.clearMeta(MetaType.ANY, set);
     }
 
     @Override

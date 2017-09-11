@@ -31,8 +31,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.api.caching.PermissionData;
+import me.lucko.luckperms.common.caching.PermissionCache;
 import me.lucko.luckperms.common.utils.PasteUtils;
+import me.lucko.luckperms.common.verbose.CheckOrigin;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -194,7 +195,7 @@ public class TreeView {
      * @return the url, or null
      * @see PasteUtils#paste(String, List)
      */
-    public String uploadPasteData(String version, String username, PermissionData checker) {
+    public String uploadPasteData(String version, String username, PermissionCache checker) {
         // only paste if there is actually data here
         if (!hasData()) {
             throw new IllegalStateException();
@@ -213,7 +214,7 @@ public class TreeView {
         for (Map.Entry<String, String> e : ret) {
 
             // lookup a permission value for the node
-            Tristate tristate = checker.getPermissionValue(e.getValue());
+            Tristate tristate = checker.getPermissionValue(e.getValue(), CheckOrigin.INTERNAL);
 
             // append the data to the paste
             builder.add(getTristateDiffPrefix(tristate) + e.getKey() + e.getValue());

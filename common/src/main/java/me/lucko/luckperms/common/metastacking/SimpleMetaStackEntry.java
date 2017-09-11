@@ -26,8 +26,10 @@
 package me.lucko.luckperms.common.metastacking;
 
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
 import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.LocalizedNode;
@@ -37,8 +39,10 @@ import java.util.Map;
 import java.util.Optional;
 
 @Getter
+@ToString
+@EqualsAndHashCode(of = {"element", "type", "current"})
 @RequiredArgsConstructor
-class SimpleMetaStackEntry implements MetaStackEntry {
+final class SimpleMetaStackEntry implements MetaStackEntry {
 
     private final MetaStack parentStack;
     private final MetaStackElement element;
@@ -48,7 +52,7 @@ class SimpleMetaStackEntry implements MetaStackEntry {
     private Map.Entry<Integer, String> current = null;
 
     @Override
-    public Optional<Map.Entry<Integer, String>> getEntry() {
+    public Optional<Map.Entry<Integer, String>> getCurrentValue() {
         return Optional.ofNullable(current);
     }
 

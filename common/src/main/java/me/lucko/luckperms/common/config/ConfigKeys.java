@@ -40,8 +40,8 @@ import me.lucko.luckperms.common.config.keys.MapKey;
 import me.lucko.luckperms.common.config.keys.StaticKey;
 import me.lucko.luckperms.common.config.keys.StringKey;
 import me.lucko.luckperms.common.defaults.Rule;
-import me.lucko.luckperms.common.metastacking.definition.SimpleMetaStackDefinition;
-import me.lucko.luckperms.common.metastacking.definition.StandardStackElements;
+import me.lucko.luckperms.common.metastacking.SimpleMetaStackDefinition;
+import me.lucko.luckperms.common.metastacking.StandardStackElements;
 import me.lucko.luckperms.common.model.TemporaryModifier;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.primarygroup.AllParentsByWeightHolder;
@@ -123,6 +123,11 @@ public class ConfigKeys {
     public static final ConfigKey<Boolean> USE_SERVER_UUID_CACHE = BooleanKey.of("use-server-uuid-cache", false);
 
     /**
+     * If LuckPerms should produce extra logging output when it handles logins.
+     */
+    public static final ConfigKey<Boolean> DEBUG_LOGINS = BooleanKey.of("debug-logins", false);
+
+    /**
      * Controls how temporary add commands should behave
      */
     public static final ConfigKey<TemporaryModifier> TEMPORARY_ADD_BEHAVIOUR = AbstractKey.of(c -> {
@@ -160,6 +165,12 @@ public class ConfigKeys {
                 return (Function<User, PrimaryGroupHolder>) AllParentsByWeightHolder::new;
         }
     }));
+
+    /**
+     * If set to false, the plugin will allow a Users primary group to be removed with the
+     * 'parent remove' command, and will set their primary group back to default.
+     */
+    public static final ConfigKey<Boolean> PREVENT_PRIMARY_GROUP_REMOVAL = BooleanKey.of("prevent-primary-group-removal", true);
 
     /**
      * If the plugin should check for "extra" permissions with users run LP commands

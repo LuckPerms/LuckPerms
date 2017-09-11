@@ -33,9 +33,15 @@ import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.commands.sender.Sender;
+import me.lucko.luckperms.common.commands.utils.Util;
+import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.PasteUtils;
+import me.lucko.luckperms.common.utils.TextUtils;
+
+import net.kyori.text.TextComponent;
+import net.kyori.text.event.HoverEvent;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -54,6 +60,9 @@ public class VerboseListener {
 
     // how much data should we store before stopping.
     private static final int DATA_TRUNCATION = 10000;
+
+    // how many traces should we add
+    private static final int TRACE_DATA_TRUNCATION = 250;
 
     // the time when the listener was first registered
     private final long startTime = System.currentTimeMillis();
@@ -98,7 +107,64 @@ public class VerboseListener {
         }
 
         if (notify) {
-            Message.VERBOSE_LOG.send(notifiedSender, "&a" + data.getCheckTarget() + "&7 -- &a" + data.getPermission() + "&7 -- " + getTristateColor(data.getResult()) + data.getResult().name().toLowerCase() + "");
+            StringBuilder msgContent = new StringBuilder();
+            msgContent.append("&a")
+                    .append(data.getCheckTarget());
+
+            if (notifiedSender.isConsole()) {
+                msgContent.append("&7 - &8[&2")
+                        .append(data.getCheckOrigin().getCode())
+                        .append("&8]");
+            }
+
+            msgContent.append("&7 - &a")
+                    .append(data.getPermission())
+                    .append("&7 - ")
+                    .append(getTristateColor(data.getResult()))
+                    .append(data.getResult().name().toLowerCase());
+
+            if (notifiedSender.isConsole()) {
+                msgContent.append("&7 - ").append(Util.contextSetToString(data.getCheckContext()));
+            }
+
+            if (notifiedSender.isConsole()) {
+                Message.VERBOSE_LOG.send(notifiedSender, msgContent.toString());
+            } else {
+                TextComponent textComponent = TextUtils.fromLegacy(Message.VERBOSE_LOG.asString(notifiedSender.getPlatform().getLocaleManager(), msgContent.toString()));
+                List<String> hover = new ArrayList<>();
+                hover.add("&bOrigin: &2" + data.getCheckOrigin().name());
+                hover.add("&bContext: &r" + Util.contextSetToString(data.getCheckContext()));
+                hover.add("&bTrace: &r");
+
+                StackTraceElement[] checkTrace = data.getCheckTrace();
+
+                // how many lines have been printed
+                int count = 0;
+                // if we're printing elements yet
+                boolean printing = false;
+
+                for (StackTraceElement e : checkTrace) {
+                    // start printing when we escape LP internals code
+                    if (!printing && !e.getClassName().startsWith("me.lucko.luckperms.")) {
+                        printing = true;
+                    }
+
+                    if (!printing) continue;
+                    if (count >= 15) break;
+
+                    hover.add("&7" + e.getClassName() + "." + e.getMethodName() + (e.getLineNumber() >= 0 ? ":" + e.getLineNumber() : ""));
+                    count++;
+                }
+
+                if (checkTrace.length > 15) {
+                    int remain = checkTrace.length - 15;
+                    hover.add("&f... and " + remain + " more");
+                }
+
+                HoverEvent e = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(TextUtils.joinNewline(hover.stream()), Constants.FORMAT_CHAR));
+                TextComponent msg = textComponent.toBuilder().applyDeep(comp -> comp.hoverEvent(e)).build();
+                notifiedSender.sendMessage(msg);
+            }
         }
     }
 
@@ -108,7 +174,7 @@ public class VerboseListener {
      * @return the url
      * @see PasteUtils#paste(String, List)
      */
-    public String uploadPasteData() {
+    public String uploadPasteData(boolean showTraces) {
         long now = System.currentTimeMillis();
         String startDate = DATE_FORMAT.format(new Date(startTime));
         String endDate = DATE_FORMAT.format(new Date(now));
@@ -132,9 +198,10 @@ public class VerboseListener {
                 .add("| Start Time | " + startDate + " |")
                 .add("| End Time | " + endDate + " |")
                 .add("| Duration | " + duration +" |")
-                .add("| Count | **" + matchedCounter.get() + "** / " + counter + " |")
+                .add("| Count | **" + matchedCounter.get() + "** / " + counter.get() + " |")
                 .add("| User | " + notifiedSender.getName() + " |")
                 .add("| Filter | " + filter + " |")
+                .add("| Include traces | " + showTraces + " |")
                 .add("");
 
         if (matchedCounter.get() > results.size()) {
@@ -142,8 +209,14 @@ public class VerboseListener {
             prettyOutput.add("");
         }
 
+        if (showTraces && results.size() > TRACE_DATA_TRUNCATION) {
+            prettyOutput.add("**WARN:** Result set exceeded size of " + TRACE_DATA_TRUNCATION + ". The traced output below was truncated to " + TRACE_DATA_TRUNCATION + " entries.   ");
+            prettyOutput.add("Either refine the query using a more specific filter, or disable tracing by adding '--slim' to the end of the paste command.");
+            prettyOutput.add("");
+        }
+
         prettyOutput.add("### Output")
-                .add("Format: `<checked>` `<permission>` `<value>`")
+                .add("Format: `<checked>` `<origin>` `<permission>` `<value>`")
                 .add("")
                 .add("___")
                 .add("");
@@ -151,8 +224,49 @@ public class VerboseListener {
         ImmutableList.Builder<String> csvOutput = ImmutableList.<String>builder()
                 .add("User,Permission,Result");
 
+        AtomicInteger printedCount = new AtomicInteger(0);
+
         results.forEach(c -> {
-            prettyOutput.add("`" + c.getCheckTarget() + "` - " + c.getPermission() + " - **" + c.getResult().toString() + "**   ");
+            if (!showTraces) {
+                prettyOutput.add("`" + c.getCheckTarget() + "` - " + c.getPermission() + " - " + getTristateSymbol(c.getResult()) + "   ");
+            } else if (printedCount.incrementAndGet() > TRACE_DATA_TRUNCATION) {
+                prettyOutput.add("<br><code>" + c.getCheckTarget() + "</code> - " + c.getPermission() + " - " + getTristateSymbol(c.getResult()));
+            } else {
+                prettyOutput.add("<details><summary><code>" + c.getCheckTarget() + "</code> - " + c.getPermission() + " - " + getTristateSymbol(c.getResult()) + "</summary><p>");
+
+                prettyOutput.add("<br><b>Origin:</b> <code>" + c.getCheckOrigin().name() + "</code>");
+                prettyOutput.add("<br><b>Context:</b> <code>" + Util.stripColor(Util.contextSetToString(c.getCheckContext())) + "</code>");
+                prettyOutput.add("<br><b>Trace:</b><pre>");
+
+                // add trace
+                StackTraceElement[] checkTrace = c.getCheckTrace();
+
+                // how many lines have been printed
+                int count = 0;
+                // if we're printing elements yet
+                boolean printing = false;
+
+                for (StackTraceElement e : checkTrace) {
+                    // start printing when we escape LP internals code
+                    if (!printing && !e.getClassName().startsWith("me.lucko.luckperms.")) {
+                        printing = true;
+                    }
+
+                    if (!printing) continue;
+                    if (count >= 30) break;
+
+                    prettyOutput.add(e.getClassName() + "." + e.getMethodName() + (e.getLineNumber() >= 0 ? ":" + e.getLineNumber() : ""));
+                    count++;
+                }
+
+                if (checkTrace.length > 30) {
+                    int remain = checkTrace.length - 30;
+                    prettyOutput.add("... and " + remain + " more");
+                }
+
+                prettyOutput.add("</pre></p></details>");
+            }
+
             csvOutput.add(escapeCommas(c.getCheckTarget()) + "," + escapeCommas(c.getPermission()) + "," + c.getResult().name().toLowerCase());
         });
         results.clear();
@@ -177,6 +291,17 @@ public class VerboseListener {
                 return "&c";
             default:
                 return "&7";
+        }
+    }
+
+    private static String getTristateSymbol(Tristate tristate) {
+        switch (tristate) {
+            case TRUE:
+                return "✔️";
+            case FALSE:
+                return "❌";
+            default:
+                return "❔";
         }
     }
 

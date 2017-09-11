@@ -34,10 +34,8 @@ import me.lucko.luckperms.common.buffers.Buffer;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
-import me.lucko.luckperms.common.references.UserIdentifier;
 import me.lucko.luckperms.common.storage.Storage;
 
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -55,7 +53,6 @@ public class BufferedOutputStorage implements Storage, Runnable {
     private final Buffer<User, Boolean> userOutputBuffer = Buffer.of(user -> BufferedOutputStorage.this.backing.saveUser(user).join());
     private final Buffer<Group, Boolean> groupOutputBuffer = Buffer.of(group -> BufferedOutputStorage.this.backing.saveGroup(group).join());
     private final Buffer<Track, Boolean> trackOutputBuffer = Buffer.of(track -> BufferedOutputStorage.this.backing.saveTrack(track).join());
-    private final Buffer<UserIdentifier, Boolean> uuidDataOutputBuffer = Buffer.of(userIdentifier -> BufferedOutputStorage.this.backing.saveUUIDData(userIdentifier.getUsername().get(), userIdentifier.getUuid()).join());
 
     @Override
     public void run() {
@@ -70,11 +67,10 @@ public class BufferedOutputStorage implements Storage, Runnable {
         userOutputBuffer.flush(flushTime);
         groupOutputBuffer.flush(flushTime);
         trackOutputBuffer.flush(flushTime);
-        userOutputBuffer.flush(flushTime);
     }
 
     @Override
-    public Storage force() {
+    public Storage noBuffer() {
         return backing;
     }
 
@@ -99,17 +95,11 @@ public class BufferedOutputStorage implements Storage, Runnable {
         return trackOutputBuffer.enqueue(track);
     }
 
-    @Override
-    public CompletableFuture<Boolean> saveUUIDData(String username, UUID uuid) {
-        return uuidDataOutputBuffer.enqueue(UserIdentifier.of(uuid, username));
-    }
-
     private interface Exclude {
-        Storage force();
+        Storage noBuffer();
         CompletableFuture<Void> shutdown();
         CompletableFuture<Boolean> saveUser(User user);
         CompletableFuture<Boolean> saveGroup(Group group);
         CompletableFuture<Boolean> saveTrack(Track track);
-        CompletableFuture<Boolean> saveUUIDData(String username, UUID uuid);
     }
 }

@@ -37,7 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-public class GenericMetaStack implements MetaStack {
+public final class SimpleMetaStack implements MetaStack {
 
     private final MetaStackDefinition definition;
     private final ChatMetaType targetType;
@@ -45,7 +45,7 @@ public class GenericMetaStack implements MetaStack {
     @Getter(AccessLevel.NONE)
     private final List<MetaStackEntry> entries;
 
-    public GenericMetaStack(MetaStackDefinition definition, ChatMetaType targetType) {
+    public SimpleMetaStack(MetaStackDefinition definition, ChatMetaType targetType) {
         this.definition = definition;
         this.targetType = targetType;
         this.entries = definition.getElements().stream()
@@ -56,7 +56,7 @@ public class GenericMetaStack implements MetaStack {
     @Override
     public String toFormattedString() {
         List<MetaStackEntry> ret = new ArrayList<>(entries);
-        ret.removeIf(m -> !m.getEntry().isPresent());
+        ret.removeIf(m -> !m.getCurrentValue().isPresent());
 
         if (ret.isEmpty()) {
             return null;
@@ -70,7 +70,7 @@ public class GenericMetaStack implements MetaStack {
             }
 
             MetaStackEntry e = ret.get(i);
-            sb.append(e.getEntry().get().getValue());
+            sb.append(e.getCurrentValue().get().getValue());
         }
         sb.append(definition.getEndSpacer());
 

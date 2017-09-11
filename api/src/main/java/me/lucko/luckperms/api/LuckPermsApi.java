@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.api;
 
+import me.lucko.luckperms.LuckPerms;
 import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.event.EventBus;
@@ -38,7 +39,13 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * The root API interface for LuckPerms
+ * The LuckPerms API.
+ *
+ * <p>This interface is the base of the entire API package. All API functions
+ * are accessed via this interface.</p>
+ *
+ * <p>An instance can be obtained via {@link LuckPerms#getApi()}, or the platforms
+ * Services Manager.</p>
  */
 public interface LuckPermsApi {
 

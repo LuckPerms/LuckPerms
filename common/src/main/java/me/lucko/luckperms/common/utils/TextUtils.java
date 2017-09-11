@@ -27,14 +27,40 @@ package me.lucko.luckperms.common.utils;
 
 import lombok.experimental.UtilityClass;
 
+import net.kyori.text.Component;
+import net.kyori.text.TextComponent;
+import net.kyori.text.serializer.ComponentSerializers;
+
 import java.util.Arrays;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+@SuppressWarnings("deprecation")
 @UtilityClass
 public class TextUtils {
 
     public String joinNewline(String... strings) {
-        return Arrays.stream(strings).collect(Collectors.joining("\n"));
+        return joinNewline(Arrays.stream(strings));
+    }
+
+    public String joinNewline(Stream<String> strings) {
+        return strings.collect(Collectors.joining("\n"));
+    }
+
+    public TextComponent fromLegacy(String input, char character) {
+        return ComponentSerializers.LEGACY.deserialize(input, character);
+    }
+
+    public TextComponent fromLegacy(String input) {
+        return ComponentSerializers.LEGACY.deserialize(input);
+    }
+
+    public String toLegacy(Component component, char character) {
+        return ComponentSerializers.LEGACY.serialize(component, character);
+    }
+
+    public String toLegacy(Component component) {
+        return ComponentSerializers.LEGACY.serialize(component);
     }
 
 }

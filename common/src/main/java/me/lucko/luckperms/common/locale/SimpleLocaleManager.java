@@ -27,6 +27,8 @@ package me.lucko.luckperms.common.locale;
 
 import com.google.common.collect.ImmutableMap;
 
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.BufferedReader;
@@ -39,6 +41,17 @@ public class SimpleLocaleManager implements LocaleManager {
 
     private Map<Message, String> messages = ImmutableMap.of();
     private Map<CommandSpec, CommandSpec.CommandSpecData> commands = ImmutableMap.of();
+
+    public void tryLoad(LuckPermsPlugin plugin, File file) {
+        if (file.exists()) {
+            plugin.getLog().info("Found lang.yml - loading messages...");
+            try {
+                loadFromFile(file);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     @SuppressWarnings("unchecked")
     public void loadFromFile(File file) throws Exception {

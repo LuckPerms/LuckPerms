@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.common.commands.impl.group;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.common.commands.abstraction.Command;
@@ -44,8 +46,19 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
-public class GroupMainCommand extends MainCommand<Group> {
+public class GroupMainCommand extends MainCommand<Group, String> {
+
+    // we use a lock per unique group
+    // this helps prevent race conditions where commands are being executed concurrently
+    // and overriding each other.
+    // it's not a great solution, but it mostly works.
+    private final LoadingCache<String, ReentrantLock> locks = Caffeine.newBuilder()
+            .expireAfterAccess(1, TimeUnit.HOURS)
+            .build(key -> new ReentrantLock());
+
     public GroupMainCommand(LocaleManager locale) {
         super(CommandSpec.GROUP.spec(locale), "Group", 2, ImmutableList.<Command<Group, ?>>builder()
                 .add(new GroupInfo(locale))
@@ -64,15 +77,18 @@ public class GroupMainCommand extends MainCommand<Group> {
     }
 
     @Override
+    protected String parseTarget(String target, LuckPermsPlugin plugin, Sender sender) {
+        return target.toLowerCase();
+    }
+
+    @Override
     protected Group getTarget(String target, LuckPermsPlugin plugin, Sender sender) {
-        target = target.toLowerCase();
         if (!plugin.getStorage().loadGroup(target).join()) {
             Message.GROUP_NOT_FOUND.send(sender);
             return null;
         }
 
         Group group = plugin.getGroupManager().getIfLoaded(target);
-
         if (group == null) {
             Message.GROUP_NOT_FOUND.send(sender);
             return null;
@@ -80,6 +96,11 @@ public class GroupMainCommand extends MainCommand<Group> {
 
         group.auditTemporaryPermissions();
         return group;
+    }
+
+    @Override
+    protected ReentrantLock getLockForTarget(String target) {
+        return locks.get(target);
     }
 
     @Override

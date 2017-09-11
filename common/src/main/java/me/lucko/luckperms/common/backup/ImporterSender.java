@@ -32,17 +32,17 @@ import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.constants.CommandPermission;
 import me.lucko.luckperms.common.constants.Constants;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.utils.TextUtils;
 
 import net.kyori.text.Component;
-import net.kyori.text.LegacyComponent;
 
 import java.util.UUID;
-import java.util.function.Consumer;
 
 @AllArgsConstructor
-public class ImporterSender implements Sender {
+public abstract class ImporterSender implements Sender {
     private final LuckPermsPlugin plugin;
-    private final Consumer<String> messageConsumer;
+
+    protected abstract void consumeMessage(String s);
 
     @Override
     public LuckPermsPlugin getPlatform() {
@@ -61,13 +61,13 @@ public class ImporterSender implements Sender {
 
     @Override
     public void sendMessage(String s) {
-        messageConsumer.accept(s);
+        consumeMessage(s);
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public void sendMessage(Component message) {
-        messageConsumer.accept(LegacyComponent.to(message));
+        consumeMessage(TextUtils.toLegacy(message));
     }
 
     @Override

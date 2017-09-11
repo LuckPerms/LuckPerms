@@ -32,12 +32,11 @@ import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.bukkit.calculators.BukkitCalculatorFactory;
+import me.lucko.luckperms.bukkit.contexts.BukkitContextManager;
 import me.lucko.luckperms.bukkit.contexts.WorldCalculator;
-import me.lucko.luckperms.bukkit.messaging.BungeeMessagingService;
-import me.lucko.luckperms.bukkit.messaging.LilyPadMessagingService;
+import me.lucko.luckperms.bukkit.messaging.BukkitMessagingFactory;
 import me.lucko.luckperms.bukkit.model.Injector;
 import me.lucko.luckperms.bukkit.model.LPPermissible;
 import me.lucko.luckperms.bukkit.processors.ChildPermissionProvider;
@@ -47,6 +46,7 @@ import me.lucko.luckperms.common.actionlog.LogDispatcher;
 import me.lucko.luckperms.common.api.ApiHandler;
 import me.lucko.luckperms.common.api.ApiProvider;
 import me.lucko.luckperms.common.buffers.BufferedRequest;
+import me.lucko.luckperms.common.buffers.UpdateTaskBuffer;
 import me.lucko.luckperms.common.caching.handlers.CachedStateManager;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.commands.sender.Sender;
@@ -68,8 +68,6 @@ import me.lucko.luckperms.common.managers.GroupManager;
 import me.lucko.luckperms.common.managers.TrackManager;
 import me.lucko.luckperms.common.managers.UserManager;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
-import me.lucko.luckperms.common.messaging.NoopMessagingService;
-import me.lucko.luckperms.common.messaging.RedisMessagingService;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.Storage;
@@ -78,7 +76,6 @@ import me.lucko.luckperms.common.storage.StorageType;
 import me.lucko.luckperms.common.storage.backing.file.FileWatcher;
 import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
-import me.lucko.luckperms.common.tasks.UpdateTask;
 import me.lucko.luckperms.common.treeview.PermissionVault;
 import me.lucko.luckperms.common.utils.LoginHelper;
 import me.lucko.luckperms.common.utils.UuidCache;
@@ -131,7 +128,6 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     private LocaleManager localeManager;
     private CachedStateManager cachedStateManager;
     private ContextManager<Player> contextManager;
-    private WorldCalculator worldCalculator;
     private CalculatorFactory calculatorFactory;
     private BufferedRequest<Void> updateTaskBuffer;
     private boolean started = false;
@@ -227,68 +223,14 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         storage = StorageFactory.getInstance(this, StorageType.H2);
 
         // initialise messaging
-        String messagingType = getConfiguration().get(ConfigKeys.MESSAGING_SERVICE).toLowerCase();
-        if (messagingType.equals("none") && getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
-            messagingType = "redis";
-        }
-
-        if (!messagingType.equals("none")) {
-            getLog().info("Loading messaging service... [" + messagingType.toUpperCase() + "]");
-        }
-
-        if (messagingType.equals("redis")) {
-            if (getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
-                RedisMessagingService redis = new RedisMessagingService(this);
-                try {
-                    redis.init(getConfiguration().get(ConfigKeys.REDIS_ADDRESS), getConfiguration().get(ConfigKeys.REDIS_PASSWORD));
-                    messagingService = redis;
-                } catch (Exception e) {
-                    getLog().warn("Couldn't load redis...");
-                    e.printStackTrace();
-                }
-            } else {
-                getLog().warn("Messaging Service was set to redis, but redis is not enabled!");
-            }
-        } else if (messagingType.equals("bungee")) {
-            BungeeMessagingService bungeeMessaging = new BungeeMessagingService(this);
-            bungeeMessaging.init();
-            messagingService = bungeeMessaging;
-        } else if (messagingType.equals("lilypad")) {
-            if (getServer().getPluginManager().getPlugin("LilyPad-Connect") == null) {
-                getLog().warn("LilyPad-Connect plugin not present.");
-            } else {
-                LilyPadMessagingService lilyPadMessaging = new LilyPadMessagingService(this);
-                lilyPadMessaging.init();
-                messagingService = lilyPadMessaging;
-            }
-        } else if (!messagingType.equals("none")) {
-            getLog().warn("Messaging service '" + messagingType + "' not recognised.");
-        }
-
-        if (messagingService == null) {
-            messagingService = new NoopMessagingService();
-        }
+        messagingService = new BukkitMessagingFactory(this).getInstance();
 
         // setup the update task buffer
-        updateTaskBuffer = new BufferedRequest<Void>(1000L, this::doAsync) {
-            @Override
-            protected Void perform() {
-                new UpdateTask(LPBukkitPlugin.this).run();
-                return null;
-            }
-        };
+        updateTaskBuffer = new UpdateTaskBuffer(this);
 
         // load locale
         localeManager = new SimpleLocaleManager();
-        File locale = new File(getDataFolder(), "lang.yml");
-        if (locale.exists()) {
-            getLog().info("Found lang.yml - loading messages...");
-            try {
-                localeManager.loadFromFile(locale);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+        localeManager.tryLoad(this, new File(getDataFolder(), "lang.yml"));
 
         // register commands
         commandManager = new BukkitCommand(this);
@@ -307,26 +249,10 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         calculatorFactory = new BukkitCalculatorFactory(this);
         cachedStateManager = new CachedStateManager();
 
-        contextManager = new ContextManager<Player>() {
-            @Override
-            public Contexts formContexts(Player player, ImmutableContextSet contextSet) {
-                return new Contexts(
-                        contextSet,
-                        getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
-                        getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
-                        true,
-                        getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
-                        getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
-                        player.isOp()
-                );
-            }
-        };
-
-        worldCalculator = new WorldCalculator(this);
-        contextManager.registerCalculator(worldCalculator);
-
-        LuckPermsCalculator<Player> staticCalculator = new LuckPermsCalculator<>(getConfiguration());
-        contextManager.registerCalculator(staticCalculator, true);
+        // setup context manager
+        contextManager = new BukkitContextManager(this);
+        contextManager.registerCalculator(new WorldCalculator(this));
+        contextManager.registerCalculator(new LuckPermsCalculator<>(getConfiguration()), true);
 
         // Provide vault support
         tryVaultHook(false);
@@ -465,7 +391,6 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         localeManager = null;
         cachedStateManager = null;
         contextManager = null;
-        worldCalculator = null;
         calculatorFactory = null;
         updateTaskBuffer = null;
         verboseHandler = null;

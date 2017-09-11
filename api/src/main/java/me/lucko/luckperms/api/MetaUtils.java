@@ -41,6 +41,7 @@ import java.util.Set;
  */
 @Deprecated
 public class MetaUtils {
+    private static final String[] DELIMS = new String[]{".", "/", "-", "$"};
 
     private static String escapeDelimiters(String s, String... delims) {
         for (String delim : delims) {
@@ -68,7 +69,7 @@ public class MetaUtils {
             throw new NullPointerException();
         }
 
-        return escapeDelimiters(s, ".", "/", "-", "$");
+        return escapeDelimiters(s, DELIMS);
     }
 
     /**
@@ -86,7 +87,7 @@ public class MetaUtils {
         s = s.replace("{SEP}", ".");
         s = s.replace("{FSEP}", "/");
         s = s.replace("{DSEP}", "$");
-        s = unescapeDelimiters(s, ".", "/", "-", "$");
+        s = unescapeDelimiters(s, DELIMS);
 
         return s;
     }
@@ -161,7 +162,7 @@ public class MetaUtils {
         node = escapeCharacters(node);
 
         for (Node n : holder.getPermissions()) {
-            if (!n.getValue() || !n.isMeta()) continue;
+            if (!n.getValuePrimitive() || !n.isMeta()) continue;
 
             if (!n.shouldApplyOnServer(server, includeGlobal, false)) continue;
             if (!n.shouldApplyOnWorld(world, includeGlobal, false)) continue;
@@ -233,7 +234,7 @@ public class MetaUtils {
         int priority = Integer.MIN_VALUE;
         String meta = null;
         for (Node n : holder.getAllNodes(Contexts.allowAll())) {
-            if (!n.getValue()) continue;
+            if (!n.getValuePrimitive()) continue;
 
             if (!n.shouldApplyOnServer(server, includeGlobal, false)) continue;
             if (!n.shouldApplyOnWorld(world, includeGlobal, false)) continue;

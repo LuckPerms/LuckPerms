@@ -44,8 +44,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.locks.ReentrantLock;
 
-public class MigrationMainCommand extends MainCommand<Object> {
+public class MigrationMainCommand extends MainCommand<Object, Object> {
     private static final Map<String, String> PLUGINS = ImmutableMap.<String, String>builder()
             .put("org.anjocaido.groupmanager.GroupManager", "me.lucko.luckperms.bukkit.migration.MigrationGroupManager")
             .put("ru.tehkode.permissions.bukkit.PermissionsEx", "me.lucko.luckperms.bukkit.migration.MigrationPermissionsEx")
@@ -57,6 +58,7 @@ public class MigrationMainCommand extends MainCommand<Object> {
             .put("io.github.djxy.permissionmanager.sponge.SpongePlugin", "me.lucko.luckperms.sponge.migration.MigrationPermissionManager")
             .build();
 
+    private final ReentrantLock lock = new ReentrantLock();
     private List<Command<Object, ?>> commands = null;
     private boolean display = true;
 
@@ -109,16 +111,26 @@ public class MigrationMainCommand extends MainCommand<Object> {
         return l;
     }
 
+    @Override
+    protected ReentrantLock getLockForTarget(Object target) {
+        return lock; // share a lock between all migration commands
+    }
+
     /* Dummy */
 
     @Override
     protected List<String> getTargets(LuckPermsPlugin plugin) {
-        return Collections.emptyList();
+        return Collections.emptyList(); // only used for tab complete, we're not bothered about it for this command.
     }
 
     @Override
-    protected Object getTarget(String target, LuckPermsPlugin plugin, Sender sender) {
-        return new Object();
+    protected Object parseTarget(String target, LuckPermsPlugin plugin, Sender sender) {
+        return this; // can't return null, but we don't need a target
+    }
+
+    @Override
+    protected Object getTarget(Object target, LuckPermsPlugin plugin, Sender sender) {
+        return this; // can't return null, but we don't need a target
     }
 
     @Override

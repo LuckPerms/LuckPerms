@@ -28,6 +28,7 @@ package me.lucko.luckperms.api;
 import com.google.common.base.Preconditions;
 
 import java.util.Map;
+import java.util.Optional;
 
 import javax.annotation.Nonnull;
 
@@ -103,5 +104,23 @@ public enum ChatMetaType {
      */
     @Nonnull
     public abstract Map.Entry<Integer, String> getEntry(@Nonnull Node node);
+
+    /**
+     * Parses a ChatMetaType from the given node.
+     *
+     * @param node the node
+     * @return the parsed chat meta type
+     * @since 3.4
+     */
+    @Nonnull
+    public static Optional<ChatMetaType> ofNode(@Nonnull Node node) {
+        if (node.isPrefix()) {
+            return Optional.of(PREFIX);
+        } else if (node.isSuffix()) {
+            return Optional.of(SUFFIX);
+        } else {
+            return Optional.empty();
+        }
+    }
 
 }

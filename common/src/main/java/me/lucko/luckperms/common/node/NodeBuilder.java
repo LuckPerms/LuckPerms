@@ -82,7 +82,7 @@ class NodeBuilder implements Node.Builder {
 
     NodeBuilder(Node other) {
         this.permission = other.getPermission();
-        this.value = other.getValue();
+        this.value = other.getValuePrimitive();
         this.override = other.isOverride();
         this.server = other.getServer().orElse(null);
         this.world = other.getWorld().orElse(null);

@@ -79,57 +79,57 @@ public class StorageDelegate implements Storage {
 
     @Override
     public CompletableFuture<Boolean> logAction(@NonNull LogEntry entry) {
-        return handle.force().logAction(entry);
+        return handle.noBuffer().logAction(entry);
     }
 
     @Override
     public CompletableFuture<Log> getLog() {
-        return handle.force().getLog().thenApply(log -> log == null ? null : new LogDelegate(log));
+        return handle.noBuffer().getLog().thenApply(log -> log == null ? null : new LogDelegate(log));
     }
 
     @Override
     public CompletableFuture<Boolean> loadUser(@NonNull UUID uuid, String username) {
-        return handle.force().loadUser(uuid, username == null ? null : checkUsername(username));
+        return handle.noBuffer().loadUser(uuid, username == null ? null : checkUsername(username));
     }
 
     @Override
     public CompletableFuture<Boolean> saveUser(@NonNull User user) {
-        return handle.force().saveUser(UserDelegate.cast(user));
+        return handle.noBuffer().saveUser(UserDelegate.cast(user));
     }
 
     @Override
     public CompletableFuture<Boolean> cleanupUsers() {
-        return handle.force().cleanupUsers();
+        return handle.noBuffer().cleanupUsers();
     }
 
     @Override
     public CompletableFuture<Set<UUID>> getUniqueUsers() {
-        return handle.force().getUniqueUsers();
+        return handle.noBuffer().getUniqueUsers();
     }
 
     @Override
     public CompletableFuture<List<HeldPermission<UUID>>> getUsersWithPermission(@NonNull String permission) {
-        return handle.force().getUsersWithPermission(permission);
+        return handle.noBuffer().getUsersWithPermission(permission);
     }
 
     @Override
     public CompletableFuture<Boolean> createAndLoadGroup(@NonNull String name) {
-        return handle.force().createAndLoadGroup(checkName(name), CreationCause.API);
+        return handle.noBuffer().createAndLoadGroup(checkName(name), CreationCause.API);
     }
 
     @Override
     public CompletableFuture<Boolean> loadGroup(@NonNull String name) {
-        return handle.force().loadGroup(checkName(name));
+        return handle.noBuffer().loadGroup(checkName(name));
     }
 
     @Override
     public CompletableFuture<Boolean> loadAllGroups() {
-        return handle.force().loadAllGroups();
+        return handle.noBuffer().loadAllGroups();
     }
 
     @Override
     public CompletableFuture<Boolean> saveGroup(@NonNull Group group) {
-        return handle.force().saveGroup(GroupDelegate.cast(group));
+        return handle.noBuffer().saveGroup(GroupDelegate.cast(group));
     }
 
     @Override
@@ -137,51 +137,51 @@ public class StorageDelegate implements Storage {
         if (group.getName().equalsIgnoreCase(plugin.getConfiguration().get(ConfigKeys.DEFAULT_GROUP_NAME))) {
             throw new IllegalArgumentException("Cannot delete the default group.");
         }
-        return handle.force().deleteGroup(GroupDelegate.cast(group), DeletionCause.API);
+        return handle.noBuffer().deleteGroup(GroupDelegate.cast(group), DeletionCause.API);
     }
 
     @Override
     public CompletableFuture<List<HeldPermission<String>>> getGroupsWithPermission(@NonNull String permission) {
-        return handle.force().getGroupsWithPermission(permission);
+        return handle.noBuffer().getGroupsWithPermission(permission);
     }
 
     @Override
     public CompletableFuture<Boolean> createAndLoadTrack(@NonNull String name) {
-        return handle.force().createAndLoadTrack(checkName(name), CreationCause.API);
+        return handle.noBuffer().createAndLoadTrack(checkName(name), CreationCause.API);
     }
 
     @Override
     public CompletableFuture<Boolean> loadTrack(@NonNull String name) {
-        return handle.force().loadTrack(checkName(name));
+        return handle.noBuffer().loadTrack(checkName(name));
     }
 
     @Override
     public CompletableFuture<Boolean> loadAllTracks() {
-        return handle.force().loadAllTracks();
+        return handle.noBuffer().loadAllTracks();
     }
 
     @Override
     public CompletableFuture<Boolean> saveTrack(@NonNull Track track) {
-        return handle.force().saveTrack(TrackDelegate.cast(track));
+        return handle.noBuffer().saveTrack(TrackDelegate.cast(track));
     }
 
     @Override
     public CompletableFuture<Boolean> deleteTrack(@NonNull Track track) {
-        return handle.force().deleteTrack(TrackDelegate.cast(track), DeletionCause.API);
+        return handle.noBuffer().deleteTrack(TrackDelegate.cast(track), DeletionCause.API);
     }
 
     @Override
     public CompletableFuture<Boolean> saveUUIDData(@NonNull String username, @NonNull UUID uuid) {
-        return handle.force().saveUUIDData(checkUsername(username), uuid);
+        return handle.noBuffer().saveUUIDData(checkUsername(username), uuid);
     }
 
     @Override
     public CompletableFuture<UUID> getUUID(@NonNull String username) {
-        return handle.force().getUUID(checkUsername(username));
+        return handle.noBuffer().getUUID(checkUsername(username));
     }
 
     @Override
     public CompletableFuture<String> getName(@NonNull UUID uuid) {
-        return handle.force().getName(uuid);
+        return handle.noBuffer().getName(uuid);
     }
 }

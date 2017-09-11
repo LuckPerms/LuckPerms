@@ -64,7 +64,7 @@ public final class NodeModel {
     public static NodeModel fromNode(Node node) {
         return NodeModel.of(
                 node.getPermission(),
-                node.getValue(),
+                node.getValuePrimitive(),
                 node.getServer().orElse("global"),
                 node.getWorld().orElse("global"),
                 node.isTemporary() ? node.getExpiryUnixTime() : 0L,

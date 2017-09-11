@@ -196,8 +196,9 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
     }
 
     @Override
-    public void cleanup(User user) {
+    public boolean cleanup(User user) {
         // Do nothing - this instance uses other means in order to cleanup
+        return false;
     }
 
     @Override

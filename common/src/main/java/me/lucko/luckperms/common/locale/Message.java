@@ -57,7 +57,7 @@ public enum Message {
     OP_DISABLED("&bThe vanilla OP system is disabled on this server.", false),
     OP_DISABLED_SPONGE("&2Server Operator status has no effect when a permission plugin is installed. Please edit user data directly.", true),
     LOG("&3LOG &3&l> {0}", true),
-    VERBOSE_LOG("&3VERBOSE &3&l> {0}", true),
+    VERBOSE_LOG("&3VB &3&l> {0}", true),
 
     EXPORT_LOG("&3EXPORT &3&l> &f{0}", true),
     EXPORT_LOG_PROGRESS("&3EXPORT &3&l> &7{0}", true),
@@ -230,14 +230,14 @@ public enum Message {
 
     CLEAR_SUCCESS("&b{0}&a's permissions were cleared in context {1}&a. (&b{2}&a nodes were removed.)", true),
     CLEAR_SUCCESS_SINGULAR("&b{0}&a's permissions were cleared in context {1}&a. (&b{2}&a node was removed.)", true),
-    PARENT_CLEAR_SUCCESS("&b{0}&a's parents were cleared in context {1}&a. &b{2}&a nodes were removed.)", true),
-    PARENT_CLEAR_SUCCESS_SINGULAR("&b{0}&a's parents were cleared in context {1}&a. &b{2}&a node was removed.)", true),
+    PARENT_CLEAR_SUCCESS("&b{0}&a's parents were cleared in context {1}&a. (&b{2}&a nodes were removed.)", true),
+    PARENT_CLEAR_SUCCESS_SINGULAR("&b{0}&a's parents were cleared in context {1}&a. (&b{2}&a node was removed.)", true),
 
-    PARENT_CLEAR_TRACK_SUCCESS("&b{0}&a's parents on track &b{1}&a were cleared in context {2}&a. &b{3}&a nodes were removed.)", true),
-    PARENT_CLEAR_TRACK_SUCCESS_SINGULAR("&b{0}&a's parents on track &b{1}&a were cleared in context {2}&a. &b{3}&a node was removed.)", true),
+    PARENT_CLEAR_TRACK_SUCCESS("&b{0}&a's parents on track &b{1}&a were cleared in context {2}&a. (&b{3}&a nodes were removed.)", true),
+    PARENT_CLEAR_TRACK_SUCCESS_SINGULAR("&b{0}&a's parents on track &b{1}&a were cleared in context {2}&a. (&b{3}&a node was removed.)", true),
 
-    META_CLEAR_SUCCESS("&b{0}&a's meta was cleared in context {1}&a. &b{2}&a nodes were removed.)", true),
-    META_CLEAR_SUCCESS_SINGULAR("&b{0}&a's meta was cleared in context {1}&a. &b{2}&a node was removed.)", true),
+    META_CLEAR_SUCCESS("&b{0}&a's meta matching type &b{1}&a was cleared in context {2}&a. (&b{3}&a nodes were removed.)", true),
+    META_CLEAR_SUCCESS_SINGULAR("&b{0}&a's meta matching type &b{1}&a was cleared in context {2}&a. (&b{3}&a node was removed.)", true),
 
     ILLEGAL_DATE_ERROR("Could not parse date '{0}'.", true),
     PAST_DATE_ERROR("You cannot set a date in the past!", true),
@@ -265,12 +265,14 @@ public enum Message {
     REMOVE_TEMP_CHATMETA_SUCCESS("&b{0}&a had temporary {1} &f\"{2}&f\"&a at priority &b{3}&a removed in context {4}&a.", true),
     BULK_REMOVE_TEMP_CHATMETA_SUCCESS("&b{0}&a had all temporary {1}es at priority &b{2}&a removed in context {3}&a.", true),
 
-    ALREADY_HAS_META("{0} already has that meta key value pair set.", true),
+    ALREADY_HAS_META("{0} already has that meta pair set.", true),
 
     SET_META_SUCCESS("&aSet meta value for key &f\"{0}&f\"&a to &f\"{1}&f\"&a for &b{2}&a in context {3}&a.", true),
     SET_META_TEMP_SUCCESS("&aSet meta value for key &f\"{0}&f\"&a to &f\"{1}&f\"&a for &b{2}&a for a duration of &b{3}&a in context {4}&a.", true),
     UNSET_META_SUCCESS("&aUnset meta value with key &f\"{0}&f\"&a for &b{1}&a in context {2}&a.", true),
     UNSET_META_TEMP_SUCCESS("&aUnset temporary meta value with key &f\"{0}&f\"&a for &b{1}&a in context {2}&a.", true),
+
+    DOESNT_HAVE_META("{0} does not have that meta pair set.", true),
 
     BULK_UPDATE_INVALID_DATA_TYPE("Invalid type. Was expecting 'all', 'users' or 'groups'.", true),
     BULK_UPDATE_INVALID_CONSTRAINT("Invalid constraint &4{0}&c. Constraints should be in the format '&f<field> <comparison operator> <value>&c'.", true),
@@ -392,8 +394,8 @@ public enum Message {
     IMPORT_LOG_NOT_READABLE("Error: File {0} is not readable.", true),
     IMPORT_LOG_FAILURE("An unexpected error occured whilst reading from the log file.", true),
 
-    IMPORT_PROGRESS("&b(Import) &b-> &f{0} &fpercent complete &7- &b{1}&f/&b{2} &foperations complete with &c{3} &ferrors.", true),
-    IMPORT_PROGRESS_SIN("&b(Import) &b-> &f{0} &fpercent complete &7- &b{1}&f/&b{2} &foperations complete with &c{3} &ferror.", true),
+    IMPORT_PROGRESS("&b(Import) &b-> &f{0}&f% complete &7- &b{1}&f/&b{2} &foperations complete with &c{3} &ferrors.", true),
+    IMPORT_PROGRESS_SIN("&b(Import) &b-> &f{0}&f% complete &7- &b{1}&f/&b{2} &foperations complete with &c{3} &ferror.", true),
     IMPORT_START("&b(Import) &b-> &fStarting import process.", true),
 
     IMPORT_END_COMPLETE("&b(Import) &a&lCOMPLETED &7- took &b{0} &7seconds - &7No errors.", true),

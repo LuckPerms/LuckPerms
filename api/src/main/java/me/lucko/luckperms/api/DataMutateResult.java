@@ -30,11 +30,29 @@ import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.function.Supplier;
 
+/**
+ * Represents the result of a mutation call.
+ */
 public enum DataMutateResult {
 
+    /**
+     * Indicates the mutation was a success
+     */
     SUCCESS(true, null),
+
+    /**
+     * Indicates the mutation failed because the subject already has something
+     */
     ALREADY_HAS(false, ObjectAlreadyHasException::new),
+
+    /**
+     * Indicates the mutation failed because the subject lacks something
+     */
     LACKS(false, ObjectLacksException::new),
+
+    /**
+     * Indicates the mutation failed
+     */
     FAIL(false, RuntimeException::new);
 
     private boolean value;
@@ -51,8 +69,33 @@ public enum DataMutateResult {
         }
     }
 
+    /**
+     * Gets a boolean representation of the result.
+     *
+     * @return a boolean representation
+     */
     public boolean asBoolean() {
         return value;
+    }
+
+    /**
+     * Gets if the result indicates a success
+     *
+     * @return if the result indicates a success
+     * @since 3.4
+     */
+    public boolean wasSuccess() {
+        return value;
+    }
+
+    /**
+     * Gets if the result indicates a failure
+     *
+     * @return if the result indicates a failure
+     * @since 3.4
+     */
+    public boolean wasFailure() {
+        return !value;
     }
 
     // allows us to throw checked exceptions without declaring it, as #throwException throws a number of

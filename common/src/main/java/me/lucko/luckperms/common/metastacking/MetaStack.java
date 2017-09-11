@@ -29,14 +29,42 @@ import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.LocalizedNode;
 import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
 
+/**
+ * A live stack of {@link MetaStackEntry} instances, formed from a
+ * {@link MetaStackDefinition}.
+ *
+ * This class is used to construct a formatted string, by accumulating
+ * nodes to each element.
+ */
 public interface MetaStack {
 
+    /**
+     * Gets the definition this stack is based upon
+     *
+     * @return the definition of the stack
+     */
     MetaStackDefinition getDefinition();
 
+    /**
+     * Gets the target of this stack
+     *
+     * @return the stack target
+     */
     ChatMetaType getTargetType();
 
+    /**
+     * Returns a formatted string, as defined by the {@link MetaStackDefinition},
+     * using the accumulated elements in the stack.
+     *
+     * @return the string output
+     */
     String toFormattedString();
 
+    /**
+     * Tries to accumulate the given node to all elements in the stack.
+     *
+     * @param node the node to accumulate
+     */
     void accumulateToAll(LocalizedNode node);
 
 }

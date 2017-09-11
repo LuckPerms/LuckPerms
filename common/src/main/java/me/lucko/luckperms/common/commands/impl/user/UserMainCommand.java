@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.common.commands.impl.user;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 
 import me.lucko.luckperms.common.commands.abstraction.Command;
@@ -44,11 +46,23 @@ import me.lucko.luckperms.common.locale.LocaleManager;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.references.UserIdentifier;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
-public class UserMainCommand extends MainCommand<User> {
+public class UserMainCommand extends MainCommand<User, UserIdentifier> {
+
+    // we use a lock per unique user
+    // this helps prevent race conditions where commands are being executed concurrently
+    // and overriding each other.
+    // it's not a great solution, but it mostly works.
+    private final LoadingCache<UUID, ReentrantLock> locks = Caffeine.newBuilder()
+            .expireAfterAccess(1, TimeUnit.HOURS)
+            .build(key -> new ReentrantLock());
+
     public UserMainCommand(LocaleManager locale) {
         super(CommandSpec.USER.spec(locale), "User", 2, ImmutableList.<Command<User, ?>>builder()
                 .add(new UserInfo(locale))
@@ -66,39 +80,41 @@ public class UserMainCommand extends MainCommand<User> {
     }
 
     @Override
-    protected User getTarget(String target, LuckPermsPlugin plugin, Sender sender) {
-        UUID u = Util.parseUuid(target.toLowerCase());
-        if (u == null) {
+    protected UserIdentifier parseTarget(String target, LuckPermsPlugin plugin, Sender sender) {
+        UUID uuid = Util.parseUuid(target.toLowerCase());
+        if (uuid == null) {
             if (!DataConstraints.PLAYER_USERNAME_TEST.test(target)) {
                 Message.USER_INVALID_ENTRY.send(sender, target);
                 return null;
             }
 
-            u = plugin.getStorage().getUUID(target.toLowerCase()).join();
-            if (u == null) {
+            uuid = plugin.getStorage().getUUID(target.toLowerCase()).join();
+            if (uuid == null) {
                 if (!plugin.getConfiguration().get(ConfigKeys.USE_SERVER_UUID_CACHE)) {
                     Message.USER_NOT_FOUND.send(sender);
                     return null;
                 }
 
-                u = plugin.lookupUuid(target).orElse(null);
-                if (u == null) {
+                uuid = plugin.lookupUuid(target).orElse(null);
+                if (uuid == null) {
                     Message.USER_NOT_FOUND.send(sender);
                     return null;
                 }
             }
         }
 
-        String name = plugin.getStorage().getName(u).join();
-        if (name == null) {
-            name = "null";
-        }
+        String name = plugin.getStorage().getName(uuid).join();
+        return UserIdentifier.of(uuid, name);
+    }
 
-        if (!plugin.getStorage().loadUser(u, name).join()) {
+    @Override
+    protected User getTarget(UserIdentifier target, LuckPermsPlugin plugin, Sender sender) {
+        if (!plugin.getStorage().loadUser(target.getUuid(), target.getUsername().orElse(null)).join()) {
             Message.LOADING_ERROR.send(sender);
+            return null;
         }
 
-        User user = plugin.getUserManager().getIfLoaded(u);
+        User user = plugin.getUserManager().getIfLoaded(target.getUuid());
         if (user == null) {
             Message.LOADING_ERROR.send(sender);
             return null;
@@ -106,6 +122,11 @@ public class UserMainCommand extends MainCommand<User> {
 
         user.auditTemporaryPermissions();
         return user;
+    }
+
+    @Override
+    protected ReentrantLock getLockForTarget(UserIdentifier target) {
+        return locks.get(target.getUuid());
     }
 
     @Override

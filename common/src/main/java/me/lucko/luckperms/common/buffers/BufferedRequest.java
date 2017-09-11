@@ -45,6 +45,7 @@ import java.util.function.Supplier;
 @RequiredArgsConstructor
 public abstract class BufferedRequest<T> {
     private final long bufferTimeMillis;
+    private final long sleepInterval;
     private final Executor executor;
 
     private WeakReference<Processor<T>> processor = null;
@@ -60,7 +61,7 @@ public abstract class BufferedRequest<T> {
                 }
             }
 
-            Processor<T> p = new Processor<>(bufferTimeMillis, this::perform);
+            Processor<T> p = new Processor<>(bufferTimeMillis, sleepInterval, this::perform);
             executor.execute(p);
             processor = new WeakReference<>(p);
             return p.get();
@@ -79,6 +80,7 @@ public abstract class BufferedRequest<T> {
     @RequiredArgsConstructor
     private static class Processor<R> implements Runnable {
         private final long delayMillis;
+        private final long sleepMillis;
         private final Supplier<R> supplier;
         private final ReentrantLock lock = new ReentrantLock();
         private final CompletableFuture<R> future = new CompletableFuture<>();
@@ -108,7 +110,7 @@ public abstract class BufferedRequest<T> {
                 }
 
                 try {
-                    Thread.sleep(500);
+                    Thread.sleep(sleepMillis);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

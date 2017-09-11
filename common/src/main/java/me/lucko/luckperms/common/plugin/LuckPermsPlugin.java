@@ -220,12 +220,14 @@ public interface LuckPermsPlugin {
 
     /**
      * Gets the name or "brand" of the running platform
+     *
      * @return the server brand
      */
     String getServerName();
 
     /**
      * Gets the version of the running platform
+     *
      * @return the server version
      */
     String getServerVersion();

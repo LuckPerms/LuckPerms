@@ -49,7 +49,6 @@ import me.lucko.luckperms.common.utils.TextUtils;
 
 import net.kyori.text.BuildableComponent;
 import net.kyori.text.Component;
-import net.kyori.text.LegacyComponent;
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
@@ -147,7 +146,7 @@ public class SearchCommand extends SingleCommand {
 
         for (Map.Entry<String, HeldPermission<UUID>> ent : uuidMappedPage) {
             String s = "&3> &b" + ent.getKey() + " &7- " + (ent.getValue().getValue() ? "&a" : "&c") + ent.getValue().getValue() + getNodeExpiryString(ent.getValue().asNode()) + Util.getAppendableNodeContextString(ent.getValue().asNode()) + "\n";
-            message.append(LegacyComponent.from(s, Constants.FORMAT_CHAR).toBuilder().applyDeep(makeFancy(ent.getKey(), false, label, ent.getValue())).build());
+            message.append(TextUtils.fromLegacy(s, Constants.FORMAT_CHAR).toBuilder().applyDeep(makeFancy(ent.getKey(), false, label, ent.getValue())).build());
         }
 
         return Maps.immutableEntry(message.build(), title);
@@ -176,7 +175,7 @@ public class SearchCommand extends SingleCommand {
 
         for (HeldPermission<String> ent : page) {
             String s = "&3> &b" + ent.getHolder() + " &7- " + (ent.getValue() ? "&a" : "&c") + ent.getValue() + getNodeExpiryString(ent.asNode()) + Util.getAppendableNodeContextString(ent.asNode()) + "\n";
-            message.append(LegacyComponent.from(s, Constants.FORMAT_CHAR).toBuilder().applyDeep(makeFancy(ent.getHolder(), true, label, ent)).build());
+            message.append(TextUtils.fromLegacy(s, Constants.FORMAT_CHAR).toBuilder().applyDeep(makeFancy(ent.getHolder(), true, label, ent)).build());
         }
 
         return Maps.immutableEntry(message.build(), title);
@@ -191,8 +190,8 @@ public class SearchCommand extends SingleCommand {
     }
 
     private static Consumer<BuildableComponent.Builder<?, ?>> makeFancy(String holderName, boolean group, String label, HeldPermission<?> perm) {
-        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, LegacyComponent.from(TextUtils.joinNewline(
-                "&3> " + (perm.asNode().getValue() ? "&a" : "&c") + perm.asNode().getPermission(),
+        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(TextUtils.joinNewline(
+                "&3> " + (perm.asNode().getValuePrimitive() ? "&a" : "&c") + perm.asNode().getPermission(),
                 " ",
                 "&7Click to remove this node from " + holderName
         ), Constants.FORMAT_CHAR));

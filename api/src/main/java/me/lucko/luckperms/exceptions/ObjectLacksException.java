@@ -26,8 +26,15 @@
 package me.lucko.luckperms.exceptions;
 
 /**
- * Thrown when a permission holding object does not already have a permission, is not already a member of a group,
- * or when a track doesn't contain a group.
+ * Thrown when an object lacks something.
+ *
+ * <p>For example, when:</p>
+ * <p></p>
+ * <ul>
+ *     <li>a permission holding object doesn't have a permission</li>
+ *     <li>a permission holding object isn't already a member of a group</li>
+ *     <li>a track doesn't contain a group</li>
+ * </ul>
  */
 public class ObjectLacksException extends MembershipException {
 }

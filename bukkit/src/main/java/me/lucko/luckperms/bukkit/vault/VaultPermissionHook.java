@@ -32,16 +32,17 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.DataMutateResult;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.api.caching.PermissionData;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
+import me.lucko.luckperms.common.caching.PermissionCache;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.contexts.ExtractedContexts;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeFactory;
+import me.lucko.luckperms.common.verbose.CheckOrigin;
 
 import net.milkbowl.vault.permission.Permission;
 
@@ -147,7 +148,7 @@ public class VaultPermissionHook extends Permission {
         }
 
         // Effectively fallback to the standard Bukkit #hasPermission check.
-        return user.getUserData().getPermissionData(createContextForWorldLookup(player, world)).getPermissionValue(permission).asBoolean();
+        return user.getUserData().getPermissionData(createContextForWorldLookup(player, world)).getPermissionValue(permission, CheckOrigin.INTERNAL).asBoolean();
     }
 
     @Override
@@ -396,7 +397,7 @@ public class VaultPermissionHook extends Permission {
         // we need to do the complex PGO checking. (it's been enabled in the config.)
         if (isPgoCheckInherited()) {
             // we can just check the cached data
-            PermissionData data = user.getUserData().getPermissionData(createContextForWorldLookup(plugin.getPlayer(user), world));
+            PermissionCache data = user.getUserData().getPermissionData(createContextForWorldLookup(plugin.getPlayer(user), world));
             for (Map.Entry<String, Boolean> e : data.getImmutableBacking().entrySet()) {
                 if (!e.getValue()) continue;
                 if (!e.getKey().toLowerCase().startsWith("vault.primarygroup.")) continue;
@@ -409,7 +410,7 @@ public class VaultPermissionHook extends Permission {
                 }
 
                 if (isPgoCheckMemberOf()) {
-                    if (data.getPermissionValue("group." + group) != Tristate.TRUE) {
+                    if (data.getPermissionValue("group." + group, CheckOrigin.INTERNAL) != Tristate.TRUE) {
                         continue;
                     }
                 }
@@ -419,7 +420,7 @@ public class VaultPermissionHook extends Permission {
         } else {
             // we need to check the users permissions only
             for (Node node : user.getOwnNodes()) {
-                if (!node.getValue()) continue;
+                if (!node.getValuePrimitive()) continue;
                 if (!node.getPermission().toLowerCase().startsWith("vault.primarygroup.")) continue;
                 if (!node.shouldApplyOnServer(getServer(), isIncludeGlobal(), false)) continue;
                 if (!node.shouldApplyOnWorld(world, true, false)) continue;

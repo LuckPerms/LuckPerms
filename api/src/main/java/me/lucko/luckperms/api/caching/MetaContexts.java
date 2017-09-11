@@ -33,8 +33,10 @@ import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
 import javax.annotation.Nonnull;
 
 /**
- * Represents the context for a meta lookup, consisting of a standard {@link Contexts} element, plus options to define how
- * the meta stack should be constructed.
+ * Represents the context for a meta lookup.
+ *
+ * <p>Consisting of a standard {@link Contexts} element, plus options to define how
+ * the meta stack should be constructed.</p>
  *
  * @since 3.2
  */

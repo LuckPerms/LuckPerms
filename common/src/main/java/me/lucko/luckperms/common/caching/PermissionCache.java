@@ -33,6 +33,7 @@ import me.lucko.luckperms.api.caching.PermissionData;
 import me.lucko.luckperms.common.calculators.CalculatorFactory;
 import me.lucko.luckperms.common.calculators.PermissionCalculator;
 import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.verbose.CheckOrigin;
 
 import java.util.Collections;
 import java.util.Map;
@@ -93,6 +94,10 @@ public class PermissionCache implements PermissionData {
 
     @Override
     public Tristate getPermissionValue(@NonNull String permission) {
-        return calculator.getPermissionValue(permission);
+        return calculator.getPermissionValue(permission, CheckOrigin.API);
+    }
+
+    public Tristate getPermissionValue(@NonNull String permission, CheckOrigin origin) {
+        return calculator.getPermissionValue(permission, origin);
     }
 }

@@ -63,7 +63,6 @@ import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.TextUtils;
 
-import net.kyori.text.LegacyComponent;
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
@@ -72,9 +71,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -84,14 +81,11 @@ public class CommandManager {
     @Getter
     private final LuckPermsPlugin plugin;
 
-    private final ExecutorService executor;
-
     @Getter
     private final List<Command> mainCommands;
 
     public CommandManager(LuckPermsPlugin plugin) {
         this.plugin = plugin;
-        this.executor = Executors.newSingleThreadExecutor();
 
         LocaleManager locale = plugin.getLocaleManager();
 
@@ -130,8 +124,8 @@ public class CommandManager {
      * @param label  the command label used
      * @param args   the arguments provided
      */
-    public Future<CommandResult> onCommand(Sender sender, String label, List<String> args) {
-        return executor.submit(() -> {
+    public CompletableFuture<CommandResult> onCommand(Sender sender, String label, List<String> args) {
+        return CompletableFuture.supplyAsync(() -> {
             try {
                 return execute(sender, label, args);
             } catch (Throwable e) {
@@ -139,7 +133,7 @@ public class CommandManager {
                 e.printStackTrace();
                 return null;
             }
-        });
+        }, plugin.getScheduler().async());
     }
 
     @SuppressWarnings("unchecked")
@@ -255,9 +249,9 @@ public class CommandManager {
                     @SuppressWarnings("unchecked")
                     String permission = (String) c.getPermission().map(p -> ((CommandPermission) p).getPermission()).orElse("None");
 
-                    TextComponent component = LegacyComponent.from("&3> &a" + String.format(c.getUsage(), label), Constants.FORMAT_CHAR)
+                    TextComponent component = TextUtils.fromLegacy("&3> &a" + String.format(c.getUsage(), label), Constants.FORMAT_CHAR)
                             .toBuilder().applyDeep(comp -> {
-                                comp.hoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, LegacyComponent.from(TextUtils.joinNewline(
+                                comp.hoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(TextUtils.joinNewline(
                                         "&bCommand: &2" + c.getName(),
                                         "&bDescription: &2" + c.getDescription(),
                                         "&bUsage: &2" + String.format(c.getUsage(), label),
@@ -310,6 +304,7 @@ public class CommandManager {
     }
 
     private static void handleRewrites(List<String> args) {
+        // Provide aliases
         if (args.size() >= 1) {
             if (args.get(0).equalsIgnoreCase("u")) {
                 args.remove(0);
@@ -318,6 +313,14 @@ public class CommandManager {
             if (args.get(0).equalsIgnoreCase("g")) {
                 args.remove(0);
                 args.add(0, "group");
+            }
+            if (args.get(0).equalsIgnoreCase("t")) {
+                args.remove(0);
+                args.add(0, "track");
+            }
+            if (args.get(0).equalsIgnoreCase("i")) {
+                args.remove(0);
+                args.add(0, "info");
             }
         }
 
@@ -342,7 +345,6 @@ public class CommandManager {
                     break;
                 case "i":
                 case "about":
-                case "list":
                     args.remove(2);
                     args.add(2, "info");
                     break;
@@ -350,6 +352,7 @@ public class CommandManager {
                 case "inheritances":
                 case "group":
                 case "groups":
+                case "g":
                 case "rank":
                 case "ranks":
                 case "parents":
@@ -440,7 +443,7 @@ public class CommandManager {
             boolean lazyInfo = (
                     args.size() >= 4 &&
                     (args.get(2).equalsIgnoreCase("permission") || args.get(2).equalsIgnoreCase("parent") || args.get(2).equalsIgnoreCase("meta")) &&
-                    (args.get(3).equalsIgnoreCase("i") || args.get(3).equalsIgnoreCase("about") || args.get(3).equalsIgnoreCase("list"))
+                    (args.get(3).equalsIgnoreCase("i") || args.get(3).equalsIgnoreCase("about"))
             );
 
             if (lazyInfo) {

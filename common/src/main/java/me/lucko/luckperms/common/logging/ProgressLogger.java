@@ -38,7 +38,7 @@ import java.util.Set;
 
 @RequiredArgsConstructor
 public class ProgressLogger {
-    private static final int NOTIFY_FREQUENCY = 100;
+    private static final int NOTIFY_FREQUENCY = 500;
 
     private final String pluginName;
     private final Message logMessage;

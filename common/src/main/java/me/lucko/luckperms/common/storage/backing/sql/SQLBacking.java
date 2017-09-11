@@ -496,7 +496,7 @@ public class SQLBacking extends AbstractBacking {
 
     @Override
     public boolean cleanupUsers() {
-        return true; // TODO
+        return true;
     }
 
     @Override

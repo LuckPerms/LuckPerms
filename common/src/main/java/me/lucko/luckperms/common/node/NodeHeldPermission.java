@@ -33,6 +33,7 @@ import com.google.common.collect.Multimap;
 
 import me.lucko.luckperms.api.HeldPermission;
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.context.ContextSet;
 
 import java.util.Optional;
 import java.util.OptionalLong;
@@ -55,7 +56,7 @@ public final class NodeHeldPermission<T> implements HeldPermission<T> {
 
     @Override
     public boolean getValue() {
-        return node.getValue();
+        return node.getValuePrimitive();
     }
 
     @Override
@@ -76,6 +77,11 @@ public final class NodeHeldPermission<T> implements HeldPermission<T> {
     @Override
     public Multimap<String, String> getContext() {
         return node.getContexts().toMultimap();
+    }
+
+    @Override
+    public ContextSet getContexts() {
+        return node.getContexts();
     }
 
     @Override

@@ -45,8 +45,8 @@ import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.common.utils.TextUtils;
 
-import net.kyori.text.LegacyComponent;
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.HoverEvent;
 
@@ -99,8 +99,8 @@ public class MetaRemoveTempChatMeta extends SharedSubCommand {
         DataMutateResult result = holder.unsetPermission(NodeFactory.makeChatMetaNode(type, priority, meta).setExpiry(10L).withExtraContext(context).build());
 
         if (result.asBoolean()) {
-            TextComponent.Builder builder = LegacyComponent.from(Message.REMOVE_TEMP_CHATMETA_SUCCESS.asString(plugin.getLocaleManager(), holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, Util.contextSetToString(context)), Constants.COLOR_CHAR).toBuilder();
-            HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, LegacyComponent.from(
+            TextComponent.Builder builder = TextUtils.fromLegacy(Message.REMOVE_TEMP_CHATMETA_SUCCESS.asString(plugin.getLocaleManager(), holder.getFriendlyName(), type.name().toLowerCase(), meta, priority, Util.contextSetToString(context)), Constants.COLOR_CHAR).toBuilder();
+            HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(
                     "¥3Raw " + type.name().toLowerCase() + ": ¥r" + meta,
                     '¥'
             ));

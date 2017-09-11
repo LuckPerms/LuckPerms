@@ -48,7 +48,6 @@ import me.lucko.luckperms.common.utils.TextUtils;
 
 import net.kyori.text.BuildableComponent;
 import net.kyori.text.Component;
-import net.kyori.text.LegacyComponent;
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
@@ -97,7 +96,7 @@ public class ParentInfo extends SharedSubCommand {
         TextComponent.Builder message = TextComponent.builder("");
         for (Node node : page) {
             String s = "&3> &a" + node.getGroupName() + Util.getAppendableNodeContextString(node) + "\n";
-            message.append(LegacyComponent.from(s, Constants.FORMAT_CHAR).toBuilder().applyDeep(makeFancy(holder, label, node)).build());
+            message.append(TextUtils.fromLegacy(s, Constants.FORMAT_CHAR).toBuilder().applyDeep(makeFancy(holder, label, node)).build());
         }
         return message.build();
     }
@@ -117,13 +116,13 @@ public class ParentInfo extends SharedSubCommand {
         TextComponent.Builder message = TextComponent.builder("");
         for (Node node : page) {
             String s = "&3> &a" + node.getPermission() + Util.getAppendableNodeContextString(node) + "\n&2-    expires in " + DateUtil.formatDateDiff(node.getExpiryUnixTime()) + "\n";
-            message.append(LegacyComponent.from(s, Constants.FORMAT_CHAR).toBuilder().applyDeep(makeFancy(holder, label, node)).build());
+            message.append(TextUtils.fromLegacy(s, Constants.FORMAT_CHAR).toBuilder().applyDeep(makeFancy(holder, label, node)).build());
         }
         return message.build();
     }
 
     private static Consumer<BuildableComponent.Builder<? ,?>> makeFancy(PermissionHolder holder, String label, Node node) {
-        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, LegacyComponent.from(TextUtils.joinNewline(
+        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(TextUtils.joinNewline(
                 "&3> &f" + node.getGroupName(),
                 " ",
                 "&7Click to remove this parent from " + holder.getFriendlyName()

@@ -39,6 +39,7 @@ import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
+import me.lucko.luckperms.common.verbose.CheckOrigin;
 
 import java.util.List;
 import java.util.UUID;
@@ -67,7 +68,7 @@ public class CheckCommand extends SingleCommand {
             return CommandResult.STATE_ERROR;
         }
 
-        Tristate tristate = user.getUserData().getPermissionData(plugin.getContextForUser(user)).getPermissionValue(permission);
+        Tristate tristate = user.getUserData().getPermissionData(plugin.getContextForUser(user)).getPermissionValue(permission, CheckOrigin.INTERNAL);
         Message.CHECK_RESULT.send(sender, user.getFriendlyName(), permission, Util.formatTristate(tristate));
         return CommandResult.SUCCESS;
     }

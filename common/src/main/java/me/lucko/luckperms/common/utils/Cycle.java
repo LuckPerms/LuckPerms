@@ -23,34 +23,57 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.metastacking.definition;
-
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.ToString;
+package me.lucko.luckperms.common.utils;
 
 import com.google.common.collect.ImmutableList;
 
-import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
-import me.lucko.luckperms.api.metastacking.MetaStackElement;
-
 import java.util.List;
 
-@Getter
-@EqualsAndHashCode
-@ToString
-public final class SimpleMetaStackDefinition implements MetaStackDefinition {
+/**
+ * A cycle of elements, backed by a list. All operations are thread safe.
+ *
+ * @param <E> the element type
+ */
+public class Cycle<E> {
+    protected final List<E> objects;
+    protected int index = 0;
 
-    private final List<MetaStackElement> elements;
-    private final String startSpacer;
-    private final String middleSpacer;
-    private final String endSpacer;
+    public Cycle(List<E> objects) {
+        if (objects == null || objects.isEmpty()) {
+            throw new IllegalArgumentException("List of objects cannot be null/empty.");
+        }
+        this.objects = ImmutableList.copyOf(objects);
+    }
 
-    public SimpleMetaStackDefinition(@NonNull List<MetaStackElement> elements, @NonNull String startSpacer, @NonNull String middleSpacer, @NonNull String endSpacer) {
-        this.elements = ImmutableList.copyOf(elements);
-        this.startSpacer = startSpacer;
-        this.middleSpacer = middleSpacer;
-        this.endSpacer = endSpacer;
+    public int getIndex() {
+        return index;
+    }
+
+    public E current() {
+        synchronized (this) {
+            return objects.get(index);
+        }
+    }
+
+    public E next() {
+        synchronized (this) {
+            index++;
+            index = index > objects.size() - 1 ? 0 : index;
+
+            return objects.get(index);
+        }
+    }
+
+    public E back() {
+        synchronized (this) {
+            index--;
+            index = index == -1 ? objects.size() - 1 : index;
+
+            return objects.get(index);
+        }
+    }
+
+    public List<E> getBacking() {
+        return objects;
     }
 }

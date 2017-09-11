@@ -25,9 +25,16 @@
 
 package me.lucko.luckperms.common.locale;
 
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+
 import java.io.File;
 
 public class NoopLocaleManager implements LocaleManager {
+
+    @Override
+    public void tryLoad(LuckPermsPlugin plugin, File file) {
+
+    }
 
     @Override
     public void loadFromFile(File file) throws Exception {

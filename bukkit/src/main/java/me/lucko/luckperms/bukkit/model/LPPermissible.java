@@ -35,6 +35,7 @@ import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.caching.UserCache;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.User;
+import me.lucko.luckperms.common.verbose.CheckOrigin;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -110,13 +111,13 @@ public class LPPermissible extends PermissibleBase {
 
     @Override
     public boolean isPermissionSet(@NonNull String permission) {
-        Tristate ts = user.getUserData().getPermissionData(calculateContexts()).getPermissionValue(permission);
+        Tristate ts = user.getUserData().getPermissionData(calculateContexts()).getPermissionValue(permission, CheckOrigin.PLATFORM_LOOKUP_CHECK);
         return ts != Tristate.UNDEFINED || Permission.DEFAULT_PERMISSION.getValue(isOp());
     }
 
     @Override
     public boolean isPermissionSet(@NonNull Permission permission) {
-        Tristate ts = user.getUserData().getPermissionData(calculateContexts()).getPermissionValue(permission.getName());
+        Tristate ts = user.getUserData().getPermissionData(calculateContexts()).getPermissionValue(permission.getName(), CheckOrigin.PLATFORM_LOOKUP_CHECK);
         if (ts != Tristate.UNDEFINED) {
             return true;
         }
@@ -130,13 +131,13 @@ public class LPPermissible extends PermissibleBase {
 
     @Override
     public boolean hasPermission(@NonNull String permission) {
-        Tristate ts = user.getUserData().getPermissionData(calculateContexts()).getPermissionValue(permission);
+        Tristate ts = user.getUserData().getPermissionData(calculateContexts()).getPermissionValue(permission, CheckOrigin.PLATFORM_PERMISSION_CHECK);
         return ts != Tristate.UNDEFINED ? ts.asBoolean() : Permission.DEFAULT_PERMISSION.getValue(isOp());
     }
 
     @Override
     public boolean hasPermission(@NonNull Permission permission) {
-        Tristate ts = user.getUserData().getPermissionData(calculateContexts()).getPermissionValue(permission.getName());
+        Tristate ts = user.getUserData().getPermissionData(calculateContexts()).getPermissionValue(permission.getName(), CheckOrigin.PLATFORM_PERMISSION_CHECK);
         if (ts != Tristate.UNDEFINED) {
             return ts.asBoolean();
         }

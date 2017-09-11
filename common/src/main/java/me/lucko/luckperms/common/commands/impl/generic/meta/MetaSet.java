@@ -45,7 +45,6 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.common.utils.TextUtils;
 
-import net.kyori.text.LegacyComponent;
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.HoverEvent;
 
@@ -88,8 +87,8 @@ public class MetaSet extends SharedSubCommand {
         holder.clearMetaKeys(key, context, false);
         holder.setPermission(n);
 
-        TextComponent.Builder builder = LegacyComponent.from(Message.SET_META_SUCCESS.asString(plugin.getLocaleManager(), key, value, holder.getFriendlyName(), Util.contextSetToString(context))).toBuilder();
-        HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, LegacyComponent.from(
+        TextComponent.Builder builder = TextUtils.fromLegacy(Message.SET_META_SUCCESS.asString(plugin.getLocaleManager(), key, value, holder.getFriendlyName(), Util.contextSetToString(context))).toBuilder();
+        HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(
                 TextUtils.joinNewline("¥3Raw key: ¥r" + key, "¥3Raw value: ¥r" + value),
                 '¥'
         ));

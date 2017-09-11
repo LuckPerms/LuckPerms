@@ -25,7 +25,6 @@
 
 package me.lucko.luckperms.common.backup;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -37,13 +36,16 @@ import me.lucko.luckperms.common.commands.CommandResult;
 import me.lucko.luckperms.common.commands.sender.Sender;
 import me.lucko.luckperms.common.commands.utils.Util;
 import me.lucko.luckperms.common.locale.Message;
-import me.lucko.luckperms.common.utils.DateUtil;
+import me.lucko.luckperms.common.utils.Cycle;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -51,16 +53,11 @@ import java.util.stream.Collectors;
  * Handles import operations
  */
 public class Importer implements Runnable {
-    private static final int PROGRESS_REPORT_SECONDS = 10;
 
     private final CommandManager commandManager;
     private final Set<Sender> notify;
     private final List<String> commands;
-    private final Map<Integer, Result> cmdResult;
-    private final ImporterSender fake;
-
-    private long lastMsg = 0;
-    private int executing = -1;
+    private final List<ImportCommand> toExecute;
 
     public Importer(CommandManager commandManager, Sender executor, List<String> commands) {
         this.commandManager = commandManager;
@@ -77,11 +74,10 @@ public class Importer implements Runnable {
                 .filter(s -> !s.startsWith("//"))
                 .map(s -> s.startsWith("/") ? s.substring("/".length()) : s)
                 .map(s -> s.startsWith("perms ") ? s.substring("perms ".length()) : s)
+                .map(s -> s.startsWith("lp ") ? s.substring("lp ".length()) : s)
                 .map(s -> s.startsWith("luckperms ") ? s.substring("luckperms ".length()) : s)
                 .collect(Collectors.toList());
-
-        this.cmdResult = new HashMap<>();
-        this.fake = new ImporterSender(commandManager.getPlugin(), this::logMessage);
+        this.toExecute = new ArrayList<>();
     }
 
     @Override
@@ -89,35 +85,77 @@ public class Importer implements Runnable {
         long startTime = System.currentTimeMillis();
         notify.forEach(s -> Message.IMPORT_START.send(s));
 
+        // form instances for all commands, and register them
         int index = 1;
         for (String command : commands) {
-            long time = DateUtil.unixSecondsNow();
-            if (lastMsg < (time - PROGRESS_REPORT_SECONDS)) {
-                lastMsg = time;
+            ImportCommand cmd = new ImportCommand(commandManager, index, command);
+            toExecute.add(cmd);
 
-                sendProgress(index);
+            if (cmd.getCommand().startsWith("creategroup ") || cmd.getCommand().startsWith("createtrack")) {
+                cmd.process(); // process immediately
             }
 
-            executing = index;
-            try {
-                CommandResult result = commandManager.onCommand(
-                        fake,
-                        "lp",
-                        Util.stripQuotes(Splitter.on(CommandManager.COMMAND_SEPARATOR_PATTERN).omitEmptyStrings().splitToList(command))
-                ).get();
-                getResult(index, command).setResult(result);
-
-            } catch (Exception e) {
-                getResult(index, command).setResult(CommandResult.FAILURE);
-                e.printStackTrace();
-            }
             index++;
         }
+
+        // divide commands up into pools
+        Cycle<List<ImportCommand>> commandPools = new Cycle<>(Util.nInstances(128, ArrayList::new));
+
+        String lastTarget = null;
+        for (ImportCommand cmd : toExecute) {
+            // if the last target isn't the same, skip to a new pool
+            if (lastTarget == null || !lastTarget.equals(cmd.getTarget())) {
+                commandPools.next();
+            }
+
+            commandPools.current().add(cmd);
+            lastTarget = cmd.getTarget();
+        }
+
+        // A set of futures, which are really just the threads we need to wait for.
+        Set<CompletableFuture<Void>> futures = new HashSet<>();
+
+        AtomicInteger processedCount = new AtomicInteger(0);
+
+        // iterate through each user sublist.
+        for (List<ImportCommand> subList : commandPools.getBacking()) {
+
+            // register and start a new thread to process the sublist
+            futures.add(CompletableFuture.runAsync(() -> {
+
+                // iterate through each user in the sublist, and grab their data.
+                for (ImportCommand cmd : subList) {
+                    cmd.process();
+                    processedCount.incrementAndGet();
+                }
+            }, commandManager.getPlugin().getScheduler().async()));
+        }
+
+        // all of the threads have been scheduled now and are running. we just need to wait for them all to complete
+        CompletableFuture<Void> overallFuture = CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()]));
+
+        while (true) {
+            try {
+                overallFuture.get(10, TimeUnit.SECONDS);
+            } catch (InterruptedException | ExecutionException e) {
+                // abnormal error - just break
+                e.printStackTrace();
+                break;
+            } catch (TimeoutException e) {
+                // still executing - send a progress report and continue waiting
+                sendProgress(processedCount.get());
+                continue;
+            }
+
+            // process is complete
+            break;
+        }
+
 
         long endTime = System.currentTimeMillis();
         double seconds = (endTime - startTime) / 1000;
 
-        int errors = (int) cmdResult.values().stream().filter(v -> v.getResult() != null && !v.getResult().asBoolean()).count();
+        int errors = (int) toExecute.stream().filter(v -> !v.getResult().asBoolean()).count();
 
         if (errors == 0) {
             notify.forEach(s -> Message.IMPORT_END_COMPLETE.send(s, seconds));
@@ -128,11 +166,11 @@ public class Importer implements Runnable {
         }
 
         AtomicInteger errIndex = new AtomicInteger(1);
-        for (Map.Entry<Integer, Result> e : cmdResult.entrySet()) {
-            if (e.getValue().getResult() != null && !e.getValue().getResult().asBoolean()) {
+        for (ImportCommand e : toExecute) {
+            if (e.getResult() != null && !e.getResult().asBoolean()) {
                 notify.forEach(s -> {
-                    Message.IMPORT_END_ERROR_HEADER.send(s, errIndex.get(), e.getKey(), e.getValue().getCommand(), e.getValue().getResult().toString());
-                    for (String out : e.getValue().getOutput()) {
+                    Message.IMPORT_END_ERROR_HEADER.send(s, errIndex.get(), e.getId(), e.getCommand(), e.getResult().toString());
+                    for (String out : e.getOutput()) {
                         Message.IMPORT_END_ERROR_CONTENT.send(s, out);
                     }
                     Message.IMPORT_END_ERROR_FOOTER.send(s);
@@ -143,50 +181,113 @@ public class Importer implements Runnable {
         }
     }
 
-    private void sendProgress(int executing) {
-        int percent = (executing * 100) / commands.size();
-        int errors = (int) cmdResult.values().stream().filter(v -> v.getResult() != null && !v.getResult().asBoolean()).count();
+    private void sendProgress(int processedCount) {
+        int percent = (processedCount * 100) / commands.size();
+        int errors = (int) toExecute.stream().filter(v -> v.isCompleted() && !v.getResult().asBoolean()).count();
 
         if (errors == 1) {
-            notify.forEach(s -> Message.IMPORT_PROGRESS_SIN.send(s, percent, executing, commands.size(), errors));
+            notify.forEach(s -> Message.IMPORT_PROGRESS_SIN.send(s, percent, processedCount, commands.size(), errors));
         } else {
-            notify.forEach(s -> Message.IMPORT_PROGRESS.send(s, percent, executing, commands.size(), errors));
-        }
-    }
-
-    private Result getResult(int executing, String command) {
-        return cmdResult.compute(executing, (i, r) -> {
-            if (r == null) {
-                r = new Result(command);
-            } else {
-                if (!command.equals("") && r.getCommand().equals("")) {
-                    r.setCommand(command);
-                }
-            }
-
-            return r;
-        });
-    }
-
-    private void logMessage(String msg) {
-        if (executing != -1) {
-            getResult(executing, "").getOutput().add(Util.stripColor(msg));
+            notify.forEach(s -> Message.IMPORT_PROGRESS.send(s, percent, processedCount, commands.size(), errors));
         }
     }
 
     @Getter
-    @Setter
-    private static class Result {
+    private static class ImportCommand extends ImporterSender {
+        private static final Splitter SPACE_SPLIT = Splitter.on(" ");
 
-        @Setter(AccessLevel.NONE)
+        private final CommandManager commandManager;
+        private final int id;
+        private final String command;
+
+        private final String target;
+
+        @Setter
+        private boolean completed = false;
+
         private final List<String> output = new ArrayList<>();
 
-        private String command;
+        @Setter
         private CommandResult result = CommandResult.FAILURE;
 
-        private Result(String command) {
+        ImportCommand(CommandManager commandManager, int id, String command) {
+            super(commandManager.getPlugin());
+            this.commandManager = commandManager;
+            this.id = id;
             this.command = command;
+            this.target = determineTarget(command);
         }
+
+        @Override
+        protected void consumeMessage(String s) {
+            output.add(s);
+        }
+
+        public void process() {
+            if (isCompleted()) {
+                return;
+            }
+
+            try {
+                CommandResult result = commandManager.onCommand(
+                        this,
+                        "lp",
+                        Util.stripQuotes(Splitter.on(CommandManager.COMMAND_SEPARATOR_PATTERN).omitEmptyStrings().splitToList(getCommand()))
+                ).get();
+                setResult(result);
+
+            } catch (Exception e) {
+                setResult(CommandResult.FAILURE);
+                e.printStackTrace();
+            }
+
+            setCompleted(true);
+        }
+
+        private static String determineTarget(String command) {
+            if (command.startsWith("user ") && command.length() > "user ".length()) {
+                String subCmd = command.substring("user ".length());
+                if (!subCmd.contains(" ")) {
+                    return null;
+                }
+
+                String targetUser = SPACE_SPLIT.split(subCmd).iterator().next();
+                return "u:" + targetUser;
+            }
+
+            if (command.startsWith("group ") && command.length() > "group ".length()) {
+                String subCmd = command.substring("group ".length());
+                if (!subCmd.contains(" ")) {
+                    return null;
+                }
+
+                String targetGroup = SPACE_SPLIT.split(subCmd).iterator().next();
+                return "g:" + targetGroup;
+            }
+
+            if (command.startsWith("track ") && command.length() > "track ".length()) {
+                String subCmd = command.substring("track ".length());
+                if (!subCmd.contains(" ")) {
+                    return null;
+                }
+
+                String targetTrack = SPACE_SPLIT.split(subCmd).iterator().next();
+                return "t:" + targetTrack;
+            }
+
+            if (command.startsWith("creategroup ") && command.length() > "creategroup ".length()) {
+                String targetGroup = command.substring("creategroup ".length());
+                return "g:" + targetGroup;
+            }
+
+            if (command.startsWith("createtrack ") && command.length() > "createtrack ".length()) {
+                String targetTrack = command.substring("createtrack ".length());
+                return "t:" + targetTrack;
+            }
+
+            return null;
+        }
+
     }
 
 }

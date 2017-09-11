@@ -26,13 +26,10 @@ already-has-temp-permission: "{0} already has this permission set temporarily!"
 does-not-have-temp-permission: "{0} does not have this permission set temporarily."
 user-not-found: "&bUser could not be found."
 user-not-online: "&bUser &a{0}&b is not online."
-user-save-success: "&7(User data was saved to storage)"
 user-save-error: "There was an error whilst saving the user."
 group-not-found: "&bGroup could not be found."
-group-save-success: "&7(Group data was saved to storage)"
 group-save-error: "There was an error whilst saving the group."
 track-not-found: "&bTrack could not be found."
-track-save-success: "&7(Track data was saved to storage)"
 track-save-error: "There was an error whilst saving the track."
 user-invalid-entry: "&d{0}&c is not a valid username/uuid."
 group-invalid-entry: "Group names can only contain alphanumeric characters."
@@ -95,34 +92,22 @@ update-task-push-success: "&aOther servers were notified via &b{0} Messaging &as
 update-task-push-failure: "&cError whilst pushing changes to other servers."
 update-task-push-failure-not-setup: "&cError whilst pushing changes to other servers. A messaging service has not been configured."
 reload-config-success: "&aThe configuration file was reloaded. &7(some options will only apply after the server has restarted.)"
-info: >
+info-top: >
   {PREFIX}&2Running &bLuckPerms v{0}&2 by &bLuck&2.\n
   {PREFIX}&f-  &3Platform: &f{1}\n
-  {PREFIX}&f-  &3Storage Method: &f{2}\n
-  {PREFIX}&f-  &3Server Name: &f{3}\n
-  {PREFIX}&f-  &3Sync Interval: &a{4} &fminutes\n
-  {PREFIX}&f-  &3Messaging Service: &f{5}\n
-  {PREFIX}&f-  &bCounts:\n
-  {PREFIX}&f-     &3Online Players: &a{6}\n
-  {PREFIX}&f-     &3Loaded Users: &a{7}\n
-  {PREFIX}&f-     &3Loaded Groups: &a{8}\n
-  {PREFIX}&f-     &3Loaded Tracks: &a{9}\n
-  {PREFIX}&f-     &3Log size: &a{10}\n
-  {PREFIX}&f-     &3UUID Cache size: &a{11}\n
-  {PREFIX}&f-     &3Translations loaded: &a{12}\n
-  {PREFIX}&f-     &3Pre-process contexts: &a{13}\n
-  {PREFIX}&f-     &3Context Calculators: &a{14}\n
-  {PREFIX}&f-     &3Unique permissions: &a{15}\n
-  {PREFIX}&f-  &bConfiguration:\n
-  {PREFIX}&f-     &3Use Server UUIDs: {16}\n
-  {PREFIX}&f-     &bPermission Calculation:\n
-  {PREFIX}&f-        &3Including Global: {17}\n
-  {PREFIX}&f-        &3Including Global World: {18}\n
-  {PREFIX}&f-        &3Applying Global Groups: {19}\n
-  {PREFIX}&f-        &3Applying Global World Groups: {20}\n
-  {PREFIX}&f-        &3Applying Wildcards: {21}\n
-  {PREFIX}&f-        &3Applying Regex: {22}\n
-  {PREFIX}&f-        &3Applying Shorthand: {23}
+  {PREFIX}&f-  &3Server Brand: &f{2}\n
+  {PREFIX}&f-  &3Server Version: &f{3}
+info-middle: >
+  {PREFIX}&f-  &bMessaging Type: &f{0}\n
+  {PREFIX}&f-  &bInstance:\n
+  {PREFIX}&f-     &3Server Name: &f{1}\n
+  {PREFIX}&f-     &3Online Players: &a{2}\n
+  {PREFIX}&f-     &3Unique Connections: &a{3}\n
+  {PREFIX}&f-     &3Uptime: &7{4}\n
+  {PREFIX}&f-     &3Local Data: &a{5} &7users, &a{6} &7groups, &a{7} &7tracks\n
+  {PREFIX}&f-     &3Context Calculators: &a{8}\n
+  {PREFIX}&f-     &3Known permissions: &a{9}\n
+  {PREFIX}&f-     &3Active processors: &7{10}
 create-group-error: "There was an error whilst creating the group."
 delete-group-error: "There was an error whilst deleting the group."
 delete-group-error-default: "You cannot delete the default group."
@@ -147,6 +132,7 @@ context-pair--global-inline: "&eglobal"
 context-pair-sep: "&a, "
 context-pair: "&8(&7{0}=&f{1}&8)"
 check-permission: "&b{0}&a has permission &b{1}&a set to {2}&a in context {3}&a."
+check-inherits-permission: "&b{0}&a has permission &b{1}&a set to {2}&a in context {3}&a. &7(inherited from &a{4}&7)"
 setpermission-success: "&aSet &b{0}&a to &b{1}&a for &b{2}&a in context {3}&a."
 setpermission-temp-success: "&aSet &b{0}&a to &b{1}&a for &b{2}&a for a duration of &b{3}&a in context {4}&a."
 unsetpermission-success: "&aUnset &b{0}&a for &b{1}&a in context {2}&a."
@@ -159,12 +145,12 @@ unset-inherit-success: "&b{0}&a no longer inherits permissions from &b{1}&a in c
 unset-temp-inherit-success: "&b{0}&a no longer temporarily inherits permissions from &b{1}&a in context {2}&a."
 clear-success: "&b{0}&a's permissions were cleared in context {1}&a. (&b{2}&a nodes were removed.)"
 clear-success-singular: "&b{0}&a's permissions were cleared in context {1}&a. (&b{2}&a node was removed.)"
-parent-clear-success: "&b{0}&a's parents were cleared in context {1}&a. &b{2}&a nodes were removed.)"
-parent-clear-success-singular: "&b{0}&a's parents were cleared in context {1}&a. &b{2}&a node was removed.)"
-parent-clear-track-success: "&b{0}&a's parents on track &b{1}&a were cleared in context {2}&a. &b{3}&a nodes were removed.)"
-parent-clear-track-success-singular: "&b{0}&a's parents on track &b{1}&a were cleared in context {2}&a. &b{3}&a node was removed.)"
-meta-clear-success: "&b{0}&a's meta was cleared in context {1}&a. &b{2}&a nodes were removed.)"
-meta-clear-success-singular: "&b{0}&a's meta was cleared in context {1}&a. &b{2}&a node was removed.)"
+parent-clear-success: "&b{0}&a's parents were cleared in context {1}&a. (&b{2}&a nodes were removed.)"
+parent-clear-success-singular: "&b{0}&a's parents were cleared in context {1}&a. (&b{2}&a node was removed.)"
+parent-clear-track-success: "&b{0}&a's parents on track &b{1}&a were cleared in context {2}&a. (&b{3}&a nodes were removed.)"
+parent-clear-track-success-singular: "&b{0}&a's parents on track &b{1}&a were cleared in context {2}&a. (&b{3}&a node was removed.)"
+meta-clear-success: "&b{0}&a's meta matching type &b{1}&a was cleared in context {2}&a. (&b{3}&a nodes were removed.)"
+meta-clear-success-singular: "&b{0}&a's meta matching type &b{1}&a was cleared in context {2}&a. (&b{3}&a node was removed.)"
 illegal-date-error: "Could not parse date '{0}'."
 past-date-error: "You cannot set a date in the past!"
 chat-meta-prefix-header: "&b{0}'s Prefixes"
@@ -261,6 +247,7 @@ log-invalid-page: "Invalid page number."
 log-invalid-page-range: "Invalid page number. Please enter a value between 1 and {0}."
 log-no-entries: "&bNo log entries to show."
 log-entry: "&b#{0} -> &8(&7{1} ago&8) {2}"
+log-notify-console: "&cCannot toggle notifications for console."
 log-notify-toggle-on: "&aEnabled&b logging output."
 log-notify-toggle-off: "&cDisabled&b logging output."
 log-notify-already-on: "You are already receiving notifications."
@@ -606,8 +593,9 @@ command-specs:
       "suffix": "the suffix string"
       "context...": "the contexts to remove the suffix in"
   meta-clear:
-    description: "Clears all chat meta"
+    description: "Clears all meta"
     args:
+      "type": "the type of meta to remove"
       "context...": "the contexts to filter by"
   track-info:
     description: "Gives info about the track"

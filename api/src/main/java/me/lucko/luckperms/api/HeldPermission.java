@@ -27,13 +27,15 @@ package me.lucko.luckperms.api;
 
 import com.google.common.collect.Multimap;
 
+import me.lucko.luckperms.api.context.ContextSet;
+
 import java.util.Optional;
 import java.util.OptionalLong;
 
 import javax.annotation.Nonnull;
 
 /**
- * A relationship between a Holder and a permission
+ * A relationship between a PermissionHolder and a permission
  *
  * @param <T> the identifier type of the holder
  * @since 2.17
@@ -90,9 +92,18 @@ public interface HeldPermission<T> {
      * Gets the context for the permission.
      *
      * @return the context
+     * @deprecated in favour of {@link #getContexts()}.
      */
     @Nonnull
+    @Deprecated
     Multimap<String, String> getContext();
+
+    /**
+     * Gets the extra context for the permission.
+     *
+     * @return the extra context
+     */
+    ContextSet getContexts();
 
     /**
      * Converts this permission into a Node

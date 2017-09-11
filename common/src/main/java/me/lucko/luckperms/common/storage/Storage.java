@@ -55,7 +55,7 @@ public interface Storage {
 
     void setAcceptingLogins(boolean acceptingLogins);
 
-    Storage force();
+    Storage noBuffer();
 
     void init();
 

@@ -33,6 +33,7 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.processors.PermissionProcessor;
+import me.lucko.luckperms.common.verbose.CheckOrigin;
 
 import java.util.List;
 import java.util.Map;
@@ -43,7 +44,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class PermissionCalculator {
     private final LuckPermsPlugin plugin;
-    private final String objectName;
+    private final PermissionCalculatorMetadata metadata;
     private final List<PermissionProcessor> processors;
 
     // caches lookup calls.
@@ -54,7 +55,7 @@ public class PermissionCalculator {
         lookupCache.invalidateAll();
     }
 
-    public Tristate getPermissionValue(String permission) {
+    public Tristate getPermissionValue(String permission, CheckOrigin origin) {
 
         // convert the permission to lowercase, as all values in the backing map are also lowercase.
         // this allows fast case insensitive lookups
@@ -64,7 +65,7 @@ public class PermissionCalculator {
         Tristate result = lookupCache.get(permission);
 
         // log this permission lookup to the verbose handler
-        plugin.getVerboseHandler().offerCheckData(objectName, permission, result);
+        plugin.getVerboseHandler().offerCheckData(origin, metadata.getObjectName(), metadata.getContext(), permission, result);
 
         // return the result
         return result;

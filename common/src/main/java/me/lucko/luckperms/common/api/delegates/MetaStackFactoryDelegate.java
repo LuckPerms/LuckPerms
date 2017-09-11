@@ -33,8 +33,8 @@ import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.api.metastacking.MetaStackDefinition;
 import me.lucko.luckperms.api.metastacking.MetaStackElement;
 import me.lucko.luckperms.api.metastacking.MetaStackFactory;
-import me.lucko.luckperms.common.metastacking.definition.SimpleMetaStackDefinition;
-import me.lucko.luckperms.common.metastacking.definition.StandardStackElements;
+import me.lucko.luckperms.common.metastacking.SimpleMetaStackDefinition;
+import me.lucko.luckperms.common.metastacking.StandardStackElements;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.List;

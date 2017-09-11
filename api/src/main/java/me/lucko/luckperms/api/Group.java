@@ -35,7 +35,7 @@ import java.util.OptionalInt;
 import javax.annotation.Nonnull;
 
 /**
- * A group which holds permission data.
+ * An inheritable holder of permission data.
  */
 public interface Group extends PermissionHolder {
 

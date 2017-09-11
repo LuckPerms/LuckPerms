@@ -61,7 +61,7 @@ public interface UserManager extends Manager<UserIdentifier, User> {
      *
      * @param user The user to be cleaned up
      */
-    void cleanup(User user);
+    boolean cleanup(User user);
 
     /**
      * Schedules a task to cleanup a user after a certain period of time, if they're not on the server anymore.

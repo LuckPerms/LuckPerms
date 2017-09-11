@@ -49,7 +49,6 @@ import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.common.utils.TextUtils;
 
-import net.kyori.text.LegacyComponent;
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.HoverEvent;
 
@@ -94,8 +93,8 @@ public class MetaSetTemp extends SharedSubCommand {
         holder.clearMetaKeys(key, context, true);
         duration = holder.setPermission(n, modifier).getValue().getExpiryUnixTime();
 
-        TextComponent.Builder builder = LegacyComponent.from(Message.SET_META_TEMP_SUCCESS.asString(plugin.getLocaleManager(), key, value, holder.getFriendlyName(), DateUtil.formatDateDiff(duration), Util.contextSetToString(context)), Constants.COLOR_CHAR).toBuilder();
-        HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, LegacyComponent.from(
+        TextComponent.Builder builder = TextUtils.fromLegacy(Message.SET_META_TEMP_SUCCESS.asString(plugin.getLocaleManager(), key, value, holder.getFriendlyName(), DateUtil.formatDateDiff(duration), Util.contextSetToString(context)), Constants.COLOR_CHAR).toBuilder();
+        HoverEvent event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextUtils.fromLegacy(
                 TextUtils.joinNewline("¥3Raw key: ¥r" + key, "¥3Raw value: ¥r" + value),
                 '¥'
         ));

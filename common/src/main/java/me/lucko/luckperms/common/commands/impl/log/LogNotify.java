@@ -61,7 +61,7 @@ public class LogNotify extends SubCommand<Log> {
 
         // if they don't have the perm, they're not ignoring
         // if set to false, ignore it, return false
-        return ret.map(Node::getValue).orElse(false);
+        return ret.map(Node::getValuePrimitive).orElse(false);
     }
 
     private static void setIgnoring(LuckPermsPlugin plugin, UUID uuid, boolean state) {
@@ -78,7 +78,7 @@ public class LogNotify extends SubCommand<Log> {
             user.removeIf(n -> n.getPermission().equalsIgnoreCase("luckperms.log.notify.ignoring"));
         }
 
-        plugin.getStorage().force().saveUser(user).join();
+        plugin.getStorage().noBuffer().saveUser(user).join();
     }
 
     @Override

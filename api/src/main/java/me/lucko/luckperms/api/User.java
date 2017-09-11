@@ -38,7 +38,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * A player holding permission data
+ * A player which holds permission data.
  */
 public interface User extends PermissionHolder {
 
@@ -51,7 +51,9 @@ public interface User extends PermissionHolder {
     UUID getUuid();
 
     /**
-     * Gets the users username, or null if no username is associated with this user
+     * Gets the users username
+     *
+     * <p>Returns null if no username is associated with this user.</p>
      *
      * @return the users username
      */
@@ -97,6 +99,16 @@ public interface User extends PermissionHolder {
     UserData getCachedData();
 
     /**
+     * Pre-calculates some values in the user's data cache.
+     *
+     * <p>Is it <b>not</b> necessary to call this method before
+     * using {@link #getCachedData()}.</p>
+     *
+     * @since 2.17
+     */
+    void setupDataCache();
+
+    /**
      * Check to see if the user is a direct member of a group
      *
      * @param group The group to check membership of
@@ -127,16 +139,6 @@ public interface User extends PermissionHolder {
     @Deprecated
     @Nonnull
     Optional<UserData> getUserDataCache();
-
-    /**
-     * Pre-calculates some values in the user's data cache.
-     *
-     * <p>Is it <b>not</b> necessary to call this method before
-     * using {@link #getCachedData()}.</p>
-     *
-     * @since 2.17
-     */
-    void setupDataCache();
 
     /**
      * Check to see if a user is a member of a group on a specific server

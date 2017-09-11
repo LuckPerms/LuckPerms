@@ -37,16 +37,18 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * An immutable permission node
+ * Represents a permission node.
  *
- * <p>Use {@link LuckPermsApi#buildNode(String)} to get an instance.</p>
+ * <p>All implementations of this interface must be immutable.</p>
+ *
+ * <p>Use the {@link NodeFactory} to obtain and construct instances.</p>
  *
  * @since 2.6
  */
 public interface Node extends Map.Entry<String, Boolean> {
 
     /**
-     * Returns the actual permission string
+     * Gets the permission string
      *
      * @return the actual permission node
      */
@@ -54,36 +56,50 @@ public interface Node extends Map.Entry<String, Boolean> {
     String getPermission();
 
     /**
-     * Gets what value the permission is set to. A negated node would return <code>false</code>.
+     * Gets the value.
+     *
+     * <p>A negated node would return a value of <code>false</code>.</p>
      *
      * @return the permission's value
      */
     @Override
     @Nonnull
-    Boolean getValue();
+    default Boolean getValue() {
+        return getValuePrimitive();
+    }
 
     /**
-     * Returns the value of this node as a tristate
+     * Gets the value.
+     *
+     * <p>A negated node would return a value of <code>false</code>.</p>
+     *
+     * @return the permission's value
+     */
+    boolean getValuePrimitive();
+
+    /**
+     * Gets the value of this node as a {@link Tristate}
      *
      * @return the value of this node as a Tristate
      */
     @Nonnull
     default Tristate getTristate() {
-        return Tristate.fromBoolean(getValue());
+        return Tristate.fromBoolean(getValuePrimitive());
     }
 
     /**
-     * Returns if the node is negated
+     * Gets if the node is negated
      *
      * @return true if the node is negated
      */
     default boolean isNegated() {
-        return !getValue();
+        return !getValuePrimitive();
     }
 
     /**
-     * If this node is set to override explicitly.
-     * This value does not persist across saves, and is therefore only useful for transient nodes
+     * Gets if this node is set to override explicitly.
+     *
+     * <p>This value does not persist across saves, and is therefore only useful for transient nodes</p>
      *
      * @return true if this node is set to override explicitly
      */
@@ -106,21 +122,21 @@ public interface Node extends Map.Entry<String, Boolean> {
     Optional<String> getWorld();
 
     /**
-     * Returns if this node is server specific
+     * Gets if this node is server specific
      *
      * @return true if this node is server specific
      */
     boolean isServerSpecific();
 
     /**
-     * Returns if this node is server specific
+     * Gets if this node is server specific
      *
      * @return true if this node is server specific
      */
     boolean isWorldSpecific();
 
     /**
-     * Returns if this node applies globally, and has no specific context
+     * Gets if this node applies globally, and therefore has no specific context
      *
      * @return true if this node applies globally, and has no specific context
      * @since 3.1
@@ -128,7 +144,7 @@ public interface Node extends Map.Entry<String, Boolean> {
     boolean appliesGlobally();
 
     /**
-     * Returns if this node has any specific context in order to apply.
+     * Gets if this node has any specific context in order for it to apply
      *
      * @return true if this node has specific context
      * @since 3.1
@@ -136,7 +152,7 @@ public interface Node extends Map.Entry<String, Boolean> {
     boolean hasSpecificContext();
 
     /**
-     * Returns if this node is able to apply in the given context
+     * Gets if this node is able to apply in the given context
      *
      * @param includeGlobal if global server values should apply
      * @param includeGlobalWorld if global world values should apply
@@ -150,7 +166,7 @@ public interface Node extends Map.Entry<String, Boolean> {
     boolean shouldApply(boolean includeGlobal, boolean includeGlobalWorld, @Nullable String server, @Nullable String world, @Nullable ContextSet context, boolean applyRegex);
 
     /**
-     * If this node should apply on a specific server
+     * Gets if this node should apply on a specific server
      *
      * @param server        the name of the server
      * @param includeGlobal if global permissions should apply
@@ -160,7 +176,7 @@ public interface Node extends Map.Entry<String, Boolean> {
     boolean shouldApplyOnServer(@Nullable String server, boolean includeGlobal, boolean applyRegex);
 
     /**
-     * If this node should apply on a specific world
+     * Gets if this node should apply on a specific world
      *
      * @param world         the name of the world
      * @param includeGlobal if global permissions should apply
@@ -170,7 +186,7 @@ public interface Node extends Map.Entry<String, Boolean> {
     boolean shouldApplyOnWorld(@Nullable String world, boolean includeGlobal, boolean applyRegex);
 
     /**
-     * If this node should apply in the given context
+     * Gets if this node should apply in the given context
      *
      * @param context        the context key value pairs
      * @param worldAndServer if world and server contexts should be checked
@@ -180,7 +196,7 @@ public interface Node extends Map.Entry<String, Boolean> {
     boolean shouldApplyWithContext(@Nonnull ContextSet context, boolean worldAndServer);
 
     /**
-     * If this node should apply in the given context
+     * Gets if this node should apply in the given context
      *
      * @param context the context key value pairs
      * @return true if the node should apply
@@ -211,8 +227,10 @@ public interface Node extends Map.Entry<String, Boolean> {
      *
      * @param possibleNodes a list of possible permission nodes
      * @return a list of permissions that match this wildcard
+     * @deprecated as this is no longer used internally to resolve wildcards
      */
     @Nonnull
+    @Deprecated
     List<String> resolveWildcard(@Nonnull List<String> possibleNodes);
 
     /**
@@ -224,14 +242,14 @@ public interface Node extends Map.Entry<String, Boolean> {
     List<String> resolveShorthand();
 
     /**
-     * Returns if this node will expire in the future
+     * Gets if this node will expire in the future
      *
      * @return true if this node will expire in the future
      */
     boolean isTemporary();
 
     /**
-     * Returns if this node will not expire
+     * Gets if this node will not expire
      *
      * @return true if this node will not expire
      */
@@ -240,7 +258,7 @@ public interface Node extends Map.Entry<String, Boolean> {
     }
 
     /**
-     * Returns a unix timestamp in seconds when this node will expire
+     * Gets a unix timestamp in seconds when this node will expire
      *
      * @return the time in Unix time when this node will expire
      * @throws IllegalStateException if the node is not temporary
@@ -248,7 +266,7 @@ public interface Node extends Map.Entry<String, Boolean> {
     long getExpiryUnixTime() throws IllegalStateException;
 
     /**
-     * Returns the date when this node will expire
+     * Gets the date when this node will expire
      *
      * @return the {@link Date} when this node will expire
      * @throws IllegalStateException if the node is not temporary
@@ -257,7 +275,7 @@ public interface Node extends Map.Entry<String, Boolean> {
     Date getExpiry() throws IllegalStateException;
 
     /**
-     * Return the number of seconds until this permission will expire
+     * Gets the number of seconds until this permission will expire
      *
      * @return the number of seconds until this permission will expire
      * @throws IllegalStateException if the node is not temporary
@@ -265,8 +283,9 @@ public interface Node extends Map.Entry<String, Boolean> {
     long getSecondsTilExpiry() throws IllegalStateException;
 
     /**
-     * Return true if the node has expired.
-     * This also returns false if the node is not temporary
+     * Gets if the node has expired.
+     *
+     * <p>This also returns false if the node is not temporary.</p>
      *
      * @return true if this node has expired
      */
@@ -301,14 +320,14 @@ public interface Node extends Map.Entry<String, Boolean> {
     String toSerializedNode();
 
     /**
-     * Returns if this is a group node
+     * Gets if this is a group node
      *
      * @return true if this is a group node
      */
     boolean isGroupNode();
 
     /**
-     * Returns the name of the group
+     * Gets the name of the group, if this is a group node.
      *
      * @return the name of the group
      * @throws IllegalStateException if this is not a group node. See {@link #isGroupNode()}
@@ -317,7 +336,7 @@ public interface Node extends Map.Entry<String, Boolean> {
     String getGroupName() throws IllegalStateException;
 
     /**
-     * Returns if this node is a wildcard node
+     * Gets if this node is a wildcard node
      *
      * @return true if this node is a wildcard node
      */
@@ -332,7 +351,7 @@ public interface Node extends Map.Entry<String, Boolean> {
     int getWildcardLevel() throws IllegalStateException;
 
     /**
-     * Returns if this node is a meta node
+     * Gets if this node is a meta node
      *
      * @return true if this node is a meta node
      */
@@ -348,7 +367,7 @@ public interface Node extends Map.Entry<String, Boolean> {
     Map.Entry<String, String> getMeta() throws IllegalStateException;
 
     /**
-     * Returns if this node is a prefix node
+     * Gets if this node is a prefix node
      *
      * @return true if this node is a prefix node
      */
@@ -364,7 +383,7 @@ public interface Node extends Map.Entry<String, Boolean> {
     Map.Entry<Integer, String> getPrefix() throws IllegalStateException;
 
     /**
-     * Returns if this node is a suffix node
+     * Gets if this node is a suffix node
      *
      * @return true if this node is a suffix node
      */

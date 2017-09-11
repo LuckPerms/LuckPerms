@@ -28,37 +28,42 @@ package me.lucko.luckperms.api;
 import javax.annotation.Nonnull;
 
 /**
- * Represents a permission setting.
+ * Represents three different states of a setting.
  *
- * <p>Consider a value of {@link #TRUE} to be a positive setting, {@link #FALSE} to be a "negated" setting,
- * and a value of {@link #UNDEFINED} to be a non-existent value.</p>
+ * <p>Possible values:</p>
+ * <p></p>
+ * <ul>
+ *     <li>{@link #TRUE} - a positive setting</li>
+ *     <li>{@link #FALSE} - a negative (negated) setting</li>
+ *     <li>{@link #UNDEFINED} - a non-existent setting</li>
+ * </ul>
  */
 public enum Tristate {
 
     /**
-     * A value indicating a holder has a permission set.
+     * A value indicating a positive setting
      */
     TRUE(true),
 
     /**
-     * A value indicating a holder has a negated value for a permission.
+     * A value indicating a negative (negated) setting
      */
     FALSE(false),
 
     /**
-     * A value indicating a holder doesn't have a value for a permission set.
+     * A value indicating a non-existent setting
      */
     UNDEFINED(false);
 
     /**
-     * Converts from {@link Boolean} a boolean
+     * Returns a {@link Tristate} from a boolean
      *
-     * @param b the boolean
+     * @param val the boolean value
      * @return {@link #TRUE} or {@link #FALSE}, depending on the value of the boolean.
      */
     @Nonnull
-    public static Tristate fromBoolean(boolean b) {
-        return b ? TRUE : FALSE;
+    public static Tristate fromBoolean(boolean val) {
+        return val ? TRUE : FALSE;
     }
 
     private final boolean booleanValue;

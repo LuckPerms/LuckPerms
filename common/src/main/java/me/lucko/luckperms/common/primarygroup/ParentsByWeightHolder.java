@@ -33,9 +33,8 @@ import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.User;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ParentsByWeightHolder extends StoredHolder {
 
@@ -55,17 +54,33 @@ public class ParentsByWeightHolder extends StoredHolder {
 
         Contexts contexts = user.getPlugin().getContextForUser(user);
         ContextSet contextSet = contexts != null ? contexts.getContexts() : user.getPlugin().getContextManager().getStaticContexts();
-        cachedValue = user.filterNodes(contextSet).stream()
-                .filter(Node::isGroupNode)
-                .filter(Node::getValue)
-                .map(n -> Optional.ofNullable(user.getPlugin().getGroupManager().getIfLoaded(n.getGroupName())))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .sorted(Collections.reverseOrder(Comparator.comparingInt(o -> o.getWeight().orElse(0))))
-                .findFirst()
-                .map(Group::getName)
-                .orElse(null);
 
+        List<Group> groups = new ArrayList<>();
+        for (Node node : user.filterNodes(contextSet)) {
+            if (!node.getValuePrimitive() || !node.isGroupNode()) {
+                continue;
+            }
+
+            Group group = user.getPlugin().getGroupManager().getIfLoaded(node.getGroupName());
+            if (group != null) {
+                groups.add(group);
+            }
+        }
+
+        Group bestGroup = null;
+
+        if (!groups.isEmpty()) {
+            int best = 0;
+            for (Group g : groups) {
+                int weight = g.getWeight().orElse(0);
+                if (bestGroup == null || g.getWeight().orElse(0) > best) {
+                    bestGroup = g;
+                    best = weight;
+                }
+            }
+        }
+
+        cachedValue = bestGroup == null ? null : bestGroup.getName();
         useCached = true;
         return cachedValue;
     }

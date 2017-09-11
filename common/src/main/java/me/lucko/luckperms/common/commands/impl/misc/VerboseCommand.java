@@ -63,6 +63,7 @@ public class VerboseCommand extends SingleCommand {
             return CommandResult.INVALID_ARGS;
         }
 
+        boolean noTraces = args.remove("--notrace") || args.remove("--notraces") || args.remove("--slim") || args.remove("-s");
         String mode = args.get(0).toLowerCase();
 
         if (mode.equals("on") || mode.equals("true") || mode.equals("record")) {
@@ -108,7 +109,7 @@ public class VerboseCommand extends SingleCommand {
                 } else {
                     Message.VERBOSE_RECORDING_UPLOAD_START.send(sender);
 
-                    String url = listener.uploadPasteData();
+                    String url = listener.uploadPasteData(!noTraces);
                     if (url == null) {
                         url = "null";
                     }

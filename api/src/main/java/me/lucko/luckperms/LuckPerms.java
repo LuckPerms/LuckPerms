@@ -32,49 +32,59 @@ import java.util.Optional;
 import javax.annotation.Nonnull;
 
 /**
- * Singleton for the {@link LuckPermsApi}.
+ * Provides static access to the {@link LuckPermsApi}.
  *
- * <p>Ideally, the ServiceManager for the platform should be used to obtain and cache an instance, however, this can be
- * used if you need static access.</p>
+ * <p>Ideally, the ServiceManager for the platform should be used to obtain an instance,
+ * however, this provider can be used if you need static access.</p>
  */
 public final class LuckPerms {
-    private static LuckPermsApi api = null;
+    private static LuckPermsApi instance = null;
 
     /**
-     * Gets an instance of {@link LuckPermsApi}, throwing {@link IllegalStateException} if the API is not loaded.
+     * Gets an instance of the {@link LuckPermsApi},
+     * throwing {@link IllegalStateException} if an instance is not yet loaded.
+     *
+     * <p>Will never return null.</p>
      *
      * @return an api instance
      * @throws IllegalStateException if the api is not loaded
      */
     @Nonnull
     public static LuckPermsApi getApi() {
-        if (api == null) {
+        if (instance == null) {
             throw new IllegalStateException("API is not loaded.");
         }
-        return api;
+        return instance;
     }
 
     /**
      * Gets an instance of {@link LuckPermsApi}, if it is loaded.
      *
-     * <p> Unlike {@link LuckPerms#getApi}, this method will not throw an {@link IllegalStateException} if the API is
-     * not loaded, rather return an empty {@link Optional}.
+     * <p>Unlike {@link LuckPerms#getApi}, this method will not throw an
+     * {@link IllegalStateException} if an instance is not yet loaded, rather return
+     * an empty {@link Optional}.
      *
      * @return an optional api instance
      */
     @Nonnull
     public static Optional<LuckPermsApi> getApiSafe() {
-        return Optional.ofNullable(api);
+        return Optional.ofNullable(instance);
     }
 
-    /* method used by the implementation to set the singleton instance */
-    static void registerProvider(LuckPermsApi luckPermsApi) {
-        api = luckPermsApi;
+    /**
+     * Registers an instance of the {@link LuckPermsApi} with this provider.
+     *
+     * @param instance the instance
+     */
+    static void registerProvider(LuckPermsApi instance) {
+        LuckPerms.instance = instance;
     }
 
-    /* method used by the implementation to remove any previous instance */
+    /**
+     * Removes the current instance from this provider.
+     */
     static void unregisterProvider() {
-        api = null;
+        LuckPerms.instance = null;
     }
 
     private LuckPerms() {

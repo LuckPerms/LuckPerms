@@ -26,8 +26,16 @@
 package me.lucko.luckperms.exceptions;
 
 /**
- * Thrown when a permission holding object doesn't / already has a permission or isn't / is already is a member of a
- * group
+ * Thrown when a certain membership state is / isn't met.
+ *
+ * For example, when:
+ * <p></p>
+ * <ul>
+ *     <li>a permission holding object doesn't have a permission</li>
+ *     <li>a permission holding object already has a permission</li>
+ *     <li>a permission holding object is already a member of a group</li>
+ *     <li>a permission holding object isn't already a member of a group</li>
+ * </ul>
  *
  * @since 2.7
  */

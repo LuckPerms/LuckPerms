@@ -39,11 +39,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
-public abstract class MainCommand<T> extends Command<Void, T> {
+public abstract class MainCommand<T, I> extends Command<Void, T> {
 
-    private final int minArgs; // equals 1 if the command doesn't take a mid argument, e.g. /lp user <USER> sub-command....
+    // equals 1 if the command doesn't take a mid argument, e.g. /lp log sub-command....
+    // equals 2 if the command does take a mid argument, e.g. /lp user <USER> sub-command....
+    private final int minArgs;
 
     public MainCommand(LocalizedSpec spec, String name, int minArgs, List<Command<T, ?>> children) {
         super(spec, name, null, Predicates.alwaysFalse(), children);
@@ -84,17 +87,28 @@ public abstract class MainCommand<T> extends Command<Void, T> {
         }
 
         final String name = args.get(0);
-        T t = getTarget(name, plugin, sender);
-        if (t != null) {
-            CommandResult result;
-            try {
-                result = sub.execute(plugin, sender, t, strippedArgs, label);
-            } catch (CommandException e) {
-                result = CommandManager.handleException(e, sender, label, sub);
-            }
+        I targetId = parseTarget(name, plugin, sender);
+        if (targetId == null) {
+            return CommandResult.LOADING_ERROR;
+        }
 
-            cleanup(t, plugin);
-            return result;
+        ReentrantLock lock = getLockForTarget(targetId);
+        lock.lock();
+        try {
+            T target = getTarget(targetId, plugin, sender);
+            if (target != null) {
+                CommandResult result;
+                try {
+                    result = sub.execute(plugin, sender, target, strippedArgs, label);
+                } catch (CommandException e) {
+                    result = CommandManager.handleException(e, sender, label, sub);
+                }
+
+                cleanup(target, plugin);
+                return result;
+            }
+        } finally {
+            lock.unlock();
         }
 
         return CommandResult.LOADING_ERROR;
@@ -145,7 +159,11 @@ public abstract class MainCommand<T> extends Command<Void, T> {
 
     protected abstract List<String> getTargets(LuckPermsPlugin plugin);
 
-    protected abstract T getTarget(String target, LuckPermsPlugin plugin, Sender sender);
+    protected abstract I parseTarget(String target, LuckPermsPlugin plugin, Sender sender);
+
+    protected abstract ReentrantLock getLockForTarget(I target);
+
+    protected abstract T getTarget(I target, LuckPermsPlugin plugin, Sender sender);
 
     protected abstract void cleanup(T t, LuckPermsPlugin plugin);
 

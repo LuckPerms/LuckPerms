@@ -65,7 +65,7 @@ public class PhasedStorage implements Storage {
     private final Phaser phaser = new Phaser();
 
     @Override
-    public Storage force() {
+    public Storage noBuffer() {
         return this;
     }
 
@@ -73,7 +73,7 @@ public class PhasedStorage implements Storage {
     public void shutdown() {
         // Wait for other threads to finish.
         try {
-            phaser.awaitAdvanceInterruptibly(phaser.getPhase(), 5, TimeUnit.SECONDS);
+            phaser.awaitAdvanceInterruptibly(phaser.getPhase(), 10, TimeUnit.SECONDS);
         } catch (InterruptedException | TimeoutException e) {
             e.printStackTrace();
         }

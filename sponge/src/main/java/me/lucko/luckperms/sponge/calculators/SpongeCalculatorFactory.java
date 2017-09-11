@@ -32,6 +32,7 @@ import com.google.common.collect.ImmutableList;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.common.calculators.AbstractCalculatorFactory;
 import me.lucko.luckperms.common.calculators.PermissionCalculator;
+import me.lucko.luckperms.common.calculators.PermissionCalculatorMetadata;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.processors.MapProcessor;
@@ -70,7 +71,11 @@ public class SpongeCalculatorFactory extends AbstractCalculatorFactory {
             processors.add(new DefaultsProcessor(plugin.getService(), contexts.getContexts().makeImmutable()));
         }
 
-        return registerCalculator(new PermissionCalculator(plugin, user.getFriendlyName(), processors.build()));
+        return registerCalculator(new PermissionCalculator(
+                plugin,
+                PermissionCalculatorMetadata.of(user.getFriendlyName(), contexts.getContexts()),
+                processors.build()
+        ));
     }
 
     @Override
@@ -79,7 +84,7 @@ public class SpongeCalculatorFactory extends AbstractCalculatorFactory {
         ret.add("Map");
         if (plugin.getConfiguration().get(ConfigKeys.APPLY_SPONGE_IMPLICIT_WILDCARDS)) ret.add("SpongeWildcard");
         if (plugin.getConfiguration().get(ConfigKeys.APPLYING_REGEX)) ret.add("Regex");
-        if (plugin.getConfiguration().get(ConfigKeys.APPLYING_WILDCARDS)) ret.add("Wildcards");
+        if (plugin.getConfiguration().get(ConfigKeys.APPLYING_WILDCARDS)) ret.add("Wildcard");
         if (plugin.getConfiguration().get(ConfigKeys.APPLY_SPONGE_DEFAULT_SUBJECTS)) ret.add("Defaults");
         return ret.build();
     }

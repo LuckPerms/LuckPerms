@@ -413,7 +413,7 @@ public class MongoDBBacking extends AbstractBacking {
 
     @Override
     public boolean cleanupUsers() {
-        return true; // TODO
+        return true;
     }
 
     @Override
@@ -755,7 +755,7 @@ public class MongoDBBacking extends AbstractBacking {
     public static Map<String, Boolean> exportToLegacy(Iterable<Node> nodes) {
         Map<String, Boolean> m = new HashMap<>();
         for (Node node : nodes) {
-            m.put(node.toSerializedNode(), node.getValue());
+            m.put(node.toSerializedNode(), node.getValuePrimitive());
         }
         return m;
     }

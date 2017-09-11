@@ -27,20 +27,13 @@ package me.lucko.luckperms.common.contexts;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
 
 public class ContextSetComparator implements Comparator<ImmutableContextSet> {
-    private static final Comparator<Map.Entry<String, String>> STRING_ENTRY_COMPARATOR = (o1, o2) -> {
-        int ret = o1.getKey().compareTo(o2.getKey());
-        if (ret != 0) {
-            return ret;
-        }
-
-        return o1.getValue().compareTo(o2.getValue());
-    };
 
     private static final ContextSetComparator INSTANCE = new ContextSetComparator();
     public static Comparator<ImmutableContextSet> get() {
@@ -75,16 +68,15 @@ public class ContextSetComparator implements Comparator<ImmutableContextSet> {
             return o1Size > o2Size ? 1 : -1;
         }
 
-        // we *have* to maintain transitivity in this comparator. this may be expensive, but it's necessary, as these
-        // values are stored in a treemap.
+        // we *have* to maintain transitivity in this comparator. this may be expensive, but it's necessary, as this
+        // comparator is used in the PermissionHolder nodes treemap
 
         // in order to have consistent ordering, we have to compare the content of the context sets by ordering the
         // elements and then comparing which set is greater.
-        TreeSet<Map.Entry<String, String>> o1Map = new TreeSet<>(STRING_ENTRY_COMPARATOR);
-        TreeSet<Map.Entry<String, String>> o2Map = new TreeSet<>(STRING_ENTRY_COMPARATOR);
-
-        o1Map.addAll(o1.toMultimap().entries());
-        o2Map.addAll(o2.toMultimap().entries());
+        List<Map.Entry<String, String>> o1Map = new ArrayList<>(o1.toSet());
+        List<Map.Entry<String, String>> o2Map = new ArrayList<>(o2.toSet());
+        o1Map.sort(STRING_ENTRY_COMPARATOR);
+        o2Map.sort(STRING_ENTRY_COMPARATOR);
 
         int o1MapSize = o1Map.size();
         int o2MapSize = o2Map.size();
@@ -101,18 +93,33 @@ public class ContextSetComparator implements Comparator<ImmutableContextSet> {
             Map.Entry<String, String> ent2 = it2.next();
 
             // compare these values.
-            if (ent1.getKey().equals(ent2.getKey()) && ent1.getValue().equals(ent2.getValue())) {
+            //noinspection StringEquality - strings are intern'd
+            if (ent1.getKey() == ent2.getKey() && ent1.getValue() == ent2.getValue()) {
                 // identical entries. just move on
                 continue;
             }
 
-            // these values are at the same position in the ordered sets.
+            // these entries are at the same position in the ordered sets.
             // if ent1 is "greater" than ent2, then at this first position, o1 has a "greater" entry, and can therefore be considered
-            // a greater set.
+            // a greater set, and vice versa
             return STRING_ENTRY_COMPARATOR.compare(ent1, ent2);
         }
 
-        // shouldn't ever reach this point. ever.
+        // shouldn't ever reach this point.
         return 0;
     }
+
+    private static final Comparator<String> FAST_STRING_COMPARATOR = (o1, o2) -> {
+        //noinspection StringEquality
+        return o1 == o2 ? 0 : o1.compareTo(o2);
+    };
+
+    private static final Comparator<Map.Entry<String, String>> STRING_ENTRY_COMPARATOR = (o1, o2) -> {
+        int ret = FAST_STRING_COMPARATOR.compare(o1.getKey(), o2.getKey());
+        if (ret != 0) {
+            return ret;
+        }
+
+        return FAST_STRING_COMPARATOR.compare(o1.getValue(), o2.getValue());
+    };
 }
