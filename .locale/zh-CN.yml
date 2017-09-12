@@ -3,52 +3,45 @@
 # Author: EuropeJing
 
 prefix: "&7&l[&b&lL&3&lP&7&l] &c"
-log-info: "&7&l[&bL&3P&7&l] &3{0}"
-log-warn: "&7&l[&bLuck&3Perms&7&l] &c[警告] {0}"
-log-error: "&7&l[&bLuck&3Perms&7&l] &4[错误] {0}"
 empty: "{0}"
 player-online: "&a在线"
 player-offline: "&c离线"
-loading-error: "无法加载权限数据，请稍后再试。"
+loading-error: "&c权限数据无法加载，请稍后再试。"
 op-disabled: "&b此服务器上禁用了vanilla OP系统。"
-op-disabled-sponge: "&2安装了权限插件时，服务器OP状态无效，请直接编辑用户数据。"
+op-disabled-sponge: "&2请注意，当安装权限插件时，服务器OP状态无效。请直接编辑用户数据。"
+log-info: "&7&l[&bL&3P&7&l] &3{0}"
+log-warn: "&7&l[&bLuck&3Perms&7&l] &c[警告] {0}"
+log-error: "&7&l[&bLuck&3Perms&7&l] &4[错误] {0}"
 log: "&3日志 &3&l> {0}"
 verbose-log: "&3详细 &3&l> {0}"
 export-log: "&3输出 &3&l> &f{0}"
 export-log-progress: "&3输出 &3&l> &7{0}"
 migration-log: "&3移动 &7[&3{0}&7] &3&l> &f{1}"
 migration-log-progress: "&3移动 &7[&3{0}&7] &3&l> &7{1}"
-command-not-recognised: "命令未被识别。"
-command-no-permission: "你没有权限使用这个命令!"
-already-haspermission: "{0}已经有这个权限!"
-does-not-havepermission: "{0}没有这个权限。"
-already-has-temp-permission: "{0}已经设置此临时权限!"
-does-not-have-temp-permission: "{0}没有设置此临时权限。"
-user-not-found: "&b找不到用户。"
-user-not-online: "&b用户&a{0}&b不在线。"
-user-save-success: "&7(保存用户数据到文件)"
-user-save-error: "保存用户数据时出错。"
-group-not-found: "&b找不到组。"
-group-save-success: "&7(保存组数据到文件)"
-group-save-error: "保存组数据时出错。"
-track-not-found: "&b无法找到权限组轨道。"
-track-save-success: "&7(保存权限组轨道到文件)"
-track-save-error: "保存权限组轨道时出错。"
-user-invalid-entry: "&d{0}&c不是有效的用户名/uuid。"
-group-invalid-entry: "组名只能包含字母数字字符。"
-track-invalid-entry: "权限组轨道名称只能包含字母数字字符。"
-server-world-invalid-entry: "服务器/世界名称只能包含字母数字字符，长度不能超过36个字符。"
-use-inherit-command: "使用'parent add'和'parent remove'命令，而不是指定节点。"
-verbose-invalid-filter: "&c无效的详细过滤器: &f{0}"
-verbose-on: "&b所有权限的详细输出设置为&a开&b。"
-verbose-on-query: "&b将匹配过滤器:&f{0}&b的权限详细输出设置为&a开&b。"
-verbose-off: "&b所有权限的详细输出设置为&c关&b。"
-verbose-recording-on: "&b所有权限的详细记录设置为&a开&b。"
-verbose-recording-on-query: "&b将匹配过滤器:&f{0}&b的权限详细记录设置为&a开&b。"
-verbose-recording-upload-start: "&b详细记录被禁用。正在上传结果..."
-verbose-recording-url: "&a详细结果的网址:"
+command-not-recognised: "&c命令未被识别。"
+command-no-permission: "&c你没有权限使用这个命令!"
+user-not-found: "&c找不到用户&4{0}&c。"
+user-not-online: "&a用户&b{0}&a不在线。"
+user-save-error: "&c保存用户&4{0}&c数据时出错。"
+group-not-found: "&b找不到名为&4{0}&c的组。"
+group-save-error: "&c保存组&4{0}&c数据时出错。"
+track-not-found: "&b无法找到为&4{0}&c的权限组轨道。"
+track-save-error: "&c保存权限组轨道&4{0}&c时出错。"
+user-invalid-entry: "&4{0}&c不是有效的用户名/uuid。"
+group-invalid-entry: "&4{0}&c不是有效的组名称。"
+track-invalid-entry: "&4{0}&c不是有效的权限组轨道名称。"
+server-world-invalid-entry: "&c服务器/世界名称只能包含字母数字字符，长度不能超过36个字符。"
+use-inherit-command: "&c使用'parent add'和'parent remove'命令，而不是指定节点。"
+verbose-invalid-filter: "&4{0}&c不是有效的详细过滤器"
+verbose-on: "&b将匹配过滤器:&aANY&b的权限详细输出设置为&a开&b。"
+verbose-on-query: "&b将匹配过滤器:&a{0}&b的权限详细输出设置为&a开&b。"
+verbose-off: "&b详细输出设置为&c关&b。"
+verbose-recording-on: "&b将匹配过滤器:&aANY&b的权限详细记录设置为&a开&b。"
+verbose-recording-on-query: "&b将匹配过滤器:&a{0}&b的权限详细记录设置为&a开&b。"
+verbose-upload-start: "&b详细记录被禁用。正在上传结果..."
+verbose-results-url: "&a详细结果的网址:"
 tree-upload-start: "&b生成权限树..."
-tree-empty: "&a无法生成树，没有找到结果。"
+tree-empty: "&c无法生成树，没有找到结果。"
 tree-url: "&a权限树网址:"
 search-searching: "&a使用&b{0}&a搜索用户和组..."
 search-searching-members: "&a正在搜索继承自&b{0}&a的用户和组..."
@@ -57,13 +50,13 @@ search-showing-users: "&b显示用户条目:"
 search-showing-groups: "&b显示组条目:"
 search-showing-users-with-page: "&b显示用户条目: {0}"
 search-showing-groups-with-page: "&b显示组条目: {0}"
-apply-edits-invalid-code: "&a无效的代码。&7({0})"
-apply-edits-unable-to-read: "&a无法使用给定代码读取数据。&7({0})"
-apply-edits-no-target: "&a无法解析编辑的目标。请提供它作为一个额外的参数。"
-apply-edits-target-group-not-exists: "&a目标组&b{0}&a不存在。"
-apply-edits-target-user-not-uuid: "&a目标用户&b{0}&a不是一个有效的uuid。"
-apply-edits-target-user-unable-to-load: "&a无法加载目标用户&b{0}&a。"
-apply-edits-target-unknown: "&a目标无效。&7({0})"
+apply-edits-invalid-code: "&c无效的代码。&7({0})"
+apply-edits-unable-to-read: "&c无法使用给定代码读取数据。&7({0})"
+apply-edits-no-target: "&c无法解析编辑的目标。请提供它作为一个额外的参数。"
+apply-edits-target-group-not-exists: "&c目标组&4{0}&c不存在。"
+apply-edits-target-user-not-uuid: "&c目标用户&4{0}&c不是一个有效的uuid。"
+apply-edits-target-user-unable-to-load: "&c无法加载目标用户&4{0}&c。"
+apply-edits-target-unknown: "&c目标无效。&7({0})"
 apply-edits-success: "&a成功应用&b{0}&a节点到&b{1}&a。"
 editor-upload-failure: "&c无法将权限数据上传到编辑器。"
 editor-url: "&a编辑器URL:"
@@ -72,85 +65,74 @@ create-success: "&b{0}&a创建成功。"
 delete-success: "&b{0}&a删除成功。"
 rename-success: "&b{0}&a成功被重命名为&b{1}&a。"
 clone-success: "&b{0}&a成功地复制到&b{1}&a。"
-already-inherits: "{0}已经继承'{1}'。"
-does-not-inherit: "{0}不再继承'{1}'。"
-already-temp-inherits: "{0}已临时继承'{1}'。"
-does-not-temp-inherit: "{0}不再临时继承'{1}'。"
-track-already-contains: "权限组轨道{0}已经包含组'{1}'。"
-track-does-not-contain: "权限组轨道{0}不包含组'{1}'。"
-track-ambiguous-call: "指定的用户是此权限组轨道上多个组的成员，无法确定他们的位置。"
-group-already-exists: "该组已存在!"
-group-does-not-exist: "组不存在!"
-group-load-error: "发生意外错误，组未加载。"
-groups-load-error: "发生意外错误，无法加载所有组。"
-track-already-exists: "权限组轨道已存在!"
-track-does-not-exist: "权限组轨道不存在!"
-track-load-error: "发生意外错误。权限组轨道未加载。"
-tracks-load-error: "出现意外错误，无法加载所有权限组轨道。"
-track-empty: "权限组轨道不能使用，因为它是空的或只包含一个组。"
-update-task-request: "&b安排更新任务。"
+already-inherits: "&b{0}&a已经从环境&b{2}&a中继承&b{1}&a。"
+does-not-inherit: "&b{0}&a不再从环境&b{2}&a中继承&b{1}&a。"
+already-temp-inherits: "&b{0}&a已经从环境&b{2}&a中临时继承&b{1}&a。"
+does-not-temp-inherit: "&b{0}&a不再从环境&b{2}&a中临时继承&b{1}&a。"
+track-already-contains: "&a权限组轨道&b{0}&a已经包含组&b{1}&a。"
+track-does-not-contain: "&a权限组轨道&b{0}&a不包含组&b{1}&a。"
+track-ambiguous-call: "&c用户&4{0}&c是此权限组轨道上多个组的成员，无法确定他们的位置。"
+already-exists: "&4{0}&c已存在!"
+does-not-exist: "&4{0}&c不存在!"
+group-load-error: "&c发生意外错误，组未加载。"
+groups-load-error: "&c发生意外错误，无法加载所有组。"
+track-load-error: "&c发生意外错误。权限组轨道未加载。"
+tracks-load-error: "&c发生意外错误，无法加载所有权限组轨道。"
+track-empty: "&c权限组轨道&4{0}&c不能使用，因为它是空的或只包含一个组。"
+update-task-request: "&b已请求更新任务。请稍候..."
 update-task-complete: "&a更新任务完成。"
 update-task-complete-network: "&a更新任务完成，现在尝试推送到其他服务器。"
 update-task-push-success: "&a其他服务器通过&b{0}消息传递成功通知。"
 update-task-push-failure: "&c将更改推送到其他服务器时出错。"
-update-task-push-failure-not-setup: "&c将更改推送到其他服务器时出错，未配置消息传递服务。"
-reload-config-success: "&a重新加载配置文件。&7(一些选项将仅在服务器重新启动后才应用。)"
-info: >
+update-task-push-failure-not-setup: "&c将更改推送到其他服务器时出错。&7(未配置消息传递服务)"
+reload-config-success: "&a重新加载配置文件。&7(一些选项将仅在服务器重新启动后才应用)"
+info-top: >
   {PREFIX}&2运行 &bLuckPerms v{0}&2 by &bLuck&2。\n
   {PREFIX}&f-  &3平台: &f{1}\n
-  {PREFIX}&f-  &3存储方式: &f{2}\n
-  {PREFIX}&f-  &3服务器名称: &f{3}\n
-  {PREFIX}&f-  &3同步间隔: &a{4} &f分钟\n
-  {PREFIX}&f-  &3消息服务: &f{5}\n
-  {PREFIX}&f-  &b统计:\n
-  {PREFIX}&f-     &3在线玩家: &a{6}\n
-  {PREFIX}&f-     &3加载用户: &a{7}\n
-  {PREFIX}&f-     &3加载组: &a{8}\n
-  {PREFIX}&f-     &3加载权限组轨道: &a{9}\n
-  {PREFIX}&f-     &3日志大小: &a{10}\n
-  {PREFIX}&f-     &3UUID缓存大小: &a{11}\n
-  {PREFIX}&f-     &3翻译加载: &a{12}\n
-  {PREFIX}&f-     &3预处理环境: &a{13}\n
-  {PREFIX}&f-     &3环境计算器: &a{14}\n
-  {PREFIX}&f-     &3唯一权限: &a{15}\n
-  {PREFIX}&f-  &b配置:\n
-  {PREFIX}&f-     &3使用服务器UUIDs: {16}\n
-  {PREFIX}&f-     &b权限计算:\n
-  {PREFIX}&f-        &3包括全部: {17}\n
-  {PREFIX}&f-        &3包括全部世界: {18}\n
-  {PREFIX}&f-        &3应用全部组: {19}\n
-  {PREFIX}&f-        &3应用全部世界组: {20}\n
-  {PREFIX}&f-        &3应用通配符: {21}\n
-  {PREFIX}&f-        &3应用正则表达式: {22}\n
-  {PREFIX}&f-        &3应用速记: {23}
-create-group-error: "创建组时出错。"
-delete-group-error: "删除组时出错。"
-delete-group-error-default: "您不能删除默认组。"
+  {PREFIX}&f-  &3服务器型号: &f{2}\n
+  {PREFIX}&f-  &3服务器版本: &f{3}
+info-middle: >
+  {PREFIX}&f-  &3消息类型: &f{0}\n
+  {PREFIX}&f-  &b详情:\n
+  {PREFIX}&f-     &3服务器名称: &f{1}\n
+  {PREFIX}&f-     &3在线玩家: &a{2}\n
+  {PREFIX}&f-     &3唯一连接: &a{3}\n
+  {PREFIX}&f-     &3正常运行时间: &7{4}\n
+  {PREFIX}&f-     &3本地数据: &a{5}&7用户，&a{6}&7组，&a{7}&7权限组轨道\n
+  {PREFIX}&f-     &3环境统计: &a{8}\n
+  {PREFIX}&f-     &3已知权限: &a{9}\n
+  {PREFIX}&f-     &3活动处理器: &7{10}
+create-group-error: "&c创建组&4{0}&c时出错。"
+delete-group-error: "&c删除组&4{0}&c时出错。"
+delete-group-error-default: "&c你不能删除默认组。"
 groups-list: "&a组: &7(名字，权重，权限组轨道)"
 groups-list-entry: "&f-  &3{0} &7- &b{1}"
 groups-list-entry-with-tracks: "&f-  &3{0} &7- &b{1} &7- [&3{2}&7]"
-create-track-error: "创建权限组轨道时出错。"
-delete-track-error: "删除权限组轨道时出错。"
 tracks-list: "&a权限组轨道: {0}"
-listnodes: "&b{0}的节点:"
-listnodes-with-page: "&b{0}的节点:  {1}"
-listnodes-temp: "&b{0}的临时节点:"
-listnodes-temp-with-page: "&b{0}的临时节点:  {1}"
+listnodes: "&b{0}的权限:"
+listnodes-with-page: "&b{0}的权限:  {1}"
+listnodes-temp: "&b{0}的临时权限:"
+listnodes-temp-with-page: "&b{0}的临时权限:  {1}"
 listparents: "&b{0}的父组"
 listparents-temp: "&b{0}的临时父组:"
 list-tracks: >
   &b{0}的权限组轨道:\n
   {1}
-list-tracks-empty: "{0}不在任何权限组轨道上。"
+list-tracks-empty: "&b{0}&a不在任何权限组轨道上。"
 context-pair-inline: "&3{0}=&b{1}"
 context-pair--global-inline: "&e全局"
 context-pair-sep: "&a，"
 context-pair: "&8(&7{0}=&f{1}&8)"
 check-permission: "&b在环境&b{3}&b中，&b{0}&b的权限&b{1}&b被设置为&b{2}&b。"
+check-inherits-permission: "&a在环境&b{3}&a中将&b{0}&a的&b{1}&a权限设置为&b{2}&a。&7(从&a{4}&7继承)"
 setpermission-success: "&a在环境&b{3}&a中将&b{2}&a的&b{0}&a权限设置为&b{1}&a。"
+already-haspermission: "&a在环境&b{2}&a中&b{0}&a已经设置权限&b{1}&a。"
 setpermission-temp-success: "&a在环境&b{4}&a中将&b{2}&a的&b{0}&a临时权限设为&b{1}&a，持续时间&b{3}&a。"
+already-has-temp-permission: "&a在环境&b{2}&a中&b{0}&a已经设置临时权限&b{1}&a。"
 unsetpermission-success: "&a在环境&b{2}&a中取消&b{1}&a的&b{0}&a权限。"
+does-not-have-permission: "&a在环境&b{2}&a中&b{0}&a没有设置权限&b{1}&a。"
 unset-temp-permission-success: "&a在环境&b{2}&a中取消&b{1}&a的临时权限&b{0}&a。"
+does-not-have-temp-permission: "&a在环境&b{2}&a中&b{0}&a没有设置临时权限&b{1}&a。"
 set-inherit-success: "&b{0}&a现在在环境&b{2}&a中继承&b{1}&a的权限&a。"
 set-temp-inherit-success: "&b{0}&a现在在环境&b{3}&a中继承&b{1}&a的权限，持续时间&b{2}&a。"
 set-parent-success: "&b{0}&a现有的父组被清除，现在只在&b{2}&a中继承&b{1}&a。"
@@ -159,41 +141,46 @@ unset-inherit-success: "&b{0}&a不再继承环境&b{2}&a中&b{1}&a的权限。"
 unset-temp-inherit-success: "&b{0}&a在环境&b{2}&a中不再继承临时权限&b{1}&a。"
 clear-success: "&b{0}&a的权限在环境&b{1}&a中被清除。(&b{2}&a节点已被删除。)"
 clear-success-singular: "&b{0}&a的权限在环境&b{1}&a中被清除。(&b{2}&a节点已被删除。)"
-parent-clear-success: "&b{0}&a的父组在环境&b{1}&a中被清除。&b{2}&a节点被删除。)"
-parent-clear-success-singular: "&b{0}&a的父组在环境&b{1}&a中被清除。&b{2}&a节点被删除。)"
-parent-clear-track-success: "在权限组轨道&b{1}&a上，&b{0}&a的父组在环境&b{2}&a中被清除。&b{3}&a节点被删除。)"
-parent-clear-track-success-singular: "在权限组轨道&b{1}&a上，&b{0}&a的父组在环境&b{2}&a中被清除。&b{3}&a节点被删除。)"
-meta-clear-success: "&b{0}&a的元数据在环境&b{1}&a中被清除。&b{2}&a节点已被删除。)"
-meta-clear-success-singular: "&b{0}&a的元数据在环境&b{1}&a中被清除。&b{2}&a节点已被删除。)"
-illegal-date-error: "无法解析日期'{0}'。"
-past-date-error: "您不能设定一个过去的日期!"
+parent-clear-success: "&b{0}&a的父组在环境&b{1}&a中被清除。(&b{2}&a节点被删除。)"
+parent-clear-success-singular: "&b{0}&a的父组在环境&b{1}&a中被清除。(&b{2}&a节点被删除。)"
+parent-clear-track-success: "在权限组轨道&b{1}&a上，&b{0}&a的父组在环境&b{2}&a中被清除。(&b{3}&a节点被删除。)"
+parent-clear-track-success-singular: "在权限组轨道&b{1}&a上，&b{0}&a的父组在环境&b{2}&a中被清除。(&b{3}&a节点被删除。)"
+meta-clear-success: "&b{0}&a的元数据匹配类型&b{1}&a在环境&b{2}&a中被清除。(&b{3}&a节点已被删除。)"
+meta-clear-success-singular: "&b{0}&a的元数据匹配类型&b{1}&a在环境&b{2}&a中被清除。(&b{3}&a节点已被删除。)"
+illegal-date-error: "&c无法解析日期'{0}'。"
+past-date-error: "&c你不能设定一个过去的日期!"
 chat-meta-prefix-header: "&b{0}的前缀"
 chat-meta-suffix-header: "&b{0}的后缀"
 meta-header: "&b{0}的元信息"
-chat-meta-entry: "&b-> {0} &f- &f\"{1}&f\" &8(&7继承自&a{2}&8)"
-chat-meta-entry-with-context: "&b-> {0} &f- &f\"{1}&f\" &8(&7继承自&a{2}&8){3}"
-meta-entry: "&b-> &a{0} &f= &f\"{1}&f\" &8(&7继承自&a{2}&8)"
-meta-entry-with-context: "&b-> &a{0} &f= &f\"{1}&f\" &8(&7继承自&a{2}&8){3}"
+chat-meta-entry: "&b-> {0} &f- &f'{1}&f' &8(&7继承自&a{2}&8)"
+chat-meta-entry-with-context: "&b-> {0} &f- &f'{1}&f' &8(&7继承自&a{2}&8){3}"
+meta-entry: "&b-> &a{0} &f= &f'{1}&f' &8(&7继承自&a{2}&8)"
+meta-entry-with-context: "&b-> &a{0} &f= &f'{1}&f' &8(&7继承自&a{2}&8){3}"
 chat-meta-prefix-none: "&b{0}没有前缀。"
 chat-meta-suffix-none: "&b{0}没有后缀。"
 meta-none: "&b{0}没有元信息。"
-meta-invalid-priority: "优先级'{0}'无效。应该是一个数字。"
-already-has-chat-meta: "{0}已经设置了{1}。"
-does-not-have-chat-meta: "{0}没有设置{1}。"
-add-chatmeta-success: "在环境&b{4}&a中将&b{0}&a的{1}设置为&f\"{2}&f\"，优先级&b{3}&a。"
-add-temp-chatmeta-success: "在环境&b{5}&a中将&b{0}&a的{1}设置为&f\"{2}&f\"&a，优先级&b{3}&a，持续时间为&b{4}&a。"
-remove-chatmeta-success: "在环境&b{3}&a中删除了&b{0}&a优先级为&b{3}&a的{1} &f\"{2}&f\"&a。"
+meta-invalid-priority: "&c优先级&4{0}&c无效。应该是一个数字。"
+already-has-chat-meta: "在环境&b{4}&a中设置&b{0}&a的元信息{1}&f'{2}&f'&a优先级为&b{3}&a。"
+already-has-temp-chat-meta: "在环境&b{4}&a中设置&b{0}&a的元信息{1}&f'{2}&f'&a临时优先级为&b{3}&a。"
+does-not-have-chat-meta: "在环境&b{4}&a中没有设置&b{0}&a的元信息{1}&f'{2}&f'&a优先级为&b{3}&a。"
+does-not-have-temp-chat-meta: "在环境&b{4}&a中没有设置&b{0}&a的元信息{1}&f'{2}&f'&a临时优先级为&b{3}&a。"
+add-chatmeta-success: "在环境&b{4}&a中将&b{0}&a的{1}设置为&f'{2}&f'，优先级&b{3}&a。"
+add-temp-chatmeta-success: "在环境&b{5}&a中将&b{0}&a的{1}设置为&f'{2}&f'&a，优先级&b{3}&a，持续时间为&b{4}&a。"
+remove-chatmeta-success: "在环境&b{4}&a中删除了&b{0}&a优先级为&b{3}&a的{1} &f'{2}&f'&a。"
 bulk-remove-chatmeta-success: "在环境&b{3}&a中删除了&b{0}&a优先级&b{2}&a的所有&b{1}&a。"
-remove-temp-chatmeta-success: "在环境&b{4}&a中删除了&b{0}&a优先级&b{3}&a的临时{1} &f\"{2}&f\"&a。"
+remove-temp-chatmeta-success: "在环境&b{4}&a中删除了&b{0}&a优先级&b{3}&a的临时{1} &f'{2}&f'&a。"
 bulk-remove-temp-chatmeta-success: "在环境&b{3}&a中删除了&b{0}&a优先级&b{2}&a的所有临时&b{1}&a。"
-already-has-meta: "{0}已经有了这个元信息集。"
-set-meta-success: "将环境&b{3}&a中&b{2}&a的键&f\"{0}&f\"&a的元信息设置为&f\"{1}&f\"&a。"
-set-meta-temp-success: "&a在环境&b{4}&a中将&b{2}&a的键&f\"{0}&f\"&a的值设置为&f\"{1}&f\"&a，持续时间为&b{3}&a。"
-unset-meta-success: "&a在环境{2}中取消设置&b{1}&a的键&f\"{0}&f\"&a的元信息。"
-unset-meta-temp-success: "&a在环境{2}中取消设置&b{1}&a的键&f\"{0}&f\"&a的临时元信息。"
-bulk-update-invalid-data-type: "类型无效。期望类型是'全部'、'用户'或'组'。"
-bulk-update-invalid-constraint: "无效的约束&4{0}&c。约束的格式应该是'&f<field> <comparison operator> <value>&c'。"
-bulk-update-invalid-comparison: "比较运算符无效'&4{0}&c'。应该以下之一: &f==  !=  ~~  ~!"
+already-has-meta: "&b{0}&a在环境&b{3}&a中设置了元信息&f'{1}&f'&a为&b&f'{2}&f'&a。"
+already-has-temp-meta: "&b{0}&a在环境&b{3}&a中设置了临时元信息&f'{1}&f'&a为&b&f'{2}&f'&a。"
+doesnt-have-meta: "&b{0}&a在环境&b{2}&a中没有设置元信息&f'{1}&f'&a。"
+doesnt-have-temp-meta: "&b{0}&a在环境&b{2}&a中没有设置临时元信息&f'{1}&f'&a。"
+set-meta-success: "&a在环境&b{3}&a中将&b{2}&a的元信息&f'{0}&f'&a设置为&f'{1}&f'&a。"
+set-meta-temp-success: "&a在环境&b{4}&a中将&b{2}&a的元信息&f'{0}&f'&a设置为&f'{1}&f'&a，持续时间为&b{3}&a。"
+unset-meta-success: "&a在环境{2}中取消设置&b{1}&a的元信息&f'{0}&f'&a。"
+unset-meta-temp-success: "&a在环境{2}中取消设置&b{1}&a的临时元信息&f'{0}&f'&a。"
+bulk-update-invalid-data-type: "&c类型无效。期望类型是'全部'、'用户'或'组'。"
+bulk-update-invalid-constraint: "&c无效的约束&4{0}&c。约束的格式应该是'&f<field> <comparison operator> <value>&c'。"
+bulk-update-invalid-comparison: "&c比较运算符无效'&4{0}&c'。应该以下之一: &f==  !=  ~~  ~!"
 bulk-update-queued: "&a批量更新操作已排队。&7(&f{0}&7)"
 bulk-update-confirm: "&a运行&b/{0} bulkupdate &a确认{1}执行更新。"
 bulk-update-unknown-id: "&a使用id&b{0}&a的操作不存在或已过期。"
@@ -206,8 +193,8 @@ user-info-general: >
   {PREFIX}&f- &3状态: {2}\n
   {PREFIX}&f- &3主组: &f{3}\n
   {PREFIX}&f- &a统计:\n
-  {PREFIX}&f-    &3权限: &a{4}\n
-  {PREFIX}&f-    &3临时权限: &a{5}\n
+  {PREFIX}&f-    &3节点: &a{4}\n
+  {PREFIX}&f-    &3权限: &a{5}\n
   {PREFIX}&f-    &3前缀: &a{6}\n
   {PREFIX}&f-    &3后缀: &a{7}\n
   {PREFIX}&f-    &3元信息: &a{8}
@@ -219,29 +206,29 @@ user-info-data: >
   {PREFIX}&f-    &3当前后缀: {3}
 info-parent-header: "&f- &a父组:"
 info-temp-parent-header: "&f- &a临时父组:"
-user-removegroup-error-primary: "您不能从其主组中删除用户。"
+user-removegroup-error-primary: "&a你不能从其主组中删除用户。"
 user-primarygroup-success: "&b{0}&a的主组已设为&b{1}&a。"
-user-primarygroup-warn-option: "&c警告：此服务器&7({0})&c使用的主组计算方法可能无法反映此更改。"
-user-primarygroup-error-alreadyhas: "用户已将此组设置为其主组。"
+user-primarygroup-warn-option: "&a警告：此服务器&7({0})&a使用的主组计算方法可能无法反映此更改。"
+user-primarygroup-error-alreadyhas: "&a已将&b{1}&a设置为用户&b{0}&a的主组。"
 user-primarygroup-error-notmember: "&b{0}&a不是&b{1}&a的成员，现在添加它们。"
-user-track-error-not-contain-group: "指定的用户尚未在此权限组轨道上的任何组中。"
+user-track-error-not-contain-group: "&a用户&b{0}&a尚未在权限组轨道&b{1}&a上的任何组中。"
 user-track-added-to-first: "&b{0}&a不在此权限组轨道上的任何组中，因此在环境&b{2}&a中将其添加到第一组&b{2}&a。"
-user-promote-success: "&a在环境&b{3}&a中将用户沿权限组轨道&b{0}&a从&b{1}&a提升到&b{2}&a。"
-user-promote-error-endoftrack: "已达到权限组轨道&4{0}&c的结尾，所以无法提升用户。"
+user-promote-success: "&a在环境&b{4}&a中将用户&b{0}&a沿权限组轨道&b{1}&a从&b{2}&a提升到&b{3}&a。"
+user-promote-error-endoftrack: "&a已达到权限组轨道&b{0}&a的结尾，所以无法提升用户&b{1}&a。"
 user-promote-error-malformed: >
-  {PREFIX}权限组轨道上的下一个组{0}不存在。无法提升用户。\n
-  {PREFIX}创建组，或将其从权限组轨道中删除，然后重试。
-user-demote-success: "&a在环境&b{3}&a中将用户沿权限组轨道&b{0}&a从&b{1}&a下降到&b{2}&a。"
-user-demote-endoftrack: "已达到权限组轨道&4{0}&c的结尾，所以&4{1}&c已从&4{2}&c中移除。"
+  {PREFIX}&a权限组轨道上的下一个组&b{0}&a不存在。无法提升用户。\n
+  {PREFIX}&a创建组，或将其从权限组轨道中删除，然后重试。
+user-demote-success: "&a在环境&b{4}&a中将&b{0}&a沿权限组轨道&b{1}&a从&b{2}&a下降到&b{3}&a。"
+user-demote-endoftrack: "&a已达到权限组轨道&b{0}&a的结尾，所以&b{1}&a已从&b{2}&a中移除。"
 user-demote-error-malformed: >
-  {PREFIX}权限组轨道上的上一组{0}不存在。无法降级用户。\n
-  {PREFIX}创建组，或将其从权限组轨道中删除，然后重试。
+  {PREFIX}&a权限组轨道上的上一组&b{0}&a不存在。无法降级用户。\n
+  {PREFIX}&a创建组，或将其从权限组轨道中删除，然后重试。
 group-info-general: >
   {PREFIX}&b&l> &b组信息: &f{0}\n
   {PREFIX}&f- &3显示名称: &f{1}\n
   {PREFIX}&f- &3权重: &f{2}\n
   {PREFIX}&f- &a统计:\n
-  {PREFIX}&f-    &3权限: &a{3}\n
+  {PREFIX}&f-    &3节点: &a{3}\n
   {PREFIX}&f-    &3临时权限: &a{4}\n
   {PREFIX}&f-    &3前缀: &a{5}\n
   {PREFIX}&f-    &3后缀: &a{6}\n
@@ -253,37 +240,38 @@ track-info: >
 track-clear: "&b{0}&a的权限组轨道已被清除。"
 track-append-success: "&a组&b{0}&a已成功添加到权限组轨道&b{1}&a。"
 track-insert-success: "&a组&b{0}&a已成功插入权限组轨道&b{1}&a的&b{2}&a位置。"
-track-insert-error-number: "没有预期的数量，而是收到: {0}"
-track-insert-error-invalid-pos: "无法插入位置{0}。索引超出范围。"
+track-insert-error-number: "&c没有预期的数量，而是收到: {0}"
+track-insert-error-invalid-pos: "&c无法插入位置&4{0}&c。&7(无效位置)"
 track-remove-success: "&a组&b{0}&a已成功从权限组轨道&b{1}&a移除。"
-log-load-error: "日志无法加载。"
-log-invalid-page: "页码无效。"
-log-invalid-page-range: "页码无效，请输入1和{0}之间的值。"
+log-load-error: "&c日志无法加载。"
+log-invalid-page: "&c页码无效。"
+log-invalid-page-range: "&c页码无效，请输入&41&c和&4{0}&c之间的值。"
 log-no-entries: "&b没有日志条目显示。"
 log-entry: "&b#{0} -> &8(&7{1} ago&8) {2}"
+log-notify-console: "&c无法切换控制台通知。"   
 log-notify-toggle-on: "&a启用&b记录输出。"
 log-notify-toggle-off: "&c禁用&b记录输出。"
-log-notify-already-on: "您已经收到通知。"
-log-notify-already-off: "您目前没有收到通知。"
-log-notify-unknown: "状态未知。输入 \"on\" 或者 \"off\"。"
+log-notify-already-on: "&c你已经收到通知。"
+log-notify-already-off: "&c你目前没有收到通知。"
+log-notify-unknown: "&c状态未知。输入 \"on\" 或者 \"off\"。"
 log-search-header: "&a显示最近的查询操作&b{0} &a(&f{1}&a/&f{2}&a)"
 log-recent-header: "&a显示最近操作 (&f{0}&a/&f{1}&a)"
 log-recent-by-header: "&a显示&b{0}&a的最近操作 (&f{1}&a/&f{2}&a)"
 log-history-user-header: "&a显示用户的历史记录&b{0} &a(&f{1}&a/&f{2}&a)"
 log-history-group-header: "&a显示组的历史记录 &b{0} &a(&f{1}&a/&f{2}&a)"
 log-history-track-header: "&a显示权限组轨道的历史记录 &b{0} &a(&f{1}&a/&f{2}&a)"
-log-export-already-exists: "错误: 文件{0}已经存在。"
-log-export-not-writable: "错误: 文件{0}不可写。"
-log-export-empty: "日志为空，因此无法导出。"
-log-export-failure: "写入文件时出现意外错误。"
+log-export-already-exists: "&c错误: 文件&4{0}&c已经存在。"
+log-export-not-writable: "&c错误: 文件&4{0}&c不可写。"
+log-export-empty: "&c日志为空，因此无法导出。"
+log-export-failure: "&c写入文件时出现意外错误。"
 log-export-success: "&a成功导出日志&b{0}&a。"
-import-already-running: "另一个导入过程已经在运行，请等待完成，然后重试。"
-export-already-running: "另一个导出过程已经在运行，请等待完成，然后重试。"
-import-log-doesnt-exist: "错误: 文件{0}不存在。"
-import-log-not-readable: "错误: 文件{0}不可读。"
-import-log-failure: "从日志文件读取时发生意外错误。"
-import-progress: "&b(导入) &b-> &f百分之{0}完成 &7- &b{1}&f/&b{2} &f完成 &c{3}&f错误。"
-import-progress-sin: "&b(导入) &b-> &f百分之{0}完成 &7- &b{1}&f/&b{2} &f完成 &c{3}&f错误。"
+import-already-running: "&c另一个导入过程已经在运行，请等待完成，然后重试。"
+export-already-running: "&c另一个导出过程已经在运行，请等待完成，然后重试。"
+import-log-doesnt-exist: "&c错误: 文件&4{0}&c不存在。"
+import-log-not-readable: "&c错误: 文件&4{0}&c不可读。"
+import-log-failure: "&c从日志文件读取时发生意外错误。"
+import-progress: "&b(导入) &b-> &f{0}&f%完成 &7- &b{1}&f/&b{2} &f完成 &c{3}&f错误。"
+import-progress-sin: "&b(导入) &b-> &f{0}&f%完成 &7- &b{1}&f/&b{2} &f完成 &c{3}&f错误。"
 import-start: "&b(导入) &b-> &f开始导入过程。"
 import-end-complete: "&b(导入) &a&l已完成 &7- 用了 &b{0} &7秒 - &7没有错误。"
 import-end-complete-err: "&b(导入) &a&l已完成 &7- 用了 &b{0} &7秒 - &c{1}错误。"
@@ -322,6 +310,7 @@ command-specs:
     args:
       "on|record|off|paste": "是否启用/禁用日志记录，或粘贴记录的输出"
       "filter": "过滤器匹配项"
+      "--slim": "添加\"--slim\"从粘贴的输出中排除跟踪数据"
   tree:
     description: "生成权限的树视图"
     usage: "/%s tree [selection] [max level] [player]"
@@ -606,8 +595,9 @@ command-specs:
       "suffix": "后缀字符串"
       "context...": "删除后缀的环境"
   meta-clear:
-    description: "清除所有聊天元"
+    description: "清除所有元"
     args:
+      "type": "要删除的元数据类型"
       "context...": "过滤的环境"
   track-info:
     description: "提供有关权限组轨道的信息"
