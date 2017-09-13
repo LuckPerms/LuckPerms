@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.bukkit.model;
 
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 import com.google.common.collect.ImmutableSet;
@@ -56,20 +57,26 @@ public class SubscriptionManager {
         // we compare changes to avoid unnecessary time wasted on the main thread mutating this data.
         // the changes can be calculated here async, and then only the needed changes can be applied.
         Map.Entry<Set<String>, Set<String>> changes = compareSets(newPerms, currentSubscriptions);
+        permissible.getPlugin().doSync(new SubscriptionUpdateTask(permissible, changes.getKey(), changes.getValue()));
 
-        Set<String> toAdd = changes.getKey();
-        Set<String> toRemove = changes.getValue();
+        this.currentSubscriptions = newPerms;
+    }
 
-        permissible.getPlugin().doSync(() -> {
+    @AllArgsConstructor
+    public static final class SubscriptionUpdateTask implements Runnable {
+        private final LPPermissible permissible;
+        private final Set<String> toAdd;
+        private final Set<String> toRemove;
+
+        @Override
+        public void run() {
             for (String s : toAdd) {
                 permissible.getPlugin().getServer().getPluginManager().subscribeToPermission(s, permissible.getParent());
             }
             for (String s : toRemove) {
                 permissible.getPlugin().getServer().getPluginManager().unsubscribeFromPermission(s, permissible.getParent());
             }
-        });
-
-        this.currentSubscriptions = newPerms;
+        }
     }
 
     /**

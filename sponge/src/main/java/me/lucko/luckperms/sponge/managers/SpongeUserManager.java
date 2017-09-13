@@ -207,16 +207,14 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
     }
 
     @Override
-    public void updateAllUsers() {
-        plugin.doSync(() -> {
-            Set<UUID> players = plugin.getOnlinePlayers();
-            plugin.doAsync(() -> {
-                for (UUID uuid : players) {
-                    UUID internal = plugin.getUuidCache().getUUID(uuid);
-                    plugin.getStorage().loadUser(internal, "null").join();
-                }
-            });
-        });
+    public CompletableFuture<Void> updateAllUsers() {
+        return CompletableFuture.supplyAsync(plugin::getOnlinePlayers, plugin.getScheduler().sync())
+                .thenAcceptAsync(players -> {
+                    for (UUID uuid : players) {
+                        UUID internal = plugin.getUuidCache().getUUID(uuid);
+                        plugin.getStorage().loadUser(internal, "null").join();
+                    }
+                }, plugin.getScheduler().async());
     }
 
     /* ------------------------------------------

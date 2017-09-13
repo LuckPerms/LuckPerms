@@ -55,7 +55,7 @@ public class UpdateTask implements Runnable {
         plugin.getStorage().loadAllTracks().join();
 
         // Refresh all online users.
-        plugin.getUserManager().updateAllUsers();
+        plugin.getUserManager().updateAllUsers().join();
 
         plugin.onPostUpdate();
 

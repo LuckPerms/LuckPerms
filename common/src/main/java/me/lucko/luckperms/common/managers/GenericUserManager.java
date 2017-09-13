@@ -34,8 +34,8 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.references.UserIdentifier;
 
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @RequiredArgsConstructor
 public class GenericUserManager extends AbstractManager<UserIdentifier, User> implements UserManager {
@@ -109,16 +109,14 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
     }
 
     @Override
-    public void updateAllUsers() {
-        plugin.doSync(() -> {
-            Set<UUID> players = plugin.getOnlinePlayers();
-            plugin.doAsync(() -> {
-                for (UUID uuid : players) {
-                    UUID internal = plugin.getUuidCache().getUUID(uuid);
-                    plugin.getStorage().loadUser(internal, "null").join();
-                }
-            });
-        });
+    public CompletableFuture<Void> updateAllUsers() {
+        return CompletableFuture.supplyAsync(plugin::getOnlinePlayers, plugin.getScheduler().sync())
+                .thenAcceptAsync(players -> {
+                    for (UUID uuid : players) {
+                        UUID internal = plugin.getUuidCache().getUUID(uuid);
+                        plugin.getStorage().loadUser(internal, "null").join();
+                    }
+                }, plugin.getScheduler().async());
     }
 
     public static boolean giveDefaultIfNeeded(User user, boolean save, LuckPermsPlugin plugin) {
