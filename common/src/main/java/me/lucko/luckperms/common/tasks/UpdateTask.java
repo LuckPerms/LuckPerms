@@ -31,9 +31,16 @@ import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
+import java.util.concurrent.CompletableFuture;
+
 @AllArgsConstructor
 public class UpdateTask implements Runnable {
     private final LuckPermsPlugin plugin;
+
+    /**
+     * If this task is being called before the server has fully started
+     */
+    private final boolean initialUpdate;
 
     /**
      * Called ASYNC
@@ -55,7 +62,10 @@ public class UpdateTask implements Runnable {
         plugin.getStorage().loadAllTracks().join();
 
         // Refresh all online users.
-        plugin.getUserManager().updateAllUsers().join();
+        CompletableFuture<Void> userUpdateFut = plugin.getUserManager().updateAllUsers();
+        if (!initialUpdate) {
+            userUpdateFut.join();
+        }
 
         plugin.onPostUpdate();
 

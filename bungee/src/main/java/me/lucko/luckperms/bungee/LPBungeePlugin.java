@@ -72,6 +72,7 @@ import me.lucko.luckperms.common.storage.StorageType;
 import me.lucko.luckperms.common.storage.backing.file.FileWatcher;
 import me.lucko.luckperms.common.tasks.CacheHousekeepingTask;
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask;
+import me.lucko.luckperms.common.tasks.UpdateTask;
 import me.lucko.luckperms.common.treeview.PermissionVault;
 import me.lucko.luckperms.common.utils.UuidCache;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
@@ -200,7 +201,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
         // run an update instantly.
         getLog().info("Performing initial data load...");
-        updateTaskBuffer.requestDirectly();
+        new UpdateTask(this, true).run();
 
         // register tasks
         scheduler.asyncRepeating(new ExpireTemporaryTask(this), 60L);
