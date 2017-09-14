@@ -140,12 +140,11 @@ public class NodeFactory {
         sb.append("/luckperms ").append(group ? "group " : "user ").append(id).append(" ");
 
         if (node.isGroupNode()) {
-            if (node.isTemporary()) {
-                sb.append(set ? "parent addtemp " : "parent removetemp ");
-                sb.append(node.getGroupName());
-            } else {
-                sb.append(set ? "parent add " : "parent remove ");
-                sb.append(node.getGroupName());
+            sb.append(node.isTemporary() ? (set ? "parent addtemp " : "parent removetemp ") : (set ? "parent add " : "parent remove "));
+            sb.append(node.getGroupName());
+
+            if (node.isTemporary() && set) {
+                sb.append(" ").append(node.getExpiryUnixTime());
             }
 
             return appendContextToCommand(sb, node).toString();
@@ -154,7 +153,6 @@ public class NodeFactory {
         if (node.getValuePrimitive() && (node.isPrefix() || node.isSuffix())) {
             ChatMetaType type = node.isPrefix() ? ChatMetaType.PREFIX : ChatMetaType.SUFFIX;
             String typeName = type.name().toLowerCase();
-
 
             sb.append(node.isTemporary() ? (set ? "meta addtemp" + typeName + " " : "meta removetemp" + typeName + " ") : (set ? "meta add" + typeName + " " : "meta remove" + typeName + " "));
             sb.append(type.getEntry(node).getKey()).append(" ");
