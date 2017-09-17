@@ -31,14 +31,15 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
-import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.StorageType;
 
 import java.io.File;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
@@ -49,14 +50,17 @@ import java.util.Set;
 
 @UtilityClass
 public class DependencyManager {
-    private static Method ADD_URL_METHOD;
+    private static final Method ADD_URL_METHOD;
+
     static {
+        Method addUrlMethod = null;
         try {
-            ADD_URL_METHOD = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-            ADD_URL_METHOD.setAccessible(true);
+            addUrlMethod = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
+            addUrlMethod.setAccessible(true);
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }
+        ADD_URL_METHOD = addUrlMethod;
     }
 
     public static final Map<StorageType, List<Dependency>> STORAGE_DEPENDENCIES = ImmutableMap.<StorageType, List<Dependency>>builder()
@@ -104,9 +108,9 @@ public class DependencyManager {
         for (Map.Entry<Dependency, File> e : toLoad) {
             try {
                 loadJar(plugin, e.getValue());
-            } catch (Throwable e1) {
+            } catch (Throwable t) {
                 plugin.getLog().severe("Failed to load jar for dependency " + e.getKey().name());
-                e1.printStackTrace();
+                t.printStackTrace();
             }
         }
     }
@@ -134,14 +138,19 @@ public class DependencyManager {
         }
     }
 
-    private static void loadJar(LuckPermsPlugin plugin, File file) throws Exception {
-        URLClassLoader classLoader = (URLClassLoader) plugin.getClass().getClassLoader();
+    private static void loadJar(LuckPermsPlugin plugin, File file) {
+        // get the classloader to load into
+        ClassLoader classLoader = plugin.getClass().getClassLoader();
 
-        if (plugin.getServerType() != PlatformType.SPONGE && !plugin.getServerName().equals("KCauldron") && !plugin.getServerName().equals("Uranium")) {
-            classLoader = (URLClassLoader) classLoader.getParent();
+        if (classLoader instanceof URLClassLoader) {
+            try {
+                ADD_URL_METHOD.invoke(classLoader, file.toURI().toURL());
+            } catch (IllegalAccessException | InvocationTargetException | MalformedURLException e) {
+                throw new RuntimeException("Unable to invoke URLClassLoader#addURL", e);
+            }
+        } else {
+            throw new RuntimeException("Unknown classloader: " + classLoader.getClass());
         }
-
-        ADD_URL_METHOD.invoke(classLoader, file.toURI().toURL());
     }
 
 }
