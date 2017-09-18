@@ -161,7 +161,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public void cleanupUser(@NonNull User user) {
-        plugin.getUserManager().cleanup(UserDelegate.cast(user));
+        plugin.getUserManager().scheduleUnload(plugin.getUuidCache().getExternalUUID(UserDelegate.cast(user).getUuid()));
     }
 
     @Override
