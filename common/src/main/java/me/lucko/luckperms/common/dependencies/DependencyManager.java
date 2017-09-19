@@ -31,6 +31,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
+import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.StorageType;
@@ -82,6 +83,12 @@ public class DependencyManager {
 
         if (plugin.getConfiguration().get(ConfigKeys.REDIS_ENABLED)) {
             dependencies.add(Dependency.JEDIS);
+        }
+
+        // don't load slf4j on sponge.
+        if (plugin.getServerType() == PlatformType.SPONGE) {
+            dependencies.remove(Dependency.SLF4J_API);
+            dependencies.remove(Dependency.SLF4J_SIMPLE);
         }
 
         loadDependencies(plugin, dependencies);
