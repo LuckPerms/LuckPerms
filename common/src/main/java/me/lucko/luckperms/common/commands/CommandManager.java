@@ -350,6 +350,7 @@ public class CommandManager {
                     break;
                 case "i":
                 case "about":
+                case "list":
                     args.remove(2);
                     args.add(2, "info");
                     break;
@@ -448,7 +449,7 @@ public class CommandManager {
             boolean lazyInfo = (
                     args.size() >= 4 && (rewriteLastArgument || args.size() >= 5) &&
                     (args.get(2).equalsIgnoreCase("permission") || args.get(2).equalsIgnoreCase("parent") || args.get(2).equalsIgnoreCase("meta")) &&
-                    (args.get(3).equalsIgnoreCase("i") || args.get(3).equalsIgnoreCase("about"))
+                    (args.get(3).equalsIgnoreCase("i") || args.get(3).equalsIgnoreCase("about") || args.get(3).equalsIgnoreCase("list"))
             );
 
             if (lazyInfo) {
