@@ -119,7 +119,7 @@ public abstract class MainCommand<T, I> extends Command<Void, T> {
         final List<String> objects = getTargets(plugin);
 
         if (args.size() <= 1) {
-            if (args.isEmpty() || args.get(0).equalsIgnoreCase("")) {
+            if (args.isEmpty() || args.get(0).equals("")) {
                 return objects;
             }
 
@@ -133,7 +133,7 @@ public abstract class MainCommand<T, I> extends Command<Void, T> {
                 .collect(Collectors.toList());
 
         if (args.size() == 2) {
-            if (args.get(1).equalsIgnoreCase("")) {
+            if (args.get(1).equals("")) {
                 return subs.stream()
                         .map(m -> m.getName().toLowerCase())
                         .collect(Collectors.toList());
@@ -147,8 +147,7 @@ public abstract class MainCommand<T, I> extends Command<Void, T> {
 
         Optional<Command<T, ?>> o = subs.stream()
                 .filter(s -> s.getName().equalsIgnoreCase(args.get(1)))
-                .limit(1)
-                .findAny();
+                .findFirst();
 
         if (!o.isPresent()) {
             return Collections.emptyList();

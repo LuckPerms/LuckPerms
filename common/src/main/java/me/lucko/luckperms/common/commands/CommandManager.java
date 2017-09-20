@@ -139,7 +139,7 @@ public class CommandManager {
     @SuppressWarnings("unchecked")
     private CommandResult execute(Sender sender, String label, List<String> args) {
         List<String> arguments = new ArrayList<>(args);
-        handleRewrites(arguments);
+        handleRewrites(arguments, true);
 
         // Handle no arguments
         if (arguments.size() == 0) {
@@ -200,7 +200,7 @@ public class CommandManager {
         List<String> arguments = new ArrayList<>(args);
 
         // we rewrite tab completions too!
-        handleRewrites(arguments);
+        handleRewrites(arguments, false);
 
         final List<Command> mains = mainCommands.stream()
                 .filter(Command::shouldDisplay)
@@ -211,7 +211,7 @@ public class CommandManager {
         if (arguments.size() <= 1) {
 
             // Nothing yet entered
-            if (arguments.isEmpty() || arguments.get(0).equalsIgnoreCase("")) {
+            if (arguments.isEmpty() || arguments.get(0).equals("")) {
                 return mains.stream()
                         .map(m -> m.getName().toLowerCase())
                         .collect(Collectors.toList());
@@ -227,8 +227,7 @@ public class CommandManager {
         // Find a main command matching the first arg
         Optional<Command> o = mains.stream()
                 .filter(m -> m.getName().equalsIgnoreCase(arguments.get(0)))
-                .limit(1)
-                .findAny();
+                .findFirst();
 
         arguments.remove(0); // remove the main command arg.
 
@@ -303,9 +302,15 @@ public class CommandManager {
         return CommandResult.FAILURE;
     }
 
-    private static void handleRewrites(List<String> args) {
+    /**
+     * Handles aliases
+     *
+     * @param args the current args list
+     * @param rewriteLastArgument if the last argument should be rewritten - this is false when the method is called on tab completions
+     */
+    private static void handleRewrites(List<String> args, boolean rewriteLastArgument) {
         // Provide aliases
-        if (args.size() >= 1) {
+        if (args.size() >= 1 && (rewriteLastArgument || args.size() >= 2)) {
             if (args.get(0).equalsIgnoreCase("u")) {
                 args.remove(0);
                 args.add(0, "user");
@@ -324,7 +329,7 @@ public class CommandManager {
             }
         }
 
-        if (args.size() >= 3) {
+        if (args.size() >= 3 && (rewriteLastArgument || args.size() >= 4)) {
             if (!args.get(0).equalsIgnoreCase("user") && !args.get(0).equalsIgnoreCase("group")) {
                 return;
             }
@@ -441,7 +446,7 @@ public class CommandManager {
 
             // provide lazy info
             boolean lazyInfo = (
-                    args.size() >= 4 &&
+                    args.size() >= 4 && (rewriteLastArgument || args.size() >= 5) &&
                     (args.get(2).equalsIgnoreCase("permission") || args.get(2).equalsIgnoreCase("parent") || args.get(2).equalsIgnoreCase("meta")) &&
                     (args.get(3).equalsIgnoreCase("i") || args.get(3).equalsIgnoreCase("about"))
             );
@@ -453,7 +458,7 @@ public class CommandManager {
 
             // Provide lazy set rewrite
             boolean lazySet = (
-                    args.size() >= 6 &&
+                    args.size() >= 6 && (rewriteLastArgument || args.size() >= 7) &&
                     args.get(2).equalsIgnoreCase("permission") &&
                     args.get(3).toLowerCase().startsWith("set") &&
                     (args.get(5).equalsIgnoreCase("none") || args.get(5).equalsIgnoreCase("0"))
