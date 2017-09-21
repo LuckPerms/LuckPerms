@@ -66,8 +66,8 @@ public final class ImmutableNode implements Node {
     /*
      * NODE STATE
      *
-     * This are the actual node parameters, and are
-     * basically what this class wraps.
+     * This are the actual node attributes, and are
+     * really just what this class wraps.
      */
 
     @Getter

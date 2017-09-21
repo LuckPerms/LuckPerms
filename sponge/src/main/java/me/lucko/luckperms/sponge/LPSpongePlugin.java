@@ -81,7 +81,6 @@ import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.persisted.PersistedCollection;
 import me.lucko.luckperms.sponge.tasks.ServiceCacheHousekeepingTask;
-import me.lucko.luckperms.sponge.timings.LPTimings;
 import me.lucko.luckperms.sponge.utils.VersionData;
 
 import org.slf4j.Logger;
@@ -122,8 +121,18 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+/**
+ * LuckPerms implementation for the Sponge API.
+ */
 @Getter
-@Plugin(id = "luckperms", name = "LuckPerms", version = VersionData.VERSION, authors = {"Luck"}, description = "A permissions plugin")
+@Plugin(
+        id = "luckperms",
+        name = "LuckPerms",
+        version = VersionData.VERSION,
+        authors = {"Luck"},
+        description = "A permissions plugin",
+        url = "https://github.com/lucko/LuckPerms"
+)
 public class LPSpongePlugin implements LuckPermsPlugin {
 
     @Inject
@@ -146,7 +155,6 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     @AsynchronousExecutor
     private SpongeExecutorService asyncExecutorService;
 
-    private LPTimings timings;
     private boolean lateLoad = false;
     private long startTime;
 
@@ -186,7 +194,6 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         verboseHandler = new VerboseHandler(scheduler.async(), getVersion());
         permissionVault = new PermissionVault(scheduler.async());
         logDispatcher = new LogDispatcher(this);
-        timings = new LPTimings(this);
 
         getLog().info("Loading configuration...");
         configuration = new SpongeConfig(this);

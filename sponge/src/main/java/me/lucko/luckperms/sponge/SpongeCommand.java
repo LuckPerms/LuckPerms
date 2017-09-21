@@ -29,7 +29,6 @@ import com.google.common.base.Splitter;
 
 import me.lucko.luckperms.common.commands.CommandManager;
 import me.lucko.luckperms.common.commands.utils.Util;
-import me.lucko.luckperms.sponge.timings.LPTiming;
 
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandException;
@@ -41,16 +40,13 @@ import org.spongepowered.api.text.selector.Selector;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
-import co.aikar.timings.Timing;
-
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-@SuppressWarnings("NullableProblems")
-class SpongeCommand extends CommandManager implements CommandCallable {
+public class SpongeCommand extends CommandManager implements CommandCallable {
     private final LPSpongePlugin plugin;
 
     SpongeCommand(LPSpongePlugin plugin) {
@@ -58,56 +54,56 @@ class SpongeCommand extends CommandManager implements CommandCallable {
         this.plugin = plugin;
     }
 
-    @Override
-    public CommandResult process(CommandSource source, String s) throws CommandException {
-        try (Timing ignored = plugin.getTimings().time(LPTiming.ON_COMMAND)) {
-            List<String> args = Util.stripQuotes(Splitter.on(COMMAND_SEPARATOR_PATTERN).omitEmptyStrings().splitToList(s));
+    private List<String> processArgs(CommandSource source, String s) {
+        List<String> args = Util.stripQuotes(Splitter.on(COMMAND_SEPARATOR_PATTERN).omitEmptyStrings().splitToList(s));
 
-            // resolve selectors
-            ListIterator<String> it = args.listIterator();
-            while (it.hasNext()) {
-                String element = it.next();
-                if (element.startsWith("@")) {
-                    try {
-                        Player ret = Selector.parse(element).resolve(source).stream()
-                                .filter(e -> e instanceof Player)
-                                .map(e -> ((Player) e))
-                                .findFirst().orElse(null);
+        // resolve selectors
+        ListIterator<String> it = args.listIterator();
+        while (it.hasNext()) {
+            String element = it.next();
+            if (element.startsWith("@")) {
+                try {
+                    Player ret = Selector.parse(element).resolve(source).stream()
+                            .filter(e -> e instanceof Player)
+                            .map(e -> ((Player) e))
+                            .findFirst().orElse(null);
 
-                        if (ret != null) {
-                            it.set(ret.getUniqueId().toString());
-                        }
-                    } catch (IllegalArgumentException e) {
-                        // ignored
+                    if (ret != null) {
+                        it.set(ret.getUniqueId().toString());
                     }
+                } catch (IllegalArgumentException e) {
+                    // ignored
                 }
             }
-
-            onCommand(plugin.getSenderFactory().wrap(source), "lp", args);
-            return CommandResult.success();
         }
+
+        return args;
+    }
+
+    @Override
+    public CommandResult process(CommandSource source, String s) throws CommandException {
+        onCommand(plugin.getSenderFactory().wrap(source), "lp", processArgs(source, s));
+        return CommandResult.success();
     }
 
     @Override
     public List<String> getSuggestions(CommandSource source, String s, @Nullable Location<World> location) throws CommandException {
-        try (Timing ignored = plugin.getTimings().time(LPTiming.COMMAND_TAB_COMPLETE)) {
-            return onTabComplete(plugin.getSenderFactory().wrap(source), Splitter.on(' ').splitToList(s));
-        }
+        return onTabComplete(plugin.getSenderFactory().wrap(source), processArgs(source, s));
     }
 
     @Override
     public boolean testPermission(CommandSource source) {
-        return true;
+        return true; // we run permission checks internally
     }
 
     @Override
     public Optional<Text> getShortDescription(CommandSource source) {
-        return Optional.of(Text.of("LuckPerms main command."));
+        return Optional.of(Text.of("Manage permissions"));
     }
 
     @Override
     public Optional<Text> getHelp(CommandSource source) {
-        return Optional.of(Text.of("Type /luckperms for help."));
+        return Optional.of(Text.of("Run /luckperms to view usage."));
     }
 
     @Override

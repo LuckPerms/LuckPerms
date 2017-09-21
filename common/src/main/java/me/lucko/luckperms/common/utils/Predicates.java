@@ -66,7 +66,7 @@ public class Predicates {
     public static <T> Predicate<T> isOneOf(Set<T> ta) {
         return t -> {
             for (T i : ta) {
-                if (i == t) {
+                if (i.equals(t)) {
                     return true;
                 }
             }
@@ -79,7 +79,7 @@ public class Predicates {
     }
 
     public static <T> Predicate<T> is(T t) {
-        return t2 -> t == t2;
+        return t::equals;
     }
 
     public static <T> Predicate<T> inverse(Predicate<T> t) {

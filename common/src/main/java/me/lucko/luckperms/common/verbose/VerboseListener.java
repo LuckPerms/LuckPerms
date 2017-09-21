@@ -171,6 +171,8 @@ public class VerboseListener {
     /**
      * Uploads the captured data in this listener to a paste and returns the url
      *
+     * @param showTraces if stack traces should be included in the output
+     * @param attachRaw if the rawdata should be attached to the gist
      * @return the url
      * @see PasteUtils#paste(String, List)
      */

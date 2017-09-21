@@ -39,12 +39,24 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Uploads content to GitHub's GIST service.
+ */
 public class PasteUtils {
+    private static final String GIST_API = "https://api.github.com/gists";
+    private static final String SHORTEN_API = "https://git.io";
 
+    /**
+     * Uploads content to GIST, and returns a shortened URL.
+     *
+     * @param desc the description of the gist
+     * @param files the files to include in the gist (file name --> content)
+     * @return the url, or null
+     */
     public static String paste(String desc, List<Map.Entry<String, String>> files) {
         HttpURLConnection connection = null;
         try {
-            connection = (HttpURLConnection) new URL("https://api.github.com/gists").openConnection();
+            connection = (HttpURLConnection) new URL(GIST_API).openConnection();
             connection.setRequestMethod("POST");
             connection.setDoInput(true);
             connection.setDoOutput(true);
@@ -82,7 +94,7 @@ public class PasteUtils {
             connection.disconnect();
 
             try {
-                connection = (HttpURLConnection) new URL("https://git.io").openConnection();
+                connection = (HttpURLConnection) new URL(SHORTEN_API).openConnection();
                 connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                 connection.setDoOutput(true);
                 try (OutputStream os = connection.getOutputStream()) {

@@ -29,7 +29,7 @@ import lombok.ToString;
 
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
-import me.lucko.luckperms.sponge.service.model.SubjectReference;
+import me.lucko.luckperms.sponge.service.model.SubjectReferenceFactory;
 import me.lucko.luckperms.sponge.service.storage.SubjectStorageModel;
 
 import java.util.List;
@@ -66,7 +66,7 @@ public class SubjectDataHolder {
                 parents.entrySet().stream()
                         .collect(Collectors.toMap(
                                 k -> ImmutableContextSet.fromMap(k.getKey()),
-                                v -> v.getValue().stream().map(s -> SubjectReference.deserialize(service, s)).collect(Collectors.toList())
+                                v -> v.getValue().stream().map(s -> SubjectReferenceFactory.deserialize(service, s)).collect(Collectors.toList())
                         ))
         );
     }

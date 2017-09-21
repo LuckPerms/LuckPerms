@@ -83,53 +83,6 @@ public class MongoDBBacking extends AbstractBacking {
         }
     }
 
-    /*  MongoDB does not allow '.' or '$' in key names.
-        See: https://docs.mongodb.com/manual/reference/limits/#Restrictions-on-Field-Names
-        The following two methods convert the node maps so they can be stored. */
-
-    private static final Function<String, String> CONVERT_STRING = s -> s.replace(".", "[**DOT**]").replace("$", "[**DOLLAR**]");
-    private static final Function<String, String> REVERT_STRING = s -> s.replace("[**DOT**]", ".").replace("[**DOLLAR**]", "$");
-
-    private static <V> Map<String, V> convert(Map<String, V> map) {
-        return map.entrySet().stream()
-                .collect(Collectors.toMap(e -> CONVERT_STRING.apply(e.getKey()), Map.Entry::getValue));
-    }
-
-    private static <V> Map<String, V> revert(Map<String, V> map) {
-        return map.entrySet().stream()
-                .collect(Collectors.toMap(e -> REVERT_STRING.apply(e.getKey()), Map.Entry::getValue));
-    }
-
-    private static Document fromUser(User user) {
-        Document main = new Document("_id", user.getUuid())
-                .append("name", user.getName().orElse("null"))
-                .append("primaryGroup", user.getPrimaryGroup().getStoredValue());
-
-        Document perms = new Document();
-        for (Map.Entry<String, Boolean> e : convert(exportToLegacy(user.getEnduringNodes().values())).entrySet()) {
-            perms.append(e.getKey(), e.getValue());
-        }
-
-        main.append("perms", perms);
-        return main;
-    }
-
-    private static Document fromGroup(Group group) {
-        Document main = new Document("_id", group.getName());
-
-        Document perms = new Document();
-        for (Map.Entry<String, Boolean> e : convert(exportToLegacy(group.getEnduringNodes().values())).entrySet()) {
-            perms.append(e.getKey(), e.getValue());
-        }
-
-        main.append("perms", perms);
-        return main;
-    }
-
-    private static Document fromTrack(Track track) {
-        return new Document("_id", track.getName()).append("groups", track.getGroups());
-    }
-
     private final DatastoreConfiguration configuration;
     private MongoClient mongoClient;
     private MongoDatabase database;
@@ -750,6 +703,53 @@ public class MongoDBBacking extends AbstractBacking {
             }
             return null;
         }, null);
+    }
+
+    /*  MongoDB does not allow '.' or '$' in key names.
+        See: https://docs.mongodb.com/manual/reference/limits/#Restrictions-on-Field-Names
+        The following two methods convert the node maps so they can be stored. */
+
+    private static final Function<String, String> CONVERT_STRING = s -> s.replace(".", "[**DOT**]").replace("$", "[**DOLLAR**]");
+    private static final Function<String, String> REVERT_STRING = s -> s.replace("[**DOT**]", ".").replace("[**DOLLAR**]", "$");
+
+    private static <V> Map<String, V> convert(Map<String, V> map) {
+        return map.entrySet().stream()
+                .collect(Collectors.toMap(e -> CONVERT_STRING.apply(e.getKey()), Map.Entry::getValue));
+    }
+
+    private static <V> Map<String, V> revert(Map<String, V> map) {
+        return map.entrySet().stream()
+                .collect(Collectors.toMap(e -> REVERT_STRING.apply(e.getKey()), Map.Entry::getValue));
+    }
+
+    private static Document fromUser(User user) {
+        Document main = new Document("_id", user.getUuid())
+                .append("name", user.getName().orElse("null"))
+                .append("primaryGroup", user.getPrimaryGroup().getStoredValue());
+
+        Document perms = new Document();
+        for (Map.Entry<String, Boolean> e : convert(exportToLegacy(user.getEnduringNodes().values())).entrySet()) {
+            perms.append(e.getKey(), e.getValue());
+        }
+
+        main.append("perms", perms);
+        return main;
+    }
+
+    private static Document fromGroup(Group group) {
+        Document main = new Document("_id", group.getName());
+
+        Document perms = new Document();
+        for (Map.Entry<String, Boolean> e : convert(exportToLegacy(group.getEnduringNodes().values())).entrySet()) {
+            perms.append(e.getKey(), e.getValue());
+        }
+
+        main.append("perms", perms);
+        return main;
+    }
+
+    private static Document fromTrack(Track track) {
+        return new Document("_id", track.getName()).append("groups", track.getGroups());
     }
 
     public static Map<String, Boolean> exportToLegacy(Iterable<Node> nodes) {

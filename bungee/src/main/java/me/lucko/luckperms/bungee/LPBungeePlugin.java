@@ -91,6 +91,9 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+/**
+ * LuckPerms implementation for the BungeeCord API.
+ */
 @Getter
 public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 

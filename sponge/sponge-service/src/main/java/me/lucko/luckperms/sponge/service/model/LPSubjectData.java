@@ -31,10 +31,12 @@ import com.google.common.collect.ImmutableMap;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 
+import org.spongepowered.api.service.permission.SubjectData;
+
 import java.util.concurrent.CompletableFuture;
 
 /**
- * LuckPerms model for the Sponge {@link org.spongepowered.api.service.permission.SubjectData}
+ * LuckPerms model for the Sponge {@link SubjectData}
  */
 public interface LPSubjectData {
 

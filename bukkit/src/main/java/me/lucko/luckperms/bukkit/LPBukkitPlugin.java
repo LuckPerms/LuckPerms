@@ -106,6 +106,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
+/**
+ * LuckPerms implementation for the Bukkit API.
+ */
 @Getter
 public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 

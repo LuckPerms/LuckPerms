@@ -228,7 +228,7 @@ public final class UserDelegate extends PermissionHolderDelegate implements User
         if (!(o instanceof UserDelegate)) return false;
 
         UserDelegate other = (UserDelegate) o;
-        return this.getUuid() == null ? other.getUuid() == null : this.getUuid().equals(other.getUuid());
+        return this.getUuid().equals(other.getUuid());
     }
 
     public int hashCode() {

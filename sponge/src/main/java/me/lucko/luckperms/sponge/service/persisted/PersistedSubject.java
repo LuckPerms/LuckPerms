@@ -44,12 +44,9 @@ import me.lucko.luckperms.sponge.service.calculated.PermissionLookup;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.SubjectReference;
 import me.lucko.luckperms.sponge.service.storage.SubjectStorageModel;
-import me.lucko.luckperms.sponge.timings.LPTiming;
 
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.permission.Subject;
-
-import co.aikar.timings.Timing;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -246,46 +243,36 @@ public class PersistedSubject implements LPSubject {
 
     @Override
     public Tristate getPermissionValue(@NonNull ImmutableContextSet contexts, @NonNull String node) {
-        try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.INTERNAL_SUBJECT_GET_PERMISSION_VALUE)) {
-            Tristate t = permissionLookupCache.get(PermissionLookup.of(node, contexts));
-            service.getPlugin().getVerboseHandler().offerCheckData(CheckOrigin.INTERNAL, "local:" + getParentCollection().getIdentifier() + "/" + identifier, contexts, node, t);
-            return t;
-        }
+        Tristate t = permissionLookupCache.get(PermissionLookup.of(node, contexts));
+        service.getPlugin().getVerboseHandler().offerCheckData(CheckOrigin.INTERNAL, "local:" + getParentCollection().getIdentifier() + "/" + identifier, contexts, node, t);
+        return t;
     }
 
     @Override
     public boolean isChildOf(@NonNull ImmutableContextSet contexts, @NonNull SubjectReference subject) {
-        try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.INTERNAL_SUBJECT_IS_CHILD_OF)) {
-            if (getParentCollection().getIdentifier().equalsIgnoreCase("defaults")) {
-                return subjectData.getParents(contexts).contains(subject) ||
-                        transientSubjectData.getParents(contexts).contains(subject);
-            } else {
-                return subjectData.getParents(contexts).contains(subject) ||
-                        transientSubjectData.getParents(contexts).contains(subject) ||
-                        getParentCollection().getDefaults().getParents(contexts).contains(subject) ||
-                        service.getDefaults().getParents(contexts).contains(subject);
-            }
+        if (getParentCollection().getIdentifier().equalsIgnoreCase("defaults")) {
+            return subjectData.getParents(contexts).contains(subject) ||
+                    transientSubjectData.getParents(contexts).contains(subject);
+        } else {
+            return subjectData.getParents(contexts).contains(subject) ||
+                    transientSubjectData.getParents(contexts).contains(subject) ||
+                    getParentCollection().getDefaults().getParents(contexts).contains(subject) ||
+                    service.getDefaults().getParents(contexts).contains(subject);
         }
     }
 
     @Override
     public ImmutableList<SubjectReference> getParents(@NonNull ImmutableContextSet contexts) {
-        try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.INTERNAL_SUBJECT_GET_PARENTS)) {
-            return parentLookupCache.get(contexts);
-        }
+        return parentLookupCache.get(contexts);
     }
 
     @Override
     public Optional<String> getOption(ImmutableContextSet contexts, String key) {
-        try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.INTERNAL_SUBJECT_GET_OPTION)) {
-            return optionLookupCache.get(OptionLookup.of(key, contexts));
-        }
+        return optionLookupCache.get(OptionLookup.of(key, contexts));
     }
 
     @Override
     public ImmutableContextSet getActiveContextSet() {
-        try (Timing ignored = service.getPlugin().getTimings().time(LPTiming.INTERNAL_SUBJECT_GET_ACTIVE_CONTEXTS)) {
-            return service.getPlugin().getContextManager().getApplicableContext(sponge()).makeImmutable();
-        }
+        return service.getPlugin().getContextManager().getApplicableContext(sponge()).makeImmutable();
     }
 }

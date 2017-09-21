@@ -34,7 +34,6 @@ import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.utils.LoginHelper;
 import me.lucko.luckperms.common.utils.UuidCache;
-import me.lucko.luckperms.sponge.timings.LPTiming;
 
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
@@ -47,8 +46,6 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.World;
-
-import co.aikar.timings.Timing;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -142,52 +139,50 @@ public class SpongeListener {
     @Listener(order = Order.FIRST)
     @IsCancelled(Tristate.UNDEFINED)
     public void onClientLogin(ClientConnectionEvent.Login e) {
-        try (Timing ignored = plugin.getTimings().time(LPTiming.ON_CLIENT_LOGIN)) {
-            /* Called when the player starts logging into the server.
+        /* Called when the player starts logging into the server.
                At this point, the users data should be present and loaded.
                Listening on LOW priority to allow plugins to further modify data here. (auth plugins, etc.) */
 
-            final GameProfile player = e.getProfile();
+        final GameProfile player = e.getProfile();
 
-            if (plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
-                plugin.getLog().info("Processing login event for " + player.getUniqueId() + " - " + player.getName());
-            }
+        if (plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
+            plugin.getLog().info("Processing login event for " + player.getUniqueId() + " - " + player.getName());
+        }
 
-            final User user = plugin.getUserManager().getIfLoaded(plugin.getUuidCache().getUUID(player.getUniqueId()));
+        final User user = plugin.getUserManager().getIfLoaded(plugin.getUuidCache().getUUID(player.getUniqueId()));
 
             /* User instance is null for whatever reason. Could be that it was unloaded between asyncpre and now. */
-            if (user == null) {
-                deniedLogin.add(player.getUniqueId());
+        if (user == null) {
+            deniedLogin.add(player.getUniqueId());
 
-                plugin.getLog().warn("User " + player.getUniqueId() + " - " + player.getName() + " doesn't have data pre-loaded. - denying login.");
-                e.setCancelled(true);
-                e.setMessageCancelled(false);
-                //noinspection deprecation
-                e.setMessage(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(Message.LOADING_ERROR.asString(plugin.getLocaleManager())));
-                return;
-            }
+            plugin.getLog().warn("User " + player.getUniqueId() + " - " + player.getName() + " doesn't have data pre-loaded. - denying login.");
+            e.setCancelled(true);
+            e.setMessageCancelled(false);
+            //noinspection deprecation
+            e.setMessage(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(Message.LOADING_ERROR.asString(plugin.getLocaleManager())));
+            return;
+        }
 
-            // Attempt to pre-process some permissions for the user to save time later. Might not work, but it's better than nothing.
-            Optional<Player> p = e.getCause().first(Player.class);
-            if (p.isPresent()) {
-                MutableContextSet context = MutableContextSet.fromSet(plugin.getContextManager().getApplicableContext(p.get()));
+        // Attempt to pre-process some permissions for the user to save time later. Might not work, but it's better than nothing.
+        Optional<Player> p = e.getCause().first(Player.class);
+        if (p.isPresent()) {
+            MutableContextSet context = MutableContextSet.fromSet(plugin.getContextManager().getApplicableContext(p.get()));
 
-                List<String> worlds = plugin.getGame().isServerAvailable() ? plugin.getGame().getServer().getWorlds().stream()
-                        .map(World::getName)
-                        .collect(Collectors.toList()) : Collections.emptyList();
+            List<String> worlds = plugin.getGame().isServerAvailable() ? plugin.getGame().getServer().getWorlds().stream()
+                    .map(World::getName)
+                    .collect(Collectors.toList()) : Collections.emptyList();
 
-                plugin.doAsync(() -> {
-                    UserData data = user.getUserData();
-                    data.preCalculate(plugin.getService().calculateContexts(context.makeImmutable()));
+            plugin.doAsync(() -> {
+                UserData data = user.getUserData();
+                data.preCalculate(plugin.getService().calculateContexts(context.makeImmutable()));
 
-                    for (String world : worlds) {
-                        MutableContextSet modified = MutableContextSet.fromSet(context);
-                        modified.removeAll("world");
-                        modified.add("world", world);
-                        data.preCalculate(plugin.getService().calculateContexts(modified.makeImmutable()));
-                    }
-                });
-            }
+                for (String world : worlds) {
+                    MutableContextSet modified = MutableContextSet.fromSet(context);
+                    modified.removeAll("world");
+                    modified.add("world", world);
+                    data.preCalculate(plugin.getService().calculateContexts(modified.makeImmutable()));
+                }
+            });
         }
     }
 
@@ -218,12 +213,11 @@ public class SpongeListener {
         /* We don't actually remove the user instance here, as Sponge likes to keep performing checks
            on players when they disconnect. The instance gets cleared up on a housekeeping task
            after a period of inactivity. */
-        try (Timing ignored = plugin.getTimings().time(LPTiming.ON_CLIENT_LEAVE)) {
-            final UuidCache cache = plugin.getUuidCache();
 
-            // Unload the user from memory when they disconnect
-            cache.clearCache(e.getTargetEntity().getUniqueId());
-        }
+        final UuidCache cache = plugin.getUuidCache();
+
+        // Unload the user from memory when they disconnect
+        cache.clearCache(e.getTargetEntity().getUniqueId());
     }
 
     @Listener

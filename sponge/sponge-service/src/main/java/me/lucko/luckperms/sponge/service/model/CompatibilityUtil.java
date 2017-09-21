@@ -40,6 +40,7 @@ import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.util.Tristate;
 
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Utility class for converting between Sponge and LuckPerms context and tristate classes
@@ -47,9 +48,11 @@ import java.util.Set;
 @UtilityClass
 public class CompatibilityUtil {
     private static final LoadingCache<Set<Context>, ImmutableContextSet> SPONGE_TO_LP_CACHE = Caffeine.newBuilder()
+            .expireAfterAccess(10, TimeUnit.MINUTES)
             .build(ImmutableContextSet::fromEntries);
 
     private static final LoadingCache<ImmutableContextSet, ImmutableSet<Context>> LP_TO_SPONGE_CACHE = Caffeine.newBuilder()
+            .expireAfterAccess(10, TimeUnit.MINUTES)
             .build(set -> set.toSet().stream().map(e -> new Context(e.getKey(), e.getValue())).collect(ImmutableCollectors.toImmutableSet()));
 
     public static ImmutableContextSet convertContexts(@NonNull Set<Context> contexts) {

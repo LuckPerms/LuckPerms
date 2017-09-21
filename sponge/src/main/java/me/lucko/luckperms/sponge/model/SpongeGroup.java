@@ -48,14 +48,11 @@ import me.lucko.luckperms.sponge.service.model.CompatibilityUtil;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.model.SubjectReference;
-import me.lucko.luckperms.sponge.timings.LPTiming;
 
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.permission.NodeTree;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
-
-import co.aikar.timings.Timing;
 
 import java.util.List;
 import java.util.Map;
@@ -176,69 +173,59 @@ public class SpongeGroup extends Group {
 
         @Override
         public Tristate getPermissionValue(ImmutableContextSet contexts, String permission) {
-            try (Timing ignored = plugin.getTimings().time(LPTiming.GROUP_GET_PERMISSION_VALUE)) {
-                NodeTree nt = permissionCache.get(contexts);
-                Tristate t = CompatibilityUtil.convertTristate(nt.get(permission));
-                if (t != Tristate.UNDEFINED) {
-                    return t;
-                }
-
-                t = plugin.getService().getGroupSubjects().getDefaults().getPermissionValue(contexts, permission);
-                if (t != Tristate.UNDEFINED) {
-                    return t;
-                }
-
-                t = plugin.getService().getDefaults().getPermissionValue(contexts, permission);
+            NodeTree nt = permissionCache.get(contexts);
+            Tristate t = CompatibilityUtil.convertTristate(nt.get(permission));
+            if (t != Tristate.UNDEFINED) {
                 return t;
             }
+
+            t = plugin.getService().getGroupSubjects().getDefaults().getPermissionValue(contexts, permission);
+            if (t != Tristate.UNDEFINED) {
+                return t;
+            }
+
+            t = plugin.getService().getDefaults().getPermissionValue(contexts, permission);
+            return t;
         }
 
         @Override
         public boolean isChildOf(ImmutableContextSet contexts, SubjectReference parent) {
-            try (Timing ignored = plugin.getTimings().time(LPTiming.GROUP_IS_CHILD_OF)) {
-                return parent.getCollectionIdentifier().equals(PermissionService.SUBJECTS_GROUP) && getPermissionValue(contexts, "group." + parent.getSubjectIdentifier()).asBoolean();
-            }
+            return parent.getCollectionIdentifier().equals(PermissionService.SUBJECTS_GROUP) && getPermissionValue(contexts, "group." + parent.getSubjectIdentifier()).asBoolean();
         }
 
         @Override
         public ImmutableList<SubjectReference> getParents(ImmutableContextSet contexts) {
-            try (Timing ignored = plugin.getTimings().time(LPTiming.GROUP_GET_PARENTS)) {
-                return parentCache.get(contexts);
-            }
+            return parentCache.get(contexts);
         }
 
         @Override
         public Optional<String> getOption(ImmutableContextSet contexts, String s) {
-            try (Timing ignored = plugin.getService().getPlugin().getTimings().time(LPTiming.GROUP_GET_OPTION)) {
-                Optional<String> option;
-                if (s.equalsIgnoreCase("prefix")) {
-                    option = getChatMeta(contexts, ChatMetaType.PREFIX);
+            Optional<String> option;
+            if (s.equalsIgnoreCase("prefix")) {
+                option = getChatMeta(contexts, ChatMetaType.PREFIX);
 
-                } else if (s.equalsIgnoreCase("suffix")) {
-                    option = getChatMeta(contexts, ChatMetaType.SUFFIX);
+            } else if (s.equalsIgnoreCase("suffix")) {
+                option = getChatMeta(contexts, ChatMetaType.SUFFIX);
 
-                } else {
-                    option = getMeta(contexts, s);
-                }
-
-                if (option.isPresent()) {
-                    return option;
-                }
-
-                option = plugin.getService().getGroupSubjects().getDefaults().getOption(contexts, s);
-                if (option.isPresent()) {
-                    return option;
-                }
-
-                return plugin.getService().getDefaults().getOption(contexts, s);
+            } else {
+                option = getMeta(contexts, s);
             }
+
+            if (option.isPresent()) {
+                return option;
+            }
+
+            option = plugin.getService().getGroupSubjects().getDefaults().getOption(contexts, s);
+            if (option.isPresent()) {
+                return option;
+            }
+
+            return plugin.getService().getDefaults().getOption(contexts, s);
         }
 
         @Override
         public ImmutableContextSet getActiveContextSet() {
-            try (Timing ignored = plugin.getTimings().time(LPTiming.GROUP_GET_ACTIVE_CONTEXTS)) {
-                return plugin.getContextManager().getApplicableContext(this.sponge()).makeImmutable();
-            }
+            return plugin.getContextManager().getApplicableContext(this.sponge()).makeImmutable();
         }
 
         private Optional<String> getChatMeta(ImmutableContextSet contexts, ChatMetaType type) {

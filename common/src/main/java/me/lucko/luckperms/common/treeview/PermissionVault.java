@@ -72,6 +72,7 @@ public class PermissionVault implements Runnable {
             for (String e; (e = queue.poll()) != null; ) {
                 try {
                     String s = e.toLowerCase();
+                    // only attempt an insert if we're not seen this permission before
                     if (knownPermissions.add(s)) {
                         insert(s);
                     }

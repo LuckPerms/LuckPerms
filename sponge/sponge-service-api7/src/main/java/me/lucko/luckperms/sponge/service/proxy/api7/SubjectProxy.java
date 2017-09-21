@@ -32,6 +32,7 @@ import me.lucko.luckperms.sponge.service.model.CompatibilityUtil;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.SubjectReference;
+import me.lucko.luckperms.sponge.service.model.SubjectReferenceFactory;
 
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.context.Context;
@@ -109,14 +110,14 @@ public class SubjectProxy implements Subject {
     @Override
     public boolean isChildOf(org.spongepowered.api.service.permission.SubjectReference parent) {
         return getHandle().thenApply(handle -> {
-            return handle.isChildOf(ImmutableContextSet.empty(), SubjectReference.cast(service, parent));
+            return handle.isChildOf(ImmutableContextSet.empty(), SubjectReferenceFactory.obtain(service, parent));
         }).join();
     }
 
     @Override
     public boolean isChildOf(Set<Context> contexts, org.spongepowered.api.service.permission.SubjectReference parent) {
         return getHandle().thenApply(handle -> {
-            return handle.isChildOf(CompatibilityUtil.convertContexts(contexts), SubjectReference.cast(service, parent));
+            return handle.isChildOf(CompatibilityUtil.convertContexts(contexts), SubjectReferenceFactory.obtain(service, parent));
         }).join();
     }
 

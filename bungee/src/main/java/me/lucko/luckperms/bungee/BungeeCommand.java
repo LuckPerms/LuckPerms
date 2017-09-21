@@ -37,7 +37,7 @@ import net.md_5.bungee.api.plugin.TabExecutor;
 
 import java.util.Arrays;
 
-class BungeeCommand extends Command implements TabExecutor {
+public class BungeeCommand extends Command implements TabExecutor {
     private final LPBungeePlugin plugin;
     private final CommandManager manager;
 

@@ -60,7 +60,7 @@ public class SpongeCalculatorLink implements ContextCalculator<Subject> {
             delegate.accumulateContexts(subject, contexts);
             accumulator.addAll(CompatibilityUtil.convertContexts(contexts));
         } catch (Exception e) {
-            new RuntimeException("Exception thrown by delegate Sponge calculator: " + delegate.getClass().getName(), e).printStackTrace();
+            throw new RuntimeException("Exception thrown by delegate Sponge calculator: " + delegate.getClass().getName(), e);
         }
 
         return accumulator;

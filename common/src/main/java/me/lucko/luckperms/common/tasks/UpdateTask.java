@@ -33,6 +33,11 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * System wide update task for LuckPerms.
+ *
+ * <p>Ensures that all local data is consistent with the storage.</p>
+ */
 @AllArgsConstructor
 public class UpdateTask implements Runnable {
     private final LuckPermsPlugin plugin;
@@ -43,7 +48,9 @@ public class UpdateTask implements Runnable {
     private final boolean initialUpdate;
 
     /**
-     * Called ASYNC
+     * Runs the update task
+     *
+     * <p>Called <b>async</b>.</p>
      */
     @Override
     public void run() {

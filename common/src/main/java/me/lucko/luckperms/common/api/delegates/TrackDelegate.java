@@ -117,7 +117,7 @@ public final class TrackDelegate implements Track {
         if (!(o instanceof TrackDelegate)) return false;
 
         TrackDelegate other = (TrackDelegate) o;
-        return this.getName() == null ? other.getName() == null : this.getName().equals(other.getName());
+        return this.getName().equals(other.getName());
     }
 
     public int hashCode() {

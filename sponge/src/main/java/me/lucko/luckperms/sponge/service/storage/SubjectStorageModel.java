@@ -41,6 +41,7 @@ import me.lucko.luckperms.common.node.NodeWithContextComparator;
 import me.lucko.luckperms.sponge.service.calculated.CalculatedSubjectData;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
 import me.lucko.luckperms.sponge.service.model.SubjectReference;
+import me.lucko.luckperms.sponge.service.model.SubjectReferenceFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -164,7 +165,7 @@ public class SubjectStorageModel {
                 String collection = parent.get("collection").getAsString();
                 String subject = parent.get("subject").getAsString();
                 
-                pars.add(SubjectReference.of(service, collection, subject));
+                pars.add(SubjectReferenceFactory.obtain(service, collection, subject));
             }
 
             parentsBuilder.put(contextSet, pars.build());
