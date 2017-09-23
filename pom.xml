@@ -55,8 +55,8 @@
         <full.version>${release.version}.${patch.version}</full.version>
 
         <!-- Standard versions used by the whole project -->
-        <compiler.version>3.6.1</compiler.version>
-        <shade.version>3.0.0</shade.version>
+        <compiler.version>3.7.0</compiler.version>
+        <shade.version>3.1.0</shade.version>
         <lombok.version>1.16.18</lombok.version>
         <gpg.version>1.6</gpg.version>
     </properties>

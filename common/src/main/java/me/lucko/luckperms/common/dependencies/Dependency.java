@@ -32,16 +32,16 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum Dependency {
 
-    CAFFEINE("com.github.ben-manes.caffeine", "caffeine", "2.5.5"),
+    CAFFEINE("com.github.ben-manes.caffeine", "caffeine", "2.5.6"),
     MARIADB_DRIVER("org.mariadb.jdbc", "mariadb-java-client", "2.0.3"),
-    MYSQL_DRIVER("mysql", "mysql-connector-java", "5.1.42"),
+    MYSQL_DRIVER("mysql", "mysql-connector-java", "5.1.44"),
     POSTGRESQL_DRIVER("org.postgresql", "postgresql", "9.4.1212"),
     H2_DRIVER("com.h2database", "h2", "1.4.196"),
-    SQLITE_DRIVER("org.xerial", "sqlite-jdbc", "3.19.3"),
-    HIKARI("com.zaxxer", "HikariCP", "2.7.0"),
+    SQLITE_DRIVER("org.xerial", "sqlite-jdbc", "3.20.0"),
+    HIKARI("com.zaxxer", "HikariCP", "2.7.1"),
     SLF4J_SIMPLE("org.slf4j", "slf4j-simple", "1.7.25"),
     SLF4J_API("org.slf4j", "slf4j-api", "1.7.25"),
-    MONGODB_DRIVER("org.mongodb", "mongo-java-driver", "3.4.2"),
+    MONGODB_DRIVER("org.mongodb", "mongo-java-driver", "3.5.0"),
     JEDIS("https://github.com/lucko/jedis/releases/download/jedis-2.9.1-shaded/jedis-2.9.1-shaded.jar", "2.9.1-shaded");
 
     private final String url;
