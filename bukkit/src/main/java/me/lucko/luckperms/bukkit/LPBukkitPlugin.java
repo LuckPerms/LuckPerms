@@ -154,7 +154,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         senderFactory = new BukkitSenderFactory(this);
         log = new SenderLogger(this, getConsoleSender());
 
-        DependencyManager.loadDependencies(this, Collections.singletonList(Dependency.CAFFEINE));
+        DependencyManager.loadDependencies(this, Collections.singleton(Dependency.CAFFEINE));
     }
 
     @Override
@@ -194,7 +194,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         configuration.loadAll();
 
         Set<StorageType> storageTypes = StorageFactory.getRequiredTypes(this, StorageType.H2);
-        DependencyManager.loadDependencies(this, storageTypes);
+        DependencyManager.loadStorageDependencies(this, storageTypes);
 
         // setup the Bukkit defaults hook
         defaultsProvider = new DefaultsProvider();

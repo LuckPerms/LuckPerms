@@ -201,7 +201,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
         configuration.loadAll();
 
         Set<StorageType> storageTypes = StorageFactory.getRequiredTypes(this, StorageType.H2);
-        DependencyManager.loadDependencies(this, storageTypes);
+        DependencyManager.loadStorageDependencies(this, storageTypes);
 
         // register events
         game.getEventManager().registerListeners(this, new SpongeListener(this));

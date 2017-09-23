@@ -129,7 +129,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         senderFactory = new BungeeSenderFactory(this);
         log = new SenderLogger(this, getConsoleSender());
 
-        DependencyManager.loadDependencies(this, Collections.singletonList(Dependency.CAFFEINE));
+        DependencyManager.loadDependencies(this, Collections.singleton(Dependency.CAFFEINE));
     }
 
     @Override
@@ -146,7 +146,7 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
         configuration.loadAll();
 
         Set<StorageType> storageTypes = StorageFactory.getRequiredTypes(this, StorageType.H2);
-        DependencyManager.loadDependencies(this, storageTypes);
+        DependencyManager.loadStorageDependencies(this, storageTypes);
 
         // register events
         getProxy().getPluginManager().registerListener(this, new BungeeListener(this));

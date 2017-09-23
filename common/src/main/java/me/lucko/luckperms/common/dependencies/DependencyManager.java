@@ -29,9 +29,7 @@ import lombok.experimental.UtilityClass;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 
-import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.StorageType;
@@ -45,10 +43,14 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Responsible for loading runtime dependencies.
+ */
 @UtilityClass
 public class DependencyManager {
     private static final Method ADD_URL_METHOD;
@@ -64,7 +66,7 @@ public class DependencyManager {
         ADD_URL_METHOD = addUrlMethod;
     }
 
-    public static final Map<StorageType, List<Dependency>> STORAGE_DEPENDENCIES = ImmutableMap.<StorageType, List<Dependency>>builder()
+    private static final Map<StorageType, List<Dependency>> STORAGE_DEPENDENCIES = ImmutableMap.<StorageType, List<Dependency>>builder()
             .put(StorageType.JSON, ImmutableList.of())
             .put(StorageType.YAML, ImmutableList.of())
             .put(StorageType.MONGODB, ImmutableList.of(Dependency.MONGODB_DRIVER))
@@ -75,8 +77,8 @@ public class DependencyManager {
             .put(StorageType.H2, ImmutableList.of(Dependency.H2_DRIVER))
             .build();
 
-    public static void loadDependencies(LuckPermsPlugin plugin, Set<StorageType> storageTypes) {
-        List<Dependency> dependencies = new ArrayList<>();
+    public static void loadStorageDependencies(LuckPermsPlugin plugin, Set<StorageType> storageTypes) {
+        Set<Dependency> dependencies = new LinkedHashSet<>();
         for (StorageType storageType : storageTypes) {
             dependencies.addAll(STORAGE_DEPENDENCIES.get(storageType));
         }
@@ -85,8 +87,8 @@ public class DependencyManager {
             dependencies.add(Dependency.JEDIS);
         }
 
-        // don't load slf4j on sponge.
-        if (plugin.getServerType() == PlatformType.SPONGE) {
+        // don't load slf4j if it's already present
+        if (classExists("org.slf4j.Logger") && classExists("org.slf4j.LoggerFactory")) {
             dependencies.remove(Dependency.SLF4J_API);
             dependencies.remove(Dependency.SLF4J_SIMPLE);
         }
@@ -94,17 +96,17 @@ public class DependencyManager {
         loadDependencies(plugin, dependencies);
     }
 
-    public static void loadDependencies(LuckPermsPlugin plugin, List<Dependency> dependencies) {
+    public static void loadDependencies(LuckPermsPlugin plugin, Set<Dependency> dependencies) {
         plugin.getLog().info("Identified the following dependencies: " + dependencies.toString());
 
-        File data = new File(plugin.getDataDirectory(), "lib");
-        data.mkdirs();
+        File libDir = new File(plugin.getDataDirectory(), "lib");
+        libDir.mkdirs();
 
         // Download files.
-        List<Map.Entry<Dependency, File>> toLoad = new ArrayList<>();
+        List<File> filesToLoad = new ArrayList<>();
         for (Dependency dependency : dependencies) {
             try {
-                toLoad.add(Maps.immutableEntry(dependency, downloadDependency(plugin, data, dependency)));
+                filesToLoad.add(downloadDependency(plugin, libDir, dependency));
             } catch (Throwable e) {
                 plugin.getLog().severe("Exception whilst downloading dependency " + dependency.name());
                 e.printStackTrace();
@@ -112,27 +114,27 @@ public class DependencyManager {
         }
 
         // Load classes.
-        for (Map.Entry<Dependency, File> e : toLoad) {
+        for (File file : filesToLoad) {
             try {
-                loadJar(plugin, e.getValue());
+                loadJar(plugin, file);
             } catch (Throwable t) {
-                plugin.getLog().severe("Failed to load jar for dependency " + e.getKey().name());
+                plugin.getLog().severe("Failed to load dependency jar " + file.getName());
                 t.printStackTrace();
             }
         }
     }
 
     private static File downloadDependency(LuckPermsPlugin plugin, File libDir, Dependency dependency) throws Exception {
-        String name = dependency.name().toLowerCase() + "-" + dependency.getVersion() + ".jar";
+        String fileName = dependency.name().toLowerCase() + "-" + dependency.getVersion() + ".jar";
 
-        File file = new File(libDir, name);
+        File file = new File(libDir, fileName);
         if (file.exists()) {
             return file;
         }
 
         URL url = new URL(dependency.getUrl());
 
-        plugin.getLog().info("Dependency '" + name + "' could not be found. Attempting to download.");
+        plugin.getLog().info("Dependency '" + fileName + "' could not be found. Attempting to download.");
         try (InputStream in = url.openStream()) {
             Files.copy(in, file.toPath());
         }
@@ -140,7 +142,7 @@ public class DependencyManager {
         if (!file.exists()) {
             throw new IllegalStateException("File not present. - " + file.toString());
         } else {
-            plugin.getLog().info("Dependency '" + name + "' successfully downloaded.");
+            plugin.getLog().info("Dependency '" + fileName + "' successfully downloaded.");
             return file;
         }
     }
@@ -156,7 +158,16 @@ public class DependencyManager {
                 throw new RuntimeException("Unable to invoke URLClassLoader#addURL", e);
             }
         } else {
-            throw new RuntimeException("Unknown classloader: " + classLoader.getClass());
+            throw new RuntimeException("Unknown classloader type: " + classLoader.getClass());
+        }
+    }
+
+    private static boolean classExists(String className) {
+        try {
+            Class.forName(className);
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
         }
     }
 

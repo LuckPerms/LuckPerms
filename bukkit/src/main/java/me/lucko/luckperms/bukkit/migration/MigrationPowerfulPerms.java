@@ -32,6 +32,7 @@ import com.github.cheesesoftware.PowerfulPermsAPI.Group;
 import com.github.cheesesoftware.PowerfulPermsAPI.Permission;
 import com.github.cheesesoftware.PowerfulPermsAPI.PermissionManager;
 import com.github.cheesesoftware.PowerfulPermsAPI.PowerfulPermsPlugin;
+import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.event.cause.CreationCause;
@@ -94,7 +95,7 @@ public class MigrationPowerfulPerms extends SubCommand<Object> {
 
         if (type == null || type != StorageType.MYSQL) {
             // We need to load the Hikari/MySQL stuff.
-            DependencyManager.loadDependencies(plugin, DependencyManager.STORAGE_DEPENDENCIES.get(StorageType.MYSQL));
+            DependencyManager.loadStorageDependencies(plugin, ImmutableSet.of(StorageType.MYSQL));
         }
 
         String address = args.get(0);
