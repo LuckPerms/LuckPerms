@@ -108,24 +108,20 @@ public class VerboseListener {
 
         if (notify) {
             StringBuilder msgContent = new StringBuilder();
-            msgContent.append("&a")
-                    .append(data.getCheckTarget());
 
             if (notifiedSender.isConsole()) {
-                msgContent.append("&7 - &8[&2")
+                msgContent.append("&8[&2")
                         .append(data.getCheckOrigin().getCode())
-                        .append("&8]");
+                        .append("&8] ");
             }
 
-            msgContent.append("&7 - &a")
+            msgContent.append("&a")
+                    .append(data.getCheckTarget())
+                    .append("&7 - &a")
                     .append(data.getPermission())
                     .append("&7 - ")
                     .append(getTristateColor(data.getResult()))
                     .append(data.getResult().name().toLowerCase());
-
-            if (notifiedSender.isConsole()) {
-                msgContent.append("&7 - ").append(Util.contextSetToString(data.getCheckContext()));
-            }
 
             if (notifiedSender.isConsole()) {
                 Message.VERBOSE_LOG.send(notifiedSender, msgContent.toString());
@@ -145,7 +141,17 @@ public class VerboseListener {
 
                 for (StackTraceElement e : checkTrace) {
                     // start printing when we escape LP internals code
-                    if (!printing && !e.getClassName().startsWith("me.lucko.luckperms.")) {
+                    boolean shouldStartPrinting = !printing && (
+                            (data.getCheckOrigin() == CheckOrigin.API || data.getCheckOrigin() == CheckOrigin.INTERNAL) || (
+                                    !e.getClassName().startsWith("me.lucko.luckperms.") &&
+                                    // all used within the checking impl somewhere
+                                    !e.getClassName().equals("java.util.concurrent.CompletableFuture") &&
+                                    !e.getClassName().startsWith("com.github.benmanes.caffeine") &&
+                                    !e.getClassName().equals("java.util.concurrent.ConcurrentHashMap")
+                            )
+                    );
+
+                    if (shouldStartPrinting) {
                         printing = true;
                     }
 
@@ -250,7 +256,17 @@ public class VerboseListener {
 
                 for (StackTraceElement e : checkTrace) {
                     // start printing when we escape LP internals code
-                    if (!printing && !e.getClassName().startsWith("me.lucko.luckperms.")) {
+                    boolean shouldStartPrinting = !printing && (
+                            (c.getCheckOrigin() == CheckOrigin.API || c.getCheckOrigin() == CheckOrigin.INTERNAL) || (
+                                    !e.getClassName().startsWith("me.lucko.luckperms.") &&
+                                    // all used within the checking impl somewhere
+                                    !e.getClassName().equals("java.util.concurrent.CompletableFuture") &&
+                                    !e.getClassName().startsWith("com.github.benmanes.caffeine") &&
+                                    !e.getClassName().equals("java.util.concurrent.ConcurrentHashMap")
+                            )
+                    );
+
+                    if (shouldStartPrinting) {
                         printing = true;
                     }
 
