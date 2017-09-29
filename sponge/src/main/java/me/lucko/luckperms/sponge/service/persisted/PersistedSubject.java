@@ -98,14 +98,27 @@ public class PersistedSubject implements LPSubject {
         this.service = service;
         this.parentCollection = parentCollection;
 
-        this.subjectData = new PersistedSubjectData(service, "local:" + parentCollection.getIdentifier() + "/" + identifier + "(p)", this);
-        this.transientSubjectData = new CalculatedSubjectData(this, service, "local:" + parentCollection.getIdentifier() + "/" + identifier + "(t)");
+        this.subjectData = new PersistedSubjectData(service, parentCollection.getIdentifier() + "/" + identifier + "/p", this);
+        this.transientSubjectData = new CalculatedSubjectData(this, service, parentCollection.getIdentifier() + "/" + identifier + "/t");
+    }
 
-        service.getLocalDataCaches().add(subjectData);
-        service.getLocalDataCaches().add(transientSubjectData);
-        service.getLocalPermissionCaches().add(permissionLookupCache);
-        service.getLocalParentCaches().add(parentLookupCache);
-        service.getLocalOptionCaches().add(optionLookupCache);
+    @Override
+    public void invalidateCaches(CacheLevel type) {
+        optionLookupCache.invalidateAll();
+
+        if (type == CacheLevel.OPTION) {
+            return;
+        }
+
+        permissionLookupCache.invalidateAll();
+        subjectData.invalidateLookupCache();
+        transientSubjectData.invalidateLookupCache();
+
+        if (type == CacheLevel.PERMISSION) {
+            return;
+        }
+
+        parentLookupCache.invalidateAll();
     }
 
     @Override

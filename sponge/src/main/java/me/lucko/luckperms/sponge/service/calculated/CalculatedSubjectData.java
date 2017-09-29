@@ -110,7 +110,7 @@ public class CalculatedSubjectData implements LPSubjectData {
             permissions.put(e.getKey(), new ConcurrentHashMap<>(e.getValue()));
         }
         permissionCache.invalidateAll();
-        service.invalidatePermissionCaches();
+        service.invalidateAllCaches(LPSubject.CacheLevel.PERMISSION);
     }
 
     public void replaceParents(Map<ImmutableContextSet, List<SubjectReference>> map) {
@@ -120,7 +120,7 @@ public class CalculatedSubjectData implements LPSubjectData {
             set.addAll(e.getValue());
             parents.put(e.getKey(), set);
         }
-        service.invalidateParentCaches();
+        service.invalidateAllCaches(LPSubject.CacheLevel.PARENT);
     }
 
     public void replaceOptions(Map<ImmutableContextSet, Map<String, String>> map) {
@@ -128,7 +128,7 @@ public class CalculatedSubjectData implements LPSubjectData {
         for (Map.Entry<ImmutableContextSet, Map<String, String>> e : map.entrySet()) {
             options.put(e.getKey(), new ConcurrentHashMap<>(e.getValue()));
         }
-        service.invalidateOptionCaches();
+        service.invalidateAllCaches(LPSubject.CacheLevel.OPTION);
     }
 
     @Override
@@ -152,7 +152,7 @@ public class CalculatedSubjectData implements LPSubjectData {
         }
         if (b) {
             permissionCache.invalidateAll();
-            service.invalidatePermissionCaches();
+            service.invalidateAllCaches(LPSubject.CacheLevel.PERMISSION);
         }
         return CompletableFuture.completedFuture(b);
     }
@@ -164,7 +164,7 @@ public class CalculatedSubjectData implements LPSubjectData {
         } else {
             permissions.clear();
             permissionCache.invalidateAll();
-            service.invalidatePermissionCaches();
+            service.invalidateAllCaches(LPSubject.CacheLevel.PERMISSION);
             return CompletableFuture.completedFuture(true);
         }
     }
@@ -179,7 +179,7 @@ public class CalculatedSubjectData implements LPSubjectData {
         permissions.remove(contexts);
         if (!perms.isEmpty()) {
             permissionCache.invalidateAll();
-            service.invalidatePermissionCaches();
+            service.invalidateAllCaches(LPSubject.CacheLevel.PERMISSION);
             return CompletableFuture.completedFuture(true);
         }
         return CompletableFuture.completedFuture(false);
@@ -199,7 +199,7 @@ public class CalculatedSubjectData implements LPSubjectData {
         Set<SubjectReference> set = parents.computeIfAbsent(contexts, c -> ConcurrentHashMap.newKeySet());
         boolean b = set.add(parent);
         if (b) {
-            service.invalidateParentCaches();
+            service.invalidateAllCaches(LPSubject.CacheLevel.PARENT);
         }
         return CompletableFuture.completedFuture(b);
     }
@@ -209,7 +209,7 @@ public class CalculatedSubjectData implements LPSubjectData {
         Set<SubjectReference> set = parents.get(contexts);
         boolean b = set != null && set.remove(parent);
         if (b) {
-            service.invalidateParentCaches();
+            service.invalidateAllCaches(LPSubject.CacheLevel.PARENT);
         }
         return CompletableFuture.completedFuture(b);
     }
@@ -220,7 +220,7 @@ public class CalculatedSubjectData implements LPSubjectData {
             return CompletableFuture.completedFuture(false);
         } else {
             parents.clear();
-            service.invalidateOptionCaches();
+            service.invalidateAllCaches(LPSubject.CacheLevel.PARENT);
             return CompletableFuture.completedFuture(true);
         }
     }
@@ -233,7 +233,7 @@ public class CalculatedSubjectData implements LPSubjectData {
         }
 
         parents.remove(contexts);
-        service.invalidateParentCaches();
+        service.invalidateAllCaches(LPSubject.CacheLevel.PARENT);
         return CompletableFuture.completedFuture(!set.isEmpty());
     }
 
@@ -251,7 +251,7 @@ public class CalculatedSubjectData implements LPSubjectData {
         Map<String, String> options = this.options.computeIfAbsent(contexts, c -> new ConcurrentHashMap<>());
         boolean b = !stringEquals(options.put(key.toLowerCase(), value), value);
         if (b) {
-            service.invalidateOptionCaches();
+            service.invalidateAllCaches(LPSubject.CacheLevel.OPTION);
         }
         return CompletableFuture.completedFuture(b);
     }
@@ -261,7 +261,7 @@ public class CalculatedSubjectData implements LPSubjectData {
         Map<String, String> options = this.options.get(contexts);
         boolean b = options != null && options.remove(key.toLowerCase()) != null;
         if (b) {
-            service.invalidateOptionCaches();
+            service.invalidateAllCaches(LPSubject.CacheLevel.OPTION);
         }
         return CompletableFuture.completedFuture(b);
     }
@@ -272,7 +272,7 @@ public class CalculatedSubjectData implements LPSubjectData {
             return CompletableFuture.completedFuture(false);
         } else {
             options.clear();
-            service.invalidateOptionCaches();
+            service.invalidateAllCaches(LPSubject.CacheLevel.OPTION);
             return CompletableFuture.completedFuture(true);
         }
     }
@@ -285,7 +285,7 @@ public class CalculatedSubjectData implements LPSubjectData {
         }
 
         options.remove(contexts);
-        service.invalidateOptionCaches();
+        service.invalidateAllCaches(LPSubject.CacheLevel.OPTION);
         return CompletableFuture.completedFuture(!map.isEmpty());
     }
 

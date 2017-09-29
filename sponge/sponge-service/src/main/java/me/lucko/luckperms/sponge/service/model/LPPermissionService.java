@@ -85,9 +85,5 @@ public interface LPPermissionService {
 
     Contexts calculateContexts(ImmutableContextSet contextSet);
 
-    void invalidatePermissionCaches();
-
-    void invalidateParentCaches();
-
-    void invalidateOptionCaches();
+    void invalidateAllCaches(LPSubject.CacheLevel cacheLevel);
 }

@@ -27,7 +27,6 @@ package me.lucko.luckperms.sponge.managers;
 
 import lombok.Getter;
 
-import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.base.Preconditions;
@@ -71,17 +70,7 @@ public class SpongeGroupManager implements GroupManager, LPSubjectCollection {
     private SubjectCollection spongeProxy = null;
 
     private final LoadingCache<String, SpongeGroup> objects = Caffeine.newBuilder()
-            .build(new CacheLoader<String, SpongeGroup>() {
-                @Override
-                public SpongeGroup load(String i) {
-                    return apply(i);
-                }
-
-                @Override
-                public SpongeGroup reload(String i, SpongeGroup t) {
-                    return t; // Never needs to be refreshed.
-                }
-            });
+            .build(this::apply);
 
     private final LoadingCache<String, LPSubject> subjectLoadingCache = Caffeine.newBuilder()
             .expireAfterWrite(1, TimeUnit.MINUTES)

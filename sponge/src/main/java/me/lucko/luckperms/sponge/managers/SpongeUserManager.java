@@ -27,7 +27,6 @@ package me.lucko.luckperms.sponge.managers;
 
 import lombok.Getter;
 
-import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.base.Preconditions;
@@ -72,17 +71,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
     private SubjectCollection spongeProxy = null;
 
     private final LoadingCache<UserIdentifier, SpongeUser> objects = Caffeine.newBuilder()
-            .build(new CacheLoader<UserIdentifier, SpongeUser>() {
-                @Override
-                public SpongeUser load(UserIdentifier i) {
-                    return apply(i);
-                }
-
-                @Override
-                public SpongeUser reload(UserIdentifier i, SpongeUser t) {
-                    return t; // Never needs to be refreshed.
-                }
-            });
+            .build(this::apply);
 
     private final LoadingCache<UUID, LPSubject> subjectLoadingCache = Caffeine.<UUID, LPSubject>newBuilder()
             .expireAfterWrite(1, TimeUnit.MINUTES)

@@ -78,6 +78,7 @@ import me.lucko.luckperms.sponge.managers.SpongeUserManager;
 import me.lucko.luckperms.sponge.messaging.SpongeMessagingFactory;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
+import me.lucko.luckperms.sponge.service.model.LPSubject;
 import me.lucko.luckperms.sponge.service.model.LPSubjectCollection;
 import me.lucko.luckperms.sponge.service.persisted.PersistedCollection;
 import me.lucko.luckperms.sponge.tasks.ServiceCacheHousekeepingTask;
@@ -332,7 +333,7 @@ public class LPSpongePlugin implements LuckPermsPlugin {
                 ((PersistedCollection) collection).loadAll();
             }
         }
-        service.invalidateParentCaches();
+        service.invalidateAllCaches(LPSubject.CacheLevel.PARENT);
     }
 
     @Override

@@ -34,23 +34,15 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.MapMaker;
 
 import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.common.caching.UserCache;
 import me.lucko.luckperms.common.model.Group;
-import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.utils.Predicates;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.contexts.SpongeCalculatorLink;
 import me.lucko.luckperms.sponge.managers.SpongeGroupManager;
 import me.lucko.luckperms.sponge.managers.SpongeUserManager;
-import me.lucko.luckperms.sponge.model.SpongeGroup;
-import me.lucko.luckperms.sponge.service.calculated.CalculatedSubjectData;
-import me.lucko.luckperms.sponge.service.calculated.OptionLookup;
-import me.lucko.luckperms.sponge.service.calculated.PermissionLookup;
 import me.lucko.luckperms.sponge.service.legacy.LegacyDataMigrator;
 import me.lucko.luckperms.sponge.service.model.LPPermissionDescription;
 import me.lucko.luckperms.sponge.service.model.LPPermissionService;
@@ -95,11 +87,6 @@ public class LuckPermsService implements LPPermissionService {
     private final PersistedCollection defaultSubjects;
     private final Set<LPPermissionDescription> descriptionSet;
 
-    private final Set<LoadingCache<PermissionLookup, Tristate>> localPermissionCaches;
-    private final Set<LoadingCache<ImmutableContextSet, ImmutableList<SubjectReference>>> localParentCaches;
-    private final Set<LoadingCache<OptionLookup, Optional<String>>> localOptionCaches;
-    private final Set<CalculatedSubjectData> localDataCaches;
-
     @Getter(value = AccessLevel.NONE)
     private final LoadingCache<String, LPSubjectCollection> collections = Caffeine.newBuilder()
             .build(s -> new PersistedCollection(this, s));
@@ -107,11 +94,6 @@ public class LuckPermsService implements LPPermissionService {
     public LuckPermsService(LPSpongePlugin plugin) {
         this.plugin = plugin;
         this.spongeProxy = ProxyFactory.toSponge(this);
-
-        localPermissionCaches = Collections.newSetFromMap(new MapMaker().weakKeys().makeMap());
-        localParentCaches = Collections.newSetFromMap(new MapMaker().weakKeys().makeMap());
-        localOptionCaches = Collections.newSetFromMap(new MapMaker().weakKeys().makeMap());
-        localDataCaches = Collections.newSetFromMap(new MapMaker().weakKeys().makeMap());
 
         storage = new SubjectStorage(this, new File(plugin.getDataDirectory(), "sponge-data"));
         new LegacyDataMigrator(plugin, new File(plugin.getDataDirectory(), "local"), storage).run();
@@ -254,44 +236,15 @@ public class LuckPermsService implements LPPermissionService {
     }
 
     @Override
-    public void invalidatePermissionCaches() {
-        for (LoadingCache<PermissionLookup, Tristate> c : localPermissionCaches) {
-            c.invalidateAll();
-        }
-        for (CalculatedSubjectData subjectData : localDataCaches) {
-            subjectData.invalidateLookupCache();
-        }
-
-        plugin.getCalculatorFactory().invalidateAll();
-
-        for (User user : plugin.getUserManager().getAll().values()) {
-            UserCache userCache = user.getUserData();
-            userCache.invalidateCache();
+    public void invalidateAllCaches(LPSubject.CacheLevel cacheLevel) {
+        for (LPSubjectCollection collection : collections.asMap().values()) {
+            for (LPSubject subject : collection.getLoadedSubjects()) {
+                subject.invalidateCaches(cacheLevel);
+            }
         }
 
-        for (SpongeGroup group : plugin.getGroupManager().getAll().values()) {
-            group.sponge().invalidateCaches();
-        }
-    }
-
-    @Override
-    public void invalidateParentCaches() {
-        for (LoadingCache<ImmutableContextSet, ImmutableList<SubjectReference>> c : localParentCaches) {
-            c.invalidateAll();
-        }
-        invalidateOptionCaches();
-        invalidatePermissionCaches();
-    }
-
-    @Override
-    public void invalidateOptionCaches() {
-        for (LoadingCache<OptionLookup, Optional<String>> c : localOptionCaches) {
-            c.invalidateAll();
-        }
-
-        for (User user : plugin.getUserManager().getAll().values()) {
-            UserCache userCache = user.getUserData();
-            userCache.invalidateCache();
+        if (cacheLevel != LPSubject.CacheLevel.OPTION) {
+            plugin.getCalculatorFactory().invalidateAll();
         }
     }
 }

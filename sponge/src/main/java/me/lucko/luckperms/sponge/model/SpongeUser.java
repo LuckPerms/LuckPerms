@@ -70,7 +70,7 @@ public class SpongeUser extends User {
         return this.spongeData;
     }
 
-    public static class UserSubject implements LPSubject {
+    public static final class UserSubject implements LPSubject {
         private final SpongeUser parent;
         private final LPSpongePlugin plugin;
 
@@ -186,6 +186,12 @@ public class SpongeUser extends User {
         @Override
         public ImmutableContextSet getActiveContextSet() {
             return plugin.getContextManager().getApplicableContext(this.sponge());
+        }
+
+        @Override
+        public void invalidateCaches(CacheLevel cacheLevel) {
+            // invalidate for all changes
+            parent.getUserData().invalidateCache();
         }
     }
 

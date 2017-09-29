@@ -126,10 +126,15 @@ public class SpongeGroup extends Group {
             this.subjectData = new LuckPermsSubjectData(true, plugin.getService(), parent, this);
             this.transientSubjectData = new LuckPermsSubjectData(false, plugin.getService(), parent, this);
 
-            parent.getStateListeners().add(this::invalidateCaches);
+            parent.getStateListeners().add(() -> invalidateCaches(CacheLevel.PERMISSION));
         }
 
-        public void invalidateCaches() {
+        @Override
+        public void invalidateCaches(CacheLevel type) {
+            if (type == CacheLevel.OPTION) {
+                return; // don't invalidate for option changes
+            }
+
             permissionCache.invalidateAll();
             parentCache.invalidateAll();
         }
