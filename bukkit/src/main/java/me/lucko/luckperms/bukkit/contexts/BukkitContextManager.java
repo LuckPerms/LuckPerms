@@ -31,12 +31,12 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.contexts.ContextManager;
+import me.lucko.luckperms.common.contexts.AbstractContextManager;
 
 import org.bukkit.entity.Player;
 
 @RequiredArgsConstructor
-public class BukkitContextManager extends ContextManager<Player> {
+public class BukkitContextManager extends AbstractContextManager<Player> {
     private final LPBukkitPlugin plugin;
 
     @Override

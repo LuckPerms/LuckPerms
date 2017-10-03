@@ -27,17 +27,9 @@ package me.lucko.luckperms.common.contexts;
 
 import lombok.NonNull;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
-
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.api.context.MutableContextSet;
-
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Manages {@link ContextCalculator}s, and calculates applicable contexts for a
@@ -45,23 +37,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @param <T> the calculator type
  */
-public abstract class ContextManager<T> {
-
-    private final List<ContextCalculator<T>> calculators = new CopyOnWriteArrayList<>();
-    private final List<ContextCalculator<?>> staticCalculators = new CopyOnWriteArrayList<>();
-
-    // caches context lookups
-    private final LoadingCache<T, Contexts> lookupCache = Caffeine.newBuilder()
-            .weakKeys()
-            .expireAfterWrite(50L, TimeUnit.MILLISECONDS) // expire roughly every tick
-            .build(subject -> {
-                MutableContextSet accumulator = MutableContextSet.create();
-                calculateApplicableContext(subject, accumulator);
-
-                ImmutableContextSet ret = accumulator.makeImmutable();
-                return formContexts(subject, ret);
-            });
-
+public interface ContextManager<T> {
 
     /**
      * Queries the ContextManager for current context values for the subject.
@@ -69,10 +45,7 @@ public abstract class ContextManager<T> {
      * @param subject the subject
      * @return the applicable context for the subject
      */
-    public ImmutableContextSet getApplicableContext(@NonNull T subject) {
-        // this is actually already immutable, but the Contexts method signature returns the interface.
-        return  getApplicableContexts(subject).getContexts().makeImmutable();
-    }
+    ImmutableContextSet getApplicableContext(@NonNull T subject);
 
     /**
      * Queries the ContextManager for current context values for the subject.
@@ -80,9 +53,7 @@ public abstract class ContextManager<T> {
      * @param subject the subject
      * @return the applicable context for the subject
      */
-    public Contexts getApplicableContexts(@NonNull T subject) {
-        return lookupCache.get(subject);
-    }
+    Contexts getApplicableContexts(@NonNull T subject);
 
     /**
      * Forms a {@link Contexts} instance from an {@link ImmutableContextSet}.
@@ -91,16 +62,14 @@ public abstract class ContextManager<T> {
      * @param contextSet the context set
      * @return a contexts instance
      */
-    public abstract Contexts formContexts(T subject, ImmutableContextSet contextSet);
+    Contexts formContexts(T subject, ImmutableContextSet contextSet);
 
     /**
      * Registers a context calculator with the manager.
      *
      * @param calculator the calculator
      */
-    public void registerCalculator(ContextCalculator<T> calculator) {
-        registerCalculator(calculator, false);
-    }
+    void registerCalculator(ContextCalculator<T> calculator);
 
     /**
      * Registers a context calculator with the manager.
@@ -108,56 +77,27 @@ public abstract class ContextManager<T> {
      * @param calculator the calculator
      * @param isStatic if the calculator is static. (if it allows a null subject parameter)
      */
-    public void registerCalculator(ContextCalculator<T> calculator, boolean isStatic) {
-        // calculators registered first should have priority (and be checked last.)
-        calculators.add(0, calculator);
-
-        if (isStatic) {
-            staticCalculators.add(0, calculator);
-        }
-    }
+    void registerCalculator(ContextCalculator<T> calculator, boolean isStatic);
 
     /**
      * Gets the contexts from the static calculators in this manager.
      *
      * @return the current active static contexts
      */
-    public ImmutableContextSet getStaticContexts() {
-        MutableContextSet accumulator = MutableContextSet.create();
-        for (ContextCalculator<?> calculator : staticCalculators) {
-            calculator.giveApplicableContext(null, accumulator);
-        }
-        return accumulator.makeImmutable();
-    }
+    ImmutableContextSet getStaticContexts();
 
     /**
      * Invalidates the lookup cache for a given subject
      *
      * @param subject the subject
      */
-    public void invalidateCache(@NonNull T subject){
-        lookupCache.invalidate(subject);
-    }
+    void invalidateCache(@NonNull T subject);
 
     /**
      * Gets the number of calculators registered with the manager.
      *
      * @return the number of calculators registered
      */
-    public int getCalculatorsSize() {
-        return calculators.size();
-    }
-
-    // iterates the calculators in this manager and accumulates contexts from them all.
-    private void calculateApplicableContext(T subject, MutableContextSet accumulator) {
-        for (ContextCalculator<T> calculator : calculators) {
-            try {
-                calculator.giveApplicableContext(subject, accumulator);
-            } catch (Exception e) {
-                new RuntimeException("Exception thrown by ContextCalculator: " + calculator.getClass().getName(), e).printStackTrace();
-            }
-
-        }
-    }
+    int getCalculatorsSize();
 
 }
