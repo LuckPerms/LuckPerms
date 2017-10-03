@@ -1,0 +1,728 @@
+# LuckPerms Language File
+# Locale: hu_HU (Hungarian)
+# Author: montlikadani
+
+prefix: "&7&l[&b&lL&3&lP&7&l] &c"
+empty: "{0}"
+player-online: "&aOnline"
+player-offline: "&cOffline"
+loading-error: "&cNem sikerült betölteni az engedélyezési adatokat. Kérlek, próbáld újra később."
+op-disabled: "&bA vanilla OP rendszer le van tiltva ezen a szerveren."
+op-disabled-sponge: "&2Kérjük, vegye figyelembe, hogy a kiszolgálói operátor állapota nem befolyásolja a Sponge engedély-ellenőrzéseket, ha engedélyezési bővítmény van telepítve. Kérjük, közvetlenül módosítsa a felhasználói adatokat."
+log-info: "&7&l[&bL&3P&7&l] &3{0}"
+log-warn: "&7&l[&bLuck&3Perms&7&l] &c[FIGYELEM] {0}"
+log-error: "&7&l[&bLuck&3Perms&7&l] &4[HIBA] {0}"
+log: "&3LOG &3&l> {0}"
+verbose-log: "&3VB &3&l> {0}"
+export-log: "&3EXPORT &3&l> &f{0}"
+export-log-progress: "&3EXPORT &3&l> &7{0}"
+migration-log: "&3VÁNDORLÁS &7[&3{0}&7] &3&l> &f{1}"
+migration-log-progress: "&3VÁNDORLÁS &7[&3{0}&7] &3&l> &7{1}"
+command-not-recognised: "&cA parancs nem ismeretes."
+command-no-permission: "&cNincs jogosultságod a használatára!"
+user-not-found: "&cEgy felhasználó számára &4{0}&c nem található."
+user-not-online: "&b{0}&a felhasználó nem elérhető."
+user-save-error: "&cHiba történt a felhasználói adatok mentése közben &4{0}&c."
+group-not-found: "&cEgy nevű csoport &4{0}&c nem található."
+group-save-error: "&cHiba történt a csoportadatok mentése közben &4{0}&c."
+track-not-found: "&cEgy nevű sáv &4{0}&c nem található."
+track-save-error: "&cHiba történt a track adatok mentése közben &4{0}&c."
+user-invalid-entry: "&4{0}&c nem érvényes felhasználónév/uuid."
+group-invalid-entry: "&4{0}&c nem érvényes csoportnév."
+track-invalid-entry: "&4{0}&c nem érvényes track név."
+server-world-invalid-entry: "&cA szerver/világnév csak alfanumerikus karaktereket tartalmazhat, és nem haladhatja meg a 36 karakter hosszúságú karaktereket."
+use-inherit-command: "&cHasználd a 'parent add' és a 'parent remove' parancsokat ahelyett, hogy meghatározta volna a csomópontot."
+verbose-invalid-filter: "&4{0}&c nem érvényes kiterjedt szűrő."
+verbose-on: "&bRészletes naplózás &aengedélyezve &ba megfelelő ellenőrzésekhez &aBÁRMILYEN&b."
+verbose-on-query: "&bRészletes naplózás &aengedélyezve &ba megfelelő ellenőrzésekhez &a{0}&b."
+verbose-off: "&bRészletes naplózás &cletiltva&b."
+verbose-recording-on: "&bRészletes felvétel &aengedélyezve &ba megfelelő ellenőrzésekhez &aBÁRMILYEN&b."
+verbose-recording-on-query: "&bRészletes felvétel &aengedélyezve &ba megfelelő ellenőrzésekhez &a{0}&b."
+verbose-upload-start: "&bRészletes naplózás &cletiltva&b. Eredmények feltöltése..."
+verbose-results-url: "&aRészletes eredmények URL-je:"
+tree-upload-start: "&bEngedélyezési fa létrehozása..."
+tree-empty: "&cNem lehet létrehozni a fát. Nincs találat."
+tree-url: "&aEngedélyezési fa URL:"
+search-searching: "&aFelhasználók és csoportok keresése a következővel: &b{0}&a..."
+search-searching-members: "&aFelhasználók és csoportok keresése, akik örökölnek &b{0}&a..."
+search-result: "&aTalál &b{0}&a bejegyzéseket a &b{1}&a felhasználók és &b{2}&a csoportok."
+search-showing-users: "&bFelhasználói bejegyzések megjelenítése:"
+search-showing-groups: "&bCsoportbejegyzések megjelenítése:"
+search-showing-users-with-page: "&bFelhasználói bejegyzések megjelenítése:  {0}"
+search-showing-groups-with-page: "&bCsoportbejegyzések megjelenítése:  {0}"
+apply-edits-invalid-code: "&cÉrvénytelen kód. &7({0})"
+apply-edits-unable-to-read: "&cA megadott kóddal nem lehet adatokat olvasni. &7({0})"
+apply-edits-no-target: "&cNem lehet elemezni a szerkesztés célját. Kérjük, nyújtsa be, mint egy extra érv."
+apply-edits-target-group-not-exists: "&cCélcsoport &4{0}&c nem létezik."
+apply-edits-target-user-not-uuid: "&cCélcsoport &4{0}&c nem érvényes uuid."
+apply-edits-target-user-unable-to-load: "&cA célfelhasználó nem tölthető be &4{0}&c."
+apply-edits-target-unknown: "&cÉrvénytelen cél. &7({0})"
+apply-edits-success: "&aSikeresen alkalmazott &b{0}&a csomópontok &b{1}&a."
+editor-upload-failure: "&cNem sikerült feltölteni az engedélyezési adatokat a szerkesztőhöz."
+editor-url: "&aSzerkesztő URL:"
+check-result: "&aEngedély-ellenőrzés eredmény a felhasználó számára &b{0}&a engedélyért &b{1}&a: &f{2}"
+create-success: "&b{0}&a sikeresen létrehozva."
+delete-success: "&b{0}&a sikeresen törölve."
+rename-success: "&b{0}&a sikeresen átnevezve &b{1}&a."
+clone-success: "&b{0}&a sikeresen klónozva &b{1}&a."
+already-inherits: "&b{0}&a már örökli &b{1}&a a szövegkörnyezetben {2}&a."
+does-not-inherit: "&b{0}&a nem örököl &b{1}&a a szövegkörnyezetben {2}&a."
+already-temp-inherits: "&b{0}&a már átmenetileg örökli &b{1}&a a szövegkörnyezetben {2}&a."
+does-not-temp-inherit: "&b{0}&a nem átmenetileg örökli &b{1}&a a szövegkörnyezetben {2}&a."
+track-already-contains: "&b{0}&a már tartalmazza &b{1}&a."
+track-does-not-contain: "&b{0}&a nem tartalmaz &b{1}&a."
+track-ambiguous-call: "&4{0}&c ezen a pályán több csoport tagja. Nem tudják meghatározni a helyüket."
+already-exists: "&4{0}&c már létezik!"
+does-not-exist: "&4{0}&c nem létezik!"
+group-load-error: "&cVáratlan hiba történt. A csoport nincs betöltve."
+groups-load-error: "&cVáratlan hiba történt. Nem sikerült betölteni az összes csoportot."
+track-load-error: "&cVáratlan hiba történt. A nyomvonal nincs betöltve."
+tracks-load-error: "&cVáratlan hiba történt. Nem sikerült betölteni az összes számot."
+track-empty: "&4{0}&c nem használható, mivel üres vagy csak egy csoportot tartalmaz."
+update-task-request: "&bFrissítési feladatot kértek. Kérlek, várj..."
+update-task-complete: "&aA feladat frissítése befejeződött."
+update-task-complete-network: "&aA feladat frissítése befejeződött. Most más szerverekre próbálkozni."
+update-task-push-success: "&aMás szervereket értesítettek &b{0} Üzenetek &asikeresen."
+update-task-push-failure: "&cHiba történt a többi kiszolgálóra történő változtatás közben."
+update-task-push-failure-not-setup: "&cHiba történt a többi kiszolgálóra történő változtatás közben. &7(egy üzenetkezelő szolgáltatást nem konfigurált)"
+reload-config-success: "&aA konfigurációs fájl újratöltve. &7(néhány opció csak a szerver újraindítása után fog működni)"
+info-top: >
+  {PREFIX}&2Running &bLuckPerms v{0}&2 by &bLuck&2.\n
+  {PREFIX}&f-  &3Emelvény: &f{1}\n
+  {PREFIX}&f-  &3Szerver márka: &f{2}\n
+  {PREFIX}&f-  &3Szerver verzió: &f{3}
+info-middle: >
+  {PREFIX}&f-  &bÜzenet típusa: &f{0}\n
+  {PREFIX}&f-  &bPélda:\n
+  {PREFIX}&f-     &3Szerver név: &f{1}\n
+  {PREFIX}&f-     &3Elérhető játékosok: &a{2}\n
+  {PREFIX}&f-     &3Egyedi kapcsolatok: &a{3}\n
+  {PREFIX}&f-     &3Üzemidő: &7{4}\n
+  {PREFIX}&f-     &3Helyi adatok: &a{5} &7felhasználó, &a{6} &7csoport, &a{7} &7pályák\n
+  {PREFIX}&f-     &3Kontextus számológépek: &a{8}\n
+  {PREFIX}&f-     &3Ismert engedélyek: &a{9}\n
+  {PREFIX}&f-     &3Aktív processzorok: &7{10}
+create-error: "&cHiba történt a létrehozás során &4{0}&c."
+delete-error: "&cTörlés közben hiba történt &4{0}&c."
+delete-group-error-default: "&cAz alapértelmezett csoportot nem törölheti."
+groups-list: "&aCsoportok: &7(név, súly, pályák)"
+groups-list-entry: "&f-  &3{0} &7- &b{1}"
+groups-list-entry-with-tracks: "&f-  &3{0} &7- &b{1} &7- [&3{2}&7]"
+tracks-list: "&aPályák: {0}"
+listnodes: "&b{0}'s Jogok:"
+listnodes-with-page: "&b{0} Jogai:  {1}"
+listnodes-temp: "&b{0} Ideiglenes engedélyei:"
+listnodes-temp-with-page: "&b{0} Ideiglenes engedélyei:  {1}"
+listparents: "&b{0} Szülői csoportok:"
+listparents-temp: "&b{0} Ideiglenes szülői csoportok:"
+list-tracks: >
+  &b{0} Pályái:\n
+  {1}
+list-tracks-empty: "&b{0}&a nincs rajta."
+context-pair-inline: "&3{0}=&b{1}"
+context-pair--global-inline: "&eglobális"
+context-pair-sep: "&a, "
+context-pair: "&8(&7{0}=&f{1}&8)"
+check-permission: "&b{0}&a engedéllyel rendelkezik &b{1}&a állítva {2}&a a szövegkörnyezetben {3}&a."
+check-inherits-permission: "&b{0}&a engedéllyel rendelkezik &b{1}&a állítva {2}&a a szövegkörnyezetben {3}&a. &7(örökölt &a{4}&7)"
+setpermission-success: "&aBeállítva &b{0}&a-nak/-nek &b{1}&a, mert &b{2}&a a szövegkörnyezetben {3}&a."
+already-haspermission: "&b{0}&a már van &b{1}&a összefüggésben {2}&a."
+setpermission-temp-success: "&aBeállítva &b{0}&a-nak/-nek &b{1}&a, mert &b{2}&a egy ideig &b{3}&a a szövegkörnyezetben {4}&a."
+already-has-temp-permission: "&b{0}&a már van &b{1}&a ideiglenesen környezetben {2}&a."
+unsetpermission-success: "&aVisszaállítva &b{0}&a, mert &b{1}&a a szövegkörnyezetben {2}&a."
+does-not-have-permission: "&b{0}&a nem rendelkezik &b{1}&a összefüggésben {2}&a."
+unset-temp-permission-success: "&aIdeiglenes engedély érvénytelenítése &b{0}&a, mert &b{1}&a a szövegkörnyezetben {2}&a."
+does-not-have-temp-permission: "&b{0}&a nem rendelkezik &b{1}&a ideiglenesen környezetben {2}&a."
+set-inherit-success: "&b{0}&a most örökli az engedélyeket &b{1}&a a szövegkörnyezetben {2}&a."
+set-temp-inherit-success: "&b{0}&a most örökli az engedélyeket &b{1}&a egy ideig &b{2}&a a szövegkörnyezetben {3}&a."
+set-parent-success: "&b{0}&a meglévő szüloi csoportjaik tiszták, és most csak örökölnek &b{1}&a a szövegkörnyezetben {2}&a."
+set-track-parent-success: "&b{0}&a meglévő szülői csoportjaik voltak a pályán &b{1}&a törölni, és most csak örökli &b{2}&a a szövegkörnyezetben {3}&a."
+unset-inherit-success: "&b{0}&a többé nem örökli az engedélyeket &b{1}&a a szövegkörnyezetben {2}&a."
+unset-temp-inherit-success: "&b{0}&a már nem ideiglenesen örökli az engedélyeket &b{1}&a a szövegkörnyezetben {2}&a."
+clear-success: "&b{0}&a a jogosultságokat a kontextusban törölték {1}&a. (&b{2}&a a csomópontokat eltávolítottuk.)"
+clear-success-singular: "&b{0}&a a jogosultságokat a kontextusban törölték {1}&a. (&b{2}&a csomópontot eltávolítottuk.)"
+parent-clear-success: "&b{0}&a a szülei a kontextusban megszűntek {1}&a. (&b{2}&a a csomópontokat eltávolítottuk.)"
+parent-clear-success-singular: "&b{0}&a a szülei a kontextusban megszűntek {1}&a. (&b{2}&a a csomópontokat eltávolítottuk.)"
+parent-clear-track-success: "&b{0}&a szülők a pályán &b{1}&a összefüggésben {2}&a. (&b{3}&a a csomópontokat eltávolítottuk.)"
+parent-clear-track-success-singular: "&b{0}&a szülők a pályán &b{1}&a összefüggésben {2}&a. (&b{3}&a csomópontot eltávolítottuk.)"
+meta-clear-success: "&b{0}&a meta egyezéstípusa &b{1}&a összefüggésben {2}&a. (&b{3}&a a csomópontokat eltávolítottuk.)"
+meta-clear-success-singular: "&b{0}&a meta egyezéstípusa &b{1}&a összefüggésben {2}&a. (&b{3}&a csomópontot eltávolítottuk.)"
+illegal-date-error: "&cNem sikerült elemezni a dátumot &4{0}&c."
+past-date-error: "&cNem állíthat be dátumot a múltban!"
+chat-meta-prefix-header: "&b{0} Előtagjai"
+chat-meta-suffix-header: "&b{0} Utótagja"
+meta-header: "&b{0} Metája"
+chat-meta-entry: "&b-> {0} &f- &f'{1}&f' &8(&7örökölt &a{2}&8)"
+chat-meta-entry-with-context: "&b-> {0} &f- &f'{1}&f' &8(&7örökölt &a{2}&8){3}"
+meta-entry: "&b-> &a{0} &f= &f'{1}&f' &8(&7örökölt &a{2}&8)"
+meta-entry-with-context: "&b-> &a{0} &f= &f'{1}&f' &8(&7örökölt &a{2}&8){3}"
+chat-meta-prefix-none: "&b{0} nincsenek előtagjai."
+chat-meta-suffix-none: "&b{0} nincs utótagja."
+meta-none: "&b{0} nincs meta."
+meta-invalid-priority: "&cÉrvénytelen prioritás &4{0}&c. Várható szám."
+already-has-chat-meta: "&b{0}&a már van {1} &f'{2}&f'&a elsőbbséget élvez &b{3}&a a szövegkörnyezetben {4}&a."
+already-has-temp-chat-meta: "&b{0}&a már van {1} &f'{2}&f'&a ideiglenesen &b{3}&a a szövegkörnyezetben {4}&a."
+does-not-have-chat-meta: "&b{0}&a nincs {1} &f'{2}&f'&a elsőbbséget élvez &b{3}&a a szövegkörnyezetben {4}&a."
+does-not-have-temp-chat-meta: "&b{0}&a nincs {1} &f'{2}&f'&a ideiglenesen &b{3}&a a szövegkörnyezetben {4}&a."
+add-chatmeta-success: "&b{0}&a volt {1} &f'{2}&f'&a elsőbbséget élvez &b{3}&a a szövegkörnyezetben {4}&a."
+add-temp-chatmeta-success: "&b{0}&a volt {1} &f'{2}&f'&a elsőbbséget élvez &b{3}&a egy ideig &b{4}&a a szövegkörnyezetben {5}&a."
+remove-chatmeta-success: "&b{0}&a volt {1} &f'{2}&f'&a prioritásként &b{3}&a eltávolítva a kontextusban {4}&a."
+bulk-remove-chatmeta-success: "&b{0}&a minden volt {1}es a prioritás &b{2}&a eltávolítva a kontextusban {3}&a."
+remove-temp-chatmeta-success: "&b{0}&a ideiglenes volt {1} &f'{2}&f'&a prioritásként &b{3}&a eltávolítva a kontextusban {4}&a."
+bulk-remove-temp-chatmeta-success: "&b{0}&a minden ideiglenes volt {1}es prioritásként &b{2}&a eltávolítva a kontextusban {3}&a."
+already-has-meta: "&b{0}&a már van meta kulcs &f'{1}&f'&a állítva &f'{2}&f'&a a szövegkörnyezetben {3}&a."
+already-has-temp-meta: "&b{0}&a már van meta kulcs &f'{1}&f'&a átmenetileg beállítva &f'{2}&f'&a a szövegkörnyezetben {3}&a."
+doesnt-have-meta: "&b{0}&a nincs meta kulcs &f'{1}&f'&a összefüggésben {2}&a."
+doesnt-have-temp-meta: "&b{0}&a nincs meta kulcs &f'{1}&f'&a ideiglenesen a környezetben {2}&a."
+set-meta-success: "&aÁllítva a meta kulcsot &f'{0}&f'&a-nak/-nek &f'{1}&f'&a, mert &b{2}&a a szövegkörnyezetben {3}&a."
+set-meta-temp-success: "&aÁllítva a meta kulcsot &f'{0}&f'&a-nak/-nek &f'{1}&f'&a, mert &b{2}&a egy ideig &b{3}&a a szövegkörnyezetben {4}&a."
+unset-meta-success: "&aLeválasztva a meta kulcsot &f'{0}&f'&a, mert &b{1}&a a szövegkörnyezetben {2}&a."
+unset-meta-temp-success: "&aIdeiglenes meta kulcs kikapcsolása &f'{0}&f'&a, mert &b{1}&a a szövegkörnyezetben {2}&a."
+bulk-update-invalid-data-type: "&cÉrvénytelen típus. Típusok 'all', 'users' vagy 'groups'."
+bulk-update-invalid-constraint: "&cÉrvénytelen kényszer &4{0}&c. A korlátozásoknak formátumban kell lenniük '&f<mező> <összehasonlító operátor> <érték>&c'."
+bulk-update-invalid-comparison: "&cÉrvénytelen összehasonlító operátor '&4{0}&c'. Várható az alábbiak közül: &f==  !=  ~~  ~!"
+bulk-update-queued: "&aA tömeges frissítés sorba állt. &7(&f{0}&7)"
+bulk-update-confirm: "&aA futtatáshoz &b/{0} a tömeges frissítés megerősítéséhez {1} &aa frissítés végrehajtásához."
+bulk-update-unknown-id: "&aMűködési id &b{0}&a nem létezik, vagy lejárt."
+bulk-update-starting: "&aFolyamatos frissítés futtatása."
+bulk-update-success: "&bA tömeges frissítés sikeresen befejeződött."
+bulk-update-failure: "&cA tömeges frissítés sikertelen. Ellenőrizze a konzolt hiba esetén."
+user-info-general: >
+  {PREFIX}&b&l> &bFelhasználói adatok: &f{0}\n
+  {PREFIX}&f- &3UUID: &f{1}\n
+  {PREFIX}&f- &3Állapot: {2}\n
+  {PREFIX}&f- &3Elsődleges csoport: &f{3}\n
+  {PREFIX}&f- &aGrófok:\n
+  {PREFIX}&f-    &3Csomópontok: &a{4}\n
+  {PREFIX}&f-    &3Jogok: &a{5}\n
+  {PREFIX}&f-    &3Előtagok: &a{6}\n
+  {PREFIX}&f-    &3Utótagok: &a{7}\n
+  {PREFIX}&f-    &3Meta: &a{8}
+user-info-data: >
+  {PREFIX}&f- &aGyorsítótár adat:\n
+  {PREFIX}&f-    &3Kontextuális adatok vannak: {0}\n
+  {PREFIX}&f-    &3Jelenlegi kontextusok: {1}\n
+  {PREFIX}&f-    &3Jelenlegi előtag: {2}\n
+  {PREFIX}&f-    &3Jelenlegi utótag: {3}
+info-parent-header: "&f- &aSzülői csoportok:"
+info-temp-parent-header: "&f- &aIdeiglenes szülői csoportok:"
+user-removegroup-error-primary: "&aNem lehet eltávolítani egy felhasználót az elsődleges csoportból."
+user-primarygroup-success: "&b{0}&a az elsődleges csoportot &b{1}&a."
+user-primarygroup-warn-option: "&aFigyelmeztetés: A kiszolgáló által használt elsődleges csoportszámítási módszer &7({0}) &anem tükrözheti ezt a változást."
+user-primarygroup-error-alreadyhas: "&b{0}&a már van &b{1}&a mint elsődleges csoportjuk."
+user-primarygroup-error-notmember: "&b{0}&a már nem tagja &b{1}&a, hozzátéve őket."
+user-track-error-not-contain-group: "&b{0}&a már nincsenek benne &b{1}&a."
+user-track-added-to-first: "&b{0}&a nincsenek ezen a pályán egyetlen csoportban sem, így az első csoportba kerültek, &b{1}&a a szövegkörnyezetben {2}&a."
+user-promote-success: "&aElőmozdítása &b{0}&a a pályán &b{1}&a-tól/-től &b{2}&a-nak/-nek &b{3}&a a szövegkörnyezetben {4}&a."
+user-promote-error-endoftrack: "&aA pálya vége &b{0}&a elérte. Nem lehetett népszerűsíteni &b{1}&a."
+user-promote-error-malformed: >
+  {PREFIX}&aA következő csoport a pályán, &b{0}&a, nem létezik többé. Nem sikerült népszerűsíteni a felhasználót.\n
+  {PREFIX}&aVagy hozzon létre egy csoportot, vagy távolítsa el a zeneszámból, és próbálkozzon újra.
+user-demote-success: "&aLefokozandó &b{0}&a a pályán &b{1}&a-tól/-től &b{2}&a-nak/-nek &b{3}&a a szövegkörnyezetben {4}&a."
+user-demote-endoftrack: "&aA pálya vége &b{0}&a, így elérte &b{1}&a eltávolították &b{2}&a."
+user-demote-error-malformed: >
+  {PREFIX}&aAz előző csoport a pályán, &b{0}&a, nem létezik többé. Nem lehet lecsökkenteni a felhasználót.\n
+  {PREFIX}&aVagy hozzon létre egy csoportot, vagy távolítsa el a zeneszámból, és próbálkozzon újra.
+group-info-general: >
+  {PREFIX}&b&l> &bCsoport info: &f{0}\n
+  {PREFIX}&f- &3Megjelenítendő név: &f{1}\n
+  {PREFIX}&f- &3Súly: &f{2}\n
+  {PREFIX}&f- &aGrófok:\n
+  {PREFIX}&f-    &3Csomópontok: &a{3}\n
+  {PREFIX}&f-    &3Jogok: &a{4}\n
+  {PREFIX}&f-    &3Előtagok: &a{5}\n
+  {PREFIX}&f-    &3Utótagok: &a{6}\n
+  {PREFIX}&f-    &3Meta: &a{7}
+group-set-weight: "&aA súly beállítása &b{0} &b{1}&a csoporthoz."
+track-info: >
+  {PREFIX}&b&l> &bPálya megjelenítése: &f{0}\n
+  {PREFIX}&f- &7Pálya: &f{1}
+track-clear: "&b{0}&a csoportok nyomvonalát törölték."
+track-append-success: "&aCsoport &b{0}&a csatolták a követéshez &b{1}&a."
+track-insert-success: "&aCsoport &b{0}&a beillesztésre került a pályára &b{1}&a helyzetben &b{2}&a."
+track-insert-error-number: "&cVárható szám, de helyette beérkezett: {0}"
+track-insert-error-invalid-pos: "&cNem helyezhető be a pozícióba &4{0}&c. &7(érvénytelen pozíció)"
+track-remove-success: "&aCsoport &b{0}&a eltávolították a pályáról &b{1}&a."
+log-load-error: "&cA napló nem tölthető be."
+log-invalid-page: "&cÉrvénytelen oldalszám."
+log-invalid-page-range: "&cÉrvénytelen oldalszám. Kérjük, adjon meg egy értéket &41&c és &4{0}&c."
+log-no-entries: "&bNincs megjeleníthető naplóbejegyzés."
+log-entry: "&b#{0} -> &8(&7{1} ezelőtt&8) {2}"
+log-notify-console: "&cA konzolra vonatkozó értesítések átváltása nem lehetséges."
+log-notify-toggle-on: "&aEngedélyezve a&b naplózási kimenet."
+log-notify-toggle-off: "&cLetiltva a&b naplózási kimenet."
+log-notify-already-on: "&cMár értesítést kapsz."
+log-notify-already-off: "&cJelenleg nem kap értesítést."
+log-notify-unknown: "&cÁllam ismeretlen. Várandós \"on\" vagy \"off\"."
+log-search-header: "&aA lekérdezés legutóbbi műveleteinek megjelenítése &b{0} &a(oldal &f{1} &f{2}&a-ból/-ből)"
+log-recent-header: "&aA legutóbbi műveletek megjelenítése (oldal &f{0} &f{1}&a-ból/-ből)"
+log-recent-by-header: "&aLegutóbbi fellépések megjelenítése a következővel: &b{0} &a(oldal &f{1} &f{2}&a-ból/-ből)"
+log-history-user-header: "&aA felhasználó előzményeinek megjelenítése &b{0} &a(oldal &f{1} &f{2}&a-ból/-ből)"
+log-history-group-header: "&aA csoport előzményeinek megjelenítése &b{0} &a(oldal &f{1} &f{2}&a-ból/-ből)"
+log-history-track-header: "&aA sáv előzményeinek megjelenítése &b{0} &a(oldal &f{1} &f{2}&a-ból/-ből)"
+log-export-already-exists: "&cHiba: A fájl &4{0}&c már létezik."
+log-export-not-writable: "&cHiba: A fájl &4{0}&c nem írható."
+log-export-empty: "&cA napló üres, ezért nem exportálható."
+log-export-failure: "&cVáratlan hiba történt a fájl írása közben."
+log-export-success: "&aSikeresen exportálta a naplót &b{0}&a."
+import-already-running: "&cEgy másik behozatali folyamat már fut. Kérjük, várjon, amíg befejeződik, és próbálkozzon újra."
+export-already-running: "&cEgy másik exportfolyamat már fut. Kérjük, várjon, amíg befejeződik, és próbálkozzon újra."
+import-log-doesnt-exist: "&cHiba: A fájl &4{0}&c nem létezik."
+import-log-not-readable: "&cHiba: A fájl &4{0}&c nem olvasható."
+import-log-failure: "&cA naplófájl olvasása közben váratlan hiba történt."
+import-progress: "&b(Import) &b-> &f{0}&f% sikeres &7- &b{1}&f/&b{2} &fműveletekkel kiegészítve &c{3} &fhibák."
+import-progress-sin: "&b(Import) &b-> &f{0}&f% sikeres &7- &b{1}&f/&b{2} &fműveletekkel kiegészítve &c{3} &fhiba."
+import-start: "&b(Import) &b-> &fImportálás indítása."
+import-end-complete: "&b(Import) &a&lSIKERES &7- vett &b{0} &7másodperc - &7Nincs hibák."
+import-end-complete-err: "&b(Import) &a&lSIKERES &7- vett &b{0} &7másodperc - &c{1} hibák."
+import-end-complete-err-sin: "&b(Import) &a&lSIKERES &7- vett &b{0} &7másodperc - &c{1} hiba."
+import-end-error-header: >
+  {PREFIX}&b(Import) &7------------> &fHiba megjelenítése #&b{0} &7<------------\n
+  {PREFIX}&b(Import) &fFuttatás közben: &3Parancs #{1}\n
+  {PREFIX}&b(Import) &fParancs: &7{2}\n
+  {PREFIX}&b(Import) &fTípus: &3{3}\n
+  {PREFIX}&b(Import) &fKibocsátás:
+import-end-error-content: "&b(Import) &b-> &c{0}"
+import-end-error-footer: "&b(Import) &7<------------------------------------------>"
+
+command-specs:
+  user:
+    description: "Felhasználói parancsok"
+    usage: "/%s user <felhasználó>"
+  group:
+    description: "Csoport parancsok"
+    usage: "/%s group <csoport>"
+  track:
+    description: "Sávparancsok"
+    usage: "/%s track <track>"
+  log:
+    description: "Napló parancsok"
+    usage: "/%s log"
+  sync:
+    description: "A szinkronizálás megváltozik a tárolóval"
+    usage: "/%s sync"
+  info:
+    description: "Általános plugin info nyomtatása"
+    usage: "/%s info"
+  verbose:
+    description: "Rendszeres engedély ellenőrzése"
+    usage: "/%s verbose <true|false> [szűrő]"
+    args:
+      "on|record|off|paste": "hogy bekapcsolják/kikapcsolják a naplózást, vagy beillesztik-e a naplózott kimenetet"
+      "filter": "a szűrő a bejegyzések ellen"
+      "--slim": "hozzáad \"--slim\" a nyomkövetési adatok kizárása a beillesztett kimenetből"
+  tree:
+    description: "Hozzon létre egy fa nézetet az engedélyekről"
+    usage: "/%s tree [kiválasztás] [max. szint] [játékos]"
+    args:
+      "selection": "a fa gyökere. Meghatározza \".\", hogy az összes engedélyt tartalmazza"
+      "max level": "hány fiókszintet kell visszaküldeni"
+      "player": "az elérhető játékos nevét ellenőrizni"
+  search:
+    description: "Keressen olyan felhasználókat/csoportokat, akiknek engedélye van"
+    usage: "/%s search <jog>"
+    args:
+      "permission": "a keresési engedély"
+      "page": "a megtekinteni kívánt oldalt"
+  check:
+    description: "Végezzen el egy szabványos engedélyt egy elérhető játékoson"
+    usage: "/%s check <felhasználó> <jog>"
+    args:
+      "user": "a felhasználó ellenőrizni"
+      "permission": "az ellenőrzés engedélye"
+  network-sync:
+    description: "A szinkronizálás a tárhely módosításával történik, és kérni fogja, hogy a hálózaton lévő összes többi szerver ugyanezt tegye"
+    usage: "/%s networksync"
+  import:
+    description: "Adatok importálása fájlból"
+    usage: "/%s import <fájl>"
+    args:
+      "file": "az importálni kívánt fájl"
+  export:
+    description: "Adatok exportálása egy fájlba"
+    usage: "/%s export <fájl>"
+    args:
+      "file": "az exportálni kívánt fájl"
+  reload-config:
+    description: "Betölt néhány konfigurációs beállítást"
+    usage: "/%s reloadconfig"
+  bulk-update:
+    description: "Végezzen ömlesztett változás lekérdezéseket az összes adaton"
+    usage: "/%s bulkupdate"
+    args:
+      "data type": "a megváltoztatott adatok típusa. ('all', 'users' vagy 'groups')"
+      "action": "az elvégzendő művelet az adatokon. ('update' vagy 'delete')"
+      "action field": "a cselekvési terület. Csak a szükséges 'update'. ('permission', 'server' vagy 'world')"
+      "action value": "a cserélendő érték. Csak a szükséges 'update'."
+      "constraint...": "a frissítéshez szükséges korlátokat"
+  migration:
+    description: "Migrációs parancsok"
+    usage: "/%s migration"
+  apply-edits:
+    description: "A webszerkesztő által végrehajtott engedély módosításokat alkalmazza"
+    usage: "/%s applyedits <kód> [cél]"
+    args:
+      "code": "az adatok egyedi kódja"
+      "target": "aki az adatokat alkalmazza"
+  create-group:
+    description: "Létrehoz egy új csoportot"
+    usage: "/%s creategroup <csoport>"
+    args:
+      "name": "a csoport neve"
+  delete-group:
+    description: "Csoport eltávolítása"
+    usage: "/%s deletegroup <csoport>"
+    args:
+      "name": "a csoport neve"
+  list-groups:
+    description: "Felsorolja az összes csoportot a platformon"
+    usage: "/%s listgroups"
+  create-track:
+    description: "Hozzon létre egy új számot"
+    usage: "/%s createtrack <track>"
+    args:
+      "name": "a pálya neve"
+  delete-track:
+    description: "Egy szám törlése"
+    usage: "/%s deletetrack <track>"
+    args:
+      "name": "a pálya neve"
+  list-tracks:
+    description: "Felsorolja az összes zeneszámot a platformon"
+    usage: "/%s listtracks"
+  user-info:
+    description: "Információkat jelenít meg a felhasználóról"
+  user-switchprimarygroup:
+    description: "A felhasználó elsődleges csoportjának átváltása"
+    args:
+      "group": "a csoport, amelyre váltani"
+  user-promote:
+    description: "Segít a felhasználónak egy számot feltölteni"
+    args:
+      "track": "a pálya, hogy elősegítse a felhasználó fel"
+      "context...": "a felhasználót elősegítő kontextusok"
+  user-demote:
+    description: "Megszünteti a felhasználót egy pályán"
+    args:
+      "track": "a sáv, amely leállítja a felhasználót"
+      "context...": "a felhasználókat lecsökkentő kontextusok"
+  group-info:
+    description: "Információkat ad a csoportról"
+  group-listmembers:
+    description: "Mutassa be a csoportból öröklődő felhasználókat/csoportokat"
+    args:
+      "page": "a megtekinteni kívánt oldal"
+  group-setweight:
+    description: "Beállítja a csoportok súlyát"
+    args:
+      "weight": "a beállítani kívánt súly"
+  group-rename:
+    description: "Átnevezi a csoportot"
+    args:
+      "name": "az új név"
+  group-clone:
+    description: "Klónozza a csoportot"
+    args:
+      "name": "a klónozni kívánt csoport neve"
+  holder-editor:
+    description: "Megnyitja a webes engedély-szerkesztőt"
+  holder-showtracks:
+    description: "Megadja az objektum sávjait"
+  holder-clear:
+    description: "Eltávolítja az összes jogosultságot, szülőt és meta-t"
+    args:
+      "context...": "a szövegszűrés körülményei"
+  permission:
+    description: "Jogok szerkesztése"
+  parent:
+    description: "Örökletek szerkesztése"
+  meta:
+    description: "Metaadatértékek szerkesztése"
+  permission-info:
+    description: "Megadja az objektum engedélyezési csomópontjait"
+    args:
+      "page": "a megtekinteni a kívánt oldalt"
+      "filter": "a string szűrni"
+  permission-set:
+    description: "Beállítja az objektum engedélyét"
+    args:
+      "node": "a beállítandó jog csomópont"
+      "true|false": "a csomópont értéke"
+      "context...": "az engedéllyel rendelkező szövegkörnyezetek"
+  permission-unset:
+    description: "Megadja az objektum engedélyét"
+    args:
+      "node": "az engedéllyel rendelkező csomópont kiiktatásához"
+      "context...": "az engedélyek eltávolításának kontextusai"
+  permission-settemp:
+    description: "Beállítja az objektum ideiglenes engedélyét"
+    args:
+      "node": "a beállítandó engedély csomópont"
+      "true|false": "a csomópont értéke"
+      "duration": "amíg az engedély csomópontja lejárt"
+      "context...": "az engedéllyel rendelkező szövegkörnyezetek"
+  permission-unsettemp:
+    description: "Megadja az ideiglenes engedélyt az objektumhoz"
+    args:
+      "node": "az engedéllyel rendelkező csomópont kiiktatásához"
+      "context...": "az engedélyek eltávolításának kontextusai"
+  permission-check:
+    description: "Ellenőrzi, hogy az objektumnak van-e engedélyezési csomópontja"
+    args:
+      "node": "az engedéllyel rendelkező csomópontot"
+      "context...": "a bejelentkezés körülményei"
+  permission-check-inherits:
+    description: "Ellenőrzi, hogy az objektum örökli-e az engedélyezési csomópontot"
+    args:
+      "node": "az engedéllyel rendelkező csomópontot"
+      "context...": "a bejelentkezés körülményei"
+  parent-info:
+    description: "Megadja azokat a csoportokat, amelyeket ez az objektum örököl"
+  parent-set:
+    description: "Eltávolítja az összes többi csoportot, amelyet az objektum már örököl, és hozzáadja azokat az adott objektumhoz"
+    args:
+      "group": "a csoport, amelyre állít"
+      "context...": "a csoport beállításához szükséges kontextusok"
+  parent-add:
+    description: "Beállít egy másik csoportot az objektumhoz, hogy örökli a jogokat"
+    args:
+      "group": "a csoport örökölni"
+      "context...": "a csoportot örökli a szövegkörnyezetben"
+  parent-remove:
+    description: "Eltávolítja a korábban beállított öröklési szabályt"
+    args:
+      "group": "a csoport eltávolítani"
+      "context...": "a csoport eltávolításának kontextusai"
+  parent-set-track:
+    description: "Eltávolítja az összes többi olyan csoportot, amelyet az adott objektum már örököl az adott sávon, és hozzáadja azokat az adott sávhoz"
+    args:
+      "track": "a pálya bekapcsolásához"
+      "group": "a beállítani kívánt csoportot, vagy a csoport helyzetét az adott sávon"
+      "context...": "a csoport beállításához szükséges kontextusok"
+  parent-add-temp:
+    description: "Egy másik csoportot állít be, hogy az objektum átmenetileg átengedi az engedélyeket"
+    args:
+      "group": "a csoport örökölni"
+      "duration": "a csoporttagság időtartamát"
+      "context...": "a csoportot örökli a szövegkörnyezetben"
+  parent-remove-temp:
+    description: "Eltávolítja a korábban beállított ideiglenes öröklési szabályt"
+    args:
+      "group": "a csoport eltávolítani"
+      "context...": "a csoport eltávolításának kontextusai"
+  parent-clear:
+    description: "Törli az összes szülőt"
+    args:
+      "context...": "a szövegszűrés körülményei"
+  parent-clear-track:
+    description: "Törli az összes szülőt egy adott pályán"
+    args:
+      "track": "az eltávolítandó sáv"
+      "context...": "a szövegszűrés körülményei"
+  meta-info:
+    description: "Az összes csevegési meta megjelenítése"
+  meta-set:
+    description: "Meta értéket állít be"
+    args:
+      "key": "a beállítani kívánt kulcs"
+      "value": "a beállítani kívánt érték"
+      "context...": "a meta-pár beillesztésének kontextusai"
+  meta-unset:
+    description: "Megszünteti a meta értéket"
+    args:
+      "key": "a kiiktatás kulcsa"
+      "context...": "a meta-pár eltávolításának kontextusai"
+  meta-settemp:
+    description: "Átmenetileg beállítja a metaértéket"
+    args:
+      "key": "a beállítani kívánt kulcs"
+      "value": "a beállítani kívánt érték"
+      "duration": "amíg a meta érték lejár"
+      "context...": "a meta-pár beillesztésének kontextusai"
+  meta-unsettemp:
+    description: "Megszünteti az ideiglenes metaértéket"
+    args:
+      "key": "a kiiktatás kulcsa"
+      "context...": "a metapár eltávolításának kontextusai"
+  meta-addprefix:
+    description: "Hozzáad egy előtagot"
+    args:
+      "priority": "az elsőbbséget az előtag hozzáadásához"
+      "prefix": "az előtag karaktersorozat"
+      "context...": "az előtag beillesztésének kontextusai"
+  meta-addsuffix:
+    description: "Hozzáad egy utótagot"
+    args:
+      "priority": "elsőbbséget kell adni az utótagnak a következőhöz:"
+      "suffix": "az utótagsor"
+      "context...": "azok a kontextusok, amelyekhez hozzá kell adni az utótagot"
+  meta-removeprefix:
+    description: "Eltávolít egy előtagot"
+    args:
+      "priority": "az elsőbbség eltávolítása az előtagon"
+      "prefix": "az előtag karaktersorozat"
+      "context...": "az előtagot eltávolító szövegkörnyezetek"
+  meta-removesuffix:
+    description: "Eltávolít egy utótagot"
+    args:
+      "priority": "az elsőbbség, hogy eltávolítsák az utótagot"
+      "suffix": "az utótagsor"
+      "context...": "azok a kontextusok, amelyek eltávolítják az utótagot"
+  meta-addtemp-prefix:
+    description: "Privát előtagot ad át ideiglenesen"
+    args:
+      "priority": "az elsőbbséget az előtag hozzáadásához"
+      "prefix": "az előtag karaktersorozat"
+      "duration": "az időtartam, amíg az előtag lejár"
+      "context...": "az előtag beillesztésének kontextusai"
+  meta-addtemp-suffix:
+    description: "Egy ideiglenes utótagot ad hozzá"
+    args:
+      "priority": "elsőbbséget kell adni az utótagnak a következőhöz:"
+      "suffix": "az utótagsor"
+      "duration": "az időtartam, amíg az utótag lejár"
+      "context...": "azok a kontextusok, amelyekhez hozzá kell adni az utótagot"
+  meta-removetemp-prefix:
+    description: "Eltávolít ideiglenes előtagot"
+    args:
+      "priority": "az elsőbbség eltávolítása az előtagon"
+      "prefix": "az előtag karaktersorozat"
+      "context...": "az előtagot eltávolító szövegkörnyezetek"
+  meta-removetemp-suffix:
+    description: "Eltávolítja az ideiglenes utótagot"
+    args:
+      "priority": "az elsőbbség, hogy eltávolítsák az utótagot"
+      "suffix": "az utótagsor"
+      "context...": "azok a kontextusok, amelyek eltávolítják az utótagot"
+  meta-clear:
+    description: "Törli az összes metódust"
+    args:
+      "type": "a eltávolítandó meta típusa"
+      "context...": "a szövegszűrés körülményei"
+  track-info:
+    description: "Ad információt a pályáról"
+  track-append:
+    description: "Csatol egy csoportot a pálya végére"
+    args:
+      "group": "a csoport hozzáfűzése"
+  track-insert:
+    description: "Beilleszti a csoportot egy adott pozícióban a pálya mentén"
+    args:
+      "group": "beszúrni a kívánt csoport"
+      "position": "a helyzet a csoport beillesztésére (az első pozíció a pályán 1)"
+  track-remove:
+    description: "Eltávolít egy csoportot a sávról"
+    args:
+      "group": "a csoport eltávolítani"
+  track-clear:
+    description: "Törli a csoportokat a pályán"
+  track-rename:
+    description: "Nevezze át a sávot"
+    args:
+      "name": "az új név"
+  track-clone:
+    description: "Klónozza a sávot"
+    args:
+      "name": "a pálya neve, hogy klónozzanak"
+  log-recent:
+    description: "A legutóbbi műveletek megtekintése"
+    args:
+      "user": "a felhasználó neve/uuid-je, hogy kiszűrje"
+      "page": "a megtekinteni kívánt oldalszám"
+  log-search:
+    description: "Keressen egy bejegyzés naplót"
+    args:
+      "query": "keresési lekérdezés"
+      "page": "a megtekinteni kívánt oldalszám"
+  log-notify:
+    description: "A naplóbejelentések módosítása"
+    args:
+      "on|off": "hogy be vagy ki van kapcsolva"
+  log-user-history:
+    description: "A felhasználó előzményeinek megtekintése"
+    args:
+      "user": "a felhasználó neve/uuid-je"
+      "page": "a megtekinteni kívánt oldalszám"
+  log-group-history:
+    description: "A csoport előzményeinek megtekintése"
+    args:
+      "group": "a csoport neve"
+      "page": "a megtekinteni kívánt oldalszám"
+  log-track-history:
+    description: "A sáv előzményeinek megtekintése"
+    args:
+      "track": "a pálya neve"
+      "page": "a megtekinteni kívánt oldalszám"
+  sponge:
+    description: "Extra Szivacs adatok szerkesztése"
+    usage: "/%s sponge <gyűjtemény> <tárgy>"
+    args:
+      "collection": "a lekérdezésre kerülő gyűjtemény"
+      "subject": "módosítani a tárgyat"
+  sponge-permission-info:
+    description: "A tárgyhoz tartozó jogokkal kapcsolatos információkat jeleníti meg"
+    args:
+      "contexts...": "a szövegszűrés körülményei"
+  sponge-permission-set:
+    description: "Engedélyt ad a Tárgyhoz"
+    args:
+      "node": "a beállítandó engedély csomópont"
+      "tristate": "az engedélyhez szükséges érték megadása"
+      "contexts...": "az engedéllyel rendelkező szövegkörnyezetek"
+  sponge-permission-clear:
+    description: "Törli a Tárgy engedélyeit"
+    args:
+      "contexts...": "a szövegkörnyezetek engedélyeinek törlése"
+  sponge-parent-info:
+    description: "Megjeleníti a tárgy szüleinek adatait"
+    args:
+      "contexts...": "a szövegszűrés körülményei"
+  sponge-parent-add:
+    description: "Szülő hozzáadása a tárgyhoz"
+    args:
+      "collection": "az a tárgyi gyűjtemény, ahol a szülő Tárgy"
+      "subject": "a szülő Tárgy neve"
+      "contexts...": "a szülő hozzáadásának összefüggései"
+  sponge-parent-remove:
+    description: "Eltávolít egy szülőt a tárgytól"
+    args:
+      "collection": "az a tárgyi gyűjtemény, ahol a szülő Tárgy"
+      "subject": "a szülő Tárgy neve"
+      "contexts...": "a szülő eltávolításának összefüggései"
+  sponge-parent-clear:
+    description: "Törli a Tárgyi szülőket"
+    args:
+      "contexts...": "a szülők egyértelművé tételének összefüggései"
+  sponge-option-info:
+    description: "Megmutatja a tárggyal kapcsolatos információkat"
+    args:
+      "contexts...": "a szövegszűrés körülményei"
+  sponge-option-set:
+    description: "Beállít egy opciót a Tárgyhoz"
+    args:
+      "key": "a beállítani kívánt kulcs"
+      "value": "a kulcs beállításához"
+      "contexts...": "az opció beállításához szükséges kontextusok"
+  sponge-option-unset:
+    description: "Lefuttat egy opciót a Tárgyhoz"
+    args:
+      "key": "a kiiktatás kulcsa"
+      "contexts...": "a kulcshoz való hozzáférés megszüntetésének kontextusai"
+  sponge-option-clear:
+    description: "Törli a Tárgy opciókat"
+    args:
+      "contexts...": "a szövegkörnyezetek egyértelművé tételének lehetőségei"
+  migration-command:
+    description: "Migrációs parancs"
+  migration-groupmanager:
+    description: "Migrációs parancs"
+    args:
+      "migrate as global": "ha a világi engedélyeket figyelmen kívül kell hagyni, és csak globális áttérést kell alkalmazni"
+  migration-powerfulperms:
+    description: "Migrációs parancs"
+    args:
+      "address": "a PP adatbázis címe"
+      "database": "a PP adatbázis neve"
+      "username": "a DB-be való bejelentkezéshez használt felhasználónév"
+      "password": "a DB-be való bejelentkezéshez használt jelszó"
+      "db table": "a PP tábla neve, ahol a játékos adatait tárolják"
