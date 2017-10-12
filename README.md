@@ -54,7 +54,7 @@ LuckPerms is licensed under the permissive MIT license. Please see [`LICENSE.txt
 ![alt text](https://luckperms.lucko.me/assets/bukkit-compare.png "Feature comparison")
 
 ### Sponge
-![alt text](https://luckperms.lucko.me/assets/sponge-compare.png "Feature comparison")
+LuckPerms is currently the only maintained and 'working' permissions plugin for Sponge servers.
 
 
 ## Thanks
