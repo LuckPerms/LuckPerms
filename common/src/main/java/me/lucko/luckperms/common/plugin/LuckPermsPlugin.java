@@ -376,10 +376,10 @@ public interface LuckPermsPlugin {
     /**
      * Gets a map of extra information to be shown in the info command
      *
-     * @return a map of options, or null
+     * @return a map of options
      */
     default Map<String, Object> getExtraInfo() {
-        return null;
+        return Collections.emptyMap();
     }
 
     /**

@@ -40,7 +40,6 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.DateUtil;
 import me.lucko.luckperms.common.utils.Predicates;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -83,14 +82,12 @@ public class InfoCommand extends SingleCommand {
                 plugin.getCalculatorFactory().getActiveProcessors().stream().collect(Collectors.joining(", "))
         );
 
-        LinkedHashMap<String, Object> platformInfo = plugin.getExtraInfo();
-        if (platformInfo == null || platformInfo.isEmpty()) {
-            return CommandResult.SUCCESS;
-        }
-
-        Message.EMPTY.send(sender, "&f-  &bPlatform Info:");
-        for (Map.Entry<String, Object> e : platformInfo.entrySet()) {
-            Message.EMPTY.send(sender, "&f-     &3" + e.getKey() + ": " + formatValue(e.getValue().toString()));
+        Map<String, Object> platformInfo = plugin.getExtraInfo();
+        if (!platformInfo.isEmpty()) {
+            Message.EMPTY.send(sender, "&f-  &bPlatform Info:");
+            for (Map.Entry<String, Object> e : platformInfo.entrySet()) {
+                Message.EMPTY.send(sender, "&f-     &3" + e.getKey() + ": " + formatValue(e.getValue().toString()));
+            }
         }
 
         return CommandResult.SUCCESS;
