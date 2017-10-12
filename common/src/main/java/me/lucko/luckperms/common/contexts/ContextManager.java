@@ -56,6 +56,20 @@ public interface ContextManager<T> {
     Contexts getApplicableContexts(@NonNull T subject);
 
     /**
+     * Gets the contexts from the static calculators in this manager.
+     *
+     * @return the current active static contexts
+     */
+    ImmutableContextSet getStaticContext();
+
+    /**
+     * Gets the contexts from the static calculators in this manager.
+     *
+     * @return the current active static contexts
+     */
+    Contexts getStaticContexts();
+
+    /**
      * Forms a {@link Contexts} instance from an {@link ImmutableContextSet}.
      *
      * @param subject the subject
@@ -65,11 +79,21 @@ public interface ContextManager<T> {
     Contexts formContexts(T subject, ImmutableContextSet contextSet);
 
     /**
+     * Forms a {@link Contexts} instance from an {@link ImmutableContextSet}.
+     *
+     * @param contextSet the context set
+     * @return a contexts instance
+     */
+    Contexts formContexts(ImmutableContextSet contextSet);
+
+    /**
      * Registers a context calculator with the manager.
      *
      * @param calculator the calculator
      */
-    void registerCalculator(ContextCalculator<T> calculator);
+    default void registerCalculator(ContextCalculator<T> calculator) {
+        registerCalculator(calculator, false);
+    }
 
     /**
      * Registers a context calculator with the manager.
@@ -78,13 +102,6 @@ public interface ContextManager<T> {
      * @param isStatic if the calculator is static. (if it allows a null subject parameter)
      */
     void registerCalculator(ContextCalculator<T> calculator, boolean isStatic);
-
-    /**
-     * Gets the contexts from the static calculators in this manager.
-     *
-     * @return the current active static contexts
-     */
-    ImmutableContextSet getStaticContexts();
 
     /**
      * Invalidates the lookup cache for a given subject

@@ -26,12 +26,14 @@
 package me.lucko.luckperms.common.primarygroup;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NonNull;
 import lombok.Setter;
 
 import me.lucko.luckperms.common.model.User;
 
-@RequiredArgsConstructor
+/**
+ * Simple implementation of {@link PrimaryGroupHolder}, which just returns the stored value.
+ */
 public class StoredHolder implements PrimaryGroupHolder {
 
     protected final User user;
@@ -39,6 +41,10 @@ public class StoredHolder implements PrimaryGroupHolder {
     @Getter
     @Setter
     private String storedValue = null;
+
+    public StoredHolder(@NonNull User user) {
+        this.user = user;
+    }
 
     public String getValue() {
         return storedValue;

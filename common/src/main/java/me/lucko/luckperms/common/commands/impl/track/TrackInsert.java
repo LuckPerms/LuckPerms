@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.commands.impl.track;
 
+import me.lucko.luckperms.api.DataMutateResult;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -40,7 +41,6 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.List;
 
@@ -77,19 +77,23 @@ public class TrackInsert extends SubCommand<Track> {
         }
 
         try {
-            track.insertGroup(group, pos - 1);
-            Message.TRACK_INSERT_SUCCESS.send(sender, group.getName(), track.getName(), pos);
-            if (track.getGroups().size() > 1) {
-                Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), group.getName()));
+            DataMutateResult result = track.insertGroup(group, pos - 1);
+
+            if (result.asBoolean()) {
+                Message.TRACK_INSERT_SUCCESS.send(sender, group.getName(), track.getName(), pos);
+                if (track.getGroups().size() > 1) {
+                    Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), group.getName()));
+                }
+                ExtendedLogEntry.build().actor(sender).acted(track)
+                        .action("insert " + group.getName() + " " + pos)
+                        .build().submit(plugin, sender);
+                save(track, sender, plugin);
+                return CommandResult.SUCCESS;
+            } else {
+                Message.TRACK_ALREADY_CONTAINS.send(sender, track.getName(), group.getName());
+                return CommandResult.STATE_ERROR;
             }
-            ExtendedLogEntry.build().actor(sender).acted(track)
-                    .action("insert " + group.getName() + " " + pos)
-                    .build().submit(plugin, sender);
-            save(track, sender, plugin);
-            return CommandResult.SUCCESS;
-        } catch (ObjectAlreadyHasException e) {
-            Message.TRACK_ALREADY_CONTAINS.send(sender, track.getName(), group.getName());
-            return CommandResult.STATE_ERROR;
+
         } catch (IndexOutOfBoundsException e) {
             Message.TRACK_INSERT_ERROR_INVALID_POS.send(sender, pos);
             return CommandResult.INVALID_ARGS;

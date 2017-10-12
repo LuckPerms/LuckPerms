@@ -48,6 +48,7 @@ import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.api.delegates.PermissionHolderDelegate;
 import me.lucko.luckperms.common.buffers.Cache;
 import me.lucko.luckperms.common.caching.MetaAccumulator;
+import me.lucko.luckperms.common.caching.handlers.StateListener;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.contexts.ContextSetComparator;
 import me.lucko.luckperms.common.contexts.ExtractedContexts;
@@ -208,7 +209,7 @@ public abstract class PermissionHolder {
      * A set of runnables which are called when this objects state changes.
      */
     @Getter
-    private final Set<Runnable> stateListeners = ConcurrentHashMap.newKeySet();
+    private final Set<StateListener> stateListeners = ConcurrentHashMap.newKeySet();
 
     private void invalidateCache() {
         nodesCopy.invalidate();
@@ -216,9 +217,9 @@ public abstract class PermissionHolder {
         weightCache.invalidate();
 
         // Invalidate listeners
-        for (Runnable r : stateListeners) {
+        for (StateListener listener : stateListeners) {
             try {
-                r.run();
+                listener.onStateChange();
             } catch (Exception e) {
                 e.printStackTrace();
             }

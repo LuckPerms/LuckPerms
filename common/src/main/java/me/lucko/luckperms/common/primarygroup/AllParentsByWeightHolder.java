@@ -25,51 +25,31 @@
 
 package me.lucko.luckperms.common.primarygroup;
 
-import lombok.NonNull;
-
 import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.contexts.ExtractedContexts;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.User;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-public class AllParentsByWeightHolder extends StoredHolder {
-
-    private String cachedValue = null;
-    private boolean useCached = false;
-
-    public AllParentsByWeightHolder(@NonNull User user) {
+public class AllParentsByWeightHolder extends CachedPrimaryGroupHolder {
+    public AllParentsByWeightHolder(User user) {
         super(user);
-        user.getStateListeners().add(() -> useCached = false);
     }
 
     @Override
-    public String getValue() {
-        if (useCached) {
-            return cachedValue;
-        }
-
+    protected String calculateValue() {
         Contexts contexts = user.getPlugin().getContextForUser(user);
         if (contexts == null) {
-            contexts = new Contexts(
-                    user.getPlugin().getContextManager().getStaticContexts(),
-                    user.getPlugin().getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
-                    user.getPlugin().getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
-                    true,
-                    user.getPlugin().getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
-                    user.getPlugin().getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
-                    false
-            );
+            contexts = user.getPlugin().getContextManager().getStaticContexts();
         }
 
         // hack to get a list of groups the holder is inheriting from
-        Set<String> groupNames = new HashSet<>();
+        Set<String> groupNames = new LinkedHashSet<>();
         user.resolveInheritances(new NoopList<>(), groupNames, ExtractedContexts.generate(contexts));
 
         List<Group> groups = new ArrayList<>();
@@ -93,9 +73,7 @@ public class AllParentsByWeightHolder extends StoredHolder {
             }
         }
 
-        cachedValue = bestGroup == null ? null : bestGroup.getName();
-        useCached = true;
-        return cachedValue;
+        return bestGroup == null ? null : bestGroup.getName();
     }
 
     private static final class NoopList<E> extends AbstractList<E> implements List<E> {

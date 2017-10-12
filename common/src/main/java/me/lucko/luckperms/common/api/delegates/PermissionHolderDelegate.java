@@ -438,12 +438,12 @@ public class PermissionHolderDelegate implements PermissionHolder {
 
     @Override
     public List<LocalizedNode> resolveInheritances(Contexts contexts) {
-        return null;
+        return handle.resolveInheritances(ExtractedContexts.generate(contexts));
     }
 
     @Override
     public List<LocalizedNode> resolveInheritances() {
-        return null;
+        return handle.resolveInheritances();
     }
 
     @Override

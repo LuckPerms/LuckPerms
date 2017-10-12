@@ -48,7 +48,6 @@ import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.exceptions.ObjectLacksException;
 
 import java.util.List;
 import java.util.Set;
@@ -120,7 +119,7 @@ public class UserDemote extends SubCommand<User> {
         final String previous;
         try {
             previous = track.getPrevious(old);
-        } catch (ObjectLacksException e) {
+        } catch (IllegalArgumentException e) {
             Message.TRACK_DOES_NOT_CONTAIN.send(sender, track.getName(), old);
             return CommandResult.STATE_ERROR;
         }
@@ -131,17 +130,15 @@ public class UserDemote extends SubCommand<User> {
         }
 
         if (previous == null) {
-
             user.unsetPermission(oldNode);
-
             Message.USER_DEMOTE_ENDOFTRACK.send(sender, track.getName(), user.getFriendlyName(), old);
 
             ExtendedLogEntry.build().actor(sender).acted(user)
                     .action("demote " + args.stream().collect(Collectors.joining(" ")))
                     .build().submit(plugin, sender);
+
             save(user, sender, plugin);
             plugin.getApiProvider().getEventFactory().handleUserDemote(user, track, old, null);
-
             return CommandResult.SUCCESS;
         }
 

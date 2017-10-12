@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.commands.impl.track;
 
+import me.lucko.luckperms.api.DataMutateResult;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.CommandException;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -40,7 +41,6 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 
 import java.util.List;
 
@@ -68,8 +68,9 @@ public class TrackAppend extends SubCommand<Track> {
             return CommandResult.LOADING_ERROR;
         }
 
-        try {
-            track.appendGroup(group);
+        DataMutateResult result = track.appendGroup(group);
+
+        if (result.asBoolean()) {
             Message.TRACK_APPEND_SUCCESS.send(sender, group.getName(), track.getName());
             if (track.getGroups().size() > 1) {
                 Message.EMPTY.send(sender, Util.listToArrowSep(track.getGroups(), group.getName()));
@@ -79,7 +80,7 @@ public class TrackAppend extends SubCommand<Track> {
                     .build().submit(plugin, sender);
             save(track, sender, plugin);
             return CommandResult.SUCCESS;
-        } catch (ObjectAlreadyHasException e) {
+        } else {
             Message.TRACK_ALREADY_CONTAINS.send(sender, track.getName(), group.getName());
             return CommandResult.STATE_ERROR;
         }

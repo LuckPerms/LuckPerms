@@ -23,31 +23,41 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit.contexts;
+package me.lucko.luckperms.common.primarygroup;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.bukkit.LPBukkitPlugin;
-import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.contexts.AbstractContextManager;
+import me.lucko.luckperms.common.buffers.Cache;
+import me.lucko.luckperms.common.caching.handlers.StateListener;
+import me.lucko.luckperms.common.model.User;
 
-import org.bukkit.entity.Player;
+/**
+ * Abstract implementation of {@link StateListener} which caches all lookups.
+ */
+public abstract class CachedPrimaryGroupHolder extends StoredHolder implements StateListener {
 
-public class BukkitContextManager extends AbstractContextManager<Player> {
-    public BukkitContextManager(LPBukkitPlugin plugin) {
-        super(plugin);
+    // cache lookups
+    private final Cache<String> cache = new Cache<String>() {
+        @Override
+        protected String supply() {
+            return calculateValue();
+        }
+    };
+
+    public CachedPrimaryGroupHolder(User user) {
+        super(user);
+        user.getStateListeners().add(this);
+    }
+
+    protected abstract String calculateValue();
+
+    @Override
+    public String getValue() {
+        String s = cache.get();
+        return s != null ? s : getStoredValue();
     }
 
     @Override
-    public Contexts formContexts(Player subject, ImmutableContextSet contextSet) {
-        return new Contexts(
-                contextSet,
-                plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
-                plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
-                true,
-                plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
-                plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
-                subject.isOp()
-        );
+    public void onStateChange() {
+        cache.invalidate();
     }
+
 }

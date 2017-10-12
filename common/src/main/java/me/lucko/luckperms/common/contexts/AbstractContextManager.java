@@ -35,6 +35,8 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.context.ContextCalculator;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
+import me.lucko.luckperms.common.config.ConfigKeys;
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -47,6 +49,7 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class AbstractContextManager<T> implements ContextManager<T> {
 
+    protected final LuckPermsPlugin plugin;
     private final List<ContextCalculator<T>> calculators = new CopyOnWriteArrayList<>();
     private final List<ContextCalculator<?>> staticCalculators = new CopyOnWriteArrayList<>();
 
@@ -56,9 +59,14 @@ public abstract class AbstractContextManager<T> implements ContextManager<T> {
             .expireAfterWrite(50L, TimeUnit.MILLISECONDS) // expire roughly every tick
             .build(new Loader());
 
+    protected AbstractContextManager(LuckPermsPlugin plugin) {
+        this.plugin = plugin;
+    }
+
     @Override
     public ImmutableContextSet getApplicableContext(@NonNull T subject) {
         // this is actually already immutable, but the Contexts method signature returns the interface.
+        // using the makeImmutable method is faster than casting
         return getApplicableContexts(subject).getContexts().makeImmutable();
     }
 
@@ -68,8 +76,30 @@ public abstract class AbstractContextManager<T> implements ContextManager<T> {
     }
 
     @Override
-    public void registerCalculator(ContextCalculator<T> calculator) {
-        registerCalculator(calculator, false);
+    public ImmutableContextSet getStaticContext() {
+        MutableContextSet accumulator = MutableContextSet.create();
+        for (ContextCalculator<?> calculator : staticCalculators) {
+            calculator.giveApplicableContext(null, accumulator);
+        }
+        return accumulator.makeImmutable();
+    }
+
+    @Override
+    public Contexts getStaticContexts() {
+        return formContexts(getStaticContext());
+    }
+
+    @Override
+    public Contexts formContexts(ImmutableContextSet contextSet) {
+        return new Contexts(
+                contextSet,
+                plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
+                plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
+                true,
+                plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
+                plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
+                false
+        );
     }
 
     @Override
@@ -80,15 +110,6 @@ public abstract class AbstractContextManager<T> implements ContextManager<T> {
         if (isStatic) {
             staticCalculators.add(0, calculator);
         }
-    }
-
-    @Override
-    public ImmutableContextSet getStaticContexts() {
-        MutableContextSet accumulator = MutableContextSet.create();
-        for (ContextCalculator<?> calculator : staticCalculators) {
-            calculator.giveApplicableContext(null, accumulator);
-        }
-        return accumulator.makeImmutable();
     }
 
     @Override

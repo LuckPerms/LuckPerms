@@ -23,31 +23,15 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.bukkit.contexts;
+package me.lucko.luckperms.common.caching.handlers;
 
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
-import me.lucko.luckperms.bukkit.LPBukkitPlugin;
-import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.contexts.AbstractContextManager;
+import me.lucko.luckperms.common.model.PermissionHolder;
 
-import org.bukkit.entity.Player;
+/**
+ * Represents an object which is notified when the state of a {@link PermissionHolder} changes.
+ */
+public interface StateListener {
 
-public class BukkitContextManager extends AbstractContextManager<Player> {
-    public BukkitContextManager(LPBukkitPlugin plugin) {
-        super(plugin);
-    }
+    void onStateChange();
 
-    @Override
-    public Contexts formContexts(Player subject, ImmutableContextSet contextSet) {
-        return new Contexts(
-                contextSet,
-                plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
-                plugin.getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
-                true,
-                plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
-                plugin.getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
-                subject.isOp()
-        );
-    }
 }

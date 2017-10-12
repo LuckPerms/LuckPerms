@@ -188,10 +188,10 @@ public final class GroupDelegate extends PermissionHolderDelegate implements Gro
         if (!(o instanceof GroupDelegate)) return false;
 
         GroupDelegate other = (GroupDelegate) o;
-        return this.getName().equals(other.getName());
+        return handle.equals(other.handle);
     }
 
     public int hashCode() {
-        return this.getName().hashCode();
+        return handle.hashCode();
     }
 }

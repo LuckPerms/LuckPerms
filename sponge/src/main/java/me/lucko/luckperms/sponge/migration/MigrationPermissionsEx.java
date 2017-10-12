@@ -41,7 +41,6 @@ import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.utils.Predicates;
-import me.lucko.luckperms.exceptions.ObjectAlreadyHasException;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
 
@@ -161,9 +160,7 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
             for (String groupName : e.getValue().values()) {
                 Group group = plugin.getGroupManager().getIfLoaded(groupName);
                 if (group != null) {
-                    try {
-                        track.appendGroup(group);
-                    } catch (ObjectAlreadyHasException ignored) {}
+                    track.appendGroup(group);
                 }
             }
         }

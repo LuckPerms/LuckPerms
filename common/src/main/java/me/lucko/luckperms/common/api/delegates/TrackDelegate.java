@@ -69,32 +69,40 @@ public final class TrackDelegate implements Track {
 
     @Override
     public String getNext(@NonNull Group current) throws ObjectLacksException {
-        return handle.getNext(GroupDelegate.cast(current));
+        try {
+            return handle.getNext(GroupDelegate.cast(current));
+        } catch (IllegalArgumentException e) {
+            throw new ObjectLacksException();
+        }
     }
 
     @Override
     public String getPrevious(@NonNull Group current) throws ObjectLacksException {
-        return handle.getPrevious(GroupDelegate.cast(current));
+        try {
+            return handle.getPrevious(GroupDelegate.cast(current));
+        } catch (IllegalArgumentException e) {
+            throw new ObjectLacksException();
+        }
     }
 
     @Override
     public void appendGroup(@NonNull Group group) throws ObjectAlreadyHasException {
-        handle.appendGroup(GroupDelegate.cast(group));
+        handle.appendGroup(GroupDelegate.cast(group)).throwException();
     }
 
     @Override
     public void insertGroup(@NonNull Group group, @NonNull int position) throws ObjectAlreadyHasException, IndexOutOfBoundsException {
-        handle.insertGroup(GroupDelegate.cast(group), position);
+        handle.insertGroup(GroupDelegate.cast(group), position).throwException();
     }
 
     @Override
     public void removeGroup(@NonNull Group group) throws ObjectLacksException {
-        handle.removeGroup(GroupDelegate.cast(group));
+        handle.removeGroup(GroupDelegate.cast(group)).throwException();
     }
 
     @Override
     public void removeGroup(@NonNull String group) throws ObjectLacksException {
-        handle.removeGroup(group);
+        handle.removeGroup(group).throwException();
     }
 
     @Override
@@ -117,10 +125,10 @@ public final class TrackDelegate implements Track {
         if (!(o instanceof TrackDelegate)) return false;
 
         TrackDelegate other = (TrackDelegate) o;
-        return this.getName().equals(other.getName());
+        return handle.equals(other.handle);
     }
 
     public int hashCode() {
-        return this.getName().hashCode();
+        return handle.hashCode();
     }
 }
