@@ -137,7 +137,7 @@ public class NodeFactory {
 
     public static String nodeAsCommand(Node node, String id, boolean group, boolean set) {
         StringBuilder sb = new StringBuilder();
-        sb.append("/luckperms ").append(group ? "group " : "user ").append(id).append(" ");
+        sb.append(group ? "group " : "user ").append(id).append(" ");
 
         if (node.isGroupNode()) {
             sb.append(node.isTemporary() ? (set ? "parent addtemp " : "parent removetemp ") : (set ? "parent add " : "parent remove "));

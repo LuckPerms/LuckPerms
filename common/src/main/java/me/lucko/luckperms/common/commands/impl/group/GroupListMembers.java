@@ -197,8 +197,7 @@ public class GroupListMembers extends SubCommand<Group> {
                 "&7Click to remove this parent from " + holderName
         ), Constants.FORMAT_CHAR));
 
-        String command = NodeFactory.nodeAsCommand(perm.asNode(), holderName, group, false)
-                .replace("/luckperms", "/" + label);
+        String command = "/" + label + " " + NodeFactory.nodeAsCommand(perm.asNode(), holderName, group, false);
 
         return component -> {
             component.hoverEvent(hoverEvent);

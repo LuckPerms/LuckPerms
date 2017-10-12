@@ -113,7 +113,7 @@ public class Exporter implements Runnable {
 
             for (Group group : groups) {
                 if (!group.getName().equals("default")) {
-                    write(writer, "/luckperms creategroup " + group.getName());
+                    write(writer, "/lp creategroup " + group.getName());
                 }
             }
 
@@ -124,7 +124,7 @@ public class Exporter implements Runnable {
 
                 write(writer, "# Export group: " + group.getName());
                 for (Node node : group.getEnduringNodes().values()) {
-                    write(writer, NodeFactory.nodeAsCommand(node, group.getName(), true, true));
+                    write(writer, "/lp " + NodeFactory.nodeAsCommand(node, group.getName(), true, true));
                 }
                 write(writer, "");
                 log.logAllProgress("Exported {} groups so far.", groupCount.incrementAndGet());
@@ -144,7 +144,7 @@ public class Exporter implements Runnable {
                 // Create the actual tracks first
                 write(writer, "# Create tracks");
                 for (Track track : tracks) {
-                    write(writer, "/luckperms createtrack " + track.getName());
+                    write(writer, "/lp createtrack " + track.getName());
                 }
 
                 write(writer, "");
@@ -153,7 +153,7 @@ public class Exporter implements Runnable {
                 for (Track track : plugin.getTrackManager().getAll().values()) {
                     write(writer, "# Export track: " + track.getName());
                     for (String group : track.getGroups()) {
-                        write(writer, "/luckperms track " + track.getName() + " append " + group);
+                        write(writer, "/lp track " + track.getName() + " append " + group);
                     }
                     write(writer, "");
                     log.logAllProgress("Exported {} tracks so far.", trackCount.incrementAndGet());
@@ -230,15 +230,15 @@ public class Exporter implements Runnable {
                                     continue;
                                 }
 
-                                output.add(NodeFactory.nodeAsCommand(node, user.getUuid().toString(), false, true));
+                                output.add("/lp" + NodeFactory.nodeAsCommand(node, user.getUuid().toString(), false, true));
                             }
 
                             if (!user.getPrimaryGroup().getStoredValue().equalsIgnoreCase("default")) {
-                                output.add("/luckperms user " + user.getUuid().toString() + " switchprimarygroup " + user.getPrimaryGroup().getStoredValue());
+                                output.add("/lp user " + user.getUuid().toString() + " switchprimarygroup " + user.getPrimaryGroup().getStoredValue());
                             }
 
                             if (!inDefault) {
-                                output.add("/luckperms user " + user.getUuid().toString() + " parent remove default");
+                                output.add("/lp user " + user.getUuid().toString() + " parent remove default");
                             }
 
                             plugin.getUserManager().cleanup(user);

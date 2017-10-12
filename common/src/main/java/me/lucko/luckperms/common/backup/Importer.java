@@ -72,10 +72,8 @@ public class Importer implements Runnable {
                 .filter(s -> !s.isEmpty())
                 .filter(s -> !s.startsWith("#"))
                 .filter(s -> !s.startsWith("//"))
-                .map(s -> s.startsWith("/") ? s.substring("/".length()) : s)
-                .map(s -> s.startsWith("perms ") ? s.substring("perms ".length()) : s)
-                .map(s -> s.startsWith("lp ") ? s.substring("lp ".length()) : s)
-                .map(s -> s.startsWith("luckperms ") ? s.substring("luckperms ".length()) : s)
+                .map(s -> s.startsWith("/luckperms ") ? s.substring("/luckperms ".length()) : s)
+                .map(s -> s.startsWith("/lp ") ? s.substring("/lp ".length()) : s)
                 .collect(Collectors.toList());
         this.toExecute = new ArrayList<>();
     }
@@ -91,7 +89,7 @@ public class Importer implements Runnable {
             ImportCommand cmd = new ImportCommand(commandManager, index, command);
             toExecute.add(cmd);
 
-            if (cmd.getCommand().startsWith("creategroup ") || cmd.getCommand().startsWith("createtrack")) {
+            if (cmd.getCommand().startsWith("creategroup ") || cmd.getCommand().startsWith("createtrack ")) {
                 cmd.process(); // process immediately
             }
 
