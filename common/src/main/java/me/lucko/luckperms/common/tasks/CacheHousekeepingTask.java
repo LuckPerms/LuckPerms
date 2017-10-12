@@ -37,7 +37,7 @@ public class CacheHousekeepingTask implements Runnable {
     @Override
     public void run() {
         for (User user : plugin.getUserManager().getAll().values()) {
-            user.cleanup();
+            user.getUserData().doCacheCleanup();
         }
     }
 }

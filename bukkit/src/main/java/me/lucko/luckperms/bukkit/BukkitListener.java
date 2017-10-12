@@ -174,11 +174,6 @@ public class BukkitListener implements Listener {
         }
 
         plugin.refreshAutoOp(player);
-
-        // We assume all users are not op, but those who are need extra calculation.
-        if (player.isOp()) {
-            plugin.doAsync(() -> user.getUserData().preCalculate(plugin.getPreProcessContexts(true)));
-        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)

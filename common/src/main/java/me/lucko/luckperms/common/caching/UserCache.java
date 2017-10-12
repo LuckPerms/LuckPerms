@@ -31,12 +31,10 @@ import lombok.RequiredArgsConstructor;
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
-import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.caching.MetaContexts;
-import me.lucko.luckperms.api.caching.PermissionData;
 import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.contexts.ExtractedContexts;
@@ -59,20 +57,22 @@ public class UserCache implements UserData {
     private final User user;
 
     private final LoadingCache<Contexts, PermissionCache> permission = Caffeine.newBuilder()
-            .expireAfterAccess(10, TimeUnit.MINUTES)
+            .expireAfterAccess(2, TimeUnit.MINUTES)
             .build(new PermissionCacheLoader());
 
     private final LoadingCache<MetaContexts, MetaCache> meta = Caffeine.newBuilder()
-            .expireAfterAccess(10, TimeUnit.MINUTES)
+            .expireAfterAccess(2, TimeUnit.MINUTES)
             .build(new MetaCacheLoader());
 
     @Override
     public PermissionCache getPermissionData(@NonNull Contexts contexts) {
+        //noinspection ConstantConditions
         return permission.get(contexts);
     }
 
     @Override
     public MetaCache getMetaData(@NonNull MetaContexts contexts) {
+        //noinspection ConstantConditions
         return meta.get(contexts);
     }
 
@@ -131,14 +131,14 @@ public class UserCache implements UserData {
 
     @Override
     public void recalculatePermissions() {
-        Set<Contexts> keys = ImmutableSet.copyOf(permission.asMap().keySet());
-        keys.forEach(permission::refresh);
+        Set<Contexts> keys = permission.asMap().keySet();
+        keys.forEach(this::recalculatePermissions);
     }
 
     @Override
     public void recalculateMeta() {
-        Set<MetaContexts> keys = ImmutableSet.copyOf(meta.asMap().keySet());
-        keys.forEach(meta::refresh);
+        Set<MetaContexts> keys = meta.asMap().keySet();
+        keys.forEach(this::recalculateMeta);
     }
 
     @Override
@@ -148,28 +148,25 @@ public class UserCache implements UserData {
 
     @Override
     public void preCalculate(@NonNull Contexts contexts) {
-        permission.get(contexts);
-        meta.get(makeFromMetaContextsConfig(contexts, user.getPlugin()));
+        // pre-calculate just by requesting the data from this cache.
+        // if the data isn't already loaded, it will be calculated.
+        getPermissionData(contexts);
+        getMetaData(contexts);
     }
 
-    public void invalidateCache() {
+    public void invalidateCaches() {
         permission.invalidateAll();
         meta.invalidateAll();
     }
 
     @Override
     public void invalidatePermissionCalculators() {
-        permission.asMap().values().forEach(PermissionData::invalidateCache);
+        permission.asMap().values().forEach(PermissionCache::invalidateCache);
     }
 
-    public void cleanup() {
+    public void doCacheCleanup() {
         permission.cleanUp();
         meta.cleanUp();
-    }
-
-    public void clear() {
-        permission.invalidateAll();
-        meta.invalidateAll();
     }
 
     private final class PermissionCacheLoader implements CacheLoader<Contexts, PermissionCache> {

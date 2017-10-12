@@ -90,7 +90,8 @@ public class LoginHelper {
                 plugin.getStorage().noBuffer().saveUser(user).join();
             }
 
-            user.preCalculateData(false); // Pretty nasty calculation call. Sets up the caching system so data is ready when the user joins.
+            // Does some minimum pre-calculations to (maybe) speed things up later.
+            user.preCalculateData();
         }
 
         final long time = System.currentTimeMillis() - startTime;

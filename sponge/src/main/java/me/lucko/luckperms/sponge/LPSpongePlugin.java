@@ -114,6 +114,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -295,6 +296,9 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
     @Listener
     public void onDisable(GameStoppingServerEvent event) {
+        permissionVault.setShutdown(true);
+        verboseHandler.setShutdown(true);
+
         getLog().info("Closing storage...");
         storage.shutdown();
 
@@ -311,6 +315,8 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
         getLog().info("Shutting down internal scheduler...");
         scheduler.shutdown();
+
+        getLog().info("Goodbye!");
     }
 
     @Listener
@@ -471,18 +477,13 @@ public class LPSpongePlugin implements LuckPermsPlugin {
     }
 
     @Override
-    public Set<Contexts> getPreProcessContexts(boolean op) {
-        return Collections.emptySet();
-    }
-
-    @Override
     public List<Command> getExtraCommands() {
         return Collections.singletonList(new SpongeMainCommand(this));
     }
 
     @Override
-    public LinkedHashMap<String, Object> getExtraInfo() {
-        LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+    public Map<String, Object> getExtraInfo() {
+        Map<String, Object> map = new LinkedHashMap<>();
         map.put("SubjectCollection count", service.getLoadedCollections().size());
         map.put("Subject count",
                 service.getLoadedCollections().values().stream()

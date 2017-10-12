@@ -29,6 +29,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
+import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.common.api.delegates.UserDelegate;
 import me.lucko.luckperms.common.buffers.BufferedRequest;
 import me.lucko.luckperms.common.caching.UserCache;
@@ -161,16 +162,14 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
      * Sets up the UserData cache
      * Blocking call.
      */
-    public synchronized void preCalculateData(boolean op) {
-        userData.preCalculate(getPlugin().getPreProcessContexts(op));
-        getPlugin().onUserRefresh(this);
-    }
+    public synchronized void preCalculateData() {
+        // first try to refresh any existing permissions
+        refreshPermissions();
 
-    /**
-     * Removes the UserData cache from this user
-     */
-    public void unregisterData() {
-        userData.clear();
+        // pre-calc the allowall & global contexts
+        // since contexts change so frequently, it's not worth trying to calculate any more than this.
+        userData.preCalculate(Contexts.allowAll());
+        userData.preCalculate(Contexts.global());
     }
 
     /**
@@ -203,10 +202,6 @@ public class User extends PermissionHolder implements Identifiable<UserIdentifie
         if (giveDefault) {
             getPlugin().getUserManager().giveDefaultIfNeeded(this, false);
         }
-    }
-
-    public void cleanup() {
-        userData.cleanup();
     }
 
     private static final class UserRefreshBuffer extends BufferedRequest<Void> {

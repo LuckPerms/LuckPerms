@@ -191,7 +191,7 @@ public class SpongeUser extends User {
         @Override
         public void invalidateCaches(CacheLevel cacheLevel) {
             // invalidate for all changes
-            parent.getUserData().invalidateCache();
+            parent.getUserData().invalidateCaches();
         }
     }
 

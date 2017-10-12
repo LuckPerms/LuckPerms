@@ -99,7 +99,7 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
                 plugin.getScheduler().asyncLater(() -> {
                     User user = getIfLoaded(plugin.getUuidCache().getUUID(uuid));
                     if (user != null && !plugin.isPlayerOnline(uuid)) {
-                        user.unregisterData();
+                        user.getUserData().invalidateCaches();
                         unload(user);
                         plugin.getUuidCache().clearCache(uuid);
                     }

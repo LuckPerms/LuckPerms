@@ -31,8 +31,6 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.PlatformType;
-import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.bukkit.calculators.BukkitCalculatorFactory;
 import me.lucko.luckperms.bukkit.contexts.BukkitContextManager;
 import me.lucko.luckperms.bukkit.contexts.WorldCalculator;
@@ -82,7 +80,6 @@ import me.lucko.luckperms.common.utils.LoginHelper;
 import me.lucko.luckperms.common.utils.UuidCache;
 import me.lucko.luckperms.common.verbose.VerboseHandler;
 
-import org.bukkit.World;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
@@ -346,7 +343,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
 
             final User user = getUserManager().getIfLoaded(getUuidCache().getUUID(player.getUniqueId()));
             if (user != null) {
-                user.unregisterData();
+                user.getUserData().invalidateCaches();
                 getUserManager().unload(user);
             }
         }
@@ -376,31 +373,7 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         // Bukkit will do this again when #onDisable completes, but we do it early to prevent NPEs elsewhere.
         getServer().getScheduler().cancelTasks(this);
         HandlerList.unregisterAll(this);
-
-        // Null everything
-        vaultHookManager = null;
-        configuration = null;
-        userManager = null;
-        groupManager = null;
-        trackManager = null;
-        storage = null;
-        fileWatcher = null;
-        messagingService = null;
-        uuidCache = null;
-        listener = null;
-        apiProvider = null;
-        log = null;
-        defaultsProvider = null;
-        childPermissionProvider = null;
-        localeManager = null;
-        cachedStateManager = null;
-        contextManager = null;
-        calculatorFactory = null;
-        updateTaskBuffer = null;
-        verboseHandler = null;
-        senderFactory = null;
-        permissionVault = null;
-        logDispatcher = null;
+        getLog().info("Goodbye!");
     }
 
     public void tryVaultHook(boolean force) {
@@ -538,75 +511,8 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
     }
 
     @Override
-    public Set<Contexts> getPreProcessContexts(boolean op) {
-        Set<ContextSet> c = new HashSet<>();
-        c.add(ContextSet.empty());
-        c.add(ContextSet.singleton("server", getConfiguration().get(ConfigKeys.SERVER)));
-
-        // Pre process all worlds
-        c.addAll(getServer().getWorlds().stream()
-                .map(World::getName)
-                .map(s -> {
-                    MutableContextSet set = MutableContextSet.create();
-                    set.add("server", getConfiguration().get(ConfigKeys.SERVER));
-                    set.add("world", s);
-                    set.addAll(configuration.getContextsFile().getStaticContexts());
-                    return set.makeImmutable();
-                })
-                .collect(Collectors.toList())
-        );
-
-        // Pre process the separate Vault server, if any
-        if (!getConfiguration().get(ConfigKeys.SERVER).equals(getConfiguration().get(ConfigKeys.VAULT_SERVER))) {
-            c.add(ContextSet.singleton("server", getConfiguration().get(ConfigKeys.VAULT_SERVER)));
-            c.addAll(getServer().getWorlds().stream()
-                    .map(World::getName)
-                    .map(s -> {
-                        MutableContextSet set = MutableContextSet.create();
-                        set.add("server", getConfiguration().get(ConfigKeys.VAULT_SERVER));
-                        set.add("world", s);
-                        set.addAll(configuration.getContextsFile().getStaticContexts());
-                        return set.makeImmutable();
-                    })
-                    .collect(Collectors.toList())
-            );
-        }
-
-        Set<Contexts> contexts = new HashSet<>();
-
-        // Convert to full Contexts
-        contexts.addAll(c.stream()
-                .map(set -> new Contexts(
-                        set,
-                        getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS),
-                        getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS),
-                        true,
-                        getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS),
-                        getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS),
-                        op
-                ))
-                .collect(Collectors.toSet())
-        );
-
-        // Check for and include varying Vault config options
-        boolean vaultDiff = getConfiguration().get(ConfigKeys.VAULT_INCLUDING_GLOBAL) != getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_PERMS) ||
-                !getConfiguration().get(ConfigKeys.INCLUDING_GLOBAL_WORLD_PERMS) ||
-                !getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_GROUPS) ||
-                !getConfiguration().get(ConfigKeys.APPLYING_GLOBAL_WORLD_GROUPS);
-
-        if (vaultDiff) {
-            contexts.addAll(c.stream()
-                    .map(map -> new Contexts(map, getConfiguration().get(ConfigKeys.VAULT_INCLUDING_GLOBAL), true, true, true, true, op))
-                    .collect(Collectors.toSet())
-            );
-        }
-
-        return contexts;
-    }
-
-    @Override
-    public LinkedHashMap<String, Object> getExtraInfo() {
-        LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+    public Map<String, Object> getExtraInfo() {
+        Map<String, Object> map = new LinkedHashMap<>();
         map.put("Vault Enabled", vaultHookManager != null);
         map.put("Bukkit Defaults count", defaultsProvider.size());
         map.put("Bukkit Child Permissions count", childPermissionProvider.getPermissions().size());

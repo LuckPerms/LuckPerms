@@ -29,7 +29,6 @@ import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Tristate;
-import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.bungee.event.TristateCheckEvent;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
@@ -44,12 +43,10 @@ import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.event.PermissionCheckEvent;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
-import net.md_5.bungee.api.event.ServerConnectEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
 
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @RequiredArgsConstructor
@@ -192,24 +189,4 @@ public class BungeeListener implements Listener {
         e.setResult(result);
     }
 
-    // We don't pre-process all servers, so we have to do it here.
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onServerSwitch(ServerConnectEvent e) {
-        String serverName = e.getTarget().getName();
-        UUID uuid = e.getPlayer().getUniqueId();
-
-        plugin.doAsync(() -> {
-            MutableContextSet set = MutableContextSet.create();
-            set.add("server", plugin.getConfiguration().get(ConfigKeys.SERVER));
-            set.add("world", serverName);
-
-            User user = plugin.getUserManager().getIfLoaded(plugin.getUuidCache().getUUID(uuid));
-            if (user == null) {
-                return;
-            }
-
-            Contexts contexts = plugin.getContextManager().formContexts(e.getPlayer(), set.makeImmutable());
-            user.getUserData().preCalculate(contexts);
-        });
-    }
 }

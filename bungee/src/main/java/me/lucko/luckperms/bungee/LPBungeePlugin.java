@@ -30,8 +30,6 @@ import lombok.Getter;
 import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Logger;
 import me.lucko.luckperms.api.PlatformType;
-import me.lucko.luckperms.api.context.ContextSet;
-import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.bungee.calculators.BungeeCalculatorFactory;
 import me.lucko.luckperms.bungee.contexts.BackendServerCalculator;
 import me.lucko.luckperms.bungee.contexts.BungeeContextManager;
@@ -83,7 +81,6 @@ import net.md_5.bungee.api.plugin.Plugin;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -215,6 +212,9 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
     @Override
     public void onDisable() {
+        permissionVault.setShutdown(true);
+        verboseHandler.setShutdown(true);
+
         getLog().info("Closing storage...");
         storage.shutdown();
 
@@ -231,8 +231,10 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
         getLog().info("Shutting down internal scheduler...");
         scheduler.shutdown();
+
         getProxy().getScheduler().cancel(this);
         getProxy().getPluginManager().unregisterListeners(this);
+        getLog().info("Goodbye!");
     }
 
     @Override
@@ -323,15 +325,5 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
     @Override
     public Sender getConsoleSender() {
         return getSenderFactory().wrap(getProxy().getConsole());
-    }
-
-    @Override
-    public Set<Contexts> getPreProcessContexts(boolean op) {
-        Set<ImmutableContextSet> c = new HashSet<>();
-        c.add(ContextSet.empty());
-        c.add(ContextSet.singleton("server", getConfiguration().get(ConfigKeys.SERVER)));
-        return c.stream()
-                .map(set -> contextManager.formContexts(null, set))
-                .collect(Collectors.toSet());
     }
 }

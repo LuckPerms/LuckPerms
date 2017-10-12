@@ -27,8 +27,6 @@ package me.lucko.luckperms.sponge;
 
 import lombok.RequiredArgsConstructor;
 
-import me.lucko.luckperms.api.caching.UserData;
-import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.locale.Message;
 import me.lucko.luckperms.common.model.User;
@@ -36,7 +34,6 @@ import me.lucko.luckperms.common.utils.LoginHelper;
 import me.lucko.luckperms.common.utils.UuidCache;
 
 import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.command.SendCommandEvent;
@@ -45,15 +42,11 @@ import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.api.world.World;
 
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class SpongeListener {
@@ -140,8 +133,8 @@ public class SpongeListener {
     @IsCancelled(Tristate.UNDEFINED)
     public void onClientLogin(ClientConnectionEvent.Login e) {
         /* Called when the player starts logging into the server.
-               At this point, the users data should be present and loaded.
-               Listening on LOW priority to allow plugins to further modify data here. (auth plugins, etc.) */
+           At this point, the users data should be present and loaded.
+           Listening on LOW priority to allow plugins to further modify data here. (auth plugins, etc.) */
 
         final GameProfile player = e.getProfile();
 
@@ -151,7 +144,7 @@ public class SpongeListener {
 
         final User user = plugin.getUserManager().getIfLoaded(plugin.getUuidCache().getUUID(player.getUniqueId()));
 
-            /* User instance is null for whatever reason. Could be that it was unloaded between asyncpre and now. */
+        /* User instance is null for whatever reason. Could be that it was unloaded between asyncpre and now. */
         if (user == null) {
             deniedLogin.add(player.getUniqueId());
 
@@ -160,29 +153,6 @@ public class SpongeListener {
             e.setMessageCancelled(false);
             //noinspection deprecation
             e.setMessage(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(Message.LOADING_ERROR.asString(plugin.getLocaleManager())));
-            return;
-        }
-
-        // Attempt to pre-process some permissions for the user to save time later. Might not work, but it's better than nothing.
-        Optional<Player> p = e.getCause().first(Player.class);
-        if (p.isPresent()) {
-            MutableContextSet context = MutableContextSet.fromSet(plugin.getContextManager().getApplicableContext(p.get()));
-
-            List<String> worlds = plugin.getGame().isServerAvailable() ? plugin.getGame().getServer().getWorlds().stream()
-                    .map(World::getName)
-                    .collect(Collectors.toList()) : Collections.emptyList();
-
-            plugin.doAsync(() -> {
-                UserData data = user.getUserData();
-                data.preCalculate(plugin.getService().calculateContexts(context.makeImmutable()));
-
-                for (String world : worlds) {
-                    MutableContextSet modified = MutableContextSet.fromSet(context);
-                    modified.removeAll("world");
-                    modified.add("world", world);
-                    data.preCalculate(plugin.getService().calculateContexts(modified.makeImmutable()));
-                }
-            });
         }
     }
 

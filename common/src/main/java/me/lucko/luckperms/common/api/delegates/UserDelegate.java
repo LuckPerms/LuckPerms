@@ -108,7 +108,7 @@ public final class UserDelegate extends PermissionHolderDelegate implements User
 
     @Override
     public void setupDataCache() {
-        handle.preCalculateData(false);
+        handle.preCalculateData();
     }
 
     @Override

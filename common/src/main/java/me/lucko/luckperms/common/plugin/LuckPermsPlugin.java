@@ -55,8 +55,8 @@ import me.lucko.luckperms.common.verbose.VerboseHandler;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -369,14 +369,6 @@ public interface LuckPermsPlugin {
      */
     Set<UUID> getUniqueConnections();
 
-    /**
-     * Gets a set of Contexts that should be pre-processed in advance
-     *
-     * @param op if the user being processed is op
-     * @return a set of contexts
-     */
-    Set<Contexts> getPreProcessContexts(boolean op);
-
     default List<Command> getExtraCommands() {
         return Collections.emptyList();
     }
@@ -386,7 +378,7 @@ public interface LuckPermsPlugin {
      *
      * @return a map of options, or null
      */
-    default LinkedHashMap<String, Object> getExtraInfo() {
+    default Map<String, Object> getExtraInfo() {
         return null;
     }
 

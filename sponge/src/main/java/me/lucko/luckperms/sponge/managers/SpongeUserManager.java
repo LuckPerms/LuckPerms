@@ -85,7 +85,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
                     user.getIoLock().unlock();
 
                     // ok, data is here, let's do the pre-calculation stuff.
-                    user.preCalculateData(false);
+                    user.preCalculateData();
                     return user.sponge();
                 }
 
@@ -97,7 +97,7 @@ public class SpongeUserManager implements UserManager, LPSubjectCollection {
                     throw new RuntimeException();
                 }
 
-                user.preCalculateData(false);
+                user.preCalculateData();
                 return user.sponge();
             });
 
