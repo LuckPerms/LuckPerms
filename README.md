@@ -49,15 +49,15 @@ The project is split up into 5 seperate modules.
 ## License
 LuckPerms is licensed under the permissive MIT license. Please see [`LICENSE.txt`](https://github.com/lucko/LuckPerms/blob/master/LICENSE.txt) for more info.
 
-## LuckPerms vs Other Plugins
+## Why use LuckPerms?
+The main features of LuckPerms are detailed on this wiki page: [Why LuckPerms?](https://github.com/lucko/LuckPerms/wiki/Why-LuckPerms)
+
 ### Bukkit
-![alt text](https://luckperms.lucko.me/assets/bukkit-compare.png "Feature comparison")
+See [here](https://luckperms.lucko.me/assets/bukkit-compare.png) for a comparison chart showing the differences between LuckPerms and other permission plugins for Bukkit.
 
 ### Sponge
 LuckPerms is currently the only maintained and 'working' permissions plugin for Sponge servers.
 
 
 ## Thanks
-[![JProfiler](https://www.ej-technologies.com/images/product_banners/jprofiler_large.png)](http://www.ej-technologies.com/products/jprofiler/overview.html)
-
 Thanks to ej-technologies for granting LuckPerms an open source licence to their [Java Profiling Software](http://www.ej-technologies.com/products/jprofiler/overview.html "Java Profiler").
