@@ -116,11 +116,6 @@ public class SplitBacking extends AbstractBacking {
     }
 
     @Override
-    public boolean cleanupUsers() {
-        return backing.get(types.get("user")).cleanupUsers();
-    }
-
-    @Override
     public Set<UUID> getUniqueUsers() {
         return backing.get(types.get("user")).getUniqueUsers();
     }

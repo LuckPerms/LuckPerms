@@ -98,11 +98,6 @@ public class StorageDelegate implements Storage {
     }
 
     @Override
-    public CompletableFuture<Boolean> cleanupUsers() {
-        return handle.noBuffer().cleanupUsers();
-    }
-
-    @Override
     public CompletableFuture<Set<UUID>> getUniqueUsers() {
         return handle.noBuffer().getUniqueUsers();
     }

@@ -73,8 +73,6 @@ public interface Storage {
 
     CompletableFuture<Boolean> saveUser(User user);
 
-    CompletableFuture<Boolean> cleanupUsers();
-
     CompletableFuture<Set<UUID>> getUniqueUsers();
 
     CompletableFuture<List<HeldPermission<UUID>>> getUsersWithPermission(String permission);

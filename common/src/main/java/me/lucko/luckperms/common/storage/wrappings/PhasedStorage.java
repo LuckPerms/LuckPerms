@@ -132,16 +132,6 @@ public class PhasedStorage implements Storage {
     }
 
     @Override
-    public CompletableFuture<Boolean> cleanupUsers() {
-        phaser.register();
-        try {
-            return backing.cleanupUsers();
-        } finally {
-            phaser.arriveAndDeregister();
-        }
-    }
-
-    @Override
     public CompletableFuture<Set<UUID>> getUniqueUsers() {
         phaser.register();
         try {

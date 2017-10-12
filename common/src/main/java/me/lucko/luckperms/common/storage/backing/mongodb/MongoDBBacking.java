@@ -365,11 +365,6 @@ public class MongoDBBacking extends AbstractBacking {
     }
 
     @Override
-    public boolean cleanupUsers() {
-        return true;
-    }
-
-    @Override
     public Set<UUID> getUniqueUsers() {
         Set<UUID> uuids = new HashSet<>();
         boolean success = call(() -> {

@@ -76,8 +76,6 @@ public abstract class AbstractBacking {
 
     public abstract boolean saveUser(User user);
 
-    public abstract boolean cleanupUsers();
-
     public abstract Set<UUID> getUniqueUsers();
 
     public abstract List<HeldPermission<UUID>> getUsersWithPermission(String permission);

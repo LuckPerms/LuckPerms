@@ -233,39 +233,6 @@ public class JSONBacking extends FlatfileBacking {
     }
 
     @Override
-    public boolean cleanupUsers() {
-        return call("null", () -> {
-            File[] files = usersDir.listFiles((dir, name1) -> name1.endsWith(".json"));
-            if (files == null) return false;
-
-            for (File file : files) {
-                call(file.getName(), () -> {
-                    registerFileAction("users", file);
-
-                    JsonObject object = readObjectFromFile(file);
-
-                    Set<NodeModel> nodes = new HashSet<>();
-                    nodes.addAll(deserializePermissions(object.get("permissions").getAsJsonArray()));
-
-                    boolean shouldDelete = false;
-                    if (nodes.size() == 1) {
-                        for (NodeModel e : nodes) {
-                            // There's only one
-                            shouldDelete = e.getPermission().equalsIgnoreCase("group.default") && e.isValue();
-                        }
-                    }
-
-                    if (shouldDelete) {
-                        file.delete();
-                    }
-                    return true;
-                }, true);
-            }
-            return true;
-        }, false);
-    }
-
-    @Override
     public List<HeldPermission<UUID>> getUsersWithPermission(String permission) {
         ImmutableList.Builder<HeldPermission<UUID>> held = ImmutableList.builder();
         boolean success = call("null", () -> {

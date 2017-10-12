@@ -121,11 +121,6 @@ public class AbstractStorage implements Storage {
     }
 
     @Override
-    public CompletableFuture<Boolean> cleanupUsers() {
-        return makeFuture(backing::cleanupUsers);
-    }
-
-    @Override
     public CompletableFuture<Set<UUID>> getUniqueUsers() {
         return makeFuture(backing::getUniqueUsers);
     }
