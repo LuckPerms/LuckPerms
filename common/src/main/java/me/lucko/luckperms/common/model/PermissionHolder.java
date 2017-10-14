@@ -60,11 +60,13 @@ import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.node.NodeTools;
 import me.lucko.luckperms.common.node.NodeWithContextComparator;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+import me.lucko.luckperms.common.primarygroup.GroupInheritanceComparator;
 import me.lucko.luckperms.common.references.GroupReference;
 import me.lucko.luckperms.common.references.HolderReference;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -204,6 +206,11 @@ public abstract class PermissionHolder {
      */
     @Getter
     private final Lock ioLock = new ReentrantLock();
+
+    /**
+     * Comparator used to ordering groups when calculating inheritance
+     */
+    private final Comparator<Group> inheritanceComparator = GroupInheritanceComparator.getFor(this);
 
     /**
      * A set of runnables which are called when this objects state changes.
@@ -559,10 +566,8 @@ public abstract class PermissionHolder {
             }
         }
 
-        resolvedGroups.sort((o1, o2) -> {
-            int result = Integer.compare(o1.getWeight().orElse(0), o2.getWeight().orElse(0));
-            return result == 1 ? -1 : 1;
-        });
+        // sort the groups according to weight + other factors.
+        resolvedGroups.sort(inheritanceComparator);
 
         for (Group g : resolvedGroups) {
             g.resolveInheritances(accumulator, excludedGroups, context);
@@ -633,10 +638,8 @@ public abstract class PermissionHolder {
             }
         }
 
-        resolvedGroups.sort((o1, o2) -> {
-            int result = Integer.compare(o1.getWeight().orElse(0), o2.getWeight().orElse(0));
-            return result == 1 ? -1 : 1;
-        });
+        // sort the groups according to weight + other factors.
+        resolvedGroups.sort(inheritanceComparator);
 
         for (Group g : resolvedGroups) {
             g.resolveInheritances(accumulator, excludedGroups);
@@ -806,10 +809,8 @@ public abstract class PermissionHolder {
             }
         }
 
-        resolvedGroups.sort((o1, o2) -> {
-            int result = Integer.compare(o1.getWeight().orElse(0), o2.getWeight().orElse(0));
-            return result == 1 ? -1 : 1;
-        });
+        // sort the groups according to weight + other factors.
+        resolvedGroups.sort(inheritanceComparator);
 
         for (Group g : resolvedGroups) {
             g.accumulateMeta(accumulator, excludedGroups, context);
@@ -862,10 +863,8 @@ public abstract class PermissionHolder {
             }
         }
 
-        resolvedGroups.sort((o1, o2) -> {
-            int result = Integer.compare(o1.getWeight().orElse(0), o2.getWeight().orElse(0));
-            return result == 1 ? -1 : 1;
-        });
+        // sort the groups according to weight + other factors.
+        resolvedGroups.sort(inheritanceComparator);
 
         for (Group g : resolvedGroups) {
             g.accumulateMeta(accumulator, excludedGroups);
