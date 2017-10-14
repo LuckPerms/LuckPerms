@@ -103,7 +103,7 @@ temporary-add-behaviour: deny
 # -> parents-by-weight      just use the users most highly weighted parent
 # -> all-parents-by-weight  same as above, but calculates based upon all parents inherited from both
 #                           directly and indirectly
-primary-group-calculation: stored
+primary-group-calculation: parents-by-weight
 
 # If set to false, the plugin will allow a Users primary group to be removed with the
 # 'parent remove' command, and will set their primary group back to default.
