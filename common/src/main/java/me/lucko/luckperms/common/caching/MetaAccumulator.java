@@ -84,19 +84,13 @@ public class MetaAccumulator {
 
         if (n.isPrefix()) {
             Map.Entry<Integer, String> value = n.getPrefix();
-            if (!prefixes.containsKey(value.getKey())) {
-                prefixes.put(value.getKey(), value.getValue());
-            }
-
+            prefixes.putIfAbsent(value.getKey(), value.getValue());
             prefixStack.accumulateToAll(n);
         }
 
         if (n.isSuffix()) {
             Map.Entry<Integer, String> value = n.getSuffix();
-            if (!suffixes.containsKey(value.getKey())) {
-                suffixes.put(value.getKey(), value.getValue());
-            }
-
+            suffixes.putIfAbsent(value.getKey(), value.getValue());
             suffixStack.accumulateToAll(n);
         }
     }

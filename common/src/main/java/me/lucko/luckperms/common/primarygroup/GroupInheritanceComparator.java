@@ -65,7 +65,8 @@ public class GroupInheritanceComparator implements Comparator<Group> {
 
             // one of them is a primary group, and therefore has priority
             if (o1Primary != o2Primary) {
-                return o1Primary ? 1 : -1;
+                // we want the primary group to come first
+                return o1Primary ? -1 : 1;
             }
         }
 
