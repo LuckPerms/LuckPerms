@@ -176,6 +176,8 @@ group-weight:
 # - lowest
 # - highest_own
 # - lowest_own
+# - highest_inherited
+# - lowest_inherited
 # - highest_on_track_<track>
 # - lowest_on_track_<track>
 # - highest_not_on_track_<track>
