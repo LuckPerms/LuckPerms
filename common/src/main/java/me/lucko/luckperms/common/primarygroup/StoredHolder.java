@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.primarygroup;
 
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.Setter;
 
 import me.lucko.luckperms.common.model.User;
 
@@ -39,7 +38,6 @@ public class StoredHolder implements PrimaryGroupHolder {
     protected final User user;
 
     @Getter
-    @Setter
     private String storedValue = null;
 
     public StoredHolder(@NonNull User user) {
@@ -50,4 +48,7 @@ public class StoredHolder implements PrimaryGroupHolder {
         return storedValue;
     }
 
+    public void setStoredValue(String storedValue) {
+        this.storedValue = storedValue == null ? null : storedValue.toLowerCase();
+    }
 }
