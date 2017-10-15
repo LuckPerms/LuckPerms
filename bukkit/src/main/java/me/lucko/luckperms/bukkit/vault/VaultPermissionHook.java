@@ -37,7 +37,6 @@ import me.lucko.luckperms.api.context.MutableContextSet;
 import me.lucko.luckperms.bukkit.LPBukkitPlugin;
 import me.lucko.luckperms.common.caching.PermissionCache;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.contexts.ExtractedContexts;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
@@ -226,7 +225,7 @@ public class VaultPermissionHook extends Permission {
         if (group == null) return false;
 
         // This is a nasty call. Groups aren't cached. :(
-        Map<String, Boolean> permissions = group.exportNodesAndShorthand(ExtractedContexts.generate(createContextForWorldLookup(world)), true);
+        Map<String, Boolean> permissions = group.exportNodesAndShorthand(createContextForWorldLookup(world), true);
         return permissions.containsKey(permission.toLowerCase()) && permissions.get(permission.toLowerCase());
     }
 

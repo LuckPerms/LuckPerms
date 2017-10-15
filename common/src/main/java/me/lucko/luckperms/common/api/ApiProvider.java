@@ -151,7 +151,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public Set<User> getUsers() {
-        return plugin.getUserManager().getAll().values().stream().map(u -> u.getDelegate()).collect(Collectors.toSet());
+        return plugin.getUserManager().getAll().values().stream().map(me.lucko.luckperms.common.model.User::getDelegate).collect(Collectors.toSet());
     }
 
     @Override
@@ -177,7 +177,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public Set<Group> getGroups() {
-        return plugin.getGroupManager().getAll().values().stream().map(g -> g.getDelegate()).collect(Collectors.toSet());
+        return plugin.getGroupManager().getAll().values().stream().map(me.lucko.luckperms.common.model.Group::getDelegate).collect(Collectors.toSet());
     }
 
     @Override
@@ -198,7 +198,7 @@ public class ApiProvider implements LuckPermsApi {
 
     @Override
     public Set<Track> getTracks() {
-        return plugin.getTrackManager().getAll().values().stream().map(t -> t.getDelegate()).collect(Collectors.toSet());
+        return plugin.getTrackManager().getAll().values().stream().map(me.lucko.luckperms.common.model.Track::getDelegate).collect(Collectors.toSet());
     }
 
     @Override

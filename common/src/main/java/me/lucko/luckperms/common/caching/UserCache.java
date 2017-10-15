@@ -37,7 +37,6 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.caching.MetaContexts;
 import me.lucko.luckperms.api.caching.UserData;
 import me.lucko.luckperms.common.config.ConfigKeys;
-import me.lucko.luckperms.common.contexts.ExtractedContexts;
 import me.lucko.luckperms.common.metastacking.SimpleMetaStack;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -89,7 +88,7 @@ public class UserCache implements UserData {
         if (contexts == Contexts.allowAll()) {
             data.setPermissions(user.exportNodesAndShorthand(true));
         } else {
-            data.setPermissions(user.exportNodesAndShorthand(ExtractedContexts.generate(contexts), true));
+            data.setPermissions(user.exportNodesAndShorthand(contexts, true));
         }
 
         return data;
@@ -102,7 +101,7 @@ public class UserCache implements UserData {
         if (contexts.getContexts() == Contexts.allowAll()) {
             data.loadMeta(user.accumulateMeta(newAccumulator(contexts), null));
         } else {
-            data.loadMeta(user.accumulateMeta(newAccumulator(contexts), null, ExtractedContexts.generate(contexts.getContexts())));
+            data.loadMeta(user.accumulateMeta(newAccumulator(contexts), null, contexts.getContexts()));
         }
 
         return data;
@@ -180,7 +179,7 @@ public class UserCache implements UserData {
             if (contexts == Contexts.allowAll()) {
                 oldData.comparePermissions(user.exportNodesAndShorthand(true));
             } else {
-                oldData.comparePermissions(user.exportNodesAndShorthand(ExtractedContexts.generate(contexts), true));
+                oldData.comparePermissions(user.exportNodesAndShorthand(contexts, true));
             }
 
             return oldData;
@@ -198,7 +197,7 @@ public class UserCache implements UserData {
             if (contexts.getContexts() == Contexts.allowAll()) {
                 oldData.loadMeta(user.accumulateMeta(newAccumulator(contexts), null));
             } else {
-                oldData.loadMeta(user.accumulateMeta(newAccumulator(contexts), null, ExtractedContexts.generate(contexts.getContexts())));
+                oldData.loadMeta(user.accumulateMeta(newAccumulator(contexts), null, contexts.getContexts()));
             }
 
             return oldData;

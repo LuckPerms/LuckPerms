@@ -35,7 +35,7 @@ import java.util.concurrent.Executor;
 
 public class LPSpongeScheduler implements LuckPermsScheduler {
     private final LPSpongePlugin plugin;
-    private Set<Task> tasks = ConcurrentHashMap.newKeySet();
+    private final Set<Task> tasks = ConcurrentHashMap.newKeySet();
 
     public LPSpongeScheduler(LPSpongePlugin plugin) {
         this.plugin = plugin;

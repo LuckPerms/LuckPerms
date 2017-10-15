@@ -59,7 +59,7 @@ public class LPBukkitScheduler implements LuckPermsScheduler {
     @Setter
     private boolean useBukkitAsync = false;
 
-    private Set<BukkitTask> tasks = ConcurrentHashMap.newKeySet();
+    private final Set<BukkitTask> tasks = ConcurrentHashMap.newKeySet();
 
     public LPBukkitScheduler(LPBukkitPlugin plugin) {
         this.plugin = plugin;

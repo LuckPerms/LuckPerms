@@ -48,6 +48,7 @@ import javax.annotation.Nullable;
  * <p>Any changes made to permission holding objects will be lost unless the
  * instance is saved back to the {@link Storage}.</p>
  */
+@SuppressWarnings("RedundantThrows")
 public interface PermissionHolder {
 
     /**

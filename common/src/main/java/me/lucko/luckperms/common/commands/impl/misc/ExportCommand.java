@@ -44,7 +44,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ExportCommand extends SingleCommand {
-    private AtomicBoolean running = new AtomicBoolean(false);
+    private final AtomicBoolean running = new AtomicBoolean(false);
 
     public ExportCommand(LocaleManager locale) {
         super(CommandSpec.EXPORT.spec(locale), "Export", CommandPermission.EXPORT, Predicates.not(1));

@@ -165,6 +165,7 @@ public class MongoDBBacking extends AbstractBacking {
         return call(() -> {
             MongoCollection<Document> c = database.getCollection(prefix + "action");
 
+            //noinspection deprecation
             Document doc = new Document()
                     .append("timestamp", entry.getTimestamp())
                     .append("actor", entry.getActor())
@@ -750,6 +751,7 @@ public class MongoDBBacking extends AbstractBacking {
     public static Map<String, Boolean> exportToLegacy(Iterable<Node> nodes) {
         Map<String, Boolean> m = new HashMap<>();
         for (Node node : nodes) {
+            //noinspection deprecation
             m.put(node.toSerializedNode(), node.getValuePrimitive());
         }
         return m;

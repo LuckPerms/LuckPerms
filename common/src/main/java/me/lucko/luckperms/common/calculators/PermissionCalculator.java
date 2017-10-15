@@ -27,6 +27,7 @@ package me.lucko.luckperms.common.calculators;
 
 import lombok.RequiredArgsConstructor;
 
+import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
@@ -42,14 +43,13 @@ import java.util.Map;
  * Calculates and caches permissions
  */
 @RequiredArgsConstructor
-public class PermissionCalculator {
+public class PermissionCalculator implements CacheLoader<String, Tristate> {
     private final LuckPermsPlugin plugin;
     private final PermissionCalculatorMetadata metadata;
     private final List<PermissionProcessor> processors;
 
     // caches lookup calls.
-    private final LoadingCache<String, Tristate> lookupCache = Caffeine.newBuilder()
-            .build(this::lookupPermissionValue);
+    private final LoadingCache<String, Tristate> lookupCache = Caffeine.newBuilder().build(this);
 
     public void invalidateCache() {
         lookupCache.invalidateAll();
@@ -69,6 +69,11 @@ public class PermissionCalculator {
 
         // return the result
         return result;
+    }
+
+    @Override
+    public Tristate load(String s) {
+        return lookupPermissionValue(s);
     }
 
     private Tristate lookupPermissionValue(String permission) {

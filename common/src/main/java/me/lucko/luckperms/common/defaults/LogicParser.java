@@ -68,7 +68,7 @@ public class LogicParser {
             String match = input.substring(i, i2 + 1);
             String matchContent = match.substring(1, match.length() - 1);
 
-            String matchReplacement = ("" + checker.apply(matchContent)).toLowerCase();
+            String matchReplacement = (Boolean.toString(checker.apply(matchContent))).toLowerCase();
 
             input = input.replaceFirst(Pattern.quote(match), matchReplacement);
         }

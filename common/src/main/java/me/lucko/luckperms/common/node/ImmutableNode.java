@@ -28,11 +28,8 @@ package me.lucko.luckperms.common.node;
 import lombok.Getter;
 import lombok.ToString;
 
-import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
 
-import me.lucko.luckperms.api.MetaUtils;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
@@ -56,11 +53,21 @@ import static com.google.common.base.Preconditions.checkState;
  */
 @ToString(of = {"permission", "value", "override", "server", "world", "expireAt", "contexts"})
 public final class ImmutableNode implements Node {
+
+    /**
+     * The character which separates each part of a permission node
+     */
     private static final int NODE_SEPARATOR_CHAR = Character.getNumericValue('.');
 
-    private static final String[] PERMISSION_DELIMS = new String[]{"/", "-", "$", "(", ")", "=", ","};
-    private static final String[] SERVER_WORLD_DELIMS = new String[]{"/", "-"};
-    private static final Splitter META_SPLITTER = Splitter.on(PatternCache.compileDelimitedMatcher(".", "\\")).limit(2);
+    /**
+     * The characters which are delimited when serializing a permission string
+     */
+    private static final String[] PERMISSION_DELIMITERS = new String[]{"/", "-", "$", "(", ")", "=", ","};
+
+    /**
+     * The characters which are delimited when serializing a server or world string
+     */
+    private static final String[] SERVER_WORLD_DELIMITERS = new String[]{"/", "-"};
 
 
     /*
@@ -114,19 +121,11 @@ public final class ImmutableNode implements Node {
 
     private final int hashCode;
 
-    private final boolean isGroup;
+    // all nullable
     private String groupName;
-
-    private final boolean isWildcard;
     private final int wildcardLevel;
-
-    private final boolean isMeta;
     private Map.Entry<String, String> meta;
-
-    private final boolean isPrefix;
     private Map.Entry<Integer, String> prefix;
-
-    private final boolean isSuffix;
     private Map.Entry<Integer, String> suffix;
 
     private final List<String> resolvedShorthand;
@@ -145,65 +144,34 @@ public final class ImmutableNode implements Node {
      */
     @SuppressWarnings("deprecation")
     ImmutableNode(String permission, boolean value, boolean override, long expireAt, String server, String world, ContextSet contexts) {
-        if (permission == null || permission.equals("")) {
+        if (permission == null || permission.isEmpty()) {
             throw new IllegalArgumentException("Empty permission");
         }
 
         // standardize server/world values.
-        if (server != null) {
-            server = server.toLowerCase();
-        }
-        if (world != null) {
-            world = world.toLowerCase();
-        }
-        if (server != null && (server.equals("global") || server.equals(""))) {
-            server = null;
-        }
-        if (world != null && (world.equals("global") || world.equals(""))) {
-            world = null;
-        }
+        server = standardizeServerWorld(server);
+        world = standardizeServerWorld(world);
 
-        this.permission = NodeFactory.unescapeDelimiters(permission, PERMISSION_DELIMS).intern();
+        // define core attributes
+        this.permission = NodeFactory.unescapeDelimiters(permission, PERMISSION_DELIMITERS).intern();
         this.value = value;
         this.override = override;
         this.expireAt = expireAt;
-        this.server = internString(NodeFactory.unescapeDelimiters(server, SERVER_WORLD_DELIMS));
-        this.world = internString(NodeFactory.unescapeDelimiters(world, SERVER_WORLD_DELIMS));
+        this.server = internString(NodeFactory.unescapeDelimiters(server, SERVER_WORLD_DELIMITERS));
+        this.world = internString(NodeFactory.unescapeDelimiters(world, SERVER_WORLD_DELIMITERS));
         this.contexts = contexts == null ? ContextSet.empty() : contexts.makeImmutable();
 
-        String lowerCasePermission = this.permission.toLowerCase();
-
-        // Setup state
-        isGroup = lowerCasePermission.startsWith("group.");
-        if (isGroup) {
-            groupName = lowerCasePermission.substring("group.".length()).intern();
-        }
-
-        isWildcard = this.permission.endsWith(".*");
-        wildcardLevel = this.permission.chars().filter(num -> num == NODE_SEPARATOR_CHAR).sum();
-
-        isMeta = NodeFactory.isMetaNode(this.permission);
-        if (isMeta) {
-            List<String> metaPart = META_SPLITTER.splitToList(this.permission.substring("meta.".length()));
-            meta = Maps.immutableEntry(MetaUtils.unescapeCharacters(metaPart.get(0)).intern(), MetaUtils.unescapeCharacters(metaPart.get(1)).intern());
-        }
-
-        isPrefix = NodeFactory.isPrefixNode(this.permission);
-        if (isPrefix) {
-            List<String> prefixPart = META_SPLITTER.splitToList(this.permission.substring("prefix.".length()));
-            Integer i = Integer.parseInt(prefixPart.get(0));
-            prefix = Maps.immutableEntry(i, MetaUtils.unescapeCharacters(prefixPart.get(1)).intern());
-        }
-
-        isSuffix = NodeFactory.isSuffixNode(this.permission);
-        if (isSuffix) {
-            List<String> suffixPart = META_SPLITTER.splitToList(this.permission.substring("suffix.".length()));
-            Integer i = Integer.parseInt(suffixPart.get(0));
-            suffix = Maps.immutableEntry(i, MetaUtils.unescapeCharacters(suffixPart.get(1)).intern());
-        }
-
+        // define cached state
+        groupName = NodeFactory.parseGroupNode(this.permission);
+        wildcardLevel = this.permission.endsWith(".*") ? this.permission.chars().filter(num -> num == NODE_SEPARATOR_CHAR).sum() : -1;
+        meta = NodeFactory.parseMetaNode(this.permission);
+        prefix = NodeFactory.parsePrefixNode(this.permission);
+        suffix = NodeFactory.parseSuffixNode(this.permission);
         resolvedShorthand = ImmutableList.copyOf(ShorthandParser.parseShorthand(getPermission()));
+        optServer = Optional.ofNullable(this.server);
+        optWorld = Optional.ofNullable(this.world);
 
+        // calculate the "full" context set
         if (this.server != null || this.world != null) {
             MutableContextSet fullContexts = this.contexts.mutableCopy();
             if (this.server != null) {
@@ -218,8 +186,6 @@ public final class ImmutableNode implements Node {
             this.fullContexts = this.contexts;
         }
 
-        this.optServer = Optional.ofNullable(this.server);
-        this.optWorld = Optional.ofNullable(this.world);
         this.hashCode = calculateHashCode();
     }
 
@@ -288,7 +254,7 @@ public final class ImmutableNode implements Node {
 
     @Override
     public boolean isGroupNode() {
-        return isGroup;
+        return groupName != null;
     }
 
     @Override
@@ -299,17 +265,18 @@ public final class ImmutableNode implements Node {
 
     @Override
     public boolean isWildcard() {
-        return isWildcard;
+        return wildcardLevel != -1;
     }
 
     @Override
     public int getWildcardLevel() {
+        checkState(isWildcard(), "Node is not a wildcard");
         return wildcardLevel;
     }
 
     @Override
     public boolean isMeta() {
-        return isMeta;
+        return meta != null;
     }
 
     @Override
@@ -320,7 +287,7 @@ public final class ImmutableNode implements Node {
 
     @Override
     public boolean isPrefix() {
-        return isPrefix;
+        return prefix != null;
     }
 
     @Override
@@ -331,7 +298,7 @@ public final class ImmutableNode implements Node {
 
     @Override
     public boolean isSuffix() {
-        return isSuffix;
+        return suffix != null;
     }
 
     @Override
@@ -446,11 +413,11 @@ public final class ImmutableNode implements Node {
         StringBuilder builder = new StringBuilder();
 
         if (server != null) {
-            builder.append(NodeFactory.escapeDelimiters(server, SERVER_WORLD_DELIMS));
-            if (world != null) builder.append("-").append(NodeFactory.escapeDelimiters(world, SERVER_WORLD_DELIMS));
+            builder.append(NodeFactory.escapeDelimiters(server, SERVER_WORLD_DELIMITERS));
+            if (world != null) builder.append("-").append(NodeFactory.escapeDelimiters(world, SERVER_WORLD_DELIMITERS));
             builder.append("/");
         } else {
-            if (world != null) builder.append("global-").append(NodeFactory.escapeDelimiters(world, SERVER_WORLD_DELIMS)).append("/");
+            if (world != null) builder.append("global-").append(NodeFactory.escapeDelimiters(world, SERVER_WORLD_DELIMITERS)).append("/");
         }
 
         if (!contexts.isEmpty()) {
@@ -616,6 +583,18 @@ public final class ImmutableNode implements Node {
 
     private static String internString(String s) {
         return s == null ? null : s.intern();
+    }
+
+    private static String standardizeServerWorld(String s) {
+        if (s != null) {
+            s = s.toLowerCase();
+
+            if (s.equals("global") || s.isEmpty()) {
+                s = null;
+            }
+        }
+
+        return s;
     }
 
 }

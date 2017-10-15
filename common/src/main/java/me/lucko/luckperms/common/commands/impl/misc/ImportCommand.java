@@ -45,7 +45,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ImportCommand extends SingleCommand {
-    private AtomicBoolean running = new AtomicBoolean(false);
+    private final AtomicBoolean running = new AtomicBoolean(false);
 
     public ImportCommand(LocaleManager locale) {
         super(CommandSpec.IMPORT.spec(locale), "Import", CommandPermission.IMPORT, Predicates.not(1));

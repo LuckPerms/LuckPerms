@@ -54,7 +54,7 @@ public class SharedMainCommand<T extends PermissionHolder> extends SubCommand<T>
     /**
      * If this instance of the shared command is targeting a user. Otherwise, it targets a group.
      */
-    private boolean user;
+    private final boolean user;
 
     public SharedMainCommand(LocalizedSpec spec, String name, boolean user, List<SharedSubCommand> secondaryCommands) {
         super(spec, name, null, Predicates.alwaysFalse());

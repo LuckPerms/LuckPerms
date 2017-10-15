@@ -25,6 +25,7 @@
 
 package me.lucko.luckperms.common.commands.impl.group;
 
+import me.lucko.luckperms.api.LogEntry;
 import me.lucko.luckperms.api.event.cause.CreationCause;
 import me.lucko.luckperms.common.actionlog.ExtendedLogEntry;
 import me.lucko.luckperms.common.commands.CommandResult;
@@ -69,7 +70,7 @@ public class CreateGroup extends SingleCommand {
         }
 
         Message.CREATE_SUCCESS.send(sender, groupName);
-        ExtendedLogEntry.build().actor(sender).actedName(groupName).type('G').action("create").build().submit(plugin, sender);
+        ExtendedLogEntry.build().actor(sender).actedName(groupName).entryType(LogEntry.Type.GROUP).action("create").build().submit(plugin, sender);
         return CommandResult.SUCCESS;
     }
 }

@@ -286,6 +286,6 @@ public class PersistedSubject implements LPSubject {
 
     @Override
     public ImmutableContextSet getActiveContextSet() {
-        return service.getPlugin().getContextManager().getApplicableContext(sponge()).makeImmutable();
+        return service.getPlugin().getContextManager().getApplicableContext(sponge());
     }
 }

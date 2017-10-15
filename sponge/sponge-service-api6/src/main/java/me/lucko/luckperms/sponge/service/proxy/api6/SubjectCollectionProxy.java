@@ -79,13 +79,13 @@ public class SubjectCollectionProxy implements SubjectCollection {
     @Override
     public Map<Subject, Boolean> getAllWithPermission(String s) {
         // again, these methods will lazily load subjects.
-        return (Map) handle.getAllWithPermission(s).thenApply(map -> {
-            return map.entrySet().stream()
-                    .collect(ImmutableCollectors.toImmutableMap(
-                            e -> new SubjectProxy(service, e.getKey()),
-                            Map.Entry::getValue
-                    ));
-        }).join();
+        return (Map) handle.getAllWithPermission(s)
+                .thenApply(map -> map.entrySet().stream()
+                        .collect(ImmutableCollectors.toImmutableMap(
+                                e -> new SubjectProxy(service, e.getKey()),
+                                Map.Entry::getValue
+                        ))
+                ).join();
     }
 
     @Override

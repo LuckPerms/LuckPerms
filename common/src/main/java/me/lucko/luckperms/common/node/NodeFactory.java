@@ -30,6 +30,7 @@ import lombok.experimental.UtilityClass;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.base.Splitter;
+import com.google.common.collect.Maps;
 
 import me.lucko.luckperms.api.ChatMetaType;
 import me.lucko.luckperms.api.MetaUtils;
@@ -38,23 +39,41 @@ import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.utils.PatternCache;
 
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 /**
  * Utility class to make Node(Builder) instances from serialised strings or existing Nodes
  */
+@SuppressWarnings("deprecation")
 @UtilityClass
 public class NodeFactory {
-    private static final LoadingCache<String, Node> CACHE = Caffeine.newBuilder()
-            .build(s -> builderFromSerializedNode(s, true).build());
 
-    private static final LoadingCache<String, Node> CACHE_NEGATED = Caffeine.newBuilder()
-            .build(s -> builderFromSerializedNode(s, false).build());
+    // used to split prefix/suffix/meta nodes
+    private static final Splitter META_SPLITTER = Splitter.on(PatternCache.compileDelimitedMatcher(".", "\\")).limit(2);
+
+    // legacy node format delimiters
+    private static final Pattern LEGACY_SERVER_DELIM = PatternCache.compileDelimitedMatcher("/", "\\");
+    private static final Splitter LEGACY_SERVER_SPLITTER = Splitter.on(LEGACY_SERVER_DELIM).limit(2);
+    private static final Pattern LEGACY_WORLD_DELIM = PatternCache.compileDelimitedMatcher("-", "\\");
+    private static final Splitter LEGACY_WORLD_SPLITTER = Splitter.on(LEGACY_WORLD_DELIM).limit(2);
+    private static final Pattern LEGACY_EXPIRY_DELIM = PatternCache.compileDelimitedMatcher("$", "\\");
+    private static final Splitter LEGACY_EXPIRY_SPLITTER = Splitter.on(LEGACY_EXPIRY_DELIM).limit(2);
+
+    // caches the conversion between legacy node strings --> node instances
+    private static final LoadingCache<String, Node> LEGACY_SERIALIZATION_CACHE = Caffeine.newBuilder()
+            .expireAfterAccess(10, TimeUnit.MINUTES)
+            .build(s -> builderFromLegacyString(s, true).build());
+
+    private static final LoadingCache<String, Node> LEGACY_SERIALIZATION_CACHE_NEGATED = Caffeine.newBuilder()
+            .expireAfterAccess(10, TimeUnit.MINUTES)
+            .build(s -> builderFromLegacyString(s, false).build());
 
     public static Node fromSerializedNode(String s, Boolean b) {
         try {
-            return b ? CACHE.get(s) : CACHE_NEGATED.get(s);
+            return b ? LEGACY_SERIALIZATION_CACHE.get(s) : LEGACY_SERIALIZATION_CACHE_NEGATED.get(s);
         } catch (Exception e) {
             throw new IllegalArgumentException(e);
         }
@@ -64,44 +83,59 @@ public class NodeFactory {
         return new NodeBuilder(s, false);
     }
 
-    public static Node.Builder builderFromSerializedNode(String s, Boolean b) {
+    public static Node.Builder builderFromLegacyString(String s, Boolean b) {
         // if contains /
-        if (PatternCache.compileDelimitedMatcher("/", "\\").matcher(s).find()) {
-            List<String> parts = Splitter.on(PatternCache.compileDelimitedMatcher("/", "\\")).limit(2).splitToList(s);
+        if (LEGACY_SERVER_DELIM.matcher(s).find()) {
             // 0=server(+world)   1=node
+            Iterator<String> parts = LEGACY_SERVER_SPLITTER.split(s).iterator();
+            String parts0 = parts.next();
+            String parts1 = parts.next();
 
             // WORLD SPECIFIC
             // if parts[0] contains -
-            if (PatternCache.compileDelimitedMatcher("-", "\\").matcher(parts.get(0)).find()) {
-                List<String> serverParts = Splitter.on(PatternCache.compileDelimitedMatcher("-", "\\")).limit(2).splitToList(parts.get(0));
+            if (LEGACY_WORLD_DELIM.matcher(parts0).find()) {
                 // 0=server   1=world
+                Iterator<String> serverParts = LEGACY_WORLD_SPLITTER.split(parts0).iterator();
+                String serverParts0 = serverParts.next();
+                String serverParts1 = serverParts.next();
 
                 // if parts[1] contains $
-                if (PatternCache.compileDelimitedMatcher("$", "\\").matcher(parts.get(1)).find()) {
-                    List<String> tempParts = Splitter.on('$').limit(2).splitToList(parts.get(1));
-                    return new NodeBuilder(tempParts.get(0), true).setServer(serverParts.get(0)).setWorld(serverParts.get(1))
-                            .setExpiry(Long.parseLong(tempParts.get(1))).setValue(b);
+                if (LEGACY_EXPIRY_DELIM.matcher(parts1).find()) {
+                    // 0=node   1=expiry
+                    Iterator<String> tempParts = LEGACY_EXPIRY_SPLITTER.split(parts1).iterator();
+                    String tempParts0 = tempParts.next();
+                    String tempParts1 = tempParts.next();
+
+                    return new NodeBuilder(tempParts0, true).setServer(serverParts0).setWorld(serverParts1).setExpiry(Long.parseLong(tempParts1)).setValue(b);
                 } else {
-                    return new NodeBuilder(parts.get(1), true).setServer(serverParts.get(0)).setWorld(serverParts.get(1)).setValue(b);
+                    return new NodeBuilder(parts1, true).setServer(serverParts0).setWorld(serverParts1).setValue(b);
                 }
             } else {
                 // SERVER BUT NOT WORLD SPECIFIC
 
                 // if parts[1] contains $
-                if (PatternCache.compileDelimitedMatcher("$", "\\").matcher(parts.get(1)).find()) {
-                    List<String> tempParts = Splitter.on(PatternCache.compileDelimitedMatcher("$", "\\")).limit(2).splitToList(parts.get(1));
-                    return new NodeBuilder(tempParts.get(0), true).setServer(parts.get(0)).setExpiry(Long.parseLong(tempParts.get(1))).setValue(b);
+                if (LEGACY_EXPIRY_DELIM.matcher(parts1).find()) {
+                    // 0=node   1=expiry
+                    Iterator<String> tempParts = LEGACY_EXPIRY_SPLITTER.split(parts1).iterator();
+                    String tempParts0 = tempParts.next();
+                    String tempParts1 = tempParts.next();
+
+                    return new NodeBuilder(tempParts0, true).setServer(parts0).setExpiry(Long.parseLong(tempParts1)).setValue(b);
                 } else {
-                    return new NodeBuilder(parts.get(1), true).setServer(parts.get(0)).setValue(b);
+                    return new NodeBuilder(parts1, true).setServer(parts0).setValue(b);
                 }
             }
         } else {
             // NOT SERVER SPECIFIC
 
             // if s contains $
-            if (PatternCache.compileDelimitedMatcher("$", "\\").matcher(s).find()) {
-                List<String> tempParts = Splitter.on(PatternCache.compileDelimitedMatcher("$", "\\")).limit(2).splitToList(s);
-                return new NodeBuilder(tempParts.get(0), true).setExpiry(Long.parseLong(tempParts.get(1))).setValue(b);
+            if (LEGACY_EXPIRY_DELIM.matcher(s).find()) {
+                // 0=node   1=expiry
+                Iterator<String> tempParts = LEGACY_EXPIRY_SPLITTER.split(s).iterator();
+                String tempParts0 = tempParts.next();
+                String tempParts1 = tempParts.next();
+
+                return new NodeBuilder(tempParts0, true).setExpiry(Long.parseLong(tempParts1)).setValue(b);
             } else {
                 return new NodeBuilder(s, true).setValue(b);
             }
@@ -250,40 +284,58 @@ public class NodeFactory {
         return s;
     }
 
-    public static boolean isMetaNode(String s) {
+    public static String parseGroupNode(String s) {
+        String lower = s.toLowerCase();
+        if (!lower.startsWith("group.")) {
+            return null;
+        }
+        return lower.substring("group.".length()).intern();
+    }
+
+    public static Map.Entry<String, String> parseMetaNode(String s) {
         if (!s.startsWith("meta.")) {
-            return false;
+            return null;
         }
-        String parts = s.substring("meta.".length());
-        return PatternCache.compileDelimitedMatcher(".", "\\").matcher(parts).find();
+
+        Iterator<String> metaParts = META_SPLITTER.split(s.substring("meta.".length())).iterator();
+
+        if (!metaParts.hasNext()) return null;
+        String key = metaParts.next();
+
+        if (!metaParts.hasNext()) return null;
+        String value = metaParts.next();
+
+        return Maps.immutableEntry(MetaUtils.unescapeCharacters(key).intern(), MetaUtils.unescapeCharacters(value).intern());
     }
 
-    private static boolean isChatMetaNode(String type, String s) {
+    private static Map.Entry<Integer, String> parseChatMetaNode(String type, String s) {
         if (!s.startsWith(type + ".")) {
-            return false;
-        }
-        String parts = s.substring((type + ".").length());
-
-        if (!PatternCache.compileDelimitedMatcher(".", "\\").matcher(parts).find()) {
-            return false;
+            return null;
         }
 
-        List<String> metaParts = Splitter.on(PatternCache.compileDelimitedMatcher(".", "\\")).limit(2).splitToList(parts);
-        String priority = metaParts.get(0);
+        Iterator<String> metaParts = META_SPLITTER.split(s.substring((type + ".").length())).iterator();
+
+        if (!metaParts.hasNext()) return null;
+        String priority = metaParts.next();
+
+        if (!metaParts.hasNext()) return null;
+        String value = metaParts.next();
+
         try {
-            Integer.parseInt(priority);
-            return true;
+            int p = Integer.parseInt(priority);
+            String v = MetaUtils.unescapeCharacters(value).intern();
+            return Maps.immutableEntry(p, v);
         } catch (NumberFormatException e) {
-            return false;
+            return null;
         }
     }
 
-    public static boolean isPrefixNode(String s) {
-        return isChatMetaNode("prefix", s);
+    public static Map.Entry<Integer, String> parsePrefixNode(String s) {
+        return parseChatMetaNode("prefix", s);
     }
 
-    public static boolean isSuffixNode(String s) {
-        return isChatMetaNode("suffix", s);
+    public static Map.Entry<Integer, String> parseSuffixNode(String s) {
+        return parseChatMetaNode("suffix", s);
     }
 
     public static Node make(String node) {

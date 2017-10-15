@@ -48,6 +48,8 @@ import javax.annotation.Nonnull;
  * @since 3.3
  */
 public final class FullySatisfiedContexts extends Contexts {
+
+    // singleton
     private static final FullySatisfiedContexts INSTANCE = new FullySatisfiedContexts();
 
     @Nonnull
@@ -62,16 +64,18 @@ public final class FullySatisfiedContexts extends Contexts {
     @Nonnull
     @Override
     public String toString() {
-        return "FullySatisfiedContexts";
+        return "FullySatisfiedContexts()";
     }
 
     @Override
     public boolean equals(Object o) {
+        // this class is a singleton, so we can use object comparison to check equality.
         return o == this;
     }
 
     @Override
     public int hashCode() {
+        // just use the system hashcode - we need to override the hashcode impl in super
         return System.identityHashCode(this);
     }
 }

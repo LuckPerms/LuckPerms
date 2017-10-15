@@ -33,7 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 public class RegexProcessor implements PermissionProcessor {
-    private Map<Pattern, Boolean> regexPermissions = new ConcurrentHashMap<>();
+    private final Map<Pattern, Boolean> regexPermissions = new ConcurrentHashMap<>();
 
     @Override
     public Tristate hasPermission(String permission) {

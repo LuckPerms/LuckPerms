@@ -50,7 +50,7 @@ abstract class FlatfileProvider extends SQLProvider {
     protected abstract String getDriverId();
 
     @Override
-    public void init() throws Exception {
+    public void init() {
 
     }
 

@@ -88,65 +88,47 @@ public class SubjectProxy implements Subject {
 
     @Override
     public boolean hasPermission(Set<Context> contexts, String permission) {
-        return getHandle().thenApply(handle -> {
-            return handle.getPermissionValue(CompatibilityUtil.convertContexts(contexts), permission).asBoolean();
-        }).join();
+        return getHandle().thenApply(handle -> handle.getPermissionValue(CompatibilityUtil.convertContexts(contexts), permission).asBoolean()).join();
     }
 
     @Override
     public boolean hasPermission(String permission) {
-        return getHandle().thenApply(handle -> {
-            return handle.getPermissionValue(ImmutableContextSet.empty(), permission).asBoolean();
-        }).join();
+        return getHandle().thenApply(handle -> handle.getPermissionValue(ImmutableContextSet.empty(), permission).asBoolean()).join();
     }
 
     @Override
     public Tristate getPermissionValue(Set<Context> contexts, String permission) {
-        return getHandle().thenApply(handle -> {
-            return CompatibilityUtil.convertTristate(handle.getPermissionValue(CompatibilityUtil.convertContexts(contexts), permission));
-        }).join();
+        return getHandle().thenApply(handle -> CompatibilityUtil.convertTristate(handle.getPermissionValue(CompatibilityUtil.convertContexts(contexts), permission))).join();
     }
 
     @Override
     public boolean isChildOf(org.spongepowered.api.service.permission.SubjectReference parent) {
-        return getHandle().thenApply(handle -> {
-            return handle.isChildOf(ImmutableContextSet.empty(), SubjectReferenceFactory.obtain(service, parent));
-        }).join();
+        return getHandle().thenApply(handle -> handle.isChildOf(ImmutableContextSet.empty(), SubjectReferenceFactory.obtain(service, parent))).join();
     }
 
     @Override
     public boolean isChildOf(Set<Context> contexts, org.spongepowered.api.service.permission.SubjectReference parent) {
-        return getHandle().thenApply(handle -> {
-            return handle.isChildOf(CompatibilityUtil.convertContexts(contexts), SubjectReferenceFactory.obtain(service, parent));
-        }).join();
+        return getHandle().thenApply(handle -> handle.isChildOf(CompatibilityUtil.convertContexts(contexts), SubjectReferenceFactory.obtain(service, parent))).join();
     }
 
     @Override
     public List<org.spongepowered.api.service.permission.SubjectReference> getParents() {
-        return (List) getHandle().thenApply(handle -> {
-            return handle.getParents(ImmutableContextSet.empty());
-        }).join();
+        return (List) getHandle().thenApply(handle -> handle.getParents(ImmutableContextSet.empty())).join();
     }
 
     @Override
     public List<org.spongepowered.api.service.permission.SubjectReference> getParents(Set<Context> contexts) {
-        return (List) getHandle().thenApply(handle -> {
-            return handle.getParents(CompatibilityUtil.convertContexts(contexts));
-        }).join();
+        return (List) getHandle().thenApply(handle -> handle.getParents(CompatibilityUtil.convertContexts(contexts))).join();
     }
 
     @Override
     public Optional<String> getOption(Set<Context> contexts, String key) {
-        return getHandle().thenApply(handle -> {
-            return handle.getOption(CompatibilityUtil.convertContexts(contexts), key);
-        }).join();
+        return getHandle().thenApply(handle -> handle.getOption(CompatibilityUtil.convertContexts(contexts), key)).join();
     }
 
     @Override
     public Optional<String> getOption(String key) {
-        return getHandle().thenApply(handle -> {
-            return handle.getOption(ImmutableContextSet.empty(), key);
-        }).join();
+        return getHandle().thenApply(handle -> handle.getOption(ImmutableContextSet.empty(), key)).join();
     }
 
     @Override

@@ -73,13 +73,11 @@ public class SubjectDataProxy implements SubjectData {
 
     @Override
     public boolean setPermission(Set<Context> contexts, String permission, Tristate value) {
-        getHandle().thenCompose(handle -> {
-            return handle.setPermission(
-                    CompatibilityUtil.convertContexts(contexts),
-                    permission,
-                    CompatibilityUtil.convertTristate(value)
-            );
-        });
+        getHandle().thenCompose(handle -> handle.setPermission(
+                CompatibilityUtil.convertContexts(contexts),
+                permission,
+                CompatibilityUtil.convertTristate(value)
+        ));
         return true;
     }
 
@@ -97,52 +95,44 @@ public class SubjectDataProxy implements SubjectData {
 
     @Override
     public Map<Set<Context>, List<Subject>> getAllParents() {
-        return (Map) getHandle().thenApply(handle -> {
-            return handle.getAllParents().entrySet().stream()
-                    .collect(ImmutableCollectors.toImmutableMap(
-                            e -> CompatibilityUtil.convertContexts(e.getKey()),
-                            e -> e.getValue().stream()
-                                    .map(s -> new SubjectProxy(service, s))
-                                    .collect(ImmutableCollectors.toImmutableList())
-                            )
-                    );
-        }).join();
+        return (Map) getHandle().thenApply(handle -> handle.getAllParents().entrySet().stream()
+                .collect(ImmutableCollectors.toImmutableMap(
+                        e -> CompatibilityUtil.convertContexts(e.getKey()),
+                        e -> e.getValue().stream()
+                                .map(s -> new SubjectProxy(service, s))
+                                .collect(ImmutableCollectors.toImmutableList())
+                        )
+                )).join();
     }
 
     @Override
     public List<Subject> getParents(Set<Context> contexts) {
-        return (List) getHandle().thenApply(handle -> {
-            return handle.getParents(CompatibilityUtil.convertContexts(contexts)).stream()
-                    .map(s -> new SubjectProxy(service, s))
-                    .collect(ImmutableCollectors.toImmutableList());
-        }).join();
+        return (List) getHandle().thenApply(handle -> handle.getParents(CompatibilityUtil.convertContexts(contexts)).stream()
+                .map(s -> new SubjectProxy(service, s))
+                .collect(ImmutableCollectors.toImmutableList())).join();
     }
 
     @Override
     public boolean addParent(Set<Context> contexts, Subject parent) {
-        getHandle().thenCompose(handle -> {
-            return handle.addParent(
-                    CompatibilityUtil.convertContexts(contexts),
-                    service.newSubjectReference(
-                            parent.getContainingCollection().getIdentifier(),
-                            parent.getIdentifier()
-                    )
-            );
-        });
+        getHandle().thenCompose(handle -> handle.addParent(
+                CompatibilityUtil.convertContexts(contexts),
+                service.newSubjectReference(
+                        parent.getContainingCollection().getIdentifier(),
+                        parent.getIdentifier()
+                )
+        ));
         return true;
     }
 
     @Override
     public boolean removeParent(Set<Context> contexts, Subject parent) {
-        getHandle().thenCompose(handle -> {
-            return handle.removeParent(
-                    CompatibilityUtil.convertContexts(contexts),
-                    service.newSubjectReference(
-                            parent.getContainingCollection().getIdentifier(),
-                            parent.getIdentifier()
-                    )
-            );
-        });
+        getHandle().thenCompose(handle -> handle.removeParent(
+                CompatibilityUtil.convertContexts(contexts),
+                service.newSubjectReference(
+                        parent.getContainingCollection().getIdentifier(),
+                        parent.getIdentifier()
+                )
+        ));
         return true;
     }
 
@@ -154,19 +144,17 @@ public class SubjectDataProxy implements SubjectData {
 
     @Override
     public boolean clearParents(Set<Context> contexts) {
-        ;
+        getHandle().thenCompose(handle -> handle.clearParents(CompatibilityUtil.convertContexts(contexts)));
         return true;
     }
 
     @Override
     public Map<Set<Context>, Map<String, String>> getAllOptions() {
-        return (Map) getHandle().thenApply(handle -> {
-            return handle.getAllOptions().entrySet().stream()
-                    .collect(ImmutableCollectors.toImmutableMap(
-                            e -> CompatibilityUtil.convertContexts(e.getKey()),
-                            Map.Entry::getValue
-                    ));
-        }).join();
+        return (Map) getHandle().thenApply(handle -> handle.getAllOptions().entrySet().stream()
+                .collect(ImmutableCollectors.toImmutableMap(
+                        e -> CompatibilityUtil.convertContexts(e.getKey()),
+                        Map.Entry::getValue
+                ))).join();
     }
 
     @Override

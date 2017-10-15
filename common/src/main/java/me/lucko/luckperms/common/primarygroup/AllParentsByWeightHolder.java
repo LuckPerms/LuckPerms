@@ -26,7 +26,6 @@
 package me.lucko.luckperms.common.primarygroup;
 
 import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.common.contexts.ExtractedContexts;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.User;
 
@@ -50,7 +49,7 @@ public class AllParentsByWeightHolder extends CachedPrimaryGroupHolder {
 
         // hack to get a list of groups the holder is inheriting from
         Set<String> groupNames = new LinkedHashSet<>();
-        user.resolveInheritances(new NoopList<>(), groupNames, ExtractedContexts.generate(contexts));
+        user.resolveInheritances(new NoopList<>(), groupNames, contexts);
 
         List<Group> groups = new ArrayList<>();
         for (String groupName : groupNames) {

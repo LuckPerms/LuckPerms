@@ -426,8 +426,8 @@ public class LogEntry implements Comparable<LogEntry> {
      * @param <B> the log builder type
      */
     public static abstract class AbstractLogEntryBuilder<T extends LogEntry, B extends AbstractLogEntryBuilder<T, B>> {
-        private T obj;
-        private B thisObj;
+        private final T obj;
+        private final B thisObj;
 
         public AbstractLogEntryBuilder() {
             obj = createEmptyLog();

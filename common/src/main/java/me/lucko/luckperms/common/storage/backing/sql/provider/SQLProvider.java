@@ -40,7 +40,7 @@ public abstract class SQLProvider {
     @Getter
     private final String name;
 
-    public abstract void init() throws Exception;
+    public abstract void init();
 
     public abstract void shutdown() throws Exception;
 

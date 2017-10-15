@@ -141,10 +141,7 @@ public class BulkUpdateCommand extends SingleCommand {
             bulkUpdateBuilder.constraint(Constraint.of(field, comparison, expr));
         }
 
-        String id = "" + ThreadLocalRandom.current().nextInt(9) +
-                ThreadLocalRandom.current().nextInt(9) +
-                ThreadLocalRandom.current().nextInt(9) +
-                ThreadLocalRandom.current().nextInt(9);
+        String id = String.format("%04d", ThreadLocalRandom.current().nextInt(10000));
 
         BulkUpdate bulkUpdate = bulkUpdateBuilder.build();
 

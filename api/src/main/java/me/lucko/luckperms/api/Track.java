@@ -36,6 +36,7 @@ import javax.annotation.Nullable;
 /**
  * An ordered chain of {@link Group}s.
  */
+@SuppressWarnings("RedundantThrows")
 public interface Track {
 
     /**

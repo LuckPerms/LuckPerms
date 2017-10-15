@@ -38,7 +38,6 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.caching.MetaAccumulator;
-import me.lucko.luckperms.common.contexts.ExtractedContexts;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.sponge.LPSpongePlugin;
 import me.lucko.luckperms.sponge.service.LuckPermsService;
@@ -92,7 +91,7 @@ public class SpongeGroup extends Group {
                 .expireAfterAccess(10, TimeUnit.MINUTES)
                 .build(contexts -> {
                     // TODO move this away from NodeTree
-                    Map<String, Boolean> permissions = getParent().getAllNodes(ExtractedContexts.generate(getPlugin().getService().calculateContexts(contexts))).stream()
+                    Map<String, Boolean> permissions = getParent().getAllNodes(getPlugin().getService().calculateContexts(contexts)).stream()
                             .map(LocalizedNode::getNode)
                             .collect(Collectors.toMap(Node::getPermission, Node::getValuePrimitive));
 
@@ -102,7 +101,7 @@ public class SpongeGroup extends Group {
         private final LoadingCache<ImmutableContextSet, ImmutableList<SubjectReference>> parentCache = Caffeine.newBuilder()
                 .expireAfterWrite(10, TimeUnit.MINUTES)
                 .build(contexts -> {
-                    Set<SubjectReference> subjects = getParent().getAllNodes(ExtractedContexts.generate(getPlugin().getService().calculateContexts(contexts))).stream()
+                    Set<SubjectReference> subjects = getParent().getAllNodes(getPlugin().getService().calculateContexts(contexts)).stream()
                             .map(LocalizedNode::getNode)
                             .filter(Node::isGroupNode)
                             .map(Node::getGroupName)
@@ -230,16 +229,16 @@ public class SpongeGroup extends Group {
 
         @Override
         public ImmutableContextSet getActiveContextSet() {
-            return plugin.getContextManager().getApplicableContext(this.sponge()).makeImmutable();
+            return plugin.getContextManager().getApplicableContext(this.sponge());
         }
 
         private Optional<String> getChatMeta(ImmutableContextSet contexts, ChatMetaType type) {
-            MetaAccumulator metaAccumulator = parent.accumulateMeta(null, null, ExtractedContexts.generate(plugin.getService().calculateContexts(contexts)));
+            MetaAccumulator metaAccumulator = parent.accumulateMeta(null, null, plugin.getService().calculateContexts(contexts));
             return Optional.ofNullable(metaAccumulator.getStack(type).toFormattedString());
         }
 
         private Optional<String> getMeta(ImmutableContextSet contexts, String key) {
-            MetaAccumulator metaAccumulator = parent.accumulateMeta(null, null, ExtractedContexts.generate(plugin.getService().calculateContexts(contexts)));
+            MetaAccumulator metaAccumulator = parent.accumulateMeta(null, null, plugin.getService().calculateContexts(contexts));
             ListMultimap<String, String> meta = metaAccumulator.getMeta();
             List<String> ret = meta.get(key);
             return ret.isEmpty() ? Optional.empty() : Optional.of(ret.get(0));

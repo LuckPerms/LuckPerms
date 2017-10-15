@@ -52,7 +52,7 @@ public class NodeFactoryDelegate implements me.lucko.luckperms.api.NodeFactory {
 
     @Override
     public Node.Builder newBuilderFromSerialisedNode(@NonNull String serialisedPermission, boolean value) {
-        return NodeFactory.builderFromSerializedNode(serialisedPermission, value);
+        return NodeFactory.builderFromLegacyString(serialisedPermission, value);
     }
 
     @Override

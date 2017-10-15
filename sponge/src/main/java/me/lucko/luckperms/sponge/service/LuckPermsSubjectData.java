@@ -38,7 +38,6 @@ import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.caching.MetaAccumulator;
-import me.lucko.luckperms.common.contexts.ExtractedContexts;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
@@ -354,7 +353,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
 
             toRemove.forEach(makeUnsetConsumer(enduring));
 
-            MetaAccumulator metaAccumulator = holder.accumulateMeta(null, null, ExtractedContexts.generate(service.calculateContexts(context)));
+            MetaAccumulator metaAccumulator = holder.accumulateMeta(null, null, service.calculateContexts(context));
             int priority = metaAccumulator.getChatMeta(type).keySet().stream().mapToInt(e -> e).max().orElse(0);
             priority += 10;
 

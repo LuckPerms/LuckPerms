@@ -55,15 +55,17 @@ public class Injector {
      *
      * This field is where the permissible is stored on a HumanEntity.
      */
-    private static Field humanEntityPermissibleField;
+    private static final Field HUMAN_ENTITY_PERMISSIBLE_FIELD;
 
     /**
      * The field where attachments are stored on a permissible base.
      */
-    private static Field permissibleBaseAttachmentsField;
+    private static final Field PERMISSIBLE_BASE_ATTACHMENTS_FIELD;
 
-    private static Throwable cachedThrowable = null;
     static {
+        Field humanEntityPermissibleField;
+        Field permissibleBaseAttachmentsField;
+
         try {
             // Catch all. If this setup doesn't fully complete without
             // exceptions, then the Injector will not work.
@@ -85,9 +87,11 @@ public class Injector {
             permissibleBaseAttachmentsField.setAccessible(true);
 
         } catch (Throwable t) {
-            cachedThrowable = t;
-            t.printStackTrace();
+            throw new RuntimeException("Injector did not init successfully.", t);
         }
+
+        HUMAN_ENTITY_PERMISSIBLE_FIELD = humanEntityPermissibleField;
+        PERMISSIBLE_BASE_ATTACHMENTS_FIELD = permissibleBaseAttachmentsField;
     }
 
     /**
@@ -99,13 +103,8 @@ public class Injector {
      */
     public static void inject(Player player, LPPermissible newPermissible) throws Exception {
 
-        // make sure the class inited without errors, otherwise, print a trace
-        if (cachedThrowable != null) {
-            throw new RuntimeException("Injector did not init successfully.", cachedThrowable);
-        }
-
         // get the existing PermissibleBase held by the player
-        PermissibleBase oldPermissible = (PermissibleBase) humanEntityPermissibleField.get(player);
+        PermissibleBase oldPermissible = (PermissibleBase) HUMAN_ENTITY_PERMISSIBLE_FIELD.get(player);
 
         // seems we have already injected into this player.
         if (oldPermissible instanceof LPPermissible) {
@@ -115,7 +114,7 @@ public class Injector {
         // Move attachments over from the old permissible
 
         //noinspection unchecked
-        List<PermissionAttachment> attachments = (List<PermissionAttachment>) permissibleBaseAttachmentsField.get(oldPermissible);
+        List<PermissionAttachment> attachments = (List<PermissionAttachment>) PERMISSIBLE_BASE_ATTACHMENTS_FIELD.get(oldPermissible);
 
         newPermissible.addAttachments(attachments);
         attachments.clear();
@@ -128,7 +127,7 @@ public class Injector {
         newPermissible.updateSubscriptionsAsync();
 
         // inject the new instance
-        humanEntityPermissibleField.set(player, newPermissible);
+        HUMAN_ENTITY_PERMISSIBLE_FIELD.set(player, newPermissible);
 
         // register the injection with the map
         INJECTED_PERMISSIBLES.put(player.getUniqueId(), newPermissible);
@@ -143,13 +142,9 @@ public class Injector {
      * @throws Exception propagates any exceptions which were thrown during uninjection
      */
     public static void unInject(Player player, boolean dummy, boolean unsubscribe) throws Exception {
-        // make sure the class inited without errors, otherwise, print a trace
-        if (cachedThrowable != null) {
-            throw new RuntimeException("Injector did not init successfully.", cachedThrowable);
-        }
 
         // gets the players current permissible.
-        PermissibleBase permissible = (PermissibleBase) humanEntityPermissibleField.get(player);
+        PermissibleBase permissible = (PermissibleBase) HUMAN_ENTITY_PERMISSIBLE_FIELD.get(player);
 
         // only uninject if the permissible was a luckperms one.
         if (permissible instanceof LPPermissible) {
@@ -169,7 +164,7 @@ public class Injector {
             // handle the replacement permissible.
             if (dummy) {
                 // just inject a dummy class. this is used when we know the player is about to quit the server.
-                humanEntityPermissibleField.set(player, new DummyPermissibleBase());
+                HUMAN_ENTITY_PERMISSIBLE_FIELD.set(player, new DummyPermissibleBase());
 
             } else {
                 // otherwise, inject the permissible they had when we first injected.
@@ -182,11 +177,11 @@ public class Injector {
                 }
 
                 //noinspection unchecked
-                List<PermissionAttachment> newPbAttachments = (List<PermissionAttachment>) permissibleBaseAttachmentsField.get(newPb);
+                List<PermissionAttachment> newPbAttachments = (List<PermissionAttachment>) PERMISSIBLE_BASE_ATTACHMENTS_FIELD.get(newPb);
                 newPbAttachments.addAll(lpAttachments);
                 lpAttachments.clear();
 
-                humanEntityPermissibleField.set(player, newPb);
+                HUMAN_ENTITY_PERMISSIBLE_FIELD.set(player, newPb);
             }
         }
 

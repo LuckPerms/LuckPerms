@@ -55,7 +55,7 @@ public enum DataMutateResult {
      */
     FAIL(false, RuntimeException::new);
 
-    private boolean value;
+    private final boolean value;
     private final Supplier<? extends Exception> exceptionSupplier;
 
     DataMutateResult(boolean value, Supplier<? extends Exception> exceptionSupplier) {
@@ -104,6 +104,7 @@ public enum DataMutateResult {
         sneakyThrow0(t);
     }
 
+    @SuppressWarnings("unchecked")
     private static <T extends Throwable> void sneakyThrow0(Throwable t) throws T {
         throw (T) t;
     }

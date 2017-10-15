@@ -116,7 +116,7 @@ public abstract class SubCommand<T> extends Command<T, Void> {
             if (args.isEmpty() || args.get(0).equals("")) {
                 return cache.getRootNode().getChildren()
                         .map(Map::keySet)
-                        .map(s -> s.stream().collect(Collectors.toList()))
+                        .map(s -> (List<String>) new ArrayList<>(s))
                         .orElse(Collections.emptyList());
             }
 

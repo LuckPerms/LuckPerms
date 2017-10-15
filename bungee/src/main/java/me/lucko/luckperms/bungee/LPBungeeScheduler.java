@@ -37,8 +37,8 @@ import java.util.concurrent.TimeUnit;
 public class LPBungeeScheduler implements LuckPermsScheduler {
     private final LPBungeePlugin plugin;
 
-    private Executor asyncExecutor;
-    private Set<ScheduledTask> tasks = ConcurrentHashMap.newKeySet();
+    private final Executor asyncExecutor;
+    private final Set<ScheduledTask> tasks = ConcurrentHashMap.newKeySet();
 
     public LPBungeeScheduler(LPBungeePlugin plugin) {
         this.plugin = plugin;

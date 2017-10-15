@@ -49,7 +49,7 @@ public class PostgreSQLProvider extends SQLProvider {
     }
 
     @Override
-    public void init() throws Exception {
+    public void init() {
         HikariConfig config = new HikariConfig();
 
         String address = configuration.getAddress();

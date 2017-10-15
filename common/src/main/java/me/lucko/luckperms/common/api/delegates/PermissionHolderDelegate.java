@@ -41,7 +41,6 @@ import me.lucko.luckperms.api.Tristate;
 import me.lucko.luckperms.api.context.ContextSet;
 import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.api.context.MutableContextSet;
-import me.lucko.luckperms.common.contexts.ExtractedContexts;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.MetaType;
 import me.lucko.luckperms.common.node.NodeFactory;
@@ -108,7 +107,7 @@ public class PermissionHolderDelegate implements PermissionHolder {
 
     @Override
     public SortedSet<LocalizedNode> getAllNodes(@NonNull Contexts contexts) {
-        return new TreeSet<>(handle.resolveInheritancesAlmostEqual(ExtractedContexts.generate(contexts)));
+        return new TreeSet<>(handle.resolveInheritancesAlmostEqual(contexts));
     }
 
     @Override
@@ -118,12 +117,12 @@ public class PermissionHolderDelegate implements PermissionHolder {
 
     @Override
     public Set<LocalizedNode> getAllNodesFiltered(@NonNull Contexts contexts) {
-        return new HashSet<>(handle.getAllNodes(ExtractedContexts.generate(contexts)));
+        return new HashSet<>(handle.getAllNodes(contexts));
     }
 
     @Override
     public Map<String, Boolean> exportNodes(Contexts contexts, boolean lowerCase) {
-        return new HashMap<>(handle.exportNodesAndShorthand(ExtractedContexts.generate(contexts), lowerCase));
+        return new HashMap<>(handle.exportNodesAndShorthand(contexts, lowerCase));
     }
 
     @Override
@@ -438,7 +437,7 @@ public class PermissionHolderDelegate implements PermissionHolder {
 
     @Override
     public List<LocalizedNode> resolveInheritances(Contexts contexts) {
-        return handle.resolveInheritances(ExtractedContexts.generate(contexts));
+        return handle.resolveInheritances(contexts);
     }
 
     @Override

@@ -73,9 +73,9 @@ public class ProgressLogger {
 
     public void logAllProgress(String msg, int amount) {
         if (pluginName == null) {
-            listeners.forEach(s -> logProgressMessage.send(s, msg.replace("{}", "" + amount)));
+            listeners.forEach(s -> logProgressMessage.send(s, msg.replace("{}", Integer.toString(amount))));
         } else {
-            listeners.forEach(s -> logProgressMessage.send(s, pluginName, msg.replace("{}", "" + amount)));
+            listeners.forEach(s -> logProgressMessage.send(s, pluginName, msg.replace("{}", Integer.toString(amount))));
         }
     }
 

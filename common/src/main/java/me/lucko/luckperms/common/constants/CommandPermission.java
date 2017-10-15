@@ -169,7 +169,7 @@ public enum CommandPermission {
 
     public static final String ROOT = "luckperms.";
 
-    private String node;
+    private final String node;
 
     @Getter
     private Type type;

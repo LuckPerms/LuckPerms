@@ -60,7 +60,7 @@ public abstract class FlatfileBacking extends AbstractBacking {
     private static final String LOG_FORMAT = "%s(%s): [%s] %s(%s) --> %s";
 
     private final Logger actionLogger = Logger.getLogger("luckperms_actions");
-    private FileUuidCache uuidCache = new FileUuidCache();
+    private final FileUuidCache uuidCache = new FileUuidCache();
 
     private final File pluginDir;
 
@@ -218,6 +218,7 @@ public abstract class FlatfileBacking extends AbstractBacking {
 
     @Override
     public boolean logAction(LogEntry entry) {
+        //noinspection deprecation
         actionLogger.info(String.format(LOG_FORMAT,
                 (entry.getActor().equals(Constants.CONSOLE_UUID) ? "" : entry.getActor() + " "),
                 entry.getActorName(),

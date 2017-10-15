@@ -32,7 +32,6 @@ import me.lucko.luckperms.api.Contexts;
 import me.lucko.luckperms.api.Node;
 import me.lucko.luckperms.api.caching.MetaData;
 import me.lucko.luckperms.common.caching.MetaAccumulator;
-import me.lucko.luckperms.common.contexts.ExtractedContexts;
 import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.PermissionHolder;
 import me.lucko.luckperms.common.model.User;
@@ -284,7 +283,7 @@ public class VaultChatHook extends Chat {
             holder.removeIf(type::matches);
 
             // find the max inherited priority & add 10
-            MetaAccumulator metaAccumulator = holder.accumulateMeta(null, null, ExtractedContexts.generate(perms.createContextForWorldSet(finalWorld)));
+            MetaAccumulator metaAccumulator = holder.accumulateMeta(null, null, perms.createContextForWorldSet(finalWorld));
             int priority = (type == ChatMetaType.PREFIX ? metaAccumulator.getPrefixes() : metaAccumulator.getSuffixes()).keySet().stream()
                     .mapToInt(e -> e).max().orElse(0) + 10;
 
@@ -355,8 +354,8 @@ public class VaultChatHook extends Chat {
         int priority = Integer.MIN_VALUE;
         String meta = null;
 
-        ExtractedContexts ec = ExtractedContexts.generate(Contexts.of(perms.createContextForWorldLookup(world).getContexts(), perms.isIncludeGlobal(), true, true, true, true, false));
-        for (Node n : group.getAllNodes(ec)) {
+        Contexts contexts = Contexts.of(perms.createContextForWorldLookup(world).getContexts(), perms.isIncludeGlobal(), true, true, true, true, false);
+        for (Node n : group.getAllNodes(contexts)) {
             if (!n.getValuePrimitive()) continue;
             if (type.shouldIgnore(n)) continue;
             if (!n.shouldApplyWithContext(perms.createContextForWorldLookup(world).getContexts())) continue;

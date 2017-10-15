@@ -59,13 +59,11 @@ public class SubjectDataProxy implements SubjectData {
 
     @Override
     public Map<Set<Context>, Map<String, Boolean>> getAllPermissions() {
-        return (Map) getHandle().thenApply(handle -> {
-            return handle.getAllPermissions().entrySet().stream()
-                    .collect(ImmutableCollectors.toImmutableMap(
-                            e -> CompatibilityUtil.convertContexts(e.getKey()),
-                            Map.Entry::getValue
-                    ));
-        }).join();
+        return (Map) getHandle().thenApply(handle -> handle.getAllPermissions().entrySet().stream()
+                .collect(ImmutableCollectors.toImmutableMap(
+                        e -> CompatibilityUtil.convertContexts(e.getKey()),
+                        Map.Entry::getValue
+                ))).join();
     }
 
     @Override
@@ -75,13 +73,11 @@ public class SubjectDataProxy implements SubjectData {
 
     @Override
     public CompletableFuture<Boolean> setPermission(Set<Context> contexts, String permission, Tristate value) {
-        return getHandle().thenCompose(handle -> {
-            return handle.setPermission(
-                    CompatibilityUtil.convertContexts(contexts),
-                    permission,
-                    CompatibilityUtil.convertTristate(value)
-            );
-        });
+        return getHandle().thenCompose(handle -> handle.setPermission(
+                CompatibilityUtil.convertContexts(contexts),
+                permission,
+                CompatibilityUtil.convertTristate(value)
+        ));
     }
 
     @Override
@@ -96,13 +92,11 @@ public class SubjectDataProxy implements SubjectData {
 
     @Override
     public Map<Set<Context>, List<org.spongepowered.api.service.permission.SubjectReference>> getAllParents() {
-        return (Map) getHandle().thenApply(handle -> {
-            return handle.getAllParents().entrySet().stream()
-                    .collect(ImmutableCollectors.toImmutableMap(
-                            e -> CompatibilityUtil.convertContexts(e.getKey()),
-                            Map.Entry::getValue
-                    ));
-        }).join();
+        return (Map) getHandle().thenApply(handle -> handle.getAllParents().entrySet().stream()
+                .collect(ImmutableCollectors.toImmutableMap(
+                        e -> CompatibilityUtil.convertContexts(e.getKey()),
+                        Map.Entry::getValue
+                ))).join();
     }
 
     @Override
@@ -132,13 +126,11 @@ public class SubjectDataProxy implements SubjectData {
 
     @Override
     public Map<Set<Context>, Map<String, String>> getAllOptions() {
-        return (Map) getHandle().thenApply(handle -> {
-            return handle.getAllOptions().entrySet().stream()
-                    .collect(ImmutableCollectors.toImmutableMap(
-                            e -> CompatibilityUtil.convertContexts(e.getKey()),
-                            Map.Entry::getValue
-                    ));
-        }).join();
+        return (Map) getHandle().thenApply(handle -> handle.getAllOptions().entrySet().stream()
+                .collect(ImmutableCollectors.toImmutableMap(
+                        e -> CompatibilityUtil.convertContexts(e.getKey()),
+                        Map.Entry::getValue
+                ))).join();
     }
 
     @Override

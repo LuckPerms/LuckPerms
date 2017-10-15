@@ -438,8 +438,8 @@ public enum Message {
     }
 
     @Getter
-    private String message;
-    private boolean showPrefix;
+    private final String message;
+    private final boolean showPrefix;
 
     Message(String message, boolean showPrefix) {
         // rewrite hardcoded placeholders according to their position
