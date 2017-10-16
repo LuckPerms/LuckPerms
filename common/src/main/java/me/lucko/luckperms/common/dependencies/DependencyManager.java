@@ -100,7 +100,9 @@ public class DependencyManager {
         plugin.getLog().info("Identified the following dependencies: " + dependencies.toString());
 
         File libDir = new File(plugin.getDataDirectory(), "lib");
-        libDir.mkdirs();
+        if (!(libDir.exists() || libDir.mkdirs())) {
+            throw new RuntimeException("Unable to create lib dir - " + libDir.getPath());
+        }
 
         // Download files.
         List<File> filesToLoad = new ArrayList<>();
