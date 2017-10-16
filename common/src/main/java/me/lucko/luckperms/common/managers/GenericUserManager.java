@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.managers;
 import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
@@ -120,8 +121,32 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
     }
 
     public static boolean giveDefaultIfNeeded(User user, boolean save, LuckPermsPlugin plugin) {
-        boolean hasGroup = false;
+        boolean work = false;
 
+        // check that they are actually a member of their primary group, otherwise remove it
+        if (plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION_METHOD).equals("stored")) {
+            String pg = user.getPrimaryGroup().getValue();
+            boolean has = false;
+
+            for (Node node : user.getEnduringNodes().values()) {
+                if (node.hasSpecificContext()) {
+                    continue;
+                }
+
+                if (node.isGroupNode() && node.getGroupName().equalsIgnoreCase(pg)) {
+                    has = true;
+                    break;
+                }
+            }
+
+            if (!has) {
+                user.getPrimaryGroup().setStoredValue("default");
+                work = true;
+            }
+        }
+
+        // check that all users are member of at least one group
+        boolean hasGroup = false;
         if (user.getPrimaryGroup().getStoredValue().isPresent()) {
             for (Node node : user.getEnduringNodes().values()) {
                 if (node.hasSpecificContext()) {
@@ -135,18 +160,17 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
             }
         }
 
-        if (hasGroup) {
-            return false;
+        if (!hasGroup) {
+            user.getPrimaryGroup().setStoredValue("default");
+            user.setPermission(NodeFactory.make("group.default"));
+            work = true;
         }
 
-        user.getPrimaryGroup().setStoredValue("default");
-        user.setPermission(NodeFactory.make("group.default"));
-
-        if (save) {
+        if (work && save) {
             plugin.getStorage().saveUser(user);
         }
 
-        return true;
+        return work;
     }
 
     /**
