@@ -327,8 +327,8 @@ public class LPBukkitPlugin extends JavaPlugin implements LuckPermsPlugin {
         started = false;
 
         defaultsProvider.close();
-        permissionVault.setShutdown(true);
-        verboseHandler.setShutdown(true);
+        permissionVault.shutdown();
+        verboseHandler.shutdown();
 
         for (Player player : getServer().getOnlinePlayers()) {
             try {

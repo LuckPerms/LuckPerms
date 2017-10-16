@@ -296,8 +296,8 @@ public class LPSpongePlugin implements LuckPermsPlugin {
 
     @Listener
     public void onDisable(GameStoppingServerEvent event) {
-        permissionVault.setShutdown(true);
-        verboseHandler.setShutdown(true);
+        permissionVault.shutdown();
+        verboseHandler.shutdown();
 
         getLog().info("Closing storage...");
         storage.shutdown();

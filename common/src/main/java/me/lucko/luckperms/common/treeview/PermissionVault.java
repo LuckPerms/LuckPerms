@@ -27,7 +27,6 @@ package me.lucko.luckperms.common.treeview;
 
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.Setter;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
@@ -55,7 +54,7 @@ public class PermissionVault implements Runnable {
     // a queue of permission strings to be processed by the tree
     private final Queue<String> queue;
 
-    @Setter
+    // if the handler should shutdown
     private boolean shutdown = false;
 
     public PermissionVault(Executor executor) {
@@ -112,6 +111,10 @@ public class PermissionVault implements Runnable {
         for (String part : parts) {
             current = current.getChildMap().computeIfAbsent(part, s -> new TreeNode());
         }
+    }
+
+    public void shutdown() {
+        shutdown = true;
     }
 
 }

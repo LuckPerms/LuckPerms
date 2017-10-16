@@ -212,8 +212,8 @@ public class LPBungeePlugin extends Plugin implements LuckPermsPlugin {
 
     @Override
     public void onDisable() {
-        permissionVault.setShutdown(true);
-        verboseHandler.setShutdown(true);
+        permissionVault.shutdown();
+        verboseHandler.shutdown();
 
         getLog().info("Closing storage...");
         storage.shutdown();

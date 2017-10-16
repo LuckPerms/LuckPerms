@@ -196,7 +196,7 @@ public class SpongeListener {
         if (source == null) return;
 
         final String name = e.getCommand().toLowerCase();
-        if (name.equals("op") || name.equals("deop")) {
+        if (((name.equals("op") || name.equals("minecraft:op")) && source.hasPermission("minecraft.command.op")) || ((name.equals("deop") || name.equals("minecraft:deop")) && source.hasPermission("minecraft.command.deop"))) {
             Message.OP_DISABLED_SPONGE.send(plugin.getSenderFactory().wrap(source));
         }
     }
