@@ -60,8 +60,8 @@ public class GroupInheritanceComparator implements Comparator<Group> {
 
         // failing differing group weights, check if one of the groups is a primary group
         if (origin != null) {
-            boolean o1Primary = o1.getName().equalsIgnoreCase(origin.getPrimaryGroup().getStoredValue());
-            boolean o2Primary = o2.getName().equalsIgnoreCase(origin.getPrimaryGroup().getStoredValue());
+            boolean o1Primary = o1.getName().equalsIgnoreCase(origin.getPrimaryGroup().getStoredValue().orElse("default"));
+            boolean o2Primary = o2.getName().equalsIgnoreCase(origin.getPrimaryGroup().getStoredValue().orElse("default"));
 
             // one of them is a primary group, and therefore has priority
             if (o1Primary != o2Primary) {

@@ -102,7 +102,7 @@ public abstract class AbstractBacking {
 
     public abstract boolean deleteTrack(Track track);
 
-    public abstract boolean saveUUIDData(String username, UUID uuid);
+    public abstract boolean saveUUIDData(UUID uuid, String username);
 
     public abstract UUID getUUID(String username);
 

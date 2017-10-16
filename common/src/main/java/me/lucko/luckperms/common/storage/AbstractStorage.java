@@ -246,8 +246,8 @@ public class AbstractStorage implements Storage {
     }
 
     @Override
-    public CompletableFuture<Boolean> saveUUIDData(String username, UUID uuid) {
-        return makeFuture(() -> backing.saveUUIDData(username, uuid));
+    public CompletableFuture<Boolean> saveUUIDData(UUID uuid, String username) {
+        return makeFuture(() -> backing.saveUUIDData(uuid, username));
     }
 
     @Override

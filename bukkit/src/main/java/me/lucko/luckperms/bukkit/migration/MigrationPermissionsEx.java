@@ -143,6 +143,10 @@ public class MigrationPermissionsEx extends SubCommand<Object> {
                 continue;
             }
 
+            // save uuid data for the user
+            plugin.getStorage().saveUUIDData(u, user.getName());
+
+            // load in a user instance
             plugin.getStorage().loadUser(u, user.getName()).join();
             User lpUser = plugin.getUserManager().getIfLoaded(u);
 

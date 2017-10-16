@@ -82,7 +82,7 @@ public class ParentRemove extends SharedSubCommand {
             boolean shouldPrevent = plugin.getConfiguration().get(ConfigKeys.PREVENT_PRIMARY_GROUP_REMOVAL) &&
                     context.isEmpty() &&
                     plugin.getConfiguration().get(ConfigKeys.PRIMARY_GROUP_CALCULATION_METHOD).equals("stored") &&
-                    user.getPrimaryGroup().getStoredValue().equalsIgnoreCase(groupName);
+                    user.getPrimaryGroup().getStoredValue().orElse("default").equalsIgnoreCase(groupName);
 
             if (shouldPrevent) {
                 Message.USER_REMOVEGROUP_ERROR_PRIMARY.send(sender);

@@ -122,7 +122,7 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
     public static boolean giveDefaultIfNeeded(User user, boolean save, LuckPermsPlugin plugin) {
         boolean hasGroup = false;
 
-        if (user.getPrimaryGroup().getStoredValue() != null && !user.getPrimaryGroup().getStoredValue().isEmpty()) {
+        if (user.getPrimaryGroup().getStoredValue().isPresent()) {
             for (Node node : user.getEnduringNodes().values()) {
                 if (node.hasSpecificContext()) {
                     continue;
@@ -177,6 +177,6 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
         }
 
         // Not in the default primary group
-        return !user.getPrimaryGroup().getStoredValue().equalsIgnoreCase("default");
+        return !user.getPrimaryGroup().getStoredValue().orElse("default").equalsIgnoreCase("default");
     }
 }

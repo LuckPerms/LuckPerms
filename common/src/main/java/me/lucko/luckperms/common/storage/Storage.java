@@ -99,7 +99,7 @@ public interface Storage {
 
     CompletableFuture<Boolean> deleteTrack(Track track, DeletionCause cause);
 
-    CompletableFuture<Boolean> saveUUIDData(String username, UUID uuid);
+    CompletableFuture<Boolean> saveUUIDData(UUID uuid, String username);
 
     CompletableFuture<UUID> getUUID(String username);
 

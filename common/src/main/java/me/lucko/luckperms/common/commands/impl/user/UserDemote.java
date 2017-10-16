@@ -156,7 +156,7 @@ public class UserDemote extends SubCommand<User> {
         user.unsetPermission(oldNode);
         user.setPermission(NodeFactory.newBuilder("group." + previousGroup.getName()).withExtraContext(context).build());
 
-        if (context.isEmpty() && user.getPrimaryGroup().getStoredValue().equalsIgnoreCase(old)) {
+        if (context.isEmpty() && user.getPrimaryGroup().getStoredValue().orElse("default").equalsIgnoreCase(old)) {
             user.getPrimaryGroup().setStoredValue(previousGroup.getName());
         }
 

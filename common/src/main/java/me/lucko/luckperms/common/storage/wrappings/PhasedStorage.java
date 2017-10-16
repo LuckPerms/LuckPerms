@@ -262,10 +262,10 @@ public class PhasedStorage implements Storage {
     }
 
     @Override
-    public CompletableFuture<Boolean> saveUUIDData(String username, UUID uuid) {
+    public CompletableFuture<Boolean> saveUUIDData(UUID uuid, String username) {
         phaser.register();
         try {
-            return backing.saveUUIDData(username, uuid);
+            return backing.saveUUIDData(uuid, username);
         } finally {
             phaser.arriveAndDeregister();
         }

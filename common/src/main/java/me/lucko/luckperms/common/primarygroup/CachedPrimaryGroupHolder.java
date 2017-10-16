@@ -52,7 +52,7 @@ public abstract class CachedPrimaryGroupHolder extends StoredHolder implements S
     @Override
     public String getValue() {
         String s = cache.get();
-        return s != null ? s : getStoredValue();
+        return s != null ? s : getStoredValue().orElse("default");
     }
 
     @Override

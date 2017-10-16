@@ -85,6 +85,7 @@ public class SQLBacking extends AbstractBacking {
     private static final String PLAYER_SELECT = "SELECT username, primary_group FROM {prefix}players WHERE uuid=?";
     private static final String PLAYER_SELECT_UUID = "SELECT uuid FROM {prefix}players WHERE username=? LIMIT 1";
     private static final String PLAYER_SELECT_USERNAME = "SELECT username FROM {prefix}players WHERE uuid=? LIMIT 1";
+    private static final String PLAYER_SELECT_PRIMARY_GROUP = "SELECT primary_group FROM {prefix}players WHERE uuid=? LIMIT 1";
     private static final String PLAYER_INSERT = "INSERT INTO {prefix}players VALUES(?, ?, ?)";
     private static final String PLAYER_UPDATE = "UPDATE {prefix}players SET username=? WHERE uuid=?";
     private static final String PLAYER_DELETE = "DELETE FROM {prefix}players WHERE username=? AND NOT uuid=?";
@@ -479,11 +480,32 @@ public class SQLBacking extends AbstractBacking {
             }
 
             try (Connection c = provider.getConnection()) {
-                try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_UPDATE_PRIMARY_GROUP))) {
-                    ps.setString(1, user.getPrimaryGroup().getStoredValue() == null ? "default" : user.getPrimaryGroup().getStoredValue());
-                    ps.setString(2, user.getUuid().toString());
-                    ps.execute();
+                boolean hasPrimaryGroupSaved;
+
+                try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_SELECT_PRIMARY_GROUP))) {
+                    ps.setString(1, user.getUuid().toString());
+                    try (ResultSet rs = ps.executeQuery()) {
+                        hasPrimaryGroupSaved = rs.next();
+                    }
                 }
+
+                if (hasPrimaryGroupSaved) {
+                    // update
+                    try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_UPDATE_PRIMARY_GROUP))) {
+                        ps.setString(1, user.getPrimaryGroup().getStoredValue().orElse("default"));
+                        ps.setString(2, user.getUuid().toString());
+                        ps.execute();
+                    }
+                } else {
+                    // insert
+                    try (PreparedStatement ps = c.prepareStatement(prefix.apply(PLAYER_INSERT))) {
+                        ps.setString(1, user.getUuid().toString());
+                        ps.setString(2, user.getName().orElse("null"));
+                        ps.setString(3, user.getPrimaryGroup().getStoredValue().orElse("default"));
+                        ps.execute();
+                    }
+                }
+
             } catch (SQLException e) {
                 e.printStackTrace();
                 return false;
@@ -967,7 +989,7 @@ public class SQLBacking extends AbstractBacking {
     }
 
     @Override
-    public boolean saveUUIDData(String username, UUID uuid) {
+    public boolean saveUUIDData(UUID uuid, String username) {
         final String u = username.toLowerCase();
         AtomicReference<String> remoteUserName = new AtomicReference<>(null);
 

@@ -181,8 +181,8 @@ public class SplitBacking extends AbstractBacking {
     }
 
     @Override
-    public boolean saveUUIDData(String username, UUID uuid) {
-        return backing.get(types.get("uuid")).saveUUIDData(username, uuid);
+    public boolean saveUUIDData(UUID uuid, String username) {
+        return backing.get(types.get("uuid")).saveUUIDData(uuid, username);
     }
 
     @Override

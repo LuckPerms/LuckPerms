@@ -317,8 +317,8 @@ public abstract class FlatfileBacking extends AbstractBacking {
     }
 
     @Override
-    public boolean saveUUIDData(String username, UUID uuid) {
-        uuidCache.addMapping(username, uuid);
+    public boolean saveUUIDData(UUID uuid, String username) {
+        uuidCache.addMapping(uuid, username);
         return true;
     }
 

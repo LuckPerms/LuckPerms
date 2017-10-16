@@ -168,6 +168,7 @@ public class MigrationZPermissions extends SubCommand<Object> {
                 username = entity.getDisplayName();
             }
 
+            plugin.getStorage().saveUUIDData(u, String.valueOf(username)).join();
             plugin.getStorage().loadUser(u, username).join();
             User user = plugin.getUserManager().getIfLoaded(u);
 

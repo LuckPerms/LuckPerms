@@ -233,8 +233,8 @@ public class Exporter implements Runnable {
                                 output.add("/lp" + NodeFactory.nodeAsCommand(node, user.getUuid().toString(), false, true));
                             }
 
-                            if (!user.getPrimaryGroup().getStoredValue().equalsIgnoreCase("default")) {
-                                output.add("/lp user " + user.getUuid().toString() + " switchprimarygroup " + user.getPrimaryGroup().getStoredValue());
+                            if (!user.getPrimaryGroup().getStoredValue().orElse("default").equalsIgnoreCase("default")) {
+                                output.add("/lp user " + user.getUuid().toString() + " switchprimarygroup " + user.getPrimaryGroup().getStoredValue().get());
                             }
 
                             if (!inDefault) {

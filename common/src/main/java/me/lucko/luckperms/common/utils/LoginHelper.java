@@ -53,7 +53,7 @@ public class LoginHelper {
                 // No previous data for this player
                 plugin.getApiProvider().getEventFactory().handleUserFirstLogin(u, username);
                 cache.addToCache(u, u);
-                CompletableFuture<Boolean> future = plugin.getStorage().noBuffer().saveUUIDData(username, u);
+                CompletableFuture<Boolean> future = plugin.getStorage().noBuffer().saveUUIDData(u, username);
                 if (joinUuidSave) {
                     future.join();
                 }
@@ -65,7 +65,7 @@ public class LoginHelper {
             }
 
             // Online mode, no cache needed. This is just for name -> uuid lookup.
-            CompletableFuture<Boolean> future = plugin.getStorage().noBuffer().saveUUIDData(username, u);
+            CompletableFuture<Boolean> future = plugin.getStorage().noBuffer().saveUUIDData(u, username);
             if (joinUuidSave) {
                 future.join();
             }

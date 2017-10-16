@@ -67,7 +67,7 @@ public class UserSwitchPrimaryGroup extends SubCommand<User> {
             return CommandResult.INVALID_ARGS;
         }
 
-        if (user.getPrimaryGroup().getStoredValue().equalsIgnoreCase(group.getName())) {
+        if (user.getPrimaryGroup().getStoredValue().orElse("default").equalsIgnoreCase(group.getName())) {
             Message.USER_PRIMARYGROUP_ERROR_ALREADYHAS.send(sender, user.getFriendlyName(), group.getFriendlyName());
             return CommandResult.STATE_ERROR;
         }

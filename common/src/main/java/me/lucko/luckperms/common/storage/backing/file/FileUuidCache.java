@@ -51,10 +51,10 @@ public class FileUuidCache {
     /**
      * Adds a mapping to the cache
      *
-     * @param username the username of the player
      * @param uuid the uuid of the player
+     * @param username the username of the player
      */
-    public void addMapping(String username, UUID uuid) {
+    public void addMapping(UUID uuid, String username) {
         lookupMap.put(username.toLowerCase(), Maps.immutableEntry(uuid, DateUtil.unixSecondsNow()));
     }
 

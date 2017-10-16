@@ -167,7 +167,7 @@ public class StorageDelegate implements Storage {
 
     @Override
     public CompletableFuture<Boolean> saveUUIDData(@NonNull String username, @NonNull UUID uuid) {
-        return handle.noBuffer().saveUUIDData(checkUsername(username), uuid);
+        return handle.noBuffer().saveUUIDData(uuid, checkUsername(username));
     }
 
     @Override

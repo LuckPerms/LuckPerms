@@ -222,7 +222,7 @@ public class YAMLBacking extends FlatfileBacking {
                 Map<String, Object> values = new LinkedHashMap<>();
                 values.put("uuid", user.getUuid().toString());
                 values.put("name", user.getName().orElse("null"));
-                values.put("primary-group", user.getPrimaryGroup().getStoredValue());
+                values.put("primary-group", user.getPrimaryGroup().getStoredValue().orElse("default"));
 
                 Set<NodeModel> data = user.getEnduringNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
                 values.put("permissions", serializePermissions(data));

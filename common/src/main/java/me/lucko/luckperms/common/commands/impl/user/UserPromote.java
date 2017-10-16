@@ -167,7 +167,7 @@ public class UserPromote extends SubCommand<User> {
         user.unsetPermission(oldNode);
         user.setPermission(NodeFactory.newBuilder("group." + nextGroup.getName()).withExtraContext(context).build());
 
-        if (context.isEmpty() && user.getPrimaryGroup().getStoredValue().equalsIgnoreCase(old)) {
+        if (context.isEmpty() && user.getPrimaryGroup().getStoredValue().orElse("default").equalsIgnoreCase(old)) {
             user.getPrimaryGroup().setStoredValue(nextGroup.getName());
         }
 

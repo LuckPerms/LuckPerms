@@ -657,7 +657,7 @@ public class MongoDBBacking extends AbstractBacking {
     }
 
     @Override
-    public boolean saveUUIDData(String username, UUID uuid) {
+    public boolean saveUUIDData(UUID uuid, String username) {
         return call(() -> {
             MongoCollection<Document> c = database.getCollection(prefix + "uuid");
 
@@ -721,7 +721,7 @@ public class MongoDBBacking extends AbstractBacking {
     private static Document fromUser(User user) {
         Document main = new Document("_id", user.getUuid())
                 .append("name", user.getName().orElse("null"))
-                .append("primaryGroup", user.getPrimaryGroup().getStoredValue());
+                .append("primaryGroup", user.getPrimaryGroup().getStoredValue().orElse("default"));
 
         Document perms = new Document();
         for (Map.Entry<String, Boolean> e : convert(exportToLegacy(user.getEnduringNodes().values())).entrySet()) {

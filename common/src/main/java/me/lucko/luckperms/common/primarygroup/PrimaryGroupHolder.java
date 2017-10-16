@@ -25,6 +25,8 @@
 
 package me.lucko.luckperms.common.primarygroup;
 
+import java.util.Optional;
+
 /**
  * Calculates and caches a User's "primary group"
  */
@@ -42,7 +44,7 @@ public interface PrimaryGroupHolder {
      *
      * @return the stored value
      */
-    String getStoredValue();
+    Optional<String> getStoredValue();
 
     /**
      * Sets the primary group which is stored against the user's data.

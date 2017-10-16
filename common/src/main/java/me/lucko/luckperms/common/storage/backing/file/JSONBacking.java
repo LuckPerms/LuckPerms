@@ -220,7 +220,7 @@ public class JSONBacking extends FlatfileBacking {
                 JsonObject data = new JsonObject();
                 data.addProperty("uuid", user.getUuid().toString());
                 data.addProperty("name", user.getName().orElse("null"));
-                data.addProperty("primaryGroup", user.getPrimaryGroup().getStoredValue());
+                data.addProperty("primaryGroup", user.getPrimaryGroup().getStoredValue().orElse("default"));
 
                 Set<NodeModel> nodes = user.getEnduringNodes().values().stream().map(NodeModel::fromNode).collect(Collectors.toCollection(LinkedHashSet::new));
                 data.add("permissions", serializePermissions(nodes));
