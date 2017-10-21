@@ -32,6 +32,7 @@ import com.google.common.collect.ImmutableSet;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.backing.AbstractBacking;
+import me.lucko.luckperms.common.storage.backing.file.HOCONBacking;
 import me.lucko.luckperms.common.storage.backing.file.JSONBacking;
 import me.lucko.luckperms.common.storage.backing.file.YAMLBacking;
 import me.lucko.luckperms.common.storage.backing.mongodb.MongoDBBacking;
@@ -155,9 +156,11 @@ public class StorageFactory {
                         plugin.getConfiguration().get(ConfigKeys.MONGODB_COLLECTION_PREFIX)
                 );
             case YAML:
-                return new YAMLBacking(plugin, plugin.getDataDirectory(), "yaml-storage");
+                return new YAMLBacking(plugin, "yaml-storage");
+            case HOCON:
+                return new HOCONBacking(plugin, "hocon-storage");
             default:
-                return new JSONBacking(plugin, plugin.getDataDirectory(), "json-storage");
+                return new JSONBacking(plugin, "json-storage");
         }
     }
 }

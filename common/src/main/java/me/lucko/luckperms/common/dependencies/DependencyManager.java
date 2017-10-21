@@ -30,6 +30,7 @@ import lombok.experimental.UtilityClass;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
+import me.lucko.luckperms.api.PlatformType;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.StorageType;
@@ -67,8 +68,9 @@ public class DependencyManager {
     }
 
     private static final Map<StorageType, List<Dependency>> STORAGE_DEPENDENCIES = ImmutableMap.<StorageType, List<Dependency>>builder()
-            .put(StorageType.JSON, ImmutableList.of())
-            .put(StorageType.YAML, ImmutableList.of())
+            .put(StorageType.JSON, ImmutableList.of(Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_GSON))
+            .put(StorageType.YAML, ImmutableList.of(Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_YAML))
+            .put(StorageType.HOCON, ImmutableList.of(Dependency.HOCON_CONFIG, Dependency.CONFIGURATE_CORE, Dependency.CONFIGURATE_HOCON))
             .put(StorageType.MONGODB, ImmutableList.of(Dependency.MONGODB_DRIVER))
             .put(StorageType.MARIADB, ImmutableList.of(Dependency.MARIADB_DRIVER, Dependency.SLF4J_API, Dependency.SLF4J_SIMPLE, Dependency.HIKARI))
             .put(StorageType.MYSQL, ImmutableList.of(Dependency.MYSQL_DRIVER, Dependency.SLF4J_API, Dependency.SLF4J_SIMPLE, Dependency.HIKARI))
@@ -91,6 +93,15 @@ public class DependencyManager {
         if (classExists("org.slf4j.Logger") && classExists("org.slf4j.LoggerFactory")) {
             dependencies.remove(Dependency.SLF4J_API);
             dependencies.remove(Dependency.SLF4J_SIMPLE);
+        }
+
+        // don't load configurate dependencies on sponge
+        if (plugin.getServerType() == PlatformType.SPONGE) {
+            dependencies.remove(Dependency.CONFIGURATE_CORE);
+            dependencies.remove(Dependency.CONFIGURATE_GSON);
+            dependencies.remove(Dependency.CONFIGURATE_YAML);
+            dependencies.remove(Dependency.CONFIGURATE_HOCON);
+            dependencies.remove(Dependency.HOCON_CONFIG);
         }
 
         loadDependencies(plugin, dependencies);

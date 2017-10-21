@@ -32,12 +32,21 @@ import me.lucko.luckperms.common.node.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.backing.file.YAMLBacking;
 
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -49,6 +58,35 @@ public class LegacyYAMLSchemaMigration implements Runnable {
     private final YAMLBacking backing;
     private final File oldDataFolder;
     private final File newDataFolder;
+
+    private static Yaml getYaml() {
+        DumperOptions options = new DumperOptions();
+        options.setAllowUnicode(true);
+        options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+        return new Yaml(options);
+    }
+
+    public boolean writeMapToFile(File file, Map<String, Object> values) {
+        try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
+            getYaml().dump(values, writer);
+            writer.flush();
+            return true;
+        } catch (Throwable t) {
+            plugin.getLog().warn("Exception whilst writing to file: " + file.getAbsolutePath());
+            t.printStackTrace();
+            return false;
+        }
+    }
+
+    public Map<String, Object> readMapFromFile(File file) {
+        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
+            return (Map<String, Object>) getYaml().load(reader);
+        } catch (Throwable t) {
+            plugin.getLog().warn("Exception whilst reading from file: " + file.getAbsolutePath());
+            t.printStackTrace();
+            return null;
+        }
+    }
 
     @Override
     public void run() {
@@ -69,7 +107,7 @@ public class LegacyYAMLSchemaMigration implements Runnable {
                     try {
                         File replacementFile = new File(newGroupsDir, oldFile.getName());
 
-                        Map<String, Object> data = backing.readMapFromFile(oldFile);
+                        Map<String, Object> data = readMapFromFile(oldFile);
 
                         Map<String, Boolean> perms = new HashMap<>();
                         String name = (String) data.get("name");
@@ -90,8 +128,8 @@ public class LegacyYAMLSchemaMigration implements Runnable {
 
                         Map<String, Object> values = new LinkedHashMap<>();
                         values.put("name", name);
-                        values.put("permissions", YAMLBacking.serializePermissions(nodes));
-                        backing.writeMapToFile(replacementFile, values);
+                        values.put("permissions", serializePermissions(nodes));
+                        writeMapToFile(replacementFile, values);
 
                         oldFile.delete();
                     } catch (Exception e) {
@@ -114,7 +152,7 @@ public class LegacyYAMLSchemaMigration implements Runnable {
                     try {
                         File replacementFile = new File(newUsersDir, oldFile.getName());
 
-                        Map<String, Object> data = backing.readMapFromFile(oldFile);
+                        Map<String, Object> data = readMapFromFile(oldFile);
 
                         Map<String, Boolean> perms = new HashMap<>();
                         String uuid = (String) data.get("uuid");
@@ -139,8 +177,8 @@ public class LegacyYAMLSchemaMigration implements Runnable {
                         values.put("uuid", uuid);
                         values.put("name", name);
                         values.put("primary-group", primaryGroup);
-                        values.put("permissions", YAMLBacking.serializePermissions(nodes));
-                        backing.writeMapToFile(replacementFile, values);
+                        values.put("permissions", serializePermissions(nodes));
+                        writeMapToFile(replacementFile, values);
 
                         oldFile.delete();
                     } catch (Exception e) {
@@ -166,5 +204,73 @@ public class LegacyYAMLSchemaMigration implements Runnable {
                 e.printStackTrace();
             }
         }
+    }
+
+    private static List<Object> serializePermissions(Set<NodeModel> nodes) {
+        List<Object> data = new ArrayList<>();
+
+        for (NodeModel node : nodes) {
+            // just a raw, default node.
+            boolean single = node.isValue() &&
+                    node.getServer().equalsIgnoreCase("global") &&
+                    node.getWorld().equalsIgnoreCase("global") &&
+                    node.getExpiry() == 0L &&
+                    node.getContexts().isEmpty();
+
+            // just add a string to the list.
+            if (single) {
+                data.add(node.getPermission());
+                continue;
+            }
+
+            // otherwise, this node has some other special context which needs to be saved.
+            // we serialise this way so it gets represented nicely in YAML.
+
+            // create a map of node attributes
+            Map<String, Object> attributes = new LinkedHashMap<>();
+            attributes.put("value", node.isValue());
+
+            if (!node.getServer().equals("global")) {
+                attributes.put("server", node.getServer());
+            }
+
+            if (!node.getWorld().equals("global")) {
+                attributes.put("world", node.getWorld());
+            }
+
+            if (node.getExpiry() != 0L) {
+                attributes.put("expiry", node.getExpiry());
+            }
+
+            if (!node.getContexts().isEmpty()) {
+                Map<String, Object> context = new HashMap<>();
+                Map<String, Collection<String>> map = node.getContexts().toMultimap().asMap();
+
+                for (Map.Entry<String, Collection<String>> e : map.entrySet()) {
+                    List<String> vals = new ArrayList<>(e.getValue());
+                    int size = vals.size();
+
+                    if (size == 1) {
+                        context.put(e.getKey(), vals.get(0));
+                    } else if (size > 1) {
+                        context.put(e.getKey(), vals);
+                    }
+                }
+
+                attributes.put("context", context);
+            }
+
+            // create a new map to represent this entry in the list
+            // the map will only contain one entry. (the permission --> attributes)
+            Map<String, Object> perm = new HashMap<>();
+
+            // add the node to the map
+            perm.put(node.getPermission(), attributes);
+
+            // add the map to the object list, and continue
+            data.add(perm);
+        }
+
+        return data;
     }
 }

@@ -83,8 +83,8 @@ public class FileWatcher implements Runnable {
         }, 40L);
     }
 
-    public void registerChange(String id, String filename) {
-        internalChanges.put(id + "/" + filename, System.currentTimeMillis());
+    public void registerChange(StorageLocation location, String fileName) {
+        internalChanges.put(location.name().toLowerCase() + "/" + fileName, System.currentTimeMillis());
     }
 
     public void close() {
@@ -124,12 +124,17 @@ public class FileWatcher implements Runnable {
                 Path file = path.resolve(context);
                 String fileName = context.toString();
 
+                // ignore temporary changes
+                if (fileName.endsWith(".tmp")) {
+                    continue;
+                }
+
                 if (internalChanges.containsKey(id + "/" + fileName)) {
                     // This file was modified by the system.
                     continue;
                 }
 
-                registerChange(id, fileName);
+                internalChanges.put(id + "/" + fileName, System.currentTimeMillis());
 
                 plugin.getLog().info("[FileWatcher] Detected change in file: " + file.toString());
 

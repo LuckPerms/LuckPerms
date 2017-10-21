@@ -27,16 +27,23 @@ package me.lucko.luckperms.common.storage.backing.legacy;
 
 import lombok.RequiredArgsConstructor;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.node.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.storage.backing.file.JSONBacking;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -47,10 +54,34 @@ import java.util.stream.Collectors;
 @SuppressWarnings("unchecked")
 @RequiredArgsConstructor
 public class LegacyJSONSchemaMigration implements Runnable {
+    private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
     private final LuckPermsPlugin plugin;
     private final JSONBacking backing;
     private final File oldDataFolder;
     private final File newDataFolder;
+
+    private boolean writeElementToFile(File file, JsonElement element) {
+        try (BufferedWriter writer = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
+            gson.toJson(element, writer);
+            writer.flush();
+            return true;
+        } catch (Throwable t) {
+            plugin.getLog().warn("Exception whilst writing to file: " + file.getAbsolutePath());
+            t.printStackTrace();
+            return false;
+        }
+    }
+
+    private JsonObject readObjectFromFile(File file) {
+        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
+            return gson.fromJson(reader, JsonObject.class);
+        } catch (Throwable t) {
+            plugin.getLog().warn("Exception whilst reading from file: " + file.getAbsolutePath());
+            t.printStackTrace();
+            return null;
+        }
+    }
 
     @Override
     public void run() {
@@ -71,7 +102,7 @@ public class LegacyJSONSchemaMigration implements Runnable {
                     try {
                         File replacementFile = new File(newGroupsDir, oldFile.getName());
 
-                        JsonObject values = backing.readObjectFromFile(oldFile);
+                        JsonObject values = readObjectFromFile(oldFile);
 
                         Map<String, Boolean> perms = new HashMap<>();
                         String name = values.get("name").getAsString();
@@ -96,8 +127,8 @@ public class LegacyJSONSchemaMigration implements Runnable {
 
                         JsonObject data = new JsonObject();
                         data.addProperty("name", name);
-                        data.add("permissions", JSONBacking.serializePermissions(nodes));
-                        backing.writeElementToFile(replacementFile, data);
+                        data.add("permissions", serializePermissions(nodes));
+                        writeElementToFile(replacementFile, data);
 
                         oldFile.delete();
                     } catch (Exception e) {
@@ -120,7 +151,7 @@ public class LegacyJSONSchemaMigration implements Runnable {
                     try {
                         File replacementFile = new File(newUsersDir, oldFile.getName());
 
-                        JsonObject values = backing.readObjectFromFile(oldFile);
+                        JsonObject values = readObjectFromFile(oldFile);
 
                         Map<String, Boolean> perms = new HashMap<>();
                         String uuid = values.get("uuid").getAsString();
@@ -148,8 +179,8 @@ public class LegacyJSONSchemaMigration implements Runnable {
                         data.addProperty("uuid", uuid);
                         data.addProperty("name", name);
                         data.addProperty("primaryGroup", primaryGroup);
-                        data.add("permissions", JSONBacking.serializePermissions(nodes));
-                        backing.writeElementToFile(replacementFile, data);
+                        data.add("permissions", serializePermissions(nodes));
+                        writeElementToFile(replacementFile, data);
 
                         oldFile.delete();
                     } catch (Exception e) {
@@ -175,5 +206,49 @@ public class LegacyJSONSchemaMigration implements Runnable {
                 e.printStackTrace();
             }
         }
+    }
+
+    private static JsonArray serializePermissions(Set<NodeModel> nodes) {
+        JsonArray arr = new JsonArray();
+
+        for (NodeModel node : nodes) {
+            // just a raw, default node.
+            boolean single = node.isValue() &&
+                    node.getServer().equalsIgnoreCase("global") &&
+                    node.getWorld().equalsIgnoreCase("global") &&
+                    node.getExpiry() == 0L &&
+                    node.getContexts().isEmpty();
+
+            // just add a string to the list.
+            if (single) {
+                arr.add(new JsonPrimitive(node.getPermission()));
+                continue;
+            }
+
+            JsonObject attributes = new JsonObject();
+            attributes.addProperty("value", node.isValue());
+
+            if (!node.getServer().equals("global")) {
+                attributes.addProperty("server", node.getServer());
+            }
+
+            if (!node.getWorld().equals("global")) {
+                attributes.addProperty("world", node.getWorld());
+            }
+
+            if (node.getExpiry() != 0L) {
+                attributes.addProperty("expiry", node.getExpiry());
+            }
+
+            if (!node.getContexts().isEmpty()) {
+                attributes.add("context", node.getContextsAsJson());
+            }
+
+            JsonObject perm = new JsonObject();
+            perm.add(node.getPermission(), attributes);
+            arr.add(perm);
+        }
+
+        return arr;
     }
 }
