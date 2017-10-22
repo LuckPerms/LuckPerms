@@ -67,7 +67,7 @@ public class LuckPermsSubjectData implements LPSubjectData {
     private final PermissionHolder holder;
 
     @Getter
-    LPSubject parentSubject;
+    private final LPSubject parentSubject;
 
     @Override
     public ImmutableMap<ImmutableContextSet, ImmutableMap<String, Boolean>> getAllPermissions() {
