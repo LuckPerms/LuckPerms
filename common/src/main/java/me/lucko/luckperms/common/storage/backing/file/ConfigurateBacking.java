@@ -179,6 +179,24 @@ public abstract class ConfigurateBacking extends AbstractBacking {
         setAcceptingLogins(true);
     }
 
+    private static void mkdir(File file) throws IOException {
+        if (file.exists()) {
+            return;
+        }
+        if (!file.mkdir()) {
+            throw new IOException("Unable to create directory - " + file.getPath());
+        }
+    }
+
+    private static void mkdirs(File file) throws IOException {
+        if (file.exists()) {
+            return;
+        }
+        if (!file.mkdirs()) {
+            throw new IOException("Unable to create directory - " + file.getPath());
+        }
+    }
+
     private void setupFiles() throws IOException {
         File data = new File(plugin.getDataDirectory(), dataFolderName);
 
@@ -186,7 +204,7 @@ public abstract class ConfigurateBacking extends AbstractBacking {
         File oldData = new File(plugin.getDataDirectory(), "data");
 
         if (!data.exists() && oldData.exists()) {
-            data.mkdirs();
+            mkdirs(data);
 
             plugin.getLog().severe("===== Legacy Schema Migration =====");
             plugin.getLog().severe("Starting migration from legacy schema. This could take a while....");
@@ -206,17 +224,17 @@ public abstract class ConfigurateBacking extends AbstractBacking {
                 }
             }
         } else {
-            data.mkdirs();
+            mkdirs(data);
         }
 
         usersDirectory = new File(data, "users");
-        usersDirectory.mkdir();
+        mkdir(usersDirectory);
 
         groupsDirectory = new File(data, "groups");
-        groupsDirectory.mkdir();
+        mkdir(groupsDirectory);
 
         tracksDirectory = new File(data, "tracks");
-        tracksDirectory.mkdir();
+        mkdir(tracksDirectory);
 
         uuidDataFile = new File(data, "uuidcache.txt");
         uuidDataFile.createNewFile();
