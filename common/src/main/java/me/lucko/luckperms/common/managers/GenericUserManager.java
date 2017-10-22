@@ -28,6 +28,7 @@ package me.lucko.luckperms.common.managers;
 import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.api.Node;
+import me.lucko.luckperms.api.context.ImmutableContextSet;
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.node.NodeFactory;
@@ -128,20 +129,26 @@ public class GenericUserManager extends AbstractManager<UserIdentifier, User> im
             String pg = user.getPrimaryGroup().getValue();
             boolean has = false;
 
-            for (Node node : user.getEnduringNodes().values()) {
-                if (node.hasSpecificContext()) {
-                    continue;
-                }
-
+            for (Node node : user.getEnduringNodes().get(ImmutableContextSet.empty())) {
                 if (node.isGroupNode() && node.getGroupName().equalsIgnoreCase(pg)) {
                     has = true;
                     break;
                 }
             }
 
+            // need to find a new primary group for the user.
             if (!has) {
-                user.getPrimaryGroup().setStoredValue("default");
-                work = true;
+                String group = user.getEnduringNodes().get(ImmutableContextSet.empty()).stream()
+                        .filter(Node::isGroupNode)
+                        .findFirst()
+                        .map(Node::getGroupName)
+                        .orElse(null);
+
+                // if the group is null, it'll be resolved in the next step
+                if (group != null) {
+                    user.getPrimaryGroup().setStoredValue(group);
+                    work = true;
+                }
             }
         }
 
