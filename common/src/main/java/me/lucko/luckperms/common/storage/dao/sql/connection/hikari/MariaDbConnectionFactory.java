@@ -23,45 +23,36 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.backing.sql.provider.file;
+package me.lucko.luckperms.common.storage.dao.sql.connection.hikari;
 
-import java.io.File;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import com.zaxxer.hikari.HikariConfig;
 
-public class SQLiteConnectionFactory extends FlatfileConnectionFactory {
-    public SQLiteConnectionFactory(File file) {
-        super("SQLite", file);
+import me.lucko.luckperms.common.storage.DatastoreConfiguration;
 
-        // backwards compat
-        File data = new File(file.getParent(), "luckperms.sqlite");
-        if (data.exists()) {
-            data.renameTo(new File(file.getParent(), "luckperms-sqlite.db"));
-        }
-    }
-
-    @Override
-    public Map<String, String> getMeta() {
-        Map<String, String> ret = new LinkedHashMap<>();
-
-        File databaseFile = new File(super.file.getParent(), "luckperms-sqlite.db");
-        if (databaseFile.exists()) {
-            double size = databaseFile.length() / 1048576;
-            ret.put("File Size", DF.format(size) + "MB");
-        } else {
-            ret.put("File Size", "0MB");
-        }
-
-        return ret;
+public class MariaDbConnectionFactory extends HikariConnectionFactory {
+    public MariaDbConnectionFactory(DatastoreConfiguration configuration) {
+        super("MariaDB", configuration);
     }
 
     @Override
     protected String getDriverClass() {
-        return "org.sqlite.JDBC";
+        return classExists("org.mariadb.jdbc.MariaDbDataSource") ? "org.mariadb.jdbc.MariaDbDataSource" : "org.mariadb.jdbc.MySQLDataSource";
     }
 
     @Override
-    protected String getDriverId() {
-        return "jdbc:sqlite";
+    protected void appendProperties(HikariConfig config) {
+        // kinda hacky. this will call #setProperties on the datasource, which will append these options
+        // onto the connections.
+        config.addDataSourceProperty("properties", "useUnicode=true;characterEncoding=utf8");
     }
+
+    private static boolean classExists(String clazz) {
+        try {
+            Class.forName(clazz);
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
 }

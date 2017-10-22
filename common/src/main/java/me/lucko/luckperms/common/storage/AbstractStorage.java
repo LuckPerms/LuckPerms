@@ -41,7 +41,7 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.storage.backing.AbstractDao;
+import me.lucko.luckperms.common.storage.dao.AbstractDao;
 import me.lucko.luckperms.common.storage.wrappings.BufferedOutputStorage;
 import me.lucko.luckperms.common.storage.wrappings.PhasedStorage;
 

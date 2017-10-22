@@ -23,9 +23,9 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.backing.sql.provider.file;
+package me.lucko.luckperms.common.storage.dao.sql.connection.file;
 
-import me.lucko.luckperms.common.storage.backing.sql.provider.AbstractConnectionFactory;
+import me.lucko.luckperms.common.storage.dao.sql.connection.AbstractConnectionFactory;
 
 import java.io.File;
 import java.sql.Connection;

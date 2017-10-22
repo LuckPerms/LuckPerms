@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.backing;
+package me.lucko.luckperms.common.storage.dao;
 
 import lombok.AccessLevel;
 import lombok.Getter;

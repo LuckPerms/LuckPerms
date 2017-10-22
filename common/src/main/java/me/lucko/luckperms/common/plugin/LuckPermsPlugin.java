@@ -47,7 +47,7 @@ import me.lucko.luckperms.common.managers.UserManager;
 import me.lucko.luckperms.common.messaging.InternalMessagingService;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.storage.Storage;
-import me.lucko.luckperms.common.storage.backing.file.FileWatcher;
+import me.lucko.luckperms.common.storage.dao.file.FileWatcher;
 import me.lucko.luckperms.common.treeview.PermissionVault;
 import me.lucko.luckperms.common.utils.UuidCache;
 import me.lucko.luckperms.common.verbose.VerboseHandler;

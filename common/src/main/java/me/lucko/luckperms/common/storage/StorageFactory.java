@@ -31,16 +31,18 @@ import com.google.common.collect.ImmutableSet;
 
 import me.lucko.luckperms.common.config.ConfigKeys;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.storage.backing.AbstractDao;
-import me.lucko.luckperms.common.storage.backing.file.HoconDao;
-import me.lucko.luckperms.common.storage.backing.file.JsonDao;
-import me.lucko.luckperms.common.storage.backing.file.YamlDao;
-import me.lucko.luckperms.common.storage.backing.mongodb.MongoDao;
-import me.lucko.luckperms.common.storage.backing.sql.SqlDao;
-import me.lucko.luckperms.common.storage.backing.sql.provider.file.H2ConnectionFactory;
-import me.lucko.luckperms.common.storage.backing.sql.provider.file.SQLiteConnectionFactory;
-import me.lucko.luckperms.common.storage.backing.sql.provider.remote.MySqlConnectionFactory;
-import me.lucko.luckperms.common.storage.backing.sql.provider.remote.PostgreConnectionFactory;
+import me.lucko.luckperms.common.storage.dao.AbstractDao;
+import me.lucko.luckperms.common.storage.dao.SplitStorageDao;
+import me.lucko.luckperms.common.storage.dao.file.HoconDao;
+import me.lucko.luckperms.common.storage.dao.file.JsonDao;
+import me.lucko.luckperms.common.storage.dao.file.YamlDao;
+import me.lucko.luckperms.common.storage.dao.mongodb.MongoDao;
+import me.lucko.luckperms.common.storage.dao.sql.SqlDao;
+import me.lucko.luckperms.common.storage.dao.sql.connection.file.H2ConnectionFactory;
+import me.lucko.luckperms.common.storage.dao.sql.connection.file.SQLiteConnectionFactory;
+import me.lucko.luckperms.common.storage.dao.sql.connection.hikari.MariaDbConnectionFactory;
+import me.lucko.luckperms.common.storage.dao.sql.connection.hikari.MySqlConnectionFactory;
+import me.lucko.luckperms.common.storage.dao.sql.connection.hikari.PostgreConnectionFactory;
 import me.lucko.luckperms.common.utils.ImmutableCollectors;
 
 import java.io.File;
@@ -121,16 +123,12 @@ public class StorageFactory {
     private static AbstractDao makeDao(StorageType method, LuckPermsPlugin plugin) {
         switch (method) {
             case MARIADB:
-                return new SqlDao(plugin, new MySqlConnectionFactory(
-                        "MariaDB",
-                        "org.mariadb.jdbc.MySQLDataSource",
+                return new SqlDao(plugin, new MariaDbConnectionFactory(
                         plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)),
                         plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
                 );
             case MYSQL:
                 return new SqlDao(plugin, new MySqlConnectionFactory(
-                        "MySQL",
-                        "com.mysql.jdbc.jdbc2.optional.MysqlDataSource",
                         plugin.getConfiguration().get(ConfigKeys.DATABASE_VALUES)),
                         plugin.getConfiguration().get(ConfigKeys.SQL_TABLE_PREFIX)
                 );

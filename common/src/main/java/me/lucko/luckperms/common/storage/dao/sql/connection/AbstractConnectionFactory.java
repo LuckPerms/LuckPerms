@@ -23,45 +23,30 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.backing.sql.provider.file;
+package me.lucko.luckperms.common.storage.dao.sql.connection;
 
-import java.io.File;
-import java.util.LinkedHashMap;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Collections;
 import java.util.Map;
 
-public class H2ConnectionFactory extends FlatfileConnectionFactory {
-    public H2ConnectionFactory(File file) {
-        super("H2", file);
+@RequiredArgsConstructor
+public abstract class AbstractConnectionFactory {
 
-        // backwards compat
-        File data = new File(file.getParent(), "luckperms.db.mv.db");
-        if (data.exists()) {
-            data.renameTo(new File(file.getParent(), "luckperms-h2.mv.db"));
-        }
-    }
+    @Getter
+    private final String name;
 
-    @Override
+    public abstract void init();
+
+    public abstract void shutdown() throws Exception;
+
     public Map<String, String> getMeta() {
-        Map<String, String> ret = new LinkedHashMap<>();
-
-        File databaseFile = new File(super.file.getParent(), "luckperms-h2.mv.db");
-        if (databaseFile.exists()) {
-            double size = databaseFile.length() / 1048576;
-            ret.put("File Size", DF.format(size) + "MB");
-        } else {
-            ret.put("File Size", "0MB");
-        }
-
-        return ret;
+        return Collections.emptyMap();
     }
 
-    @Override
-    protected String getDriverClass() {
-        return "org.h2.Driver";
-    }
+    public abstract Connection getConnection() throws SQLException;
 
-    @Override
-    protected String getDriverId() {
-        return "jdbc:h2";
-    }
 }

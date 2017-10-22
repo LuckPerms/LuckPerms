@@ -23,14 +23,14 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.backing.legacy;
+package me.lucko.luckperms.common.storage.dao.legacy;
 
 import lombok.RequiredArgsConstructor;
 
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.node.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.storage.backing.file.YamlDao;
+import me.lucko.luckperms.common.storage.dao.file.YamlDao;
 
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;

@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.backing.sql.provider.file;
+package me.lucko.luckperms.common.storage.dao.sql.connection.file;
 
 import lombok.AllArgsConstructor;
 import lombok.experimental.Delegate;

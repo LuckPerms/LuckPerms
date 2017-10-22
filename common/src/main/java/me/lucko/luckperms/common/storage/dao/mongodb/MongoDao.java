@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.backing.mongodb;
+package me.lucko.luckperms.common.storage.dao.mongodb;
 
 import lombok.Getter;
 
@@ -53,7 +53,7 @@ import me.lucko.luckperms.common.node.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.references.UserIdentifier;
 import me.lucko.luckperms.common.storage.DatastoreConfiguration;
-import me.lucko.luckperms.common.storage.backing.AbstractDao;
+import me.lucko.luckperms.common.storage.dao.AbstractDao;
 
 import org.bson.Document;
 

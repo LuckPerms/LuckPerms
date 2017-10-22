@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.backing.file;
+package me.lucko.luckperms.common.storage.dao.file;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 

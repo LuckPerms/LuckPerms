@@ -23,30 +23,45 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.backing.sql.provider;
+package me.lucko.luckperms.common.storage.dao.sql.connection.file;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Collections;
+import java.io.File;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-@RequiredArgsConstructor
-public abstract class AbstractConnectionFactory {
+public class SQLiteConnectionFactory extends FlatfileConnectionFactory {
+    public SQLiteConnectionFactory(File file) {
+        super("SQLite", file);
 
-    @Getter
-    private final String name;
-
-    public abstract void init();
-
-    public abstract void shutdown() throws Exception;
-
-    public Map<String, String> getMeta() {
-        return Collections.emptyMap();
+        // backwards compat
+        File data = new File(file.getParent(), "luckperms.sqlite");
+        if (data.exists()) {
+            data.renameTo(new File(file.getParent(), "luckperms-sqlite.db"));
+        }
     }
 
-    public abstract Connection getConnection() throws SQLException;
+    @Override
+    public Map<String, String> getMeta() {
+        Map<String, String> ret = new LinkedHashMap<>();
 
+        File databaseFile = new File(super.file.getParent(), "luckperms-sqlite.db");
+        if (databaseFile.exists()) {
+            double size = databaseFile.length() / 1048576;
+            ret.put("File Size", DF.format(size) + "MB");
+        } else {
+            ret.put("File Size", "0MB");
+        }
+
+        return ret;
+    }
+
+    @Override
+    protected String getDriverClass() {
+        return "org.sqlite.JDBC";
+    }
+
+    @Override
+    protected String getDriverId() {
+        return "jdbc:sqlite";
+    }
 }

@@ -23,13 +23,13 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.backing.sql.provider.remote;
+package me.lucko.luckperms.common.storage.dao.sql.connection.hikari;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import me.lucko.luckperms.common.storage.DatastoreConfiguration;
-import me.lucko.luckperms.common.storage.backing.sql.provider.AbstractConnectionFactory;
+import me.lucko.luckperms.common.storage.dao.sql.connection.AbstractConnectionFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -38,22 +38,21 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-public class MySqlConnectionFactory extends AbstractConnectionFactory {
+public abstract class HikariConnectionFactory extends AbstractConnectionFactory {
 
-    private final DatastoreConfiguration configuration;
-    private final String driverClass;
+    protected final DatastoreConfiguration configuration;
     private HikariDataSource hikari;
 
-    public MySqlConnectionFactory(String name, String driverClass, DatastoreConfiguration configuration) {
+    public HikariConnectionFactory(String name, DatastoreConfiguration configuration) {
         super(name);
         this.configuration = configuration;
-        this.driverClass = driverClass;
     }
 
-    @Override
-    public void init() {
-        HikariConfig config = new HikariConfig();
+    protected abstract String getDriverClass();
 
+    protected abstract void appendProperties(HikariConfig config);
+
+    protected void appendConfigurationInfo(HikariConfig config) {
         String address = configuration.getAddress();
         String[] addressSplit = address.split(":");
         address = addressSplit[0];
@@ -64,38 +63,21 @@ public class MySqlConnectionFactory extends AbstractConnectionFactory {
         String password = configuration.getPassword();
 
         config.setMaximumPoolSize(configuration.getPoolSize());
-
-        config.setPoolName("luckperms");
-        config.setDataSourceClassName(driverClass);
+        config.setDataSourceClassName(getDriverClass());
         config.addDataSourceProperty("serverName", address);
         config.addDataSourceProperty("port", port);
         config.addDataSourceProperty("databaseName", database);
         config.setUsername(username);
         config.setPassword(password);
+    }
 
-        if (!getName().toLowerCase().equals("mariadb")) {
+    @Override
+    public void init() {
+        HikariConfig config = new HikariConfig();
+        config.setPoolName("luckperms");
 
-            // doesn't exist on the MariaDB driver
-            config.addDataSourceProperty("cachePrepStmts", "true");
-            config.addDataSourceProperty("alwaysSendSetIsolation", "false");
-            config.addDataSourceProperty("cacheServerConfiguration", "true");
-            config.addDataSourceProperty("elideSetAutoCommits", "true");
-            config.addDataSourceProperty("useLocalSessionState", "true");
-
-            // already set as default on mariadb
-            config.addDataSourceProperty("useServerPrepStmts", "true");
-            config.addDataSourceProperty("prepStmtCacheSize", "250");
-            config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
-            config.addDataSourceProperty("cacheCallableStmts", "true");
-
-            // make sure unicode characters can be used.
-            config.addDataSourceProperty("characterEncoding", "utf8");
-            config.addDataSourceProperty("useUnicode", "true");
-        } else {
-            // hack for mariadb. this will call #setProperties on the datasource, which will append these options
-            // onto the connections.
-            config.addDataSourceProperty("properties", "useUnicode=true;characterEncoding=utf8");
-        }
+        appendConfigurationInfo(config);
+        appendProperties(config);
 
         // We will wait for 15 seconds to get a connection from the pool.
         // Default is 30, but it shouldn't be taking that long.

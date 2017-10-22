@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage;
+package me.lucko.luckperms.common.storage.dao;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -35,7 +35,6 @@ import me.lucko.luckperms.common.model.Group;
 import me.lucko.luckperms.common.model.Track;
 import me.lucko.luckperms.common.model.User;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
-import me.lucko.luckperms.common.storage.backing.AbstractDao;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -47,7 +46,7 @@ public class SplitStorageDao extends AbstractDao {
     private final Map<String, AbstractDao> backing;
     private final Map<String, String> types;
 
-    protected SplitStorageDao(LuckPermsPlugin plugin, Map<String, AbstractDao> backing, Map<String, String> types) {
+    public SplitStorageDao(LuckPermsPlugin plugin, Map<String, AbstractDao> backing, Map<String, String> types) {
         super(plugin, "Split Storage");
         this.backing = ImmutableMap.copyOf(backing);
         this.types = ImmutableMap.copyOf(types);

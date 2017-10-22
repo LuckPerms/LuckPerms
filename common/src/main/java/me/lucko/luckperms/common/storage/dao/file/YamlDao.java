@@ -23,22 +23,24 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.backing.file;
+package me.lucko.luckperms.common.storage.dao.file;
 
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 
+import org.yaml.snakeyaml.DumperOptions;
+
 import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.gson.GsonConfigurationLoader;
+import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
-public class JsonDao extends ConfigurateDao {
+public class YamlDao extends ConfigurateDao {
 
-    public JsonDao(LuckPermsPlugin plugin, String dataFolderName) {
-        super(plugin, "JSON", ".json", dataFolderName);
+    public YamlDao(LuckPermsPlugin plugin, String dataFolderName) {
+        super(plugin, "YAML", ".yml", dataFolderName);
     }
 
     @Override
@@ -47,8 +49,8 @@ public class JsonDao extends ConfigurateDao {
             return null;
         }
 
-        GsonConfigurationLoader loader = GsonConfigurationLoader.builder()
-                .setIndent(2)
+        YAMLConfigurationLoader loader = YAMLConfigurationLoader.builder()
+                .setFlowStyle(DumperOptions.FlowStyle.BLOCK)
                 .setSource(() -> Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8))
                 .setSink(() -> Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8))
                 .build();
@@ -63,7 +65,8 @@ public class JsonDao extends ConfigurateDao {
             return;
         }
 
-        GsonConfigurationLoader loader = GsonConfigurationLoader.builder()
+        YAMLConfigurationLoader loader = YAMLConfigurationLoader.builder()
+                .setFlowStyle(DumperOptions.FlowStyle.BLOCK)
                 .setIndent(2)
                 .setSource(() -> Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8))
                 .setSink(() -> Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8))

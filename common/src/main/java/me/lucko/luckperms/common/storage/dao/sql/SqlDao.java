@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.backing.sql;
+package me.lucko.luckperms.common.storage.dao.sql;
 
 import lombok.Getter;
 
@@ -49,9 +49,9 @@ import me.lucko.luckperms.common.node.NodeHeldPermission;
 import me.lucko.luckperms.common.node.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.references.UserIdentifier;
-import me.lucko.luckperms.common.storage.backing.AbstractDao;
-import me.lucko.luckperms.common.storage.backing.legacy.LegacySqlMigration;
-import me.lucko.luckperms.common.storage.backing.sql.provider.AbstractConnectionFactory;
+import me.lucko.luckperms.common.storage.dao.AbstractDao;
+import me.lucko.luckperms.common.storage.dao.legacy.LegacySqlMigration;
+import me.lucko.luckperms.common.storage.dao.sql.connection.AbstractConnectionFactory;
 
 import java.io.BufferedReader;
 import java.io.InputStream;

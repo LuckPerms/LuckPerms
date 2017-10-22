@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.backing.legacy;
+package me.lucko.luckperms.common.storage.dao.legacy;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,7 +33,7 @@ import com.google.gson.reflect.TypeToken;
 import me.lucko.luckperms.common.contexts.ContextSetJsonSerializer;
 import me.lucko.luckperms.common.node.NodeFactory;
 import me.lucko.luckperms.common.node.NodeModel;
-import me.lucko.luckperms.common.storage.backing.sql.SqlDao;
+import me.lucko.luckperms.common.storage.dao.sql.SqlDao;
 
 import java.lang.reflect.Type;
 import java.sql.Connection;

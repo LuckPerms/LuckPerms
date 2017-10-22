@@ -23,7 +23,7 @@
  *  SOFTWARE.
  */
 
-package me.lucko.luckperms.common.storage.backing.file;
+package me.lucko.luckperms.common.storage.dao.file;
 
 import lombok.Getter;
 
@@ -50,9 +50,9 @@ import me.lucko.luckperms.common.node.NodeHeldPermission;
 import me.lucko.luckperms.common.node.NodeModel;
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
 import me.lucko.luckperms.common.references.UserIdentifier;
-import me.lucko.luckperms.common.storage.backing.AbstractDao;
-import me.lucko.luckperms.common.storage.backing.legacy.LegacyJsonMigration;
-import me.lucko.luckperms.common.storage.backing.legacy.LegacyYamlMigration;
+import me.lucko.luckperms.common.storage.dao.AbstractDao;
+import me.lucko.luckperms.common.storage.dao.legacy.LegacyJsonMigration;
+import me.lucko.luckperms.common.storage.dao.legacy.LegacyYamlMigration;
 
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.SimpleConfigurationNode;
